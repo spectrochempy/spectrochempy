@@ -14,3 +14,5 @@ docs/_build
 
 # data
 essai.scp
+docs/source/api/auto_examples
+docs/source/gen_modules
