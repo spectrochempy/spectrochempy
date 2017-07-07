@@ -34,5 +34,5 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from spectrochempy.preferences.preference_manager_view import view_preferences
+# from spectrochempy.preferences.preference_manager_view import view_preferences
 from spectrochempy.preferences.preference_manager import preference_manager as preferences

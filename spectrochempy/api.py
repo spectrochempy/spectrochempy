@@ -55,9 +55,9 @@ import spectrochempy
 # ==============================================================================
 # Preferences
 # ==============================================================================
-#from spectrochempy.preferences import view_preferences, preferences
 
-from spectrochempy.preferences.preference_manager_view import view_preferences
+#TODO: wait for a Qt5 compatible traitsui package
+#from spectrochempy.preferences.preference_manager_view import view_preferences
 from spectrochempy.preferences.preference_manager import preference_manager as preferences
 
 # ==============================================================================
@@ -82,18 +82,18 @@ warnings.simplefilter('ignore', (DeprecationWarning,
 # ==============================================================================
 # Graphics backend
 # ==============================================================================
-os.environ['ETS_TOOLKIT'] = 'qt5'
+os.environ['ETS_TOOLKIT'] = 'qt4'  # waiting to have a Qt5 tookit
 
 import matplotlib as mpl
 if not 'sphinx-build' in sys.argv[0]:
-    mpl.use('Qt5Agg')
+    mpl.use('Qt4Agg')
 else:
     # this is necessary to buid doc with sphinx-gallery
     log.info('Building docs')
     mpl.use('agg')
     preferences.general._DO_NOT_BLOCK = True
 
-mpl.rcParams['backend.qt5'] = 'PyQt5'
+mpl.rcParams['backend.qt4'] = 'PyQt4'
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython

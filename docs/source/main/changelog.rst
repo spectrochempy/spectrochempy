@@ -1,6 +1,9 @@
 .. _change_log:
 
-Release History
-================
+Change log
+===========
 
-to do
+0.1.a : alpha version of the first release
+
+- first commit to bitbucket
+

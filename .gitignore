@@ -12,4 +12,5 @@ docs/_build
 .eggs
 *generated
 
+# data
 essai.scp

@@ -34,11 +34,11 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from spectrochempy.api import view_preferences, preferences as pm, mpl
+from spectrochempy.api import  preferences as pm, mpl #view_preferences,
 
 def test_preference_manager():
 
-    view_preferences()
+    #view_preferences()
 
     import matplotlib as mpl
 

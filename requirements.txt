@@ -8,7 +8,6 @@ traits
 traitsui
 pyface
 xlrd
-pyqt5
 apptools
 
 # for tests
@@ -25,8 +24,10 @@ sphinx>=1.4
 ipykernel
 nbsphinx
 pillow
+sphinx_gallery
+seaborn
 
 # for nmr
 nmrglue
 
-
+# install pyqt=4 with conda

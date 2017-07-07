@@ -42,6 +42,7 @@ from setuptools.command.develop import develop
 import os
 import shutil as sh
 
+
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
     def run(self):
@@ -77,8 +78,6 @@ def get_dependencies():
         for item in pkg:
             if item.startswith('#'):
                 pkg.remove(item)
-        print(pkg)
-
         return pkg
 
 
@@ -104,11 +103,10 @@ setup(
             "License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
             "Operating System :: OS Independent",
             "Programming Language :: Python :: 3.5",
-            "Programming Language :: Python :: 3.6",
     ],
     cmdclass = {
                'develop': PostDevelopCommand,
-              # 'install': PostInstallCommand,
-           },
+                          # 'install': PostInstallCommand,
+               },
 )
 

@@ -15,3 +15,5 @@ for information about packaging, see::
 Building the documentation
 ==========================
 pip install sphinx-gallery
+
+One need to install pandoc : https://github.com/jgm/pandoc/releases

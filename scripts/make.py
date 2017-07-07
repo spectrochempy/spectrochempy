@@ -50,7 +50,7 @@ from warnings import warn
 
 from spectrochempy.api import log, consolelog, __version__, __release__
 
-DOCDIR = os.path.join(
+DOCDIR = os.path.join(\
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
 
 SOURCE = os.path.join(DOCDIR, 'source')
