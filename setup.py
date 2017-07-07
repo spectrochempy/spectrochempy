@@ -45,13 +45,14 @@ import shutil as sh
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
     def run(self):
-        if os.path.exists ('.git/hooks/pre-commit'):
-            os.remove('.git/hooks/pre-commit')
-        if os.path.exists ('.git/hooks/pre-push'):
-            os.remove('.git/hooks/pre-push')
-        sh.copy('git_hooks/pre-commit','.git/hooks/pre-commit')
-        sh.copy('git_hooks/pre-push', '.git/hooks/pre-push')
-        print('installation of git hooks made.')
+        for item in ['pre-commit', 'pre-push', 'post-merge', 'post-commit',
+                     'post-checkout']:
+            if os.path.exists ('.git/hooks/{}'.format(item)):
+                os.remove('.git/hooks/{}'.format(item))
+            sh.copy('git_hooks/{}'.format(item), '.git/hooks/{}'.format(item))
+
+            print('installation of `.git/hooks/{}` made.'.format(item))
+
         develop.run(self)
 
 # class PostInstallCommand(install):
