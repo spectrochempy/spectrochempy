@@ -1,0 +1,57 @@
+@import "sphinxdoc.css";
+
+/**
+ * 	Separation between classes and functions
+ */
+
+dl.class, dl.function {
+    border-top: 4px solid #888;
+}
+
+dl.method{
+    border-top: 1px solid #aaa;
+}
+
+dt{
+    border-top: 1px solid #aaa;
+}
+
+/* dl.attribute, {
+    border-top: 1px solid #aaa;
+}*/
+
+dl.glossary dt {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/*
+ * Title
+ */
+h2 {
+    border-bottom:2px solid #ddd;
+    font-size:1.35em;
+    margin:1.3em 0 0.2em;
+    padding:0;
+}
+
+th {
+    background-color:#EDEFED;
+}
+
+table.field-list th {
+    border-left-color:#AAAAAA !important;
+    border-left-style:solid !important;
+    border-left-width:1px !important;
+    padding-left:5px;
+}
+
+div.body a{
+    text-decoration: none;
+}
+p.rubric{
+    border-bottom:2px solid #ddd;
+    font-size:1.25em;
+    margin:1.3em 0 0.2em;
+    padding:0;
+}

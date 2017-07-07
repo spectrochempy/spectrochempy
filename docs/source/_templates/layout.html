@@ -1,0 +1,16 @@
+{% extends "!layout.html" %}
+
+{% block relbar1 %}
+<div style=" background-image:url('{{
+pathto("_static/bg.png", 1) }}'); text-align: left; padding: 0px 0px 0px 0px">
+<a href="{{ pathto('index') }}"><img src="{{
+pathto("_static/logo.png", 1) }}" border="0" height=32,
+                                     alt="SpectroChemPy"/></a>
+</div>
+{{ super() }}
+{% endblock %}
+
+{# put the sidebar before the body #}
+{% block sidebar1 %}{{ sidebar() }}{% endblock %}
+{% block sidebar2 %}{% endblock %}
+
