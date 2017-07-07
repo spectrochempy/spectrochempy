@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# to use the pre-push in the source git_hooks directory
+# in the Spectrochempy/.git/hooks  directory do
+# ln -s ../../git_hooks/pre-push pre-push
+
+#source /anaconda/bin/activate /anaconda/envs/python27
+#pip uninstall -y spectrochempy
+#python setup.py develop || exit 1
+
+
+source /anaconda/bin/activate /anaconda/envs/python35
+pip uninstall -y spectrochempy
+python setup.py develop || exit 1
+

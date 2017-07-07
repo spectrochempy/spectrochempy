@@ -1,0 +1,15 @@
+*~
+~*
+.idea/
+__pycache__/
+.cache/
+*.ipynb_checkpoints
+docs/_build
+*.egg-info
+.DS_Store
+*.log
+*.zip
+.eggs
+*generated
+
+essai.scp

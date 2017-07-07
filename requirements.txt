@@ -1,0 +1,32 @@
+ipython
+notebook >= 5.0.0
+numpy >= 1.9
+scipy
+pandas
+matplotlib
+traits
+traitsui
+pyface
+xlrd
+pyqt5
+apptools
+
+# for tests
+pytest
+
+# units and uncertainty
+pint
+uncertainties
+
+# for documentation
+numpydoc
+pandoc
+sphinx>=1.4
+ipykernel
+nbsphinx
+pillow
+
+# for nmr
+nmrglue
+
+
