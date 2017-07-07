@@ -1,6 +1,6 @@
 # SpectroChemPy 
 
-*Version: 0.1.1a1*
+*Version: 0.1.alpha*
 
 ****
 ## What is SpectroChemPy?
