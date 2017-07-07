@@ -3,3 +3,9 @@ test_data/*.* filter=lfs diff=lfs merge=lfs -text
 ser filter=lfs diff=lfs merge=lfs -text
 *.scp filter=lfs diff=lfs merge=lfs -text
 *.SPG filter=lfs diff=lfs merge=lfs -text
+test_data/nmrdata/ filter=lfs diff=lfs merge=lfs -text
+test_data/ filter=lfs diff=lfs merge=lfs -text
+*.fid filter=lfs diff=lfs merge=lfs -text
+test_data/irdata/ filter=lfs diff=lfs merge=lfs -text
+*/fid filter=lfs diff=lfs merge=lfs -text
+*/ser filter=lfs diff=lfs merge=lfs -text

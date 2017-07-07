@@ -1,0 +1,76 @@
+# 2D PISEMA example modified from SIMPSON article (JMR 2000) example 8
+
+spinsys {
+    channels 1H 15N
+    nuclei 1H 15N
+    dipole 1 2 10000 0 0 0
+    shift 2 100p 100p 0.25 0 17 0
+}
+
+par {
+    spin_rate 0
+    crystal_file zcw376
+    start_operator I2x-I1y
+    detect_operator I2p
+    proton_frequency 400e6
+    verbose 1101
+    np 128
+    ni 48
+    variable rf 83000
+    variable dec 130000
+    sw 40000
+    sw1 rf/2.0/sqrt(2.0/3.0)
+    variable theta 90-54.73561032
+}
+proc pulseq {} {
+    global par
+    set tsw [expr 1e6/$par(sw)]
+    set tp [expr 1e6*sqrt(2.0/3.0)/$par(rf)]
+    set tth [expr 1e6*$par(theta)/360/$par(rf)]
+    set off [expr -sqrt(0.5)*$par(rf)]
+    set rf2 [expr sqrt(1.5)*$par(rf)]
+    
+    reset
+    offset $off 0
+    pulse $tp $par(rf) y $rf2 x
+    offset [expr -$off] 0
+    pulse $tp $par(rf) -y $rf2 -x
+    offset 0 0
+    store 1
+
+    reset
+    pulse $tsw $par(dec) x 0 x
+    store 2
+
+    for {set i 1} {$i <= $par(ni)} {incr i} {
+        reset
+
+    if {$i == 1} {
+        pulse $tth $par(rf) -x 0 x
+    } else {
+        prop 3
+        prop 1
+    }
+    store 3
+    acq $par(np) 2
+    }
+}
+proc main {} {
+    global par
+
+    set f [fsimpson]
+    fsave $f $par(name).fid -binary
+    set f [fload $par(name).fid]
+    fsave $f $par(name)_text.fid 
+    fsave $f $par(name)_ftext.fid -xyreim
+    fsave $f $par(name)_raw.fid -raw_bin
+    fzerofill $f 256 512
+    faddlb $f 300 1 300 1
+    fft $f 0 0 0 0
+    fsave $f $par(name).spe -binary
+    set f [fload $par(name).spe]
+    fsave $f $par(name)_text.spe
+    fsave $f $par(name)_ftext.spe -xyreim
+    fsave $f $par(name)_raw.spe -raw_bin
+    fplot2d $f $par(name).ppm -ppm
+}
