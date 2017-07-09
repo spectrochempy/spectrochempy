@@ -69,8 +69,9 @@ DOCDIR = os.path.join(\
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
 
 SOURCE = os.path.join(DOCDIR, 'source')
-BUILDDIR = os.path.join(DOCDIR, '_build')
-SPHINXARGV = u"-b%s;-d{1}/doctrees;{0};{1}/%s".format(SOURCE, BUILDDIR)
+BUILDDIR = os.path.join(DOCDIR, '..', '..','spectrochempy_doc')
+DOCTREES = os.path.join(DOCDIR, '..', '..','spectrochempy_doc', 'doctrees')
+SPHINXARGV = u"-b%s;-d{1};{0};{2}/%s".format(SOURCE, DOCTREES, BUILDDIR)
 
 def make_docs(*options):
     """Make the html and pdf documentation
@@ -125,7 +126,9 @@ def release(*args):
 def clean():
     """Clean/remove the built documentation.
     """
-    shutil.rmtree(BUILDDIR, ignore_errors=True)
+    shutil.rmtree(BUILDDIR + '/html', ignore_errors=True)
+    shutil.rmtree(BUILDDIR + '/pdf', ignore_errors=True)
+    shutil.rmtree(BUILDDIR + '/doctrees', ignore_errors=True)
     shutil.rmtree(SOURCE + '/api/auto_examples', ignore_errors=True)
     shutil.rmtree(SOURCE + '/gen_modules', ignore_errors=True)
     shutil.rmtree(SOURCE + '/api/auto_examples', ignore_errors=True)
