@@ -47,9 +47,22 @@ from glob import glob
 from pkgutil import walk_packages
 from subprocess import call, getoutput
 from warnings import warn
-from sphinx.cmdline import main as sphinx_build
+
+from sphinx.util.docutils import docutils_namespace, patch_docutils
+from sphinx.errors import SphinxError
+from sphinx.application import Sphinx
+from sphinx.util.console import bold, darkgreen
 
 from spectrochempy.api import SCP
+
+#TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
+#from sphinx.cmdline import main as sphinx_build
+
+import matplotlib as mpl
+mpl.use('agg')
+
+from sphinx.util import logging
+log = logging.getLogger(__name__)
 
 
 DOCDIR = os.path.join(\
@@ -57,12 +70,57 @@ DOCDIR = os.path.join(\
 
 SOURCE = os.path.join(DOCDIR, 'source')
 BUILDDIR = os.path.join(DOCDIR, '_build')
+SPHINXARGV = u"-b%s;-d{1}/doctrees;{0};{1}/%s".format(SOURCE, BUILDDIR)
 
-SPHINXBUILD = "/anaconda/envs/python352/bin/sphinx-build"
+def make_docs(*options):
+    """Make the html and pdf documentation
 
-#Usage: %%prog [options] sourcedir outdir [filenames...]
-SPHINXARGV = u"{1};-b %s;-d {0}/doctrees;%s;{0}/%s".format(BUILDDIR, SOURCE)
+    """
+    options = list(options)
 
+    if  'html' in options:
+        builder = 'html'
+
+    if 'pdf' in options:
+        builder = 'pdf'
+
+    if 'clean' in options:
+        clean()
+        make_dirs()
+        options.remove('clean')
+        log.info('\n\nOld documentation now erased.\n\n')
+
+    srcdir = confdir = SOURCE
+    outdir = "{0}/{1}".format(BUILDDIR, builder)
+    doctreedir = "{0}/doctrees".format(BUILDDIR)
+
+    #with patch_docutils(), docutils_namespace():
+    app = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
+    app.verbosity = 2
+
+    update_rest()
+
+    app.build()
+    res = app.statuscode
+
+    log.debug(res)
+    log.info(bold(
+    u"\n\nBuild finished. The {0} pages are in {1}/{2}.".format(
+            builder.upper(), BUILDDIR, builder)))
+
+def release(*args):
+    """Release/publish the documentation to the webpage.
+    """
+
+    # make the doc
+    make_docs(*args)
+
+    # commit and push
+    log.info(getoutput('git add *'))
+    log.info(getoutput('git commit -m "DOC: Documentation rebuilded"'))
+    log.info(getoutput('git push origin master'))
+
+    # download on the server
 
 def clean():
     """Clean/remove the built documentation.
@@ -73,8 +131,6 @@ def clean():
     shutil.rmtree(SOURCE + '/api/auto_examples', ignore_errors=True)
     shutil.rmtree(SOURCE + '/modules/generated', ignore_errors=True)
     shutil.rmtree(SOURCE + '/dev/generated', ignore_errors=True)
-
-    SCP.log.info('Old documentation now erased.\n\n')
 
 
 def make_dirs():
@@ -203,76 +259,6 @@ def write_download_page():
         f.write(rpls)
 
 
-def docs(*options):
-    """Make the html and pdf documentation
-
-    """
-    options = list(options)
-    _clean = 'clean' in options
-    _pdf = 'pdf' in options
-    _html = 'html' in options
-
-    if _clean:
-        clean()
-        make_dirs()
-        update_rest()
-        options.remove('clean')
-
-    if  _html:
-
-        html()
-
-    if _pdf:
-        pdf()
-
-
-def html(*args):
-
-    write_download_page()
-
-    if not args:
-        args = (" ")
-
-    argv = SPHINXARGV % ("html", *args, "html")
-    argv = ["app"]+argv.split(';')
-    SCP.log.info(argv)
-    SCP.log.info("result will be displayed only at the end of the run")
-    #res = call([cmd], shell=True, executable='/bin/bash')
-    res = sphinx_build(argv)
-    SCP.log.info(res)
-    SCP.log.info("Build finished. The HTML pages are in {}/html.".format(BUILDDIR))
-
-def pdf(*args):
-
-    if not args:
-        args = (" ")
-
-    cmd = MAKE % ("latex", *args, "pdf")
-    SCP.log.info(cmd)
-    SCP.log.info("result will be displayed only at the end of the run")
-    res = call([cmd], shell=True, executable='/bin/bash')
-    SCP.log.info(res)
-    cmd = "cd {}/pdf; make".format(BUILDDIR)
-    res = call([cmd], shell=True, executable='/bin/bash')
-    SCP.log.info(res)
-    SCP.log.info("Build finished. The PDF pages are in {}/pdf.".format(BUILDDIR))
-
-
-def release(*args):
-    """Release/publish the documentation to the webpage.
-    """
-
-    # make the doc
-    docs(*args)
-
-    # commit and push
-    SCP.log.info(getoutput('git add *'))
-    SCP.log.info(getoutput('git commit -m "DOC: Documentation rebuilded"'))
-    SCP.log.info(getoutput('git push origin master'))
-
-    # download on the server
-
-
 
 if __name__ == '__main__':
 
@@ -290,4 +276,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         options = sys.argv[2:]
 
-    docs(*options)
+    make_docs(*options)

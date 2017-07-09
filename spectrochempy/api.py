@@ -85,7 +85,7 @@ for app in ['make.py','pytest', 'py.test', 'docrunner.py',]:
 # Graphics backend
 # ==============================================================================
 import matplotlib as mpl
-if not 'sphinx-build' in sys.argv[0]:
+if not 'make.py' in sys.argv[0]:
     mpl.use('Qt5Agg')
 else:
     # this is necessary to buid doc with sphinx-gallery
@@ -107,14 +107,14 @@ if ip is not None:
         try:
             ip.magic('matplotlib nbagg')
         except UsageError:
-            #try:
-            #    ip.magic('matplotlib osx')
-            #except:
+            try:
+                ip.magic('matplotlib osx')
+            except:
                 ip.magic('matplotlib qt')
     else:
-        #try:
-        #    ip.magic('matplotlib osx')
-        #except:
+        try:
+            ip.magic('matplotlib osx')
+        except:
             ip.magic('matplotlib qt')
 
 
@@ -144,7 +144,7 @@ else:
 # in case spectrochempy was not yet installed using setup
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-log.debug("sys.path : %s"%str(sys.path))
+log.debug("\n\nsys.path : %s\n\n"%str(sys.path))
 
 # =============================================================================
 # Load Spectrochempy API

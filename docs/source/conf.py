@@ -46,8 +46,6 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-#import matplotlib as mpl
-#mpl.use('agg')   # to make shinx gallery work
 
 global doc_building
 doc_building = True
@@ -112,7 +110,8 @@ source_encoding = 'utf-8'
 # The master toctree document.
 master_doc = 'index'
 
-from spectrochempy.api import __version__, __release__, __copyright__
+from spectrochempy.version import get_version
+__version__, __release__, __copyright__ = get_version()
 
 # General information about the project.
 project = "spectrochempy"
