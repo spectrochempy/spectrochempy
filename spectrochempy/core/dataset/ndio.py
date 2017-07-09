@@ -48,8 +48,9 @@ import os
 import logging
 import copy
 
-from traits.api import HasTraits, Dict
-from pyface.api import FileDialog, OK
+from traitlets import Unicode, Bool, HasTraits
+
+#from pyface.api import FileDialog, OK
 
 import json
 import datetime
@@ -64,12 +65,13 @@ from numpy.lib.format import write_array, MAGIC_PREFIX
 
 # local import
 
+
 from spectrochempy.core.dataset.ndaxes import Axes, Axis
 from spectrochempy.core.units import Unit
 
 import spectrochempy
 
-from spectrochempy.preferences.preference_manager import preference_manager as pm
+#from spectrochempy.preferences.preference_manager import preference_manager as pm
 from spectrochempy.logger import log
 
 __all__ = ['NDIO']
@@ -85,13 +87,25 @@ class NDIO(HasTraits):
 
     """
 
+    def _get_datadir(self):
+        """`str`- Default directory for i/o operations.
+
+        """
+        datadir = self.preferences.datadir
+        return datadir
+
+    def _set_datadir(self, value):
+        pass  # preferences_manager.root.datadir = value
+        # preferences_manager.preferences.save()
+
+
     ## BASIC READER ##
     ##################
 
     @classmethod
-    def load(cls, path='', protocol='scp'):
+    def load(cls, path='', protocol='SCP'):
         """
-        Load a dataset object saved as a pickle file (``.scp`` file).
+        Load a dataset object saved as a pickle file (``.SCP`` file).
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
@@ -107,7 +121,7 @@ class NDIO(HasTraits):
         --------
 
         >>> from spectrochempy.api import NDDataset
-        >>> mydataset = NDDataset.load('DATA/myexperiment.scp')
+        >>> mydataset = NDDataset.load('DATA/myexperiment.SCP')
         >>> print(mydataset) # doctest: +ELLIPSIS
         <BLANKLINE>
         ...
@@ -123,7 +137,7 @@ class NDIO(HasTraits):
 
         """
 
-        if protocol not in ['scp']:
+        if protocol not in ['SCP']:
             return cls.read(path, protocol=protocol)
 
         # open file dialog box
@@ -131,7 +145,7 @@ class NDIO(HasTraits):
         filename = path
         if not path:
             dlg = FileDialog(action='open',
-        wildcard='Spectrochempy (*.scp)|*.scp|Sappy --DEPRECATED (*.sap)|*.sap')
+        wildcard='Spectrochempy (*.SCP)|*.SCP|Sappy --DEPRECATED (*.sap)|*.sap')
             if dlg.open() == OK:
                 filename = dlg.path
             else:
@@ -200,7 +214,7 @@ class NDIO(HasTraits):
     def save(self, path=''):
         """
         Save the :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-        (default extension: ``.scp`` ).
+        (default extension: ``.SCP`` ).
 
         Parameters
         ----------
@@ -225,7 +239,7 @@ class NDIO(HasTraits):
 
         if not path:
             dlg = FileDialog(action='save as',
-                             wildcard='Spectrochempy (*.scp)|*.scp')
+                             wildcard='Spectrochempy (*.SCP)|*.SCP')
             if dlg.open() == OK:
                 filename = dlg.path
             else:
@@ -237,8 +251,8 @@ class NDIO(HasTraits):
         # Import deferred for startup time improvement
         import tempfile
 
-        if not filename.endswith('.scp'):
-            file = filename + '.scp'
+        if not filename.endswith('.SCP'):
+            file = filename + '.SCP'
 
         compression = zipfile.ZIP_DEFLATED
         zipf = zipfile_factory(filename, mode="w", compression=compression)
@@ -336,7 +350,7 @@ class NDIO(HasTraits):
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
-        if protocol == 'scp':
+        if protocol == 'SCP':
             # default reader
             return self.load(path)
 
@@ -383,7 +397,7 @@ class NDIO(HasTraits):
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
-        if protocol == 'scp':
+        if protocol == 'SCP':
             return self.save(path)
 
         # find the adequate reader
@@ -545,7 +559,7 @@ class NDIO(HasTraits):
         if savename is not None:
             self.fig.savefig(savename)
 
-        pm.save()
+
 
     def show(self):
         """
@@ -583,6 +597,6 @@ class NDIO(HasTraits):
 # =============================================================================
 # Modify the doc to include Traits
 # =============================================================================
-from spectrochempy.utils import create_traitsdoc
+#from spectrochempy.utils import create_traitsdoc
 
-create_traitsdoc(NDIO)
+#create_traitsdoc(NDIO)

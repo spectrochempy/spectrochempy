@@ -61,12 +61,12 @@ from pandas.core.generic import NDFrame
 # third-party imports
 # =============================================================================
 from six import string_types
-from traits.api import (List, Unicode, Property, Instance,
+from traitlets import (List, Unicode, Instance, default,
                         Bool)
 
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils import SpectroChemPyWarning
-from spectrochempy.utils import create_traitsdoc
+#from spectrochempy.utils import create_traitsdoc
 # from spectrochempy.api import preferences_manager
 from spectrochempy.utils import is_sequence, is_number
 from spectrochempy.utils import (numpyprintoptions,
@@ -75,7 +75,6 @@ from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndaxes import Axis, Axes, AxisError
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 from spectrochempy.core.dataset.ndmeta import Meta
-#from .ndplugin import NDPlugin
 from spectrochempy.core.dataset.ndio import NDIO
 
 # =============================================================================
@@ -116,12 +115,12 @@ class NDDatasetWarning(SpectroChemPyWarning):
     """
 
 
-class NDDataset(#NDPlugin,
+class NDDataset(
                 NDIO,
                 NDMath,
                 NDArray,
                 ):
-    """The main N-dimensional dataset class used by |scp|.
+    """The main N-dimensional dataset class used by |SCP|.
 
     Parameters
     -----------
@@ -153,7 +152,7 @@ class NDDataset(#NDPlugin,
 
         standard deviation on the `data`. Handling of uncertainty use a fork of the
         `uncertainties <http://pythonhosted.org/uncertainties/>`_
-        package (BSD Licence) which is embedded in |scp|.
+        package (BSD Licence) which is embedded in |SCP|.
 
     units : an instance of :class:`~spectrochempy.core.units.Unit` or string, optional
 
@@ -161,7 +160,7 @@ class NDDataset(#NDPlugin,
         `units` is set to the units of the `data`; if a `unit` is also explicitly
         provided an error is raised. Handling of `units` use a fork of the
         `pint <https://pint.readthedocs.org/en/0.6>`_ (BSD Licence) package
-        which is embedded in |scp|)
+        which is embedded in |SCP|)
 
     meta : :class:`~spectrochempy.core.dataset.ndmeta.Meta` object, optional
 
@@ -196,9 +195,13 @@ class NDDataset(#NDPlugin,
     _description = Unicode
     _history = List
 
-    _axes = Instance(Axes)
+    _axes = Instance(Axes, allow_none=True)
 
-    _iscopy = Bool
+    _iscopy = Bool(False)
+
+    @default('_iscopy')
+    def _get_iscopy_default(self):
+        return False
 
     def __init__(self,
                  data=None,
@@ -206,7 +209,7 @@ class NDDataset(#NDPlugin,
                  mask=None,
                  uncertainty=None,
                  units=None,
-                 meta=Meta(),
+                 meta=None,
                  name=None,
                  title=None,
                  axesunits=None,
@@ -214,7 +217,7 @@ class NDDataset(#NDPlugin,
                  is_complex=None,
                  **kwargs):
 
-        self._iscopy = kwargs.pop('iscopy', False)
+        self._iscopy = False #kwargs.pop('iscopy', False)
 
         if is_complex is not None:
             self._data_is_complex = is_complex
@@ -300,7 +303,16 @@ class NDDataset(#NDPlugin,
 
         self._data = newdata[:]
 
-    def _set_data(self, data):
+    @property
+    def data(self):
+        """:class:`~numpy.ndarray`-like object - The actual array data
+        contained in this object.
+
+        """
+        return self._data
+
+    @data.setter
+    def data(self, data):
         # property.setter for data
         if data is None:
             self._data = np.array([]).astype(float)  # reinit data
@@ -384,7 +396,22 @@ class NDDataset(#NDPlugin,
     #     if units is not None:
     #         super(NDDataset, self)._set_units(units)
 
-    def _set_mask(self, mask):
+    @property
+    def mask(self):
+        """:class:`~numpy.ndarray`-like - Mask for the data.
+
+        The values must be `False` where
+        the data is *valid* and `True` when it is not (like Numpy
+        masked arrays). If `data` is a numpy masked array, providing
+        `mask` here will causes the mask from the masked array to be
+        ignored.
+
+        """
+
+        return self._mask
+
+    @mask.setter
+    def mask(self, mask):
         # property.setter for mask
         if mask is not None:
             if self._mask is not None:
@@ -402,7 +429,15 @@ class NDDataset(#NDPlugin,
             # internal representation should be one numpy understands
             self._mask = np.ma.nomask
 
-    def _set_uncertainty(self, value):
+    @property
+    def uncertainty(self):
+        """:class:`~numpy.ndarray` -  Uncertainty (std deviation) on the data.
+
+        """
+        return self._uncertainty
+
+    @uncertainty.setter
+    def uncertainty(self, value):
         # property setter for uncertainty
         if value is not None:
             if self.uncertainty is not None and self.uncertainty.size > 0:
@@ -425,36 +460,36 @@ class NDDataset(#NDPlugin,
     # --------------------------------------------------------------------------
     # additional properties (not in the NDArray base class)
     # --------------------------------------------------------------------------
-    description = Property(desc='description')
-
-    def _get_description(self):
+    @property
+    def description(self):
         return self._description
 
-    def _set_description(self, value):
+    @description.setter
+    def description(self, value):
         self._description = value
 
-    history = Property
-
-    def _get_history(self):
+    @property
+    def history(self):
         """ list of strings
 
         Describes the history of actions made on this dataset
         """
         return self._history
 
-    def _set_history(self, value):
+    @history.setter
+    def history(self, value):
         self._history.append(value)
 
-    axes = Property
-
-    def _get_axes(self):
+    @property
+    def axes(self):
         """:class:`~spectrochempy.core.dataset.ndaxes.Axes` instance
 
         Contain the axes of the dataset
         """
         return self._axes
 
-    def _set_axes(self, value):
+    @axes.setter
+    def axes(self, value):
         if value is not None:
             if self._axes is not None:
                 log.info("Overwriting NDDataset's current "
@@ -475,12 +510,12 @@ class NDDataset(#NDPlugin,
             else:
                 self._axes = value
 
-    def __axes_default(self):
+    @default('_axes')
+    def _get_axes_default(self):
         return None  # Axes([None for dim in self.shape])
 
-    axestitles = Property
-
-    def _get_axestitles(self):
+    @property
+    def axestitles(self):
         """`list` - A list of the :class:`~spectrochempy.core.dataset.ndaxes.Axis`
         titles.
 
@@ -488,39 +523,27 @@ class NDDataset(#NDPlugin,
         if self.axes is not None:
             return self.axes.titles
 
-    def _set_axestitles(self, value):
+    @axestitles.setter
+    def axestitles(self, value):
         if self.axes is not None:
             self.axes.titles = value
 
-    axesunits = Property
-
-    def _get_axesunits(self):
+    @property
+    def axesunits(self):
         """`List`- A list of the :class:`~spectrochempy.core.dataset.ndaxes.Axis`
         units
         """
         if self.axes is not None:
             return self.axes.units
 
-    def _set_axesunits(self, value):
+    @axestitles.setter
+    def axesunits(self, value):
         if self.axes is not None:
             self.axes.units = value
 
-    datadir = Property
 
-    def _get_datadir(self):
-        """`str`- Default directory for i/o operations.
-
-        """
-        datadir = self.preferences.datadir
-        return datadir
-
-    def _set_datadir(self, value):
-        pass  # preferences_manager.root.datadir = value
-        # preferences_manager.preferences.save()
-
-    T = Property
-
-    def _get_T(self):
+    @property
+    def T(self):
         """same type - Transposed array.
 
         The object is returned if `ndim` < 2.
@@ -528,31 +551,26 @@ class NDDataset(#NDPlugin,
         """
         return self.transpose()
 
-    x = Property
-
-    def _get_x(self):
+    @property
+    def x(self):
         return self.axes[-1]
 
-    y = Property
-
-    def _get_y(self):
+    @property
+    def y(self):
         if self.ndim > 1:
             return self.coords(-2)
 
-    z = Property
-
-    def _get_z(self):
+    @property
+    def z(self):
         if self.ndim > 2:
             return self.coords(-3)
 
-    date = Property
-
-    def _get_date(self):
+    @property
+    def date(self):
         return self._date
 
-    modified = Property
-
-    def _get_modified(self):
+    @property
+    def modified(self):
         return self._modified
 
     # -------------------------------------------------------------------------
@@ -945,7 +963,7 @@ class NDDataset(#NDPlugin,
 
     def __repr__(self):
         prefix = type(self).__name__ + '('
-        body = np.array2string(self.data, separator=', ', prefix=prefix)
+        body = np.array2string(self._data, separator=', ', prefix=prefix)
         return ''.join([prefix, body, ')'])
 
     def __str__(self):
@@ -1022,7 +1040,7 @@ class NDDataset(#NDPlugin,
     def __getattr__(self, item):
         # when the attribute was not found
 
-        if item in ["__numpy_ufunc__"]:
+        if item in ["__numpy_ufunc__"] or '_validate' in item or '_changed' in item:
             # raise an error so that masked array will be handled correctly
             # with arithmetic operators and more
             raise AttributeError
@@ -1374,4 +1392,4 @@ set_operators(NDDataset, priority=50)
 # Modify the doc to include Traits
 # =============================================================================
 
-create_traitsdoc(NDDataset)
+#create_traitsdoc(NDDataset)

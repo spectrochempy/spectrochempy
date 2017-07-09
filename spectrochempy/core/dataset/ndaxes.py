@@ -55,23 +55,23 @@ from pandas import Index
 from datetime import datetime
 import copy
 
-from traits.api import (HasStrictTraits, List, Property, Bool, Array, Unicode)
-from traits.trait_errors import TraitError
+from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
+from traitlets import TraitError
+from ...utils.traittypes import Range
 
 from ..units import Q_ as quantity
 from .ndarray import NDArray
 from .ndmeta import Meta
 from .ndmath import NDMath, set_operators
 
-from ...utils import (is_sequence, is_number, numpyprintoptions,
+from ...utils import (is_sequence, numpyprintoptions,
                       SpectroChemPyWarning)
-from ...utils import create_traitsdoc
+#from ...utils import create_traitsdoc
 from ...logger import log
 
 __all__ = ['Axes',
            'Axis',
            'AxisRange',
-           'Interval',
            'AxisRangeError',
            'AxisError',
            'AxisError',
@@ -180,7 +180,7 @@ class Axis(NDMath, NDArray):
                  units=None,
                  title=None,
                  name=None,
-                 meta=Meta(),
+                 meta=None,
                  **kwargs):
 
         _iscopy = kwargs.pop('iscopy', False)
@@ -228,20 +228,30 @@ class Axis(NDMath, NDArray):
     # -------------------------------------------------------------------------
     # properties
     # -------------------------------------------------------------------------
+    @default('_name')
+    def _get_name_default(self):
+        return u"Axis_"+str(uuid.uuid1()).split('-')[0]  # a unique id
 
-    def _set_data(self, val):
-        # Alias for coords
-        self._set_coords(val)
 
-    coords = Property
+    @property
+    def is_reversed(self):
+        """`bool`, read-only property - Whether the axis is ascending or reversed.
 
-    def _get_coords(self):
+        return a correct result only if the data are sorted
+
+        """
+        return bool(self.data[0] > self.data[-1])
+
+    @property
+    def coords(self):
         """:class:`~numpy.ndarray`-like object - The axis coordinates.
+        (alias of `data`)
 
         """
         return self._data
 
-    def _set_coords(self, data):
+    @coords.setter
+    def coords(self, data):
         # property.setter for data
 
         if data is None:
@@ -297,45 +307,35 @@ class Axis(NDMath, NDArray):
             log.debug("init data axis a numpy array")
             self._data = np.array(data, subok=True, copy=self._iscopy)
 
-    def _set_mask(self, mask):
-        # property.setter for mask
 
-        if mask is not None:
-            if self.is_masked and np.any(mask != self._mask):
-                log.info("Overwriting Axis's current "
-                            "mask with specified mask")
-            self._mask = mask
 
     # hidden properties (for the documentation, only - we remove the docs)
     # some of the property of NDArray has to be hidden because they are not
     # usefull for this Axis class
-    def _get_is_complex(self):
+    @property
+    def is_complex(self):
         return None  # always real
 
-    def _get_ndim(self):
-        return self._data.ndim
+    @property
+    def ndim(self):
+        return 1
 
-    def _get_uncertainty(self):
+    @property
+    def uncertainty(self):
         return None
 
-    def _get_T(self):
+    @property
+    def T(self):  # no transpose
         return self
 
-    def _get_data(self):
+    @property
+    def data(self):
         return self._data
 
-    def _get_shape(self):
+    @property
+    def shape(self):
         return self._data.shape
 
-    is_reversed = Property
-
-    def _get_is_reversed(self):
-        """`bool`, read-only property - Whether the axis is ascending or reversed.
-
-        return a correct result only if the data are sorted
-
-        """
-        return self.data[0] > self.data[-1]
 
     # -------------------------------------------------------------------------
     # private methods
@@ -483,7 +483,7 @@ class Axis(NDMath, NDArray):
 # Axes
 # =============================================================================
 
-class Axes(HasStrictTraits):
+class Axes(HasTraits):
     """A collection of axes for a dataset with a validation method.
 
     Parameters
@@ -498,13 +498,14 @@ class Axes(HasStrictTraits):
     """
 
     # Hidden attributes containing the collection of Axis instance
-    _axes = List
+    _axes = List(Instance(Axis), allow_none=True)
 
     # Hidden name of the object
     _name = Unicode
 
-    def __name_default(self):
-        return str(uuid.uuid1()).split('-')[0]  # a unique id
+    @default('_name')
+    def _get_name_default(self):
+        return u"Axes_"+str(uuid.uuid1()).split('-')[0]  # a unique id
 
 
     # Hidden attribute to specify if the collection is for a single dimension
@@ -564,26 +565,23 @@ class Axes(HasStrictTraits):
     # -------------------------------------------------------------------------
     # Properties
     # -------------------------------------------------------------------------
-    issamedim = Property
-
-    def _get_issamedim(self):
-        return self._issamedim
-
-    name = Property # read only
-
-    def _get_name(self):
+    @property
+    def name(self):
         return self._name
 
-    names = Property
-
-    def _get_names(self):
+    @property
+    def names(self):
         """`list`, read-only property - Get the list of axis names.
         """
-        return [item.name for item in self._axes]
+        if len(self._axes)<1:
+            return []
+        try:
+            return [item.name for item in self._axes]
+        except:
+            log.critical(self._axes)
 
-    titles = Property
-
-    def _get_titles(self):
+    @property
+    def titles(self):
         """`list` - Get/Set a list of axis titles.
 
         """
@@ -599,59 +597,57 @@ class Axes(HasStrictTraits):
 
         return _titles
 
-    def _set_titles(self, value):
+    @titles.setter
+    def titles(self, value):
         # Set the titles at once
         if is_sequence(value):
             for i, item in enumerate(value):
                 self._axes[i].title = item
 
-    labels = Property
-
-    def _get_labels(self):
+    @property
+    def labels(self):
         """`list` - Get/Set a list of axis labels.
 
         """
         return [item.label for item in self._axes]
 
-    def _set_labels(self, value):
+    @labels.setter
+    def labels(self, value):
         # Set the labels at once
         if is_sequence(value):
             for i, item in enumerate(value):
                 self._axes[i].label = item
 
-    units = Property
-
-    def _get_units(self):
+    @property
+    def units(self):
         """`list` - Get/Set a list of axis units.
 
         """
         return [item.units for item in self._axes]
 
-    def _set_units(self, value):
+    @units.setter
+    def units(self, value):
         if is_sequence(value):
             for i, item in enumerate(value):
                 self._axes[i].units = item
 
-    isempty = Property()
-
-    def _get_isempty(self):
+    @property
+    def isempty(self):
         """`bool`, read-only property - `True` if there is no axes defined.
 
         """
         return len(self._axes) == 0
 
-    issamedim = Property()
-
-    def _get_issamedim(self):
+    @property
+    def issamedim(self):
         """`bool`, read-only property -
         `True` if the axes define a single dimension.
 
         """
         return self._issamedim
 
-    sizes = Property()
-
-    def _get_sizes(self):
+    @property
+    def sizes(self):
         """`int`, read-only property -
         gives the size of the axis or axes for each dimention"""
         _sizes = []
@@ -662,9 +658,8 @@ class Axes(HasStrictTraits):
                 _sizes.append(item.sizes[i][0])
         return _sizes
 
-    coords = Property
-
-    def _get_coords(self):
+    @property
+    def coords(self):
         """:class:`~numpy.ndarray`-like object - The first axis coordinates.
 
         """
@@ -786,39 +781,11 @@ class Axes(HasStrictTraits):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-
-# =============================================================================
-# Interval
-# =============================================================================
-
-class Interval(List):
-    """Define a trait whose values define an ordered interval
-
-    """
-    # Define the default value
-    default_value = []
-
-    # Describe the trait type
-    info_text = 'an ordered interval trait'
-
-    def validate(self, object, name, value):
-
-        value = super(Interval, self).validate(object, name, value)
-
-        if not value:
-            return []
-
-        if len(value) == 2:
-            value.sort()
-            return value
-
-        raise TraitError("An interval must be a list of 2 values exactly")
-
 # =============================================================================
 # AxisRange
 # =============================================================================
 
-class AxisRange(HasStrictTraits):
+class AxisRange(HasTraits):
     """An axisrange is a set of ordered, non intersecting intervals,\
     e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
 
@@ -840,7 +807,7 @@ class AxisRange(HasStrictTraits):
    """
     # TODO: May use also units ???
 
-    ranges = List(Interval)
+    ranges = List(Range)
     reversed = Bool
 
     def __init__(self, *ranges, reversed=False):
@@ -879,9 +846,8 @@ class AxisRange(HasStrictTraits):
 
     # Properties
 
-    nranges = Property
-
-    def _get_nranges(self):
+    @property
+    def nranges(self):
         return len(self.ranges)
 
     # public methods
@@ -937,5 +903,5 @@ set_operators(Axis, priority=50)
 # =============================================================================
 # Modify the doc to include Traits
 # =============================================================================
-create_traitsdoc(Axes)
-create_traitsdoc(Axis)
+#create_traitsdoc(Axes)
+#create_traitsdoc(Axis)

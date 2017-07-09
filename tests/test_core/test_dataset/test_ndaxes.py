@@ -71,6 +71,7 @@ def test_axisarray_subclass():
     assert a.units is None
     assert a.unitless
     assert not a.is_uncertain
+    print(a.meta)
     assert not a.meta
 
     # set
@@ -414,20 +415,24 @@ def test_unit_conversion_operators(operation, result_units):
     assert_equal_units(combined.units, result_units)
 
 
-from spectrochempy.api import Interval, AxisRange,  AxisRangeError
+from spectrochempy.api import AxisRange,  AxisRangeError
+from spectrochempy.utils.traittypes import Range
 
-from traits.api import HasTraits
-from traits.trait_errors import TraitError
+from traitlets import HasTraits
+from traitlets import TraitError
 
-class testInterval(HasTraits):
+class testRangeTrait(HasTraits):
 
-    x = Interval
+    x = Range()
 
     def __init__(self):
 
         assert not self.x
 
         self.x = [2,1.]
+        assert self.x == [1,2]
+
+        self.x = (2,1.)
         assert self.x == [1,2]
 
         self.x.reverse()
@@ -445,7 +450,7 @@ class testInterval(HasTraits):
         pass
 
 def testinterval():
-    testInterval()
+    testRangeTrait()
 
 def test_axisrange():
 
@@ -500,14 +505,14 @@ def test_multiaxis_for_a_single_dim():
     axesc._transpose()
     axesd = Axes(axesa, axesc)
     assert str(axesd) == "([['wavelengths', 'temperature']], " \
-                         "[['temperature', 'wavelengths']])"
+                          "[['temperature', 'wavelengths']])"
 
     assert not axesd.issamedim
     assert np.all([item.issamedim for item in axesd])
 
     axesd._transpose()
     assert str(axesd) == "([['temperature', 'wavelengths']], " \
-                         "[['wavelengths', 'temperature']])"
+                          "[['wavelengths', 'temperature']])"
 
     with pytest.warns(AxisWarning):
         axesd[0]._transpose()

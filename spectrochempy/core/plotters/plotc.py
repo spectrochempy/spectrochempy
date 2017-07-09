@@ -44,9 +44,9 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.preferences.preference_manager import \
-                                                        preference_manager as pm
-_DO_NOT_BLOCK = pm.general._DO_NOT_BLOCK
+from spectrochempy.application import SCP
+
+_DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK
 
 
 __all__ = ['plotc']

@@ -41,8 +41,7 @@ import os as os
 import numpy as np
 from datetime import datetime, timezone, timedelta
 
-from traitsui.api import FileEditor, Item, View
-from traits.api import HasTraits, File, Str, CList
+from traitlets import HasTraits, Unicode, List
 
 __all__ = ['read_jdx']
 

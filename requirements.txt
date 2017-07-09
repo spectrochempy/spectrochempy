@@ -1,33 +1,21 @@
 ipython
-notebook >= 5.0.0
-numpy >= 1.9
+notebook
+numpy
 scipy
 pandas
 matplotlib
-traits
-traitsui
-pyface
+traitlets
 xlrd
-apptools
-
-# for tests
 pytest
-
-# units and uncertainty
+pytest-runner
 pint
 uncertainties
-
-# for documentation
 numpydoc
 pandoc
-sphinx>=1.4
+sphinx
 ipykernel
 nbsphinx
 pillow
-sphinx_gallery
+sphinx-gallery
 seaborn
-
-# for nmr
 nmrglue
-
-# install pyqt=4 with conda

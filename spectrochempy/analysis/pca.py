@@ -39,7 +39,7 @@ __all__ = ['Pca']
 
 import matplotlib.pyplot as plt
 
-from traits.api import HasTraits, Property, Instance, Array
+from traitlets import HasTraits , Instance
 
 from ..core import NDDataset, Axes, Axis
 from .svd import Svd
@@ -49,10 +49,9 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.preferences.preference_manager import \
-                                                        preference_manager as pm
-_DO_NOT_BLOCK = pm.general._DO_NOT_BLOCK
+from spectrochempy.api import SCP
 
+_DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK
 
 # ==============================================================================
 # class Pca
@@ -77,10 +76,10 @@ class Pca(HasTraits):
 
     T = Instance(NDDataset)
     Pt = Instance(NDDataset)
-    center = Array
+    center = Instance(np.ndarray)
 
     # private attributes
-    _ev = Array
+    _ev = Instance(np.ndarray)
 
     def __init__(self, X, npc=None):
         '''Constructor'''
@@ -121,15 +120,13 @@ class Pca(HasTraits):
 
     # Properties
     #------------
-    ev_ratio = Property
-
-    def _get_ev_ratio(self):
+    @property
+    def ev_ratio(self):
         '''% Explained Variance per PC'''
         return 100 * self._ev / sum(self._ev)
 
-    ev_cum = Property
-
-    def _get_ev_cum(self):
+    @property
+    def ev_cum(self):
         '''% Cummulative Explained Variance'''
         return np.cumsum(self.ev_ratio)
 

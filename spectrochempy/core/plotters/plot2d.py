@@ -49,8 +49,10 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-from spectrochempy.preferences.preference_manager import preference_manager as pm
 
+from spectrochempy.api import SCP
+
+_DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK
 # =============================================================================
 # nddataset plot2D functions
 # =============================================================================

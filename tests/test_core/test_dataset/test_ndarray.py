@@ -42,7 +42,7 @@ from copy import copy, deepcopy
 
 import numpy as np
 import pytest
-from traits.api import TraitError
+from traitlets import TraitError
 
 from pint import DimensionalityError
 from spectrochempy.api import NDArray
@@ -69,7 +69,6 @@ def test_init_ndarray_subclass():
     assert not a.is_uncertain
     assert a.unitless
     assert a.is_untitled
-    assert not a.dimensionless
     assert not a.meta
 
 

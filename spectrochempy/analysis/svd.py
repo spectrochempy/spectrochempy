@@ -37,7 +37,7 @@
 
 __all__ = ['Svd']
 
-from traits.api import HasTraits, Property, Instance, Array
+from traitlets import HasTraits, Instance
 
 from ..core import NDDataset, Axis, Axes
 
@@ -87,7 +87,7 @@ class Svd(HasTraits):
     """
 
     U = Instance(NDDataset)
-    s = Array
+    s = Instance(np.ndarray)
     Vt = Instance(NDDataset)
 
     def __init__(self, X, full_matrices=False, compute_uv=True):
@@ -149,20 +149,17 @@ class Svd(HasTraits):
     # Properties
     # ----------
 
-    ev = Property
-
-    def _get_ev(self):
+    @property
+    def ev(self):
         """`numpy.ndarray`,  eigenvalues of the covariance matrix """
         return (self.s * self.s) / (np.size(self.s) - 1)
 
-    ev_cum = Property
-
-    def _get_ev_cum(self):
+    @property
+    def ev_cum(self):
         """`numpy.ndarray`,  Cummulative Explained Variance """
         return np.cumsum(self.ev)
 
-    ev_ratio = Property
-
-    def _get_ev_ratio(self):
+    @property
+    def ev_ratio(self):
         """`numpy.ndarray`,  Explained Variance per singular values """
         return self.ev / np.sum(self.ev)

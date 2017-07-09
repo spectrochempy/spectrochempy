@@ -47,8 +47,10 @@ from glob import glob
 from pkgutil import walk_packages
 from subprocess import call, getoutput
 from warnings import warn
+from sphinx.cmdline import main as sphinx_build
 
-from spectrochempy.api import log, consolelog, __version__, __release__
+from spectrochempy.api import SCP
+
 
 DOCDIR = os.path.join(\
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
@@ -56,10 +58,10 @@ DOCDIR = os.path.join(\
 SOURCE = os.path.join(DOCDIR, 'source')
 BUILDDIR = os.path.join(DOCDIR, '_build')
 
-SPHINXBUILD = "/anaconda/envs/python35/bin/sphinx-build"
+SPHINXBUILD = "/anaconda/envs/python352/bin/sphinx-build"
 
-MAKE = "{0} -b %s -d {1}/doctrees %s {2} {1}/%s".format(SPHINXBUILD, BUILDDIR,
-                                                        SOURCE)
+#Usage: %%prog [options] sourcedir outdir [filenames...]
+SPHINXARGV = u"{1};-b %s;-d {0}/doctrees;%s;{0}/%s".format(BUILDDIR, SOURCE)
 
 
 def clean():
@@ -72,7 +74,7 @@ def clean():
     shutil.rmtree(SOURCE + '/modules/generated', ignore_errors=True)
     shutil.rmtree(SOURCE + '/dev/generated', ignore_errors=True)
 
-    log.info('Old documentation now erased.\n\n')
+    SCP.log.info('Old documentation now erased.\n\n')
 
 
 def make_dirs():
@@ -107,9 +109,6 @@ def list_packages(package):
                                       prefix=package.__name__ + '.',
                                       onerror=lambda x: None):
         names.append(name)
-
-    # for name in names:
-    #    log.info(name)
 
     return names
 
@@ -197,7 +196,7 @@ def write_download_page():
       </li>
     </ul>
 
-    """.format(__release__, date_release, __version__, date_version)
+    """.format(SCP.RELEASE, date_release, SCP.VERSION, date_version)
 
     with open(os.path.join(DOCDIR, 'source', '_templates', 'download.html'),
               "w") as f:
@@ -220,6 +219,7 @@ def docs(*options):
         options.remove('clean')
 
     if  _html:
+
         html()
 
     if _pdf:
@@ -233,13 +233,14 @@ def html(*args):
     if not args:
         args = (" ")
 
-    cmd = MAKE % ("html", *args, "html")
-    log.info(cmd)
-
-    log.info("result will be displayed only at the end of the run")
-    res = call([cmd], shell=True, executable='/bin/bash')
-    log.info(res)
-    log.info("Build finished. The HTML pages are in {}/html.".format(BUILDDIR))
+    argv = SPHINXARGV % ("html", *args, "html")
+    argv = ["app"]+argv.split(';')
+    SCP.log.info(argv)
+    SCP.log.info("result will be displayed only at the end of the run")
+    #res = call([cmd], shell=True, executable='/bin/bash')
+    res = sphinx_build(argv)
+    SCP.log.info(res)
+    SCP.log.info("Build finished. The HTML pages are in {}/html.".format(BUILDDIR))
 
 def pdf(*args):
 
@@ -247,14 +248,14 @@ def pdf(*args):
         args = (" ")
 
     cmd = MAKE % ("latex", *args, "pdf")
-    log.info(cmd)
-    log.info("result will be displayed only at the end of the run")
+    SCP.log.info(cmd)
+    SCP.log.info("result will be displayed only at the end of the run")
     res = call([cmd], shell=True, executable='/bin/bash')
-    log.info(res)
+    SCP.log.info(res)
     cmd = "cd {}/pdf; make".format(BUILDDIR)
     res = call([cmd], shell=True, executable='/bin/bash')
-    log.info(res)
-    log.info("Build finished. The PDF pages are in {}/pdf.".format(BUILDDIR))
+    SCP.log.info(res)
+    SCP.log.info("Build finished. The PDF pages are in {}/pdf.".format(BUILDDIR))
 
 
 def release(*args):
@@ -265,20 +266,15 @@ def release(*args):
     docs(*args)
 
     # commit and push
-    log.info(getoutput('git add *'))
-    log.info(getoutput('git commit -m "DOC: Documentation rebuilded"'))
-    log.info(getoutput('git push origin master'))
+    SCP.log.info(getoutput('git add *'))
+    SCP.log.info(getoutput('git commit -m "DOC: Documentation rebuilded"'))
+    SCP.log.info(getoutput('git push origin master'))
 
     # download on the server
 
 
 
 if __name__ == '__main__':
-
-    from logging import WARNING, DEBUG, getLogger
-    rootlogger = getLogger()
-    rootlogger.setLevel(DEBUG)
-    consolelog.setLevel(DEBUG)
 
     if len(sys.argv) < 2:
         # full make

@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-from spectrochempy.api import log, filelog, consolelog
+from spectrochempy.api import log
 from logging import WARNING
 
 def test_logger():
@@ -45,7 +45,7 @@ def test_logger():
     log.warning('aie aie aie')
     log.error('very bad')
 
-    consolelog.setLevel(WARNING)
+    log.setLevel(WARNING)
 
     log.debug('test log output for debugging, after changing level')
     log.info('ssssssafter changing level')

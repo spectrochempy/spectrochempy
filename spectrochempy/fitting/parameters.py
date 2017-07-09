@@ -55,8 +55,7 @@ import numpy as np
 #=================
 # enthought import
 #=================
-from traits.api import (HasTraits, Str, Instance, on_trait_change,
-                        Property, List)
+from traitlets import (HasTraits, Unicode, Instance, List, observe)
 
 #==============
 # Local import
@@ -364,7 +363,7 @@ class ParameterScript(HasTraits):
 
     fp = Instance(FitParameters)
 
-    script = Str('')
+    script = Unicode('')
 
     sources = List(Instance('spectrochempy.core.dataset.nddataset.NDDataset'))
 
@@ -372,8 +371,8 @@ class ParameterScript(HasTraits):
     # properties
     #===========================================================================
     #--------------------------
-    @on_trait_change('script')
-    def _check_parameters(self):
+    @observe('script')
+    def _check_parameters(self, change):
         """
         Check the validity of the parameters
         """

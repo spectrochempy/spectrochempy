@@ -45,7 +45,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from matplotlib.ticker import MaxNLocator
-from ...preferences import preference_manager as pm
+
 
 def plot1D(data, **kwargs):
     """

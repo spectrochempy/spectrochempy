@@ -81,14 +81,14 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
 
     >>> from spectrochempy.api import NDDataset
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
-    >>> ref = NDDataset.load('ref.scp')
+    >>> ref = NDDataset.load(SCP)
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
 
     or
 
     >>> from spectrochempy.api import NDDataset, autosub
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
-    >>> ref = NDDataset.load('ref.scp')
+    >>> ref = NDDataset.load('ref.SCP')
     >>> B = autosub(A, ref, [3900., 3700.], [1600., 1500.])
 
     """

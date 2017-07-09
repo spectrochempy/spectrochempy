@@ -35,65 +35,17 @@ import stat
 import sys
 import six
 
-# Enthought library imports.
-from traits.api import Bool, HasPrivateTraits, Instance, List, Property
-from traits.api import Str
+from traitlets import Bool, HasTraits, Instance, List, Unicode
 
 #from .decorators import wraps
 #from .introspection import find_current_module, resolve_name
 
-class File(HasPrivateTraits):
+class File(HasTraits):
     """ A representation of files and folders in a file system. """
 
-    #### 'File' interface #####################################################
-
-    # The absolute path name of this file/folder.
-    absolute_path = Property(Str)
-
-    # The folder's children (for files this is always None).
-    children = Property(List('File'))
-
-    # The file extension (for folders this is always the empty string).
-    #
-    # fixme: Currently the extension includes the '.' (ie. we have '.py' and
-    # not 'py'). This is because things like 'os.path.splitext' leave the '.'
-    # on, but I'm not sure that this is a good idea!
-    ext = Property(Str)
-
-    # Does the file/folder exist?
-    exists = Property(Bool)
-
-    # Is this an existing file?
-    is_file = Property(Bool)
-
-    # Is this an existing folder?
-    is_folder = Property(Bool)
-
-    # Is this a Python package (ie. a folder contaning an '__init__.py' file.
-    is_package = Property(Bool)
-
-    # Is the file/folder readonly?
-    is_readonly = Property(Bool)
-
-    # The MIME type of the file (for a folder this will always be
-    # 'context/unknown' (is that what it should be?)).
-    mime_type = Property(Str)
-
-    # The last component of the path without the extension.
-    name = Property(Str)
-
-    # The parent of this file/folder (None if it has no parent).
-    parent = Property(Instance('File'))
-
     # The path name of this file/folder.
-    path = Str
+    path = Unicode
 
-    # A URL reference to the file.
-    url = Property(Str)
-
-    ###########################################################################
-    # 'object' interface.
-    ###########################################################################
 
     def __init__(self, path, **traits):
         """ Creates a new representation of the specified path. """
@@ -114,18 +66,19 @@ class File(HasPrivateTraits):
 
         return 'File(%s)' % self.path
 
-    ###########################################################################
-    # 'File' interface.
-    ###########################################################################
 
     #### Properties ###########################################################
 
-    def _get_absolute_path(self):
+    # The absolute path name of this file/folder.
+
+    @property
+    def absolute_path(self):
         """ Returns the absolute path of this file/folder. """
 
         return os.path.abspath(self.path)
 
-    def _get_children(self):
+    @property
+    def children(self):
         """ Returns the folder's children.
 
         Returns None if the path does not exist or is not a folder.
@@ -142,34 +95,40 @@ class File(HasPrivateTraits):
 
         return children
 
-    def _get_exists(self):
+    @property
+    def exists(self):
         """ Returns True if the file exists, otherwise False. """
 
         return os.path.exists(self.path)
 
-    def _get_ext(self):
+    @property
+    def ext(self):
         """ Returns the file extension. """
 
         name, ext = os.path.splitext(self.path)
 
         return ext
 
-    def _get_is_file(self):
+    @property
+    def is_file(self):
         """ Returns True if the path exists and is a file. """
 
         return self.exists and os.path.isfile(self.path)
 
-    def _get_is_folder(self):
+    @property
+    def is_folder(self):
         """ Returns True if the path exists and is a folder. """
 
         return self.exists and os.path.isdir(self.path)
 
-    def _get_is_package(self):
+    @property
+    def is_package(self):
         """ Returns True if the path exists and is a Python package. """
 
         return self.is_folder and '__init__.py' in os.listdir(self.path)
 
-    def _get_is_readonly(self):
+    @property
+    def is_readonly(self):
         """ Returns True if the file/folder is readonly, otherwise False. """
 
         # If the File object is a folder, os.access cannot be used because it
@@ -195,7 +154,8 @@ class File(HasPrivateTraits):
 
         return readonly
 
-    def _get_mime_type(self):
+    @property
+    def mime_type(self):
         """ Returns the mime-type of this file/folder. """
 
         mime_type, encoding = mimetypes.guess_type(self.path)
@@ -204,7 +164,8 @@ class File(HasPrivateTraits):
 
         return mime_type
 
-    def _get_name(self):
+    @property
+    def name(self):
         """ Returns the last component of the path without the extension. """
 
         basename = os.path.basename(self.path)
@@ -213,15 +174,17 @@ class File(HasPrivateTraits):
 
         return name
 
-    def _get_parent(self):
+    @property
+    def parent(self):
         """ Returns the parent of this file/folder. """
 
         return File(os.path.dirname(self.path))
 
-    def _get_url(self):
+    @property
+    def url(self):
         """ Returns the path as a URL. """
 
-        # Strip out the leading slash on POSIX systems.
+        # Unicodeip out the leading slash on POSIX systems.
         return 'file:///%s' % self.absolute_path.lstrip('/')
 
     #### Methods ##############################################################

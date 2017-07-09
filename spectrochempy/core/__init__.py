@@ -36,7 +36,7 @@
 
 from spectrochempy.core.dataset import *
 from spectrochempy.core.readers import *
-from spectrochempy.core.plotters import *
+from .plotters import *
 from spectrochempy.core.writers import *
 from spectrochempy.core.processors import *
 from spectrochempy.core.units import *

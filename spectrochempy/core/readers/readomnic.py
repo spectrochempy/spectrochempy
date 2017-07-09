@@ -41,8 +41,6 @@ import os as os
 import numpy as np
 from datetime import datetime, timezone, timedelta
 
-from pyface.api import FileDialog, OK
-
 from ..dataset import NDDataset
 
 __all__ = ['read_omnic']

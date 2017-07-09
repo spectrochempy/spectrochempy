@@ -38,8 +38,10 @@ The following libraries are also required:
 
 * `Matplotlib <http://matplotlib.sourceforge.net/index.html>`_
 
-* `Traits <http://code.enthought.com/projects/traits/>`_
+pint
+uncertainty
 
+conda config --add channels conda-forge
 
 Follow the instructions to install these packages on those sites, or, far easier,
 install them as packages from your operating system

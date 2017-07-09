@@ -90,5 +90,7 @@ def get_version():
         print('exception')
 
     finally:
+        copyright = u'2014-2017, LCS - ' \
+                        u'Laboratory for Catalysis and Spectrochempy'
 
-        return version, release
+        return version, release, copyright

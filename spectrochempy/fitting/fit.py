@@ -44,8 +44,8 @@ from __future__ import print_function, division
 # ===============================================================================
 #  general imports
 # ===============================================================================
-from traits.api import (HasTraits, Bool, Any, ListStr, List,
-                        Array, Str, Instance, provides, Property)
+from traitlets import (HasTraits, Bool, Any, List,
+                        Unicode, Instance)
 
 import sys
 import re
@@ -83,7 +83,7 @@ class Fit(HasTraits):
     source : Dataset or list of Dataset instance
         The data to fit
 
-    mode : Str, optional
+    mode : Unicode, optional
         Reserved - not used for now
 
     Attributes
@@ -92,7 +92,7 @@ class Fit(HasTraits):
         Fit parameters dictionary (read-only, but individual elements of the dict
         can be changed)
 
-    script : Str
+    script : Unicode
         A string representation of the fp dict,
         which can be used as input for other a fit (read-only)
 
@@ -311,14 +311,12 @@ class Fit(HasTraits):
     # properties
     # *******************************************************************************
 
-    fp = Property
-
-    def _get_fp(self):
+    @property
+    def fp(self):
         return self.parameterscript.fp
 
-    script = Property
-
-    def _get_script(self):
+    @property
+    def script(self):
         return self.parameterscript.script
 
     # *******************************************************************************

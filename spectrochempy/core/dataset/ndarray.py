@@ -56,19 +56,19 @@ from datetime import datetime
 
 import numpy as np
 from six import string_types
-from traits.api import Property, CArray, Either, List, Unicode, Instance, \
-    Bool, HasStrictTraits
+from traitlets import List, Unicode, Instance, Bool, HasTraits, default, Any
+from ...utils.traittypes import Array
 
 # =============================================================================
 # local imports
 # =============================================================================
 from ...utils import SpectroChemPyWarning, deprecated
-from ...utils import create_traitsdoc
+#from ...utils import create_traitsdoc
 from pint.errors import DimensionalityError, UndefinedUnitError
 from uncertainties import unumpy as unp
 from .ndmeta import Meta
 from ..units import Unit, U_ as ur, Q_ as quantity, M_ as measurement
-from ...utils import EPSILON
+from ...utils import EPSILON, is_number
 from ...logger import log
 
 # =============================================================================
@@ -86,7 +86,7 @@ __all__ = ['NDArray']
 # NDArray class
 # =============================================================================
 
-class NDArray(HasStrictTraits):
+class NDArray(HasTraits):
     """A read-only NDArray object (This is the base class for SpectroChemPy
     array-like object, intended to be subclassed)
 
@@ -126,16 +126,16 @@ class NDArray(HasStrictTraits):
 
     """
 
-    _data = CArray
-    _is_complex = Either(None, List(Bool))
-    _mask = CArray
-    _units = Instance(Unit)
-    _uncertainty = CArray
+    _data = Array
+    _is_complex = List(Bool)
+    _mask = Array
+    _units = Instance(Unit, allow_none=True)
+    _uncertainty = Array
     _name = Unicode
     _title = Unicode
-    _meta = Instance(Meta)
+    _meta = Instance(Meta, allow_none=True)
     _date = Instance(datetime)
-    _labels = Either(None,Instance(np.ndarray))
+    _labels = Array
 
     # _scaling = Float(1.)
 
@@ -153,64 +153,69 @@ class NDArray(HasStrictTraits):
     # --------------------------------------------------------------------------
     # Defaults
     # --------------------------------------------------------------------------
-    def __data_default(self):
-        return np.array([], dtype=object)
+    # @default('_data')
+    # def _get_data_default(self):
+    #     return None
 
-    def __name_default(self):
+    @default('_name')
+    def _get_name_default(self):
         return str(uuid.uuid1()).split('-')[0]  # a unique id
 
-    def __mask_default(self):
+    @default('_mask')
+    def _get_mask_default(self):
         return np.zeros(self._data.shape, dtype=bool)
 
-    def __uncertainty_default(self):
+    @default('_units')
+    def _get_units_default(self):
+        return None #ur.dimensionless
+
+    @default('_uncertainty')
+    def _get_uncertainty_default(self):
         return np.zeros(self._data.shape, dtype=float)
 
-    def __meta_default(self):
+    @default('_meta')
+    def _get_meta_default(self):
         return Meta()
 
-    def __is_complex_default(self):
+    @default('_is_complex')
+    def _get_is_complex_default(self):
         return list([False for _ in self._data.shape])
 
-    def __date_default(self):
+    @default('_date')
+    def _get_date_default(self):
         return datetime(1, 1, 1, 0, 0)
 
-    def __labels_default(self):
+    @default('_labels')
+    def _get_labels_default(self):
         return np.array([''] * self._data.size)
 
     # -------------------------------------------------------------------------
     # Properties
     # -------------------------------------------------------------------------
 
-    data = Property
-
-    def _get_data(self):
+    @property
+    def data(self):
         """:class:`~numpy.ndarray`-like object - The actual array data
         contained in this object.
 
         """
         return self._data
 
-    def _set_data(self, value):
-        raise NotImplementedError('`data` property is read only. '
-                                  'Change this behavior in subclass if needed!')
+    @data.setter
+    def data(self, data):
 
-    values = Property
+        self._data = data
 
-    def _get_values(self):
+    @property
+    def values(self):
         """:class:`~numpy.ndarray`-like object - The actual values (data, units,
         + uncertainties) contained in this object.
 
         """
         return self._uarray(self._data, self._uncertainty, self._units)
 
-    def _set_values(self, value):
-        raise NotImplementedError('`data` property is read only. '
-                                  'Change this behavior in subclass if needed!')
-
-
-    name = Property
-
-    def _get_name(self):
+    @property
+    def name(self):
         """`str` - An user friendly name for this object (often not necessary,
         as the title may be used for the same purpose).
 
@@ -221,15 +226,15 @@ class NDArray(HasStrictTraits):
         """
         return self._name
 
-    def _set_name(self, name):
+    @name.setter
+    def name(self, name):
         # property.setter for name
         if name is not None:
             self._name = name
 
 
-    title = Property
-
-    def _get_title(self):
+    @property
+    def title(self):
         """`str` - An user friendly title for this object.
 
         Unlike the :attr:`name`, the title doesn't need to be unique.
@@ -239,7 +244,8 @@ class NDArray(HasStrictTraits):
         """
         return self._title
 
-    def _set_title(self, title):
+    @title.setter
+    def title(self, title):
         # property.setter for title
         if title is not None:
             if self._title is not None:
@@ -247,9 +253,8 @@ class NDArray(HasStrictTraits):
                         "Overwriting Axis's current title with specified title")
             self._title = title
 
-    mask = Property
-
-    def _get_mask(self):
+    @property
+    def mask(self):
         """:class:`~numpy.ndarray`-like - Mask for the data.
 
         The values must be `False` where
@@ -262,13 +267,18 @@ class NDArray(HasStrictTraits):
 
         return self._mask
 
-    def _set_mask(self, value):
-        raise NotImplementedError('`mask` property is read only. '
-                                  'Change this behavior in subclass if needed!')
+    @mask.setter
+    def mask(self, mask):
+        # property.setter for mask
 
-    units = Property
+        if mask is not None:
+            if self.is_masked and np.any(mask != self._mask):
+                log.info("Overwriting Axis's current "
+                            "mask with specified mask")
+            self._mask = mask
 
-    def _get_units(self):
+    @property
+    def units(self):
         """An instance of `Unit` or `str` - The units of the data.
 
         If data is a
@@ -280,8 +290,8 @@ class NDArray(HasStrictTraits):
         """
         return self._units
 
-
-    def _set_units(self, units):
+    @units.setter
+    def units(self, units):
 
         if units is None:
             return
@@ -311,39 +321,33 @@ class NDArray(HasStrictTraits):
         self._units = units
 
 
-    uncertainty = Property
-
-    def _get_uncertainty(self):
+    @property
+    def uncertainty(self):
         """:class:`~numpy.ndarray` -  Uncertainty (std deviation) on the data.
 
         """
         return self._uncertainty
 
-    def _set_uncertainty(self, value):
-        raise NotImplementedError('`uncertainty` property is read only. '
-                                  'Change this behavior in subclass if needed!')
+    @uncertainty.setter
+    def uncertainty(self, uncertainty):
+        raise NotImplementedError()
 
-    meta = Property
-
-    def _get_meta(self):
+    @property
+    def meta(self):
         """:class:`~spectrochempy.core.dataset.ndmeta.Meta` instance object -
         Additional metadata for this object.
 
         """
         return self._meta
 
-    # def _set_meta(self, value):
-    #     raise NotImplementedError('`meta` property is read only. '
-    #                               'Change this behavior in subclass if needed!')
-
-    def _set_meta(self, meta):
+    @meta.setter
+    def meta(self, meta):
         # property.setter for meta
         if meta is not None:
             self._meta.update(meta)
 
-    labels = Property
-
-    def _get_labels(self):
+    @property
+    def labels(self):
         """:class:`~numpy.ndarray` - An array of objects of any type (but most
         generally string).
 
@@ -356,7 +360,8 @@ class NDArray(HasStrictTraits):
         else:
             return np.empty_like(self._data, dtype='str')
 
-    def _set_labels(self, labels):
+    @labels.setter
+    def labels(self, labels):
         # Property setter for labels
         if labels is None:
             return
@@ -366,9 +371,8 @@ class NDArray(HasStrictTraits):
             self._labels = np.array(labels, subok=True,
                                     copy=self._iscopy).astype(object)
 
-    is_labeled = Property
-
-    def _get_is_labeled(self):
+    @property
+    def is_labeled(self):
         """`bool`, read-only property - Whether the axis has labels or not.
 
         """
@@ -384,9 +388,8 @@ class NDArray(HasStrictTraits):
     # read-only properties / attributes
     # -------------------------------------------------------------------------
 
-    shape = Property
-
-    def _get_shape(self):
+    @property
+    def shape(self):
         """`tuple`, read-only property - A `tuple` with the size of each axis.
 
         i.e., the number of data element on each axis (possibly complex).
@@ -405,9 +408,8 @@ class NDArray(HasStrictTraits):
 
         return tuple(shape)
 
-    size = Property
-
-    def _get_size(self):
+    @property
+    def size(self):
         """`int`, read-only property - Size of the underlying `ndarray`.
 
         i.e., the total number of data element
@@ -421,18 +423,16 @@ class NDArray(HasStrictTraits):
                     size //= 2
         return size
 
-    ndim = Property
-
-    def _get_ndim(self):
+    @property
+    def ndim(self):
         """`int`, read-only property - The number of dimensions of
         the underlying array.
 
         """
         return self._data.ndim
 
-    dtype = Property
-
-    def _get_dtype(self):
+    @property
+    def dtype(self):
         """`dtype`, read-only property - data type of the underlying array
 
         """
@@ -441,18 +441,16 @@ class NDArray(HasStrictTraits):
         else:
             return self._data.dtype
 
-    is_empty = Property
-
-    def _get_is_empty(self):
+    @property
+    def is_empty(self):
         """`bool`, read-only property - Whether the array is empty (size==0)
         or not.
 
         """
         return self._data.size == 0
 
-    is_masked = Property
-
-    def _get_is_masked(self):
+    @property
+    def is_masked(self):
         """`bool`, read-only property - Whether the array is masked or not.
 
         """
@@ -464,9 +462,8 @@ class NDArray(HasStrictTraits):
 
         return False
 
-    is_uncertain = Property
-
-    def _get_is_uncertain(self):
+    @property
+    def is_uncertain(self):
         """`bool`, read-only property - Whether the array has uncertainty
         or not.
 
@@ -478,9 +475,8 @@ class NDArray(HasStrictTraits):
             return True
         return False
 
-    is_untitled = Property
-
-    def _get_is_untitled(self):
+    @property
+    def is_untitled(self):
         """`bool`, read-only property - Whether the array has `title` or not.
 
         """
@@ -488,17 +484,15 @@ class NDArray(HasStrictTraits):
             return False
         return True
 
-    unitless = Property
-
-    def _get_unitless(self):
+    @property
+    def unitless(self):
         """`bool`, read-only property - Whether the array has `units` or not.
 
         """
         return self._units is None
 
-    dimensionless = Property
-
-    def _get_dimensionless(self):
+    @property
+    def dimensionless(self):
         """`bool`, read-only property - Whether the array is dimensionless
         or not.
 
@@ -511,12 +505,8 @@ class NDArray(HasStrictTraits):
 
         return self._units.dimensionless
 
-
-    dimensionless = Property
-
-    is_complex = Property
-
-    def _get_is_complex(self):
+    @property
+    def is_complex(self):
         """`tuple` of `bool` - Indicate if any dimension is is_complex.
 
         If a dimension is is_complex, real and imaginary part are interlaced
@@ -537,9 +527,9 @@ class NDArray(HasStrictTraits):
 
         return self._is_complex
 
-    has_complex_dims = Property
 
-    def _get_has_complex_dims(self):
+    @property
+    def has_complex_dims(self):
         """`bool` - Check if any of the dimension is complex
 
         """
@@ -915,8 +905,8 @@ class NDArray(HasStrictTraits):
             if loc > self._data.max() or loc < self._data.min():
                 warnings.warn(
                         '\nThis coordinate ({}) is outside the axis limits.\n'
-                        'The closest limit index is returned'.format(loc),
-                        AxisWarning)
+                        'The closest limit index is returned'.format(loc),)
+                        # AxisWarning)
             return index
 
         else:
@@ -925,4 +915,4 @@ class NDArray(HasStrictTraits):
 # Modify the doc to include Traits
 # =============================================================================
 
-create_traitsdoc(NDArray)
+# create_traitsdoc(NDArray)

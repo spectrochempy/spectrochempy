@@ -49,7 +49,11 @@ elements can be accessed by key, but also by attributes, *e.g.*
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from traits.api import HasTraits, Dict, Bool, Property
+from traitlets import HasTraits, Dict, Bool, default
+
+import logging
+log = logging.getLogger()
+
 
 __all__ = ['Meta']
 
@@ -57,7 +61,7 @@ __all__ = ['Meta']
 # Class Meta
 # =============================================================================
 
-class Meta(HasTraits):
+class Meta(object): #HasTraits):
     """A dictionary to store metadata.
 
     The metadata are accessible by item or by attributes, and
@@ -98,21 +102,28 @@ class Meta(HasTraits):
     # private attributes
     # -------------------------------------------------------------------------
 
-    _data = Dict
+    _data = {} #Dict()
+
+    #@default('_data')
+    #def _get_data(self):
+    #    return {}
 
     # -------------------------------------------------------------------------
     # public attributes
     # -------------------------------------------------------------------------
 
-    readonly = Bool
+    readonly = False #Bool(False)
 
     # -------------------------------------------------------------------------
     # special methods
     # -------------------------------------------------------------------------
+    def __init__(self):
+        self._data = dict()
 
     def __setattr__(self, key, value):
-        if key != 'readonly':
-            self[key] = value
+        if key not in [ 'readonly','_data','_trait_values', '_trait_notifiers',
+                        '_trait_validators', '_cross_validation_lock']:
+                self[key] = value
         else:
             self.__dict__[key] = value  # to avoid a recursive call
             # we can not use self._readonly = value!
@@ -121,8 +132,10 @@ class Meta(HasTraits):
         return self[key]
 
     def __setitem__(self, key, value):
+
         if key in ['readonly'] or key.startswith('_'):
-            raise KeyError('`{}` can not be use as a metadata key'.format(key))
+            raise KeyError('`{}` can not be used as a metadata key'.format(key))
+
         elif not self.readonly:
             self._data.update({key: value})
         else:
@@ -152,6 +165,9 @@ class Meta(HasTraits):
     def __iter__(self):
         for item in sorted(self._data.keys()):
             yield item
+
+    def __str__(self):
+        return str(self._data)
 
     # -------------------------------------------------------------------------
     # public methods

@@ -55,6 +55,9 @@ from tests.utils import (assert_equal, assert_array_equal,
                          raises)
 from ...utils import NumpyRNGContext
 
+def test_fix_crossvalidate_bug():
+
+    assert hasattr(NDDataset(), '_%s_validate' % '_iscopy') is False
 
 @pytest.fixture()
 def ndcplx():

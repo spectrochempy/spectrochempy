@@ -46,54 +46,54 @@ Examples
 
 
 """
+# python imports
 
 import os
 import sys
+import logging
+import warnings
 
-import spectrochempy
+# third party imports
 
-# ==============================================================================
-# Preferences
-# ==============================================================================
 
-#TODO: wait for a Qt5 compatible traitsui package
-#from spectrochempy.preferences.preference_manager_view import view_preferences
-from spectrochempy.preferences.preference_manager import preference_manager as preferences
-
-# ==============================================================================
-# Test detection
-# ==============================================================================
-preferences.general._DO_NOT_BLOCK = False
-for app in ['make.py','pytest', 'py.test', 'docrunner.py',]:
-    if  app in sys.argv[0]:
-        # this is necessary to buid doc with sphinx-gallery and doctests
-        preferences.general._DO_NOT_BLOCK = True
-
+# local imports
+from spectrochempy.application import SCP
 
 # ==============================================================================
 # Logger
 # ==============================================================================
-from spectrochempy.logger import *
 
-import warnings
+SCP.log_level = logging.DEBUG
+log = SCP.log
+
 warnings.simplefilter('ignore', (DeprecationWarning,
                                  FutureWarning, UserWarning))
 
 # ==============================================================================
+# Test, Sphinx ...  detection
+# ==============================================================================
+
+DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK
+
+for app in ['make.py','pytest', 'py.test', 'docrunner.py',]:
+
+    if  app in sys.argv[0]:
+        # this is necessary to buid doc with sphinx-gallery and doctests
+        DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK = True
+
+# ==============================================================================
 # Graphics backend
 # ==============================================================================
-os.environ['ETS_TOOLKIT'] = 'qt4'  # waiting to have a Qt5 tookit
-
 import matplotlib as mpl
 if not 'sphinx-build' in sys.argv[0]:
-    mpl.use('Qt4Agg')
+    mpl.use('Qt5Agg')
 else:
     # this is necessary to buid doc with sphinx-gallery
     log.info('Building docs')
     mpl.use('agg')
-    preferences.general._DO_NOT_BLOCK = True
+    DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK = True
 
-mpl.rcParams['backend.qt4'] = 'PyQt4'
+mpl.rcParams['backend.qt5'] = 'PyQt5'
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
@@ -107,21 +107,23 @@ if ip is not None:
         try:
             ip.magic('matplotlib nbagg')
         except UsageError:
-            try:
-                ip.magic('matplotlib osx')
-            except:
+            #try:
+            #    ip.magic('matplotlib osx')
+            #except:
                 ip.magic('matplotlib qt')
     else:
-        try:
-            ip.magic('matplotlib osx')
-        except:
+        #try:
+        #    ip.magic('matplotlib osx')
+        #except:
             ip.magic('matplotlib qt')
 
+
+log.debug("DO NOT BLOCK : %s "%DO_NOT_BLOCK)
 
 # ==============================================================================
 # Matplotlib preamble for latex
 # ==============================================================================
-usetex = preferences.plot.use_latex
+usetex = SCP.plotoptions.USETEX
 
 if usetex:
     mpl.rc('text', usetex=True)
@@ -140,9 +142,9 @@ else:
 # PYTHONPATH
 # ==============================================================================
 # in case spectrochempy was not yet installed using setup
-import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-log.debug(sys.path)
+log.debug("sys.path : %s"%str(sys.path))
 
 # =============================================================================
 # Load Spectrochempy API
@@ -161,22 +163,16 @@ from spectrochempy.fitting import *
 # version
 # =============================================================================
 
-from spectrochempy.version import get_version
-
-__version__, __release__ = get_version()
-__copyright__ = u'2014-2017, LCS - ' \
-                u'Laboratory for Catalysis and Spectrochempy'
-
 info_string = u"""
 SpectroChemPy's API
     Version   : {}
     Copyright : {}
-""".format(__version__, __copyright__)
+""".format(SCP.VERSION, SCP.COPYRIGHT)
 
-if preferences.general.print_info_on_loading and \
-    not preferences.general._DO_NOT_BLOCK:
+if SCP.INFO_ON_LOADING and \
+    not SCP.plotoptions.DO_NOT_BLOCK:
     print(info_string)
-    log.debug("argv0 : ", sys.argv[0])
+    log.debug("argv0 : %s"%str(sys.argv[0]))
 
 
 # =============================================================================
@@ -203,4 +199,4 @@ except:
 # =============================================================================
 if __name__ == '__main__':
 
-    print(get_version())
+   pass

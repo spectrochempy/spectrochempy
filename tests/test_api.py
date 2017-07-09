@@ -37,15 +37,15 @@
 from spectrochempy.api import *
 # some symbols are not in wildcard import
 # we must import them explicitely
-from spectrochempy.api import __version__, __release__, __copyright__
+from spectrochempy.api import SCP
 import spectrochempy.api as scp
 
 
 def test_api():
 
-    assert __version__.startswith('0.1')
-    assert __release__.startswith('0.1')
-    assert __copyright__
+    assert SCP.VERSION.startswith('0.1')
+    assert SCP.RELEASE.startswith('0.1')
+    assert SCP.COPYRIGHT
 
     print (dir(scp))
 

@@ -55,6 +55,7 @@ import numpy as np
 
 from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
+#TODO: make a conda install for nmrglue
 
 # unit_conversion,
 # =============================================================================

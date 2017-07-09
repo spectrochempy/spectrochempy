@@ -64,3 +64,5 @@ def deprecated(message):
     return deprecation_decorator
 
 
+if __name__ == '__main__':
+    pass

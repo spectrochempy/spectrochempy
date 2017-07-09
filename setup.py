@@ -38,6 +38,7 @@
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop
 # from setuptools.command.install import install
+from spectrochempy.version import get_version
 
 import os
 import shutil as sh
@@ -65,10 +66,7 @@ class PostDevelopCommand(develop):
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-def get_release():
-    from spectrochempy.version import get_version
-    _, release = get_version()
-    return release
+
 
 def get_dependencies():
     with open("requirements.txt", 'r') as f:
@@ -83,7 +81,7 @@ def get_dependencies():
 
 setup(
     name='spectrochempy',
-    version=get_release(),
+    version=get_version()[1],
     packages=find_packages(),
     include_package_data=True,
     url='http:/www-lcs.ensicaen.fr/spectrochempy',

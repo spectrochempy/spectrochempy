@@ -10,7 +10,7 @@ for information about packaging, see::
 
 	http://python-packaging.readthedocs.io/en/latest/index.html
 
-
+conda config --add channels conda-forge
 
 Building the documentation
 ==========================

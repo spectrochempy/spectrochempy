@@ -53,8 +53,8 @@ from fractions import Fraction
 # =============================================================================
 # Third-party imports
 # =============================================================================
-from traits.api import (HasTraits, Property,
-                        Str, Int, Float, Instance)
+from traitlets import (HasTraits,
+                        Unicode, Int, Float, Instance)
 
 # =============================================================================
 # Local imports
@@ -158,93 +158,89 @@ class Isotopes(HasTraits):
 
     isotopes = Instance(pd.DataFrame)
 
-    _nucleus = Str
+    _nucleus = Unicode
 
     # -------------------------------------------------------------------------
     # nucleus (has an alias isotope, for the getter property only)
     # -------------------------------------------------------------------------
-    nucleus = Property(Str,
-                       desc='The current isotope (alias for nucleus)',
-                       depends_on='_nucleus')
-
-    def _get_nucleus(self):
+    @property
+    def nucleus(self):
+        """The current isotope(alias for nucleus)"""
         return self._nucleus
 
-    def _set_nucleus(self, value):
+    @nucleus.setter
+    def nucleus(self, value):
         self._nucleus = value
 
     # -------------------------------------------------------------------------
     # isotope / alias of nucleus
     # -------------------------------------------------------------------------
-    isotope = Property(Str,
-                       desc='The current isotope (alias for nucleus)')
 
-    def _get_isotope(self):
+    @property
+    def isotope(self):
+        """The current isotope (alias for nucleus)"""
         return self.nucleus.strip()
 
     # -------------------------------------------------------------------------
     # spin
     # -------------------------------------------------------------------------
-    spin = Property(Float,
-                    Desc="Spin quantum number of the current nucleus")
-
-    def _get_spin(self):
+    @property
+    def spin(self):
+        "Spin quantum number of the current nucleus"
         return Fraction(self.isotopes.ix[self.nucleus]['spin'])
 
     # ===========================================================================
     # Z
     # ===========================================================================
-    Z = Property(Int,
-                 Desc='Atomic number  of the current nucleus')
-
-    def _get_Z(self):
+    @property
+    def Z(self):
+        'Atomic number  of the current nucleus'
         return self.isotopes.ix[self.nucleus]['Z']
 
     # ===========================================================================
     # A
     # ===========================================================================
-    A = Property(Int,
-                 Desc='Atomic mass  of the current nucleus')
-
-    def _get_A(self):
+    @property
+    def A(self):
+        'Atomic mass  of the current nucleus'
         return self.isotopes.ix[self.nucleus]['A']
 
     # ===========================================================================
     # full name
     # ===========================================================================
-    name = Property(Str,
-                    Desc='Current name of the current nucleus')
-
-    def _get_name(self):
+    @property
+    def name(self):
+        'the name of the nucleus'
         return self.isotopes.ix[self.nucleus]['name'].strip()
 
     # ===========================================================================
     # gamma
     # ===========================================================================
-    gamma = Property(Float,
-                     Desc='gyromagnetic ratio of the current nucleus')
-
-    def _get_gamma(self):
+    @property
+    def gamma(self):
+        'gyromagnetic ratio of the current nucleus'
         muN = ur.elementary_charge / ur.proton_mass / 2. / (2. * np.pi)
         return (self.isotopes.ix[self.nucleus]['gn']* muN).to('MHz/T')
 
     # ===========================================================================
     # _get_abundance
     # ===========================================================================
-    abundance = Property(Float, Desc='natural abundance in percent '
-                                     'of the current nucleus')
-
-    def _get_abundance(self):
+    @property
+    def abundance(self):
+        'natural abundance in percent of the current nucleus'
         return self.isotopes.ix[self.nucleus]['abundance']
 
     # ===========================================================================
     # _get_Q
     # ===========================================================================
-    Q = Property(Float,
-                 Desc='Electric quadrupole moment in barn '
-                      'of the current nucleus')
 
-    def _get_Q(self):
+    @property
+    def Q(self):
+        """
+        Electric quadrupole moment in barn '
+                      'of the current nucleus
+
+        """
         try:
             return float(self.isotopes.ix[self.nucleus]['quadrupole'])*1000. * ur.mbarn
         except:
@@ -253,19 +249,20 @@ class Isotopes(HasTraits):
     # -------------------------------------------------------------------------
     # symbol
     # -------------------------------------------------------------------------
-    symbol = Property(Str,
-                      Desc="Symbol of the current nucleus")
-
-    def _get_symbol(self):
+    @property
+    def symbol(self):
+        "Symbol of the current nucleus"
         return self.isotopes.ix[self._nucleus].symbol.strip()
 
     # -------------------------------------------------------------------------
     # Stability
     # -------------------------------------------------------------------------
-    stability = Property(Str,
-                         desc='The stability of the current nucleus')
+    @property
+    def stability(self):
+        """
+        The stability of the current nucleus
 
-    def _get_stability(self):
+        """
         return self.isotopes.ix[self.nucleus].stability.strip()
 
     # -------------------------------------------------------------------------
