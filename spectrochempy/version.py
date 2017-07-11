@@ -33,10 +33,12 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
+"""
+Determine version string from file or git version
 
+"""
 import os
 import subprocess
-
 
 # get the version string
 # -----------------------
@@ -51,6 +53,10 @@ def get_version():
         the release string such as  |release|
     """
 
+    from spectrochempy.application import scp # here to avoid circular imports
+                                              # as version is also called inside
+                                              # scp
+
     version = '0.1'
     release = '0.1'
 
@@ -63,34 +69,38 @@ def get_version():
     except IOError:
 
         with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "w") as f:
-            print(version, end='\n', file=f)
-            print(release, end='\n', file=f)
+            f.write(version)
+            f.write(release)
 
     finally:
         pass
 
     try:
         # get the version number (if we are using git)
-        verstr = subprocess.getoutput("git describe")
-        verstr = verstr.split('-')
+        version_info = subprocess.getoutput("git describe")
+        version_info = version_info.split('-')
 
         # in case of a just tagged version version str contain only one string
-        if len(verstr) >= 2:  # case of minor revision
-            version = "%s.%s" % tuple(verstr[:2])
-            release = verstr[0]
+        if len(version_info) >= 2:  # case of minor revision
+            version = "%s.%s" % tuple(version_info[:2])
+            release = version_info[0]
         else:
-            version = verstr[0]
+            version = version_info[0]
             release = version
 
         with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "w") as f:
-            print(version, end='\n', file=f)
-            print(release, end='\n', file=f)
+            f.write(version, end='\n')
+            f.write(release,  end='\n')
 
     except:
-        print('exception')
+        scp.log.debug('Could not get version string from GIT repository')
 
     finally:
         copyright = u'2014-2017, LCS - ' \
-                        u'Laboratory for Catalysis and Spectrochempy'
+                    u'Laboratory for Catalysis and Spectrochempy'
 
         return version, release, copyright
+
+if __name__ == '__main__':
+
+    v, r, c = get_version()

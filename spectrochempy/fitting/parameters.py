@@ -47,9 +47,6 @@ import string
 import types
 from collections import UserDict  # This is to be able to create a special dictionary
 
-import logging
-logger = logging.getLogger()
-
 import numpy as np
 
 #=================
@@ -60,7 +57,7 @@ from traitlets import (HasTraits, Unicode, Instance, List, observe)
 #==============
 # Local import
 #==============
-#from spectrochempy.core.dataset import NDDataset
+from spectrochempy.api import log
 
 #=============
 # id_generator
@@ -394,7 +391,7 @@ class ParameterScript(HasTraits):
 
         # set the number of experiments
         fp.expnumber = len(self.sources)
-        logger.info("The number of experiment(s) is set to %d" % fp.expnumber)
+        log.info("The number of experiment(s) is set to %d" % fp.expnumber)
 
         # start interpreting ------------------------------------------------------
         lines = script.split('\n')

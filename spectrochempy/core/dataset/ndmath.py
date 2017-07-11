@@ -60,7 +60,7 @@ import numpy as np
 # Local imports
 # =============================================================================
 from uncertainties import unumpy as unp
-from spectrochempy.core.units import Q_ as quantity
+from spectrochempy.core.units import Quantity
 from .ndarray import NDArray
 
 # =============================================================================
@@ -197,7 +197,7 @@ class NDMath(object):
 
             # units?
             if not obj.unitless:
-                q = quantity(1., obj.units)  # create a quantity from the units
+                q = Quantity(1., obj.units)  # create a Quantity from the units
             else:
                 q = 1.
 
@@ -217,12 +217,12 @@ class NDMath(object):
             d = obj._umasked(d, obj._mask)
 
         else:
-            # assume an array or a scalar (possibly a quantity)
+            # assume an array or a scalar (possibly a Quantity)
             isdataset = False
 
             if hasattr(obj, 'units'):
                 if not obj.dimensionless:
-                    q = quantity(1., obj.units)  # create a quantity from the units
+                    q = Quantity(1., obj.units)  # create a Quantity from the units
                 else:
                     q = 1.
                 d = d = obj.magnitude
@@ -255,10 +255,10 @@ class NDMath(object):
 
                 # rescale according to units
                 if not other.unitless:
-                    if hasattr(obj, 'units'):  # obj is a quantity
+                    if hasattr(obj, 'units'):  # obj is a Quantity
                         if sameunits:
                             other.to(obj._units, inplace=True)  # must also rescale uncertainty
-                        argunits.append(quantity(1., other._units))
+                        argunits.append(Quantity(1., other._units))
                     else:
                         argunits.append(1.)
                 else:
@@ -271,9 +271,9 @@ class NDMath(object):
                 arg = other._umasked(arg, other._mask)
 
             else:
-                if isinstance(other, quantity):
+                if isinstance(other, Quantity):
                     arg = other.magnitude
-                    argunits.append(quantity(1., other._units))
+                    argunits.append(Quantity(1., other._units))
                 else:
                     arg = other
                     argunits.append(1.)

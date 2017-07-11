@@ -37,8 +37,6 @@
 
 """This module holds the definitions all the various models """
 
-import logging
-logger = logging.getLogger()
 import os
 import numpy as np
 

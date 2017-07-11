@@ -52,9 +52,6 @@ import re
 import numpy as np
 from warnings import warn
 
-import logging
-logger = logging.getLogger()
-
 # IPython
 from IPython import display
 
@@ -66,6 +63,7 @@ from spectrochempy.fitting.parameters import ParameterScript
 from spectrochempy.fitting.models import getmodel
 from spectrochempy.fitting.optimization import optimize
 from spectrochempy.utils.misc import htmldoc
+from spectrochempy.api import log
 
 __all__ = ['Fit']
 
@@ -193,9 +191,9 @@ class Fit(HasTraits):
         """
 
         if not self.silent:
-            logger.info('*' * 50)
-            logger.info('  Entering fitting procedure')
-            logger.info('*' * 50)
+            log.info('*' * 50)
+            log.info('  Entering fitting procedure')
+            log.info('*' * 50)
 
         global niter, chi2, everyiter, ncalls
         ncalls = 0
@@ -270,11 +268,11 @@ class Fit(HasTraits):
             if niter % everyiter != 0:
                 return
 
-            logger.info(kwargs)
-            logger.info (args)
+            log.info(kwargs)
+            log.info (args)
             if not self.silent:
                 display.clear_output(wait=True)
-                logger.info("Iterations: %d, Calls: %d (chi2: %.5f)" % (niter, ncalls, chi2))
+                print("Iterations: %d, Calls: %d (chi2: %.5f)" % (niter, ncalls, chi2))
                 sys.stdout.flush()
 
         # end callback function ---------------------------------------------------
@@ -294,11 +292,11 @@ class Fit(HasTraits):
 
         if not self.silent:
             # log.info the results
-            logger.info("\n")
-            logger.info('*' * 50  )
-            logger.info("  Result:")
-            logger.info('*' * 50)
-            logger.info(self.parameterscript.script)
+            log.info("\n")
+            log.info('*' * 50  )
+            log.info("  Result:")
+            log.info('*' * 50)
+            log.info(self.parameterscript.script)
 
         # store the models
         for exp_idx, source in enumerate(self.sources):

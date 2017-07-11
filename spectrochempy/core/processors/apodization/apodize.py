@@ -52,13 +52,9 @@ import numpy as np
 # =============================================================================
 # Local imports
 # =============================================================================
-from spectrochempy.core.units import U_, Q_, M_, set_nmr_context
+from spectrochempy.core.units import ur, Quantity, Measurement, set_nmr_context
 from spectrochempy.utils import epsilon
 
-units = U_
-quantity = Q_
-measurement = M_
-set_nmr_context = set_nmr_context
 
 # =============================================================================
 # interface for the processing class
@@ -86,19 +82,19 @@ def apodize(self, **kwargs):
     method : Callable,
         Apodization function
 
-    apod : `float` or a `quantity`, default 0, or list
+    apod : `float` or a `Quantity`, default 0, or list
 
-        Apodization oarameter(s). If it is not a quantity with units,
+        Apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
 
-    apod2 : `float` or a `quantity`, optional, default 0, or list
+    apod2 : `float` or a `Quantity`, optional, default 0, or list
 
-        Second apodization oarameter(s). If it is not a quantity with units,
+        Second apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
 
-    apod3 : `float` or a `quantity`, optional, default 0, or list
+    apod3 : `float` or a `Quantity`, optional, default 0, or list
 
-        third apodization oarameter(s). If it is not a quantity with units,
+        third apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
         alias: shifted
 
@@ -139,19 +135,19 @@ def apodize(self, **kwargs):
 
     if (lastaxe.unitless or lastaxe.dimensionless or
                                       lastaxe.units.dimensionality != '[time]'):
-        logger.error('apodization apply only to dimensions '
+        log.error('apodization apply only to dimensions '
                      'with [time] dimensionality')
         return self
 
     # first parameters (apodization in Hz) ?
     apod = kwargs.get('apod', kwargs.get('apod1', 0))
-    if not isinstance(apod, quantity):
+    if not isinstance(apod, Quantity):
         # we default to Hz units
         apod = apod * units.Hz
 
     # second parameters (second apodization parameter in Hz) ?
     apod2 = kwargs.get('apod2', 0)
-    if not isinstance(apod2, quantity):
+    if not isinstance(apod2, Quantity):
         # we default to Hz units
         apod2 = apod2 * units.Hz
 
@@ -179,7 +175,7 @@ def apodize(self, **kwargs):
 
     # should we shift the time origin? (should be in axis units)
     shifted = kwargs.get('shifted', kwargs.get('apod3', 0))
-    if not isinstance(shifted, quantity):
+    if not isinstance(shifted, Quantity):
         # we default to lastaxe.units
         shifted = shifted * lastaxe.units
     else:

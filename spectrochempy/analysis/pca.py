@@ -49,9 +49,9 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.api import SCP
+from spectrochempy.application import scp
 
-_DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK
+_DO_NOT_BLOCK = scp.plotoptions.DO_NOT_BLOCK
 
 # ==============================================================================
 # class Pca

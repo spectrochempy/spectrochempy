@@ -59,7 +59,7 @@ from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
 from traitlets import TraitError
 from ...utils.traittypes import Range
 
-from ..units import Q_ as quantity
+from ..units import Quantity
 from .ndarray import NDArray
 from .ndmeta import Meta
 from .ndmath import NDMath, set_operators
@@ -278,7 +278,7 @@ class Axis(NDMath, NDArray):
             if data.name is not None:
                 self._title = data.name
 
-        elif isinstance(data, quantity):
+        elif isinstance(data, Quantity):
             log.debug("init data with data from a Quantity object")
             self._data_passed_is_quantity = True
             self._data = np.array(data.magnitude, subok=True, copy=self._iscopy)

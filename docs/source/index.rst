@@ -21,14 +21,14 @@ What is |scp|?
 data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
 running on Linux, Windows or OS X.
 
-  1.  A |NDDataset| object embedding spectroscopic data and metadata.
-  2. `Units` and `Uncertainties` can be specified for |NDDataset|.
+  1.  A |NDDataset| object embedding array of data with labeled axes and metadata.
+  2. `Units` and `Uncertainties` for |NDDataset| and |NDDataset| axes.
   3.  Mathematical operations over |NDDataset| such addition, multiplication and many more ...
   4.  Import functions to read data from experiments or modelling programs ...
   5.  Display functions such as ``print``, :meth:`plot` ...
   6.  Export functions to `csv`, `xls` ...
   7.  Preprocessing funtions such as baseline correction, automatic subtraction and many more ...
-  8.  Exploratory analysis such as ``svd``, ``pca``, ``efa``...
+  8.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
 
 
 .. warning::
@@ -40,8 +40,6 @@ running on Linux, Windows or OS X.
 
 Installation
 ============
-
-    conda create -n python35 python=3.5
 
 .. toctree::
     :maxdepth: 1
@@ -112,7 +110,6 @@ Developper's Documentation
 
 .. toctree::
     :maxdepth: 1
-
 
     dev/develguide
     dev/reference

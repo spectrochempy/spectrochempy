@@ -42,7 +42,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from spectrochempy.api import ur, set_nmr_context, quantity
+from spectrochempy.api import ur, set_nmr_context, Quantity
 
 def test_ppm():
 
@@ -78,12 +78,12 @@ def test_units():
     assert type(x) == type(ur.km)
 
 def test_repr_html():
-    a = quantity(10, 's/km')
+    a = Quantity(10, 's/km')
     assert "{}".format(a) == "10 second / kilometer"
     assert a._repr_html_() == "10 s.km<sup>-1</sup>"
     #print(a)
 
 def test_unit_dimensionality():
-    a = quantity(1., 'cm')
-    b = a/quantity(1., 'km')
+    a = Quantity(1., 'cm')
+    b = a/Quantity(1., 'km')
     #print(b)

@@ -41,10 +41,3 @@ from spectrochempy.core.writers import *
 from spectrochempy.core.processors import *
 from spectrochempy.core.units import *
 
-# set units and uncertainties
-# ----------------------------
-ur = U_
-quantity = Q_
-measurement = M_
-set_nmr_context = set_nmr_context
-ur.define('absorbance = [absorbance] = AU')

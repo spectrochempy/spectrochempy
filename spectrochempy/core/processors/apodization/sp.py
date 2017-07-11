@@ -44,7 +44,7 @@ import numpy as np
 # Local imports
 # =============================================================================
 from .apodize import apodize
-from spectrochempy.core.units import Q_ as quantity
+from spectrochempy.core.units import Quantity
 
 # =============================================================================
 # interface for the processing class
@@ -118,7 +118,7 @@ def sp(self, *args, **kwargs):
     def func(x, off, end, pow):
         w = x[-1].data - x[0].data
         i = np.arange(0, x.size, 1)
-        if isinstance(pow, quantity):
+        if isinstance(pow, Quantity):
             pow = pow.magnitude
             off = off.magnitude
             end = end.magnitude

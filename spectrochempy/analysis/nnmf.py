@@ -146,7 +146,7 @@ class nnmf:
                         Hp = Hn
 
             if n_iter == maxiter:
-                logger.info('Max iter in nlssubprob')
+                log.info('Max iter in nlssubprob')
 
             return (H, grad, n_iter)
 
@@ -159,7 +159,7 @@ class nnmf:
         gradW = np.dot(W, np.dot(H, H.T)) - np.dot(V, H.T)
         gradH = np.dot(np.dot(W.T, W), H) - np.dot(W.T, V)
         initgrad = norm(np.r_[gradW, gradH.T])
-        logger.info('Init gradient norm {:.3f}'.format(initgrad))
+        log.info('Init gradient norm {:.3f}'.format(initgrad))
         tolW = max(0.001, tol) * initgrad
         tolH = tolW
 
@@ -185,7 +185,7 @@ class nnmf:
 
             if myiter % 10 == 0: stdout.write('.')
 
-        logger.info(
+        log.info(
             '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter, projnorm))
         return (W, H)
 

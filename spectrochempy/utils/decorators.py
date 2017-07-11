@@ -34,15 +34,10 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-from IPython import get_ipython
 import warnings
 from .exceptions import SpectroChemPyDeprecationWarning
-import logging
 
 all =['deprecated']
-
-logger = logging.getLogger()
 
 def deprecated(message):
     """

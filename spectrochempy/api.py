@@ -52,151 +52,96 @@ import os
 import sys
 import logging
 import warnings
-
-# third party imports
-
-
-# local imports
-from spectrochempy.application import SCP
-
-# ==============================================================================
-# Logger
-# ==============================================================================
-
-SCP.log_level = logging.DEBUG
-log = SCP.log
-
 warnings.simplefilter('ignore', (DeprecationWarning,
                                  FutureWarning, UserWarning))
+from pytest import raises
 
 # ==============================================================================
-# Test, Sphinx ...  detection
+# Tells here the methods or object we allow to import from this library
 # ==============================================================================
-
-DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK
-
-for app in ['make.py','pytest', 'py.test', 'docrunner.py',]:
-
-    if  app in sys.argv[0]:
-        # this is necessary to buid doc with sphinx-gallery and doctests
-        DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK = True
-
-# ==============================================================================
-# Graphics backend
-# ==============================================================================
-import matplotlib as mpl
-if not 'make.py' in sys.argv[0]:
-    mpl.use('Qt5Agg')
-else:
-    # this is necessary to buid doc with sphinx-gallery
-    log.info('Building docs')
-    mpl.use('agg')
-    DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK = True
-
-mpl.rcParams['backend.qt5'] = 'PyQt5'
-
-from IPython.core.magic import UsageError
-from IPython import get_ipython
-from spectrochempy.utils import is_kernel
-
-ip = get_ipython()
-if ip is not None:
-
-    if is_kernel():
-        # if we are running this under ipython and jupyter notebooks
-        try:
-            ip.magic('matplotlib nbagg')
-        except UsageError:
-            try:
-                ip.magic('matplotlib osx')
-            except:
-                ip.magic('matplotlib qt')
-    else:
-        try:
-            ip.magic('matplotlib osx')
-        except:
-            ip.magic('matplotlib qt')
+__all__ = [ ### Helpers
+            'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO', 'raises',
+            'APIref',
+            'options', 'plotoptions',
+            ### Data
+            'NDDataset', 'Axes', 'Axis', 'AxisRange', 'Meta',
+            'ur', 'Quantity', 'Measurement', 'set_nmr_context',
+            ### Info
+            'COPYRIGHT', 'RELEASE', 'VERSION',
+            ### Database
+            'Isotopes',
+            ### Analysis and Fit
+            'Efa', 'Fit', 'Pca', 'Svd', 'align', 'autosub', 'basecor',
+            'concatenate', 'interpolate', 'lsqnonneg', 'lstsq', 'mcrals', 'nnmf',
+            ### View
+            'plot1D', 'plot2D', 'plotc',  'plotr', 'contour',
+            ### import/export
+            'read_dso', 'read_jdx', 'read_omnic', 'readbruker_nmr', 'write_jdx',
+            ### imported library
+            'np', 'plt', 'scipy', 'sympy', 'ng'
+          ]
 
 
-log.debug("DO NOT BLOCK : %s "%DO_NOT_BLOCK)
+
+def APIref():
+    """
+    Helper to display public objects and methods from the API
+
+    """
+    return __all__
 
 # ==============================================================================
-# Matplotlib preamble for latex
+# matplotlib use directive to set before calling matplotlib backends
 # ==============================================================================
-usetex = SCP.plotoptions.USETEX
-
-if usetex:
-    mpl.rc('text', usetex=True)
-    mpl.rcParams['text.latex.preamble'] = [
-            r'\usepackage{siunitx}',
-            r'\sisetup{detect-all}',
-            r'\usepackage{times}',     # set the normal font here
-            r'\usepackage{sansmath}',  # load up the sansmath so that math -> helvet
-            r'\sansmath'
-        ]
-else:
-    mpl.rc('text', usetex=False)
-    mpl.rcParams['text.latex.preamble'] = []
+from spectrochempy.application import scp
 
 # ==============================================================================
-# PYTHONPATH
+# API namespace
 # ==============================================================================
-# in case spectrochempy was not yet installed using setup
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-log.debug("\n\nsys.path : %s\n\n"%str(sys.path))
+VERSION = scp.VERSION
+RELEASE = scp.RELEASE
+COPYRIGHT = scp.COPYRIGHT
+log = scp.log
 
-# =============================================================================
-# Load Spectrochempy API
-# =============================================================================
-log.debug('loading spectrochempy API.')
+plotoptions = scp.plotoptions
+options = scp
 
+# Flags
+# -----
+_DO_NOT_BLOCK = scp.plotoptions.DO_NOT_BLOCK
+
+# log levels
+# ----------
+DEBUG = logging.DEBUG
+INFO = logging.INFO
+WARN = logging.WARNING
+ERROR = logging.ERROR
+CRITICAL = logging.CRITICAL
+
+# loading module libraries
+# ------------------------
 from spectrochempy.core import *
-
 from spectrochempy.databases import *
-
 from spectrochempy.analysis import *
-
 from spectrochempy.fitting import *
 
-# =============================================================================
-# version
-# =============================================================================
-
-info_string = u"""
-SpectroChemPy's API
-    Version   : {}
-    Copyright : {}
-""".format(SCP.VERSION, SCP.COPYRIGHT)
-
-if SCP.INFO_ON_LOADING and \
-    not SCP.plotoptions.DO_NOT_BLOCK:
-    print(info_string)
-    log.debug("argv0 : %s"%str(sys.argv[0]))
-
-
-# =============================================================================
-# additional useful librairies
-# =============================================================================
+# Useful librairies alias
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-# optional libraries
-
-try:
-    import scipy
-except:
-    pass
-
-try:
-    import sympy
-except:
-    pass
+import scipy
+import sympy
+import nmrglue as ng
 
 
+# START THE APPLICATION ========================================================
 
-# =============================================================================
+scp.start()
+scp.log.info(scp.RUNNING)
+
+# ==============================================================================
+
 if __name__ == '__main__':
 
    pass

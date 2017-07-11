@@ -52,14 +52,10 @@ import numpy as np
 # =============================================================================
 # Local imports
 # =============================================================================
-from spectrochempy.core.units import U_, Q_, M_, set_nmr_context
+from spectrochempy.core.units import ur, Quantity, Measurement, set_nmr_context
 from spectrochempy.utils import closer_power_of_two
 
 epsilon = np.finfo(float).eps
-units = U_
-quantity = Q_
-measurement = M_
-set_nmr_context = set_nmr_context
 
 # =============================================================================
 # interface for the processing class
@@ -70,7 +66,7 @@ __callable__ = "ft"
 # =============================================================================
 # Constants
 # =============================================================================
-logger = logging.getLogger()
+from spectrochempy.api import log
 
 # =============================================================================
 # generic transform function
@@ -113,7 +109,7 @@ def ft(self, **kwargs):
 
     if (lastaxe.unitless or lastaxe.dimensionless or
                                       lastaxe.units.dimensionality != '[time]'):
-        logger.error('ft apply only to dimensions with [time] dimensionality')
+        log.error('ft apply only to dimensions with [time] dimensionality')
         return self
 
     # first parameters ?

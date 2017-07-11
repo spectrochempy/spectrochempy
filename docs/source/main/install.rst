@@ -69,7 +69,6 @@ installer for a really easy installation of |scp| from the
 
 .. TODO::
 
-   Conda installer
 
 
 Installation

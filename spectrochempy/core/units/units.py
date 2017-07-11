@@ -41,7 +41,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-__all__ = ['Unit', 'Quantity', 'U_', 'Q_', 'M_']
+__all__ = ['Unit', 'ur', 'Quantity', 'Measurement', 'set_nmr_context']
 
 __doctest_skip__ = ['*']
 
@@ -54,9 +54,7 @@ from pint.quantity import _Quantity as Quantity
 from pint.unit import _Unit as Unit
 from pint import formatting
 from pint.formatting import siunitx_format_unit
-
-
-PKG = 'spectrochempy.core.units'
+from pint import Context
 
 # Modify the pint behaviour ####################################################
 #  TODO: better ways ??
@@ -149,9 +147,87 @@ else:
 
 
 U_.define('__wrapped__ = 1')  #<- hack to avoid an error with pytest (doctest activated)
+U_.define('ppm = 1. = ppm')
+U_.define('absorbance = [absorbance] = AU')
+
 U_.default_format = '' #.2fK'
 Q_ = U_.Quantity
 Q_.default_format = '' #.2fK'
 M_ = U_.Measurement
 M_.default_format = 'uK'
+
+
+# Context for NMR
+# -----------------
+
+def set_nmr_context(larmor):
+    """Set a NMR context ur\_ relative to the given Larmor frequency
+
+    Parameters
+    ----------
+    larmor: Quantity or float
+        The Larmor frequency of the current nucleus.
+        If it is not a quantity it is assumed to be given i MHz
+
+
+    Examples
+    --------
+
+    First we set the NMR context,
+
+    >>> set_nmr_context(104.3 * U_.MHz)
+
+    then, we can use the context as follow:
+
+    >>> fhz = 10000 * U_.Hz
+    >>> with U_.context('nmr'):
+    ...    fppm = fhz.to('ppm')
+    >>> print("{:~.3f}".format(fppm))
+    95.877 ppm
+
+    or in the opposite direction
+
+    >>> with U_.context('nmr'):
+    ...    fhz = fppm.to('kHz')
+    >>> print("{:~.3f}".format(fhz))
+    10.000 kHz
+
+    Now we update the context:
+
+    >>> with U_.context('nmr', larmor=100. * U_.MHz):
+    ...    fppm = fhz.to('ppm')
+    >>> print("{:~.3f}".format(fppm))
+    100.000 ppm
+
+    >>> set_nmr_context(75 * U_.MHz)
+    >>> fhz = 10000 * U_.Hz
+    >>> with U_.context('nmr'):
+    ...    fppm = fhz.to('ppm')
+    >>> print("{:~.3f}".format(fppm))
+    133.333 ppm
+    """
+
+    if not isinstance(larmor, U_.Quantity):
+        larmor = larmor * U_.MHz
+
+    if 'nmr' not in U_._contexts.keys():
+        c = Context('nmr', defaults={'larmor':larmor})
+
+        c.add_transformation('[]', '[frequency]',
+                             lambda U_, x, **kwargs:  x * kwargs.get('larmor') / 1.e6)
+        c.add_transformation('[frequency]', '[]',
+                             lambda U_, x, **kwargs: x * 1.e6 / kwargs.get('larmor') )
+        U_.add_context(c)
+
+    else:
+
+        c = U_._contexts['nmr']
+        c.defaults['larmor']=larmor
+
+
+# set alias for units and uncertainties
+# --------------------------------------
+ur = U_
+Quantity = Q_
+Measurement = M_
 

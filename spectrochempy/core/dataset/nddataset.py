@@ -120,7 +120,7 @@ class NDDataset(
                 NDMath,
                 NDArray,
                 ):
-    """The main N-dimensional dataset class used by |SCP|.
+    """The main N-dimensional dataset class used by |app|.
 
     Parameters
     -----------
@@ -152,7 +152,7 @@ class NDDataset(
 
         standard deviation on the `data`. Handling of uncertainty use a fork of the
         `uncertainties <http://pythonhosted.org/uncertainties/>`_
-        package (BSD Licence) which is embedded in |SCP|.
+        package (BSD Licence) which is embedded in |app|.
 
     units : an instance of :class:`~spectrochempy.core.units.Unit` or string, optional
 
@@ -160,7 +160,7 @@ class NDDataset(
         `units` is set to the units of the `data`; if a `unit` is also explicitly
         provided an error is raised. Handling of `units` use a fork of the
         `pint <https://pint.readthedocs.org/en/0.6>`_ (BSD Licence) package
-        which is embedded in |SCP|)
+        which is embedded in |app|)
 
     meta : :class:`~spectrochempy.core.dataset.ndmeta.Meta` object, optional
 

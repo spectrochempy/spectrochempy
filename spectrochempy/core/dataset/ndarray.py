@@ -67,7 +67,7 @@ from ...utils import SpectroChemPyWarning, deprecated
 from pint.errors import DimensionalityError, UndefinedUnitError
 from uncertainties import unumpy as unp
 from .ndmeta import Meta
-from ..units import Unit, U_ as ur, Q_ as quantity, M_ as measurement
+from ..units import Unit, ur, Quantity, Measurement
 from ...utils import EPSILON, is_number
 from ...logger import log
 
@@ -299,9 +299,9 @@ class NDArray(HasTraits):
         try:
             if isinstance(units, string_types):
                 units = ur.Unit(units)
-            elif isinstance(units, quantity):
+            elif isinstance(units, Quantity):
                 raise TypeError("Units or string representation "
-                                "of unit is expected, not quantity")
+                                "of unit is expected, not Quantity")
 
         except DimensionalityError:
             raise DimensionalityError
@@ -600,7 +600,7 @@ class NDArray(HasTraits):
 
         """
         if self._units is not None:
-            q = quantity(1., self._units).to(other)
+            q = Quantity(1., self._units).to(other)
             scale = q.magnitude
             if inplace:
                 new = self
@@ -631,9 +631,9 @@ class NDArray(HasTraits):
         try:
             if isinstance(units, string_types):
                 units = ur.Unit(units)
-            elif isinstance(units, quantity):
+            elif isinstance(units, Quantity):
                 raise TypeError("Units or string representation "
-                                "of unit is expected, not quantity")
+                                "of unit is expected, not Quantity")
 
         except DimensionalityError:
             raise DimensionalityError
@@ -770,7 +770,7 @@ class NDArray(HasTraits):
             otherunits = other._units
             otherlabels = other._labels
             otherislabeled = other.is_labeled
-        elif isinstance(other, quantity):
+        elif isinstance(other, Quantity):
             otherdata = other.magnitude
             otherunits = other.units
         elif isinstance(other, (float, int, np.ndarray)):
@@ -827,7 +827,7 @@ class NDArray(HasTraits):
             uar= unp.uarray(data, uncertainty)
 
         if units:
-            return quantity(uar, units)
+            return Quantity(uar, units)
         else:
             return uar
 

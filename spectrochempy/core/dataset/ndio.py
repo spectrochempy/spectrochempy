@@ -71,8 +71,8 @@ from spectrochempy.core.units import Unit
 
 import spectrochempy
 
-#from spectrochempy.preferences.preference_manager import preference_manager as pm
-from spectrochempy.logger import log
+from spectrochempy.api import log
+
 
 __all__ = ['NDIO']
 
@@ -103,9 +103,9 @@ class NDIO(HasTraits):
     ##################
 
     @classmethod
-    def load(cls, path='', protocol='SCP'):
+    def load(cls, path='', protocol='app'):
         """
-        Load a dataset object saved as a pickle file (``.SCP`` file).
+        Load a dataset object saved as a pickle file (``.app`` file).
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
@@ -121,7 +121,7 @@ class NDIO(HasTraits):
         --------
 
         >>> from spectrochempy.api import NDDataset
-        >>> mydataset = NDDataset.load('DATA/myexperiment.SCP')
+        >>> mydataset = NDDataset.load(app)
         >>> print(mydataset) # doctest: +ELLIPSIS
         <BLANKLINE>
         ...
@@ -137,7 +137,7 @@ class NDIO(HasTraits):
 
         """
 
-        if protocol not in ['SCP']:
+        if protocol not in ['app']:
             return cls.read(path, protocol=protocol)
 
         # open file dialog box
@@ -145,7 +145,7 @@ class NDIO(HasTraits):
         filename = path
         if not path:
             dlg = FileDialog(action='open',
-        wildcard='Spectrochempy (*.SCP)|*.SCP|Sappy --DEPRECATED (*.sap)|*.sap')
+        wildcard='Spectrochempy (*.app)|*.app|Sappy --DEPRECATED (*.sap)|*.sap')
             if dlg.open() == OK:
                 filename = dlg.path
             else:
@@ -214,7 +214,7 @@ class NDIO(HasTraits):
     def save(self, path=''):
         """
         Save the :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-        (default extension: ``.SCP`` ).
+        (default extension: ``.app`` ).
 
         Parameters
         ----------
@@ -239,7 +239,7 @@ class NDIO(HasTraits):
 
         if not path:
             dlg = FileDialog(action='save as',
-                             wildcard='Spectrochempy (*.SCP)|*.SCP')
+                             wildcard='Spectrochempy (*.app)|*.app')
             if dlg.open() == OK:
                 filename = dlg.path
             else:
@@ -251,8 +251,8 @@ class NDIO(HasTraits):
         # Import deferred for startup time improvement
         import tempfile
 
-        if not filename.endswith('.SCP'):
-            file = filename + '.SCP'
+        if not filename.endswith('.app'):
+            file = filename + '.app'
 
         compression = zipfile.ZIP_DEFLATED
         zipf = zipfile_factory(filename, mode="w", compression=compression)
@@ -350,7 +350,7 @@ class NDIO(HasTraits):
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
-        if protocol == 'SCP':
+        if protocol == 'app':
             # default reader
             return self.load(path)
 
@@ -397,7 +397,7 @@ class NDIO(HasTraits):
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
-        if protocol == 'SCP':
+        if protocol == 'app':
             return self.save(path)
 
         # find the adequate reader

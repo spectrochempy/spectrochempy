@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from pint import DimensionalityError
-from spectrochempy.api import *
+
 
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
@@ -13,7 +13,8 @@ import pytest
 import numpy as np
 import os
 
-from spectrochempy.api import NDDataset
+
+from spectrochempy.api import NDDataset, Axes, Axis
 
 PKG = os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','test_data')
 
@@ -134,3 +135,4 @@ def dsm():  # dataset with axes containing several axis
                    uncertainty=dx * 0.1,
                    )
     return da.copy()
+

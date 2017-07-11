@@ -51,27 +51,30 @@ from warnings import warn
 from sphinx.util.docutils import docutils_namespace, patch_docutils
 from sphinx.errors import SphinxError
 from sphinx.application import Sphinx
-from sphinx.util.console import bold, darkgreen
 
-from spectrochempy.api import SCP
+from spectrochempy.api import scp
+import logging
+log = scp.log
+scp.log_level = logging.INFO
 
+#from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
 #from sphinx.cmdline import main as sphinx_build
 
 import matplotlib as mpl
 mpl.use('agg')
 
-from sphinx.util import logging
-log = logging.getLogger(__name__)
 
+
+
+SERVER = os.environ.get('SERVER_FOR_LCS', None)
 
 DOCDIR = os.path.join(\
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
 
 SOURCE = os.path.join(DOCDIR, 'source')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','spectrochempy_doc')
-DOCTREES = os.path.join(DOCDIR, '..', '..','spectrochempy_doc', 'doctrees')
-SPHINXARGV = u"-b%s;-d{1};{0};{2}/%s".format(SOURCE, DOCTREES, BUILDDIR)
+DOCTREES = os.path.join(DOCDIR, '..', '..','spectrochempy_doc', '~doctrees')
 
 def make_docs(*options):
     """Make the html and pdf documentation
@@ -79,11 +82,14 @@ def make_docs(*options):
     """
     options = list(options)
 
+    builder=None
+
+    builders = []
     if  'html' in options:
-        builder = 'html'
+        builders.append('html')
 
     if 'pdf' in options:
-        builder = 'pdf'
+        builders.append('latex')
 
     if 'clean' in options:
         clean()
@@ -91,44 +97,65 @@ def make_docs(*options):
         options.remove('clean')
         log.info('\n\nOld documentation now erased.\n\n')
 
-    srcdir = confdir = SOURCE
-    outdir = "{0}/{1}".format(BUILDDIR, builder)
-    doctreedir = "{0}/doctrees".format(BUILDDIR)
+    for builder in builders:
+        srcdir = confdir = SOURCE
+        outdir = "{0}/{1}".format(BUILDDIR, builder)
+        doctreedir = "{0}/~doctrees".format(BUILDDIR)
 
-    #with patch_docutils(), docutils_namespace():
-    app = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
-    app.verbosity = 2
+        #with patch_docutils(), docutils_namespace():
+        sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
+        sp.verbosity = 2
 
-    update_rest()
+        update_rest()
 
-    app.build()
-    res = app.statuscode
+        sp.build()
+        res = sp.statuscode
+        log.debug(res)
 
-    log.debug(res)
-    log.info(bold(
-    u"\n\nBuild finished. The {0} pages are in {1}/{2}.".format(
-            builder.upper(), BUILDDIR, builder)))
+        if builder=='latex':
+            cmd = "cd {}/latex; " \
+              "make; mv spectrochempy.pdf " \
+              " ../pdf/spectrochempy.pdf".format(BUILDDIR)
+            res = call([cmd], shell=True, executable='/bin/bash')
+            log.info(res)
 
-def release(*args):
+        log.info(
+        u"\n\nBuild finished. The {0} pages are in {1}/www/{2}.".format(
+            builder.upper(), BUILDDIR, builder))
+
+    if 'release' in options:
+        make_release()
+
+
+def make_release():
     """Release/publish the documentation to the webpage.
     """
 
     # make the doc
-    make_docs(*args)
+    # make_docs(*args)
 
-    # commit and push
-    log.info(getoutput('git add *'))
-    log.info(getoutput('git commit -m "DOC: Documentation rebuilded"'))
-    log.info(getoutput('git push origin master'))
+    # upload docs to the remote web server
+    if SERVER:
 
-    # download on the server
+        log.info(u"uploads to the server of the html/pdf files")
+        cmd = 'rsync -e ssh -avz  --exclude="~*"    ' \
+              '../spectrochempy_doc/*   '+SERVER+':spectrochempy/'
+        print(cmd)
+        res = call([cmd], shell=True, executable='/bin/bash')
+        log.info(res)
+        log.info('\n'+cmd + "Finished")
+
+    else:
+        log.error ('Cannot find the upload server: {}!'.format(SERVER))
+
 
 def clean():
     """Clean/remove the built documentation.
     """
     shutil.rmtree(BUILDDIR + '/html', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/pdf', ignore_errors=True)
-    shutil.rmtree(BUILDDIR + '/doctrees', ignore_errors=True)
+    shutil.rmtree(BUILDDIR + '/latex', ignore_errors=True)
+    shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
     shutil.rmtree(SOURCE + '/api/auto_examples', ignore_errors=True)
     shutil.rmtree(SOURCE + '/gen_modules', ignore_errors=True)
     shutil.rmtree(SOURCE + '/api/auto_examples', ignore_errors=True)
@@ -141,8 +168,9 @@ def make_dirs():
     """
 
     # Create regular directories.
-    build_dirs = [os.path.join(BUILDDIR, 'doctrees'),
+    build_dirs = [os.path.join(BUILDDIR, '~doctrees'),
                   os.path.join(BUILDDIR, 'html'),
+                  os.path.join(BUILDDIR, 'latex'),
                   os.path.join(BUILDDIR, 'pdf'),
                   os.path.join(SOURCE, '_static'),
                   os.path.join(SOURCE, 'dev', 'generated')
@@ -255,7 +283,7 @@ def write_download_page():
       </li>
     </ul>
 
-    """.format(SCP.RELEASE, date_release, SCP.VERSION, date_version)
+    """.format(scp.RELEASE, date_release, scp.VERSION, date_version)
 
     with open(os.path.join(DOCDIR, 'source', '_templates', 'download.html'),
               "w") as f:
@@ -279,4 +307,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         options = sys.argv[2:]
 
-    make_docs(*options)
+    if action == 'release':
+        make_release()
+    else:
+        make_docs(*options)

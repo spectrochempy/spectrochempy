@@ -46,7 +46,6 @@ necessary features of NMR nuclei, such as their spin, larmor frequency and so on
 import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
-import logging
 import re
 from fractions import Fraction
 
@@ -59,7 +58,8 @@ from traitlets import (HasTraits,
 # =============================================================================
 # Local imports
 # =============================================================================
-from spectrochempy.core.units import U_ as ur
+from spectrochempy.core.units import ur
+from spectrochempy.api import log
 
 # =============================================================================
 # Constants
@@ -74,8 +74,6 @@ PKG = 'spectrochempy.databases.isotopes'
 # helpers
 attributes = ['isotopes', 'name', 'symbol',
               'A', 'Z', 'spin', 'gamma', 'Q', 'abundance', 'stability']
-
-logger = logging.getLogger()
 
 
 # =============================================================================
@@ -301,7 +299,7 @@ class Isotopes(HasTraits):
             self.nucleus = nucleus
             return self
 
-        logger.warning('The isotope attribute {0} does not exists!'.format(item))
+        log.warning('The isotope attribute {0} does not exists!'.format(item))
         return None
 
 
@@ -309,7 +307,7 @@ class Isotopes(HasTraits):
     # events
     # -------------------------------------------------------------------------
     def __nucleus_changed(self):
-        logger.info('Current nucleus has been set to {}'.format(self.nucleus))
+        log.info('Current nucleus has been set to {}'.format(self.nucleus))
 
 
 if __name__ == '__main__':

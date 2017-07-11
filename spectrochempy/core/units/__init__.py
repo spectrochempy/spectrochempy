@@ -39,4 +39,3 @@
 """
 
 from .units import *
-from .nmr_units import *

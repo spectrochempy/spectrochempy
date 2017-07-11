@@ -1,5 +1,8 @@
 ipython
+jupyter_client
+jupyter_core
 notebook
+nb_conda
 numpy
 scipy
 pandas
@@ -19,3 +22,4 @@ pillow
 sphinx-gallery
 seaborn
 nmrglue
+sympy

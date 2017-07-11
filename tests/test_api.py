@@ -34,19 +34,17 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from spectrochempy.api import *
-# some symbols are not in wildcard import
-# we must import them explicitely
-from spectrochempy.api import SCP
-import spectrochempy.api as scp
+import spectrochempy
 
+from spectrochempy.api import *
 
 def test_api():
 
-    assert SCP.VERSION.startswith('0.1')
-    assert SCP.RELEASE.startswith('0.1')
-    assert SCP.COPYRIGHT
 
-    print (dir(scp))
 
-    log.info('xxxx')
+    print('\n\nRunning : ', spectrochempy.api.scp.RUNNING)
+    assert VERSION.startswith('0.1')
+    assert "Laboratory for Catalysis and Spectrochempy" in COPYRIGHT
+    assert RELEASE.startswith('0.1')
+
+    log.warning('Ok, this is nicely executing!')

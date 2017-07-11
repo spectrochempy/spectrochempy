@@ -48,7 +48,7 @@ import pytest
 
 from pint import DimensionalityError, UndefinedUnitError
 from spectrochempy.api import (NDDataset, Axes, Axis, AxisError, Meta)
-from spectrochempy.core.units import U_ as ur
+from spectrochempy.core.units import ur
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,

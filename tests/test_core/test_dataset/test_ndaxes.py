@@ -34,13 +34,9 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-
 """
 
 """
-from __future__ import print_function, division, absolute_import, \
-    unicode_literals
 
 from copy import copy
 
@@ -48,6 +44,7 @@ import numpy as np
 import pytest
 
 from spectrochempy.api import *
+from spectrochempy.core.dataset.ndaxes import AxisWarning
 
 from tests.utils import (assert_array_equal,
                          assert_equal_units)
@@ -327,12 +324,12 @@ def test_axes_slicing_with_labels():
     assert axe0[0] == 4000.0 * (1./ur.cm)
     assert type(axe0[0])==Axis
 
-    print(quantity("4000 cm^-1").m)
+    print(Quantity("4000 cm^-1").m)
     assert isinstance(axe0[0].coords, np.ndarray)
 
     print (axe0[0].values)
-    assert isinstance(axe0[0].values, quantity)
-    assert isinstance(axe0.values, quantity)
+    assert isinstance(axe0[0].values, Quantity)
+    assert isinstance(axe0.values, Quantity)
 
     print (axe0[2].labels)
     assert axe0[2].labels == labs[2]

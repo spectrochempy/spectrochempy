@@ -50,9 +50,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.api import SCP
+from spectrochempy.application import scp
 
-_DO_NOT_BLOCK = SCP.plotoptions.DO_NOT_BLOCK
+_DO_NOT_BLOCK = scp.plotoptions.DO_NOT_BLOCK
+
 # =============================================================================
 # nddataset plot2D functions
 # =============================================================================
