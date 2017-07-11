@@ -8,7 +8,7 @@
 #python setup.py develop || exit 1
 
 
-source /anaconda/bin/activate /anaconda/envs/python35
+source /anaconda/bin/activate /anaconda/envs/python352  #TODO change this
 pip uninstall -y spectrochempy
 python setup.py develop || exit 1
 

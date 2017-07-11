@@ -5,11 +5,11 @@
 # ln -s ../../git_hooks/pre-commit pre-commit
 # or run pip install -e . to install it automatically
 
-# run test for python 3.5
+# run test for python 3.6
 #-------------------------
 
 # to make it work with SourceTree (assuming anaconda is used)
-source /anaconda/bin/activate /anaconda/envs/python35
+source /anaconda/bin/activate /anaconda/envs/python352
 
 # to make it work with matplotlib/latex
 export PATH=$PATH:/Library/TeX/texbin/
