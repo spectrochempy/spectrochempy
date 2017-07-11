@@ -41,7 +41,7 @@ import numpy as np
 from ..dataset import NDDataset
 
 
-__all__ = ['align', 'interpolate']
+__all__ = []
 
 
 def interpolate(source, axis=0, size=None):
@@ -52,7 +52,8 @@ def interpolate(source, axis=0, size=None):
 
 def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
           inplace=False):
-    """ Align the current dataset on a reference dataset along a given axis by interpolation
+    """ Align the current dataset on a reference dataset along a given axis by
+    interpolation
 
     Parameters
     -----------
@@ -166,6 +167,3 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
 
     return out
 
-
-# make align a dataset method too.
-setattr(NDDataset, 'align', align)

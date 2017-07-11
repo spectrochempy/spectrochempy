@@ -57,7 +57,7 @@ def test_concatenate(IR_source_1):
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
     assert s.coords(0).size==(s1.coords(0).size+s2.coords(0).size)
     s = s.sort(axis=0)
-    s.plotr()
+    s.plot()
 
     # second syntax
     s = s1.concatenate(s2)

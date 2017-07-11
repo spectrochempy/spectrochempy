@@ -51,7 +51,7 @@ import numpy as np
 # ==============================================================================
 from spectrochempy.application import scp
 
-_DO_NOT_BLOCK = scp.plotoptions.DO_NOT_BLOCK
+_do_not_block = scp.plotoptions.do_not_block
 
 # ==============================================================================
 # class Pca
@@ -198,7 +198,7 @@ class Pca(HasTraits):
         plt.ylabel('cummulative / %')
         # plt.ylim((0.,100.))
 
-        if  not _DO_NOT_BLOCK:
+        if  not _do_not_block:
             plt.show()
         return
 
@@ -236,7 +236,7 @@ class Pca(HasTraits):
                        self.T.data[:, pcs[2]], zdir=u'z', s=30, c=col,
                        depthshade=True)
 
-        if not _DO_NOT_BLOCK:
+        if not _do_not_block:
             plt.show()
 
         return

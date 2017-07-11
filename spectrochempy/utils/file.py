@@ -24,6 +24,7 @@ __all__ = ['File',
            'get_cache_dir',
            'set_temp_config',
            'set_temp_cache',
+           'get_pkg_data_dir',
            'get_pkg_data_filename',
           ]
 
@@ -38,7 +39,7 @@ import six
 from traitlets import Bool, HasTraits, Instance, List, Unicode
 
 #from .decorators import wraps
-#from .introspection import find_current_module, resolve_name
+from .introspect import find_current_module, resolve_name
 
 class File(HasTraits):
     """ A representation of files and folders in a file system. """
@@ -743,5 +744,34 @@ def get_pkg_data_filename(data_name, package=None):
                       "a package data directory")
     return datafn
 
+def get_pkg_data_dir(data_name, package=None):
+    """
+    Retrieves a data directory
+
+    Parameters
+    ----------
+    data_name : str
+
+    package : str, optional
+        If specified, look for a directory relative to the given package, rather
+        than the default of looking relative to the calling module's package.
+
+    Returns
+    -------
+    filename : str
+        A file path on the local file system corresponding to the data directory
+        requested in ``data_name``.
+
+
+    """
+
+    data_name = os.path.normpath(data_name)
+
+    datadir = _find_pkg_data_path(data_name, package=package)
+
+    if not os.path.isdir(datadir):
+        return os.path.dirname(datadir)
+
+    return datadir
 
 #### EOF ######################################################################

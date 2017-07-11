@@ -51,7 +51,7 @@ def test_basecor_sequential(IR_source_1):
     source = IR_source_1
 
     s = source.copy().basecor([6000.,3500.],[1800.,1500.], [10 , 0])
-    s.plotr()
+    s.plot()
 
 def test_basecor_sequential_pchip(IR_source_1):
 
@@ -59,7 +59,7 @@ def test_basecor_sequential_pchip(IR_source_1):
 
     s = source.copy().basecor([6000., 3500.], [1800., 1500.], [10 , 0], #last range is defined in point
                               interpolation='pchip')
-    s.plotr()
+    s.plot()
 
 def test_basecor_multivariate(IR_source_1):
 
@@ -68,7 +68,7 @@ def test_basecor_multivariate(IR_source_1):
     s = source.copy().basecor([6000., 3500.], [1800., 1500.],
                               method='multivariate',
                               interpolation='polynomial')
-    s.plotr()
+    s.plot()
 
 def test_basecor_multivariate_pchip(IR_source_1):
 
@@ -77,4 +77,4 @@ def test_basecor_multivariate_pchip(IR_source_1):
     s = source.copy().basecor([6000., 3500.], [1800., 1500.],
                               method='multivariate',
                               interpolation='pchip')
-    s.plotr()
+    s.plot()

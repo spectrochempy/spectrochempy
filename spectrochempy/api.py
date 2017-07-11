@@ -61,22 +61,23 @@ from pytest import raises
 # ==============================================================================
 __all__ = [ ### Helpers
             'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO', 'raises',
-            'APIref',
+            'APIref', 'data_dir',
             'options', 'plotoptions',
             ### Data
             'NDDataset', 'Axes', 'Axis', 'AxisRange', 'Meta',
             'ur', 'Quantity', 'Measurement', 'set_nmr_context',
             ### Info
-            'COPYRIGHT', 'RELEASE', 'VERSION',
+            'copyright', 'release', 'version',
             ### Database
             'Isotopes',
             ### Analysis and Fit
             'Efa', 'Fit', 'Pca', 'Svd', 'align', 'autosub', 'basecor',
             'concatenate', 'interpolate', 'lsqnonneg', 'lstsq', 'mcrals', 'nnmf',
             ### View
-            'plot1D', 'plot2D', 'plotc',  'plotr', 'contour',
+            'plot_1D', 'plot_2D', 'contour',
             ### import/export
-            'read_dso', 'read_jdx', 'read_omnic', 'readbruker_nmr', 'write_jdx',
+            'read_dso', 'read_jdx', 'read_omnic', 'read_bruker_nmr',
+            'write_jdx',
             ### imported library
             'np', 'plt', 'scipy', 'sympy', 'ng'
           ]
@@ -99,17 +100,15 @@ from spectrochempy.application import scp
 # API namespace
 # ==============================================================================
 
-VERSION = scp.VERSION
-RELEASE = scp.RELEASE
-COPYRIGHT = scp.COPYRIGHT
+version = scp.version
+release = scp.release
+copyright = scp.copyright
 log = scp.log
 
 plotoptions = scp.plotoptions
 options = scp
 
-# Flags
-# -----
-_DO_NOT_BLOCK = scp.plotoptions.DO_NOT_BLOCK
+data_dir = scp.data_dir
 
 # log levels
 # ----------
@@ -132,13 +131,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy
 import sympy
+import scikit_learn as sk
 import nmrglue as ng
 
 
 # START THE APPLICATION ========================================================
 
 scp.start()
-scp.log.info(scp.RUNNING)
+scp.log.info(scp.running)
 
 # ==============================================================================
 

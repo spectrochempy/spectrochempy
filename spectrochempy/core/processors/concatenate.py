@@ -41,7 +41,7 @@ import numpy as np
 from ..dataset import NDDataset
 from spectrochempy.utils import is_sequence
 
-__all__ = ['concatenate']
+__all__ = []
 
 def concatenate(*sources, axis=None):
     '''Concatenation of DataSet objects along a given axis (by default the fisrt)
@@ -220,7 +220,3 @@ def concatenate(*sources, axis=None):
     out._history = [str(out.date) + ':created by concatenate()']
 
     return out
-
-
-# make concatenate a dataset method too.
-setattr(NDDataset, 'concatenate', concatenate)

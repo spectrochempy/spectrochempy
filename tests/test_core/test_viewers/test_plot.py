@@ -35,9 +35,14 @@
 # =============================================================================
 import pytest
 
+from spectrochempy.api import plotoptions
+
 #@pytest.mark.xfail(True, reason='not yet finished')
 def test_plot(IR_source_1):
     source = IR_source_1
+    BLOCK = plotoptions.do_not_block
+    assert BLOCK == True  # as we are in pytest
+    plotoptions.do_not_block = False
     source.plot()
     pass
 

@@ -40,11 +40,9 @@ from spectrochempy.api import *
 
 def test_api():
 
-
-
-    print('\n\nRunning : ', spectrochempy.api.scp.RUNNING)
-    assert VERSION.startswith('0.1')
-    assert "Laboratory for Catalysis and Spectrochempy" in COPYRIGHT
-    assert RELEASE.startswith('0.1')
+    print('\n\nRunning : ', spectrochempy.api.scp.running)
+    assert version.startswith('0.1')
+    assert "Laboratory for Catalysis and Spectrochempy" in copyright
+    assert release.startswith('0.1')
 
     log.warning('Ok, this is nicely executing!')

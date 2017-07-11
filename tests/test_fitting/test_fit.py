@@ -83,7 +83,7 @@ def test_fit_single_source(IR_source_1, script):
     assert_approx_equal(source2.model_A, -50.6219 * 2.34, significant=4)
     assert_approx_equal(f2.fp['width_line_2'], 192.6362, significant=4)
 
-    source2.plotr(showmodel=True)
+    source2.plot(showmodel=True)
 
 def test_fit_multiple_source(IR_source_1, script):
     source = IR_source_1[54, 3700.:3400.]
@@ -94,7 +94,6 @@ def test_fit_multiple_source(IR_source_1, script):
     assert_approx_equal(sources[1].model_A, -50.6219 * 2.23456, significant=4)
     assert_approx_equal(f.fp['width_line_2'], 192.6362, significant=4)
 
-    from spectrochempy.api import plotr
 
     #TODO: plotting of multiple sources
     #plotr(*sources, showmodel=True, test=True)

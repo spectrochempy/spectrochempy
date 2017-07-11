@@ -56,7 +56,7 @@ def test_svd(IR_source_1):
     print(svd.ev_cum)
     print(svd.ev_ratio)
 
-    svd.Vt[:10].plotr()
+    svd.Vt[:10].plot()
 
 
 

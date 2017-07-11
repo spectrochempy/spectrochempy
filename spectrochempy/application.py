@@ -60,10 +60,18 @@ from IPython import get_ipython
 # =============================================================================
 
 from spectrochempy.utils import is_kernel
-from spectrochempy.utils import get_config_dir
+from spectrochempy.utils import get_config_dir, get_pkg_data_dir
 from spectrochempy.version import get_version
 
-# For wild importing using the *, we limit the methods, obetcs, ...
+# the module options
+
+from spectrochempy.core.plotters.plottersoptions import PlotOptions
+from spectrochempy.core.readers.readersoptions import ReadOptions
+from spectrochempy.core.writers.writersoptions import WriteOptions
+from spectrochempy.core.processors.processorsoptions import ProcessOptions
+from spectrochempy.utils.file import get_pkg_data_filename
+
+# For wild importing using the *, we limit the methods, objetcs, ...
 # that this method exposes
 # ------------------------------------------------------------------------------
 __all__ = ['scp']
@@ -74,44 +82,6 @@ __all__ = ['scp']
 # in case spectrochempy was not yet installed using setup
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-# =============================================================================
-# Plot Options
-# =============================================================================
-class PlotOptions(Configurable):
-    """
-    All options relative to plotting and views
-
-    """
-    name = Unicode(u'PlotsOptions')
-
-    description = Unicode(u'')
-
-    # -------------------------------------------------------------------------
-
-    USE_LATEX = Bool(True, help='should we use latex for plotting labels and texts?').tag(
-        config=True)
-
-    @observe('USE_LATEX')
-    def _USE_LATEX_changed(self, change):
-        mpl.rc('text', usetex=change.new)
-
-    # -------------------------------------------------------------------------
-
-    LATEX_PREAMBLE = List(mpl.rcParams['text.latex.preamble'],
-                          help='latex preamble for matplotlib outputs'
-                          ).tag(config=True)
-
-    @observe('LATEX_PREAMBLE')
-    def _set_LATEX_PREAMBLE(self, change):
-        mpl.rcParams['text.latex.preamble'] = change.new
-
-    # -------------------------------------------------------------------------
-
-    DO_NOT_BLOCK = Bool(False,
-                        help="whether or not we show the plots "
-                             "and stop after each of them").tag(config=True)
-
 
 
 # ==============================================================================
@@ -125,41 +95,49 @@ class SpectroChemPy(Application):
     name = Unicode(u'SpectroChemPy')
     description = Unicode(u'This is the main SpectroChemPy application ')
 
-    VERSION = Unicode('').tag(config=True)
-    RELEASE = Unicode('').tag(config=True)
-    COPYRIGHT = Unicode('').tag(config=True)
+    version = Unicode('').tag(config=True)
+    release = Unicode('').tag(config=True)
+    copyright = Unicode('').tag(config=True)
 
     classes = List([PlotOptions,])
 
     # configuration parameters  ________________________________________________
 
-    RESET_CONFIG = Bool(False,
+    reset_config = Bool(False,
             help='should we restaure a default configuration?').tag(config=True)
 
-    CONFIG_FILE_NAME = Unicode(None,
+    config_file_name = Unicode(None,
                                   help="Load this config file").tag(config=True)
 
-    @default('CONFIG_FILE_NAME')
-    def _set_config_file_name_default(self):
+    @default('config_file_name')
+    def _get_config_file_name_default(self):
         return self.name + u'_config.py'
 
-    CONFIG_DIR = Unicode(None,
+    config_dir = Unicode(None,
                      help="Set the configuration dir location").tag(config=True)
 
-    @default('CONFIG_DIR')
-    def _set_config_dir_default(self):
+    @default('config_dir')
+    def _get_config_dir_default(self):
         return get_config_dir()
 
-    INFO_ON_LOADING = Bool(True,
+
+    data_dir = Unicode(help="Set a data directory where to look for data").tag(
+            config=True)
+
+    @default('data_dir')
+    def _get_data_dir_default(self):
+        return get_pkg_data_dir('testdata','tests')
+
+    info_on_loading = Bool(True,
                                 help='display info on loading').tag(config=True)
 
-    RUNNING = Bool(False,
+    running = Bool(False,
                    help="Is SpectrochemPy running?").tag(config=True)
 
-    DEBUG = Bool(False,
+    debug = Bool(False,
                  help='set DEBUG mode, with full outputs').tag(config=True)
 
-    QUIET = Bool(False,
+    quiet = Bool(False,
                  help='set Quiet mode, with minimal outputs').tag(config=True)
 
 
@@ -173,10 +151,10 @@ class SpectroChemPy(Application):
         self.plotoptions = PlotOptions(config=self.config)
 
         # set default matplotlib options
-        mpl.rc('text', usetex=self.plotoptions.USE_LATEX)
+        mpl.rc('text', usetex=self.plotoptions.use_latex)
 
-        if self.plotoptions.LATEX_PREAMBLE == []:
-            self.plotoptions.LATEX_PREAMBLE = [
+        if self.plotoptions.latex_preamble == []:
+            self.plotoptions.latex_preamble = [
                 r'\usepackage{siunitx}',
                 r'\sisetup{detect-all}',
                 r'\usepackage{times}',  # set the normal font here
@@ -249,7 +227,8 @@ class SpectroChemPy(Application):
         # (such that those from jupyter which cause problems here)
 
         _do_parse = True
-        for arg in ['egg_info', '--egg-base', 'pip-egg-info', 'develop', '-f', '-x']:
+        for arg in ['egg_info', '--egg-base', 
+                    'pip-egg-info', 'develop', '-f', '-x']:
             if arg in sys.argv:
                 _do_parse = False
 
@@ -261,9 +240,9 @@ class SpectroChemPy(Application):
         # Get options from the config file
         # --------------------------------
 
-        if self.CONFIG_FILE_NAME :
+        if self.config_file_name :
 
-            config_file = os.path.join(self.CONFIG_DIR, self.CONFIG_FILE_NAME)
+            config_file = os.path.join(self.config_dir, self.config_file_name)
             self.load_config_file(config_file)
 
         # add other options
@@ -274,7 +253,7 @@ class SpectroChemPy(Application):
         # Test, Sphinx,  ...  detection
         # ------------------------------
 
-        _DO_NOT_BLOCK = self.plotoptions.DO_NOT_BLOCK
+        _do_not_block = self.plotoptions.do_not_block
 
         for caller in ['make.py', 'pytest', 'py.test', 'docrunner.py']:
 
@@ -283,17 +262,17 @@ class SpectroChemPy(Application):
                 # this is necessary to build doc
                 # with sphinx-gallery and doctests
 
-                _DO_NOT_BLOCK = self.plotoptions.DO_NOT_BLOCK = True
+                _do_not_block = self.plotoptions.do_not_block = True
                 self.log.warning(
-                    'Running {} - set DO_NOT_BLOCK: {}'.format(
-                                                         caller, _DO_NOT_BLOCK))
+                    'Running {} - set do_not_block: {}'.format(
+                                                         caller, _do_not_block))
 
-        self.log.debug("DO NOT BLOCK : %s " % _DO_NOT_BLOCK)
+        self.log.debug("DO NOT BLOCK : %s " % _do_not_block)
 
         # version
         # --------
 
-        self.VERSION, self.RELEASE, self.COPYRIGHT = get_version()
+        self.version, self.release, self.copyright = get_version()
 
         # Possibly write the default config file
         # ---------------------------------------
@@ -316,12 +295,12 @@ class SpectroChemPy(Application):
         >>> app = SpectroChemPy()
         >>> app.initialize()
         >>> app.start(
-            RESET_CONFIG=True,   # option for restoring default configuration
-            DEBUG=True,          # debugging logs
+            reset_config=True,   # option for restoring default configuration
+            debug=True,          # debugging logs
             )
 
         """
-        if self.RUNNING:
+        if self.running:
             self.log.debug('API already started. Nothing done!')
             return
 
@@ -331,10 +310,10 @@ class SpectroChemPy(Application):
 
         self.log_format = '%(highlevel)s %(message)s'
 
-        if self.QUIET:
+        if self.quiet:
             self.log_level = logging.CRITICAL
 
-        if self.DEBUG:
+        if self.debug:
             self.log_level = logging.DEBUG
             self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
 
@@ -343,15 +322,15 @@ class SpectroChemPy(Application):
     SpectroChemPy's API
     Version   : {}
     Copyright : {}
-        """.format(self.VERSION, self.COPYRIGHT)
+        """.format(self.version, self.copyright)
 
-        if self.INFO_ON_LOADING and \
-                not self.plotoptions.DO_NOT_BLOCK:
+        if self.info_on_loading and \
+                not self.plotoptions.do_not_block:
 
             print(info_string)
             self.log.debug("argv0 : %s" % str(sys.argv[0]))
 
-        self.RUNNING = True
+        self.running = True
 
     # --------------------------------------------------------------------------
     # Store default configuration file
@@ -359,10 +338,10 @@ class SpectroChemPy(Application):
     def _make_default_config_file(self):
         """auto generate default config file."""
 
-        fname = config_file = os.path.join(self.CONFIG_DIR,
-                                           self.CONFIG_FILE_NAME)
+        fname = config_file = os.path.join(self.config_dir,
+                                           self.config_file_name)
 
-        if not os.path.exists(fname) or self.RESET_CONFIG:
+        if not os.path.exists(fname) or self.reset_config:
             s = self.generate_config_file()
             self.log.warning("Generating default config file: %r"%(fname))
             with open(fname, 'w') as f:
@@ -387,7 +366,7 @@ scp.initialize()
 if __name__ == "__main__":
 
     scp.start(
-            RESET_CONFIG=True,
+            reset_config=True,
             log_level = logging.INFO,
     )
 
@@ -398,6 +377,7 @@ if __name__ == "__main__":
 
     log.info('Name : %s ' % scp.name)
 
-    scp.plotoptions.USE_LATEX = True
+    scp.plotoptions.use_latex = True
 
-    log.info(scp.plotoptions.LATEX_PREAMBLE)
+    log.info(scp.plotoptions.latex_preamble)
+

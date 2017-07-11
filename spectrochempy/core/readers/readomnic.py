@@ -43,7 +43,7 @@ from datetime import datetime, timezone, timedelta
 
 from ..dataset import NDDataset
 
-__all__ = ['read_omnic']
+__all__ = []
 
 # utility functions
 #-------------------
@@ -497,8 +497,4 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
     # return the dataset
     return source
 
-# register
-setattr(NDDataset, 'read_omnic', read_omnic)
-setattr(NDDataset, 'read_spg', read_omnic)
-setattr(NDDataset, 'read_spa', read_omnic)
 

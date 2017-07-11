@@ -46,10 +46,10 @@ import numpy as np
 # ==============================================================================
 from spectrochempy.application import scp
 
-_DO_NOT_BLOCK = scp.plotoptions.DO_NOT_BLOCK
+_do_not_block = scp.plotoptions.do_not_block
 
 
-__all__ = ['plotr']
+__all__ = []
 
 def plotr(source,
           nfig = None,
@@ -120,9 +120,7 @@ def plotr(source,
             model = source.modeldata[i]
             plt.plot(xaxis, model, '--')
 
-    if not _DO_NOT_BLOCK:
+    if not _do_not_block:
         plt.show()
 
-#------------------------------------------------------------------------------
-from ..dataset import NDDataset
-setattr(NDDataset, 'plotr', plotr)
+

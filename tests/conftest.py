@@ -14,31 +14,20 @@ import numpy as np
 import os
 
 
-from spectrochempy.api import NDDataset, Axes, Axis
-
-PKG = os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','test_data')
-
-
-def pytest_configure(config):
-    import sys
-    sys._called_from_test = True
-
-def pytest_unconfigure(config):
-    import sys
-    del sys._called_from_test
+from spectrochempy.api import NDDataset, Axes, Axis, data_dir
 
 # An IR spectra
 @pytest.fixture(scope="function")
 def IR_source_1():
     source = NDDataset.read_omnic(
-        os.path.join(PKG, 'irdata', 'NH4Y-activation.SPG'))
+        os.path.join(data_dir, 'irdata', 'NH4Y-activation.SPG'))
     return source
 
 
 @pytest.fixture(scope="function")
 def IR_scp_1():
     source = NDDataset.read_omnic(
-        os.path.join(PKG, 'irdata', 'NH4Y-activation.SPG'))
+        os.path.join(data_dir, 'irdata', 'NH4Y-activation.SPG'))
     return source
 
 

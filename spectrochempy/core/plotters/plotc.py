@@ -44,10 +44,10 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.api import _DO_NOT_BLOCK
+from spectrochempy.api import _do_not_block
 
 
-__all__ = ['plotc']
+__all__ = []
 
 def plotc(source,
           nfig = None,
@@ -94,9 +94,7 @@ def plotc(source,
     plt.ylabel("{} [{:~P}]".format(source.title, source.units))
     plt.title(source.name)
 
-    if not _DO_NOT_BLOCK:
+    if not _do_not_block:
         plt.show()
 
 #------------------------------------------------------------------------------
-from ..dataset import NDDataset
-setattr(NDDataset, 'plotc', plotc)

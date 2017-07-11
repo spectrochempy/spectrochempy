@@ -810,11 +810,11 @@ class AxisRange(HasTraits):
     ranges = List(Range)
     reversed = Bool
 
-    def __init__(self, *ranges, reversed=False):
+    def __init__(self, *ranges, **kwargs):
         """ Constructs Axisrange with default values
 
         """
-        self.reversed = reversed
+        self.reversed = kwargs.get('reversed', False)
 
         if len(ranges) == 0:
             # first case: no argument passed, returns an empty range

@@ -44,7 +44,7 @@ from datetime import datetime, timezone, timedelta
 
 from traitlets import HasTraits, Unicode, List
 
-__all__ = ['read_dso']
+__all__ = []
 
 def read_dso(filename='', **kwargs):
     """Open an eigevector DSO object (.mat file) and return the corresponding dataset
@@ -159,5 +159,3 @@ def read_dso(filename='', **kwargs):
 
     return out
 
-from ..dataset import NDDataset
-setattr(NDDataset, 'read_dso', read_dso)

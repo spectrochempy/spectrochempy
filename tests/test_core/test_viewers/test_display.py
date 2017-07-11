@@ -41,8 +41,8 @@ import os
 
 def test_plotr(IR_source_1):
     source = IR_source_1
-    source.plotr()
+    source.plot()
 
-def test_plotc(IR_source_1):
+def test_plot(IR_source_1):
     source = IR_source_1
-    source.plotc()
+    source.T.plot()

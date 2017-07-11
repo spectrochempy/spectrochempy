@@ -66,8 +66,9 @@ from ...dataset import Axis
 from ...units import ur, Quantity
 from .parameter import nmr_valid_meta
 
-from spectrochempy.api import log
-
+import logging
+log = logging.getLogger()
+print('log_level', log.level)
 # =============================================================================
 # Constants
 # =============================================================================
@@ -312,7 +313,7 @@ def _remove_digital_filter(dic, data):
 # bruker import function
 # =============================================================================
 
-def readbruker_nmr(self, *args, **kwargs):
+def read_bruker_nmr(self, *args, **kwargs):
     """
     Import Bruker dataset
 

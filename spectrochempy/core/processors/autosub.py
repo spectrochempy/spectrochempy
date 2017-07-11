@@ -43,7 +43,7 @@ from scipy.optimize import minimize_scalar
 
 from ..dataset import AxisRange
 
-__all__ = ['autosub']
+__all__ = []
 
 def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     """Automatic subtraction of ref to the dataset to minimise peaks due to ref
@@ -183,10 +183,3 @@ app >>> B = autosub(A, ref, [3900., 3700.], [1600., 1500.])
         new.modified) + ': ' + 'Automatic subtraction of :' + ref.name + '\n'
 
     return new
-
-#------------------------------------------------------------------------------
-from ..dataset import NDDataset
-
-setattr(NDDataset, 'autosub', autosub)
-#api = __import__('spectrochempy.api')
-#setattr(api, 'autosub', autosub)

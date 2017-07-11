@@ -50,15 +50,14 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.application import scp
 
-_DO_NOT_BLOCK = scp.plotoptions.DO_NOT_BLOCK
+__all__ = []
 
 # =============================================================================
 # nddataset plot2D functions
 # =============================================================================
 
-def plot2D(data, **kwargs):
+def plot_2D(data, **kwargs):
     """
 
     Parameters
@@ -69,15 +68,18 @@ def plot2D(data, **kwargs):
 
 
     """
+    # avoid circular call to this module
+    from spectrochempy.api import plotoptions as options
+
     # where to plot?
     ax = data.ax
 
     # show projections
-    proj = kwargs.get('proj', pm.plot.show_projections)
+    proj = kwargs.get('proj', options.show_projections)
 
-    xproj = kwargs.get('xproj',pm.plot.show_x_projection)
+    xproj = kwargs.get('xproj',options.show_projection_x)
 
-    yproj = kwargs.get('yproj',pm.plot.show_y_projection)
+    yproj = kwargs.get('yproj',options.show_projection_y)
 
     if proj or xproj or yproj:
         # create new axes on the right and on the top of the current axes
@@ -103,12 +105,12 @@ def plot2D(data, **kwargs):
 
     # contour colormap
     cmap = mpl.rcParams['image.cmap'] = kwargs.pop('colormap',
-                        kwargs.pop('cmap', pm.plot.colormap))
-    pm.plot.colormap =  cmap
+                        kwargs.pop('cmap', options.colormap))
+    options.colormap =  cmap
 
-    lw = kwargs.get('linewidth', kwargs.get('lw', pm.plot.linewidth))
+    lw = kwargs.get('linewidth', kwargs.get('lw', options.linewidth))
 
-    alpha = kwargs.get('alpha', pm.plot.contour_alpha)
+    alpha = kwargs.get('calpha', options.calpha)
 
     # -------------------------------------------------------------------------
     # plot the data
@@ -153,8 +155,8 @@ def plot2D(data, **kwargs):
     ax.set_xlim(xlim)
     ax.set_ylim(zlim)
 
-    number_x_labels = pm.plot.number_x_labels
-    number_y_labels = pm.plot.number_y_labels
+    number_x_labels = options.number_of_x_labels
+    number_y_labels = options.number_of_y_labels
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
 
@@ -211,19 +213,24 @@ def plot2D(data, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
+    return True
+
 # ===========================================================================
 # clevels
 # ===========================================================================
 def clevels(data, **kwargs):
     """Utility function to determine contours levels
     """
+    # avoid circular call to this module
+    from spectrochempy.api import plotoptions as options
+
     # contours
     maximum = data.max()
     minimum = -maximum
 
-    nlevels = kwargs.get('nlevels', pm.plot.number_of_contour_levels)
-    exponent = kwargs.get('exponent', pm.plot.contour_exponent)
-    start = kwargs.get('start', pm.plot.contour_start)
+    nlevels = kwargs.get('nlevels', options.number_of_contours)
+    exponent = kwargs.get('exponent', options.cexponent)
+    start = kwargs.get('start', options.cstart)
 
     if (exponent - 1.00) < .005:
         clevelc = np.linspace(minimum, maximum, nlevels)
@@ -244,6 +251,4 @@ def clevels(data, **kwargs):
         clevelc = [ms * exponent ** xi for xi in range(xl)]
     return sorted(clevelc)
 
-#-----------------------------------------------------------------
-from ..dataset import NDDataset
-setattr(NDDataset, 'plot2D', plot2D)
+

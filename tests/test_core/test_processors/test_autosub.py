@@ -69,8 +69,8 @@ def test_autosub(IR_source_1):
 
     s1 = source.copy()
     ref = s1[0]
-    source.plotr()
-    ref.plotr()
+    source.plot()
+    ref.plot()
 
     s2 = source.copy()
 
@@ -79,13 +79,13 @@ def test_autosub(IR_source_1):
     assert np.round(s2.data[0,0],4) != 0.0000
     assert np.round(s3.data[0,0],4) == 0.0000
     s3.name="varfit"
-    s3.plotr()
+    s3.plot()
 
     s4 = source.copy()
     s4.autosub(ref, *ranges, method='chi2', inplace=True)
     s4.name = "chi2, inplace"
     assert np.round(s4.data[0,0],4) == 0.0000
-    s4.plotr()  #true avoid blocking due to graphs
+    s4.plot()  #true avoid blocking due to graphs
 
     s4 = source.copy()
     from spectrochempy.api import autosub
@@ -93,5 +93,5 @@ def test_autosub(IR_source_1):
     assert np.round(s4.data[0, 0], 4) != 0.0000
     assert np.round(s.data[0, 0], 4) == 0.0000
     s.name = 'chi2 direct call'
-    s.plotr()  #true avoid blocking due to graphs
+    s.plot()  #true avoid blocking due to graphs
 

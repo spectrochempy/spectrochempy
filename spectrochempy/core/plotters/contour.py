@@ -46,12 +46,12 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.application import scp
+from .plottersoptions import PlotOptions as options
 
-_DO_NOT_BLOCK = scp.plotoptions.DO_NOT_BLOCK
+_do_not_block = options.do_not_block
 
 
-__all__ = ['contour']
+__all__ = []
 
 def contour(ds, nfig = None, invertxaxis=True,
             formatstring = '-'):
@@ -90,9 +90,5 @@ def contour(ds, nfig = None, invertxaxis=True,
         plt.ylabel(ds.dims[0].axes[0].name)
     plt.title(ds.name)
 
-    if not _DO_NOT_BLOCK:
+    if not _do_not_block:
         plt.show()
-
-#------------------------------------------------------------------------------
-from ..dataset import NDDataset
-setattr(NDDataset, 'contour', contour)

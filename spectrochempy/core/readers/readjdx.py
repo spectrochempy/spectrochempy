@@ -43,7 +43,7 @@ from datetime import datetime, timezone, timedelta
 
 from traitlets import HasTraits, Unicode, List
 
-__all__ = ['read_jdx']
+__all__ = []
 
 def read_jdx(filename='', sortbydate=True):
     """Open a .jdx file and return the correspondant dataset
@@ -270,5 +270,3 @@ def read_jdx(filename='', sortbydate=True):
 
     return out
 
-from ..dataset import NDDataset
-setattr(NDDataset, 'read_jdx', read_jdx)

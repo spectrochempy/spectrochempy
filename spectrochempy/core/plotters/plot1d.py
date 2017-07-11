@@ -41,13 +41,12 @@
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 from matplotlib.ticker import MaxNLocator
 
 
-def plot1D(data, **kwargs):
+__all__ = []
+
+def plot_1D(data, **kwargs):
     """
 
     Parameters
@@ -58,6 +57,9 @@ def plot1D(data, **kwargs):
 
 
     """
+    # avoid circular call to this module
+    from spectrochempy.api import plotoptions as options
+
     # where to plot?
     ax = data.ax
 
@@ -114,8 +116,8 @@ def plot1D(data, **kwargs):
     ax.set_xlim(xlim)
     ax.set_ylim(zlim)
 
-    number_x_labels = pm.plot.number_x_labels # get from config
-    number_y_labels = pm.plot.number_y_labels
+    number_x_labels = options.number_of_x_labels # get from config
+    number_y_labels = options.number_of_y_labels
 
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
@@ -175,6 +177,4 @@ def plot1D(data, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
-#--------------------------------------
-from ..dataset import NDDataset
-setattr(NDDataset, 'plot1D', plot1D)
+

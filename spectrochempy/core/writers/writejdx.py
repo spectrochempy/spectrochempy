@@ -45,7 +45,7 @@ from datetime import datetime, timezone, timedelta
 
 from traitlets import HasTraits, Unicode, List
 
-__all__ = ['write_jdx']
+__all__ = []
 
 def write_jdx(X, filename=''):
     ''' Exports dataset to jcampdx format'''
@@ -140,5 +140,3 @@ def write_jdx(X, filename=''):
     f.write('##END=' + '\n')
     f.close()
 
-from ..dataset import NDDataset
-setattr(NDDataset, 'write_jdx', write_jdx)

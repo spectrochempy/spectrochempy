@@ -34,10 +34,10 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from spectrochempy.core.dataset import *
-from spectrochempy.core.readers import *
+from .dataset import *
+from .units import *
+from .processors import *
+from .readers import *
 from .plotters import *
-from spectrochempy.core.writers import *
-from spectrochempy.core.processors import *
-from spectrochempy.core.units import *
+from .writers import *
 

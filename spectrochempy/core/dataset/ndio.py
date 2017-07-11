@@ -45,7 +45,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import os
-import logging
+
 import copy
 
 from traitlets import Unicode, Bool, HasTraits
@@ -69,9 +69,11 @@ from numpy.lib.format import write_array, MAGIC_PREFIX
 from spectrochempy.core.dataset.ndaxes import Axes, Axis
 from spectrochempy.core.units import Unit
 
+
 import spectrochempy
 
-from spectrochempy.api import log
+import logging
+log = logging.getLogger()
 
 
 __all__ = ['NDIO']
@@ -503,30 +505,26 @@ class NDIO(HasTraits):
         # -------------------------------------------------------------------------
         kind = kwargs.pop('kind', 'generic')
 
+        # Find or guess the adequate plotter
+        # -----------------------------------
+
         try:
-            # find the adequate plotter
             _plotter = getattr(self, 'plot_{}'.format(kind))
-            return _plotter(ax=ax, **kwargs)
 
-        except:
-            pass
-
-        try:
-            if self.ndim == 1:
-                self.plot1D(ax=ax, **kwargs)
-            elif self.ndim == 2:
-                self.plot2D(ax=ax, **kwargs)
-            elif self.ndim == 3:
-                raise ValueError  # self.plot3D(ax=ax, **kwargs)
-
-        except:
-
-            raise ValueError('The specified plotter '
+        except: # no plotter found
+            log.error('The specified plotter '
                              'for kind `{}` was not found!'.format(kind))
+            return None
 
-        # -------------------------------------------------------------------------
-        # additional matplotlib commands
-        # -------------------------------------------------------------------------
+        # Execute the plotter
+        # --------------------
+
+        if not _plotter(ax=ax, **kwargs):
+            return None
+
+        # Additional matplotlib commands on the current plot
+        # ----------------------------------------------------------------------
+
         commands = kwargs.get('commands', [])
         if commands:
             for command in commands:
@@ -543,6 +541,7 @@ class NDIO(HasTraits):
                 getattr(self.ax, com)(*ags, **kws)
 
         # adjust the plots
+
         # subplot dimensions
         top = kwargs.pop('top', mpl.rcParams['figure.subplot.top'])
         bottom = kwargs.pop('bottom', mpl.rcParams['figure.subplot.bottom'])
@@ -559,6 +558,39 @@ class NDIO(HasTraits):
         if savename is not None:
             self.fig.savefig(savename)
 
+        from spectrochempy.api import _do_not_block
+        if _do_not_block:
+            self.show()
+
+    def plot_generic(self, ax=None, **kwargs):
+        """
+        The generic plotter. It try to guess an adequate basic plot for the data
+
+        Parameters
+        ----------
+        ax
+        kwargs
+
+        Returns
+        -------
+
+        """
+
+        if self.ndim == 1:
+
+            return self.plot_1D(ax=ax, **kwargs)
+
+        elif self.ndim == 2:
+
+            return self.plot_2D(ax=ax, **kwargs)
+
+        elif self.ndim == 3:
+
+            return self.plot_3D(ax=ax, **kwargs)
+
+        else:
+            log.error('Cannot guess an adequate plotter. I did nothing!')
+            return False
 
 
     def show(self):
@@ -571,7 +603,7 @@ class NDIO(HasTraits):
 
         """
         if hasattr(self, 'fig'):
-            plt.show
+            plt.show()
 
     def __getstate__(self):
         # needed to remove some entry to avoid picling them

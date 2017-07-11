@@ -44,7 +44,7 @@ import numpy as np
 
 from ...dataset import AxisRange
 
-__all__=['basecor']
+__all__=[]
 
 def basecor(source,*ranges,axis=-1,
             method='sequential',
@@ -175,8 +175,4 @@ def basecor(source,*ranges,axis=-1,
     return new
 
 
-# make basecor a dataset method too.
-#-----------------------------------
-from ...dataset import NDDataset
 
-setattr(NDDataset, 'basecor', basecor)
