@@ -249,7 +249,7 @@ class SpectroChemPy(Application):
         # (such that those from jupyter which cause problems here)
 
         _do_parse = True
-        for arg in ['egg_info', '--egg-base', 'pip-egg-info', 'develop', '-f']:
+        for arg in ['egg_info', '--egg-base', 'pip-egg-info', 'develop', '-f', '-x']:
             if arg in sys.argv:
                 _do_parse = False
 
