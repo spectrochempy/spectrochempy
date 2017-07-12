@@ -1,12 +1,4 @@
 #!/bin/bash
-# to use the pre-push in the source git_hooks directory
-# in the Spectrochempy/.git/hooks  directory do
-# ln -s ../../git_hooks/pre-push pre-push
-
-#source activate scp27
-#pip uninstall -y spectrochempy
-#python setup.py develop || exit 1
-
 
 source ~/.bash_profile
 
@@ -15,4 +7,4 @@ pip install -e . || exit 1
 
 # make new docs
 
-# python scripts/make_scp_docs.py clean html release > /dev/null  || exit 1
+python scripts/make_scp_docs.py clean html release
