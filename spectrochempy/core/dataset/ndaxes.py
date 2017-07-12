@@ -44,30 +44,26 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import logging
+import copy
 import uuid
 import warnings
 
-from six import string_types
-
 import numpy as np
 from pandas import Index
-from datetime import datetime
-import copy
-
+from six import string_types
 from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
-from traitlets import TraitError
-from ...utils.traittypes import Range
 
-from ..units import Quantity
+import logging
+log = logging.getLogger(__name__)
+
 from .ndarray import NDArray
-from .ndmeta import Meta
 from .ndmath import NDMath, set_operators
+from ..units import Quantity
+# from ...utils import create_traitsdoc
 
 from ...utils import (is_sequence, numpyprintoptions,
                       SpectroChemPyWarning)
-#from ...utils import create_traitsdoc
-from ...logger import log
+from ...utils.traittypes import Range
 
 __all__ = ['Axes',
            'Axis',

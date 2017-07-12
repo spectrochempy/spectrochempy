@@ -68,7 +68,7 @@ from .parameter import nmr_valid_meta
 
 import logging
 log = logging.getLogger()
-print('log_level', log.level)
+
 # =============================================================================
 # Constants
 # =============================================================================
