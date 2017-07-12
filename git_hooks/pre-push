@@ -15,4 +15,4 @@ pip install -e . || exit 1
 
 # make new docs
 
-python scripts/make_scp_docs.py clean html release > /dev/null  || exit 1
+# python scripts/make_scp_docs.py clean html release > /dev/null  || exit 1
