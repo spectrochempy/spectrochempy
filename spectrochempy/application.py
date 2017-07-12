@@ -191,8 +191,8 @@ class SpectroChemPy(Application):
         # later in this application
 
         # if we are building the docs, in principle it should be done using
-        # the make.py located in the scripts folder
-        if not 'make.py' in sys.argv[0]:
+        # the make_scp_docs.py located in the scripts folder
+        if not 'make_scp_docs.py' in sys.argv[0]:
             # the normal backend
             mpl.use('Qt5Agg')
             mpl.rcParams['backend.qt5'] = 'PyQt5'
@@ -255,7 +255,7 @@ class SpectroChemPy(Application):
 
         _do_not_block = self.plotoptions.do_not_block
 
-        for caller in ['make.py', 'pytest', 'py.test', 'docrunner.py']:
+        for caller in ['make_scp_docs.py', 'pytest', 'py.test', 'docrunner.py']:
 
             if caller in sys.argv[0]:
 

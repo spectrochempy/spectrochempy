@@ -52,6 +52,10 @@ from sphinx.util.docutils import docutils_namespace, patch_docutils
 from sphinx.errors import SphinxError
 from sphinx.application import Sphinx
 
+# set the correct backend for sphinx-gallery
+import matplotlib as mpl
+mpl.use('agg')
+
 from spectrochempy.api import scp
 import logging
 log = scp.log
@@ -60,12 +64,6 @@ scp.log_level = logging.INFO
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
 #from sphinx.cmdline import main as sphinx_build
-
-import matplotlib as mpl
-mpl.use('agg')
-
-
-
 
 SERVER = os.environ.get('SERVER_FOR_LCS', None)
 
@@ -124,10 +122,10 @@ def make_docs(*options):
             builder.upper(), BUILDDIR, builder))
 
     if 'release' in options:
-        make_release()
+        release()
 
 
-def make_release():
+def release():
     """Release/publish the documentation to the webpage.
     """
 
@@ -295,19 +293,10 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2:
         # full make
-        sys.argv.append('docs')
         sys.argv.append('clean')
         sys.argv.append('html')
-        sys.argv.append('pdf')
 
     action = sys.argv[1]
 
-    options = []
+    make_docs(*sys.argv[1:])
 
-    if len(sys.argv) > 2:
-        options = sys.argv[2:]
-
-    if action == 'release':
-        make_release()
-    else:
-        make_docs(*options)
