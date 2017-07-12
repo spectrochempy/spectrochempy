@@ -20,3 +20,4 @@ docs/source/gen_modules/
 conda_recipes/spectrochempy/
 docs/source/modules/
 docs/source/savefig/
+*.pyc

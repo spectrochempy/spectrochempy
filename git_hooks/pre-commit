@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # to use the pre-commit in the source git_hooks directory
 # in the Spectrochempy/.git/hooks  directory
@@ -8,19 +8,21 @@
 # run test for python 3.6
 #-------------------------
 
+
 # to make it work with SourceTree (assuming anaconda is used)
-source /anaconda/bin/activate /anaconda/envs/python352
+source ~/.bash_profile
 
 # to make it work with matplotlib/latex
 export PATH=$PATH:/Library/TeX/texbin/
 
 py.test -x tests || exit 1
 
+
 # test also python27
 #--------------------
 
 # to make it work with SourceTree (assuming anaconda is used)
-# source /anaconda/bin/activate /anaconda/envs/python27test
+# source activate scp27
 
 # run test
 # py.test -x tests || exit 1
