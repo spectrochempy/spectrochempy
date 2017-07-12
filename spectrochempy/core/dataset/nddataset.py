@@ -898,19 +898,18 @@ class NDDataset(
 
         Parameters
         ----------
-        axis : `int`, optional, default = -1
-
+        axis : `int` [optional, default = -1].
             The axis along which the absolute value should be calculated
 
         Returns
         -------
         abs_dataset : same type
-
             Output array.
 
         See Also
         --------
-        real, imag, conjugate
+        real, imag, conjugate.
+
 
         """
         new = self.copy()

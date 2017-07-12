@@ -52,34 +52,31 @@ def interpolate(source, axis=0, size=None):
 
 def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
           inplace=False):
-    """ Align the current dataset on a reference dataset along a given axis by
+    """
+    Align the current dataset on a reference dataset along a given axis by
     interpolation
 
     Parameters
     -----------
-
     source : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
         Dataset to align
 
     ref : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
         Reference dataset on which to align
 
-    axis : `int`, optional, default = 0.
+    axis : `int`[optional, default = 0].
         Tells on which axis to perform the alignement.
 
-    kind: `str`, among ['linear','pchip']
+    kind: `str`[optional among [`linear`,`pchip`], default=`linear`].
         Kind of interpolation to performs for the alignment.
 
     Returns
     --------
-
-    aligned_dataset: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-
+    aligned_dataset : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
        A dataset aligned with ref along the axis
 
-    Todo
-    -----
-    Perform an alignment along numeric axis labels
+
+    #TODO : Perform an alignment along numeric axis labels
 
     """
     # TODO: Perform an alignment along numeric labels

@@ -657,12 +657,10 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-
         other : NDArray
 
         Returns
         -------
-
         compat : `bool`
 
         """

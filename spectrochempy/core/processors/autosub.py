@@ -64,10 +64,10 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
         True if the subtraction is done in place.
         In this case we do not need to catch the function output
 
-    axis : `int`, optional, default = -1.
+    axis : `int` [optional, default = -1].
         Tells on which axis to perform the subtraction
 
-    method  : `str`, optional, default = 'vardiff'
+    method  : `str` [optional, default = 'vardiff'].
 
 
     Returns
@@ -89,7 +89,8 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     >>> from spectrochempy.api import NDDataset, autosub
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> ref = NDDataset.load(app)
-app >>> B = autosub(A, ref, [3900., 3700.], [1600., 1500.])
+    >>> B = autosub(A, ref, [3900., 3700.], [1600., 1500.])
+
 
     """
     # output dataset

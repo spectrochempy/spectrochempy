@@ -57,8 +57,10 @@ import matplotlib as mpl
 mpl.use('agg')
 
 from spectrochempy.api import scp
+
 import logging
-log = scp.log
+log = logging.getLogger(__name__)
+
 scp.log_level = logging.INFO
 
 #from sphinx.util.console import bold, darkgreen
@@ -79,6 +81,11 @@ def make_docs(*options):
 
     """
     options = list(options)
+
+    DEBUG = 'DEBUG' in options
+
+    if DEBUG:
+        scp.log_level = logging.DEBUG
 
     builder=None
 
@@ -104,7 +111,7 @@ def make_docs(*options):
 
         #with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
-        sp.verbosity = 2
+        sp.verbosity = 0
 
         update_rest()
 
