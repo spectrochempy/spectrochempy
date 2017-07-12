@@ -277,30 +277,31 @@ class SpectroChemPy(Application):
         # ---------------------------------------
         self._make_default_config_file()
 
-        # exception handler
-        # ------------------
-        if ip is not None:
+        if not self.log_level == logging.DEBUG:
+            # exception handler
+            # ------------------
+            if ip is not None:
 
-            def custom_exc(shell, etype, evalue, tb, tb_offset=None):
-                if self.log_level == logging.DEBUG:
-                    shell.showtraceback((etype, evalue, tb),
-                                        tb_offset=tb_offset)
-                else:
-                    self.log.error("%s: %s" % (etype.__name__, evalue))
+                def custom_exc(shell, etype, evalue, tb, tb_offset=None):
+                    if self.log_level == logging.DEBUG:
+                        shell.showtraceback((etype, evalue, tb),
+                                            tb_offset=tb_offset)
+                    else:
+                        self.log.error("%s: %s" % (etype.__name__, evalue))
 
-            ip.set_custom_exc((Exception,), custom_exc)
+                ip.set_custom_exc((Exception,), custom_exc)
 
-        else:
+            else:
 
-            def exceptionHandler(exception_type, exception, traceback,
-                                 debug_hook=sys.excepthook):
-                if self.log_level == logging.DEBUG:
-                    debug_hook(exception_type, exception, traceback)
-                else:
-                    self.log.error(
-                            "%s: %s" % (exception_type.__name__, exception))
+                def exceptionHandler(exception_type, exception, traceback,
+                                     debug_hook=sys.excepthook):
+                    if self.log_level == logging.DEBUG:
+                        debug_hook(exception_type, exception, traceback)
+                    else:
+                        self.log.error(
+                                "%s: %s" % (exception_type.__name__, exception))
 
-            sys.excepthook = exceptionHandler
+                sys.excepthook = exceptionHandler
 
     # --------------------------------------------------------------------------
     # start the application
