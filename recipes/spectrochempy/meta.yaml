@@ -1,0 +1,67 @@
+package:
+  name: spectrochempy
+  version: "0.1a1"
+
+source:
+  git_tag: 0.1a1
+  git_url: https://fernandezc@bitbucket.org/spectrocat/spectrochempy.git
+
+requirements:
+  build:
+    - python
+
+  run:
+    - python
+    - matplotlib
+    - traitlets
+    - pint
+    - uncertainties
+    - sympy
+    - scikit-learn
+    - numpy
+    - scipy
+    - pandas
+    - xlrd
+    - pytest
+    - pytest-runner
+    - sphinx
+    - sphinx-gallery
+    - pandoc
+    - numpydoc
+    - seaborn
+    - nmrglue
+    - ipython
+    - ipykernel
+    - nb_conda
+    - nbbrowserpdf
+    - nbsphinx
+    - jupyter_nbextensions_configurator
+
+#test:
+  # Python imports
+#  imports:
+#    - spectrochempy
+#    - spectrochempy.api
+
+  # commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  requires:
+    # Put any additional test requirements here.  For example
+    - pytest
+    - pytest-runner
+
+about:
+  home: http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html
+  license: BSD License
+  summary: 'SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for Chemistry with Python'
+  license_family: BSD
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml

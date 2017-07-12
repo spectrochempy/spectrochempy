@@ -10,7 +10,9 @@ The best to proceed with development is that we (the developers) all have a simi
 
 The master is build on the 3.6 python version. 
 
-1) Install anaconda (website)
+1. Install anaconda3 or miniconda3
+
+	* OSX : `miniconda3 <https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh>`_
 
 2) issue the following command to be sure to have add the conda-forge channel (on top priority):
 
