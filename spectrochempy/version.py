@@ -66,8 +66,8 @@ def get_version():
     except IOError:
 
         with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "w") as f:
-            f.write(version)
-            f.write(release)
+            f.write(version + "\n")
+            f.write(release + "\n")
 
     finally:
         pass
@@ -86,8 +86,8 @@ def get_version():
             release = version
 
         with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "w") as f:
-            f.write(version, end='\n')
-            f.write(release,  end='\n')
+            f.write(version + "\n")
+            f.write(release + "\n")
 
     except:
         warn('Could not get version string from GIT repository')
@@ -101,3 +101,6 @@ def get_version():
 if __name__ == '__main__':
 
     v, r, c = get_version()
+    print (v)
+    print (r)
+    print (c)
