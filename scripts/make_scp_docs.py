@@ -100,6 +100,8 @@ def make_docs(*options):
         outdir = "{0}/{1}".format(BUILDDIR, builder)
         doctreedir = "{0}/~doctrees".format(BUILDDIR)
 
+        write_download_page()
+
         #with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
         sp.verbosity = 2
@@ -137,7 +139,7 @@ def release():
 
         log.info(u"uploads to the server of the html/pdf files")
         cmd = 'rsync -e ssh -avz  --exclude="~*"    ' \
-              '../spectrochempy_doc/*   '+SERVER+':spectrochempy/'
+              '../../spectrochempy_doc/*   '+SERVER+':spectrochempy/'
         print(cmd)
         res = call([cmd], shell=True, executable='/bin/bash')
         log.info(res)
@@ -281,7 +283,7 @@ def write_download_page():
       </li>
     </ul>
 
-    """.format(scp.RELEASE, date_release, scp.VERSION, date_version)
+    """.format(scp.release, date_release, scp.version, date_version)
 
     with open(os.path.join(DOCDIR, 'source', '_templates', 'download.html'),
               "w") as f:

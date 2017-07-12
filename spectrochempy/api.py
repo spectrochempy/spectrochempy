@@ -164,8 +164,10 @@ except ImportError:
 
 
 # START THE APPLICATION ========================================================
+_started = scp.start(debug=False)
 
-scp.log.info("API activated " if scp.start(debug=True) else "API was not started!")
+scp.log.info("API activated "
+             if _started else "API was not started!")
 
 # ==============================================================================
 

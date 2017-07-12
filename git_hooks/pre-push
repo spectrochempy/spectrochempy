@@ -11,8 +11,8 @@
 source ~/.bash_profile
 
 pip uninstall -y spectrochempy
-python setup.py develop || exit 1
+pip install -e . || exit 1
 
 # make new docs
 
-python scripts/make_scp_docs.py html
+python scripts/make_scp_docs.py clean html release
