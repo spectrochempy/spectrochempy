@@ -33,11 +33,14 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
-"""
-Determine version string from file or git version
 
-"""
+
+from setuptools import setup, find_packages
+from setuptools.command.develop import develop
+# from setuptools.command.install import install
+
 import os
+import shutil as sh
 import subprocess
 from warnings import warn
 
@@ -98,6 +101,67 @@ def get_version():
 
         return version, release, copyright
 
-if __name__ == '__main__':
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+    def run(self):
+        for item in ['pre-commit', 'pre-push', 'post-merge', 'post-commit',
+                     'post-checkout']:
+            if os.path.exists ('.git/hooks/{}'.format(item)):
+                os.remove('.git/hooks/{}'.format(item))
+            sh.copy('git_hooks/{}'.format(item), '.git/hooks/{}'.format(item))
 
-    v, r, c = get_version()
+            print('installation of `.git/hooks/{}` made.'.format(item))
+
+        develop.run(self)
+
+# class PostInstallCommand(install):
+#     """Post-installation for installation mode."""
+#     def run(self):
+#         # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+#         install.run(self)
+
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+
+
+def get_dependencies():
+    with open("requirements.txt", 'r') as f:
+        pkg = f.read().split("\n")
+        while '' in pkg:
+            pkg.remove('')
+        for item in pkg:
+            if item.startswith('#'):
+                pkg.remove(item)
+        return pkg
+
+
+setup(
+    name='spectrochempy',
+    version=get_version()[1],
+    packages=find_packages(),
+    include_package_data=True,
+    url='http:/www-lcs.ensicaen.fr/spectrochempy',
+    license='CeCILL-2.1',
+    author='Arnaud Travert & christian Fernandez',
+    author_email='spectrochempy@ensicaen.fr',
+    description='Spectra Analysis & Processing with Python',
+    long_description=read('README.md'),
+    setup_requires=['pytest-runner'],
+    install_requires=get_dependencies(),
+    tests_require=['pytest'],
+    classifiers=[
+            "Development Status :: 2 - Pre-Alpha",
+            "Topic :: Utilities",
+            "Topic :: Scientific/Engineering",
+            "Intended Audience :: Science/Research",
+            "License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
+            "Operating System :: OS Independent",
+            "Programming Language :: Python :: 3.5",
+    ],
+    cmdclass = {
+               'develop': PostDevelopCommand,
+                          # 'install': PostInstallCommand,
+               },
+)
+

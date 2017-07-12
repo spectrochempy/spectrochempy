@@ -12,24 +12,44 @@ The master is build on the 3.6 python version.
 
 1) Install anaconda (website)
 
-2) issue the following command to add the conda-forge channel:
+2) issue the following command to be sure to have add the conda-forge channel (on top priority):
 
 	conda config --add channels conda-forge
 
 
-3) create an environment called **scp_36**
+3) list the current environments
 
-	conda create --name scp_36 python=3.6
+    conda info --envs
 
 
-4) switch to this environment
+4) create an environment called **scp36**
 
-    source activate scp_36
+	conda create -n scp36 python=3.6 --file requirements.txt
+
+
+5) switch to this environment
+
+    source activate scp36
 
 
 You can make it permanent by putting this command in you bash_profile (MAC)
 
 
+6) install the additional librairies with conda
+
+    conda install --yes --file requirements.txt
+
+
+
+Setup PyCharm
+--------------
+open preferences.
+
+set the an interpreter call scp_36 corresponding to the path:
+
+/anaconda/envs/scp_36/bin/python
+
+Set the
 
 
 
@@ -39,8 +59,7 @@ You can make it permanent by putting this command in you bash_profile (MAC)
 
 
 
-
-
+jupyter qtconsole
 
 
 

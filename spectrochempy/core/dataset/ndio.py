@@ -559,7 +559,7 @@ class NDIO(HasTraits):
             self.fig.savefig(savename)
 
         from spectrochempy.api import _do_not_block
-        if _do_not_block:
+        if not _do_not_block:
             self.show()
 
     def plot_generic(self, ax=None, **kwargs):

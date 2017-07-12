@@ -51,20 +51,19 @@ from traitlets.config.application import Application, catch_config_error
 from traitlets import (
     Bool, Unicode, Int, List, Dict, default, observe
 )
-import matplotlib as mpl
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
 
-# local imports
+import matplotlib as mpl
+
+
+# local
 # =============================================================================
 
 from spectrochempy.utils import is_kernel
 from spectrochempy.utils import get_config_dir, get_pkg_data_dir
 from spectrochempy.version import get_version
-
-# the module options
-
 from spectrochempy.core.plotters.plottersoptions import PlotOptions
 from spectrochempy.core.readers.readersoptions import ReadOptions
 from spectrochempy.core.writers.writersoptions import WriteOptions
@@ -89,6 +88,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 # ==============================================================================
 
 class SpectroChemPy(Application):
+
+
 
     # info _____________________________________________________________________
 
@@ -126,6 +127,7 @@ class SpectroChemPy(Application):
 
     @default('data_dir')
     def _get_data_dir_default(self):
+        # look for the testdata path in package tests
         return get_pkg_data_dir('testdata','tests')
 
     info_on_loading = Bool(True,
@@ -187,8 +189,6 @@ class SpectroChemPy(Application):
         # ------------------------------------------------------------------
         # we performs this before any call to matplotlib that are performed
         # later in this application
-
-        import matplotlib as mpl
 
         # if we are building the docs, in principle it should be done using
         # the make.py located in the scripts folder
@@ -300,37 +300,46 @@ class SpectroChemPy(Application):
             )
 
         """
-        if self.running:
-            self.log.debug('API already started. Nothing done!')
-            return
+        try:
 
-        for key in kwargs.keys():
-            if hasattr(self, key):
-                setattr(self, key, kwargs[key])
+            if self.running:
+                self.log.debug('API already started. Nothing done!')
+                return
 
-        self.log_format = '%(highlevel)s %(message)s'
+            for key in kwargs.keys():
+                if hasattr(self, key):
+                    setattr(self, key, kwargs[key])
 
-        if self.quiet:
-            self.log_level = logging.CRITICAL
+            self.log_format = '%(highlevel)s %(message)s'
 
-        if self.debug:
-            self.log_level = logging.DEBUG
-            self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
+            if self.quiet:
+                self.log_level = logging.CRITICAL
+
+            if self.debug:
+                self.log_level = logging.DEBUG
+                self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
 
 
-        info_string = u"""
-    SpectroChemPy's API
-    Version   : {}
-    Copyright : {}
-        """.format(self.version, self.copyright)
+            info_string = u"""
+        SpectroChemPy's API
+        Version   : {}
+        Copyright : {}
+            """.format(self.version, self.copyright)
 
-        if self.info_on_loading and \
-                not self.plotoptions.do_not_block:
+            if self.info_on_loading and \
+                    not self.plotoptions.do_not_block:
 
-            print(info_string)
-            self.log.debug("argv0 : %s" % str(sys.argv[0]))
+                print(info_string)
 
-        self.running = True
+            self.log.debug("The application was launched with ARGV : %s" % str(sys.argv))
+
+            self.running = True
+
+            return True
+
+        except:
+
+            return False
 
     # --------------------------------------------------------------------------
     # Store default configuration file

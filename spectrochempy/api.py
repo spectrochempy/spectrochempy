@@ -60,26 +60,34 @@ from pytest import raises
 # Tells here the methods or object we allow to import from this library
 # ==============================================================================
 __all__ = [ ### Helpers
-            'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO', 'raises',
-            'APIref', 'data_dir',
-            'options', 'plotoptions',
+             'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO', 'raises',
+             'APIref', 'data_dir',
+             'options', 'plotoptions',
+
             ### Data
-            'NDDataset', 'Axes', 'Axis', 'AxisRange', 'Meta',
-            'ur', 'Quantity', 'Measurement', 'set_nmr_context',
+             'NDDataset', 'Axes', 'Axis', 'AxisRange', 'Meta',
+             'ur', 'Quantity', 'Measurement', 'set_nmr_context',
+
             ### Info
-            'copyright', 'release', 'version',
+             'copyright', 'release', 'version',
+
             ### Database
-            'Isotopes',
+             'Isotopes',
+
             ### Analysis and Fit
-            'Efa', 'Fit', 'Pca', 'Svd', 'align', 'autosub', 'basecor',
-            'concatenate', 'interpolate', 'lsqnonneg', 'lstsq', 'mcrals', 'nnmf',
+             'Efa', 'Fit', 'Pca', 'Svd', 'align', 'autosub', 'basecor',
+             'concatenate', 'interpolate', 'lsqnonneg', 'lstsq', 'mcrals', 'nnmf',
+
             ### View
-            'plot_1D', 'plot_2D', 'contour',
+             'plot_1D', 'plot_2D', 'contour',
+
             ### import/export
-            'read_dso', 'read_jdx', 'read_omnic', 'read_bruker_nmr',
-            'write_jdx',
+             'read_dso', 'read_jdx', 'read_omnic', 'read_bruker_nmr',
+             'write_jdx',
+
             ### imported library
-            'np', 'plt', 'scipy', 'sympy', 'ng'
+             'np', 'plt', 'scipy'
+
           ]
 
 
@@ -108,6 +116,8 @@ log = scp.log
 plotoptions = scp.plotoptions
 options = scp
 
+_do_not_block = plotoptions.do_not_block
+
 data_dir = scp.data_dir
 
 # log levels
@@ -125,20 +135,37 @@ from spectrochempy.databases import *
 from spectrochempy.analysis import *
 from spectrochempy.fitting import *
 
-# Useful librairies alias
-
+# Useful librairies alias for the end user avoiding to load them
+# --------------------------------------------------------------
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy
-import sympy
-import scikit_learn as sk
-import nmrglue as ng
+
+import matplotlib.pyplot as plt
+
+
+# optional libraries
+try:
+    import sympy as sym
+    __all__.append('sym')
+except ImportError:
+    pass
+
+try:
+    import sklearn as skl
+    __all__.append('skl')
+except ImportError:
+    pass
+
+try:
+    import nmrglue as ng
+    __all__.append('ng')
+except ImportError:
+    pass
 
 
 # START THE APPLICATION ========================================================
 
-scp.start()
-scp.log.info(scp.running)
+scp.log.info("API activated " if scp.start(debug=True) else "API was not started!")
 
 # ==============================================================================
 

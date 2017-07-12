@@ -48,14 +48,14 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 def test_basecor_sequential(IR_source_1):
 
-    source = IR_source_1
+    source = IR_source_1[:5]
 
     s = source.copy().basecor([6000.,3500.],[1800.,1500.], [10 , 0])
     s.plot()
 
 def test_basecor_sequential_pchip(IR_source_1):
 
-    source = IR_source_1
+    source = IR_source_1[:5]
 
     s = source.copy().basecor([6000., 3500.], [1800., 1500.], [10 , 0], #last range is defined in point
                               interpolation='pchip')
@@ -63,7 +63,7 @@ def test_basecor_sequential_pchip(IR_source_1):
 
 def test_basecor_multivariate(IR_source_1):
 
-    source = IR_source_1
+    source = IR_source_1[:5]
 
     s = source.copy().basecor([6000., 3500.], [1800., 1500.],
                               method='multivariate',
@@ -72,7 +72,7 @@ def test_basecor_multivariate(IR_source_1):
 
 def test_basecor_multivariate_pchip(IR_source_1):
 
-    source = IR_source_1
+    source = IR_source_1[:5]
 
     s = source.copy().basecor([6000., 3500.], [1800., 1500.],
                               method='multivariate',

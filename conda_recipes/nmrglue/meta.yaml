@@ -1,0 +1,72 @@
+package:
+  name: nmrglue
+  version: "0.6"
+
+source:
+  fn: nmrglue-0.6.tar.gz
+  url: https://pypi.python.org/packages/da/17/05fc5bc4da8ff8be34b65ad48834201be9f7fe12dd59b0365b3542d67770/nmrglue-0.6.tar.gz
+  md5: 9f0b9044799101ba352f73f1f94a0e5a
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+# build:
+  # noarch: python
+  # preserve_egg_dir: True
+  # entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - nmrglue = nmrglue:main
+    #
+    # Would create an entry point called nmrglue that calls nmrglue.main()
+
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - numpy
+    - scipy
+
+  run:
+    - python
+    - numpy
+    - scipy
+
+test:
+  # Python imports
+  imports:
+    - nmrglue
+    - nmrglue.analysis
+    - nmrglue.analysis.tests
+    - nmrglue.fileio
+    - nmrglue.fileio.tests
+    - nmrglue.process
+    - nmrglue.process.nmrtxt
+    - nmrglue.util
+
+  # commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: http://www.nmrglue.com
+  license: BSD License
+  summary: 'A module for working with NMR data in Python'
+  license_family: BSD
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml

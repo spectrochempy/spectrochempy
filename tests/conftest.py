@@ -7,14 +7,17 @@ from pint import DimensionalityError
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
+
 from tests.utils import NumpyRNGContext
 
 import pytest
 import numpy as np
 import os
+import sys
 
+from spectrochempy.api import NDDataset, Axes, Axis, data_dir, plotoptions
 
-from spectrochempy.api import NDDataset, Axes, Axis, data_dir
+plotoptions.do_not_block = True
 
 # An IR spectra
 @pytest.fixture(scope="function")
