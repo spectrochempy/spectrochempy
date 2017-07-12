@@ -9,7 +9,7 @@ specifying the keyword-value pair ``sphinx_gallery_thumbnail_number = 2`` as a
 comment somewhere below the docstring in the example file.
 """
 
-# Code source: Óscar Nájera
+# Code source: Oscar Najera
 # License: BSD 3 clause
 
 import numpy as np

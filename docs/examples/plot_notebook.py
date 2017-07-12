@@ -27,7 +27,7 @@ style docstring, then for the first code block we write the example file author
 and script license continued by the import modules instructions.
 """
 
-# Code source: Óscar Nájera
+# Code source: Oscar Najera
 # License: BSD 3 clause
 from __future__ import division, absolute_import, print_function
 
