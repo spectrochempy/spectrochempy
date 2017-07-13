@@ -94,9 +94,9 @@ class DataDir(Configurable):
     testdata
     >>> print(data_dir) # doctest: +ELLIPSIS
     testdata
-    ↳irdata
-       ↳NH4Y-activation.SPG
-     ↳nmrdata
+    | irdata
+      | NH4Y-activation.SPG
+    | nmrdata
        ...
     <BLANKLINE>
 
@@ -109,19 +109,19 @@ class DataDir(Configurable):
 
         s = os.path.basename(self.data_dir)+"\n"
 
-        def _listdir(s, initial, esp=""):
-
+        def _listdir(s, initial, ns):
+            ns += 1
             for f in glob.glob(os.path.join(initial, '*')):
                 fb = os.path.basename(f)
                 if not fb.startswith('acqu') and \
                         not fb.startswith('pulse') and fb not in ['ser', 'fid']:
-                    s += esp + u"↳%s\n "%fb
+                    s += "   "*ns + "|__" + u"%s\n"%fb
                 if os.path.isdir(f):
-                    esp1 = esp + '  ' * 1
-                    s = _listdir(s, f, esp1)
+                    s = _listdir(s, f, ns)
+
             return s
 
-        return _listdir(s, self.data_dir)
+        return _listdir(s, self.data_dir, -1)
 
     def __str__(self):
 
@@ -271,7 +271,7 @@ class SpectroChemPy(Application):
                     ip.magic('matplotlib notebook') #nbagg')
                 except UsageError:
                     try:
-                        ip.magic('matplotlib oscx')
+                        ip.magic('matplotlib osx')
                     except:
                         try:
                             ip.magic('matplotlib qt5')
@@ -279,7 +279,7 @@ class SpectroChemPy(Application):
                             pass
             else:
                 try:
-                    ip.magic('matplotlib oscx')
+                    ip.magic('matplotlib osx')
                 except:
                     try:
                         ip.magic('matplotlib qt5')
