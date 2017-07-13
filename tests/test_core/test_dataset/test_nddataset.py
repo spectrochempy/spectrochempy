@@ -1064,6 +1064,7 @@ def test_unary_ufuncs_data_w_uncertainties(nd, name):
 def test_creationdate():
     ndd = NDDataset([1., 2., 3.])
     ndd2 = np.sqrt(ndd)
+    print(ndd2)
     assert ndd2._date is not None
 
 

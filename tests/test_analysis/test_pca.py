@@ -54,6 +54,8 @@ def test_pca(IR_source_1):
     print(pca)
     pca.printev(npc=5)
 
+    assert str(pca)[:3] == '\nPC'
+
     pca.screeplot(npc=5)
 
     pca.scoreplot(pcs=(0,1))

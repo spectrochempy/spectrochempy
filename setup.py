@@ -44,62 +44,7 @@ import shutil as sh
 import subprocess
 from warnings import warn
 
-# get the version string
-# -----------------------
-def get_version():
-    """Get the version string
-
-    Returns
-    -------
-    version: str
-        the version string such as  |version|
-    release: str
-        the release string such as  |release|
-    """
-
-    version = '0.1'
-    release = '0.1'
-
-    try:
-
-        with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "r") as f:
-            version = f.readline()
-            release = f.readline()
-
-    except IOError:
-
-        with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "w") as f:
-            f.write(version + "\n")
-            f.write(release + "\n")
-
-    finally:
-        pass
-
-    try:
-        # get the version number (if we are using git)
-        version_info = subprocess.getoutput("git describe")
-        version_info = version_info.split('-')
-
-        # in case of a just tagged version version str contain only one string
-        if len(version_info) >= 2:  # case of minor revision
-            version = "%s.%s" % tuple(version_info[:2])
-            release = version_info[0]
-        else:
-            version = version_info[0]
-            release = version
-
-        with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "w") as f:
-            f.write(version+"\n")
-            f.write(release+"\n")
-
-    except:
-        warn('Could not get version string from GIT repository')
-
-    finally:
-        copyright = u'2014-2017, LCS - ' \
-                    u'Laboratory for Catalysis and Spectrochempy'
-
-        return version, release, copyright
+from spectrochempy.version import get_version
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
@@ -122,7 +67,6 @@ class PostDevelopCommand(develop):
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
 
 
 def get_dependencies():

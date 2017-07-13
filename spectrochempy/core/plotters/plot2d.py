@@ -64,6 +64,8 @@ def plot_2D(data, **kwargs):
     ----------
     data : NDDataset to plot
 
+    projections : `bool` [optional, default=False]
+
     kwargs : additionnal keywords
 
 
@@ -76,7 +78,7 @@ def plot_2D(data, **kwargs):
 
     # show projections
     proj = kwargs.get('proj', options.show_projections)
-
+        #TODO: tell the axis by title.
     xproj = kwargs.get('xproj',options.show_projection_x)
 
     yproj = kwargs.get('yproj',options.show_projection_y)
@@ -114,6 +116,7 @@ def plot_2D(data, **kwargs):
 
     # -------------------------------------------------------------------------
     # plot the data
+    # by default contours are plotted
     # -------------------------------------------------------------------------
 
     # abscissa and ordinate axis

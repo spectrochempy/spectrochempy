@@ -36,4 +36,4 @@
 
 
 if __name__ == "__main__":
-    pass
+    from spectrochempy.api import *

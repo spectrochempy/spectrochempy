@@ -54,18 +54,25 @@ def get_version():
         the release string such as  |release|
     """
 
+    from spectrochempy.utils import get_config_dir
+
     version = '0.1'
-    release = '0.1'
+    release = '0.1a1'
+
+    # Insure that the __VERSION__ file exists and the config directories
+    version_path = os.path.join(get_config_dir(), "__VERSION__")
+    if not os.path.exists(os.path.dirname(version_path)):
+        os.makedirs(os.path.dirname(version_path), exist_ok=True)
 
     try:
-
-        with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "r") as f:
+        with open(os.path.join(get_config_dir(),
+                                     "__VERSION__"), "r") as f:
             version = f.readline()
             release = f.readline()
 
     except IOError:
-
-        with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "w") as f:
+        with open(os.path.join(get_config_dir(),
+                                     "__VERSION__"), "w") as f:
             f.write(version + "\n")
             f.write(release + "\n")
 
@@ -85,7 +92,8 @@ def get_version():
             version = version_info[0]
             release = version
 
-        with open(os.path.expanduser("~/.spectrochempy/__VERSION__"), "w") as f:
+        with open(os.path.join(get_config_dir(),
+                               "__VERSION__"), "w") as f:
             f.write(version + "\n")
             f.write(release + "\n")
 
@@ -104,3 +112,4 @@ if __name__ == '__main__':
     print (v)
     print (r)
     print (c)
+

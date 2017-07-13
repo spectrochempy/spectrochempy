@@ -53,6 +53,10 @@ def plot_1D(data, **kwargs):
     ----------
     data : NDDataset to plot
 
+    reverse: `bool` [optional, default=True]
+
+
+
     kwargs : additionnal keywords
 
 

@@ -575,14 +575,20 @@ class NDIO(HasTraits):
         -------
 
         """
+        contour = kwargs.get('contour', True)
 
         if self.ndim == 1:
 
             return self.plot_1D(ax=ax, **kwargs)
 
-        elif self.ndim == 2:
+        elif self.ndim == 2 and contour:
 
             return self.plot_2D(ax=ax, **kwargs)
+
+        elif self.ndim == 2:
+
+            kwargs['flat'] = True   # else it will be stacked plot
+            return self.plot_3D(ax=ax, **kwargs)
 
         elif self.ndim == 3:
 

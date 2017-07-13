@@ -268,17 +268,23 @@ class SpectroChemPy(Application):
 
                 # set the ipython matplotlib environments
                 try:
-                    ip.magic('matplotlib nbagg')
+                    ip.magic('matplotlib notebook') #nbagg')
                 except UsageError:
                     try:
-                        ip.magic('matplotlib osx')
+                        ip.magic('matplotlib oscx')
                     except:
-                        ip.magic('matplotlib qt')
+                        try:
+                            ip.magic('matplotlib qt5')
+                        except:
+                            pass
             else:
                 try:
-                    ip.magic('matplotlib osx')
+                    ip.magic('matplotlib oscx')
                 except:
-                    ip.magic('matplotlib qt')
+                    try:
+                        ip.magic('matplotlib qt5')
+                    except:
+                        pass
 
         # parse the argv
         # --------------
