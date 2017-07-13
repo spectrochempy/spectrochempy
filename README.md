@@ -33,7 +33,7 @@ running on Linux, Windows or OSX.
 ****
 ## Documentation
 
-Link to the [documentation](https://www-lcs.ensicaen.fr/cfnews/spectrochempy/)
+Link to the [documentation](http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/)
 
 ****
 ## Citing SpectroChemPy
