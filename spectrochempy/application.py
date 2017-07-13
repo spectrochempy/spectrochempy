@@ -94,10 +94,11 @@ class DataDir(Configurable):
     testdata
     >>> print(data_dir) # doctest: +ELLIPSIS
     testdata
-    | irdata
-      | NH4Y-activation.SPG
-    | nmrdata
-       ...
+    |__irdata
+       |__NH4Y-activation.SPG
+    |__nmrdata
+       |__bruker
+          ...
     <BLANKLINE>
 
     """
