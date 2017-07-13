@@ -62,7 +62,7 @@ from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 # Local imports
 # =============================================================================
 from ...dataset import Meta
-from ...dataset import Axis
+from ...dataset import Axis, NDDataset
 from ...units import ur, Quantity
 from .parameter import nmr_valid_meta
 
@@ -312,8 +312,7 @@ def _remove_digital_filter(dic, data):
 # =============================================================================
 # bruker import function
 # =============================================================================
-
-def read_bruker_nmr(self, *args, **kwargs):
+def read_bruker_nmr(source, *args, **kwargs):
     """
     Import Bruker dataset
 
@@ -341,6 +340,13 @@ def read_bruker_nmr(self, *args, **kwargs):
     """
 
     log.debug('Bruker imports...')
+
+    # determine if the method was called as a classmethod or not
+    # if yes create a dataset
+    #TODO: a decorator for this
+    if not isinstance(source, NDDataset):
+        args = [source] + list(args)
+        source = NDDataset()
 
     expnos = False
     data_dir = kwargs.get('data_dir', '')
@@ -682,16 +688,16 @@ def read_bruker_nmr(self, *args, **kwargs):
     if len(list_data) == 1:
         log.debug('One experiment read. Make it the current dataset')
 
-        self.data = list_data[0]  # complex data will be transformed
+        source.data = list_data[0]  # complex data will be transformed
                                   # automatically into an interleaved
                                   # data array
         for axis, cplex in enumerate(meta.iscomplex):
             if cplex:
-                self.set_complex(axis)
+                source.set_complex(axis)
 
-        self.meta.update(list_meta[0])
-        self.meta.readonly = True
-        self.axes = list_axes[0]
+        source.meta.update(list_meta[0])
+        source.meta.readonly = True
+        source.axes = list_axes[0]
 
     else:
         # case of multiple experiments to merge
@@ -746,11 +752,11 @@ def read_bruker_nmr(self, *args, **kwargs):
                 meta_diffs[key] = [meta[key][-1] for meta in list_meta]
 
         # we can now store the meta for the datset object
-        self.meta.update(list_meta[-1])
+        source.meta.update(list_meta[-1])
         # we additionaly set the list of variable parameters whch will indicate
         # the orders of the labels for the new axis
-        self.meta.labels = mkeys
-        self.meta.readonly = True  # and from now no more modifications in metas
+        source.meta.labels = mkeys
+        source.meta.readonly = True  # and from now no more modifications in metas
 
         # by default and if it is possible we try to create an homogeneous
         # NDDataset (needs same TD, SFO1, etc.. and of course same data.shape)
@@ -760,12 +766,12 @@ def read_bruker_nmr(self, *args, **kwargs):
             newdata = np.stack(list_data, axis=0)
 
             # store it in the current datset
-            self.data = newdata
+            source.data = newdata
             # complexity?
             complexity = [False] + meta.iscomplex
             for axis, iscomplex in enumerate(complexity):
                 if iscomplex:
-                    self.set_complex(axis)
+                    source.set_complex(axis)
 
             # new axes
             vkey = kwargs.get('var_key', None)
@@ -795,6 +801,8 @@ def read_bruker_nmr(self, *args, **kwargs):
             # only one axes of the list is taken: they are all the same
             # in principle... if not problem above or the experiments
             # are not compatibles
-            self.axes = [axis]+list_axes[-1]
+            source.axes = [axis] + list_axes[-1]
+
+    return source
 
 ###EOF######################################################################

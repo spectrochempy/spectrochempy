@@ -328,22 +328,16 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
         source.axes[0].labels = (allacquisitiondates, alltitles)
         source.axes[0].units = 's'
 
-        # TODO: Arnaud, what's the purpose of this ?
-        indexFirstSpectrum = 0
-        #
-        # if kwargs.get('sortbydate','True'):
-        #     out.addtimeaxis()
-        #     firstTime = min(out.dims[0].axes[0].values)
-        #     indexFirstSpectrum = out.idx(firstTime, dim=0)
-        #     out = out.sort(0, 0)
-        #     out.dims[0].deleteaxis(0)
-
         # Set description and history
         source.description = (
         'Dataset from spg file : ' + spg_title + ' \n'
-        + 'History of the 1st spectrum: ' + allhistories[indexFirstSpectrum])
+        + 'History of the 1st spectrum: ' + allhistories[0])
 
-        source.history = (str(datetime.now()) + ':read from spg file \n')
+        source.history = str(datetime.now()) + ':read from spg file \n'
+
+        if kwargs.get('sortbydate','True'):
+            source.sort(axis=0, inplace=True)
+            source.history = 'sorted'
 
         # Set the NDDataset date
         source._date = datetime.now()
@@ -480,6 +474,8 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
         source._modified = source._date
 
         #TODO: Finish the conversion
+        raise NotImplementedError('implementation not finished')
+
         out.appendlabels(Labels(alltitles, 'Title'))
         out.appendlabels(Labels(allacquisitiondates, 'Acquisition date (GMT)'))
         out.appendaxis(Axis(xaxis, 'Wavenumbers (cm-1)'), dim=1)

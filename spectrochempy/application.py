@@ -41,6 +41,7 @@ This module define the application on which the API rely
 """
 
 import os
+import glob
 import sys
 import logging
 from copy import deepcopy
@@ -48,7 +49,7 @@ from copy import deepcopy
 from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, catch_config_error
 
-from traitlets import (
+from traitlets import (HasTraits, Instance,
     Bool, Unicode, Int, List, Dict, default, observe
 )
 
@@ -81,6 +82,59 @@ __all__ = ['scp']
 # in case spectrochempy was not yet installed using setup
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+
+# some useful objects
+class DataDir(Configurable):
+    """
+    Examples
+    --------
+    >>> data_dir = DataDir()
+    >>> print(os.path.basename(data_dir.data_dir))
+    testdata
+    >>> print(data_dir) # doctest: +ELLIPSIS
+    testdata
+    ↳irdata
+       ↳NH4Y-activation.SPG
+     ↳nmrdata
+       ...
+    <BLANKLINE>
+
+    """
+
+    data_dir = Unicode(help="Set a data directory where to look for data").tag(
+            config=True)
+
+    def listing(self):
+
+        s = os.path.basename(self.data_dir)+"\n"
+
+        def _listdir(s, initial, esp=""):
+
+            for f in glob.glob(os.path.join(initial, '*')):
+                fb = os.path.basename(f)
+                if not fb.startswith('acqu') and \
+                        not fb.startswith('pulse') and fb not in ['ser', 'fid']:
+                    s += esp + u"↳%s\n "%fb
+                if os.path.isdir(f):
+                    esp1 = esp + '  ' * 1
+                    s = _listdir(s, f, esp1)
+            return s
+
+        return _listdir(s, self.data_dir)
+
+    def __str__(self):
+
+        return self.listing()
+
+    def _repr_html_(self):
+
+        return self.listing().replace('\n','<br/>').replace(" ","&nbsp;")
+
+    @default('data_dir')
+    def _get_data_dir_default(self):
+        # look for the testdata path in package tests
+        return get_pkg_data_dir('testdata','tests')
 
 
 # ==============================================================================
@@ -122,14 +176,6 @@ class SpectroChemPy(Application):
         return get_config_dir()
 
 
-    data_dir = Unicode(help="Set a data directory where to look for data").tag(
-            config=True)
-
-    @default('data_dir')
-    def _get_data_dir_default(self):
-        # look for the testdata path in package tests
-        return get_pkg_data_dir('testdata','tests')
-
     info_on_loading = Bool(True,
                                 help='display info on loading').tag(config=True)
 
@@ -142,6 +188,21 @@ class SpectroChemPy(Application):
     quiet = Bool(False,
                  help='set Quiet mode, with minimal outputs').tag(config=True)
 
+
+    _data_dir = Instance(DataDir,help="Set a data directory where to look for data")
+
+    @default('_data_dir')
+    def _get__data_dir_default(self):
+        # look for the testdata path in package tests
+        return DataDir()
+
+    @property
+    def data_dir(self):
+        return self._data_dir.data_dir
+
+    @property
+    def list_data_dir(self):
+        return self._data_dir
 
     # --------------------------------------------------------------------------
     # Initialisation of the plot options
@@ -320,9 +381,12 @@ class SpectroChemPy(Application):
         >>> app = SpectroChemPy()
         >>> app.initialize()
         >>> app.start(
-            reset_config=True,   # option for restoring default configuration
-            debug=True,          # debugging logs
-            )
+        ...    reset_config=True,   # option for restoring default configuration
+        ...    debug=True,          # debugging logs
+        ...    )
+        True
+
+        #>>> print(app.list_data_dir)
 
         """
 

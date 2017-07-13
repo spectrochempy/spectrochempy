@@ -371,7 +371,8 @@ class NDMath(object):
             self._uncertainty = uncertainty
             self._units = units
             self._mask = mask
-            self._history.append('inplace binary op : ' + f.__name__ + ' with %s ' % str(other))
+            if hasattr(self, '_history'):
+                self._history.append('inplace binary op : ' + f.__name__ + ' with %s ' % str(other))
             return self
 
         return func

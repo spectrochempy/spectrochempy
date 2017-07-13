@@ -74,14 +74,14 @@ def test_fit_single_source(IR_source_1, script):
 
     f1 = Fit(source, script, silent=True)
     f1.run(maxiter=10, every=1)
-    assert_approx_equal(source.model_A, -50.6219, significant=4)
-    assert_approx_equal(f1.fp['width_line_2'], 192.6362, significant=4)
+    assert_approx_equal(source.model_A, -116.40475, significant=4)
+    assert_approx_equal(f1.fp['width_line_2'], 195.7273, significant=4)
 
     source2 = source.copy() * 2.34
     f2 = Fit(source2, script, silent=True)
     f2.run(maxiter=10, every=1)
-    assert_approx_equal(source2.model_A, -50.6219 * 2.34, significant=4)
-    assert_approx_equal(f2.fp['width_line_2'], 192.6362, significant=4)
+    assert_approx_equal(source2.model_A, -116.40475 * 2.34, significant=4)
+    assert_approx_equal(f2.fp['width_line_2'], 195.7273, significant=4)
 
     source2.plot(showmodel=True)
 
@@ -90,9 +90,9 @@ def test_fit_multiple_source(IR_source_1, script):
     sources = [source.copy(), source.copy() * 2.23456]
     f = Fit(sources, script, silent=True)
     f.run(maxiter=10, every=1)
-    assert_approx_equal(sources[0].model_A, -50.6219, significant=4)
-    assert_approx_equal(sources[1].model_A, -50.6219 * 2.23456, significant=4)
-    assert_approx_equal(f.fp['width_line_2'], 192.6362, significant=4)
+    assert_approx_equal(sources[0].model_A, -116.404751, significant=4)
+    assert_approx_equal(sources[1].model_A, -116.404751 * 2.23456, significant=4)
+    assert_approx_equal(f.fp['width_line_2'], 195.7273, significant=4)
 
 
     #TODO: plotting of multiple sources

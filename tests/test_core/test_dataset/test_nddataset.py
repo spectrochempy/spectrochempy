@@ -1413,24 +1413,33 @@ def test_dataset_with_meta(ds1):
 #### sorting ###################################################################
 def test_sorting(ds1):  # ds1 is defined in conftest
 
-    source = ds1.copy()
-    labels = np.array('a b c d e f g h i j'.split())
+    source = ds1[:3,:3,0].copy()
+    source = source.squeeze()
+    source.sort(inplace=True)
+    labels = np.array('c b a'.split())
     assert_array_equal(source.axes[0].labels, labels)
+    print(source)
 
-    new = source.copy().sort()
-    assert_array_equal(new.axes[0].labels, labels[::-1])
+    source.sort(inplace=True)
+    print (source)
+    new = source.copy()
+    new = new.sort(descend=True, inplace=False)
+    print (new)
     assert_array_equal(new.data, source.data[::-1])
-    assert (new[0, 0, 0] == source[-1, 0, 0])
+    assert (new[0, 0] == source[-1, 0])
+    assert_array_equal(new.axes[0].labels, labels[::-1])
+    assert_array_equal(new.axes[0].data, source.axes[0].data[::-1])
 
     new = source.copy()
-    new.sort(inplace=True, descend=True)
-    assert_array_equal(new.axes[0].labels, labels)
+    new.sort(inplace=True, descend=False)
     assert_array_equal(new.data, source.data)
-    assert (new[0, 0, 0] == source[0, 0, 0])
+    assert (new[0, 0] == source[0, 0])
+    assert_array_equal(new.axes[0].labels, labels)
 
     # check for another dimension
 
-    new = source.copy()
+    source = ds1.copy()
+    new = ds1.copy()
     new.sort(axis=1, inplace=True, descend=False)
     assert_array_equal(new.data, source.data)
     assert not new.coords(1).is_reversed
@@ -1438,7 +1447,6 @@ def test_sorting(ds1):  # ds1 is defined in conftest
 
     new = source.copy()
     new.sort(axis=1, inplace=True, descend=True)
-    assert_array_equal(new.axes[0].labels, labels)
     assert_array_equal(new.data, source.data[:, ::-1, :])
     assert new.coords(1).is_reversed
     assert (new[0, -1, 0] == source[0, 0, 0])

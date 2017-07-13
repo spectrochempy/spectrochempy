@@ -516,3 +516,11 @@ def test_multiaxis_for_a_single_dim():
 
 
 
+def test_axes_manipulation(IR_source_1):
+
+    source = IR_source_1
+    axe0 = source.axes[0]
+
+    axe0 -= axe0[0]
+
+    print(axe0)

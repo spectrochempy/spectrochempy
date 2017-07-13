@@ -61,7 +61,7 @@ from pytest import raises
 # ==============================================================================
 __all__ = [ ### Helpers
              'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO', 'raises',
-             'APIref', 'data_dir',
+             'APIref', 'data_dir', 'list_data_dir',
              'options', 'plotoptions',
 
             ### Data
@@ -99,6 +99,7 @@ def APIref():
     """
     return __all__
 
+
 # ==============================================================================
 # matplotlib use directive to set before calling matplotlib backends
 # ==============================================================================
@@ -119,6 +120,7 @@ options = scp
 _do_not_block = plotoptions.do_not_block
 
 data_dir = scp.data_dir
+list_data_dir = scp.list_data_dir
 
 # log levels
 # ----------

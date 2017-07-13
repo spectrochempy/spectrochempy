@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-from spectrochempy.api import NDDataset
+from spectrochempy.api import NDDataset, data_dir
 
 from tests.utils import assert_approx_equal
 import os
@@ -46,8 +46,20 @@ import pytest
 def test_load(IR_source_1, IR_scp_1):
 
     source = IR_source_1
-    assert_approx_equal(source.data[0,0], 1.82, significant=2)
+    assert_approx_equal(source.data[0,0], 2.05, significant=2)
     B = source * 1.98
-    assert_approx_equal(B.data[0, 0], 3.60, significant=2)
+    assert_approx_equal(B.data[0, 0], 2.05 * 1.98, significant=2)
     assert "binary op : mul with 1.98" in B.history
+
+def test_methods_read_access():
+
+    path = os.path.join(data_dir, 'nmrdata', 'bruker', 'tests', 'nmr',
+                        'bruker_1d')
+
+    # load the data in a new dataset
+    ndd = NDDataset()
+    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+
+    # alternatively
+    ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 
