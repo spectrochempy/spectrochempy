@@ -83,10 +83,13 @@ __all__ = ['scp']
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-
 # some useful objects
 class DataDir(Configurable):
     """
+    This class is used to determine the path to the data directory.
+
+    The attribute data_dir is configurable.
+
     Examples
     --------
     >>> data_dir = DataDir()
@@ -107,7 +110,14 @@ class DataDir(Configurable):
             config=True)
 
     def listing(self):
+        """
+        Create a `str` representing a listing of the data repertory.
 
+        Returns
+        -------
+        listing : `str`
+
+        """
         s = os.path.basename(self.data_dir)+"\n"
 
         def _listdir(s, initial, ns):
@@ -119,17 +129,15 @@ class DataDir(Configurable):
                     s += "   "*ns + "|__" + u"%s\n"%fb
                 if os.path.isdir(f):
                     s = _listdir(s, f, ns)
-
             return s
 
         return _listdir(s, self.data_dir, -1)
 
     def __str__(self):
-
         return self.listing()
 
     def _repr_html_(self):
-
+        # _repr_html is needed to output in notebooks
         return self.listing().replace('\n','<br/>').replace(" ","&nbsp;")
 
     @default('data_dir')
@@ -143,7 +151,11 @@ class DataDir(Configurable):
 # ==============================================================================
 
 class SpectroChemPy(Application):
+    """
+    SpectroChemPy is the main class, cotaining most of the setup, configuration,
+    and more.
 
+    """
 
 
     # info _____________________________________________________________________
@@ -384,7 +396,6 @@ class SpectroChemPy(Application):
 
         Examples
         --------
-
         >>> app = SpectroChemPy()
         >>> app.initialize()
         >>> app.start(
@@ -441,6 +452,7 @@ class SpectroChemPy(Application):
     # --------------------------------------------------------------------------
     # Store default configuration file
     # --------------------------------------------------------------------------
+
     def _make_default_config_file(self):
         """auto generate default config file."""
 
