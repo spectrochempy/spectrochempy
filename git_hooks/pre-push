@@ -1,9 +1,3 @@
 #!/bin/bash
 
-source ~/.bash_profile
-
-pip uninstall -y spectrochempy
-pip install -e . || exit 1
-
-# make new docs
 

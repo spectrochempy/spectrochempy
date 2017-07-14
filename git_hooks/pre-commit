@@ -18,6 +18,10 @@ export PATH=$PATH:/Library/TeX/texbin/
 # test everything
 py.test -x tests || exit 1
 
+# install to check setup
+pip uninstall -y spectrochempy
+pip install -e . || exit 1
+
 # make docs
 python scripts/make_scp_docs.py clean html release
 

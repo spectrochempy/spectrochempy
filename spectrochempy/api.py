@@ -103,7 +103,6 @@ def APIref():
 # ==============================================================================
 # matplotlib use directive to set before calling matplotlib backends
 # ==============================================================================
-#from spectrochempy.application import scp
 from spectrochempy.application import SpectroChemPy
 scp = SpectroChemPy()
 scp.initialize()
