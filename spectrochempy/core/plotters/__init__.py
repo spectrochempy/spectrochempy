@@ -34,31 +34,3 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-"""
-Various plotters
-
-"""
-# nothing to import
-# the various methods for plotting are set as attributes for the Dataset
-
-# obviously (it is always possible to import them by specifying the full path
-
-#--------------------------------------
-
-
-# register to dataset
-
-from ..dataset import NDDataset
-
-from .plot1d import plot_1D
-from .plot2d import plot_2D
-from .contour import contour
-
-setattr(NDDataset, 'plot_1D', plot_1D)
-setattr(NDDataset, 'plot_2D', plot_2D)
-setattr(NDDataset, 'contour', contour)
-
-# all (make this function also available as full API functions
-
-__all__ = ['plot_1D', 'plot_2D', 'contour']
-

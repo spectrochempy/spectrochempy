@@ -34,22 +34,17 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+"""
+This package provides classes and functions to define datasets and axis.
+Mathematecal functions, plotting, printing are among their methods.
 
-import logging
-log = logging.getLogger(__name__)
+"""
 
-from logging import WARNING
+from .units import *
 
-def test_logger():
+from .dataset.api import *
+from .processors.api import *
+from .readers.api import *
+from .plotters.api import *
+from .writers.api import *
 
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
-
-    log.setLevel(WARNING)
-
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')

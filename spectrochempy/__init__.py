@@ -34,10 +34,34 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+"""
+The main module of Spectrochempy
+
+The only things made here is to setup a gui PyQt5.QApplication
+
+
+"""
 import sys
 from PyQt5.QtWidgets import QApplication
-
-guiapp = QApplication(sys.argv)
+guiApp = QApplication(sys.argv)
 
 if __name__ == "__main__":
-    from spectrochempy.api import *
+
+    from spectrochempy.api import scp
+    import logging
+    scp.start(
+            reset_config=True,
+            log_level = logging.INFO,
+    )
+
+    # ==============================================================================
+    # Logger
+    # ==============================================================================
+    log = scp.log
+
+    log.info('Name : %s ' % scp.name)
+
+    scp.plotoptions.use_latex = True
+
+    log.info(scp.plotoptions.latex_preamble)
+

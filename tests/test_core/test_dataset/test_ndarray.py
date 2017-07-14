@@ -34,10 +34,6 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-from __future__ import print_function, division, absolute_import, \
-    unicode_literals
-
 from copy import copy, deepcopy
 
 import numpy as np

@@ -41,9 +41,6 @@ are defined.
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import os
 
 import copy
@@ -65,7 +62,6 @@ from numpy.lib.format import write_array, MAGIC_PREFIX
 # -------
 
 import logging
-log = logging.getLogger()
 
 # local import
 # ------------
@@ -78,6 +74,7 @@ from spectrochempy.gui import gui
 
 __all__ = ['NDIO']
 
+log = logging.getLogger(__name__)
 
 class NDIO(HasTraits):
     """

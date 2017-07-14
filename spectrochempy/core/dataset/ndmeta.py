@@ -46,13 +46,10 @@ elements can be accessed by key, but also by attributes, *e.g.*
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 from traitlets import HasTraits, Dict, Bool, default
 
 import logging
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 __all__ = ['Meta']

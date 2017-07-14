@@ -38,7 +38,7 @@ import datetime as datetime
 from warnings import warn
 import numpy as np
 
-from ..dataset import NDDataset
+from ..dataset.api import NDDataset
 from spectrochempy.utils import is_sequence
 
 __all__ = []

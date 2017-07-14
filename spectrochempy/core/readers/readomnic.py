@@ -41,7 +41,8 @@ import os as os
 import numpy as np
 from datetime import datetime, timezone, timedelta
 
-from ..dataset import NDDataset
+from ..dataset.api import NDDataset
+
 from spectrochempy.gui import gui
 
 __all__ = []

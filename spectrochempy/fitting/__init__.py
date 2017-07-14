@@ -34,10 +34,3 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-"""
-This package provides classes and functions to perform spectral fitting.
-
-"""
-
-from .fit import Fit

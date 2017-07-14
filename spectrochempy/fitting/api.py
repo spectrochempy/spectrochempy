@@ -35,21 +35,9 @@
 # =============================================================================
 
 
-import logging
-log = logging.getLogger(__name__)
+"""
+This package provides classes and functions to perform spectral fitting.
 
-from logging import WARNING
+"""
 
-def test_logger():
-
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
-
-    log.setLevel(WARNING)
-
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+from .fit import Fit

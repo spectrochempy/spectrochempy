@@ -74,12 +74,12 @@ class Gui(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    guiapp = QApplication(sys.argv)
 
     ex = Gui()
     print(ex.openFileNameDialog())
 
-    # app.exec_()
+    # guiapp.exec_()
 
 
 

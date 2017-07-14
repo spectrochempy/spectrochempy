@@ -34,8 +34,6 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from __future__ import print_function, division, absolute_import, \
-    unicode_literals
 
 from spectrochempy.api import ur, concatenate, AxisRange
 

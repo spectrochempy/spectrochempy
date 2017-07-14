@@ -38,8 +38,6 @@
 """The core interface to the Pint library
 
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 __all__ = ['Unit', 'ur', 'Quantity', 'Measurement', 'set_nmr_context']
 

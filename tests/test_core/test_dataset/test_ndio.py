@@ -39,8 +39,6 @@
 """ Tests for the ndplugin module
 
 """
-from __future__ import print_function, division, absolute_import, \
-    unicode_literals
 
 from spectrochempy.api import NDDataset
 

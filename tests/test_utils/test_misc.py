@@ -40,9 +40,6 @@
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 from spectrochempy.utils import *
 
 def test_dict_compare():

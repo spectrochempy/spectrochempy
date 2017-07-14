@@ -39,7 +39,7 @@ __all__ = ['Svd']
 
 from traitlets import HasTraits, Instance
 
-from ..core import NDDataset, Axis, Axes
+from ..core.api import NDDataset, Axis, Axes
 
 import numpy as np
 

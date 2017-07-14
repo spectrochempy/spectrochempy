@@ -39,7 +39,7 @@ __all__ = ['Efa']
 import numpy as np
 from scipy.linalg import svdvals
 
-from spectrochempy.core.dataset.nddataset import NDDataset
+from ..core.api import NDDataset
 
 
 class Efa:

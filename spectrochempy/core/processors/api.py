@@ -35,21 +35,24 @@
 # =============================================================================
 
 
-import logging
-log = logging.getLogger(__name__)
+"""In this folder are  stored plugins that will extend the methods of a dataset
 
-from logging import WARNING
+"""
 
-def test_logger():
+# register to dataset
+from ..dataset.api import NDDataset
 
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
+from .autosub import autosub
+from .baseline import basecor
+from .concatenate import concatenate
+from .interpolate import align, interpolate
 
-    log.setLevel(WARNING)
+setattr(NDDataset, 'autosub', autosub)
+setattr(NDDataset, 'align', align)
+setattr(NDDataset, 'concatenate', concatenate)
+setattr(NDDataset, 'basecor', basecor)
 
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+# all (make this function also available as full API functions
+
+__all__ = ['autosub', 'align', 'concatenate', 'basecor', 'interpolate']
+

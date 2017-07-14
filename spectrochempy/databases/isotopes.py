@@ -48,6 +48,8 @@ import pandas as pd
 from pkg_resources import resource_filename
 import re
 from fractions import Fraction
+import logging
+log = logging.getLogger(__name__)
 
 # =============================================================================
 # Third-party imports
@@ -59,7 +61,6 @@ from traitlets import (HasTraits,
 # Local imports
 # =============================================================================
 from spectrochempy.core.units import ur
-from spectrochempy.api import log
 
 # =============================================================================
 # Constants

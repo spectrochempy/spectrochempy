@@ -41,11 +41,8 @@
 # =============================================================================
 # Standard python imports
 # =============================================================================
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import glob
-import logging
 import os
 
 # =============================================================================
@@ -61,13 +58,13 @@ from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 # =============================================================================
 # Local imports
 # =============================================================================
-from ...dataset import Meta
-from ...dataset import Axis, NDDataset
+from ...dataset.api import Meta
+from ...dataset.api import Axis, NDDataset
 from ...units import ur, Quantity
 from .parameter import nmr_valid_meta
 
 import logging
-log = logging.getLogger()
+
 
 # =============================================================================
 # Constants
@@ -77,6 +74,7 @@ FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI",
           "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
+log = logging.getLogger(__name__)
 # =============================================================================
 # Utilities
 # =============================================================================

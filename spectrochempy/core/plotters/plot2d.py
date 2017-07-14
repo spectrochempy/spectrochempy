@@ -41,9 +41,6 @@
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pyplot as plt

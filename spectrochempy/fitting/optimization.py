@@ -38,11 +38,13 @@
 # ===============================================================================
 # imports
 # ===============================================================================
-from __future__ import print_function
+
 import sys
 
 import scipy.optimize
 from warnings import warn
+import logging
+log = logging.getLogger(__name__)
 
 from spectrochempy.fitting.parameters import FitParameters
 

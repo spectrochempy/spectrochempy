@@ -41,9 +41,9 @@
 import numpy as np
 from scipy.optimize import minimize_scalar
 
-from ..dataset import AxisRange
+from spectrochempy.core.api import AxisRange
 
-__all__ = []
+__all__ = ['autosub']
 
 def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     """Automatic subtraction of ref to the dataset to minimise peaks due to ref
@@ -79,18 +79,12 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     Examples
     ---------
 
-    >>> from spectrochempy.api import NDDataset
-    >>> A = NDDataset.load('spec.spg', protocol='omnic')
-    >>> ref = NDDataset.load(app)
+    >>> import os
+    >>> from spectrochempy.api import NDDataset, data_dir
+    >>> path_A = os.path.join(data_dir, 'irdata', 'NH4Y-activation.SPG')
+    >>> A = NDDataset.load(path_A, protocol='omnic')
+    >>> ref = A[0]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
-
-    or
-
-    >>> from spectrochempy.api import NDDataset, autosub
-    >>> A = NDDataset.load('spec.spg', protocol='omnic')
-    >>> ref = NDDataset.load(app)
-    >>> B = autosub(A, ref, [3900., 3700.], [1600., 1500.])
-
 
     """
     # output dataset

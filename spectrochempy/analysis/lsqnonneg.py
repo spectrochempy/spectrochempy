@@ -38,7 +38,7 @@
 
 __all__ = ['lsqnonneg']
 
-from ..core import NDDataset
+from ..core.api import NDDataset
 
 import numpy as np
 

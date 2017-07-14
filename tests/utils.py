@@ -39,10 +39,6 @@
 """
 
 """
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 __all__ = ["assert_equal",
            "assert_array_equal",
            "assert_array_almost_equal",

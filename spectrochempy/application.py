@@ -74,7 +74,7 @@ from spectrochempy.utils.file import get_pkg_data_filename
 # For wild importing using the *, we limit the methods, objetcs, ...
 # that this method exposes
 # ------------------------------------------------------------------------------
-__all__ = ['scp']
+__all__ = []
 
 # ==============================================================================
 # PYTHONPATH
@@ -255,7 +255,7 @@ class SpectroChemPy(Application):
 
         Returns
         -------
-        app : Application.
+        application : Application.
             The application handler.
 
         """
@@ -396,15 +396,15 @@ class SpectroChemPy(Application):
 
         Examples
         --------
-        >>> app = SpectroChemPy()
-        >>> app.initialize()
-        >>> app.start(
+        >>> scp = SpectroChemPy()
+        >>> scp.initialize()
+        >>> scp.start(
         ...    reset_config=True,   # option for restoring default configuration
         ...    debug=True,          # debugging logs
         ...    )
         True
 
-        #>>> print(app.list_data_dir)
+        #>>> print(scp.list_data_dir)
 
         """
 
@@ -477,25 +477,8 @@ class SpectroChemPy(Application):
         self.log.level = self.log_level
         self.log.debug("changed default loglevel to {}".format(change.new))
 
-scp = SpectroChemPy()
-scp.initialize()
 
 #TODO: look at the subcommands capabilities of traitlets
 if __name__ == "__main__":
 
-    scp.start(
-            reset_config=True,
-            log_level = logging.INFO,
-    )
-
-    # ==============================================================================
-    # Logger
-    # ==============================================================================
-    log = scp.log
-
-    log.info('Name : %s ' % scp.name)
-
-    scp.plotoptions.use_latex = True
-
-    log.info(scp.plotoptions.latex_preamble)
-
+    pass

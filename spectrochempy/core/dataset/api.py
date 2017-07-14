@@ -34,22 +34,9 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-import logging
-log = logging.getLogger(__name__)
-
-from logging import WARNING
-
-def test_logger():
-
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
-
-    log.setLevel(WARNING)
-
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+from .ndarray import *
+from .ndaxes import *
+from .nddataset import  *
+from .ndio import *
+from .ndmath import *
+from .ndmeta import *

@@ -46,6 +46,8 @@ import re  # For regular expression search
 import string
 import types
 from collections import UserDict  # This is to be able to create a special dictionary
+import logging
+log = logging.getLogger(__name__)
 
 import numpy as np
 
@@ -57,7 +59,7 @@ from traitlets import (HasTraits, Unicode, Instance, List, observe)
 #==============
 # Local import
 #==============
-from spectrochempy.api import log
+
 
 #=============
 # id_generator

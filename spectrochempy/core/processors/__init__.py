@@ -33,25 +33,3 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
-
-"""In this folder are  stored plugins that will extend the methods of a dataset
-
-"""
-
-# register to dataset
-
-from .autosub import autosub
-from .baseline import basecor
-from .concatenate import concatenate
-from .interpolate import align, interpolate
-
-from ..dataset import NDDataset
-
-setattr(NDDataset, 'autosub', autosub)
-setattr(NDDataset, 'align', align)
-setattr(NDDataset, 'concatenate', concatenate)
-setattr(NDDataset, 'basecor', basecor)
-
-# all (make this function also available as full API functions
-
-__all__ = ['align', 'concatenate', 'autosub', 'basecor', 'interpolate']

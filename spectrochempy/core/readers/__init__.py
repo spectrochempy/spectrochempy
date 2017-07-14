@@ -33,25 +33,3 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
-
-
-# register to dataset
-
-from ..dataset import NDDataset
-
-from .readjdx import read_jdx
-from .readomnic import read_omnic
-from .readdso import read_dso
-from .nmr import read_bruker_nmr
-
-from ..dataset import NDDataset
-setattr(NDDataset, 'read_dso', read_dso)
-setattr(NDDataset, 'read_jdx', read_jdx)
-setattr(NDDataset, 'read_omnic', read_omnic)
-setattr(NDDataset, 'read_spg', read_omnic)
-setattr(NDDataset, 'read_spa', read_omnic)
-setattr(NDDataset, 'read_bruker_nmr', read_bruker_nmr)
-
-# make also the reader available for the API
-__all__ = ['read_dso','read_jdx','read_omnic',
-           'read_bruker_nmr']

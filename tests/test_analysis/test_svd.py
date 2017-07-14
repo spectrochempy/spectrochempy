@@ -38,9 +38,6 @@
 """ Tests for the svd module
 
 """
-from __future__ import print_function, division, absolute_import, \
-    unicode_literals
-
 from spectrochempy.api import Svd
 
 # test svd

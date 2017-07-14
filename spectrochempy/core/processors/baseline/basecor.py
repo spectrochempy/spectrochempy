@@ -42,7 +42,7 @@ import scipy.interpolate
 import numpy as np
 
 
-from ...dataset import AxisRange
+from ...dataset.api import AxisRange
 
 __all__=[]
 

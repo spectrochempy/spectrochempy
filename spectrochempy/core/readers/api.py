@@ -35,21 +35,23 @@
 # =============================================================================
 
 
-import logging
-log = logging.getLogger(__name__)
 
-from logging import WARNING
+# register to dataset
 
-def test_logger():
+from ..dataset.api import NDDataset
 
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
+from .readjdx import read_jdx
+from .readomnic import read_omnic
+from .readdso import read_dso
+from .nmr import read_bruker_nmr
 
-    log.setLevel(WARNING)
+setattr(NDDataset, 'read_dso', read_dso)
+setattr(NDDataset, 'read_jdx', read_jdx)
+setattr(NDDataset, 'read_omnic', read_omnic)
+setattr(NDDataset, 'read_spg', read_omnic)
+setattr(NDDataset, 'read_spa', read_omnic)
+setattr(NDDataset, 'read_bruker_nmr', read_bruker_nmr)
 
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+# make also the reader available for the API
+__all__ = ['read_dso','read_jdx','read_omnic',
+           'read_bruker_nmr']

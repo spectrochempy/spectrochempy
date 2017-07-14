@@ -38,7 +38,7 @@
 import scipy.interpolate
 import numpy as np
 
-from ..dataset import NDDataset
+#from ..dataset import NDDataset
 
 
 __all__ = []

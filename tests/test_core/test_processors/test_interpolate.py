@@ -38,9 +38,6 @@
 """ Tests for the ndplugin module
 
 """
-from __future__ import print_function, division, absolute_import, \
-    unicode_literals
-
 # align
 #-------
 def test_align(ds1, ds2):

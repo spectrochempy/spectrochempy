@@ -41,7 +41,7 @@ import matplotlib.pyplot as plt
 
 from traitlets import HasTraits , Instance
 
-from ..core import NDDataset, Axes, Axis
+from ..core.api import NDDataset, Axes, Axis
 from .svd import Svd
 
 import numpy as np
@@ -49,7 +49,7 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.application import scp
+from spectrochempy.api import scp
 
 _do_not_block = scp.plotoptions.do_not_block
 

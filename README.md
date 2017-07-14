@@ -1,4 +1,4 @@
-# SpectroChemPy 
+ # SpectroChemPy 
 
 *Version: 0.1.alpha*
 

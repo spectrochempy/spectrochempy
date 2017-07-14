@@ -38,10 +38,6 @@
 """
 
 """
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 from spectrochempy.api import ur, set_nmr_context, Quantity
 
 def test_ppm():

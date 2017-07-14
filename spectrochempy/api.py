@@ -103,7 +103,10 @@ def APIref():
 # ==============================================================================
 # matplotlib use directive to set before calling matplotlib backends
 # ==============================================================================
-from spectrochempy.application import scp
+#from spectrochempy.application import scp
+from spectrochempy.application import SpectroChemPy
+scp = SpectroChemPy()
+scp.initialize()
 
 # ==============================================================================
 # API namespace
@@ -114,6 +117,7 @@ release = scp.release
 copyright = scp.copyright
 log = scp.log
 
+# give a user friendly name to the objects containing configurables options
 plotoptions = scp.plotoptions
 options = scp
 
@@ -132,10 +136,10 @@ CRITICAL = logging.CRITICAL
 
 # loading module libraries
 # ------------------------
-from spectrochempy.core import *
-from spectrochempy.databases import *
-from spectrochempy.analysis import *
-from spectrochempy.fitting import *
+from spectrochempy.core.api import *
+from spectrochempy.databases.api import *
+from spectrochempy.analysis.api import *
+from spectrochempy.fitting.api import *
 
 # Useful librairies alias for the end user avoiding to load them
 # --------------------------------------------------------------
@@ -143,7 +147,6 @@ import numpy as np
 import scipy
 
 import matplotlib.pyplot as plt
-
 
 # optional libraries
 try:

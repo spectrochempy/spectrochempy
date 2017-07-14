@@ -25,7 +25,7 @@ from matplotlib.widgets import SpanSelector
 # local import
 
 from ..core.processors.baseline.basecor import basecor
-from ..core import AxisRange
+from ..core.api import AxisRange
                
 def basecorgui(X, display='all'):
     """graphical interface for dataset baseline correction.

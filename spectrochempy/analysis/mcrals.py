@@ -35,13 +35,13 @@
 # =============================================================================
 
 
-
-__all__ = ['mcrals']
-
+import logging
+log = logging.getLogger(__name__)
 import numpy as np
 
-from ..core import NDDataset
-from ..api import log
+from ..core.api import NDDataset
+
+__all__ = ['mcrals']
 
 def mcrals(X, guess, **options):
     '''Performs MCR-ALS of a dataset knowing the initial C or St matrix

@@ -35,9 +35,7 @@
 # =============================================================================
 
 
-from spectrochempy.fitting import Fit
-
-from spectrochempy.api import NDDataset
+from spectrochempy.api import Fit, NDDataset
 import os
 import pytest
 from tests.utils import assert_approx_equal

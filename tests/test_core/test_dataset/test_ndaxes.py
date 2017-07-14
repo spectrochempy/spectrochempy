@@ -412,7 +412,7 @@ def test_unit_conversion_operators(operation, result_units):
     assert_equal_units(combined.units, result_units)
 
 
-from spectrochempy.api import AxisRange,  AxisRangeError
+from spectrochempy.core.api import AxisRange,  AxisRangeError
 from spectrochempy.utils.traittypes import Range
 
 from traitlets import HasTraits

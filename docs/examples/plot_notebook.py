@@ -29,7 +29,6 @@ and script license continued by the import modules instructions.
 
 # Code source: Oscar Najera
 # License: BSD 3 clause
-from __future__ import division, absolute_import, print_function
 
 import numpy as np
 import matplotlib.pyplot as plt

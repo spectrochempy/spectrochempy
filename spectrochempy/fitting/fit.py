@@ -39,7 +39,6 @@
 
 
 """
-from __future__ import print_function, division
 
 # ===============================================================================
 #  general imports
@@ -51,6 +50,7 @@ import sys
 import re
 import numpy as np
 from warnings import warn
+import logging
 
 # IPython
 from IPython import display
@@ -63,9 +63,11 @@ from spectrochempy.fitting.parameters import ParameterScript
 from spectrochempy.fitting.models import getmodel
 from spectrochempy.fitting.optimization import optimize
 from spectrochempy.utils.misc import htmldoc
-from spectrochempy.api import log
+
 
 __all__ = ['Fit']
+
+log = logging.getLogger(__name__)
 
 # *******************************************************************************
 # Fit : main object to handle a fit

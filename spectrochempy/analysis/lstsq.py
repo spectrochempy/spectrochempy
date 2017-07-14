@@ -40,7 +40,7 @@ __all__ = ['lstsq']
 
 import numpy as np
 
-from ..core import NDDataset
+from ..core.api import NDDataset
 
 def lstsq(A, B, rcond = -1):
     """

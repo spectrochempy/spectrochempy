@@ -15,9 +15,6 @@
 """ This module contains functions to determine where configuration and
 data/cache files used by Spectrochempy should be placed."""
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 __all__ = ['File',
            'get_log_dir',
            'get_config_dir',

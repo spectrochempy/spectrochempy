@@ -34,22 +34,31 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+"""
+Various plotters
 
-import logging
-log = logging.getLogger(__name__)
+"""
+# nothing to import
+# the various methods for plotting are set as attributes for the Dataset
 
-from logging import WARNING
+# obviously (it is always possible to import them by specifying the full path
 
-def test_logger():
+#--------------------------------------
 
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
 
-    log.setLevel(WARNING)
+# register to dataset
 
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+from ..dataset.api import NDDataset
+
+from .plot1d import plot_1D
+from .plot2d import plot_2D
+from .contour import contour
+
+setattr(NDDataset, 'plot_1D', plot_1D)
+setattr(NDDataset, 'plot_2D', plot_2D)
+setattr(NDDataset, 'contour', contour)
+
+# all (make this function also available as full API functions
+
+__all__ = ['plot_1D', 'plot_2D', 'contour']
+

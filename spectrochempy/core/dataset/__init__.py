@@ -34,12 +34,4 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
-from spectrochempy.core.dataset.ndarray import *
-from spectrochempy.core.dataset.ndaxes import *
-from spectrochempy.core.dataset.nddataset import  *
-from spectrochempy.core.dataset.ndio import *
-from spectrochempy.core.dataset.ndmath import *
-from spectrochempy.core.dataset.ndmeta import *

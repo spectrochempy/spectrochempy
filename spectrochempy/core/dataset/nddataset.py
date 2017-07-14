@@ -43,8 +43,6 @@ This module implements the base `NDDataset` class.
 # =============================================================================
 # Standard python imports
 # =============================================================================
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 import copy
 import itertools
@@ -90,7 +88,7 @@ __all__ = ['NDDataset',
            'NDDatasetWarning'
           ]
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 # =============================================================================
 # numpy print options
@@ -120,7 +118,7 @@ class NDDataset(
                 NDMath,
                 NDArray,
                 ):
-    """The main N-dimensional dataset class used by |app|.
+    """The main N-dimensional dataset class used by |scp|.
 
     Parameters
     -----------
@@ -152,7 +150,7 @@ class NDDataset(
 
         standard deviation on the `data`. Handling of uncertainty use a fork of the
         `uncertainties <http://pythonhosted.org/uncertainties/>`_
-        package (BSD Licence) which is embedded in |app|.
+        package (BSD Licence) which is embedded in |scp|.
 
     units : an instance of :class:`~spectrochempy.core.units.Unit` or string, optional
 
@@ -160,7 +158,7 @@ class NDDataset(
         `units` is set to the units of the `data`; if a `unit` is also explicitly
         provided an error is raised. Handling of `units` use a fork of the
         `pint <https://pint.readthedocs.org/en/0.6>`_ (BSD Licence) package
-        which is embedded in |app|)
+        which is embedded in |scp|)
 
     meta : :class:`~spectrochempy.core.dataset.ndmeta.Meta` object, optional
 

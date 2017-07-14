@@ -34,14 +34,10 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-
 """
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
 from spectrochempy.api import Meta
 from ...utils import raises

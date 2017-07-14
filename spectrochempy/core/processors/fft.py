@@ -39,10 +39,9 @@
 # =============================================================================
 # Standard python imports
 # =============================================================================
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import logging
+log = logging.getLogger(__name__)
+
 
 # =============================================================================
 # Third party imports
@@ -62,11 +61,6 @@ epsilon = np.finfo(float).eps
 # =============================================================================
 # NOTE: if these parameters are not set, the name of the module is taken
 __callable__ = "ft"
-
-# =============================================================================
-# Constants
-# =============================================================================
-from spectrochempy.api import log
 
 # =============================================================================
 # generic transform function

@@ -54,7 +54,7 @@ from time import time
 from sys import stdout
 
 import logging
-logger = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class nnmf:

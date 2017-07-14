@@ -43,8 +43,6 @@ This module implements the base `NDDataset` class.
 # =============================================================================
 # Standard python imports
 # =============================================================================
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 import copy
 import functools
 import logging
@@ -69,7 +67,7 @@ from .ndarray import NDArray
 
 __all__ =['NDMath', 'set_operators']
 
-logger = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class NDMath(object):

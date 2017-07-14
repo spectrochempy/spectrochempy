@@ -38,9 +38,6 @@
 """ Tests for the PCA module
 
 """
-from __future__ import print_function, division, absolute_import, \
-    unicode_literals
-
 from spectrochempy.api import Pca
 
 # test pca
