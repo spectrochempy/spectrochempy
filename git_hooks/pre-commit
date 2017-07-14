@@ -10,6 +10,9 @@
 
 
 # to make it work with SourceTree (assuming anaconda is used)
+# probably need to change this to account for windows developper..
+#TODO: activate in windows?
+
 source ~/.bash_profile
 
 # to make it work with matplotlib/latex
