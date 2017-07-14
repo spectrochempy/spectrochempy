@@ -34,4 +34,7 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-#from .gui import run
+# create an instance
+from .gui import Gui
+gui = Gui()
+

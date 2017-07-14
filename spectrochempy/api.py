@@ -43,7 +43,7 @@ Examples
 ---------
 
     >>> from spectrochempy.api import NDDataset
-
+    >>> mynewdataset = NDDataset()   # create an empty dataset
 
 """
 # python imports
@@ -72,7 +72,7 @@ __all__ = [ ### Helpers
              'copyright', 'release', 'version',
 
             ### Database
-             'Isotopes',
+            'Isotopes',
 
             ### Analysis and Fit
              'Efa', 'Fit', 'Pca', 'Svd', 'align', 'autosub', 'basecor',

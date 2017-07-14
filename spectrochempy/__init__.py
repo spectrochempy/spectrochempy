@@ -34,6 +34,10 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+import sys
+from PyQt5.QtWidgets import QApplication
+
+guiapp = QApplication(sys.argv)
 
 if __name__ == "__main__":
     from spectrochempy.api import *

@@ -63,4 +63,7 @@ def test_save_and_load(IR_source_1):
     assert_array_equal(A.data,B.data)
     os.remove('tartempion.scp')
 
+    #B.save()
+
+    #C=NDDataset.load()
 

@@ -50,8 +50,6 @@ import copy
 
 from traitlets import Unicode, Bool, HasTraits
 
-#from pyface.api import FileDialog, OK
-
 import json
 import datetime
 import numpy as np
@@ -63,18 +61,20 @@ from numpy.compat import asbytes, asstr, asbytes_nested, bytes, \
 from numpy.lib.npyio import zipfile_factory, NpzFile
 from numpy.lib.format import write_array, MAGIC_PREFIX
 
-# local import
-
-
-from spectrochempy.core.dataset.ndaxes import Axes, Axis
-from spectrochempy.core.units import Unit
-
-
-import spectrochempy
+# logging
+# -------
 
 import logging
 log = logging.getLogger()
 
+# local import
+# ------------
+
+import spectrochempy
+from spectrochempy.core.dataset.ndaxes import Axes, Axis
+from spectrochempy.core.units import Unit
+
+from spectrochempy.gui import gui
 
 __all__ = ['NDIO']
 
@@ -100,131 +100,33 @@ class NDIO(HasTraits):
         pass  # preferences_manager.root.datadir = value
         # preferences_manager.preferences.save()
 
-
     ## BASIC READER ##
     ##################
 
-    @classmethod
-    def load(cls, path='', protocol='app'):
-        """
-        Load a dataset object saved as a pickle file (``.app`` file).
-        It's a class method, that can be used directly on the class,
-        without prior opening of a class instance.
-
-        Parameters
-        ----------
-        path : `str`
-            The path to the file to be read
-
-        kwargs : optional keyword parameters
-            Any additional keyword to pass to the actual reader
-
-        Examples
-        --------
-
-        >>> from spectrochempy.api import NDDataset
-        >>> mydataset = NDDataset.load(app)
-        >>> print(mydataset) # doctest: +ELLIPSIS
-        <BLANKLINE>
-        ...
-
-
-        Notes
-        -----
-        adapted from :func:`numpy.load`
-
-        See Also
-        --------
-        :meth:`read`
-
-        """
-
-        if protocol not in ['app']:
-            return cls.read(path, protocol=protocol)
-
-        # open file dialog box
-
-        filename = path
-        if not path:
-            dlg = FileDialog(action='open',
-        wildcard='Spectrochempy (*.app)|*.app|Sappy --DEPRECATED (*.sap)|*.sap')
-            if dlg.open() == OK:
-                filename = dlg.path
-            else:
-                return None
-
-        # TODO: file open error handling
-        fid = open(filename, 'rb')
-
-        _ZIP_PREFIX = asbytes('PK\x03\x04')
-        N = len(MAGIC_PREFIX)
-        magic = fid.read(N)
-        fid.seek(-N, 1)  # back-up
-        if magic.startswith(_ZIP_PREFIX):
-
-            # get zip file
-            obj = NpzFile(fid, own_fid=True)
-
-            # interpret
-            ndim = obj["data"].ndim
-            axes = None
-            new = cls()
-
-            for key, val in obj.items():
-                if key.startswith('axis'):
-                    if not axes:
-                        axes = [Axis() for _ in range(ndim)]
-                    els = key.split('_')
-                    setattr(axes[int(els[1])], "_" + els[2], val)
-                elif key == "pars.json":
-                    pars = json.loads(asstr(val))
-                else:
-                    setattr(new, "_" + key, val)
-            if axes:
-                new.axes = axes
-
-            def setattributes(clss, key, val):
-                # utility function to set the attributes
-                if key in ['modified', 'date']:
-                    val = datetime.datetime.fromtimestamp(val)
-                    setattr(clss, "_" + key, val)
-                elif key == 'meta':
-                    clss.meta.update(val)
-                elif key in ['units']:
-                    setattr(clss, key, val)
-                else:
-                    setattr(clss, "_" + key, val)
-
-            for key, val in pars.items():
-
-                if key.startswith('axis'):
-
-                    els = key.split('_')
-                    setattributes(axes[int(els[1])], els[2], val)
-
-                else:
-
-                    setattributes(new, key, val)
-
-            return new
-
-        else:
-            raise IOError("Failed to load file %s " % filename)
-            # finally:
-            #    fid.close()
-
-    def save(self, path=''):
+    def save(self, path='', compress=True, directory=None):
         """
         Save the :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-        (default extension: ``.app`` ).
+        (default extension: ``.scp`` ).
 
         Parameters
         ----------
         path : `str`
             The path to the file to be save
 
-        compress : `bool`
-            Whether or not to compress the saved file (default:`True`)
+        compress : `bool` [optional, default=True]
+            Whether or not to compress the saved file
+
+        dir : `str` [optional, default=True]
+            It specified, the given path (generally a file name) fill be
+            appended to the ``dir``.
+
+        Examples
+        ---------
+        Read some experimental data and then save in our proprietary format **scp**
+
+        >>> from spectrochempy.api import NDDataset, data_dir
+        >>> mydataset = NDDataset.read_omnic('NH4Y-activation.SPG', directory=data_dir
+        >>> mydataset.save('mydataset.scp', directory=data_dir)
 
         Notes
         -----
@@ -240,12 +142,10 @@ class NDIO(HasTraits):
         filename = path
 
         if not path:
-            dlg = FileDialog(action='save as',
-                             wildcard='Spectrochempy (*.app)|*.app')
-            if dlg.open() == OK:
-                filename = dlg.path
-            else:
-                return None
+            filename = gui.saveFileDialog()
+
+        if not filename:
+            raise IOError('no filename provided!')
 
         # Import is postponed to here since zipfile depends on gzip, an optional
         # component of the so-called standard library.
@@ -253,8 +153,8 @@ class NDIO(HasTraits):
         # Import deferred for startup time improvement
         import tempfile
 
-        if not filename.endswith('.app'):
-            file = filename + '.app'
+        if not filename.endswith('.scp'):
+            file = filename + '.scp'
 
         compression = zipfile.ZIP_DEFLATED
         zipf = zipfile_factory(filename, mode="w", compression=compression)
@@ -318,6 +218,121 @@ class NDIO(HasTraits):
         zipf.close()
 
     @classmethod
+    def load(cls, path='', protocol='scp', directory=None):
+        """
+        Load a dataset object saved as a pickle file (``.scp`` file).
+        It's a class method, that can be used directly on the class,
+        without prior opening of a class instance.
+
+        Parameters
+        ----------
+        path : `str`
+            The path to the file to be read.
+
+        kwargs : optional keyword parameters.
+            Any additional keyword to pass to the actual reader.
+
+        Examples
+        --------
+
+        >>> from spectrochempy.api import NDDataset,data_dir
+        >>> mydataset = NDDataset.load('mydataset.scp', dir=data_dir)
+        >>> print(mydataset)                  # doctest: +ELLIPSIS
+        <BLANKLINE>
+        ...
+
+
+        Notes
+        -----
+        adapted from :func:`numpy.load`
+
+        See Also
+        --------
+        :meth:`read`
+
+        """
+
+        if protocol not in ['scp']:
+            return cls.read(path, protocol=protocol)
+
+        # open file dialog box
+
+        filename = path
+        if not path:
+            filename = gui.openFileNameDialog(directory=directory)
+            if not filename:
+                raise IOError('no filename provided!')
+        else:
+            try:
+                if directory is None:
+                    fid = open(filename, 'rb')
+                else:
+                    # cast to  file in the testdata directory
+                    #TODO: add possibility to search in several directory
+                    fid = open(os.path.expander(os.path.join(directory, filename)))
+            except:
+                raise IOError('no valid filename provided')
+                return None
+
+        _ZIP_PREFIX = asbytes('PK\x03\x04')
+        N = len(MAGIC_PREFIX)
+        magic = fid.read(N)
+        fid.seek(-N, 1)  # back-up
+        if magic.startswith(_ZIP_PREFIX):
+
+            # get zip file
+            obj = NpzFile(fid, own_fid=True)
+
+            # interpret
+            ndim = obj["data"].ndim
+            axes = None
+            new = cls()
+
+            for key, val in obj.items():
+                if key.startswith('axis'):
+                    if not axes:
+                        axes = [Axis() for _ in range(ndim)]
+                    els = key.split('_')
+                    setattr(axes[int(els[1])], "_" + els[2], val)
+                elif key == "pars.json":
+                    pars = json.loads(asstr(val))
+                else:
+                    setattr(new, "_" + key, val)
+            if axes:
+                new.axes = axes
+
+            def setattributes(clss, key, val):
+                # utility function to set the attributes
+                if key in ['modified', 'date']:
+                    val = datetime.datetime.fromtimestamp(val)
+                    setattr(clss, "_" + key, val)
+                elif key == 'meta':
+                    clss.meta.update(val)
+                elif key in ['units']:
+                    setattr(clss, key, val)
+                else:
+                    setattr(clss, "_" + key, val)
+
+            for key, val in pars.items():
+
+                if key.startswith('axis'):
+
+                    els = key.split('_')
+                    setattributes(axes[int(els[1])], els[2], val)
+
+                else:
+
+                    setattributes(new, key, val)
+
+            return new
+
+        else:
+            raise IOError("Failed to load file %s " % filename)
+            # finally:
+            #    fid.close()
+
+
+    @classmethod
     def read(self, path, **kwargs):
         """
         Generic read function. It's like load a class method.
@@ -352,7 +367,7 @@ class NDIO(HasTraits):
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
-        if protocol == 'app':
+        if protocol == 'scp':
             # default reader
             return self.load(path)
 
@@ -366,7 +381,7 @@ class NDIO(HasTraits):
         except:
             raise ValueError('The specified importer '
                              'for protocol `{}` was not found!'.format(
-                protocol))
+                    protocol))
 
     def write(self, path, **kwargs):
         """
@@ -399,7 +414,7 @@ class NDIO(HasTraits):
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
-        if protocol == 'app':
+        if protocol == 'scp':
             return self.save(path)
 
         # find the adequate reader
@@ -414,7 +429,7 @@ class NDIO(HasTraits):
 
             raise ValueError('The specified writter '
                              'for protocol `{}` was not found!'.format(
-                protocol))
+                    protocol))
 
     def plot(self,
              ax=None,
@@ -511,9 +526,9 @@ class NDIO(HasTraits):
         try:
             _plotter = getattr(self, 'plot_{}'.format(kind))
 
-        except: # no plotter found
+        except:  # no plotter found
             log.error('The specified plotter '
-                             'for kind `{}` was not found!'.format(kind))
+                      'for kind `{}` was not found!'.format(kind))
             return None
 
         # Execute the plotter
@@ -587,7 +602,7 @@ class NDIO(HasTraits):
 
         elif self.ndim == 2:
 
-            kwargs['flat'] = True   # else it will be stacked plot
+            kwargs['flat'] = True  # else it will be stacked plot
             return self.plot_3D(ax=ax, **kwargs)
 
         elif self.ndim == 3:
@@ -597,7 +612,6 @@ class NDIO(HasTraits):
         else:
             log.error('Cannot guess an adequate plotter. I did nothing!')
             return False
-
 
     def show(self):
         """
@@ -631,10 +645,9 @@ class NDIO(HasTraits):
 
         return state
 
-
 # =============================================================================
 # Modify the doc to include Traits
 # =============================================================================
-#from spectrochempy.utils import create_traitsdoc
+# from spectrochempy.utils import create_traitsdoc
 
-#create_traitsdoc(NDIO)
+# create_traitsdoc(NDIO)

@@ -1,1 +1,1 @@
-from .isotopes import *
+from .isotopes import Isotopes

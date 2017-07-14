@@ -42,6 +42,7 @@ import numpy as np
 from datetime import datetime, timezone, timedelta
 
 from ..dataset import NDDataset
+from spectrochempy.gui import gui
 
 __all__ = []
 
@@ -64,15 +65,11 @@ def readbtext(f, pos):
 def readfilename(filename):
 
     if not filename:
-        dlg = FileDialog(action='open',
-                         wildcard='OMNIC file (*.spg)|*.spg'
-                                  '|OMNIC file (*.spa)|*.spa'
-                                  '|All files (*)|*')
-        if dlg.open() == OK:
-            _, extension = os.path.splitext(dlg.path)
-            return dlg.paths, extension
-        else:
-            return None
+        filename = gui.openFileNameDialog(filters='OMNIC file (*.spg);;'
+                              'OMNIC file (*.spa)')
+
+        if not filename:
+            raise IOError('no filename provided!')
 
     # filename passed
     _, extension = os.path.splitext(filename)

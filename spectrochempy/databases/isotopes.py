@@ -135,12 +135,18 @@ class Isotopes(HasTraits):
 
     >>> isotope = Isotopes('129Xe')
     >>> isotope.name
+    'xenon'
     >>> isotope.spin
+    Fraction(1, 2)
     >>> isotope.symbol
+    'Xe'
     >>> isotope.nucleus = '27Al' # we change the isotope`inplace`
     >>> isotope.name
+    'aluminium'
     >>> isotope.spin
+    Fraction(5, 2)
     >>> isotope.symbol
+    'Al'
 
 
     References
