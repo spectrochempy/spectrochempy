@@ -46,7 +46,7 @@ Licence ???
 """
 #TODO: create  tests
 
-__all__ = ['nnmf']
+__all__ = ['Nnmf']
 
 import numpy as np
 from numpy.linalg import norm
@@ -57,7 +57,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class nnmf:
+class Nnmf:
 
     def __init__(self, X, Ci, Sti, **options):
         """

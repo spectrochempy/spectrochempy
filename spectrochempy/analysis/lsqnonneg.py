@@ -36,13 +36,13 @@
 
 #todo: create tests
 
-__all__ = ['lsqnonneg']
+__all__ = ['Lsqnonneg']
 
 from ..core.api import NDDataset
 
 import numpy as np
 
-def lsqnonneg(C, d, x0=None, tol=None, itmax_factor=3):
+def Lsqnonneg(C, d, x0=None, tol=None, itmax_factor=3):
 
     '''Linear least squares with nonnegativity constraints
     (x, resnorm, residual) = lsqnonneg(C,d)

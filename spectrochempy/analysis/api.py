@@ -44,5 +44,30 @@ from .lsqnonneg import *
 from .lstsq import *
 from .mcrals import *
 from .nnmf import *
-from .pca import Pca
-from .svd import Svd
+from .pca import *
+from .svd import *
+
+_all = []
+
+from .efa import __all__
+_all += __all__
+
+from .lsqnonneg import __all__
+_all += __all__
+
+from .lstsq import __all__
+_all += __all__
+
+from .mcrals import __all__
+_all += __all__
+
+from .nnmf import __all__
+_all += __all__
+
+from .pca import __all__
+_all += __all__
+
+from .svd import __all__
+_all += __all__
+
+__all__ = _all

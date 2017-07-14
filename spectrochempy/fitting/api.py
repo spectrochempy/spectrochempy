@@ -41,3 +41,5 @@ This package provides classes and functions to perform spectral fitting.
 """
 
 from .fit import Fit
+
+__all__ = ['Fit']

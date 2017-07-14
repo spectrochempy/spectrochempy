@@ -35,13 +35,13 @@
 # =============================================================================
 
 
-__all__ = ['iris']
+__all__ = ['Iris']
 
 import numpy as np
 
 from scipy import optimize
 
-class iris:   
+class Iris:
     '''Infrared inversion soectroscopy'''
 
     def __init__(self, X, invertParam):

@@ -52,13 +52,13 @@ from ..dataset.api import NDDataset
 
 from .plot1d import plot_1D
 from .plot2d import plot_2D
-from .contour import contour
+from .plot3d import plot_3D
 
 setattr(NDDataset, 'plot_1D', plot_1D)
 setattr(NDDataset, 'plot_2D', plot_2D)
-setattr(NDDataset, 'contour', contour)
+setattr(NDDataset, 'plot_3D', plot_3D)
 
 # all (make this function also available as full API functions
 
-__all__ = ['plot_1D', 'plot_2D', 'contour']
+__all__ = ['plot_1D', 'plot_2D', 'plot_3D']
 

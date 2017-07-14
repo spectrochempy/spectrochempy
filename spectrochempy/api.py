@@ -64,33 +64,16 @@ __all__ = [ ### Helpers
              'APIref', 'data_dir', 'list_data_dir',
              'options', 'plotoptions',
 
-            ### Data
-             'NDDataset', 'Axes', 'Axis', 'AxisRange', 'Meta',
-             'ur', 'Quantity', 'Measurement', 'set_nmr_context',
-
             ### Info
              'copyright', 'release', 'version',
-
-            ### Database
-            'Isotopes',
-
-            ### Analysis and Fit
-             'Efa', 'Fit', 'Pca', 'Svd', 'align', 'autosub', 'basecor',
-             'concatenate', 'interpolate', 'lsqnonneg', 'lstsq', 'mcrals', 'nnmf',
-
-            ### View
-             'plot_1D', 'plot_2D', 'contour',
-
-            ### import/export
-             'read_dso', 'read_jdx', 'read_omnic', 'read_bruker_nmr',
-             'write_jdx',
 
             ### imported library
              'np', 'plt', 'scipy'
 
+            ### methods and objects from other packages will be added
+            ### later on this module (see below)
+
           ]
-
-
 
 def APIref():
     """
@@ -135,10 +118,25 @@ CRITICAL = logging.CRITICAL
 
 # loading module libraries
 # ------------------------
+# here we also construct the __all__ list automatically
+
+# cores
 from spectrochempy.core.api import *
+from spectrochempy.core import api
+__all__ += api.__all__
+
+# databases
 from spectrochempy.databases.api import *
+from spectrochempy.databases import api
+__all__ += api.__all__
+
 from spectrochempy.analysis.api import *
+from spectrochempy.analysis import api
+__all__ += api.__all__
+
 from spectrochempy.fitting.api import *
+from spectrochempy.fitting import api
+__all__ += api.__all__
 
 # Useful librairies alias for the end user avoiding to load them
 # --------------------------------------------------------------

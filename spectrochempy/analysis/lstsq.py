@@ -36,13 +36,13 @@
 
 #TODO: create tests
 
-__all__ = ['lstsq']
+__all__ = ['Lstsq']
 
 import numpy as np
 
 from ..core.api import NDDataset
 
-def lstsq(A, B, rcond = -1):
+def Lstsq(A, B, rcond = -1):
     """
     Extension of numpy.linag.lstsq to hddatasets
     Return the least-squares solution to the linear equation
