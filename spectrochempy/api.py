@@ -120,20 +120,26 @@ CRITICAL = logging.CRITICAL
 # ------------------------
 # here we also construct the __all__ list automatically
 
-# cores
+# core
+#------
 from spectrochempy.core.api import *
 from spectrochempy.core import api
 __all__ += api.__all__
 
 # databases
+#----------
 from spectrochempy.databases.api import *
 from spectrochempy.databases import api
 __all__ += api.__all__
 
+# analysis
+#---------
 from spectrochempy.analysis.api import *
 from spectrochempy.analysis import api
 __all__ += api.__all__
 
+# fitting
+#--------
 from spectrochempy.fitting.api import *
 from spectrochempy.fitting import api
 __all__ += api.__all__

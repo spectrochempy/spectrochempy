@@ -41,8 +41,6 @@
 
 __all__ = ['Unit', 'ur', 'Quantity', 'Measurement', 'set_nmr_context']
 
-__doctest_skip__ = ['*']
-
 from warnings import warn
 
 from pint import set_application_registry

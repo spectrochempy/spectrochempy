@@ -47,6 +47,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
+from spectrochempy.api import plotoptions as options
 
 __all__ = []
 
@@ -67,9 +68,6 @@ def plot_2D(data, **kwargs):
 
 
     """
-    # avoid circular call to this module
-    from spectrochempy.api import plotoptions as options
-
     # where to plot?
     ax = data.ax
 

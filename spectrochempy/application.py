@@ -71,8 +71,7 @@ from spectrochempy.core.writers.writersoptions import WriteOptions
 from spectrochempy.core.processors.processorsoptions import ProcessOptions
 from spectrochempy.utils.file import get_pkg_data_filename
 
-# For wild importing using the *, we limit the methods, objetcs, ...
-# that this method exposes
+# no wild import with this class
 # ------------------------------------------------------------------------------
 __all__ = []
 
@@ -109,6 +108,8 @@ class DataDir(Configurable):
     data_dir = Unicode(help="Set a data directory where to look for data").tag(
             config=True)
 
+    _testdata_dir = Unicode()
+
     def listing(self):
         """
         Create a `str` representing a listing of the data repertory.
@@ -142,8 +143,13 @@ class DataDir(Configurable):
 
     @default('data_dir')
     def _get_data_dir_default(self):
-        # look for the testdata path in package tests
-        return get_pkg_data_dir('testdata','tests')
+        # return the testdata dir by default
+        return self._testdata_dir
+
+    @default('_testdata_dir')
+    def _get__testdata_dir_default(self):
+        # the testdata path in package tests
+        return get_pkg_data_dir('testdata', 'tests')
 
 
 # ==============================================================================

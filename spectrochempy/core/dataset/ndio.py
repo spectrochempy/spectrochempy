@@ -41,27 +41,28 @@ are defined.
 
 """
 
-import os
+# Python and third parties imports
+#----------------------------------
 
+import os
 import copy
+import logging
+import json
+import datetime
+import warnings
 
 from traitlets import Unicode, Bool, HasTraits
 
-import json
-import datetime
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.pyplot import Figure
+
+import numpy as np
 from numpy.compat import asbytes, asstr, asbytes_nested, bytes, \
     basestring, unicode
 from numpy.lib.npyio import zipfile_factory, NpzFile
 from numpy.lib.format import write_array, MAGIC_PREFIX
 
-# logging
-# -------
-
-import logging
 
 # local import
 # ------------
@@ -71,10 +72,19 @@ from spectrochempy.core.dataset.ndaxes import Axes, Axis
 from spectrochempy.core.units import Unit
 
 from spectrochempy.gui import gui
+from spectrochempy.api import plotoptions
+from spectrochempy.api import options
+
+# Constants
+# ---------
 
 __all__ = ['NDIO']
 
 log = logging.getLogger(__name__)
+
+# ==============================================================================
+# Class NDIO to handle I/O of datasets
+# ==============================================================================
 
 class NDIO(HasTraits):
     """
@@ -86,21 +96,14 @@ class NDIO(HasTraits):
 
     """
 
-    def _get_datadir(self):
-        """`str`- Default directory for i/o operations.
+    # --------------------------------------------------------------------------
+    # Generic save function
+    # --------------------------------------------------------------------------
 
-        """
-        datadir = self.preferences.datadir
-        return datadir
-
-    def _set_datadir(self, value):
-        pass  # preferences_manager.root.datadir = value
-        # preferences_manager.preferences.save()
-
-    ## BASIC READER ##
-    ##################
-
-    def save(self, path='', compress=True, directory=None):
+    def save(self, path='',
+             compress=False,
+             **kwargs
+             ):
         """
         Save the :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         (default extension: ``.scp`` ).
@@ -110,10 +113,7 @@ class NDIO(HasTraits):
         path : `str`
             The path to the file to be save
 
-        compress : `bool` [optional, default=True]
-            Whether or not to compress the saved file
-
-        dir : `str` [optional, default=True]
+        directory : `str` [optional, default=True]
             It specified, the given path (generally a file name) fill be
             appended to the ``dir``.
 
@@ -122,7 +122,7 @@ class NDIO(HasTraits):
         Read some experimental data and then save in our proprietary format **scp**
 
         >>> from spectrochempy.api import NDDataset, data_dir
-        >>> mydataset = NDDataset.read_omnic('NH4Y-activation.SPG', directory=data_dir
+        >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data_dir)
         >>> mydataset.save('mydataset.scp', directory=data_dir)
 
         Notes
@@ -135,6 +135,8 @@ class NDIO(HasTraits):
 
         """
 
+        directory = kwargs.get("directory", options.data_dir)
+
         # open file dialog box
         filename = path
 
@@ -144,17 +146,27 @@ class NDIO(HasTraits):
         if not filename:
             raise IOError('no filename provided!')
 
+        if not filename.endswith('.scp'):
+            filename = filename + '.scp'
+
+
+        if not os.path.exists(directory):
+            raise IOError("directory doesn't exists!")
+
+        if os.path.isdir(directory):
+            filename = os.path.expanduser(os.path.join(directory, filename))
+        else:
+            warnings.warn('Provided directory is a file, '
+                          'so we use its parent directory')
+            filename = os.path.join(os.path.dirname(directory), filename)
+
         # Import is postponed to here since zipfile depends on gzip, an optional
         # component of the so-called standard library.
         import zipfile
         # Import deferred for startup time improvement
         import tempfile
 
-        if not filename.endswith('.scp'):
-            file = filename + '.scp'
-
-        compression = zipfile.ZIP_DEFLATED
-        zipf = zipfile_factory(filename, mode="w", compression=compression)
+        zipf = zipfile_factory(filename, mode="w", compression=zipfile.ZIP_DEFLATED)
 
         # Stage arrays in a temporary file on disk, before writing to zip.
         fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.tmp')
@@ -215,7 +227,11 @@ class NDIO(HasTraits):
         zipf.close()
 
     @classmethod
-    def load(cls, path='', protocol='scp', directory=None):
+    def load(cls,
+             path='',
+             protocol='scp',
+             **kwargs
+             ):
         """
         Load a dataset object saved as a pickle file (``.scp`` file).
         It's a class method, that can be used directly on the class,
@@ -226,6 +242,12 @@ class NDIO(HasTraits):
         path : `str`
             The path to the file to be read.
 
+        protocol : `str` [optional, default='scp']
+            The default type for saving,
+
+        directory : `str` [optional, default=`data_dir`]
+            The directory from where to load hhe file
+
         kwargs : optional keyword parameters.
             Any additional keyword to pass to the actual reader.
 
@@ -233,7 +255,16 @@ class NDIO(HasTraits):
         --------
 
         >>> from spectrochempy.api import NDDataset,data_dir
-        >>> mydataset = NDDataset.load('mydataset.scp', dir=data_dir)
+        >>> mydataset = NDDataset.load('mydataset.scp', directory=data_dir)
+        >>> print(mydataset)                  # doctest: +ELLIPSIS
+        <BLANKLINE>
+        ...
+
+        by default, directory for saving is the `data_dir`.
+        So the same thing can be done simply by:
+
+        >>> from spectrochempy.api import NDDataset,data_dir
+        >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
         ...
@@ -255,18 +286,19 @@ class NDIO(HasTraits):
         # open file dialog box
 
         filename = path
+        directory = kwargs.get("directory", options.data_dir)
         if not path:
             filename = gui.openFileNameDialog(directory=directory)
             if not filename:
                 raise IOError('no filename provided!')
         else:
             try:
-                if directory is None:
+                if not directory:
                     fid = open(filename, 'rb')
                 else:
                     # cast to  file in the testdata directory
                     #TODO: add possibility to search in several directory
-                    fid = open(os.path.expander(os.path.join(directory, filename)))
+                    fid = open(os.path.expanduser(os.path.join(directory, filename)), 'rb')
             except:
                 raise IOError('no valid filename provided')
                 return None
@@ -428,6 +460,10 @@ class NDIO(HasTraits):
                              'for protocol `{}` was not found!'.format(
                     protocol))
 
+    #--------------------------------------------------------------------------
+    # generic plotter
+    #--------------------------------------------------------------------------
+
     def plot(self,
              ax=None,
              figsize=None,
@@ -466,52 +502,12 @@ class NDIO(HasTraits):
 
         log.debug('Standard Plot...')
 
-        # -------------------------------------------------------------------------
-        # setup figure and axes
-        # -------------------------------------------------------------------------
-
-        fig = kwargs.pop('fig', None)
-        if isinstance(fig, int):
-            if plt.fignum_exists(fig):
-                self.fig = plt.figure(fig)
-                log.debug('get the existing figure %d' % fig)
-
-            else:  # we need to create a new one
-                fig = None
-
-        if fig is None:
-
-            # when using matplotlib inline
-            # dpi is the savefig.dpi so we should set it here
-
-            figsize = mpl.rcParams['figure.figsize'] = \
-                kwargs.pop('figsize', mpl.rcParams['figure.figsize'])
-            fontsize = mpl.rcParams['font.size'] = \
-                kwargs.pop('fontsize', mpl.rcParams['font.size'])
-            mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
-            mpl.rcParams['xtick.labelsize'] = int(fontsize)
-            mpl.rcParams['ytick.labelsize'] = int(fontsize)
-
-            self.fig = plt.figure(figsize=figsize, tight_layout=None)
-            log.debug('fig is None, create a new figure')
-
-        elif isinstance(fig, Figure):
-            log.debug('fig is a figure instance, get this one')
-            self.fig = fig
-
-        # for generic plot we assume only a single ax.
-        # other plugin class will or are taking care of other needs
-        log.debug('get or create a new ax')
-        self.ax = self.fig.gca()
+        fig, ax = self.figure_setup(**kwargs)
 
         # color cycle
-        # prop_cycle = pm.plot.prop_cycle
+        # prop_cycle = options.prop_cycle
         # mpl.rcParams['axes.prop_cycle']= r" cycler('color', %s) " % prop_cycle
 
-        # pyplot.subplots_adjust(left=(5 / 25.4) / figure.xsize,
-        #                        bottom=(4 / 25.4) / figure.ysize,
-        #                        right=1 - (1 / 25.4) / figure.xsize,
-        #                        top=1 - (3 / 25.4) / figure.ysize)
         # -------------------------------------------------------------------------
         # select plotter depending on the dimension of the data
         # -------------------------------------------------------------------------
@@ -570,8 +566,7 @@ class NDIO(HasTraits):
         if savename is not None:
             self.fig.savefig(savename)
 
-        from spectrochempy.api import _do_not_block
-        if not _do_not_block:
+        if not plotoptions.do_not_block:
             self.show()
 
     def plot_generic(self, ax=None, **kwargs):
@@ -621,6 +616,56 @@ class NDIO(HasTraits):
         """
         if hasattr(self, 'fig'):
             plt.show()
+
+    def figure_setup(self, **kwargs):
+
+        """
+        setup figure and axes
+
+        Parameters
+        ----------
+        kwargs
+
+        Returns
+        -------
+
+        """
+
+        fig = kwargs.pop('fig', None)
+        if isinstance(fig, int):
+            if plt.fignum_exists(fig):
+                log.debug('get the existing figure %d' % fig)
+                fig = plt.figure(fig)
+            else:  # we need to create a new one
+                fig = None
+
+        if fig is None:
+
+            log.debug('fig is None, create a new figure')
+            # when using matplotlib inline
+            # dpi is the savefig.dpi so we should set it here
+
+            figsize = mpl.rcParams['figure.figsize'] = \
+                kwargs.pop('figsize', mpl.rcParams['figure.figsize'])
+            fontsize = mpl.rcParams['font.size'] = \
+                kwargs.pop('fontsize', mpl.rcParams['font.size'])
+            mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
+            mpl.rcParams['xtick.labelsize'] = int(fontsize)
+            mpl.rcParams['ytick.labelsize'] = int(fontsize)
+
+            fig = plt.figure(figsize=figsize, tight_layout=None)
+
+        elif isinstance(fig, Figure):
+            log.debug('fig is a figure instance, get this one')
+
+
+        # for generic plot we assume only a single ax.
+        # other plugin class will or are taking care of other needs
+        log.debug('get or create a new ax')
+        ax = fig.gca()
+
+        return fig, ax
+
 
     def __getstate__(self):
         # needed to remove some entry to avoid picling them

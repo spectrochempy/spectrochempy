@@ -41,8 +41,7 @@ import os as os
 import numpy as np
 from datetime import datetime, timezone, timedelta
 
-from ..dataset.api import NDDataset
-
+from spectrochempy.core.api import NDDataset
 from spectrochempy.gui import gui
 
 __all__ = []
@@ -93,11 +92,13 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
         filename of the file to load
 
+    directory: `str` [optional, default=""].
+        From where to read the specified filename. If not sperfied, read i the current directory.
 
     Example
     --------
-        >>> from spectrochempy.api import NDDataset
-        >>> A = NDDataset.read_omnic('C:\Spectra\Ex_spectra.spg')
+        >>> from spectrochempy.api import NDDataset, data_dir
+        >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data_dir)
         >>> A.print()
            name: Ex_spectra.spg
          author: Username

@@ -174,12 +174,18 @@ class NDDataset(
     The underlying array in a `NDDataset` object can be accessed through the `data`
     attribute, which will return a conventional :class:`~numpy.ndarray`.
 
-    For example::
+    Examples
+    --------
+
+
+
+    Usage by an end-user:
 
         >>> from spectrochempy.api import NDDataset
         >>> x = NDDataset([1,2,3])
         >>> x.data
         array([       1,        2,        3])
+
 
     """
     # This module is strongly inspired from Astropy (BSD license).

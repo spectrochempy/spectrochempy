@@ -36,17 +36,23 @@
 
 """
 This package provides classes and functions to define datasets and axis.
-Mathematecal functions, plotting, printing are among their methods.
+Mathematical functions, plotting, printing are among their methods.
+
+Examples
+--------
+
+>>> from spectrochempy.core.api import NDDataset
+
 
 """
 
-from .units import *
+from spectrochempy.core.units import *
 
-from .dataset.api import *
-from .processors.api import *
-from .readers.api import *
-from .plotters.api import *
-from .writers.api import *
+from spectrochempy.core.dataset.api import *
+from spectrochempy.core.processors.api import *
+from spectrochempy.core.readers.api import *
+from spectrochempy.core.plotters.api import *
+from spectrochempy.core.writers.api import *
 
 _all = []
 from .units import __all__

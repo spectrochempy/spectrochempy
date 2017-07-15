@@ -41,6 +41,7 @@
 """
 
 from spectrochempy.api import NDDataset
+from spectrochempy.api import data_dir
 
 import pytest
 import os
@@ -53,13 +54,17 @@ from tests.utils import assert_array_equal
 # Basic
 # -------
 def test_save_and_load(IR_source_1):
+
     A = IR_source_1.copy()
     A.save('tartempion.scp')
+    # no directory for saving passed ... it must be in data_dir
+    path = os.path.join(data_dir, 'tartempion.scp')
+    assert os.path.exists(path)
 
     B = NDDataset.load('tartempion.scp')
     assert B.description == A.description
     assert_array_equal(A.data,B.data)
-    os.remove('tartempion.scp')
+    os.remove(path)
 
     #B.save()
 

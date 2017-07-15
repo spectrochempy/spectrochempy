@@ -41,8 +41,8 @@ import os
 
 def test_plotr(IR_source_1):
     source = IR_source_1
-    source.plot()
+    source.plot()         #plotr replaced with plot
 
 def test_plot(IR_source_1):
     source = IR_source_1
-    source.T.plot()
+    source.T.plot()       #plotc replaced with plot using Transposition

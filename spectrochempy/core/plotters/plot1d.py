@@ -43,6 +43,7 @@
 
 from matplotlib.ticker import MaxNLocator
 
+from spectrochempy.api import plotoptions as options
 
 __all__ = []
 
@@ -61,9 +62,6 @@ def plot_1D(data, **kwargs):
 
 
     """
-    # avoid circular call to this module
-    from spectrochempy.api import plotoptions as options
-
     # where to plot?
     ax = data.ax
 
