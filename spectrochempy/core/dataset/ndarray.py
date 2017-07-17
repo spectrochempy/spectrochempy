@@ -57,17 +57,17 @@ from six import string_types
 from traitlets import List, Unicode, Instance, Bool, HasTraits, default
 from uncertainties import unumpy as unp
 
-from spectrochempy.application import log
-
-from .ndmeta import Meta
-from ..units import Unit, ur, Quantity
-
-from ...utils import EPSILON, is_number
 # =============================================================================
 # local imports
 # =============================================================================
-from ...utils import SpectroChemPyWarning, deprecated
-from ...utils.traittypes import Array
+from spectrochempy.application import log
+
+from spectrochempy.core.dataset.ndmeta import Meta
+from spectrochempy.core.units import Unit, ur, Quantity
+
+from spectrochempy.utils import EPSILON, is_number
+from spectrochempy.utils import SpectroChemPyWarning, deprecated
+from spectrochempy.utils.traittypes import Array
 
 
 # =============================================================================
@@ -119,8 +119,9 @@ class NDArray(HasTraits):
 
     Let's see the string representation of this newly created `ndd` object.
 
-    >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    NDARRAY: ...
+    >>> print(ndd)  #doctest: +ELLIPSIS
+    NDArray:
+    array([...])
 
 
     """

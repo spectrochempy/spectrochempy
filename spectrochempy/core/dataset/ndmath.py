@@ -59,7 +59,7 @@ import numpy as np
 # =============================================================================
 from uncertainties import unumpy as unp
 from spectrochempy.core.units import Quantity
-from .ndarray import NDArray
+from spectrochempy.core.dataset.ndarray import NDArray
 
 # =============================================================================
 # Constants
@@ -73,6 +73,15 @@ from spectrochempy.application import log
 
 class NDMath(object):
     """
+    Examples
+    --------
+
+    >>> from spectrochempy.api import *
+    >>> source = NDDataset.load('mydataset.scp')
+    >>> source             #doctest: +ELLIPSIS
+    NDDataset([[    2.06,...,     1.24]])
+    >>> np.negative(source) #doctest: +ELLIPSIS
+    NDDataset([[   -2.06,...,    -1.24]])
 
     """
 
@@ -110,7 +119,6 @@ class NDMath(object):
 
         Use ``.pipe`` when chaining together functions that expect
         on `NDDataset`.
-
 
         """
         if isinstance(func, tuple):

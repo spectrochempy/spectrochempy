@@ -43,7 +43,7 @@ import numpy as np
 from datetime import datetime, timezone, timedelta
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.api import options
+from spectrochempy.application import options
 from spectrochempy.gui import gui
 
 __all__ = ['read_omnic']

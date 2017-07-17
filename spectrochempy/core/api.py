@@ -46,32 +46,30 @@ Examples
 
 """
 
-_all = []
-from .units import __all__
-_all += __all__
+import sys
+from traitlets import import_item
 
-from .dataset.api import __all__
-_all += __all__
-
-from .processors.api import __all__
-_all += __all__
-
-from .readers.api import __all__
-_all += __all__
-
-from .plotters.api import __all__
-_all += __all__
-
-from .writers.api import __all__
-_all += __all__
-
-__all__ = _all
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import list_packages
 
 
-from spectrochempy.core.units import *
+pkgs = sys.modules['spectrochempy.core']
+api = sys.modules['spectrochempy.core.api']
 
-from spectrochempy.core.dataset.api import *
-from spectrochempy.core.processors.api import *
-from spectrochempy.core.readers.api import *
-from spectrochempy.core.plotters.api import *
-from spectrochempy.core.writers.api import *
+pkgs = list_packages(pkgs)
+
+__all__ = []
+
+for pkg in pkgs:
+    if pkg.endswith('api'):
+        continue
+    pkg = import_item(pkg)
+    if not hasattr(pkg, '__all__'):
+        continue
+    a = getattr(pkg,'__all__')
+    __all__ += a
+    for item in a:
+        if 'dataset.' not in item:
+            setattr(NDDataset, item, getattr(pkg, item))
+        setattr(api, item, getattr(pkg, item))
+

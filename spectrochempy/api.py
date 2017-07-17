@@ -81,8 +81,12 @@ def APIref():
 # loading module libraries
 # ------------------------
 # here we also construct the __all__ list automatically
+from spectrochempy.application import log
 
-from spectrochempy.application import *
+try:
+    from spectrochempy.application import *
+except:
+    pass #seems necessary for doctest #FIXME: why?
 from spectrochempy import application
 __all__ = application.__all__
 

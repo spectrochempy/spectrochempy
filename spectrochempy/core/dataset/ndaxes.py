@@ -52,14 +52,14 @@ from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
 
 from spectrochempy.application import log
 
-from .ndarray import NDArray
-from .ndmath import NDMath, set_operators
-from ..units import Quantity
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndmath import NDMath, set_operators
+from spectrochempy.core.units import Quantity
 # from ...utils import create_traitsdoc
 
-from ...utils import (is_sequence, numpyprintoptions,
+from spectrochempy.utils import (is_sequence, numpyprintoptions,
                       SpectroChemPyWarning)
-from ...utils.traittypes import Range
+from spectrochempy.utils.traittypes import Range
 
 __all__ = ['Axes',
            'Axis',
@@ -151,7 +151,7 @@ class Axis(NDMath, NDArray):
 
     For example::
 
-    >>> from spectrochempy.api import Axis # doctest: +SKIP
+    >>> from spectrochempy.api import Axis
 
 
     >>> x = Axis([1,2,3], title='time on stream', units='hours')
@@ -897,3 +897,6 @@ set_operators(Axis, priority=50)
 # =============================================================================
 #create_traitsdoc(Axes)
 #create_traitsdoc(Axis)
+
+if __name__ == '__main__':
+    pass

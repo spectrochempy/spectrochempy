@@ -75,6 +75,8 @@ from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.dataset.ndio import NDIO
 
+from spectrochempy.application import log
+
 # =============================================================================
 # Local imports
 # =============================================================================
@@ -88,14 +90,12 @@ __all__ = ['NDDataset',
            'NDDatasetWarning'
           ]
 
-from spectrochempy.application import log
 
 # =============================================================================
 # numpy print options
 # =============================================================================
 
 numpyprintoptions()
-
 
 # =============================================================================
 # NDDataset class definition

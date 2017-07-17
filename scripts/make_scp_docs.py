@@ -56,7 +56,7 @@ from sphinx.application import Sphinx
 import matplotlib as mpl
 mpl.use('agg')
 
-from spectrochempy.api import scp, log
+from spectrochempy.application import scp, log
 from spectrochempy.utils import list_packages
 
 import logging

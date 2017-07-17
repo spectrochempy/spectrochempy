@@ -69,6 +69,7 @@ from numpy.lib.format import write_array, MAGIC_PREFIX
 
 import spectrochempy
 from spectrochempy.core.dataset.ndaxes import Axes, Axis
+from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
 
 from spectrochempy.gui import gui
@@ -205,7 +206,7 @@ class NDIO(HasTraits):
                     pars[level + key] = str(val)
 
 
-                elif isinstance(val, spectrochempy.api.Meta):
+                elif isinstance(val, Meta):
 
                     pars[level + key] = val.to_dict()
 

@@ -44,7 +44,7 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.api import scp
+from spectrochempy.application import scp
 
 _do_not_block = scp.plotoptions.do_not_block
 

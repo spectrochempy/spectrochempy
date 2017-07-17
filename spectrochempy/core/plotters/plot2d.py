@@ -254,7 +254,7 @@ def clevels(data, **kwargs):
     """Utility function to determine contours levels
     """
     # avoid circular call to this module
-    from spectrochempy.api import plotoptions as options
+    from spectrochempy.application import plotoptions as options
 
     # contours
     maximum = data.max()
