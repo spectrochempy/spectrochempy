@@ -41,7 +41,7 @@ import numpy as np
 from ..dataset.api import NDDataset
 from spectrochempy.utils import is_sequence
 
-__all__ = []
+__all__ = ['concatenate']
 
 def concatenate(*sources, axis=None):
     '''Concatenation of DataSet objects along a given axis (by default the fisrt)

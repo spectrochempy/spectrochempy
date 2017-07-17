@@ -67,7 +67,8 @@ from .ndarray import NDArray
 
 __all__ =['NDMath', 'set_operators']
 
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
+
 
 
 class NDMath(object):

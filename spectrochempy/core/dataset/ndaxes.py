@@ -50,8 +50,7 @@ from pandas import Index
 from six import string_types
 from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
 
-import logging
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
 
 from .ndarray import NDArray
 from .ndmath import NDMath, set_operators

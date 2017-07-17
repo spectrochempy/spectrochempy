@@ -34,5 +34,8 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from .basecor import basecor
+from .basecor import *
+
+
+__all__ = ['basecor']
 

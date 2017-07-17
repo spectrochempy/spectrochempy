@@ -88,7 +88,7 @@ __all__ = ['NDDataset',
            'NDDatasetWarning'
           ]
 
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
 
 # =============================================================================
 # numpy print options

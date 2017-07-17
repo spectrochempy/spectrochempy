@@ -72,15 +72,15 @@ from spectrochempy.core.dataset.ndaxes import Axes, Axis
 from spectrochempy.core.units import Unit
 
 from spectrochempy.gui import gui
-from spectrochempy.api import plotoptions
-from spectrochempy.api import options
+from spectrochempy.application import plotoptions
+from spectrochempy.application import options
 
 # Constants
 # ---------
 
 __all__ = ['NDIO']
 
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
 
 # ==============================================================================
 # Class NDIO to handle I/O of datasets
@@ -135,8 +135,6 @@ class NDIO(HasTraits):
 
         """
 
-        directory = kwargs.get("directory", options.data_dir)
-
         # open file dialog box
         filename = path
 
@@ -149,7 +147,7 @@ class NDIO(HasTraits):
         if not filename.endswith('.scp'):
             filename = filename + '.scp'
 
-
+        directory = kwargs.get("directory", options.data_dir)
         if not os.path.exists(directory):
             raise IOError("directory doesn't exists!")
 
@@ -527,7 +525,7 @@ class NDIO(HasTraits):
         # Execute the plotter
         # --------------------
 
-        if not _plotter(ax=ax, **kwargs):
+        if not _plotter(**kwargs):
             return None
 
         # Additional matplotlib commands on the current plot
@@ -586,20 +584,20 @@ class NDIO(HasTraits):
 
         if self.ndim == 1:
 
-            return self.plot_1D(ax=ax, **kwargs)
+            return self.plot_1D(**kwargs)
 
         elif self.ndim == 2 and contour:
 
-            return self.plot_2D(ax=ax, **kwargs)
+            return self.plot_2D(**kwargs)
 
         elif self.ndim == 2:
 
             kwargs['flat'] = True  # else it will be stacked plot
-            return self.plot_3D(ax=ax, **kwargs)
+            return self.plot_3D(**kwargs)
 
         elif self.ndim == 3:
 
-            return self.plot_3D(ax=ax, **kwargs)
+            return self.plot_3D(**kwargs)
 
         else:
             log.error('Cannot guess an adequate plotter. I did nothing!')
@@ -663,6 +661,10 @@ class NDIO(HasTraits):
         # other plugin class will or are taking care of other needs
         log.debug('get or create a new ax')
         ax = fig.gca()
+
+        # make them know in the class
+        self.fig = fig
+        self.ax = ax
 
         return fig, ax
 

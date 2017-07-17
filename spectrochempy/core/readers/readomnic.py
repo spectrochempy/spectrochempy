@@ -37,11 +37,13 @@
 """Plugin module to extend NDDataset with the import methods method.
 
 """
-import os as os
+import os
+import warnings
 import numpy as np
 from datetime import datetime, timezone, timedelta
 
-from spectrochempy.core.api import NDDataset
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.api import options
 from spectrochempy.gui import gui
 
 __all__ = []
@@ -120,6 +122,16 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
             #TODO: GENERATE A WARNING
             return None
 
+    directory = kwargs.get("directory", options.data_dir)
+    if not os.path.exists(directory):
+        raise IOError("directory doesn't exists!")
+
+    if os.path.isdir(directory):
+        filename = os.path.expanduser(os.path.join(directory, filename))
+    else:
+        warnings.warn('Provided directory is a file, '
+                      'so we use its parent directory')
+        filename = os.path.join(os.path.dirname(directory), filename)
 
     # open file dialog box if necessary
     res = readfilename(filename)

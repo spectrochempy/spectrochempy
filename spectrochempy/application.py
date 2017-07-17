@@ -58,22 +58,28 @@ from IPython import get_ipython
 
 import matplotlib as mpl
 
-
 # local
 # =============================================================================
 
 from spectrochempy.utils import is_kernel
 from spectrochempy.utils import get_config_dir, get_pkg_data_dir
+from spectrochempy.utils import get_pkg_data_filename
 from spectrochempy.version import get_version
 from spectrochempy.core.plotters.plottersoptions import PlotOptions
 from spectrochempy.core.readers.readersoptions import ReadOptions
 from spectrochempy.core.writers.writersoptions import WriteOptions
 from spectrochempy.core.processors.processorsoptions import ProcessOptions
-from spectrochempy.utils.file import get_pkg_data_filename
 
-# no wild import with this class
-# ------------------------------------------------------------------------------
-__all__ = []
+__all__ = ['SpectroChemPy','DataDir','scp',
+
+           ### Helpers
+             'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
+             'data_dir', 'list_data_dir',
+             'options', 'plotoptions',
+
+            ### Info
+             'copyright', 'release', 'version',
+           ]
 
 # ==============================================================================
 # PYTHONPATH
@@ -483,6 +489,39 @@ class SpectroChemPy(Application):
         self.log.level = self.log_level
         self.log.debug("changed default loglevel to {}".format(change.new))
 
+
+# ==============================================================================
+# matplotlib use directive to set before calling matplotlib backends
+# ==============================================================================
+#from spectrochempy.application import SpectroChemPy
+scp = SpectroChemPy()
+scp.initialize()
+
+# ==============================================================================
+# API namespace
+# ==============================================================================
+
+version = scp.version
+release = scp.release
+copyright = scp.copyright
+log = scp.log
+
+# give a user friendly name to the objects containing configurables options
+plotoptions = scp.plotoptions
+options = scp
+
+_do_not_block = plotoptions.do_not_block
+
+data_dir = scp.data_dir
+list_data_dir = scp.list_data_dir
+
+# log levels
+# ----------
+DEBUG = logging.DEBUG
+INFO = logging.INFO
+WARN = logging.WARNING
+ERROR = logging.ERROR
+CRITICAL = logging.CRITICAL
 
 #TODO: look at the subcommands capabilities of traitlets
 if __name__ == "__main__":

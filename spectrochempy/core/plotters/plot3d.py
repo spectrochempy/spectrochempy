@@ -40,6 +40,7 @@ This module should be able to handle a large set of plot types.
 
 
 """
+__all__ = ['plot_3D']
 
 
 def plot_3D(source,

@@ -41,7 +41,7 @@
 import numpy as np
 from scipy.optimize import minimize_scalar
 
-from spectrochempy.core.api import AxisRange
+from spectrochempy.core.dataset.ndaxes import AxisRange
 
 __all__ = ['autosub']
 

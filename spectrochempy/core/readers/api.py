@@ -38,7 +38,7 @@
 
 # register to dataset
 
-from ..dataset.api import NDDataset
+from ..dataset.nddataset import NDDataset
 
 from .readjdx import read_jdx
 from .readomnic import read_omnic

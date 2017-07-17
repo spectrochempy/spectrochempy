@@ -40,7 +40,7 @@
 """
 
 # register to dataset
-from ..dataset.api import NDDataset
+from ..dataset.nddataset import NDDataset
 
 from .autosub import autosub
 from .baseline import basecor

@@ -48,15 +48,37 @@ Various plotters
 
 # register to dataset
 
-from ..dataset.api import NDDataset
+from ..dataset.nddataset import NDDataset
+from spectrochempy.utils import list_packages
+from traitlets import import_item
 
-from .plot1d import plot_1D
-from .plot2d import plot_2D
-from .plot3d import plot_3D
+from .plot1d import *
+from .plot2d import *
+from .plot3d import *
 
-setattr(NDDataset, 'plot_1D', plot_1D)
-setattr(NDDataset, 'plot_2D', plot_2D)
-setattr(NDDataset, 'plot_3D', plot_3D)
+
+from .. import plotters
+
+pkgs = list_packages(plotters)
+
+__all__ = []
+
+for pkg in pkgs:
+    if pkg.endswith('api'):
+        continue
+    pkg = import_item(pkg)
+    if not hasattr(pkg, '__all__'):
+        continue
+    a = getattr(pkg,'__all__')
+    __all__ += a
+    for item in a:
+        setattr(NDDataset, item, getattr(pkg, item))
+
+# for item in plot2d.__all__:
+#     setattr(NDDataset, item, getattr(plot2d, item))
+# for item in plot3d.__all__:
+#     setattr(NDDataset, item, getattr(plot3d, item))
+
 
 # all (make this function also available as full API functions
 

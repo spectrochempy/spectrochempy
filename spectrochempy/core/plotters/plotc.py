@@ -44,7 +44,7 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.api import _do_not_block
+from spectrochempy.application import _do_not_block
 
 
 __all__ = []

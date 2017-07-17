@@ -74,7 +74,8 @@ FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI",
           "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
+
 # =============================================================================
 # Utilities
 # =============================================================================

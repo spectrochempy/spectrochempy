@@ -4,7 +4,7 @@
 
 from .writejdx import write_jdx
 
-from ..dataset.api import NDDataset
+from ..dataset.nddataset import NDDataset
 
 setattr(NDDataset, 'write_jdx', write_jdx)
 

@@ -46,6 +46,7 @@ from .mcrals import *
 from .nnmf import *
 from .pca import *
 from .svd import *
+# do not forget to add new import for new functionalitit)es
 
 _all = []
 

@@ -43,8 +43,8 @@ import sys
 
 import scipy.optimize
 from warnings import warn
-import logging
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
+
 
 from spectrochempy.fitting.parameters import FitParameters
 

@@ -42,9 +42,9 @@ import scipy.interpolate
 import numpy as np
 
 
-from ...dataset.api import AxisRange
+from ...dataset.ndaxes import AxisRange
 
-__all__=[]
+__all__=['basecor']
 
 def basecor(source,*ranges,axis=-1,
             method='sequential',

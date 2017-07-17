@@ -48,8 +48,9 @@ import pandas as pd
 from pkg_resources import resource_filename
 import re
 from fractions import Fraction
-import logging
-log = logging.getLogger(__name__)
+
+from spectrochempy.application import log
+
 
 # =============================================================================
 # Third-party imports

@@ -48,8 +48,8 @@ elements can be accessed by key, but also by attributes, *e.g.*
 
 from traitlets import HasTraits, Dict, Bool, default
 
-import logging
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
+
 
 
 __all__ = ['Meta']

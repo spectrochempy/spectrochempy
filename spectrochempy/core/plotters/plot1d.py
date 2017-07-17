@@ -43,9 +43,10 @@
 
 from matplotlib.ticker import MaxNLocator
 
-from spectrochempy.api import plotoptions as options
+from spectrochempy.application import plotoptions as options
 
-__all__ = []
+__all__ = ['plot_1D']
+
 
 def plot_1D(data, **kwargs):
     """

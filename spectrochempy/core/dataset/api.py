@@ -41,26 +41,22 @@ from .ndio import *
 from .ndmath import *
 from .ndmeta import *
 
-_all = []
+__all__ = []
 
-from .ndarray import __all__
-_all += __all__
+from . import ndarray
+__all__ += ndarray.__all__
 
-from .ndaxes import __all__
-_all += __all__
+from . import ndaxes
+__all__ += ndaxes.__all__
 
-from .nddataset import __all__
-_all += __all__
+from . import ndio
+__all__ += ndio.__all__
 
-from .ndio import __all__
-_all += __all__
+from . import ndmath
+__all__ += ndmath.__all__
 
-from .ndmath import __all__
-_all += __all__
+from . import ndmeta
+__all__+= ndmeta.__all__
 
-from .ndmeta import __all__
-_all += __all__
-
-__all__ = _all
-
-pass
+from . import nddataset
+__all__ += nddataset.__all__

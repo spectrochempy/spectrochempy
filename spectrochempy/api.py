@@ -59,14 +59,8 @@ from pytest import raises
 # ==============================================================================
 # Tells here the methods or object we allow to import from this library
 # ==============================================================================
-__all__ = [ ### Helpers
-             'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO', 'raises',
-             'APIref', 'data_dir', 'list_data_dir',
-             'options', 'plotoptions',
-
-            ### Info
-             'copyright', 'release', 'version',
-
+__all__ = [  'raises',
+             'APIref',
             ### imported library
              'np', 'plt', 'scipy'
 
@@ -83,42 +77,15 @@ def APIref():
     return __all__
 
 
-# ==============================================================================
-# matplotlib use directive to set before calling matplotlib backends
-# ==============================================================================
-from spectrochempy.application import SpectroChemPy
-scp = SpectroChemPy()
-scp.initialize()
-
-# ==============================================================================
-# API namespace
-# ==============================================================================
-
-version = scp.version
-release = scp.release
-copyright = scp.copyright
-log = scp.log
-
-# give a user friendly name to the objects containing configurables options
-plotoptions = scp.plotoptions
-options = scp
-
-_do_not_block = plotoptions.do_not_block
-
-data_dir = scp.data_dir
-list_data_dir = scp.list_data_dir
-
-# log levels
-# ----------
-DEBUG = logging.DEBUG
-INFO = logging.INFO
-WARN = logging.WARNING
-ERROR = logging.ERROR
-CRITICAL = logging.CRITICAL
 
 # loading module libraries
 # ------------------------
 # here we also construct the __all__ list automatically
+
+from spectrochempy.application import *
+from spectrochempy import application
+__all__ = application.__all__
+
 
 # core
 #------

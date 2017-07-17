@@ -35,8 +35,8 @@
 # =============================================================================
 
 
-import logging
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
+
 
 from logging import WARNING
 

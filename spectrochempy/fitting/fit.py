@@ -67,7 +67,8 @@ from spectrochempy.utils.misc import htmldoc
 
 __all__ = ['Fit']
 
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
+
 
 # *******************************************************************************
 # Fit : main object to handle a fit

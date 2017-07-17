@@ -13,7 +13,9 @@
 #------------------------------------------------------------------------------
 
 """ This module contains functions to determine where configuration and
-data/cache files used by Spectrochempy should be placed."""
+data/cache files used by Spectrochempy should be placed.
+
+"""
 
 __all__ = ['File',
            'get_log_dir',
@@ -23,6 +25,7 @@ __all__ = ['File',
            'set_temp_cache',
            'get_pkg_data_dir',
            'get_pkg_data_filename',
+           'list_packages',
           ]
 
 # Standard/built-in imports.
@@ -32,6 +35,8 @@ import shutil
 import stat
 import sys
 import six
+from glob import glob
+from pkgutil import walk_packages
 
 from traitlets import Bool, HasTraits, Instance, List, Unicode
 
@@ -770,5 +775,23 @@ def get_pkg_data_dir(data_name, package=None):
         return os.path.dirname(datadir)
 
     return datadir
+
+
+def list_packages(package):
+    """Return a list of the names of a package and its subpackages.
+
+    This only works if the package has a :attr:`__path__` attribute, which is
+    not the case for some (all?) of the built-in packages.
+    """
+    # Based on response at
+    # http://stackoverflow.com/questions/1707709
+
+    names = [package.__name__]
+    for __, name, __ in walk_packages(package.__path__,
+                                      prefix=package.__name__ + '.',
+                                      onerror=lambda x: None):
+        names.append(name)
+
+    return names
 
 #### EOF ######################################################################

@@ -41,7 +41,7 @@ import numpy as np
 #from ..dataset import NDDataset
 
 
-__all__ = []
+__all__ = ['interpolate', 'align']
 
 
 def interpolate(source, axis=0, size=None):

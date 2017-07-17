@@ -46,14 +46,6 @@ Examples
 
 """
 
-from spectrochempy.core.units import *
-
-from spectrochempy.core.dataset.api import *
-from spectrochempy.core.processors.api import *
-from spectrochempy.core.readers.api import *
-from spectrochempy.core.plotters.api import *
-from spectrochempy.core.writers.api import *
-
 _all = []
 from .units import __all__
 _all += __all__
@@ -74,3 +66,12 @@ from .writers.api import __all__
 _all += __all__
 
 __all__ = _all
+
+
+from spectrochempy.core.units import *
+
+from spectrochempy.core.dataset.api import *
+from spectrochempy.core.processors.api import *
+from spectrochempy.core.readers.api import *
+from spectrochempy.core.plotters.api import *
+from spectrochempy.core.writers.api import *

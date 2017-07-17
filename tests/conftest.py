@@ -15,7 +15,9 @@ import numpy as np
 import os
 import sys
 
-from spectrochempy.api import NDDataset, Axes, Axis, data_dir, plotoptions
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndaxes import Axes, Axis
+from spectrochempy.api import data_dir, plotoptions
 
 plotoptions.do_not_block = True
 

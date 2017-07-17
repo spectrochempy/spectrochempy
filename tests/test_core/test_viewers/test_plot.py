@@ -39,19 +39,21 @@ from spectrochempy.api import plotoptions
 
 #@pytest.mark.xfail(True, reason='not yet finished')
 
-def test_plot_generic(IR_source_1):
-    source = IR_source_1
-    BLOCK = plotoptions.do_not_block
-    assert BLOCK == True  # as we are in pytest
-    #plotoptions.do_not_block = False  # uncomment to make plot show during the test
+@pytest.fixture()
+def DONOTBLOCK():
+    return False
+
+def test_plot_generic(IR_source_1, DONOTBLOCK ):
+    source = IR_source_1.copy()
+    plotoptions.do_not_block = DONOTBLOCK
     source.plot()
     pass
 
-def test_plot_2D(IR_source_1):
-    source = IR_source_1
-    BLOCK = plotoptions.do_not_block
-    assert BLOCK == True  # as we are in pytest
-    #plotoptions.do_not_block = False  # uncomment to make plot show during the test
+def test_plot_2D(IR_source_1,):
+    source = IR_source_1.copy()
     source.plot_2D()
-    pass
 
+def test_plot_map(IR_source_1):
+    source = IR_source_1.copy()
+    source.plot_map()   # plot_map is an alias of plot_2D
+    pass

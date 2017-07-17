@@ -56,11 +56,10 @@ from sphinx.application import Sphinx
 import matplotlib as mpl
 mpl.use('agg')
 
-from spectrochempy.api import scp
+from spectrochempy.api import scp, log
+from spectrochempy.utils import list_packages
 
 import logging
-log = logging.getLogger(__name__)
-
 scp.log_level = logging.INFO
 
 #from sphinx.util.console import bold, darkgreen
@@ -187,24 +186,6 @@ def make_dirs():
             os.makedirs(d)
         except OSError:
             pass
-
-
-def list_packages(package):
-    """Return a list of the names of a package and its subpackages.
-
-    This only works if the package has a :attr:`__path__` attribute, which is
-    not the case for some (all?) of the built-in packages.
-    """
-    # Based on response at
-    # http://stackoverflow.com/questions/1707709
-
-    names = [package.__name__]
-    for __, name, __ in walk_packages(package.__path__,
-                                      prefix=package.__name__ + '.',
-                                      onerror=lambda x: None):
-        names.append(name)
-
-    return names
 
 
 TEMPLATE = """{headerline}

@@ -46,8 +46,8 @@ import re  # For regular expression search
 import string
 import types
 from collections import UserDict  # This is to be able to create a special dictionary
-import logging
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
+
 
 import numpy as np
 

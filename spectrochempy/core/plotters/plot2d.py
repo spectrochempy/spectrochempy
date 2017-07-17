@@ -40,6 +40,7 @@
 """
 
 """
+import sys
 
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -47,29 +48,62 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.api import plotoptions as options
+from spectrochempy.application import plotoptions as options
 
-__all__ = []
+__all__ = ['plot_2D', 'plot_map', 'plot_stack']
 
 # =============================================================================
 # nddataset plot2D functions
 # =============================================================================
 
-def plot_2D(data, **kwargs):
+# contour map -----------------------------------------------------------------
+
+def plot_map(source, **kwargs):
     """
+    Plot a 2D dataset as a contoured map.
+
+    Alias of plot_2D (with `kind` argument set to `map`.
+
+    """
+    kwargs['kind'] = 'map'
+    return plot_2D(source, **kwargs)
+
+
+# stack plot (default) --------------------------------------------------------
+
+def plot_stack(source, **kwargs):
+    """
+    Plot a 2D dataset as a stacked plot.
+
+    Alias of plot_2D (with `kind` argument set to `map`.
+
+    """
+    kwargs['kind'] = 'stack'
+    return plot_2D(source, **kwargs)
+
+
+# generic plot (default stack plot) -------------------------------------------
+
+def plot_2D(source, **kwargs):
+    """
+    PLot of 2D array.
 
     Parameters
     ----------
-    data : NDDataset to plot
+    source : NDDataset to plot
 
     projections : `bool` [optional, default=False]
+
+    contour : `bool` [optional, default=False]
 
     kwargs : additionnal keywords
 
 
     """
     # where to plot?
-    ax = data.ax
+    ax = source.ax
+    if ax is None:
+        fig, ax = source.figure_setup(**kwargs)
 
     # show projections
     proj = kwargs.get('proj', options.show_projections)
@@ -90,7 +124,7 @@ def plot_2D(data, **kwargs):
             axex.tick_params(bottom='off', top='off')
             plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
                     visible=False)
-            data.axex = axex
+            source.axex = axex
 
         if proj or yproj:
             axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
@@ -98,7 +132,7 @@ def plot_2D(data, **kwargs):
             axey.tick_params(right='off', left='off')
             plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
                     visible=False)
-            data.axey = axey
+            source.axey = axey
 
     # contour colormap
     cmap = mpl.rcParams['image.cmap'] = kwargs.pop('colormap',
@@ -110,16 +144,16 @@ def plot_2D(data, **kwargs):
     alpha = kwargs.get('calpha', options.calpha)
 
     # -------------------------------------------------------------------------
-    # plot the data
+    # plot the source
     # by default contours are plotted
     # -------------------------------------------------------------------------
 
     # abscissa and ordinate axis
-    x = data.x
-    y = data.y
+    x = source.x
+    y = source.y
 
     # z axis
-    z = data.real()
+    z = source.real()
 
     # contour levels
     cl = clevels(z.data, **kwargs)
@@ -141,7 +175,7 @@ def plot_2D(data, **kwargs):
     xlim[0] = max(xlim[0], xl[0])
 
     # reversed axis?
-    reverse = data.meta.reverse
+    reverse = source.meta.reverse
     if kwargs.get('reverse', reverse):
         xlim.reverse()
 

@@ -57,8 +57,7 @@ from six import string_types
 from traitlets import List, Unicode, Instance, Bool, HasTraits, default
 from uncertainties import unumpy as unp
 
-import logging
-log = logging.getLogger(__name__)
+from spectrochempy.application import log
 
 from .ndmeta import Meta
 from ..units import Unit, ur, Quantity

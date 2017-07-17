@@ -39,7 +39,7 @@
 
 """
 
-__all__ = ['Unit', 'ur', 'Quantity', 'Measurement', 'set_nmr_context']
+__all__ = ['Unit', 'Quantity', 'Measurement', 'ur', 'set_nmr_context']
 
 from warnings import warn
 
