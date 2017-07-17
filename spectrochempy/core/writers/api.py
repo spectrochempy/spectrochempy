@@ -1,13 +1,28 @@
 
 
-# register to dataset
+import sys
+from traitlets import import_item
 
-from .writejdx import write_jdx
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import list_packages
 
-from ..dataset.nddataset import NDDataset
+name = 'writers'
+pkgs = sys.modules['spectrochempy.core.%s'%name]
+api = sys.modules['spectrochempy.core.%s.api'%name]
 
-setattr(NDDataset, 'write_jdx', write_jdx)
+pkgs = list_packages(pkgs)
 
-# make also the reader available for the API
+__all__ = []
 
-__all__ = ['write_jdx']
+for pkg in pkgs:
+    if pkg.endswith('api'):
+        continue
+    pkg = import_item(pkg)
+    if not hasattr(pkg, '__all__'):
+        continue
+    a = getattr(pkg,'__all__')
+    __all__ += a
+    for item in a:
+        setattr(NDDataset, item, getattr(pkg, item))
+        setattr(api, item, getattr(pkg, item))
+

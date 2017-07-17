@@ -41,7 +41,7 @@ from spectrochempy.api import plotoptions
 
 @pytest.fixture()
 def DONOTBLOCK():
-    return False
+    return True
 
 def test_plot_generic(IR_source_1, DONOTBLOCK ):
     source = IR_source_1.copy()

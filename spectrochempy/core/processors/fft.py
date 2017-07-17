@@ -58,7 +58,7 @@ epsilon = np.finfo(float).eps
 # interface for the processing class
 # =============================================================================
 # NOTE: if these parameters are not set, the name of the module is taken
-__callable__ = "ft"
+__all__ = ["ft"]
 
 # =============================================================================
 # generic transform function

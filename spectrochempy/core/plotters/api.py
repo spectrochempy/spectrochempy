@@ -45,21 +45,17 @@ Various plotters
 
 #--------------------------------------
 
-
-# register to dataset
-
-from ..dataset.nddataset import NDDataset
-from spectrochempy.utils import list_packages
+import sys
 from traitlets import import_item
 
-from .plot1d import *
-from .plot2d import *
-from .plot3d import *
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import list_packages
 
+name = 'plotters'
+pkgs = sys.modules['spectrochempy.core.%s'%name]
+api = sys.modules['spectrochempy.core.%s.api'%name]
 
-from .. import plotters
-
-pkgs = list_packages(plotters)
+pkgs = list_packages(pkgs)
 
 __all__ = []
 
@@ -73,14 +69,5 @@ for pkg in pkgs:
     __all__ += a
     for item in a:
         setattr(NDDataset, item, getattr(pkg, item))
-
-# for item in plot2d.__all__:
-#     setattr(NDDataset, item, getattr(plot2d, item))
-# for item in plot3d.__all__:
-#     setattr(NDDataset, item, getattr(plot3d, item))
-
-
-# all (make this function also available as full API functions
-
-__all__ = ['plot_1D', 'plot_2D', 'plot_3D']
+        setattr(api, item, getattr(pkg, item))
 

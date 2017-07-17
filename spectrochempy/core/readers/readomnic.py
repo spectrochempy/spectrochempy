@@ -46,7 +46,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.api import options
 from spectrochempy.gui import gui
 
-__all__ = []
+__all__ = ['read_omnic']
 
 # utility functions
 #-------------------

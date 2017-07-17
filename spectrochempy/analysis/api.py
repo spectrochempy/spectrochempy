@@ -39,36 +39,30 @@
 This package provides classes and functions to perform spectral analysis.
 
 """
-from .efa import *
-from .lsqnonneg import *
-from .lstsq import *
-from .mcrals import *
-from .nnmf import *
-from .pca import *
-from .svd import *
-# do not forget to add new import for new functionalitit)es
 
-_all = []
+import sys
+from traitlets import import_item
 
-from .efa import __all__
-_all += __all__
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import list_packages
 
-from .lsqnonneg import __all__
-_all += __all__
+name = 'analysis'
+pkgs = sys.modules['spectrochempy.%s'%name]
+api = sys.modules['spectrochempy.%s.api'%name]
 
-from .lstsq import __all__
-_all += __all__
+pkgs = list_packages(pkgs)
 
-from .mcrals import __all__
-_all += __all__
+__all__ = []
 
-from .nnmf import __all__
-_all += __all__
+for pkg in pkgs:
+    if pkg.endswith('api'):
+        continue
+    pkg = import_item(pkg)
+    if not hasattr(pkg, '__all__'):
+        continue
+    a = getattr(pkg,'__all__')
+    __all__ += a
+    for item in a:
+        setattr(NDDataset, item, getattr(pkg, item))
+        setattr(api, item, getattr(pkg, item))
 
-from .pca import __all__
-_all += __all__
-
-from .svd import __all__
-_all += __all__
-
-__all__ = _all

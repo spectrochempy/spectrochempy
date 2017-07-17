@@ -65,6 +65,7 @@ from .parameter import nmr_valid_meta
 
 import logging
 
+__all__ = ['read_bruker_nmr']
 
 # =============================================================================
 # Constants

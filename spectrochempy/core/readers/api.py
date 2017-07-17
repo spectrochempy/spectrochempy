@@ -35,23 +35,29 @@
 # =============================================================================
 
 
+import sys
+from traitlets import import_item
 
-# register to dataset
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import list_packages
 
-from ..dataset.nddataset import NDDataset
+name = 'readers'
+pkgs = sys.modules['spectrochempy.core.%s'%name]
+api = sys.modules['spectrochempy.core.%s.api'%name]
 
-from .readjdx import read_jdx
-from .readomnic import read_omnic
-from .readdso import read_dso
-from .nmr import read_bruker_nmr
+pkgs = list_packages(pkgs)
 
-setattr(NDDataset, 'read_dso', read_dso)
-setattr(NDDataset, 'read_jdx', read_jdx)
-setattr(NDDataset, 'read_omnic', read_omnic)
-setattr(NDDataset, 'read_spg', read_omnic)
-setattr(NDDataset, 'read_spa', read_omnic)
-setattr(NDDataset, 'read_bruker_nmr', read_bruker_nmr)
+__all__ = []
 
-# make also the reader available for the API
-__all__ = ['read_dso','read_jdx','read_omnic',
-           'read_bruker_nmr']
+for pkg in pkgs:
+    if pkg.endswith('api'):
+        continue
+    pkg = import_item(pkg)
+    if not hasattr(pkg, '__all__'):
+        continue
+    a = getattr(pkg,'__all__')
+    __all__ += a
+    for item in a:
+        setattr(NDDataset, item, getattr(pkg, item))
+        setattr(api, item, getattr(pkg, item))
+

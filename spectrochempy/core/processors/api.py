@@ -39,20 +39,47 @@
 
 """
 
-# register to dataset
-from ..dataset.nddataset import NDDataset
+# # register to dataset
+# from ..dataset.nddataset import NDDataset
+#
+# from .autosub import autosub
+# from .baseline import basecor
+# from .concatenate import concatenate
+# from .interpolate import align, interpolate
+#
+# setattr(NDDataset, 'autosub', autosub)
+# setattr(NDDataset, 'align', align)
+# setattr(NDDataset, 'concatenate', concatenate)
+# setattr(NDDataset, 'basecor', basecor)
+#
+# # all (make this function also available as full API functions
+#
+# __all__ = ['autosub', 'align', 'concatenate', 'basecor', 'interpolate']
+#
 
-from .autosub import autosub
-from .baseline import basecor
-from .concatenate import concatenate
-from .interpolate import align, interpolate
+import sys
+from traitlets import import_item
 
-setattr(NDDataset, 'autosub', autosub)
-setattr(NDDataset, 'align', align)
-setattr(NDDataset, 'concatenate', concatenate)
-setattr(NDDataset, 'basecor', basecor)
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import list_packages
 
-# all (make this function also available as full API functions
+name = 'processors'
+pkgs = sys.modules['spectrochempy.core.%s'%name]
+api = sys.modules['spectrochempy.core.%s.api'%name]
 
-__all__ = ['autosub', 'align', 'concatenate', 'basecor', 'interpolate']
+pkgs = list_packages(pkgs)
+
+__all__ = []
+
+for pkg in pkgs:
+    if pkg.endswith('api'):
+        continue
+    pkg = import_item(pkg)
+    if not hasattr(pkg, '__all__'):
+        continue
+    a = getattr(pkg,'__all__')
+    __all__ += a
+    for item in a:
+        setattr(NDDataset, item, getattr(pkg, item))
+        setattr(api, item, getattr(pkg, item))
 

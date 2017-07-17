@@ -57,7 +57,7 @@ from spectrochempy.utils import epsilon
 # interface for the processing class
 # =============================================================================
 # NOTE: if these parameters are not set, the name of the module is taken
-__callable__ = "apodize"
+__all__ = ["apodize"]
 
 # =============================================================================
 # Constants

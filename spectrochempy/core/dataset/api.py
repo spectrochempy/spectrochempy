@@ -34,29 +34,28 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from .ndarray import *
-from .ndaxes import *
-from .nddataset import  *
-from .ndio import *
-from .ndmath import *
-from .ndmeta import *
+import sys
+from traitlets import import_item
+
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import list_packages
+
+name = 'dataset'
+pkgs = sys.modules['spectrochempy.core.%s'%name]
+api = sys.modules['spectrochempy.core.%s.api'%name]
+
+pkgs = list_packages(pkgs)
 
 __all__ = []
 
-from . import ndarray
-__all__ += ndarray.__all__
+for pkg in pkgs:
+    if pkg.endswith('api'):
+        continue
+    pkg = import_item(pkg)
+    if not hasattr(pkg, '__all__'):
+        continue
+    a = getattr(pkg,'__all__')
+    __all__ += a
+    for item in a:
+        setattr(api, item, getattr(pkg, item))
 
-from . import ndaxes
-__all__ += ndaxes.__all__
-
-from . import ndio
-__all__ += ndio.__all__
-
-from . import ndmath
-__all__ += ndmath.__all__
-
-from . import ndmeta
-__all__+= ndmeta.__all__
-
-from . import nddataset
-__all__ += nddataset.__all__
