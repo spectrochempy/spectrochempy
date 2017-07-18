@@ -26,7 +26,7 @@ pip uninstall -y spectrochempy
 pip install -e . || exit 1
 
 # make docs
-python scripts/make_scp_docs.py clean html release
+# python scripts/make_scp_docs.py clean html release
 
 # add files modified
 git add -A

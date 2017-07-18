@@ -147,7 +147,7 @@ _started = scp.start(debug=False)
 
 scp.log.info("API activated "
              if _started else "API was not started!")
-
+pass
 # ==============================================================================
 
 if __name__ == '__main__':
