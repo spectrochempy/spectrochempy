@@ -37,23 +37,54 @@ import pytest
 
 from spectrochempy.api import plotoptions
 
-#@pytest.mark.xfail(True, reason='not yet finished')
+
+# @pytest.mark.xfail(True, reason='not yet finished')
 
 @pytest.fixture()
 def DONOTBLOCK():
-    return True
+    return True  # True # True in principle for testing
 
-def test_plot_generic(IR_source_1, DONOTBLOCK ):
+
+
+def test_plot_generic(IR_source_1, DONOTBLOCK):
+
     source = IR_source_1.copy()
     plotoptions.do_not_block = DONOTBLOCK
     source.plot()
-    pass
 
-def test_plot_2D(IR_source_1,):
+def test_plot_generic_1D(IR_source_1, DONOTBLOCK):
+    source = IR_source_1[0].copy()
+    plotoptions.do_not_block = DONOTBLOCK
+    source.plot()
+
+def test_plot_2D(IR_source_1, DONOTBLOCK):
+
     source = IR_source_1.copy()
+    plotoptions.do_not_block = DONOTBLOCK
     source.plot_2D()
 
-def test_plot_map(IR_source_1):
     source = IR_source_1.copy()
-    source.plot_map()   # plot_map is an alias of plot_2D
-    pass
+    plotoptions.do_not_block = DONOTBLOCK
+    source.plot_2D(kind='map')
+
+    source = IR_source_1.copy()
+    plotoptions.do_not_block = DONOTBLOCK
+    source.plot_2D(kind='image')
+
+    source = IR_source_1.copy()
+    plotoptions.do_not_block = DONOTBLOCK
+    source.plot_2D(kind='stack')
+
+
+def test_plot_map(IR_source_1, DONOTBLOCK):
+
+    source = IR_source_1.copy()
+    plotoptions.do_not_block = DONOTBLOCK
+    source.plot_map()  # plot_map is an alias of plot_2D
+
+
+def test_plot_stack(IR_source_1, DONOTBLOCK):
+
+    source = IR_source_1.copy()
+    plotoptions.do_not_block = DONOTBLOCK
+    source.plot_stack()  # plot_map is an alias of plot_2D

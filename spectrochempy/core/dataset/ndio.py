@@ -467,7 +467,7 @@ class NDIO(HasTraits):
              ax=None,
              figsize=None,
              fontsize=None,
-             kind='modal',
+             kind='generic',
              **kwargs):
 
         """
@@ -481,7 +481,7 @@ class NDIO(HasTraits):
         kind : `str`, optional
             The kind of plot of the dataset,
             which will determine the plotter to use.
-            For instance, for 2D data, it can be `contour`, `flat` or `stacked',
+            For instance, for 2D data, it can be `map`, `stack' or 'image'
             among other kind.
 
         ax : :class:`matplotlib.Axe` instance. Optional, default = current or new one)
@@ -528,6 +528,8 @@ class NDIO(HasTraits):
 
         if not _plotter(**kwargs):
             return None
+
+    def plot_resume(self, **kwargs):
 
         # Additional matplotlib commands on the current plot
         # ----------------------------------------------------------------------
@@ -581,24 +583,23 @@ class NDIO(HasTraits):
         -------
 
         """
-        contour = kwargs.get('contour', True)
 
-        if self.ndim == 1:
+        # reduce 2D data with  only one row to 1D
+        # the same for ND that must be reduce to the minimal form.
+        temp = self.copy()
+        temp = temp.squeeze()
 
-            return self.plot_1D(**kwargs)
+        if temp.ndim == 1:
 
-        elif self.ndim == 2 and contour:
+            return temp.plot_1D(**kwargs)
 
-            return self.plot_2D(**kwargs)
+        elif temp.ndim == 2 :
 
-        elif self.ndim == 2:
+            return temp.plot_2D(**kwargs)
 
-            kwargs['flat'] = True  # else it will be stacked plot
-            return self.plot_3D(**kwargs)
+        elif temp.ndim == 3:
 
-        elif self.ndim == 3:
-
-            return self.plot_3D(**kwargs)
+            return temp.plot_3D(**kwargs)
 
         else:
             log.error('Cannot guess an adequate plotter. I did nothing!')

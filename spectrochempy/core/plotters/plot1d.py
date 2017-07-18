@@ -40,20 +40,20 @@
 """
 
 """
-
+import numpy as np
 from matplotlib.ticker import MaxNLocator
 
 from spectrochempy.application import plotoptions as options
+from spectrochempy.core.plotters.utils import make_label
 
 __all__ = ['plot_1D']
 
-
-def plot_1D(data, **kwargs):
+def plot_1D(source, **kwargs):
     """
 
     Parameters
     ----------
-    data : NDDataset to plot
+    source : NDDataset to plot
 
     reverse: `bool` [optional, default=True]
 
@@ -64,17 +64,20 @@ def plot_1D(data, **kwargs):
 
     """
     # where to plot?
-    ax = data.ax
+    #---------------
+    ax = source.ax
+    if ax is None:
+        fig, ax = source.figure_setup(**kwargs)
 
     # -------------------------------------------------------------------------
-    # plot the data
+    # plot the source
     # -------------------------------------------------------------------------
 
     # abscissa axis
-    x = data.x
+    x = source.x
 
     # ordinates
-    y = data.real()
+    y = source.real()
 
     # offset
     offset = kwargs.get('offset', 0.0)
@@ -99,20 +102,20 @@ def plot_1D(data, **kwargs):
     # -------------------------------------------------------------------------
 
     # abscissa limits?
-    xlim = list(kwargs.get('xlim', ax.get_xlim()))
-    xlim.sort()
     xl = [x.coords[0], x.coords[-1]]
-    xl.sort()
+    xlim = list(kwargs.get('xlim', xl))
+    xlim.sort()
     xlim[-1] = min(xlim[-1], xl[-1])
     xlim[0] = max(xlim[0], xl[0])
 
     # reversed axis?
-    reverse = data.meta.reverse
+    reverse = source.x.is_reversed
     if kwargs.get('reverse', reverse):
         xlim.reverse()
 
     # ordinates limits?
-    zlim = list(kwargs.get('zlim', kwargs.get('ylim', ax.get_ylim())))
+    zl = [np.amin(y.data), np.amax(y.data)]
+    zlim = list(kwargs.get('zlim',zl))
     zlim.sort()
 
     # set the limits
@@ -131,48 +134,21 @@ def plot_1D(data, **kwargs):
 
     # x label
 
-    # if xlabel exists or is passed, use this
-    xlabel = kwargs.get("xlabel", ax.get_xlabel())
-
-    # else:
+    xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        # make a label from title and units
-        if x.title:
-            label = x.title.replace(' ', '\ ')
-        else:
-            label = 'x'
-        if x.units is not None and str(x.units) !='dimensionless':
-            units = "({:~X})".format(x.units)
-        else:
-            units = '(a.u)'
-
-        xlabel = r"$\mathrm{%s\ %s}$"%(label, units)
-
+        xlabel = make_label(source.x, 'x')
     ax.set_xlabel(xlabel)
 
-    # y label
+    # z label
+    zlabel = kwargs.get("zlabel", None)
+    if not zlabel:
+        zlabel = make_label(source, 'z')
 
-    # if ylabel exists or is passed, use this
-    ylabel = kwargs.get("ylabel", ax.get_ylabel())
-
-    if not ylabel:
-
-        # make a label from title and units
-        if data.title:
-            label = data.title.replace(' ', '\ ')
-        else:
-            label = r"intensity"
-        if data.units is not None and str(data.units) !='dimensionless':
-            units = r"({:~X})".format(data.units)
-        else:
-            units = '(a.u.)'
-        ylabel = r"$\mathrm{%s\ %s}$" % (label, units)
-
-    ax.set_ylabel(ylabel)
+    ax.set_ylabel(zlabel)
 
     # do we display the ordinate axis?
-    if kwargs.get('show_y', True):
-        ax.set_ylabel(ylabel)
+    if kwargs.get('show_z', True):
+        ax.set_ylabel(zlabel)
     else:
         ax.set_yticks([])
 
@@ -180,4 +156,6 @@ def plot_1D(data, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
+    source.plot_resume(**kwargs)
 
+    return True

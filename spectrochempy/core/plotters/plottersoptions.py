@@ -34,7 +34,7 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple
+from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple, Unicode
 from traitlets.config.configurable import Configurable
 
 import matplotlib as mpl
@@ -77,6 +77,9 @@ class PlotOptions(Configurable):
                              "and stop after each of them").tag(config=True)
 
     offscreen = Bool(False)
+
+    kind_2D = Unicode('map', help='default kind of plot for 2D').tag(
+            config=True)
 
     show_projections = Bool(False, help='show all projections').tag(
             config=True)

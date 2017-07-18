@@ -39,7 +39,7 @@ __all__ = ['Svd']
 
 from traitlets import HasTraits, Instance
 
-from ..core.api import NDDataset, Axis, Axes
+from spectrochempy.core.api import NDDataset, Axis, Axes
 
 import numpy as np
 
@@ -83,6 +83,17 @@ class Svd(HasTraits):
         Vt contains a transpose matrix of the Loadings.
         Its shape depends on `full_matrices`
         :rtype self.ur: Dataset
+
+    Examples
+    ---------
+    >>> source = NDDataset.load('mydataset.scp')
+    >>> svd = Svd(source)
+    >>> print(svd.ev)
+    [1.18e+04      634 ...,  0.00109 0.000975]
+    >>> print(svd.ev_cum)
+    [1.18e+04 1.25e+04 ..., 1.25e+04 1.25e+04]
+    >>> print(svd.ev_ratio)
+    [   0.945   0.0506 ..., 8.69e-08 7.78e-08]
 
     """
 

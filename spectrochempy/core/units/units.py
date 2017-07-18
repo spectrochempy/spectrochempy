@@ -144,7 +144,7 @@ else:
 
 U_.define('__wrapped__ = 1')  #<- hack to avoid an error with pytest (doctest activated)
 U_.define('ppm = 1. = ppm')
-U_.define('absorbance = [absorbance] = AU')
+U_.define('absorbance = 1. = AU')
 
 U_.default_format = '' #.2fK'
 Q_ = U_.Quantity

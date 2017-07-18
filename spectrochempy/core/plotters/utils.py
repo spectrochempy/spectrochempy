@@ -35,14 +35,21 @@
 # =============================================================================
 
 
-from spectrochempy.api import NDDataset
-import os
 
+__all__ = []
 
-def test_plotr(IR_source_1):
-    source = IR_source_1
-    source.plot()         #plotr replaced with plot
-
-def test_plot(IR_source_1):
-    source = IR_source_1
-    source.T.plot()       #plotc replaced with plot using Transposition
+def make_label(ss, lab='<no_axe_label>'):
+    # make a label from title and units
+    if ss.title:
+        label = ss.title.replace(' ', '\ ')
+    else:
+        label = lab
+    if ss.units is not None and str(ss.units) != 'dimensionless':
+        if str(ss.units) == 'absorbance':
+            units = ' (a.u.)'
+        else:
+            units = "({:~Lx})".format(ss.units)
+    else:
+        units = ''
+    label = r"%s\ $\mathrm{%s}$" % (label, units)
+    return label

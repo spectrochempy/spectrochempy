@@ -334,7 +334,7 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
         source.title = 'Absorbance'
         source.name = spg_title
         source.axes = (np.array(alltimestamps), xaxis)
-        source.axes.titles = ('Acquisition date (GMT)', 'Wavenumbers')
+        source.axes.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
         source.axes[1].units = 'cm^-1'
         source.axes[0].labels = (allacquisitiondates, alltitles)
         source.axes[0].units = 's'
