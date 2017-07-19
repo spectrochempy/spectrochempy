@@ -79,7 +79,8 @@ except ImportError:
             except exceptions:
                 pass
 
-        Example::
+        Examples
+        --------
 
             >>> import os
             >>> with ignored(OSError):
@@ -190,7 +191,8 @@ def makedirs(newdir):  # from active recipes http://code.activestate.com/recipes
 def dict_compare(d1, d2, check_equal_only=True):
     """ Compare two dictionaries
 
-    Example::
+    Examples
+    --------
 
         >>> x = dict(a=1, b=2)
         >>> y = dict(a=2, b=2)

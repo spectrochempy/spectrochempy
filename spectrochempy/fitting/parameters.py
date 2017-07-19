@@ -67,7 +67,7 @@ from traitlets import (HasTraits, Unicode, Instance, List, observe)
 def _id_generator():
     """Returns a sequence of numbers for the title of the objects.
 
-    Example:
+    Examples
     --------
 
     >>> id_generator.next()

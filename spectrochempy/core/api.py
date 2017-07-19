@@ -60,16 +60,38 @@ pkgs = list_packages(pkgs)
 
 __all__ = []
 
-for pkg in pkgs:
-    if pkg.endswith('api'):
-        continue
-    pkg = import_item(pkg)
-    if not hasattr(pkg, '__all__'):
-        continue
-    a = getattr(pkg,'__all__')
-    __all__ += a
-    for item in a:
-        if 'dataset.' not in item:
-            setattr(NDDataset, item, getattr(pkg, item))
-        setattr(api, item, getattr(pkg, item))
+# dataset
+#--------
+from spectrochempy.core.dataset.api import *
+from spectrochempy.core.dataset import api
+__all__ += api.__all__
 
+# plotters
+#--------
+from spectrochempy.core.plotters.api import *
+from spectrochempy.core.plotters import api
+__all__ += api.__all__
+
+# processors
+#------------
+from spectrochempy.core.processors.api import *
+from spectrochempy.core.processors import api
+__all__ += api.__all__
+
+# readers
+#------------
+from spectrochempy.core.readers.api import *
+from spectrochempy.core.readers import api
+__all__ += api.__all__
+
+# writers
+#------------
+from spectrochempy.core.writers.api import *
+from spectrochempy.core.writers import api
+__all__ += api.__all__
+
+# units
+#------------
+from spectrochempy.core.units import *
+from spectrochempy.core import units
+__all__ += units.__all__

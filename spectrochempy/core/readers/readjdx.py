@@ -53,7 +53,8 @@ def read_jdx(filename='', sortbydate=True):
     :return: a  dataset object with spectra and metadata
     :rtype: sappy.Dataset
 
-    :Example:
+    Examples
+    --------
 
     >>> import spectrochempy as sa
     >>> A = sa.loadjdx('C:\Spectra\Ex_spectra.jdx')

@@ -394,7 +394,9 @@ def linkcode_resolve(domain, info):
 # autosummary_generate = glob.glob("reference/*.rst")
 # autosummary_generate = True
 
-autodoc_default_flags = ['members', 'inherited-members', 'show-inheritance']
+autodoc_default_flags = ['members',
+                         #'inherited-members',
+                         'show-inheritance']
 
 exclusions = ('set', 'get', 'with_traceback')
 

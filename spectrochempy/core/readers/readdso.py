@@ -49,26 +49,32 @@ __all__ = ['read_dso']
 def read_dso(filename='', **kwargs):
     """Open an eigevector DSO object (.mat file) and return the corresponding dataset
 
-    :param filename: filename of file to load
-    :type filename: str
-    :return: a  dataset object with spectra and metadata
-    :rtype: sappy.Dataset
+    Parameters
+    ===========
+    filename : `str`
+        filename of file to load
 
-    :Example:
-        >>> import spectrochempy as sa
-        >>> A = sa.loaddso('C:\Spectra\Ex_spectra.mat')
-        >>> A.print()
-           name: Ex_spectra.mat
-         author: Username
-           date: Wed., 26-Nov-14, 08:30:35
-           data: 10x1350  [float64]
-           (...)
+    Returns
+    ========
+    dataset : : a  dataset object with spectra and metadata
 
-    .. seealso:: Dataset(), loadjdx(), loaddso()
 
-    .. note:: note
+    Examples
+    =========
+    >>> import spectrochempy as sa
+    >>> A = sa.loaddso('C:\Spectra\Ex_spectra.mat')
+    >>> A.print()
+       name: Ex_spectra.mat
+     author: Username
+       date: Wed., 26-Nov-14, 08:30:35
+       data: 10x1350  [float64]
+       (...)
 
-    .. todo:: todo
+    See Also
+    =========
+
+
+
     """
     # open file dialog box
     if filename == '':

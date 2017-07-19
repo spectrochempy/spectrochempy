@@ -21,6 +21,6 @@ for pkg in pkgs:
     a = getattr(pkg,'__all__')
     __all__ += a
     for item in a:
-        setattr(NDDataset, item, getattr(pkg, item))
+        #setattr(NDDataset, item, getattr(pkg, item))
         setattr(api, item, getattr(pkg, item))
 

@@ -42,8 +42,16 @@ The only things made here is to setup a gui PyQt5.QApplication
 
 """
 import sys
+import os
 from PyQt5.QtWidgets import QApplication
 guiApp = QApplication(sys.argv)
+
+# ==============================================================================
+# PYTHONPATH
+# ==============================================================================
+# in case spectrochempy was not yet installed using setup
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 if __name__ == "__main__":
 

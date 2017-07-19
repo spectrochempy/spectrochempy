@@ -70,7 +70,7 @@ from spectrochempy.core.readers.readersoptions import ReadOptions
 from spectrochempy.core.writers.writersoptions import WriteOptions
 from spectrochempy.core.processors.processorsoptions import ProcessOptions
 
-__all__ = ['SpectroChemPy','DataDir','scp',
+__all = ['scp',
 
            ### Helpers
              'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
@@ -81,12 +81,6 @@ __all__ = ['SpectroChemPy','DataDir','scp',
              'copyright', 'release', 'version',
            ]
 
-# ==============================================================================
-# PYTHONPATH
-# ==============================================================================
-# in case spectrochempy was not yet installed using setup
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 # some useful objects
 class DataDir(Configurable):

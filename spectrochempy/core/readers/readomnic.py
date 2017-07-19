@@ -97,7 +97,7 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
     directory: `str` [optional, default=""].
         From where to read the specified filename. If not sperfied, read i the current directory.
 
-    Example
+    Examples
     --------
         >>> from spectrochempy.api import NDDataset, data_dir
         >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data_dir)

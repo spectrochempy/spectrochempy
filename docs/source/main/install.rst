@@ -90,13 +90,13 @@ Standard Installation from PyPi sources
 
 Very simple, use the following command in a terminal:
 
-.. code-block:: bash
+.. sourcecode:: bash
 
     $ pip install spectrochempy
 
 or to update a previous installation with the latest stable release:
 
-.. code-block:: bash
+.. sourcecode:: bash
 
     $ pip install -U spectrochempy
 
@@ -122,13 +122,13 @@ or on PyPi:
 
 Ungzip and untar the source package, ** *cd to the new directory* **, and execute:
 
-.. code-block:: bash
+.. sourcecode:: bash
 
-    $ pip install .
+	$ pip install .
 
 or better :
 
-.. code-block:: bash
+.. sourcecode:: bash
 
 	$ pip install -e .
 
@@ -155,7 +155,9 @@ and those who would like to contribute
 Check the Installation
 ======================
 
-Run a IPython session by issuing in the terminal the following command::
+Run a IPython session by issuing in the terminal the following command:
+
+.. sourcecode:: bash
 
 	$ ipython
 

@@ -836,13 +836,11 @@ class NDDataset(
 
         Parameters
         ----------
-
         axis : `int`, optional, default = -1.
             The axis along which the angle should be calculated.
 
         Returns
         -------
-
         imag_dataset : same type
             Output array.
 

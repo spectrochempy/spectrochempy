@@ -77,18 +77,33 @@ def APIref():
     return __all__
 
 
-
 # loading module libraries
 # ------------------------
 # here we also construct the __all__ list automatically
-from spectrochempy.application import log
 
-try:
-    from spectrochempy.application import *
-except:
-    pass #seems necessary for doctest #FIXME: why?
-from spectrochempy import application
-__all__ = application.__all__
+#     from spectrochempy.application import *
+# do not work for doctest --> import explicitely here then
+from spectrochempy.application import (scp,
+
+           ### Helpers
+             log, DEBUG,WARN, ERROR, CRITICAL, INFO,
+             data_dir,list_data_dir,
+             options, plotoptions,
+
+            ### Info
+             copyright, release, version)
+
+
+__all__ = ['scp',
+
+           ### Helpers
+             'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
+             'data_dir', 'list_data_dir',
+             'options', 'plotoptions',
+
+            ### Info
+             'copyright', 'release', 'version',
+           ]
 
 
 # core

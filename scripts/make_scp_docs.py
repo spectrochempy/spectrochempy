@@ -194,6 +194,7 @@ TEMPLATE = """{headerline}
 {underline}
 
 .. automodule:: {package}
+    :members:
 
 {subpackages}
 
@@ -245,7 +246,8 @@ def update_rest():
             f.write(TEMPLATE.format(package=package,
                                     headerline=headerline,
                                     underline='=' * (len(package) + 7),
-                                    subpackages=subpackages))
+                                    subpackages=subpackages
+                                    ))
 
 
 def write_download_page():
