@@ -37,7 +37,7 @@
 
 """
 """
-__all__ = ['get_user_and_node',
+__all__ = _methods = ['get_user_and_node',
            'get_user',
            'get_node',
            'is_kernel'

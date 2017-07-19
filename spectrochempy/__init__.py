@@ -35,14 +35,19 @@
 # =============================================================================
 
 """
-The main module of Spectrochempy
+The Spectrochempy package.
 
 The only things made here is to setup a gui PyQt5.QApplication
 
+Attributes
+==========
+guiApp : :class:`~PyQt5.QtWidgets.QApplication`
+    The main gui.
 
 """
 import sys
 import os
+
 from PyQt5.QtWidgets import QApplication
 guiApp = QApplication(sys.argv)
 

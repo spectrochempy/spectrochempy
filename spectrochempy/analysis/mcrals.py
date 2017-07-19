@@ -42,6 +42,8 @@ import numpy as np
 from ..core.api import NDDataset
 
 __all__ = ['McrAls']
+_methods = __all__[:]
+
 
 def McrAls(X, guess, **options):
     '''Performs MCR-ALS of a dataset knowing the initial C or St matrix

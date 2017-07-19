@@ -66,9 +66,9 @@ from spectrochempy.core.dataset.ndarray import NDArray
 # =============================================================================
 
 __all__ =['NDMath', 'set_operators']
+_classes = ['NDMath']
 
 from spectrochempy.application import log
-
 
 
 class NDMath(object):

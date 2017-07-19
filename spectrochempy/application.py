@@ -35,7 +35,7 @@
 # =============================================================================
 
 """
-This module define the application on which the API rely
+This module define the `application` on which the API rely
 
 
 """
@@ -70,24 +70,22 @@ from spectrochempy.core.readers.readersoptions import ReadOptions
 from spectrochempy.core.writers.writersoptions import WriteOptions
 from spectrochempy.core.processors.processorsoptions import ProcessOptions
 
-__all = ['scp',
-
-           ### Helpers
-             'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
-             'data_dir', 'list_data_dir',
-             'options', 'plotoptions',
-
-            ### Info
-             'copyright', 'release', 'version',
-           ]
+# doc info
+# --------
+_classes = [
+        'DataDir',
+        'SpectroChemPy',
+        ]
 
 
 # some useful objects
+# -------------------
+
 class DataDir(Configurable):
     """
     This class is used to determine the path to the data directory.
 
-    The attribute data_dir is configurable.
+    {attributes}
 
     Examples
     --------
@@ -105,7 +103,7 @@ class DataDir(Configurable):
 
     """
 
-    data_dir = Unicode(help="Set a data directory where to look for data").tag(
+    data_dir = Unicode(help="Directory where to look for data").tag(
             config=True)
 
     _testdata_dir = Unicode()
@@ -151,15 +149,17 @@ class DataDir(Configurable):
         # the testdata path in package tests
         return get_pkg_data_dir('testdata', 'tests')
 
-
 # ==============================================================================
 # Main application and configurators
 # ==============================================================================
 
 class SpectroChemPy(Application):
     """
-    SpectroChemPy is the main class, cotaining most of the setup, configuration,
+    SpectroChemPy is the main class, containing most of the setup, configuration,
     and more.
+
+    {attributes}
+
 
     """
 
@@ -409,8 +409,6 @@ class SpectroChemPy(Application):
         ...    debug=True,          # debugging logs
         ...    )
         True
-
-        #>>> print(scp.list_data_dir)
 
         """
 

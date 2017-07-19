@@ -60,11 +60,11 @@ from pandas.core.generic import NDFrame
 # =============================================================================
 from six import string_types
 from traitlets import (List, Unicode, Instance, default,
-                        Bool)
+                       Bool)
 
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils import SpectroChemPyWarning
-#from spectrochempy.utils import create_traitsdoc
+# from spectrochempy.utils import create_traitsdoc
 # from spectrochempy.api import preferences_manager
 from spectrochempy.utils import is_sequence, is_number
 from spectrochempy.utils import (numpyprintoptions,
@@ -88,14 +88,16 @@ from spectrochempy.application import log
 __all__ = ['NDDataset',
            'NDDatasetError',
            'NDDatasetWarning'
-          ]
+           ]
 
+_classes = __all__[:]
 
 # =============================================================================
 # numpy print options
 # =============================================================================
 
 numpyprintoptions()
+
 
 # =============================================================================
 # NDDataset class definition
@@ -114,10 +116,10 @@ class NDDatasetWarning(SpectroChemPyWarning):
 
 
 class NDDataset(
-                NDIO,
-                NDMath,
-                NDArray,
-                ):
+        NDIO,
+        NDMath,
+        NDArray,
+):
     """The main N-dimensional dataset class used by |scp|.
 
     Parameters
@@ -221,7 +223,7 @@ class NDDataset(
                  is_complex=None,
                  **kwargs):
 
-        self._iscopy = False #kwargs.pop('iscopy', False)
+        self._iscopy = False  # kwargs.pop('iscopy', False)
 
         if is_complex is not None:
             self._data_is_complex = is_complex
@@ -255,9 +257,9 @@ class NDDataset(
         if mask is not None:
             if self._data_passed_with_mask and self._mask != mask:
                 log.info("NDDataset was created with a masked array, and a "
-                            "mask was explicitly provided to Axis. The  "
-                            "explicitly passed-in mask will be used and the "
-                            "masked array's mask will be ignored.")
+                         "mask was explicitly provided to Axis. The  "
+                         "explicitly passed-in mask will be used and the "
+                         "masked array's mask will be ignored.")
             self.mask = mask
 
         if units is not None:
@@ -420,7 +422,7 @@ class NDDataset(
         if mask is not None:
             if self._mask is not None:
                 log.info("Overwriting NDDataset's current "
-                            "mask with specified mask")
+                         "mask with specified mask")
 
             # Check that value is not either type of null mask.
             if mask is not np.ma.nomask:
@@ -446,7 +448,7 @@ class NDDataset(
         if value is not None:
             if self.uncertainty is not None and self.uncertainty.size > 0:
                 log.info("Overwriting NDDataset's current uncertainty being"
-                            " overwritten with specified uncertainty")
+                         " overwritten with specified uncertainty")
             if not isinstance(value, np.ndarray):
                 raise ValueError('Uncertainty must be specified as a ndarray')
                 # TODO: make this a loittle less strict so it accept other list structure
@@ -497,7 +499,7 @@ class NDDataset(
         if value is not None:
             if self._axes is not None:
                 log.info("Overwriting NDDataset's current "
-                            "axes with specified axes")
+                         "axes with specified axes")
 
             for i, axis in enumerate(value):
                 if isinstance(axis, Axes):
@@ -544,7 +546,6 @@ class NDDataset(
     def axesunits(self, value):
         if self.axes is not None:
             self.axes.units = value
-
 
     @property
     def T(self):
@@ -895,23 +896,21 @@ class NDDataset(
     conj = conjugate
 
     def absolute(self, axis=-1):
-        """
-        Return the absolute value of a complex NDDataset.
+        """Return the absolute value of a complex |NDDataset|.
 
         Parameters
         ----------
-        axis : `int` [optional, default = -1].
-            The axis along which the absolute value should be calculated
+        axis : `int`, optional, default = -1.
+            The axis along which the absolute value should be calculated.
 
         Returns
         -------
-        abs_dataset : same type
+        nddataset : same type
             Output array.
 
         See Also
         --------
-        real, imag, conjugate.
-
+        real, imag, conjugate
 
         """
         new = self.copy()
@@ -982,7 +981,6 @@ class NDDataset(
                                         subsequent_indent=' ' * 15, \
                                         replace_whitespace=True)
 
-
         pars = self.description.strip().splitlines()
 
         out += '  description: '
@@ -1041,20 +1039,21 @@ class NDDataset(
     def __getattr__(self, item):
         # when the attribute was not found
 
-        if item in ["__numpy_ufunc__"] or '_validate' in item or '_changed' in item:
+        if item in [
+            "__numpy_ufunc__"] or '_validate' in item or '_changed' in item:
             # raise an error so that masked array will be handled correctly
             # with arithmetic operators and more
             raise AttributeError
 
-        # look from the plugins
-        # attr = super(NDDataset, self)._getattr(item)
+            # look from the plugins
+            # attr = super(NDDataset, self)._getattr(item)
 
-        #if attr is not None:
-        #    return attr
+            # if attr is not None:
+            #    return attr
 
-        # log.warning('not found attribute: %s' % item)
+            # log.warning('not found attribute: %s' % item)
 
-    #def __deepcopy__(self, memo=None):
+    # def __deepcopy__(self, memo=None):
     #    return self.copy(deep=False)
 
     def __getitem__(self, item):
@@ -1113,7 +1112,7 @@ class NDDataset(
                              "location slicing".format(str(new_data.shape)))
 
         new = self.copy()
-        new._name = '*'+self._name
+        new._name = '*' + self._name
         new._data = new_data
         new._mask = new_mask
         new._axes = new_axes
@@ -1133,12 +1132,12 @@ class NDDataset(
 
     def __eq__(self, other):
         eq = super(NDDataset, self).__eq__(other)
-    #     if self._units is None:
-    #         eq = np.all(self._data == other._data)
-    #     else:
-    #         eq = np.all(self._data * self._units == other._data * other._units)
+        #     if self._units is None:
+        #         eq = np.all(self._data == other._data)
+        #     else:
+        #         eq = np.all(self._data * self._units == other._data * other._units)
         eq &= (np.all(self._uncertainty == other._uncertainty))
-    #     eq &= (self._meta == other._meta)
+        #     eq &= (self._meta == other._meta)
         return eq
 
     def __hash__(self):
@@ -1183,11 +1182,11 @@ class NDDataset(
         out = '<table>\n'
         # out += '   name or id: %s \n' % self.name
         out += '<tr><td>       author</td><td> {}</td></tr>\n'.format(
-            self.author)
+                self.author)
         out += '<tr><td>       created</td><td> {}</td></tr>\n'.format(
-            self._date)
+                self._date)
         out += '<tr><td>       last modified</td><td> {}</td></tr>\n'.format(
-            self._modified)
+                self._modified)
 
         wrapper1 = textwrap.TextWrapper(initial_indent='', \
                                         subsequent_indent=' ' * 15, \
@@ -1393,4 +1392,4 @@ set_operators(NDDataset, priority=50)
 # Modify the doc to include Traits
 # =============================================================================
 
-#create_traitsdoc(NDDataset)
+# create_traitsdoc(NDDataset)

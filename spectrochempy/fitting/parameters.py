@@ -57,9 +57,10 @@ import numpy as np
 from traitlets import (HasTraits, Unicode, Instance, List, observe)
 
 #==============
-# Local import
+# constants
 #==============
-
+__all__ =['FitParameters', 'ParameterScript']
+_classes = __all__[:]
 
 #=============
 # id_generator

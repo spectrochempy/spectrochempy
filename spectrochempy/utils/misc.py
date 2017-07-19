@@ -40,7 +40,7 @@
 Various methods used in other part of the program
 
 """
-__all__ = ["closer_power_of_two",
+__all__ = _methods = ["closer_power_of_two",
            "create_traitsdoc",
            "dict_compare",
            'htmldoc',

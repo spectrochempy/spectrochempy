@@ -38,6 +38,8 @@ from traitlets import TraitType, TraitError, List, class_of
 
 import numpy as np
 
+_classes = ['Array', 'Range']
+
 # =============================================================================
 # Range
 # =============================================================================

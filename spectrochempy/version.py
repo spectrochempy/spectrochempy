@@ -41,6 +41,8 @@ import os
 import subprocess
 from warnings import warn
 
+_methods = ['get_version']
+
 # get the version string
 # -----------------------
 def get_version():

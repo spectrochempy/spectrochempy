@@ -13,7 +13,7 @@ import six
 from six.moves import range, zip
 
 
-__all__ = ['resolve_name', 'minversion', 'find_current_module',
+__all__ = _methods = ['resolve_name', 'minversion', 'find_current_module',
            'isinstancemethod']
 
 

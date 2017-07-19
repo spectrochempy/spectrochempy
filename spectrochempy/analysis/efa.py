@@ -35,6 +35,7 @@
 # =============================================================================
 
 __all__ = ['Efa']
+_classes = ['Efa']
 
 import numpy as np
 from scipy.linalg import svdvals

@@ -28,6 +28,19 @@ __all__ = ['File',
            'list_packages',
           ]
 
+_classes = ['File',
+           'set_temp_config',
+           'set_temp_cache',
+          ]
+
+_methods = ['get_log_dir',
+           'get_config_dir',
+           'get_cache_dir',
+           'get_pkg_data_dir',
+           'get_pkg_data_filename',
+           'list_packages',
+          ]
+
 # Standard/built-in imports.
 import mimetypes
 import os

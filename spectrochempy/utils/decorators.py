@@ -37,7 +37,7 @@
 import warnings
 from .exceptions import SpectroChemPyDeprecationWarning
 
-all =['deprecated']
+all = _methods = ['deprecated']
 
 def deprecated(message):
     """

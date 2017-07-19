@@ -39,6 +39,8 @@ from traitlets.config.configurable import Configurable
 
 import matplotlib as mpl
 
+_classes = ['PlotOptions']
+
 # =============================================================================
 # Plot Options
 # =============================================================================

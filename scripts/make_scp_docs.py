@@ -49,6 +49,7 @@ from subprocess import call, getoutput
 from warnings import warn
 
 from sphinx.util.docutils import docutils_namespace, patch_docutils
+from ipython_genutils.text import indent, dedent, wrap_paragraphs
 from sphinx.errors import SphinxError
 from sphinx.application import Sphinx
 
@@ -58,6 +59,7 @@ mpl.use('agg')
 
 from spectrochempy.application import scp, log
 from spectrochempy.utils import list_packages
+from traitlets import import_item
 
 import logging
 scp.log_level = logging.INFO
@@ -193,13 +195,66 @@ TEMPLATE = """{headerline}
 :mod:`{package}`
 {underline}
 
-.. automodule:: {package}
-    :members:
 
+.. automodule:: {package}
+
+{methods}
+
+{classes}    
+   
 {subpackages}
 
 """  # This is important to align the text on the border
 
+#**Inheritance diagram**:
+
+#.. inheritance-diagram:: {package}
+#   :parts: 3
+
+def class_config_rst_doc(cls):
+    """Generate rST documentation for the class `cls` config options.
+    Excludes traits defined on parent classes. (adapted from traitlets)
+    """
+    lines = []
+    classname = cls.__name__
+    for k, trait in sorted(cls.class_traits().items()):
+        if trait.name.startswith('_') or not trait.help or trait.name in [
+            'cli_config',
+        ]:
+            continue
+
+        ttype = '`'+trait.__class__.__name__+'`'
+
+        termline = '**'+trait.name+'**'
+
+        # Choices or type
+        if 'Enum' in ttype:
+            # include Enum choices
+            termline += ' : ' + '|'.join('`'+repr(x)+'`' for x in trait.values)
+        else:
+            termline += ' : ' + ttype + ', '
+        lines.append(termline)
+
+        # Default value
+        try:
+            dvr = trait.default_value_repr()
+        except Exception:
+            dvr = None  # ignore defaults we can't construct
+        if dvr is not None:
+            if len(dvr) > 64:
+                dvr = dvr[:61] + '...'
+            # Double up backslashes, so they get to the rendered docs
+            dvr = dvr.replace('\\n', '\\\\n')
+            lines.append(indent('Default: `%s`,' % dvr, 4))
+            lines.append('')
+
+        help = trait.help or 'No description'
+        lines.append(indent(dedent(help+'.'), 4))
+
+        # Blank line
+        lines.append('')
+
+    return '\n'.join(lines)
 
 def update_rest():
     """Update the Sphinx ReST files for the package .
@@ -212,12 +267,13 @@ def update_rest():
         os.remove(f)
 
     # Create new files.
+    packages = []
     import spectrochempy
-    packages = list_packages(spectrochempy)
+    packages += list_packages(spectrochempy)
 
-    pack = packages[:]  # remove extern librairies
+    pack = packages[:]  # remove api librairies
     for package in pack:
-        if 'extern' in package:
+        if 'api' in package:
             packages.remove(package)
 
     for package in packages:
@@ -233,11 +289,47 @@ def update_rest():
         if not subs:
             subpackages = ""
         else:
-            subpackages = ".. toctree::\n\t:maxdepth: 1\n"
+            subpackages = """
+            
+Sub-Packages
+-------------
+
+The following sub-packages are available in this package:
+ 
+"""
+            subpackages += ".. toctree::\n\t:maxdepth: 1\n"
             for sub in sorted(subs):
+                if 'api' in sub:
+                    continue
                 subpackages += "\n\t{0}".format(package + '.' + sub)
 
         # temporary import as to check the presence of doc functions
+        pkg = import_item(package)
+
+        classes = ''
+        methods = ''
+
+        if hasattr(pkg, '_classes'):
+            classes += "\nClasses\n-------------\n"
+            classes += "This module contains the following classes:\n\n"
+            for item in pkg._classes:
+                _item = "%s.%s"%(package,item)
+                _imported_item = import_item(_item)
+                if hasattr(_imported_item,'class_config_rst_doc'):
+                    doc = "\n"+class_config_rst_doc(_imported_item)
+                    doc = doc.replace(item+".",'')
+                    doc = doc.replace(item + "\n", '\n\t')
+                    _imported_item.__doc__ = _imported_item.__doc__.format(attributes=doc) # "\n\tAttributes\n\t========================\n%s\n"%doc
+                classes += "\n.. autoclass:: %s\n\t:members:\n\t:inherited-members:\n\n" % _item
+
+        if hasattr(pkg, '_methods'):
+            methods += "\nMethods\n---------------\n"
+            methods += "This module contains the following methods:\n\n"
+            for item in pkg._methods:
+                _item = "%s.%s"%(package,item)
+                methods += "\n.. automethod:: %s\n\n" % _item
+
+
         title = "_".join(package.split('.')[1:])
         headerline = ".. _mod_{}:".format(title)
 
@@ -246,7 +338,9 @@ def update_rest():
             f.write(TEMPLATE.format(package=package,
                                     headerline=headerline,
                                     underline='=' * (len(package) + 7),
-                                    subpackages=subpackages
+                                    classes = classes,
+                                    methods=methods,
+                                    subpackages=subpackages,
                                     ))
 
 

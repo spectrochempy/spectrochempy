@@ -51,8 +51,11 @@ from traitlets import HasTraits, Dict, Bool, default
 from spectrochempy.application import log
 
 
+# contants
+# ----------
 
 __all__ = ['Meta']
+_classes = __all__[:]
 
 # =============================================================================
 # Class Meta

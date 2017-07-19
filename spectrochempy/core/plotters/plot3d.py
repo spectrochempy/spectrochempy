@@ -41,7 +41,7 @@ This module should be able to handle a large set of plot types.
 
 """
 __all__ = ['plot_3D']
-
+_methods = __all__[:]
 
 def plot_3D(source,
            **kwargs):
@@ -49,13 +49,13 @@ def plot_3D(source,
 
     Parameters
     ----------
-    source : NDDataset
+    source : :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
     contour : `bool`
     axeslabels : None,
 
     transpose : False,
-    step : `int` or `str` [optional, default='all']
+    step : `int` or `str` [optional, default=``all``]
 
 
     lw = None,

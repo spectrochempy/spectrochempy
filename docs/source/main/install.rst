@@ -120,10 +120,11 @@ or on PyPi:
 
 	* `Download tar.gz archives from PyPi <http://pypi.python.org/pypi/spectrochempy>`_
 
-Ungzip and untar the source package, ** *cd to the new directory* **, and execute:
+Ungzip and untar the source package and execute:
 
 .. sourcecode:: bash
 
+	$ cd <directory>    # replace <directory> by the actual download folder
 	$ pip install .
 
 or better :

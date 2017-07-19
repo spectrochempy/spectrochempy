@@ -36,6 +36,7 @@
 
 
 __all__ = ['Pca']
+_classes = __all__[:]
 
 import matplotlib.pyplot as plt
 

@@ -69,14 +69,10 @@ from spectrochempy.core.units import ur
 
 # for the command : from .isotopes import *
 __all__ = ['Isotopes']
+_classes = __all__[:]
 
 # This module's package.
 PKG = 'spectrochempy.databases.isotopes'
-
-# helpers
-attributes = ['isotopes', 'name', 'symbol',
-              'A', 'Z', 'spin', 'gamma', 'Q', 'abundance', 'stability']
-
 
 # =============================================================================
 # Isotopes class
@@ -90,38 +86,6 @@ class Isotopes(HasTraits):
     nucleus : String, optional, default='1H'
         In the AX form where A is the atomic mass and X the atom symbol
 
-    Attributes
-    ----------
-    name : `str`
-        Long name of the nucleus
-
-    symbol : `str`
-        Symbol of the nucleus
-
-    A : `int`
-        Atomic mass / Number of nucleons
-
-    Z : `int`
-        Atomic number / number of protons
-
-    spin : `float`
-        The spin quantum number
-
-    abundance : `float`
-        The natural abundance in %
-
-    gamma : `float`
-        Gyromagnetic ratio divided by nuclear magneton
-
-    Q : `Float`
-        The electric quadrupole moment in barns [1]
-
-    stability : `str`
-        Stability of the nucleus (radioactive or not)
-
-
-    isotopes : pandas array
-        Returns the full list of nucleus in the database
 
     Examples
     --------

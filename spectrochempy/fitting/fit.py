@@ -66,6 +66,7 @@ from spectrochempy.utils.misc import htmldoc
 
 
 __all__ = ['Fit']
+_classes = __all__[:]
 
 from spectrochempy.application import log
 

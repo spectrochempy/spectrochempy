@@ -55,7 +55,7 @@ from spectrochempy.application import plotoptions as options
 from spectrochempy.core.plotters.utils import make_label
 
 __all__ = ['plot_2D', 'plot_map', 'plot_stack']
-
+_methods = __all__[:]
 
 # =============================================================================
 # nddataset plot2D functions
@@ -67,7 +67,7 @@ def plot_map(source, **kwargs):
     """
     Plot a 2D dataset as a contoured map.
 
-    Alias of plot_2D (with `kind` argument set to `map`.
+    Alias of plot_2D (with `kind` argument set to ``map``.
 
     """
     kwargs['kind'] = 'map'
@@ -80,7 +80,7 @@ def plot_stack(source, **kwargs):
     """
     Plot a 2D dataset as a stacked plot.
 
-    Alias of plot_2D (with `kind` argument set to `stack`).
+    Alias of plot_2D (with `kind` argument set to ``stack``).
 
     """
     kwargs['kind'] = 'stack'
@@ -95,11 +95,11 @@ def plot_2D(source, **kwargs):
 
     Parameters
     ----------
-    source : NDDataset to plot
+    source : :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
     projections : `bool` [optional, default=False]
 
-    kind : `str` [optional among `map`, `stack` or `3d` , default=`stack`]
+    kind : `str` [optional among ``map``, ``stack`` or ``3d`` , default=``stack``]
 
     kwargs : additional keywords
 

@@ -37,6 +37,10 @@
 #TODO: create tests
 
 __all__ = ['Lstsq']
+_methods = __all__[:]
+
+
+
 
 import numpy as np
 

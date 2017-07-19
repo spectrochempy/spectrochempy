@@ -36,10 +36,11 @@
 
 
 __all__ = ['Svd']
+_classes = __all__[:]
 
 from traitlets import HasTraits, Instance
 
-from spectrochempy.core.api import NDDataset, Axis, Axes
+from spectrochempy.core.dataset.nddataset import NDDataset, Axis, Axes
 
 import numpy as np
 

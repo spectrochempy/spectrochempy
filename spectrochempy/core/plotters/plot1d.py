@@ -47,19 +47,20 @@ from spectrochempy.application import plotoptions as options
 from spectrochempy.core.plotters.utils import make_label
 
 __all__ = ['plot_1D']
+_methods = __all__[:]
 
 def plot_1D(source, **kwargs):
     """
 
     Parameters
     ----------
-    source : NDDataset to plot
+    source : :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
-    reverse: `bool` [optional, default=True]
+    reverse: `bool` [optional, default=`True`]
 
 
 
-    kwargs : additionnal keywords
+    kwargs : additional keywords
 
 
     """

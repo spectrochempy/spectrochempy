@@ -36,6 +36,7 @@
 
 
 __all__ = ['Iris']
+_classes = __all__[:]
 
 import numpy as np
 

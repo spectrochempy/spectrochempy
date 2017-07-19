@@ -37,6 +37,7 @@
 #todo: create tests
 
 __all__ = ['Lsqnonneg']
+_methods = __all__[:]
 
 from ..core.api import NDDataset
 

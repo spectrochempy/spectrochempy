@@ -41,6 +41,10 @@ import os
 import numpy as np
 from spectrochempy.application import log
 
+_classes = ['polynomialbaseline', 'gaussianmodel', 'lorentzianmodel',
+            'assymvoigtmodel', 'voigtmodel']
+
+_methods = ['getmodel']
 
 ############
 ###      ###

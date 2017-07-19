@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-__all__ = ['readXlCellRange']
+__all__ = _methods = ['readXlCellRange']
 
 import xlrd
 import numpy as np

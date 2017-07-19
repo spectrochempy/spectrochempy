@@ -80,6 +80,7 @@ from spectrochempy.application import options
 # ---------
 
 __all__ = ['NDIO']
+_classes = __all__[:]
 
 from spectrochempy.application import log
 
@@ -114,7 +115,7 @@ class NDIO(HasTraits):
         path : `str`
             The path to the file to be save
 
-        directory : `str` [optional, default=True]
+        directory : `str` [optional, default=`True`]
             It specified, the given path (generally a file name) fill be
             appended to the ``dir``.
 
@@ -241,11 +242,11 @@ class NDIO(HasTraits):
         path : `str`
             The path to the file to be read.
 
-        protocol : `str` [optional, default='scp']
+        protocol : `str` [optional, default=``scp``]
             The default type for saving,
 
-        directory : `str` [optional, default=`data_dir`]
-            The directory from where to load hhe file
+        directory : `str` [optional, default=``data_dir``]
+            The directory from where to load hhe file.
 
         kwargs : optional keyword parameters.
             Any additional keyword to pass to the actual reader.
@@ -275,7 +276,7 @@ class NDIO(HasTraits):
 
         See Also
         --------
-        :meth:`read`
+        read, save
 
         """
 

@@ -50,6 +50,7 @@ from spectrochempy.fitting.parameters import FitParameters
 
 
 __all__ = ["optimize", ]
+_methods = ['optimize', ]
 
 #===========================================================================
 # _fitting
