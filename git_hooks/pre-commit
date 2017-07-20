@@ -18,15 +18,15 @@ source ~/.bash_profile
 # to make it work with matplotlib/latex
 export PATH=$PATH:/Library/TeX/texbin/
 
-# test everything
+# test everything and do not commit if erros
 py.test -x tests || exit 1
 
 # install to check setup
 pip uninstall -y spectrochempy
 pip install -e . || exit 1
 
-# make docs
-python scripts/make_scp_docs.py clean html release
+# make docs and do not commit if doc fails to build
+python scripts/make_scp_docs.py clean html release || exit 1
 
 # add files modified
 git add -A
