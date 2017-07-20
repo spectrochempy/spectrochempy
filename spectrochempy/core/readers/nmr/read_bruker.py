@@ -50,7 +50,12 @@ import os
 # =============================================================================
 import numpy as np
 
-from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
+from spectrochempy.api import log
+try:
+    from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
+except ImportError:
+    raise ImportError('nmrglue must be installed prior to use of nmr function.'
+                 ' Use pip install nmrglue to get the latest version')
 
 #TODO: make a conda install for nmrglue
 

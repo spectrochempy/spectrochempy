@@ -25,4 +25,3 @@ nbbrowserpdf
 nbsphinx
 jupyter_nbextensions_configurator
 
-nmrglue
