@@ -337,7 +337,7 @@ The following sub-packages are available in this package:
                                "%s.rst" % package), 'w') as f:
             f.write(TEMPLATE.format(package=package,
                                     headerline=headerline,
-                                    underline='=' * (len(package) + 7),
+                                    underline='#' * (len(package) + 7),
                                     classes = classes,
                                     methods=methods,
                                     subpackages=subpackages,

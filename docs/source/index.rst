@@ -1,6 +1,5 @@
 .. _main:
 
-
 Welcome to the |scp| documentation!
 ###################################
 
@@ -25,8 +24,8 @@ running on Linux, Windows or OS X.
   2. `Units` and `Uncertainties` for |NDDataset| and |NDDataset| axes.
   3.  Mathematical operations over |NDDataset| such addition, multiplication and many more ...
   4.  Import functions to read data from experiments or modelling programs ...
-  5.  Display functions such as ``print``, :meth:`plot` ...
-  6.  Export functions to `csv`, `xls` ...
+  5.  Display functions such as ``print``, ``plot`` ...
+  6.  Export functions to ``csv``, ``xls`` ...
   7.  Preprocessing funtions such as baseline correction, automatic subtraction and many more ...
   8.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
 
@@ -57,28 +56,41 @@ Documentation is available here:
 
 * `https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
 
-and through docstrings provided with the code.
 
 .. _main_user_guides:
 
-User Guide and Tutorials
-=========================
-
-Tutorial pages and Jupyter notebooks with running examples are also available.
+User Guide, Tutorials and Examples
+===================================
 
 .. toctree::
     :maxdepth: 1
 
     api/userguide
+    api/reference
     main/faq
-    api/auto_examples/index
+
+Tutorial pages with Jupyter notebooks with running examples are available.
+
+.. toctree::
+    :maxdepth: 1
+
+    api/tutorials
+
+Gallery of examples
+--------------------
+
+.. toctree::
+	:maxdepth: 1
+
+	api/auto_examples/index
+
 
 .. _main_issue_tracker:
 
 Issue Tracker
 ==============
 
-You find a problem, want to suggest enhancement, or want to look at the current issues and milestones, you can go there:
+You find a problem, want to suggest enhancement or want to look at the current issues and milestones, you can go there:
 
 * `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 

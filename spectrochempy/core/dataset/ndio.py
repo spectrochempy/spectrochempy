@@ -133,7 +133,7 @@ class NDIO(HasTraits):
 
         See Also
         ---------
-        :meth:`write`
+        write
 
         """
 
@@ -233,22 +233,28 @@ class NDIO(HasTraits):
              **kwargs
              ):
         """
-        Load a dataset object saved as a pickle file (``.scp`` file).
+        Load a dataset object saved as a pickle file ( ``.scp`` file).
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
         Parameters
         ----------
         path : `str`
+
             The path to the file to be read.
 
-        protocol : `str` [optional, default=``scp``]
+        protocol : `str`
+
+            optional, default= ``scp``
             The default type for saving,
 
-        directory : `str` [optional, default=``data_dir``]
+        directory : `str`
+
+            optional, default=``data_dir``
             The directory from where to load hhe file.
 
         kwargs : optional keyword parameters.
+
             Any additional keyword to pass to the actual reader.
 
         Examples
@@ -272,11 +278,12 @@ class NDIO(HasTraits):
 
         Notes
         -----
-        adapted from :func:`numpy.load`
+        adapted from `numpy.load`
 
         See Also
         --------
         read, save
+
 
         """
 

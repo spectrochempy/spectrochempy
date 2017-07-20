@@ -60,7 +60,7 @@ from pandas.core.generic import NDFrame
 # =============================================================================
 from six import string_types
 from traitlets import (List, Unicode, Instance, default,
-                       Bool)
+                       Bool, observe, All)
 
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils import SpectroChemPyWarning
@@ -72,7 +72,7 @@ from spectrochempy.utils import (numpyprintoptions,
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndaxes import Axis, Axes, AxisError
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
-from spectrochempy.core.dataset.ndmeta import Meta
+#from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.dataset.ndio import NDIO
 
 from spectrochempy.application import log
@@ -104,13 +104,15 @@ numpyprintoptions()
 # =============================================================================
 
 class NDDatasetError(ValueError):
-    """ An exception that is raised when something is wrong with the `NDDataset`
+    """
+    An exception that is raised when something is wrong with the NDDataset`
     definitions.
     """
 
 
 class NDDatasetWarning(SpectroChemPyWarning):
-    """ A warning that is raised when something is wrong with the `NDDataset`
+    """
+    A warning that is raised when something is wrong with the `NDDataset`
     definitions but do not necessarily need to raise an error.
     """
 
@@ -120,13 +122,15 @@ class NDDataset(
         NDMath,
         NDArray,
 ):
-    """The main N-dimensional dataset class used by |scp|.
+    """
+    The main N-dimensional dataset class used by |scp|.
 
     Parameters
     -----------
     data : :class:`~numpy.ndarray`-like object.
 
-        If possible, the provided data will not be copied for `data` input, but will be
+        If possible, the provided data will not be copied for `data` input,
+        but will be
         passed by reference, so you should make a copy
         the :attr:`data` before passing it in if that's the desired behavior
         or set of the `iscopy` parameter to True.
@@ -136,12 +140,14 @@ class NDDataset(
 
         Mask for the data. The values must be `False` where
         the data is *valid* and `True` when it is not (like Numpy
-        masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or
+        masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`,
+        or
         any array object (such as a `NDDataset`), providing
         a `mask` here will causes the mask from the masked array to be
         ignored.
 
-    axes : An instance of :class:`~spectrochempy.core.dataset.ndaxes.Axes` , optional
+    axes : An instance of :class:`~spectrochempy.core.dataset.ndaxes.Axes`,
+    optional
 
         It contains the `axis` coordinates and `labels` for the different
         dimensions of the `data`. if `axes` is provided, it must specified
@@ -150,14 +156,17 @@ class NDDataset(
 
     uncertainty : :class:`~numpy.ndarray`, optional
 
-        standard deviation on the `data`. Handling of uncertainty use a fork of the
+        standard deviation on the `data`. Handling of uncertainty
+        use a fork of the
         `uncertainties <http://pythonhosted.org/uncertainties/>`_
         package (BSD Licence) which is embedded in |scp|.
 
-    units : an instance of :class:`~spectrochempy.core.units.Unit` or string, optional
+    units : an instance of :class:`~spectrochempy.core.units.Unit` or string,
+    optional
 
         The units of the data. If `data` is a `Quantity` then
-        `units` is set to the units of the `data`; if a `unit` is also explicitly
+        `units` is set to the units of the `data`; if a `unit`
+        is also explicitly
         provided an error is raised. Handling of `units` use a fork of the
         `pint <https://pint.readthedocs.org/en/0.6>`_ (BSD Licence) package
         which is embedded in |scp|)
@@ -168,18 +177,18 @@ class NDDataset(
 
     iscopy :  `bool`, optional, default = `False`.
 
-        `False` means that the initializer try to keep reference to the passed `data`
+        `False` means that the initializer try to keep reference
+        to the passed `data`
 
 
     Notes
     -----
-    The underlying array in a `NDDataset` object can be accessed through the `data`
+    The underlying array in a `NDDataset` object can be accessed
+    through the `data`
     attribute, which will return a conventional :class:`~numpy.ndarray`.
 
     Examples
     --------
-
-
 
     Usage by an end-user:
 
@@ -190,8 +199,6 @@ class NDDataset(
 
 
     """
-    # This module is strongly inspired from Astropy (BSD license).
-
     author = Unicode(get_user_and_node(),
                      desc='Name of the author of this dataset',
                      config=True)
@@ -265,7 +272,8 @@ class NDDataset(
         if units is not None:
             if self._data_passed_is_quantity and self._units != units:
                 raise ValueError(
-                        "Cannot use the units argument when passed data is a Quantity")
+                        "Cannot use the units argument "
+                        "when passed data is a Quantity")
             self.units = units
 
         self.axes = axes
@@ -292,7 +300,8 @@ class NDDataset(
         # complex values are only accepted for the last dimension
 
         if self._data_is_complex is None:
-            # make the data in the last dimension (or the dimension specified by is complex)
+            # make the data in the last dimension (or the dimension
+            # specified by is complex)
             # compatible with the structure of
             # NDDataset which does not accept complex data (must be interlaced)
             self._is_complex = [False] * data.ndim
@@ -311,7 +320,8 @@ class NDDataset(
 
     @property
     def data(self):
-        """:class:`~numpy.ndarray`-like object - The actual array data
+        """
+        :class:`~numpy.ndarray`-like object - The actual array data
         contained in this object.
 
         """
@@ -379,32 +389,10 @@ class NDDataset(
             self._check_for_complex_data(np.array(data, subok=True,
                                                   copy=self._iscopy))
 
-    # def _set_name(self, name):
-    #     # property.setter for name
-    #     if name is not None:
-    #         self._name = name
-    #
-    # def _set_title(self, title):
-    #     # property.setter for name
-    #     if title is not None:
-    #         if self._title is not None:
-    #             log.info("Overwriting NDDataset's current "
-    #                         "title with specified title")
-    #         self._title = title
-
-    # def _set_meta(self, meta):
-    #     # property.setter for meta
-    #     if meta is not None:
-    #         self._meta.update(meta)
-
-    # def _set_units(self, units):
-    #     # property.setter for units
-    #     if units is not None:
-    #         super(NDDataset, self)._set_units(units)
-
     @property
     def mask(self):
-        """:class:`~numpy.ndarray`-like - Mask for the data.
+        """
+        :class:`~numpy.ndarray`-like - Mask for the data.
 
         The values must be `False` where
         the data is *valid* and `True` when it is not (like Numpy
@@ -437,7 +425,8 @@ class NDDataset(
 
     @property
     def uncertainty(self):
-        """:class:`~numpy.ndarray` -  Uncertainty (std deviation) on the data.
+        """
+        :class:`~numpy.ndarray` -  Uncertainty (std deviation) on the data.
 
         """
         return self._uncertainty
@@ -451,7 +440,8 @@ class NDDataset(
                          " overwritten with specified uncertainty")
             if not isinstance(value, np.ndarray):
                 raise ValueError('Uncertainty must be specified as a ndarray')
-                # TODO: make this a loittle less strict so it accept other list structure
+                # TODO: make this a little less strict
+                # so it accept other list structure
 
             if value.shape != self._data.shape:
 
@@ -468,6 +458,12 @@ class NDDataset(
     # --------------------------------------------------------------------------
     @property
     def description(self):
+        """
+        `str`,
+
+        Provides a description of the underlying data
+
+        """
         return self._description
 
     @description.setter
@@ -476,7 +472,8 @@ class NDDataset(
 
     @property
     def history(self):
-        """ list of strings
+        """
+        List of strings
 
         Describes the history of actions made on this dataset
         """
@@ -488,9 +485,11 @@ class NDDataset(
 
     @property
     def axes(self):
-        """:class:`~spectrochempy.core.dataset.ndaxes.Axes` instance
+        """
+        :class:`~spectrochempy.core.dataset.ndaxes.Axes` instance
 
         Contain the axes of the dataset
+
         """
         return self._axes
 
@@ -506,7 +505,7 @@ class NDDataset(
                     size = axis.sizes[i]
                 else:
                     size = axis.size
-                if (size != self.shape[i]):
+                if size != self.shape[i]:
                     raise AxisError(
                             'the size of each axis coordinates must '
                             'be equal to that of the respective data dimension')
@@ -522,7 +521,8 @@ class NDDataset(
 
     @property
     def axestitles(self):
-        """`list` - A list of the :class:`~spectrochempy.core.dataset.ndaxes.Axis`
+        """
+        `List` - A list of the :class:`~spectrochempy.core.dataset.ndaxes.Axis`
         titles.
 
         """
@@ -536,20 +536,23 @@ class NDDataset(
 
     @property
     def axesunits(self):
-        """`List`- A list of the :class:`~spectrochempy.core.dataset.ndaxes.Axis`
+        """
+        `List`- A list of the :class:`~spectrochempy.core.dataset.ndaxes.Axis`
         units
         """
         if self.axes is not None:
             return self.axes.units
 
-    @axestitles.setter
+    @axesunits.setter
     def axesunits(self, value):
+
         if self.axes is not None:
             self.axes.units = value
 
     @property
     def T(self):
-        """same type - Transposed array.
+        """
+        Same type - Transposed array.
 
         The object is returned if `ndim` < 2.
 
@@ -558,31 +561,57 @@ class NDDataset(
 
     @property
     def x(self):
+        """
+        Read-pnly properties
+
+        Return the x axis, i.e. coords(-1)
+
+        """
         return self.axes[-1]
 
     @property
     def y(self):
+        """
+        Read-pnly properties
+
+        Return the y axis, i.e. coords(-2) for 2D dataset.
+
+        """
         if self.ndim > 1:
             return self.coords(-2)
 
     @property
     def z(self):
+        """
+        Read-pnly properties
+
+        Return the z axis, i.e. coords(-3) fpr 3D dataset
+
+        """
         if self.ndim > 2:
             return self.coords(-3)
 
     @property
     def date(self):
+        """
+        Date of the dataset creation
+        """
         return self._date
 
     @property
     def modified(self):
+        """
+        Date of modification
+
+        """
         return self._modified
 
     # -------------------------------------------------------------------------
     # public methods
     # -------------------------------------------------------------------------
     def squeeze(self, axis=None, inplace=False):
-        """Remove single-dimensional entries from the shape of an array.
+        """
+        Remove single-dimensional entries from the shape of an array.
 
         Parameters
         ----------
@@ -616,7 +645,8 @@ class NDDataset(
 
                 if self.shape[axis] > 1:
                     raise IndexError(
-                            '%d is of length greater than one: cannot be squeezed' % axis)
+                            '%d is of length greater than one: '
+                            'cannot be squeezed' % axis)
         else:
             squeeze_axis = []
             for axis, dim in enumerate(self.shape):
@@ -645,12 +675,14 @@ class NDDataset(
         return new
 
     def coords(self, axis=-1):
-        """This method return the the coordinates along the given axis
+        """
+        This method return the the coordinates along the given axis
 
         Parameters
         ----------
         axis : `int` or `unicode`
-                An axis index or name, default=-1 for the last axis
+
+            An axis index or name, default=-1 for the last axis
 
         Returns
         -------
@@ -660,7 +692,8 @@ class NDDataset(
         return self.axes[axis]  # .coords
 
     def transpose(self, axes=None, inplace=False):
-        """Permute the dimensions of a NDDataset.
+        """
+        Permute the dimensions of a NDDataset.
 
         Parameters
         ----------
@@ -669,11 +702,17 @@ class NDDataset(
             By default, reverse the dimensions, otherwise permute the axes
             according to the values given.
 
+        inplace : `bool`, optional, default = `False`.
+
+            By default a new dataset is returned.
+            Change to `True` to chnage data inplace.
+
         Returns
         -------
         transposed_dataset : same type
 
-            The nd-dataset or a new nd-dataset (inplace=False) is returned with axes
+            The nd-dataset or a new nd-dataset (inplace=False)
+            is returned with axes
             transposed
 
         See Also
@@ -695,7 +734,8 @@ class NDDataset(
         return new
 
     def swapaxes(self, axis1, axis2, inplace=False):
-        """Interchange two axes of the NDDataset.
+        """
+        Interchange two axes of the NDDataset.
 
         Parameters
         ----------
@@ -729,10 +769,10 @@ class NDDataset(
             new = self
 
         if axis1 == -1:
-            axis1 == self.ndim - 1
+            axis1 = self.ndim - 1
 
         if axis2 == -1:
-            axis2 == self.ndim - 1
+            axis2 = self.ndim - 1
 
         new._data = np.swapaxes(new._data, axis1, axis2)
         if new._axes:
@@ -744,30 +784,32 @@ class NDDataset(
         return new
 
     def sort(self, axis=0, pos=None, by='axis', descend=False, inplace=False):
-        """returns a copy of the dataset sorted along a given axis
+        """
+        Returns a copy of the dataset sorted along a given axis
         using the numeric or label values.
 
         Parameters
         ----------
-        axis : `int`, optional, default = 0.
+        axis : `int` , optional, default = 0.
 
             Axis id along which to sort.
 
+        pos: `int` , optional
 
-        pos: `int`, optional
-
-            If labels are multidimentional  - allow to sort on a define row of labels: labels[pos].
-            Experimental: Not yet checked
+            If labels are multidimentional  - allow to sort on a define
+            row of labels: labels[pos]. Experimental: Not yet checked
 
         by : `str` among ['axis', 'label'], optional, default = ``axis``.
 
-            Indicate if the sorting is following the order of labels or numeric axis values.
+            Indicate if the sorting is following the order of labels or
+            numeric axis values.
 
         descend : `bool`, optional, default = ``False``.
 
         inplace : bool, optional, default = ``False``.
 
-            if False a new object is returned, else the data are modified inline.
+            if False a new object is returned,
+            else the data are modified inline.
 
         Returns
         -------
@@ -802,11 +844,12 @@ class NDDataset(
         return new
 
     def real(self, axis=-1):
-        """Compute the real part of the elements of the NDDataset.
+        """
+        Compute the real part of the elements of the NDDataset.
 
         Parameters
         ----------
-        axis : `int`, optional, default = -1
+        axis : `int` , optional, default = -1
 
             The axis along which the angle should be calculated
 
@@ -818,7 +861,7 @@ class NDDataset(
 
         See Also
         --------
-        imag, conjugate, absolute
+        imag, conj, abs
 
         """
         new = self.copy()
@@ -831,29 +874,33 @@ class NDDataset(
         return new
 
     def imag(self, axis=-1):
-        """Imaginary part
+        """
+        Imaginary part
 
         Compute the imaginary part of the elements of the NDDataset.
 
         Parameters
         ----------
-        axis : `int`, optional, default = -1.
+        axis : `int` , optional, default = -1.
+
             The axis along which the angle should be calculated.
 
         Returns
         -------
         imag_dataset : same type
+
             Output array.
 
         See Also
         --------
-        real, conjugate, absolute
+        real, conj, abs
 
         """
         new = self.copy()
         if not new._is_complex[axis]:
             logging.error(
-                    'The current dataset is not complex. Imag = None is returned.')
+                    'The current dataset is not complex. '
+                    'Imag = None is returned.')
             return None
 
         new.swapaxes(-1, axis, inplace=True)
@@ -862,13 +909,13 @@ class NDDataset(
         new.swapaxes(-1, axis, inplace=True)
         return new
 
-    def conjugate(self, axis=-1):
+    def conj(self, axis=-1):
         """
         Return the conjugate of the NDDataset.
 
         Parameters
         ----------
-        axis : `int`, optional, default = -1
+        axis : `int` , optional, default = -1
 
             The axis along which the conjugate value should be calculated
 
@@ -880,7 +927,7 @@ class NDDataset(
 
         See Also
         --------
-        real, imag, absolute
+        real, imag, abs
 
         """
         new = self.copy()
@@ -893,24 +940,30 @@ class NDDataset(
 
         return new
 
-    conj = conjugate
+    conjugate = conj
 
-    def absolute(self, axis=-1):
-        """Return the absolute value of a complex |NDDataset|.
+    def abs(self, axis= -1):
+        """
+        Returns the absolute value of a complex NDDataset.
 
         Parameters
         ----------
-        axis : `int`, optional, default = -1.
+        axis : int
+
+            Optional, default: -1.
+
             The axis along which the absolute value should be calculated.
 
         Returns
         -------
-        nddataset : same type
+        nddataset : same type,
+
             Output array.
 
         See Also
         --------
-        real, imag, conjugate
+        real, imag, conj
+
 
         """
         new = self.copy()
@@ -922,22 +975,24 @@ class NDDataset(
         new._data = np.sqrt(new)._data
 
         return new
-
-    abs = absolute
+    absolute = abs
 
     def set_complex(self, axis=-1):
-        """Make a dimension complex
+        """
+        Make a dimension complex
 
         Parameters
         ----------
         axis : `int`, optional, default = -1
+
             The axis to make complex
 
         """
         # override the ndarray function because we must care about the axis too.
 
         if self.data.shape[axis] % 2 == 0:
-            # we have a pair number of element along this axis. It can be complex
+            # we have a pair number of element along this axis.
+            # It can be complex
             # data are then supposed to be interlaced (real, imag, real, imag ..
             self._is_complex[axis] = True
         else:
@@ -950,7 +1005,6 @@ class NDDataset(
 
     # Create the returned values of functions should be same class as input.
     # The units should have been handled by __array_wrap__ already
-
 
     # -------------------------------------------------------------------------
     # special methods
@@ -967,8 +1021,8 @@ class NDDataset(
         return ''.join([prefix, body, ')'])
 
     def __str__(self):
-        """ Display the metadata of the object and partially the data
-        """
+        # Display the metadata of the object and partially the data
+
         # print field names/values (class/sizes)
         # data.name, .author, .date,
         out = '\n' + '-' * 80 + '\n'
@@ -977,14 +1031,14 @@ class NDDataset(
         out += '      create  d: {}\n'.format(self._date)
         out += 'last modified: {}\n'.format(self._modified)
 
-        wrapper1 = textwrap.TextWrapper(initial_indent='', \
-                                        subsequent_indent=' ' * 15, \
+        wrapper1 = textwrap.TextWrapper(initial_indent='',
+                                        subsequent_indent=' ' * 15,
                                         replace_whitespace=True)
 
         pars = self.description.strip().splitlines()
 
         out += '  description: '
-        if pars != []:
+        if pars:
             out += '{}\n'.format(wrapper1.fill(pars[0]))
         for par in pars[1:]:
             out += '{}'.format(textwrap.indent(par, ' ' * 15))
@@ -992,10 +1046,10 @@ class NDDataset(
         if not out.endswith('\n'):
             out += '\n'
 
-        if self._history != []:
+        if self._history:
             pars = self.history
             out += '      history: '
-            if pars != []:
+            if pars:
                 out += '{}\n'.format(wrapper1.fill(pars[0]))
             for par in pars[1:]:
                 out += '{}'.format(textwrap.indent(par, ' ' * 15))
@@ -1039,8 +1093,8 @@ class NDDataset(
     def __getattr__(self, item):
         # when the attribute was not found
 
-        if item in [
-            "__numpy_ufunc__"] or '_validate' in item or '_changed' in item:
+        if item in [ "__numpy_ufunc__"] or '_validate' in item or \
+                        '_changed' in item:
             # raise an error so that masked array will be handled correctly
             # with arithmetic operators and more
             raise AttributeError
@@ -1052,9 +1106,6 @@ class NDDataset(
             #    return attr
 
             # log.warning('not found attribute: %s' % item)
-
-    # def __deepcopy__(self, memo=None):
-    #    return self.copy(deep=False)
 
     def __getitem__(self, item):
         # we need axes (but they might be not present...
@@ -1108,7 +1159,8 @@ class NDDataset(
 
         if new_data.size == 0:
             raise IndexError("Empty array of shape {} resulted from slicing.\n"
-                             "Check the indexes and make sure to use floats for "
+                             "Check the indexes and make "
+                             "sure to use floats for "
                              "location slicing".format(str(new_data.shape)))
 
         new = self.copy()
@@ -1118,31 +1170,16 @@ class NDDataset(
         new._axes = new_axes
         new._uncertainty = new_uncertainty
 
-        # return self.__class__(new_data,
-        #                       mask=new_mask,
-        #                       # do not create new axis if they were not set
-        #                       axes=new_axes if self.axes is not None else None,
-        #                       uncertainty=new_uncertainty,
-        #                       units=self.units,
-        #                       meta=self.meta,
-        #                       title=self.title,
-        #                       iscopy=False)
-
         return new
 
     def __eq__(self, other):
         eq = super(NDDataset, self).__eq__(other)
-        #     if self._units is None:
-        #         eq = np.all(self._data == other._data)
-        #     else:
-        #         eq = np.all(self._data * self._units == other._data * other._units)
         eq &= (np.all(self._uncertainty == other._uncertainty))
-        #     eq &= (self._meta == other._meta)
         return eq
 
     def __hash__(self):
         # all instance of this class has same hash, so they can be compared
-        return type(self) + 1234567890
+        return str(type(self)) + "1234567890"
 
     # def __iter__(self):
     #     if self.ndim == 0:
@@ -1165,7 +1202,8 @@ class NDDataset(
     #         return getattr(objs[0], f.__name__)()
     #
     #     if  self.iscomplex[-1]:
-    #         if f.__name__ in ["fabs",]: # fonction not available for complex data
+    #         if f.__name__ in ["fabs",]:
+    #  fonction not available for complex data
     #             raise ValueError("{} does not accept complex data ".format(f))
     #
     #     data, uncertainty, units, mask = self._op(f, objs, ufunc=True)
@@ -1176,7 +1214,6 @@ class NDDataset(
     # -------------------------------------------------------------------------
 
     def _repr_html_(self):
-
         # print field names/values (class/sizes)
         # data.name, .author, .date,
         out = '<table>\n'
@@ -1188,8 +1225,8 @@ class NDDataset(
         out += '<tr><td>       last modified</td><td> {}</td></tr>\n'.format(
                 self._modified)
 
-        wrapper1 = textwrap.TextWrapper(initial_indent='', \
-                                        subsequent_indent=' ' * 15, \
+        wrapper1 = textwrap.TextWrapper(initial_indent='',
+                                        subsequent_indent=' ' * 15,
                                         replace_whitespace=True)
 
         pars = self.description.strip().splitlines()
@@ -1204,10 +1241,10 @@ class NDDataset(
         # if not out.endswith('\n'):
         #    out += '</td></tr>\n'
 
-        if self._history != []:
+        if self._history:
             pars = self.history
             out += '<tr><td>      history</td><td> '
-            if pars != []:
+            if pars:
                 out += '{}'.format(wrapper1.fill(pars[0]))
             for par in pars[1:]:
                 out += '{}'.format(textwrap.indent(par, ' ' * 15))
@@ -1231,8 +1268,9 @@ class NDDataset(
 
         out += '<tr><td>data</td><td><table>'
         out += '<tr><td>title</td><td> {}</td></tr>\n'.format(self.title)
-        out += '<tr><td>size</td><td> {}{}</td></tr>\n'.format(size,
-                                                               sizecplx) if self.ndim < 2 \
+        out += '<tr><td>size</td><td> ' \
+               '{}{}</td></tr>\n'.format(size,
+                                         sizecplx) if self.ndim < 2 \
             else '<tr><td>shape</td><td> {}</td></tr>\n'.format(shape)
 
         out += '<tr><td>units</td><td> {}</td></tr>\n'.format(units)
@@ -1302,8 +1340,7 @@ class NDDataset(
                 stop = self._loc2index(stop, axis) + 1
 
             if step is not None and not isinstance(step, (int, np.int)):
-                warn(
-                        'step in location slicing is not yet possible. Set to 1')
+                warn('step in location slicing is not yet possible. Set to 1')
                 # TODO: we have may be a special case with datetime
                 step = None
 
@@ -1361,19 +1398,29 @@ class NDDataset(
     # -------------------------------------------------------------------------
     # events
     # -------------------------------------------------------------------------
-    def _anytrait_changed(self, name, old, new):
+    @observe(All)
+    def _anytrait_changed(self, change):
 
-        if name in ["_date", "_modified", "trait_added"]:
+        # ex: change {
+        #   'owner': object, # The HasTraits instance
+        #   'new': 6, # The new value
+        #   'old': 5, # The old value
+        #   'name': "foo", # The name of the changed trait
+        #   'type': 'change', # The event type of the notification, usually 'change'
+        # }
+
+        if change['name'] in ["_date", "_modified", "trait_added"]:
             return
 
         # changes in data -> update dates
-        if name == '_data' and self._date == datetime(1, 1, 1, 0, 0):
+        if change['name'] == '_data' and self._date == datetime(1, 1, 1, 0, 0):
             self._date = datetime.now()
             self._modified = datetime.now()
 
         # change to complex
-        # change type of data to complex require modification of the axes, if any
-        if name == '_is_complex':
+        # change type of data to complex
+        # require modification of the axes, if any
+        if change['name'] == '_is_complex':
             pass
 
         # all the time -> update modified date
@@ -1387,9 +1434,3 @@ class NDDataset(
 # =============================================================================
 
 set_operators(NDDataset, priority=50)
-
-# =============================================================================
-# Modify the doc to include Traits
-# =============================================================================
-
-# create_traitsdoc(NDDataset)

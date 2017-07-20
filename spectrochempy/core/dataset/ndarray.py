@@ -883,7 +883,7 @@ class NDArray(HasTraits):
 
         return new
 
-    def _loc2index(self, loc):
+    def _loc2index(self, loc, axis):
         # Return the index of a location (label or coordinates) along the axis
 
         if isinstance(loc, string_types):
@@ -909,8 +909,3 @@ class NDArray(HasTraits):
 
         else:
             raise ValueError('Could not find this location: {}'.format(loc))
-# =============================================================================
-# Modify the doc to include Traits
-# =============================================================================
-
-# create_traitsdoc(NDArray)
