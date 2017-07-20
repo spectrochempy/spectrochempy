@@ -10,11 +10,13 @@ Where to Get |scp|
 ==================
 
 To get a working installation of |scp| , on any platform (windows, mac OS X, Linux ... ),
-several solutions are (or will be soon) available.
+several solutions are (*or will be soon*) available.
 
 * :ref:`binaries`
 
 * :ref:`pypi`
+
+* :ref:`conda`
 
 * :ref:`dev`
 
@@ -28,9 +30,12 @@ Requirements
 
 * `Python <http://www.python.org/>`_
 
-Currently, only the python version 3.5 has been tested.
+.. warning::
 
-The following libraries are also required:
+	Currently, only the python version 3.6 has been tested.
+
+
+The following libraries are also required such as :
 
 * `Numpy <http://numpy.scipy.org>`_
 
@@ -38,38 +43,30 @@ The following libraries are also required:
 
 * `Matplotlib <http://matplotlib.sourceforge.net/index.html>`_
 
-pint
-uncertainty
-
-conda config --add channels conda-forge
 
 Follow the instructions to install these packages on those sites, or, far easier,
 install them as packages from your operating system
 (e.g. apt-get or the synaptic GUI on Ubuntu, `Macports <http://www.macports.org/>`_ on OS X, etc.).
 
-Regarding the installation of all these above packages, we highy recommend to install EPD python framework (a much straitforward solution!)
-which is available for most platforms:
+Regarding the installation of all these above packages, we highy recommend to install **anaconda** or **canopy** python framework (a much straitforward solution!)
+which is available for most platforms.
 
-#. install the **Anaconda Scientific Python Distribution** :
-Go to `http://continuum.io/downloads <http://continuum.io/downloads>`_ and follow the instructions for your platform -
-and if you register as academic member of the university you get interesting add-ons
+We prefer the **anaconda distribution**, so tha the rest of this guide will mainly
+use commands for this distribution.
 
-or
+* install the **Anaconda Scientific Python Distribution** : Go to `http://continuum.io/downloads <http://continuum.io/downloads>`_ and follow the instructions for your platform
 
-#. install the **Canopy Enthought Distribution** :
-Go to `https://store.enthought.com/downloads/ <https://store.enthought.com/downloads/>`_
-(it's a commercial distribution, but you have a free version Canopy Express -
-and if you register with your academic email, you can get the full academic version)
+  if you register as academic member of the university you get interesting add-ons.
 
+  Finally, see :ref:`conda` for installing the |scp| conda package.
 
-Finally, after installing your python distribution, you can use the `pip`_
-installer for a really easy installation of |scp| from the
-`Pypi (spectrochempy) <https://pypi.python.org/pypi/spectrochempy>`_ repository.
+If you prefer **Canopy** here it is:
 
+* install the **Canopy Enthought Distribution** :Go to `https://store.enthought.com/downloads/ <https://store.enthought.com/downloads/>`_ (it's a commercial distribution, but you have a free version Canopy Express.
 
-.. TODO::
+  If you register with your academic email, you can get the full academic version).
 
-	jmlkjmlj
+  Finally, see :ref:`pypi` for installing |scp| .
 
 
 Installation
@@ -82,13 +79,32 @@ Installation from Binaries
 
 Not yet available, sorry.
 
+.. _conda:
+
+Standard installation from Conda sources
+*****************************************
+
+Very simple, use the following command in a terminal:
+
+.. sourcecode:: bash
+
+	$ conda config –add channels conda-forge
+	$ conda config –add channels fernandezc  #TODO: create a channel spectrocat
+    $ conda install spectrochempy
+
+.. note::
+
+	the conda installer doesn't exist right now. It will be present for version 1.b1.
+
+	For now, use the method described for developper, here: :ref:`develguide`
+
 
 .. _pypi:
 
 Standard Installation from PyPi sources
 ***************************************
 
-Very simple, use the following command in a terminal:
+Again very simple, use the following command in a terminal:
 
 .. sourcecode:: bash
 
@@ -99,6 +115,11 @@ or to update a previous installation with the latest stable release:
 .. sourcecode:: bash
 
     $ pip install -U spectrochempy
+
+.. note::
+
+	the Pypi installer doesn't exist right now. It will be present for version 1.b1.
+
 
 .. _dev:
 

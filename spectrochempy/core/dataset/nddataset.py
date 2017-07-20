@@ -476,6 +476,7 @@ class NDDataset(
         List of strings
 
         Describes the history of actions made on this dataset
+
         """
         return self._history
 
@@ -554,7 +555,7 @@ class NDDataset(
         """
         Same type - Transposed array.
 
-        The object is returned if `ndim` < 2.
+        The object is returned if `ndim` is less than 2.
 
         """
         return self.transpose()
@@ -881,7 +882,7 @@ class NDDataset(
 
         Parameters
         ----------
-        axis : `int` , optional, default = -1.
+        axis : `int` , optional
 
             The axis along which the angle should be calculated.
 
