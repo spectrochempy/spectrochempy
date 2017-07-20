@@ -50,7 +50,7 @@ import os
 # =============================================================================
 import numpy as np
 
-from spectrochempy.api import log
+from spectrochempy.application import log
 try:
     from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 except ImportError:
@@ -67,8 +67,6 @@ from ...dataset.api import Meta
 from ...dataset.api import Axis, NDDataset
 from ...units import ur, Quantity
 from .parameter import nmr_valid_meta
-
-import logging
 
 __all__ = ['read_bruker_nmr']
 
