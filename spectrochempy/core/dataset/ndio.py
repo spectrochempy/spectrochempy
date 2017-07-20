@@ -51,11 +51,12 @@ import json
 import datetime
 import warnings
 
-from traitlets import Unicode, Bool, HasTraits
+from traitlets import Unicode, Bool, HasTraits, Instance
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.pyplot import Figure
+from matplotlib.pyplot import Figure, Axes as Ax  # change the name to avoid
+                                                  # collisions with Our Axes
 
 import numpy as np
 from numpy.compat import asbytes, asstr, asbytes_nested, bytes, \
@@ -97,6 +98,10 @@ class NDIO(HasTraits):
     :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
 
     """
+
+    # new traits useful for i/o operations
+    fig = Instance(Figure, allow_none=True)
+    ax = Instance(Ax, allow_none=True)
 
     # --------------------------------------------------------------------------
     # Generic save function
@@ -509,7 +514,7 @@ class NDIO(HasTraits):
 
         log.debug('Standard Plot...')
 
-        fig, ax = self.figure_setup(**kwargs)
+        self.fig, self.ax = self.figure_setup(**kwargs)
 
         # color cycle
         # prop_cycle = options.prop_cycle
@@ -578,14 +583,17 @@ class NDIO(HasTraits):
         if not plotoptions.do_not_block:
             self.show()
 
-    def plot_generic(self, ax=None, **kwargs):
+    def plot_generic(self, **kwargs):
         """
         The generic plotter. It try to guess an adequate basic plot for the data
 
         Parameters
         ----------
-        ax
-        kwargs
+        ax : :class:`matplotlib.axe'
+
+            the viewplot where to plot.
+
+        kwargs : optional additional arguments
 
         Returns
         -------
@@ -596,6 +604,10 @@ class NDIO(HasTraits):
         # the same for ND that must be reduce to the minimal form.
         temp = self.copy()
         temp = temp.squeeze()
+
+        # ax and fig are not copied, so we add them here (hack)
+        temp.ax = self.ax._axes
+        temp.fig = plt.gcf()
 
         if temp.ndim == 1:
 
@@ -671,10 +683,6 @@ class NDIO(HasTraits):
         # other plugin class will or are taking care of other needs
         log.debug('get or create a new ax')
         ax = fig.gca()
-
-        # make them know in the class
-        self.fig = fig
-        self.ax = ax
 
         return fig, ax
 

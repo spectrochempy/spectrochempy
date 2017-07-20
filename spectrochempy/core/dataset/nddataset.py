@@ -1014,7 +1014,8 @@ class NDDataset(
     def __dir__(self):
         return ['data', 'mask', 'units', 'uncertainty',
                 'meta', 'name', 'title', 'is_complex',
-                'axes', 'description', 'history', 'date', 'modified']
+                'axes', 'description', 'history', 'date', 'modified'
+                ]
 
     def __repr__(self):
         prefix = type(self).__name__ + '('

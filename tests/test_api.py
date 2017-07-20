@@ -46,3 +46,6 @@ def test_api():
     assert release.startswith('0.1')
 
     log.warning('Ok, this is nicely executing!')
+
+    assert 'np' in APIref()
+    assert 'NDDataset' in APIref()

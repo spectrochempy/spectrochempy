@@ -269,13 +269,16 @@ class SpectroChemPy(Application):
         # ------------------------------------------------------------------
         # we performs this before any call to matplotlib that are performed
         # later in this application
+        import matplotlib as mpl
+        backend = mpl.get_backend()
 
         # if we are building the docs, in principle it should be done using
         # the make_scp_docs.py located in the scripts folder
         if not 'make_scp_docs.py' in sys.argv[0]:
             # the normal backend
-            mpl.use('Qt5Agg')
-            mpl.rcParams['backend.qt5'] = 'PyQt5'
+            if backend == 'module://ipykernel.pylab.backend_inline':
+                mpl.use('Qt5Agg')
+                mpl.rcParams['backend.qt5'] = 'PyQt5'
         else:
             # 'agg' backend is necessary to build docs with sphinx-gallery
             mpl.use('agg')
@@ -283,7 +286,7 @@ class SpectroChemPy(Application):
         ip = get_ipython()
         if ip is not None:
 
-            if is_kernel():
+            if is_kernel() and backend == 'module://ipykernel.pylab.backend_inline':
 
                 # set the ipython matplotlib environments
                 try:
@@ -437,14 +440,6 @@ class SpectroChemPy(Application):
         Version   : {}
         Copyright : {}
             """.format(self.version, self.copyright)
-
-            info_string += u"\n\t-matplotlib and numpy namespaces are available"\
-                           u" under the name 'plt' and 'np' respectively"
-            info_string += u"\n\t-matplotlib currently uses the '{}' backend." \
-                           u" To change this, use e.g.," \
-                           u" plt.switch_backend('Tkagg')".format(
-                                                              mpl.get_backend())
-
 
             if self.info_on_loading and \
                     not self.plotoptions.do_not_block:

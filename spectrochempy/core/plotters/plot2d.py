@@ -107,7 +107,7 @@ def plot_2D(source, **kwargs):
     """
     # where to plot?
     # ----------------
-    ax = source.ax
+    ax = kwargs.get('ax', source.ax)
     if ax is None:
         fig, ax = source.figure_setup(**kwargs)
 
