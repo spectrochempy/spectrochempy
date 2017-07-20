@@ -438,6 +438,14 @@ class SpectroChemPy(Application):
         Copyright : {}
             """.format(self.version, self.copyright)
 
+            info_string += u"\n\t-matplotlib and numpy namespaces are available"\
+                           u" under the name 'plt' and 'np' respectively"
+            info_string += u"\n\t-matplotlib currently uses the '{}' backend." \
+                           u" To change this, use e.g.," \
+                           u" plt.switch_backend('Tkagg')".format(
+                                                              mpl.get_backend())
+
+
             if self.info_on_loading and \
                     not self.plotoptions.do_not_block:
 

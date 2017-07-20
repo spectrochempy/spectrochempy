@@ -29,15 +29,4 @@ or whatever you prefer to read and edit a text file.
 
 .. _faq_cannot_launch_jupyter_from_terminal:
 
-I can't launch the Jupyter notebook on Mac OSX Sierra
-======================================================
-If with Sierra you enconter difficulties to launch the jupyter notebook using
-the command line:
-
-.. sourcecode:: bash
-
-	$ jupyter notebook
-
-you can try this solution. Go to ``jupyter`` in your home directory and there
-edit the
 

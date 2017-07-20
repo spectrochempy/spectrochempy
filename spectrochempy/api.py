@@ -94,7 +94,7 @@ from spectrochempy.application import (scp,
              copyright, release, version)
 
 
-__all__ = ['scp',
+__all__ += ['scp',
 
            ### Helpers
              'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
