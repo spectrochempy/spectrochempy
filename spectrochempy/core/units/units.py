@@ -55,6 +55,7 @@ from pint import Context
 # Modify the pint behaviour ####################################################
 #  TODO: better ways ??
 
+
 formats = {
 
     'K': {  # spectrochempy Compact format.
@@ -75,9 +76,9 @@ formats = {
         'parentheses_fmt': r'({0})',
     },
 
-    'X': {  # Latex format.
+    'L': {  # Latex format.
         'as_ratio': False,
-        'single_denominator': False,
+        'single_denominator': True,
         'product_fmt': r' \cdot ',
         'division_fmt': r'\frac[{0}][{1}]',
         'power_fmt': '{0}^[{1}]',
@@ -103,12 +104,14 @@ def __format__(self, spec):
 
     # special cases
     if 'Lx' in spec:  # the LaTeX siunitx code
+
+
         opts = ''
         ustr = siunitx_format_unit(self)
         ret = r'\si[%s]{%s}' % (opts, ustr)
         return ret
 
-    if '~' in spec or 'K' in spec or 'T' in spec or 'X' in spec: #spectrochempy modified
+    if '~' in spec or 'K' in spec or 'T' in spec or 'L' in spec: #spectrochempy modified
         if self.dimensionless:
 
             if self._units == 'ppm':

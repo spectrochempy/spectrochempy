@@ -49,10 +49,10 @@ def make_label(ss, lab='<no_axe_label>'):
         label = lab
     if ss.units is not None and str(ss.units) != 'dimensionless':
         if str(ss.units) == 'absorbance':
-            units = ' (a.u.)'
+            units = 'a.u.'
         else:
-            units = "({:~Lx})".format(ss.units)
+            units = "{:~L}".format(ss.units)
     else:
         units = ''
-    label = r"%s\ $\mathrm{%s}$" % (label, units)
+    label = r"%s / $\mathrm{%s}$" % (label, units)
     return label
