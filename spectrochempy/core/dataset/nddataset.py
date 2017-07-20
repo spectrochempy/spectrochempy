@@ -718,7 +718,7 @@ class NDDataset(
 
         See Also
         --------
-        swapaxes
+        :meth:`swapaxes`
 
         """
         if not inplace:
@@ -761,7 +761,7 @@ class NDDataset(
 
         See Also
         --------
-        transpose
+        :meth:`transpose`
 
         """
         if not inplace:
@@ -862,7 +862,7 @@ class NDDataset(
 
         See Also
         --------
-        imag, conj, abs
+        :meth:`imag`, :meth:`conj`, :meth:`abs`
 
         """
         new = self.copy()
@@ -894,7 +894,7 @@ class NDDataset(
 
         See Also
         --------
-        real, conj, abs
+        :meth:`real`,:meth:`conj`, :meth:`abs`
 
         """
         new = self.copy()
@@ -928,7 +928,7 @@ class NDDataset(
 
         See Also
         --------
-        real, imag, abs
+        :meth:`real`, :meth:`imag`, :meth:`abs`
 
         """
         new = self.copy()
@@ -963,7 +963,7 @@ class NDDataset(
 
         See Also
         --------
-        real, imag, conj
+        :meth:`real`, :meth:`imag`, :meth:`conj`
 
 
         """

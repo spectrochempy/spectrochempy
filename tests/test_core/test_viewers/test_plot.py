@@ -88,3 +88,8 @@ def test_plot_stack(IR_source_1, DONOTBLOCK):
     source = IR_source_1.copy()
     plotoptions.do_not_block = DONOTBLOCK
     source.plot_stack()  # plot_map is an alias of plot_2D
+
+def test_plot_stack_generic(IR_source_1, DONOTBLOCK):
+    source = IR_source_1.copy()
+    plotoptions.do_not_block = DONOTBLOCK
+    source.plot(kind='stack')

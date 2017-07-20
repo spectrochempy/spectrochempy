@@ -476,12 +476,7 @@ class NDIO(HasTraits):
     # generic plotter
     #--------------------------------------------------------------------------
 
-    def plot(self,
-             ax=None,
-             figsize=None,
-             fontsize=None,
-             kind='generic',
-             **kwargs):
+    def plot(self, **kwargs):
 
         """
         Generic plot function for a
@@ -506,6 +501,11 @@ class NDIO(HasTraits):
         fontsize : `int`, optional
             The font size in pixels, default is 10 (or read from preferences)
 
+        hold = `bool`, optional, default = `False`.
+
+            Should we plot on the ax previously used
+            or create a new figure?
+
         See Also
         --------
         :meth:`show`
@@ -513,8 +513,6 @@ class NDIO(HasTraits):
         """
 
         log.debug('Standard Plot...')
-
-        self.fig, self.ax = self.figure_setup(**kwargs)
 
         # color cycle
         # prop_cycle = options.prop_cycle
@@ -606,8 +604,9 @@ class NDIO(HasTraits):
         temp = temp.squeeze()
 
         # ax and fig are not copied, so we add them here (hack)
-        temp.ax = self.ax._axes
-        temp.fig = plt.gcf()
+        if self.ax and kwargs.get('hold', False):
+                temp.ax = self.ax._axes
+                temp.fig = plt.gcf()
 
         if temp.ndim == 1:
 
