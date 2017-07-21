@@ -395,7 +395,7 @@ def linkcode_resolve(domain, info):
 # from spectrochempy.api import *
 
 # autosummary_generate = glob.glob("reference/*.rst")
-# autosummary_generate = True
+autosummary_generate = True
 #
 autodoc_default_flags = ['show-inheritance']
 

@@ -51,15 +51,6 @@ It's a 3-D dataset (with dimensionless intensity)"""
 new = mydataset[...,0]
 new = new.squeeze() #inplace=True)
 
-import matplotlib as mpl
-mpl.rcParams['text.latex.preamble'] = [
-                r'\usepackage{siunitx}',
-                r'\sisetup{detect-all}',
-                r'\usepackage{times}',  # set the normal font here
-                r'\usepackage{sansmath}',
-                # load up the sansmath so that math -> helvet
-                r'\sansmath'
-            ]
 new.plot()
 
 

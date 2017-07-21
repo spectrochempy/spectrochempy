@@ -9,4 +9,4 @@ Gallery of Examples
 General examples
 ----------------
 
-General-purpose and introductory examples from the sphinx-gallery
+General-purpose and introductory examples from SpectroChemPy

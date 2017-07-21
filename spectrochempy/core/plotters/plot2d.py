@@ -54,14 +54,14 @@ import numpy as np
 from spectrochempy.application import plotoptions as options
 from spectrochempy.core.plotters.utils import make_label
 
-__all__ = ['plot_2D', 'plot_map', 'plot_stack']
+__all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
 _methods = __all__[:]
 
 # =============================================================================
 # nddataset plot2D functions
 # =============================================================================
 
-# contour map -----------------------------------------------------------------
+# contour map (default) -------------------------------------------------------
 
 def plot_map(source, **kwargs):
     """
@@ -74,7 +74,7 @@ def plot_map(source, **kwargs):
     return plot_2D(source, **kwargs)
 
 
-# stack plot (default) --------------------------------------------------------
+# stack plot  -----------------------------------------------------------------
 
 def plot_stack(source, **kwargs):
     """
@@ -86,6 +86,17 @@ def plot_stack(source, **kwargs):
     kwargs['kind'] = 'stack'
     return plot_2D(source, **kwargs)
 
+# image plot --------------------------------------------------------
+
+def plot_image(source, **kwargs):
+    """
+    Plot a 2D dataset as an image plot.
+
+    Alias of plot_2D (with `kind` argument set to ``image``).
+
+    """
+    kwargs['kind'] = 'image'
+    return plot_2D(source, **kwargs)
 
 # generic plot (default stack plot) -------------------------------------------
 
