@@ -429,11 +429,10 @@ def setup(app):
 
 sphinx_gallery_conf = {
     'backreferences_dir': 'gen_modules/backreferences',
-    'doc_module': ('sphinx_gallery', 'numpy'),
+    'doc_module': ('spectrochempy'),
     'reference_url': {
-        'sphinx_gallery': None,
-        'matplotlib': 'http://matplotlib.org',
-        'numpy': 'http://docs.scipy.org/doc/numpy-1.9.1'},
+        'spectrochempy': None,
+        },
     # path to your examples scripts
     'examples_dirs': '../examples',
     # path where to save gallery generated examples

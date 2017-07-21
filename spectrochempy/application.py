@@ -55,6 +55,7 @@ from traitlets import (HasTraits, Instance,
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
+from IPython.core.display import HTML
 
 import matplotlib as mpl
 
@@ -299,6 +300,7 @@ class SpectroChemPy(Application):
                             ip.magic('matplotlib qt5')
                         except:
                             pass
+
             else:
                 try:
                     ip.magic('matplotlib osx')
