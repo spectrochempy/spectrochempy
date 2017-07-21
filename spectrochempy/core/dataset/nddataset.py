@@ -570,6 +570,10 @@ class NDDataset(
         """
         return self.axes[-1]
 
+    @x.setter
+    def x(self, value):
+        self.axes[-1] = value
+
     @property
     def y(self):
         """
@@ -579,7 +583,11 @@ class NDDataset(
 
         """
         if self.ndim > 1:
-            return self.coords(-2)
+            return self.axes[-2]
+
+    @y.setter
+    def y(self, value):
+        self.axes[-2] = value
 
     @property
     def z(self):
@@ -590,7 +598,11 @@ class NDDataset(
 
         """
         if self.ndim > 2:
-            return self.coords(-3)
+            return self.axes[-3]
+
+    @z.setter
+    def z(self, value):
+        self.axes[-3] = value
 
     @property
     def date(self):
