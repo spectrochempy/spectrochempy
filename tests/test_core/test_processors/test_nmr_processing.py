@@ -35,26 +35,39 @@
 # =============================================================================
 
 
+""" Tests for the ndplugin module
 
-__all__ = []
-_methods = ['make_label']
+"""
+import numpy as np
+import pandas as pd
 
-def make_label(ss, lab='<no_axe_label>'):
-    """ make a label from title and units
+from pint import DimensionalityError
+from spectrochempy.api import (NDDataset, Axes, Axis,
+                                            AxisError, Meta, ur)
+from spectrochempy.utils import SpectroChemPyWarning
+from tests.utils import (assert_equal, assert_array_equal,
+                         assert_array_almost_equal, assert_equal_units,
+                         raises)
 
-    """
-    if ss.title:
-        label = ss.title.replace(' ', '\ ')
-    else:
-        label = lab
 
-    if ss.units is not None and str(ss.units) != 'dimensionless':
-        if str(ss.units) == 'absorbance':
-            units = '/ a.u.'
-        else:
-            units = "/ {:~L}".format(ss.units)
-    else:
-        units = ''
+import pytest
+import numpy as np
+import os
 
-    label = r"%s $\mathrm{%s}$" % (label, units)
-    return label
+from spectrochempy.api import plotoptions
+
+@pytest.fixture()
+def DONOTBLOCK():
+    return False  # True # True in principle for testing
+
+# nmr_processing
+#-----------------------------
+
+def test_nmr_1D(NMR_source_1D, DONOTBLOCK):
+
+    source = NMR_source_1D
+
+    plotoptions.do_not_block = DONOTBLOCK
+    source.plot()
+
+

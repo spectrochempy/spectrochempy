@@ -701,7 +701,7 @@ def read_bruker_nmr(source, *args, **kwargs):
         source.meta.update(list_meta[0])
         source.meta.readonly = True
         source.axes = list_axes[0]
-
+        source.title = 'intensity'
     else:
         # case of multiple experiments to merge
 
