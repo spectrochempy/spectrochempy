@@ -39,12 +39,13 @@
 
 """
 
-__all__ = ['Unit', 'Quantity', 'Measurement', 'ur', 'set_nmr_context']
+__all__ = ['Unit', 'Quantity', 'Measurement', 'ur', 'set_nmr_context',
+           'DimensionalityError']
 
 from warnings import warn
 
 from pint import set_application_registry
-from pint import UnitRegistry
+from pint import UnitRegistry, DimensionalityError
 from pint.unit import UnitsContainer
 from pint.quantity import _Quantity as Quantity
 from pint.unit import _Unit as Unit
