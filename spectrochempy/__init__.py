@@ -58,6 +58,9 @@ guiApp = QApplication(sys.argv)
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
+from spectrochempy.api import *
+
+
 if __name__ == "__main__":
 
     from spectrochempy.api import scp

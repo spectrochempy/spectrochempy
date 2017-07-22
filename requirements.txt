@@ -16,7 +16,7 @@ sphinx
 sphinx-gallery
 pandoc
 numpydoc
-seaborn
+sphinx_bootstrap_theme
 
 ipython
 ipykernel

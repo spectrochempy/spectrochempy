@@ -29,6 +29,10 @@ running on Linux, Windows or OS X.
   7.  Preprocessing funtions such as baseline correction, automatic subtraction and many more ...
   8.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
 
+.. include:: auto_examples/read
+.. raw:: html
+
+        <div style='clear:both'></div>
 
 .. warning::
 
@@ -43,8 +47,8 @@ Installation
 .. toctree::
     :maxdepth: 1
 
-    main/install
-    main/license
+    install
+    license
 
 
 .. _main_documentation:
@@ -52,37 +56,33 @@ Installation
 Documentation
 ===============
 
-Documentation is available here:
+Html documentation is available here:
 
 * `https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
+
+Pdf documentation can also be downloaded here:
+
+* `spectrochempy.pdf <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/pdf/spectrochempy.pf>`_
 
 
 .. _main_user_guides:
 
-User Guide, Tutorials and Examples
-===================================
+User Guide
+=========================
 
 .. toctree::
     :maxdepth: 1
 
-    api/userguide
-    api/reference
-    main/faq
-
-Tutorial pages with Jupyter notebooks with running examples are available.
-
-.. toctree::
-    :maxdepth: 1
-
-    api/tutorials
+    userguide/index
+    faq
 
 Gallery of examples
---------------------
+=====================
 
 .. toctree::
 	:maxdepth: 1
 
-	api/auto_examples/index
+	auto_examples/index
 
 
 .. _main_issue_tracker:
@@ -112,7 +112,7 @@ Credits
 .. toctree::
     :maxdepth: 1
 
-    main/credits
+    credits
 
 
 .. _main_developper:
@@ -132,14 +132,14 @@ See also
 .. toctree::
     :maxdepth: 1
 
-    main/seealso
+    seealso
 
 Changes in the last release
 =============================
 .. toctree::
     :maxdepth: 1
 
-    main/changelog
+    changelog
 
 
 

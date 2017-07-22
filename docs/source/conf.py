@@ -34,7 +34,6 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
 #
 # SpectroChemPy documentation build configuration file, created by
 # sphinx-quickstart on Sat Sep 29 21:37:47 2012.
@@ -51,6 +50,7 @@ global doc_building
 doc_building = True
 
 import sys, os
+import sphinx_gallery
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -73,27 +73,27 @@ sys._called_from_sphinx = True
 
 extensions = [
     'sphinx_gallery.gen_gallery',
-    'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.autosummary',
     'sphinx.ext.autodoc',
-    #'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.inheritance_diagram',
     'sphinx.ext.viewcode',
-    # 'sphinx.ext.linkcode',  # for production
+    'sphinx.ext.linkcode',  # for production
     'numpydoc',
-    # 'matplotlib.sphinxext.only_directives',
-    # 'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
     'nbsphinx',
+    # 'sphinx.ext.todo',
+    # 'sphinx.ext.inheritance_diagram',
+    # 'matplotlib.sphinxext.only_directives',
+    # 'matplotlib.sphinxext.plot_directive',
+
 ]
 
 # Numpy autodoc attributes
 numpydoc_show_class_members = False
-numpydoc_use_plots = True
+#numpydoc_use_plots = True
 numpydoc_class_members_toctree = False
 
 # http://sphinx.pocoo.org/ext/todo.html
@@ -111,6 +111,7 @@ source_encoding = 'utf-8'
 # The master toctree document.
 master_doc = 'index'
 
+import spectrochempy
 from spectrochempy.version import get_version
 
 __version__, __release__, __copyright__ = get_version()
@@ -169,8 +170,85 @@ from spectrochempy.utils.rstutils import rst_epilog
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinxdoc'
-html_style = 'spectrochempy.css'
+#html_theme = 'sphinxdoc'
+
+# Activate the theme.
+import sphinx_bootstrap_theme
+html_theme = 'bootstrap'  # https://github.com/ryan-roemer/sphinx-bootstrap-theme
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+
+# (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
+# Path should be relative to the ``_static`` files directory.
+html_logo = "" #logo.png"
+
+# Theme options are theme-specific and customize the look and feel of a
+# theme further.
+html_theme_options = {
+    # Navigation bar title. (Default: ``project`` value)
+    'navbar_title': "SpectroChemPy",
+
+    # Tab name for entire site. (Default: "Site")
+    'navbar_site_name': "Documentation",
+
+    # A list of tuples containing pages or urls to link to.
+    # Valid tuples should be in the following forms:
+    #    (name, page)                 # a link to a page
+    #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
+    #    (name, "http://example.com", True) # arbitrary absolute url
+    # Note the "1" or "True" value above as the third argument to indicate
+    # an arbitrary url.
+    'navbar_links': [
+        #("Examples", "examples"),
+        #("Link", "http://example.com", True),
+    ],
+
+    # Render the next and previous page links in navbar. (Default: true)
+    'navbar_sidebarrel': True,
+
+    # Render the current pages TOC in the navbar. (Default: true)
+    'navbar_pagenav': True,
+
+    # Tab name for the current pages TOC. (Default: "Page")
+    'navbar_pagenav_name': "Page",
+
+    # Global TOC depth for "site" navbar tab. (Default: 1)
+    # Switching to -1 shows all levels.
+    'globaltoc_depth': 1,
+
+    # Include hidden TOCs in Site navbar?
+    #
+    # Note: If this is "false", you cannot have mixed ``:hidden:`` and
+    # non-hidden ``toctree`` directives in the same page, or else the build
+    # will break.
+    #
+    # Values: "true" (default) or "false"
+    'globaltoc_includehidden': "true",
+
+    # HTML navbar class (Default: "navbar") to attach to <div> element.
+    # For black navbar, do "navbar navbar-inverse"
+    'navbar_class': "navbar navbar-inverse",
+
+    # Fix navigation bar to top of page?
+    # Values: "true" (default) or "false"
+    'navbar_fixed_top': "false",
+
+    # Location of link to source.
+    # Options are "nav" (default), "footer" or anything else to exclude.
+    'source_link_position': "", #"nav",
+
+    # Bootswatch (http://bootswatch.com/) theme.
+    #
+    # Options are nothing (default) or the name of a valid theme
+    # such as "amelia" or "cosmo".
+    'bootswatch_theme': "united",
+
+    # Choose Bootstrap version.
+    # Values: "3" (default) or "2" (in quotes)
+    'bootstrap_version': "3",
+}
+
+
+#html_style = 'spectrochempy.css'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -178,7 +256,7 @@ html_style = 'spectrochempy.css'
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['_static']
+#html_theme_path = ['_static']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -210,11 +288,11 @@ html_last_updated_fmt = '%b %d, %Y'
 # html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {'**': ['info.html',
-                        'api.html',
-                        'links.html',
-                        'searchbox.html',
-                        'download.html']}
+#html_sidebars = {'**': ['info.html',
+#                        'api.html',
+#                        'links.html',
+#                        'searchbox.html',
+#                        'download.html']}
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 # html_additional_pages = {}
@@ -247,6 +325,8 @@ html_show_copyright = True
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'spectrochempydoc'
+
+trim_doctests_flags = True
 
 # -- Options for LaTeX output --------------------------------------------------
 
@@ -390,19 +470,10 @@ def linkcode_resolve(domain, info):
 # Autosummary
 # -----------------
 
-# import glob
-
-# from spectrochempy.api import *
-
-# autosummary_generate = glob.glob("reference/*.rst")
 autosummary_generate = True
-#
-autodoc_default_flags = ['show-inheritance']
 
-# 'members',
-#                          'inherited-members',
-#                          ]
-#
+autodoc_default_flags = ['members', 'inherited-members', 'show-inheritance']
+
 exclusions = ('with_traceback', 'with_traceback',
               'observe', 'unobserve', 'observe', 'cross_validation_lock',
               'unobserve_all', 'class_config_rst_doc', 'class_config_section',
@@ -422,20 +493,19 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
     exclude = name in exclusions or 'trait' in name
     return skip or exclude
 
-
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
 
+# Sphinx-gallery ------------------
+
+# Generate the plots for the gallery
+plot_gallery = True
 
 sphinx_gallery_conf = {
-    'backreferences_dir': 'gen_modules/backreferences',
-    'doc_module': ('spectrochempy'),
-    'reference_url': {
-        'spectrochempy': None,
-        },
+    'backreferences_dir': False,
     # path to your examples scripts
-    'examples_dirs': '../examples',
+    'examples_dirs': 'examples',
     # path where to save gallery generated examples
-    'gallery_dirs': 'api/auto_examples',
+    'gallery_dirs': 'auto_examples',
     'expected_failing_examples': [],
 }

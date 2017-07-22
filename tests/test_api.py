@@ -36,7 +36,7 @@
 
 import spectrochempy
 
-from spectrochempy.api import *
+from spectrochempy import *
 
 def test_api():
 

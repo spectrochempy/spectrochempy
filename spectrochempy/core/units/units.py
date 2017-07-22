@@ -91,7 +91,7 @@ formatting._FORMATS.update(formats)
 formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ['~'])
 
 setattr(Quantity, '_repr_html_', lambda cls: cls.__format__('~T'))
-setattr(Quantity, '_repr_latex_', lambda cls:"$" + cls.__format__('X') + "$")
+setattr(Quantity, '_repr_latex_', lambda cls:"$" + cls.__format__('~L') + "$")
 
 #TODO: work on this latex format
 

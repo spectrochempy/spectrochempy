@@ -64,8 +64,6 @@ from traitlets import (List, Unicode, Instance, default,
 
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils import SpectroChemPyWarning
-# from spectrochempy.utils import create_traitsdoc
-# from spectrochempy.api import preferences_manager
 from spectrochempy.utils import is_sequence, is_number
 from spectrochempy.utils import (numpyprintoptions,
                                  get_user_and_node)
@@ -192,11 +190,10 @@ class NDDataset(
 
     Usage by an end-user:
 
-        >>> from spectrochempy.api import NDDataset
-        >>> x = NDDataset([1,2,3])
-        >>> x.data
-        array([       1,        2,        3])
-
+    >>> from spectrochempy.api import NDDataset
+    >>> x = NDDataset([1,2,3])
+    >>> x.data
+    array([       1,        2,        3])
 
     """
     author = Unicode(get_user_and_node(),
@@ -1228,78 +1225,70 @@ class NDDataset(
     # -------------------------------------------------------------------------
 
     def _repr_html_(self):
-        # print field names/values (class/sizes)
-        # data.name, .author, .date,
+        tr = "<tr style='border-bottom: 1px solid lightgray;" \
+                         "border-top: 1px solid lightgray;'>" \
+             "<td style='padding-right:5px'><strong>{}</strong></td>" \
+                                        "<td>{}</td><tr>\n"
+
         out = '<table>\n'
-        # out += '   name or id: %s \n' % self.name
-        out += '<tr><td>       author</td><td> {}</td></tr>\n'.format(
-                self.author)
-        out += '<tr><td>       created</td><td> {}</td></tr>\n'.format(
-                self._date)
-        out += '<tr><td>       last modified</td><td> {}</td></tr>\n'.format(
-                self._modified)
+
+        out += tr.format("Id/Name", self.name)
+        out += tr.format("Author", self.author)
+        out += tr.format("Created", str(self.date))
+        out += tr.format("Last Modified", self.modified)
 
         wrapper1 = textwrap.TextWrapper(initial_indent='',
                                         subsequent_indent=' ' * 15,
                                         replace_whitespace=True)
 
-        pars = self.description.strip().splitlines()
+        out += tr.format("Description", wrapper1.fill(self.description))
 
-        out += '<tr><td>  description</td><td> '
-        out += '{}</td></tr>\n'.format(wrapper1.fill(self.description))
-        # if pars != []:
-        #    out += '{}</td></tr>\n'.format(wrapper1.fill(pars[0]))
-        # for par in pars[1:]:
-        #    out += '{}'.format(textwrap.indent(par, ' ' * 15))
-
-        # if not out.endswith('\n'):
-        #    out += '</td></tr>\n'
-
-        if self._history:
+        if self.history:
             pars = self.history
-            out += '<tr><td>      history</td><td> '
+            hist = ""
             if pars:
-                out += '{}'.format(wrapper1.fill(pars[0]))
+                hist += '{}'.format(wrapper1.fill(pars[0]))
             for par in pars[1:]:
-                out += '{}'.format(textwrap.indent(par, ' ' * 15))
+                hist += '{}'.format(textwrap.indent(par, ' ' * 15))
+            out += tr.format("History", hist)
 
-            if not out.endswith('\n'):
-                out += '</td></tr>\n'
-
-        uncertainty = "(+/-%s)" % self.uncertainty if \
-            self.uncertainty is not None else ""
+        uncertainty = "(+/-%s)" % self.uncertainty \
+            if self.uncertainty is not None else ""
         units = '{:~T}'.format(
-                self.units) if self.units is not None else 'unitless'
+            self.units) if self.units is not None else 'unitless'
+
         sh = ' size' if self.ndim < 2 else 'shape'
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
                              zip(self.shape, self.is_complex)))
+
         shape = (' x '.join(['{}{}'] * len(self.shape))).format(
-                *shapecplx).replace(
-                'False', '').replace('True', '(complex)')
+                *shapecplx).replace('False', '').replace('True', '(complex)')
+
         size = self.size
         sizecplx = '' if not self.has_complex_dims else " (complex)"
+        size = '{}{}'.format(size, sizecplx) \
+                                        if self.ndim < 2 else '{}'.format(shape)
 
-        out += '<tr><td>data</td><td><table>'
-        out += '<tr><td>title</td><td> {}</td></tr>\n'.format(self.title)
-        out += '<tr><td>size</td><td> ' \
-               '{}{}</td></tr>\n'.format(size,
-                                         sizecplx) if self.ndim < 2 \
-            else '<tr><td>shape</td><td> {}</td></tr>\n'.format(shape)
+        data = '<table>\n'
+        data += tr.format("Title", self.title)
+        data += tr.format("Size",size)
+        data += tr.format("Units", units)
+        data_str = str(self._uarray(self._data, self._uncertainty))
+        data_str = data_str.replace('\n\n', '\n')
+        data += tr.format("Values", textwrap.indent(str(data_str), ' ' * 9))
+        data += '</table>\n'  # end of row data
 
-        out += '<tr><td>units</td><td> {}</td></tr>\n'.format(units)
-        data_str = str(
-                self._uarray(self._data, self._uncertainty)).replace('\n\n',
-                                                                     '\n')
-        out += '<tr><td>values</td><td>\n'
-        out += '{}</td></tr>\n'.format(textwrap.indent(str(data_str), ' ' * 9))
-        out += '</table></td></tr>'
+        out += tr.format('data', data)
+
         if self.axes is not None:
             for i, axis in enumerate(self.axes):
                 axis_str = axis._repr_html_().replace('\n\n', '\n')
-                out += '<tr><td>       axis {}</td><td>'.format(i)
-                out += textwrap.indent(axis_str, ' ' * 9)
-                out += "</td></tr>\n"
+                out += tr.format("axis %i"%i,
+                                 textwrap.indent(axis_str, ' ' * 9))
+
+        out += '</table><br/>\n'
+
         return out
 
     def _loc2index(self, loc, axis):
@@ -1327,7 +1316,7 @@ class NDDataset(
             if loc > coords.max() or loc < coords.min():
                 warn('This coordinate ({}) is outside the axis limits.\n'
                      'The closest limit index is returned'.format(loc),
-                     SpectroChemPyWarning)
+                     NDDatasetWarning)
             return index
 
         else:

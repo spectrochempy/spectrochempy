@@ -9,9 +9,26 @@ API (Application Programming Interface)
 
 The |scp| **API** is accessible from python shell or IPython.
 
+Introduction
+------------
+
 .. toctree::
     :maxdepth: 1
 
-    userguide.nddataset
-    userguide.units
-    userguide.uncertainty
+    introduction
+
+The NDDataset object
+---------------------
+
+.. toctree::
+	:maxdepth: 1
+
+	nddataset
+
+Plotting
+---------------------
+
+.. toctree::
+	:maxdepth: 1
+
+	plotting

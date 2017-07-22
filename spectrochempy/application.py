@@ -44,6 +44,7 @@ import os
 import glob
 import sys
 import logging
+import warnings
 from copy import deepcopy
 
 from traitlets.config.configurable import Configurable
@@ -369,6 +370,18 @@ class SpectroChemPy(Application):
         self._make_default_config_file()
 
         if not self.log_level == logging.DEBUG:
+
+            # warning handler
+
+            def send_warnings_to_log(message, category, filename, lineno,
+                                     *args ):
+                self.log.warning(
+                        '%s:  %s' %
+                        (category.__name__, message))
+                return
+
+            warnings.showwarning = send_warnings_to_log
+
             # exception handler
             # ------------------
             if ip is not None:

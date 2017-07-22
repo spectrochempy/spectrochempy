@@ -416,17 +416,21 @@ class Axis(NDMath, NDArray):
 
     def _repr_html_(self):
 
+        tr = "<tr style='border-bottom: 1px solid lightgray;" \
+             "border-top: 1px solid lightgray;'>" \
+             "<td style='padding-right:5px'><strong>{}</strong></td>" \
+                                                "<td>{}</td><tr>\n"
+
         units = '{:~T}'.format(self._units) \
             if self._units is not None else 'unitless'
-        out = '<table>'
-        out += '<tr><td>title</td><td>%s</td></tr>\n' % (
-            self.title.capitalize())
-        out += '<tr><td>coordinates</td><td>%s</td></tr>\n' % np.array2string(
-                self.coords, separator=' ')
-        out += '<tr><td>units</td><td>%s</td></tr>\n' % units
+        out = '<table>\n'
+        out += tr.format("Title", self.title.capitalize())
+        out += tr.format("Coordinates",
+                         np.array2string(self.coords, separator=' '))
+        out += tr.format("Units", units)
         if self.is_labeled:
-            out += '<tr border=0><td>labels</td><td>%s</td></tr>\n' % self.labels
-        out += '</table>\n'
+            out += tr.format("Labels", self.labels)
+        out += '</table><br/>\n'
         return out
 
     # TODO: _repr_latex

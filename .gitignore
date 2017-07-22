@@ -15,7 +15,7 @@ docs/_build
 
 # data
 essai.scp
-docs/source/api/auto_examples/
+docs/source/auto_examples/
 docs/source/gen_modules/
 conda_recipes/spectrochempy/
 docs/source/modules/
