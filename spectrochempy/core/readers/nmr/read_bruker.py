@@ -692,8 +692,8 @@ def read_bruker_nmr(source, *args, **kwargs):
         log.debug('One experiment read. Make it the current dataset')
 
         source.data = list_data[0]  # complex data will be transformed
-                                  # automatically into an interleaved
-                                  # data array
+                                    # automatically into an interleaved
+                                    # data array
         for axis, cplex in enumerate(meta.iscomplex):
             if cplex:
                 source.set_complex(axis)
@@ -702,6 +702,7 @@ def read_bruker_nmr(source, *args, **kwargs):
         source.meta.readonly = True
         source.axes = list_axes[0]
         source.title = 'intensity'
+
     else:
         # case of multiple experiments to merge
 

@@ -52,11 +52,6 @@ import numpy as np
 from spectrochempy.core.units import ur, Quantity, Measurement, set_nmr_context
 from spectrochempy.utils import epsilon
 
-
-# =============================================================================
-# interface for the processing class
-# =============================================================================
-# NOTE: if these parameters are not set, the name of the module is taken
 __all__ = ["apodize"]
 
 # =============================================================================

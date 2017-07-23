@@ -38,27 +38,18 @@
 """ Tests for the ndplugin module
 
 """
-import numpy as np
-import pandas as pd
-
-from pint import DimensionalityError
-from spectrochempy.api import (NDDataset, Axes, Axis,
-                                            AxisError, Meta, ur)
-from spectrochempy.utils import SpectroChemPyWarning
+import pytest
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
 
 
-import pytest
-import numpy as np
-import os
-
-from spectrochempy.api import plotoptions
+from spectrochempy.api import *
+from spectrochempy.utils import SpectroChemPyWarning
 
 @pytest.fixture()
 def DONOTBLOCK():
-    return False  # True # True in principle for testing
+    return True #False  # True # True in principle for testing
 
 # nmr_processing
 #-----------------------------
@@ -81,7 +72,24 @@ def test_nmr_1D(NMR_source_1D, DONOTBLOCK):
     source.plot(show_complex=True, color='green',
                 xlim=(0.,3000.), zlim=(-2.,2.))
 
+    # NMR parameter access
+
+    assert source.meta.sw_h == [Quantity(10000., "hertz")]
+
+    # NMR fft transform
+
+    em(source)
+
+
     pass
+
+
+
+
+
+
+
+
 
 def test_nmr_2D(NMR_source_2D, DONOTBLOCK):
     source = NMR_source_2D
