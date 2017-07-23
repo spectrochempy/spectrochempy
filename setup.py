@@ -93,6 +93,9 @@ setup(
     long_description=read('README.md'),
     setup_requires=['pytest-runner'],
     install_requires=get_dependencies(),
+    dependency_links=[
+        "git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
+    ],
     tests_require=['pytest'],
     classifiers=[
             "Development Status :: 2 - Pre-Alpha",

@@ -31,7 +31,7 @@ def IR_source_1():
     return source
 
 
-# Fixture:  IR spectra (scp)
+# Fixture:  IR spectra
 
 @pytest.fixture(scope="function")
 def IR_scp_1():

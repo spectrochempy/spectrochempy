@@ -51,9 +51,9 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.application import scp
+from spectrochempy.application import plotoptions
 
-_do_not_block = scp.plotoptions.do_not_block
+_do_not_block = plotoptions.do_not_block
 
 # ==============================================================================
 # class Pca

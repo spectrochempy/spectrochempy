@@ -69,35 +69,15 @@ __all__ = [  'raises',
 
           ]
 
-def APIref():
-    """
-    Helper to display public objects and methods from the API
-
-    """
-    return __all__
-
-
 # loading module libraries
 # ------------------------
 # here we also construct the __all__ list automatically
 
-#     from spectrochempy.application import *
-# do not work for doctest --> import explicitely here then
-from spectrochempy.application import (scp,
+from spectrochempy.application import *
+__all__ += [
 
            ### Helpers
-             log, DEBUG,WARN, ERROR, CRITICAL, INFO,
-             data_dir,list_data_dir,
-             options, plotoptions,
-
-            ### Info
-             copyright, release, version)
-
-
-__all__ += ['scp',
-
-           ### Helpers
-             'log', 'DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
+             'log', 'log_level','DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
              'data_dir', 'list_data_dir',
              'options', 'plotoptions',
 
@@ -156,11 +136,32 @@ try:
 except ImportError:
     pass
 
+def APIref():
+    """
+    Helper to display public objects and methods from the API
+
+    """
+    a = __all__[:]
+    a = sorted(a)
+
+    return a
+
+APIref = APIref()
+
+from traitlets import import_item
+_NDDataset = import_item("spectrochempy.core.dataset.nddataset.NDDataset")
+
+class NDDataset(_NDDataset):
+    """
+    essai
+    """
+    pass
 
 # START THE APPLICATION ========================================================
-_started = scp.start(debug=False)
+from spectrochempy.application import app
+_started = app.start(debug=False)
 
-scp.log.info("API activated "
+log.info("API activated "
              if _started else "API was not started!")
 pass
 # ==============================================================================

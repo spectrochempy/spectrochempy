@@ -75,15 +75,15 @@ def concatenate(*sources, axis=None):
     Examples
     --------
 
-    >>> import spectrochempy as scp
-    >>> A = scp.load_dataset('spec.spg', protocol='omnic')
-    >>> B = scp.load_dataset('spec2.scp')
+    >>> import spectrochempy.api as scp
+    >>> A = scp.load('spec.spg', protocol='omnic')
+    >>> B = scp.load('mydataset.scp')
     >>> C = scp.concatenate( A, B, axis=0)
 
     or
 
-    >>> A = scp.load_dataset('spec.spg', protocol='omnic')
-    >>> B = scp.load_dataset('spec2.scp')
+    >>> A = scp.load('spec.spg', protocol='omnic')
+    >>> B = scp.load('mydataset.scp')
     >>> C = A.concatenate(B, axis=0)
 
     Notes

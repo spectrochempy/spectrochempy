@@ -85,7 +85,7 @@ def test_autosub(IR_source_1):
     s4.plot()  #true avoid blocking due to graphs
 
     s4 = source.copy()
-    from spectrochempy import autosub
+    from spectrochempy.api import autosub
     s = autosub(s4, ref, *ranges, method='chi2')
     assert np.round(s4.data[0, 0], 4) != 0.0000
     assert np.round(s.data[0, 0], 4) == 0.0000

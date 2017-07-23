@@ -80,6 +80,17 @@ _classes = [
         ]
 
 
+__all__ = [
+
+           ### Helpers
+             'log', 'log_level','DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
+             'data_dir', 'list_data_dir',
+             'options', 'plotoptions',
+
+            ### Info
+             'copyright', 'release', 'version',
+           ]
+
 # some useful objects
 # -------------------
 
@@ -420,9 +431,9 @@ class SpectroChemPy(Application):
 
         Examples
         --------
-        >>> scp = SpectroChemPy()
-        >>> scp.initialize()
-        >>> scp.start(
+        >>> app = SpectroChemPy()
+        >>> app.initialize()
+        >>> app.start(
         ...    reset_config=True,   # option for restoring default configuration
         ...    debug=True,          # debugging logs
         ...    )
@@ -504,26 +515,27 @@ class SpectroChemPy(Application):
 # matplotlib use directive to set before calling matplotlib backends
 # ==============================================================================
 #from spectrochempy.application import SpectroChemPy
-scp = SpectroChemPy()
-scp.initialize()
+app = SpectroChemPy()
+app.initialize()
 
 # ==============================================================================
 # API namespace
 # ==============================================================================
 
-version = scp.version
-release = scp.release
-copyright = scp.copyright
-log = scp.log
+version = app.version
+release = app.release
+copyright = app.copyright
+log = app.log
+log_level = app.log_level
 
 # give a user friendly name to the objects containing configurables options
-plotoptions = scp.plotoptions
-options = scp
+plotoptions = app.plotoptions
+options = app
 
 _do_not_block = plotoptions.do_not_block
 
-data_dir = scp.data_dir
-list_data_dir = scp.list_data_dir
+data_dir = app.data_dir
+list_data_dir = app.list_data_dir
 
 # log levels
 # ----------

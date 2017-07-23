@@ -65,7 +65,13 @@ from spectrochempy.core.dataset.ndarray import NDArray
 # Constants
 # =============================================================================
 
-__all__ =['NDMath', 'set_operators']
+__all__ =['NDMath',
+          'abs',
+          'conj',
+          'imag',
+          'real',
+]
+
 _classes = ['NDMath']
 
 from spectrochempy.application import log
@@ -78,7 +84,7 @@ class NDMath(object):
 
     >>> from spectrochempy.api import *
     >>> source = NDDataset.load('mydataset.scp')
-    >>> source             #doctest: +ELLIPSIS
+    >>appource             #doctest: +ELLIPSIS
     NDDataset([[    2.06,...,     1.24]])
     >>> np.negative(source) #doctest: +ELLIPSIS
     NDDataset([[   -2.06,...,    -1.24]])
@@ -92,6 +98,142 @@ class NDMath(object):
     # -------------------------------------------------------------------------
     # public methods
     # -------------------------------------------------------------------------
+
+    def real(self, axis=-1):
+        """
+        Compute the real part of the elements of the NDDataset.
+
+        Parameters
+        ----------
+        axis : `int` , optional, default = -1
+
+            The axis along which the angle should be calculated
+
+        Returns
+        -------
+        real_dataset : same type
+
+            Output array.
+
+        See Also
+        --------
+        :meth:`imag`, :meth:`conj`, :meth:`abs`
+
+        """
+        new = self.copy()
+        if not new._is_complex[axis]:
+            return new
+        new.swapaxes(-1, axis, inplace=True)
+        new._data = new._data[..., ::2]
+        new._is_complex[axis] = False
+        new.swapaxes(-1, axis, inplace=True)
+        return new
+
+    def imag(self, axis=-1):
+        """
+        Imaginary part
+
+        Compute the imaginary part of the elements of the NDDataset.
+
+        Parameters
+        ----------
+        axis : `int` , optional
+
+            The axis along which the angle should be calculated.
+
+        Returns
+        -------
+        imag_dataset : same type
+
+            Output array.
+
+        See Also
+        --------
+        :meth:`real`,:meth:`conj`, :meth:`abs`
+
+        """
+        new = self.copy()
+        if not new._is_complex[axis]:
+            logging.error(
+                    'The current dataset is not complex. '
+                    'Imag = None is returned.')
+            return None
+
+        new.swapaxes(-1, axis, inplace=True)
+        new._data = new._data[..., 1::2]
+        new._is_complex[axis] = False
+        new.swapaxes(-1, axis, inplace=True)
+        return new
+
+    def conj(self, axis=-1):
+        """
+        Return the conjugate of the NDDataset.
+
+        Parameters
+        ----------
+        axis : `int` , optional, default = -1
+
+            The axis along which the conjugate value should be calculated
+
+        Returns
+        -------
+        conj_dataset : same type
+
+            Output array.
+
+        See Also
+        --------
+        :meth:`real`, :meth:`imag`, :meth:`abs`
+
+        """
+        new = self.copy()
+        if not new._is_complex[axis]:
+            return new  # not a complex, return inchanged
+
+        new.swapaxes(-1, axis)
+        new._data[..., 1::2] = -new._data[..., 1::2]
+        new.swapaxes(-1, axis)
+
+        return new
+
+    conjugate = conj
+
+    def abs(self, axis= -1):
+        """
+        Returns the absolute value of a complex NDDataset.
+
+        Parameters
+        ----------
+        axis : int
+
+            Optional, default: 1.
+
+            The axis along which the absolute value should be calculated.
+
+
+
+        Returns
+        -------
+        nddataset : same type,
+
+            Output array.
+
+        See Also
+        --------
+        :meth:`real`, :meth:`imag`, :meth:`conj`
+
+
+        """
+        new = self.copy()
+        if not new.has_complex_dims or not new.is_complex[axis]:
+            return np.fabs(new)  # not a complex, return fabs should be faster
+
+        new = new.real(axis) ** 2 + new.imag(axis) ** 2
+        new._is_complex[axis] = False
+        new._data = np.sqrt(new)._data
+
+        return new
+    absolute = abs
 
     def pipe(self, func, *args, **kwargs):
         """Apply func(self, \*args, \*\*kwargs)
@@ -384,6 +526,10 @@ class NDMath(object):
 
         return func
 
+abs = NDMath.abs
+conj = NDMath.conj
+imag = NDMath.imag
+real = NDMath.real
 
 # =============================================================================
 # ARITHMETIC ON NDDATASET

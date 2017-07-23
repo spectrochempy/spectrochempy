@@ -39,4 +39,6 @@ rst_epilog = """
 .. |scp| replace:: **SpectroChemPy**
 
 .. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+
+.. |Axis| replace:: :class:`~spectrochempy.core.dataset.nddaxes.Axis`
 """

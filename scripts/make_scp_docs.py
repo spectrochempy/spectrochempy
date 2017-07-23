@@ -57,12 +57,12 @@ from sphinx.application import Sphinx
 import matplotlib as mpl
 mpl.use('agg')
 
-from spectrochempy.application import scp, log
+from spectrochempy.api import *
 from spectrochempy.utils import list_packages
 from traitlets import import_item
 
 import logging
-scp.log_level = logging.INFO
+log_level = logging.INFO
 
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
@@ -86,7 +86,7 @@ def make_docs(*options):
     DEBUG = 'DEBUG' in options
 
     if DEBUG:
-        scp.log_level = logging.DEBUG
+        log_level = logging.DEBUG
 
     builder=None
 
@@ -367,7 +367,7 @@ def write_download_page():
       </li>
     </ul>
 
-    """.format(scp.release, date_release, scp.version, date_version)
+    """.format(release, date_release, version, date_version)
 
     with open(os.path.join(DOCDIR, 'source', '_templates', 'download.html'),
               "w") as f:

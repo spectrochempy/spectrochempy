@@ -70,4 +70,8 @@ def test_nmr_1D(NMR_source_1D, DONOTBLOCK):
     plotoptions.do_not_block = DONOTBLOCK
     source.plot()
 
+    # perform a fft
+
+
+
 

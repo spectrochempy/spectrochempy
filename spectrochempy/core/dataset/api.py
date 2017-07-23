@@ -37,7 +37,6 @@
 import sys
 from traitlets import import_item
 
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import list_packages
 
 name = 'dataset'

@@ -179,7 +179,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
 # Path should be relative to the ``_static`` files directory.
-html_logo = "" #logo.png"
+# html_logo = "_static/logo.png"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.
@@ -213,7 +213,7 @@ html_theme_options = {
 
     # Global TOC depth for "site" navbar tab. (Default: 1)
     # Switching to -1 shows all levels.
-    'globaltoc_depth': 1,
+    'globaltoc_depth': 0,
 
     # Include hidden TOCs in Site navbar?
     #
@@ -267,7 +267,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-# html_logo = None
+# html_logo = '_static/logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -352,7 +352,7 @@ latex_documents = [
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-# latex_logo = None
+latex_logo = "_static/log.png"
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -502,7 +502,16 @@ def setup(app):
 plot_gallery = True
 
 sphinx_gallery_conf = {
-    'backreferences_dir': False,
+    #'backreferences_dir': False,
+    'backreferences_dir': 'gen_modules/backreferences',
+    'doc_module': ('spectrochempy', ),
+    'reference_url': {
+        'spectrochempy': None,
+        'matplotlib': 'https://matplotlib.org',
+        'numpy': 'https://docs.scipy.org/doc/numpy',
+        'sklearn': 'http://scikit-learn.org/stable',
+    },
+
     # path to your examples scripts
     'examples_dirs': 'examples',
     # path where to save gallery generated examples

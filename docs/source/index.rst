@@ -29,11 +29,6 @@ running on Linux, Windows or OS X.
   7.  Preprocessing funtions such as baseline correction, automatic subtraction and many more ...
   8.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
 
-.. include:: auto_examples/read
-.. raw:: html
-
-        <div style='clear:both'></div>
-
 .. warning::
 
 	|scp| is still experimental and under active development.
@@ -62,7 +57,7 @@ Html documentation is available here:
 
 Pdf documentation can also be downloaded here:
 
-* `spectrochempy.pdf <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/pdf/spectrochempy.pf>`_
+* `spectrochempy.pdf <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/pdf/spectrochempy.pdf>`_
 
 
 .. _main_user_guides:
@@ -83,7 +78,6 @@ Gallery of examples
 	:maxdepth: 1
 
 	auto_examples/index
-
 
 .. _main_issue_tracker:
 

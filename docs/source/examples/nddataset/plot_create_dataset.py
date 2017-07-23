@@ -8,29 +8,40 @@ and then we plot one section
 
 """
 
-######################
-# As usual, we start by loading the scp
+#############################################
+# As usual, we start by loading the api
+from spectrochempy.api import NDDataset, Axis
+
+##############################################
 import numpy as np
 import matplotlib.pyplot as plt
 
-import spectrochempy as scp
+##############################################
+# Another faster way to do this would be to use:
+#
+# from spectrochempy.api import *
+
+###############################################
+# However it may be a problem because it may
+# provoque some collisions between different namespaces.
+
 
 ###############################################
 # Now we create a 3D NDDataset from scratch
 
-axe0 = scp.Axis(coords = np.linspace(200., 300., 3),
+axe0 = Axis(coords = np.linspace(200., 300., 3),
             labels = ['cold', 'normal', 'hot'],
             mask = None,
             units = "K",
             title = 'temperature')
 
-axe1 = scp.Axis(coords = np.linspace(0., 60., 100),
+axe1 = Axis(coords = np.linspace(0., 60., 100),
             labels = None,
             mask = None,
             units = "minutes",
             title = 'time-on-stream')
 
-axe2 = scp.Axis(coords = np.linspace(4000., 1000., 100),
+axe2 = Axis(coords = np.linspace(4000., 1000., 100),
             labels = None,
             mask = None,
             units = "cm^-1",
@@ -40,7 +51,7 @@ nd_data=np.array([np.array([np.sin(axe2.data*2.*np.pi/4000.)*np.exp(-y/60.) for 
          for t in axe0.data])**2
 
 
-mydataset = scp.NDDataset(nd_data,
+mydataset = NDDataset(nd_data,
                axes = [axe0, axe1, axe2],
                title='Absorbance',
                units='absorbance'

@@ -13,7 +13,7 @@ import os
 from spectrochempy.api import *
 
 ##########################################################
-# ``data_dir` contains the path to a default data directory.
+# ``data_dir`` contains the path to a default data directory.
 
 path = os.path.join(data_dir, 'nmrdata','bruker', 'tests', 'nmr','bruker_1d')
 
@@ -25,5 +25,5 @@ ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 ##########################################################
 # view it...
 
-ndd.plot()
+plot(ndd)
 

@@ -36,16 +36,17 @@
 
 import spectrochempy
 
-from spectrochempy import *
+from spectrochempy.api import *
 
 def test_api():
 
-    print('\n\nRunning : ', spectrochempy.api.scp.running)
+    print('\n\nRunning : ', spectrochempy.application.running)
     assert version.startswith('0.1')
     assert "Laboratory for Catalysis and Spectrochempy" in copyright
     assert release.startswith('0.1')
 
     log.warning('Ok, this is nicely executing!')
 
-    assert 'np' in APIref()
-    assert 'NDDataset' in APIref()
+    assert 'np' in APIref
+    assert 'NDDataset' in APIref
+    assert 'abs' in APIref

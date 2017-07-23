@@ -80,8 +80,15 @@ from spectrochempy.application import options
 # Constants
 # ---------
 
-__all__ = ['NDIO']
-_classes = __all__[:]
+__all__ = ['NDIO',
+
+           'plot',
+           'load',
+           'read',
+           'write',
+
+           ]
+_classes = ['NDIO']
 
 from spectrochempy.application import log
 
@@ -706,9 +713,8 @@ class NDIO(HasTraits):
 
         return state
 
-# =============================================================================
-# Modify the doc to include Traits
-# =============================================================================
-# from spectrochempy.utils import create_traitsdoc
 
-# create_traitsdoc(NDIO)
+plot = NDIO.plot
+load = NDIO.load
+read = NDIO.read
+write = NDIO.write

@@ -85,10 +85,18 @@ from spectrochempy.application import log
 
 __all__ = ['NDDataset',
            'NDDatasetError',
-           'NDDatasetWarning'
+           'NDDatasetWarning',
+           #dataset
+           'squeeze',
+           'sort',
+           'swapaxes',
+           'transpose',
            ]
 
-_classes = __all__[:]
+_classes = ['NDDataset',
+           'NDDatasetError',
+           'NDDatasetWarning'
+           ]
 
 # =============================================================================
 # numpy print options
@@ -853,140 +861,6 @@ class NDDataset(
 
         return new
 
-    def real(self, axis=-1):
-        """
-        Compute the real part of the elements of the NDDataset.
-
-        Parameters
-        ----------
-        axis : `int` , optional, default = -1
-
-            The axis along which the angle should be calculated
-
-        Returns
-        -------
-        real_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`imag`, :meth:`conj`, :meth:`abs`
-
-        """
-        new = self.copy()
-        if not new._is_complex[axis]:
-            return new
-        new.swapaxes(-1, axis, inplace=True)
-        new._data = new._data[..., ::2]
-        new._is_complex[axis] = False
-        new.swapaxes(-1, axis, inplace=True)
-        return new
-
-    def imag(self, axis=-1):
-        """
-        Imaginary part
-
-        Compute the imaginary part of the elements of the NDDataset.
-
-        Parameters
-        ----------
-        axis : `int` , optional
-
-            The axis along which the angle should be calculated.
-
-        Returns
-        -------
-        imag_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`real`,:meth:`conj`, :meth:`abs`
-
-        """
-        new = self.copy()
-        if not new._is_complex[axis]:
-            logging.error(
-                    'The current dataset is not complex. '
-                    'Imag = None is returned.')
-            return None
-
-        new.swapaxes(-1, axis, inplace=True)
-        new._data = new._data[..., 1::2]
-        new._is_complex[axis] = False
-        new.swapaxes(-1, axis, inplace=True)
-        return new
-
-    def conj(self, axis=-1):
-        """
-        Return the conjugate of the NDDataset.
-
-        Parameters
-        ----------
-        axis : `int` , optional, default = -1
-
-            The axis along which the conjugate value should be calculated
-
-        Returns
-        -------
-        conj_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`real`, :meth:`imag`, :meth:`abs`
-
-        """
-        new = self.copy()
-        if not new._is_complex[axis]:
-            return new  # not a complex, return inchanged
-
-        new.swapaxes(-1, axis)
-        new._data[..., 1::2] = -new._data[..., 1::2]
-        new.swapaxes(-1, axis)
-
-        return new
-
-    conjugate = conj
-
-    def abs(self, axis= -1):
-        """
-        Returns the absolute value of a complex NDDataset.
-
-        Parameters
-        ----------
-        axis : int
-
-            Optional, default: -1.
-
-            The axis along which the absolute value should be calculated.
-
-        Returns
-        -------
-        nddataset : same type,
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`real`, :meth:`imag`, :meth:`conj`
-
-
-        """
-        new = self.copy()
-        if not new.has_complex_dims or not new.is_complex[axis]:
-            return np.fabs(new)  # not a complex, return fabs should be faster
-
-        new = new.real(axis) ** 2 + new.imag(axis) ** 2
-        new._is_complex[axis] = False
-        new._data = np.sqrt(new)._data
-
-        return new
-    absolute = abs
-
     def set_complex(self, axis=-1):
         """
         Make a dimension complex
@@ -1431,6 +1305,11 @@ class NDDataset(
 
         return
 
+# make some function also accesiibles from the module
+squeeze = NDDataset.squeeze
+sort = NDDataset.sort
+swapaxes = NDDataset.swapaxes
+transpose = NDDataset.transpose
 
 # =============================================================================
 # Set the operators

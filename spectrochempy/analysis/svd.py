@@ -88,7 +88,7 @@ class Svd(HasTraits):
     Examples
     ---------
     >>> source = NDDataset.load('mydataset.scp')
-    >>> svd = Svd(source)
+    >>appvd = Svd(source)
     >>> print(svd.ev)
     [1.18e+04      634 ...,  0.00109 0.000975]
     >>> print(svd.ev_cum)
