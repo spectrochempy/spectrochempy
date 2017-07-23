@@ -547,6 +547,8 @@ class NDIO(HasTraits):
         if not _plotter(**kwargs):
             return None
 
+        return True
+
     def plot_resume(self, **kwargs):
 
         # Additional matplotlib commands on the current plot
@@ -585,8 +587,12 @@ class NDIO(HasTraits):
         if savename is not None:
             self.fig.savefig(savename)
 
-        if not plotoptions.do_not_block:
+        if not plotoptions.do_not_block and not kwargs.get('hold', False):
+            # if hold we do not show the figure becaus ewe will use it again
+            # for a next plot
             self.show()
+            self.ax = None
+            self.fig = None
 
     def plot_generic(self, **kwargs):
         """
@@ -611,25 +617,33 @@ class NDIO(HasTraits):
         temp = temp.squeeze()
 
         # ax and fig are not copied, so we add them here (hack)
-        if self.ax and kwargs.get('hold', False):
+        if self.ax :
                 temp.ax = self.ax._axes
                 temp.fig = plt.gcf()
 
         if temp.ndim == 1:
 
-            return temp.plot_1D(**kwargs)
+            temp.plot_1D(**kwargs)
 
         elif temp.ndim == 2 :
 
-            return temp.plot_2D(**kwargs)
+            temp.plot_2D(**kwargs)
 
         elif temp.ndim == 3:
 
-            return temp.plot_3D(**kwargs)
+            temp.plot_3D(**kwargs)
 
         else:
             log.error('Cannot guess an adequate plotter. I did nothing!')
             return False
+
+        if kwargs.get('hold', False):
+            self.ax = temp.ax
+            self.fig = temp.fig
+        else:
+            self.ax = None
+            self.fig = None
+        return True
 
     def show(self):
         """

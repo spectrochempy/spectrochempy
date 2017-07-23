@@ -86,7 +86,7 @@ __all__ = [
              'log', 'log_level','DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
              'data_dir', 'list_data_dir',
              'options', 'plotoptions',
-
+             'running',
             ### Info
              'copyright', 'release', 'version',
            ]
@@ -521,7 +521,7 @@ app.initialize()
 # ==============================================================================
 # API namespace
 # ==============================================================================
-
+running = app.running
 version = app.version
 release = app.release
 copyright = app.copyright

@@ -58,6 +58,87 @@ def plot_1D(source, **kwargs):
 
     reverse: `bool` [optional, default=`True`]
 
+    hold : `bool` [optional, default=`False`]
+
+        If true hold the current figure and ax until a new plot is performed.
+
+    data_only: `bool` [optional, default=`False`]
+
+        Only the plot is done. No addition of axes or label specifications
+        (current if any or automatic settings are kept.
+
+    imag : `bool` [optional, default=`False`]
+
+        Show imaginary part. By default only the real part is displayed.
+
+    show_complex : `bool` [optional, default=`False`]
+
+        Show both real and imaginary part.
+        By default only the real part is displayed.
+
+        dpi: int, optional
+        the number of pixel per inches
+    figsize: tuple, optional, default is (3.4, 1.7)
+        figure size
+    fontsize: int, optional
+        font size in pixels, default is 10
+    imag: bool, optional, default False
+        By default real part is shown. Set to True to display the imaginary part
+    xlim: tuple, optional
+        limit on the horizontal axis
+    zlim or ylim: tuple, optional
+        limit on the vertical axis
+
+    color or c: matplotlib valid color, optional
+
+        color of the line #TODO: a list if several line
+
+    linewidth or lw: float, optional
+
+        line width
+
+    linestyle or ls: str, optional
+
+        line style definition
+
+    xlabel: str, optional
+        label on the horizontal axis
+    zlabel or ylabel: str, optional
+        label on the vertical axis
+    showz: bool, optional, default=True
+        should we show the vertical axis
+
+    plot_model:Bool,
+
+        plot model data if available
+
+    modellinestyle or modls: str,
+
+        line style of the model
+
+    offset: float,
+
+        offset of the model individual lines
+
+    commands: str,
+
+        matplotlib commands to be executed
+
+    show_zero: boolean, optional
+
+        show the zero basis
+
+    savename: str,
+
+        name of the file to save the figure
+
+    savefig: Bool,
+
+        save the fig if savename is defined,
+        should be executed after all other commands
+
+    vshift: float, optional
+        vertically shift the line from its baseline
 
 
     kwargs : additional keywords
@@ -77,8 +158,11 @@ def plot_1D(source, **kwargs):
     # abscissa axis
     x = source.x
 
-    # ordinates
-    y = source.real()
+    # ordinates (by default we plot real part of the data)
+    if not kwargs.get('imag', False) or kwargs.get('show_complex', False):
+        y = source.real()
+    else:
+        y = source.imag()
 
     # offset
     offset = kwargs.get('offset', 0.0)
@@ -86,6 +170,9 @@ def plot_1D(source, **kwargs):
 
     # plot
     line, = ax.plot(x.coords, y.data)
+    if kwargs.get('show_complex', False):
+        yimag = source.imag()
+        lineimag, = ax.plot(x.coords, yimag.data, ls='--')
 
     # line attributes
     c = kwargs.get('color', kwargs.get('c'))
@@ -97,6 +184,17 @@ def plot_1D(source, **kwargs):
     ls = kwargs.get('linestyle', kwargs.get('ls', '-'))
     if ls:
         line.set_linestyle(ls)
+
+    if kwargs.get('hold', False):
+        # we need reference to the current axe if we want to plot again
+        source.ax = ax
+        source.fig = fig
+
+    if kwargs.get('data_only', False):
+        # if data only (we will  ot set axes and labels
+        # it was probably done already in a previuos plot
+        source.plot_resume(**kwargs)
+        return True
 
     # -------------------------------------------------------------------------
     # axis limits and labels

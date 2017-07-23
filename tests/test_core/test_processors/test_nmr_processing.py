@@ -68,10 +68,30 @@ def test_nmr_1D(NMR_source_1D, DONOTBLOCK):
     source = NMR_source_1D
 
     plotoptions.do_not_block = DONOTBLOCK
+
+    # perform some analysis
+    assert source.is_complex[-1]
+
+    # test if we can plot on the same figure
+    source.plot(hold=True, xlim=(0.,25000.))
+    # we want to superpose a second spectrum
+    source.plot(imag=True, data_only=True)
+
+    # display the real and complex at the same time
+    source.plot(show_complex=True, color='green',
+                xlim=(0.,3000.), zlim=(-2.,2.))
+
+    pass
+
+def test_nmr_2D(NMR_source_2D, DONOTBLOCK):
+    source = NMR_source_2D
+
+    plotoptions.do_not_block = DONOTBLOCK
     source.plot()
 
-    # perform a fft
+    # perform some anakysis
+    assert source.is_complex[-1]
 
-
-
+    ax = source.real().plot()
+    source.imag().plot(ax)
 
