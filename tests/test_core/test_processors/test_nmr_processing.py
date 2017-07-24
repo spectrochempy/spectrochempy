@@ -49,14 +49,14 @@ from spectrochempy.utils import SpectroChemPyWarning
 
 @pytest.fixture()
 def DONOTBLOCK():
-    return True #False  # True # True in principle for testing
+    return False  # True # True in principle for testing
 
 # nmr_processing
 #-----------------------------
 
 def test_nmr_1D(NMR_source_1D, DONOTBLOCK):
 
-    source = NMR_source_1D
+    source = NMR_source_1D.copy()
 
     plotoptions.do_not_block = DONOTBLOCK
 
@@ -74,12 +74,18 @@ def test_nmr_1D(NMR_source_1D, DONOTBLOCK):
 
     # NMR parameter access
 
-    assert source.meta.sw_h == [Quantity(10000., "hertz")]
+    assert source.meta.sw_h == [Quantity(10000., "Hz")]
 
-    # NMR fft transform
 
-    em(source)
+def test_nmr_1D_apodization(NMR_source_1D, DONOTBLOCK):
 
+    source = NMR_source_1D.copy()
+
+    plotoptions.do_not_block = DONOTBLOCK
+
+    source.plot(hold=True)
+    source = source.em(100.*ur.Hz)
+    source.plot(data_only=True)
 
     pass
 
@@ -101,5 +107,5 @@ def test_nmr_2D(NMR_source_2D, DONOTBLOCK):
     assert source.is_complex[-1]
 
     ax = source.real().plot()
-    source.imag().plot(ax)
+    source.imag().plot()
 

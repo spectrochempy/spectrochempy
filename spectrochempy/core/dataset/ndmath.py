@@ -65,12 +65,7 @@ from spectrochempy.core.dataset.ndarray import NDArray
 # Constants
 # =============================================================================
 
-__all__ =['NDMath',
-          'abs',
-          'conj',
-          'imag',
-          'real',
-]
+__all__ =['NDMath',]
 
 _classes = ['NDMath']
 
@@ -98,142 +93,6 @@ class NDMath(object):
     # -------------------------------------------------------------------------
     # public methods
     # -------------------------------------------------------------------------
-
-    def real(self, axis=-1):
-        """
-        Compute the real part of the elements of the NDDataset.
-
-        Parameters
-        ----------
-        axis : `int` , optional, default = -1
-
-            The axis along which the angle should be calculated
-
-        Returns
-        -------
-        real_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`imag`, :meth:`conj`, :meth:`abs`
-
-        """
-        new = self.copy()
-        if not new._is_complex[axis]:
-            return new
-        new.swapaxes(-1, axis, inplace=True)
-        new._data = new._data[..., ::2]
-        new._is_complex[axis] = False
-        new.swapaxes(-1, axis, inplace=True)
-        return new
-
-    def imag(self, axis=-1):
-        """
-        Imaginary part
-
-        Compute the imaginary part of the elements of the NDDataset.
-
-        Parameters
-        ----------
-        axis : `int` , optional
-
-            The axis along which the angle should be calculated.
-
-        Returns
-        -------
-        imag_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`real`,:meth:`conj`, :meth:`abs`
-
-        """
-        new = self.copy()
-        if not new._is_complex[axis]:
-            logging.error(
-                    'The current dataset is not complex. '
-                    'Imag = None is returned.')
-            return None
-
-        new.swapaxes(-1, axis, inplace=True)
-        new._data = new._data[..., 1::2]
-        new._is_complex[axis] = False
-        new.swapaxes(-1, axis, inplace=True)
-        return new
-
-    def conj(self, axis=-1):
-        """
-        Return the conjugate of the NDDataset.
-
-        Parameters
-        ----------
-        axis : `int` , optional, default = -1
-
-            The axis along which the conjugate value should be calculated
-
-        Returns
-        -------
-        conj_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`real`, :meth:`imag`, :meth:`abs`
-
-        """
-        new = self.copy()
-        if not new._is_complex[axis]:
-            return new  # not a complex, return inchanged
-
-        new.swapaxes(-1, axis)
-        new._data[..., 1::2] = -new._data[..., 1::2]
-        new.swapaxes(-1, axis)
-
-        return new
-
-    conjugate = conj
-
-    def abs(self, axis= -1):
-        """
-        Returns the absolute value of a complex NDDataset.
-
-        Parameters
-        ----------
-        axis : int
-
-            Optional, default: 1.
-
-            The axis along which the absolute value should be calculated.
-
-
-
-        Returns
-        -------
-        nddataset : same type,
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`real`, :meth:`imag`, :meth:`conj`
-
-
-        """
-        new = self.copy()
-        if not new.has_complex_dims or not new.is_complex[axis]:
-            return np.fabs(new)  # not a complex, return fabs should be faster
-
-        new = new.real(axis) ** 2 + new.imag(axis) ** 2
-        new._is_complex[axis] = False
-        new._data = np.sqrt(new)._data
-
-        return new
-    absolute = abs
 
     def pipe(self, func, *args, **kwargs):
         """Apply func(self, \*args, \*\*kwargs)
@@ -327,45 +186,62 @@ class NDMath(object):
     @staticmethod
     def _op(f, objs, ufunc=False):
 
+        fname = f.__name__   # name of the function to use
+        objs = list(objs)    # work with a list of objs not tuples
+
+        # determine if the function needs compatible units
         sameunits = False
-
-        fname = f.__name__
-
         if fname in ['lt', 'le', 'ge', 'gt', 'add', 'sub']:
             sameunits = True
 
-        objs = list(objs)
+
+        # take the first object out of the objs list
         obj = copy.deepcopy(objs.pop(0))
 
+        # Some flags to be set depending of the object
         isdataset = True
-        isaxe = False
+        isaxis = False
         iscomplex = False
 
+        # case our first object is a NDArray
+        # (Axis or NDDataset derive from NDArray)
         if isinstance(obj, NDArray):
-            d = obj.data
 
-            # units?
+            d = obj.data  # The underlying data
+
+            # do we have units?
             if not obj.unitless:
                 q = Quantity(1., obj.units)  # create a Quantity from the units
             else:
                 q = 1.
 
-            if hasattr(obj, 'axes'):
-                # uncertainties?
+            # Check if our NDArray is actually a NDDataset
+            # (it must have an attribute _axes)
+            if hasattr(obj, '_axes'):
+
+                # do we have uncertainties on our data ?
                 # if any create an UFloat type if any uncertainty
                 d = obj._uarray(d, obj._uncertainty)
 
-                # complex
+                # Our data may be complex
                 iscomplex = obj.is_complex[-1]
 
             else:
+
+                # Ok it's an NDArray but not a NDDataset, then it's an Axis.
                 isdataset = False
-                isaxe = True
+                isaxis = True
 
             # mask?
             d = obj._umasked(d, obj._mask)
 
+            if iscomplex:
+                # pack to complex
+                d = d[..., ::2] + 1j * d[..., 1::2]
+
         else:
+
+            # obj is not a NDDarray
             # assume an array or a scalar (possibly a Quantity)
             isdataset = False
 
@@ -374,12 +250,12 @@ class NDMath(object):
                     q = Quantity(1., obj.units)  # create a Quantity from the units
                 else:
                     q = 1.
-                d = d = obj.magnitude
+                d = obj.magnitude
             else:
                 q = 1.
                 d = obj
 
-        # other operand
+        # Now we analyse the other operands
         args = []
         argunits = []
         argcomplex = []
@@ -387,6 +263,8 @@ class NDMath(object):
         # TODO: check the units with respect to some ufuncs or ops
         for o in objs:
             other = copy.deepcopy(o)
+
+            # is other a NDDataset or Axis?
             if isinstance(other, NDArray):
 
                 # if isaxe:
@@ -419,21 +297,32 @@ class NDMath(object):
                 # mask?
                 arg = other._umasked(arg, other._mask)
 
+                # complex?
+                if hasattr(other, '_is_complex') and \
+                                other.is_complex is not None:
+                    if other.is_complex[-1]:
+                        # pack arg to complex
+                        arg = arg[..., ::2] + 1j * arg[..., 1::2]
+
+                    argcomplex.append(other.is_complex)  # keep memory of the complex dims
+                                                         # not sure if this will work
+                else:
+                    argcomplex.append(None)
+
             else:
+                # Not a NDArray.
+                # separate units and magnitude
                 if isinstance(other, Quantity):
                     arg = other.magnitude
                     argunits.append(Quantity(1., other._units))
                 else:
                     arg = other
                     argunits.append(1.)
+
             args.append(arg)
 
-            # complex?
-            if hasattr(other, '_is_complex') and other.is_complex is not None:
-                argcomplex.append(other.is_complex[-1])
-            else:
-                argcomplex.append(False)
-
+        # perform operations
+        # ------------------
         if ufunc:
             # with use of the numpy functions of uncertainty package
             # some transformation to handle missing function in the unumpy module
@@ -455,13 +344,14 @@ class NDMath(object):
             else:
                 data = getattr(unp, fname)(d, *args)
         else:
-            if iscomplex:
-                # pack to complex
-                d = d[..., ::2] + 1j * d[..., 1::2]
+
             data = f(d, *args)
-            if iscomplex:
-                # unpack
-                new = np.empty_like(obj.data)
+
+            if np.any(np.iscomplex(data)):
+                # unpack (we must double the last dimension
+                newshape = list(data.shape)
+                newshape[-1] *= 2
+                new = np.empty(newshape)
                 new[..., ::2] = data.real
                 new[..., 1::2] = data.imag
                 data = new
@@ -525,11 +415,6 @@ class NDMath(object):
             return self
 
         return func
-
-abs = NDMath.abs
-conj = NDMath.conj
-imag = NDMath.imag
-real = NDMath.real
 
 # =============================================================================
 # ARITHMETIC ON NDDATASET

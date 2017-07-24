@@ -49,13 +49,17 @@ from spectrochempy.utils import epsilon
 # =============================================================================
 # interface for the processing class
 # =============================================================================
-__all__ = ["em"]
+#__all__ = ["em"]
 
 # =============================================================================
 # em function
 # =============================================================================
 
-def em(self, *args, **kwargs):
+#def em()
+
+
+
+def _em(self, *args, **kwargs):
     """Calculate an exponential apodization function
 
     The exponential apodization is calculated in the last dimension on NDDatasets.

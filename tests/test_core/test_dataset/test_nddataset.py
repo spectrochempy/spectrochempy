@@ -1141,6 +1141,19 @@ def test_create_from_complex_data():
     assert nd.shape == (2, 2)
     pass
 
+def test_make_complex_1D_during_math_op():
+
+    nd = NDDataset([1. , 2. ],axes=[Axis([10,20])], units='meter')
+    assert nd.data.size == 2
+    assert nd.size == 2
+    assert nd.shape == (2,)
+    assert nd.is_complex == [False,]
+
+    ndj = nd * 1j
+    assert ndj.data.size == 4
+    assert ndj.is_complex[-1]
+
+
 
 def test_create_from_complex_data_with_units_and_uncertainties():
     # 1D

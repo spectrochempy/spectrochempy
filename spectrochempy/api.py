@@ -130,12 +130,6 @@ try:
 except ImportError:
     pass
 
-try:
-    import nmrglue as ng
-    __all__.append('ng')
-except ImportError:
-    pass
-
 def APIref():
     """
     Helper to display public objects and methods from the API

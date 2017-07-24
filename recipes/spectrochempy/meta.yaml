@@ -29,7 +29,6 @@ requirements:
     - pandoc
     - numpydoc
     - seaborn
-    - nmrglue
     - ipython
     - ipykernel
     - nb_conda
