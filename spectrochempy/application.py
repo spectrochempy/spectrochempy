@@ -416,7 +416,7 @@ class SpectroChemPy(Application):
                         self.log.error(
                                 "%s: %s" % (exception_type.__name__, exception))
 
-                sys.excepthook = exceptionHandler
+                #sys.excepthook = exceptionHandler
 
     # --------------------------------------------------------------------------
     # start the application

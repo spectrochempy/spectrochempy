@@ -143,13 +143,12 @@ def plot_1D(source, **kwargs):
 
     kwargs : additional keywords
 
-
     """
     # where to plot?
     #---------------
-    ax = source.ax
-    if ax is None:
-        fig, ax = source.figure_setup(**kwargs)
+    source.hold = kwargs.get('hold', False)
+
+    fig, ax = source.figure_setup(**kwargs)
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -185,10 +184,9 @@ def plot_1D(source, **kwargs):
     if ls:
         line.set_linestyle(ls)
 
-    if kwargs.get('hold', False):
+    #if kwargs.get('hold', False):
         # we need reference to the current axe if we want to plot again
-        source.ax = ax
-        source.fig = fig
+    #    pass #source.ax = ax
 
     if kwargs.get('data_only', False):
         # if data only (we will  ot set axes and labels

@@ -1508,3 +1508,10 @@ def test_multiple_axis(dsm):  # dsm is defined in conftest
     assert_array_equal(da.axes['temperature'].coords,
                            np.logspace(1., 4., 50) + 273.15,
                            "get axis by title failed")
+
+
+def test_bug_fixe_figopeninnotebookwithoutplot():
+
+    da = NDDataset([1,2,3])
+    da2 = np.sqrt(da ** 3)
+    assert da2._fig is None  # no figure should open

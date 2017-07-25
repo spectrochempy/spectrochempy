@@ -106,9 +106,7 @@ class NDIO(HasTraits):
 
     """
 
-    # new traits useful for i/o operations
-    fig = Instance(Figure, allow_none=True)
-    ax = Instance(Ax, allow_none=True)
+    hold =Bool(False)  # Do we clear old figure? Default : True
 
     # --------------------------------------------------------------------------
     # Generic save function
@@ -587,12 +585,18 @@ class NDIO(HasTraits):
         if savename is not None:
             self.fig.savefig(savename)
 
-        if not plotoptions.do_not_block and not kwargs.get('hold', False):
-            # if hold we do not show the figure becaus ewe will use it again
+        self.hold = kwargs.get('hold', False)
+
+        if not plotoptions.do_not_block and not self.hold:
+            # if hold we do not show the figure because we will use it again
             # for a next plot
             self.show()
-            self.ax = None
             self.fig = None
+            self.ax = None
+        elif plotoptions.do_not_block:
+            # we are testing of something similar
+            self.fig = None
+            self.ax = None
 
     def plot_generic(self, **kwargs):
         """
@@ -616,11 +620,6 @@ class NDIO(HasTraits):
         temp = self.copy()
         temp = temp.squeeze()
 
-        # ax and fig are not copied, so we add them here (hack)
-        if self.ax :
-                temp.ax = self.ax._axes
-                temp.fig = plt.gcf()
-
         if temp.ndim == 1:
 
             temp.plot_1D(**kwargs)
@@ -636,6 +635,8 @@ class NDIO(HasTraits):
         else:
             log.error('Cannot guess an adequate plotter. I did nothing!')
             return False
+
+
 
         if kwargs.get('hold', False):
             self.ax = temp.ax
@@ -670,42 +671,37 @@ class NDIO(HasTraits):
         -------
 
         """
+        ax = self.ax
 
-        fig = kwargs.pop('fig', None)
-        if isinstance(fig, int):
-            if plt.fignum_exists(fig):
-                log.debug('get the existing figure %d' % fig)
-                fig = plt.figure(fig)
-            else:  # we need to create a new one
-                fig = None
+        fignum = kwargs.pop('fignum', None)
+        figsize = mpl.rcParams['figure.figsize'] = \
+            kwargs.pop('figsize', mpl.rcParams['figure.figsize'])
 
-        if fig is None:
 
-            log.debug('fig is None, create a new figure')
-            # when using matplotlib inline
-            # dpi is the savefig.dpi so we should set it here
+        fontsize = mpl.rcParams['font.size'] = \
+            kwargs.pop('fontsize', mpl.rcParams['font.size'])
+        mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
+        mpl.rcParams['xtick.labelsize'] = int(fontsize)
+        mpl.rcParams['ytick.labelsize'] = int(fontsize)
 
-            figsize = mpl.rcParams['figure.figsize'] = \
-                kwargs.pop('figsize', mpl.rcParams['figure.figsize'])
-            fontsize = mpl.rcParams['font.size'] = \
-                kwargs.pop('fontsize', mpl.rcParams['font.size'])
-            mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
-            mpl.rcParams['xtick.labelsize'] = int(fontsize)
-            mpl.rcParams['ytick.labelsize'] = int(fontsize)
+        if fignum is None and self.fig is not None:
+            fignum = self.fig.number
 
-            fig = plt.figure(figsize=figsize, tight_layout=None)
-
-        elif isinstance(fig, Figure):
-            log.debug('fig is a figure instance, get this one')
-
+        fig = plt.figure(fignum, figsize=figsize, tight_layout=None)
 
         # for generic plot we assume only a single ax.
         # other plugin class will or are taking care of other needs
         log.debug('get or create a new ax')
         ax = fig.gca()
 
+        self._fig = fig
+        self._ax = ax
+
         return fig, ax
 
+    # -------------------------------------------------------------------------
+    # Special attributes
+    # -------------------------------------------------------------------------
 
     def __getstate__(self):
         # needed to remove some entry to avoid picling them
@@ -726,6 +722,36 @@ class NDIO(HasTraits):
                 del state[key]
 
         return state
+
+    # -------------------------------------------------------------------------
+    # Properties
+    # -------------------------------------------------------------------------
+
+    @property
+    def fig(self):
+        """
+        Matplotlib figure associated to this dataset
+
+        """
+        return self._fig
+
+    @fig.setter
+    def fig(self, fig):
+        # property setter for fig
+        self._fig = fig
+
+    @property
+    def ax(self):
+        """
+        Matplotlib figure associated to this dataset
+
+        """
+        return self._ax
+
+    @ax.setter
+    def ax(self, ax):
+        # property setter for ax
+        self._ax = ax
 
 
 plot = NDIO.plot

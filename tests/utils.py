@@ -343,3 +343,23 @@ class ignore_warnings(catch_warnings):
             warnings.simplefilter('ignore')
         return retval
 
+#-------------------------------------------------------------------------------
+
+from spectrochempy.api import plotoptions
+
+def show_do_not_block(func):
+    """
+    A decorator to allow non blocking testing of matplotlib figures-
+    set the plotoption.do_not_block
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if func.__name__ in sys.argv[1]:
+            # The individual test has been called - then we show figures
+            # we do not show for full tests
+            plotoptions.do_not_block = False
+        else:
+            plotoptions.do_not_block = True
+        return func(*args, **kwargs)
+
+    return wrapper

@@ -13,7 +13,7 @@ pytest
 pytest-runner
 
 sphinx
-#sphinx-gallery
+sphinx-gallery
 pandoc
 numpydoc
 sphinx_bootstrap_theme

@@ -91,13 +91,14 @@ __all__ = ['NDDataset',
            'sort',
            'swapaxes',
            'transpose',
-            'abs',
-          'conj',
-          'imag',
-          'real',
+           'abs',
+           'conj',
+           'imag',
+           'real',
            ]
 
-_classes = ['NDDataset',
+_classes = [
+           'NDDataset',
            'NDDatasetError',
            'NDDatasetWarning'
            ]

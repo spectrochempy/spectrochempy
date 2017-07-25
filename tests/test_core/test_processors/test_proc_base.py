@@ -35,30 +35,28 @@
 # =============================================================================
 
 
-""" Tests for the ndplugin module
+""" Tests for the  module
 
 """
+import sys
+import functools
 import pytest
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
-                         raises)
+                         raises, show_do_not_block)
 
 
 from spectrochempy.api import *
 from spectrochempy.utils import SpectroChemPyWarning
 
-@pytest.fixture()
-def DONOTBLOCK():
-    return False  # True # True in principle for testing
 
 # nmr_processing
 #-----------------------------
+@show_do_not_block
+def test_nmr_1D(NMR_source_1D):
 
-def test_nmr_1D(NMR_source_1D, DONOTBLOCK):
-
+    import sys
     source = NMR_source_1D.copy()
-
-    plotoptions.do_not_block = DONOTBLOCK
 
     # perform some analysis
     assert source.is_complex[-1]
@@ -76,31 +74,24 @@ def test_nmr_1D(NMR_source_1D, DONOTBLOCK):
 
     assert source.meta.sw_h == [Quantity(10000., "Hz")]
 
-
-def test_nmr_1D_apodization(NMR_source_1D, DONOTBLOCK):
+@show_do_not_block
+def test_nmr_1D_em(NMR_source_1D):
 
     source = NMR_source_1D.copy()
 
-    plotoptions.do_not_block = DONOTBLOCK
-
     source.plot(hold=True)
-    source = source.em(100.*ur.Hz)
+    source = source.em(lb=100.*ur.Hz)
     source.plot(data_only=True)
+
+    #np.exp(-pi * np.arange(data.shape[-1]) * lb)
 
     pass
 
 
-
-
-
-
-
-
-
-def test_nmr_2D(NMR_source_2D, DONOTBLOCK):
+@show_do_not_block
+def test_nmr_2D(NMR_source_2D):
     source = NMR_source_2D
 
-    plotoptions.do_not_block = DONOTBLOCK
     source.plot()
 
     # perform some anakysis

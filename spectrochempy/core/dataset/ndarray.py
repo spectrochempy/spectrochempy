@@ -56,7 +56,7 @@ from pint.errors import DimensionalityError, UndefinedUnitError
 from six import string_types
 from traitlets import List, Unicode, Instance, Bool, HasTraits, default
 from uncertainties import unumpy as unp
-
+import matplotlib.pyplot as plt
 # =============================================================================
 # local imports
 # =============================================================================
@@ -136,12 +136,14 @@ class NDArray(HasTraits):
     _meta = Instance(Meta, allow_none=True)
     _date = Instance(datetime)
     _labels = Array
+    _fig = Instance(plt.Figure, allow_none=True)
+    _ax = Instance(plt.Axes, allow_none=True)
 
     # _scaling = Float(1.)
 
     # private flags
-    _data_passed_with_mask = Bool(transient=True)
-    _data_passed_is_quantity = Bool(transient=True)
+    _data_passed_with_mask = Bool(transient=True)     # TODO: transient is a residue of Traits
+    _data_passed_is_quantity = Bool(transient=True)   # we need to adapt something similar for traitlets
 
     # -------------------------------------------------------------------------
     # Initialization
@@ -702,11 +704,15 @@ class NDArray(HasTraits):
                 # we set directly the hidden attribute as no checking
                 # is necessary for such copy
                 setattr(new, "_" + attr, do_copy(getattr(self, attr)))
-            elif attr == 'units':
+            elif attr in ['units']:
                 setattr(new, "_" + attr, copy.copy(getattr(self,
                                                            attr)))  # deepcopy not working (and not necessary)
         new._name = str(uuid.uuid1()).split('-')[0]
         new._date = datetime.now()
+        if hasattr(self, 'fig') and self.fig: # prevent opening a new figure if no plot was done
+            new._fig = plt.gcf()
+            new._ax = plt.gca()
+
         return new
 
     # -------------------------------------------------------------------------

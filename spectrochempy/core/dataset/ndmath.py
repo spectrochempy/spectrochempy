@@ -38,6 +38,8 @@
 """
 This module implements the base `NDDataset` class.
 
+It is largely adapted from xarray (...)
+
 """
 
 # =============================================================================
@@ -130,7 +132,7 @@ class NDMath(object):
             kwargs[target] = self
             return func(*args, **kwargs)
 
-            return func(self, *args, **kwargs)
+        return func(self, *args, **kwargs)
 
     # -------------------------------------------------------------------------
     # special methods
@@ -149,30 +151,45 @@ class NDMath(object):
 
         # case of complex data
         if self.is_complex is not None:
+
             if self.is_complex[-1] and \
-                            f.__name__ in ['real', 'imag', 'conjugate', 'absolute']:
+                            f.__name__ in ['real', 'imag',
+                                           'conjugate', 'absolute',
+                                           'conj', 'abs']:
                 return getattr(objs[0], f.__name__)()
+
             if self.is_complex[-1] and f.__name__ in ["fabs", ]:
                 # fonction not available for complex data
                 raise ValueError("{} does not accept complex data ".format(f))
 
-        # not a complex data or a function not in the ['real', 'imag', 'conjugate']
-        if f.__name__ in ['absolute']:
+        # not a complex data
+        if f.__name__ in ['absolute', 'abs']:
             f = np.fabs
 
-        data, uncertainty, units, mask = self._op(f, objs, ufunc=True)
-        history = 'ufunc ' + f.__name__
-        return self._op_result(data, uncertainty, units, mask, history)
+        data, uncertainty, units, mask, iscomplex = self._op(f, objs, ufunc=True)
+        history = 'ufunc %s applied.' % f.__name__
+
+        return self._op_result(data, uncertainty, units, mask, history, iscomplex)
 
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
 
-    def _op_result(self, data, uncertainty=None, units=None, mask=None, history=None):
+    def _op_result(self, data, uncertainty=None, units=None,
+                   mask=None, history=None, is_complex=None,
+                   inplace = False):
+        # make a new NDArray resulting of some operation
 
-        new = self.copy()
+        # copy of the current NDArray or keep the same depending on inplace
+        if inplace:
+            new = self
+        else:
+            new = self.copy()
+
+        # update the data
         new._data = copy.deepcopy(data)
 
+        # update the attributes
         if uncertainty is not None:
             new._uncertainty = copy.deepcopy(uncertainty)
         if units is not None:
@@ -181,10 +198,18 @@ class NDMath(object):
             new._mask = copy.copy(mask)
         if history is not None and hasattr(new, 'history'):
             new._history.append(history.strip())
+        if is_complex is not None:
+            new._is_complex = is_complex
+
+        # return the new NDArray (actually not necessary if inplace is True
+        # but this should avoid errors in case of a misuse of this function
+        # i.e.,   new = self._op_result(..., inplace=True)
+
         return new
 
     @staticmethod
     def _op(f, objs, ufunc=False):
+        # achieve an operation f on the objs
 
         fname = f.__name__   # name of the function to use
         objs = list(objs)    # work with a list of objs not tuples
@@ -202,6 +227,9 @@ class NDMath(object):
         isdataset = True
         isaxis = False
         iscomplex = False
+
+        objcomplex = []  # to keep track of the complex nature of the obj
+                         # in the other dimensions tahn the last
 
         # case our first object is a NDArray
         # (Axis or NDDataset derive from NDArray)
@@ -225,6 +253,8 @@ class NDMath(object):
 
                 # Our data may be complex
                 iscomplex = obj.is_complex[-1]
+
+                objcomplex.append(obj.is_complex)
 
             else:
 
@@ -258,7 +288,7 @@ class NDMath(object):
         # Now we analyse the other operands
         args = []
         argunits = []
-        argcomplex = []
+
 
         # TODO: check the units with respect to some ufuncs or ops
         for o in objs:
@@ -304,10 +334,7 @@ class NDMath(object):
                         # pack arg to complex
                         arg = arg[..., ::2] + 1j * arg[..., 1::2]
 
-                    argcomplex.append(other.is_complex)  # keep memory of the complex dims
-                                                         # not sure if this will work
-                else:
-                    argcomplex.append(None)
+                    objcomplex.append(other.is_complex)
 
             else:
                 # Not a NDArray.
@@ -343,18 +370,23 @@ class NDMath(object):
                 data = np.sign(unp.nominal_values(d))
             else:
                 data = getattr(unp, fname)(d, *args)
+
+            #TODO: check the complex nature of the result to return it
+
         else:
 
             data = f(d, *args)
 
             if np.any(np.iscomplex(data)):
-                # unpack (we must double the last dimension
+                # unpack (we must double the last dimension)
                 newshape = list(data.shape)
                 newshape[-1] *= 2
                 new = np.empty(newshape)
                 new[..., ::2] = data.real
                 new[..., 1::2] = data.imag
                 data = new
+                iscomplex = True
+
 
         # unpack the data
         uncertainty = unp.std_devs(data)
@@ -374,15 +406,44 @@ class NDMath(object):
         else:
             units = None
 
-        return data, uncertainty, units, mask
+        # determine the is_complex parameter:
+        data_iscomplex = [False]*data.ndim
+
+
+        if iscomplex:
+            # the resulting data are complex on the last dimension
+            data_iscomplex[-1] = True
+
+        # For the other dimension, this will depends on the history of the
+        # objs:
+        # TODO: The following will have to be carefully checked in many kind
+        # of situation
+        for i in range(data.ndim)[:-1]:
+
+            for item in objcomplex:
+                # dim is complex for this object
+                # (should be also the case of the results)
+                # of course this will work only if the array
+                # doesn't change in ndim ...
+                # TODO: is that possible? - To check
+                # this also assume that compatible object have been
+                # passed. If it is not the case,
+                # some adaptation will be necessary
+                # TODO: adapt array if necessary
+                # for complex dimension
+
+                data_iscomplex[i] |= item[i]   # `or` operation
+
+        return data, uncertainty, units, mask, data_iscomplex
 
     @staticmethod
     def _unary_op(f):
         @functools.wraps(f)
         def func(self):
-            data, uncertainty, units, mask = self._op(f, [self])
+            data, uncertainty, units, mask, iscomplex = self._op(f, [self])
             history = 'unary op : ' + f.__name__
-            return self._op_result(data, uncertainty, units, mask, history)
+            return self._op_result(data,
+                                   uncertainty, units, mask, history, iscomplex)
 
         return func
 
@@ -394,9 +455,10 @@ class NDMath(object):
                 objs = [self, other]
             else:
                 objs = [other, self]
-            data, uncertainty, units, mask = self._op(f, objs)
+            data, uncertainty, units, mask, iscomplex = self._op(f, objs)
             history = 'binary op : ' + f.__name__ + ' with %s ' % str(other)
-            return self._op_result(data, uncertainty, units, mask, history)
+            return self._op_result(data,
+                                   uncertainty, units, mask, history, iscomplex)
 
         return func
 
@@ -405,13 +467,15 @@ class NDMath(object):
         @functools.wraps(f)
         def func(self, other):
             objs = [self, other]
-            data, uncertainty, units, mask = self._op(f, objs)
+            data, uncertainty, units, mask, iscomplex = self._op(f, objs)
             self._data = data
             self._uncertainty = uncertainty
             self._units = units
             self._mask = mask
+            self._iscomplex = iscomplex
             if hasattr(self, '_history'):
-                self._history.append('inplace binary op : ' + f.__name__ + ' with %s ' % str(other))
+                self._history.append('inplace binary op : ' + f.__name__ +
+                                     ' with %s ' % str(other))
             return self
 
         return func

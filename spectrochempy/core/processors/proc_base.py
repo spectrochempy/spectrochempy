@@ -7,41 +7,105 @@ units of points unless otherwise noted.
 
 Adapted from nmrglue
 
+For this a decorator is preparing data to be processed by NMRGLUE functions.
+
+Some function accept units
+
+
 """
+#TODO: make testing of all functions - add units whenever it is possible
+#TODO: check for collision of func name with other function defined in scp.
+
 import copy
 
 from spectrochempy.application import log
 from spectrochempy.core.units import ur, Quantity
 
 import warnings
+import inspect
+from functools import partial, wraps
 
-__all__ = ['em']
+__all__ = ['em', 'gm', 'gmb', 'jmod', 'sp', 'sine', 'tm', 'tri',
+           'rs', 'ls', 'cs', 'roll', 'fsh', 'fsh2', 'nmr_reorder',
+           'swap_halves', 'rft', 'irft', 'fft', 'fft_norm', 'fft_positive',
+           'ifft', 'ifft_norm', 'ifft_positive', 'ha', 'ht', 'di', 'ps',
+           'ps_exp', 'tp', 'tp_hyper', 'zf_inter', 'zf_pad', 'zf', 'zf_double',
+           'zf_size', 'zf_auto', 'add', 'add_ri', 'dx', 'ext', 'ext_left',
+           'ext_mid', 'ext_right', 'integ', 'mc', 'mc_pow',
+           'mir_center', 'mir_left', 'mir_right', 'mir_center_onepoint', 'mult',
+           'rev', 'set_constant', 'set_cmplex', 'set_real', 'set_imag', 'ri2c',
+           'interleave_complex', 'unpack_complex', 'decode_States',
+           'ri2rr', 'append_imag', 'rr2ri', 'unappend_imag', 'exlr', 'exchange_lr',
+           'rolr', 'rotate_lr', 'swap', 'swap_ri', 'bswap', 'byte_swap',
+           'neg_all', 'neg_alt', 'neg_edges', 'neg_even', 'neg_imag', 'neg_odd',
+           'neg_left', 'neg_middle', 'neg_real', 'neg_right', 'abscplx', 'sign',
+           'coadd', 'coad', 'thres', 'conv', 'convolute', 'corr', 'correlate',
+           'filter_amax', 'filter_amin', 'filter_avg', 'filter_dev',
+           'filter_generic', 'filter_max', 'filter_median', 'filter_min',
+           'filter_percentile', 'filter_range', 'filter_rank', 'filter_sum',
+           'qart', 'qart_auto', 'gram_schmidt', 'qmix', 'smo', 'center', 'zd',
+           'zd_boxcar', 'zd_gaussian', 'zd_sinebell', 'zd_triangle', ]
 
 
 def scpadapter(**kw):
+    """
 
+    Parameters
+    ----------
+    kw
+
+    Returns
+    -------
+
+    """
     def scpadapter_decorator(func):
+        """
+        Decorator to add units to nmrglue process function
+        and make them able to process NDDataset
 
-        def wrapper(source, *args, **kwargs):
+        Parameters
+        ----------
+        **kwargs: keywords args
+            each keys must correspond to a parameter of the func
+            for wich we wants to add unit speified as str value.
 
-            kind = kw.get('kind', 'apodization')
 
-            if len(args)>0:
-                args = list(args)
-                if kind in ['apodization']:
-                    # the first args is assumed to be line broadening in Hz
-                    lb = args[0]
-                    if not isinstance(lb, Quantity):
+        """
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+
+            source = args[0]
+
+            sig = inspect.signature(func)
+
+            newkw = {}
+            l = len(args)
+
+            for i, (k, v) in enumerate(sig.parameters.items()):
+
+                if i== 0:
+                    continue   # data
+
+                if i<l:
+                    # parameters passed as arg
+                    val = args[i]
+                else:
+                    val = kwargs.get(k, v.default)
+
+                if k in kw:
+                    if not isinstance(val, Quantity):
                         # try to correct this
-                        lb = lb * ur.Hz
+                        val = val * ur(kw[k])
+
                     # transform to points for compatibility with NMRGLUE
                     # We need the spectral with
                     sw_h = source.meta.sw_h[-1]  #remember that meta are list
                     #TODO: can be estimated from time domain sampling if sw_h is missing
-                    lb = lb/sw_h
-                    if not lb.dimensionless:
+                    val = val/sw_h
+                    if not val.dimensionless:
                         log.error ("units of args are not correct")
-                    args[0] = lb.magnitude
+                    val = val.magnitude
+                newkw[k] = val
 
             if source.is_complex[-1]:
                 log.debug("data are complex")
@@ -51,7 +115,7 @@ def scpadapter(**kw):
             else:
                 data = source.data
 
-            data = func(data, *args, **kwargs)
+            data = func(data,**newkw)
 
             # now possibly unpack the data
             if np.any(np.iscomplex(data)):
@@ -63,13 +127,15 @@ def scpadapter(**kw):
                 new[..., 1::2] = data.imag
                 data = new
 
-            res = copy.deepcopy(source)
+            res = source.copy()
             res._data = data   # inplace
 
             return res
 
         return wrapper
+
     return scpadapter_decorator
+
 
 
 # TODO determine which of these work on N-dimension and which assume 2D
@@ -86,7 +152,7 @@ pi = np.pi
 # Apodization functions #
 #########################
 
-@scpadapter(kind='apodization')
+@scpadapter(lb='Hz')
 def em(data, lb=0.0, inv=False, rev=False):
     """
     Exponential apodization
@@ -99,13 +165,10 @@ def em(data, lb=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     lb : float
-        Exponential line broadening, in units of points. To apply a similar
-        apodization as NMRPipe's EM function, use lb = lb_hz / sw_hz,
-        where lb_hz is the amount of broadening to apply in Hz and sw_hz
-        is the spectral width of the last dimension in Hz.
+        Exponential line broadening in Hz.
     inv : bool, optional
         True for inverse apodization.  False (default) for standard.
     rev : bool, optional.
@@ -113,8 +176,8 @@ def em(data, lb=0.0, inv=False, rev=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with apodization applied.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with apodization applied.
 
     """
     apod = np.exp(-pi * np.arange(data.shape[-1]) * lb).astype(data.dtype)
@@ -125,6 +188,7 @@ def em(data, lb=0.0, inv=False, rev=False):
     return apod * data
 
 
+@scpadapter(g1='Hz', g2='Hz', g3_range=(0,1))
 def gm(data, g1=0.0, g2=0.0, g3=0.0, inv=False, rev=False):
     """
     Lorentz-to-Gauss apodization
@@ -142,14 +206,14 @@ def gm(data, g1=0.0, g2=0.0, g3=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     g1 : float
-        Inverse exponential width.
+        Inverse exponential width in Hz
     g2 : float
-        Gaussian broadening width.
+        Gaussian broadening width in Hz
     g3 : float
-        Location of Gaussian maximum.
+        Location of Gaussian maximum. Must lie between 0 and 1.
     inv : bool, optional
         True for inverse apodization.  False (default) for standard.
     rev : bool, optional.
@@ -157,8 +221,8 @@ def gm(data, g1=0.0, g2=0.0, g3=0.0, inv=False, rev=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with apodization applied.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with apodization applied.
 
     """
     size = data.shape[-1]
@@ -171,7 +235,7 @@ def gm(data, g1=0.0, g2=0.0, g3=0.0, inv=False, rev=False):
         apod = 1 / apod
     return apod * data
 
-
+@scpadapter()
 def gmb(data, a=0.0, b=0.0, inv=False, rev=False):
     """
     Modified gaussian apodization
@@ -183,8 +247,8 @@ def gmb(data, a=0.0, b=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     a : float
         Exponential term in apodization.
     b : float
@@ -196,8 +260,8 @@ def gmb(data, a=0.0, b=0.0, inv=False, rev=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with apodization applied.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with apodization applied.
 
     """
     size = data.shape[-1]
@@ -209,7 +273,7 @@ def gmb(data, a=0.0, b=0.0, inv=False, rev=False):
         apod = 1 / apod
     return apod * data
 
-
+@scpadapter()
 def jmod(data, e=0.0, off=0.0, end=0.0, inv=False, rev=False):
     """
     Exponentially damped J-modulation apodization
@@ -222,8 +286,8 @@ def jmod(data, e=0.0, off=0.0, end=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     e : float
         Exponential apodization term.
     off : float
@@ -237,8 +301,8 @@ def jmod(data, e=0.0, off=0.0, end=0.0, inv=False, rev=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with apodization applied.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with apodization applied.
 
     """
     size = data.shape[-1]
@@ -251,7 +315,7 @@ def jmod(data, e=0.0, off=0.0, end=0.0, inv=False, rev=False):
         apod = 1 / apod
     return apod * data
 
-
+@scpadapter()
 def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
     """
     Shifted sine-bell apodization
@@ -264,8 +328,8 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     off : float
         Offset start of sine-bell as a percentage of the trace (0 -> 1).
     end : float
@@ -279,8 +343,8 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with apodization applied.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with apodization applied.
 
     """
     size = data.shape[-1]
@@ -295,7 +359,7 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
 
 sine = sp
 
-
+@scpadapter()
 def tm(data, t1=0.0, t2=0.0, inv=False, rev=False):
     """
     Trapezoid Apodization
@@ -312,8 +376,8 @@ def tm(data, t1=0.0, t2=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     t1 : int
         Length of left ramp in points.
     t2 : int
@@ -325,8 +389,8 @@ def tm(data, t1=0.0, t2=0.0, inv=False, rev=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with apodization applied.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with apodization applied.
 
     """
     size = data.shape[-1]
@@ -338,7 +402,7 @@ def tm(data, t1=0.0, t2=0.0, inv=False, rev=False):
         apod = 1 / apod
     return apod * data
 
-
+@scpadapter()
 def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
     """
     Triangle apodization.
@@ -354,8 +418,8 @@ def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     loc : int or "auto"
         Location of triangle apex. 'auto' set the apex to the middle of the
         trace (default).
@@ -370,8 +434,8 @@ def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with apodization applied.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with apodization applied.
 
     """
     size = data.shape[-1]
@@ -390,22 +454,22 @@ def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
 # Shift functions #
 ###################
 
-
+@scpadapter()
 def rs(data, pts=0.0):
     """
     Right shift and zero fill.
 
     Parameters
     ----------
-    data :
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset to process.
     pts : int
         Number of points to right shift.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data right shifted and zero filled.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset right shifted and zero filled.
 
     See Also
     --------
@@ -416,22 +480,22 @@ def rs(data, pts=0.0):
     data[..., :int(pts)] = 0
     return data
 
-
+@scpadapter()
 def ls(data, pts=0.0):
     """
     Left shift and fill with zero
 
     Parameters
     ----------
-    data :
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset.
     pts : int
         Number of points to left shift.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data left shifted and zero filled.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset left shifted and zero filled.
 
     See Also
     --------
@@ -442,15 +506,15 @@ def ls(data, pts=0.0):
     data[..., -int(pts):] = 0
     return data
 
-
+@scpadapter()
 def cs(data, pts=0.0, neg=False):
     """
     Circular shift
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     pts : int
         Number of points to shift.  Positive value will right shift the data,
         negative values will left shift the data.
@@ -459,21 +523,21 @@ def cs(data, pts=0.0, neg=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of shifted NMR data.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset with shifted NMR data.
 
     """
     return roll(data, pts, neg)
 
-
+@scpadapter()
 def roll(data, pts=0.0, neg=False):
     """
     Roll axis
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     pts : int
         Number of points to shift.  Positive value will right shift the data,
         negative values will left shift the data.
@@ -482,8 +546,8 @@ def roll(data, pts=0.0, neg=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with last axis rolled.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with last axis rolled.
 
     """
     data = np.roll(data, int(pts), axis=-1)
@@ -494,23 +558,23 @@ def roll(data, pts=0.0, neg=False):
             data[..., int(pts):] = -data[..., int(pts):]
     return data
 
-
+@scpadapter()
 def fsh(data, pts):
     """
     Frequency shift by Fourier transform. Negative signed phase correction.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     pts : float
         Number of points to frequency shift the data.  Positive value will
         shift the spectrum to the right, negative values to the left.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with last axis rolled.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with last axis rolled.
 
     """
     s = float(data.shape[-1])
@@ -524,23 +588,23 @@ def fsh(data, pts):
     return fft(np.exp(-2.j * pi * pts * np.arange(s) /
                       s).astype(data.dtype) * ifft(data))
 
-
+@scpadapter()
 def fsh2(data, pts):
     """
     Frequency Shift by Fourier transform. Postive signed phase correction.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     pts : float
         Number of points to frequency shift the data.  Positive value will
         shift the spectrum to the right, negative values to the left.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with last axis rolled.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with last axis rolled.
 
     """
     s = float(data.shape[-1])
@@ -552,7 +616,7 @@ def fsh2(data, pts):
 # Transforms #
 ##############
 
-
+@scpadapter()
 def nmr_reorder(data):
     """
     Reorder spectrum after FT transform to NMR order (swap halves and reverse).
@@ -561,7 +625,7 @@ def nmr_reorder(data):
     return np.append(data[..., int(s / 2)::-1], data[..., s:int(s / 2):-1],
                      axis=-1)
 
-
+@scpadapter()
 def swap_halves(data):
     """
     Swap the halves of a spectrum,
@@ -571,19 +635,20 @@ def swap_halves(data):
 
 
 # Fourier based Transforms
+@scpadapter()
 def rft(x):
     """
     Real Fourier transform.
 
     Parameters
     ----------
-    x : ndarray
-        Array of NMR data.
+    x : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    y : ndarray
-        Array of NMR data with real Fourier transform applied.
+    y : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with real Fourier transform applied.
 
     """
     # XXX figure out what exactly this is doing...
@@ -595,20 +660,20 @@ def rft(x):
     return np.array(nmr_reorder(np.fft.fft(2 * xp, axis=-1).real),
                     dtype="float32")
 
-
+@scpadapter()
 def irft(xp):
     """
     Inverse real fourier transform
 
     Parameters
     ----------
-    x : ndarray
-        Array of NMR data.
+    x : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    y : ndarray
-        Array of NMR data with an inverse real Fourier transform applied.
+    y : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with an inverse real Fourier transform applied.
 
     """
     # XXX figure out what exactly this is doing
@@ -627,6 +692,7 @@ def irft(xp):
 
 
 # Fourier transforms
+@scpadapter()
 def fft(data):
     """
     Fourier transform, NMR ordering of results.
@@ -665,12 +731,12 @@ def fft(data):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Fourier transform of NMR data in 'NMR order'.
 
     See Also
@@ -683,7 +749,7 @@ def fft(data):
     """
     return np.fft.fftshift(np.fft.fft(data, axis=-1).astype(data.dtype), -1)
 
-
+@scpadapter()
 def fft_norm(data):
     """
     Fourier transform, total power preserved, NMR ordering of results
@@ -696,12 +762,12 @@ def fft_norm(data):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Fourier transform of NMR data in 'NMR order'.
 
     See Also
@@ -713,7 +779,7 @@ def fft_norm(data):
     """
     return fft(data) / np.sqrt(float(data.shape[-1]))
 
-
+@scpadapter()
 def fft_positive(data):
     """
     Fourier transform with positive exponential, NMR ordering of results
@@ -725,12 +791,12 @@ def fft_positive(data):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Fourier transform of NMR data in 'NMR order'.
 
     See Also
@@ -746,7 +812,7 @@ def fft_positive(data):
     return (np.fft.fftshift(np.fft.ifft(data, axis=-1).astype(data.dtype), -1)
             * s)
 
-
+@scpadapter()
 def ifft(data):
     """
     Inverse fourier transform, NMR ordering of results.
@@ -756,12 +822,12 @@ def ifft(data):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Inverse fourier transform of NMR data in 'NMR order'.
 
     See Also
@@ -773,7 +839,7 @@ def ifft(data):
     """
     return np.fft.ifft(np.fft.ifftshift(data, -1), axis=-1).astype(data.dtype)
 
-
+@scpadapter()
 def ifft_norm(data):
     """
     Inverse fourier transform, total power preserved, NMR ordering of results
@@ -786,12 +852,12 @@ def ifft_norm(data):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Inverse fourier transform of NMR data in 'NMR order'.
 
     See Also
@@ -803,7 +869,7 @@ def ifft_norm(data):
     """
     return ifft(data) * np.sqrt(float(data.shape[-1]))
 
-
+@scpadapter()
 def ifft_positive(data):
     """
     Inverse fourier transform with positive exponential, NMR ordered results.
@@ -813,12 +879,12 @@ def ifft_positive(data):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Inverse fourier transform of NMR data in 'NMR order'.
 
     See Also
@@ -866,19 +932,19 @@ def gray(n):
         g = [mg[j] + first[j] for j in range(2 ** (i + 1))]
     return g
 
-
+@scpadapter()
 def ha(data):
     """
     Hadamard Transform
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Hadamard transform of NMR data.
 
     Notes
@@ -917,7 +983,7 @@ def ha(data):
 
     return gp_data
 
-
+@scpadapter()
 def ht(data, N=None):
     """
     Hilbert transform.
@@ -927,13 +993,13 @@ def ht(data, N=None):
     Parameters
     ----------
     data : ndarrat
-        Array of NMR data.
+         Dataset.
     N : int or None
         Number of Fourier components.
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         NMR data which has been Hilvert transformed.
 
     """
@@ -958,33 +1024,33 @@ def ht(data, N=None):
 # Standard NMR Functions #
 ##########################
 
-
+@scpadapter()
 def di(data):
     """
     Delete imaginary from data
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data without imaginaries.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset without imaginaries.
 
     """
     return data.real
 
-
+@scpadapter()
 def ps(data, p0=0.0, p1=0.0, inv=False):
     """
     Linear phase correction
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     p0 : float
         Zero order phase in degrees.
     p1 : float
@@ -994,7 +1060,7 @@ def ps(data, p0=0.0, p1=0.0, inv=False):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Phased NMR data.
 
     """
@@ -1007,15 +1073,15 @@ def ps(data, p0=0.0, p1=0.0, inv=False):
         apod = 1 / apod
     return apod * data
 
-
+@scpadapter()
 def ps_exp(data, p0=0.0, tc=0.0, inv=False):
     """
     Exponential Phase Correction
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     p0 : float
         Zero order phase in degrees.
     tc : float
@@ -1025,7 +1091,7 @@ def ps_exp(data, p0=0.0, tc=0.0, inv=False):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Phased NMR data.
 
     """
@@ -1037,22 +1103,22 @@ def ps_exp(data, p0=0.0, tc=0.0, inv=False):
         apod = 1 / apod
     return apod * data
 
-
+@scpadapter()
 def tp(data, hyper=False):
     """
     Transpose data.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     hyper : bool
         True if hypercomplex data.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with axes transposed.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with axes transposed.
 
     """
     if hyper:
@@ -1066,7 +1132,7 @@ ytp = tp
 
 xy2yx = tp
 
-
+@scpadapter()
 def tp_hyper(data):
     """
     Hypercomplex tranpose.
@@ -1075,32 +1141,32 @@ def tp_hyper(data):
 
     Parameters
     ----------
-    data : ndarray
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Array of hypercomplex NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Array of hypercomplex NMR data with axes transposed.
     """
     return c2ri(ri2c(data).transpose())
 
-
+@scpadapter()
 def zf_inter(data, pts=1):
     """
     Zero fill between points.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     pts : int
         Number zeros to add between points.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data to which `pts` zero have been added between all
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset to which `pts` zero have been added between all
         points.
 
     """
@@ -1110,15 +1176,15 @@ def zf_inter(data, pts=1):
     z[..., ::pts + 1] = data[..., :]
     return z
 
-
+@scpadapter()
 def zf_pad(data, pad=0, mid=False):
     """
     Zero fill by padding with zeros.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     pad : int
         Number of zeros to pad data with.
     mid : bool
@@ -1126,8 +1192,8 @@ def zf_pad(data, pad=0, mid=False):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data to which `pad` zeros have been appended to the end or
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset to which `pad` zeros have been appended to the end or
         middle of the data.
 
     """
@@ -1144,15 +1210,15 @@ def zf_pad(data, pad=0, mid=False):
 
 zf = zf_pad
 
-
+@scpadapter()
 def zf_double(data, n, mid=False):
     """
     Zero fill by doubling original data size once or multiple times.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     n : int
         Number of times to double the size of the data.
     mid : bool
@@ -1160,21 +1226,21 @@ def zf_double(data, n, mid=False):
 
     Returns
     -------
-    ndata : ndarray
-        Zero filled array of NMR data.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Zero filled  Dataset.
 
     """
     return zf_pad(data, int((data.shape[-1] * 2 ** n) - data.shape[-1]), mid)
 
-
+@scpadapter()
 def zf_size(data, size, mid=False):
     """
     Zero fill to given size.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     size : int
         Size of data after zero filling.
     mid : bool
@@ -1182,8 +1248,8 @@ def zf_size(data, size, mid=False):
 
     Returns
     -------
-    ndata : ndarray
-        Zero filled array of NMR data.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Zero filled  Dataset.
 
     """
     return zf_pad(data, int(size - data.shape[-1]), mid)
@@ -1206,22 +1272,22 @@ def largest_power_of_2(value):
     """
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
-
+@scpadapter()
 def zf_auto(data, mid=False):
     """
     Zero fill to next largest power of two.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     mid : bool
         True to zero fill in the middle of data.
 
     Returns
     -------
-    ndata : ndarray
-        Zero filled array of NMR data.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Zero filled  Dataset.
 
     """
     return zf_size(data, largest_power_of_2(data.shape[-1]), mid)
@@ -1233,18 +1299,19 @@ def zf_auto(data, mid=False):
 
 
 # Add Constant
+@scpadapter()
 def add(data, r=0.0, i=0.0, c=0.0):
     """
     Add constant.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     r : float
         Constant to add to real data.
     i : float
-        Constant to add to imaginary data, ignored if no data does not have
+        Constant to add to imaginary data, ignored if data does not have
         imaginary data.
     c : float
         Constant to add to both real and imaginary data.  This constant is only
@@ -1252,8 +1319,8 @@ def add(data, r=0.0, i=0.0, c=0.0):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with constant added.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with constant added.
 
     """
     data.real = data.real + r + c
@@ -1261,19 +1328,19 @@ def add(data, r=0.0, i=0.0, c=0.0):
         data.imag = data.imag + i + c
     return data
 
-
+@scpadapter()
 def add_ri(data):
     """
     Add real and imaginary components.
 
     Parameters
     ----------
-    data : ndarray
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Array of complex NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Sum of real and imaginary component of NMR data.
 
     """
@@ -1281,6 +1348,7 @@ def add_ri(data):
 
 
 # Derivative
+@scpadapter()
 def dx(data):
     """
     Derivative by central difference
@@ -1289,12 +1357,12 @@ def dx(data):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Derivate of NMR data.
 
     """
@@ -1306,6 +1374,7 @@ def dx(data):
 
 
 # Extract Region
+@scpadapter()
 def ext(data, x0=None, xn=None, y0=None, yn=None):
     """
     Extract region.
@@ -1314,8 +1383,8 @@ def ext(data, x0=None, xn=None, y0=None, yn=None):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     x0 : int
         X-axis extract region start.
     xn : int
@@ -1327,61 +1396,61 @@ def ext(data, x0=None, xn=None, y0=None, yn=None):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Extracted region.
 
     """
     return data[y0:yn, x0:xn]
 
-
+@scpadapter()
 def ext_left(data):
     """
     Extract the left half of spectrum.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Left half of spectrum.
 
     """
     return data[..., 0:int(data.shape[-1] / 2.)]
 
-
+@scpadapter()
 def ext_right(data):
     """
     Extract the right half of the spectrum.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Right half of spectrum.
 
     """
     return data[..., int(data.shape[-1] / 2.):]
 
-
+@scpadapter()
 def ext_mid(data):
     """
     Extract the middle of the spectrum.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Middle half of spectrum.
 
     """
@@ -1390,6 +1459,7 @@ def ext_mid(data):
 
 
 # Integrate
+@scpadapter()
 def integ(data):
     """
     Integrate by cumulative sum. The units of the integral is in points (i.e.
@@ -1397,12 +1467,12 @@ def integ(data):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Integrated NMR data.
 
     """
@@ -1410,6 +1480,7 @@ def integ(data):
 
 
 # Modulus Calculation
+@scpadapter()
 def mc(data):
     """
     Modulus calculation.
@@ -1418,7 +1489,7 @@ def mc(data):
     """
     return np.sqrt(data.real ** 2 + data.imag ** 2)
 
-
+@scpadapter()
 def mc_pow(data):
     """
     Modulus calculation. Squared version.
@@ -1429,20 +1500,21 @@ def mc_pow(data):
 
 
 # Mirror
+@scpadapter()
 def mir_left(data):
     """
     Append a mirror image of the data on the left.
     """
     return np.append(data, data[..., ::-1], axis=-1)
 
-
+@scpadapter()
 def mir_right(data):
     """
     Append a mirror image of the data on the right.
     """
     return np.append(data[..., ::-1], data, axis=-1)
 
-
+@scpadapter()
 def mir_center(data):
     """
     Append a mirror image of the data in the center.
@@ -1451,7 +1523,7 @@ def mir_center(data):
     return np.concatenate(
         (data[..., int(s / 2):], data, data[..., :int(s / 2)]), axis=-1)
 
-
+@scpadapter()
 def mir_center_onepoint(data):
     """
     Append a mirror image of the data in the center with a one point shift
@@ -1465,14 +1537,15 @@ def mir_center_onepoint(data):
 
 
 # Multiply by a constant
+@scpadapter()
 def mult(data, r=1.0, i=1.0, c=1.0):
     """
     Multiply by a constant.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     r : float
         Constant to multiply real channel by.
     i : float
@@ -1483,8 +1556,8 @@ def mult(data, r=1.0, i=1.0, c=1.0):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data which has been multiplied by a constant.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset which has been multiplied by a constant.
 
     """
     data.real = data.real * r * c
@@ -1494,6 +1567,7 @@ def mult(data, r=1.0, i=1.0, c=1.0):
 
 
 # Reverse
+@scpadapter()
 def rev(data):
     """
     Reverse data.
@@ -1502,20 +1576,21 @@ def rev(data):
 
 
 # Set to a Constant
-def set(data, c):
+@scpadapter()
+def set_constant(data, c):
     """
     Set to a constant.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     c : float or complex
         Constant to set data to.
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Array of constants.
 
     Notes
@@ -1527,21 +1602,21 @@ def set(data, c):
     data[..., :] = c
     return data
 
-
-def set_complex(data, v):
+@scpadapter()
+def set_cmplex(data, v):
     """
     Set real and imaginary portions of data to a constant.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     v : float
         Constant to set both real and imaginary component of `data` to.
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Array with real and imaginary components set to v.
 
     Notes
@@ -1555,22 +1630,22 @@ def set_complex(data, v):
         data.imag = v
     return data
 
-
+@scpadapter()
 def set_real(data, v):
     """
     Set real component of data to a constant.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     v : float
         Constant to set both real component of `data` to.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with real components set to v.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with real components set to v.
 
     Notes
     -----
@@ -1581,22 +1656,22 @@ def set_real(data, v):
     data.real = v
     return data
 
-
+@scpadapter()
 def set_imag(data, v):
     """
     Set imaginary portion of data to a constant.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     v : float
         Constant to set both imaginary component of `data` to.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with imaginary components set to v.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with imaginary components set to v.
 
     Notes
     -----
@@ -1610,6 +1685,7 @@ def set_imag(data, v):
 
 
 # Shuffle Utilities
+@scpadapter()
 def ri2c(data):
     """
     Interleave real and imaginary data into a real array.
@@ -1621,21 +1697,21 @@ def ri2c(data):
     n[..., 1::2] = data.imag
     return n
 
-
+@scpadapter()
 def interleave_complex(data):
     """
     Unpack complex data into an interleaved real, imaginary array.
     """
     return ri2c(data)
 
-
+@scpadapter()
 def unpack_complex(data):
     """
     Unpacks complex array into real array (interleaves values).
     """
     return ri2c(data)
 
-
+@scpadapter()
 def c2ri(data):
     """
     Seperate interleaved real, imaginary data into complex array.
@@ -1653,28 +1729,28 @@ def c2ri(data):
     n.imag = data.real[..., 1::2]
     return n
 
-
+@scpadapter()
 def seperate_interleaved(data):
     """
     Seperate interleaved real, imaginary data into complex array.
     """
     return c2ri(data)
 
-
+@scpadapter()
 def pack_complex(data):
     """
     Packs interleaved real array into complex array.
     """
     return c2ri(data)
 
-
+@scpadapter()
 def decode_States(data):
     """
     Decode data collected using States (seperates interleaved data).
     """
     return c2ri(data)
 
-
+@scpadapter()
 def ri2rr(data):
     """
     Append imaginary data to end of real data, returning a real array.
@@ -1690,7 +1766,7 @@ def ri2rr(data):
 
 append_imag = ri2rr
 
-
+@scpadapter()
 def rr2ri(data):
     """
     Unappend real and imaginary data returning a complex array.
@@ -1709,7 +1785,7 @@ def rr2ri(data):
 
 unappend_imag = rr2ri
 
-
+@scpadapter()
 def exlr(data):
     """
     Exchange left and right halves of array.
@@ -1723,7 +1799,7 @@ def exlr(data):
 
 exchange_lr = exlr
 
-
+@scpadapter()
 def rolr(data):
     """
     Rotate left and right halves of array.
@@ -1737,7 +1813,7 @@ def rolr(data):
 
 rotate_lr = rolr
 
-
+@scpadapter()
 def swap(data):
     """
     Swap real and imaginary data.
@@ -1750,7 +1826,7 @@ def swap(data):
 
 swap_ri = swap
 
-
+@scpadapter()
 def bswap(data):
     """
     Byteswap data
@@ -1762,6 +1838,7 @@ byte_swap = bswap
 
 
 # Sign Manipulation Utilities
+@scpadapter()
 def neg_left(data):
     """
     Negate left half.
@@ -1770,7 +1847,7 @@ def neg_left(data):
         -data[..., 0:int(data.shape[-1] / 2.)]
     return data
 
-
+@scpadapter()
 def neg_right(data):
     """
     Negate right half.
@@ -1779,7 +1856,7 @@ def neg_right(data):
         -data[..., int(data.shape[-1] / 2.):]
     return data
 
-
+@scpadapter()
 def neg_middle(data):
     """
     Negate middle half.
@@ -1788,7 +1865,7 @@ def neg_middle(data):
         -data[..., int(data.shape[-1] * 1. / 4.):int(data.shape[-1] * 3. / 4.)]
     return data
 
-
+@scpadapter()
 def neg_edges(data):
     """
     Negate edge half (non-middle) of spectra.
@@ -1799,14 +1876,14 @@ def neg_edges(data):
         -data[..., int(data.shape[-1] * 3. / 4):]
     return data
 
-
+@scpadapter()
 def neg_all(data):
     """
     Negate data
     """
     return -data
 
-
+@scpadapter()
 def neg_real(data):
     """
     Negate real data
@@ -1814,7 +1891,7 @@ def neg_real(data):
     data.real = -data.real
     return data
 
-
+@scpadapter()
 def neg_imag(data):
     """
     Negate imaginary data
@@ -1822,7 +1899,7 @@ def neg_imag(data):
     data.imag = -data.imag
     return data
 
-
+@scpadapter()
 def neg_even(data):
     """
     Negate even points
@@ -1830,7 +1907,7 @@ def neg_even(data):
     data[..., ::2] = -data[..., ::2]
     return data
 
-
+@scpadapter()
 def neg_odd(data):
     """
     Negate odd points
@@ -1838,15 +1915,15 @@ def neg_odd(data):
     data[..., 1::2] = -data[..., 1::2]
     return data
 
-
+@scpadapter()
 def neg_alt(data):
     """
     Negate alternate (odd) points.
     """
     return neg_odd(data)
 
-
-def abs(data):
+@scpadapter()
+def abscplx(data):   #  original abs in nmrglue
     """
     Replace data with absolute value of data (abs of real, imag seperately)
     """
@@ -1854,7 +1931,7 @@ def abs(data):
     data.imag = np.abs(data.imag)
     return data
 
-
+@scpadapter()
 def sign(data):
     """
     Replace data with sign (-1 or 1) of data (seperately on each channel)
@@ -1870,6 +1947,7 @@ def sign(data):
 
 
 # Coadd data
+@scpadapter()
 def coadd(data, clist, axis=-1):
     """
     Coadd data.
@@ -1879,8 +1957,8 @@ def coadd(data, clist, axis=-1):
 
     Parameters
     ----------
-    data : 2D ndarray
-        Array of NMR data data.
+    data : 2D :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset data.
     clist : list
         List of Coefficients
     axis : {0, 1, -1}
@@ -1915,26 +1993,27 @@ coad = coadd
 
 
 # Image Processing
+@scpadapter()
 def thres(data, thres=0.0):
     """
     Mark values less than thres as invalid (for use with filters)
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     thres : float
         Threshold value.
 
     Returns
     -------
-    ndata : masked ndarray
-        Masked array of NMR data with values less than thres masked.
+    ndata : masked :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Masked  Dataset with values less than thres masked.
 
     """
     return np.ma.masked_less(data, thres)
 
-
+@scpadapter()
 def conv(data, kern=[1.], m="wrap", c=0.0):
     """
     Convolute data with kernel.
@@ -1943,8 +2022,8 @@ def conv(data, kern=[1.], m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     kern : array_like
         Convolution kernel
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -1954,7 +2033,7 @@ def conv(data, kern=[1.], m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         NMR data which has been convolved with the given kernel.
 
     """
@@ -1966,7 +2045,7 @@ def conv(data, kern=[1.], m="wrap", c=0.0):
 
 convolute = conv
 
-
+@scpadapter()
 def corr(data, kern=[1.], m="wrap", c=0.0):
     """
     Correlate data with a kernel (weights).
@@ -1975,8 +2054,8 @@ def corr(data, kern=[1.], m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     kern : array_like
         Correlation kernel (weights).
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -1986,7 +2065,7 @@ def corr(data, kern=[1.], m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         NMR data which has been correlated with the given kernel.
 
     """
@@ -2000,7 +2079,7 @@ def corr(data, kern=[1.], m="wrap", c=0.0):
 
 correlate = corr
 
-
+@scpadapter()
 def filter_median(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a median filter.
@@ -2009,8 +2088,8 @@ def filter_median(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2020,7 +2099,7 @@ def filter_median(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2028,7 +2107,7 @@ def filter_median(data, s=(1, 1), m="wrap", c=0.0):
     data.imag = scipy.ndimage.median_filter(data.imag, size=s, mode=m, cval=c)
     return data
 
-
+@scpadapter()
 def filter_min(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a minimum filter.
@@ -2037,8 +2116,8 @@ def filter_min(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2048,7 +2127,7 @@ def filter_min(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2056,7 +2135,7 @@ def filter_min(data, s=(1, 1), m="wrap", c=0.0):
     data.imag = scipy.ndimage.minimum_filter(data.imag, size=s, mode=m, cval=c)
     return data
 
-
+@scpadapter()
 def filter_max(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a maximum filter.
@@ -2065,8 +2144,8 @@ def filter_max(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2076,7 +2155,7 @@ def filter_max(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2084,7 +2163,7 @@ def filter_max(data, s=(1, 1), m="wrap", c=0.0):
     data.imag = scipy.ndimage.maximum_filter(data.imag, size=s, mode=m, cval=c)
     return data
 
-
+@scpadapter()
 def filter_percentile(data, percentile, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a percentile filter.
@@ -2093,8 +2172,8 @@ def filter_percentile(data, percentile, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     percentile : float
         Filter percentile parameter.
     s : tuple
@@ -2106,7 +2185,7 @@ def filter_percentile(data, percentile, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2116,7 +2195,7 @@ def filter_percentile(data, percentile, s=(1, 1), m="wrap", c=0.0):
                                                 mode=m, cval=c)
     return data
 
-
+@scpadapter()
 def filter_rank(data, rank, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a rank filter.
@@ -2125,8 +2204,8 @@ def filter_rank(data, rank, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     rank : int
         Filter rank parameter.
     s : tuple
@@ -2138,7 +2217,7 @@ def filter_rank(data, rank, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2151,7 +2230,7 @@ def filter_rank(data, rank, s=(1, 1), m="wrap", c=0.0):
 
 # These filter are much slower as they use the generic filter functions...
 
-
+@scpadapter()
 def filter_amin(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply an absolute minimum filter.
@@ -2160,8 +2239,8 @@ def filter_amin(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2171,7 +2250,7 @@ def filter_amin(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2182,7 +2261,7 @@ def filter_amin(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
-
+@scpadapter()
 def filter_amax(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply an absolute maximum filter.
@@ -2191,8 +2270,8 @@ def filter_amax(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2202,7 +2281,7 @@ def filter_amax(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2213,7 +2292,7 @@ def filter_amax(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
-
+@scpadapter()
 def filter_range(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a range filter.
@@ -2222,8 +2301,8 @@ def filter_range(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2233,7 +2312,7 @@ def filter_range(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2244,7 +2323,7 @@ def filter_range(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
-
+@scpadapter()
 def filter_avg(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply an average filter.
@@ -2253,8 +2332,8 @@ def filter_avg(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2264,7 +2343,7 @@ def filter_avg(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2275,7 +2354,7 @@ def filter_avg(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
-
+@scpadapter()
 def filter_dev(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a standard deviation filter.
@@ -2284,8 +2363,8 @@ def filter_dev(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2295,7 +2374,7 @@ def filter_dev(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2306,7 +2385,7 @@ def filter_dev(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
-
+@scpadapter()
 def filter_sum(data, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a summation filter.
@@ -2315,8 +2394,8 @@ def filter_sum(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     s : tuple
         Shape or size taken for each step of the filter.
     m : {'reflect', 'constant', 'nearest', 'wrap'}
@@ -2326,7 +2405,7 @@ def filter_sum(data, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2337,7 +2416,7 @@ def filter_sum(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
-
+@scpadapter()
 def filter_generic(data, filter, s=(1, 1), m="wrap", c=0.0):
     """
     Apply a generic filter.
@@ -2346,8 +2425,8 @@ def filter_generic(data, filter, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     filter : functions
         Python function which takes an array and returns a single value.
     s : tuple
@@ -2359,7 +2438,7 @@ def filter_generic(data, filter, s=(1, 1), m="wrap", c=0.0):
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Filtered NMR data.
 
     """
@@ -2398,6 +2477,7 @@ def sum_flt(arr):
 
 
 # Scale Quad Artifacts
+@scpadapter()
 def qart(data, a=0.0, f=0.0):
     """
     Scale Quad Artifacts.
@@ -2406,8 +2486,8 @@ def qart(data, a=0.0, f=0.0):
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     a : float
         Amplitude adjustment.
     f : float
@@ -2415,14 +2495,14 @@ def qart(data, a=0.0, f=0.0):
 
     Returns
     -------
-    ndata: ndarray
-        Array of NMR data with quadrature artifacts scaled.
+    ndata: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with quadrature artifacts scaled.
 
     """
     data.imag = (1 + a) * data.imag + f * data.real
     return data
 
-
+@scpadapter()
 def qart_auto(data):
     """
     Scale quad artifacts by values from Gram-Schmidt orthogonalization.
@@ -2430,7 +2510,7 @@ def qart_auto(data):
     a, f = gram_schmidt(data)
     return qart(data, a, f)
 
-
+@scpadapter()
 def gram_schmidt(data):
     """
     Calculate Gram-Schmidt orthogonalization parameters.
@@ -2457,22 +2537,23 @@ def gram_schmidt(data):
 
 
 # Complex Mixing
+@scpadapter()
 def qmix(data, carr):
     """
     Mix input and output channels provided coefficient array.
 
     Parameters
     ----------
-    data : 2D ndarray
-        Array of NMR data.
+    data : 2D :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     carr : array_liek
         Array of coefficients for mixing.  The size of carr must evenly divide
         qmix.
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with channels mixed.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with channels mixed.
 
     """
     carr = np.array(carr).transpose()
@@ -2496,20 +2577,21 @@ def qmix(data, carr):
 
 
 # Smooth and Center
+@scpadapter()
 def smo(data, n):
     """
     Smooth data.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     n : int
         Size of smoothing window (+/- points)
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Array of smoothed NMR data.
 
     """
@@ -2532,36 +2614,36 @@ def smo(data, n):
         a[..., i] = a[..., i] / (n - i)
     return a
 
-
+@scpadapter()
 def center(data, n):
     """
     Center data.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     n : int
         Size of centering window (+/- points)
 
     Returns
     -------
-    ndata : ndarray
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Array of centered NMR data.
 
     """
     return data - smo(data, n)
 
-
+@scpadapter()
 def zd(data, window, x0=0.0, slope=1.0):
     """
     Zero Diagonal band with generic window function.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
-    window : ndarray
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+    window : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Window to apply to diagonal band.
     wide : int
         Diagonal band half width in points.
@@ -2572,8 +2654,8 @@ def zd(data, window, x0=0.0, slope=1.0):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with diagonal band set to zero.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with diagonal band set to zero.
 
 
     """
@@ -2606,15 +2688,15 @@ def zd(data, window, x0=0.0, slope=1.0):
 
     return data
 
-
+@scpadapter()
 def zd_boxcar(data, wide=1, x0=0.0, slope=1.0):
     """
     Zero diagonal band with a boxcar function.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     wide : int
         Diagonal band half width in points.
     x0 : int
@@ -2624,22 +2706,22 @@ def zd_boxcar(data, wide=1, x0=0.0, slope=1.0):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with diagonal band set to zero.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with diagonal band set to zero.
 
     """
     window = np.zeros(2 * int(wide) + 1)
     return zd(data, window, x0=x0, slope=slope)
 
-
+@scpadapter()
 def zd_triangle(data, wide=1.0, x0=0.0, slope=1.0):
     """
     Zero diagonal band with triangle function
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     wide : int
         Diagonal band half width in points.
     x0 : int
@@ -2649,23 +2731,23 @@ def zd_triangle(data, wide=1.0, x0=0.0, slope=1.0):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with diagonal band set to zero.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with diagonal band set to zero.
 
     """
     window = np.append(np.linspace(1, 0, wide + 1),
                        np.linspace(0, 1, wide + 1)[1:])
     return zd(data, window, x0=x0, slope=slope)
 
-
+@scpadapter()
 def zd_sinebell(data, wide=1.0, x0=0.0, slope=1.0):
     """
     Zero diagonal band with sinebell function.
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     wide : int
         Diagonal band half width in points.
     x0 : int
@@ -2675,22 +2757,22 @@ def zd_sinebell(data, wide=1.0, x0=0.0, slope=1.0):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with diagonal band set to zero.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with diagonal band set to zero.
 
     """
     window = 1 - np.sin(np.linspace(0, pi, 2 * wide + 1))
     return zd(data, window, x0=x0, slope=slope)
 
-
+@scpadapter()
 def zd_gaussian(data, wide=1.0, x0=0.0, slope=1.0, g=1):
     """
     Zero Diagonal band with gaussian function
 
     Parameters
     ----------
-    data : ndarray
-        Array of NMR data.
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
     wide : int
         Diagonal band half width in points.
     x0 : int
@@ -2702,8 +2784,8 @@ def zd_gaussian(data, wide=1.0, x0=0.0, slope=1.0, g=1):
 
     Returns
     -------
-    ndata : ndarray
-        Array of NMR data with diagonal band set to zero.
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset with diagonal band set to zero.
 
     """
     tln2 = np.sqrt(2 * np.log(2))

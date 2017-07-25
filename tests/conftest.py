@@ -21,18 +21,14 @@ from spectrochempy.api import data_dir, plotoptions
 
 plotoptions.do_not_block = True
 
-
 # Fixture:  IR spectra (SPG)
-
 @pytest.fixture(scope="function")
 def IR_source_1():
     source = NDDataset.read_omnic(
         os.path.join(data_dir, 'irdata', 'NH4Y-activation.SPG'))
     return source
 
-
 # Fixture:  IR spectra
-
 @pytest.fixture(scope="function")
 def IR_scp_1():
     source = NDDataset.load(
@@ -41,7 +37,6 @@ def IR_scp_1():
 
 
 # Fixture : NMR spectra
-
 @pytest.fixture(scope="function")
 def NMR_source_1D():
     path = os.path.join(data_dir, 'nmrdata','bruker', 'tests', 'nmr',
