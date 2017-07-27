@@ -44,15 +44,15 @@ def make_label(ss, lab='<no_axe_label>'):
 
     """
     if ss.title:
-        label = ss.title.replace(' ', '\ ')
+        label = ss.title.replace(' ', r'\ ')
     else:
         label = lab
 
     if ss.units is not None and str(ss.units) != 'dimensionless':
         if str(ss.units) == 'absorbance':
-            units = '/ a.u.'
+            units = r'/\ a.u.'
         else:
-            units = "/ {:~L}".format(ss.units)
+            units = r"/\ {:~L}".format(ss.units)
     else:
         units = ''
 
