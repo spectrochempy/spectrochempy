@@ -49,7 +49,7 @@ def test_load(IR_source_1, IR_scp_1):
     assert_approx_equal(source.data[0,0], 2.05, significant=2)
     B = source * 1.98
     assert_approx_equal(B.data[0, 0], 2.05 * 1.98, significant=2)
-    assert "binary op : mul with 1.98" in B.history
+    assert "binary operation mul with `1.98` has been performed" in B.history
 
 def test_methods_read_access():
 

@@ -175,37 +175,6 @@ class NDMath(object):
     # private methods
     # -------------------------------------------------------------------------
 
-    def _op_result(self, data, uncertainty=None, units=None,
-                   mask=None, history=None, is_complex=None,
-                   inplace = False):
-        # make a new NDArray resulting of some operation
-
-        # copy of the current NDArray or keep the same depending on inplace
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
-
-        # update the data
-        new._data = copy.deepcopy(data)
-
-        # update the attributes
-        if uncertainty is not None:
-            new._uncertainty = copy.deepcopy(uncertainty)
-        if units is not None:
-            new._units = copy.copy(units)
-        if mask is not None:
-            new._mask = copy.copy(mask)
-        if history is not None and hasattr(new, 'history'):
-            new._history.append(history.strip())
-        if is_complex is not None:
-            new._is_complex = is_complex
-
-        # return the new NDArray (actually not necessary if inplace is True
-        # but this should avoid errors in case of a misuse of this function
-        # i.e.,   new = self._op_result(..., inplace=True)
-
-        return new
 
     @staticmethod
     def _op(f, objs, ufunc=False):
@@ -441,7 +410,8 @@ class NDMath(object):
         @functools.wraps(f)
         def func(self):
             data, uncertainty, units, mask, iscomplex = self._op(f, [self])
-            history = 'unary op : ' + f.__name__
+            if hasattr(self, 'history'):
+                history ='unary operation %s applied' % f.__name__
             return self._op_result(data,
                                    uncertainty, units, mask, history, iscomplex)
 
@@ -456,7 +426,11 @@ class NDMath(object):
             else:
                 objs = [other, self]
             data, uncertainty, units, mask, iscomplex = self._op(f, objs)
-            history = 'binary op : ' + f.__name__ + ' with %s ' % str(other)
+            if hasattr(self, 'history'):
+                history = 'binary operation ' + f.__name__ + \
+                    ' with `%s` has been performed' % str(other)
+            else:
+                history=None
             return self._op_result(data,
                                    uncertainty, units, mask, history, iscomplex)
 
@@ -473,12 +447,35 @@ class NDMath(object):
             self._units = units
             self._mask = mask
             self._iscomplex = iscomplex
-            if hasattr(self, '_history'):
-                self._history.append('inplace binary op : ' + f.__name__ +
-                                     ' with %s ' % str(other))
+
+            self.history = 'inplace binary op : ' + f.__name__ +\
+                                     ' with %s ' % str(other)
             return self
 
         return func
+
+    def _op_result(self, data, uncertainty=None, units=None,
+                   mask=None, history=None, is_complex=None):
+        # make a new NDArray resulting of some operation
+
+        new = self.copy()
+
+        # update the data
+        new._data = copy.deepcopy(data)
+
+        # update the attributes
+        if uncertainty is not None:
+            new._uncertainty = copy.deepcopy(uncertainty)
+        if units is not None:
+            new._units = copy.copy(units)
+        if mask is not None:
+            new._mask = copy.copy(mask)
+        if history is not None and hasattr(new, 'history'):
+            new._history.append(history.strip())
+        if is_complex is not None:
+            new._is_complex = is_complex
+
+        return new
 
 # =============================================================================
 # ARITHMETIC ON NDDATASET
@@ -492,9 +489,6 @@ CMP_BINARY_OPS = ['lt', 'le', 'ge', 'gt']
 
 NUM_BINARY_OPS = ['add', 'sub', 'and', 'xor', 'or',
                   'mul', 'truediv', 'floordiv', 'pow']
-if not PY3:
-    NUM_BINARY_OPS.append('div')
-
 
 def _op_str(name):
     return '__%s__' % name

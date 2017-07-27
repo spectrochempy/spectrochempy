@@ -45,6 +45,15 @@ def NMR_source_1D():
                                       path, expno=1, remove_digital_filter=True)
     return source
 
+# Fixture : NMR spectra
+@pytest.fixture(scope="function")
+def NMR_source_1D_1H():
+    path = os.path.join(data_dir, 'nmrdata','bruker', 'tests', 'nmr',
+                        'tpa')
+    source = NDDataset.read_bruker_nmr(
+                                      path, expno=10, remove_digital_filter=True)
+    return source
+
 @pytest.fixture(scope="function")
 def NMR_source_2D():
     path = os.path.join(data_dir, 'nmrdata', 'bruker', 'tests', 'nmr',

@@ -21,3 +21,5 @@ conda_recipes/spectrochempy/
 docs/source/modules/
 docs/source/savefig/
 *.pyc
+
+testdata/nmrdata/bruker/tests/nmr/tpa/

@@ -70,20 +70,17 @@ def test_nmr_1D(NMR_source_1D):
     source.plot(show_complex=True, color='green',
                 xlim=(0.,3000.), zlim=(-2.,2.))
 
-    # NMR parameter access
-
-    assert source.meta.sw_h == [Quantity(10000., "Hz")]
-
 @show_do_not_block
-def test_nmr_1D_em(NMR_source_1D):
+def test_nmr_1D_em_fft(NMR_source_1D_1H):
 
-    source = NMR_source_1D.copy()
+    source = NMR_source_1D_1H.copy()
 
     source.plot(hold=True)
     source = source.em(lb=100.*ur.Hz)
     source.plot(data_only=True)
 
-    #np.exp(-pi * np.arange(data.shape[-1]) * lb)
+    source1 = source.fft()
+    source1.plot()
 
     pass
 

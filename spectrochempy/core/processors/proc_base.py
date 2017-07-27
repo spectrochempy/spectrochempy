@@ -13,8 +13,8 @@ Some function accept units
 
 
 """
-#TODO: make testing of all functions - add units whenever it is possible
-#TODO: check for collision of func name with other function defined in scp.
+# TODO: make testing of all functions - add units whenever it is possible
+# TODO: check for collision of func name with other function defined in scp.
 
 import copy
 
@@ -23,19 +23,24 @@ from spectrochempy.core.units import ur, Quantity
 
 import warnings
 import inspect
-from functools import partial, wraps
+import functools
 
-__all__ = ['em', 'gm', 'gmb', 'jmod', 'sp', 'sine', 'tm', 'tri',
-           'rs', 'ls', 'cs', 'roll', 'fsh', 'fsh2', 'nmr_reorder',
-           'swap_halves', 'rft', 'irft', 'fft', 'fft_norm', 'fft_positive',
-           'ifft', 'ifft_norm', 'ifft_positive', 'ha', 'ht', 'di', 'ps',
+# TODO: clean this list as some function are not really useful for the scp API.
+__all__ = ['scpadapter',
+           'em', 'gm', 'gmb', 'jmod', 'sp', 'sine', 'tm', 'tri',
+           'rs', 'ls', 'cs', 'roll', 'fsh', 'fsh2', 'rft', 'irft',
+           'fft', 'fft_norm', 'fft_positive',
+           'ifft', 'ifft_norm', 'ifft_positive',
+           'ha', 'ht',
+           'di', 'ps',
            'ps_exp', 'tp', 'tp_hyper', 'zf_inter', 'zf_pad', 'zf', 'zf_double',
            'zf_size', 'zf_auto', 'add', 'add_ri', 'dx', 'ext', 'ext_left',
            'ext_mid', 'ext_right', 'integ', 'mc', 'mc_pow',
            'mir_center', 'mir_left', 'mir_right', 'mir_center_onepoint', 'mult',
            'rev', 'set_constant', 'set_cmplex', 'set_real', 'set_imag', 'ri2c',
            'interleave_complex', 'unpack_complex', 'decode_States',
-           'ri2rr', 'append_imag', 'rr2ri', 'unappend_imag', 'exlr', 'exchange_lr',
+           'ri2rr', 'append_imag', 'rr2ri', 'unappend_imag', 'exlr',
+           'exchange_lr',
            'rolr', 'rotate_lr', 'swap', 'swap_ri', 'bswap', 'byte_swap',
            'neg_all', 'neg_alt', 'neg_edges', 'neg_even', 'neg_imag', 'neg_odd',
            'neg_left', 'neg_middle', 'neg_real', 'neg_right', 'abscplx', 'sign',
@@ -43,8 +48,20 @@ __all__ = ['em', 'gm', 'gmb', 'jmod', 'sp', 'sine', 'tm', 'tri',
            'filter_amax', 'filter_amin', 'filter_avg', 'filter_dev',
            'filter_generic', 'filter_max', 'filter_median', 'filter_min',
            'filter_percentile', 'filter_range', 'filter_rank', 'filter_sum',
-           'qart', 'qart_auto', 'gram_schmidt', 'qmix', 'smo', 'center', 'zd',
+           'qart', 'qart_auto', 'qmix', 'smo', 'center', 'zd',
            'zd_boxcar', 'zd_gaussian', 'zd_sinebell', 'zd_triangle', ]
+
+added_docs = """
+
+    inplace : `bool`, optional, default = `False`
+
+        Should we make the transform in place or return a new dataset
+
+    axis : optional, default is -1
+
+        The transformation is applied in the last dimension or on the specified
+        axis of a dataset.
+"""
 
 
 def scpadapter(**kw):
@@ -58,23 +75,70 @@ def scpadapter(**kw):
     -------
 
     """
+
     def scpadapter_decorator(func):
         """
         Decorator to add units to nmrglue process function
-        and make them able to process NDDataset
+        and make them able to process NDDataset.
+
+        Using this decorator we have a
+        unique way of preparing dataset for the low level proc_base functions.
 
         Parameters
         ----------
+        in_dim : str, optional, default: '[]'
+            dimensionality of the input
+        out_dim : str, optional, default: same as in_dim
+            dimensionality of the output
+
         **kwargs: keywords args
             each keys must correspond to a parameter of the func
-            for wich we wants to add unit speified as str value.
+            for which we want to add unit specified as str value.
 
 
         """
-        @wraps(func)
+        func.__doc__ = func.__doc__.replace('Returns\n',
+                                            added_docs + "\n\n    Returns\n")
+
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
             source = args[0]
+
+            # dimensionalities
+            in_dim = kw.pop('input', '[]')
+            if in_dim == '[frequency]':
+                in_dim = '1/[time]'
+            out_dim = kw.pop('output', in_dim)
+            if out_dim == '[frequency]':
+                out_dim = '1/[time]'
+
+            # which axis ?
+            axis = kwargs.pop('axis', -1)
+
+            if axis < 0:
+                axis = source.ndim + axis
+
+            # dataset selected axis
+            lastaxe = source.axes[axis]
+
+            # check axis dimensionality:
+            if (lastaxe.unitless or lastaxe.dimensionless or
+                        lastaxe.units.dimensionality != in_dim):
+                log.error(
+                        '{0} apply only to dimensions'
+                        ' with {1} dimensionality'.format(func.__name__,
+                                                          in_dim))
+                return source
+
+            # we work on the last dimension always
+
+            if axis != source.ndim - 1:  # swap the dataset to make
+                                         # the axis the last dimension
+                source.swapaxes(-1, axis, inplace=True)
+
+            # we analyse the arg of the function, to see if our decorator is
+            # specifiying some changes
 
             sig = inspect.signature(func)
 
@@ -83,59 +147,99 @@ def scpadapter(**kw):
 
             for i, (k, v) in enumerate(sig.parameters.items()):
 
-                if i== 0:
-                    continue   # data
+                # let's check all parameters for units
 
-                if i<l:
-                    # parameters passed as arg
+                if i == 0:
+                    continue  # data  (nothing to do here)
+
+                if i < l:
+                    # parameter passed as arg
                     val = args[i]
                 else:
+                    # parameter passed as kwargs
                     val = kwargs.get(k, v.default)
 
                 if k in kw:
+                    # parameter k is in our decorator args...
+                    # this mean that it needs units
+
                     if not isinstance(val, Quantity):
+                        # no units were specified in the func parameters
                         # try to correct this
+
                         val = val * ur(kw[k])
 
                     # transform to points for compatibility with NMRGLUE
-                    # We need the spectral with
-                    sw_h = source.meta.sw_h[-1]  #remember that meta are list
-                    #TODO: can be estimated from time domain sampling if sw_h is missing
-                    val = val/sw_h
+                    # as all function are based on point calculation
+
+                    # get the spectral width
+                    sw = source.meta.sw_h[-1]  # remember that meta are list
+                    # TODO: can be estimated from time domain sampling if sw_h is missing
+
+                    if val.dimensionality == '1/[time]':  #TODO: doesn't accept [frequency], why?
+                        val = val / sw
+                    else:
+                        val = val * sw  # TODO: check if this is correct
+
                     if not val.dimensionless:
-                        log.error ("units of args are not correct")
+                        log.error("units of args are not correct")
                     val = val.magnitude
+
+                # The dictionary of keywords parameters is filling...
                 newkw[k] = val
 
             if source.is_complex[-1]:
                 log.debug("data are complex")
-                # pack data to complex (remember that for complex,
-                # data are interlaced re,im,..)
-                data = source.data[..., ::2] + 1j * source.data[..., 1::2]
+                data = pack_complex(source.data)
+
             else:
                 data = source.data
 
-            data = func(data,**newkw)
+            data = func(data, **newkw)
 
             # now possibly unpack the data
             if np.any(np.iscomplex(data)):
-                # unpack (we must double the last dimension
-                newshape = list(data.shape)
-                newshape[-1] *= 2
-                new = np.empty(newshape)
-                new[..., ::2] = data.real
-                new[..., 1::2] = data.imag
-                data = new
+                # unpack
+                data = unpack_complex(data)
 
-            res = source.copy()
-            res._data = data   # inplace
 
-            return res
+            # inplace?
+            inplace = kwargs.pop('inplace', False)
+            if not inplace:
+                new = source.copy()
+            else:
+                new = source
+
+            new._data = copy.deepcopy(data)
+            # new._uncertainty = uncertainty
+            # TODO: certainly something todo here for uncertainties
+
+            # now deal with the axis and units!
+            if out_dim != in_dim:
+                # if same dimensionality units has not changed
+                # so we have to handle the case of different units
+                # for now I consider only case of time and frequency.
+                # as it will happen for fft
+                # TODO: revise this to handle other type of transformation (which
+                # ones?)
+                size = new.coords(-1).size
+                sw = new.meta.sw_h[-1]
+                new.coords(-1)._data =  np.linspace(sw/2., -sw/2., size)
+                # TODO: check if this work also for an IR interferogram
+                new.coords(-1)._units = ur.Hz
+                new.coords(-1)._title = 'frequency'
+
+            new._history.append('processed by %s(%s)'%(func.__name__,newkw.values()))
+
+            # swap back to the original axis's order
+            if axis != source.ndim - 1:
+                new.swapaxes(-1, axis, inplace=True)
+
+            return new
 
         return wrapper
 
     return scpadapter_decorator
-
 
 
 # TODO determine which of these work on N-dimension and which assume 2D
@@ -147,12 +251,11 @@ import scipy.linalg
 pi = np.pi
 
 
-
 #########################
 # Apodization functions #
 #########################
 
-@scpadapter(lb='Hz')
+@scpadapter(lb='Hz', input='[time]', output='[time]')
 def em(data, lb=0.0, inv=False, rev=False):
     """
     Exponential apodization
@@ -184,11 +287,11 @@ def em(data, lb=0.0, inv=False, rev=False):
     if rev:
         apod = apod[::-1]
     if inv:
-        apod = 1 / apod   # invert apodization
+        apod = 1 / apod  # invert apodization
     return apod * data
 
 
-@scpadapter(g1='Hz', g2='Hz', g3_range=(0,1))
+@scpadapter(g1='Hz', g2='Hz', g3_range=(0, 1), input='[time]', output='[time]')
 def gm(data, g1=0.0, g2=0.0, g3=0.0, inv=False, rev=False):
     """
     Lorentz-to-Gauss apodization
@@ -235,7 +338,8 @@ def gm(data, g1=0.0, g2=0.0, g3=0.0, inv=False, rev=False):
         apod = 1 / apod
     return apod * data
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[time]')
 def gmb(data, a=0.0, b=0.0, inv=False, rev=False):
     """
     Modified gaussian apodization
@@ -273,7 +377,8 @@ def gmb(data, a=0.0, b=0.0, inv=False, rev=False):
         apod = 1 / apod
     return apod * data
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[time]')
 def jmod(data, e=0.0, off=0.0, end=0.0, inv=False, rev=False):
     """
     Exponentially damped J-modulation apodization
@@ -315,7 +420,8 @@ def jmod(data, e=0.0, off=0.0, end=0.0, inv=False, rev=False):
         apod = 1 / apod
     return apod * data
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[time]')
 def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
     """
     Shifted sine-bell apodization
@@ -349,7 +455,8 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
     """
     size = data.shape[-1]
     apod = np.power(np.sin(pi * off + pi * (end - off) * np.arange(size) /
-                    (size - 1)).astype(data.dtype), pow).astype(data.dtype)
+                           (size - 1)).astype(data.dtype), pow).astype(
+        data.dtype)
     if rev:
         apod = apod[::-1]
     if inv:
@@ -359,7 +466,8 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
 
 sine = sp
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[time]')
 def tm(data, t1=0.0, t2=0.0, inv=False, rev=False):
     """
     Trapezoid Apodization
@@ -402,7 +510,8 @@ def tm(data, t1=0.0, t2=0.0, inv=False, rev=False):
         apod = 1 / apod
     return apod * data
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[time]')
 def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
     """
     Triangle apodization.
@@ -442,7 +551,8 @@ def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
     if loc == "auto":
         loc = int(size / 2.)
     apod = np.concatenate((np.linspace(lHi, 1., loc), np.linspace(1., rHi,
-                          size - loc + 1)[1:])).astype(data.dtype)
+                                                                  size - loc + 1)[
+                                                      1:])).astype(data.dtype)
     if rev:
         apod = apod[::-1]
     if inv:
@@ -454,7 +564,7 @@ def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
 # Shift functions #
 ###################
 
-@scpadapter()
+@scpadapter(input='[time]', output='[time]')
 def rs(data, pts=0.0):
     """
     Right shift and zero fill.
@@ -480,7 +590,8 @@ def rs(data, pts=0.0):
     data[..., :int(pts)] = 0
     return data
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[time]')
 def ls(data, pts=0.0):
     """
     Left shift and fill with zero
@@ -506,7 +617,8 @@ def ls(data, pts=0.0):
     data[..., -int(pts):] = 0
     return data
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[time]')
 def cs(data, pts=0.0, neg=False):
     """
     Circular shift
@@ -529,7 +641,8 @@ def cs(data, pts=0.0, neg=False):
     """
     return roll(data, pts, neg)
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[time]')
 def roll(data, pts=0.0, neg=False):
     """
     Roll axis
@@ -558,8 +671,9 @@ def roll(data, pts=0.0, neg=False):
             data[..., int(pts):] = -data[..., int(pts):]
     return data
 
-@scpadapter()
-def fsh(data, pts):
+
+@scpadapter(fs='Hz', input='[frequency]', output='[frequency]')
+def fsh(data, fs):
     """
     Frequency shift by Fourier transform. Negative signed phase correction.
 
@@ -567,14 +681,14 @@ def fsh(data, pts):
     ----------
     data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Dataset to process
-    pts : float
-        Number of points to frequency shift the data.  Positive value will
+    fs : float
+        Frequency shift of the data in Hz.  Positive value will
         shift the spectrum to the right, negative values to the left.
 
     Returns
     -------
     ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-         Dataset with last axis rolled.
+         Dataset with last axis shifted.
 
     """
     s = float(data.shape[-1])
@@ -585,11 +699,12 @@ def fsh(data, pts):
     # data = complexft(pdata)
 
     # inplace processing
-    return fft(np.exp(-2.j * pi * pts * np.arange(s) /
+    return fft(np.exp(-2.j * pi * fs * np.arange(s) /
                       s).astype(data.dtype) * ifft(data))
 
-@scpadapter()
-def fsh2(data, pts):
+
+@scpadapter(fs='Hz', input='[frequency]', output='[frequency]')
+def fsh2(data, fs):
     """
     Frequency Shift by Fourier transform. Postive signed phase correction.
 
@@ -597,102 +712,104 @@ def fsh2(data, pts):
     ----------
     data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Dataset to process
-    pts : float
-        Number of points to frequency shift the data.  Positive value will
+    fs : `float`
+        Frequency shift of the data in Hz.  Positive value will
         shift the spectrum to the right, negative values to the left.
 
     Returns
     -------
     ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-         Dataset with last axis rolled.
+         Dataset with last axis shifted.
 
     """
     s = float(data.shape[-1])
-    return fft_positive(np.exp(2.j * pi * pts * np.arange(s) /
-                        s).astype(data.dtype) * ifft_positive(data))
+    return fft_positive(np.exp(2.j * pi * fs * np.arange(s) /
+                               s).astype(data.dtype) * ifft_positive(data))
 
 
 ##############
 # Transforms #
 ##############
 
-@scpadapter()
 def nmr_reorder(data):
     """
     Reorder spectrum after FT transform to NMR order (swap halves and reverse).
+
     """
     s = data.shape[-1]
     return np.append(data[..., int(s / 2)::-1], data[..., s:int(s / 2):-1],
                      axis=-1)
 
-@scpadapter()
+
 def swap_halves(data):
     """
     Swap the halves of a spectrum,
+
     """
     s = data.shape[-1]
     return np.append(data[..., int(s / 2):], data[..., :int(s / 2)], axis=-1)
 
 
 # Fourier based Transforms
-@scpadapter()
-def rft(x):
+@scpadapter(input='[time]', output='[frequency]')
+def rft(data):
     """
     Real Fourier transform.
 
     Parameters
     ----------
-    x : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Dataset to process
 
     Returns
     -------
-    y : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
          Dataset with real Fourier transform applied.
 
     """
     # XXX figure out what exactly this is doing...
-    s = x.shape[-1]
-    xp = np.zeros(x.shape, dtype="complex64")
-    xp[..., 1:int(s / 2)] = x[..., 1:-1:2] + x[..., 2::2] * 1.j
-    xp[..., 0] = x[..., 0] / 2.
-    xp[..., int(s / 2)] = x[..., -1] / 2.
+    s = data.shape[-1]
+    xp = np.zeros(data.shape, dtype="complex64")
+    xp[..., 1:int(s / 2)] = data[..., 1:-1:2] + data[..., 2::2] * 1.j
+    xp[..., 0] = data[..., 0] / 2.
+    xp[..., int(s / 2)] = data[..., -1] / 2.
     return np.array(nmr_reorder(np.fft.fft(2 * xp, axis=-1).real),
                     dtype="float32")
 
-@scpadapter()
-def irft(xp):
+
+@scpadapter(input='[frequency]', output='[time]')
+def irft(data):
     """
     Inverse real fourier transform
 
     Parameters
     ----------
-    x : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Dataset to process
 
     Returns
     -------
-    y : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
          Dataset with an inverse real Fourier transform applied.
 
     """
-    # XXX figure out what exactly this is doing
-    s = xp.shape[-1]
-    xp = np.fft.ifft(nmr_reorder(xp))   # re-order, inverse FT
+    # TODO: figure out what exactly this is doing
+    s = data.shape[-1]
+    data = np.fft.ifft(nmr_reorder(data))  # re-order, inverse FT
 
     # output results
-    x = np.zeros(xp.shape, dtype="float32")
+    x = np.zeros(data.shape, dtype="float32")
 
     # unpack ifft data
-    x[..., 1:-1:2] = xp[..., 1:int(s / 2)].real
-    x[..., 2::2] = xp[..., 1:int(s / 2)].imag
-    x[..., 0] = xp[..., 0].real
-    x[..., -1] = xp[..., int(s / 2)].real
+    x[..., 1:-1:2] = data[..., 1:int(s / 2)].real
+    x[..., 2::2] = data[..., 1:int(s / 2)].imag
+    x[..., 0] = data[..., 0].real
+    x[..., -1] = data[..., int(s / 2)].real
     return x
 
 
 # Fourier transforms
-@scpadapter()
+@scpadapter(input='[time]', output='[frequency]')
 def fft(data):
     """
     Fourier transform, NMR ordering of results.
@@ -725,7 +842,7 @@ def fft(data):
     performed by the NMRPipe processing package and the functions
     :py:func:`fft_positive` and :py:func:`ifft_positive`.
 
-    All of the Fourier transforms perfromed by nmrglue return results in 'NMR
+    All of the Fourier transforms performed by nmrglue return results in 'NMR
     order', in which the two half of the spectrum have been swapped and
     reversed.
 
@@ -749,7 +866,8 @@ def fft(data):
     """
     return np.fft.fftshift(np.fft.fft(data, axis=-1).astype(data.dtype), -1)
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[frequency]')
 def fft_norm(data):
     """
     Fourier transform, total power preserved, NMR ordering of results
@@ -779,7 +897,8 @@ def fft_norm(data):
     """
     return fft(data) / np.sqrt(float(data.shape[-1]))
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[frequency]')
 def fft_positive(data):
     """
     Fourier transform with positive exponential, NMR ordering of results
@@ -812,7 +931,8 @@ def fft_positive(data):
     return (np.fft.fftshift(np.fft.ifft(data, axis=-1).astype(data.dtype), -1)
             * s)
 
-@scpadapter()
+
+@scpadapter(input='[frequency]', output='[time]')
 def ifft(data):
     """
     Inverse fourier transform, NMR ordering of results.
@@ -839,7 +959,8 @@ def ifft(data):
     """
     return np.fft.ifft(np.fft.ifftshift(data, -1), axis=-1).astype(data.dtype)
 
-@scpadapter()
+
+@scpadapter(input='[frequency]', output='[time]')
 def ifft_norm(data):
     """
     Inverse fourier transform, total power preserved, NMR ordering of results
@@ -869,7 +990,8 @@ def ifft_norm(data):
     """
     return ifft(data) * np.sqrt(float(data.shape[-1]))
 
-@scpadapter()
+
+@scpadapter(input='[frequency]', output='[time]')
 def ifft_positive(data):
     """
     Inverse fourier transform with positive exponential, NMR ordered results.
@@ -902,6 +1024,8 @@ def ifft_positive(data):
 
 
 # Hadamard Transform functions
+# ----------------------------
+
 def int2bin(n, digits=8):
     """
     Integer to binary string
@@ -926,13 +1050,14 @@ def gray(n):
     """
     g = [0, 1]
     for i in range(1, int(n)):
-        mg = g + g[::-1]   # mirror the current code
+        mg = g + g[::-1]  # mirror the current code
         # first bit 0/2**u for mirror
         first = [0] * 2 ** (i) + [2 ** (i)] * 2 ** (i)
         g = [mg[j] + first[j] for j in range(2 ** (i + 1))]
     return g
 
-@scpadapter()
+
+@scpadapter(input='[time]', output='[frequency]')
 def ha(data):
     """
     Hadamard Transform
@@ -983,6 +1108,7 @@ def ha(data):
 
     return gp_data
 
+
 @scpadapter()
 def ht(data, N=None):
     """
@@ -1000,10 +1126,11 @@ def ht(data, N=None):
     Returns
     -------
     ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-        NMR data which has been Hilvert transformed.
+        NMR data which has been Hilbert transformed.
 
     """
-    # XXX come back and fix this when a sane version of scipy.signal.hilbert
+
+    # FIXME:  come back and fix this when a sane version of scipy.signal.hilbert
     # is included with scipy 0.8
 
     # create an empty output array
@@ -1042,6 +1169,7 @@ def di(data):
     """
     return data.real
 
+
 @scpadapter()
 def ps(data, p0=0.0, p1=0.0, inv=False):
     """
@@ -1073,6 +1201,7 @@ def ps(data, p0=0.0, p1=0.0, inv=False):
         apod = 1 / apod
     return apod * data
 
+
 @scpadapter()
 def ps_exp(data, p0=0.0, tc=0.0, inv=False):
     """
@@ -1103,6 +1232,7 @@ def ps_exp(data, p0=0.0, tc=0.0, inv=False):
         apod = 1 / apod
     return apod * data
 
+
 @scpadapter()
 def tp(data, hyper=False):
     """
@@ -1129,8 +1259,8 @@ def tp(data, hyper=False):
 
 ytp = tp
 
-
 xy2yx = tp
+
 
 @scpadapter()
 def tp_hyper(data):
@@ -1150,6 +1280,7 @@ def tp_hyper(data):
         Array of hypercomplex NMR data with axes transposed.
     """
     return c2ri(ri2c(data).transpose())
+
 
 @scpadapter()
 def zf_inter(data, pts=1):
@@ -1175,6 +1306,7 @@ def zf_inter(data, pts=1):
     z = np.zeros(size, dtype=data.dtype)
     z[..., ::pts + 1] = data[..., :]
     return z
+
 
 @scpadapter()
 def zf_pad(data, pad=0, mid=False):
@@ -1210,6 +1342,7 @@ def zf_pad(data, pad=0, mid=False):
 
 zf = zf_pad
 
+
 @scpadapter()
 def zf_double(data, n, mid=False):
     """
@@ -1231,6 +1364,7 @@ def zf_double(data, n, mid=False):
 
     """
     return zf_pad(data, int((data.shape[-1] * 2 ** n) - data.shape[-1]), mid)
+
 
 @scpadapter()
 def zf_size(data, size, mid=False):
@@ -1271,6 +1405,7 @@ def largest_power_of_2(value):
 
     """
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
+
 
 @scpadapter()
 def zf_auto(data, mid=False):
@@ -1328,6 +1463,7 @@ def add(data, r=0.0, i=0.0, c=0.0):
         data.imag = data.imag + i + c
     return data
 
+
 @scpadapter()
 def add_ri(data):
     """
@@ -1367,7 +1503,7 @@ def dx(data):
 
     """
     z = np.empty_like(data)
-    z[..., 0] = data[..., 1] - data[..., 0]    # first point
+    z[..., 0] = data[..., 1] - data[..., 0]  # first point
     z[..., -1] = data[..., -1] - data[..., -2]  # last point
     z[..., 1:-1] = data[..., 2:] - data[..., :-2]  # interior
     return z
@@ -1402,6 +1538,7 @@ def ext(data, x0=None, xn=None, y0=None, yn=None):
     """
     return data[y0:yn, x0:xn]
 
+
 @scpadapter()
 def ext_left(data):
     """
@@ -1419,6 +1556,7 @@ def ext_left(data):
 
     """
     return data[..., 0:int(data.shape[-1] / 2.)]
+
 
 @scpadapter()
 def ext_right(data):
@@ -1438,6 +1576,7 @@ def ext_right(data):
     """
     return data[..., int(data.shape[-1] / 2.):]
 
+
 @scpadapter()
 def ext_mid(data):
     """
@@ -1455,7 +1594,7 @@ def ext_mid(data):
 
     """
     return data[..., int(data.shape[-1] * 1. / 4.):
-                int(data.shape[-1] * 3. / 4.)]
+    int(data.shape[-1] * 3. / 4.)]
 
 
 # Integrate
@@ -1486,8 +1625,21 @@ def mc(data):
     Modulus calculation.
 
     Calculates sqrt(real^2 + imag^2)
+
+
+    Parameters
+    ----------
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+
+    Returns
+    -------
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset transformed.
+
     """
     return np.sqrt(data.real ** 2 + data.imag ** 2)
+
 
 @scpadapter()
 def mc_pow(data):
@@ -1495,6 +1647,18 @@ def mc_pow(data):
     Modulus calculation. Squared version.
 
     Calculated real^2+imag^2
+
+
+    Parameters
+    ----------
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+
+    Returns
+    -------
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset transformed.
+
     """
     return data.real ** 2 + data.imag ** 2
 
@@ -1504,30 +1668,79 @@ def mc_pow(data):
 def mir_left(data):
     """
     Append a mirror image of the data on the left.
+
+
+    Parameters
+    ----------
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+
+    Returns
+    -------
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset transformed.
+
     """
     return np.append(data, data[..., ::-1], axis=-1)
+
 
 @scpadapter()
 def mir_right(data):
     """
     Append a mirror image of the data on the right.
+
+
+    Parameters
+    ----------
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+
+    Returns
+    -------
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset transformed.
+
     """
     return np.append(data[..., ::-1], data, axis=-1)
+
 
 @scpadapter()
 def mir_center(data):
     """
     Append a mirror image of the data in the center.
+
+    Parameters
+    ----------
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+
+    Returns
+    -------
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset transformed.
+
     """
     s = data.shape[-1]
     return np.concatenate(
-        (data[..., int(s / 2):], data, data[..., :int(s / 2)]), axis=-1)
+            (data[..., int(s / 2):], data, data[..., :int(s / 2)]), axis=-1)
+
 
 @scpadapter()
 def mir_center_onepoint(data):
     """
     Append a mirror image of the data in the center with a one point shift
     amd negate appended imaginary data.
+
+    Parameters
+    ----------
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+
+    Returns
+    -------
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset transformed.
+
     """
     s = int(data.shape[-1])
     data = np.concatenate((data[..., s - 1:0:-1], data), axis=-1)
@@ -1571,6 +1784,17 @@ def mult(data, r=1.0, i=1.0, c=1.0):
 def rev(data):
     """
     Reverse data.
+
+    Parameters
+    ----------
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+
+    Returns
+    -------
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset transformed.
+
     """
     return data[..., ::-1]
 
@@ -1602,6 +1826,7 @@ def set_constant(data, c):
     data[..., :] = c
     return data
 
+
 @scpadapter()
 def set_cmplex(data, v):
     """
@@ -1630,6 +1855,7 @@ def set_cmplex(data, v):
         data.imag = v
     return data
 
+
 @scpadapter()
 def set_real(data, v):
     """
@@ -1655,6 +1881,7 @@ def set_real(data, v):
     """
     data.real = v
     return data
+
 
 @scpadapter()
 def set_imag(data, v):
@@ -1685,11 +1912,29 @@ def set_imag(data, v):
 
 
 # Shuffle Utilities
-@scpadapter()
+
+# apply to dataset.data not dataset (
+# TODO: separate function in two groups utilities and dataset methods)
+
+utildoc = """
+    Parameters
+    ----------
+    data : ndarray
+        Array to process
+
+    Returns
+    -------
+    ndata : ndarray
+         Array transformed.
+    """
+
+
 def ri2c(data):
     """
     Interleave real and imaginary data into a real array.
-    """
+
+    """ + utildoc
+
     s = list(data.shape)
     s[-1] = s[-1] * 2
     n = np.empty(s, data.real.dtype)
@@ -1697,64 +1942,77 @@ def ri2c(data):
     n[..., 1::2] = data.imag
     return n
 
-@scpadapter()
+
 def interleave_complex(data):
     """
     Unpack complex data into an interleaved real, imaginary array.
-    """
+
+    """ + utildoc
+
     return ri2c(data)
 
-@scpadapter()
+
 def unpack_complex(data):
     """
     Unpacks complex array into real array (interleaves values).
-    """
+
+    """ + utildoc
+
     return ri2c(data)
 
-@scpadapter()
+
 def c2ri(data):
     """
-    Seperate interleaved real, imaginary data into complex array.
+    Separate interleaved real, imaginary data into complex array.
 
     Assumes data is real only, ignores imaginary portion of data.
 
-    """
+    """ + utildoc
+
     # make a 1,1 array to determind dtype
     temp = np.array(data.flat[0] + data.flat[1] * 1j)
     s = list(data.shape)
     s[-1] = int(s[-1] / 2)
     n = np.empty(s, temp.dtype)
-    del(temp)
+    del (temp)
     n.real = data.real[..., ::2]
     n.imag = data.real[..., 1::2]
     return n
 
-@scpadapter()
-def seperate_interleaved(data):
+
+def separate_interleaved(data):
     """
-    Seperate interleaved real, imaginary data into complex array.
-    """
+    Separate interleaved real, imaginary data into complex array.
+
+    """ + utildoc
+
     return c2ri(data)
 
-@scpadapter()
+
 def pack_complex(data):
     """
     Packs interleaved real array into complex array.
-    """
+
+    """ + utildoc
+
     return c2ri(data)
 
-@scpadapter()
+
 def decode_States(data):
     """
     Decode data collected using States (seperates interleaved data).
-    """
+
+    """ + utildoc
+
     return c2ri(data)
 
-@scpadapter()
+
 def ri2rr(data):
     """
     Append imaginary data to end of real data, returning a real array.
-    """
+
+    """ + utildoc
+
     s = list(data.shape)
     half = int(s[-1])
     s[-1] = half * 2
@@ -1766,18 +2024,20 @@ def ri2rr(data):
 
 append_imag = ri2rr
 
-@scpadapter()
+
 def rr2ri(data):
     """
     Unappend real and imaginary data returning a complex array.
-    """
+
+    """ + utildoc
+
     # make a 1,1 array to determind dtype
     temp = np.array(data.flat[0] + data.flat[1] * 1.j)
     s = list(data.shape)
     half = int(s[-1] / 2.0)
     s[-1] = half
     n = np.empty(s, temp.dtype)
-    del(temp)
+    del (temp)
     n.real = data[..., :half]
     n.imag = data[..., half:]
     return n
@@ -1785,11 +2045,13 @@ def rr2ri(data):
 
 unappend_imag = rr2ri
 
-@scpadapter()
+
 def exlr(data):
     """
     Exchange left and right halves of array.
-    """
+
+    """ + utildoc
+
     half = int(data.shape[-1] / 2)
     n = np.empty_like(data)
     n[..., :half] = data[..., half:]
@@ -1799,11 +2061,13 @@ def exlr(data):
 
 exchange_lr = exlr
 
-@scpadapter()
+
 def rolr(data):
     """
     Rotate left and right halves of array.
-    """
+
+    """ + utildoc
+
     half = int(data.shape[-1] / 2)
     n = np.empty_like(data)
     n[..., :half] = data[..., (half - 1)::-1]
@@ -1813,11 +2077,13 @@ def rolr(data):
 
 rotate_lr = rolr
 
-@scpadapter()
+
 def swap(data):
     """
     Swap real and imaginary data.
-    """
+
+    """ + utildoc
+
     n = np.empty_like(data)
     n.real = data.imag
     n.imag = data.real
@@ -1826,11 +2092,13 @@ def swap(data):
 
 swap_ri = swap
 
-@scpadapter()
+
 def bswap(data):
     """
     Byteswap data
-    """
+
+    """ + utildoc
+
     return data.byteswap()
 
 
@@ -1838,104 +2106,128 @@ byte_swap = bswap
 
 
 # Sign Manipulation Utilities
-@scpadapter()
+
 def neg_left(data):
     """
     Negate left half.
-    """
+
+    """ + utildoc
+
     data[..., 0:int(data.shape[-1] / 2.)] = \
         -data[..., 0:int(data.shape[-1] / 2.)]
     return data
 
-@scpadapter()
+
 def neg_right(data):
     """
     Negate right half.
-    """
+
+    """ + utildoc
+
     data[..., int(data.shape[-1] / 2.):] = \
         -data[..., int(data.shape[-1] / 2.):]
     return data
 
-@scpadapter()
+
 def neg_middle(data):
     """
     Negate middle half.
-    """
+
+    """ + utildoc
+
     data[..., int(data.shape[-1] * 1. / 4.):int(data.shape[-1] * 3. / 4.)] = \
         -data[..., int(data.shape[-1] * 1. / 4.):int(data.shape[-1] * 3. / 4.)]
     return data
 
-@scpadapter()
+
 def neg_edges(data):
     """
     Negate edge half (non-middle) of spectra.
-    """
+
+    """ + utildoc
+
     data[..., :int(data.shape[-1] * 1. / 4)] = \
         -data[..., :int(data.shape[-1] * 1. / 4)]
     data[..., int(data.shape[-1] * 3. / 4):] = \
         -data[..., int(data.shape[-1] * 3. / 4):]
     return data
 
-@scpadapter()
+
 def neg_all(data):
     """
     Negate data
-    """
+
+    """ + utildoc
+
     return -data
 
-@scpadapter()
+
 def neg_real(data):
     """
     Negate real data
-    """
+
+    """ + utildoc
+
     data.real = -data.real
     return data
 
-@scpadapter()
+
 def neg_imag(data):
     """
     Negate imaginary data
-    """
+
+    """ + utildoc
+
     data.imag = -data.imag
     return data
 
-@scpadapter()
+
 def neg_even(data):
     """
     Negate even points
-    """
+
+    """ + utildoc
+
     data[..., ::2] = -data[..., ::2]
     return data
 
-@scpadapter()
+
 def neg_odd(data):
     """
     Negate odd points
-    """
+
+    """ + utildoc
+
     data[..., 1::2] = -data[..., 1::2]
     return data
 
-@scpadapter()
+
 def neg_alt(data):
     """
     Negate alternate (odd) points.
-    """
+
+    """ + utildoc
+
     return neg_odd(data)
 
-@scpadapter()
-def abscplx(data):   #  original abs in nmrglue
+
+def abscplx(data):  # original abs in nmrglue
     """
     Replace data with absolute value of data (abs of real, imag seperately)
-    """
+
+    """ + utildoc
+
     data.real = np.abs(data.real)
     data.imag = np.abs(data.imag)
     return data
 
-@scpadapter()
+
 def sign(data):
     """
     Replace data with sign (-1 or 1) of data (seperately on each channel)
-    """
+
+    """ + utildoc
+
     data.real = np.sign(data.real)
     data.imag = np.sign(data.imag)
     return data
@@ -1944,7 +2236,6 @@ def sign(data):
 ##################
 # Misc Functions #
 ##################
-
 
 # Coadd data
 @scpadapter()
@@ -1971,16 +2262,16 @@ def coadd(data, clist, axis=-1):
     # algorith creates a empty array, then fills it element wise
     # with each factor from clist times the blocks selected
 
-    s = list(data.shape)    # data shape
-    k = len(clist)          # length of coefficient list
+    s = list(data.shape)  # data shape
+    k = len(clist)  # length of coefficient list
 
-    if axis == 1 or axis == -1:   # 'x' axis
+    if axis == 1 or axis == -1:  # 'x' axis
         s[-1] = int(np.floor(float(s[-1]) / k))
         n = np.zeros(s, dtype=data.dtype)
-        m = s[-1] * k   # last element read
+        m = s[-1] * k  # last element read
         for i in range(k):
             n = n + clist[i] * data[..., i:m:k]
-    else:   # 'y' axis
+    else:  # 'y' axis
         s[0] = int(np.floor(float(s[0]) / k))
         n = np.zeros(s, dtype=data.dtype)
         m = s[0] * k
@@ -2013,6 +2304,7 @@ def thres(data, thres=0.0):
     """
     return np.ma.masked_less(data, thres)
 
+
 @scpadapter()
 def conv(data, kern=[1.], m="wrap", c=0.0):
     """
@@ -2044,6 +2336,7 @@ def conv(data, kern=[1.], m="wrap", c=0.0):
 
 
 convolute = conv
+
 
 @scpadapter()
 def corr(data, kern=[1.], m="wrap", c=0.0):
@@ -2079,6 +2372,7 @@ def corr(data, kern=[1.], m="wrap", c=0.0):
 
 correlate = corr
 
+
 @scpadapter()
 def filter_median(data, s=(1, 1), m="wrap", c=0.0):
     """
@@ -2106,6 +2400,7 @@ def filter_median(data, s=(1, 1), m="wrap", c=0.0):
     data.real = scipy.ndimage.median_filter(data.real, size=s, mode=m, cval=c)
     data.imag = scipy.ndimage.median_filter(data.imag, size=s, mode=m, cval=c)
     return data
+
 
 @scpadapter()
 def filter_min(data, s=(1, 1), m="wrap", c=0.0):
@@ -2135,6 +2430,7 @@ def filter_min(data, s=(1, 1), m="wrap", c=0.0):
     data.imag = scipy.ndimage.minimum_filter(data.imag, size=s, mode=m, cval=c)
     return data
 
+
 @scpadapter()
 def filter_max(data, s=(1, 1), m="wrap", c=0.0):
     """
@@ -2162,6 +2458,7 @@ def filter_max(data, s=(1, 1), m="wrap", c=0.0):
     data.real = scipy.ndimage.maximum_filter(data.real, size=s, mode=m, cval=c)
     data.imag = scipy.ndimage.maximum_filter(data.imag, size=s, mode=m, cval=c)
     return data
+
 
 @scpadapter()
 def filter_percentile(data, percentile, s=(1, 1), m="wrap", c=0.0):
@@ -2194,6 +2491,7 @@ def filter_percentile(data, percentile, s=(1, 1), m="wrap", c=0.0):
     data.imag = scipy.ndimage.percentile_filter(data.imag, percentile, size=s,
                                                 mode=m, cval=c)
     return data
+
 
 @scpadapter()
 def filter_rank(data, rank, s=(1, 1), m="wrap", c=0.0):
@@ -2261,6 +2559,7 @@ def filter_amin(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
+
 @scpadapter()
 def filter_amax(data, s=(1, 1), m="wrap", c=0.0):
     """
@@ -2291,6 +2590,7 @@ def filter_amax(data, s=(1, 1), m="wrap", c=0.0):
     data.imag = scipy.ndimage.generic_filter(data.imag, flt, size=s, mode=m,
                                              cval=c)
     return data
+
 
 @scpadapter()
 def filter_range(data, s=(1, 1), m="wrap", c=0.0):
@@ -2323,6 +2623,7 @@ def filter_range(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
+
 @scpadapter()
 def filter_avg(data, s=(1, 1), m="wrap", c=0.0):
     """
@@ -2353,6 +2654,7 @@ def filter_avg(data, s=(1, 1), m="wrap", c=0.0):
     data.imag = scipy.ndimage.generic_filter(data.imag, flt, size=s, mode=m,
                                              cval=c)
     return data
+
 
 @scpadapter()
 def filter_dev(data, s=(1, 1), m="wrap", c=0.0):
@@ -2385,6 +2687,7 @@ def filter_dev(data, s=(1, 1), m="wrap", c=0.0):
                                              cval=c)
     return data
 
+
 @scpadapter()
 def filter_sum(data, s=(1, 1), m="wrap", c=0.0):
     """
@@ -2415,6 +2718,7 @@ def filter_sum(data, s=(1, 1), m="wrap", c=0.0):
     data.imag = scipy.ndimage.generic_filter(data.imag, flt, size=s, mode=m,
                                              cval=c)
     return data
+
 
 @scpadapter()
 def filter_generic(data, filter, s=(1, 1), m="wrap", c=0.0):
@@ -2502,15 +2806,28 @@ def qart(data, a=0.0, f=0.0):
     data.imag = (1 + a) * data.imag + f * data.real
     return data
 
+
 @scpadapter()
 def qart_auto(data):
     """
     Scale quad artifacts by values from Gram-Schmidt orthogonalization.
+
+
+    Parameters
+    ----------
+    data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        Dataset to process
+
+    Returns
+    -------
+    ndata : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+         Dataset transformed.
+
     """
     a, f = gram_schmidt(data)
     return qart(data, a, f)
 
-@scpadapter()
+
 def gram_schmidt(data):
     """
     Calculate Gram-Schmidt orthogonalization parameters.
@@ -2533,7 +2850,7 @@ def gram_schmidt(data):
     # therefore:
     # imag(data'') = R/S*imag(data) - R*C/(S*R) * real(data)
     # so A = R/S, B=-C/(S)
-    return(R / S, -C / S)
+    return (R / S, -C / S)
 
 
 # Complex Mixing
@@ -2614,6 +2931,7 @@ def smo(data, n):
         a[..., i] = a[..., i] / (n - i)
     return a
 
+
 @scpadapter()
 def center(data, n):
     """
@@ -2633,6 +2951,7 @@ def center(data, n):
 
     """
     return data - smo(data, n)
+
 
 @scpadapter()
 def zd(data, window, x0=0.0, slope=1.0):
@@ -2659,19 +2978,19 @@ def zd(data, window, x0=0.0, slope=1.0):
 
 
     """
-    width = len(window)             # full width
-    wide = int((width - 1.) / 2)    # half width
-    rows = data.shape[0]            # rows in data
-    cols = data.shape[-1]           # columns in data
-    c_start = x0 + slope            # start of center diagonal band
+    width = len(window)  # full width
+    wide = int((width - 1.) / 2)  # half width
+    rows = data.shape[0]  # rows in data
+    cols = data.shape[-1]  # columns in data
+    c_start = x0 + slope  # start of center diagonal band
 
     # last row to apply window to is last row or where we run off the grid
     max_r = int(min(rows, np.floor((cols - c_start + wide) / slope) + 1))
 
     # apply window to band row by row
     for r in range(max_r):  # r from 0 to max_r-1
-        w_min = 0           # window min
-        w_max = width       # window max
+        w_min = 0  # window min
+        w_max = width  # window max
 
         c_mid = int(r * slope + (c_start))  # middle of diagonal band
         c_min = c_mid - wide
@@ -2687,6 +3006,7 @@ def zd(data, window, x0=0.0, slope=1.0):
         data[r, c_min:c_max] = data[r, c_min:c_max] * window[w_min:w_max]
 
     return data
+
 
 @scpadapter()
 def zd_boxcar(data, wide=1, x0=0.0, slope=1.0):
@@ -2712,6 +3032,7 @@ def zd_boxcar(data, wide=1, x0=0.0, slope=1.0):
     """
     window = np.zeros(2 * int(wide) + 1)
     return zd(data, window, x0=x0, slope=slope)
+
 
 @scpadapter()
 def zd_triangle(data, wide=1.0, x0=0.0, slope=1.0):
@@ -2739,6 +3060,7 @@ def zd_triangle(data, wide=1.0, x0=0.0, slope=1.0):
                        np.linspace(0, 1, wide + 1)[1:])
     return zd(data, window, x0=x0, slope=slope)
 
+
 @scpadapter()
 def zd_sinebell(data, wide=1.0, x0=0.0, slope=1.0):
     """
@@ -2763,6 +3085,7 @@ def zd_sinebell(data, wide=1.0, x0=0.0, slope=1.0):
     """
     window = 1 - np.sin(np.linspace(0, pi, 2 * wide + 1))
     return zd(data, window, x0=x0, slope=slope)
+
 
 @scpadapter()
 def zd_gaussian(data, wide=1.0, x0=0.0, slope=1.0, g=1):
