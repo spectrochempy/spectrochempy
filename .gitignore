@@ -12,6 +12,8 @@ docs/_build
 .eggs
 *.egg-info
 *generated
+dist/
+build/
 
 # data
 essai.scp
