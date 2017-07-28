@@ -20,7 +20,7 @@ docs/source/gen_modules/
 recipes/spectrochempy/
 docs/source/modules/
 docs/source/savefig/
-docs/_templates_old
+docs/source/_templates_old
 *.pyc
-ressources/
-tests/testdata/nmrdata/bruker/tests/nmr/tpa/
+#ressources/
+#tests/testdata/nmrdata/bruker/tests/nmr/tpa/
