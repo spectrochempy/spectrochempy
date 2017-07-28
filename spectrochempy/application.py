@@ -246,7 +246,7 @@ class SpectroChemPy(Application):
         self.plotoptions = PlotOptions(config=self.config)
 
         # set default matplotlib options
-        mpl.rc('text', usetex=self.plotoptions.use_latex)
+        mpl.rc('text', usetex=False)  #usetex=self.plotoptions.use_latex)
 
         if self.plotoptions.latex_preamble == []:
             self.plotoptions.latex_preamble = [

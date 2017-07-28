@@ -44,7 +44,7 @@ def make_label(ss, lab='<no_axe_label>'):
 
     """
     if ss.title:
-        label = ss.title.replace(' ', r'\ ')
+        label = ss.title#.replace(' ', r'\ ')
     else:
         label = lab
 

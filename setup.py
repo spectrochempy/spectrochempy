@@ -37,33 +37,70 @@
 
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop
-# from setuptools.command.install import install
+from setuptools.command.install import install
 
 import os
 import shutil as sh
 import subprocess
-from warnings import warn
+import warnings
 
-from spectrochempy.version import get_version
+#from spectrochempy.version import get_version
+from setuptools_scm import get_version
+
+version = get_version(root='.', relative_to=__file__)
+
+
+def mpl_setup():
+    # matplotlib setup
+
+    mplrc = os.path.expanduser(os.path.join(
+            '~', '.matplotlib', 'matplotlibrc'))
+
+    if os.path.exists(mplrc):
+        # file already exist - make a backup
+
+        backup = os.path.expanduser(os.path.join(
+                '~', '.matplotlib', 'matplotlibrc.bak'))
+
+        sh.copy(mplrc, backup)
+
+        warnings.warn(
+                'your matplotlib.rc has been modified, ' + \
+                'your own version is backup here: %s' % backup)
+
+    else:
+        # use our provided file
+        setup_data = os.path.join(os.path.dirname(__file__), 'setup_data')
+        scp_mplrc = os.path.join(setup_data, 'matplotlibrc.scp')
+        sh.copy(scp_mplrc, mplrc)
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
+
     def run(self):
+
+        develop.run(self)
+
         for item in ['pre-commit', 'pre-push', 'post-merge', 'post-commit',
                      'post-checkout']:
-            if os.path.exists ('.git/hooks/{}'.format(item)):
+            if os.path.exists('.git/hooks/{}'.format(item)):
                 os.remove('.git/hooks/{}'.format(item))
             sh.copy('git_hooks/{}'.format(item), '.git/hooks/{}'.format(item))
 
             print('installation of `.git/hooks/{}` made.'.format(item))
 
-        develop.run(self)
+       # mpl_setup()
 
-# class PostInstallCommand(install):
-#     """Post-installation for installation mode."""
-#     def run(self):
-#         # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
-#         install.run(self)
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+
+    def run(self):
+
+        install.run(self)
+
+        # mpl_setup()
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -81,23 +118,24 @@ def get_dependencies():
 
 
 setup(
-    name='spectrochempy',
-    version=get_version()[1],
-    packages=find_packages(),
-    include_package_data=True,
-    url='http:/www-lcs.ensicaen.fr/spectrochempy',
-    license='CeCILL-2.1',
-    author='Arnaud Travert & christian Fernandez',
-    author_email='spectrochempy@ensicaen.fr',
-    description='Spectra Analysis & Processing with Python',
-    long_description=read('README.md'),
-    setup_requires=['pytest-runner'],
-    install_requires=get_dependencies(),
-    dependency_links=[
-        "git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
-    ],
-    tests_require=['pytest'],
-    classifiers=[
+        name='spectrochempy',
+        version=get_version(),
+        packages=find_packages(),
+        #include_package_data=True,
+        url='http:/www-lcs.ensicaen.fr/spectrochempy',
+        license='CeCILL-2.1',
+        author='Arnaud Travert & christian Fernandez',
+        author_email='spectrochempy@ensicaen.fr',
+        description='Spectra Analysis & Processing with Python',
+        long_description=read('README.md'),
+        use_scm_version=True,
+        setup_requires=['setuptools_scm', 'pytest-runner'],
+        install_requires=get_dependencies(),
+        dependency_links=[
+            "git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
+        ],
+        tests_require=['pytest'],
+        classifiers=[
             "Development Status :: 2 - Pre-Alpha",
             "Topic :: Utilities",
             "Topic :: Scientific/Engineering",
@@ -105,10 +143,9 @@ setup(
             "License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
             "Operating System :: OS Independent",
             "Programming Language :: Python :: 3.5",
-    ],
-    cmdclass = {
-               'develop': PostDevelopCommand,
-                          # 'install': PostInstallCommand,
-               },
+        ],
+        cmdclass={
+            'develop': PostDevelopCommand,
+            'install': PostInstallCommand,
+        },
 )
-

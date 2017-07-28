@@ -22,4 +22,4 @@ docs/source/modules/
 docs/source/savefig/
 *.pyc
 
-testdata/nmrdata/bruker/tests/nmr/tpa/
+tests/testdata/nmrdata/bruker/tests/nmr/tpa/
