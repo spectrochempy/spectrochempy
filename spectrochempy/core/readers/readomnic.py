@@ -99,8 +99,8 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
     Examples
     --------
-        >>> from spectrochempy.api import NDDataset, data_dir
-        >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data_dir)
+        >>> from spectrochempy.api import NDDataset, data
+        >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
         >>> A.print()
            name: Ex_spectra.spg
          author: Username
@@ -122,7 +122,7 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
             #TODO: GENERATE A WARNING
             return None
 
-    directory = kwargs.get("directory", options.data_dir)
+    directory = kwargs.get("directory", options.data)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 

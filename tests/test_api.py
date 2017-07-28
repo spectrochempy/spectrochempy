@@ -43,7 +43,6 @@ def test_api():
     print('\n\nRunning : ', spectrochempy.application.running)
     assert version.startswith('0.1')
     assert "Laboratory for Catalysis and Spectrochempy" in copyright
-    assert release.startswith('0.1')
 
     log.warning('Ok, this is nicely executing!')
 

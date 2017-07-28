@@ -80,8 +80,8 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     ---------
 
     >>> import os
-    >>> from spectrochempy.api import NDDataset, data_dir
-    >>> path_A = os.path.join(data_dir, 'irdata', 'NH4Y-activation.SPG')
+    >>> from spectrochempy.api import NDDataset, data
+    >>> path_A = os.path.join(data, 'irdata', 'NH4Y-activation.SPG')
     >>> A = NDDataset.load(path_A, protocol='omnic')
     >>> ref = A[0]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)

@@ -13,9 +13,9 @@ import os
 from spectrochempy.api import *
 
 ##########################################################
-# ``data_dir`` contains the path to a default data directory.
+# ``data`` contains the path to a default data directory.
 
-path = os.path.join(data_dir, 'nmrdata','bruker', 'tests', 'nmr','bruker_1d')
+path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
 
 ##########################################################
 # load the data in a new dataset

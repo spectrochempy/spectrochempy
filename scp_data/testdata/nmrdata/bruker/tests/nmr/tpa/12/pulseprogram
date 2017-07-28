@@ -1,0 +1,116 @@
+# 1 "/home/nmr/prog/pp/babasansdec.cm"
+;baba4rot (TopSpin 2.0)
+;version Bruker + FF modifs CM Le Mans fev 2008
+
+;2D SQ-DQ correlation experiment for 4 rotor periods recoupling using BABA
+;DQ experiment for weaker interaction hamiltonians, full compensated for
+;pulse imperfections and offset effects
+;
+;M. Feike, D.E. Demco, R. Graf, J. Gottwald, S. Hafner, and H.W. Spiess JMR A 122, 214-221 (1996)
+;written by JOS, 11/12/03
+
+;Avance II+ version
+;parameters:
+;d0  : incremented delay (2D) [3 usec]
+;d1 : recycle delay
+;pl1 : for 90 degree BABA pulses
+;pl2 : = 120 dB, not used
+;pl12 : for decoupling
+;cpdprg2 : decoupling sequence (tppm, cw, etc.)
+;p1 : 90 degree pulse (in BABA sequence)
+;pcpd2 : pulse length in decoupling sequence
+;cnst31 : rotation rate in Hz
+;ns : n*16
+;FnMode: States-TPPI or STATES
+;l1  :number of rotor cycles for recoupling m any integer
+;l2  :l2*4=l1 = (number of rotorcycles)
+;ns  : n*16
+;FnMode: States-TPPI or STATES
+# 29 "/home/nmr/prog/pp/babasansdec.cm"
+;$COMMENT=SQ-DQ experiment with BABA for 4 rotor periods
+;$CLASS=Solids
+;$DIM=2D
+;$TYPE=direct excitation
+;$SUBTYPE=homonuclear correlation
+
+;$OWNER=charlotte
+define delay tau
+"tau=0.5s/cnst31-p1*2"
+
+"d0=1u"
+;cnst11 : to adjust t=0 for acquisition, if digmod = baseopt
+"acqt0=1u*cnst11"
+# 1 "mc_line 43 file /home/nmr/prog/pp/babasansdec.cm exp. def. part of mc cmd. before ze"
+define delay MCWRK
+define delay MCREST
+define loopcounter ST1CNT
+"ST1CNT = td1 / 2"
+"MCREST = 30m - 30m"
+"MCWRK = 0.200000*30m"
+
+    dccorr
+# 43 "/home/nmr/prog/pp/babasansdec.cm"
+# 43 "/home/nmr/prog/pp/babasansdec.cm"
+1 ze
+# 1 "mc_line 43 file /home/nmr/prog/pp/babasansdec.cm exp. def. of mc cmd. after ze"
+# 44 "/home/nmr/prog/pp/babasansdec.cm"
+# 1 "mc_line 44 file /home/nmr/prog/pp/babasansdec.cm exp. start label for mc cmd."
+2 MCWRK  * 3
+LBLSTS1, MCWRK 
+LBLF1, MCWRK
+  MCREST
+# 45 "/home/nmr/prog/pp/babasansdec.cm"
+
+
+# 53 "/home/nmr/prog/pp/babasansdec.cm"
+ d1
+5 (p1 pl1 ph1):f1 		   	;DQ excitation block
+  tau
+  (p1 ph1)
+  (p1 ph2)
+  tau
+  (p1 ph4)
+  (p1 ph1)
+  tau
+  (p1 ph1)
+  (p1 ph4)
+  tau
+  (p1 ph2)
+lo to 5 times l2
+  d0
+7 (p1 ph11) 		   	;DQ excitation block
+  tau
+  (p1 ph11)
+  (p1 ph12)
+  tau
+  (p1 ph14)
+  (p1 ph11)
+  tau
+  (p1 ph11)
+  (p1 ph14)
+  tau
+  (p1 ph12)
+  lo to 7 times l2
+  0.5u
+  (p1 ph5):f1
+  go=2 ph31
+# 1 "mc_line 84 file /home/nmr/prog/pp/babasansdec.cm exp. mc cmd. in line"
+  MCWRK  wr #0 if #0 zd ip1  MCWRK  ip2  MCWRK  ip4
+  lo to LBLSTS1 times 2
+  MCWRK id0
+  lo to LBLF1 times ST1CNT
+  MCWRK
+# 85 "/home/nmr/prog/pp/babasansdec.cm"
+HaltAcqu, 
+exit
+
+ph0=0
+ph1=(8)  0  2  4  6 
+ph2=(8)  2  4  6  0
+ph4=(8)  6 0 2 4 
+ph11=(8) 2
+ph12=(8) 4
+ph13=(8) 6
+ph14= (8) 0
+ph5=  0 0 0 0  1 1 1 1  2 2 2 2  3 3 3 3
+ph31= 2 0 2 0  3 1 3 1  0 2 0 2  1 3 1 3

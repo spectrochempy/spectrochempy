@@ -17,7 +17,7 @@ import sys
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndaxes import Axes, Axis
-from spectrochempy.api import data_dir, plotoptions
+from spectrochempy.api import data, plotoptions
 
 plotoptions.do_not_block = True
 
@@ -25,21 +25,21 @@ plotoptions.do_not_block = True
 @pytest.fixture(scope="function")
 def IR_source_1():
     source = NDDataset.read_omnic(
-        os.path.join(data_dir, 'irdata', 'NH4Y-activation.SPG'))
+        os.path.join(data, 'irdata', 'NH4Y-activation.SPG'))
     return source
 
 # Fixture:  IR spectra
 @pytest.fixture(scope="function")
 def IR_scp_1():
     source = NDDataset.load(
-                        os.path.join(data_dir, 'irdata', 'NH4Y-activation.scp'))
+                        os.path.join(data, 'irdata', 'NH4Y-activation.scp'))
     return source
 
 
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D():
-    path = os.path.join(data_dir, 'nmrdata','bruker', 'tests', 'nmr',
+    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
     source = NDDataset.read_bruker_nmr(
                                       path, expno=1, remove_digital_filter=True)
@@ -48,7 +48,7 @@ def NMR_source_1D():
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D_1H():
-    path = os.path.join(data_dir, 'nmrdata','bruker', 'tests', 'nmr',
+    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'tpa')
     source = NDDataset.read_bruker_nmr(
                                       path, expno=10, remove_digital_filter=True)
@@ -56,7 +56,7 @@ def NMR_source_1D_1H():
 
 @pytest.fixture(scope="function")
 def NMR_source_2D():
-    path = os.path.join(data_dir, 'nmrdata', 'bruker', 'tests', 'nmr',
+    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')
     source = NDDataset.read_bruker_nmr(
                                       path, expno=1, remove_digital_filter=True)

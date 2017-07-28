@@ -78,11 +78,11 @@ __all__ += [
 
            ### Helpers
              'log', 'log_level','DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
-             'data_dir', 'list_data_dir',
+             'data', 'list_data',
              'options', 'plotoptions',
 
             ### Info
-             'copyright', 'release', 'version',
+             'copyright', 'version',
            ]
 
 

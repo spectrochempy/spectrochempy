@@ -26,18 +26,13 @@ pip uninstall -y spectrochempy
 pip install -e . || exit 1
 
 # make docs and do not commit if doc fails to build
-python scripts/make_scp_docs.py clean html release || exit 1
+python docs/builddocs.py clean pdf html release || exit 1
 
 # add files modified
 git add -A
 
-# test also python27
+# test also python35
 #--------------------
 
-# to make it work with SourceTree (assuming anaconda is used)
-# source activate scp27
-
-# run test
-# py.test -x tests || exit 1
 
 

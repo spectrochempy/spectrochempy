@@ -317,8 +317,8 @@ def read_bruker_nmr(source, *args, **kwargs):
     ----------
     path: str, optional
         path of the Bruker directory. It path is None, at least the parameters
-        `data_dir`, `user`, `name`, `expno` must be provided.
-    data_dir: str,
+        `data`, `user`, `name`, `expno` must be provided.
+    data: str,
         main strorage directory, optional
     user: str, optional
         user name of the dataset
@@ -326,7 +326,8 @@ def read_bruker_nmr(source, *args, **kwargs):
         name of the dataset
     expno: int, optional
         experiment number
-    expnos: A list of expno
+    expnos: list, optional
+        A list of expno
     processed: bool, optioanl, default is False
         should we load already bruker processed files
     procno: int
@@ -346,7 +347,7 @@ def read_bruker_nmr(source, *args, **kwargs):
         source = NDDataset()
 
     expnos = False
-    data_dir = kwargs.get('data_dir', '')
+    data = kwargs.get('data', '')
     user = kwargs.get('user', '')
     name = kwargs.get('name', '')
 
@@ -363,7 +364,7 @@ def read_bruker_nmr(source, *args, **kwargs):
 
     if not os.path.exists(path):
         # look alternative definitions
-        path_alt = os.path.join(str(data_dir), str(user), 'nmr', str(name),
+        path_alt = os.path.join(str(data), str(user), 'nmr', str(name),
                          str(expno))
 
         if os.path.exists(path_alt):
@@ -373,7 +374,7 @@ def read_bruker_nmr(source, *args, **kwargs):
         # look multiple
         expnos = kwargs.get('expnos', False)
         if expnos:
-             path = os.path.join(str(data_dir), str(user), 'nmr', str(name))
+             path = os.path.join(str(data), str(user), 'nmr', str(name))
 
     # path must be pointing to a valid bruker directory
     if not os.path.exists(path):

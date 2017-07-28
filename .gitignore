@@ -19,7 +19,7 @@ build/
 essai.scp
 docs/source/auto_examples/
 docs/source/gen_modules/
-recipes/spectrochempy/
+~recipes/spectrochempy/
 docs/source/modules/
 docs/source/savefig/
 docs/source/_templates_old

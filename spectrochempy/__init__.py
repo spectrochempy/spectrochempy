@@ -58,26 +58,3 @@ guiApp = QApplication(sys.argv)
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-# from spectrochempy.api import *
-
-
-if __name__ == "__main__":
-
-    from spectrochempy.api import scp
-    import logging
-    scp.start(
-            reset_config=True,
-            log_level = logging.INFO,
-    )
-
-    # ==============================================================================
-    # Logger
-    # ==============================================================================
-    log = scp.log
-
-    log.info('Name : %s ' % scp.name)
-
-    scp.plotoptions.use_latex = True
-
-    log.info(scp.plotoptions.latex_preamble)
-

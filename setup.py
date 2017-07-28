@@ -39,41 +39,28 @@ from setuptools.command.develop import develop
 from setuptools.command.install import install
 
 import os
+import subprocess
 import shutil as sh
 import warnings
 
-from setuptools_scm import get_version
+from spectrochempy.api import version
 
+def style_setup():
 
-def version():
-    version = get_version(root='.', relative_to=__file__).split('+')[0]
-    return version
+    # matplotlib style setup
 
+    stylelib = os.path.expanduser(os.path.join('~', '.matplotlib', 'stylelib'))
+    if not os.path.exists(stylelib):
+        os.mkdir(stylelib)
 
-def mpl_setup():
-    # matplotlib setup
+    styles_path = os.path.join(os.path.dirname(__file__),
+                              'scp_data','setupdata','stylesheets')
+    styles = os.listdir(styles_path)
 
-    mplrc = os.path.expanduser(os.path.join(
-            '~', '.matplotlib', 'matplotlibrc'))
-
-    if os.path.exists(mplrc):
-        # file already exist - make a backup
-
-        backup = os.path.expanduser(os.path.join(
-                '~', '.matplotlib', 'matplotlibrc.bak'))
-
-        sh.copy(mplrc, backup)
-
-        warnings.warn(
-                'your matplotlib.rc has been modified, ' + \
-                'your own version is backup here: %s' % backup)
-
-    else:
-        # use our provided file
-        setup_data = os.path.join(os.path.dirname(__file__), 'setup_data')
-        scp_mplrc = os.path.join(setup_data, 'matplotlibrc.scp')
-        sh.copy(scp_mplrc, mplrc)
-
+    for style in styles:
+        src= os.path.join(styles_path, style)
+        dest = os.path.join(stylelib, style)
+        sh.copy(src, dest)
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
@@ -82,15 +69,14 @@ class PostDevelopCommand(develop):
 
         develop.run(self)
 
-        for item in ['pre-commit', 'pre-push', 'post-merge', 'post-commit',
-                     'post-checkout']:
+        for item in ['pre-commit']:
             if os.path.exists('.git/hooks/{}'.format(item)):
                 os.remove('.git/hooks/{}'.format(item))
             sh.copy('git_hooks/{}'.format(item), '.git/hooks/{}'.format(item))
 
             print('installation of `.git/hooks/{}` made.'.format(item))
 
-            # mpl_setup()
+        style_setup()
 
 
 class PostInstallCommand(install):
@@ -99,11 +85,12 @@ class PostInstallCommand(install):
     def run(self):
         install.run(self)
 
-        # mpl_setup()
+        style_setup()
 
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    with open(fname, 'r') as f:
+        return f.read()
 
 
 def get_dependencies():
@@ -119,17 +106,16 @@ def get_dependencies():
 
 setup(
         name='spectrochempy',
-        version=version(),
-        packages=find_packages(),
-      #include_package_data=True,
+        version=version,
+        packages=find_packages(exclude=['docs',"*.tests", "*.tests.*", "tests.*", "tests"]),
+        include_package_data=True,
         url='http:/www-lcs.ensicaen.fr/spectrochempy',
         license='CeCILL-2.1',
         author='Arnaud Travert & christian Fernandez',
         author_email='spectrochempy@ensicaen.fr',
         description='Spectra Analysis & Processing with Python',
-        long_description=read('README.md'),
-        use_scm_version=True,
-        setup_requires=['setuptools_scm', 'pytest-runner'],
+        long_description=read('README.rst'),
+        setup_requires=['pytest-runner'],
         install_requires=get_dependencies(),
         dependency_links=[
             "git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
@@ -146,6 +132,6 @@ setup(
         ],
         cmdclass={
             'develop': PostDevelopCommand,
-            'install': PostInstallCommand,
+            #'install': PostInstallCommand,
         },
 )

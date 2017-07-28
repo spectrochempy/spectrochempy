@@ -1,3 +1,5 @@
+.. -_\- coding: utf-8 -_-
+
 Spectrochempy
 =============
 
@@ -80,7 +82,7 @@ way::
      Arnaud Travert & Christian Fernandez,
      SpectroChemPy, a framework for processing, analysing and modelling of Spectroscopic data for Chemistry with Python
      https://bitbucket.org/spectrocat/spectrochempy, (version 0.1)
-     Laboratoire Catalyse and Spectrochemistry, ENSICAEN/Universit� de Caen/CNRS, 2017
+     Laboratoire Catalyse and Spectrochemistry, ENSICAEN/Universit\'e de Caen/CNRS, 2017
 
 
 

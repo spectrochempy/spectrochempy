@@ -133,9 +133,9 @@ class NDIO(HasTraits):
         ---------
         Read some experimental data and then save in our proprietary format **scp**
 
-        >>> from spectrochempy.api import NDDataset, data_dir
-        >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data_dir)
-        >>> mydataset.save('mydataset.scp', directory=data_dir)
+        >>> from spectrochempy.api import NDDataset, data
+        >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
+        >>> mydataset.save('mydataset.scp', directory=data)
 
         Notes
         -----
@@ -159,7 +159,7 @@ class NDIO(HasTraits):
         if not filename.endswith('.scp'):
             filename = filename + '.scp'
 
-        directory = kwargs.get("directory", options.data_dir)
+        directory = kwargs.get("directory", options.data)
         if not os.path.exists(directory):
             raise IOError("directory doesn't exists!")
 
@@ -260,7 +260,7 @@ class NDIO(HasTraits):
 
         directory : `str`
 
-            optional, default=``data_dir``
+            optional, default=``data``
             The directory from where to load hhe file.
 
         kwargs : optional keyword parameters.
@@ -270,16 +270,16 @@ class NDIO(HasTraits):
         Examples
         --------
 
-        >>> from spectrochempy.api import NDDataset,data_dir
-        >>> mydataset = NDDataset.load('mydataset.scp', directory=data_dir)
+        >>> from spectrochempy.api import NDDataset,data
+        >>> mydataset = NDDataset.load('mydataset.scp', directory=data)
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
         ...
 
-        by default, directory for saving is the `data_dir`.
+        by default, directory for saving is the `data`.
         So the same thing can be done simply by:
 
-        >>> from spectrochempy.api import NDDataset,data_dir
+        >>> from spectrochempy.api import NDDataset,data
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -303,7 +303,7 @@ class NDIO(HasTraits):
         # open file dialog box
 
         filename = path
-        directory = kwargs.get("directory", options.data_dir)
+        directory = kwargs.get("directory", options.data)
         if not path:
             filename = gui.openFileNameDialog(directory=directory)
             if not filename:

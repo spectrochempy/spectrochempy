@@ -12,7 +12,7 @@ from spectrochempy.api import *
 ###################################################################
 # Loading and stacked plot of the original
 
-source = NDDataset.read_omnic(os.path.join(data_dir,
+source = NDDataset.read_omnic(os.path.join(data,
                                            'irdata', 'NH4Y-activation.SPG'))
 source.plot_stack()
 

@@ -45,14 +45,18 @@ import glob
 import sys
 import logging
 import warnings
+import setuptools_scm
+from pkg_resources import get_distribution, DistributionNotFound
+
+
 from copy import deepcopy
 
 from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, catch_config_error
 
 from traitlets import (HasTraits, Instance,
-    Bool, Unicode, Int, List, Dict, default, observe
-)
+                       Bool, Unicode, Int, List, Dict, default, observe
+                       )
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
@@ -66,7 +70,7 @@ import matplotlib as mpl
 from spectrochempy.utils import is_kernel
 from spectrochempy.utils import get_config_dir, get_pkg_data_dir
 from spectrochempy.utils import get_pkg_data_filename
-from spectrochempy.version import get_version
+
 from spectrochempy.core.plotters.plottersoptions import PlotOptions
 from spectrochempy.core.readers.readersoptions import ReadOptions
 from spectrochempy.core.writers.writersoptions import WriteOptions
@@ -75,26 +79,26 @@ from spectrochempy.core.processors.processorsoptions import ProcessOptions
 # doc info
 # --------
 _classes = [
-        'DataDir',
-        'SpectroChemPy',
-        ]
-
+    'Data',
+    'SpectroChemPy',
+]
 
 __all__ = [
 
-           ### Helpers
-             'log', 'log_level','DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
-             'data_dir', 'list_data_dir',
-             'options', 'plotoptions',
-             'running',
-            ### Info
-             'copyright', 'release', 'version',
-           ]
+    ### Helpers
+    'log', 'log_level', 'DEBUG', 'WARN', 'ERROR', 'CRITICAL', 'INFO',
+    'data', 'list_data',
+    'options', 'plotoptions',
+    'running',
+    ### Info
+    'copyright', 'version',
+]
+
 
 # some useful objects
 # -------------------
 
-class DataDir(Configurable):
+class Data(Configurable):
     """
     This class is used to determine the path to the data directory.
 
@@ -102,10 +106,10 @@ class DataDir(Configurable):
 
     Examples
     --------
-    >>> data_dir = DataDir()
-    >>> print(os.path.basename(data_dir.data_dir))
+    >>> data = Data()
+    >>> print(os.path.basename(data.data))
     testdata
-    >>> print(data_dir) # doctest: +ELLIPSIS
+    >>> print(data) # doctest: +ELLIPSIS
     testdata
     |__irdata
        |__NH4Y-activation.SPG
@@ -116,10 +120,9 @@ class DataDir(Configurable):
 
     """
 
-    data_dir = Unicode(help="Directory where to look for data").tag(
-            config=True)
+    data = Unicode(help="Directory where to look for data").tag(config=True)
 
-    _testdata_dir = Unicode()
+    _data = Unicode()
 
     def listing(self):
         """
@@ -130,7 +133,7 @@ class DataDir(Configurable):
         listing : `str`
 
         """
-        s = os.path.basename(self.data_dir)+"\n"
+        s = os.path.basename(self.data) + "\n"
 
         def _listdir(s, initial, ns):
             ns += 1
@@ -138,29 +141,30 @@ class DataDir(Configurable):
                 fb = os.path.basename(f)
                 if not fb.startswith('acqu') and \
                         not fb.startswith('pulse') and fb not in ['ser', 'fid']:
-                    s += "   "*ns + "|__" + u"%s\n"%fb
+                    s += "   " * ns + "|__" + u"%s\n" % fb
                 if os.path.isdir(f):
                     s = _listdir(s, f, ns)
             return s
 
-        return _listdir(s, self.data_dir, -1)
+        return _listdir(s, self.data, -1)
 
     def __str__(self):
         return self.listing()
 
     def _repr_html_(self):
         # _repr_html is needed to output in notebooks
-        return self.listing().replace('\n','<br/>').replace(" ","&nbsp;")
+        return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
 
-    @default('data_dir')
-    def _get_data_dir_default(self):
-        # return the testdata dir by default
-        return self._testdata_dir
+    @default('data')
+    def _get_data_default(self):
+        # return the spectra dir by default
+        return self._data
 
-    @default('_testdata_dir')
-    def _get__testdata_dir_default(self):
-        # the testdata path in package tests
-        return get_pkg_data_dir('testdata', 'tests')
+    @default('_data')
+    def _get__data_default(self):
+        # the spectra path in package data
+        return get_pkg_data_dir('testdata','scp_data')
+
 
 # ==============================================================================
 # Main application and configurators
@@ -176,40 +180,72 @@ class SpectroChemPy(Application):
 
     """
 
-
     # info _____________________________________________________________________
 
     name = Unicode(u'SpectroChemPy')
     description = Unicode(u'This is the main SpectroChemPy application ')
 
-    version = Unicode('').tag(config=True)
-    release = Unicode('').tag(config=True)
+    version = Unicode('0.1').tag(config=True)
+
+    @default('version')
+    def _get_version(self):
+
+        try:
+
+            version = get_distribution('spectrochempy').version
+
+        except DistributionNotFound:
+
+            try:
+
+                version = setuptools_scm.get_version(
+                        version_scheme='post-release',
+                        root='..',
+                        relative_to=__file__).split('+')[0]
+
+            except:
+
+                from spectrochempy.version import version
+
+        path = os.path.join(os.path.dirname(__file__), 'version.py')
+        with open(path, "w") as f:
+            f.write("version = '%s' " % version)
+
+        return version
+
     copyright = Unicode('').tag(config=True)
 
-    classes = List([PlotOptions,])
+    @default('copyright')
+    def _get_copyright(self):
+        copyright = u'2014-2017'  # TODO put current year%
+        copyright += u' - LCS (Laboratory for Catalysis and Spectrochempy)'
+        return copyright
+
+    classes = List([PlotOptions, ])
 
     # configuration parameters  ________________________________________________
 
     reset_config = Bool(False,
-            help='should we restaure a default configuration?').tag(config=True)
+                        help='should we restaure a default configuration?').tag(
+        config=True)
 
     config_file_name = Unicode(None,
-                                  help="Load this config file").tag(config=True)
+                               help="Load this config file").tag(config=True)
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
         return self.name + u'_config.py'
 
     config_dir = Unicode(None,
-                     help="Set the configuration dir location").tag(config=True)
+                         help="Set the configuration dir location").tag(
+        config=True)
 
     @default('config_dir')
     def _get_config_dir_default(self):
         return get_config_dir()
 
-
     info_on_loading = Bool(True,
-                                help='display info on loading').tag(config=True)
+                           help='display info on loading').tag(config=True)
 
     running = Bool(False,
                    help="Is SpectrochemPy running?").tag(config=True)
@@ -220,21 +256,21 @@ class SpectroChemPy(Application):
     quiet = Bool(False,
                  help='set Quiet mode, with minimal outputs').tag(config=True)
 
+    _data = Instance(Data,
+                         help="Set a data directory where to look for data")
 
-    _data_dir = Instance(DataDir,help="Set a data directory where to look for data")
-
-    @default('_data_dir')
-    def _get__data_dir_default(self):
+    @default('_data')
+    def _get__data_default(self):
         # look for the testdata path in package tests
-        return DataDir()
+        return Data()
 
     @property
-    def data_dir(self):
-        return self._data_dir.data_dir
+    def data(self):
+        return self._data.data
 
     @property
-    def list_data_dir(self):
-        return self._data_dir
+    def list_data(self):
+        return self._data
 
     # --------------------------------------------------------------------------
     # Initialisation of the plot options
@@ -246,7 +282,7 @@ class SpectroChemPy(Application):
         self.plotoptions = PlotOptions(config=self.config)
 
         # set default matplotlib options
-        mpl.rc('text', usetex=False)  #usetex=self.plotoptions.use_latex)
+        mpl.rc('text', usetex=False)  # usetex=self.plotoptions.use_latex)
 
         if self.plotoptions.latex_preamble == []:
             self.plotoptions.latex_preamble = [
@@ -286,8 +322,8 @@ class SpectroChemPy(Application):
         backend = mpl.get_backend()
 
         # if we are building the docs, in principle it should be done using
-        # the make_scp_docs.py located in the scripts folder
-        if not 'make_scp_docs.py' in sys.argv[0]:
+        # the builddocs.py located in the scripts folder
+        if not 'builddocs.py' in sys.argv[0]:
             # the normal backend
             if backend == 'module://ipykernel.pylab.backend_inline':
                 mpl.use('Qt5Agg')
@@ -303,7 +339,7 @@ class SpectroChemPy(Application):
 
                 # set the ipython matplotlib environments
                 try:
-                    ip.magic('matplotlib notebook') #nbagg')
+                    ip.magic('matplotlib notebook')  # nbagg')
                 except UsageError:
                     try:
                         ip.magic('matplotlib osx')
@@ -330,7 +366,7 @@ class SpectroChemPy(Application):
         # (such that those from jupyter which cause problems here)
 
         _do_parse = True
-        for arg in ['egg_info', '--egg-base', 
+        for arg in ['egg_info', '--egg-base',
                     'pip-egg-info', 'develop', '-f', '-x']:
             if arg in sys.argv:
                 _do_parse = False
@@ -343,8 +379,7 @@ class SpectroChemPy(Application):
         # Get options from the config file
         # --------------------------------
 
-        if self.config_file_name :
-
+        if self.config_file_name:
             config_file = os.path.join(self.config_dir, self.config_file_name)
             self.load_config_file(config_file)
 
@@ -358,23 +393,18 @@ class SpectroChemPy(Application):
 
         _do_not_block = self.plotoptions.do_not_block
 
-        for caller in ['make_scp_docs.py', 'pytest', 'py.test', 'docrunner.py']:
+        for caller in ['builddocs.py', 'pytest', 'py.test', 'docrunner.py']:
 
             if caller in sys.argv[0]:
-
                 # this is necessary to build doc
                 # with sphinx-gallery and doctests
 
                 _do_not_block = self.plotoptions.do_not_block = True
                 self.log.warning(
-                    'Running {} - set do_not_block: {}'.format(
-                                                         caller, _do_not_block))
+                        'Running {} - set do_not_block: {}'.format(
+                                caller, _do_not_block))
 
         self.log.debug("DO NOT BLOCK : %s " % _do_not_block)
-
-        # version
-        # --------
-        self.version, self.release, self.copyright = get_version()
 
         # Possibly write the default config file
         # ---------------------------------------
@@ -385,7 +415,7 @@ class SpectroChemPy(Application):
             # warning handler
 
             def send_warnings_to_log(message, category, filename, lineno,
-                                     *args ):
+                                     *args):
                 self.log.warning(
                         '%s:  %s' %
                         (category.__name__, message))
@@ -416,7 +446,7 @@ class SpectroChemPy(Application):
                         self.log.error(
                                 "%s: %s" % (exception_type.__name__, exception))
 
-                #sys.excepthook = exceptionHandler
+                        # sys.excepthook = exceptionHandler
 
     # --------------------------------------------------------------------------
     # start the application
@@ -460,7 +490,6 @@ class SpectroChemPy(Application):
                 self.log_level = logging.DEBUG
                 self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
 
-
             info_string = u"""
         SpectroChemPy's API
         Version   : {}
@@ -469,10 +498,10 @@ class SpectroChemPy(Application):
 
             if self.info_on_loading and \
                     not self.plotoptions.do_not_block:
-
                 print(info_string)
 
-            self.log.debug("The application was launched with ARGV : %s" % str(sys.argv))
+            self.log.debug(
+                "The application was launched with ARGV : %s" % str(sys.argv))
 
             self.running = True
 
@@ -494,7 +523,7 @@ class SpectroChemPy(Application):
 
         if not os.path.exists(fname) or self.reset_config:
             s = self.generate_config_file()
-            self.log.warning("Generating default config file: %r"%(fname))
+            self.log.warning("Generating default config file: %r" % (fname))
             with open(fname, 'w') as f:
                 f.write(s)
 
@@ -514,7 +543,7 @@ class SpectroChemPy(Application):
 # ==============================================================================
 # matplotlib use directive to set before calling matplotlib backends
 # ==============================================================================
-#from spectrochempy.application import SpectroChemPy
+# from spectrochempy.application import SpectroChemPy
 app = SpectroChemPy()
 app.initialize()
 
@@ -523,7 +552,6 @@ app.initialize()
 # ==============================================================================
 running = app.running
 version = app.version
-release = app.release
 copyright = app.copyright
 log = app.log
 log_level = app.log_level
@@ -534,8 +562,8 @@ options = app
 
 _do_not_block = plotoptions.do_not_block
 
-data_dir = app.data_dir
-list_data_dir = app.list_data_dir
+data = app.data
+list_data = app.list_data
 
 # log levels
 # ----------
@@ -545,7 +573,6 @@ WARN = logging.WARNING
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
 
-#TODO: look at the subcommands capabilities of traitlets
+# TODO: look at the subcommands capabilities of traitlets
 if __name__ == "__main__":
-
     pass
