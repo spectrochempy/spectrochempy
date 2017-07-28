@@ -72,11 +72,12 @@ way::
      Arnaud Travert & Christian Fernandez,
      SpectroChemPy, a framework for processing, analysing and modelling of Spectroscopic data for Chemistry with Python
      https://bitbucket.org/spectrocat/spectrochempy, (version 0.1)
-     Laboratoire Catalyse and Spectrochemistry, ENSICAEN/Université de Caen/CNRS, 2017
+     Laboratoire Catalyse and Spectrochemistry, ENSICAEN/Universitï¿½ de Caen/CNRS, 2017
 
 
 
 .. |scp| replace:: **SpectroChemPy**
+
 
 .. |NDDataset| replace:: `**NDDataset**`
 
