@@ -17,9 +17,10 @@ docs/_build
 essai.scp
 docs/source/auto_examples/
 docs/source/gen_modules/
-conda_recipes/spectrochempy/
+recipes/spectrochempy/
 docs/source/modules/
 docs/source/savefig/
+docs/_templates_old
 *.pyc
-
+ressources/
 tests/testdata/nmrdata/bruker/tests/nmr/tpa/
