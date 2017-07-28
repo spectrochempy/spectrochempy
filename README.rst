@@ -12,7 +12,7 @@ data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
 running on Linux, Windows or OS X.
 
   1.  A ``NDDataset`` object embedding array of data with labeled axes and metadata.
-  2. ``Units`` and ``Uncertainties`` for ``NDDataset`` and ``NDDataset`` axes.
+  2. ``Units`` and ``Uncertainties`` for ``NDDataset``.
   3.  Mathematical operations over ``NDDataset`` such addition, multiplication and many more ...
   4.  Import functions to read data from experiments or modelling programs ...
   5.  Display functions such as ``print``, ``plot`` ...
@@ -30,17 +30,23 @@ running on Linux, Windows or OS X.
 Installation
 ============
 
-* conda install spectrochempy
+.. sourcecode:: bash
+
+	conda install spectrochempy
 
 or
 
-* pip install spectrochempy
+.. sourcecode:: bash
+
+	pip install spectrochempy
 
 
 License
 =======
 
+.. todo::
 
+	Fix the correct license to use. Not sure Cecill 2.1 is compatible with BSD-3 code sometimes included (such as NMRGlue)
 
 Documentation
 ===============
