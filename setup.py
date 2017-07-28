@@ -34,20 +34,20 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
 import os
 import shutil as sh
-import subprocess
 import warnings
 
-#from spectrochempy.version import get_version
 from setuptools_scm import get_version
 
-version = get_version(root='.', relative_to=__file__)
+
+def version():
+    version = get_version(root='.', relative_to=__file__).split('+')[0]
+    return version
 
 
 def mpl_setup():
@@ -74,6 +74,7 @@ def mpl_setup():
         scp_mplrc = os.path.join(setup_data, 'matplotlibrc.scp')
         sh.copy(scp_mplrc, mplrc)
 
+
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
 
@@ -89,14 +90,13 @@ class PostDevelopCommand(develop):
 
             print('installation of `.git/hooks/{}` made.'.format(item))
 
-       # mpl_setup()
+            # mpl_setup()
 
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
 
     def run(self):
-
         install.run(self)
 
         # mpl_setup()
@@ -119,9 +119,9 @@ def get_dependencies():
 
 setup(
         name='spectrochempy',
-        version=get_version(),
+        version=version(),
         packages=find_packages(),
-        #include_package_data=True,
+      #include_package_data=True,
         url='http:/www-lcs.ensicaen.fr/spectrochempy',
         license='CeCILL-2.1',
         author='Arnaud Travert & christian Fernandez',
