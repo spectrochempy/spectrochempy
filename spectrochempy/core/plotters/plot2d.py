@@ -112,6 +112,10 @@ def plot_2D(source, **kwargs):
 
     kind : `str` [optional among ``map``, ``stack`` or ``3d`` , default=``stack``]
 
+    style : str, optional, default = 'notebook'
+        Matplotlib stylesheet (use `available_style` to get a list of available
+        styles for plotting
+
     kwargs : additional keywords
 
 
@@ -119,11 +123,20 @@ def plot_2D(source, **kwargs):
     # where to plot?
     # ----------------
 
-    fig, ax = source.figure_setup(**kwargs)
+    fig, ax = source._figure_setup(**kwargs)
 
-    # kind of plot
-    # ------------
+    # kind of plot and other ptoperties
+    # ----------------------------------
     kind = kwargs.get('kind', options.kind_2D)
+
+    cmap = colormap = kwargs.pop('colormap',
+                                 kwargs.pop('cmap', mpl.rcParams['image.cmap']))
+
+    colorbar = kwargs.get('colorbar', True)
+
+    lw = kwargs.get('linewidth', kwargs.get('lw', options.linewidth))
+
+    alpha = kwargs.get('calpha', options.calpha)
 
     # show projections (only useful for maps)
     # ----------------------------------------
@@ -134,13 +147,18 @@ def plot_2D(source, **kwargs):
 
     yproj = kwargs.get('yproj', options.show_projection_y)
 
-    if (proj or xproj or yproj) and kind in ['map' 'image']:
+    if kind in ['map','image']:
         # create new axes on the right and on the top of the current axes
         # The first argument of the new_vertical(new_horizontal) method is
         # the height (width) of the axes to be created in inches.
+        #
+        # This is necessary for projections and colorbar
+
         divider = make_axes_locatable(ax)
         # print divider.append_axes.__doc__
+
         if proj or xproj:
+
             axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
                                        frameon=0, yticks=[])
             axex.tick_params(bottom='off', top='off')
@@ -149,6 +167,7 @@ def plot_2D(source, **kwargs):
             source.axex = axex
 
         if proj or yproj:
+
             axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
                                        frameon=0, xticks=[])
             axey.tick_params(right='off', left='off')
@@ -156,16 +175,12 @@ def plot_2D(source, **kwargs):
                      visible=False)
             source.axey = axey
 
-    # colormap
-    # ----------
-    cmap = colormap = kwargs.pop('colormap',
-                      kwargs.pop('cmap', options.colormap))
+        if colorbar:
 
-    colorbar = kwargs.get('colorbar', True)
-
-    lw = kwargs.get('linewidth', kwargs.get('lw', options.linewidth))
-
-    alpha = kwargs.get('calpha', options.calpha)
+            axec = divider.append_axes("right", .15, pad=0.3, frameon=0, xticks=[])
+            axec.tick_params(right='off', left='off')
+            plt.setp(axec.get_xticklabels(), visible=False)
+            source.axec = axec
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -177,6 +192,17 @@ def plot_2D(source, **kwargs):
     ylim = kwargs.get("ylim", None)
     zlim = kwargs.get("zlim", None)
 
+    if kind in ['map', 'image']:
+        #vmax = max(abs(s.data.min()), s.data.max())
+        #if s.data.min()>=0:
+        #    vmin = 0.01*vmax
+        #else:
+        #    vmin = -vmax
+        vmax = s.data.max()
+        vmin = s.data.min()
+        norm = mpl.colors.Normalize(vmin=vmin,
+                                    vmax=vmax)
+
     if kind in ['map']:
 
         # contour plot
@@ -185,6 +211,7 @@ def plot_2D(source, **kwargs):
         c = ax.contour(s.x.coords, s.y.coords, s.data, cl, linewidths=lw,
                        alpha=alpha)
         c.set_cmap(cmap)
+        c.set_norm(norm)
 
     elif kind in ['image']:
 
@@ -193,6 +220,7 @@ def plot_2D(source, **kwargs):
         c = ax.contourf(s.x.coords, s.y.coords, s.data, cl, linewidths=lw,
                         alpha=alpha)
         c.set_cmap(cmap)
+        c.set_norm(norm)
 
     elif kind in ['stack']:
 
@@ -309,8 +337,6 @@ def plot_2D(source, **kwargs):
     # labels
     # -------------------------------------------------------------------------
 
-
-
     # x label
     # -------
     xlabel = kwargs.get("xlabel", None)
@@ -345,10 +371,15 @@ def plot_2D(source, **kwargs):
         fig = plt.gcf()
 
         if kind in ['stack']:
-
             axcb = fig.colorbar(line_segments, ax=ax)
-            axcb.set_label(ylabel)
             axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5))
+            axcb.set_label(ylabel)
+        else:
+            #axcb = fig.colorbar(c)
+            axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
+            axcb.set_label(zlabel)
+            pass
+
 
 
     # do we display the zero line
@@ -357,7 +388,7 @@ def plot_2D(source, **kwargs):
 
     source.plot_resume(**kwargs)
 
-    return True
+    return ax
 
 
 # ===========================================================================
@@ -371,11 +402,11 @@ def clevels(data, **kwargs):
 
     # contours
     maximum = data.max()
-    minimum = -maximum
+    minimum = 1e-30
 
     nlevels = kwargs.get('nlevels', options.number_of_contours)
     exponent = kwargs.get('exponent', options.cexponent)
-    start = kwargs.get('start', options.cstart)
+    start = abs(kwargs.get('start', maximum*0.01))
 
     if (exponent - 1.00) < .005:
         clevelc = np.linspace(minimum, maximum, nlevels)
@@ -388,10 +419,10 @@ def clevels(data, **kwargs):
         if ms * exponent ** xi > maximum:
             xl = xi
             break
-    if start != 0:
-        clevelc = [float(start) * ms * exponent ** xi
-                   for xi in range(xl)] + [ms * exponent ** xi for xi in
-                                           range(xl)]
-    else:
-        clevelc = [ms * exponent ** xi for xi in range(xl)]
+    # if start != 0:
+    #     clevelc = [float(start) * ms * exponent ** xi
+    #                for xi in range(xl)] + [ms * exponent ** xi for xi in
+    #                                        range(xl)]
+    # else:
+    clevelc = [-ms * exponent ** xi for xi in range(xl)]+[ms * exponent ** xi for xi in range(xl)]
     return sorted(clevelc)

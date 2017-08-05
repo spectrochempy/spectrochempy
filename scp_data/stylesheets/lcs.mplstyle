@@ -1,0 +1,63 @@
+# LCS
+# ------------------------------------------------------------------------------
+
+axes.prop_cycle: cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
+
+axes.titlesize: 14
+
+figure.facecolor: white
+figure.edgecolor: white
+figure.figsize: 6.8, 4.4
+figure.dpi: 100
+figure.autolayout: True
+figure.max_open_warning : 30
+
+savefig.dpi       : 600
+savefig.facecolor : white
+savefig.edgecolor : white
+
+font.family: serif
+font.sans-serif: Arial, Liberation Sans, DejaVu Sans, Bitstream Vera Sans, sans-serif
+font.serif: Times New Roman, Times, Palatino, DejaVu Serif, Computer Modern Roman, New Century Schoolbook,serif
+font.size         : 12
+font.style        : normal
+font.weight       : normal
+
+grid.color: .85
+grid.linestyle: -
+grid.linewidth: .85
+
+image.cmap: viridis
+
+legend.fontsize: 9
+legend.frameon: False
+legend.numpoints: 1
+legend.scatterpoints: 1
+legend.labelspacing  : 0.2
+legend.handletextpad : 0.1
+legend.columnspacing : .5
+
+lines.linewidth: 0.75
+lines.markeredgewidth: 0
+lines.markersize: 7
+lines.solid_capstyle: round
+
+patch.facecolor: 4C72B0
+patch.linewidth: .3
+
+text.color: .15
+
+xtick.color: .15
+xtick.direction: out
+xtick.labelsize: 11
+
+ytick.color: .15
+ytick.direction: out
+ytick.labelsize: 11
+
+mathtext.fontset  : stix
+mathtext.bf       : bold
+mathtext.cal      : cursive
+mathtext.default  : rm
+
+text.usetex       : False

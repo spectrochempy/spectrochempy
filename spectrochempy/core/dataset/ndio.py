@@ -51,7 +51,7 @@ import json
 import datetime
 import warnings
 
-from traitlets import Unicode, Bool, HasTraits, Instance
+from traitlets import Unicode, Bool, HasTraits, Instance, observe, default
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -72,7 +72,7 @@ import spectrochempy
 from spectrochempy.core.dataset.ndaxes import Axes, Axis
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
-
+from spectrochempy.utils import is_sequence
 from spectrochempy.gui import gui
 from spectrochempy.application import plotoptions
 from spectrochempy.application import options
@@ -86,6 +86,8 @@ __all__ = ['NDIO',
            'load',
            'read',
            'write',
+
+           'available_styles'
 
            ]
 _classes = ['NDIO']
@@ -105,8 +107,6 @@ class NDIO(HasTraits):
     :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
 
     """
-
-    hold =Bool(False)  # Do we clear old figure? Default : True
 
     # --------------------------------------------------------------------------
     # Generic save function
@@ -236,6 +236,9 @@ class NDIO(HasTraits):
 
         zipf.close()
 
+    # --------------------------------------------------------------------------
+    # Generic load function
+    # --------------------------------------------------------------------------
     @classmethod
     def load(cls,
              path='',
@@ -377,7 +380,9 @@ class NDIO(HasTraits):
             # finally:
             #    fid.close()
 
-
+    # --------------------------------------------------------------------------
+    # Generic read function
+    # --------------------------------------------------------------------------
     @classmethod
     def read(self, path, **kwargs):
         """
@@ -429,6 +434,10 @@ class NDIO(HasTraits):
                              'for protocol `{}` was not found!'.format(
                     protocol))
 
+    # --------------------------------------------------------------------------
+    # Generic write function
+    # --------------------------------------------------------------------------
+
     def write(self, path, **kwargs):
         """
         Generic write function which actually delegate the work to an
@@ -478,8 +487,17 @@ class NDIO(HasTraits):
                     protocol))
 
     #--------------------------------------------------------------------------
-    # generic plotter
+    # generic plotter and plot related methods or properties
     #--------------------------------------------------------------------------
+
+
+    @classmethod
+    def available_styles(self):
+        return ['notebook','paper','poster','talk', 'sans']
+
+
+    hold = Bool(False, help='Do we clear old figure? Default : True')
+
 
     def plot(self, **kwargs):
 
@@ -506,10 +524,12 @@ class NDIO(HasTraits):
         fontsize : `int`, optional
             The font size in pixels, default is 10 (or read from preferences)
 
-        hold = `bool`, optional, default = `False`.
+        hold : `bool`, optional, default = `False`.
 
             Should we plot on the ax previously used
             or create a new figure?
+
+        style : `str`
 
         See Also
         --------
@@ -545,7 +565,7 @@ class NDIO(HasTraits):
         if not _plotter(**kwargs):
             return None
 
-        return True
+        return self.ax
 
     def plot_resume(self, **kwargs):
 
@@ -570,12 +590,12 @@ class NDIO(HasTraits):
         # adjust the plots
 
         # subplot dimensions
-        top = kwargs.pop('top', mpl.rcParams['figure.subplot.top'])
-        bottom = kwargs.pop('bottom', mpl.rcParams['figure.subplot.bottom'])
-        left = kwargs.pop('left', mpl.rcParams['figure.subplot.left'])
-        right = kwargs.pop('right', mpl.rcParams['figure.subplot.right'])
+        #top = kwargs.pop('top', mpl.rcParams['figure.subplot.top'])
+        #bottom = kwargs.pop('bottom', mpl.rcParams['figure.subplot.bottom'])
+        #left = kwargs.pop('left', mpl.rcParams['figure.subplot.left'])
+        #right = kwargs.pop('right', mpl.rcParams['figure.subplot.right'])
 
-        plt.subplots_adjust(left=left, right=right, top=top, bottom=bottom)
+        #plt.subplots_adjust(left=left, right=right, top=top, bottom=bottom)
         # self.fig.tight_layout()
 
         # finally return the current fig for further manipulation.
@@ -593,10 +613,13 @@ class NDIO(HasTraits):
             self.show()
             self.fig = None
             self.ax = None
+
         elif plotoptions.do_not_block:
             # we are testing of something similar
             self.fig = None
             self.ax = None
+
+        return self.ax
 
     def plot_generic(self, **kwargs):
         """
@@ -644,7 +667,8 @@ class NDIO(HasTraits):
         else:
             self.ax = None
             self.fig = None
-        return True
+
+        return self.ax
 
     def show(self):
         """
@@ -658,20 +682,22 @@ class NDIO(HasTraits):
         if hasattr(self, 'fig'):
             plt.show()
 
-    def figure_setup(self, **kwargs):
+    def _figure_setup(self, **kwargs):
+        # setup figure properties
 
-        """
-        setup figure and axes
-
-        Parameters
-        ----------
-        kwargs
-
-        Returns
-        -------
-
-        """
         ax = self.ax
+
+        # set temporarity a new style if any
+        plt.style.use('classic')
+        plt.style.use(plotoptions.style)
+        style = kwargs.pop('style', None)
+        if style:
+            if not is_sequence(style):
+                style = [style]
+            if isinstance(style, dict):
+                style = [style]
+            style = [plotoptions.style]+list(style)
+            plt.style.use(style)
 
         fignum = kwargs.pop('fignum', None)
         figsize = mpl.rcParams['figure.figsize'] = \
@@ -680,14 +706,14 @@ class NDIO(HasTraits):
 
         fontsize = mpl.rcParams['font.size'] = \
             kwargs.pop('fontsize', mpl.rcParams['font.size'])
-        mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
-        mpl.rcParams['xtick.labelsize'] = int(fontsize)
-        mpl.rcParams['ytick.labelsize'] = int(fontsize)
+        #mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
+        #mpl.rcParams['xtick.labelsize'] = int(fontsize)
+        #mpl.rcParams['ytick.labelsize'] = int(fontsize)
 
         if fignum is None and self.fig is not None:
             fignum = self.fig.number
 
-        fig = plt.figure(fignum, figsize=figsize, tight_layout=None)
+        fig = plt.figure(fignum, figsize=figsize)
 
         # for generic plot we assume only a single ax.
         # other plugin class will or are taking care of other needs
@@ -758,3 +784,4 @@ plot = NDIO.plot
 load = NDIO.load
 read = NDIO.read
 write = NDIO.write
+available_styles = NDIO.available_styles()

@@ -33,26 +33,26 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
+# run setup in develop mode
+import sys
+import contextlib
 
-import spectrochempy
+import sys
+import pytest
+do_it = 'setup' in sys.argv[1]   # this test is run alone
 
-from spectrochempy.api import *
+@pytest.mark.skipif(not do_it, reason="ignore this during all tests")
+def test_setup():
 
-def test_api():
+    @contextlib.contextmanager
+    def redirect_argv(new):
+        sys._argv = sys.argv[:]
+        sys.argv.append(str(new))
+        sys.argv = sys.argv[1:]
+        yield
+        sys.argv = sys._argv
 
-    # test version
-    from spectrochempy.version import version
-    assert version.split('.')[0]=='0'
-    assert version.split('.')[1][:2] == '1a'
-                                            #TODO: modify this for each release
-
-    # test application
-    print('\n\nRunning : ', spectrochempy.application.running)
-    assert version.startswith('0.1')
-    assert "Laboratory for Catalysis and Spectrochempy" in copyright
-
-    log.warning('Ok, this is nicely executing!')
-
-    assert 'np' in APIref
-    assert 'NDDataset' in APIref
-    assert 'abs' in APIref
+    with redirect_argv('develop'):
+        print (sys.argv)
+        import __setup__ as s
+        s.run_setup()

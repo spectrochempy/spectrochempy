@@ -34,25 +34,18 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-import spectrochempy
+import pytest
+from docs import builddocs as bd
 
-from spectrochempy.api import *
+import sys
+do_it = 'builddocs' in sys.argv[1]   # this test is run alone
 
-def test_api():
+@pytest.mark.skipif(not do_it, reason="too long test")
+def test_buildocs_html():
+    bd.make_docs('clean')
+    bd.make_docs('html')
 
-    # test version
-    from spectrochempy.version import version
-    assert version.split('.')[0]=='0'
-    assert version.split('.')[1][:2] == '1a'
-                                            #TODO: modify this for each release
+@pytest.mark.skipif(not do_it, reason="too long test")
+def test_buildocs_pdf():
+    bd.make_docs('pdf')
 
-    # test application
-    print('\n\nRunning : ', spectrochempy.application.running)
-    assert version.startswith('0.1')
-    assert "Laboratory for Catalysis and Spectrochempy" in copyright
-
-    log.warning('Ok, this is nicely executing!')
-
-    assert 'np' in APIref
-    assert 'NDDataset' in APIref
-    assert 'abs' in APIref

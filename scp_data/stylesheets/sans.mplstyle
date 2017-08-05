@@ -1,0 +1,11 @@
+# sans
+# ------------------------------------------------------------------------------
+
+font.family       : sans-serif
+font.sans-serif   : DejaVu Sans
+mathtext.fontset  : dejavusans
+mathtext.bf       : bold
+mathtext.cal      : cursive
+mathtext.default  : rm
+
+text.usetex       : False

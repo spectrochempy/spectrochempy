@@ -148,7 +148,7 @@ def plot_1D(source, **kwargs):
     #---------------
     source.hold = kwargs.get('hold', False)
 
-    fig, ax = source.figure_setup(**kwargs)
+    fig, ax = source._figure_setup(**kwargs)
 
     # -------------------------------------------------------------------------
     # plot the source

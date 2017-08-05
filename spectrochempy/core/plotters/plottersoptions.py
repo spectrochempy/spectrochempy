@@ -38,6 +38,7 @@ from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple, Unico
 from traitlets.config.configurable import Configurable
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 _classes = ['PlotOptions']
 
@@ -54,6 +55,8 @@ class PlotOptions(Configurable):
     description = Unicode(u'Options for plotting datasets')
 
     # -------------------------------------------------------------------------
+    style = Unicode('lcs',
+                    help='basic matplotlib style to use').tag(config=True)
 
     use_latex = Bool(True, help='should we use latex for '
                                 'plotting labels and texts?').tag(config=True)
@@ -61,6 +64,10 @@ class PlotOptions(Configurable):
     @observe('use_latex')
     def _use_latex_changed(self, change):
         mpl.rc('text', usetex=change.new)
+
+    @observe('style')
+    def _style_changed(self, change):
+        plt.style.use(change.new)
 
     # -------------------------------------------------------------------------
 
@@ -101,6 +108,4 @@ class PlotOptions(Configurable):
     number_of_contours = Integer(50).tag(config=True)
 
     cexponent = Float(1.2).tag(config=True)
-    cstart = Float(-1.).tag(config=True)
     calpha = Float(1).tag(config=True)
-    colormap = Unicode("viridis").tag(config=True)

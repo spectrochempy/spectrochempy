@@ -1,3 +1,10 @@
+import matplotlib as mpl
+import sys
+if 'builddocs' in sys.argv[1]:
+    mpl.use('agg')
+
+matplotlib_backend = mpl.get_backend()
+
 import numpy as np
 import pandas as pd
 
@@ -14,6 +21,7 @@ import pytest
 import numpy as np
 import os
 import sys
+
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndaxes import Axes, Axis

@@ -63,6 +63,7 @@ from IPython import get_ipython
 from IPython.core.display import HTML
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 # local
 # =============================================================================
@@ -70,6 +71,7 @@ import matplotlib as mpl
 from spectrochempy.utils import is_kernel
 from spectrochempy.utils import get_config_dir, get_pkg_data_dir
 from spectrochempy.utils import get_pkg_data_filename
+from spectrochempy.utils import install_styles
 
 from spectrochempy.core.plotters.plottersoptions import PlotOptions
 from spectrochempy.core.readers.readersoptions import ReadOptions
@@ -191,20 +193,17 @@ class SpectroChemPy(Application):
     def _get_version(self):
 
         try:
+            # let's first try to get version from git
+            version = setuptools_scm.get_version(
+                    version_scheme='post-release',
+                    root='..',
+                    relative_to=__file__).split('+')[0]
 
-            version = get_distribution('spectrochempy').version
-
-        except DistributionNotFound:
-
+        except:
             try:
-
-                version = setuptools_scm.get_version(
-                        version_scheme='post-release',
-                        root='..',
-                        relative_to=__file__).split('+')[0]
-
-            except:
-
+                # let's try with the distribution version
+                version = get_distribution('spectrochempy').version
+            except DistributionNotFound:
                 from spectrochempy.version import version
 
         path = os.path.join(os.path.dirname(__file__), 'version.py')
@@ -281,9 +280,6 @@ class SpectroChemPy(Application):
         # Pass config to other classes for them to inherit the config.
         self.plotoptions = PlotOptions(config=self.config)
 
-        # set default matplotlib options
-        mpl.rc('text', usetex=False)  # usetex=self.plotoptions.use_latex)
-
         if self.plotoptions.latex_preamble == []:
             self.plotoptions.latex_preamble = [
                 r'\usepackage{siunitx}',
@@ -293,6 +289,12 @@ class SpectroChemPy(Application):
                 # load up the sansmath so that math -> helvet
                 r'\sansmath'
             ]
+
+        # also install style to be sure everything is set
+        install_styles()
+
+        # load the default style
+        plt.style.use(self.plotoptions.style)
 
     # --------------------------------------------------------------------------
     # Initialisation of the application

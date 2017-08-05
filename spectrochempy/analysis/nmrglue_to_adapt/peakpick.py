@@ -7,9 +7,9 @@ import scipy.ndimage as ndimage
 
 from .analysisbase import ndwindow_index, valid_pt
 from .lineshapes1d import gauss, ls_str2class
-from .segmentation import find_all_downward, find_all_upward
 from .segmentation import find_all_connected, find_all_nconnected
-from ..core.readers.fileio import table
+from .segmentation import find_all_downward, find_all_upward
+from ...core.readers.fileio import table
 
 
 def pick(data, pthres, nthres=None, msep=None, algorithm='connected',

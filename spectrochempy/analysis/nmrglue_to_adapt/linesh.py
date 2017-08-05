@@ -7,10 +7,10 @@ from __future__ import print_function
 
 import numpy as np
 
-from .leastsqbound import leastsqbound
 from .analysisbase import squish
+from .leastsqbound import leastsqbound
 from .lineshapes1d import ls_str2class
-from ..core.readers.fileio import table
+from ...core.readers.fileio import table
 
 pi = np.pi
 

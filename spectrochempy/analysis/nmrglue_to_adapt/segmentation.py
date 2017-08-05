@@ -8,6 +8,7 @@ import scipy.ndimage as ndimage
 
 from .analysisbase import neighbors
 
+
 # Connected segmenting method:
 # The connected segmentation method finds all nodes which are above a given
 # threshold and connected to the initial point.  For finding all segments

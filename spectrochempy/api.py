@@ -142,22 +142,14 @@ def APIref():
 
 APIref = APIref()
 
-from traitlets import import_item
-_NDDataset = import_item("spectrochempy.core.dataset.nddataset.NDDataset")
-
-class NDDataset(_NDDataset):
-    """
-    essai
-    """
-    pass
 
 # START THE APPLICATION ========================================================
 from spectrochempy.application import app
-_started = app.start(debug=False)
+_started = app.start(debug=False, reset_config=True)
 
 log.info("API activated "
              if _started else "API was not started!")
-pass
+
 # ==============================================================================
 
 if __name__ == '__main__':

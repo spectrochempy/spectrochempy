@@ -33,26 +33,27 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
+import os
+import shutil as sh
+from pkg_resources import resource_filename
 
-import spectrochempy
+__all__ = ['install_styles']
 
-from spectrochempy.api import *
+def install_styles():
+    """
+    Install matplotlib styles
 
-def test_api():
+    """
+    stylelib = os.path.expanduser(
+            os.path.join('~', '.matplotlib', 'stylelib'))
+    if not os.path.exists(stylelib):
+        os.mkdir(stylelib)
 
-    # test version
-    from spectrochempy.version import version
-    assert version.split('.')[0]=='0'
-    assert version.split('.')[1][:2] == '1a'
-                                            #TODO: modify this for each release
+    styles_path = resource_filename('scp_data','stylesheets')
 
-    # test application
-    print('\n\nRunning : ', spectrochempy.application.running)
-    assert version.startswith('0.1')
-    assert "Laboratory for Catalysis and Spectrochempy" in copyright
+    styles = os.listdir(styles_path)
 
-    log.warning('Ok, this is nicely executing!')
-
-    assert 'np' in APIref
-    assert 'NDDataset' in APIref
-    assert 'abs' in APIref
+    for style in styles:
+        src = os.path.join(styles_path, style)
+        dest = os.path.join(stylelib, style)
+        sh.copy(src, dest)

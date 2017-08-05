@@ -1,0 +1,10 @@
+# paper context
+
+figure.figsize: 3.5, 2.5
+figure.dpi: 150.0
+
+axes.titlesize: 12
+font.size: 10
+legend.fontsize: 8
+xtick.labelsize: 9
+ytick.labelsize: 9

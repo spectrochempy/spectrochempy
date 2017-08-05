@@ -36,16 +36,23 @@
 import pytest
 
 from tests.utils import show_do_not_block
+from spectrochempy.api import plotoptions
+import matplotlib as mpl
 
 @show_do_not_block
 def test_plot_generic(IR_source_1):
     source = IR_source_1.copy()
     source.plot()
+    print()
 
 @show_do_not_block
 def test_plot_generic_1D(IR_source_1):
     source = IR_source_1[0].copy()
     source.plot()
+    assert mpl.rcParams['figure.figsize']==[6.8,4.4]
+    source.plot(style='sans')
+    assert mpl.rcParams['font.family'] == ['sans-serif']
+
 
 @show_do_not_block
 def test_plot_2D(IR_source_1):
@@ -67,6 +74,12 @@ def test_plot_map(IR_source_1):
 
     source = IR_source_1.copy()
     source.plot_map()  # plot_map is an alias of plot_2D
+
+@show_do_not_block
+def test_plot_image(IR_source_1):
+
+    source = IR_source_1.copy()
+    source.plot_image(start=0.1)  # plot_image is an alias of plot_2D
 
 @show_do_not_block
 def test_plot_stack(IR_source_1):

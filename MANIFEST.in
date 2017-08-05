@@ -1,2 +1,2 @@
 recursive-include spectrochempy *
-recursive-include data *
+recursive-include scp_data *
