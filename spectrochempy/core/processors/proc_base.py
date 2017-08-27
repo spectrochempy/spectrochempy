@@ -106,15 +106,15 @@ def scpadapter(**kw):
             source = args[0]
 
             # dimensionalities
-            in_dim = kw.pop('input', '[]')
+            in_dim = kw.get('input', '[]')
             if in_dim == '[frequency]':
                 in_dim = '1/[time]'
-            out_dim = kw.pop('output', in_dim)
+            out_dim = kw.get('output', in_dim)
             if out_dim == '[frequency]':
                 out_dim = '1/[time]'
 
             # which axis ?
-            axis = kwargs.pop('axis', -1)
+            axis = kwargs.get('axis', -1)
 
             if axis < 0:
                 axis = source.ndim + axis
@@ -204,7 +204,7 @@ def scpadapter(**kw):
 
 
             # inplace?
-            inplace = kwargs.pop('inplace', False)
+            inplace = kwargs.get('inplace', False)
             if not inplace:
                 new = source.copy()
             else:

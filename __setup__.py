@@ -80,6 +80,10 @@ def get_dependencies():
         for item in pkg:
             if item.startswith('#'):
                 pkg.remove(item)
+        # found a problem during pip install with pyqt (works when
+        # replaced by PyQt5)
+        pkg = ['PyQt5' if item.strip() == 'pyqt' else item for item in pkg]
+
         return pkg
 
 def run_setup():

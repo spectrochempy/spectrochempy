@@ -337,6 +337,8 @@ class NDMath(object):
                                    unp.std_devs(d))
             elif fname == 'sign':
                 data = np.sign(unp.nominal_values(d))
+            elif fname == 'isfinite':
+                data = np.isfinite(unp.nominal_values(d))
             else:
                 data = getattr(unp, fname)(d, *args)
 

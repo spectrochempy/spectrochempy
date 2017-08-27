@@ -77,9 +77,7 @@ class NumpyRNGContext(object):
     numpy random number generator (RNG) to a specific value, and then restore
     the RNG state back to whatever it was before.
 
-    This is primarily intended for use in the astropy testing suit, but it
-    may be useful in ensuring reproducibility of Monte Carlo simulations in a
-    science context.
+    Copied from Astropy
 
     Parameters
     ----------

@@ -14,6 +14,7 @@ docs/_build
 *generated
 dist/
 build/
+cov/
 
 # data
 essai.scp
@@ -26,3 +27,4 @@ docs/source/_templates_old
 *.pyc
 #ressources/
 #tests/testdata/nmrdata/bruker/tests/nmr/tpa/
+

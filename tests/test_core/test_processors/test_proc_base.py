@@ -53,7 +53,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 # nmr_processing
 #-----------------------------
 @show_do_not_block
-def test_nmr_1D(NMR_source_1D):
+def test_nmr_1D_show(NMR_source_1D):
 
     import sys
     source = NMR_source_1D.copy()
@@ -71,15 +71,35 @@ def test_nmr_1D(NMR_source_1D):
                 xlim=(0.,3000.), zlim=(-2.,2.))
 
 @show_do_not_block
-def test_nmr_1D_em_fft(NMR_source_1D_1H):
+def test_nmr_1D_em(NMR_source_1D_1H):
 
     source = NMR_source_1D_1H.copy()
 
     source.plot(hold=True)
-    source = source.em(lb=100.*ur.Hz)
+    source.em(lb=100.*ur.Hz, inplace=True)
+    source.plot(data_only=True, hold=True)
+
+    # successive call
+    source.em(lb=200. * ur.Hz, inplace=True)
+
+    source.gm(lb=2000. * ur.Hz, inplace=True)
     source.plot(data_only=True)
 
+@show_do_not_block
+def test_nmr_1D_em_not_inplace(NMR_source_1D_1H):
+    source = NMR_source_1D_1H.copy()
+
+    source.plot(hold=True)
+    source_em = source.em(lb=100. * ur.Hz)
+    assert source_em is not source
+    try:
+        assert_array_equal(source_em.data, source.data)  # not inplace transform by default
+    except AssertionError:
+        pass
+    source_em.plot()
+
     source1 = source.fft()
+    assert source1 is not source # not inplace transform by default
     source1.plot()
 
     pass

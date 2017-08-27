@@ -17,7 +17,7 @@ The master is build on the 3.6 python version.
 
 2. create an environment called **scp36**
 
-	conda create -n scp36 python=3.6 --file requirements.txt
+	conda create -n scp36 python=3.6 -\-file requirements.txt
 
 
 3. switch to this environment
@@ -28,9 +28,24 @@ The master is build on the 3.6 python version.
 You can make it permanent by putting this command in you bash_profile (MAC)
 
 
-4. If duing set up or runtime, some package appear to miss, just install them using:
+4. If during set up or runtime, some package appear to miss, just install them using:
 
 	conda install -n scp36 <pkgname>
+
+5. Clone the **spectrochempy** bitbucket repository
+
+    cd <workspace>
+
+    where <workspace> is you progr<mming workspace (any folder you like)
+
+    git clone git@bitbucket.org:spectrocat/spectrochempy.git
+
+6. Install the spectrochempy package
+
+    switch to the installation directory
+
+    cd <wokspace/spectrochempy>
+
 
 
 Setup PyCharm

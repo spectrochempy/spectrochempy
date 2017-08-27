@@ -8,6 +8,8 @@ numpy
 scipy
 pandas
 xlrd
+pyqt
+setuptools_scm
 
 pytest
 pytest-runner
