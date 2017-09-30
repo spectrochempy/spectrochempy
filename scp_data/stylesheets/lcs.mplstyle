@@ -10,7 +10,6 @@ figure.edgecolor: white
 figure.figsize: 6.8, 4.4
 figure.dpi: 100
 figure.autolayout: True
-figure.max_open_warning : 30
 
 savefig.dpi       : 600
 savefig.facecolor : white
