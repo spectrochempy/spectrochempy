@@ -395,7 +395,7 @@ class SpectroChemPy(Application):
 
         _do_not_block = self.plotoptions.do_not_block
 
-        for caller in ['builddocs.py', 'pytest', 'py.test', 'docrunner.py']:
+        for caller in ['builddocs.py', 'pytest', 'py.test']:
 
             if caller in sys.argv[0]:
                 # this is necessary to build doc

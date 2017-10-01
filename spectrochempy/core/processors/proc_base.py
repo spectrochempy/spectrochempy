@@ -27,14 +27,17 @@ import functools
 
 # TODO: clean this list as some function are not really useful for the scp API.
 __all__ = ['scpadapter',
-           'em', 'gm', 'gmb', 'jmod', 'sp', 'sine', 'tm', 'tri',
+           #'em', 'gm',
+           'gmb', 'jmod',
+           #'sp',
+           'sine', 'tm', 'tri',
            'rs', 'ls', 'cs', 'roll', 'fsh', 'fsh2', 'rft', 'irft',
            'fft', 'fft_norm', 'fft_positive',
            'ifft', 'ifft_norm', 'ifft_positive',
            'ha', 'ht',
            'di', 'ps',
-           'ps_exp', 'tp', 'tp_hyper', 'zf_inter', 'zf_pad', 'zf', 'zf_double',
-           'zf_size', 'zf_auto', 'add', 'add_ri', 'dx', 'ext', 'ext_left',
+           'ps_exp', 'tp', 'tp_hyper', 'zf_inter', 'zf', 'zf_double',
+           'zf_auto', 'add', 'add_ri', 'dx', 'ext', 'ext_left',
            'ext_mid', 'ext_right', 'integ', 'mc', 'mc_pow',
            'mir_center', 'mir_left', 'mir_right', 'mir_center_onepoint', 'mult',
            'rev', 'set_constant', 'set_cmplex', 'set_real', 'set_imag', 'ri2c',
@@ -69,11 +72,13 @@ def scpadapter(**kw):
 
     Parameters
     ----------
-    kw
+    in_dim : str, optional, default: '[]'
+        dimensionality of the input
+    out_dim : str, optional, default: same as in_dim
+        dimensionality of the output
 
-    Returns
-    -------
-
+    kw :
+        ##
     """
 
     def scpadapter_decorator(func):
@@ -86,12 +91,7 @@ def scpadapter(**kw):
 
         Parameters
         ----------
-        in_dim : str, optional, default: '[]'
-            dimensionality of the input
-        out_dim : str, optional, default: same as in_dim
-            dimensionality of the output
-
-        **kwargs: keywords args
+        kwargs: keywords args
             each keys must correspond to a parameter of the func
             for which we want to add unit specified as str value.
 
@@ -124,7 +124,7 @@ def scpadapter(**kw):
 
             # check axis dimensionality:
             if (lastaxe.unitless or lastaxe.dimensionless or
-                        lastaxe.units.dimensionality != in_dim):
+                    (lastaxe.units.dimensionality != in_dim and in_dim!='[]')):
                 log.error(
                         '{0} apply only to dimensions'
                         ' with {1} dimensionality'.format(func.__name__,
@@ -211,12 +211,26 @@ def scpadapter(**kw):
                 new = source
 
             new._data = copy.deepcopy(data)
-            # new._uncertainty = uncertainty
-            # TODO: certainly something todo here for uncertainties
 
-            # now deal with the axis and units!
+            if source.is_uncertain:
+                # new._uncertainty = uncertainty
+                # TODO: certainly something todo here for uncertainties, but need some thinking -
+                new._uncertainty = np.zeros_like(new._data)
+
+            # mask
+            if out_dim != in_dim or new.shape != source.shape:
+                # don't know how to deal with masked array in this case...
+                # so reset mask
+                new._mask = np.zeros(new._data.shape, dtype=bool)
+
+            # now deal with the axes
+
+            if out_dim == in_dim and new.shape[-1] != source.shape[-1]:
+                si = list(new.shape)
+
+
             if out_dim != in_dim:
-                # if same dimensionality units has not changed
+                # if dimensionality has changed
                 # so we have to handle the case of different units
                 # for now I consider only case of time and frequency.
                 # as it will happen for fft
@@ -224,7 +238,7 @@ def scpadapter(**kw):
                 # ones?)
                 size = new.coords(-1).size
                 sw = new.meta.sw_h[-1]
-                new.coords(-1)._data =  np.linspace(sw/2., -sw/2., size)
+                new.coords(-1)._data = np.linspace(sw / 2., -sw / 2., size)
                 # TODO: check if this work also for an IR interferogram
                 new.coords(-1)._units = ur.Hz
                 new.coords(-1)._title = 'frequency'
@@ -1282,7 +1296,7 @@ def tp_hyper(data):
     return c2ri(ri2c(data).transpose())
 
 
-@scpadapter()
+@scpadapter(input='[time]', output='[time]')
 def zf_inter(data, pts=1):
     """
     Zero fill between points.
@@ -1308,8 +1322,7 @@ def zf_inter(data, pts=1):
     return z
 
 
-@scpadapter()
-def zf_pad(data, pad=0, mid=False):
+def _zf_pad(data, pad=0, mid=False):
     """
     Zero fill by padding with zeros.
 
@@ -1340,10 +1353,7 @@ def zf_pad(data, pad=0, mid=False):
         return np.concatenate((data, z), axis=-1)
 
 
-zf = zf_pad
-
-
-@scpadapter()
+@scpadapter(input='[time]', output='[time]')
 def zf_double(data, n, mid=False):
     """
     Zero fill by doubling original data size once or multiple times.
@@ -1363,11 +1373,9 @@ def zf_double(data, n, mid=False):
         Zero filled  Dataset.
 
     """
-    return zf_pad(data, int((data.shape[-1] * 2 ** n) - data.shape[-1]), mid)
+    return _zf_pad(data, int((data.shape[-1] * 2 ** n) - data.shape[-1]), mid)
 
-
-@scpadapter()
-def zf_size(data, size, mid=False):
+def _zf_size(data, size, mid=False):
     """
     Zero fill to given size.
 
@@ -1386,7 +1394,7 @@ def zf_size(data, size, mid=False):
         Zero filled  Dataset.
 
     """
-    return zf_pad(data, int(size - data.shape[-1]), mid)
+    return _zf_pad(data, int(size - data.shape[-1]), mid)
 
 
 def largest_power_of_2(value):
@@ -1407,8 +1415,8 @@ def largest_power_of_2(value):
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
 
-@scpadapter()
-def zf_auto(data, mid=False):
+@scpadapter(input='[time]', output='[time]')
+def zf_auto(data, size=None, mid=False):
     """
     Zero fill to next largest power of two.
 
@@ -1416,6 +1424,9 @@ def zf_auto(data, mid=False):
     ----------
     data : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Dataset to process
+    size : int, default=Current data size
+        Size of data after zero filling.
+        Automatilly adjested to the next power of two.
     mid : bool
         True to zero fill in the middle of data.
 
@@ -1425,8 +1436,11 @@ def zf_auto(data, mid=False):
         Zero filled  Dataset.
 
     """
-    return zf_size(data, largest_power_of_2(data.shape[-1]), mid)
+    if size is None:
+        size = data.shape[-1]
+    return _zf_size(data, largest_power_of_2(size), mid)
 
+zf = zf_auto
 
 ####################
 # Basic Untilities #

@@ -71,7 +71,7 @@ def test_nmr_1D_show(NMR_source_1D):
                 xlim=(0.,3000.), zlim=(-2.,2.))
 
 @show_do_not_block
-def test_nmr_1D_em(NMR_source_1D_1H):
+def test_nmr_1D_em_gm(NMR_source_1D_1H):
 
     source = NMR_source_1D_1H.copy()
 
@@ -85,23 +85,34 @@ def test_nmr_1D_em(NMR_source_1D_1H):
     source.gm(lb=2000. * ur.Hz, inplace=True)
     source.plot(data_only=True)
 
+
+@show_do_not_block
+def test_nmr_1D_em_with_no_kw_lb_parameters(NMR_source_1D_1H):
+
+    source = NMR_source_1D_1H.copy()
+    source.em(100.*ur.Hz, inplace=True)
+
+
 @show_do_not_block
 def test_nmr_1D_em_not_inplace(NMR_source_1D_1H):
     source = NMR_source_1D_1H.copy()
 
     source.plot(hold=True)
-    source_em = source.em(lb=100. * ur.Hz)
-    assert source_em is not source
+    source1 = source.em(lb=100. * ur.Hz)
+    assert source1 is not source # not inplace transform by default
     try:
-        assert_array_equal(source_em.data, source.data)  # not inplace transform by default
+        assert_array_equal(source1.data, source.data)  # not inplace transform by default
     except AssertionError:
         pass
-    source_em.plot()
+    #source1.plot()
 
-    source1 = source.fft()
-    assert source1 is not source # not inplace transform by default
+    td = source1.meta.td[-1]
+    source1 = source1.zf(size=2*td)
+    #si = source_em.meta.si[-1]
+    source1.plot(hold=True)
+
+    # source1 = source1.fft()
     source1.plot()
-
     pass
 
 

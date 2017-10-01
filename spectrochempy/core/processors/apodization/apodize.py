@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2016 Christian Fernandez
+# Copyright (©) 2015-2017 Christian Fernandez
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 #
@@ -63,7 +63,7 @@ from spectrochempy.application import log
 # =============================================================================
 # generic apodization function
 # =============================================================================
-def apodize(self, **kwargs):
+def apodize(source, **kwargs):
     """Calculate an apodization function
 
     The apodization is calculated in the last dimension of the dataset.
@@ -117,20 +117,35 @@ def apodize(self, **kwargs):
 
     """
 
-    # which axis ?
+    # output dataset
+    inplace = kwargs.pop('inplace', False)
+
+    if not inplace:
+        new = source.copy()
+    else:
+        new = source
+
+    # On which axis do we want to apodize?
     axis = kwargs.pop('axis', -1)
 
     if axis < 0:
-        axis = self.ndim + axis
+        axis = source.ndim + axis
 
-    # get selected axis
-    lastaxe = self.axes[axis]
+    # we assume that the last dimension if always the dimension
+    # to which we want to apply apodization.
+
+    # swap the axes to be sure to be in this situation
+
+    swaped = False
+    if axis != -1:
+        new = new.swapaxes(axis, -1)
+        swaped = True
 
     if (lastaxe.unitless or lastaxe.dimensionless or
                                       lastaxe.units.dimensionality != '[time]'):
         log.error('apodization apply only to dimensions '
                      'with [time] dimensionality')
-        return self
+        return source
 
     # first parameters (apodization in Hz) ?
     apod = kwargs.get('apod', kwargs.get('apod1', 0))
@@ -147,7 +162,7 @@ def apodize(self, **kwargs):
     # if no parameter passed
     if np.abs(apod.magnitude) <= epsilon and np.abs(apod2.magnitude) <= epsilon:
         # nothing to do
-        return self
+        return source
 
     # create the args list
     args = []
@@ -177,8 +192,8 @@ def apodize(self, **kwargs):
 
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
-    iscomplex = self.is_complex[axis]
-    encoding = self.meta.encoding[axis]
+    iscomplex = source.is_complex[axis]
+    encoding = source.meta.encoding[axis]
     #TODO: handle this eventual complexity
 
     # compute the apodization function
@@ -202,21 +217,21 @@ def apodize(self, **kwargs):
         return apod_arr
 
     # we work on the last dimension always
-    if axis != self.ndim - 1:  # swap
-        data = self.swapaxes(-1, axis, inplace=False)
+    if axis != source.ndim - 1:  # swap
+        data = source.swapaxes(-1, axis, inplace=False)
     else:
-        data = self.copy()
+        data = source.copy()
 
     data = data * apod_arr
 
-    if axis != self.ndim - 1:  # swap back
+    if axis != source.ndim - 1:  # swap back
         data = data.swapaxes(-1, axis)
 
     # inplace?
     inplace = kwargs.pop('inplace', False)
     if inplace:
-        self = data
-        return self
+        source = data
+        return source
     else:
         return data
 

@@ -49,17 +49,13 @@ from spectrochempy.utils import epsilon
 # =============================================================================
 # interface for the processing class
 # =============================================================================
-#__all__ = ["em"]
+__all__ = ["em"]
 
 # =============================================================================
 # em function
 # =============================================================================
 
-#def em()
-
-
-
-def _em(self, *args, **kwargs):
+def em(source, *args, **kwargs):
     """Calculate an exponential apodization function
 
     The exponential apodization is calculated in the last dimension on NDDatasets.
@@ -74,6 +70,9 @@ def _em(self, *args, **kwargs):
 
     Parameters
     ----------
+    source : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
+        Dataset we want to apodize using exponential multiplication
+
     lb : float or quantity
 
         Exponential line broadening,
@@ -108,28 +107,25 @@ def _em(self, *args, **kwargs):
 
     Returns
     -------
-    object : nd-dataset or nd-array
-        apodized dataset if apply is True, the apodization array if not True.
+    out : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
+        The apodized dataset if apply is True, the apodization array if not True.
 
     """
     args = list(args) # important (args is a tuple)
 
-    # line broadening ?
-    lb = kwargs.pop('lb', 0)
-    if lb==0:
-        # let's try the args if the kwargs was not passed
+    # what's the line broadening ?
+    lb = kwargs.pop('lb', None)
+    if lb is None:
+        # let's try the args if the kwargs was not passed. In this case it should be the first arg
+
         if len(args)>0:
             lb = args.pop(0)
 
-    # shifted ?
-    shifted = kwargs.pop('shifted', 0)
-    if shifted == 0:
-        # let's try the args if the kwargs was not passed
-        if len(args) > 0:
-            shifted = args.pop(0)
+    # is it a shifted broadening?
+    shifted = kwargs.pop('shifted', None)
 
     def func(x, tc1, tc2, shifted):
-        # tc2 not used
+        # tc2 not used here
         if tc1.magnitude <= epsilon:
             e = np.ones_like(x)
         else:
@@ -140,4 +136,6 @@ def _em(self, *args, **kwargs):
     kwargs['apod'] = lb
     kwargs['shifted'] = shifted
 
-    return apodize(self, **kwargs)
+    out =  apodize(source, **kwargs)
+
+    return out
