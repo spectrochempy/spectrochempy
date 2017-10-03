@@ -50,7 +50,7 @@ import numpy as np
 # Local imports
 # =============================================================================
 from spectrochempy.core.units import ur, Quantity, Measurement, set_nmr_context
-from spectrochempy.utils import epsilon
+from spectrochempy.utils import epsilon, interleave, interleaved2complex
 
 __all__ = ["apodize"]
 
@@ -121,15 +121,21 @@ def apodize(source, **kwargs):
     inplace = kwargs.pop('inplace', False)
 
     if not inplace:
-        new = source.copy()
+        new = source.copy()  # copy to be sure not to modify this dataset
     else:
         new = source
+
+    # Do we apply the apodization or just return
+    # the apodization array
+    apply = kwargs.pop('apply', True)
 
     # On which axis do we want to apodize?
     axis = kwargs.pop('axis', -1)
 
-    if axis < 0:
-        axis = source.ndim + axis
+    #if axis < 0:
+    #    axis = source.ndim + axis
+    if axis == new.ndim - 1:
+        axis = -1
 
     # we assume that the last dimension if always the dimension
     # to which we want to apply apodization.
@@ -141,9 +147,10 @@ def apodize(source, **kwargs):
         new = new.swapaxes(axis, -1)
         swaped = True
 
+    lastaxe = new.axes[-1]
     if (lastaxe.unitless or lastaxe.dimensionless or
                                       lastaxe.units.dimensionality != '[time]'):
-        log.error('apodization apply only to dimensions '
+        log.error('apodization functions apply only to dimensions '
                      'with [time] dimensionality')
         return source
 
@@ -151,18 +158,23 @@ def apodize(source, **kwargs):
     apod = kwargs.get('apod', kwargs.get('apod1', 0))
     if not isinstance(apod, Quantity):
         # we default to Hz units
-        apod = apod * units.Hz
+        apod = apod * ur.Hz
 
     # second parameters (second apodization parameter in Hz) ?
     apod2 = kwargs.get('apod2', 0)
     if not isinstance(apod2, Quantity):
         # we default to Hz units
-        apod2 = apod2 * units.Hz
+        apod2 = apod2 * ur.Hz
 
     # if no parameter passed
     if np.abs(apod.magnitude) <= epsilon and np.abs(apod2.magnitude) <= epsilon:
         # nothing to do
-        return source
+        if apply:
+            return source
+        else:
+            # we have to return something as an array of one,
+            # as nothing is calculated
+            return np.ones_like(source.data)
 
     # create the args list
     args = []
@@ -172,14 +184,14 @@ def apodize(source, **kwargs):
         tc1 = (1./apod).to(lastaxe.units)
         args.append(tc1)
     else:
-        args.append(0 * units.us)
+        args.append(0 * ur.us)
 
     # convert (1./apod2) to the axis time units
     if np.abs(apod2.magnitude) > epsilon:
         tc2 = (1. / apod2).to(lastaxe.units)
         args.append(tc2)
     else:
-        args.append(0 * units.us)
+        args.append(0 * ur.us)
 
     # should we shift the time origin? (should be in axis units)
     shifted = kwargs.get('shifted', kwargs.get('apod3', 0))
@@ -189,12 +201,6 @@ def apodize(source, **kwargs):
     else:
         shifted = shifted.to(lastaxe.units)
     args.append(shifted)
-
-    # if we are in NMR we have an additional complication due to the mode
-    # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
-    iscomplex = source.is_complex[axis]
-    encoding = source.meta.encoding[axis]
-    #TODO: handle this eventual complexity
 
     # compute the apodization function
     x = lastaxe
@@ -212,28 +218,28 @@ def apodize(source, **kwargs):
         apod_arr  = 1. / apod_arr  # invert apodization
 
     # apply?
-    apply = kwargs.pop('apply', True)
     if not apply:
         return apod_arr
 
-    # we work on the last dimension always
-    if axis != source.ndim - 1:  # swap
-        data = source.swapaxes(-1, axis, inplace=False)
+    # if we are in NMR we have an additional complication due to the mode
+    # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
+    # TODO: CHECK IF THIS WORK WITH 2D DATA - IMPORTANT - CHECK IN PARTICULAR IF SWAPING ALSO SWAP METADATA (NOT SURE FOR NOW)
+    iscomplex = new.is_complex[-1]
+    encoding = new.meta.encoding[-1]
+    #TODO: handle this eventual complexity
+
+    if iscomplex:
+        data = interleaved2complex(new.data)
+        data, _ = interleave(data * apod_arr)
+        new._data = data
     else:
-        data = source.copy()
+        new = new * apod_arr
 
-    data = data * apod_arr
+    # restore original data order if it was swaped
+    if swaped:
+        new = new.swapaxes(axis, -1)
 
-    if axis != source.ndim - 1:  # swap back
-        data = data.swapaxes(-1, axis)
-
-    # inplace?
-    inplace = kwargs.pop('inplace', False)
-    if inplace:
-        source = data
-        return source
-    else:
-        return data
+    return new
 
     # shifted = args.shifted  # float(kargs.get('top', 0.0))
     # k_shifted = args.k_shifted

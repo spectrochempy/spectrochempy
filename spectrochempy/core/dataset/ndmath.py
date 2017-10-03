@@ -62,6 +62,7 @@ import numpy as np
 from uncertainties import unumpy as unp
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.utils import interleave, interleaved2complex
 
 # =============================================================================
 # Constants
@@ -236,7 +237,7 @@ class NDMath(object):
 
             if iscomplex:
                 # pack to complex
-                d = d[..., ::2] + 1j * d[..., 1::2]
+                d = interleaved2complex(d)
 
         else:
 
@@ -275,7 +276,7 @@ class NDMath(object):
                 #     raise TypeError('when the first argument is a NDDataset, '
                 #                     'second argument cannot be an Axis'
                 #                     ' instance')
-
+                # if the first arg (obj) is a nddataset
                 if isdataset and other._axes != obj._axes:
                     raise ValueError("axes properties do not match")
 
@@ -301,7 +302,7 @@ class NDMath(object):
                                 other.is_complex is not None:
                     if other.is_complex[-1]:
                         # pack arg to complex
-                        arg = arg[..., ::2] + 1j * arg[..., 1::2]
+                        arg = interleaved2complex(arg)
 
                     objcomplex.append(other.is_complex)
 
@@ -347,16 +348,7 @@ class NDMath(object):
         else:
 
             data = f(d, *args)
-
-            if np.any(np.iscomplex(data)):
-                # unpack (we must double the last dimension)
-                newshape = list(data.shape)
-                newshape[-1] *= 2
-                new = np.empty(newshape)
-                new[..., ::2] = data.real
-                new[..., 1::2] = data.imag
-                data = new
-                iscomplex = True
+            data, iscomplex = interleave(data)
 
 
         # unpack the data
@@ -380,10 +372,10 @@ class NDMath(object):
         # determine the is_complex parameter:
         data_iscomplex = [False]*data.ndim
 
-
         if iscomplex:
             # the resulting data are complex on the last dimension
             data_iscomplex[-1] = True
+
 
         # For the other dimension, this will depends on the history of the
         # objs:

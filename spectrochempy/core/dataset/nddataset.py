@@ -300,6 +300,7 @@ class NDDataset(
     def _check_for_complex_data(self, data):
 
         if data.dtype != np.complex:
+            # given data in the last dimension are not complex!
             self._data = data
             if self._data_is_complex is None:
                 self._is_complex = [False] * data.ndim
@@ -307,7 +308,8 @@ class NDDataset(
                 self._is_complex = self._data_is_complex
             return
 
-        # complex values are only accepted for the last dimension
+        # input complex values are only accepted for the last dimension
+        # They will be interlaced in the final dataset
 
         if self._data_is_complex is None:
             # make the data in the last dimension (or the dimension

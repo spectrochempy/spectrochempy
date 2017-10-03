@@ -70,6 +70,87 @@ def test_nmr_1D_show(NMR_source_1D):
     source.plot(show_complex=True, color='green',
                 xlim=(0.,3000.), zlim=(-2.,2.))
 
+def test_nmr_em_nothing_calculated(NMR_source_1D_1H):
+    source = NMR_source_1D_1H.copy()
+
+    arr = source.em(apply=False)
+    # we should get an array of ones only , as apply = False mean
+    # that we do not apply the apodization, but just make the
+    # calculation of the apodization function
+    assert_equal(arr, np.ones_like(source.data))
+
+def test_nmr_em_calculated_notapplied(NMR_source_1D_1H):
+    source = NMR_source_1D_1H.copy()
+
+    lb = 100
+    arr = source.em(lb=lb, apply=False)
+    # here we assume it is 100 Hz
+    x = source.axes[-1]
+    tc = (1./(lb * ur.Hz)).to(x.units)
+    e = np.pi * np.abs(x) / tc
+    arrcalc = np.exp(-e.data)
+    assert_equal(arr, arrcalc)
+
+def test_nmr_em_calculated_applied(NMR_source_1D_1H):
+    source = NMR_source_1D_1H.copy()
+
+    lb = 100
+    arr = source.em(lb=lb, apply=False)
+    # here we assume it is 100 Hz
+    x = source.axes[-1]
+    tc = (1. / (lb * ur.Hz)).to(x.units)
+    e = np.pi * np.abs(x) / tc
+    arrcalc = np.exp(-e.data)
+
+    # check with apply = True (by default)
+    source2 = source.copy()
+    source3 = source.em(lb=lb)
+
+    # data should be equal
+    assert_equal(source3.data, (arrcalc*source2).data)
+
+    # but also the sources as whole entity
+    assert(source3 == arrcalc*source2)
+
+def test_nmr_em_calculated_Hz(NMR_source_1D_1H):
+    source = NMR_source_1D_1H.copy()
+
+    lb = 200 * ur.Hz
+    x = source.axes[-1]
+    tc = (1. / lb).to(x.units)
+    e = np.pi * np.abs(x) / tc
+    arrcalc = np.exp(-e.data)
+
+    source2 = source.copy()
+    source3 = source.em(lb=lb)
+
+    # the sources should be equal
+    assert(source3 == arrcalc*source2)
+
+    # and the original untouched
+    assert (source != source3)
+
+def test_nmr_em_calculated_inplace(NMR_source_1D_1H):
+    source = NMR_source_1D_1H.copy()
+
+    lb = 200 * ur.Hz
+
+    x = source.axes[-1]
+    tc = (1. / lb).to(x.units)
+    e = np.pi * np.abs(x) / tc
+    arrcalc = np.exp(-e.data)
+
+    source2 = source.copy()
+    source.em(lb=lb, inplace=True)  # inplace transformation
+
+    # the sources data array should be equal
+    s = arrcalc * source2
+    assert(np.all(source.data == s.data))
+
+    # as well as the whole new sources
+    assert (source == arrcalc * source2)
+
+
 @show_do_not_block
 def test_nmr_1D_em_gm(NMR_source_1D_1H):
 

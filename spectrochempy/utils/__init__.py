@@ -49,3 +49,4 @@ from .system import *
 from .utilities import *
 from .introspect import *
 from .matplolib_utils import *
+from .arrayutils import *

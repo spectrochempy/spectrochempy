@@ -114,15 +114,15 @@ def em(source, *args, **kwargs):
     args = list(args) # important (args is a tuple)
 
     # what's the line broadening ?
-    lb = kwargs.pop('lb', None)
-    if lb is None:
+    lb = kwargs.pop('lb', 0)
+    if lb == 0:
         # let's try the args if the kwargs was not passed. In this case it should be the first arg
 
         if len(args)>0:
             lb = args.pop(0)
 
     # is it a shifted broadening?
-    shifted = kwargs.pop('shifted', None)
+    shifted = kwargs.pop('shifted', 0)
 
     def func(x, tc1, tc2, shifted):
         # tc2 not used here
@@ -137,5 +137,8 @@ def em(source, *args, **kwargs):
     kwargs['shifted'] = shifted
 
     out =  apodize(source, **kwargs)
+
+    out.history = str(
+        out.modified) + ': ' + 'em apodization performed: ' + str(lb) + '\n'
 
     return out
