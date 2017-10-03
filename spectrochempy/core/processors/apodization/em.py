@@ -133,12 +133,10 @@ def em(source, *args, **kwargs):
         return np.exp(-e.data)
 
     kwargs['method'] = func
+    kwargs['method_name'] = 'em'
     kwargs['apod'] = lb
     kwargs['shifted'] = shifted
 
     out =  apodize(source, **kwargs)
-
-    out.history = str(
-        out.modified) + ': ' + 'em apodization performed: ' + str(lb) + '\n'
 
     return out

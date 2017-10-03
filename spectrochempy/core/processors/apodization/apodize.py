@@ -239,6 +239,11 @@ def apodize(source, **kwargs):
     if swaped:
         new = new.swapaxes(axis, -1)
 
+    if apply:
+        name = kwargs.pop('method_name', 'em')
+        new.history = str(
+        new.modified) + ': ' + '%s apodization performed: '%name + str(apod) +'\n'
+
     return new
 
     # shifted = args.shifted  # float(kargs.get('top', 0.0))

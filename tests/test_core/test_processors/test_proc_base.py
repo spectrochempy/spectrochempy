@@ -171,8 +171,10 @@ def test_nmr_1D_em_gm(NMR_source_1D_1H):
 def test_nmr_1D_em_with_no_kw_lb_parameters(NMR_source_1D_1H):
 
     source = NMR_source_1D_1H.copy()
-    source.em(100.*ur.Hz, inplace=True)
 
+    source.plot(hold=True)
+    source.em(100.*ur.Hz, inplace=True)
+    source.plot()
 
 @show_do_not_block
 def test_nmr_1D_em_not_inplace(NMR_source_1D_1H):
@@ -187,14 +189,15 @@ def test_nmr_1D_em_not_inplace(NMR_source_1D_1H):
         pass
     #source1.plot()
 
-    td = source1.meta.td[-1]
-    source1 = source1.zf(size=2*td)
-    #si = source_em.meta.si[-1]
-    source1.plot(hold=True)
-
-    # source1 = source1.fft()
-    source1.plot()
-    pass
+# def test_zf():
+#     td = source1.meta.td[-1]
+#     source1 = source1.zf(size=2*td)
+#     #si = source_em.meta.si[-1]
+#     source1.plot(hold=True)
+#
+#     # source1 = source1.fft()
+#     source1.plot()
+#     pass
 
 
 @show_do_not_block
