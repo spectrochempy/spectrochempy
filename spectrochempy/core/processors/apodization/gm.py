@@ -52,11 +52,11 @@ from spectrochempy.utils import epsilon
 __all__ = ["gm"]
 
 # =============================================================================
-# em function
+# gm function
 # =============================================================================
 
-def gm(self, *args, **kwargs):
-    """Calculate a Lorentz-tp-Gauss apodization
+def gm(source, *args, **kwargs):
+    """Calculate a Lorentz-Gauss apodization
 
     Functional form of apodization window:
 
@@ -71,13 +71,13 @@ def gm(self, *args, **kwargs):
 
     Parameters
     ----------
-    lb : float
+    lb : `float` or `quantity`
 
         Inverse exponential width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
 
-    gb : float
+    gb : `float` or `quantity`
 
         Gaussian broadening width.
         If it is not a quantity with units,
@@ -96,6 +96,22 @@ def gm(self, *args, **kwargs):
     rev : bool, optional.
 
         True to reverse the apodization before applying it to the data.
+
+    apply : `bool`, optional, default = `True`
+
+        Should we apply the calculated apodization to the dataset (default)
+        or just return the apodization ndarray.
+
+    inplace : `bool`, optional, default = `False`
+
+        Should we make the transform in place or return a new dataset
+
+    axis : optional, default is -1
+
+    Returns
+    -------
+    out : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
+        The apodized dataset if apply is True, the apodization array if not True.
 
     """
     args = list(args)  # important (args is a tuple)
@@ -116,10 +132,6 @@ def gm(self, *args, **kwargs):
 
     # shifted ?
     shifted = kwargs.pop('shifted', 0)
-    if shifted == 0:
-        # let's try the args if the kwargs was not passed
-        if len(args) > 0:
-            shifted = args.pop(0)
 
     # apod func (must be func(x, tc1, tc2, shifted) form
     def func(x, tc1, tc2, shifted):
@@ -140,4 +152,6 @@ def gm(self, *args, **kwargs):
     kwargs['apod2'] = gb
     kwargs['shifted'] = shifted
 
-    return apodize(self, **kwargs)
+    out = apodize(source, **kwargs)
+
+    return out

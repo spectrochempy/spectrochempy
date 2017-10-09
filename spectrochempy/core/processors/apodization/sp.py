@@ -91,6 +91,8 @@ def sp(self, *args, **kwargs):
         True to reverse the apodization before applying it to the data.
 
     """
+    #TODO: To be finished!!!!
+
     args = list(args)  # important (args is a tuple)
 
     # off

@@ -54,6 +54,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 #-----------------------------
 @show_do_not_block
 def test_nmr_1D_show(NMR_source_1D):
+    # display testing
 
     import sys
     source = NMR_source_1D.copy()
@@ -63,14 +64,19 @@ def test_nmr_1D_show(NMR_source_1D):
 
     # test if we can plot on the same figure
     source.plot(hold=True, xlim=(0.,25000.))
+
     # we want to superpose a second spectrum
     source.plot(imag=True, data_only=True)
 
+@show_do_not_block
+def test_nmr_1D_show_complex(NMR_source_1D):
     # display the real and complex at the same time
+    source = NMR_source_1D.copy()
     source.plot(show_complex=True, color='green',
                 xlim=(0.,3000.), zlim=(-2.,2.))
 
 def test_nmr_em_nothing_calculated(NMR_source_1D_1H):
+    # em without parameters
     source = NMR_source_1D_1H.copy()
 
     arr = source.em(apply=False)
@@ -80,6 +86,7 @@ def test_nmr_em_nothing_calculated(NMR_source_1D_1H):
     assert_equal(arr, np.ones_like(source.data))
 
 def test_nmr_em_calculated_notapplied(NMR_source_1D_1H):
+    # em calculated but not applied
     source = NMR_source_1D_1H.copy()
 
     lb = 100
@@ -92,6 +99,7 @@ def test_nmr_em_calculated_notapplied(NMR_source_1D_1H):
     assert_equal(arr, arrcalc)
 
 def test_nmr_em_calculated_applied(NMR_source_1D_1H):
+    # em calculated and applied
     source = NMR_source_1D_1H.copy()
 
     lb = 100
@@ -152,18 +160,19 @@ def test_nmr_em_calculated_inplace(NMR_source_1D_1H):
 
 
 @show_do_not_block
-def test_nmr_1D_em_gm(NMR_source_1D_1H):
+def test_nmr_1D_em_(NMR_source_1D_1H):
 
     source = NMR_source_1D_1H.copy()
 
-    source.plot(hold=True)
+    source.plot(hold=True, xlim=(0.,6000.))
+
     source.em(lb=100.*ur.Hz, inplace=True)
+
     source.plot(data_only=True, hold=True)
 
     # successive call
     source.em(lb=200. * ur.Hz, inplace=True)
 
-    source.gm(lb=2000. * ur.Hz, inplace=True)
     source.plot(data_only=True)
 
 
@@ -189,6 +198,19 @@ def test_nmr_1D_em_not_inplace(NMR_source_1D_1H):
         pass
     #source1.plot()
 
+@show_do_not_block
+def test_nmr_1D_gm(NMR_source_1D_1H):
+
+    # first test gm
+    source = NMR_source_1D_1H.copy()
+
+    source.plot(hold=True, xlim=(0.,6000.))
+
+    source.gm(lb=50.*ur.Hz, gb=100.*ur.Hz, inplace=True)
+
+    source.plot()
+
+
 # def test_zf():
 #     td = source1.meta.td[-1]
 #     source1 = source1.zf(size=2*td)
@@ -206,7 +228,7 @@ def test_nmr_2D(NMR_source_2D):
 
     source.plot()
 
-    # perform some anakysis
+    # perform some analysis
     assert source.is_complex[-1]
 
     ax = source.real().plot()

@@ -73,7 +73,7 @@ def em(source, *args, **kwargs):
     source : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
         Dataset we want to apodize using exponential multiplication
 
-    lb : float or quantity
+    lb : `float` or `quantity`
 
         Exponential line broadening,
         If it is not a quantity with units,
@@ -116,7 +116,8 @@ def em(source, *args, **kwargs):
     # what's the line broadening ?
     lb = kwargs.pop('lb', 0)
     if lb == 0:
-        # let's try the args if the kwargs was not passed. In this case it should be the first arg
+        # let's try the args if the kwargs was not passed.
+        # In this case it should be the first arg
 
         if len(args)>0:
             lb = args.pop(0)
