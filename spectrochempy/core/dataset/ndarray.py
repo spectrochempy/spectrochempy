@@ -709,10 +709,13 @@ class NDArray(HasTraits):
                                                            attr)))  # deepcopy not working (and not necessary)
         new._name = str(uuid.uuid1()).split('-')[0]
         new._date = datetime.now()
-        if hasattr(self, 'fig') and self.fig: # prevent opening a new figure if no plot was done
-            new._fig = plt.gcf()
-            new._ax = plt.gca()
-
+        if self._fig: #is not None: # prevent opening a new figure if no plot was done
+            new._fig = self._fig # plt.gcf()
+            new._ax = self._ax
+            new._axec = self._axec
+            new._axex = self._axex
+            new._axey = self._axey
+            new._divider = self._divider
         return new
 
     # -------------------------------------------------------------------------

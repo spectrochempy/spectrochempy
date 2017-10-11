@@ -51,7 +51,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.application import plotoptions as options
+from spectrochempy.application import plotoptions
 from spectrochempy.core.plotters.utils import make_label
 
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
@@ -106,11 +106,20 @@ def plot_2D(source, **kwargs):
 
     Parameters
     ----------
-    source : :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
+    source: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
-    projections : `bool` [optional, default=False]
+    hold: `bool` [optional, default=`False`]
 
-    kind : `str` [optional among ``map``, ``stack`` or ``3d`` , default=``stack``]
+        If true hold the current figure and ax until a new plot is performed.
+
+    data_only: `bool` [optional, default=`False`]
+
+        Only the plot is done. No addition of axes or label specifications
+        (current if any or automatic settings are kept.
+
+    projections: `bool` [optional, default=False]
+
+    kind: `str` [optional among ``map``, ``stack`` or ``3d`` , default=``stack``]
 
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
@@ -121,66 +130,74 @@ def plot_2D(source, **kwargs):
 
     """
     # where to plot?
-    # ----------------
+    # --------------
 
-    fig, ax = source._figure_setup(**kwargs)
+    fig, ax, axec, axex, axey = source._figure_setup(ndim=2, **kwargs)
 
-    # kind of plot and other ptoperties
-    # ----------------------------------
-    kind = kwargs.get('kind', options.kind_2D)
+    # kind of plot
+    # ------------
 
-    cmap = colormap = kwargs.pop('colormap',
-                                 kwargs.pop('cmap', mpl.rcParams['image.cmap']))
+    kind = kwargs.get('kind', plotoptions.kind_2D)
 
     colorbar = kwargs.get('colorbar', True)
 
-    lw = kwargs.get('linewidth', kwargs.get('lw', options.linewidth))
-
-    alpha = kwargs.get('calpha', options.calpha)
+    data_only = kwargs.get('data_only', False)
 
     # show projections (only useful for maps)
-    # ----------------------------------------
-    proj = kwargs.get('proj',
-                      options.show_projections)  # TODO: tell the axis by title.
+    # ---------------------------------------
 
-    xproj = kwargs.get('xproj', options.show_projection_x)
+    #proj = kwargs.get('proj', plotoptions.show_projections)
+    #                                            # TODO: tell the axis by title.
 
-    yproj = kwargs.get('yproj', options.show_projection_y)
+    #xproj = kwargs.get('xproj', plotoptions.show_projection_x)
 
-    if kind in ['map','image']:
+    #yproj = kwargs.get('yproj', plotoptions.show_projection_y)
+
+    #if kind in ['map','image']:
         # create new axes on the right and on the top of the current axes
         # The first argument of the new_vertical(new_horizontal) method is
         # the height (width) of the axes to be created in inches.
         #
         # This is necessary for projections and colorbar
 
-        divider = make_axes_locatable(ax)
-        # print divider.append_axes.__doc__
+        # divider = make_axes_locatable(ax)
+        # # print divider.append_axes.__doc__
+        #
+        # if proj or xproj:
+        #
+        #     axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
+        #                                frameon=0, yticks=[])
+        #     axex.tick_params(bottom='off', top='off')
+        #     plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
+        #              visible=False)
+        #     source.axex = axex
+        #
+        # if proj or yproj:
+        #
+        #     axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
+        #                                frameon=0, xticks=[])
+        #     axey.tick_params(right='off', left='off')
+        #     plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
+        #              visible=False)
+        #     source.axey = axey
+        #
+        # if colorbar:
+        #
+        #     axec = divider.append_axes("right", .15, pad=0.3, frameon=0, xticks=[])
+        #     axec.tick_params(right='off', left='off')
+        #     plt.setp(axec.get_xticklabels(), visible=False)
+        #     source.axec = axec
 
-        if proj or xproj:
+    # Other properties
+    # ------------------
 
-            axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
-                                       frameon=0, yticks=[])
-            axex.tick_params(bottom='off', top='off')
-            plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
-                     visible=False)
-            source.axex = axex
+    cmap = colormap = kwargs.pop('colormap',
+                                 kwargs.pop('cmap',
+                                            mpl.rcParams['image.cmap']))
 
-        if proj or yproj:
+    lw = kwargs.get('linewidth', kwargs.get('lw', plotoptions.linewidth))
 
-            axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
-                                       frameon=0, xticks=[])
-            axey.tick_params(right='off', left='off')
-            plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
-                     visible=False)
-            source.axey = axey
-
-        if colorbar:
-
-            axec = divider.append_axes("right", .15, pad=0.3, frameon=0, xticks=[])
-            axec.tick_params(right='off', left='off')
-            plt.setp(axec.get_xticklabels(), visible=False)
-            source.axec = axec
+    alpha = kwargs.get('calpha', plotoptions.calpha)
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -207,23 +224,29 @@ def plot_2D(source, **kwargs):
 
         # contour plot
         # -------------
-        cl = clevels(s.data, **kwargs)
-        c = ax.contour(s.x.coords, s.y.coords, s.data, cl, linewidths=lw,
+        if s.clevels is None:
+            s.clevels = clevels(s.data, **kwargs)
+        c = ax.contour(s.x.coords, s.y.coords, s.data, s.clevels, linewidths=lw,
                        alpha=alpha)
         c.set_cmap(cmap)
         c.set_norm(norm)
 
     elif kind in ['image']:
 
+        # image plot
+        # ----------
         kwargs['nlevels'] = 500
-        cl = clevels(s.data, **kwargs)
-        c = ax.contourf(s.x.coords, s.y.coords, s.data, cl, linewidths=lw,
+        if s.clevels is None:
+            s.clevels = clevels(s.data, **kwargs)
+        c = ax.contourf(s.x.coords, s.y.coords, s.data, s.clevels, linewidths=lw,
                         alpha=alpha)
         c.set_cmap(cmap)
         c.set_norm(norm)
 
     elif kind in ['stack']:
 
+        # stack plot
+        # ----------
         step = kwargs.get("step", "all")
         normalize = kwargs.get('normalize', None)
         color = kwargs.get('color', 'colormap')
@@ -278,6 +301,12 @@ def plot_2D(source, **kwargs):
 
             ax.add_collection(line_segments)
 
+    if data_only:
+        # if data only (we will  ot set axes and labels
+        # it was probably done already in a previuos plot
+        source.plot_resume(**kwargs)
+        return True
+
     # -------------------------------------------------------------------------
     # axis limits and labels
     # -------------------------------------------------------------------------
@@ -328,8 +357,8 @@ def plot_2D(source, **kwargs):
         #----------------
         ax.set_ylim(ylim)
 
-    number_x_labels = options.number_of_x_labels
-    number_y_labels = options.number_of_y_labels
+    number_x_labels = plotoptions.number_of_x_labels
+    number_y_labels = plotoptions.number_of_y_labels
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
 
@@ -368,16 +397,16 @@ def plot_2D(source, **kwargs):
 
     if colorbar:
 
-        fig = plt.gcf()
+        #fig = plt.gcf()
 
         if kind in ['stack']:
-            axcb = fig.colorbar(line_segments, ax=ax)
+            axcb = s.fig.colorbar(line_segments, ax=ax)
             axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5))
             axcb.set_label(ylabel)
         else:
-            #axcb = fig.colorbar(c)
-            axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
-            axcb.set_label(zlabel)
+            if not s.axcb:
+                s.axcb = mpl.colorbar.ColorbarBase(s.axec, cmap=cmap, norm=norm)
+                s.axcb.set_label(zlabel)
             pass
 
 
@@ -398,14 +427,14 @@ def clevels(data, **kwargs):
     """Utility function to determine contours levels
     """
     # avoid circular call to this module
-    from spectrochempy.application import plotoptions as options
+    from spectrochempy.application import plotoptions
 
     # contours
     maximum = data.max()
     minimum = 1e-30
 
-    nlevels = kwargs.get('nlevels', options.number_of_contours)
-    exponent = kwargs.get('exponent', options.cexponent)
+    nlevels = kwargs.get('nlevels', plotoptions.number_of_contours)
+    exponent = kwargs.get('exponent', plotoptions.cexponent)
     start = abs(kwargs.get('start', maximum*0.01))
 
     if (exponent - 1.00) < .005:

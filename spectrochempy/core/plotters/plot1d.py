@@ -43,7 +43,7 @@
 import numpy as np
 from matplotlib.ticker import MaxNLocator
 
-from spectrochempy.application import plotoptions as options
+from spectrochempy.application import plotoptions
 from spectrochempy.core.plotters.utils import make_label
 
 __all__ = ['plot_1D']
@@ -58,7 +58,7 @@ def plot_1D(source, **kwargs):
 
     reverse: `bool` [optional, default=`True`]
 
-    hold : `bool` [optional, default=`False`]
+    hold: `bool` [optional, default=`False`]
 
         If true hold the current figure and ax until a new plot is performed.
 
@@ -67,25 +67,30 @@ def plot_1D(source, **kwargs):
         Only the plot is done. No addition of axes or label specifications
         (current if any or automatic settings are kept.
 
-    imag : `bool` [optional, default=`False`]
+    imag: `bool` [optional, default=`False`]
 
         Show imaginary part. By default only the real part is displayed.
 
-    show_complex : `bool` [optional, default=`False`]
+    show_complex: `bool` [optional, default=`False`]
 
         Show both real and imaginary part.
         By default only the real part is displayed.
 
-        dpi: int, optional
+    dpi: int, optional
         the number of pixel per inches
+
     figsize: tuple, optional, default is (3.4, 1.7)
         figure size
+
     fontsize: int, optional
         font size in pixels, default is 10
+
     imag: bool, optional, default False
         By default real part is shown. Set to True to display the imaginary part
+
     xlim: tuple, optional
         limit on the horizontal axis
+
     zlim or ylim: tuple, optional
         limit on the vertical axis
 
@@ -103,8 +108,10 @@ def plot_1D(source, **kwargs):
 
     xlabel: str, optional
         label on the horizontal axis
+
     zlabel or ylabel: str, optional
         label on the vertical axis
+
     showz: bool, optional, default=True
         should we show the vertical axis
 
@@ -146,9 +153,8 @@ def plot_1D(source, **kwargs):
     """
     # where to plot?
     #---------------
-    source.hold = kwargs.get('hold', False)
 
-    fig, ax = source._figure_setup(**kwargs)
+    fig, ax, _, _, _ = source._figure_setup(**kwargs)
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -184,10 +190,6 @@ def plot_1D(source, **kwargs):
     if ls:
         line.set_linestyle(ls)
 
-    #if kwargs.get('hold', False):
-        # we need reference to the current axe if we want to plot again
-    #    pass #source.ax = ax
-
     if kwargs.get('data_only', False):
         # if data only (we will  ot set axes and labels
         # it was probably done already in a previuos plot
@@ -219,8 +221,8 @@ def plot_1D(source, **kwargs):
     ax.set_xlim(xlim)
     ax.set_ylim(zlim)
 
-    number_x_labels = options.number_of_x_labels # get from config
-    number_y_labels = options.number_of_y_labels
+    number_x_labels = plotoptions.number_of_x_labels # get from config
+    number_y_labels = plotoptions.number_of_y_labels
 
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
@@ -253,6 +255,6 @@ def plot_1D(source, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
-    source.plot_resume(**kwargs)
+    ax = source.plot_resume(**kwargs)
 
     return True

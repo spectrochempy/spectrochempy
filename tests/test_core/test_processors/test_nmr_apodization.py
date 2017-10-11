@@ -56,17 +56,25 @@ from spectrochempy.utils import SpectroChemPyWarning
 def test_nmr_1D_show(NMR_source_1D):
     # display testing
 
-    import sys
     source = NMR_source_1D.copy()
+    ax1 = source.plot()
+    pass
+
+@show_do_not_block
+def test_nmr_1D_show_hold(NMR_source_1D):
+    # display testing
+
+    source = NMR_source_1D.copy()
+    ax1 = source.plot()
 
     # perform some analysis
     assert source.is_complex[-1]
 
     # test if we can plot on the same figure
     source.plot(hold=True, xlim=(0.,25000.))
-
     # we want to superpose a second spectrum
-    source.plot(imag=True, data_only=True)
+    ax2 = source.plot(imag=True, data_only=True)
+
 
 @show_do_not_block
 def test_nmr_1D_show_complex(NMR_source_1D):
@@ -206,7 +214,7 @@ def test_nmr_1D_gm(NMR_source_1D_1H):
 
     source.plot(hold=True, xlim=(0.,6000.))
 
-    source.gm(lb=50.*ur.Hz, gb=100.*ur.Hz, inplace=True)
+    source.gm(lb=100.*ur.Hz, gb=100.*ur.Hz, inplace=True)
 
     source.plot()
 
@@ -222,15 +230,40 @@ def test_nmr_1D_gm(NMR_source_1D_1H):
 #     pass
 
 
+#### TEST IN 2D #####
 @show_do_not_block
 def test_nmr_2D(NMR_source_2D):
-    source = NMR_source_2D
 
+    source = NMR_source_2D
     source.plot()
 
-    # perform some analysis
-    assert source.is_complex[-1]
+@show_do_not_block
+def test_nmr_2D_imag(NMR_source_2D):
 
-    ax = source.real().plot()
+    source = NMR_source_2D
     source.imag().plot()
 
+@show_do_not_block
+def test_nmr_2D_hold(NMR_source_2D):
+
+    source = NMR_source_2D
+    source.plot(hold=True)
+    source.imag().plot()
+
+#@show_do_not_block
+def test_nmr_2D_em_(NMR_source_2D):
+
+    source = NMR_source_2D.copy()
+
+    source.plot(hold=True)
+
+    #source.em(lb=10.*ur.Hz, inplace=True)
+
+    #source.plot()
+
+    # call on axis 0
+    #source.em(lb=10000. * ur.Hz, axis=0, inplace=True)
+
+    source.plot(data_only=True)
+
+    pass

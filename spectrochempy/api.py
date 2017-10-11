@@ -79,7 +79,8 @@ __all__ += [
            ### Helpers
              'log', 'log_level','DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
              'data', 'list_data',
-             'options', 'plotoptions',
+             'plotoptions',
+            'options',
 
             ### Info
              'copyright', 'version',
