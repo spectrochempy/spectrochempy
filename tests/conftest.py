@@ -1,5 +1,7 @@
+# coding=utf-8
 import matplotlib as mpl
 import sys
+
 if 'builddocs' in sys.argv[1]:
     mpl.use('agg')
 
@@ -9,7 +11,6 @@ import numpy as np
 import pandas as pd
 
 from pint import DimensionalityError
-
 
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
@@ -22,25 +23,26 @@ import numpy as np
 import os
 import sys
 
-
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndaxes import Axes, Axis
 from spectrochempy.api import data, plotoptions
 
 plotoptions.do_not_block = True
 
+
 # Fixture:  IR spectra (SPG)
 @pytest.fixture(scope="function")
 def IR_source_1():
     source = NDDataset.read_omnic(
-        os.path.join(data, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(data, 'irdata', 'NH4Y-activation.SPG'))
     return source
+
 
 # Fixture:  IR spectra
 @pytest.fixture(scope="function")
 def IR_scp_1():
     source = NDDataset.load(
-                        os.path.join(data, 'irdata', 'NH4Y-activation.scp'))
+            os.path.join(data, 'irdata', 'NH4Y-activation.scp'))
     return source
 
 
@@ -50,8 +52,9 @@ def NMR_source_1D():
     path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
     source = NDDataset.read_bruker_nmr(
-                                      path, expno=1, remove_digital_filter=True)
+            path, expno=1, remove_digital_filter=True)
     return source
+
 
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
@@ -59,20 +62,20 @@ def NMR_source_1D_1H():
     path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'tpa')
     source = NDDataset.read_bruker_nmr(
-                                      path, expno=10, remove_digital_filter=True)
+            path, expno=10, remove_digital_filter=True)
     return source
+
 
 @pytest.fixture(scope="function")
 def NMR_source_2D():
     path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')
     source = NDDataset.read_bruker_nmr(
-                                      path, expno=1, remove_digital_filter=True)
+            path, expno=1, remove_digital_filter=True)
     return source
 
 
-
-#TODO: rationalise all this fixtures
+# TODO: rationalise all this fixtures
 
 # some datasets
 @pytest.fixture()
@@ -167,4 +170,3 @@ def dsm():  # dataset with axes containing several axis
                    uncertainty=dx * 0.1,
                    )
     return da.copy()
-

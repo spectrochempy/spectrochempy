@@ -156,7 +156,7 @@ def plot_1D(source, **kwargs):
 
     """
     # where to plot?
-    #---------------
+    # ---------------
 
     source._figure_setup(**kwargs)
 
@@ -180,10 +180,9 @@ def plot_1D(source, **kwargs):
     # plot
     line, = source.ax.plot(x.coords, z.data)
 
-
     if kwargs.get('show_complex', False):
         zimag = source.imag()
-        lineimag, = source.ax.plot(x.coords, zimag.data, ls='--')
+        source.ax.plot(x.coords, zimag.data, ls='--')
 
     # line attributes
     c = kwargs.get('color', kwargs.get('c'))
@@ -220,14 +219,14 @@ def plot_1D(source, **kwargs):
 
     # ordinates limits?
     zl = [np.amin(z.data), np.amax(z.data)]
-    zlim = list(kwargs.get('zlim',kwargs.get('ylim',zl)))
+    zlim = list(kwargs.get('zlim', kwargs.get('ylim', zl)))
     zlim.sort()
 
     # set the limits
     source.ax.set_xlim(xlim)
     source.ax.set_ylim(zlim)
 
-    number_x_labels = plotoptions.number_of_x_labels # get from config
+    number_x_labels = plotoptions.number_of_x_labels  # get from config
     number_y_labels = plotoptions.number_of_y_labels
 
     source.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))

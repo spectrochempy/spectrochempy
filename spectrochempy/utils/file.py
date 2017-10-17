@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Copyright (c) 2005, Enthought, Inc.
 # All rights reserved.
 #
@@ -10,7 +10,7 @@
 #
 # Author: Enthought, Inc.
 # Description: <Enthought IO package component>
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """ This module contains functions to determine where configuration and
 data/cache files used by Spectrochempy should be placed.
@@ -26,20 +26,20 @@ __all__ = ['File',
            'get_pkg_data_dir',
            'get_pkg_data_filename',
            'list_packages',
-          ]
+           ]
 
 _classes = ['File',
-           'set_temp_config',
-           'set_temp_cache',
-          ]
+            'set_temp_config',
+            'set_temp_cache',
+            ]
 
 _methods = ['get_log_dir',
-           'get_config_dir',
-           'get_cache_dir',
-           'get_pkg_data_dir',
-           'get_pkg_data_filename',
-           'list_packages',
-          ]
+            'get_config_dir',
+            'get_cache_dir',
+            'get_pkg_data_dir',
+            'get_pkg_data_filename',
+            'list_packages',
+            ]
 
 # Standard/built-in imports.
 import mimetypes
@@ -53,15 +53,15 @@ from pkgutil import walk_packages
 
 from traitlets import Bool, HasTraits, Instance, List, Unicode
 
-#from .decorators import wraps
+# from .decorators import wraps
 from .introspect import find_current_module, resolve_name
+
 
 class File(HasTraits):
     """ A representation of files and folders in a file system. """
 
     # The path name of this file/folder.
     path = Unicode
-
 
     def __init__(self, path, **traits):
         """ Creates a new representation of the specified path. """
@@ -81,7 +81,6 @@ class File(HasTraits):
         """ Returns an 'informal' string representation of the object. """
 
         return 'File(%s)' % self.path
-
 
     #### Properties ###########################################################
 
@@ -338,6 +337,7 @@ class File(HasTraits):
 
         return
 
+
 def _find_home():
     """ Locates and return the home directory (or best approximation) on this
     system.
@@ -349,7 +349,6 @@ def _find_home():
         SpectroChemPy on some obscure platform that doesn't have standard home
         directories.
     """
-
 
     # this is used below to make fix up encoding issues that sometimes crop up
     # in py2.x but not in py3.x
@@ -599,17 +598,17 @@ class set_temp_config(_SetTempPath):
     def __enter__(self):
         # Special case for the config case, where we need to reset all the
         # cached config objects
-        #from .configuration import _cfgobjs
+        # from .configuration import _cfgobjs
 
         path = super(set_temp_config, self).__enter__()
-        #_cfgobjs.clear()
+        # _cfgobjs.clear()
         return path
 
     def __exit__(self, *args):
-        #from .configuration import _cfgobjs
+        # from .configuration import _cfgobjs
 
         super(set_temp_config, self).__exit__(*args)
-        #_cfgobjs.clear()
+        # _cfgobjs.clear()
 
 
 class set_temp_cache(_SetTempPath):
@@ -667,7 +666,7 @@ def _find_or_create_spectrochempy_dir(dirnm, linkto):
                 raise
 
         if (not sys.platform.startswith('win') and
-            linkto is not None and
+                    linkto is not None and
                 not os.path.exists(linkto)):
             os.symlink(maindir, linkto)
 
@@ -677,13 +676,15 @@ def _find_or_create_spectrochempy_dir(dirnm, linkto):
 
     return os.path.abspath(maindir)
 
+
 def _is_inside(path, parent_path):
     # We have to try realpath too to avoid issues with symlinks, but we leave
     # abspath because some systems like debian have the absolute path (with no
     # symlinks followed) match, but the real directories in different
     # locations, so need to try both cases.
     return os.path.abspath(path).startswith(os.path.abspath(parent_path)) \
-        or os.path.realpath(path).startswith(os.path.realpath(parent_path))
+           or os.path.realpath(path).startswith(os.path.realpath(parent_path))
+
 
 def _find_pkg_data_path(data_name, package=None):
     """
@@ -720,10 +721,11 @@ def _find_pkg_data_path(data_name, package=None):
 
     root_dir = os.path.dirname(rootpkg.__file__)
     assert _is_inside(path, root_dir), \
-           ("attempted to get a local data file outside "
-            "of the " + rootpkgname + " tree")
+        ("attempted to get a local data file outside "
+         "of the " + rootpkgname + " tree")
 
     return path
+
 
 def get_pkg_data_filename(data_name, package=None):
     """
@@ -758,6 +760,7 @@ def get_pkg_data_filename(data_name, package=None):
         raise IOError("Tried to access a data file that's actually "
                       "a package data directory")
     return datafn
+
 
 def get_pkg_data_dir(data_name, package=None):
     """

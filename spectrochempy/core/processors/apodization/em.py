@@ -51,6 +51,7 @@ from spectrochempy.utils import epsilon
 # =============================================================================
 __all__ = ["em"]
 
+
 # =============================================================================
 # em function
 # =============================================================================
@@ -111,7 +112,7 @@ def em(source, *args, **kwargs):
         The apodized dataset if apply is True, the apodization array if not True.
 
     """
-    args = list(args) # important (args is a tuple)
+    args = list(args)  # important (args is a tuple)
 
     # what's the line broadening ?
     lb = kwargs.pop('lb', 0)
@@ -119,7 +120,7 @@ def em(source, *args, **kwargs):
         # let's try the args if the kwargs was not passed.
         # In this case it should be the first arg
 
-        if len(args)>0:
+        if len(args) > 0:
             lb = args.pop(0)
 
     # is it a shifted broadening?
@@ -138,6 +139,6 @@ def em(source, *args, **kwargs):
     kwargs['apod'] = lb
     kwargs['shifted'] = shifted
 
-    out =  apodize(source, **kwargs)
+    out = apodize(source, **kwargs)
 
     return out

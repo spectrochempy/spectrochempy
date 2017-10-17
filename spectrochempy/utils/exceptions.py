@@ -42,9 +42,10 @@ be here, but rather in the particular subpackage.
 """
 
 all = _classes = ['SpectroChemPyError',
-       'SpectroChemPyWarning',
-       'SpectroChemPyDeprecationWarning',
-       ]
+                  'SpectroChemPyWarning',
+                  'SpectroChemPyDeprecationWarning',
+                  ]
+
 
 class SpectroChemPyError(Exception):
     """
@@ -52,12 +53,14 @@ class SpectroChemPyError(Exception):
 
     """
 
+
 class SpectroChemPyWarning(Warning):
     """
     The base warning class from which all SpectroChemPy warnings should inherit.
 
     Any warning inheriting from this class is handled by the SpectroChemPy log.
     """
+
 
 class SpectroChemPyDeprecationWarning(SpectroChemPyWarning):
     """

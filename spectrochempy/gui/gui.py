@@ -5,7 +5,6 @@ from PyQt5.QtGui import QIcon
 
 
 class Gui(QWidget):
-
     def __init__(self):
 
         super().__init__()
@@ -17,58 +16,57 @@ class Gui(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-
     def openFileNameDialog(self,
-                 directory="",
-                 filter=""):
+                           directory="",
+                           filter=""):
 
         filters = "SpectroChemPy (*.scp);;All Files (*)"
         if filter:
-            filter + filter + ";;" + filters
+            filters = filter + ";;" + filters
 
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getOpenFileName(self,
-                                        caption="Open ...",
-                                        directory=directory,
-                                        filter=filters,
-                                        options=options)
+                                                  caption="Open ...",
+                                                  directory=directory,
+                                                  filter=filters,
+                                                  options=options)
         if fileName:
             return fileName
 
     def openFileNamesDialog(self,
-                 directory="",
-                 filter=""):
+                            directory="",
+                            filter=""):
 
         filters = "SpectroChemPy (*.scp);;All Files (*)"
         if filter:
-            filter + filter + ";;" + filters
+            filters =  filter + ";;" + filters
 
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         files, _ = QFileDialog.getOpenFileNames(self,
-                                        caption="Open Multiples files ...",
-                                        directory=directory,
-                                        filter=filters,
-                                        options=options)
+                                                caption="Open Multiples files ...",
+                                                directory=directory,
+                                                filter=filters,
+                                                options=options)
         if files:
             return files
 
     def saveFileDialog(self,
-                 directory="",
-                 filter=""):
+                       directory="",
+                       filter=""):
 
         filters = "SpectroChemPy (*.scp);;All Files (*)"
         if filter:
-            filter + filter + ";;" + filters
+            filters = filter + ";;" + filters
 
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(self,
-                                        caption="Save file ...",
-                                        directory=directory,
-                                        filter=filters,
-                                        options=options)
+                                                  caption="Save file ...",
+                                                  directory=directory,
+                                                  filter=filters,
+                                                  options=options)
         if fileName:
             return fileName
 
@@ -80,6 +78,3 @@ if __name__ == '__main__':
     print(ex.openFileNameDialog())
 
     # guiapp.exec_()
-
-
-

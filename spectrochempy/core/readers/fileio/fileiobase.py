@@ -23,16 +23,16 @@ def create_blank_udic(ndim):
 
     for i in range(ndim):
         d = dict()
-        d["sw"] = 999.99        # spectral width in Hz
-        d["complex"] = True     # Quadrature, True when dimension is complex
-        d["obs"] = 999.99       # Observation frequency in MHz
-        d["car"] = 999.99       # Carrier frequency in Hz
+        d["sw"] = 999.99  # spectral width in Hz
+        d["complex"] = True  # Quadrature, True when dimension is complex
+        d["obs"] = 999.99  # Observation frequency in MHz
+        d["car"] = 999.99  # Carrier frequency in Hz
         # Number of points in dimension based on the shape of the data array.
         # As such the direct dimension (-1) size is R|I, all indirect
         # dimensions are R+I
         d["size"] = 1
 
-        d["label"] = ["X", "Y", "Z", "A"][i]    # name of dimension
+        d["label"] = ["X", "Y", "Z", "A"][i]  # name of dimension
 
         # encoding of dimension, ie states, tppi, etc.  The direct dimension
         # should be listed as direct.
@@ -50,7 +50,7 @@ def create_blank_udic(ndim):
     return udic
 
 
-class unit_conversion():
+class unit_conversion:
     """
     Provides methods to convert between common NMR units
 
@@ -68,6 +68,7 @@ class unit_conversion():
         Carrier frequency in Hz.
 
     """
+
     def __init__(self, size, cplx, sw, obs, car):
         """
         create and set up a unit_conversion object
@@ -327,7 +328,7 @@ class unit_conversion():
         x0, x1 = self.us_limits()
         return np.linspace(x0, x1, self._size)
 
-    __call__ = i    # calling the object x is the same as x.i
+    __call__ = i  # calling the object x is the same as x.i
 
 
 def uc_from_udic(udic, dim=-1):
@@ -383,18 +384,18 @@ def uc_from_freqscale(scale, obs, unit='ppm'):
 
         # The scale needs be corrected by extending each extremum by half the
         # bin width (to convert from centers to edges).
-        dx = abs(scale[1]-scale[0])
+        dx = abs(scale[1] - scale[0])
 
         if unit is 'ppm':
-            sw = ((max + dx/2.0) - (min - dx/2.0)) * obs
-            car = (min-dx/2.0 + (max-min)/2.0) * obs
+            sw = ((max + dx / 2.0) - (min - dx / 2.0)) * obs
+            car = (min - dx / 2.0 + (max - min) / 2.0) * obs
         elif unit is 'hz':
-            sw = ((max + dx/2.0) - (min - dx/2.0))
-            car = (min-dx/2.0 + (max-min)/2.0)
+            sw = ((max + dx / 2.0) - (min - dx / 2.0))
+            car = (min - dx / 2.0 + (max - min) / 2.0)
         else:
             # unit is 'kHz':
-            sw = ((max + dx/2.0) - (min - dx/2.0)) / 1.e3
-            car = (min-dx/2.0 + (max-min)/2.0) / 1.e3
+            sw = ((max + dx / 2.0) - (min - dx / 2.0)) / 1.e3
+            car = (min - dx / 2.0 + (max - min) / 2.0) / 1.e3
 
     else:
         mesg = '{} is not a supported unit.'.format(unit)
@@ -420,6 +421,7 @@ def open_towrite(filename, overwrite=False, mode='wb'):
         os.makedirs(p)
 
     return open(filename, mode)
+
 
 ################################################
 # numpy ndarray emulation and helper functions #
@@ -543,6 +545,7 @@ def trace2index_reg(shape, ntrace):
     base = list(trace2index_flat(pshape, q))
     total = [b * 2 + a for b, a in zip(base, to_add)]
     return tuple(total)
+
 
 #
 # data_nd class
@@ -722,18 +725,18 @@ class data_nd(object):
             Object whose axes are permuted.
 
         """
-        if axes == ():    # default is to switch order of axes
+        if axes == ():  # default is to switch order of axes
             axes = range(self.ndim)[::-1]
 
-        if len(axes) == 1:    # if a single tuple is given unpack
+        if len(axes) == 1:  # if a single tuple is given unpack
             axes = axes[0]
 
-        try:    # convert to integers
+        try:  # convert to integers
             axes = [int(i) for i in axes]
         except:
             raise TypeError("an integer is required")
 
-        if len(axes) != self.ndim:   # check for to few/many axes
+        if len(axes) != self.ndim:  # check for to few/many axes
             raise ValueError("axes don't match array")
 
         # replace negatives axes values with positives

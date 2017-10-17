@@ -41,19 +41,19 @@ Various methods used in other part of the program
 
 """
 __all__ = _methods = ["closer_power_of_two",
-           "create_traitsdoc",
-           "dict_compare",
-           'htmldoc',
-           "ignored",
-           "is_iterable",
-           "is_sequence",
-           "is_number",
-           "silence",
-           "makedirs",
-           "multisort",
-           "numpyprintoptions",
-           'makestr',
-           'srepr']
+                      "create_traitsdoc",
+                      "dict_compare",
+                      'htmldoc',
+                      "ignored",
+                      "is_iterable",
+                      "is_sequence",
+                      "is_number",
+                      "silence",
+                      "makedirs",
+                      "multisort",
+                      "numpyprintoptions",
+                      'makestr',
+                      'srepr']
 
 import re
 from operator import itemgetter
@@ -61,7 +61,6 @@ import os
 import numpy as np
 import sys
 from contextlib import contextmanager
-
 
 # =============================================================================
 # Ignored context
@@ -93,6 +92,7 @@ except ImportError:
         except exceptions:
             pass
 
+
 # =============================================================================
 # dummy file
 # =============================================================================
@@ -102,6 +102,7 @@ class _DummyFile(object):
 
     def write(self, s):
         pass
+
 
 # =============================================================================
 # silence
@@ -164,7 +165,8 @@ def multisort(*args, **kargs):
 # makedirs
 # =============================================================================
 
-def makedirs(newdir):  # from active recipes http://code.activestate.com/recipes/82465-a-friendly-mkdir/
+def makedirs(
+        newdir):  # from active recipes http://code.activestate.com/recipes/82465-a-friendly-mkdir/
     """works the way a good mkdir should :)
         - already exists, silently complete
         - regular file in the way, raise an exception
@@ -183,6 +185,7 @@ def makedirs(newdir):  # from active recipes http://code.activestate.com/recipes
         # print "_mkdir %s" % repr(newdir)
         if tail:
             os.mkdir(newdir)
+
 
 # =============================================================================
 # Dictionary comparison
@@ -205,7 +208,7 @@ def dict_compare(d1, d2, check_equal_only=True):
 
     """
     # from http://stackoverflow.com/questions/4527942/comparing-two-dictionaries-in-python
-    #modified to account for the comparison of list objects
+    # modified to account for the comparison of list objects
 
     d1_keys = set(d1.keys())
     d2_keys = set(d2.keys())
@@ -216,15 +219,15 @@ def dict_compare(d1, d2, check_equal_only=True):
     modified = added.union(removed)
     for o in intersect_keys:
         if is_sequence(d1[o]):
-            if not is_sequence(d2[o]) or len(d1[o])!=len(d2[o]):
+            if not is_sequence(d2[o]) or len(d1[o]) != len(d2[o]):
                 modified.add(o)
             else:
                 # in principe we vae here two list of same length
                 for i1, i2 in zip(d1[o], d2[o]):
-                    if np.any(i1!=i2):
+                    if np.any(i1 != i2):
                         modified.add(o)
         else:
-            if is_sequence(d2[o]) or d1[o]!=d2[o]:
+            if is_sequence(d2[o]) or d1[o] != d2[o]:
                 modified.add(o)
 
     same = set(o for o in intersect_keys if o not in modified)
@@ -242,13 +245,13 @@ def dict_compare(d1, d2, check_equal_only=True):
 # =============================================================================
 
 def numpyprintoptions(precision=4, threshold=5, edgeitems=2, suppress=True,
-                  formatter=None, spc=4, **kargs):
+                      formatter=None, spc=4, **kargs):
     if not formatter:
         spc = 4
         formatter = {
             'float_kind': lambda x: '{:{l}.{prec}g}'.format(x.real,
-                                                     prec=precision - 1,
-                                                     l=precision + spc),
+                                                            prec=precision - 1,
+                                                            l=precision + spc),
             'int_kind': lambda x: '{:>{l}d}'.format(x, l=precision + spc),
             'str_kind': lambda x: '{}'.format(x),
             'complex_kind': lambda
@@ -283,11 +286,12 @@ def create_traitsdoc(klass):
             if kdoc is not None:
                 attr_doc += "**{0}**\n\t{1}\n".format(k, kdoc)
 
-    if not klass.__doc__.startswith(' '*4):
-        klass.__doc__ = "    "+klass.__doc__
+    if not klass.__doc__.startswith(' ' * 4):
+        klass.__doc__ = "    " + klass.__doc__
     doc = textwrap.dedent(klass.__doc__).strip()
     doc += "\n\nAttributes\n----------\n\n{attributes}\n"
-    klass.__doc__= doc.format(attributes= attr_doc)
+    klass.__doc__ = doc.format(attributes=attr_doc)
+
 
 def closer_power_of_two(value):
     """
@@ -306,13 +310,14 @@ def closer_power_of_two(value):
     """
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
+
 def htmldoc(text):
     """
     format docstring in html for a nice display in IPython
     :param text:
     :return:
     """
-    p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  #To get the keywords
+    p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r'<b>\1</b>\2', text)
     html = html.replace('-', '')
     html = html.split('\n')
@@ -335,6 +340,7 @@ def htmldoc(text):
 
     return html
 
+
 def srepr(arg):
     if is_sequence(arg):
         return '<' + ", ".join(srepr(x) for x in arg) + '>'
@@ -347,8 +353,8 @@ def makestr(l):
     """
 
     if is_sequence(l):
-        l = " ".join(map(str,l))
-    l = l.replace('$','')
-    l = l.replace(' ','\ ')
+        l = " ".join(map(str, l))
+    l = l.replace('$', '')
+    l = l.replace(' ', '\ ')
     l = r'$%s$' % l
     return l

@@ -39,12 +39,13 @@
 __all__ = []
 _methods = ['make_label']
 
+
 def make_label(ss, lab='<no_axe_label>'):
     """ make a label from title and units
 
     """
     if ss.title:
-        label = ss.title#.replace(' ', r'\ ')
+        label = ss.title  # .replace(' ', r'\ ')
     else:
         label = lab
 

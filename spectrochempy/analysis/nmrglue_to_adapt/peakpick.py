@@ -83,13 +83,13 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
 
     # check msep
     if isinstance(msep, int):
-        msep = (msep, )
+        msep = (msep,)
     if algorithm in ['thres', 'thres-fast'] and len(msep) != ndim:
         raise ValueError("msep has incorrect length")
 
     # check algorithm
     if algorithm not in ['thres', 'thres-fast', 'downward', 'connected']:
-        raise ValueError('Invalid algorithm %s' % (algorithm))
+        raise ValueError('Invalid algorithm %s' % algorithm)
 
     # check  lineshapes
     if est_params:
@@ -108,7 +108,7 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
         for i, ls in enumerate(ls_classes):
             if ls.nparam(10) != 2:
                 s = "Lineshape class %i does not have two parameters"
-                raise ValueError(s % (i))
+                raise ValueError(s % i)
 
         if len(ls_classes) != ndim:
             raise ValueError("Incorrect number of lineshapes")
@@ -119,7 +119,7 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
     #######################
     # find positive peaks #
     #######################
-    if pthres is None:    # no locations
+    if pthres is None:  # no locations
         ploc = []
         pseg = []
 
@@ -133,9 +133,9 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
         elif algorithm == 'connected':
             ploc, pseg = find_all_connected(data, pthres, True, diag)
         else:
-            raise ValueError('Invalid algorithm %s' % (algorithm))
+            raise ValueError('Invalid algorithm %s' % algorithm)
 
-    else:   # find only locations
+    else:  # find only locations
         if algorithm == 'thres':
             ploc = find_all_thres_fast(data, pthres, msep, False)
         elif algorithm == 'thres-fast':
@@ -145,12 +145,12 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
         elif algorithm == 'connected':
             ploc = find_all_connected(data, pthres, False, diag)
         else:
-            raise ValueError('Invalid algorithm %s' % (algorithm))
+            raise ValueError('Invalid algorithm %s' % algorithm)
 
     #######################
     # find negative peaks #
     #######################
-    if nthres is None:    # no locations
+    if nthres is None:  # no locations
         nloc = []
         nseg = []
 
@@ -164,9 +164,9 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
         elif algorithm == 'connected':
             nloc, nseg = find_all_nconnected(data, nthres, True, diag)
         else:
-            raise ValueError('Invalid algorithm %s' % (algorithm))
+            raise ValueError('Invalid algorithm %s' % algorithm)
 
-    else:   # find only locations
+    else:  # find only locations
         if algorithm == 'thres':
             nloc = find_all_nthres(data, nthres, msep, False)
         elif algorithm == 'thres-fast':
@@ -176,7 +176,7 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
         elif algorithm == 'connected':
             nloc = find_all_nconnected(data, nthres, False, diag)
         else:
-            raise ValueError('Invalid algorithm %s' % (algorithm))
+            raise ValueError('Invalid algorithm %s' % algorithm)
 
     # combine the positive and negative peaks
     locations = ploc + nloc
@@ -185,7 +185,7 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
     # return locations if no parameter estimation requested #
     #########################################################
     if est_params is False:
-        if cluster:     # find clusters
+        if cluster:  # find clusters
             cluster_ids = clusters(data, locations, pthres, nthres, c_struc,
                                    None, c_ndil)
             locations = add_edge(locations, edge)
@@ -194,7 +194,7 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
                                   axis_names=axis_names)
             else:
                 return locations, cluster_ids
-        else:   # Do not determine clusters
+        else:  # Do not determine clusters
             locations = add_edge(locations, edge)
             if table:
                 return pack_table(locations, axis_names=axis_names)
@@ -278,7 +278,7 @@ def clusters(data, locations, pthres, nthres, d_struc=None, l_struc=None,
         input = data < nthres
     elif nthres is None:  # postive peaks only
         input = data > pthres
-    else:               # both positive and negative
+    else:  # both positive and negative
         input = np.bitwise_or(data < nthres, data > pthres)
 
     # apply dialations to these segments
@@ -374,8 +374,8 @@ def guess_params_slice(data, location, seg_slice, ls_classes):
     # amptide is estimated by the sum of all points in region
     amp = np.sum(region)
 
-    scale = []    # list of linewidths
-    nlocation = []    # list of peak centers
+    scale = []  # list of linewidths
+    nlocation = []  # list of peak centers
 
     # loop over the axes
     for axis, ls in enumerate(ls_classes):
@@ -525,13 +525,13 @@ def find_pseg_slice(data, location, thres):
         # find start value
         al = list(location)
         start = v
-        while(valid_pt(al, shape) and data[tuple(al)] > thres):
+        while valid_pt(al, shape) and data[tuple(al)] > thres:
             start = start - 1
             al[dim] = start
         # find stop value
         al = list(location)
         stop = v
-        while(valid_pt(al, shape) and data[tuple(al)] > thres):
+        while valid_pt(al, shape) and data[tuple(al)] > thres:
             stop = stop + 1
             al[dim] = stop
         seg_slice.append(slice(start + 1, stop))
@@ -548,13 +548,13 @@ def find_nseg_slice(data, location, thres):
         # find start value
         al = list(location)
         start = v
-        while(valid_pt(al, shape) and data[tuple(al)] < thres):
+        while valid_pt(al, shape) and data[tuple(al)] < thres:
             start = start - 1
             al[dim] = start
         # find stop value
         al = list(location)
         stop = v
-        while(valid_pt(al, shape) and data[tuple(al)] < thres):
+        while valid_pt(al, shape) and data[tuple(al)] < thres:
             stop = stop + 1
             al[dim] = stop
         seg_slice.append(slice(start + 1, stop))

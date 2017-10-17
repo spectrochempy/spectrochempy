@@ -39,6 +39,7 @@ from .exceptions import SpectroChemPyDeprecationWarning
 
 all = _methods = ['deprecated']
 
+
 def deprecated(message):
     """
     Deprecation decorator
@@ -49,13 +50,16 @@ def deprecated(message):
         the deprecation message
 
     """
+
     def deprecation_decorator(func):
         def wrapper(*args, **kwargs):
             warnings.warn("The function `{} is deprecated: {}".format(
-                func.__name__, message),
-                SpectroChemPyDeprecationWarning)
+                    func.__name__, message),
+                    SpectroChemPyDeprecationWarning)
             return func(*args, **kwargs)
+
         return wrapper
+
     return deprecation_decorator
 
 

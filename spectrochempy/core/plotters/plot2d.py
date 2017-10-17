@@ -57,6 +57,7 @@ from spectrochempy.core.plotters.utils import make_label
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
 _methods = __all__[:]
 
+
 # =============================================================================
 # nddataset plot2D functions
 # =============================================================================
@@ -86,6 +87,7 @@ def plot_stack(source, **kwargs):
     kwargs['kind'] = 'stack'
     return plot_2D(source, **kwargs)
 
+
 # image plot --------------------------------------------------------
 
 def plot_image(source, **kwargs):
@@ -97,6 +99,7 @@ def plot_image(source, **kwargs):
     """
     kwargs['kind'] = 'image'
     return plot_2D(source, **kwargs)
+
 
 # generic plot (default stack plot) -------------------------------------------
 
@@ -150,7 +153,6 @@ def plot_2D(source, **kwargs):
     lw = kwargs.get('linewidth', kwargs.get('lw', plotoptions.linewidth))
 
     alpha = kwargs.get('calpha', plotoptions.calpha)
-
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -219,11 +221,11 @@ def plot_2D(source, **kwargs):
         z = z[ishowed]
 
         # now plot the collection of lines
-        #---------------------------------
-        if color == None:
+        # ---------------------------------
+        if color is None:
             # very basic plot (likely the faster)
             # use the matplotlib color cycler
-            source.ax.plot(x.coords, z.data, lw=lw )
+            source.ax.plot(x.coords, z.data, lw=lw)
 
         elif color != 'colormap':
             # just add a color to the line (the same for all)
@@ -232,14 +234,15 @@ def plot_2D(source, **kwargs):
         elif color == 'colormap':
             # here we map the color of each line to the colormap
             # according to the y axis values
-            #if not source._updateplot:
+            # if not source._updateplot:
             ylim = kwargs.get("ylim", None)
 
             if ylim is not None:
                 vmin, vmax = ylim
             else:
                 vmin, vmax = y.coords[0], y.coords[-1]
-            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)  # we normalize to the max time
+            norm = mpl.colors.Normalize(vmin=vmin,
+                                        vmax=vmax)  # we normalize to the max time
             if normalize is not None:
                 norm.vmax = normalize
 
@@ -249,13 +252,13 @@ def plot_2D(source, **kwargs):
             sc = sp.y.coords
 
             line_segments = LineCollection(
-                                        [list(zip(sp.x.coords, y)) for y in ys[::-1]],
-                                        # Make a sequence of x,s[i] pairs
-                                        # linewidths    = (0.5,1,1.5,2),
-                                        linewidths=(lw,),
-                                        linestyles='solid',
-                                        #alpha=.5,
-                             )
+                    [list(zip(sp.x.coords, y)) for y in ys[::-1]],
+                    # Make a sequence of x,s[i] pairs
+                    # linewidths    = (0.5,1,1.5,2),
+                    linewidths=(lw,),
+                    linestyles='solid',
+                    # alpha=.5,
+            )
             line_segments.set_array(sc[::-1])
             line_segments.set_cmap(colormap)
             line_segments.set_norm(norm)
@@ -271,10 +274,6 @@ def plot_2D(source, **kwargs):
     # -------------------------------------------------------------------------
     # axis limits and labels
     # -------------------------------------------------------------------------
-    xlim = kwargs.get("xlim", None)
-    ylim = kwargs.get("ylim", None)
-    zlim = kwargs.get("zlim", None)
-
     # abscissa limits?
     xl = [x.coords[0], x.coords[-1]]
     xl.sort()
@@ -284,20 +283,20 @@ def plot_2D(source, **kwargs):
     xlim[0] = max(xlim[0], xl[0])
 
     # reversed x axis?
-    #-----------------
+    # -----------------
     if kwargs.get('x_reverse', x.is_reversed):
         xlim.reverse()
 
     # set the limits
-    #---------------
+    # ---------------
     source.ax.set_xlim(xlim)
 
     # ordinates limits?
-    #------------------
+    # ------------------
     if kind in ['stack']:
         # the z axis info
-        #----------------
-        zl = (np.amin(np.amin(ys)),np.amax(np.amax(ys)))
+        # ----------------
+        zl = (np.amin(np.amin(ys)), np.amax(np.amax(ys)))
         zlim = list(kwargs.get('zlim', zl))
         zlim.sort()
         z_reverse = kwargs.get('z_reverse', False)
@@ -305,12 +304,12 @@ def plot_2D(source, **kwargs):
             zlim.reverse()
 
         # set the limits
-        #---------------
+        # ---------------
         source.ax.set_ylim(zlim)
 
     else:
         # the y axis info
-        #----------------
+        # ----------------
         ylim = list(kwargs.get('ylim', source.ax.get_ylim()))
         ylim.sort()
         y_reverse = kwargs.get('y_reverse', y.is_reversed)
@@ -318,7 +317,7 @@ def plot_2D(source, **kwargs):
             ylim.reverse()
 
         # set the limits
-        #----------------
+        # ----------------
         source.ax.set_ylim(ylim)
 
     number_x_labels = plotoptions.number_of_x_labels
@@ -349,7 +348,6 @@ def plot_2D(source, **kwargs):
     if not zlabel:
         zlabel = make_label(z, 'z')
 
-
     # do we display the ordinate axis?
     if kwargs.get('show_y', True):
         if kind not in ['stack']:
@@ -367,7 +365,9 @@ def plot_2D(source, **kwargs):
             source._axcb.set_label(ylabel)
         else:
             if not source._axcb:
-                source._axcb = axcb = mpl.colorbar.ColorbarBase(source.axec, cmap=cmap, norm=norm)
+                source._axcb = mpl.colorbar.ColorbarBase(source.axec,
+                                                                cmap=cmap,
+                                                                norm=norm)
                 source._axcb.set_label(zlabel)
             pass
 
@@ -395,7 +395,7 @@ def clevels(data, **kwargs):
 
     nlevels = kwargs.get('nlevels', plotoptions.number_of_contours)
     exponent = kwargs.get('exponent', plotoptions.cexponent)
-    start = abs(kwargs.get('start', maximum*0.01))
+    start = abs(kwargs.get('start', maximum * 0.01))
 
     if (exponent - 1.00) < .005:
         clevelc = np.linspace(minimum, maximum, nlevels)
@@ -413,5 +413,6 @@ def clevels(data, **kwargs):
     #                for xi in range(xl)] + [ms * exponent ** xi for xi in
     #                                        range(xl)]
     # else:
-    clevelc = [-ms * exponent ** xi for xi in range(xl)]+[ms * exponent ** xi for xi in range(xl)]
+    clevelc = [-ms * exponent ** xi for xi in range(xl)] + [ms * exponent ** xi
+                                                            for xi in range(xl)]
     return sorted(clevelc)

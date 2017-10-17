@@ -47,8 +47,10 @@ import warnings
 
 from spectrochempy.api import version
 
+
 def path():
     return os.path.dirname(__file__)
+
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
@@ -58,22 +60,22 @@ class PostDevelopCommand(develop):
         develop.run(self)
 
         for item in ['pre-commit']:
-            hook = os.path.join(path(),'.git','hooks',item)
+            hook = os.path.join(path(), '.git', 'hooks', item)
             if os.path.exists(hook):
                 os.remove(hook)
-            nhook = os.path.join(path(),'git_hooks',item)
-            sh.copy(nhook,hook)
+            nhook = os.path.join(path(), 'git_hooks', item)
+            sh.copy(nhook, hook)
 
             print('installation of `.git/hooks/{}` made.'.format(item))
 
 
 def read(fname):
-    with open(os.path.join(path(),fname), 'r') as f:
+    with open(os.path.join(path(), fname), 'r') as f:
         return f.read()
 
 
 def get_dependencies():
-    with open(os.path.join(path(),"requirements.txt"), 'r') as f:
+    with open(os.path.join(path(), "requirements.txt"), 'r') as f:
         pkg = f.read().split("\n")
         while '' in pkg:
             pkg.remove('')
@@ -86,40 +88,42 @@ def get_dependencies():
 
         return pkg
 
-def run_setup():
 
+def run_setup():
     setup(
-        name='spectrochempy',
-        version=version,
-        packages=find_packages(exclude=['docs',"*.tests", "*.tests.*", "tests.*", "tests"]),
-        include_package_data=True,
-        url='http:/www-lcs.ensicaen.fr/spectrochempy',
-        license='CeCILL-2.1',
-        author='Arnaud Travert & christian Fernandez',
-        author_email='spectrochempy@ensicaen.fr',
-        description='Spectra Analysis & Processing with Python',
-        long_description=read('README.rst'),
-        setup_requires=['pytest-runner'],
-        install_requires=get_dependencies(),
-        dependency_links=[
-            "git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
-        ],
-        tests_require=['pytest'],
-        classifiers=[
-            "Development Status :: 2 - Pre-Alpha",
-            "Topic :: Utilities",
-            "Topic :: Scientific/Engineering",
-            "Intended Audience :: Science/Research",
-            "License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
-            "Operating System :: OS Independent",
-            "Programming Language :: Python :: 3.5",
-        ],
-        cmdclass={
-            'develop': PostDevelopCommand,
-            #'install': PostInstallCommand,
-        },
+            name='spectrochempy',
+            version=version,
+            packages=find_packages(
+                    exclude=['docs', "*.tests", "*.tests.*", "tests.*",
+                             "tests"]),
+            include_package_data=True,
+            url='http:/www-lcs.ensicaen.fr/spectrochempy',
+            license='CeCILL-2.1',
+            author='Arnaud Travert & christian Fernandez',
+            author_email='spectrochempy@ensicaen.fr',
+            description='Spectra Analysis & Processing with Python',
+            long_description=read('README.rst'),
+            setup_requires=['pytest-runner'],
+            install_requires=get_dependencies(),
+            dependency_links=[
+                "git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
+            ],
+            tests_require=['pytest'],
+            classifiers=[
+                "Development Status :: 2 - Pre-Alpha",
+                "Topic :: Utilities",
+                "Topic :: Scientific/Engineering",
+                "Intended Audience :: Science/Research",
+                "License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
+                "Operating System :: OS Independent",
+                "Programming Language :: Python :: 3.5",
+            ],
+            cmdclass={
+                'develop': PostDevelopCommand,
+                # 'install': PostInstallCommand,
+            },
     )
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     run_setup()

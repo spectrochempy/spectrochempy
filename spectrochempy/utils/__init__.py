@@ -39,6 +39,7 @@ This package provides utilities classes and functions.
 
 """
 import numpy as np
+
 EPSILON = epsilon = np.finfo(float).eps
 
 from .decorators import *

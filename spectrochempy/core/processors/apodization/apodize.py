@@ -118,12 +118,12 @@ def apodize(source, **kwargs):
     """
 
     # output dataset inplace (by default) or not
-    inplace = kwargs.pop('inplace', True )
+    inplace = kwargs.pop('inplace', True)
 
     # Do we apply the apodization or just return
     # the apodization array
     apply = kwargs.pop('apply', True)
-    inplace = inplace and apply # force inplace false if we do not apply
+    inplace = inplace and apply  # force inplace false if we do not apply
 
     if not inplace:
         new = source.copy()  # copy to be sure not to modify this dataset
@@ -133,7 +133,7 @@ def apodize(source, **kwargs):
     # On which axis do we want to apodize?
     axis = kwargs.pop('axis', -1)
 
-    #if axis < 0:
+    # if axis < 0:
     #    axis = source.ndim + axis
     if axis == new.ndim - 1:
         axis = -1
@@ -150,9 +150,9 @@ def apodize(source, **kwargs):
 
     lastaxe = new.axes[-1]
     if (lastaxe.unitless or lastaxe.dimensionless or
-                                      lastaxe.units.dimensionality != '[time]'):
+                lastaxe.units.dimensionality != '[time]'):
         log.error('apodization functions apply only to dimensions '
-                     'with [time] dimensionality')
+                  'with [time] dimensionality')
         return source
 
     # first parameters (apodization in Hz) ?
@@ -181,7 +181,7 @@ def apodize(source, **kwargs):
 
     # convert (1./apod) to the axis time units
     if apod.magnitude > epsilon:
-        tc1 = (1./apod).to(lastaxe.units)
+        tc1 = (1. / apod).to(lastaxe.units)
         args.append(tc1)
     else:
         args.append(0 * ur.us)
@@ -204,10 +204,10 @@ def apodize(source, **kwargs):
 
     # compute the apodization function
     x = lastaxe
-    method = kwargs.pop('method',None)
-    if method is None or method=='em':
+    method = kwargs.pop('method', None)
+    if method is None or method == 'em':
         # em by default
-        apod_arr = np.exp(-np.pi * np.abs(x - args[2])/args[0])
+        apod_arr = np.exp(-np.pi * np.abs(x - args[2]) / args[0])
     else:
         apod_arr = method(x, *args)
 
@@ -215,10 +215,10 @@ def apodize(source, **kwargs):
         apod_arr = apod_arr[::-1]
 
     if kwargs.pop('inv', False):
-        apod_arr  = 1. / apod_arr  # invert apodization
+        apod_arr = 1. / apod_arr  # invert apodization
 
     # apply?
-    #if not apply:
+    # if not apply:
     #    return apod_arr
 
     # if we are in NMR we have an additional complication due to the mode
@@ -226,12 +226,12 @@ def apodize(source, **kwargs):
     # TODO: CHECK IF THIS WORK WITH 2D DATA - IMPORTANT - CHECK IN PARTICULAR IF SWAPING ALSO SWAP METADATA (NOT SURE FOR NOW)
     iscomplex = new.is_complex[-1]
     encoding = new.meta.encoding[-1]
-    #TODO: handle this eventual complexity
+    # TODO: handle this eventual complexity
 
     if iscomplex:
         data = interleaved2complex(new.data)
         if not apply:
-            data = np.ones_like(data)+0j
+            data = np.ones_like(data) + 0j
         data, _ = interleave(data * apod_arr)
         new._data = data
     else:
@@ -247,7 +247,8 @@ def apodize(source, **kwargs):
     if apply:
         name = kwargs.pop('method_name', 'em')
         new.history = str(
-        new.modified) + ': ' + '%s apodization performed: '%name + str(apod) +'\n'
+                new.modified) + ': ' + '%s apodization performed: ' % name + str(
+            apod) + '\n'
 
     return new
 

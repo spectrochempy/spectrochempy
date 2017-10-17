@@ -1,4 +1,4 @@
-
+# coding=utf-8
 # TODO: This is an old file from another project - need to adapt some of the technique to scp
 
 import numpy as np
@@ -12,19 +12,20 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import matplotlib.pyplot as plt
 
-#TODO : plt.style.use('agir_default')
+
+# TODO : plt.style.use('agir_default')
 
 # ******************************************************************************
 # PLOTTING
 # ******************************************************************************
 
-def drawabs(ax, x, y, dy, head_width = 5, xshift=10 ):
-    ax.arrow(x, y, 0, dy, head_width=head_width, head_length=dy/5.,
-                  length_includes_head=True, fc='k', ec='k')
-    ax.arrow(x, y+dy, 0, -dy, head_width=head_width, head_length=dy/5.,
-                  length_includes_head=True, fc='k', ec='k')
-    txt = "%.2f a.u." % (dy)
-    ax.text(x-xshift, (2.*y+dy)/2., txt, va='center', fontsize=6)
+def drawabs(ax, x, y, dy, head_width=5, xshift=10):
+    ax.arrow(x, y, 0, dy, head_width=head_width, head_length=dy / 5.,
+             length_includes_head=True, fc='k', ec='k')
+    ax.arrow(x, y + dy, 0, -dy, head_width=head_width, head_length=dy / 5.,
+             length_includes_head=True, fc='k', ec='k')
+    txt = "%.2f a.u." % dy
+    ax.text(x - xshift, (2. * y + dy) / 2., txt, va='center', fontsize=6)
 
 
 def plotregions(ax, data, regions=[], inc=20):
@@ -46,17 +47,17 @@ def plotregions(ax, data, regions=[], inc=20):
     ax.set_xlim(w[-1], w[0])
     return colors
 
-def plots(ax, specs, t=None, w=None,
-             labels=['wavenumbers (cm$^{-1}$)', 'TOS (h)', 'absorbance (a.u.)'],
-             transpose=False,
-             step='all',
-             lw = 1.,
-             color='map',
-             colormap='jet',
-             normalize=None,
-             zlim=None,
-             colorbar=True):
 
+def plots(ax, specs, t=None, w=None,
+          labels=['wavenumbers (cm$^{-1}$)', 'TOS (h)', 'absorbance (a.u.)'],
+          transpose=False,
+          step='all',
+          lw=1.,
+          color='map',
+          colormap='jet',
+          normalize=None,
+          zlim=None,
+          colorbar=True):
     if isinstance(specs, pd.DataFrame):
         # prepare data to plot
         S = specs.values.copy()
@@ -98,14 +99,14 @@ def plots(ax, specs, t=None, w=None,
         ishowed = slice(None)
     else:
         raise ValueError(
-     'step parameter was not recognized. Should be: an int, "all"')
+                'step parameter was not recognized. Should be: an int, "all"')
 
     s = s[:, ishowed]
     y = y[ishowed]
 
     # now plot the collection of lines
-    if color == None:
-        ax.plot(x, s, lw=lw )
+    if color is None:
+        ax.plot(x, s, lw=lw)
     elif color != 'map':
         ax.plot(x, s, c=color, lw=lw)
     elif color == 'map':
@@ -114,19 +115,21 @@ def plots(ax, specs, t=None, w=None,
                 vmin, vmax = zlim
             else:
                 vmin, vmax = y[0], y[-1]
-            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)  # we normalize to the max time
+            norm = mpl.colors.Normalize(vmin=vmin,
+                                        vmax=vmax)  # we normalize to the max time
             if normalize is not None:
                 norm.vmax = normalize
         else:
             norm = mpl.colors.Normalize(vmin=y[0], vmax=y[-1])
 
-        line_segments = LineCollection([list(zip(x, s[:, i].tolist())) for i in xrange(len(y))][::-1],
-                                    # Make a sequence of x,s[i] pairs
-                                    # linewidths    = (0.5,1,1.5,2),
-                                    linewidths=lw,
-                                    linestyles='solid',
-                                    # alpha=.5,
-                         )
+        line_segments = LineCollection(
+                [list(zip(x, s[:, i].tolist())) for i in xrange(len(y))][::-1],
+                # Make a sequence of x,s[i] pairs
+                # linewidths    = (0.5,1,1.5,2),
+                linewidths=lw,
+                linestyles='solid',
+                # alpha=.5,
+                )
         line_segments.set_array(y[::-1])
         line_segments.set_cmap(colormap)
         line_segments.set_norm(norm)
@@ -137,7 +140,7 @@ def plots(ax, specs, t=None, w=None,
             fig = pl.gcf()
             axcb = fig.colorbar(line_segments, ax=ax)
             axcb.set_label(ylabel)
-            axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5 ))
+            axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5))
 
     ax.set_xlim(xlim)
     ax.set_ylim(-.2, 3.0)
@@ -145,12 +148,14 @@ def plots(ax, specs, t=None, w=None,
     ax.set_ylabel(zlabel)
     return ax, line_segments
 
+
 def plot_param(fig, fignumb, sharey=None, sharex=None):
-    #print int(fignumb)
+    # print int(fignumb)
     ax = fig.add_subplot(int(fignumb), sharex=sharex, sharey=sharey)
     ax.xaxis.set_major_locator(MaxNLocator(5))
     ax.yaxis.set_major_locator(MaxNLocator(5))
     return ax
+
 
 def plotdata(SL,
              colormap='jet',
@@ -158,37 +163,36 @@ def plotdata(SL,
              xlim=None,
              ylim=None,
              zlim=None,
-             lw = 0.5,
+             lw=0.5,
              boldlines=None,
              interrupted=None,
-             #width = 3.4,
-             #height = 3.4*0.75,
+             # width = 3.4,
+             # height = 3.4*0.75,
              horizontal=False,
-             figsize = None,
+             figsize=None,
              middle_ticks=True,
              barshow=True,
              step='all',
              xshared=True,
              yshared=True,
-             yticks = True,
+             yticks=True,
              title=None,
-             titlecolor = 'k',
+             titlecolor='k',
              hspace=0,
              wspace=0,
-             bottom = 0.24,
+             bottom=0.24,
              top=0.95,
-             left = 0.08,
+             left=0.08,
              right=0.97,
              ):
-
     row = 1
     col = 1
     axes = []
     if isinstance(SL, list):
         # several plots
         if horizontal:
-            row=1
-            col=len(SL)
+            row = 1
+            col = len(SL)
         else:
             row = len(SL)
         if not isinstance(title, list):
@@ -225,67 +229,70 @@ def plotdata(SL,
                 xlim2_ = (min(S.index), interrupted[0])[::-1]
                 xlim_ = (interrupted[-1], max(S.index))[::-1]
         else:
-            xlim_=xlim
+            xlim_ = xlim
 
         if ylim is None and S is not None:
             ylim_ = (S.values.min(), S.values.max())
         else:
             ylim_ = ylim
 
-        if not(xshared or yshared) or idx==0:
+        if not (xshared or yshared) or idx == 0:
             ax = plot_param(fig, "%d%d%d" % (row, col, (idx + 1)))
         elif xshared and not yshared:
-            ax = plot_param(fig, "%d%d%d" % (row, col, (idx + 1)), sharex=axes[0])
+            ax = plot_param(fig, "%d%d%d" % (row, col, (idx + 1)),
+                            sharex=axes[0])
         elif yshared and not xshared:
-            ax = plot_param(fig, "%d%d%d" % (row, col, (idx + 1)), sharey=axes[0])
+            ax = plot_param(fig, "%d%d%d" % (row, col, (idx + 1)),
+                            sharey=axes[0])
         else:
             ax = plot_param(fig, "%d%d%d" % (row, col, (idx + 1)),
                             sharex=axes[0], sharey=axes[0])
 
-
         if interrupted:
-            ax2 = plot_param(fig, "%d%d%d" % (row, col, (idx * 2 + 2)), sharey=ax)
+            ax2 = plot_param(fig, "%d%d%d" % (row, col, (idx * 2 + 2)),
+                             sharey=ax)
             # Make the spacing between the two axes a bit smaller
-            wspace=0.05
-            axes.append([ax,ax2])
+            wspace = 0.05
+            axes.append([ax, ax2])
 
         if interrupted:
-            plots(ax, S, zlim=zlim, colormap=colormap, lw=lw, colorbar=False, step=step)
-            plots(ax2, S,  lw=lw, zlim=zlim, colormap=colormap, step=step)
+            plots(ax, S, zlim=zlim, colormap=colormap, lw=lw, colorbar=False,
+                  step=step)
+            plots(ax2, S, lw=lw, zlim=zlim, colormap=colormap, step=step)
 
         else:
             axes.append(ax)
             showbar = barshow
-            if row==3:
+            if row == 3:
                 showbar = False
             if not middle_ticks:
-                if idx==1:
-                    if S is  None:
+                if idx == 1:
+                    if S is None:
                         ax.axis('off')
-                        plots(ax, SL[idx-1], color='w', lw=lw,
+                        plots(ax, SL[idx - 1], color='w', lw=lw,
                               zlim=zlim, colorbar=barshow, step=step)
 
                     else:
-                        plots(ax, S, colormap=colormap,  zlim=zlim,
+                        plots(ax, S, colormap=colormap, zlim=zlim,
                               lw=lw, colorbar=barshow, step=step)
                     ax.set_yticklabels([])
                     ax.set_ylabel('')
 
                 else:
-                    plots(ax, S, colormap=colormap,  lw=lw,
+                    plots(ax, S, colormap=colormap, lw=lw,
                           zlim=zlim, colorbar=False, step=step)
             else:
-                if idx==1 and S is  None:
+                if idx == 1 and S is None:
                     ax.axis('off')
-                    plots(ax, SL[idx-1], color='w',  lw=lw,
+                    plots(ax, SL[idx - 1], color='w', lw=lw,
                           zlim=zlim, colorbar=barshow, step=step)
                 else:
-                    ax, lseg = plots(ax, S, colormap=colormap,  lw=lw,
+                    ax, lseg = plots(ax, S, colormap=colormap, lw=lw,
                                      zlim=zlim, colorbar=showbar, step=step)
 
         if boldlines is not None:
             if isinstance(boldlines, int):
-                plots(ax, S, color='k',  lw=lw, step=boldlines, zlim=zlim, )
+                plots(ax, S, color='k', lw=lw, step=boldlines, zlim=zlim, )
                 if interrupted:
                     plots(ax2, S, color='k',
                           lw=lw, step=boldlines, zlim=zlim, )
@@ -293,7 +300,7 @@ def plotdata(SL,
         if not interrupted and not plot_transposed:
             if title[idx]:
                 # ax.set_title(title[idx])
-                ax.text(0.97,0.89,
+                ax.text(0.97, 0.89,
                         title[idx],
                         color=titlecolor[idx],
                         verticalalignment='top',
@@ -324,8 +331,8 @@ def plotdata(SL,
 
         if plot_transposed:
             axt = plot_param(fig, "%d%d%d" % (row, col, (idx * 2 + 2)))
-            plots(axt, S,  lw=lw, transpose=True, zlim=zlim, )
-            #axt.set_title(title[idx])
+            plots(axt, S, lw=lw, transpose=True, zlim=zlim, )
+            # axt.set_title(title[idx])
 
             if ylim_ is not None:
                 axt.set_ylim(ylim_)
@@ -335,37 +342,35 @@ def plotdata(SL,
         if not yticks:
             ax.set_yticks([])
         # case of three plots (denoised)
-        if row==3:
-            if idx==0:
+        if row == 3:
+            if idx == 0:
                 axes[0].set_ylabel('')
-            if idx==2:
+            if idx == 2:
                 axes[2].set_ylabel('')
 
-        if idx<len(SL)-1:
+        if idx < len(SL) - 1:
             axes[idx].set_xticklabels([])
 
-
-    if row==3 and barshow:
+    if row == 3 and barshow:
 
         axins = inset_axes(axes[1],
-                   width="2.5%", # width = 10% of parent_bbox width
-                   height="150%", # height : 50%
-                   loc=3,
-                   bbox_to_anchor=(1.05, -0.25, 1, 1),
-                   bbox_transform=axes[1].transAxes,
-                   borderpad=0,
-                   )
+                           width="2.5%",  # width = 10% of parent_bbox width
+                           height="150%",  # height : 50%
+                           loc=3,
+                           bbox_to_anchor=(1.05, -0.25, 1, 1),
+                           bbox_transform=axes[1].transAxes,
+                           borderpad=0,
+                           )
         axcb = pl.colorbar(lseg, cax=axins)
         if zlim:
             vmin, vmax = zlim
-            axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5 ))
+            axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5))
         axcb.set_label('TOS (h)')
 
-
     pl.subplots_adjust(
-                    hspace=hspace, wspace=wspace,
-                    bottom=bottom, top=top,
-                    left=left, right=right)
+            hspace=hspace, wspace=wspace,
+            bottom=bottom, top=top,
+            left=left, right=right)
 
     if plot_transposed:
         return fig, ax, axt

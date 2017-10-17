@@ -45,16 +45,15 @@ import scipy.optimize
 from warnings import warn
 from spectrochempy.application import log
 
-
 from spectrochempy.fitting.parameters import FitParameters
-
 
 __all__ = ["optimize", ]
 _methods = ['optimize', ]
 
-#===========================================================================
+
+# ===========================================================================
 # _fitting
-#===========================================================================
+# ===========================================================================
 
 #  Internal/external transformation
 #  These transformations are used in the MINUIT package,
@@ -80,6 +79,7 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
     :return:
 
     """
+
     global keys
 
     def restore_external(fp, p, keys):
@@ -118,6 +118,7 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
     # make internal parameters
     par = []
     keys = []
+
     for key in sorted(fp0.keys()):
         if not fp0.fixed[key]:
             # we make internal parameters in case of bounding
@@ -151,10 +152,13 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
     elif method.upper() == "HOPPING":
         result = scipy.optimize.basinhopping(internal_func, par,
                                              niter=100, T=1.0, stepsize=0.5,
-                                             minimizer_kwargs={'args': tuple(args)},
+                                             minimizer_kwargs={
+                                                 'args': tuple(args)},
                                              take_step=None,
-                                             accept_test=None, callback=internal_callback,
-                                             interval=50, disp=False, niter_success=None)
+                                             accept_test=None,
+                                             callback=internal_callback,
+                                             interval=50, disp=False,
+                                             niter_success=None)
 
         # fmin(func, par, args=args, maxfun=maxfun, maxiter=maxiter, ftol=ftol, xtol=xtol,
         #                                                full_output=True, disp=False, callback=callback)
@@ -163,13 +167,13 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
 
     elif method == "XXXX":
         raise NotImplementedError("method: %s" % method)
-        #TODO: implement other algorithms
+        # TODO: implement other algorithms
     else:
         raise NotImplementedError("method: %s" % method)
 
-    #restore the external parameter
+    # restore the external parameter
     fpe = restore_external(fp0, res, keys)
-    #for i, key in enumerate(keys):
+    # for i, key in enumerate(keys):
     #    fp0.to_external(key, res[i])
 
 
@@ -183,4 +187,3 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
 
 if __name__ == "__main__":
     pass
-

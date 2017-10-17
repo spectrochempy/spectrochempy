@@ -40,8 +40,8 @@ from traitlets import import_item
 from spectrochempy.utils import list_packages
 
 name = 'dataset'
-pkgs = sys.modules['spectrochempy.core.%s'%name]
-api = sys.modules['spectrochempy.core.%s.api'%name]
+pkgs = sys.modules['spectrochempy.core.%s' % name]
+api = sys.modules['spectrochempy.core.%s.api' % name]
 
 pkgs = list_packages(pkgs)
 
@@ -53,8 +53,7 @@ for pkg in pkgs:
     pkg = import_item(pkg)
     if not hasattr(pkg, '__all__'):
         continue
-    a = getattr(pkg,'__all__')
+    a = getattr(pkg, '__all__')
     __all__ += a
     for item in a:
         setattr(api, item, getattr(pkg, item))
-

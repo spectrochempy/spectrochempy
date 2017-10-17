@@ -46,6 +46,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+
 global doc_building
 doc_building = True
 
@@ -93,7 +94,7 @@ extensions = [
 
 # Numpy autodoc attributes
 numpydoc_show_class_members = False
-#numpydoc_use_plots = True
+# numpydoc_use_plots = True
 numpydoc_class_members_toctree = False
 
 # http://sphinx.pocoo.org/ext/todo.html
@@ -168,10 +169,11 @@ from spectrochempy.utils.rstutils import rst_epilog
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'sphinxdoc'
+# html_theme = 'sphinxdoc'
 
 # Activate the theme.
 import sphinx_bootstrap_theme
+
 html_theme = 'bootstrap'  # https://github.com/ryan-roemer/sphinx-bootstrap-theme
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
@@ -196,8 +198,8 @@ html_theme_options = {
     # Note the "1" or "True" value above as the third argument to indicate
     # an arbitrary url.
     'navbar_links': [
-        #("Examples", "examples"),
-        #("Link", "http://example.com", True),
+        # ("Examples", "examples"),
+        # ("Link", "http://example.com", True),
     ],
 
     # Render the next and previous page links in navbar. (Default: true)
@@ -232,7 +234,7 @@ html_theme_options = {
 
     # Location of link to source.
     # Options are "nav" (default), "footer" or anything else to exclude.
-    'source_link_position': "", #"nav",
+    'source_link_position': "",  # "nav",
 
     # Bootswatch (http://bootswatch.com/) theme.
     #
@@ -245,8 +247,7 @@ html_theme_options = {
     'bootstrap_version': "3",
 }
 
-
-#html_style = 'spectrochempy.css'
+# html_style = 'spectrochempy.css'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -254,7 +255,7 @@ html_theme_options = {
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = ['_static']
+# html_theme_path = ['_static']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -286,7 +287,7 @@ html_last_updated_fmt = '%b %d, %Y'
 # html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {'**': ['info.html',
+# html_sidebars = {'**': ['info.html',
 #                        'api.html',
 #                        'links.html',
 #                        'searchbox.html',
@@ -474,7 +475,7 @@ autodoc_default_flags = ['members', 'inherited-members', 'show-inheritance']
 exclusions = ('with_traceback', 'with_traceback',
               'observe', 'unobserve', 'observe', 'cross_validation_lock',
               'unobserve_all', 'class_config_rst_doc', 'class_config_section',
-              'class_get_help','class_print_help',
+              'class_get_help', 'class_print_help',
               'section_names', 'update_config',
               'clear_instance', 'document_config_options', 'flatten_flags',
               'generate_config_file', 'initialize_subcommand', 'initialized',
@@ -490,8 +491,10 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
     exclude = name in exclusions or 'trait' in name
     return skip or exclude
 
+
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
+
 
 # Sphinx-gallery ------------------
 
@@ -499,9 +502,9 @@ def setup(app):
 plot_gallery = True
 
 sphinx_gallery_conf = {
-    #'backreferences_dir': False,
+    # 'backreferences_dir': False,
     'backreferences_dir': 'gen_modules/backreferences',
-    'doc_module': ('spectrochempy', ),
+    'doc_module': ('spectrochempy',),
     'reference_url': {
         'spectrochempy': None,
         'matplotlib': 'https://matplotlib.org',

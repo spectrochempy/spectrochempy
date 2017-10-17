@@ -15,6 +15,7 @@ from warnings import warn
 
 from . import fileiobase
 
+
 ###################
 # unit conversion #
 ###################
@@ -40,15 +41,15 @@ def make_uc(dic, data, dim=-1):
         Unit conversion object for given dimension.
 
     """
-    if dim < 0:     # negative dimensions
+    if dim < 0:  # negative dimensions
         dim = data.ndim + dim
     size = data.shape[dim]  # R|I
 
     ddim = find_dic_dim(dic, dim)
     cplx = {'R': False, 'C': True}[dic['nptype'][ddim]]
-    sw = dic['sw'][ddim]   # Hz
-    obs = dic['sf'][ddim]   # MHz
-    car = dic['ppm'][ddim] * dic[obs]   # Hz
+    sw = dic['sw'][ddim]  # Hz
+    obs = dic['sf'][ddim]  # MHz
+    car = dic['ppm'][ddim] * dic[obs]  # Hz
     return fileiobase.unit_conversion(size, cplx, sw, obs, car)
 
 
@@ -65,6 +66,7 @@ def create_data(data):
         return np.array(data, dtype="complex64")
     else:
         return np.array(data, dtype="float32")
+
 
 ########################
 # universal dictionary #
@@ -107,7 +109,7 @@ def guess_udic(dic, data):
         # set quadrature and correct size
         if dic['nptype'][idim] == 'C':
             if iudim != ndim - 1:
-                udic[iudim]['size'] *= 2    # don't double size of last dim
+                udic[iudim]['size'] *= 2  # don't double size of last dim
             udic[iudim]['complex'] = True
         else:
             udic[iudim]['complex'] = False
@@ -182,7 +184,7 @@ def create_dic(udic, dim_order=None):
             dic['quad'][i] = 'states'
 
         # fix parameters if time domain data
-        if dic['dom'][i] == 'T':    # time domain data
+        if dic['dom'][i] == 'T':  # time domain data
             dic['xfirst'][i] = 0.0
             if dic['quad'][i] in ['states']:
                 # states time domain data
@@ -209,6 +211,7 @@ def create_dic(udic, dim_order=None):
     dic['layout'] = (size, domains)
 
     return dic
+
 
 #######################
 # Reading and Writing #
@@ -379,6 +382,7 @@ def write_lowmem(filename, dic, data, par_file=None, overwrite=False):
     f.close()
     return
 
+
 #######################
 # sec reading/writing #
 #######################
@@ -444,6 +448,7 @@ def read_sec(filename, dtype, shape, cplex):
     if cplex:
         data = uninterleave_data(data)
     return data
+
 
 ##########################
 # data get/put functions #
@@ -531,6 +536,7 @@ def interleave_data(data):
     # data_out[...,1::2] = data.imag
     # return data_out
 
+
 ######################
 # low-memory objects #
 ######################
@@ -572,7 +578,7 @@ class rnmrtk_nd(fileiobase.data_nd):
         self.order = order
 
         # set additional parameters
-        self.fshape = fshape    # shape on disk
+        self.fshape = fshape  # shape on disk
         self.cplex = cplex
         self.filename = filename
         self.big = big
@@ -582,7 +588,7 @@ class rnmrtk_nd(fileiobase.data_nd):
         else:
             self.dtype = np.dtype('float32')
 
-        self.__setdimandshape__()   # set ndim and shape attributes
+        self.__setdimandshape__()  # set ndim and shape attributes
 
     def __fcopy__(self, order):
         """
@@ -641,6 +647,7 @@ class rnmrtk_nd(fileiobase.data_nd):
         f.close()
         return out
 
+
 ##################################
 # Parameter dictionary utilities #
 ##################################
@@ -686,6 +693,7 @@ def find_array_dim(dic, ddim):
     """
     dic_dims = [int(i[1]) for i in dic['layout'][1]]
     return dic_dims[ddim]
+
 
 ############################
 # parameter file functions #
@@ -748,7 +756,7 @@ def write_par(par_file, dic, overwrite):
     f.write(l + "\n")
 
     # N line
-    s = ["%14i %c" % (t) for t in zip(dic['npts'], dic['nptype'])]
+    s = ["%14i %c" % t for t in zip(dic['npts'], dic['nptype'])]
     l = "N".ljust(8) + "".join(s)
     f.write(l + "\n")
 
@@ -795,7 +803,7 @@ def parse_par_line(line, dic):
         dic['comment'] = pl[0].strip('\'')
 
     elif c == 'DOM':
-        dom = [s[0] for s in pl]        # dom as it appears in the file
+        dom = [s[0] for s in pl]  # dom as it appears in the file
         dic['ndim'] = ndim = len(pl)
         dic['order'] = order = [int(s[1]) for s in pl]  # dimension order
         # dom in accending order (to match other parameter)

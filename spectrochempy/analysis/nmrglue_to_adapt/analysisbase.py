@@ -49,11 +49,12 @@ def valid_pt(pt, shape):
     Determind if a point (indices) is valid for a given shaped
     """
     for i, j in zip(pt, shape):
-        if i < 0:   # index is not negative
+        if i < 0:  # index is not negative
             return False
-        if i >= j:    # index is less than j
+        if i >= j:  # index is less than j
             return False
     return True
+
 
 dimension_names = ['A', 'Z', 'Y', 'X']
 
@@ -222,6 +223,7 @@ class ndwindow(object):
     ndwindow_inside : Iterator over equal sized windows in the array.
 
     """
+
     def __init__(self, shape, wsize):
         """ Set up the ndwindow object """
         if len(shape) != len(wsize):
@@ -264,6 +266,7 @@ class ndwindow_index(object):
     ndwindow_inside : Iterator over equal sized windows in the array.
 
     """
+
     def __init__(self, shape, wsize):
         """ Set up the object """
         if len(shape) != len(wsize):
@@ -329,12 +332,13 @@ class ndwindow_inside(object):
         window's top left point.
 
     """
+
     def __init__(self, shape, wsize):
         """ Set up the object """
         if len(shape) != len(wsize):
             raise ValueError("shape and wsize do match match")
         self.ndindex = np.ndindex(
-            tuple(np.array(shape) - np.array(wsize) + 1))
+                tuple(np.array(shape) - np.array(wsize) + 1))
         self.wsize = wsize
 
     def __next__(self):
@@ -364,12 +368,13 @@ class ndwindow_inside_index(object):
     documentation.
 
     """
+
     def __init__(self, shape, wsize):
         " Set up the object """
         if len(shape) != len(wsize):
             raise ValueError("shape and wsize do match match")
         self.ndindex = np.ndindex(
-            tuple(np.array(shape) - np.array(wsize) + 1))
+                tuple(np.array(shape) - np.array(wsize) + 1))
         self.wsize = wsize
 
     def __next__(self):
@@ -380,7 +385,7 @@ class ndwindow_inside_index(object):
         """ x.next() -> the next value, or raiseStopIteration """
         start = self.ndindex.next()
         stop = np.array(start) + np.array(self.wsize)
-        return (start, tuple([slice(x, y) for x, y in zip(start, stop)]))
+        return start, tuple([slice(x, y) for x, y in zip(start, stop)])
 
     def __iter__(self):
         """ x.__iter__() <==> iter(x) """

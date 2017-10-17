@@ -45,6 +45,7 @@ from traitlets import HasTraits, Unicode, List
 
 __all__ = ['read_jdx']
 
+
 def read_jdx(filename='', sortbydate=True):
     """Open a .jdx file and return the correspondant dataset
 
@@ -78,8 +79,9 @@ def read_jdx(filename='', sortbydate=True):
         root.deiconify()
         root.lift()
         root.focus_force()
-        filename = filedialog.askopenfilename(parent=root, \
-                                              filetypes=[('jdx files', '.jdx'), ('all files', '.*')],
+        filename = filedialog.askopenfilename(parent=root,
+                                              filetypes=[('jdx files', '.jdx'),
+                                                         ('all files', '.*')],
                                               title='Open .jdx file')
         root.destroy()
 
@@ -123,7 +125,7 @@ def read_jdx(filename='', sortbydate=True):
     #        print('Error: no ##JCAMP-DX LR in outer block header')
     #        return
 
-    while ((keyword != '##DATA TYPE') and (keyword != '##DATATYPE')):
+    while (keyword != '##DATA TYPE') and (keyword != '##DATATYPE'):
         keyword, text = readl(f)
     if keyword != 'EOF':
         jdx_data_type = text
@@ -144,7 +146,9 @@ def read_jdx(filename='', sortbydate=True):
     # Create variables ********************************************************
     xaxis, data = [], []
     alltitles, allacquisitiondates, xunits, yunits = [], [], [], []
-    nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec, 'float'), np.zeros(nspec, 'float')
+    nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec,
+                                                         'float'), np.zeros(
+        nspec, 'float')
 
     # Read the spectra ********************************************************
     for i in range(nspec):
@@ -158,7 +162,8 @@ def read_jdx(filename='', sortbydate=True):
         while keyword != '##END':
             keyword, text = readl(f)
             if keyword == '##TITLE':
-                alltitles.append(text)  # Add the title of the spectrum in the liste alltitles
+                alltitles.append(
+                    text)  # Add the title of the spectrum in the liste alltitles
             if keyword == '##LONGDATE':
                 [year, month, day] = text.split('/')
             if keyword == '##TIME':
@@ -189,8 +194,10 @@ def read_jdx(filename='', sortbydate=True):
                     intensities = text.split(' ')[
                                   1:]  # for each line, get all the values exept the first one (first value = wavenumber)
                     allintensities = allintensities + intensities
-                spectra = np.array([allintensities])  # convert allintensities into an array
-                spectra[spectra == '?'] = 'nan'  # deals with missing or out of range intensity values
+                spectra = np.array([
+                                       allintensities])  # convert allintensities into an array
+                spectra[
+                    spectra == '?'] = 'nan'  # deals with missing or out of range intensity values
                 spectra = spectra.astype(float)
                 spectra = spectra * yfactor
                 # add spectra in "data" matrix
@@ -200,28 +207,35 @@ def read_jdx(filename='', sortbydate=True):
                     data = np.concatenate((data, spectra), 0)
 
         # Check "firstx", "lastx" and "nx"
-        if (firstx[i] != 0 and lastx[i] != 0 and nx[i] != 0):
+        if firstx[i] != 0 and lastx[i] != 0 and nx[i] != 0:
             # Creation of xaxis if it doesn't exist yet
             if not xaxis:
                 xaxis = np.linspace(firstx[0], lastx[0], nx[0])
                 xaxis = np.around((xaxis * xfactor), 3)
             else:  # Check the consistency of xaxis
                 if nx[i] - nx[i - 1] != 0:
-                    print('Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
+                    print(
+                        'Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
                     return
                 elif firstx[i] - firstx[i - 1] != 0:
-                    print('Error: Inconsistant data set - the x axis should start at same value')
+                    print(
+                        'Error: Inconsistant data set - the x axis should start at same value')
                     return
                 elif lastx[i] - lastx[i - 1] != 0:
-                    print('Error: Inconsistant data set - the x axis should end at same value')
+                    print(
+                        'Error: Inconsistant data set - the x axis should end at same value')
                     return
         else:
-            print('Error: ##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°', i + 1)
+            print(
+                'Error: ##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°',
+                i + 1)
             return
 
             # Creation of the acquisition date
-        if (year != '' and month != '' and day != '' and hour != '' and minute != '' and second != ''):
-            acqdate = datetime.datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
+        if (
+                                year != '' and month != '' and day != '' and hour != '' and minute != '' and second != ''):
+            acqdate = datetime.datetime(int(year), int(month), int(day),
+                                        int(hour), int(minute), int(second))
         else:
             acqdate = ''
         allacquisitiondates.append(acqdate)
@@ -229,10 +243,14 @@ def read_jdx(filename='', sortbydate=True):
         # Check the consistency of xunits and yunits
         if i > 0:
             if yunits[i] != yunits[i - 1]:
-                print('Error: ##YUNITS sould be the same for all spectra (check spectrum n°', i + 1, ')')
+                print(
+                    'Error: ##YUNITS sould be the same for all spectra (check spectrum n°',
+                    i + 1, ')')
                 return
             elif xunits[i] != xunits[i - 1]:
-                print('Error: ##XUNITS sould be the same for all spectra (check spectrum n°', i + 1, ')')
+                print(
+                    'Error: ##XUNITS sould be the same for all spectra (check spectrum n°',
+                    i + 1, ')')
                 return
 
     # Determine xaxis name ****************************************************
@@ -249,7 +267,8 @@ def read_jdx(filename='', sortbydate=True):
 
     out = Dataset(data)
     out.name = jdx_title
-    out.author = (os.environ['USERNAME'] + '@' + os.environ['COMPUTERNAME'])  # dataset author string
+    out.author = (os.environ['USERNAME'] + '@' + os.environ[
+        'COMPUTERNAME'])  # dataset author string
     out.date = datetime.datetime.now()
     out.moddate = out.date
     out.datalabel = yunits[0]
@@ -260,8 +279,10 @@ def read_jdx(filename='', sortbydate=True):
         out.addtimeaxis()
         out.sort(0, 0)
         out.dims[0].deleteaxis(0)
-    out.description = ('dataset "' + out.name + '" : imported from jdx file. \n')
-    out.history = (str(out.date) + " : Created by jdxload('" + filename + "') \n")
+    out.description = (
+    'dataset "' + out.name + '" : imported from jdx file. \n')
+    out.history = (
+    str(out.date) + " : Created by jdxload('" + filename + "') \n")
 
     # make sure that the lowest( index correspond to th largest wavenember*
     # for compatibility with dataset creacted by spgload:
@@ -270,4 +291,3 @@ def read_jdx(filename='', sortbydate=True):
         out = out[:, ::-1]
 
     return out
-

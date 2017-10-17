@@ -54,11 +54,12 @@ from spectrochempy.utils import closer_power_of_two
 
 epsilon = np.finfo(float).eps
 
+
 # =============================================================================
 # interface for the processing class
 # =============================================================================
 # NOTE: if these parameters are not set, the name of the module is taken
-#__all__ = ["ft"]
+# __all__ = ["ft"]
 
 # =============================================================================
 # generic transform function
@@ -100,7 +101,7 @@ def ft(self, **kwargs):
     lastaxe = self.axes[axis]
 
     if (lastaxe.unitless or lastaxe.dimensionless or
-                                      lastaxe.units.dimensionality != '[time]'):
+                lastaxe.units.dimensionality != '[time]'):
         log.error('ft apply only to dimensions with [time] dimensionality')
         return self
 
@@ -108,7 +109,7 @@ def ft(self, **kwargs):
     si = kwargs.get('size', kwargs.get('si', None))
     if si is None:
         # we default to Hz units
-        si = closer_power_of_two(self.meta.td[axis]*2)
+        si = closer_power_of_two(self.meta.td[axis] * 2)
 
     # should we work on complex data
     iscomplex = self.is_complex[axis]
@@ -124,12 +125,12 @@ def ft(self, **kwargs):
         data = self.copy()
 
     # perform the fft
-    if iscomplex and encoding in ['QSIM','DQD']:
-        arr = np.fft.fft(data.real().data + data.imag().data *1j, si)
+    if iscomplex and encoding in ['QSIM', 'DQD']:
+        arr = np.fft.fft(data.real().data + data.imag().data * 1j, si)
     else:
         raise NotImplementedError(encoding)
 
-    #TODO: we need here to create a new dataset with new shape and axis
+    # TODO: we need here to create a new dataset with new shape and axis
     if axis != self.ndim - 1:  # swap back
         data = data.swapaxes(-1, axis)
 

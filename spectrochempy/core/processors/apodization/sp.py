@@ -46,10 +46,11 @@ import numpy as np
 from .apodize import apodize
 from spectrochempy.core.units import Quantity
 
+
 # =============================================================================
 # interface for the processing class
 # =============================================================================
-#__all__ = ["sp"]
+# __all__ = ["sp"]
 
 
 # =============================================================================
@@ -91,7 +92,7 @@ def sp(self, *args, **kwargs):
         True to reverse the apodization before applying it to the data.
 
     """
-    #TODO: To be finished!!!!
+    # TODO: To be finished!!!!
 
     args = list(args)  # important (args is a tuple)
 
@@ -125,7 +126,8 @@ def sp(self, *args, **kwargs):
             off = off.magnitude
             end = end.magnitude
         return np.sin(
-            np.pi * off / w + np.pi * ((end - off)/w) * i / (x.size - 1.)) ** pow
+                np.pi * off / w + np.pi * ((end - off) / w) * i / (
+                x.size - 1.)) ** pow
 
     kwargs['method'] = func
     kwargs['apod'] = off

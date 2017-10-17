@@ -44,10 +44,10 @@ from ..core.api import NDDataset
 
 
 class Efa:
-    '''Evolving Factor Analysis'''
+    """Evolving Factor Analysis"""
 
     def __init__(self, X, npc=None):
-        '''  Performs an Evolving Factor Analysis of the dataset X
+        """  Performs an Evolving Factor Analysis of the dataset X
         :param X: dataset
         :param plots: display plots of forward and backward analysis
         :param npc: number of singular values to display (if None: display all \
@@ -59,7 +59,7 @@ class Efa:
         f : Eigenvalues of the forward analysis
         b : Eigenvalues of the backward analysis
         c : estimated concentration profile (first in - first out)
-        '''
+        """
 
         NaNColumns = np.any(np.isnan(X.data), axis=0)
         packeddata = X.data[:, ~ NaNColumns]
@@ -90,7 +90,7 @@ class Efa:
         self.b.dims[0] = X.dims[0].copy()
 
     def c(self, npc=3, order='fifo'):
-        ''' Computes abstract concentration profile '''
+        """ Computes abstract concentration profile """
 
         n, k = np.shape(self.f.data)
         c = np.zeros((n, npc))

@@ -76,7 +76,7 @@ def integrate(data, unit_conv, limits, unit='ppm', noise_limits=None,
 
     # dx part of the integral
     scale = unit_conv.ppm_scale()
-    dx = abs(scale[1]-scale[0])
+    dx = abs(scale[1] - scale[0])
 
     # put together the integral
     values = sum_slice * dx
@@ -177,9 +177,9 @@ def ndintegrate(data, unit_conv, limits, unit='ppm', noise_limits=None):
 
     # the integrate_nd needs to be scaled by the bin width in ppm
     ppm_scales = [x.ppm_scale() for x in unit_conv]
-    dx = np.prod(np.array([abs(x[1]-x[0]) for x in ppm_scales]))
+    dx = np.prod(np.array([abs(x[1] - x[0]) for x in ppm_scales]))
 
-    slice_sum = (data[[slice(x[0], x[1])for x in np.flipud(inds)]]).sum()
+    slice_sum = (data[[slice(x[0], x[1]) for x in np.flipud(inds)]]).sum()
 
     value = slice_sum * dx
 
@@ -200,8 +200,8 @@ def ndintegrate(data, unit_conv, limits, unit='ppm', noise_limits=None):
         noise_inds = [sorted(x) for x in noise_inds]
 
         # see docstring of integrate
-        nm = np.prod(np.array([abs(x[1]-x[0]) for x in noise_inds]))
-        std = np.std(data[[slice(x[0], x[1])for x in np.flipud(noise_inds)]])
+        nm = np.prod(np.array([abs(x[1] - x[0]) for x in noise_inds]))
+        std = np.std(data[[slice(x[0], x[1]) for x in np.flipud(noise_inds)]])
 
         error = std * np.sqrt(nm)
         return np.hstack((value, error))

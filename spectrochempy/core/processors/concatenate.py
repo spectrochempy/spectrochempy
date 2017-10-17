@@ -43,8 +43,9 @@ from spectrochempy.utils import is_sequence
 
 __all__ = ['concatenate']
 
+
 def concatenate(*sources, axis=None):
-    '''Concatenation of DataSet objects along a given axis (by default the fisrt)
+    """Concatenation of DataSet objects along a given axis (by default the fisrt)
 
     Any number of DataSet objects can be concatenated. For this operation
     to be defined the following must be true:
@@ -112,7 +113,7 @@ def concatenate(*sources, axis=None):
 
     - ``out.description``: concatenates all descriptions
 
-    '''
+    """
 
     # checks dataset validity
 
@@ -127,7 +128,7 @@ def concatenate(*sources, axis=None):
 
         if not isinstance(source, NDDataset):
             raise TypeError(
-                "Only instance of NDDataset can be concatenated, not: " + type(
+                    "Only instance of NDDataset can be concatenated, not: " + type(
                             source).__name__)
 
         if source.ndim != sources[0].ndim:
@@ -148,7 +149,7 @@ def concatenate(*sources, axis=None):
         shapes.append(source.shape)
 
     # guess ndim
-    if axis == None:
+    if axis is None:
         try:
             # should work whatever the number of dimensions
             axis = [pair[0] == pair[1] for pair in zip(*shapes)].index(False)
@@ -193,7 +194,7 @@ def concatenate(*sources, axis=None):
 
             if saxe.title != axes[i].title:
                 warn(
-'Different axis title [%s] => the axis name is that of the 1st dataset [%s]' % (
+                        'Different axis title [%s] => the axis name is that of the 1st dataset [%s]' % (
                             outaxis.title,
                             saxe.title))
 

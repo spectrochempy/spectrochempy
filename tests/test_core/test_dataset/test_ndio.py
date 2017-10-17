@@ -45,8 +45,6 @@ from spectrochempy.api import data
 
 import pytest
 import os
-from numpy.compat import asbytes, asstr, asbytes_nested, bytes, basestring, \
-    unicode
 
 from tests.utils import assert_array_equal
 

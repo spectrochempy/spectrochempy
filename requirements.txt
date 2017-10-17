@@ -10,6 +10,7 @@ pandas
 xlrd
 pyqt
 setuptools_scm
+six
 
 pytest
 pytest-runner
@@ -26,4 +27,4 @@ nb_conda
 nbbrowserpdf
 nbsphinx
 jupyter_nbextensions_configurator
-
+ipython_genutils

@@ -29,33 +29,34 @@ import matplotlib.pyplot as plt
 ###############################################
 # Now we create a 3D NDDataset from scratch
 
-axe0 = Axis(coords = np.linspace(200., 300., 3),
-            labels = ['cold', 'normal', 'hot'],
-            mask = None,
-            units = "K",
-            title = 'temperature')
+axe0 = Axis(coords=np.linspace(200., 300., 3),
+            labels=['cold', 'normal', 'hot'],
+            mask=None,
+            units="K",
+            title='temperature')
 
-axe1 = Axis(coords = np.linspace(0., 60., 100),
-            labels = None,
-            mask = None,
-            units = "minutes",
-            title = 'time-on-stream')
+axe1 = Axis(coords=np.linspace(0., 60., 100),
+            labels=None,
+            mask=None,
+            units="minutes",
+            title='time-on-stream')
 
-axe2 = Axis(coords = np.linspace(4000., 1000., 100),
-            labels = None,
-            mask = None,
-            units = "cm^-1",
-            title = 'wavenumber')
+axe2 = Axis(coords=np.linspace(4000., 1000., 100),
+            labels=None,
+            mask=None,
+            units="cm^-1",
+            title='wavenumber')
 
-nd_data=np.array([np.array([np.sin(axe2.data*2.*np.pi/4000.)*np.exp(-y/60.) for y in axe1.data])*float(t)
-         for t in axe0.data])**2
-
+nd_data = np.array([np.array(
+        [np.sin(axe2.data * 2. * np.pi / 4000.) * np.exp(-y / 60.) for y in
+         axe1.data]) * float(t)
+                    for t in axe0.data]) ** 2
 
 mydataset = NDDataset(nd_data,
-               axes = [axe0, axe1, axe2],
-               title='Absorbance',
-               units='absorbance'
-              )
+                      axes=[axe0, axe1, axe2],
+                      title='Absorbance',
+                      units='absorbance'
+                      )
 
 mydataset.description = """Dataset example created for this tutorial. 
 It's a 3-D dataset (with dimensionless intensity : absorbance )"""

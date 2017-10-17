@@ -116,7 +116,7 @@ def test_axis_init_unitless():
                 mask = None,
                 units = None,
                 title = 'wavelength')
-    assert axe0.units == None
+    assert axe0.units is None
     assert axe0.data[0] == 4000.
     assert axe0.coords[0] == 4000.
     assert repr(axe0) == "Axis([   4e+03, 3.67e+03, ..., 1.33e+03,    1e+03]) unitless"
@@ -186,7 +186,7 @@ def test_axis_equal():
                 labels = None,
                 mask = None,
                 title = 'wavelength')
-    axe0 == axe1
+
     assert axe0 == axe1
     assert axe0 != axe2 # different labels
     assert axe0 == axe3 # one axe has no label (ignored)
@@ -243,7 +243,7 @@ def test_axis_sort():
                 units= 's',
                 mask = None,
                 title = 'wavelength')
-    assert(axe0.is_labeled)
+    assert axe0.is_labeled
     ax = axe0._sort()
     assert(ax.data[0]==1000)
     axe0._sort(descend=True, inplace=True)

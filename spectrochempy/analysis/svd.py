@@ -103,7 +103,7 @@ class Svd(HasTraits):
     Vt = Instance(NDDataset)
 
     def __init__(self, X, full_matrices=False, compute_uv=True):
-        ''' constructor of svd object '''
+        """ constructor of svd object """
 
         # retains valid columns
         NaNColumns = np.any(np.isnan(X.data), axis=0)
@@ -144,7 +144,7 @@ class Svd(HasTraits):
                        Axis(X.axes[1])
                        )
         Vt.description = (
-        'Loadings obtained by singular value decomposition of ' + X.name)
+            'Loadings obtained by singular value decomposition of ' + X.name)
         Vt.history = (str(Vt.modified) + ': created by Svd \n')
 
         self.U = U
@@ -156,7 +156,7 @@ class Svd(HasTraits):
 
     def __repr__(self):
         return '<spectrochempy.svd: ur%s , s(%s), Vt%s>' % (
-        self.U.shape, len(self.s), self.Vt.shape)
+            self.U.shape, len(self.s), self.Vt.shape)
 
     # Properties
     # ----------

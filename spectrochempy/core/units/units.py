@@ -66,7 +66,7 @@ formats = {
         'division_fmt': '/',
         'power_fmt': '{0}^{1}',
         'parentheses_fmt': r'({0})',
-        },
+    },
 
     'T': {  # spectrochempy HTML format.
         'as_ratio': False,
@@ -92,15 +92,16 @@ formatting._FORMATS.update(formats)
 formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ['~'])
 
 setattr(Quantity, '_repr_html_', lambda cls: cls.__format__('~T'))
-setattr(Quantity, '_repr_latex_', lambda cls:"$" + cls.__format__('~L') + "$")
+setattr(Quantity, '_repr_latex_', lambda cls: "$" + cls.__format__('~L') + "$")
 
-#TODO: work on this latex format
+# TODO: work on this latex format
 
 setattr(Unit, 'scaling', property(lambda u:
-                  u._REGISTRY.Quantity(1., u._units).to_base_units().magnitude))
+                                  u._REGISTRY.Quantity(1.,
+                                                       u._units).to_base_units().magnitude))
+
 
 def __format__(self, spec):
-
     spec = spec or self.default_format
 
     # special cases
@@ -112,47 +113,50 @@ def __format__(self, spec):
         ret = r'\si[%s]{%s}' % (opts, ustr)
         return ret
 
-    if '~' in spec or 'K' in spec or 'T' in spec or 'L' in spec: #spectrochempy modified
+    if '~' in spec or 'K' in spec or 'T' in spec or 'L' in spec:  # spectrochempy modified
         if self.dimensionless:
 
             if self._units == 'ppm':
-                units = UnitsContainer({'ppm':1})
+                units = UnitsContainer({'ppm': 1})
             elif abs(self.scaling - 1.) < 1.e-10:
-                units = UnitsContainer({'dimensionless':1})
+                units = UnitsContainer({'dimensionless': 1})
             else:
-                units = UnitsContainer({'scaled-dimensionless (%.2g)' % self.scaling
-:1})
+                units = UnitsContainer(
+                        {'scaled-dimensionless (%.2g)' % self.scaling
+                         : 1})
         else:
             units = UnitsContainer(dict((self._REGISTRY._get_symbol(key),
-                                     value)
-                                    for key, value in self._units.items()))
+                                         value)
+                                        for key, value in self._units.items()))
         spec = spec.replace('~', '')
     else:
         units = self._units
 
     return '%s' % (format(units, spec))
+
+
 setattr(Unit, '__format__', __format__)
 
 ################################################################################
 
 if globals().get('U_', None) is None:
-    #filename = resource_filename(PKG, 'spectrochempy.txt')
-    U_ = UnitRegistry(on_redefinition='ignore') #filename)
+    # filename = resource_filename(PKG, 'spectrochempy.txt')
+    U_ = UnitRegistry(on_redefinition='ignore')  # filename)
     set_application_registry(U_)
-    U_.enable_contexts('spectroscopy','boltzmann', 'chemistry')
-    del UnitRegistry # to avoid importing it
+    U_.enable_contexts('spectroscopy', 'boltzmann', 'chemistry')
+    del UnitRegistry  # to avoid importing it
 
 else:
     warn('Unit registry was already set up. Bypassed the new loading')
 
-
-U_.define('__wrapped__ = 1')  #<- hack to avoid an error with pytest (doctest activated)
+U_.define(
+    '__wrapped__ = 1')  # <- hack to avoid an error with pytest (doctest activated)
 U_.define('ppm = 1. = ppm')
 U_.define('absorbance = 1. = AU')
 
-U_.default_format = '' #.2fK'
+U_.default_format = ''  # .2fK'
 Q_ = U_.Quantity
-Q_.default_format = '' #.2fK'
+Q_.default_format = ''  # .2fK'
 M_ = U_.Measurement
 M_.default_format = 'uK'
 
@@ -211,18 +215,20 @@ def set_nmr_context(larmor):
         larmor = larmor * U_.MHz
 
     if 'nmr' not in U_._contexts.keys():
-        c = Context('nmr', defaults={'larmor':larmor})
+        c = Context('nmr', defaults={'larmor': larmor})
 
         c.add_transformation('[]', '[frequency]',
-                             lambda U_, x, **kwargs:  x * kwargs.get('larmor') / 1.e6)
+                             lambda U_, x, **kwargs: x * kwargs.get(
+                                 'larmor') / 1.e6)
         c.add_transformation('[frequency]', '[]',
-                             lambda U_, x, **kwargs: x * 1.e6 / kwargs.get('larmor') )
+                             lambda U_, x, **kwargs: x * 1.e6 / kwargs.get(
+                                 'larmor'))
         U_.add_context(c)
 
     else:
 
         c = U_._contexts['nmr']
-        c.defaults['larmor']=larmor
+        c.defaults['larmor'] = larmor
 
 
 # set alias for units and uncertainties
@@ -230,4 +236,3 @@ def set_nmr_context(larmor):
 ur = U_
 Quantity = Q_
 Measurement = M_
-

@@ -231,7 +231,7 @@ def calc_tshape(shape, kbyte_max=128):
     # Algorithm divides each dimention by 2 until under kbyte_max tile size.
     s = np.array(shape, dtype="int")
     i = 0
-    while (s.prod() * 4. / 1024. > kbyte_max):
+    while s.prod() * 4. / 1024. > kbyte_max:
         s[i] = np.floor(s[i] / 2.)
         i = i + 1
         if i == len(s):
@@ -425,7 +425,7 @@ def write_2D(filename, dic, data, overwrite=False):
     tt = ttX * ttY
 
     for i in range(int(tt)):
-        put_data(f, find_tilen_2d(data, i, (t_tup)))
+        put_data(f, find_tilen_2d(data, i, t_tup))
 
     f.close()
     return
@@ -490,7 +490,7 @@ def write_3D(filename, dic, data, overwrite=False):
     tt = ttX * ttY * ttZ
 
     for i in range(int(tt)):
-        put_data(f, find_tilen_3d(data, i, (t_tup)))
+        put_data(f, find_tilen_3d(data, i, t_tup))
     f.close()
     return
 
@@ -616,7 +616,7 @@ class sparky_2d(fileiobase.data_nd):
         # create a empty output directory
         out = np.empty((len(gY), len(gX)), dtype=self.dtype)
 
-        for iY in gtY:      # loop over Y tiles to get
+        for iY in gtY:  # loop over Y tiles to get
             for iX in gtX:  # loop over X tiles to get
 
                 # get the tile and reshape it
@@ -682,6 +682,7 @@ class sparky_3d(fileiobase.data_nd):
         Ordering of axes against file. None is equilent to (0, 1, 2)
 
     """
+
     def __init__(self, filename, order=None):
         """
         Create and set up object
@@ -760,8 +761,8 @@ class sparky_3d(fileiobase.data_nd):
         # create a empty output array
         out = np.empty((len(gZ), len(gY), len(gX)), dtype=self.dtype)
 
-        for iZ in gtZ:          # loop over Z tiles to get
-            for iY in gtY:      # loop over Y tiles to get
+        for iZ in gtZ:  # loop over Z tiles to get
+            for iY in gtY:  # loop over Y tiles to get
                 for iX in gtX:  # loop over X tiles to get
 
                     # get the tile and reshape it
@@ -872,7 +873,7 @@ def get_tile(f, num_points):
         Tile of NMR data. Data is returned as a 1D array.
 
     """
-    bsize = num_points * 4        # size in bytes
+    bsize = num_points * 4  # size in bytes
     return np.frombuffer(f.read(bsize), dtype='>f4')
 
 
@@ -954,7 +955,7 @@ def find_tilen_2d(data, ntile, tile_size):
 
     # some edge tiles might need zero filling
     # see if this is the case
-    if tile.shape == (lentY, lentX):    # well sized tile
+    if tile.shape == (lentY, lentX):  # well sized tile
         return tile.flatten()
     else:
         new_tile = np.zeros((lentY, lentX), dtype="float32")
@@ -986,7 +987,7 @@ def tile_data2d(data, tile_size):
     tt = ttX * ttY  # total number of tiles
 
     # calc some basic parameter
-    tsize = lentX * lentY   # number of points in one tile
+    tsize = lentX * lentY  # number of points in one tile
     t_tup = (lentY, lentX)  # tile size tuple
 
     # create an empty array to store file data
@@ -1135,7 +1136,7 @@ def tile_data3d(data, tile_size):
     ttY = int(np.ceil(data.shape[1] / float(lentY)))  # total tiles in Y dim
     ttZ = int(np.ceil(data.shape[0] / float(lentZ)))  # total tiles in Z dim
 
-    tt = ttX * ttY * ttZ    # total number of tiles
+    tt = ttX * ttY * ttZ  # total number of tiles
 
     # calc some basic parameter
     tsize = lentX * lentY * lentZ  # number of points in one tile
@@ -1187,7 +1188,6 @@ def untile_data3D(data, tile_size, data_size):
     for iZ in range(int(ttZ)):
         for iY in range(int(ttY)):
             for iX in range(int(ttX)):
-
                 minX = iX * lentX
                 maxX = (iX + 1) * lentX
 
@@ -1201,7 +1201,7 @@ def untile_data3D(data, tile_size, data_size):
                 minT = ntile * tsize
                 maxT = (ntile + 1) * tsize
 
-                out[minZ:maxZ, minY:maxY, minX:maxX] =  \
+                out[minZ:maxZ, minY:maxY, minX:maxX] = \
                     data[minT:maxT].reshape(t_tup)
 
     return out[:lenZ, :lenY, :lenX]
@@ -1248,7 +1248,7 @@ def fileheader2dic(header):
     dic["owner"] = str(header[5].decode()).strip('\x00')
     dic["date"] = str(header[6].decode()).strip('\x00')
     dic["comment"] = str(header[7].decode()).strip('\x00')
-    dic["seek_pos"] = header[8]     # eof seek position
+    dic["seek_pos"] = header[8]  # eof seek position
     dic["scratch"] = str(header[9].decode()).strip('\x00')
     return dic
 

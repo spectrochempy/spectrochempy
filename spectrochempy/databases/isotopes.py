@@ -51,12 +51,11 @@ from fractions import Fraction
 
 from spectrochempy.application import log
 
-
 # =============================================================================
 # Third-party imports
 # =============================================================================
 from traitlets import (HasTraits,
-                        Unicode, Int, Float, Instance)
+                       Unicode, Int, Float, Instance)
 
 # =============================================================================
 # Local imports
@@ -73,6 +72,7 @@ _classes = __all__[:]
 
 # This module's package.
 PKG = 'spectrochempy.databases.isotopes'
+
 
 # =============================================================================
 # Isotopes class
@@ -156,7 +156,7 @@ class Isotopes(HasTraits):
     # -------------------------------------------------------------------------
     @property
     def spin(self):
-        "Spin quantum number of the current nucleus"
+        """Spin quantum number of the current nucleus"""
         return Fraction(self.isotopes.ix[self.nucleus]['spin'])
 
     # ===========================================================================
@@ -164,7 +164,7 @@ class Isotopes(HasTraits):
     # ===========================================================================
     @property
     def Z(self):
-        'Atomic number  of the current nucleus'
+        """Atomic number  of the current nucleus"""
         return self.isotopes.ix[self.nucleus]['Z']
 
     # ===========================================================================
@@ -172,7 +172,7 @@ class Isotopes(HasTraits):
     # ===========================================================================
     @property
     def A(self):
-        'Atomic mass  of the current nucleus'
+        """Atomic mass  of the current nucleus"""
         return self.isotopes.ix[self.nucleus]['A']
 
     # ===========================================================================
@@ -180,7 +180,7 @@ class Isotopes(HasTraits):
     # ===========================================================================
     @property
     def name(self):
-        'the name of the nucleus'
+        """the name of the nucleus"""
         return self.isotopes.ix[self.nucleus]['name'].strip()
 
     # ===========================================================================
@@ -188,16 +188,16 @@ class Isotopes(HasTraits):
     # ===========================================================================
     @property
     def gamma(self):
-        'gyromagnetic ratio of the current nucleus'
+        """gyromagnetic ratio of the current nucleus"""
         muN = ur.elementary_charge / ur.proton_mass / 2. / (2. * np.pi)
-        return (self.isotopes.ix[self.nucleus]['gn']* muN).to('MHz/T')
+        return (self.isotopes.ix[self.nucleus]['gn'] * muN).to('MHz/T')
 
     # ===========================================================================
     # _get_abundance
     # ===========================================================================
     @property
     def abundance(self):
-        'natural abundance in percent of the current nucleus'
+        """natural abundance in percent of the current nucleus"""
         return self.isotopes.ix[self.nucleus]['abundance']
 
     # ===========================================================================
@@ -212,7 +212,8 @@ class Isotopes(HasTraits):
 
         """
         try:
-            return float(self.isotopes.ix[self.nucleus]['quadrupole'])*1000. * ur.mbarn
+            return float(self.isotopes.ix[self.nucleus][
+                             'quadrupole']) * 1000. * ur.mbarn
         except:
             return 0. * ur.barn
 
@@ -221,7 +222,7 @@ class Isotopes(HasTraits):
     # -------------------------------------------------------------------------
     @property
     def symbol(self):
-        "Symbol of the current nucleus"
+        """Symbol of the current nucleus"""
         return self.isotopes.ix[self._nucleus].symbol.strip()
 
     # -------------------------------------------------------------------------
@@ -256,24 +257,23 @@ class Isotopes(HasTraits):
         return "Isotopes < " + self.nucleus.strip() + " >"
 
     def _repr_html_(self):
-        return "<sup>%s</sup>%s [%s]"%(self.A, self.symbol, self.spin)
+        return "<sup>%s</sup>%s [%s]" % (self.A, self.symbol, self.spin)
 
     def __getattr__(self, item):
         """
         when an attribute is not found, try to interpret or retrun an informative message
         """
         # it may be a nucleus but in a inverted format
-        #try:
+        # try:
         p = re.compile(r'^([A-Z,a-z]+)[_-]*([0-9]+$)')
-        m= re.match(p, item).groups()
-        nucleus = m[1]+m[0]  # transform "e.g., Al27->27Al, ou AL-27 to 27Al"
+        m = re.match(p, item).groups()
+        nucleus = m[1] + m[0]  # transform "e.g., Al27->27Al, ou AL-27 to 27Al"
         if nucleus in self.isotopes.index.values:
             self.nucleus = nucleus
             return self
 
         log.warning('The isotope attribute {0} does not exists!'.format(item))
         return None
-
 
     # -------------------------------------------------------------------------
     # events
@@ -287,12 +287,12 @@ if __name__ == '__main__':
     print(isotope.name)
     print(isotope.spin)
     print(isotope.symbol)
-    isotope.nucleus = '27Al' # we change the isotope`inplace`
+    isotope.nucleus = '27Al'  # we change the isotope`inplace`
     print(isotope.name)
     print(isotope.spin)
     print(isotope.symbol)
     print(isotope.H_2.Q)
-    print(isotope.H_2.gamma.to('MHz/T')/2./np.pi)
+    print(isotope.H_2.gamma.to('MHz/T') / 2. / np.pi)
 # =============================================================================
 # EOF
 # =============================================================================

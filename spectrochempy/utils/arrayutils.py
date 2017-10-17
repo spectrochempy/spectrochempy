@@ -37,6 +37,7 @@
 __all__ = ['interleave', 'interleaved2complex']
 import numpy as np
 
+
 def interleave(data):
     """
     This function make an array where real and imaginary part are interleaved
@@ -64,6 +65,7 @@ def interleave(data):
         return new, True
     else:
         return data, False
+
 
 def interleaved2complex(data):
     """

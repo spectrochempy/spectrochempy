@@ -99,33 +99,34 @@ def guess_ftype(filename):
     f = open(filename, 'rb')
     line = f.readline()
 
-    if line[:4] == b"SIMP":   # either text or binary
+    if line[:4] == b"SIMP":  # either text or binary
         f.seek(0)
         for line in f:  # look for format line
             line = line.decode('ascii', 'ignore').strip('\n')
             if line[:6] == "FORMAT":
                 f.close()
                 return "BINARY"
-            elif line == "DATA":    # early end if we screw up
+            elif line == "DATA":  # early end if we screw up
                 break
             else:
                 continue
         f.close()
         return "TEXT"
 
-    else:   # xyreim, xreim, or binary
+    else:  # xyreim, xreim, or binary
         # determine the number of columns in the first 4 lines of the file
         ll1 = len(line.split())
         ll2 = len(f.readline().split())
         ll3 = len(f.readline().split())
         ll4 = len(f.readline().split())
         f.close()
-        if ll1 == ll2 == ll3 == ll4 == 3:   # all have 3 columns
+        if ll1 == ll2 == ll3 == ll4 == 3:  # all have 3 columns
             return "XREIM"
         elif ll1 == ll2 == ll3 == ll4 == 4:  # all have 4 columns
             return "XYREIM"
         else:
             return "RAWBIN"
+
 
 ###############################
 # Read SIMPSON text file data #
@@ -136,7 +137,7 @@ def read_text(filename):
     """Read a SIMPSON text file. See :py:func:`read`."""
     f = open(filename, 'r')  # open the file
 
-    dic = {}                # initalize dictionary of parameters
+    dic = {}  # initalize dictionary of parameters
 
     # parse the header of the file, storing parameters in dictionary, stop
     # when we hit the data line
@@ -150,32 +151,32 @@ def read_text(filename):
             key, value = line.split("=")
             dic[key] = value
         else:
-            warn("Warning, skipping line: %s" % (line))
+            warn("Warning, skipping line: %s" % line)
 
     # convert float and int keys
-    for key in ['SW1', 'SW']:    # convert keys to floats
+    for key in ['SW1', 'SW']:  # convert keys to floats
         if key in dic:
             dic[key] = float(dic[key])
-    for key in ['NP', 'NI']:    # convert keys to ints
+    for key in ['NP', 'NI']:  # convert keys to ints
         if key in dic:
             dic[key] = int(dic[key])
 
     # DEBUGGING
     # return dic
 
-    if "NI" in dic:     # 2D data
+    if "NI" in dic:  # 2D data
         data = np.empty((dic['NI'], dic['NP']), dtype='complex64')
 
         # loop over remaining lines, extracting data values
         for iline, line in enumerate(f):
-            if line[0:3] == "END":   # END marks end of data block
+            if line[0:3] == "END":  # END marks end of data block
                 break
             ni_idx, np_idx = divmod(iline, dic['NP'])
             r_val, i_val = [float(i) for i in line.split()]
             data.real[ni_idx, np_idx] = r_val
             data.imag[ni_idx, np_idx] = i_val
 
-    else:   # 1D data
+    else:  # 1D data
         data = np.empty((dic['NP']), dtype='complex64')
 
         # loop over remaining lines, extracting data values
@@ -205,8 +206,8 @@ def read_xreim(filename):
 
     # second pass, place text-data into data and unit arrays
     f.seek(0)
-    data = np.empty((NP, ), dtype='complex64')
-    units = np.empty((NP, ), dtype='float32')
+    data = np.empty((NP,), dtype='complex64')
+    units = np.empty((NP,), dtype='float32')
 
     for l_idx, line in enumerate(f):
         np_unit, r_val, i_val = [float(i) for i in line.split()]
@@ -226,7 +227,7 @@ def read_xyreim(filename):
     blines = 0  # number of blank lines, gives us num. of indirect points
     for nline, line in enumerate(f):
         if line == '\n':
-            if blines == 0:     # location of first blank line gives us NP
+            if blines == 0:  # location of first blank line gives us NP
                 NP = int(nline)
             blines += 1
     NI = blines
@@ -238,7 +239,7 @@ def read_xyreim(filename):
 
     for l_idx, line in enumerate(f):
         ni_idx, np_idx = divmod(l_idx, NP + 1)  # determine indicies
-        if np_idx == NP:    # skip blank line between blocks
+        if np_idx == NP:  # skip blank line between blocks
             continue
         # unpack the line and store
         ni_unit, np_unit, r_val, i_val = [float(i) for i in line.split()]
@@ -260,7 +261,7 @@ def read_raw_bin_1d(filename, spe=False):
     """Read a 1D raw binary SIMPSON file. See :py:func:`read`. """
     data = unappend_data(np.fromfile(filename, dtype='float32'))
     if spe:
-        return {}, data[::-1]   # freq domain data is flipped
+        return {}, data[::-1]  # freq domain data is flipped
     else:
         return {}, data
 
@@ -303,7 +304,7 @@ def read_binary(filename):
     """Read a binary SIMPSON file. See :py:func:`read`."""
     f = open(filename, 'r')  # open the file
 
-    dic = {}                # initalize dictionary of parameters
+    dic = {}  # initalize dictionary of parameters
 
     # parse the header of the file, storing parameters in dictionary, stop
     # when we hit the data line
@@ -317,13 +318,13 @@ def read_binary(filename):
             key, value = line.split("=")
             dic[key] = value
         else:
-            warn("Warning, skipping line: %s" % (line))
+            warn("Warning, skipping line: %s" % line)
 
     # convert float and int keys
-    for key in ['SW1', 'SW']:    # convert keys to floats
+    for key in ['SW1', 'SW']:  # convert keys to floats
         if key in dic:
             dic[key] = float(dic[key])
-    for key in ['NP', 'NI']:    # convert keys to ints
+    for key in ['NP', 'NI']:  # convert keys to ints
         if key in dic:
             dic[key] = int(dic[key])
 
@@ -332,12 +333,12 @@ def read_binary(filename):
 
     # extract characters from data block
     chardata = "".join([line.strip('\n') for line in f])
-    chardata = chardata[:-3]    # remove END
+    chardata = chardata[:-3]  # remove END
     f.close()
 
     # convert every 4 character to 3 'bytes'
     nquads, mod = divmod(len(chardata), 4)
-    assert mod == 0     # character should be in blocks of 4
+    assert mod == 0  # character should be in blocks of 4
     bytes = []
     for i in range(nquads):
         bytes += chars2bytes(chardata[i * 4:(i + 1) * 4])
@@ -346,7 +347,7 @@ def read_binary(filename):
     # return dic, bytes
     # convert every 4 'bytes' to a float, then complex data
     num_points, _num_pad = divmod(len(bytes), 4)
-    data = np.empty((num_points, ), dtype='float32')
+    data = np.empty((num_points,), dtype='float32')
 
     for i in range(num_points):
         data[i] = bytes2float(bytes[i * 4: (i + 1) * 4])
@@ -356,12 +357,13 @@ def read_binary(filename):
     if 'NI' in dic:  # 2D data
         return dic, data.reshape(dic["NI"], dic["NP"])
 
-    else:   # 1D data
+    else:  # 1D data
         return dic, data
 
+
 BASE = 33
-FIRST = lambda f, x: ((x) & ~(~0 << f))
-LAST = lambda f, x: ((x) & (~0 << (8 - f)))
+FIRST = lambda f, x: (x & ~(~0 << f))
+LAST = lambda f, x: (x & (~0 << (8 - f)))
 
 
 def chars2bytes(chars):

@@ -3,9 +3,10 @@ One-dimensional lineshape functions and classes
 """
 
 import numpy as np
-import scipy.special    # needed for complex error function (wo
+import scipy.special  # needed for complex error function (wo
 
 pi = np.pi
+
 
 ####################################
 # 1D lineshape simulator functions #
@@ -280,7 +281,7 @@ def sim_pvoigt_fwhm(x, x0, fwhm, eta):
 
 
 # location-scale lineshapes
-class location_scale():
+class location_scale:
     """
     Base class for building a 2 parameter location scale lineshape class.
     """
@@ -319,10 +320,10 @@ class gauss_sigma(location_scale):
 
     def guessp(self, sig):
         c, fwhm = center_fwhm(sig)
-        return (c, fwhm / 2.35482004503)
+        return c, fwhm / 2.35482004503
 
     def pnames(self, M):
-        return ("x0", "sigma")
+        return "x0", "sigma"
 
 
 class gauss_fwhm(location_scale):
@@ -340,10 +341,10 @@ class gauss_fwhm(location_scale):
 
     def guessp(self, sig):
         c, fwhm = center_fwhm(sig)
-        return (c, fwhm)
+        return c, fwhm
 
     def pnames(self, M):
-        return ("x0", "fwhm")
+        return "x0", "fwhm"
 
 
 class lorentz_gamma(location_scale):
@@ -361,10 +362,10 @@ class lorentz_gamma(location_scale):
 
     def guessp(self, sig):
         c, fwhm = center_fwhm(sig)
-        return (c, fwhm / 2.)
+        return c, fwhm / 2.
 
     def pnames(self, M):
-        return("x0", "gamma")
+        return "x0", "gamma"
 
 
 class lorentz_fwhm(location_scale):
@@ -382,14 +383,14 @@ class lorentz_fwhm(location_scale):
 
     def guessp(self, sig):
         c, fwhm = center_fwhm(sig)
-        return (c, fwhm)
+        return c, fwhm
 
     def pnames(self, M):
-        return("x0", "fwhm")
+        return "x0", "fwhm"
 
 
 # Voigt (location, 2 scale-like parameters) lineshapes.
-class location_2params():
+class location_2params:
     """
     Base Class for building a 3 parameter location, scale, other lineshape
     classes.
@@ -429,10 +430,10 @@ class voigt_fwhm(location_2params):
 
     def guessp(self, sig):
         c, fwhm = center_fwhm(sig)
-        return (c, fwhm * 0.5, fwhm * 0.5)
+        return c, fwhm * 0.5, fwhm * 0.5
 
     def pnames(self, M):
-        return ("x0", "fwhm_gauss", "fwhm_lorentz")
+        return "x0", "fwhm_gauss", "fwhm_lorentz"
 
 
 class voigt_sigmagamma(location_2params):
@@ -450,10 +451,10 @@ class voigt_sigmagamma(location_2params):
 
     def guessp(self, sig):
         c, fwhm = center_fwhm(sig)
-        return (c, fwhm / 2.35482004503 * 0.5, fwhm * 0.5 * 0.5)
+        return c, fwhm / 2.35482004503 * 0.5, fwhm * 0.5 * 0.5
 
     def pnames(self, M):
-        return ("x0", "fwhm_gauss", "fwhm_lorentz")
+        return "x0", "fwhm_gauss", "fwhm_lorentz"
 
 
 class pvoigt_fwhm(location_2params):
@@ -471,14 +472,14 @@ class pvoigt_fwhm(location_2params):
 
     def guessp(self, sig):
         c, fwhm = center_fwhm(sig)
-        return (c, fwhm, 0.5)
+        return c, fwhm, 0.5
 
     def pnames(self, M):
-        return ("x0", "fwhm", "eta")
+        return "x0", "fwhm", "eta"
 
 
 # misc lineshape classes
-class scale():
+class scale:
     """
     Scale lineshape class
 
@@ -512,6 +513,7 @@ class scale():
     def remove_edge(self, p, limits):
         return p
 
+
 # lineshape convience
 gauss = gauss_fwhm
 lorentz = lorentz_fwhm
@@ -538,7 +540,7 @@ def ls_str2class(l):
     if l in ls_table:
         return ls_table[l]()
     else:
-        raise ValueError("Unknown lineshape %s", (l))
+        raise ValueError("Unknown lineshape %s", l)
 
 
 # basic lineshape analysis
@@ -560,9 +562,9 @@ def center_fwhm(signal):
     max = signal.max()
     hmax = max / 2.
 
-    top_args = np.nonzero(signal > hmax)[0]     # all points above half-max
-    l_idx = top_args[0]     # index of left hand side above half-max
-    r_idx = top_args[-1]    # index of right hand side above half-max
+    top_args = np.nonzero(signal > hmax)[0]  # all points above half-max
+    l_idx = top_args[0]  # index of left hand side above half-max
+    r_idx = top_args[-1]  # index of right hand side above half-max
 
     # solve hmax = mx+b => x = y-b/m
     # for two points x_0 and x_1 this becomes y = (hmax-x_0)/(x_1-x_0)
@@ -570,14 +572,14 @@ def center_fwhm(signal):
 
     # left side
     if l_idx == 0:
-        left = l_idx    # this is a bad guess but the best we can do
+        left = l_idx  # this is a bad guess but the best we can do
     else:
         x_0, x_1 = signal[l_idx - 1], signal[l_idx]
         left = l_idx - 1 + (hmax - x_0) / (x_1 - x_0)
 
     # right side
     if r_idx == len(signal) - 1:
-        right = r_idx   # this is a poor guess but the best we can do
+        right = r_idx  # this is a poor guess but the best we can do
     else:
         x_0, x_1 = signal[r_idx], signal[r_idx + 1]
         right = r_idx + (hmax - x_0) / (x_1 - x_0)

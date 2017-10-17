@@ -58,7 +58,7 @@ from spectrochempy.core.units import Quantity
 # from ...utils import create_traitsdoc
 
 from spectrochempy.utils import (is_sequence, numpyprintoptions,
-                      SpectroChemPyWarning)
+                                 SpectroChemPyWarning)
 from spectrochempy.utils.traittypes import Range
 
 __all__ = ['Axes',
@@ -69,7 +69,6 @@ __all__ = ['Axes',
            'AxisError',
            'AxisWarning']
 _classes = __all__[:]
-
 
 # =============================================================================
 # set numpy print options
@@ -91,6 +90,7 @@ class AxisError(ValueError):
     """An exception that is raised when something is wrong with the axis or
     axes.
     """
+
 
 class AxisWarning(SpectroChemPyWarning):
     """A warning that is raised when something is wrong with the axis or
@@ -200,9 +200,9 @@ class Axis(NDMath, NDArray):
         if mask is not None:
             if self._data_passed_with_mask and self._mask != mask:
                 log.info("Axis was created with a masked array, and a "
-                            "mask was explicitly provided to Axis. The  "
-                            "explicitly passed-in mask will be used and the "
-                            "masked array's mask will be ignored.")
+                         "mask was explicitly provided to Axis. The  "
+                         "explicitly passed-in mask will be used and the "
+                         "masked array's mask will be ignored.")
             self.mask = mask
 
         if units is not None:
@@ -222,8 +222,7 @@ class Axis(NDMath, NDArray):
     # -------------------------------------------------------------------------
     @default('_name')
     def _get_name_default(self):
-        return u"Axis_"+str(uuid.uuid1()).split('-')[0]  # a unique id
-
+        return u"Axis_" + str(uuid.uuid1()).split('-')[0]  # a unique id
 
     @property
     def is_reversed(self):
@@ -299,8 +298,6 @@ class Axis(NDMath, NDArray):
             log.debug("init data axis a numpy array")
             self._data = np.array(data, subok=True, copy=self._iscopy)
 
-
-
     # hidden properties (for the documentation, only - we remove the docs)
     # some of the property of NDArray has to be hidden because they are not
     # usefull for this Axis class
@@ -327,7 +324,6 @@ class Axis(NDMath, NDArray):
     @property
     def shape(self):
         return self._data.shape
-
 
     # -------------------------------------------------------------------------
     # private methods
@@ -419,7 +415,7 @@ class Axis(NDMath, NDArray):
         tr = "<tr style='border-bottom: 1px solid lightgray;" \
              "border-top: 1px solid lightgray;'>" \
              "<td style='padding-right:5px'><strong>{}</strong></td>" \
-                                                "<td>{}</td><tr>\n"
+             "<td>{}</td><tr>\n"
 
         units = '{:~T}'.format(self._units) \
             if self._units is not None else 'unitless'
@@ -464,15 +460,15 @@ class Axis(NDMath, NDArray):
         return ''.join([prefix, body, ') {}'.format(units)])
 
 
-    # def __lt__(self, other):
-    #     # hack to make axis sortable
-    #     this = self.data
-    #     if hasattr(other, '_data'):
-    #         other = other._data
-    #     try:
-    #         return self[0] < other[0]
-    #     except IndexError:
-    #         return this < other
+        # def __lt__(self, other):
+        #     # hack to make axis sortable
+        #     this = self.data
+        #     if hasattr(other, '_data'):
+        #         other = other._data
+        #     try:
+        #         return self[0] < other[0]
+        #     except IndexError:
+        #         return this < other
 
 
 # =============================================================================
@@ -501,8 +497,7 @@ class Axes(HasTraits):
 
     @default('_name')
     def _get_name_default(self):
-        return u"Axes_"+str(uuid.uuid1()).split('-')[0]  # a unique id
-
+        return u"Axes_" + str(uuid.uuid1()).split('-')[0]  # a unique id
 
     # Hidden attribute to specify if the collection is for a single dimension
     _issamedim = Bool
@@ -518,19 +513,19 @@ class Axes(HasTraits):
 
         self._axes = []
 
-        if all([isinstance(axes[i],(Axis,Axes)) for i in range(len(axes))]):
+        if all([isinstance(axes[i], (Axis, Axes)) for i in range(len(axes))]):
             axes = list(axes)
-        elif len(axes)==1:
+        elif len(axes) == 1:
             # this a set of axis or axes passed as a list
             axes = axes[0]
         else:
             # not implemented yet -
             # a list of list of object have been passed
-            #TODO: try to ipmplement this
+            # TODO: try to ipmplement this
             raise AxisError(
-     'a list of list of object have been passed - this not yet implemented')
+                    'a list of list of object have been passed - this not yet implemented')
 
-        if len(axes)==1 and isinstance(axes[0], Axes):
+        if len(axes) == 1 and isinstance(axes[0], Axes):
             if _iscopy:
                 axes = copy.deepcopy(axes)
             self._axes = axes[0]._axes
@@ -539,10 +534,9 @@ class Axes(HasTraits):
             for item in axes:
 
                 if not isinstance(item, (Axis, Axes)):
-
-                    item = Axis(item,  iscopy=_iscopy)
-                                                 # full validation of the item
-                                                 # will be done in Axis
+                    item = Axis(item, iscopy=_iscopy)
+                    # full validation of the item
+                    # will be done in Axis
                 if self._validation(item):
                     self._axes.append(item)
 
@@ -554,9 +548,9 @@ class Axes(HasTraits):
                 item._issamedim = True
                 # in this case we must have same length axes
                 siz = item[0].size
-                if np.any([elt.size!=siz for elt in item._axes]):
+                if np.any([elt.size != siz for elt in item._axes]):
                     raise AxisError('axis must be of the same size '
-                                'for a dimension with multiple axis dimension')
+                                    'for a dimension with multiple axis dimension')
 
     # -------------------------------------------------------------------------
     # Properties
@@ -569,7 +563,7 @@ class Axes(HasTraits):
     def names(self):
         """`list`, read-only property - Get the list of axis names.
         """
-        if len(self._axes)<1:
+        if len(self._axes) < 1:
             return []
         try:
             return [item.name for item in self._axes]
@@ -587,7 +581,7 @@ class Axes(HasTraits):
                 _titles.append(item.title if item.title else item.name)
             elif isinstance(item, Axes):
                 _titles.append([el.title if el.title else el.name
-                                       for el in item])
+                                for el in item])
             else:
                 raise AxisError('Something wrong with the titles!')
 
@@ -681,7 +675,7 @@ class Axes(HasTraits):
     def _transpose(self, axes=None):
         # in principle it is not directly called by the user as it is intimately
         # linked to a dataset
-        if self._issamedim :
+        if self._issamedim:
             # not applicable for same dimension axes
             warnings.warn('Axes for a single dimentsion are not transposable',
                           AxisWarning)
@@ -694,9 +688,9 @@ class Axes(HasTraits):
     def _validation(self, item):
         # To be valid any added axis must have a different name
 
-        if not isinstance(item, (Axis, Axes) ):
+        if not isinstance(item, (Axis, Axes)):
             raise AxisError('The elements of must be Axis or '
-                                      'Axes objects only!')
+                            'Axes objects only!')
 
         if item._name in self.names:
             raise AxisError('The axis name must be unique!')
@@ -712,7 +706,8 @@ class Axes(HasTraits):
     # special methods
     # -------------------------------------------------------------------------
 
-    def __dir__(self):
+    @staticmethod
+    def __dir__():
         return ['_axes']
 
     def __call__(self, *args):
@@ -766,7 +761,7 @@ class Axes(HasTraits):
         return out
 
     def __deepcopy__(self, memo):
-        return self.__class__([copy.deepcopy(ax, memo) for ax in self])
+        return self.__class__([copy.deepcopy(ax, memo=memo) for ax in self])
 
     def __copy__(self):
         return self.__class__([copy.copy(ax) for ax in self])
@@ -776,6 +771,7 @@ class Axes(HasTraits):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
 
 # =============================================================================
 # AxisRange
@@ -810,6 +806,8 @@ class AxisRange(HasTraits):
         """ Constructs Axisrange with default values
 
         """
+        super(AxisRange, self).__init__(**kwargs)
+
         self.reversed = kwargs.get('reversed', False)
 
         if len(ranges) == 0:
@@ -831,6 +829,7 @@ class AxisRange(HasTraits):
 
         if self.reversed:
             self.reverse()
+
 
     def __iter__(self):
         """
@@ -858,8 +857,9 @@ class AxisRange(HasTraits):
 
     # private methods
 
-    def _cleanranges(self, ranges):
-        ''' sort and merge overlaping ranges
+    @staticmethod
+    def _cleanranges(ranges):
+        """ sort and merge overlaping ranges
 
         works as follows:
          1. orders each interval
@@ -867,7 +867,7 @@ class AxisRange(HasTraits):
          3. merge overlapping intervals
          4. reverse the orders if required
 
-        '''
+        """
 
         # transforms each pairs into valid interval
         # should generate an error if a pair is not valid
@@ -899,8 +899,8 @@ set_operators(Axis, priority=50)
 # =============================================================================
 # Modify the doc to include Traits
 # =============================================================================
-#create_traitsdoc(Axes)
-#create_traitsdoc(Axis)
+# create_traitsdoc(Axes)
+# create_traitsdoc(Axis)
 
 if __name__ == '__main__':
     pass

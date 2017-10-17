@@ -70,8 +70,8 @@ log_level = logging.INFO
 
 SERVER = os.environ.get('SERVER_FOR_LCS', None)
 
-DOCDIR = os.path.join(\
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
+DOCDIR = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
 
 SOURCE = os.path.join(DOCDIR, 'source')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','spectrochempy_doc')
@@ -87,8 +87,6 @@ def make_docs(*options):
 
     if DEBUG:
         log_level = logging.DEBUG
-
-    builder=None
 
     builders = []
     if  'html' in options:
@@ -216,7 +214,6 @@ def class_config_rst_doc(cls):
     Excludes traits defined on parent classes. (adapted from traitlets)
     """
     lines = []
-    classname = cls.__name__
     for k, trait in sorted(cls.class_traits().items()):
         if trait.name.startswith('_') or not trait.help or trait.name in [
             'cli_config',

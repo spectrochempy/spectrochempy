@@ -58,11 +58,12 @@ from spectrochempy.utils import is_sequence
 __all__ = ['Meta']
 _classes = __all__[:]
 
+
 # =============================================================================
 # Class Meta
 # =============================================================================
 
-class Meta(object): #HasTraits):
+class Meta(object):  # HasTraits):
     """A dictionary to store metadata.
 
     The metadata are accessible by item or by attributes, and
@@ -103,17 +104,17 @@ class Meta(object): #HasTraits):
     # private attributes
     # -------------------------------------------------------------------------
 
-    _data = {} #Dict()
+    _data = {}  # Dict()
 
-    #@default('_data')
-    #def _get_data(self):
+    # @default('_data')
+    # def _get_data(self):
     #    return {}
 
     # -------------------------------------------------------------------------
     # public attributes
     # -------------------------------------------------------------------------
 
-    readonly = False #Bool(False)
+    readonly = False  # Bool(False)
 
     # -------------------------------------------------------------------------
     # special methods
@@ -122,9 +123,9 @@ class Meta(object): #HasTraits):
         self._data = dict()
 
     def __setattr__(self, key, value):
-        if key not in [ 'readonly','_data','_trait_values', '_trait_notifiers',
-                        '_trait_validators', '_cross_validation_lock']:
-                self[key] = value
+        if key not in ['readonly', '_data', '_trait_values', '_trait_notifiers',
+                       '_trait_validators', '_cross_validation_lock']:
+            self[key] = value
         else:
             self.__dict__[key] = value  # to avoid a recursive call
             # we can not use self._readonly = value!
@@ -158,7 +159,7 @@ class Meta(object): #HasTraits):
         return self.__copy__()
 
     def __eq__(self, other):
-        return (self._data == other._data)
+        return self._data == other._data
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -264,7 +265,7 @@ class Meta(object): #HasTraits):
         """
         return [(key, self[key]) for key in self]
 
-    def swapaxes(self, axis1, axis2, inplace = True):
+    def swapaxes(self, axis1, axis2, inplace=True):
 
         if not inplace:
             newmeta = self.copy()
@@ -273,7 +274,7 @@ class Meta(object): #HasTraits):
 
         newmeta.readonly = False
         for key in self:
-            if is_sequence(self[key]) and len(self[key])>1:
+            if is_sequence(self[key]) and len(self[key]) > 1:
                 X = newmeta[key]
                 X[axis1], X[axis2] = X[axis2], X[axis1]
             else:

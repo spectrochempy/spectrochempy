@@ -36,5 +36,5 @@
 
 # create an instance
 from .gui import Gui
-gui = Gui()
 
+gui = Gui()

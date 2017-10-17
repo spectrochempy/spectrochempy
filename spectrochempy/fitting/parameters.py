@@ -45,26 +45,27 @@ import sys
 import re  # For regular expression search
 import string
 import types
-from collections import UserDict  # This is to be able to create a special dictionary
+from collections import \
+    UserDict  # This is to be able to create a special dictionary
 from spectrochempy.application import log
-
 
 import numpy as np
 
-#=================
+# =================
 # enthought import
-#=================
+# =================
 from traitlets import (HasTraits, Unicode, Instance, List, observe)
 
-#==============
+# ==============
 # constants
-#==============
-__all__ =['FitParameters', 'ParameterScript']
+# ==============
+__all__ = ['FitParameters', 'ParameterScript']
 _classes = __all__[:]
 
-#=============
+
+# =============
 # id_generator
-#=============
+# =============
 def _id_generator():
     """Returns a sequence of numbers for the title of the objects.
 
@@ -84,9 +85,9 @@ def _id_generator():
 id_generator = _id_generator()
 
 
-#==============
+# ==============
 # FitParameters
-#==============
+# ==============
 class FitParameters(UserDict):
     """
     Allow passing a dictionary of parameters with additional properties
@@ -94,7 +95,7 @@ class FitParameters(UserDict):
     if any.
     """
 
-    #------------------
+    # ------------------
     def __init__(self):
         UserDict.__init__(self)  # Create a dictionary class
         self.lob = {}  # Lower bound
@@ -108,7 +109,7 @@ class FitParameters(UserDict):
         self.expvars = []  # list of parameters which are experiment dependent
         self.expnumber = 1  # number of experiments
 
-    #---------------------------------
+    # ---------------------------------
     def __setitem__(self, key, value):
         key = str(key)
         if key not in self.reference:
@@ -137,30 +138,32 @@ class FitParameters(UserDict):
             self.upb[key] = None
             self.fixed[key] = False
 
-    #--------------------------
+    # --------------------------
     def __getitem__(self, key):
         key = str(key)
         if key in self.data:
             return self.data[key]
         raise KeyError("parameter %s is not found" % key)
 
-    #-------------------
+    # -------------------
     def iteritems(self):
         return self.data.iteritems()
 
-    #--------------------------
+    # --------------------------
     def _checkerror(self, key):
         key = str(key)
         if self.lob[key] is None and self.upb[key] is None:
             return False
         elif (self.lob[key] is not None and self.data[key] < self.lob[key]) \
-                or (self.upb[key] is not None and self.data[key] > self.upb[key]):
-            raise ValueError('%s value %s is out of bounds' % (key, str(self.data[key])))
+                or (self.upb[key] is not None and self.data[key] > self.upb[
+                    key]):
+            raise ValueError(
+                '%s value %s is out of bounds' % (key, str(self.data[key])))
 
-    #-----------------
+    # -----------------
     def __str__(self):
 
-        #.............................................................
+        # .............................................................
         def makestr(key):
 
             keystring = key.split('_')[0]
@@ -179,9 +182,10 @@ class FitParameters(UserDict):
                     upb = "none"
                 val = str(self.data[key])
 
-                return "%s: %10.4f, %s, %s \n" % (keystring, float(val), lob, upb)
+                return "%s: %10.4f, %s, %s \n" % (
+                keystring, float(val), lob, upb)
 
-        #..............................................................
+        # ..............................................................
 
         message = "#PARAMETER SCRIPT\n\nCOMMON: \n"
 
@@ -211,8 +215,9 @@ class FitParameters(UserDict):
                 message += makestr(key)
         return message
 
-    #-------------------------
-    def _evaluate(self, strg):
+    # -------------------------
+    @staticmethod
+    def _evaluate(strg):
         """
         Allow the evaluation of strings containing some operations
 
@@ -231,23 +236,25 @@ class FitParameters(UserDict):
         res = False
 
         if isinstance(strg, str):
-            #strg=string.upper(strg)
+            # strg=string.upper(strg)
             p = re.compile('\s+')
             m = p.split(strg.strip())
             try:
                 res = eval(m[0])
             except NameError:
-                message = "Cannot evaluate '" + strg + "' >> " + m[0] + " is not defined"
+                message = "Cannot evaluate '" + strg + "' >> " + m[
+                    0] + " is not defined"
                 raise NameError(message)
             except SyntaxError:
                 message = "Syntax error in '" + strg + "'"
                 raise SyntaxError(message)
-            #read mulitplier
+            # read mulitplier
             if len(m) > 1:
                 try:
                     res = res * eval(m[1])
                 except NameError:
-                    message = "Cannot evaluate '" + strg + "' >> " + m[1] + " is not defined"
+                    message = "Cannot evaluate '" + strg + "' >> " + m[
+                        1] + " is not defined"
                     raise ValueError(message)
                 except SyntaxError:
                     message = "Syntax error in '" + strg + "'"
@@ -258,7 +265,7 @@ class FitParameters(UserDict):
 
         return res
 
-    #----------------------------------------
+    # ----------------------------------------
     def to_internal(self, key, expi=None):
         """
         if expi is not none, several parameters to create
@@ -294,7 +301,7 @@ class FitParameters(UserDict):
             pi = pe
         return pi
 
-    #------------------------------
+    # ------------------------------
     def to_external(self, key, pi):
 
         key = str(key)
@@ -308,7 +315,7 @@ class FitParameters(UserDict):
         is_upb = lob is not None and upb < +0.1 / sys.float_info.epsilon  # upb is not None
 
         if not isinstance(pi, list):
-            pi = [pi, ]  #make a list
+            pi = [pi, ]  # make a list
 
         pe = []
         for item in pi:
@@ -316,10 +323,10 @@ class FitParameters(UserDict):
                 #  With min and max bounds defined
                 pei = lob + ((upb - lob) / 2.) * (np.sin(item) + 1.)
             elif is_upb:
-                #With only max defined
+                # With only max defined
                 pei = upb + 1. - np.sqrt(item ** 2 + 1.)
             elif is_lob:
-                #With only min defined
+                # With only min defined
                 pei = lob - 1. + np.sqrt(item ** 2 + 1.)
             else:
                 pei = pi
@@ -352,9 +359,10 @@ class FitParameters(UserDict):
 
         return c
 
-#================
+
+# ================
 # ParameterScript
-#================
+# ================
 class ParameterScript(HasTraits):
     """
     This class allow some manipulation of the parameter list for modelling
@@ -367,10 +375,10 @@ class ParameterScript(HasTraits):
 
     sources = List(Instance('spectrochempy.core.dataset.nddataset.NDDataset'))
 
-    #===========================================================================
+    # ===========================================================================
     # properties
-    #===========================================================================
-    #--------------------------
+    # ===========================================================================
+    # --------------------------
     @observe('script')
     def _check_parameters(self, change):
         """
@@ -378,7 +386,7 @@ class ParameterScript(HasTraits):
         """
         self.fp = self._interpret(self.script)
 
-    #-----------------------------
+    # -----------------------------
     def _interpret(self, script):
         """
         Interpreter of the script content
@@ -406,10 +414,11 @@ class ParameterScript(HasTraits):
             if line == '' or line.startswith("#"):
                 # this is a blank or comment line, go to next line
                 continue
-            #split around the semi-column
+            # split around the semi-column
             s = line.split(':')
             if len(s) != 2:
-                raise SyntaxError('Cannot interpret line %d : A semi-column is missing?' % lc)
+                raise SyntaxError(
+                    'Cannot interpret line %d : A semi-column is missing?' % lc)
 
             key, values = s
             key = key.strip().lower()
@@ -425,15 +434,16 @@ class ParameterScript(HasTraits):
                 continue
             elif key.startswith('shape'):
                 shape = values.lower().strip()
-                if shape is None: # or (shape not in self._list_of_models and shape not in self._list_of_baselines):
-                    raise SyntaxError('Shape of this model "%s" was not specified or is not implemented' % shape)
+                if shape is None:  # or (shape not in self._list_of_models and shape not in self._list_of_baselines):
+                    raise SyntaxError(
+                        'Shape of this model "%s" was not specified or is not implemented' % shape)
                 fp.model[modlabel] = shape
                 common = False
                 continue
             elif key.startswith("experiment"):  # must be in common
                 if not common:
                     raise SyntaxError(
-                        "'experiment_...' specification was found outside the common block.")
+                            "'experiment_...' specification was found outside the common block.")
                 if "variables" in key:
                     expvars = values.lower().strip()
                     expvars = expvars.replace(',', ' ').replace(';', ' ')
@@ -443,7 +453,7 @@ class ParameterScript(HasTraits):
             else:
                 if modlabel is None and not common:
                     raise SyntaxError(
-                        "The first definition should be a label for a model or a block of variables or constants.")
+                            "The first definition should be a label for a model or a block of variables or constants.")
                 # get the parameters
                 if key.startswith('*'):
                     fixed = True
@@ -458,35 +468,39 @@ class ParameterScript(HasTraits):
                     reference = True
                     key = key[1:].strip()
                 else:
-                    raise SyntaxError('Cannot interpret line %d: A parameter definition must start with *,$ or >' % lc)
+                    raise SyntaxError(
+                        'Cannot interpret line %d: A parameter definition must start with *,$ or >' % lc)
 
                 # store this parameter
                 s = values.split(',')
                 s = [ss.strip() for ss in s]
-                if len(s) > 1 and ('[' in s[0]) and (']' in s[1]):  #list
+                if len(s) > 1 and ('[' in s[0]) and (']' in s[1]):  # list
                     s[0] = "%s, %s" % (s[0], s[1])
                     if len(s) > 2:
                         s[1:] = s[2:]
                 if len(s) > 3:
-                    raise SyntaxError('line %d: value, min, max should be defined in this order' % lc)
+                    raise SyntaxError(
+                        'line %d: value, min, max should be defined in this order' % lc)
                 elif len(s) == 2:
                     raise SyntaxError('only two items in line %d' % lc)
-                    s.append('none')
+                    #s.append('none')
                 elif len(s) == 1:
                     s.extend(['none', 'none'])
                 value, mini, maxi = s
-                if mini.strip().lower() in ['none', '']: mini = str(-1. / sys.float_info.epsilon)
-                if maxi.strip().lower() in ['none', '']: maxi = str(+1. / sys.float_info.epsilon)
+                if mini.strip().lower() in ['none', '']: mini = str(
+                    -1. / sys.float_info.epsilon)
+                if maxi.strip().lower() in ['none', '']: maxi = str(
+                    +1. / sys.float_info.epsilon)
                 if modlabel != 'common':
                     ks = "%s_%s" % (key, modlabel)
-                    #print(ks)
-                    #if "ratio_line_1" in ks:
+                    # print(ks)
+                    # if "ratio_line_1" in ks:
                     #    print('xxxx'+ks)
                     fp.common[key] = False
                 else:
-                    ks = "%s" % (key)
+                    ks = "%s" % key
                     fp.common[key] = True
-                #if key in fp.expvars:
+                # if key in fp.expvars:
                 #    for i in xrange(len(self.sources)):
                 #        ks = "%s_exp%d"%(ks, i)
                 fp.reference[ks] = reference
@@ -497,9 +511,11 @@ class ParameterScript(HasTraits):
                         # if the parameter is already a list, that's ok if the number of parameters is ok
                         if len(val) != fp.expnumber:
                             raise ValueError(
-                                'the number of parameters for %s is not the number of experiments.' % len(val))
+                                    'the number of parameters for %s is not the number of experiments.' % len(
+                                        val))
                         if key not in fp.expvars:
-                            raise ValueError('parameter %s is not declared as variable' % key)
+                            raise ValueError(
+                                'parameter %s is not declared as variable' % key)
                     else:
                         if key in fp.expvars:
                             # we create a list of parameters corresponding

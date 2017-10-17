@@ -41,12 +41,12 @@ import datetime as datetime
 import scipy.interpolate
 import numpy as np
 
-
 from ...dataset.ndaxes import AxisRange
 
-__all__=['basecor']
+__all__ = ['basecor']
 
-def basecor(source,*ranges,axis=-1,
+
+def basecor(source, *ranges, axis=-1,
             method='sequential',
             interpolation='polynomial',
             order=0,
@@ -79,7 +79,7 @@ def basecor(source,*ranges,axis=-1,
     # most of the time we need sorted axis, so let's do it now
     coords = new.coords(-1)
 
-    sorted=False
+    sorted = False
     if new.coords(-1).is_reversed:
         new.sort(axis=-1, inplace=True)
         sorted = True
@@ -99,8 +99,8 @@ def basecor(source,*ranges,axis=-1,
         s.append(new[..., sl])
 
     sbase = s[0].concatenate(*s[1:],
-                            axis=-1)    # TODO: probably we could use masked
-                                        # data instead of concatenating
+                             axis=-1)  # TODO: probably we could use masked
+    # data instead of concatenating
     xbase = sbase.coords(-1)
 
     if method == 'sequential':
@@ -110,7 +110,7 @@ def basecor(source,*ranges,axis=-1,
             if np.any(np.isnan(sbase)):
                 sbase[np.isnan(sbase)] = 0
 
-            polycoef = np.polynomial.polynomial.polyfit(xbase.data, \
+            polycoef = np.polynomial.polynomial.polyfit(xbase.data,
                                                         sbase.data.T, deg=order,
                                                         rcond=None, full=False)
             baseline = np.polynomial.polynomial.polyval(coords.data, polycoef)
@@ -118,13 +118,13 @@ def basecor(source,*ranges,axis=-1,
         elif interpolation == 'pchip':
             for i in range(new.shape[0]):
                 y = scipy.interpolate.PchipInterpolator(
-                                                   xbase.data, sbase.data[i, :])
+                        xbase.data, sbase.data[i, :])
                 baseline[i, :] = y(coords)
 
     elif method == 'multivariate':
 
         # SVD of Sbase
-        U, s, Vt = np.linalg.svd(sbase.data, full_matrices=False, \
+        U, s, Vt = np.linalg.svd(sbase.data, full_matrices=False,
                                  compute_uv=True)
 
         # select npc loadings & compute scores
@@ -173,6 +173,3 @@ def basecor(source,*ranges,axis=-1,
         new = new.swapaxes(axis, -1)
 
     return new
-
-
-

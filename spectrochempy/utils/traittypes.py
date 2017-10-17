@@ -40,6 +40,7 @@ import numpy as np
 
 _classes = ['Array', 'Range']
 
+
 # =============================================================================
 # Range
 # =============================================================================
@@ -75,7 +76,7 @@ class Range(List):
 
         self._sampling = sampling
         super(Range, self).__init__(trait=None, default_value=default_value,
-                                   **kwargs)
+                                    **kwargs)
 
     def length_error(self, obj, value):
         e = "The '%s' trait of %s instance must be of length 2 exactly," \
@@ -84,7 +85,7 @@ class Range(List):
         raise TraitError(e)
 
     def validate_elements(self, obj, value):
-        if value is None or len(value)==0:
+        if value is None or len(value) == 0:
             return
         length = len(value)
         if length < 2:
@@ -98,6 +99,7 @@ class Range(List):
         value = self.validate_elements(obj, value)
 
         return value
+
 
 # =============================================================================
 # Array
@@ -114,7 +116,7 @@ class Array(TraitType):
     info_text = 'an array'
 
     def validate(self, obj, value):
-        if isinstance(value, (np.ndarray)):
+        if isinstance(value, np.ndarray):
             return value
         elif hasattr(value, '_data'):
             return value

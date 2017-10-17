@@ -27,9 +27,9 @@ import functools
 
 # TODO: clean this list as some function are not really useful for the scp API.
 __all__ = ['scpadapter',
-           #'em', 'gm',
+           # 'em', 'gm',
            'gmb', 'jmod',
-           #'sp',
+           # 'sp',
            'sine', 'tm', 'tri',
            'rs', 'ls', 'cs', 'roll', 'fsh', 'fsh2', 'rft', 'irft',
            'fft', 'fft_norm', 'fft_positive',
@@ -124,7 +124,8 @@ def scpadapter(**kw):
 
             # check axis dimensionality:
             if (lastaxe.unitless or lastaxe.dimensionless or
-                    (lastaxe.units.dimensionality != in_dim and in_dim!='[]')):
+                    (
+                            lastaxe.units.dimensionality != in_dim and in_dim != '[]')):
                 log.error(
                         '{0} apply only to dimensions'
                         ' with {1} dimensionality'.format(func.__name__,
@@ -134,7 +135,7 @@ def scpadapter(**kw):
             # we work on the last dimension always
 
             if axis != source.ndim - 1:  # swap the dataset to make
-                                         # the axis the last dimension
+                # the axis the last dimension
                 source.swapaxes(-1, axis, inplace=True)
 
             # we analyse the arg of the function, to see if our decorator is
@@ -176,7 +177,7 @@ def scpadapter(**kw):
                     sw = source.meta.sw_h[-1]  # remember that meta are list
                     # TODO: can be estimated from time domain sampling if sw_h is missing
 
-                    if val.dimensionality == '1/[time]':  #TODO: doesn't accept [frequency], why?
+                    if val.dimensionality == '1/[time]':  # TODO: doesn't accept [frequency], why?
                         val = val / sw
                     else:
                         val = val * sw  # TODO: check if this is correct
@@ -201,7 +202,6 @@ def scpadapter(**kw):
             if np.any(np.iscomplex(data)):
                 # unpack
                 data = unpack_complex(data)
-
 
             # inplace?
             inplace = kwargs.get('inplace', False)
@@ -228,7 +228,6 @@ def scpadapter(**kw):
             if out_dim == in_dim and new.shape[-1] != source.shape[-1]:
                 si = list(new.shape)
 
-
             if out_dim != in_dim:
                 # if dimensionality has changed
                 # so we have to handle the case of different units
@@ -243,7 +242,8 @@ def scpadapter(**kw):
                 new.coords(-1)._units = ur.Hz
                 new.coords(-1)._title = 'frequency'
 
-            new._history.append('processed by %s(%s)'%(func.__name__,newkw.values()))
+            new._history.append(
+                'processed by %s(%s)' % (func.__name__, newkw.values()))
 
             # swap back to the original axis's order
             if axis != source.ndim - 1:
@@ -470,7 +470,7 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
     size = data.shape[-1]
     apod = np.power(np.sin(pi * off + pi * (end - off) * np.arange(size) /
                            (size - 1)).astype(data.dtype), pow).astype(
-        data.dtype)
+            data.dtype)
     if rev:
         apod = apod[::-1]
     if inv:
@@ -1066,7 +1066,7 @@ def gray(n):
     for i in range(1, int(n)):
         mg = g + g[::-1]  # mirror the current code
         # first bit 0/2**u for mirror
-        first = [0] * 2 ** (i) + [2 ** (i)] * 2 ** (i)
+        first = [0] * 2 ** i + [2 ** i] * 2 ** i
         g = [mg[j] + first[j] for j in range(2 ** (i + 1))]
     return g
 
@@ -1375,6 +1375,7 @@ def zf_double(data, n, mid=False):
     """
     return _zf_pad(data, int((data.shape[-1] * 2 ** n) - data.shape[-1]), mid)
 
+
 def _zf_size(data, size, mid=False):
     """
     Zero fill to given size.
@@ -1440,7 +1441,9 @@ def zf_auto(data, size=None, mid=False):
         size = data.shape[-1]
     return _zf_size(data, largest_power_of_2(size), mid)
 
+
 zf = zf_auto
+
 
 ####################
 # Basic Untilities #
@@ -1988,7 +1991,7 @@ def c2ri(data):
     s = list(data.shape)
     s[-1] = int(s[-1] / 2)
     n = np.empty(s, temp.dtype)
-    del (temp)
+    del temp
     n.real = data.real[..., ::2]
     n.imag = data.real[..., 1::2]
     return n
@@ -2051,7 +2054,7 @@ def rr2ri(data):
     half = int(s[-1] / 2.0)
     s[-1] = half
     n = np.empty(s, temp.dtype)
-    del (temp)
+    del temp
     n.real = data[..., :half]
     n.imag = data[..., half:]
     return n
@@ -2864,7 +2867,7 @@ def gram_schmidt(data):
     # therefore:
     # imag(data'') = R/S*imag(data) - R*C/(S*R) * real(data)
     # so A = R/S, B=-C/(S)
-    return (R / S, -C / S)
+    return R / S, -C / S
 
 
 # Complex Mixing
@@ -3006,7 +3009,7 @@ def zd(data, window, x0=0.0, slope=1.0):
         w_min = 0  # window min
         w_max = width  # window max
 
-        c_mid = int(r * slope + (c_start))  # middle of diagonal band
+        c_mid = int(r * slope + c_start)  # middle of diagonal band
         c_min = c_mid - wide
         c_max = c_mid + wide + 1
 

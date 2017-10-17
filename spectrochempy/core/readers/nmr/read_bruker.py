@@ -74,6 +74,7 @@ AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
 from spectrochempy.application import log
 
+
 # =============================================================================
 # Utilities
 # =============================================================================
@@ -100,6 +101,7 @@ def _get_par_files(_dir, _procno, _processed=False):
         _dir = pdir
     return _dir, parfiles
 
+
 # =============================================================================
 # Digital filter functions
 # =============================================================================
@@ -122,89 +124,90 @@ def _get_par_files(_dir, _procno, _processed=False):
 
 bruker_dsp_table = {
     10: {
-        2    : 44.75,
-        3    : 33.5,
-        4    : 66.625,
-        6    : 59.083333333333333,
-        8    : 68.5625,
-        12   : 60.375,
-        16   : 69.53125,
-        24   : 61.020833333333333,
-        32   : 70.015625,
-        48   : 61.34375,
-        64   : 70.2578125,
-        96   : 61.505208333333333,
-        128  : 70.37890625,
-        192  : 61.5859375,
-        256  : 70.439453125,
-        384  : 61.626302083333333,
-        512  : 70.4697265625,
-        768  : 61.646484375,
-        1024 : 70.48486328125,
-        1536 : 61.656575520833333,
-        2048 : 70.492431640625,
+        2: 44.75,
+        3: 33.5,
+        4: 66.625,
+        6: 59.083333333333333,
+        8: 68.5625,
+        12: 60.375,
+        16: 69.53125,
+        24: 61.020833333333333,
+        32: 70.015625,
+        48: 61.34375,
+        64: 70.2578125,
+        96: 61.505208333333333,
+        128: 70.37890625,
+        192: 61.5859375,
+        256: 70.439453125,
+        384: 61.626302083333333,
+        512: 70.4697265625,
+        768: 61.646484375,
+        1024: 70.48486328125,
+        1536: 61.656575520833333,
+        2048: 70.492431640625,
     },
     11: {
-        2    : 46.,
-        3    : 36.5,
-        4    : 48.,
-        6    : 50.166666666666667,
-        8    : 53.25,
-        12   : 69.5,
-        16   : 72.25,
-        24   : 70.166666666666667,
-        32   : 72.75,
-        48   : 70.5,
-        64   : 73.,
-        96   : 70.666666666666667,
-        128  : 72.5,
-        192  : 71.333333333333333,
-        256  : 72.25,
-        384  : 71.666666666666667,
-        512  : 72.125,
-        768  : 71.833333333333333,
-        1024 : 72.0625,
-        1536 : 71.916666666666667,
-        2048 : 72.03125
+        2: 46.,
+        3: 36.5,
+        4: 48.,
+        6: 50.166666666666667,
+        8: 53.25,
+        12: 69.5,
+        16: 72.25,
+        24: 70.166666666666667,
+        32: 72.75,
+        48: 70.5,
+        64: 73.,
+        96: 70.666666666666667,
+        128: 72.5,
+        192: 71.333333333333333,
+        256: 72.25,
+        384: 71.666666666666667,
+        512: 72.125,
+        768: 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125
     },
     12: {
-        2    : 46.,
-        3    : 36.5,
-        4    : 48.,
-        6    : 50.166666666666667,
-        8    : 53.25,
-        12   : 69.5,
-        16   : 71.625,
-        24   : 70.166666666666667,
-        32   : 72.125,
-        48   : 70.5,
-        64   : 72.375,
-        96   : 70.666666666666667,
-        128  : 72.5,
-        192  : 71.333333333333333,
-        256  : 72.25,
-        384  : 71.666666666666667,
-        512  : 72.125,
-        768  : 71.833333333333333,
-        1024 : 72.0625,
-        1536 : 71.916666666666667,
-        2048 : 72.03125
+        2: 46.,
+        3: 36.5,
+        4: 48.,
+        6: 50.166666666666667,
+        8: 53.25,
+        12: 69.5,
+        16: 71.625,
+        24: 70.166666666666667,
+        32: 72.125,
+        48: 70.5,
+        64: 72.375,
+        96: 70.666666666666667,
+        128: 72.5,
+        192: 71.333333333333333,
+        256: 72.25,
+        384: 71.666666666666667,
+        512: 72.125,
+        768: 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125
     },
     13: {
-        2    : 2.75,
-        3    : 2.8333333333333333,
-        4    : 2.875,
-        6    : 2.9166666666666667,
-        8    : 2.9375,
-        12   : 2.9583333333333333,
-        16   : 2.96875,
-        24   : 2.9791666666666667,
-        32   : 2.984375,
-        48   : 2.9895833333333333,
-        64   : 2.9921875,
-        96   : 2.9947916666666667
+        2: 2.75,
+        3: 2.8333333333333333,
+        4: 2.875,
+        6: 2.9166666666666667,
+        8: 2.9375,
+        12: 2.9583333333333333,
+        16: 2.96875,
+        24: 2.9791666666666667,
+        32: 2.984375,
+        48: 2.9895833333333333,
+        64: 2.9921875,
+        96: 2.9947916666666667
     }
 }
+
 
 def _remove_digital_filter(dic, data):
     """
@@ -265,10 +268,9 @@ def _remove_digital_filter(dic, data):
     td = dic['acqus']['TD'] // 2
     data = data[..., :int(td)]
 
-    log.debug('Bruker digital filter: removed %s points'%rp)
+    log.debug('Bruker digital filter: removed %s points' % rp)
 
     return data
-
 
 
 # def _scale(meta, dim=-1, reverse=None):
@@ -341,7 +343,7 @@ def read_bruker_nmr(source, *args, **kwargs):
 
     # determine if the method was called as a classmethod or not
     # if yes create a dataset
-    #TODO: a decorator for this
+    # TODO: a decorator for this
     if not isinstance(source, NDDataset):
         args = [source] + list(args)
         source = NDDataset()
@@ -365,7 +367,7 @@ def read_bruker_nmr(source, *args, **kwargs):
     if not os.path.exists(path):
         # look alternative definitions
         path_alt = os.path.join(str(data), str(user), 'nmr', str(name),
-                         str(expno))
+                                str(expno))
 
         if os.path.exists(path_alt):
             path = path_alt
@@ -374,7 +376,7 @@ def read_bruker_nmr(source, *args, **kwargs):
         # look multiple
         expnos = kwargs.get('expnos', False)
         if expnos:
-             path = os.path.join(str(data), str(user), 'nmr', str(name))
+            path = os.path.join(str(data), str(user), 'nmr', str(name))
 
     # path must be pointing to a valid bruker directory
     if not os.path.exists(path):
@@ -387,12 +389,12 @@ def read_bruker_nmr(source, *args, **kwargs):
     # Determine some parameter automatically
     processed = kwargs.get('processed', False)  # read unprocessed by default
 
-    #TODO: make a full implementation of read_proc
+    # TODO: make a full implementation of read_proc
     if processed:
         raise NotImplementedError('Not yet fully implemented... do not use!')
 
     lowmem = kwargs.get('lowmem', False)  # load all in memero by default
-    if lowmem :
+    if lowmem:
         log.debug('import with low memory handling (lowmem)')
 
     # -------------------------------------------------------------------------
@@ -425,7 +427,7 @@ def read_bruker_nmr(source, *args, **kwargs):
 
     for idx, path in enumerate(paths):
 
-        log.debug('Reading %d:%s'%(idx, path))
+        log.debug('Reading %d:%s' % (idx, path))
 
         # Acquisition parameters
 
@@ -443,7 +445,7 @@ def read_bruker_nmr(source, *args, **kwargs):
         else:
             if not processed:
                 log.warning('No binary fid or ser found in %s.\n'
-                               'Try processed files...' % path)
+                            'Try processed files...' % path)
                 processed = True
 
         if os.path.isfile(os.path.join(path, 'pdata', procno, '1r')):
@@ -461,7 +463,7 @@ def read_bruker_nmr(source, *args, **kwargs):
                         "No Bruker binary file could be found in %s" % path)
             elif processed:
                 log.warning("No processed Bruker binary file could be found"
-                               " in %s. Use fid's." % path)
+                            " in %s. Use fid's." % path)
 
         # we read all parameters file whatever the datatype
         npath, par_files = _get_par_files(path, procno, processed)
@@ -469,35 +471,35 @@ def read_bruker_nmr(source, *args, **kwargs):
         if datatype in ['FID', 'SER']:
             if not lowmem:
                 dic, data = read(npath, acqus_files=par_files,
-                             read_pulseprogram=False)
+                                 read_pulseprogram=False)
             else:
                 dic, data = read_lowmem(npath, acqus_files=par_files,
-                             read_pulseprogram=False)
+                                        read_pulseprogram=False)
 
-            # # look the case whn the reshaping was not correct
-            # # for example, this happen when the number
-            # # of accumulated row was incomplete
-            # if datatype in ['SER'] and data.ndim == 1:
-            #     # we must reshape using the acqu parameters
-            #     td1 = dic['acqu2']['TD']
-            #     try:
-            #         data = data.reshape(td1, -1)
-            #     except ValueError:
-            #         try:
-            #             td = dic['acqu']['TD'] // 2
-            #             data = data.reshape(-1, td)
-            #         except ValueError:
-            #             raise ValueError(
-            #                     "Inconsistency between TD's and data size")
-            #
-            # # reduce to td
-            # ntd = dic['acqus']['TD'] // 2
-            # data = data[...,
-            #               :ntd]  # necessary for agreement with bruker data and
-            # phase
+                # # look the case whn the reshaping was not correct
+                # # for example, this happen when the number
+                # # of accumulated row was incomplete
+                # if datatype in ['SER'] and data.ndim == 1:
+                #     # we must reshape using the acqu parameters
+                #     td1 = dic['acqu2']['TD']
+                #     try:
+                #         data = data.reshape(td1, -1)
+                #     except ValueError:
+                #         try:
+                #             td = dic['acqu']['TD'] // 2
+                #             data = data.reshape(-1, td)
+                #         except ValueError:
+                #             raise ValueError(
+                #                     "Inconsistency between TD's and data size")
+                #
+                # # reduce to td
+                # ntd = dic['acqus']['TD'] // 2
+                # data = data[...,
+                #               :ntd]  # necessary for agreement with bruker data and
+                # phase
         else:
 
-            log.debug('Reading processed %d:%s'%(idx, path))
+            log.debug('Reading processed %d:%s' % (idx, path))
 
             dic, data = read_pdata(npath, procs_files=par_files, )
 
@@ -508,7 +510,8 @@ def read_bruker_nmr(source, *args, **kwargs):
                 dic[newkey] = dic.pop(key)
 
         # Eliminate the digital filter
-        if datatype in ['FID', 'SER'] and kwargs.get('remove_digital_filter', True):
+        if datatype in ['FID', 'SER'] and kwargs.get('remove_digital_filter',
+                                                     True):
             data = _remove_digital_filter(dic, data)
 
         # we now make some rearrangement of the dic
@@ -541,23 +544,24 @@ def read_bruker_nmr(source, *args, **kwargs):
 
                     value = dic[item][key]
                     units = ur(keys_units[key.lower()]) \
-                                            if keys_units[key.lower()] else None
-                    #print( key, value, units)
+                        if keys_units[key.lower()] else None
+                    # print( key, value, units)
                     if units is not None:
                         if isinstance(value, (float, int)):
-                            value = value * units # make a quantity
+                            value = value * units  # make a quantity
                         elif isinstance(value, list) and isinstance(value[0],
-                                                                    (float,int)):
+                                                                    (float,
+                                                                     int)):
                             value = np.array(value) * units
 
-                    if not item.endswith('s'): # initial parameter
+                    if not item.endswith('s'):  # initial parameter
 
                         if dim == parmode:
                             meta[key.lower()] = [value, ]
                         else:
                             meta[key.lower()].insert(0, value)
 
-                    else: # status parameters (replace initial)
+                    else:  # status parameters (replace initial)
                         try:
                             meta[key.lower()][dim] = value
                         except:
@@ -571,7 +575,7 @@ def read_bruker_nmr(source, *args, **kwargs):
 
         # correct some initial values
 
-        meta.encoding = [0]*(parmode+1)
+        meta.encoding = [0] * (parmode + 1)
         meta.iscomplex = [False] * (parmode + 1)
 
         if datatype in ['FID', 'SER']:
@@ -602,7 +606,7 @@ def read_bruker_nmr(source, *args, **kwargs):
                 meta.td[-3] = data.shape[-3]
                 meta.tdeff[-3] = meta.td[-3]
                 meta.isfreq.insert(0, False)
-                if meta.fnmode[-3] == 0 and  meta.mc2 is not None:
+                if meta.fnmode[-3] == 0 and meta.mc2 is not None:
                     meta.fnmode[-3] = meta.mc2[-3] + 1
                 meta.encoding[-3] = FnMODE[meta.fnmode[-3]]
                 meta.iscomplex[-3] = meta.fnmode[-3] > 1
@@ -611,16 +615,15 @@ def read_bruker_nmr(source, *args, **kwargs):
         # not for the last dimension which is already correct
         for axis in range(parmode):
             if meta.iscomplex[axis]:
-                meta.td[axis] = meta.td[axis] //2
+                meta.td[axis] = meta.td[axis] // 2
 
         if datatype in ['1D', '2D', '3D']:
             meta.si = [si for si in data.shape]
-            meta.isfreq = [True]*(parmode+1)  # at least we assume this
-
+            meta.isfreq = [True] * (parmode + 1)  # at least we assume this
 
         # this transformation is to make data coherent with bruker processsing
         if meta.iscomplex[-1]:
-            data = np.conj(data * np.exp(np.pi*1j/2.))
+            data = np.conj(data * np.exp(np.pi * 1j / 2.))
 
         # normalised amplitudes to ns=1 and rg=1
         def _norm(dat):
@@ -645,15 +648,15 @@ def read_bruker_nmr(source, *args, **kwargs):
         # make the corresponding axis
         log.debug('Create axis...')
         axes = []
-        axe_range = range(parmode+1)
+        axe_range = range(parmode + 1)
         for axis in axe_range:
             if not meta.isfreq[axis]:
                 # the axis is in time units
-                dw = (1./meta.sw_h[axis]).to('us')
+                dw = (1. / meta.sw_h[axis]).to('us')
                 axespoints = np.arange(meta.td[axis])
-                axe = Axis(axespoints*dw,
-                           name = 'F{}'.format(axis),
-                           title = "acquisition time")
+                axe = Axis(axespoints * dw,
+                           name='F{}'.format(axis),
+                           title="acquisition time")
                 axes.append(axe)
             else:
                 raise NotImplementedError('Not yet implemented')
@@ -687,8 +690,8 @@ def read_bruker_nmr(source, *args, **kwargs):
         log.debug('One experiment read. Make it the current dataset')
 
         source.data = list_data[0]  # complex data will be transformed
-                                    # automatically into an interleaved
-                                    # data array
+        # automatically into an interleaved
+        # data array
         for axis, cplex in enumerate(meta.iscomplex):
             if cplex:
                 source.set_complex(axis)
@@ -701,7 +704,7 @@ def read_bruker_nmr(source, *args, **kwargs):
     else:
         # case of multiple experiments to merge
 
-        #find difference in data.shape
+        # find difference in data.shape
 
         diff = False
         shape = list_data[0].shape
@@ -718,17 +721,18 @@ def read_bruker_nmr(source, *args, **kwargs):
 
         if not diff:
             log.info('the experiments look perfectly compatibles'
-                        ' regarding the shape and the axis!')
+                     ' regarding the shape and the axis!')
 
         # find what are the differences in meta
-        meta= list_meta[0]
+        meta = list_meta[0]
 
         mkeys = set()  # will stroe the modified keys
         from spectrochempy.core.utils import dict_compare
         for i, d1 in enumerate(list_meta):
-            for j, d2 in enumerate(list_meta[i+1:]):
+            for j, d2 in enumerate(list_meta[i + 1:]):
                 added, removed, modified, _ = \
-                dict_compare(d1.to_dict(), d2.to_dict(), check_equal_only=False)
+                    dict_compare(d1.to_dict(), d2.to_dict(),
+                                 check_equal_only=False)
                 mkeys = mkeys.union(added)
                 mkeys = mkeys.union(removed)
                 mkeys = mkeys.union(modified)
@@ -782,11 +786,11 @@ def read_bruker_nmr(source, *args, **kwargs):
             else:
                 ax = np.arange(newdata.shape[0])
                 title = '-nd-'
-            axis = Axis(ax, title = title)
+            axis = Axis(ax, title=title)
 
             labels = []
             for i in range(len(ax)):
-                if len(mkeys)>1:
+                if len(mkeys) > 1:
                     label = []
                     for key in mkeys:
                         label.append(meta_diffs[key][i])

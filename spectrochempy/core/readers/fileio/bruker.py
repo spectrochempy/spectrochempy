@@ -87,7 +87,7 @@ def guess_udic(dic, data, strip_fake=False):
         try:
             add_axis_to_udic(udic, dic, b_dim, strip_fake)
         except:
-            warn("Failed to determine udic parameters for dim: %i" % (b_dim))
+            warn("Failed to determine udic parameters for dim: %i" % b_dim)
     return udic
 
 
@@ -124,7 +124,7 @@ def add_axis_to_udic(udic, dic, udim, strip_fake):
 
     try:
         obs = dic[pro_file]["SF"]
-        car = (dic[acq_file]["SFO1"]-obs) * 1e6
+        car = (dic[acq_file]["SFO1"] - obs) * 1e6
 
     except KeyError:
         warn('The chemical shift referencing was not corrected for "sr".')
@@ -135,11 +135,11 @@ def add_axis_to_udic(udic, dic, udim, strip_fake):
         try:
 
             # Temporary parameters
-            w = sw/float(dic[pro_file]["FTSIZE"])
-            d = (w * dic[pro_file]["STSR"]) + (w * dic[pro_file]["STSI"]/2.0)
+            w = sw / float(dic[pro_file]["FTSIZE"])
+            d = (w * dic[pro_file]["STSR"]) + (w * dic[pro_file]["STSI"] / 2.0)
 
             # Fake car frequency
-            car -= (d-(sw/2.0))
+            car -= (d - (sw / 2.0))
 
             # Fake sw frequency
             sw = w * dic[pro_file]["STSI"]
@@ -151,7 +151,7 @@ def add_axis_to_udic(udic, dic, udim, strip_fake):
     udic[udim]["obs"] = obs
 
     if acq_file == "acqus":
-        if dic['acqus']['AQ_mod'] == 0:     # qf
+        if dic['acqus']['AQ_mod'] == 0:  # qf
             udic[udim]['complex'] = False
         else:
             udic[udim]['complex'] = True
@@ -300,7 +300,7 @@ def read(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
 
     """
     if os.path.isdir(dir) is not True:
-        raise IOError("directory %s does not exist" % (dir))
+        raise IOError("directory %s does not exist" % dir)
 
     # Take a shot at reading the procs file
     if read_procs:
@@ -328,10 +328,10 @@ def read(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
                 bin_file = "ser"
             else:
                 mesg = "No Bruker binary file could be found in %s"
-                raise IOError(mesg % (dir))
+                raise IOError(mesg % dir)
         else:
             mesg = "No Bruker binary file could be found in %s"
-            raise IOError(mesg % (dir))
+            raise IOError(mesg % dir)
 
     if read_acqus:
         # read the acqus_files and add to the dictionary
@@ -354,7 +354,7 @@ def read(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
     # determind shape and complexity for direct dim if needed
     if shape is None or cplex is None:
         gshape, gcplex = guess_shape(dic)
-        if gcplex is True:    # divide last dim by 2 if complex
+        if gcplex is True:  # divide last dim by 2 if complex
             t = list(gshape)
             t[-1] = t[-1] // 2
             gshape = tuple(t)
@@ -365,7 +365,7 @@ def read(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
 
     # determind endianness (assume little-endian unless BYTORDA is 1)
     if big is None:
-        big = False     # default value
+        big = False  # default value
         if "acqus" in dic and "BYTORDA" in dic["acqus"]:
             if dic["acqus"]["BYTORDA"] == 1:
                 big = True
@@ -401,7 +401,7 @@ def read_lowmem(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
     """
 
     if os.path.isdir(dir) is not True:
-        raise IOError("directory %s does not exist" % (dir))
+        raise IOError("directory %s does not exist" % dir)
 
     # Take a shot at reading the procs file
     if read_procs:
@@ -429,10 +429,10 @@ def read_lowmem(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
                 bin_file = "ser"
             else:
                 mesg = "No Bruker binary file could be found in %s"
-                raise IOError(mesg % (dir))
+                raise IOError(mesg % dir)
         else:
             mesg = "No Bruker binary file could be found in %s"
-            raise IOError(mesg % (dir))
+            raise IOError(mesg % dir)
 
     if read_acqus:
         # read the acqus_files and add to the dictionary
@@ -452,7 +452,7 @@ def read_lowmem(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
     # determind shape and complexity for direct dim if needed
     if shape is None or cplex is None:
         gshape, gcplex = guess_shape(dic)
-        if gcplex is True:    # divide last dim by 2 if complex
+        if gcplex is True:  # divide last dim by 2 if complex
             t = list(gshape)
             t[-1] = t[-1] // 2
             gshape = tuple(t)
@@ -463,7 +463,7 @@ def read_lowmem(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
 
     # determine endianness (assume little-endian unless BYTORDA is 1)
     if big is None:
-        big = False     # default value
+        big = False  # default value
         if "acqus" in dic and "BYTORDA" in dic["acqus"]:
             if dic["acqus"]["BYTORDA"] == 1:
                 big = True
@@ -603,7 +603,7 @@ def write(dir, dic, data, bin_file=None, acqus_files=None, pprog_file=None,
 
     # determind endianness (assume little-endian unless BYTORDA is 1)
     if big is None:
-        big = False     # default value
+        big = False  # default value
         if "acqus" in dic and "BYTORDA" in dic["acqus"]:
             if dic["acqus"]["BYTORDA"] == 1:
                 big = True
@@ -656,7 +656,7 @@ def write_lowmem(dir, dic, data, bin_file=None, acqus_files=None,
 
     # determind endianness (assume little-endian unless BYTORDA is 1)
     if big is None:
-        big = False     # default value
+        big = False  # default value
         if "acqus" in dic and "BYTORDA" in dic["acqus"]:
             if dic["acqus"]["BYTORDA"] == 1:
                 big = True
@@ -705,22 +705,22 @@ def guess_shape(dic):
     try:
         td0 = float(dic["acqus"]["TD"])
     except KeyError:
-        td0 = 1024   # default value
+        td0 = 1024  # default value
 
     try:
         td2 = int(dic["acqu2s"]["TD"])
     except KeyError:
-        td2 = 0     # default value
+        td2 = 0  # default value
 
     try:
         td1 = float(dic["acqu3s"]["TD"])
     except KeyError:
-        td1 = int(td2)   # default value
+        td1 = int(td2)  # default value
 
     try:
         td3 = int(dic["acqu4s"]["TD"])
     except KeyError:
-        td3 = int(td1)     # default value
+        td3 = int(td1)  # default value
 
     # last (direct) dimension is given by "TD" parameter in acqus file
     # rounded up to nearest 256
@@ -745,8 +745,8 @@ def guess_shape(dic):
 
     # determine indirect dimension sizes from pulseprogram parameters
     loop = pprog["loop"]
-    loopn = len(loop)       # number of loops
-    li = [len(i) for i in pprog["incr"]]    # length of incr lists
+    loopn = len(loop)  # number of loops
+    li = [len(i) for i in pprog["incr"]]  # length of incr lists
 
     # replace td0,td1,td2,td3 in loop list
     rep = {'td0': td0, 'td1': td1, 'td2': td2, 'td3': td3}
@@ -771,7 +771,7 @@ def guess_shape(dic):
 
     # The following checks for these and updates the indirect dimension
     # if the above is found.
-    if loopn == 1:    # 2D with no leading passive loops
+    if loopn == 1:  # 2D with no leading passive loops
         if li[0] != 0:
             shape[2] = loop[0]
             shape = shape[-2:]
@@ -783,7 +783,7 @@ def guess_shape(dic):
 
     elif loopn == 3:  # 2D with two leading passive loops
         if (loop[0] == 2 and loop[1] == 2 and li[0] == 0 and li[1] == 0
-                and li[2] != 0):
+            and li[2] != 0):
             shape[2] = 2 * loop[2]
             shape = shape[-2:]
 
@@ -883,7 +883,7 @@ def read_pdata(dir=".", bin_files=None, procs_files=None, read_procs=True,
     # TODO read_pdata_lowmem, write_pdata
 
     if os.path.isdir(dir) is not True:
-        raise IOError("directory %s does not exist" % (dir))
+        raise IOError("directory %s does not exist" % dir)
 
     # find binary files
     if bin_files is None:
@@ -904,7 +904,7 @@ def read_pdata(dir=".", bin_files=None, procs_files=None, read_procs=True,
             else:
                 bin_files = ['3rrr']
         else:
-            raise IOError("No Bruker binary file could be found in %s" % (dir))
+            raise IOError("No Bruker binary file could be found in %s" % dir)
 
     if read_procs:
         # read the acqus_files and add to the dictionary
@@ -942,7 +942,7 @@ def read_pdata(dir=".", bin_files=None, procs_files=None, read_procs=True,
 
     # determind endianness (assume little-endian unless BYTORDA is 1)
     if big is None:
-        big = False     # default value
+        big = False  # default value
         if "procs" in dic and "BYTORDA" in dic["procs"]:
             if dic["procs"]["BYTORDA"] == 1:
                 big = True
@@ -997,17 +997,17 @@ def guess_shape_and_submatrix_shape(dic):
 
     procs = dic['procs']
     if 'SI' not in procs or 'XDIM' not in procs:
-        return None, None   # cannot determine shape
+        return None, None  # cannot determine shape
 
     si_0 = procs['SI']
     xdim_0 = procs['XDIM']
 
     if 'proc2s' not in dic:  # 1D data
-        return (si_0, ), (xdim_0, )
+        return (si_0,), (xdim_0,)
 
     proc2s = dic['proc2s']
     if 'SI' not in proc2s or 'XDIM' not in proc2s:
-        return None, None   # cannot determine shape
+        return None, None  # cannot determine shape
 
     si_1 = proc2s['SI']
     xdim_1 = proc2s['XDIM']
@@ -1017,7 +1017,7 @@ def guess_shape_and_submatrix_shape(dic):
 
     proc3s = dic['proc3s']
     if 'SI' not in proc3s or 'XDIM' not in proc3s:
-        return None, None   # cannot determine shape
+        return None, None  # cannot determine shape
 
     si_2 = proc3s['SI']
     xdim_2 = proc3s['XDIM']
@@ -1027,7 +1027,7 @@ def guess_shape_and_submatrix_shape(dic):
 
     proc4s = dic['proc4s']
     if 'SI' not in proc4s or 'XDIM' not in proc4s:
-        return None, None   # cannot determine shape
+        return None, None  # cannot determine shape
 
     si_3 = proc4s['SI']
     xdim_3 = proc4s['XDIM']
@@ -1123,7 +1123,7 @@ def reorder_submatrix(data, shape, submatrix_shape):
 
 # Bruker binary (fid/ser) reading and writing
 
-def read_binary(filename, shape=(1), cplex=True, big=True):
+def read_binary(filename, shape=1, cplex=True, big=True):
     """
     Read Bruker binary data from file and return dic,data pair.
 
@@ -1174,7 +1174,7 @@ def read_binary(filename, shape=(1), cplex=True, big=True):
         return dic, data
 
 
-def read_binary_lowmem(filename, shape=(1), cplex=True, big=True):
+def read_binary_lowmem(filename, shape=1, cplex=True, big=True):
     """
     Read Bruker binary data from file using minimal memory.
 
@@ -1323,7 +1323,7 @@ class bruker_nd(fileiobase.data_nd):
         else:
             self.dtype = np.dtype("int32")
 
-        self.__setdimandshape__()   # set ndim and shape attributes
+        self.__setdimandshape__()  # set ndim and shape attributes
 
     def __fcopy__(self, order):
         """
@@ -1376,6 +1376,7 @@ class bruker_nd(fileiobase.data_nd):
             out[out_index] = trace[lslice]
 
         return out
+
 
 # binary get/put functions
 
@@ -1454,87 +1455,87 @@ def uncomplexify_data(data_in):
 
 bruker_dsp_table = {
     10: {
-        2    : 44.75,
-        3    : 33.5,
-        4    : 66.625,
-        6    : 59.083333333333333,
-        8    : 68.5625,
-        12   : 60.375,
-        16   : 69.53125,
-        24   : 61.020833333333333,
-        32   : 70.015625,
-        48   : 61.34375,
-        64   : 70.2578125,
-        96   : 61.505208333333333,
-        128  : 70.37890625,
-        192  : 61.5859375,
-        256  : 70.439453125,
-        384  : 61.626302083333333,
-        512  : 70.4697265625,
-        768  : 61.646484375,
-        1024 : 70.48486328125,
-        1536 : 61.656575520833333,
-        2048 : 70.492431640625,
+        2: 44.75,
+        3: 33.5,
+        4: 66.625,
+        6: 59.083333333333333,
+        8: 68.5625,
+        12: 60.375,
+        16: 69.53125,
+        24: 61.020833333333333,
+        32: 70.015625,
+        48: 61.34375,
+        64: 70.2578125,
+        96: 61.505208333333333,
+        128: 70.37890625,
+        192: 61.5859375,
+        256: 70.439453125,
+        384: 61.626302083333333,
+        512: 70.4697265625,
+        768: 61.646484375,
+        1024: 70.48486328125,
+        1536: 61.656575520833333,
+        2048: 70.492431640625,
     },
     11: {
-        2    : 46.,
-        3    : 36.5,
-        4    : 48.,
-        6    : 50.166666666666667,
-        8    : 53.25,
-        12   : 69.5,
-        16   : 72.25,
-        24   : 70.166666666666667,
-        32   : 72.75,
-        48   : 70.5,
-        64   : 73.,
-        96   : 70.666666666666667,
-        128  : 72.5,
-        192  : 71.333333333333333,
-        256  : 72.25,
-        384  : 71.666666666666667,
-        512  : 72.125,
-        768  : 71.833333333333333,
-        1024 : 72.0625,
-        1536 : 71.916666666666667,
-        2048 : 72.03125
+        2: 46.,
+        3: 36.5,
+        4: 48.,
+        6: 50.166666666666667,
+        8: 53.25,
+        12: 69.5,
+        16: 72.25,
+        24: 70.166666666666667,
+        32: 72.75,
+        48: 70.5,
+        64: 73.,
+        96: 70.666666666666667,
+        128: 72.5,
+        192: 71.333333333333333,
+        256: 72.25,
+        384: 71.666666666666667,
+        512: 72.125,
+        768: 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125
     },
     12: {
-        2    : 46.,
-        3    : 36.5,
-        4    : 48.,
-        6    : 50.166666666666667,
-        8    : 53.25,
-        12   : 69.5,
-        16   : 71.625,
-        24   : 70.166666666666667,
-        32   : 72.125,
-        48   : 70.5,
-        64   : 72.375,
-        96   : 70.666666666666667,
-        128  : 72.5,
-        192  : 71.333333333333333,
-        256  : 72.25,
-        384  : 71.666666666666667,
-        512  : 72.125,
-        768  : 71.833333333333333,
-        1024 : 72.0625,
-        1536 : 71.916666666666667,
-        2048 : 72.03125
+        2: 46.,
+        3: 36.5,
+        4: 48.,
+        6: 50.166666666666667,
+        8: 53.25,
+        12: 69.5,
+        16: 71.625,
+        24: 70.166666666666667,
+        32: 72.125,
+        48: 70.5,
+        64: 72.375,
+        96: 70.666666666666667,
+        128: 72.5,
+        192: 71.333333333333333,
+        256: 72.25,
+        384: 71.666666666666667,
+        512: 72.125,
+        768: 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125
     },
     13: {
-        2    : 2.75,
-        3    : 2.8333333333333333,
-        4    : 2.875,
-        6    : 2.9166666666666667,
-        8    : 2.9375,
-        12   : 2.9583333333333333,
-        16   : 2.96875,
-        24   : 2.9791666666666667,
-        32   : 2.984375,
-        48   : 2.9895833333333333,
-        64   : 2.9921875,
-        96   : 2.9947916666666667
+        2: 2.75,
+        3: 2.8333333333333333,
+        4: 2.875,
+        6: 2.9166666666666667,
+        8: 2.9375,
+        12: 2.9583333333333333,
+        16: 2.96875,
+        24: 2.9791666666666667,
+        32: 2.984375,
+        48: 2.9895833333333333,
+        64: 2.9921875,
+        96: 2.9947916666666667
     }
 }
 
@@ -1643,21 +1644,21 @@ def rm_dig_filter(data, decim, dspfvs, grpdly=0, truncate_grpdly=True):
 
     # determind the phase correction
     else:
-        if dspfvs >= 14:    # DSPFVS greater than 14 give no phase correction.
+        if dspfvs >= 14:  # DSPFVS greater than 14 give no phase correction.
             phase = 0.
-        else:   # loop up the phase in the table
+        else:  # loop up the phase in the table
             if dspfvs not in bruker_dsp_table:
                 raise ValueError("dspfvs not in lookup table")
             if decim not in bruker_dsp_table[dspfvs]:
                 raise ValueError("decim not in lookup table")
             phase = bruker_dsp_table[dspfvs][decim]
 
-    if truncate_grpdly:     # truncate the phase
+    if truncate_grpdly:  # truncate the phase
         phase = np.floor(phase)
 
     # and the number of points to remove (skip) and add to the beginning
-    skip = int(np.floor(phase + 2.))    # round up two integers
-    add = int(max(skip - 6, 0))           # 6 less, or 0
+    skip = int(np.floor(phase + 2.))  # round up two integers
+    add = int(max(skip - 6, 0))  # 6 less, or 0
 
     # DEBUG
     # print("phase: %f, skip: %i add: %i"%(phase,skip,add))
@@ -1704,10 +1705,10 @@ def read_jcamp(filename):
     dic = {"_coreheader": [], "_comments": []}  # create empty dictionary
     f = open(filename, 'r')
 
-    while True:     # loop until end of file is found
+    while True:  # loop until end of file is found
 
-        line = f.readline().rstrip()    # read a line
-        if line == '':      # end of file found
+        line = f.readline().rstrip()  # read a line
+        if line == '':  # end of file found
             break
 
         if line[:6] == "##END=":
@@ -1743,12 +1744,12 @@ def parse_jcamp_line(line, f):
     key = line[3:line.index("=")]
     text = line[line.index("=") + 1:].lstrip()
 
-    if "<" in text:   # string
-        while ">" not in text:      # grab additional text until ">" in string
+    if "<" in text:  # string
+        while ">" not in text:  # grab additional text until ">" in string
             text = text + "\n" + f.readline().rstrip()
         value = text[1:-1]  # remove < and >
 
-    elif "(" in text:   # array
+    elif "(" in text:  # array
         num = int(line[line.index("..") + 2:line.index(")")]) + 1
         value = []
         rline = line[line.index(")") + 1:]
@@ -1769,7 +1770,7 @@ def parse_jcamp_line(line, f):
     elif text == "no":
         value = False
 
-    else:   # simple value
+    else:  # simple value
         value = parse_jcamp_value(text)
 
     return key, value
@@ -1868,10 +1869,10 @@ def write_jcamp_pair(f, key, value):
     if type(value) == float or type(value) == int:  # simple numbers
         line = line + repr(value)
 
-    elif isinstance(value, str):    # string
+    elif isinstance(value, str):  # string
         line = line + "<" + value + ">"
 
-    elif type(value) == bool:   # yes or no
+    elif type(value) == bool:  # yes or no
         if value:
             line = line + "yes"
         else:
@@ -2049,7 +2050,7 @@ def read_pprog(filename):
                 # print(line,"--Phase")
                 continue
 
-            # print(line,"--Unimportant")
+                # print(line,"--Unimportant")
 
     f.close()
 

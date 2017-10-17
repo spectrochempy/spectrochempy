@@ -36,6 +36,4 @@
 
 from .basecor import *
 
-
 __all__ = ['basecor']
-

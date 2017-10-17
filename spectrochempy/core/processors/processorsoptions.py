@@ -34,5 +34,5 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-class ProcessOptions():
+class ProcessOptions:
     pass

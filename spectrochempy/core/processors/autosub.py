@@ -45,6 +45,7 @@ from spectrochempy.core.dataset.ndaxes import AxisRange
 
 __all__ = ['autosub']
 
+
 def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     """Automatic subtraction of ref to the dataset to minimise peaks due to ref
 
@@ -134,8 +135,8 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     # ref_r = np.zeros(shaper)
 
     ranges = tuple(np.array(ranges,
-                            dtype=float))   # must be float to be considered
-                                            # as frequency for instance
+                            dtype=float))  # must be float to be considered
+    # as frequency for instance
     coords = new.coords(-1)
     xrange = AxisRange(*ranges, reversed=coords.is_reversed).ranges
 
@@ -182,6 +183,6 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
         new = new.swapaxes(axis, -1)
 
     new.history = str(
-        new.modified) + ': ' + 'Automatic subtraction of :' + ref.name + '\n'
+            new.modified) + ': ' + 'Automatic subtraction of :' + ref.name + '\n'
 
     return new

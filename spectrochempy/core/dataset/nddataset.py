@@ -70,7 +70,7 @@ from spectrochempy.utils import (numpyprintoptions,
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndaxes import Axis, Axes, AxisError
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
-#from spectrochempy.core.dataset.ndmeta import Meta
+# from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.dataset.ndio import NDIO
 
 from spectrochempy.application import log
@@ -86,7 +86,7 @@ from spectrochempy.application import log
 __all__ = ['NDDataset',
            'NDDatasetError',
            'NDDatasetWarning',
-           #dataset
+           # dataset
            'squeeze',
            'sort',
            'swapaxes',
@@ -98,10 +98,10 @@ __all__ = ['NDDataset',
            ]
 
 _classes = [
-           'NDDataset',
-           'NDDatasetError',
-           'NDDatasetWarning'
-           ]
+    'NDDataset',
+    'NDDatasetError',
+    'NDDatasetWarning'
+]
 
 # =============================================================================
 # numpy print options
@@ -763,7 +763,7 @@ class NDDataset(
         new._axes._transpose(axes)
         new._is_complex = [new._is_complex[axis] for axis in axes]
 
-        #TODO: Add transpose of meta
+        # TODO: Add transpose of meta
 
         return new
 
@@ -824,9 +824,7 @@ class NDDataset(
 
         new._meta = new._meta.swapaxes(axis1, axis2, inplace=False)
 
-
         return new
-
 
     def sort(self, axis=0, pos=None, by='axis', descend=False, inplace=False):
         """
@@ -987,7 +985,7 @@ class NDDataset(
 
     conjugate = conj
 
-    def abs(self, axis= -1):
+    def abs(self, axis=-1):
         """
         Returns the absolute value of a complex NDDataset.
 
@@ -1022,6 +1020,7 @@ class NDDataset(
         new._data = np.sqrt(new)._data
 
         return new
+
     absolute = abs
 
     def set_complex(self, axis=-1):
@@ -1059,9 +1058,10 @@ class NDDataset(
 
     def __dir__(self):
         return NDIO().__dir__() + ['data', 'mask', 'units', 'uncertainty',
-                'meta', 'name', 'title', 'is_complex',
-                'axes', 'description', 'history', 'date', 'modified'
-                ]
+                                   'meta', 'name', 'title', 'is_complex',
+                                   'axes', 'description', 'history', 'date',
+                                   'modified'
+                                   ]
 
     def __repr__(self):
         prefix = type(self).__name__ + '('
@@ -1141,7 +1141,7 @@ class NDDataset(
     def __getattr__(self, item):
         # when the attribute was not found
 
-        if item in [ "__numpy_ufunc__"] or '_validate' in item or \
+        if item in ["__numpy_ufunc__"] or '_validate' in item or \
                         '_changed' in item:
             # raise an error so that masked array will be handled correctly
             # with arithmetic operators and more
@@ -1263,9 +1263,9 @@ class NDDataset(
 
     def _repr_html_(self):
         tr = "<tr style='border-bottom: 1px solid lightgray;" \
-                         "border-top: 1px solid lightgray;'>" \
+             "border-top: 1px solid lightgray;'>" \
              "<td style='padding-right:5px'><strong>{}</strong></td>" \
-                                        "<td>{}</td><tr>\n"
+             "<td>{}</td><tr>\n"
 
         out = '<table>\n'
 
@@ -1292,7 +1292,7 @@ class NDDataset(
         uncertainty = "(+/-%s)" % self.uncertainty \
             if self.uncertainty is not None else ""
         units = '{:~T}'.format(
-            self.units) if self.units is not None else 'unitless'
+                self.units) if self.units is not None else 'unitless'
 
         sh = ' size' if self.ndim < 2 else 'shape'
         shapecplx = (x for x in
@@ -1305,11 +1305,11 @@ class NDDataset(
         size = self.size
         sizecplx = '' if not self.has_complex_dims else " (complex)"
         size = '{}{}'.format(size, sizecplx) \
-                                        if self.ndim < 2 else '{}'.format(shape)
+            if self.ndim < 2 else '{}'.format(shape)
 
         data = '<table>\n'
         data += tr.format("Title", self.title)
-        data += tr.format("Size",size)
+        data += tr.format("Size", size)
         data += tr.format("Units", units)
         data_str = str(self._uarray(self._data, self._uncertainty))
         data_str = data_str.replace('\n\n', '\n')
@@ -1321,7 +1321,7 @@ class NDDataset(
         if self.axes is not None:
             for i, axis in enumerate(self.axes):
                 axis_str = axis._repr_html_().replace('\n\n', '\n')
-                out += tr.format("axis %i"%i,
+                out += tr.format("axis %i" % i,
                                  textwrap.indent(axis_str, ' ' * 9))
 
         out += '</table><br/>\n'
@@ -1467,6 +1467,7 @@ class NDDataset(
         self._modified = datetime.now()
 
         return
+
 
 # make some function also accesiibles from the module
 squeeze = NDDataset.squeeze

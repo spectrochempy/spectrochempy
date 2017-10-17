@@ -12,12 +12,11 @@ import types
 import six
 from six.moves import range, zip
 
-
 __all__ = _methods = ['resolve_name', 'minversion', 'find_current_module',
-           'isinstancemethod']
+                      'isinstancemethod']
 
 
-#__doctest_skip__ = ['find_current_module']
+# __doctest_skip__ = ['find_current_module']
 
 
 def resolve_name(name, *additional_parts):
@@ -328,7 +327,7 @@ def find_mod_objs(modname, onlylocals=False):
     fqnames = []
     for obj, lnm in zip(objs, localnames):
         if hasattr(obj, '__module__') and hasattr(obj, '__name__'):
-            print(obj.__module__, " (((%s)))"%obj.__name__)
+            print(obj.__module__, " (((%s)))" % obj.__name__)
             fqnames.append(str(obj.__module__) + '.' + str(obj.__name__))
         else:
             fqnames.append(modname + '.' + lnm)
@@ -336,7 +335,8 @@ def find_mod_objs(modname, onlylocals=False):
     if onlylocals:
         if onlylocals is True:
             onlylocals = [modname]
-        valids = [any(fqn.startswith(nm) for nm in onlylocals) for fqn in fqnames]
+        valids = [any(fqn.startswith(nm) for nm in onlylocals) for fqn in
+                  fqnames]
         localnames = [e for i, e in enumerate(localnames) if valids[i]]
         fqnames = [e for i, e in enumerate(fqnames) if valids[i]]
         objs = [e for i, e in enumerate(objs) if valids[i]]
@@ -412,9 +412,7 @@ else:
     def _isinstancemethod(cls, obj):
         return isinstance(obj, types.MethodType) and obj.im_class is cls
 
-
 if __name__ == '__main__':
-
     array = find_mod_objs('spectrochempy.api', onlylocals=False)
     log = array[2][34]
     log.error("xxxxxxxx")

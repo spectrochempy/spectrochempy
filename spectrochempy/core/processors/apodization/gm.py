@@ -51,6 +51,7 @@ from spectrochempy.utils import epsilon
 # =============================================================================
 __all__ = ["gm"]
 
+
 # =============================================================================
 # gm function
 # =============================================================================
@@ -118,16 +119,16 @@ def gm(source, *args, **kwargs):
 
     # lb broadening
     lb = kwargs.get('lb', 0)
-    if lb==0:
+    if lb == 0:
         # let's try the args if the kwargs was not passed
-        if len(args)>0:
+        if len(args) > 0:
             lb = args.pop(0)
 
     # gb broadening
     gb = kwargs.get('gb', 0)
-    if gb==0:
+    if gb == 0:
         # let's try the second args if the kwargs was not passed
-        if len(args)>0:
+        if len(args) > 0:
             gb = args.pop(0)
 
     # shifted ?
@@ -144,8 +145,7 @@ def gm(source, *args, **kwargs):
         else:
             g = np.zeros_like(x)
 
-        return np.exp(e - g**2).data
-
+        return np.exp(e - g ** 2).data
 
     kwargs['method'] = func
     kwargs['apod'] = lb

@@ -36,7 +36,7 @@ def base(data, nl, nw=0):
     """
     if data.ndim == 1:
         data = data - calc_bl_linear(data, nl, nw)
-    else:   # for 2D array loop over traces
+    else:  # for 2D array loop over traces
         for i, vec in enumerate(data):
             data[i] = data[i] - calc_bl_linear(vec, nl, nw)
     return data
@@ -196,8 +196,8 @@ def calc_bl_med(x, mw, sf, sigma):
     """
     # create extrema array (non extrema values are masked out)
     mask = x == scipy.ndimage.median_filter(x, size=3)
-    mask[0] = False     # first pt always extrema
-    mask[-1] = False    # last pt always extrema
+    mask[0] = False  # first pt always extrema
+    mask[-1] = False  # last pt always extrema
     e = np.ma.masked_array(x, mask)
 
     # fill in the median vector
@@ -254,15 +254,15 @@ def _get_sd(data, k):
 
 
 def _find_noise_sd(sd_set, ratio):
-    '''Calculate the median m1 from SDset. exclude the elements greater
+    """Calculate the median m1 from SDset. exclude the elements greater
     than 2m1from SDset and recalculate the median m2. Repeat until
-    m2/m1 converge(sd_set)'''
+    m2/m1 converge(sd_set)"""
     m1 = np.median(sd_set)
     S = sd_set <= 2.0 * m1
     tmp = S * sd_set
     sd_set = tmp[tmp != 0]
     m2 = np.median(sd_set)
-    while m2/m1 < ratio:
+    while m2 / m1 < ratio:
         m1 = np.median(sd_set)
         S = sd_set <= 2.0 * m1
         tmp = S * sd_set
@@ -274,7 +274,8 @@ def _is_signal(sigma, sd_set, w):
     sn_vector = sd_set * 0
     for i in np.arange(len(sn_vector)):
         if sd_set[i] > sigma * 1.1:
-            sn_vector[np.maximum(0, i-w):np.minimum(i + w, len(sn_vector))] = 1
+            sn_vector[
+            np.maximum(0, i - w):np.minimum(i + w, len(sn_vector))] = 1
     return sn_vector
 
 

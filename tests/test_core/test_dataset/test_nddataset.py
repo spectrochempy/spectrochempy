@@ -53,9 +53,10 @@ from tests.utils import (assert_equal, assert_array_equal,
                          raises)
 from ...utils import NumpyRNGContext
 
-def test_fix_crossvalidate_bug():
 
+def test_fix_crossvalidate_bug():
     assert hasattr(NDDataset(), '_%s_validate' % '_iscopy') is False
+
 
 @pytest.fixture()
 def ndcplx():
@@ -109,8 +110,6 @@ def test_nddataset_simple(nd):
     assert nd.data.shape == (10, 10)
     assert nd.data.size == 100
     assert nd.data.dtype == np.dtype(float)
-
-
 
 
 # @pytest.mark.xfail(True, reason='not fully implemented ')
@@ -293,6 +292,7 @@ def dataframe():
 def panel():
     shape = (7, 6, 5)
     with NumpyRNGContext(23452):
+        # TODO: WARNING: pd.Panel is deprecated in pandas
         arr = pd.Panel(np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
                        major_axis=np.arange(shape[1]) * 10.,
                        minor_axis=np.arange(shape[2]) * 10.)
@@ -390,7 +390,7 @@ def test_ndarray_swapaxes(nd1d, nd2d):
     # swapaxes needs 2D at least
     assert nd1.shape == (4,)
     nd1s = nd1.swapaxes(1, 0)
-    assert_equal(nd1s.data,nd1.data)
+    assert_equal(nd1s.data, nd1.data)
 
     assert nd2.shape == (2, 4)
     nd2s = nd2.swapaxes(1, 0)
@@ -408,7 +408,8 @@ def test_ndarray_swapaxes(nd1d, nd2d):
     assert nd2s.shape == (2, 4)
     assert nd2s is not nd2
 
-    #TODO: add check for swaping of all elements of a dataset such as meta
+    # TODO: add check for swaping of all elements of a dataset such as meta
+
 
 def test_set_axes_parameters_at_init():
     dx = np.random.random((10, 10, 10))
@@ -605,6 +606,7 @@ def test_dataset_slicing_by_label(dataset3d):
     assert bc.shape == (5, 100, 1)
     assert bc.coords(0).labels[0] == 'b'
     assert bc['b'].squeeze(axis=-1).coords(0).labels == 'b'
+
 
 def test_dataset_slicing_by_values(dataset3d):
     da = dataset3d
@@ -949,7 +951,7 @@ def test_nddataset_unmasked_in_operation_with_masked_numpy_array():
     # assert np.all(result2[~result2.mask].data == -ndd.data[~np_mask])
 
 
-@pytest.mark.parametrize(('shape'), [(10,), (5, 5), (3, 10, 10)])
+@pytest.mark.parametrize('shape', [(10,), (5, 5), (3, 10, 10)])
 def test_nddataset_mask_invalid_shape(shape):
     with pytest.raises(ValueError) as exc:
         with NumpyRNGContext(789):
@@ -1142,18 +1144,17 @@ def test_create_from_complex_data():
     assert nd.shape == (2, 2)
     pass
 
-def test_make_complex_1D_during_math_op():
 
-    nd = NDDataset([1. , 2. ],axes=[Axis([10,20])], units='meter')
+def test_make_complex_1D_during_math_op():
+    nd = NDDataset([1., 2.], axes=[Axis([10, 20])], units='meter')
     assert nd.data.size == 2
     assert nd.size == 2
     assert nd.shape == (2,)
-    assert nd.is_complex == [False,]
+    assert nd.is_complex == [False, ]
 
     ndj = nd * 1j
     assert ndj.data.size == 4
     assert ndj.is_complex[-1]
-
 
 
 def test_create_from_complex_data_with_units_and_uncertainties():
@@ -1426,7 +1427,7 @@ def test_dataset_with_meta(ds1):
 #### sorting ###################################################################
 def test_sorting(ds1):  # ds1 is defined in conftest
 
-    source = ds1[:3,:3,0].copy()
+    source = ds1[:3, :3, 0].copy()
     source = source.squeeze()
     source.sort(inplace=True)
     labels = np.array('c b a'.split())
@@ -1434,10 +1435,10 @@ def test_sorting(ds1):  # ds1 is defined in conftest
     print(source)
 
     source.sort(inplace=True)
-    print (source)
+    print(source)
     new = source.copy()
     new = new.sort(descend=True, inplace=False)
-    print (new)
+    print(new)
     assert_array_equal(new.data, source.data[::-1])
     assert (new[0, 0] == source[-1, 0])
     assert_array_equal(new.axes[0].labels, labels[::-1])
@@ -1469,7 +1470,7 @@ def test_sorting(ds1):  # ds1 is defined in conftest
 def test_multiple_axis(dsm):  # dsm is defined in conftest
 
     da = dsm.copy()
-    print(da)  #TODO: improve output in this case of multiple axis
+    print(da)  # TODO: improve output in this case of multiple axis
 
     # check slicing
     assert da.shape == (9, 50)
@@ -1494,25 +1495,26 @@ def test_multiple_axis(dsm):  # dsm is defined in conftest
     assert_array_equal(da.axes[1][1].coords, np.logspace(1., 4., 50),
                        "get axis by index failed")
 
-    assert_array_equal(da.axes[1]['temperature'].coords, np.logspace(1., 4., 50),
+    assert_array_equal(da.axes[1]['temperature'].coords,
+                       np.logspace(1., 4., 50),
                        "get axis by index failed")
 
     # even simlper we can specify any of the axis title and get it ...
-    assert_array_equal(da.axes['time-on-stream'].coords, np.linspace(0., 60., 50),
+    assert_array_equal(da.axes['time-on-stream'].coords,
+                       np.linspace(0., 60., 50),
                        "get axis by title failed")
 
-    assert_array_equal(da.axes['temperature'].coords,  np.logspace(1., 4., 50),
+    assert_array_equal(da.axes['temperature'].coords, np.logspace(1., 4., 50),
                        "get axis by title failed")
 
     da.axes['temperature'].coords += 273.15
 
     assert_array_equal(da.axes['temperature'].coords,
-                           np.logspace(1., 4., 50) + 273.15,
-                           "get axis by title failed")
+                       np.logspace(1., 4., 50) + 273.15,
+                       "get axis by title failed")
 
 
 def test_bug_fixe_figopeninnotebookwithoutplot():
-
-    da = NDDataset([1,2,3])
+    da = NDDataset([1, 2, 3])
     da2 = np.sqrt(da ** 3)
     assert da2._fig is None  # no figure should open

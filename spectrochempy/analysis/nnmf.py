@@ -44,11 +44,10 @@ Python/numpy translation: Anthony Di Franco
 
 Licence ???
 """
-#TODO: create  tests
+# TODO: create  tests
 
 __all__ = ['Nnmf']
 _classes = __all__[:]
-
 
 import numpy as np
 from numpy.linalg import norm
@@ -56,11 +55,11 @@ from time import time
 from sys import stdout
 
 import logging
+
 log = logging.getLogger(__name__)
 
 
 class Nnmf:
-
     def __init__(self, X, Ci, Sti, **options):
         """
         self.C, self.St = nnmf(X, Ci, Sti,**options)
@@ -83,9 +82,9 @@ class Nnmf:
         self.St.name = 'Spectral profile optimized by nnmf'
         self.St.history = ''
 
-        self.C.data, self.St.data = self.nmf(X.data, Ci.data, Sti.data, tol, maxtime,
-                                        maxit)
-
+        self.C.data, self.St.data = self.nmf(X.data, Ci.data, Sti.data, tol,
+                                             maxtime,
+                                             maxit)
 
     @staticmethod
     def nmf(V, Winit, Hinit, tol, timelimit, maxiter):
@@ -150,7 +149,7 @@ class Nnmf:
             if n_iter == maxiter:
                 log.info('Max iter in nlssubprob')
 
-            return (H, grad, n_iter)
+            return H, grad, n_iter
 
         W = Winit
 
@@ -188,9 +187,6 @@ class Nnmf:
             if myiter % 10 == 0: stdout.write('.')
 
         log.info(
-            '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter, projnorm))
-        return (W, H)
-
-
-
-
+                '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
+                                                                 projnorm))
+        return W, H

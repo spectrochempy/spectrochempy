@@ -48,27 +48,29 @@ from spectrochempy.gui import gui
 
 __all__ = ['read_omnic']
 
+
 # utility functions
-#-------------------
+# -------------------
 
 def readbtext(f, pos):
     """Read some text in binary file, until b\0\ is encountered. \
     Returns utf-8 string """
     f.seek(pos)  # read first byte, ensure entering the while loop
     btext = f.read(1)
-    while not (btext[len(btext) - 1] == 0):  # while the last byte of btext differs from zero
+    while not (btext[len(
+            btext) - 1] == 0):  # while the last byte of btext differs from zero
         btext = btext + f.read(1)  # append 1 byte
 
     btext = btext[0:len(btext) - 1]  # cuts the last byte
-    text = btext.decode(encoding='utf-8', errors='ignore')  # decode btext to string
+    text = btext.decode(encoding='utf-8',
+                        errors='ignore')  # decode btext to string
     return text
 
 
 def readfilename(filename):
-
     if not filename:
         filename = gui.openFileNameDialog(filters='OMNIC file (*.spg);;'
-                              'OMNIC file (*.spa)')
+                                                  'OMNIC file (*.spa)')
 
         if not filename:
             raise IOError('no filename provided!')
@@ -79,7 +81,7 @@ def readfilename(filename):
 
 
 # function for loading spa or spg file
-#--------------------------------------
+# --------------------------------------
 def read_omnic(source, filename='', sortbydate=True, **kwargs):
     """Open a Thermo Nicolet .spg or list of .spa files and set data/metadata in the current dataset
 
@@ -117,9 +119,9 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
         # so the first parameters must be the filename
         if isinstance(source, str):
             filename = source
-            source = NDDataset() # create a NDDataset
+            source = NDDataset()  # create a NDDataset
         else:
-            #TODO: GENERATE A WARNING
+            # TODO: GENERATE A WARNING
             return None
 
     directory = kwargs.get("directory", options.data)
@@ -192,7 +194,7 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
             # read "key values"
             pos = 304
-            keys = np.zeros((nlines))
+            keys = np.zeros(nlines)
             for i in range(nlines[0]):
                 f.seek(pos)
                 keys[i] = np.fromfile(f, dtype='uint8', count=1)[0]
@@ -202,18 +204,23 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
             nspec = np.count_nonzero((keys == 2))
 
             if nspec == 0:
-                print('Error: File format not recognized - information markers not found')
+                print(
+                    'Error: File format not recognized - information markers not found')
                 return
 
             ##Get xaxis (e.g. wavenumbers)
 
             # container to hold values
-            nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec, 'float'), np.zeros(nspec, 'float')
+            nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec,
+                                                                 'float'), np.zeros(
+                nspec, 'float')
 
             # Extracts positions of '02' keys
             key_is_02 = (keys == 2)  # ex: [T F F F F T F (...) F T ....]'
             indices02 = np.nonzero(key_is_02)  # ex: [1 9 ...]
-            position02 = 304 * np.ones(len(indices02[0]), dtype='int') + 16 * indices02[0]
+            position02 = 304 * np.ones(len(indices02[0]), dtype='int') + 16 * \
+                                                                         indices02[
+                                                                             0]
 
             # ex: [304 432 ...]
             for i in range(nspec):
@@ -235,13 +242,16 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
             # check the consistency of xaxis
             if np.ptp(nx) != 0:
-                print('Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
+                print(
+                    'Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
                 return
-            elif (np.ptp(firstx) != 0):
-                print('Error: Inconsistant data set - the x axis should start at same value')
+            elif np.ptp(firstx) != 0:
+                print(
+                    'Error: Inconsistant data set - the x axis should start at same value')
                 return
-            elif (np.ptp(lastx) != 0):
-                print('Error: Inconsistant data set - the x axis should end at same value')
+            elif np.ptp(lastx) != 0:
+                print(
+                    'Error: Inconsistant data set - the x axis should end at same value')
                 return
 
             xaxis = np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3)
@@ -249,12 +259,15 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
             ##now the intensity data
 
             # container to hold values
-            intensity_pos, intensity_size = np.zeros(nspec, 'int'), np.zeros(nspec, 'int')
+            intensity_pos, intensity_size = np.zeros(nspec, 'int'), np.zeros(
+                nspec, 'int')
 
             # Extracts positions of '02' keys
             key_is_03 = (keys == 3)
             indices03 = np.nonzero(key_is_03)
-            position03 = 304 * np.ones(len(indices03[0]), dtype='int') + 16 * indices03[0]
+            position03 = 304 * np.ones(len(indices03[0]), dtype='int') + 16 * \
+                                                                         indices03[
+                                                                             0]
 
             # Read number of spectral intensities
             for i in range(nspec):
@@ -266,13 +279,14 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
             # check the consistency of intensities (probably redundent w/ xaxis check above)
             if np.ptp(intensity_size) != 0:
-                print('Error: Inconsistent data set - number of data per spectrum should be identical')
+                print(
+                    'Error: Inconsistent data set - number of data per spectrum should be identical')
 
             nintensities = int(intensity_size[0] / 4)  # 4 = size of uint32
 
             if nintensities != nx[0]:
                 print(
-                    'Error: Inconsistent file - number of wavenumber per spectrum should be equal to number of intensities')
+                        'Error: Inconsistent file - number of wavenumber per spectrum should be equal to number of intensities')
 
             # Read spectral intensities
             data = np.zeros((nspec, nintensities), dtype='float32')
@@ -287,7 +301,9 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
             # extract positions of '6B' keys (spectra titles & acquisition dates)
             key_is_6B = (keys == 107)
             indices6B = np.nonzero(key_is_6B)
-            position6B = 304 * np.ones(len(indices6B[0]), dtype='int') + 16 * indices6B[0]
+            position6B = 304 * np.ones(len(indices6B[0]), dtype='int') + 16 * \
+                                                                         indices6B[
+                                                                             0]
 
             # read spectra titles and acquisition date
             for i in range(nspec):
@@ -301,20 +317,23 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
                 # and the acquisition date
                 f.seek(spa_title_pos[0] + 256)
-                timestamp = np.fromfile(f, dtype=np.uint32, count=1)[0]   # days since 31/12/1899, 00:00
-                acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
+                timestamp = np.fromfile(f, dtype=np.uint32, count=1)[
+                    0]  # days since 31/12/1899, 00:00
+                acqdate = datetime(1899, 12, 31, 0, 0,
+                                   tzinfo=timezone.utc) + timedelta(
+                    seconds=int(timestamp))
                 allacquisitiondates.append(acqdate)
                 timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Axis object
-                                                    #  use datetime.fromtimestamp(d, timezone.utc))
-                                                    # to transform back to datetime obkct
+                #  use datetime.fromtimestamp(d, timezone.utc))
+                # to transform back to datetime obkct
 
                 alltimestamps.append(timestamp)
-
 
                 # extract positions of '1B' codes (history text -- sometimes absent, e.g. peakresolve)
                 key_is_1B = (keys == 27)
                 indices1B = np.nonzero(key_is_1B)
-                position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
+                position1B = 304 * np.ones(len(indices1B[0]),
+                                           dtype='int') + 16 * indices6B[0]
 
                 if len(position1B) != 0:
                     # read history texts
@@ -326,7 +345,6 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
                         # read history
                         history = readbtext(f, history_pos[0])
                         allhistories.append(history)
-
 
         # Create Dataset Object of spectral content
         source.data = data
@@ -341,12 +359,12 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
         # Set description and history
         source.description = (
-        'Dataset from spg file : ' + spg_title + ' \n'
-        + 'History of the 1st spectrum: ' + allhistories[0])
+            'Dataset from spg file : ' + spg_title + ' \n'
+            + 'History of the 1st spectrum: ' + allhistories[0])
 
         source.history = str(datetime.now()) + ':read from spg file \n'
 
-        if kwargs.get('sortbydate','True'):
+        if kwargs.get('sortbydate', 'True'):
             source.sort(axis=0, inplace=True)
             source.history = 'sorted'
 
@@ -354,10 +372,12 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
         source._date = datetime.now()
         source._modified = source.date
 
-    else: # list of spa
+    else:  # list of spa
 
         # containers to hold values
-        nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec, 'float'), np.zeros(nspec, 'float')
+        nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec,
+                                                             'float'), np.zeros(
+            nspec, 'float')
         allintensities, alltitles, allacquisitiondates, alltimestamps, allhistories = [], [], [], [], []
 
         for i, _filename in enumerate(filename):
@@ -378,12 +398,15 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
                 f.seek(296)
 
-                timestamp = np.fromfile(f, dtype=np.uint32, count=1)[0]  # days since 31/12/1899, 00:00
-                acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
+                timestamp = np.fromfile(f, dtype=np.uint32, count=1)[
+                    0]  # days since 31/12/1899, 00:00
+                acqdate = datetime(1899, 12, 31, 0, 0,
+                                   tzinfo=timezone.utc) + timedelta(
+                    seconds=int(timestamp))
                 allacquisitiondates.append(acqdate)
-                timestamp = acqdate.timestamp() # Transform back to timestamp for storage in the Axis object
-                                                # use datetime.fromtimestamp(d, timezone.utc))
-                                                # to transform back to datetime obkct
+                timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Axis object
+                # use datetime.fromtimestamp(d, timezone.utc))
+                # to transform back to datetime obkct
 
                 alltimestamps.append(timestamp)
 
@@ -404,7 +427,8 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
                 #
 
 
-                gotinfos = [False, False, False]  # spectral header, intensity, history
+                gotinfos = [False, False,
+                            False]  # spectral header, intensity, history
                 # scan "key values"
                 pos = 304
                 #        keys = np.zeros((nlines))
@@ -416,7 +440,7 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
                 while not (all(gotinfos)):
                     f.seek(pos)
                     key = np.fromfile(f, dtype='uint8', count=1)[0]
-                    if (key == 2):
+                    if key == 2:
                         f.seek(pos + 2)  # skip 2 bytes
                         info_pos = np.fromfile(f, dtype='uint32', count=1)[0]
                         nx_pos = info_pos + 4
@@ -433,11 +457,12 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
                         f.seek(lastx_pos)
                         lastx[i] = np.fromfile(f, 'float32', 1)[0]
 
-                        xaxis = np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3)
+                        xaxis = np.around(
+                            np.linspace(firstx[0], lastx[0], nx[0]), 3)
                         gotinfos[0] = True
 
 
-                    elif (key == 3):
+                    elif key == 3:
                         f.seek(pos + 2)  # skip 2 bytes
                         intensity_pos = np.fromfile(f, 'uint32', 1)[0]
                         f.seek(pos + 6)
@@ -446,12 +471,13 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
                         nintensities = int(intensity_size / 4)
                         # Read spectral intensities
                         f.seek(intensity_pos)
-                        allintensities.append(np.fromfile(f, 'float32', int(nintensities)))
+                        allintensities.append(
+                            np.fromfile(f, 'float32', int(nintensities)))
                         gotinfos[1] = True
 
 
                         # todo: extract positions of '1B' code (history text -- sometimes absent, e.g. peakresolve)
-                    elif (key == 27):
+                    elif key == 27:
                         f.seek(pos + 2)
                         history_pos = np.fromfile(f, 'uint32', 1)[0]
                         # read history
@@ -459,32 +485,35 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
                         allhistories.append(history)
                         gotinfos[2] = True
 
-                    elif (key == False):
+                    elif key == False:
                         break
 
                     pos = pos + 16
 
         # check the consistency of xaxis
         if np.ptp(nx) != 0:
-            print('Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
+            print(
+                'Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
             return
-        elif (np.ptp(firstx) != 0):
-            print('Error: Inconsistant data set - the x axis should start at same value')
+        elif np.ptp(firstx) != 0:
+            print(
+                'Error: Inconsistant data set - the x axis should start at same value')
             return
-        elif (np.ptp(lastx) != 0):
-            print('Error: Inconsistant data set - the x axis should end at same value')
+        elif np.ptp(lastx) != 0:
+            print(
+                'Error: Inconsistant data set - the x axis should end at same value')
             return
 
         # load into the  Dataset Object of spectral content
         source.data = np.array(allintensities)
-        #nd.title = alltitles[0] + ' ... ' + alltitles[-1]
+        # nd.title = alltitles[0] + ' ... ' + alltitles[-1]
         source.units = 'absorbance'
         source.title = 'Absorbance'
         source.name = alltitles[0] + ' ... ' + alltitles[-1]
         source._date = datetime.datetime.now()
         source._modified = source._date
 
-        #TODO: Finish the conversion
+        # TODO: Finish the conversion
         raise NotImplementedError('implementation not finished')
 
         out.appendlabels(Labels(alltitles, 'Title'))
@@ -498,10 +527,10 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
             out = out.sort(0, 0)
             out.dims[0].deleteaxis(0)
         out.description = (
-        'dataset from spa files : ' + out.name + ' \n' + 'History of 1st spectrum: ' + allhistories[indexFirstSpectrum])
-        out.history = (str(datetime.datetime.now()) + ':created by sa.loadspa() \n')
+            'dataset from spa files : ' + out.name + ' \n' + 'History of 1st spectrum: ' +
+            allhistories[indexFirstSpectrum])
+        out.history = (
+        str(datetime.datetime.now()) + ':created by sa.loadspa() \n')
 
     # return the dataset
     return source
-
-

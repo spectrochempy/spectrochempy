@@ -56,6 +56,8 @@ import functools
 import sys
 import types
 import warnings
+
+# TODO: we should remove this as we will use only PY3
 import six
 
 from numpy.testing import (assert_equal,
@@ -100,6 +102,7 @@ class NumpyRNGContext(object):
 
 
     """
+
     def __init__(self, seed):
         self.seed = seed
 
@@ -126,7 +129,7 @@ def assert_equal_units(unit1, unit2):
         return False
     if x.dimensionless:
         return True
-    False
+    return False
 
 
 class raises(object):
@@ -153,6 +156,7 @@ class raises(object):
         @functools.wraps(func)
         def run_raises_test(*args, **kwargs):
             pytest.raises(self._exc, func, *args, **kwargs)
+
         return run_raises_test
 
     def __enter__(self):
@@ -165,6 +169,7 @@ class raises(object):
 
 _deprecations_as_exceptions = False
 _include_spectrochempy_deprecations = True
+
 
 def enable_deprecations_as_exceptions(include_spectrochempy_deprecations=True):
     """
@@ -192,7 +197,7 @@ def treat_deprecations_as_exceptions():
         # We don't want to deal with six.MovedModules, only "real"
         # modules.
         if (isinstance(module, types.ModuleType) and
-            hasattr(module, '__warningregistry__')):
+                hasattr(module, '__warningregistry__')):
             del module.__warningregistry__
 
     if not _deprecations_as_exceptions:
@@ -231,40 +236,40 @@ def treat_deprecations_as_exceptions():
         # py.test's warning.showwarning does not include the line argument
         # on Python 2.6, so we need to explicitly ignore this warning.
         warnings.filterwarnings(
-            "ignore",
-            r"functions overriding warnings\.showwarning\(\) must support "
-            r"the 'line' argument",
-            DeprecationWarning)
+                "ignore",
+                r"functions overriding warnings\.showwarning\(\) must support "
+                r"the 'line' argument",
+                DeprecationWarning)
 
     if sys.version_info[:2] >= (3, 4):
         # py.test reads files with the 'ur' flag, which is now
         # deprecated in Python 3.4.
         warnings.filterwarnings(
-            "ignore",
-            r"'ur' mode is deprecated",
-            DeprecationWarning)
+                "ignore",
+                r"'ur' mode is deprecated",
+                DeprecationWarning)
 
         # BeautifulSoup4 triggers a DeprecationWarning in stdlib's
         # html module.x
         warnings.filterwarnings(
-            "ignore",
-            r"The strict argument and mode are deprecated\.",
-            DeprecationWarning)
+                "ignore",
+                r"The strict argument and mode are deprecated\.",
+                DeprecationWarning)
         warnings.filterwarnings(
-            "ignore",
-            r"The value of convert_charrefs will become True in 3\.5\. "
-            r"You are encouraged to set the value explicitly\.",
-            DeprecationWarning)
+                "ignore",
+                r"The value of convert_charrefs will become True in 3\.5\. "
+                r"You are encouraged to set the value explicitly\.",
+                DeprecationWarning)
 
     if sys.version_info[:2] >= (3, 5):
         # py.test raises this warning on Python 3.5.
         # This can be removed when fixed in py.test.
         # See https://github.com/pytest-dev/pytest/pull/1009
         warnings.filterwarnings(
-            "ignore",
-            r"inspect\.getargspec\(\) is deprecated, use "
-            r"inspect\.signature\(\) instead",
-            DeprecationWarning)
+                "ignore",
+                r"inspect\.getargspec\(\) is deprecated, use "
+                r"inspect\.signature\(\) instead",
+                DeprecationWarning)
 
 
 class catch_warnings(warnings.catch_warnings):
@@ -285,6 +290,7 @@ class catch_warnings(warnings.catch_warnings):
             do.something.bad()
         assert len(w) > 0
     """
+
     def __init__(self, *classes):
         super(catch_warnings, self).__init__(record=True)
         self.classes = classes
@@ -341,15 +347,18 @@ class ignore_warnings(catch_warnings):
             warnings.simplefilter('ignore')
         return retval
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 
 from spectrochempy.api import plotoptions
+
 
 def show_do_not_block(func):
     """
     A decorator to allow non blocking testing of matplotlib figures-
     set the plotoption.do_not_block
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         if func.__name__ in sys.argv[1]:

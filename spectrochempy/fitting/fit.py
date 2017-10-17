@@ -44,7 +44,7 @@
 #  general imports
 # ===============================================================================
 from traitlets import (HasTraits, Bool, Any, List,
-                        Unicode, Instance)
+                       Unicode, Instance)
 
 import sys
 import re
@@ -63,7 +63,6 @@ from spectrochempy.fitting.parameters import ParameterScript
 from spectrochempy.fitting.models import getmodel
 from spectrochempy.fitting.optimization import optimize
 from spectrochempy.utils.misc import htmldoc
-
 
 __all__ = ['Fit']
 _classes = __all__[:]
@@ -114,7 +113,6 @@ class Fit(HasTraits):
 
     def __init__(self, *args, **kargs):
 
-
         if args:
             # look in args
             if not isinstance(args[0], list):
@@ -128,13 +126,14 @@ class Fit(HasTraits):
             return
 
         # get parameters form script
-        self.parameterscript = ParameterScript(sources=self.sources, script=script)
+        self.parameterscript = ParameterScript(sources=self.sources,
+                                               script=script)
         if self.fp is None:
             # for unknown reason for now, this sometimes happens during tests
             warn('error with fp')
 
-        #sequence = kargs.get('sequence', 'ideal_pulse')
-        #self.sequence = PulseSequence(type=sequence)
+        # sequence = kargs.get('sequence', 'ideal_pulse')
+        # self.sequence = PulseSequence(type=sequence)
 
         self.mode = kargs.get('mode', None)
         self.kind = kargs.get('kind', None)
@@ -142,7 +141,7 @@ class Fit(HasTraits):
         for exp_idx, source in enumerate(self.sources):
             source.modeldata, source.modelnames, source.model_A, source.model_a, source.model_b = \
                 self._get_modeldata(source, exp_idx)
-            #TODO: add a plugin to dataset to Handle such modeldata properly
+            # TODO: add a plugin to dataset to Handle such modeldata properly
 
     # *******************************************************************************
     # public methodss
@@ -223,9 +222,9 @@ class Fit(HasTraits):
                 # not the complex number
                 data = source.data
 
-                #if not source.is_2d:
+                # if not source.is_2d:
                 mdata = modeldata[-1]  # modelsum
-                #else:
+                # else:
                 #    mdata = modeldata.values
 
                 merror = 1.
@@ -273,10 +272,11 @@ class Fit(HasTraits):
                 return
 
             log.info(kwargs)
-            log.info (args)
+            log.info(args)
             if not self.silent:
                 display.clear_output(wait=True)
-                print("Iterations: %d, Calls: %d (chi2: %.5f)" % (niter, ncalls, chi2))
+                print("Iterations: %d, Calls: %d (chi2: %.5f)" % (
+                niter, ncalls, chi2))
                 sys.stdout.flush()
 
         # end callback function ---------------------------------------------------
@@ -284,12 +284,12 @@ class Fit(HasTraits):
         fp = self.fp  # starting parameters
 
         fp, fopt = optimize(funchi2, fp,
-                                args=(self.sources, ),
-                                maxfun=maxfun,
-                                maxiter=maxiter,
-                                method=method,
-                                constraints=kwargs.get('constraints',None),
-                                callback=callback)
+                            args=(self.sources,),
+                            maxfun=maxfun,
+                            maxiter=maxiter,
+                            method=method,
+                            constraints=kwargs.get('constraints', None),
+                            callback=callback)
 
         # replace the previous script with new fp parameters
         self.parameterscript.script = str(fp)
@@ -297,7 +297,7 @@ class Fit(HasTraits):
         if not self.silent:
             # log.info the results
             log.info("\n")
-            log.info('*' * 50  )
+            log.info('*' * 50)
             log.info("  Result:")
             log.info('*' * 50)
             log.info(self.parameterscript.script)
@@ -331,7 +331,6 @@ class Fit(HasTraits):
         else:
             return self.message
 
-
     def _get_modeldata(self, source, exp_idx):
 
         # Prepare parameters
@@ -349,15 +348,15 @@ class Fit(HasTraits):
         expedata = source.real().data
         x = source.axes[1].data
 
-        if source.shape[-2]>1:
-            #2D data
+        if source.shape[-2] > 1:
+            # 2D data
             raise ValueError("Fit not implemented for 2D data yet!")
 
         modeldata = np.zeros((nbmodels + 2, x.size)).astype(float)
 
         if nbmodels < 1:
             names = ['baseline', 'modelsum']
-            return (modeldata, names)
+            return modeldata, names
 
         # Calculates model data
         # The first row (i=0) of the modeldata array is the baseline,
@@ -378,26 +377,27 @@ class Fit(HasTraits):
         modeldata[row + 1] = modeldata.sum(axis=0)
         names.append('modelsum')
 
-        #remove unused row
+        # remove unused row
         modeldata = modeldata[:row + 2]
 
         xi = np.arange(float(x.size))
-        A, a, b = self._ampbas(xi, expedata[-1], modeldata[-1])  #(fitzone-fitzone[0], data.take(fitzone),
-        #modeldata[-1].take(fitzone))
+        A, a, b = self._ampbas(xi, expedata[-1], modeldata[
+            -1])  # (fitzone-fitzone[0], data.take(fitzone),
+        # modeldata[-1].take(fitzone))
 
         modeldata = A * modeldata
-        baseline = a * xi + b  #a*(xi-fitzone[0]) + b
+        baseline = a * xi + b  # a*(xi-fitzone[0]) + b
 
-        #update the modeldata
+        # update the modeldata
         modeldata[0] += baseline
         modeldata[-1] += baseline
 
         # return modeldata
-        return (modeldata, names, A, a, b)
+        return modeldata, names, A, a, b
 
     @staticmethod
     def _parsing(expr, param):
-        keyword = r"\b([a-z]+[0-9]*)\b"  #match a whole word
+        keyword = r"\b([a-z]+[0-9]*)\b"  # match a whole word
         pat = re.compile(keyword)
         mo = pat.findall(str(expr))
         for kw in mo:
@@ -433,20 +433,18 @@ class Fit(HasTraits):
                 except:
                     raise ValueError('Cannot evaluate the expression: %s: %s'
                                      % (key, param[refpar]))
-                    return
 
                 new_param.fixed[key] = True
-                new_param.reference[key] = True  #restore it for the next call
+                new_param.reference[key] = True  # restore it for the next call
 
             if isinstance(new_param[key], list):
                 new_param.data[key] = new_param.data[key][exp_idx]
 
         return new_param
 
-
-    #===============================================================================
+    # ===============================================================================
     # automatic calculation of amplitude and baseline
-    #===============================================================================
+    # ===============================================================================
     @staticmethod
     def _ampbas(xi, expe, calc):
         # Automatically calculate correct amplitude A and baseline
@@ -463,14 +461,20 @@ class Fit(HasTraits):
         sEI = sum(xi * expe)
         sId = sum(xi ** 2)
 
-        a = (-sE * (sF * sFI - sFd * sI) + sEF * (n * sFI - sF * sI) - sEI * (n * sFd - sF ** 2)
-            ) / (n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+        a = (-sE * (sF * sFI - sFd * sI) + sEF * (n * sFI - sF * sI) - sEI * (
+        n * sFd - sF ** 2)
+             ) / (
+            n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
 
-        A = (sE * (sF * sId - sFI * sI) - sEF * (n * sId - sI ** 2) + sEI * (n * sFI - sF * sI)
-            ) / (n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+        A = (sE * (sF * sId - sFI * sI) - sEF * (n * sId - sI ** 2) + sEI * (
+        n * sFI - sF * sI)
+             ) / (
+            n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
 
-        b = (sE * (sFI ** 2 - sFd * sId) + sEF * (sF * sId - sFI * sI) - sEI * (sF * sFI - sFd * sI)
-            ) / (n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+        b = (sE * (sFI ** 2 - sFd * sId) + sEF * (sF * sId - sFI * sI) - sEI * (
+        sF * sFI - sFd * sI)
+             ) / (
+            n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
 
         # in case the modeldata is zero, to avoid further errors
         if np.isnan(A): A = 0.0
@@ -485,7 +489,7 @@ class Fit(HasTraits):
         sE = expe.sum()
         sF = calc.sum()
         sFI = (xi * calc).sum()
-        sFJ = ((yj * calc.T)).sum()
+        sFJ = (yj * calc.T).sum()
         sFd = (calc * calc).sum()
         sI = sum(xi)
         sJ = sum(yj)
@@ -557,5 +561,4 @@ class Fit(HasTraits):
 
 
 if __name__ == '__main__':
-
     pass

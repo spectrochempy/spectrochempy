@@ -48,7 +48,6 @@ import warnings
 import setuptools_scm
 from pkg_resources import get_distribution, DistributionNotFound
 
-
 from copy import deepcopy
 
 from traitlets.config.configurable import Configurable
@@ -87,12 +86,12 @@ _classes = [
 
 __all__ = [
 
-    ### Helpers
+    # ## Helpers
     'log', 'log_level', 'DEBUG', 'WARN', 'ERROR', 'CRITICAL', 'INFO',
     'data', 'list_data',
     'options', 'plotoptions',
     'running',
-    ### Info
+    # ## Info
     'copyright', 'version',
 ]
 
@@ -165,7 +164,7 @@ class Data(Configurable):
     @default('_data')
     def _get__data_default(self):
         # the spectra path in package data
-        return get_pkg_data_dir('testdata','scp_data')
+        return get_pkg_data_dir('testdata', 'scp_data')
 
 
 # ==============================================================================
@@ -226,7 +225,7 @@ class SpectroChemPy(Application):
 
     reset_config = Bool(False,
                         help='should we restaure a default configuration?').tag(
-        config=True)
+            config=True)
 
     config_file_name = Unicode(None,
                                help="Load this config file").tag(config=True)
@@ -237,7 +236,7 @@ class SpectroChemPy(Application):
 
     config_dir = Unicode(None,
                          help="Set the configuration dir location").tag(
-        config=True)
+            config=True)
 
     @default('config_dir')
     def _get_config_dir_default(self):
@@ -256,7 +255,7 @@ class SpectroChemPy(Application):
                  help='set Quiet mode, with minimal outputs').tag(config=True)
 
     _data = Instance(Data,
-                         help="Set a data directory where to look for data")
+                     help="Set a data directory where to look for data")
 
     @default('_data')
     def _get__data_default(self):
@@ -503,7 +502,8 @@ class SpectroChemPy(Application):
                 print(info_string)
 
             self.log.debug(
-                "The application was launched with ARGV : %s" % str(sys.argv))
+                    "The application was launched with ARGV : %s" % str(
+                            sys.argv))
 
             self.running = True
 
@@ -525,7 +525,7 @@ class SpectroChemPy(Application):
 
         if not os.path.exists(fname) or self.reset_config:
             s = self.generate_config_file()
-            self.log.warning("Generating default config file: %r" % (fname))
+            self.log.warning("Generating default config file: %r" % fname)
             with open(fname, 'w') as f:
                 f.write(s)
 

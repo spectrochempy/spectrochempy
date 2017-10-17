@@ -47,8 +47,9 @@ from traitlets import HasTraits, Unicode, List
 
 __all__ = []
 
+
 def write_jdx(X, filename=''):
-    ''' Exports dataset to jcampdx format'''
+    """ Exports dataset to jcampdx format"""
 
     # if no filename is provided, open a dialog box to create jdx file
     if filename == '':
@@ -61,12 +62,14 @@ def write_jdx(X, filename=''):
         root.focus_force()
         f = filedialog.asksaveasfile(mode='w', initialfile='dataset',
                                      defaultextension=".jdx",
-                                     filetypes=(("JCAMPDX", "*.jdx"), ("All Files", "*.*")))
+                                     filetypes=(("JCAMPDX", "*.jdx"),
+                                                ("All Files", "*.*")))
         if f is None:  # asksaveasile return `None` if dialog closed with "cancel".
             return
         root.destroy()
     else:
-        f = open(filename, 'w')  # if filename is provided,directly create jdx file
+        f = open(filename,
+                 'w')  # if filename is provided,directly create jdx file
 
     # writes first lines
     f.write('##TITLE=' + X.name + '\n')
@@ -74,7 +77,8 @@ def write_jdx(X, filename=''):
     # if several spectra => Data Type = LINK
     if X.shape[0] > 1:
         f.write('##DATA TYPE=LINK' + '\n')
-        f.write('##BLOCKS=' + str(X.shape[0]) + '\n')  # number of spectra (size of 1st dimension )
+        f.write('##BLOCKS=' + str(X.shape[
+                                      0]) + '\n')  # number of spectra (size of 1st dimension )
     else:
         f.write('##DATA TYPE=INFRARED SPECTRUM' + '\n')
 
@@ -88,8 +92,10 @@ def write_jdx(X, filename=''):
         f.write('##ORIGIN=' + X.author + '\n')
         f.write('##OWNER=LCS' + '\n')
         if len(X.dims[0].labels):
-            f.write('##LONGDATE=' + X.dims[0].labels[1][i].strftime("%Y/%m/%d") + '\n')
-            f.write('##TIME=' + X.dims[0].labels[1][i].strftime("%H:%M:%S") + '\n')
+            f.write('##LONGDATE=' + X.dims[0].labels[1][i].strftime(
+                "%Y/%m/%d") + '\n')
+            f.write(
+                '##TIME=' + X.dims[0].labels[1][i].strftime("%H:%M:%S") + '\n')
         f.write('##XUNITS=1/CM' + '\n')
         f.write('##YUNITS=' + 'ABSORBANCE' + '\n')
         nx = X.shape[1]
@@ -126,7 +132,7 @@ def write_jdx(X, filename=''):
         llen = len(x) + len(y) + 2  # length of current line
         for j in np.arange(1, nx):
             if np.isnan(X.data[i, j]):
-                y = ('?')
+                y = '?'
             else:
                 y = str(int(X.data[i, j] / yfactor))
             f.write(y + ' ')
@@ -139,4 +145,3 @@ def write_jdx(X, filename=''):
 
     f.write('##END=' + '\n')
     f.close()
-

@@ -39,6 +39,7 @@ from pkg_resources import resource_filename
 
 __all__ = ['install_styles']
 
+
 def install_styles():
     """
     Install matplotlib styles
@@ -49,7 +50,7 @@ def install_styles():
     if not os.path.exists(stylelib):
         os.mkdir(stylelib)
 
-    styles_path = resource_filename('scp_data','stylesheets')
+    styles_path = resource_filename('scp_data', 'stylesheets')
 
     styles = os.listdir(styles_path)
 

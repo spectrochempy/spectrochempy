@@ -34,13 +34,15 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple, Unicode
+from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple, \
+    Unicode
 from traitlets.config.configurable import Configurable
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 _classes = ['PlotOptions']
+
 
 # =============================================================================
 # Plot Options
@@ -93,9 +95,9 @@ class PlotOptions(Configurable):
     show_projections = Bool(False, help='show all projections').tag(
             config=True)
     show_projection_x = Bool(False, help='show projection along x').tag(
-        config=True)
+            config=True)
     show_projection_y = Bool(False, help='show projection along y').tag(
-        config=True)
+            config=True)
 
     background_color = Tuple((0.5, 0.5, 0.5)).tag(config=True)
     foreground_color = Tuple((1.0, 1.0, 1.0)).tag(config=True)

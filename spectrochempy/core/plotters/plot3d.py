@@ -43,8 +43,9 @@ This module should be able to handle a large set of plot types.
 __all__ = ['plot_3D']
 _methods = __all__[:]
 
+
 def plot_3D(source,
-           **kwargs):
+            **kwargs):
     """
 
     Parameters
@@ -73,16 +74,13 @@ def plot_3D(source,
 
     """
 
-    if source.ndim==2:
+    if source.ndim == 2:
         S = source.data.copy()
         w = source.coords(-1).copy()
         t = source.coords(-2).copy()
 
-    elif source.ndim==1:
+    elif source.ndim == 1:
         return source.plot_1D(**kwargs)
-
-
-
 
     # full limits of the spectra
     wlim = (w[-1], w[0])
@@ -119,14 +117,14 @@ def plot_3D(source,
         ishowed = slice(None)
     else:
         raise ValueError(
-     'step parameter was not recognized. Should be: an int, "all"')
+                'step parameter was not recognized. Should be: an int, "all"')
 
     s = s[:, ishowed]
     y = y[ishowed]
 
     # now plot the collection of lines
-    if color == None:
-        ax.plot(x, s, lw=lw )
+    if color is None:
+        ax.plot(x, s, lw=lw)
     elif color != 'map':
         ax.plot(x, s, c=color, lw=lw)
     elif color == 'map':
@@ -135,19 +133,21 @@ def plot_3D(source,
                 vmin, vmax = zlim
             else:
                 vmin, vmax = y[0], y[-1]
-            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)  # we normalize to the max time
+            norm = mpl.colors.Normalize(vmin=vmin,
+                                        vmax=vmax)  # we normalize to the max time
             if normalize is not None:
                 norm.vmax = normalize
         else:
             norm = mpl.colors.Normalize(vmin=y[0], vmax=y[-1])
 
-        line_segments = LineCollection([list(zip(x, s[:, i].tolist())) for i in xrange(len(y))][::-1],
-                                    # Make a sequence of x,s[i] pairs
-                                    # linewidths    = (0.5,1,1.5,2),
-                                    linewidths=lw,
-                                    linestyles='solid',
-                                    # alpha=.5,
-                         )
+        line_segments = LineCollection(
+                [list(zip(x, s[:, i].tolist())) for i in xrange(len(y))][::-1],
+                # Make a sequence of x,s[i] pairs
+                # linewidths    = (0.5,1,1.5,2),
+                linewidths=lw,
+                linestyles='solid',
+                # alpha=.5,
+                )
         line_segments.set_array(y[::-1])
         line_segments.set_cmap(colormap)
         line_segments.set_norm(norm)
@@ -158,7 +158,7 @@ def plot_3D(source,
             fig = pl.gcf()
             axcb = fig.colorbar(line_segments, ax=ax)
             axcb.set_label(ylabel)
-            axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5 ))
+            axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5))
 
     ax.set_xlim(xlim)
     ax.set_ylim(-.2, 3.0)

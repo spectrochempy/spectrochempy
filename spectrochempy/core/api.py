@@ -52,7 +52,6 @@ from traitlets import import_item
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import list_packages
 
-
 pkgs = sys.modules['spectrochempy.core']
 api = sys.modules['spectrochempy.core.api']
 
@@ -61,37 +60,43 @@ pkgs = list_packages(pkgs)
 __all__ = []
 
 # dataset
-#--------
+# --------
 from spectrochempy.core.dataset.api import *
 from spectrochempy.core.dataset import api
+
 __all__ += api.__all__
 
 # plotters
-#--------
+# --------
 from spectrochempy.core.plotters.api import *
 from spectrochempy.core.plotters import api
+
 __all__ += api.__all__
 
 # processors
-#------------
+# ------------
 from spectrochempy.core.processors.api import *
 from spectrochempy.core.processors import api
+
 __all__ += api.__all__
 
 # readers
-#------------
+# ------------
 from spectrochempy.core.readers.api import *
 from spectrochempy.core.readers import api
+
 __all__ += api.__all__
 
 # writers
-#------------
+# ------------
 from spectrochempy.core.writers.api import *
 from spectrochempy.core.writers import api
+
 __all__ += api.__all__
 
 # units
-#------------
+# ------------
 from spectrochempy.core.units import *
 from spectrochempy.core import units
+
 __all__ += units.__all__

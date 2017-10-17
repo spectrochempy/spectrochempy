@@ -40,7 +40,7 @@ _classes = __all__[:]
 
 import matplotlib.pyplot as plt
 
-from traitlets import HasTraits , Instance
+from traitlets import HasTraits, Instance
 
 from ..core.dataset.nddataset import NDDataset
 from ..core.dataset.ndaxes import Axes, Axis
@@ -54,6 +54,7 @@ import numpy as np
 from spectrochempy.application import plotoptions
 
 _do_not_block = plotoptions.do_not_block
+
 
 # ==============================================================================
 # class Pca
@@ -84,7 +85,7 @@ class Pca(HasTraits):
     _ev = Instance(np.ndarray)
 
     def __init__(self, X, npc=None):
-        '''Constructor'''
+        """Constructor"""
 
         # mean center the dataset
         self.center = Xmean = np.nanmean(X.data, axis=0)
@@ -121,36 +122,36 @@ class Pca(HasTraits):
         return
 
     # Properties
-    #------------
+    # ------------
     @property
     def ev_ratio(self):
-        '''% Explained Variance per PC'''
+        """% Explained Variance per PC"""
         return 100 * self._ev / sum(self._ev)
 
     @property
     def ev_cum(self):
-        '''% Cummulative Explained Variance'''
+        """% Cummulative Explained Variance"""
         return np.cumsum(self.ev_ratio)
 
     # special methods
-    #-----------------
+    # -----------------
     def __str__(self, npc=10):
 
-        s =  '\nPC\t\tEigenvalue\t\t%variance\t' \
-             '%cumulative\n'
+        s = '\nPC\t\tEigenvalue\t\t%variance\t' \
+            '%cumulative\n'
         s += '   \t\tof cov(X)\t\t per PC\t' \
              '     variance\n'
         for i in np.arange(npc):
-            tuple= (i, self._ev[i], self.ev_ratio[i], self.ev_cum[i])
+            tuple = (i, self._ev[i], self.ev_ratio[i], self.ev_cum[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tuple)
 
         return s
 
     # Public methods
-    #-----------------
+    # -----------------
 
     def construct(self, npc=5):
-        '''reconstructs a dataset with npc PC's
+        """reconstructs a dataset with npc PC's
 
         Parameters
         ----------
@@ -158,16 +159,15 @@ class Pca(HasTraits):
 
             The number of PC to use for the reconstruction
 
-        '''
+        """
         X = self.center + np.dot(self.T.data[:, 0:npc], self.Pt.data[0:npc, :])
         X = NDDataset(X)
         X.name = 'PCA constructed Dataset with {} PCs'.format(npc)
         X.axes = Axes(self.T.coords(0).copy(), self.Pt.coords(1).copy())
         return X
 
-
     def printev(self, npc=10):
-        '''prints figures of merit: eigenvalues and explained variance for the first npc PS's
+        """prints figures of merit: eigenvalues and explained variance for the first npc PS's
 
         Parameters
         ----------
@@ -175,18 +175,17 @@ class Pca(HasTraits):
 
           The number of PC to print
 
-        '''
-        print( self.__str__(npc))
-
+        """
+        print(self.__str__(npc))
 
     def screeplot(self, npc=5, nfig=None):
-        '''scree plot of explained variance + cummulative variance by pca or svd
+        """scree plot of explained variance + cummulative variance by pca or svd
         :param npc: number of components to plot
         :type npc: int
         :param nfig: figure number. If None (default), a new figure is made
-        :type nfig: int'''
+        :type nfig: int"""
 
-        if nfig == None:
+        if nfig is None:
             plt.figure()
         else:
             plt.figure(nfig)
@@ -200,18 +199,18 @@ class Pca(HasTraits):
         plt.ylabel('cummulative / %')
         # plt.ylim((0.,100.))
 
-        if  not _do_not_block:
+        if not _do_not_block:
             plt.show()
         return
 
     def scoreplot(self, pcs, nfig=None):
-        '''2D or 3D scoreplot of samples
+        """2D or 3D scoreplot of samples
         :param pcs: set of  or 3 pcs
         :type npc: list or tuplet of int with 2 or 3 elements
         :param nfig: figure number. If None (default), a new figure is made
-        :type nfig: int'''
+        :type nfig: int"""
 
-        if nfig == None:
+        if nfig is None:
             fig = plt.figure()
         else:
             fig = plt.figure(nfig)
@@ -226,14 +225,15 @@ class Pca(HasTraits):
                         c=col)
 
         if len(pcs) == 3:
-            ax = fig.add_subplot(111, projection='3d')  #FIXME: projection does not work
+            ax = fig.add_subplot(111,
+                                 projection='3d')  # FIXME: projection does not work
             ax.set_title('Score plot')
             ax.set_xlabel(
-                'PC# {} ({:.3f}%)'.format(pcs[0], self.ev_ratio[pcs[0]]))
+                    'PC# {} ({:.3f}%)'.format(pcs[0], self.ev_ratio[pcs[0]]))
             ax.set_ylabel(
-                'PC# {} ({:.3f}%)'.format(pcs[1], self.ev_ratio[pcs[1]]))
+                    'PC# {} ({:.3f}%)'.format(pcs[1], self.ev_ratio[pcs[1]]))
             ax.set_zlabel(
-                'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio[pcs[2]]))
+                    'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio[pcs[2]]))
             ax.scatter(self.T.data[:, pcs[0]], self.T.data[:, pcs[1]],
                        self.T.data[:, pcs[2]], zdir=u'z', s=30, c=col,
                        depthshade=True)
@@ -242,5 +242,3 @@ class Pca(HasTraits):
             plt.show()
 
         return
-
-

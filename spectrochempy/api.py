@@ -52,6 +52,7 @@ import os
 import sys
 import logging
 import warnings
+
 warnings.simplefilter('ignore', (DeprecationWarning,
                                  FutureWarning, UserWarning))
 from pytest import raises
@@ -59,56 +60,60 @@ from pytest import raises
 # ==============================================================================
 # Tells here the methods or object we allow to import from this library
 # ==============================================================================
-__all__ = [  'raises',
-             'APIref',
-            ### imported library
-             'np', 'plt', 'scipy'
+__all__ = ['raises',
+           'APIref',
+           ### imported library
+           'np', 'plt', 'scipy'
 
-            ### methods and objects from other packages will be added
-            ### later on this module (see below)
+           ### methods and objects from other packages will be added
+           ### later on this module (see below)
 
-          ]
+           ]
 
 # loading module libraries
 # ------------------------
 # here we also construct the __all__ list automatically
 
 from spectrochempy.application import *
+
 __all__ += [
 
-           ### Helpers
-             'log', 'log_level','DEBUG','WARN', 'ERROR', 'CRITICAL', 'INFO',
-             'data', 'list_data',
-             'plotoptions',
-            'options',
+    ### Helpers
+    'log', 'log_level', 'DEBUG', 'WARN', 'ERROR', 'CRITICAL', 'INFO',
+    'data', 'list_data',
+    'plotoptions',
+    'options',
 
-            ### Info
-             'copyright', 'version',
-           ]
-
+    ### Info
+    'copyright', 'version',
+]
 
 # core
-#------
+# ------
 from spectrochempy.core.api import *
 from spectrochempy.core import api
+
 __all__ += api.__all__
 
 # databases
-#----------
+# ----------
 from spectrochempy.databases.api import *
 from spectrochempy.databases import api
+
 __all__ += api.__all__
 
 # analysis
-#---------
+# ---------
 from spectrochempy.analysis.api import *
 from spectrochempy.analysis import api
+
 __all__ += api.__all__
 
 # fitting
-#--------
+# --------
 from spectrochempy.fitting.api import *
 from spectrochempy.fitting import api
+
 __all__ += api.__all__
 
 # Useful librairies alias for the end user avoiding to load them
@@ -121,15 +126,18 @@ import matplotlib.pyplot as plt
 # optional libraries
 try:
     import sympy as sym
+
     __all__.append('sym')
 except ImportError:
     pass
 
 try:
     import sklearn as skl
+
     __all__.append('skl')
 except ImportError:
     pass
+
 
 def APIref():
     """
@@ -141,18 +149,18 @@ def APIref():
 
     return a
 
-APIref = APIref()
 
+APIref = APIref()
 
 # START THE APPLICATION ========================================================
 from spectrochempy.application import app
+
 _started = app.start(debug=False, reset_config=True)
 
 log.info("API activated "
-             if _started else "API was not started!")
+         if _started else "API was not started!")
 
 # ==============================================================================
 
 if __name__ == '__main__':
-
-   pass
+    pass

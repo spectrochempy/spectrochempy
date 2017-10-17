@@ -21,7 +21,6 @@ import numpy as np
 
 from . import fileiobase
 
-
 TNTMAGIC_RE = re.compile(b"^TNT1\.\d\d\d$")
 
 TNTMAGIC = np.dtype('a8')
@@ -110,7 +109,6 @@ TNTTMAG = np.dtype([
     ('lock_nucleus', 'a16')
 ])
 
-
 TNTGRIDANDAXIS = np.dtype([
     ('majorTickInc', '<f8', 12),
     ('minorIntNum', '<i2', 12),
@@ -125,7 +123,6 @@ TNTGRIDANDAXIS = np.dtype([
     ('axisName', 'a32'),
     ('space', 'a52'),
 ])
-
 
 TNTTMG2 = np.dtype([
     ('real_flag', '<u4'),
@@ -263,7 +260,7 @@ def read(filename):
 
         # Read in the section headers
         tnthdrbytes = tntfile.read(TNTTLV.itemsize)
-        while(TNTTLV.itemsize == len(tnthdrbytes)):
+        while TNTTLV.itemsize == len(tnthdrbytes):
             tlv = np.fromstring(tnthdrbytes, TNTTLV)[0]
             data_length = tlv['length']
             hdrdict = {'offset': tntfile.tell(),
@@ -271,17 +268,17 @@ def read(filename):
                        'bool': bool(tlv['bool'])}
             if data_length <= 4096:
                 hdrdict['data'] = tntfile.read(data_length)
-                assert(len(hdrdict['data']) == data_length)
+                assert (len(hdrdict['data']) == data_length)
             else:
                 tntfile.seek(data_length, os.SEEK_CUR)
             tnt_sections[tlv['tag'].decode()] = hdrdict
             tnthdrbytes = tntfile.read(TNTTLV.itemsize)
 
-    assert(tnt_sections['TMAG']['length'] == TNTTMAG.itemsize)
+    assert (tnt_sections['TMAG']['length'] == TNTTMAG.itemsize)
     tmag = np.fromstring(tnt_sections['TMAG']['data'], TNTTMAG, count=1)[0]
 
-    assert(tnt_sections['DATA']['length'] ==
-           tmag['actual_npts'].prod() * 8)
+    assert (tnt_sections['DATA']['length'] ==
+            tmag['actual_npts'].prod() * 8)
     #  For some reason we can't set offset and shape together
     # DATA = np.memmap(tntfilename,np.dtype('<c8'), mode='r',
     #                  offset=self.tnt_sections['DATA']['offset'],
@@ -291,7 +288,7 @@ def read(filename):
                      shape=tmag['actual_npts'].prod())
     data = np.reshape(data, tmag['actual_npts'], order='F')
 
-    assert(tnt_sections['TMG2']['length'] == TNTTMG2.itemsize)
+    assert (tnt_sections['TMG2']['length'] == TNTTMG2.itemsize)
     tmg2 = np.fromstring(tnt_sections['TMG2']['data'], TNTTMG2, count=1)[0]
 
     dic = dict()

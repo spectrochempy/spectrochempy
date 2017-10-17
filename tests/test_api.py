@@ -38,13 +38,13 @@ import spectrochempy
 
 from spectrochempy.api import *
 
-def test_api():
 
+def test_api():
     # test version
     from spectrochempy.version import version
-    assert version.split('.')[0]=='0'
+    assert version.split('.')[0] == '0'
     assert version.split('.')[1][:2] == '1a'
-                                            #TODO: modify this for each release
+    # TODO: modify this for each release
 
     # test application
     print('\n\nRunning : ', spectrochempy.application.running)

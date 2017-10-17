@@ -42,7 +42,7 @@ are defined.
 """
 
 # Python and third parties imports
-#----------------------------------
+# ----------------------------------
 
 import os
 import copy
@@ -56,18 +56,16 @@ from traitlets import Unicode, Bool, HasTraits, Instance, observe, default
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.pyplot import isinteractive, Figure, Axes as Ax
-                                                  # change the name to avoid
-                                                  # collisions with
-                                                  # spectrochempy Axes objets
+# change the name to avoid
+# collisions with
+# spectrochempy Axes objets
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from spectrochempy.utils import is_kernel
 
 import numpy as np
-from numpy.compat import asbytes, asstr, asbytes_nested, bytes, \
-    basestring, unicode
+from numpy.compat import asbytes, asstr
 from numpy.lib.npyio import zipfile_factory, NpzFile
 from numpy.lib.format import write_array, MAGIC_PREFIX
-
 
 # local import
 # ------------
@@ -102,6 +100,7 @@ _classes = ['NDIO']
 
 from spectrochempy.application import log
 
+
 # ==============================================================================
 # Class NDIO to handle I/O of datasets
 # ==============================================================================
@@ -116,12 +115,14 @@ class NDIO(HasTraits):
 
     """
 
+    _ax = Instance(Ax, allow_none=True)
+    _fig = Instance(Figure, allow_none=True)
+
     # --------------------------------------------------------------------------
     # Generic save function
     # --------------------------------------------------------------------------
 
     def save(self, path='',
-             compress=False,
              **kwargs
              ):
         """
@@ -184,7 +185,8 @@ class NDIO(HasTraits):
         # Import deferred for startup time improvement
         import tempfile
 
-        zipf = zipfile_factory(filename, mode="w", compression=zipfile.ZIP_DEFLATED)
+        zipf = zipfile_factory(filename, mode="w",
+                               compression=zipfile.ZIP_DEFLATED)
 
         # Stage arrays in a temporary file on disk, before writing to zip.
         fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.tmp')
@@ -325,11 +327,13 @@ class NDIO(HasTraits):
                     fid = open(filename, 'rb')
                 else:
                     # cast to  file in the testdata directory
-                    #TODO: add possibility to search in several directory
-                    fid = open(os.path.expanduser(os.path.join(directory, filename)), 'rb')
+                    # TODO: add possibility to search in several directory
+                    fid = open(
+                            os.path.expanduser(
+                                os.path.join(directory, filename)),
+                            'rb')
             except:
                 raise IOError('no valid filename provided')
-                return None
 
         _ZIP_PREFIX = asbytes('PK\x03\x04')
         N = len(MAGIC_PREFIX)
@@ -392,7 +396,7 @@ class NDIO(HasTraits):
     # Generic read function
     # --------------------------------------------------------------------------
     @classmethod
-    def read(self, path, **kwargs):
+    def read(cls, path, **kwargs):
         """
         Generic read function. It's like load a class method.
 
@@ -428,11 +432,11 @@ class NDIO(HasTraits):
 
         if protocol == 'scp':
             # default reader
-            return self.load(path)
+            return cls.load(path)
 
         try:
             # find the adequate reader
-            _reader = getattr(self, 'read_{}'.format(protocol))
+            _reader = getattr(cls, 'read_{}'.format(protocol))
             return _reader(path, protocol='protocol',
                            sortbydate=sortbydate,
                            **kwargs)
@@ -494,15 +498,9 @@ class NDIO(HasTraits):
                              'for protocol `{}` was not found!'.format(
                     protocol))
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # generic plotter and plot related methods or properties
-    #--------------------------------------------------------------------------
-
-
-    @classmethod
-    def available_styles(self):
-        return ['notebook','paper','poster','talk', 'sans']
-
+    # --------------------------------------------------------------------------
 
     def plot(self, **kwargs):
 
@@ -588,7 +586,7 @@ class NDIO(HasTraits):
                 style = [style]
             if isinstance(style, dict):
                 style = [style]
-            style = [plotoptions.style]+list(style)
+            style = [plotoptions.style] + list(style)
             plt.style.use(style)
 
         # size of the figure and other properties
@@ -604,15 +602,15 @@ class NDIO(HasTraits):
 
         # Get current figure information
         # ------------------------------
-        #if (self._fig is None and self._ax is None):
+        # if (self._fig is None and self._ax is None):
         if curfig() is None:
-            self._updateplot = False # the figure doesn't yet exists.
-            self._fignum = kwargs.pop('fignum', None) # self._fignum)
+            self._updateplot = False  # the figure doesn't yet exists.
+            self._fignum = kwargs.pop('fignum', None)  # self._fignum)
             # if no figure present, then create one with the fignum number
-            self._fig = fig = plt.figure(self._fignum, figsize=self._figsize)
+            self._fig = plt.figure(self._fignum, figsize=self._figsize)
             self._ax = self._fig.gca()
         else:
-            self._updateplot = True #fig exist: updateplot
+            self._updateplot = True  # fig exist: updateplot
             self._fig = curfig()
             if ndim > 1 and self._fig.get_axes():
                 self._ax, self._axec = self._fig.get_axes()
@@ -620,7 +618,7 @@ class NDIO(HasTraits):
             else:
                 self._ax = self._fig.gca()
 
-        #elif self._ax is not None:
+        # elif self._ax is not None:
         #    self._fig = fig = self._ax.figure
 
         # Get the number of the present figure
@@ -643,10 +641,6 @@ class NDIO(HasTraits):
 
             kind = kwargs.get('kind', plotoptions.kind_2D)
 
-
-
-
-
         # for generic plot, we assume only a single axe with possible projections
         # and colobar
         #
@@ -654,7 +648,7 @@ class NDIO(HasTraits):
 
         ax = self._ax
 
-        if ndim==2 and kind in ['map', 'image'] and self._divider is None:
+        if ndim == 2 and kind in ['map', 'image'] and self._divider is None:
             # create new axes on the right and on the top of the current axes
             # The first argument of the new_vertical(new_horizontal) method is
             # the height (width) of the axes to be created in inches.
@@ -684,7 +678,7 @@ class NDIO(HasTraits):
                 axec = divider.append_axes("right", .15, pad=0.3, frameon=0,
                                            xticks=[], yticks=[])
                 axec.tick_params(right='off', left='off')
-                #plt.setp(axec.get_xticklabels(), visible=False)
+                # plt.setp(axec.get_xticklabels(), visible=False)
 
                 self._axec = axec
 
@@ -716,12 +710,12 @@ class NDIO(HasTraits):
         # adjust the plots
 
         # subplot dimensions
-        #top = kwargs.pop('top', mpl.rcParams['figure.subplot.top'])
-        #bottom = kwargs.pop('bottom', mpl.rcParams['figure.subplot.bottom'])
-        #left = kwargs.pop('left', mpl.rcParams['figure.subplot.left'])
-        #right = kwargs.pop('right', mpl.rcParams['figure.subplot.right'])
+        # top = kwargs.pop('top', mpl.rcParams['figure.subplot.top'])
+        # bottom = kwargs.pop('bottom', mpl.rcParams['figure.subplot.bottom'])
+        # left = kwargs.pop('left', mpl.rcParams['figure.subplot.left'])
+        # right = kwargs.pop('right', mpl.rcParams['figure.subplot.right'])
 
-        #plt.subplots_adjust(left=left, right=right, top=top, bottom=bottom)
+        # plt.subplots_adjust(left=left, right=right, top=top, bottom=bottom)
         # self.fig.tight_layout()
 
         # finally return the current fig for further manipulation.
@@ -760,7 +754,7 @@ class NDIO(HasTraits):
 
             temp.plot_1D(**kwargs)
 
-        elif temp.ndim == 2 :
+        elif temp.ndim == 2:
 
             temp.plot_2D(**kwargs)
 
@@ -779,7 +773,7 @@ class NDIO(HasTraits):
         self._fig = temp._fig
         self._fignum = temp._fignum
 
-        return True # Everything was OK
+        return True  # Everything was OK
 
     # -------------------------------------------------------------------------
     # Special attributes
@@ -806,7 +800,7 @@ class NDIO(HasTraits):
         return state
 
     def __dir__(self):
-        return ['fignum','ax','axec','axex','axey','divider']
+        return ['fignum', 'ax', 'axec', 'axex', 'axey', 'divider']
 
     # -------------------------------------------------------------------------
     # Properties
@@ -870,12 +864,14 @@ class NDIO(HasTraits):
         """
         return self._divider
 
+
 def curfig():
     n = plt.get_fignums()
     if not n:
         return None
     fig = plt.gcf()
     return fig
+
 
 def show():
     """
@@ -887,9 +883,12 @@ def show():
             plt.show()
 
 
+def available_styles():
+    return ['notebook', 'paper', 'poster', 'talk', 'sans']
+
+
 figure = plt.figure
 plot = NDIO.plot
 load = NDIO.load
 read = NDIO.read
 write = NDIO.write
-available_styles = NDIO.available_styles()

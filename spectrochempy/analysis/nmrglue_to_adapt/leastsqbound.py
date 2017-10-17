@@ -18,11 +18,11 @@ def _internal2external_grad(xi, bounds):
         lower, upper = bound
         if lower is None and upper is None:  # No constraints
             grad[i] = 1.0
-        elif upper is None:     # only lower bound
+        elif upper is None:  # only lower bound
             grad[i] = v / sqrt(v * v + 1.)
-        elif lower is None:     # only upper bound
+        elif lower is None:  # only upper bound
             grad[i] = -v / sqrt(v * v + 1.)
-        else:   # lower and upper bounds
+        else:  # lower and upper bounds
             grad[i] = (upper - lower) * cos(v) / 2.
     return grad
 
@@ -51,9 +51,9 @@ def _internal2external_lambda(bound):
 
     if lower is None and upper is None:  # no constraints
         return lambda x: x
-    elif upper is None:     # only lower bound
+    elif upper is None:  # only lower bound
         return lambda x: lower - 1. + sqrt(x * x + 1.)
-    elif lower is None:     # only upper bound
+    elif lower is None:  # only upper bound
         return lambda x: upper + 1. - sqrt(x * x + 1.)
     else:
         return lambda x: lower + ((upper - lower) / 2.) * (sin(x) + 1.)
@@ -83,9 +83,9 @@ def _external2internal_lambda(bound):
 
     if lower is None and upper is None:  # no constraints
         return lambda x: x
-    elif upper is None:     # only lower bound
+    elif upper is None:  # only lower bound
         return lambda x: sqrt((x - lower + 1.) ** 2 - 1)
-    elif lower is None:     # only upper bound
+    elif lower is None:  # only upper bound
         return lambda x: sqrt((upper - x + 1.) ** 2 - 1)
     else:
         return lambda x: arcsin((2. * (x - lower) / (upper - lower)) - 1.)
@@ -260,7 +260,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         return func(i2e(x), *args)
 
     if Dfun is None:
-        if (maxfev == 0):
+        if maxfev == 0:
             maxfev = 200 * (n + 1)
         retval = _minpack._lmdif(wfunc, i0, args, full_output, ftol, xtol,
                                  gtol, maxfev, epsfcn, factor, diag)
@@ -269,15 +269,15 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
             _check_func('leastsq', 'Dfun', Dfun, x0, args, n, (n, m))
         else:
             _check_func('leastsq', 'Dfun', Dfun, x0, args, n, (m, n))
-        if (maxfev == 0):
+        if maxfev == 0:
             maxfev = 100 * (n + 1)
 
         def wDfun(x, *args):  # wrapped Dfun
             return Dfun(i2e(x), *args)
 
         retval = _minpack._lmder(
-            func, wDfun, i0, args, full_output, col_deriv, ftol, xtol, gtol,
-            maxfev, factor, diag)
+                func, wDfun, i0, args, full_output, col_deriv, ftol, xtol, gtol,
+                maxfev, factor, diag)
 
     errors = {0: ["Improper input parameters.", TypeError],
               1: ["Both actual and predicted relative reductions "
@@ -302,9 +302,9 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                   "precision." % gtol, ValueError],
               'unknown': ["Unknown error.", TypeError]}
 
-    info = retval[-1]    # The FORTRAN return value
+    info = retval[-1]  # The FORTRAN return value
 
-    if (info not in [1, 2, 3, 4] and not full_output):
+    if info not in [1, 2, 3, 4] and not full_output:
         if info in [5, 6, 7, 8]:
             warnings.warn(errors[info][0], RuntimeWarning)
         else:
@@ -320,7 +320,8 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         # convert fjac from internal params to external
         grad = _internal2external_grad(retval[0], bounds)
         retval[1]['fjac'] = (retval[1]['fjac'].T / take(grad,
-                             retval[1]['ipvt'] - 1)).T
+                                                        retval[1][
+                                                            'ipvt'] - 1)).T
         cov_x = None
         if info in [1, 2, 3, 4]:
             from numpy.dual import inv
@@ -334,4 +335,4 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                 pass
         return (x, cov_x) + retval[1:-1] + (mesg, info)
     else:
-        return (x, info)
+        return x, info

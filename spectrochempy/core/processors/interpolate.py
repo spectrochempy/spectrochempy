@@ -38,7 +38,7 @@
 import scipy.interpolate
 import numpy as np
 
-#from ..dataset import NDDataset
+# from ..dataset import NDDataset
 
 
 __all__ = ['interpolate', 'align']
@@ -96,24 +96,24 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
         sourceordered.coords(axis).to(refordered.coords(refaxis).units)
     except:
         raise TypeError(
-            'units of the dataset and reference axes on which interpolate are not compatible')
+                'units of the dataset and reference axes on which interpolate are not compatible')
 
     oldaxisdata = sourceordered.coords(axis).data
     refaxisdata = refordered.coords(
-        refaxis).data  # TODO: at the end restore the original order
+            refaxis).data  # TODO: at the end restore the original order
 
     if kind == 'linear':
 
         interpolator = lambda data, ax=-1: scipy.interpolate.interp1d(
-            oldaxisdata, data, axis=ax, kind=kind,
-            bounds_error=False, fill_value=fill_value,
-            assume_sorted=True)
+                oldaxisdata, data, axis=ax, kind=kind,
+                bounds_error=False, fill_value=fill_value,
+                assume_sorted=True)
 
     elif kind == 'pchip':
 
         interpolator = lambda data, ax=-1: scipy.interpolate.PchipInterpolator(
-            oldaxisdata, data,
-            axis=ax, extrapolate=False)
+                oldaxisdata, data,
+                axis=ax, extrapolate=False)
     else:
         raise TypeError('Not recognised option kind for `align`')
 
@@ -163,4 +163,3 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
             str(source.modified), axis, ref.name, ref.axes[refaxis].title)
 
     return out
-

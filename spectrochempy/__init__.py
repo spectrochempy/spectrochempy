@@ -49,6 +49,7 @@ import sys
 import os
 
 from PyQt5.QtWidgets import QApplication
+
 guiApp = QApplication(sys.argv)
 
 # ==============================================================================
@@ -57,4 +58,3 @@ guiApp = QApplication(sys.argv)
 # in case spectrochempy was not yet installed using setup
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-

@@ -69,7 +69,6 @@ from spectrochempy.utils import EPSILON, is_number
 from spectrochempy.utils import SpectroChemPyWarning, deprecated
 from spectrochempy.utils.traittypes import Array
 
-
 # =============================================================================
 # Third party imports
 # =============================================================================
@@ -80,6 +79,7 @@ from spectrochempy.utils.traittypes import Array
 
 __all__ = ['NDArray']
 _classes = __all__[:]
+
 
 # =============================================================================
 # NDArray class
@@ -142,8 +142,10 @@ class NDArray(HasTraits):
     # _scaling = Float(1.)
 
     # private flags
-    _data_passed_with_mask = Bool(transient=True)     # TODO: transient is a residue of Traits
-    _data_passed_is_quantity = Bool(transient=True)   # we need to adapt something similar for traitlets
+    _data_passed_with_mask = Bool(
+            transient=True)  # TODO: transient is a residue of Traits
+    _data_passed_is_quantity = Bool(
+            transient=True)  # we need to adapt something similar for traitlets
 
     # -------------------------------------------------------------------------
     # Initialization
@@ -169,7 +171,7 @@ class NDArray(HasTraits):
 
     @default('_units')
     def _get_units_default(self):
-        return None #ur.dimensionless
+        return None  # ur.dimensionless
 
     @default('_uncertainty')
     def _get_uncertainty_default(self):
@@ -234,7 +236,6 @@ class NDArray(HasTraits):
         if name is not None:
             self._name = name
 
-
     @property
     def title(self):
         """`str` - An user friendly title for this object.
@@ -276,7 +277,7 @@ class NDArray(HasTraits):
         if mask is not None:
             if self.is_masked and np.any(mask != self._mask):
                 log.info("Overwriting Axis's current "
-                            "mask with specified mask")
+                         "mask with specified mask")
             self._mask = mask
 
     @property
@@ -317,11 +318,10 @@ class NDArray(HasTraits):
                 self.to(units)
             except:
                 raise ValueError(
-                    "Unit provided in initializer does not match data units.\n "
-                    "To force a change - use the change_units() method")
+                        "Unit provided in initializer does not match data units.\n "
+                        "To force a change - use the change_units() method")
 
         self._units = units
-
 
     @property
     def uncertainty(self):
@@ -379,7 +379,7 @@ class NDArray(HasTraits):
 
         """
         if self._labels is None:
-             return False
+            return False
         elif self._labels.size == 0:
             return False
         elif np.any(self._labels != ''):
@@ -516,11 +516,11 @@ class NDArray(HasTraits):
 
         """
         try:
-            if len(self._data)==0: # self._data.any():
+            if len(self._data) == 0:  # self._data.any():
                 self._is_complex = None
                 return None
         except:
-            if self._data.size == 0: # self._data.any():
+            if self._data.size == 0:  # self._data.any():
                 self._is_complex = None
                 return None
 
@@ -528,7 +528,6 @@ class NDArray(HasTraits):
             self._is_complex = list([False for _ in self._data.shape])
 
         return self._is_complex
-
 
     @property
     def has_complex_dims(self):
@@ -608,13 +607,14 @@ class NDArray(HasTraits):
                 new = self
             else:
                 new = self.copy()
-            new._data = new._data * scale #new * scale #
+            new._data = new._data * scale  # new * scale #
             if new.uncertainty is not None:
                 new._uncertainty = new._uncertainty * scale
             new._units = q.units
             return new
         else:
-            warnings.warn("There is no units for this NDArray!", SpectroChemPyWarning)
+            warnings.warn("There is no units for this NDArray!",
+                          SpectroChemPyWarning)
 
         return self
 
@@ -648,7 +648,6 @@ class NDArray(HasTraits):
         except DimensionalityError:
             self._units = units
             log.info('units forced to change')
-
 
     def is_units_compatible(self, other):
         """
@@ -706,14 +705,14 @@ class NDArray(HasTraits):
             except:
                 # if deep copy do not work
                 setattr(new, "_" + attr, copy.copy(getattr(self,
-                                                       attr)))
-            # if attr not in ['data', 'units']:
-            #     # we set directly the hidden attribute as no checking
-            #     # is necessary for such copy
-            #     setattr(new, "_" + attr, do_copy(getattr(self, attr)))
-            # elif attr in ['units']:
-            #     setattr(new, "_" + attr, copy.copy(getattr(self,
-            #                                                attr)))  # deepcopy not working (and not necessary)
+                                                           attr)))
+                # if attr not in ['data', 'units']:
+                #     # we set directly the hidden attribute as no checking
+                #     # is necessary for such copy
+                #     setattr(new, "_" + attr, do_copy(getattr(self, attr)))
+                # elif attr in ['units']:
+                #     setattr(new, "_" + attr, copy.copy(getattr(self,
+                #                                                attr)))  # deepcopy not working (and not necessary)
         new._name = str(uuid.uuid1()).split('-')[0]
         new._date = datetime.now()
         return new
@@ -722,7 +721,7 @@ class NDArray(HasTraits):
     # special methods
     # -------------------------------------------------------------------------
 
-    def __repr__(self):  #TODO: display differently if no uncertainty
+    def __repr__(self):  # TODO: display differently if no uncertainty
         txt = "NDArray: \n" + repr(self._uarray(self._data, self._uncertainty))
         if self.units is not None:
             txt += repr(self.units)
@@ -741,8 +740,8 @@ class NDArray(HasTraits):
         return self.copy(deep=True, memo=memo)
 
     def __dir__(self):
-        return     ['data', 'mask', 'units', 'uncertainty', 'labels',
-                    'meta', 'name', 'title', 'is_complex']
+        return ['data', 'mask', 'units', 'uncertainty', 'labels',
+                'meta', 'name', 'title', 'is_complex']
 
     def __getitem__(self, item):
 
@@ -829,9 +828,9 @@ class NDArray(HasTraits):
         # return the array with uncertainty and units if any
 
         if uncertainty is None or np.all(uncertainty <= EPSILON):
-            uar= np.array(data)
+            uar = np.array(data)
         else:
-            uar= unp.uarray(data, uncertainty)
+            uar = unp.uarray(data, uncertainty)
 
         if units:
             return Quantity(uar, units)
@@ -912,8 +911,8 @@ class NDArray(HasTraits):
             if loc > self._data.max() or loc < self._data.min():
                 warnings.warn(
                         '\nThis coordinate ({}) is outside the axis limits.\n'
-                        'The closest limit index is returned'.format(loc),)
-                        # AxisWarning)
+                        'The closest limit index is returned'.format(loc), )
+                # AxisWarning)
             return index
 
         else:

@@ -46,6 +46,7 @@ from traitlets import HasTraits, Unicode, List
 
 __all__ = ['read_dso']
 
+
 def read_dso(filename='', **kwargs):
     """Open an eigevector DSO object (.mat file) and return the corresponding dataset
 
@@ -85,8 +86,9 @@ def read_dso(filename='', **kwargs):
         root.deiconify()
         root.lift()
         root.focus_force()
-        filename = filedialog.askopenfilename(parent=root, \
-                                              filetypes=[('mat files', '.mat'), ('all files', '.*')],
+        filename = filedialog.askopenfilename(parent=root,
+                                              filetypes=[('mat files', '.mat'),
+                                                         ('all files', '.*')],
                                               title='Open .mat file')
         root.destroy()
 
@@ -125,8 +127,9 @@ def read_dso(filename='', **kwargs):
     if len(date_mat) == 0:
         date = datetime.datetime(1, 1, 1, 0, 0)
     else:
-        date = datetime.datetime(int(date_mat[0][0]), int(date_mat[0][1]), \
-                                 int(date_mat[0][2]), int(date_mat[0][3]), int(date_mat[0][4]), \
+        date = datetime.datetime(int(date_mat[0][0]), int(date_mat[0][1]),
+                                 int(date_mat[0][2]), int(date_mat[0][3]),
+                                 int(date_mat[0][4]),
                                  int(date_mat[0][5]))
 
     data = f[dso]['data'][0][0]
@@ -141,7 +144,9 @@ def read_dso(filename='', **kwargs):
         for nj, j in enumerate(f[dso]['label'][0][0][i][0]):
             if len(j):
                 if len(f[dso]['label'][0][0][i][1][nj]):
-                    out.dims[i].appendlabels(Labels(j, f[dso]['label'][0][0][i][1][nj][0]))  # or [nj][0]
+                    out.dims[i].appendlabels(Labels(j,
+                                                    f[dso]['label'][0][0][i][1][
+                                                        nj][0]))  # or [nj][0]
                 else:
                     out.dims[i].appendlabels(Labels(j, '*unammed*'))
 
@@ -150,8 +155,9 @@ def read_dso(filename='', **kwargs):
         for nj, j in enumerate(f[dso]['axisscale'][0][0][i][0]):
             if len(j[0]):
                 if len(f[dso]['axisscale'][0][0][i][1]):
-                    out.dims[i].appendaxis(Axis(j[0], f[dso]['axisscale'][0][0][i][1][nj][
-                        0]))  # sometimes: Axis(j, f[dso]... , i.e. no j[0]    and  [nj] i.e. no [nj][0][0]
+                    out.dims[i].appendaxis(
+                        Axis(j[0], f[dso]['axisscale'][0][0][i][1][nj][
+                            0]))  # sometimes: Axis(j, f[dso]... , i.e. no j[0]    and  [nj] i.e. no [nj][0][0]
                 else:
                     out.dims[i].appendaxis(Axis(j[0], '*unammed*'))
 
@@ -161,7 +167,7 @@ def read_dso(filename='', **kwargs):
     for i in f[dso]['history'][0][0][0]:
         out.history += i[0] + ' \n'
 
-    out.history += (str(datetime.datetime.now()) + ': imported by spectrochempy.loaddso() \n')
+    out.history += (
+    str(datetime.datetime.now()) + ': imported by spectrochempy.loaddso() \n')
 
     return out
-

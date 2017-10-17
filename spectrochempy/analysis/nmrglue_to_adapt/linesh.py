@@ -133,7 +133,6 @@ def estimate_scales(spectrum, centers, box_width, scale_axis=0):
     scales = []
     # loop over the box centers
     for bc in bcenters:
-
         # calculate box limits
         bmin = [max(c - w, 0) for c, w in zip(bc, box_width)]
         bmax = [min(c + w + 1, s) for c, w, s in zip(bc, box_width, shape)]
@@ -222,7 +221,7 @@ def fit_spectrum(spectrum, lineshapes, params, amps, bounds, ampbounds,
         else:
             ls_classes.append(l)
 
-    cIDs = set(rIDs)    # region values to loop over
+    cIDs = set(rIDs)  # region values to loop over
 
     for cID in cIDs:
         cpeaks = [i for i, v in enumerate(rIDs) if v == cID]
@@ -265,11 +264,11 @@ def fit_spectrum(spectrum, lineshapes, params, amps, bounds, ampbounds,
 
         # add edges to the initial parameters
         ecparams = [[ls.add_edge(p, (mn, mx)) for ls, mn, mx, p in
-                    zip(ls_classes, rmin, rmax, g)] for g in cparams]
+                     zip(ls_classes, rmin, rmax, g)] for g in cparams]
 
         # TODO make this better...
         ecbounds = [[zip(*[ls.add_edge(b, (mn, mx)) for b in zip(*db)])
-                    for ls, mn, mx, db in zip(ls_classes, rmin, rmax, pb)]
+                     for ls, mn, mx, db in zip(ls_classes, rmin, rmax, pb)]
                     for pb in cbounds]
 
         # fit the region
@@ -278,7 +277,7 @@ def fit_spectrum(spectrum, lineshapes, params, amps, bounds, ampbounds,
         if error_flag:
             ecpbest, acbest, ecpbest_err, acbest_err, ier = t
             cpbest_err = [[ls.remove_edge(p, (mn, mx)) for ls, mn, mx, p in
-                          zip(ls_classes, rmin, rmax, g)] for g in ecpbest_err]
+                           zip(ls_classes, rmin, rmax, g)] for g in ecpbest_err]
         else:
             ecpbest, acbest, ier = t
 
@@ -422,9 +421,9 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
     for i, guess in enumerate(params):  # peak loop
         if len(guess) != ndim:
             err = "Incorrect number of params for peak %i"
-            raise ValueError(err % (i))
+            raise ValueError(err % i)
 
-        for j, dim_guess in enumerate(guess):    # dimension loop
+        for j, dim_guess in enumerate(guess):  # dimension loop
             if len(dim_guess) != dim_nparam[j]:
                 err = "Incorrect number of parameters in peak %i dimension %i"
                 raise ValueError(err % (i, j))
@@ -433,7 +432,7 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
                 p0.append(g)
 
     # parse the bounds parameter
-    if bounds is None:   # No bounds
+    if bounds is None:  # No bounds
         peak_bounds = [[(None, None)] * i for i in dim_nparam]
         bounds = [peak_bounds] * n_peaks
 
@@ -449,9 +448,9 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
 
         if len(peak_bounds) != ndim:
             err = "Incorrect number of bounds for peak %i"
-            raise ValueError(err % (i))
+            raise ValueError(err % i)
 
-        for j, dim_bounds in enumerate(peak_bounds):    # dimension loop
+        for j, dim_bounds in enumerate(peak_bounds):  # dimension loop
 
             if dim_bounds is None:
                 dim_bounds = [(None, None)] * dim_nparam[j]
@@ -460,7 +459,7 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
                 err = "Incorrect number of bounds for peak %i dimension %i"
                 raise ValueError(err % (i, j))
 
-            for k, b in enumerate(dim_bounds):    # parameter loop
+            for k, b in enumerate(dim_bounds):  # parameter loop
                 if b is None:
                     b = (None, None)
 
@@ -489,15 +488,15 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
 
         if len(b) != 2:
             err = "No min/max for amplitude bound %i"
-            raise ValueError(err % (k))
+            raise ValueError(err % k)
         to_add.append(b)
-    p_bounds = to_add + p_bounds    # amplitude bound at front of p_bounds
+    p_bounds = to_add + p_bounds  # amplitude bound at front of p_bounds
 
     # parse the wmask parameter
-    if wmask is None:   # default is to include all points in region
+    if wmask is None:  # default is to include all points in region
         wmask = np.ones(shape, dtype='bool')
     if wmask.shape != shape:
-        err = "wmask has incorrect shape:" + str(wmask.shape) +   \
+        err = "wmask has incorrect shape:" + str(wmask.shape) + \
               " should be " + str(shape)
         raise ValueError(err)
 
@@ -607,7 +606,7 @@ def sim_NDregion(shape, lineshapes, params, amps):
     for i, param in enumerate(params):
         if len(param) != ndim:
             err = "Incorrect number of parameters for peak %i"
-            raise ValueError(err % (i))
+            raise ValueError(err % i)
         for j, dim_param in enumerate(param):
             if len(dim_param) != dim_nparam[j]:
                 err = "Incorrect number of parameters in peak %i dimension %i"
@@ -619,7 +618,7 @@ def sim_NDregion(shape, lineshapes, params, amps):
     # parse the amps parameter
     if len(amps) != n_peaks:
         raise ValueError("Incorrect number of amplitudes provided")
-    p = list(amps) + p   # amplitudes appended to front of p
+    p = list(amps) + p  # amplitudes appended to front of p
 
     # DEBUGGING
     # print("p",p)
@@ -687,11 +686,11 @@ def calc_errors(region, ls_classes, p, cov, n_peaks, wmask):
     """
     # calculate the residuals
     resid = err_NDregion(p, region, region.shape, ls_classes, n_peaks, wmask)
-    SS_err = np.power(resid, 2).sum()   # Sum of squared residuals
+    SS_err = np.power(resid, 2).sum()  # Sum of squared residuals
     n = region.size  # size of sample XXX not sure if this always makes sense
-    k = p.size - 1   # free parameters
-    st_err = np.sqrt(SS_err / (n - k - 1))    # standard error of estimate
-    if cov is None:   # indicate that parameter errors cannot be calculated.
+    k = p.size - 1  # free parameters
+    st_err = np.sqrt(SS_err / (n - k - 1))  # standard error of estimate
+    if cov is None:  # indicate that parameter errors cannot be calculated.
         return [None] * len(p)
     return st_err * np.sqrt(np.diag(cov))
 
@@ -755,7 +754,7 @@ def s_single_NDregion(p, shape, ls_classes):
         Simulated region.
 
     """
-    A = p.pop(0)    # amplitude is ALWAYS the first parameter
+    A = p.pop(0)  # amplitude is ALWAYS the first parameter
     r = np.array(A, dtype='float')
 
     for length, ls_class in zip(shape, ls_classes):
@@ -763,7 +762,7 @@ def s_single_NDregion(p, shape, ls_classes):
         s_p = [p.pop(0) for i in range(ls_class.nparam(length))]
         ls = ls_class.sim(length, s_p)
         # print("Lineshape is:", ls)
-        r = np.kron(r, ls)   # vector direct product flattened
+        r = np.kron(r, ls)  # vector direct product flattened
     return r.reshape(shape)
 
 

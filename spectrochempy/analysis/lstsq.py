@@ -34,19 +34,17 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-#TODO: create tests
+# TODO: create tests
 
 __all__ = ['Lstsq']
 _methods = __all__[:]
-
-
-
 
 import numpy as np
 
 from ..core.api import NDDataset
 
-def Lstsq(A, B, rcond = -1):
+
+def Lstsq(A, B, rcond=-1):
     """
     Extension of numpy.linag.lstsq to hddatasets
     Return the least-squares solution to the linear equation
@@ -76,13 +74,12 @@ def Lstsq(A, B, rcond = -1):
     s : (min(M, N),) ndarray, Singular values of a
 
     """
-    
+
     X, res, rank, s = np.linalg.lstsq(A.data, B.data, rcond)
-    
+
     X = NDDataset(X)
     X.name = A.name + ' \ ' + B.name
     X.axes[0] = A.axes[1]
     X.axes[1] = B.axes[1]
     X.history = 'computed by spectrochempy.lstsq \n'
-    return (X, res, rank, s)
-
+    return X, res, rank, s
