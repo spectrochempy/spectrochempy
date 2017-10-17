@@ -194,7 +194,7 @@ def read_jdx(filename='', sortbydate=True):
                 spectra = spectra.astype(float)
                 spectra = spectra * yfactor
                 # add spectra in "data" matrix
-                if data == []:
+                if not data:
                     data = spectra
                 else:
                     data = np.concatenate((data, spectra), 0)
@@ -202,7 +202,7 @@ def read_jdx(filename='', sortbydate=True):
         # Check "firstx", "lastx" and "nx"
         if (firstx[i] != 0 and lastx[i] != 0 and nx[i] != 0):
             # Creation of xaxis if it doesn't exist yet
-            if xaxis == []:
+            if not xaxis:
                 xaxis = np.linspace(firstx[0], lastx[0], nx[0])
                 xaxis = np.around((xaxis * xfactor), 3)
             else:  # Check the consistency of xaxis

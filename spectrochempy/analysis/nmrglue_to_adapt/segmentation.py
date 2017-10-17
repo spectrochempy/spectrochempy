@@ -183,7 +183,7 @@ def label_downward_seg(data, labels, seg_slice, seg_index, max_index,
     mark_dseg(msdata, slabels, argmax, seg_index, structure)
 
     # mark any
-    while msdata.mask.all() == False:
+    while not msdata.mask.all():
         argmax = np.unravel_index(msdata.argmax(), msdata.shape)
         mark_dseg(msdata, slabels, argmax, max_index, structure)
         max_index = max_index + 1
@@ -301,7 +301,7 @@ def label_upward_seg(data, labels, seg_slice, seg_index, max_index,
     mark_useg(msdata, slabels, argmin, seg_index, structure)
 
     # mark any
-    while msdata.mask.all() == False:
+    while not msdata.mask.all():
         argmin = np.unravel_index(msdata.argmin(), msdata.shape)
         mark_useg(msdata, slabels, argmin, max_index, structure)
         max_index = max_index + 1

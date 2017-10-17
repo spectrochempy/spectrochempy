@@ -164,7 +164,7 @@ def basecorgui(X, display='all'):
                             plt.subplot(211) #activate subplot 1  
                             for patch in [patch for patch in ax1.patches if type(patch) == mpl.patches.Polygon]:
                                 patch.remove()
-                            if self.r == []:
+                            if not self.r:
                                 plt.figure(1).draw_idle()
                             self.p = []
                             plt.subplot(211)

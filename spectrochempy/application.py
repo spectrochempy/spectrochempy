@@ -280,7 +280,7 @@ class SpectroChemPy(Application):
         # Pass config to other classes for them to inherit the config.
         self.plotoptions = PlotOptions(config=self.config)
 
-        if self.plotoptions.latex_preamble == []:
+        if not self.plotoptions.latex_preamble:
             self.plotoptions.latex_preamble = [
                 r'\usepackage{siunitx}',
                 r'\sisetup{detect-all}',

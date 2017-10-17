@@ -186,7 +186,7 @@ def plotdata(SL,
     axes = []
     if isinstance(SL, list):
         # several plots
-        if horizontal==True:
+        if horizontal:
             row=1
             col=len(SL)
         else:
@@ -258,7 +258,7 @@ def plotdata(SL,
             showbar = barshow
             if row==3:
                 showbar = False
-            if middle_ticks==False:
+            if not middle_ticks:
                 if idx==1:
                     if S is  None:
                         ax.axis('off')
