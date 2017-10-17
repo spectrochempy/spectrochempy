@@ -318,9 +318,9 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
                 if len(position1B) != 0:
                     # read history texts
-                    for i in range(nspec):
+                    for j in range(nspec):
                         # determine the position of information
-                        f.seek(position1B[i] + 2)
+                        f.seek(position1B[j] + 2)
                         history_pos = np.fromfile(f, 'uint32', 1)
 
                         # read history
