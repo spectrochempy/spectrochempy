@@ -102,7 +102,7 @@ def gm(source, *args, **kwargs):
         Should we apply the calculated apodization to the dataset (default)
         or just return the apodization ndarray.
 
-    inplace : `bool`, optional, default = `False`
+    inplace : `bool`, optional, default = `True`
 
         Should we make the transform in place or return a new dataset
 

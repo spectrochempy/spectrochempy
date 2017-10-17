@@ -700,22 +700,22 @@ class NDArray(HasTraits):
         new = type(self)()
         new._data = do_copy(self._data)
         for attr in self.__dir__():
-            if attr not in ['data', 'units']:
-                # we set directly the hidden attribute as no checking
-                # is necessary for such copy
+
+            try:
                 setattr(new, "_" + attr, do_copy(getattr(self, attr)))
-            elif attr in ['units']:
+            except:
+                # if deep copy do not work
                 setattr(new, "_" + attr, copy.copy(getattr(self,
-                                                           attr)))  # deepcopy not working (and not necessary)
+                                                       attr)))
+            # if attr not in ['data', 'units']:
+            #     # we set directly the hidden attribute as no checking
+            #     # is necessary for such copy
+            #     setattr(new, "_" + attr, do_copy(getattr(self, attr)))
+            # elif attr in ['units']:
+            #     setattr(new, "_" + attr, copy.copy(getattr(self,
+            #                                                attr)))  # deepcopy not working (and not necessary)
         new._name = str(uuid.uuid1()).split('-')[0]
         new._date = datetime.now()
-        if self._fig: #is not None: # prevent opening a new figure if no plot was done
-            new._fig = self._fig # plt.gcf()
-            new._ax = self._ax
-            new._axec = self._axec
-            new._axex = self._axex
-            new._axey = self._axey
-            new._divider = self._divider
         return new
 
     # -------------------------------------------------------------------------

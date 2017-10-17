@@ -110,4 +110,13 @@ def test_copy():
     assert meta2 is not meta
     assert sorted([val for val in meta2]) == ['ls', 'ns', 'si', 'td']
 
+def test_swapaxes():
+    meta = Meta()
+    meta.td = [200, 400, 500]
+    meta.xe = [30, 40, 80]
+    meta.si = 2048
+    meta.swapaxes(1,2)
+    assert meta.xe == [30,80,40]
+
+
 

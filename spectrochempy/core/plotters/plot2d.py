@@ -108,10 +108,6 @@ def plot_2D(source, **kwargs):
     ----------
     source: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
-    hold: `bool` [optional, default=`False`]
-
-        If true hold the current figure and ax until a new plot is performed.
-
     data_only: `bool` [optional, default=`False`]
 
         Only the plot is done. No addition of axes or label specifications
@@ -132,64 +128,20 @@ def plot_2D(source, **kwargs):
     # where to plot?
     # --------------
 
-    fig, ax, axec, axex, axey = source._figure_setup(ndim=2, **kwargs)
+    source._figure_setup(ndim=2, **kwargs)
 
     # kind of plot
     # ------------
 
-    kind = kwargs.get('kind', plotoptions.kind_2D)
-
-    colorbar = kwargs.get('colorbar', True)
-
     data_only = kwargs.get('data_only', False)
-
-    # show projections (only useful for maps)
-    # ---------------------------------------
-
-    #proj = kwargs.get('proj', plotoptions.show_projections)
-    #                                            # TODO: tell the axis by title.
-
-    #xproj = kwargs.get('xproj', plotoptions.show_projection_x)
-
-    #yproj = kwargs.get('yproj', plotoptions.show_projection_y)
-
-    #if kind in ['map','image']:
-        # create new axes on the right and on the top of the current axes
-        # The first argument of the new_vertical(new_horizontal) method is
-        # the height (width) of the axes to be created in inches.
-        #
-        # This is necessary for projections and colorbar
-
-        # divider = make_axes_locatable(ax)
-        # # print divider.append_axes.__doc__
-        #
-        # if proj or xproj:
-        #
-        #     axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
-        #                                frameon=0, yticks=[])
-        #     axex.tick_params(bottom='off', top='off')
-        #     plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
-        #              visible=False)
-        #     source.axex = axex
-        #
-        # if proj or yproj:
-        #
-        #     axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
-        #                                frameon=0, xticks=[])
-        #     axey.tick_params(right='off', left='off')
-        #     plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
-        #              visible=False)
-        #     source.axey = axey
-        #
-        # if colorbar:
-        #
-        #     axec = divider.append_axes("right", .15, pad=0.3, frameon=0, xticks=[])
-        #     axec.tick_params(right='off', left='off')
-        #     plt.setp(axec.get_xticklabels(), visible=False)
-        #     source.axec = axec
 
     # Other properties
     # ------------------
+
+
+    kind = kwargs.get('kind', plotoptions.kind_2D)
+
+    colorbar = kwargs.get('colorbar', True)
 
     cmap = colormap = kwargs.pop('colormap',
                                  kwargs.pop('cmap',
@@ -199,35 +151,38 @@ def plot_2D(source, **kwargs):
 
     alpha = kwargs.get('calpha', plotoptions.calpha)
 
+
     # -------------------------------------------------------------------------
     # plot the source
     # by default contours are plotted
     # -------------------------------------------------------------------------
 
-    s = source.real()
+    # ordinates (by default we plot real part of the data)
+    if not kwargs.get('imag', False):
+        z = source.real()
+    else:
+        z = source.imag()
 
-    ylim = kwargs.get("ylim", None)
-    zlim = kwargs.get("zlim", None)
+    # abscissa axis
+    x = source.x
+
+    # ordinates axis
+    y = source.y
 
     if kind in ['map', 'image']:
-        #vmax = max(abs(s.data.min()), s.data.max())
-        #if s.data.min()>=0:
-        #    vmin = 0.01*vmax
-        #else:
-        #    vmin = -vmax
-        vmax = s.data.max()
-        vmin = s.data.min()
-        norm = mpl.colors.Normalize(vmin=vmin,
-                                    vmax=vmax)
+        vmax = z.data.max()
+        vmin = z.data.min()
+        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
 
     if kind in ['map']:
 
         # contour plot
         # -------------
-        if s.clevels is None:
-            s.clevels = clevels(s.data, **kwargs)
-        c = ax.contour(s.x.coords, s.y.coords, s.data, s.clevels, linewidths=lw,
-                       alpha=alpha)
+        if z.clevels is None:
+            z.clevels = clevels(z.data, **kwargs)
+        c = source.ax.contour(x.coords, y.coords, z.data,
+                              z.clevels,
+                              linewidths=lw, alpha=alpha)
         c.set_cmap(cmap)
         c.set_norm(norm)
 
@@ -236,10 +191,11 @@ def plot_2D(source, **kwargs):
         # image plot
         # ----------
         kwargs['nlevels'] = 500
-        if s.clevels is None:
-            s.clevels = clevels(s.data, **kwargs)
-        c = ax.contourf(s.x.coords, s.y.coords, s.data, s.clevels, linewidths=lw,
-                        alpha=alpha)
+        if z.clevels is None:
+            z.clevels = clevels(z.data, **kwargs)
+        c = source.ax.contourf(x.coords, y.coords, z.data,
+                               z.clevels,
+                               linewidths=lw, alpha=alpha)
         c.set_cmap(cmap)
         c.set_norm(norm)
 
@@ -252,38 +208,43 @@ def plot_2D(source, **kwargs):
         color = kwargs.get('color', 'colormap')
 
         if not isinstance(step, str):
-            showed = np.arange(s.y[0], s.y[-1], float(step))
-            ishowed = np.searchsorted(s.y, showed, 'left')
+            showed = np.arange(y[0], y[-1], float(step))
+            ishowed = np.searchsorted(y, showed, 'left')
         elif step == 'all':
             ishowed = slice(None)
         else:
             raise ValueError(
                     'step parameter was not recognized. Should be: an int, "all"')
 
-        s = s[ishowed]
+        z = z[ishowed]
 
         # now plot the collection of lines
         #---------------------------------
         if color == None:
             # very basic plot (likely the faster)
             # use the matplotlib color cycler
-            ax.plot(s.x.coords, s.data, lw=lw )
+            source.ax.plot(x.coords, z.data, lw=lw )
 
         elif color != 'colormap':
             # just add a color to the line (the same for all)
-            ax.plot(s.x.coords, s.data, c=color, lw=lw)
+            source.ax.plot(x.coords, z.data, c=color, lw=lw)
 
         elif color == 'colormap':
             # here we map the color of each line to the colormap
+            # according to the y axis values
+            #if not source._updateplot:
+            ylim = kwargs.get("ylim", None)
+
             if ylim is not None:
                 vmin, vmax = ylim
             else:
-                vmin, vmax = s.y.coords[0], s.y.coords[-1]
+                vmin, vmax = y.coords[0], y.coords[-1]
             norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)  # we normalize to the max time
             if normalize is not None:
                 norm.vmax = normalize
 
-            sp = s.sort(inplace=False)
+            sp = z.sort(inplace=False)
+
             ys = [sp.data[i] for i in range(len(sp.y.coords))]
             sc = sp.y.coords
 
@@ -299,20 +260,23 @@ def plot_2D(source, **kwargs):
             line_segments.set_cmap(colormap)
             line_segments.set_norm(norm)
 
-            ax.add_collection(line_segments)
+            source.ax.add_collection(line_segments)
 
     if data_only:
         # if data only (we will  ot set axes and labels
-        # it was probably done already in a previuos plot
-        source.plot_resume(**kwargs)
+        # it was probably done already in a previous plot
+        source._plot_resume(**kwargs)
         return True
 
     # -------------------------------------------------------------------------
     # axis limits and labels
     # -------------------------------------------------------------------------
+    xlim = kwargs.get("xlim", None)
+    ylim = kwargs.get("ylim", None)
+    zlim = kwargs.get("zlim", None)
 
     # abscissa limits?
-    xl = [s.x.coords[0], s.x.coords[-1]]
+    xl = [x.coords[0], x.coords[-1]]
     xl.sort()
     xlim = list(kwargs.get('xlim', xl))
     xlim.sort()
@@ -321,12 +285,12 @@ def plot_2D(source, **kwargs):
 
     # reversed x axis?
     #-----------------
-    if kwargs.get('x_reverse', s.x.is_reversed):
+    if kwargs.get('x_reverse', x.is_reversed):
         xlim.reverse()
 
     # set the limits
     #---------------
-    ax.set_xlim(xlim)
+    source.ax.set_xlim(xlim)
 
     # ordinates limits?
     #------------------
@@ -342,25 +306,25 @@ def plot_2D(source, **kwargs):
 
         # set the limits
         #---------------
-        ax.set_ylim(zlim)
+        source.ax.set_ylim(zlim)
 
     else:
         # the y axis info
         #----------------
-        ylim = list(kwargs.get('ylim', ax.get_ylim()))
+        ylim = list(kwargs.get('ylim', source.ax.get_ylim()))
         ylim.sort()
-        y_reverse = kwargs.get('y_reverse', s.y.is_reversed)
+        y_reverse = kwargs.get('y_reverse', y.is_reversed)
         if y_reverse:
             ylim.reverse()
 
         # set the limits
         #----------------
-        ax.set_ylim(ylim)
+        source.ax.set_ylim(ylim)
 
     number_x_labels = plotoptions.number_of_x_labels
     number_y_labels = plotoptions.number_of_y_labels
-    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    source.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+    source.ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
 
     # -------------------------------------------------------------------------
     # labels
@@ -370,54 +334,50 @@ def plot_2D(source, **kwargs):
     # -------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        xlabel = make_label(s.x, 'x')
-    ax.set_xlabel(xlabel)
+        xlabel = make_label(x, 'x')
+    source.ax.set_xlabel(xlabel)
 
     # y label
     # --------
     ylabel = kwargs.get("ylabel", None)
     if not ylabel:
-        ylabel = make_label(s.y, 'y')
+        ylabel = make_label(y, 'y')
 
     # z label
     # --------
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
-        zlabel = make_label(s, 'z')
+        zlabel = make_label(z, 'z')
 
 
     # do we display the ordinate axis?
     if kwargs.get('show_y', True):
         if kind not in ['stack']:
-            ax.set_ylabel(ylabel)
+            source.ax.set_ylabel(ylabel)
         else:
-            ax.set_ylabel(zlabel)
+            source.ax.set_ylabel(zlabel)
     else:
-        ax.set_yticks([])
+        source.ax.set_yticks([])
 
     if colorbar:
 
-        #fig = plt.gcf()
-
         if kind in ['stack']:
-            axcb = s.fig.colorbar(line_segments, ax=ax)
-            axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5))
-            axcb.set_label(ylabel)
+            source._axcb = source.fig.colorbar(line_segments, ax=source.ax)
+            source._axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5))
+            source._axcb.set_label(ylabel)
         else:
-            if not s.axcb:
-                s.axcb = mpl.colorbar.ColorbarBase(s.axec, cmap=cmap, norm=norm)
-                s.axcb.set_label(zlabel)
+            if not source._axcb:
+                source._axcb = axcb = mpl.colorbar.ColorbarBase(source.axec, cmap=cmap, norm=norm)
+                source._axcb.set_label(zlabel)
             pass
-
-
 
     # do we display the zero line
     if kwargs.get('show_zero', False):
-        ax.haxlines()
+        source.ax.haxlines()
 
-    source.plot_resume(**kwargs)
+    source._plot_resume(**kwargs)
 
-    return ax
+    return source.ax
 
 
 # ===========================================================================

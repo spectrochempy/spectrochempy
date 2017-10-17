@@ -35,22 +35,31 @@
 # =============================================================================
 import pytest
 
+from spectrochempy.api import plotoptions, figure, show
 from tests.utils import show_do_not_block
-from spectrochempy.api import plotoptions
+
 import matplotlib as mpl
 
 @show_do_not_block
 def test_plot_generic(IR_source_1):
     source = IR_source_1.copy()
+    figure()
     source.plot()
-    print()
+    show()
 
 @show_do_not_block
 def test_plot_generic_1D(IR_source_1):
     source = IR_source_1[0].copy()
+
+    figure()
     source.plot()
+    show()
+
     assert mpl.rcParams['figure.figsize']==[6.8,4.4]
+    figure()
     source.plot(style='sans')
+    show()
+
     assert mpl.rcParams['font.family'] == ['sans-serif']
 
 
@@ -58,36 +67,51 @@ def test_plot_generic_1D(IR_source_1):
 def test_plot_2D(IR_source_1):
 
     source = IR_source_1.copy()
+
+    figure()
     source.plot_2D()
 
     source = IR_source_1.copy()
+    figure()
     source.plot_2D(kind='map')
 
     source = IR_source_1.copy()
+    figure()
     source.plot_2D(kind='image')
 
     source = IR_source_1.copy()
+    figure()
     source.plot_2D(kind='stack')
+    show()
+    pass
 
 @show_do_not_block
 def test_plot_map(IR_source_1):
 
+    figure()
     source = IR_source_1.copy()
     source.plot_map()  # plot_map is an alias of plot_2D
+    show()
 
 @show_do_not_block
 def test_plot_image(IR_source_1):
 
     source = IR_source_1.copy()
+    figure()
     source.plot_image(start=0.1)  # plot_image is an alias of plot_2D
+    show()
 
 @show_do_not_block
 def test_plot_stack(IR_source_1):
 
     source = IR_source_1.copy()
+    figure()
     source.plot_stack()  # plot_map is an alias of plot_2D
+    show()
 
 @show_do_not_block
 def test_plot_stack_generic(IR_source_1):
     source = IR_source_1.copy()
+    figure()
     source.plot(kind='stack')
+    show()

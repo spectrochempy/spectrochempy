@@ -51,10 +51,11 @@ _methods = __all__[:]
 
 def plot_1D(source, **kwargs):
     """
+    Plot of one-dimensional data
 
     Parameters
     ----------
-    source : :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
+    source: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
     reverse: `bool` [optional, default=`True`]
 
@@ -154,7 +155,7 @@ def plot_1D(source, **kwargs):
     # where to plot?
     #---------------
 
-    fig, ax, _, _, _ = source._figure_setup(**kwargs)
+    source._figure_setup(**kwargs)
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -165,19 +166,21 @@ def plot_1D(source, **kwargs):
 
     # ordinates (by default we plot real part of the data)
     if not kwargs.get('imag', False) or kwargs.get('show_complex', False):
-        y = source.real()
+        z = source.real()
     else:
-        y = source.imag()
+        z = source.imag()
 
     # offset
     offset = kwargs.get('offset', 0.0)
-    y = y - offset
+    z = z - offset
 
     # plot
-    line, = ax.plot(x.coords, y.data)
+    line, = source.ax.plot(x.coords, z.data)
+
+
     if kwargs.get('show_complex', False):
-        yimag = source.imag()
-        lineimag, = ax.plot(x.coords, yimag.data, ls='--')
+        zimag = source.imag()
+        lineimag, = source.ax.plot(x.coords, zimag.data, ls='--')
 
     # line attributes
     c = kwargs.get('color', kwargs.get('c'))
@@ -192,8 +195,8 @@ def plot_1D(source, **kwargs):
 
     if kwargs.get('data_only', False):
         # if data only (we will  ot set axes and labels
-        # it was probably done already in a previuos plot
-        source.plot_resume(**kwargs)
+        # it was probably done already in a previous plot
+        source._plot_resume(**kwargs)
         return True
 
     # -------------------------------------------------------------------------
@@ -213,19 +216,19 @@ def plot_1D(source, **kwargs):
         xlim.reverse()
 
     # ordinates limits?
-    zl = [np.amin(y.data), np.amax(y.data)]
-    zlim = list(kwargs.get('zlim',zl))
+    zl = [np.amin(z.data), np.amax(z.data)]
+    zlim = list(kwargs.get('zlim',kwargs.get('ylim',zl)))
     zlim.sort()
 
     # set the limits
-    ax.set_xlim(xlim)
-    ax.set_ylim(zlim)
+    source.ax.set_xlim(xlim)
+    source.ax.set_ylim(zlim)
 
     number_x_labels = plotoptions.number_of_x_labels # get from config
     number_y_labels = plotoptions.number_of_y_labels
 
-    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    source.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+    source.ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
 
     # -------------------------------------------------------------------------
     # labels
@@ -236,25 +239,25 @@ def plot_1D(source, **kwargs):
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
         xlabel = make_label(source.x, 'x')
-    ax.set_xlabel(xlabel)
+    source.ax.set_xlabel(xlabel)
 
     # z label
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         zlabel = make_label(source, 'z')
 
-    ax.set_ylabel(zlabel)
+    source.ax.set_ylabel(zlabel)
 
     # do we display the ordinate axis?
     if kwargs.get('show_z', True):
-        ax.set_ylabel(zlabel)
+        source.ax.set_ylabel(zlabel)
     else:
-        ax.set_yticks([])
+        source.ax.set_yticks([])
 
     # do we display the zero line
     if kwargs.get('show_zero', False):
-        ax.haxlines()
+        source.ax.haxlines()
 
-    ax = source.plot_resume(**kwargs)
+    source._plot_resume(**kwargs)
 
     return True

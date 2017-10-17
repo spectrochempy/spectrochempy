@@ -38,10 +38,13 @@
 """ Tests for the svd module
 
 """
-from spectrochempy.api import Svd
+from spectrochempy.api import Svd, figure, show
+from tests.utils import show_do_not_block
 
 # test svd
 #-----------
+
+@show_do_not_block
 def test_svd(IR_source_1):
 
     source = IR_source_1.copy()
@@ -53,7 +56,9 @@ def test_svd(IR_source_1):
     print(svd.ev_cum)
     print(svd.ev_ratio)
 
+    figure()
     svd.Vt[:10].plot()
+    show()
 
 
 

@@ -750,12 +750,21 @@ class NDDataset(
         else:
             new = self
 
+        if self.ndim < 2:  # cannot transpose 1D data
+            return new
+
         if axes is None:
             axes = range(self.ndim - 1, -1, -1)
 
         new._data = np.transpose(new._data, axes)
+        new._mask = np.transpose(new._mask, axes)
+        new._uncertainty = np.transpose(new._uncertainty, axes)
+
         new._axes._transpose(axes)
         new._is_complex = [new._is_complex[axis] for axis in axes]
+
+        #TODO: Add transpose of meta
+
         return new
 
     def swapaxes(self, axis1, axis2, inplace=False):
@@ -788,10 +797,14 @@ class NDDataset(
         :meth:`transpose`
 
         """
+
         if not inplace:
             new = self.copy()
         else:
             new = self
+
+        if self.ndim < 2:  # cannot swap axe for 1D data
+            return new
 
         if axis1 == -1:
             axis1 = self.ndim - 1
@@ -800,13 +813,20 @@ class NDDataset(
             axis2 = self.ndim - 1
 
         new._data = np.swapaxes(new._data, axis1, axis2)
+        new._mask = np.swapaxes(new._mask, axis1, axis2)
+        new._uncertainty = np.swapaxes(new._uncertainty, axis1, axis2)
+
         if new._axes:
             new._axes[axis1], new._axes[axis2] = \
                 new._axes[axis2], new._axes[axis1]
         new._is_complex[axis1], new._is_complex[axis2] = \
             new._is_complex[axis2], new._is_complex[axis1]
 
+        new._meta = new._meta.swapaxes(axis1, axis2, inplace=False)
+
+
         return new
+
 
     def sort(self, axis=0, pos=None, by='axis', descend=False, inplace=False):
         """
@@ -876,7 +896,7 @@ class NDDataset(
         ----------
         axis : `int` , optional, default = -1
 
-            The axis along which the angle should be calculated
+            The axis along which the real part should be calculated
 
         Returns
         -------
@@ -894,8 +914,8 @@ class NDDataset(
             return new
         new.swapaxes(-1, axis, inplace=True)
         new._data = new._data[..., ::2]
-        new._is_complex[axis] = False
         new.swapaxes(-1, axis, inplace=True)
+        new._is_complex[axis] = False
         return new
 
     def imag(self, axis=-1):
@@ -908,7 +928,7 @@ class NDDataset(
         ----------
         axis : `int` , optional
 
-            The axis along which the angle should be calculated.
+            The axis along which the imag part should be calculated.
 
         Returns
         -------
@@ -930,8 +950,8 @@ class NDDataset(
 
         new.swapaxes(-1, axis, inplace=True)
         new._data = new._data[..., 1::2]
-        new._is_complex[axis] = False
         new.swapaxes(-1, axis, inplace=True)
+        new._is_complex[axis] = False
         return new
 
     def conj(self, axis=-1):
@@ -1038,7 +1058,7 @@ class NDDataset(
     # -------------------------------------------------------------------------
 
     def __dir__(self):
-        return ['data', 'mask', 'units', 'uncertainty',
+        return NDIO().__dir__() + ['data', 'mask', 'units', 'uncertainty',
                 'meta', 'name', 'title', 'is_complex',
                 'axes', 'description', 'history', 'date', 'modified'
                 ]

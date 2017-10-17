@@ -47,6 +47,7 @@ from tests.utils import (assert_equal, assert_array_equal,
 
 
 from spectrochempy.api import *
+from spectrochempy.api import figure, show
 from spectrochempy.utils import SpectroChemPyWarning
 
 
@@ -54,34 +55,60 @@ from spectrochempy.utils import SpectroChemPyWarning
 #-----------------------------
 @show_do_not_block
 def test_nmr_1D_show(NMR_source_1D):
-    # display testing
-
     source = NMR_source_1D.copy()
+    figure()
     ax1 = source.plot()
+    assert ax1 is not None
+    assert source.is_complex[-1]
+    show()
     pass
 
 @show_do_not_block
 def test_nmr_1D_show_hold(NMR_source_1D):
-    # display testing
-
     source = NMR_source_1D.copy()
-    ax1 = source.plot()
-
-    # perform some analysis
-    assert source.is_complex[-1]
-
+    figure()
     # test if we can plot on the same figure
-    source.plot(hold=True, xlim=(0.,25000.))
+    source.plot(xlim=(0.,25000.))
     # we want to superpose a second spectrum
-    ax2 = source.plot(imag=True, data_only=True)
+    source.plot(imag=True, data_only=True)
+    show()
 
+@show_do_not_block
+def test_nmr_1D_show_dualdisplay(NMR_source_1D):
+    source = NMR_source_1D.copy()
+    # test if we can plot on the same figure
+    source.plot(xlim=(0.,25000.))
+    source.em(lb=100. * ur.Hz)
+    # we want to superpose a second spectrum
+    source.plot()
+    show()
+
+    figure()
+    source.plot()
+    show()
+
+@show_do_not_block
+def test_nmr_1D_show_dualdisplay_apodfun(NMR_source_1D):
+    source = NMR_source_1D.copy()
+    figure()
+    # test if we can plot on the same figure
+    source.plot(xlim=(0.,25000.))
+    # we want to superpose a second spectrum wich is the apodization function
+    LB = 80 * ur.Hz
+    source.em(lb=LB)
+    source.plot(data_only=True)
+    # display the apodization function
+    apodfun = source.em(lb=LB, apply=False)
+    apodfun.plot(data_only=True)
+    show()
 
 @show_do_not_block
 def test_nmr_1D_show_complex(NMR_source_1D):
     # display the real and complex at the same time
     source = NMR_source_1D.copy()
     source.plot(show_complex=True, color='green',
-                xlim=(0.,3000.), zlim=(-2.,2.))
+                xlim=(0.,30000.), zlim=(-2.,2.))
+    show()
 
 def test_nmr_em_nothing_calculated(NMR_source_1D_1H):
     # em without parameters
@@ -99,12 +126,16 @@ def test_nmr_em_calculated_notapplied(NMR_source_1D_1H):
 
     lb = 100
     arr = source.em(lb=lb, apply=False)
+    assert isinstance(arr, NDDataset)
+
     # here we assume it is 100 Hz
     x = source.axes[-1]
     tc = (1./(lb * ur.Hz)).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
-    assert_equal(arr, arrcalc)
+
+    assert_equal(arr.real().data, arrcalc)  # note that we have to compare
+    # to the real part data because of the complex nature of the data
 
 def test_nmr_em_calculated_applied(NMR_source_1D_1H):
     # em calculated and applied
@@ -112,6 +143,7 @@ def test_nmr_em_calculated_applied(NMR_source_1D_1H):
 
     lb = 100
     arr = source.em(lb=lb, apply=False)
+
     # here we assume it is 100 Hz
     x = source.axes[-1]
     tc = (1. / (lb * ur.Hz)).to(x.units)
@@ -138,7 +170,7 @@ def test_nmr_em_calculated_Hz(NMR_source_1D_1H):
     arrcalc = np.exp(-e.data)
 
     source2 = source.copy()
-    source3 = source.em(lb=lb)
+    source3 = source.em(lb=lb, inplace=False)
 
     # the sources should be equal
     assert(source3 == arrcalc*source2)
@@ -157,7 +189,7 @@ def test_nmr_em_calculated_inplace(NMR_source_1D_1H):
     arrcalc = np.exp(-e.data)
 
     source2 = source.copy()
-    source.em(lb=lb, inplace=True)  # inplace transformation
+    source.em(lb=lb)  # inplace transformation
 
     # the sources data array should be equal
     s = arrcalc * source2
@@ -172,39 +204,41 @@ def test_nmr_1D_em_(NMR_source_1D_1H):
 
     source = NMR_source_1D_1H.copy()
 
-    source.plot(hold=True, xlim=(0.,6000.))
+    source.plot(xlim=(0.,6000.))
 
-    source.em(lb=100.*ur.Hz, inplace=True)
-
-    source.plot(data_only=True, hold=True)
-
-    # successive call
-    source.em(lb=200. * ur.Hz, inplace=True)
+    source.em(lb=100.*ur.Hz)
 
     source.plot(data_only=True)
 
+    # successive call
+    source.em(lb=200. * ur.Hz)
+
+    source.plot(data_only=True)
+
+    show()
 
 @show_do_not_block
 def test_nmr_1D_em_with_no_kw_lb_parameters(NMR_source_1D_1H):
 
     source = NMR_source_1D_1H.copy()
 
-    source.plot(hold=True)
+    source.plot()
     source.em(100.*ur.Hz, inplace=True)
     source.plot()
+    show()
 
 @show_do_not_block
-def test_nmr_1D_em_not_inplace(NMR_source_1D_1H):
+def test_nmr_1D_em_inplace(NMR_source_1D_1H):
     source = NMR_source_1D_1H.copy()
 
-    source.plot(hold=True)
+    source.plot()
     source1 = source.em(lb=100. * ur.Hz)
-    assert source1 is not source # not inplace transform by default
+    assert source1 is source # inplace transform by default
     try:
-        assert_array_equal(source1.data, source.data)  # not inplace transform by default
+        assert_array_equal(source1.data, source.data)
     except AssertionError:
         pass
-    #source1.plot()
+    show()
 
 @show_do_not_block
 def test_nmr_1D_gm(NMR_source_1D_1H):
@@ -212,12 +246,12 @@ def test_nmr_1D_gm(NMR_source_1D_1H):
     # first test gm
     source = NMR_source_1D_1H.copy()
 
-    source.plot(hold=True, xlim=(0.,6000.))
+    source.plot(xlim=(0.,6000.))
 
-    source.gm(lb=100.*ur.Hz, gb=100.*ur.Hz, inplace=True)
+    source.gm(lb=100.*ur.Hz, gb=100.*ur.Hz)
 
     source.plot()
-
+    show()
 
 # def test_zf():
 #     td = source1.meta.td[-1]
@@ -234,36 +268,41 @@ def test_nmr_1D_gm(NMR_source_1D_1H):
 @show_do_not_block
 def test_nmr_2D(NMR_source_2D):
 
+    figure()
     source = NMR_source_2D
     source.plot()
+    show()
+    pass
 
 @show_do_not_block
 def test_nmr_2D_imag(NMR_source_2D):
 
-    source = NMR_source_2D
-    source.imag().plot()
+    #plt.ion()
+    figure()
+    source = NMR_source_2D.copy()
+    source.plot()
+    source.plot(imag=True, cmap='jet', data_only=True)
+                                # better not to replot a second colorbar
+    show()
+    pass
 
 @show_do_not_block
 def test_nmr_2D_hold(NMR_source_2D):
 
     source = NMR_source_2D
-    source.plot(hold=True)
-    source.imag().plot()
+    figure()
+    source.plot()
+    source.imag().plot(cmap='jet', data_only=True)
+    show()
+    pass
 
-#@show_do_not_block
+@show_do_not_block
 def test_nmr_2D_em_(NMR_source_2D):
-
+    figure()
     source = NMR_source_2D.copy()
-
-    source.plot(hold=True)
-
-    #source.em(lb=10.*ur.Hz, inplace=True)
-
-    #source.plot()
-
-    # call on axis 0
-    #source.em(lb=10000. * ur.Hz, axis=0, inplace=True)
-
-    source.plot(data_only=True)
-
+    source.plot()
+    source.em(lb=20.*ur.Hz)
+    source.em(lb=10. * ur.Hz, axis=0)
+    source.plot(cmap='copper',data_only=True)
+    show()
     pass

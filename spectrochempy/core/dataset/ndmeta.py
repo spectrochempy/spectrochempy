@@ -47,9 +47,10 @@ elements can be accessed by key, but also by attributes, *e.g.*
 """
 
 from traitlets import HasTraits, Dict, Bool, default
+import numpy as np
 
 from spectrochempy.application import log
-
+from spectrochempy.utils import is_sequence
 
 # contants
 # ----------
@@ -262,3 +263,22 @@ class Meta(object): #HasTraits):
 
         """
         return [(key, self[key]) for key in self]
+
+    def swapaxes(self, axis1, axis2, inplace = True):
+
+        if not inplace:
+            newmeta = self.copy()
+        else:
+            newmeta = self
+
+        newmeta.readonly = False
+        for key in self:
+            if is_sequence(self[key]) and len(self[key])>1:
+                X = newmeta[key]
+                X[axis1], X[axis2] = X[axis2], X[axis1]
+            else:
+                newmeta[key] = self[key]
+
+        newmeta.readonly = self.readonly
+        if not inplace:
+            return newmeta

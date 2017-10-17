@@ -54,7 +54,7 @@ def interleave(data):
     iscomplex : is the data are really complex it is set to true
 
     """
-    if np.any(np.iscomplex(data)):
+    if np.any(np.iscomplex(data)) or data.dtype == np.complex:
         # unpack (we must double the last dimension)
         newshape = list(data.shape)
         newshape[-1] *= 2

@@ -104,7 +104,7 @@ def apodize(source, **kwargs):
         Should we apply the calculated apodization to the dataset (default)
         or just return the apodization ndarray.
 
-    inplace : `bool`, optional, default = `False`
+    inplace : `bool`, optional, default = `True`
 
         Should we make the transform in place or return a new dataset
 
@@ -117,17 +117,18 @@ def apodize(source, **kwargs):
 
     """
 
-    # output dataset
-    inplace = kwargs.pop('inplace', False)
+    # output dataset inplace (by default) or not
+    inplace = kwargs.pop('inplace', True )
+
+    # Do we apply the apodization or just return
+    # the apodization array
+    apply = kwargs.pop('apply', True)
+    inplace = inplace and apply # force inplace false if we do not apply
 
     if not inplace:
         new = source.copy()  # copy to be sure not to modify this dataset
     else:
         new = source
-
-    # Do we apply the apodization or just return
-    # the apodization array
-    apply = kwargs.pop('apply', True)
 
     # On which axis do we want to apodize?
     axis = kwargs.pop('axis', -1)
@@ -144,7 +145,7 @@ def apodize(source, **kwargs):
 
     swaped = False
     if axis != -1:
-        new = new.swapaxes(axis, -1)
+        new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
     lastaxe = new.axes[-1]
@@ -169,12 +170,11 @@ def apodize(source, **kwargs):
     # if no parameter passed
     if np.abs(apod.magnitude) <= epsilon and np.abs(apod2.magnitude) <= epsilon:
         # nothing to do
-        if apply:
-            return source
-        else:
+        if not apply:
             # we have to return something as an array of one,
             # as nothing is calculated
-            return np.ones_like(source.data)
+            new.data = np.ones_like(new.data)
+        return new
 
     # create the args list
     args = []
@@ -218,8 +218,8 @@ def apodize(source, **kwargs):
         apod_arr  = 1. / apod_arr  # invert apodization
 
     # apply?
-    if not apply:
-        return apod_arr
+    #if not apply:
+    #    return apod_arr
 
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
@@ -230,14 +230,19 @@ def apodize(source, **kwargs):
 
     if iscomplex:
         data = interleaved2complex(new.data)
+        if not apply:
+            data = np.ones_like(data)+0j
         data, _ = interleave(data * apod_arr)
         new._data = data
     else:
-        new = new * apod_arr
+        data = new.data
+        if not apply:
+            data = np.ones_like(data).astype(new.data.dtype)
+        new._data = data * apod_arr
 
     # restore original data order if it was swaped
     if swaped:
-        new = new.swapaxes(axis, -1)
+        new.swapaxes(axis, -1, inplace=True)  # must be done inplace
 
     if apply:
         name = kwargs.pop('method_name', 'em')

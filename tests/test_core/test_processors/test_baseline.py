@@ -34,28 +34,37 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from spectrochempy.api import NDDataset
+from spectrochempy.api import NDDataset, figure, show
+from tests.utils import show_do_not_block
 
 import pytest
 import os
 
 path = os.path.dirname(os.path.abspath(__file__))
 
+@show_do_not_block
 def test_basecor_sequential(IR_source_1):
 
     source = IR_source_1[:5]
 
     s = source.copy().basecor([6000.,3500.],[1800.,1500.], [10 , 0])
-    s.plot()
 
+    figure()
+    s.plot()
+    show()
+
+@show_do_not_block
 def test_basecor_sequential_pchip(IR_source_1):
 
     source = IR_source_1[:5]
 
     s = source.copy().basecor([6000., 3500.], [1800., 1500.], [10 , 0], #last range is defined in point
                               interpolation='pchip')
+    figure()
     s.plot()
+    show()
 
+@show_do_not_block
 def test_basecor_multivariate(IR_source_1):
 
     source = IR_source_1[:5]
@@ -63,8 +72,11 @@ def test_basecor_multivariate(IR_source_1):
     s = source.copy().basecor([6000., 3500.], [1800., 1500.],
                               method='multivariate',
                               interpolation='polynomial')
+    figure()
     s.plot()
+    show()
 
+@show_do_not_block
 def test_basecor_multivariate_pchip(IR_source_1):
 
     source = IR_source_1[:5]
@@ -72,4 +84,6 @@ def test_basecor_multivariate_pchip(IR_source_1):
     s = source.copy().basecor([6000., 3500.], [1800., 1500.],
                               method='multivariate',
                               interpolation='pchip')
+    figure()
     s.plot()
+    show()

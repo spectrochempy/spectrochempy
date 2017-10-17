@@ -389,8 +389,8 @@ def test_ndarray_swapaxes(nd1d, nd2d):
 
     # swapaxes needs 2D at least
     assert nd1.shape == (4,)
-    with raises(ValueError):
-        nd1s = nd1.swapaxes(1, 0)
+    nd1s = nd1.swapaxes(1, 0)
+    assert_equal(nd1s.data,nd1.data)
 
     assert nd2.shape == (2, 4)
     nd2s = nd2.swapaxes(1, 0)
@@ -408,6 +408,7 @@ def test_ndarray_swapaxes(nd1d, nd2d):
     assert nd2s.shape == (2, 4)
     assert nd2s is not nd2
 
+    #TODO: add check for swaping of all elements of a dataset such as meta
 
 def test_set_axes_parameters_at_init():
     dx = np.random.random((10, 10, 10))

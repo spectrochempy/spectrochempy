@@ -55,10 +55,12 @@ from traitlets import Unicode, Bool, HasTraits, Instance, observe, default
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.pyplot import Figure, Axes as Ax  # change the name to avoid
+from matplotlib.pyplot import isinteractive, Figure, Axes as Ax
+                                                  # change the name to avoid
                                                   # collisions with
-                                                  # spectrochmepy Axes objets
+                                                  # spectrochempy Axes objets
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from spectrochempy.utils import is_kernel
 
 import numpy as np
 from numpy.compat import asbytes, asstr, asbytes_nested, bytes, \
@@ -83,6 +85,10 @@ from spectrochempy.application import options
 # ---------
 
 __all__ = ['NDIO',
+
+           'curfig',
+           'show',
+           'figure',
 
            'plot',
            'load',
@@ -498,9 +504,6 @@ class NDIO(HasTraits):
         return ['notebook','paper','poster','talk', 'sans']
 
 
-    hold = Bool(False, help='Do we clear old figure? Default : True')
-
-
     def plot(self, **kwargs):
 
         """
@@ -567,9 +570,130 @@ class NDIO(HasTraits):
         if not _plotter(**kwargs):
             return None
 
-        return self.ax
+        return self._ax
 
-    def plot_resume(self, **kwargs):
+    # --------------------------------------------------------------------------
+    # setup figure properties
+    # --------------------------------------------------------------------------
+    def _figure_setup(self, ndim=1, **kwargs):
+
+        # set temporarity a new style if any
+        # ----------------------------------
+        plt.style.use('classic')
+        plt.style.use(plotoptions.style)
+        style = kwargs.pop('style', None)
+
+        if style:
+            if not is_sequence(style):
+                style = [style]
+            if isinstance(style, dict):
+                style = [style]
+            style = [plotoptions.style]+list(style)
+            plt.style.use(style)
+
+        # size of the figure and other properties
+        # ---------------------------------------
+        self._figsize = mpl.rcParams['figure.figsize'] = \
+            kwargs.pop('figsize', mpl.rcParams['figure.figsize'])
+
+        fontsize = mpl.rcParams['font.size'] = \
+            kwargs.pop('fontsize', mpl.rcParams['font.size'])
+        mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
+        mpl.rcParams['xtick.labelsize'] = int(fontsize)
+        mpl.rcParams['ytick.labelsize'] = int(fontsize)
+
+        # Get current figure information
+        # ------------------------------
+        #if (self._fig is None and self._ax is None):
+        if curfig() is None:
+            self._updateplot = False # the figure doesn't yet exists.
+            self._fignum = kwargs.pop('fignum', None) # self._fignum)
+            # if no figure present, then create one with the fignum number
+            self._fig = fig = plt.figure(self._fignum, figsize=self._figsize)
+            self._ax = self._fig.gca()
+        else:
+            self._updateplot = True #fig exist: updateplot
+            self._fig = curfig()
+            if ndim > 1 and self._fig.get_axes():
+                self._ax, self._axec = self._fig.get_axes()
+
+            else:
+                self._ax = self._fig.gca()
+
+        #elif self._ax is not None:
+        #    self._fig = fig = self._ax.figure
+
+        # Get the number of the present figure
+        self._fignum = self._fig.number
+
+        if ndim == 2:
+            # TODO: also the case of 3D
+
+            # show projections (only useful for maps)
+            # ---------------------------------------
+
+            colorbar = kwargs.get('colorbar', True)
+
+            proj = kwargs.get('proj', plotoptions.show_projections)
+            # TODO: tell the axis by title.
+
+            xproj = kwargs.get('xproj', plotoptions.show_projection_x)
+
+            yproj = kwargs.get('yproj', plotoptions.show_projection_y)
+
+            kind = kwargs.get('kind', plotoptions.kind_2D)
+
+
+
+
+
+        # for generic plot, we assume only a single axe with possible projections
+        # and colobar
+        #
+        # other plot class may take care of other needs
+
+        ax = self._ax
+
+        if ndim==2 and kind in ['map', 'image'] and self._divider is None:
+            # create new axes on the right and on the top of the current axes
+            # The first argument of the new_vertical(new_horizontal) method is
+            # the height (width) of the axes to be created in inches.
+            #
+            # This is necessary for projections and colorbar
+
+            self._divider = divider = make_axes_locatable(ax)
+            # print divider.append_axes.__doc__
+
+            if proj or xproj:
+                axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
+                                           frameon=0, yticks=[])
+                axex.tick_params(bottom='off', top='off')
+                plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
+                         visible=False)
+                self._axex = axex
+
+            if proj or yproj:
+                axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
+                                           frameon=0, xticks=[])
+                axey.tick_params(right='off', left='off')
+                plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
+                         visible=False)
+                self._axey = axey
+
+            if colorbar:
+                axec = divider.append_axes("right", .15, pad=0.3, frameon=0,
+                                           xticks=[], yticks=[])
+                axec.tick_params(right='off', left='off')
+                #plt.setp(axec.get_xticklabels(), visible=False)
+
+                self._axec = axec
+
+        return
+
+    # --------------------------------------------------------------------------
+    # resume the plot
+    # --------------------------------------------------------------------------
+    def _plot_resume(self, **kwargs):
 
         # Additional matplotlib commands on the current plot
         # ----------------------------------------------------------------------
@@ -605,31 +729,10 @@ class NDIO(HasTraits):
         # should be after all plot commands
         savename = kwargs.get('savefig', None)
         if savename is not None:
-            self.fig.savefig(savename)
+            self._fig.savefig(savename)
 
-        self.hold = kwargs.get('hold', False)
-
-        if not plotoptions.do_not_block and not self.hold:
-            # if hold we do not show the figure because we will use it again
-            # for a next plot
-            self.show()
-
-            self.fig = None
-            self.ax = None
-            self.axec = None
-            self.axex = None
-            self.axey = None
-
-        elif plotoptions.do_not_block:
-            # we are testing of something similar
-
-            self.fig = None
-            self.ax = None
-            self.axec = None
-            self.axex = None
-            self.axey = None
-
-        return self.ax
+        # if not plotoptions.do_not_block:
+        plt.draw()
 
     def plot_generic(self, **kwargs):
         """
@@ -669,125 +772,14 @@ class NDIO(HasTraits):
             log.error('Cannot guess an adequate plotter. I did nothing!')
             return False
 
+        self._ax = temp._ax
+        self._axec = temp._axec
+        self._axex = temp._axex
+        self._axey = temp._axey
+        self._fig = temp._fig
+        self._fignum = temp._fignum
 
-
-        if kwargs.get('hold', False):
-            self.ax = temp.ax
-            self.axec = temp.axec
-            self.axex = temp.axex
-            self.axey = temp.axey
-            self.fig = temp.fig
-        else:
-            self.ax = None
-            self.axec = None
-            self.axex = None
-            self.axey = None
-            self.fig = None
-
-        return self.ax, self.axec, self.axex, self.axey
-
-    def show(self):
-        """
-        Method to force the `matplotlib` figure display
-
-        See Also
-        --------
-        :meth:`plot`
-
-        """
-        if hasattr(self, 'fig'):
-            plt.show()
-
-    def _figure_setup(self, ndim=1, **kwargs):
-
-        # setup figure properties
-
-        if ndim == 2:
-            # TODO: also the case of 3D
-
-            # show projections (only useful for maps)
-            # ---------------------------------------
-
-            colorbar = kwargs.get('colorbar', True)
-
-            proj = kwargs.get('proj', plotoptions.show_projections)
-            # TODO: tell the axis by title.
-
-            xproj = kwargs.get('xproj', plotoptions.show_projection_x)
-
-            yproj = kwargs.get('yproj', plotoptions.show_projection_y)
-
-            kind = kwargs.get('kind', plotoptions.kind_2D)
-
-        # set temporarity a new style if any
-        plt.style.use('classic')
-        plt.style.use(plotoptions.style)
-        style = kwargs.pop('style', None)
-        if style:
-            if not is_sequence(style):
-                style = [style]
-            if isinstance(style, dict):
-                style = [style]
-            style = [plotoptions.style]+list(style)
-            plt.style.use(style)
-
-        self._fignum = kwargs.pop('fignum', None)
-        self._figsize = mpl.rcParams['figure.figsize'] = \
-            kwargs.pop('figsize', mpl.rcParams['figure.figsize'])
-
-
-        fontsize = mpl.rcParams['font.size'] = \
-            kwargs.pop('fontsize', mpl.rcParams['font.size'])
-        #mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
-        #mpl.rcParams['xtick.labelsize'] = int(fontsize)
-        #mpl.rcParams['ytick.labelsize'] = int(fontsize)
-
-        fig = self.fig
-
-        # for generic plot, we assume only a single axe with possible projections
-        # and colobar
-        #
-        # other plot class may take care of other needs
-        ax = self.ax
-        axec = self.axec
-        axex = self.axex
-        axey = self.axey
-        divider = self._divider
-
-        if ndim==2 and kind in ['map', 'image'] and self._divider is None:
-            # create new axes on the right and on the top of the current axes
-            # The first argument of the new_vertical(new_horizontal) method is
-            # the height (width) of the axes to be created in inches.
-            #
-            # This is necessary for projections and colorbar
-
-            self._divider = divider = make_axes_locatable(ax)
-            # print divider.append_axes.__doc__
-
-            if proj or xproj:
-                axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
-                                           frameon=0, yticks=[])
-                axex.tick_params(bottom='off', top='off')
-                plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
-                         visible=False)
-                self._axex = axex
-
-            if proj or yproj:
-                axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
-                                           frameon=0, xticks=[])
-                axey.tick_params(right='off', left='off')
-                plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
-                         visible=False)
-                self._axey = axey
-
-            if colorbar:
-                axec = divider.append_axes("right", .15, pad=0.3, frameon=0,
-                                           xticks=[])
-                axec.tick_params(right='off', left='off')
-                plt.setp(axec.get_xticklabels(), visible=False)
-                self._axec = axec
-
-        return fig, ax, axec, axex, axey
+        return True # Everything was OK
 
     # -------------------------------------------------------------------------
     # Special attributes
@@ -813,6 +805,9 @@ class NDIO(HasTraits):
 
         return state
 
+    def __dir__(self):
+        return ['fignum','ax','axec','axex','axey','divider']
+
     # -------------------------------------------------------------------------
     # Properties
     # -------------------------------------------------------------------------
@@ -823,16 +818,15 @@ class NDIO(HasTraits):
         Matplotlib figure associated to this dataset
 
         """
-        if self._fignum is None and self._fig is not None:
-            # get the figure number of the current fig
-            self._fignum = self._fig.number
-        self._fig = fig = plt.figure(self._fignum, figsize=self._figsize)
-        return fig
+        return self._fig
 
-    @fig.setter
-    def fig(self, fig):
-        # property setter for fig
-        self._fig = fig
+    @property
+    def fignum(self):
+        """
+        Matplotlib figure associated to this dataset
+
+        """
+        return self._fignum
 
     @property
     def ax(self):
@@ -844,11 +838,6 @@ class NDIO(HasTraits):
             self._ax = self._fig.gca()
         return self._ax
 
-    @ax.setter
-    def ax(self, ax):
-        # property setter for ax
-        self._ax = ax
-
     @property
     def axec(self):
         """
@@ -856,11 +845,6 @@ class NDIO(HasTraits):
 
         """
         return self._axec
-
-    @axec.setter
-    def axec(self, axec):
-        # property setter for axec
-        self._axec = axec
 
     @property
     def axex(self):
@@ -870,11 +854,6 @@ class NDIO(HasTraits):
         """
         return self._axex
 
-    @axex.setter
-    def axex(self, axex):
-        # property setter for axex
-        self._axex = axex
-
     @property
     def axey(self):
         """
@@ -883,12 +862,32 @@ class NDIO(HasTraits):
         """
         return self._axey
 
-    @axey.setter
-    def axey(self, axey):
-        # property setter for axey
-        self._axey = axey
+    @property
+    def divider(self):
+        """
+        Matplotlib plot divider
+
+        """
+        return self._divider
+
+def curfig():
+    n = plt.get_fignums()
+    if not n:
+        return None
+    fig = plt.gcf()
+    return fig
+
+def show():
+    """
+    Method to force the `matplotlib` figure display
+
+    """
+    if not plotoptions.do_not_block or isinteractive():
+        if curfig():
+            plt.show()
 
 
+figure = plt.figure
 plot = NDIO.plot
 load = NDIO.load
 read = NDIO.read

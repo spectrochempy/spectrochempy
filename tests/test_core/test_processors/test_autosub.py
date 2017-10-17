@@ -43,11 +43,11 @@ import pandas as pd
 
 from pint import DimensionalityError
 from spectrochempy.api import (NDDataset, Axes, Axis,
-                                            AxisError, Meta, ur)
+                                            AxisError, Meta, ur, figure, show)
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
-                         raises)
+                         raises, show_do_not_block)
 
 
 import pytest
@@ -57,6 +57,7 @@ import os
 
 # autosub
 #------
+@show_do_not_block
 def test_autosub(IR_source_1):
 
     source = IR_source_1
@@ -66,8 +67,11 @@ def test_autosub(IR_source_1):
 
     s1 = source.copy()
     ref = s1[0]
+
+    figure()
     source.plot()
     ref.plot()
+
 
     s2 = source.copy()
 
@@ -76,12 +80,16 @@ def test_autosub(IR_source_1):
     assert np.round(s2.data[0,0],4) != 0.0000
     assert np.round(s3.data[0,0],4) == 0.0000
     s3.name="varfit"
+
+    figure()
     s3.plot()
 
     s4 = source.copy()
     s4.autosub(ref, *ranges, method='chi2', inplace=True)
     s4.name = "chi2, inplace"
     assert np.round(s4.data[0,0],4) == 0.0000
+
+    figure()
     s4.plot()  #true avoid blocking due to graphs
 
     s4 = source.copy()
@@ -90,5 +98,9 @@ def test_autosub(IR_source_1):
     assert np.round(s4.data[0, 0], 4) != 0.0000
     assert np.round(s.data[0, 0], 4) == 0.0000
     s.name = 'chi2 direct call'
-    s.plot()  #true avoid blocking due to graphs
+
+    figure()
+    s.plot()
+
+    show()
 
