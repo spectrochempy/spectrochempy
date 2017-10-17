@@ -35,9 +35,8 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-#
-
 """
+Module containing 1D plotting function(s)
 
 """
 import numpy as np
@@ -49,6 +48,10 @@ from spectrochempy.core.plotters.utils import make_label
 __all__ = ['plot_1D']
 _methods = __all__[:]
 
+
+# ------------------------------------------------------------------------------
+# plot_1D
+# ------------------------------------------------------------------------------
 def plot_1D(source, **kwargs):
     """
     Plot of one-dimensional data

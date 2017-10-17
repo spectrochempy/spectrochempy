@@ -368,6 +368,9 @@ def write_download_page():
     </ul>
 
     """.format(release, date_release, version, date_version)
+    
+#TODO: correct the above release... for know this information is missing
+
 
     with open(os.path.join(DOCDIR, 'source', '_templates', 'download.html'),
               "w") as f:

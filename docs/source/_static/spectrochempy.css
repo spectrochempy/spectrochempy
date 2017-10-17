@@ -40,9 +40,7 @@ th {
 }
 
 table.field-list th {
-    border-left-color:#AAAAAA !important;
-    border-left-style:solid !important;
-    border-left-width:1px !important;
+    border-left: 1px solid #AAAAAA !important;
     padding-left:5px;
 }
 

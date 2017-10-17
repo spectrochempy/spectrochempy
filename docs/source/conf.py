@@ -447,12 +447,11 @@ epub_copyright = copyright
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {}
-intersphinx_mapping['python'] = ('https://docs.python.org/3.5', None)
-intersphinx_mapping['pytest'] = ('http://pytest.org/latest/', None)
-intersphinx_mapping['ipython'] = (
-'http://ipython.readthedocs.org/en/stable/', None)
-intersphinx_mapping['numpy'] = ('http://docs.scipy.org/doc/numpy/', None)
+intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None),
+                       'pytest': ('http://pytest.org/latest/', None),
+                       'ipython': (
+                           'http://ipython.readthedocs.org/en/stable/', None),
+                       'numpy': ('http://docs.scipy.org/doc/numpy/', None)}
 
 
 def linkcode_resolve(domain, info):
