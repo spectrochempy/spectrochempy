@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2016 LCS
+# Copyright (©) 2015-2018 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 #
