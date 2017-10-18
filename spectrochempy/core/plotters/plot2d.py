@@ -161,11 +161,10 @@ def plot_2D(source, **kwargs):
 
     # ordinates (by default we plot real part of the data)
     if not kwargs.get('imag', False):
-        z = source.real()
+        z = source.RR()
     else:
-        z = source.imag()
+        z = source.IR()
 
-    # limit to to
     # abscissa axis
     x = source.x
 

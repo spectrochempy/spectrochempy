@@ -1094,11 +1094,6 @@ def test_ndarray_complex(ndcplx):
     assert ndr.size == nd.size
     assert ndr.is_complex == [False, False]
 
-    ndr = nd.real(axis=0)
-    assert_array_equal(ndr.data, nd.data)
-    assert ndr.size == nd.size
-    assert ndr.is_complex == [False, True]
-
 
 def test_create_from_complex_data():
     # 1D (complex)
@@ -1142,6 +1137,13 @@ def test_create_from_complex_data():
     assert nd.size == 4
     assert nd.data.shape == (4, 4)
     assert nd.shape == (2, 2)
+
+    # take real part
+    ndr = nd.real()
+    assert ndr.shape == (2,2)
+    assert ndr.is_complex == [False, False]
+    assert_equal (ndr.data,[[0,2],[0,2]])
+
     pass
 
 
@@ -1193,7 +1195,9 @@ def test_create_from_complex_data_with_units_and_uncertainties():
 
 def test_real_imag():
     na = np.array(
-            [[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j]])
+            [[1. + 2.j, 2. + 0j],
+             [1.3 + 2.j, 2. + 0.5j],
+             [1. + 4.2j, 2. + 3j]])
 
     nd = NDDataset(na)
 
@@ -1203,7 +1207,8 @@ def test_real_imag():
 
     # in another dimension
     with raises(ValueError):
-        nd.set_complex(axis=0)  # axis = 0 complex
+        nd.set_complex(axis=0)  # cannot be complex as the number of row
+        # doesn't match an even number
 
     na = np.array(
             [[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j],
@@ -1212,8 +1217,8 @@ def test_real_imag():
     nd = NDDataset(na)
     nd.set_complex(axis=0)
     assert nd.is_complex == [True, True]
-    assert_array_equal(nd.real(), na.real)
-    assert_array_equal(nd.imag(), na.imag)
+    assert_array_equal(nd.real(), na.real[::2,:])
+    assert_array_equal(nd.imag(), na.imag[::2,:])
 
     assert_array_equal(nd.real(-1), na.real)
 
