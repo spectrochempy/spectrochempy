@@ -337,6 +337,8 @@ class NDDataset(
         contained in this object.
 
         """
+        #ua = self._uarray(self._data, self.uncertainty, self.units)
+        #return self._umasked(ua, self.mask)
         return self._data
 
     @data.setter

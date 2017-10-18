@@ -39,16 +39,46 @@ from copy import copy, deepcopy
 import numpy as np
 import pytest
 from traitlets import TraitError
+from datetime import datetime
 
 from pint import DimensionalityError
 from spectrochempy.api import NDArray
 from spectrochempy.api import ur
 from tests.utils import (raises)
-from ...utils import NumpyRNGContext
+from spectrochempy.core.units import ur
+from spectrochempy.utils import SpectroChemPyWarning
+from tests.utils import (assert_equal, assert_array_equal,
+                         assert_array_almost_equal, assert_equal_units,
+                         raises)
+from tests.utils import NumpyRNGContext
 
 
-#warnings.simplefilter(action="ignore", category=FutureWarning)
+# fixtures
+# --------
+@pytest.fixture(scope="module")
+def ndarraysubclass():
+    # return a simple ndarray
+    # with some data
+    with NumpyRNGContext(12345):
+        dx = 10.*np.random.random((10, 10))-5.
+    _nd = MinimalSubclass()
+    _nd.data = dx
+    return _nd.copy()
 
+@pytest.fixture(scope="module")
+def ndarraysubclasscplx():
+    # return a complex ndarray
+    # with some complex data
+    with NumpyRNGContext(1245):
+        dx = np.random.random((10, 20))
+    _nd = MinimalSubclass()
+    _nd.data = dx
+    _nd.set_complex(axis=-1)  # this means that the data are complex in
+    # the last dimension
+    return _nd.copy()
+
+# test initialization
+# --------------------
 
 class MinimalSubclass(NDArray):
     # in principle NDArray is not used directly and should be subclassed
@@ -66,35 +96,26 @@ def test_init_ndarray_subclass():
     assert a.unitless
     assert a.is_untitled
     assert not a.meta
+    assert a.date == datetime(1, 1, 1, 0, 0)
+    a.date = datetime(2005,10,12)
+    a.date = "25/12/2025"
+    assert a.date == datetime(2025, 12, 25, 0, 0)
 
-
-# noinspection PyProtectedMember,PyProtectedMember
 def test_set_ndarray_subclass():
     # test of setting some attributes of an empty ndarray
     # check some of its properties
     a = MinimalSubclass()
-    a._name = 'xxxx'
+    a.name = 'xxxx'
     assert a.name == u'xxxx'
-    a._title = 'yyyy'
+    a.title = 'yyyy'
     assert not a.is_untitled
     assert a.title == u"yyyy"
-    with pytest.raises(TraitError):
-        a._meta = []  # need to be a Meta class
-    a._meta.something = "a_value"
-    assert a._meta.something == "a_value"
-
-@pytest.fixture(scope="module")
-def ndarraysubclass():
-    # return a simple ndarray
-    # with some data
-    with NumpyRNGContext(12345):
-        dx = 10.*np.random.random((10, 10))-5.
-    _nd = MinimalSubclass()
-    _nd._data = dx
-    return _nd.copy()
+    a.meta = []
+    a.meta.something = "a_value"
+    assert a.meta.something == "a_value"
 
 def test_set_simple_ndarray(ndarraysubclass):
-    nd = ndarraysubclass
+    nd = ndarraysubclass.copy()
     assert nd.data.size == 100
     assert nd.shape == (10, 10)
     assert nd.size == 100
@@ -103,11 +124,10 @@ def test_set_simple_ndarray(ndarraysubclass):
     assert nd.data[1,1] == 4.6130673607282127
 
 def test_set_ndarray_with_units(ndarraysubclass):
-    nd = ndarraysubclass
+    nd = ndarraysubclass.copy()
 
     assert nd.unitless # ,o units
     assert not nd.dimensionless # no unit so no dimension has no sense
-
 
     #with catch_warnings() as w:
     nd.to('m')  # should not change anything (but raise a warning)
@@ -130,7 +150,7 @@ def test_set_ndarray_with_units(ndarraysubclass):
     # change of units - ok if it can be casted to the current one
     nd.units = 'cm'
 
-    # cannot chnage to incompatible units
+    # cannot change to incompatible units
     with pytest.raises(ValueError):
         nd.units = 'radian'
 
@@ -146,17 +166,9 @@ def test_set_ndarray_with_units(ndarraysubclass):
     assert nd.units.dimensionless
     assert nd.units.scaling == 0.001
 
-@pytest.fixture(scope="module")
-def ndarraysubclasscplx():
-    # return a complex ndarray
-    # with some complex data
-    with NumpyRNGContext(1245):
-        dx = np.random.random((10, 20))
-    _nd = MinimalSubclass()
-    _nd._data = dx
-    _nd.set_complex(axis=-1)  # this means that the data are complex in
-    # the last dimension
-    return _nd.copy()
+    with raises(TypeError):
+        nd.change_units(1 * ur.m)  # cannot use a quantity to set units
+
 
 def test_set_ndarray_with_complex(ndarraysubclasscplx):
     nd = ndarraysubclasscplx.copy()
@@ -194,26 +206,38 @@ def test_deepcopy_of_ndarray(ndarraysubclasscplx):
     assert nd.ndim == 2
 
 
-# noinspection PyProtectedMember
 def test_ndarray_with_uncertaincy(ndarraysubclass):
     nd = ndarraysubclass.copy()
     assert not nd.is_uncertain
     assert repr(nd).startswith('NDArray:')
     nd._uncertainty = np.abs(nd._data * .01)
+    nd.change_units('second') # force a change of units
     assert nd.is_uncertain
     assert str(nd).startswith('NDArray:')
+    assert str(nd.values[0,0]) == "4.30+/-0.04 second"
+    print(nd)
 
 
-# noinspection PyProtectedMember
 def test_ndarray_with_mask(ndarraysubclass):
     nd = ndarraysubclass.copy()
+    print(nd)
     assert not nd.is_masked
     assert str(nd).startswith('NDArray:')
-    nd._mask[5] = True
+    nd._mask[0] = True
     assert nd.is_masked
+    print(nd)
 
 
-# noinspection PyProtectedMember
+def test_ndarray_units(ndarraysubclass):
+    nd = ndarraysubclass.copy()
+    nd2 = ndarraysubclass.copy()
+    nd.units = 'm'
+    nd2.units = 'km'
+    assert nd.is_units_compatible(nd2)
+    nd2.change_units('radian')
+    assert not nd.is_units_compatible(nd2)
+
+
 def test_ndarray_with_uncertaincy_and_units(ndarraysubclass):
     nd = ndarraysubclass.copy()
     nd.change_units('m')
@@ -223,10 +247,14 @@ def test_ndarray_with_uncertaincy_and_units(ndarraysubclass):
     nd._uncertainty = np.abs(nd._data * .01)
     assert nd.is_uncertain
     assert str(nd).startswith('NDArray:')
-    #print(nd)
+    units = nd.units
+    nd.units = None # should change nothing
+    assert nd.units == units
+    nd._mask[1,1] = True
+    assert nd.is_masked
+    print(nd)
 
 
-# noinspection PyProtectedMember,PyProtectedMember
 def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraysubclasscplx):
     nd = ndarraysubclasscplx.copy()
     nd.units = 'm'
@@ -241,8 +269,7 @@ def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraysubclasscplx):
 
 
 def test_ndarray_len_and_sizes(ndarraysubclass, ndarraysubclasscplx):
-
-    nd = ndarraysubclass
+    nd = ndarraysubclass.copy()
     #print(nd.is_complex)
     assert not nd.is_complex[0]
     assert len(nd) == 10
@@ -250,7 +277,7 @@ def test_ndarray_len_and_sizes(ndarraysubclass, ndarraysubclasscplx):
     assert nd.size == 100
     assert nd.ndim == 2
 
-    nd = ndarraysubclasscplx
+    nd = ndarraysubclasscplx.copy()
     #print(nd.is_complex)
     assert nd.is_complex[1]
     assert len(nd) == 10
@@ -258,3 +285,8 @@ def test_ndarray_len_and_sizes(ndarraysubclass, ndarraysubclasscplx):
     assert nd.size == 100
     assert nd.ndim == 2
 
+
+def test_slicing_byindex(ndarraysubclass):
+    nd = ndarraysubclass.copy()
+    nd3 = nd[7:10]
+    assert_equal(nd3.data,nd.data[7:10])

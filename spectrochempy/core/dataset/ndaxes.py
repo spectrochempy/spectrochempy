@@ -309,17 +309,17 @@ class Axis(NDMath, NDArray):
     def ndim(self):
         return 1
 
-    @property
-    def uncertainty(self):
-        return None
+    #@property
+    #def uncertainty(self):
+    #    return None
 
     @property
     def T(self):  # no transpose
         return self
 
-    @property
-    def data(self):
-        return self._data
+    #@property
+    #def data(self):
+    #    return self._data
 
     @property
     def shape(self):

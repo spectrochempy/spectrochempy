@@ -63,11 +63,12 @@ import matplotlib.pyplot as plt
 from spectrochempy.application import log
 
 from spectrochempy.core.dataset.ndmeta import Meta
-from spectrochempy.core.units import Unit, ur, Quantity
+from spectrochempy.core.units import Unit, ur, Quantity, Measurement
 
 from spectrochempy.utils import EPSILON, is_number
 from spectrochempy.utils import SpectroChemPyWarning, deprecated
 from spectrochempy.utils.traittypes import Array
+
 
 # =============================================================================
 # Third party imports
@@ -128,14 +129,14 @@ class NDArray(HasTraits):
 
     _data = Array
     _is_complex = List(Bool)
-    _mask = Array
+    _mask = Array(allow_none=True)
     _units = Instance(Unit, allow_none=True)
-    _uncertainty = Array
+    _uncertainty = Array(allow_none=True)
     _name = Unicode
     _title = Unicode
     _meta = Instance(Meta, allow_none=True)
     _date = Instance(datetime)
-    _labels = Array
+    _labels = Array(allow_none=True)
     _fig = Instance(plt.Figure, allow_none=True)
     _ax = Instance(plt.Axes, allow_none=True)
 
@@ -203,12 +204,30 @@ class NDArray(HasTraits):
         contained in this object.
 
         """
+        #ua = self._uarray(self._data, self.uncertainty, self.units)
+        #return self._umasked(ua, self.mask)
         return self._data
 
     @data.setter
     def data(self, data):
-
         self._data = data
+
+    @property
+    def date(self):
+        """A datetime object containing date information
+        about the ndarray object, for example a creation date
+        or a modification date"""
+        return self._date
+
+    @date.setter
+    def date(self, date):
+        if isinstance(date, datetime):
+            self._date = date
+        elif isinstance(date, str):
+            try:
+                self._date = datetime.strptime(date, "%Y/%m/%d")
+            except ValueError:
+                self._date = datetime.strptime(date, "%d/%m/%Y")
 
     @property
     def values(self):
@@ -253,7 +272,7 @@ class NDArray(HasTraits):
         if title is not None:
             if self._title is not None:
                 log.info(
-                        "Overwriting Axis's current title with specified title")
+                        "Overwriting ndarray current title with specified title")
             self._title = title
 
     @property
@@ -276,7 +295,7 @@ class NDArray(HasTraits):
 
         if mask is not None:
             if self.is_masked and np.any(mask != self._mask):
-                log.info("Overwriting Axis's current "
+                log.info("Overwriting ndarray current "
                          "mask with specified mask")
             self._mask = mask
 
@@ -332,7 +351,7 @@ class NDArray(HasTraits):
 
     @uncertainty.setter
     def uncertainty(self, uncertainty):
-        raise NotImplementedError()
+        self._uncertainty = uncertainty
 
     @property
     def meta(self):
@@ -456,7 +475,7 @@ class NDArray(HasTraits):
         """`bool`, read-only property - Whether the array is masked or not.
 
         """
-        if self._mask.size == 0:
+        if self._mask is None or self._mask.size == 0:
             return False
 
         if np.any(self._mask):
@@ -470,11 +489,12 @@ class NDArray(HasTraits):
         or not.
 
         """
-        if self._uncertainty.size == 0:
+        if self._uncertainty is None or self._uncertainty.size == 0:
             return False
 
         if np.any(self._uncertainty > EPSILON):
             return True
+
         return False
 
     @property
@@ -630,6 +650,10 @@ class NDArray(HasTraits):
         -------
 
         """
+        if self._units is None:
+            self.units = units
+            return
+
         try:
             if isinstance(units, string_types):
                 units = ur.Unit(units)
@@ -680,7 +704,7 @@ class NDArray(HasTraits):
 
             If `True` a deepcopy is performed which is the default behavior
 
-        memo : Not really used.
+        memo : Not used.
 
             This parameter ensure compatibility with deepcopy() from the copy
             package.
@@ -703,16 +727,9 @@ class NDArray(HasTraits):
             try:
                 setattr(new, "_" + attr, do_copy(getattr(self, attr)))
             except:
-                # if deep copy do not work
+                # ensure that if deepcopy do not work, a shadow copy can be done
                 setattr(new, "_" + attr, copy.copy(getattr(self,
                                                            attr)))
-                # if attr not in ['data', 'units']:
-                #     # we set directly the hidden attribute as no checking
-                #     # is necessary for such copy
-                #     setattr(new, "_" + attr, do_copy(getattr(self, attr)))
-                # elif attr in ['units']:
-                #     setattr(new, "_" + attr, copy.copy(getattr(self,
-                #                                                attr)))  # deepcopy not working (and not necessary)
         new._name = str(uuid.uuid1()).split('-')[0]
         new._date = datetime.now()
         return new
@@ -722,9 +739,9 @@ class NDArray(HasTraits):
     # -------------------------------------------------------------------------
 
     def __repr__(self):  # TODO: display differently if no uncertainty
-        txt = "NDArray: \n" + repr(self._uarray(self._data, self._uncertainty))
-        if self.units is not None:
-            txt += repr(self.units)
+        txt = "NDArray: \n" + repr(self.data)
+        # if self.units is not None:
+        #     txt += repr(self.units)
         return txt
 
     def __str__(self):
@@ -750,19 +767,24 @@ class NDArray(HasTraits):
             return self.__copy__()
 
         # slicing by index of all internal array
-        new_coords = np.array(self._data[item])
+        new_data = np.array(self._data[item])
         new_mask = np.array(self._mask[item])
+        if self.is_uncertain:
+            new_uncertainty = np.array(self._uncertainty[item])
+        else:
+            new_uncertainty = None
         if self.is_labeled:
             new_labels = np.array(self._labels[..., item])
         else:
             new_labels = None
 
-        return self.__class__(new_coords,
-                              labels=new_labels,
-                              mask=new_mask,
-                              units=self.units,
-                              meta=self.meta,
-                              title=self.title)
+        new = self.copy()
+        new.data= new_data
+        new.labels=new_labels
+        new.mask=new_mask
+        new.uncertainty=new_uncertainty
+
+        return new
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -834,11 +856,13 @@ class NDArray(HasTraits):
 
         if units:
             return Quantity(uar, units)
+            #return (np.vectorize(lambda m, u: Quantity(m, u), otypes=[object])
+            #        (uar, units))
         else:
             return uar
 
     def _argsort(self, by='value', pos=None, descend=False):
-        # found the indices sorted by axes or labels
+        # found the indices sorted by values or labels
 
         if not self.is_labeled:
             by = 'value'
@@ -891,29 +915,29 @@ class NDArray(HasTraits):
 
         return new
 
-    def _loc2index(self, loc, axis):
-        # Return the index of a location (label or coordinates) along the axis
-
-        if isinstance(loc, string_types):
-            # it's probably a label
-            indexes = np.argwhere(self._labels == loc).flatten()
-            if indexes.size > 0:
-                return indexes[0]
-            else:
-                raise ValueError('Could not find this label: {}'.format(loc))
-
-        elif isinstance(loc, datetime):
-            # not implemented yet
-            return None  # TODO: date!
-
-        elif is_number(loc):
-            index = (np.abs(self._data - loc)).argmin()
-            if loc > self._data.max() or loc < self._data.min():
-                warnings.warn(
-                        '\nThis coordinate ({}) is outside the axis limits.\n'
-                        'The closest limit index is returned'.format(loc), )
-                # AxisWarning)
-            return index
-
-        else:
-            raise ValueError('Could not find this location: {}'.format(loc))
+    # def _loc2index(self, loc, axis):
+    #     # Return the index of a location (label or coordinates) along the axis
+    #
+    #     if isinstance(loc, string_types):
+    #         # it's probably a label
+    #         indexes = np.argwhere(self._labels == loc).flatten()
+    #         if indexes.size > 0:
+    #             return indexes[0]
+    #         else:
+    #             raise ValueError('Could not find this label: {}'.format(loc))
+    #
+    #     elif isinstance(loc, datetime):
+    #         # not implemented yet
+    #         return None  # TODO: date!
+    #
+    #     elif is_number(loc):
+    #         index = (np.abs(self._data - loc)).argmin()
+    #         if loc > self._data.max() or loc < self._data.min():
+    #             warnings.warn(
+    #                     '\nThis coordinate ({}) is outside the axis limits.\n'
+    #                     'The closest limit index is returned'.format(loc), )
+    #             # AxisWarning)
+    #         return index
+    #
+    #     else:
+    #         raise ValueError('Could not find this location: {}'.format(loc))

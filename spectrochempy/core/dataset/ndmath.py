@@ -204,7 +204,7 @@ class NDMath(object):
         # (Axis or NDDataset derive from NDArray)
         if isinstance(obj, NDArray):
 
-            d = obj.data  # The underlying data
+            d = obj._data  # The underlying data
 
             # do we have units?
             if not obj.unitless:
@@ -290,7 +290,7 @@ class NDMath(object):
                 else:
                     argunits.append(1.)
 
-                arg = other.data
+                arg = other._data
                 arg = other._uarray(arg, other._uncertainty)
 
                 # mask?
@@ -355,8 +355,8 @@ class NDMath(object):
 
         # get possible mask
         if isinstance(data, np.ma.MaskedArray):
-            mask = data.mask
-            data = data.data
+            mask = data._mask
+            data = data._data
         else:
             mask = np.zeros_like(data, dtype=bool)
 

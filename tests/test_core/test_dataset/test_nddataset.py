@@ -51,7 +51,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
-from ...utils import NumpyRNGContext
+from tests.utils import NumpyRNGContext
 
 
 def test_fix_crossvalidate_bug():
@@ -1141,8 +1141,8 @@ def test_create_from_complex_data():
     # take real part
     ndr = nd.real()
     assert ndr.shape == (2,2)
-    assert ndr.is_complex == [False, False]
-    assert_equal (ndr.data,[[0,2],[0,2]])
+    assert ndr.is_complex == [True, False]
+
 
     pass
 
@@ -1217,8 +1217,8 @@ def test_real_imag():
     nd = NDDataset(na)
     nd.set_complex(axis=0)
     assert nd.is_complex == [True, True]
-    assert_array_equal(nd.real(), na.real[::2,:])
-    assert_array_equal(nd.imag(), na.imag[::2,:])
+    assert_array_equal(nd.real(), na.real)
+    assert_array_equal(nd.imag(), na.imag)
 
     assert_array_equal(nd.real(-1), na.real)
 
