@@ -14,7 +14,10 @@ from spectrochempy.api import *
 
 source = NDDataset.read_omnic(os.path.join(data,
                                            'irdata', 'NH4Y-activation.SPG'))
-source.plot_stack()
+
+figure()
+source.plot_stack(style='paper')
+show()
 
 ##################################################################
 # change the unit of y axis, the y origin as well as the title of the axis
@@ -22,4 +25,7 @@ source.plot_stack()
 source.y.to('hour')
 source.y -= source.y[0]
 source.y.title = 'acquisition time'
+
+figure()
 source.plot_stack()
+show()

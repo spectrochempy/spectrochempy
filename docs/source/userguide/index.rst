@@ -32,3 +32,11 @@ Plotting
 	:maxdepth: 1
 
 	plotting
+
+NMR processing
+---------------------
+
+.. toctree::
+	:maxdepth: 1
+
+	nmr_intro

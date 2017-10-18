@@ -1,441 +1,116 @@
-# 1 "/u/exp/stan/nmr/lists/pp/hsqc-rk-fb+3919.cpj"
-;hsqc-rk-fb+3919.cpj
+# 1 "/home/nmr/prog/pp/babasansdec.cm"
+;baba4rot (TopSpin 2.0)
+;version Bruker + FF modifs CM Le Mans fev 2008
+
+;2D SQ-DQ correlation experiment for 4 rotor periods recoupling using BABA
+;DQ experiment for weaker interaction hamiltonians, full compensated for
+;pulse imperfections and offset effects
 ;
-;gradient and sensitivity enhanced HSQC with water flip-back pulses + 3-9-19 pulse
-;for water suppression
-;
-;CPJ 12/4/08
-;
-; ---- old comments ----
-;2D HSQC gradient and sensitivity enhanced
-;with water flip-back pulses
-;**** this set-up for z-axis gradients only ****
-;**** for 3-axis gradients see hsqc-rk-fb-3919-3ax.cpj
-;Echo/Antiecho gradient selection in F1
-;waltz-16 decoupling during acquisition
-;A.G. Palmer III, J. Cavanagh, P.E. Wright & M. Rance, J. Magn.
-;   Reson. 93, 151-170 (1991)
-;L.E. Kay, P. Keifer & T. Saarinen, J. Am. Chem. Soc. 114,
-;   10663-5 (1992)
-;J. Schleucher, M. Schwendinger, M. Sattler, P. Schmidt, O. Schedletzky,
-;   S.J. Glaser, O.W. Sorensen & C. Griesinger, J. Biomol. NMR 4,
-;   301-306 (1994)
-;
-; gradient ratio: 0.1013 for 15N
-
-# 1 "/u/exp/stan/nmr/lists/pp/Avance.incl" 1
-;Avance.incl
-;
-;avance-version (03/02/17)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;$Id: Avance1.incl,v 1.7.2.3 2003/02/25 14:48:47 ber Exp $
-# 25 "/u/exp/stan/nmr/lists/pp/hsqc-rk-fb+3919.cpj" 2
-
-# 1 "/u/exp/stan/nmr/lists/pp/Grad.incl" 1
-;Grad.incl  -  include file for Gradient Spectroscopy
-;
-;avance-version (02/05/31)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-define list<gradient> EA=<EA>
-
-
-
-;$Id: Grad1.incl,v 1.7 2002/06/12 09:04:22 ber Exp $
-# 26 "/u/exp/stan/nmr/lists/pp/hsqc-rk-fb+3919.cpj" 2
-
-# 1 "/u/exp/stan/nmr/lists/pp/Delay.incl" 1
-;Delay.incl  -  include file for commonly used delays
-;
-;version 00/02/07
-
-
-;general delays
-
-define delay DELTA
-define delay DELTA1
-define delay DELTA2
-define delay DELTA3
-define delay DELTA4
-define delay DELTA5
-define delay DELTA6
-define delay DELTA7
-define delay DELTA8
-
-define delay TAU
-define delay TAU1
-define delay TAU2
-define delay TAU3
-define delay TAU4
-define delay TAU5
-
-
-;delays for centering pulses
-
-define delay CEN_HN1
-define delay CEN_HN2
-define delay CEN_HN3
-define delay CEN_HC1
-define delay CEN_HC2
-define delay CEN_HC3
-define delay CEN_HC4
-define delay CEN_HP1
-define delay CEN_HP2
-define delay CEN_CN1
-define delay CEN_CN2
-define delay CEN_CN3
-define delay CEN_CN4
-define delay CEN_CP1
-define delay CEN_CP2
-
-
-;loop counters
-
-define loopcounter COUNTER
-define loopcounter SCALEF
-define loopcounter FACTOR1
-define loopcounter FACTOR2
-define loopcounter FACTOR3
-
-
-
-;$Id: Delay.incl,v 1.11 2002/06/12 09:04:22 ber Exp $
-# 27 "/u/exp/stan/nmr/lists/pp/hsqc-rk-fb+3919.cpj" 2
-
-
-
-;#define NITROGEN
-
-
-"d2=2.3m-p21-p11-10u"		; ~1/4JNH - optimize between ~2.25-2.65 ms
-"d3=2.3m-p22-p11*2-15u"
-"d4=2.3m-p23-p11-15u"
-"d5=2.3m-p23-p11*2-15u"
-
-"d11=50m"		; disk I/O
-"d12=1m"		; short delay
-"d26=p7-p1"		; delay for centering pulses
-
-"d0=3u"
-"d27=d0*2+p1*2+p11*2+20u-3u-p26+p17*0.6366-p7*0.6366" ; 0 phase in F1 (p26 <= 2*p11)
-"d7=p24+p1*0.6366-p25"
-
+;M. Feike, D.E. Demco, R. Graf, J. Gottwald, S. Hafner, and H.W. Spiess JMR A 122, 214-221 (1996)
+;written by JOS, 11/12/03
+
+;Avance II+ version
+;parameters:
+;d0  : incremented delay (2D) [3 usec]
+;d1 : recycle delay
+;pl1 : for 90 degree BABA pulses
+;pl2 : = 120 dB, not used
+;pl12 : for decoupling
+;cpdprg2 : decoupling sequence (tppm, cw, etc.)
+;p1 : 90 degree pulse (in BABA sequence)
+;pcpd2 : pulse length in decoupling sequence
+;cnst31 : rotation rate in Hz
+;ns : n*16
+;FnMode: States-TPPI or STATES
+;l1  :number of rotor cycles for recoupling m any integer
+;l2  :l2*4=l1 = (number of rotorcycles)
+;ns  : n*16
+;FnMode: States-TPPI or STATES
+# 29 "/home/nmr/prog/pp/babasansdec.cm"
+;$COMMENT=SQ-DQ experiment with BABA for 4 rotor periods
+;$CLASS=Solids
+;$DIM=2D
+;$TYPE=direct excitation
+;$SUBTYPE=homonuclear correlation
+
+;$OWNER=charlotte
+define delay tau
+"tau=0.5s/cnst31-p1*2"
+
+"d0=1u"
+;cnst11 : to adjust t=0 for acquisition, if digmod = baseopt
+"acqt0=1u*cnst11"
+# 1 "mc_line 43 file /home/nmr/prog/pp/babasansdec.cm exp. def. part of mc cmd. before ze"
+define delay MCWRK
+define delay MCREST
+define loopcounter ST1CNT
+"ST1CNT = td1 / 2"
+"MCREST = 30m - 30m"
+"MCWRK = 0.200000*30m"
+
+    dccorr
+# 43 "/home/nmr/prog/pp/babasansdec.cm"
+# 43 "/home/nmr/prog/pp/babasansdec.cm"
 1 ze
-2 1m do:f3
-  d11
-  d12
-3 d12
-  d12
-  d12
-4 d12
-  d12
-  d1
-  10u pl1:f1
-  10u pl3:f3
-  10u setnmr2|0 setnmr0|34|32|33
-  10u
-;-------- Eliminate 15N Boltzmann magnetization ---------
-;
-  (p7 ph0):f3
-  5u
-  p18:gp18			; gp18 = 1m, 3%
-;--
-  1m pl0:f1
-  (p11:sp11 ph12:r):f1
-  5u pl1:f1
-  (p1 ph0)
-  5u
-  p21:gp21
-  d2 pl0:f1
-  (p11:sp11 ph12:r):f1
-  5u pl1:f1
-  (d26 p1*2 ph0) (p7*2 ph0):f3
-  5u pl0:f1
-  (p11:sp11 ph12:r):f1
-  5u pl1:f1
-  p21:gp21
-  d2
+# 1 "mc_line 43 file /home/nmr/prog/pp/babasansdec.cm exp. def. of mc cmd. after ze"
+# 44 "/home/nmr/prog/pp/babasansdec.cm"
+# 1 "mc_line 44 file /home/nmr/prog/pp/babasansdec.cm exp. start label for mc cmd."
+2 MCWRK  * 3
+LBLSTS1, MCWRK 
+LBLF1, MCWRK
+  MCREST
+# 45 "/home/nmr/prog/pp/babasansdec.cm"
+
+
+# 53 "/home/nmr/prog/pp/babasansdec.cm"
+ d1
+5 (p1 pl1 ph1):f1 		   	;DQ excitation block
+  tau
   (p1 ph1)
-  5u pl0:f1
-  (p11:sp11 ph13:r):f1
-  5u
-  p20:gp20	      ; gp20 = 1m, 60% (dephase any transverse magnetization)
-  5u pl17:f3
-  300u				; gradient ringdown
-;-------- INEPT to 15N -------
-
- (p17 ph17):f3
-
-
+  (p1 ph2)
+  tau
+  (p1 ph4)
+  (p1 ph1)
+  tau
+  (p1 ph1)
+  (p1 ph4)
+  tau
+  (p1 ph2)
+lo to 5 times l2
   d0
-  (p11:sp11 ph12:r)
-  10u pl1:f1
-  (p1*2 ph0)
-  10u pl0:f1
-  (p11:sp11 ph12:r)
-  2u pl4:f2
-  3u fq4:f2
-  (p14 ph0):f2
-  2u pl4:f2
-  3u fq4:f2
-  (p14 ph0):f2
-  5u
-  d0 pl1:f1
-  200u pl3:f3
-  (p7*2 ph14):f3
-  3u
-  2u pl4:f2
-  3u fq4:f2
-  (p14 ph0):f2
-  2u pl4:f2
-  3u fq4:f2
-  (p14 ph0):f2
-  5u
-  p26:gp26*EA			; coherence encoding gradient, gp26 = 2m, 90%, SINE.50
-  d27
-  200u
-# 134 "/u/exp/stan/nmr/lists/pp/hsqc-rk-fb+3919.cpj"
-
-
-;-------- Rance-Kay transfer back to 1H --------
-  (d26 p1 ph0) (p7 ph9):f3
-  5u pl0:f1
-  (p11:sp11 ph12:r)
-  5u
-  p22:gp22			; gp22 = 1.5m, 11%
-  d3
-  (p11:sp11 ph12:r)
-  5u pl1:f1
-  (d26 p1*2 ph0) (p7*2 ph7):f3
-  5u pl0:f1
-  (p11:sp11 ph12:r)
-  5u
-  p22:gp22			; gp22 = 1.5m, 11%
-  d3
-  (p11:sp11 ph13:r)
-  5u pl1:f1
-  (p1 ph5) (p7 ph8):f3
-  10u pl0:f1
-  p23:gp23			; gp23 = 1.5m, 31%
-  d4
-  (p11:sp11 ph15:r)
-  5u pl1:f1
-  (d26 p1*2 ph2) (p7*2 ph7):f3				; ph0 before
-  5u pl0:f1
-  (p11:sp11 ph15:r)
-  5u
-  p23:gp23			; gp23 = 1.5m, 31%
-  d5
-  (p11:sp11 ph15:r)
-  5u pl1:f1
-  (p1 ph2)						; ph0 before (water along +z)
-;--- 3-9-19 readout + coherence decoding ---
-  5u pl16:f3
-  p24:gp24			; coherence decoding gradient + watergate, gp24 = 202.6u+1m
-  200u pl18:f1
-  p28*0.231 ph10			; p28=90deg 1H pulse
-  d19*2				; delay for binomial water suppression, d19=100u
-  p28*0.692 ph10
-  d19*2
-  p28*1.462 ph10
-  d19*2
-  p28*1.462 ph11
-  d19*2
-  p28*0.692 ph11
-  d19*2
-  p28*0.231 ph11
-  5u
-  p25:gp25
-  195u
-  d7
-  5u setnmr2^0 setnmr0^34^32^33
-  go=2 ph31 cpd3:f3
-  1m do:f3
-  d11 wr #0 if #0 zd
-
-# 202 "/u/exp/stan/nmr/lists/pp/hsqc-rk-fb+3919.cpj"
-
-
+7 (p1 ph11) 		   	;DQ excitation block
+  tau
+  (p1 ph11)
+  (p1 ph12)
+  tau
+  (p1 ph14)
+  (p1 ph11)
+  tau
+  (p1 ph11)
+  (p1 ph14)
+  tau
+  (p1 ph12)
+  lo to 7 times l2
+  0.5u
+  (p1 ph5):f1
+  go=2 ph31
+# 1 "mc_line 84 file /home/nmr/prog/pp/babasansdec.cm exp. mc cmd. in line"
+  MCWRK  wr #0 if #0 zd ip1  MCWRK  ip2  MCWRK  ip4
+  lo to LBLSTS1 times 2
+  MCWRK id0
+  lo to LBLF1 times ST1CNT
+  MCWRK
+# 85 "/home/nmr/prog/pp/babasansdec.cm"
+HaltAcqu, 
 exit
 
 ph0=0
-ph1=1
-ph2=2
-ph3=3
-ph5=1
-ph7=0
-ph8=1
-ph9=2
-ph10=0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1
-ph11=2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3
-ph12=2
-ph13=3
-ph14=0 0 1 1 2 2 3 3
-ph15=0
-ph17=0 2
-ph31=0 2 2 0 0 2 2 0 2 0 0 2 2 0 0 2
-
-
-;pl1 : f1 channel - power level for pulse (default)
-;pl3 : f3 channel - power level for pulse (default)
-;pl16: f3 channel - power level for CPD/BB decoupling
-;p1  : f1 channel - 90 degree high power pulse
-;p7  : f3 channel - 90 degree high power pulse
-;p17 : f3 channel - 90 degree high power pulse (also use for pulse calibration)
-;p20 : gradient pulse for water dephasing after initial INEPT
-;p21 : gradient pulse during initial INEPT delay
-;p22 : gradient pulse during 1st INEPT in Rance-Kay transfer
-;p23 : gradient pulse during 2nd INEPT in Rance-Kay transfer
-;p24 : coh. dec. 102.6u,  50%, SINE.10
-;p25 : coh. dec. 100.0u, -50%, SINE.10
-;p26 : coh. enc.  1000u,  50%, SINE.10
-;p27 : coh. enc.  1000u, -50%, SINE.10
-;d2  : initial INEPT delay; d2 + p21 = ~1/(4J)
-;d3  : 1st INEPT delay for Rance-Kay transfer; d3 + p22 = ~1/(4J)
-;d4  : 2nd INEPT delay for Rance-Kay transfer; d4 + p23 = ~1/(4J)
-;d6  : short echo delay before acquisition
-;d7  : short echo delay before acquisition
-;d0  : incremented delay for t1 evolution (3u initial value)
-;d1  : relaxation delay; 1.5*T1
-;d11 : delay for disk I/0 (50 m)
-;d12 : delay for incrementing phases etc. (10m)
-;d26 : difference between f3 and f1 90 degree pulses
-;d27 : compensation delay for zero phase correction in F1
-;l0  : number of iscomplex points in F1
-;nd0 : 2
-;cpd3: decoupling according to sequence defined by cpdprg3
-;pcpd3: f3 channel - 90 degree pulse for decoupling sequence
-
-;gpz24: 90%, 452.6u
-;gpz25: 90%, 250u
-;gpz26: 90%, 2m
+ph1=(8)  0  2  4  6 
+ph2=(8)  2  4  6  0
+ph4=(8)  6 0 2 4 
+ph11=(8) 2
+ph12=(8) 4
+ph13=(8) 6
+ph14= (8) 0
+ph5=  0 0 0 0  1 1 1 1  2 2 2 2  3 3 3 3
+ph31= 2 0 2 0  3 1 3 1  0 2 0 2  1 3 1 3

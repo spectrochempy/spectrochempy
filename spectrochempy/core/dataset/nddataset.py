@@ -813,12 +813,17 @@ class NDDataset(
             axis2 = self.ndim - 1
 
         new._data = np.swapaxes(new._data, axis1, axis2)
-        new._mask = np.swapaxes(new._mask, axis1, axis2)
-        new._uncertainty = np.swapaxes(new._uncertainty, axis1, axis2)
+
+        if new._mask is not None:
+            new._mask = np.swapaxes(new._mask, axis1, axis2)
+
+        if new._uncertainty is not None:
+            new._uncertainty = np.swapaxes(new._uncertainty, axis1, axis2)
 
         if new._axes:
             new._axes[axis1], new._axes[axis2] = \
                 new._axes[axis2], new._axes[axis1]
+
         new._is_complex[axis1], new._is_complex[axis2] = \
             new._is_complex[axis2], new._is_complex[axis1]
 
@@ -886,15 +891,16 @@ class NDDataset(
 
         return new
 
-    def real(self, axis=-1):
+    def real(self, inplace=False):
         """
         Compute the real part of the elements of the NDDataset.
+        For hypercomplex multidimensional data, the real part will be taken
+        in all dimensions
 
         Parameters
         ----------
-        axis : `int` , optional, default = -1
-
-            The axis along which the real part should be calculated
+        inplace : `bool`, optional, default=``False``
+            should we return a new dataset (default) or not (inplace=True)
 
         Returns
         -------
@@ -907,26 +913,42 @@ class NDDataset(
         :meth:`imag`, :meth:`conj`, :meth:`abs`
 
         """
-        new = self.copy()
-        if not new._is_complex[axis]:
+        if not inplace: # default is to return a new array
+            new = self.copy()
+        else:
+            new = self  # work inplace
+
+        if not any(new._is_complex):
+            # none of the dims is complex, so we return the array inchanged
             return new
-        new.swapaxes(-1, axis, inplace=True)
-        new._data = new._data[..., ::2]
-        new.swapaxes(-1, axis, inplace=True)
-        new._is_complex[axis] = False
+
+        for axis in range(self.ndim):
+            if not new._is_complex[axis]:
+                continue
+            if axis > -1:
+                new.swapaxes(-1, axis, inplace=True)
+            new._data = new._data[..., ::2]
+            new._mask = new._mask[..., ::2]
+            new._uncertainty = new._uncertainty[..., ::2]
+            new._is_complex[-1] = False
+            if axis > -1:
+                new.swapaxes(-1, axis, inplace=True)
+
         return new
 
-    def imag(self, axis=-1):
+    def imag(self, inplace=False):
         """
         Imaginary part
 
         Compute the imaginary part of the elements of the NDDataset.
 
+        Note that for hypercomplex multidimensional data,
+        the real part will be taken in all dimensions other than the last
+
         Parameters
         ----------
-        axis : `int` , optional
-
-            The axis along which the imag part should be calculated.
+        inplace : `bool`, optional, default=``False``
+            should we return a new dataset (default) or not (inplace=True)
 
         Returns
         -------
@@ -939,28 +961,40 @@ class NDDataset(
         :meth:`real`,:meth:`conj`, :meth:`abs`
 
         """
-        new = self.copy()
-        if not new._is_complex[axis]:
-            logging.error(
-                    'The current dataset is not complex. '
-                    'Imag = None is returned.')
-            return None
+        if not inplace: # default is to return a new array
+            new = self.copy()
+        else:
+            new = self  # work inplace
 
-        new.swapaxes(-1, axis, inplace=True)
-        new._data = new._data[..., 1::2]
-        new.swapaxes(-1, axis, inplace=True)
-        new._is_complex[axis] = False
+        if not any(new._is_complex):
+            # none of the dims is complex, so we return the array inchanged
+            return new
+
+        for axis in range(self.ndim):
+            if not new._is_complex[axis]:
+                continue
+            if axis > -1:
+                new.swapaxes(-1, axis, inplace=True)
+            new._data = new._data[..., 1::2]
+            new._mask = new._mask[..., 1::2]
+            new._uncertainty = new._uncertainty[..., 1::2]
+            new._is_complex[-1] = False
+            if axis > -1:
+                new.swapaxes(-1, axis, inplace=True)
+
         return new
 
-    def conj(self, axis=-1):
+    def conj(self, inplace=False):
         """
         Return the conjugate of the NDDataset.
 
+        Note that for hypercomplex multidimensional data,
+        the real part will be taken in all dimensions other than the last
+
         Parameters
         ----------
-        axis : `int` , optional, default = -1
-
-            The axis along which the conjugate value should be calculated
+        inplace : `bool`, optional, default=``False``
+            should we return a new dataset (default) or not (inplace=True)
 
         Returns
         -------
@@ -973,13 +1007,24 @@ class NDDataset(
         :meth:`real`, :meth:`imag`, :meth:`abs`
 
         """
-        new = self.copy()
-        if not new._is_complex[axis]:
-            return new  # not a complex, return inchanged
+        if not inplace: # default is to return a new array
+            new = self.copy()
+        else:
+            new = self  # work inplace
 
-        new.swapaxes(-1, axis)
-        new._data[..., 1::2] = -new._data[..., 1::2]
-        new.swapaxes(-1, axis)
+        if not any(new._is_complex):
+            # none of the dims is complex, so we return the array inchanged
+            return new
+
+        for axis in range(self.ndim):
+            if not new._is_complex[axis]:
+                continue
+            if axis > -1:
+                new.swapaxes(-1, axis, inplace=True)
+                new._data[..., 1::2] = -new._data[..., 1::2]
+            new._is_complex[-1] = False
+            if axis > -1:
+                new.swapaxes(-1, axis, inplace=True)
 
         return new
 

@@ -251,7 +251,7 @@ def _remove_digital_filter(dic, data):
     pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(
             si / 2)
     pdata = (pdata.T - pdata.T[0]).T  # TODO: this allow generally to
-    # remove Bruker smiles, not so sure actually
+    # TODO: remove Bruker smiles, not so sure actually
 
     # Phasing
     si = float(pdata.shape[-1])
@@ -263,10 +263,11 @@ def _remove_digital_filter(dic, data):
             si / 2)
 
     # remove last points * 2
-    rp = 4 * (phase // 2)
-    data[..., -int(rp):] = 0j
+    rp = 2*(phase // 2)
     td = dic['acqus']['TD'] // 2
-    data = data[..., :int(td)]
+    td = int(td)-int(rp)
+    dic['acqus']['TD'] = td * 2
+    data = data[..., :td]
 
     log.debug('Bruker digital filter: removed %s points' % rp)
 
@@ -476,27 +477,27 @@ def read_bruker_nmr(source, *args, **kwargs):
                 dic, data = read_lowmem(npath, acqus_files=par_files,
                                         read_pulseprogram=False)
 
-                # # look the case whn the reshaping was not correct
-                # # for example, this happen when the number
-                # # of accumulated row was incomplete
-                # if datatype in ['SER'] and data.ndim == 1:
-                #     # we must reshape using the acqu parameters
-                #     td1 = dic['acqu2']['TD']
-                #     try:
-                #         data = data.reshape(td1, -1)
-                #     except ValueError:
-                #         try:
-                #             td = dic['acqu']['TD'] // 2
-                #             data = data.reshape(-1, td)
-                #         except ValueError:
-                #             raise ValueError(
-                #                     "Inconsistency between TD's and data size")
-                #
-                # # reduce to td
-                # ntd = dic['acqus']['TD'] // 2
-                # data = data[...,
-                #               :ntd]  # necessary for agreement with bruker data and
-                # phase
+            # look the case whn the reshaping was not correct
+            # for example, this happen when the number
+            # of accumulated row was incomplete
+            if datatype in ['SER'] and data.ndim == 1:
+                # we must reshape using the acqu parameters
+                td1 = dic['acqu2']['TD']
+                try:
+                    data = data.reshape(td1, -1)
+                except ValueError:
+                    try:
+                        td = dic['acqu']['TD'] // 2
+                        data = data.reshape(-1, td)
+                    except ValueError:
+                        raise ValueError(
+                                "Inconsistency between TD's and data size")
+
+                # reduce to td
+                ntd = dic['acqus']['TD'] // 2
+                data = data[...,
+                         :ntd]  # necessary for agreement with bruker data and
+                                # phase
         else:
 
             log.debug('Reading processed %d:%s' % (idx, path))
@@ -504,7 +505,8 @@ def read_bruker_nmr(source, *args, **kwargs):
             dic, data = read_pdata(npath, procs_files=par_files, )
 
         # Clean dict for pdata keys
-        for key in dic.keys():
+        keys = list(dic.keys())
+        for key in keys:
             if key.startswith('pdata'):
                 newkey = key.split(os.path.sep)[-1]
                 dic[newkey] = dic.pop(key)
@@ -526,6 +528,11 @@ def read_bruker_nmr(source, *args, **kwargs):
 
         # we need the ndim of the data
         parmode = int(dic['acqus']['PARMODE'])
+        if parmode+1 != data.ndim:
+            raise IOError("The NMR data were not read properly "
+                          "as the PARMODE+1 parameter ({}) doesn't fit "
+                          "the actual number of dimensions ({})".format(
+                    parmode+1, data.ndim))
 
         # read the acqu and proc
         valid_keys = list(zip(*nmr_valid_meta))[0]
@@ -536,7 +543,7 @@ def read_bruker_nmr(source, *args, **kwargs):
             if item[:4] in ['acqu', 'proc']:
                 dim = parmode
                 if len(item) > 4 and item[4] in ['2', '3']:
-                    dim = parmode - int(item[4])
+                    dim = parmode + 1 - int(item[4])
 
                 for key in sorted(dic[item]):
                     if key.startswith('_') or key.lower() not in valid_keys:
@@ -559,7 +566,7 @@ def read_bruker_nmr(source, *args, **kwargs):
                         if dim == parmode:
                             meta[key.lower()] = [value, ]
                         else:
-                            meta[key.lower()].insert(0, value)
+                            meta[key.lower()].insert(dim, value)
 
                     else:  # status parameters (replace initial)
                         try:
@@ -579,17 +586,11 @@ def read_bruker_nmr(source, *args, **kwargs):
         meta.iscomplex = [False] * (parmode + 1)
 
         if datatype in ['FID', 'SER']:
-            meta.td[-1] = data.shape[-1]
-            if meta.tdeff is None:
-                meta.tdeff = meta.td
-            meta.tdeff[-1] = meta.td[-1]
             meta.isfreq = [False]
             meta.encoding[-1] = AQ_mod[meta.aq_mod[-1]]
             meta.iscomplex[-1] = meta.aq_mod[-1] > 0
 
         if datatype in ['SER']:
-            meta.td[-2] = data.shape[-2]
-            meta.tdeff[-2] = meta.td[-2]
             meta.isfreq.insert(0, False)
 
             if meta.fnmode[-2] == 0:
@@ -603,8 +604,6 @@ def read_bruker_nmr(source, *args, **kwargs):
             meta.iscomplex[-2] = meta.fnmode[-2] > 1
 
             if parmode == 2:
-                meta.td[-3] = data.shape[-3]
-                meta.tdeff[-3] = meta.td[-3]
                 meta.isfreq.insert(0, False)
                 if meta.fnmode[-3] == 0 and meta.mc2 is not None:
                     meta.fnmode[-3] = meta.mc2[-3] + 1
@@ -613,9 +612,14 @@ def read_bruker_nmr(source, *args, **kwargs):
 
         # correct TD, so it is the number of complex points, not the number of data
         # not for the last dimension which is already correct
-        for axis in range(parmode):
+        meta.tdeff = meta.td[:]
+        meta.td = list(data.shape)
+
+        for axis in range(parmode+1):
             if meta.iscomplex[axis]:
-                meta.td[axis] = meta.td[axis] // 2
+                if axis != parmode: # already done for last axis
+                    meta.td[axis] = meta.td[axis] // 2
+                meta.tdeff[axis] = meta.tdeff[axis] // 2
 
         if datatype in ['1D', '2D', '3D']:
             meta.si = [si for si in data.shape]

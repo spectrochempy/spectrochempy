@@ -10,7 +10,7 @@ and then we plot one section
 
 #############################################
 # As usual, we start by loading the api
-from spectrochempy.api import NDDataset, Axis
+from spectrochempy.api import NDDataset, Axis, figure, show
 
 ##############################################
 import numpy as np
@@ -88,16 +88,22 @@ new = new.squeeze()
 # To plot a dataset, use the `plot` command (generic plot).
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 
-new.plot()
+figure()
+new.plot(style='paper')
+show()
 
 ##################################################################
 # But it is possible to display image
 #
 # sphinx_gallery_thumbnail_number = 2
 
+figure()
 new.plot(kind='image')
+show()
 
 ##################################################################
 # or stacked plot
 
+figure()
 new.plot(kind='stack')
+show()

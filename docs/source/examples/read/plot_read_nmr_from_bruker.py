@@ -25,5 +25,6 @@ ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 ##########################################################
 # view it...
 
-plot(ndd)
-
+figure()
+plot(ndd, style='paper')
+show()

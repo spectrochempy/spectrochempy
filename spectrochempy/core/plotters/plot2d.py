@@ -51,7 +51,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.application import plotoptions
+from spectrochempy.application import plotoptions, log
 from spectrochempy.core.plotters.utils import make_label
 
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
@@ -165,15 +165,24 @@ def plot_2D(source, **kwargs):
     else:
         z = source.imag()
 
+    # limit to to
     # abscissa axis
     x = source.x
 
     # ordinates axis
     y = source.y
 
+    # limits to tdeff
+    tdeff = z.meta.tdeff
+    xeff = x.coords[:tdeff[1]]
+    yeff = y.coords[:tdeff[0]]
+    zeff = z.data[:tdeff[0],:tdeff[1]]
+
     if kind in ['map', 'image']:
-        vmax = z.data.max()
-        vmin = z.data.min()
+        vmax = zeff.max()
+        vmin = zeff.min()
+        if not kwargs.get('negative', True):
+            vmin=0
         norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
 
     if kind in ['map']:
@@ -181,10 +190,9 @@ def plot_2D(source, **kwargs):
         # contour plot
         # -------------
         if z.clevels is None:
-            z.clevels = clevels(z.data, **kwargs)
-        c = source.ax.contour(x.coords, y.coords, z.data,
-                              z.clevels,
-                              linewidths=lw, alpha=alpha)
+            z.clevels = clevels(zeff, **kwargs)
+            c = source.ax.contour(xeff, yeff, zeff,
+                              z.clevels, linewidths=lw, alpha=alpha)
         c.set_cmap(cmap)
         c.set_norm(norm)
 
@@ -194,10 +202,9 @@ def plot_2D(source, **kwargs):
         # ----------
         kwargs['nlevels'] = 500
         if z.clevels is None:
-            z.clevels = clevels(z.data, **kwargs)
-        c = source.ax.contourf(x.coords, y.coords, z.data,
-                               z.clevels,
-                               linewidths=lw, alpha=alpha)
+            z.clevels = clevels(zeff, **kwargs)
+        c = source.ax.contourf(xeff, yeff, zeff,
+                               z.clevels, linewidths=lw, alpha=alpha)
         c.set_cmap(cmap)
         c.set_norm(norm)
 
@@ -210,26 +217,26 @@ def plot_2D(source, **kwargs):
         color = kwargs.get('color', 'colormap')
 
         if not isinstance(step, str):
-            showed = np.arange(y[0], y[-1], float(step))
-            ishowed = np.searchsorted(y, showed, 'left')
+            showed = np.arange(yeff[0], yeff[-1], float(step))
+            ishowed = np.searchsorted(yeff, showed, 'left')
         elif step == 'all':
             ishowed = slice(None)
         else:
             raise ValueError(
                     'step parameter was not recognized. Should be: an int, "all"')
 
-        z = z[ishowed]
+        zeffs = zeff[ishowed]
 
         # now plot the collection of lines
         # ---------------------------------
         if color is None:
             # very basic plot (likely the faster)
             # use the matplotlib color cycler
-            source.ax.plot(x.coords, z.data, lw=lw)
+            source.ax.plot(xeff, zeffs, lw=lw)
 
         elif color != 'colormap':
             # just add a color to the line (the same for all)
-            source.ax.plot(x.coords, z.data, c=color, lw=lw)
+            source.ax.plot(xeff, zeffs, c=color, lw=lw)
 
         elif color == 'colormap':
             # here we map the color of each line to the colormap
@@ -240,7 +247,7 @@ def plot_2D(source, **kwargs):
             if ylim is not None:
                 vmin, vmax = ylim
             else:
-                vmin, vmax = y.coords[0], y.coords[-1]
+                vmin, vmax = yeff[0], yeff[-1]
             norm = mpl.colors.Normalize(vmin=vmin,
                                         vmax=vmax)  # we normalize to the max time
             if normalize is not None:
@@ -383,6 +390,41 @@ def plot_2D(source, **kwargs):
 # ===========================================================================
 # clevels
 # ===========================================================================
+def clevels_old(data, **kwargs):
+    """Utility function to determine contours levels
+    """
+    # avoid circular call to this module
+    from spectrochempy.application import plotoptions
+
+    # contours
+    maximum = data.max()
+    minimum = -maximum
+
+    nlevels = kwargs.get('nlevels', kwargs.get('nc',
+                                               plotoptions.number_of_contours))
+    exponent = kwargs.get('exponent', plotoptions.cexponent)
+    if 'start' in kwargs:
+        log.info("'start' is deprecated, use 'negative' instead.")
+    negative = kwargs.get('start', kwargs.get('negative', True))
+    if negative < 0:
+        negative = True
+
+
+    maximum = data.max()
+    ms = maximum / nlevels
+    for xi in range(100):
+        if ms * exponent ** xi > maximum:
+            xl = xi
+            break
+    clevelc = [ms * exponent ** xi for xi in range(xl)]
+    if negative:
+        clevelc = [- ms * exponent ** xi for xi in range(xl)[::-1]] + clevelc
+
+    return sorted(clevelc)
+
+# ===========================================================================
+# clevels
+# ===========================================================================
 def clevels(data, **kwargs):
     """Utility function to determine contours levels
     """
@@ -391,28 +433,20 @@ def clevels(data, **kwargs):
 
     # contours
     maximum = data.max()
-    minimum = 1e-30
+    minimum = -maximum
 
-    nlevels = kwargs.get('nlevels', plotoptions.number_of_contours)
-    exponent = kwargs.get('exponent', plotoptions.cexponent)
-    start = abs(kwargs.get('start', maximum * 0.01))
+    nlevels = kwargs.get('nlevels', kwargs.get('nc',
+                                               plotoptions.number_of_contours))
+    start = kwargs.get('start', maximum / 20.)
+    negative = kwargs.get('negative', True)
+    if negative < 0:
+        negative = True
 
-    if (exponent - 1.00) < .005:
-        clevelc = np.linspace(minimum, maximum, nlevels)
-        clevelc[clevelc.size / 2 - 1:clevelc.size / 2 + 1] = np.NaN
-        return clevelc
+    c = np.arange(nlevels)
+    cl = np.log(c + 1.)
+    clevel = cl * (maximum-start)/cl.max() + start
+    clevelneg = - clevel
+    if negative:
+        clevelc = sorted(list(np.concatenate((clevel,clevelneg))))
 
-    maximum = data.max()
-    ms = maximum / nlevels
-    for xi in range(100):
-        if ms * exponent ** xi > maximum:
-            xl = xi
-            break
-    # if start != 0:
-    #     clevelc = [float(start) * ms * exponent ** xi
-    #                for xi in range(xl)] + [ms * exponent ** xi for xi in
-    #                                        range(xl)]
-    # else:
-    clevelc = [-ms * exponent ** xi for xi in range(xl)] + [ms * exponent ** xi
-                                                            for xi in range(xl)]
-    return sorted(clevelc)
+    return clevelc

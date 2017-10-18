@@ -97,8 +97,8 @@ def test_nmr_1D_show_dualdisplay_apodfun(NMR_source_1D):
     LB = 80 * ur.Hz
     source.em(lb=LB)
     source.plot(data_only=True)
-    # display the apodization function
-    apodfun = source.em(lb=LB, apply=False)
+    # display the apodization function (scaled to the data !)
+    apodfun = source.em(lb=LB, apply=False)*source.data.max()
     apodfun.plot(data_only=True)
     show()
 
@@ -107,12 +107,12 @@ def test_nmr_1D_show_complex(NMR_source_1D):
     # display the real and complex at the same time
     source = NMR_source_1D.copy()
     source.plot(show_complex=True, color='green',
-                xlim=(0.,30000.), zlim=(-2.,2.))
+                xlim=(0.,30000.), zlim=(-200.,200.))
     show()
 
-def test_nmr_em_nothing_calculated(NMR_source_1D_1H):
+def test_nmr_em_nothing_calculated(NMR_source_1D):
     # em without parameters
-    source = NMR_source_1D_1H.copy()
+    source = NMR_source_1D.copy()
 
     arr = source.em(apply=False)
     # we should get an array of ones only , as apply = False mean
@@ -120,9 +120,9 @@ def test_nmr_em_nothing_calculated(NMR_source_1D_1H):
     # calculation of the apodization function
     assert_equal(arr, np.ones_like(source.data))
 
-def test_nmr_em_calculated_notapplied(NMR_source_1D_1H):
+def test_nmr_em_calculated_notapplied(NMR_source_1D):
     # em calculated but not applied
-    source = NMR_source_1D_1H.copy()
+    source = NMR_source_1D.copy()
 
     lb = 100
     arr = source.em(lb=lb, apply=False)
@@ -137,9 +137,9 @@ def test_nmr_em_calculated_notapplied(NMR_source_1D_1H):
     assert_equal(arr.real().data, arrcalc)  # note that we have to compare
     # to the real part data because of the complex nature of the data
 
-def test_nmr_em_calculated_applied(NMR_source_1D_1H):
+def test_nmr_em_calculated_applied(NMR_source_1D):
     # em calculated and applied
-    source = NMR_source_1D_1H.copy()
+    source = NMR_source_1D.copy()
 
     lb = 100
     arr = source.em(lb=lb, apply=False)
@@ -160,8 +160,8 @@ def test_nmr_em_calculated_applied(NMR_source_1D_1H):
     # but also the sources as whole entity
     assert(source3 == arrcalc*source2)
 
-def test_nmr_em_calculated_Hz(NMR_source_1D_1H):
-    source = NMR_source_1D_1H.copy()
+def test_nmr_em_calculated_Hz(NMR_source_1D):
+    source = NMR_source_1D.copy()
 
     lb = 200 * ur.Hz
     x = source.axes[-1]
@@ -178,8 +178,8 @@ def test_nmr_em_calculated_Hz(NMR_source_1D_1H):
     # and the original untouched
     assert (source != source3)
 
-def test_nmr_em_calculated_inplace(NMR_source_1D_1H):
-    source = NMR_source_1D_1H.copy()
+def test_nmr_em_calculated_inplace(NMR_source_1D):
+    source = NMR_source_1D.copy()
 
     lb = 200 * ur.Hz
 
@@ -200,9 +200,9 @@ def test_nmr_em_calculated_inplace(NMR_source_1D_1H):
 
 
 @show_do_not_block
-def test_nmr_1D_em_(NMR_source_1D_1H):
+def test_nmr_1D_em_(NMR_source_1D):
 
-    source = NMR_source_1D_1H.copy()
+    source = NMR_source_1D.copy()
 
     source.plot(xlim=(0.,6000.))
 
@@ -218,9 +218,9 @@ def test_nmr_1D_em_(NMR_source_1D_1H):
     show()
 
 @show_do_not_block
-def test_nmr_1D_em_with_no_kw_lb_parameters(NMR_source_1D_1H):
+def test_nmr_1D_em_with_no_kw_lb_parameters(NMR_source_1D):
 
-    source = NMR_source_1D_1H.copy()
+    source = NMR_source_1D.copy()
 
     source.plot()
     source.em(100.*ur.Hz, inplace=True)
@@ -228,8 +228,8 @@ def test_nmr_1D_em_with_no_kw_lb_parameters(NMR_source_1D_1H):
     show()
 
 @show_do_not_block
-def test_nmr_1D_em_inplace(NMR_source_1D_1H):
-    source = NMR_source_1D_1H.copy()
+def test_nmr_1D_em_inplace(NMR_source_1D):
+    source = NMR_source_1D.copy()
 
     source.plot()
     source1 = source.em(lb=100. * ur.Hz)
@@ -241,10 +241,10 @@ def test_nmr_1D_em_inplace(NMR_source_1D_1H):
     show()
 
 @show_do_not_block
-def test_nmr_1D_gm(NMR_source_1D_1H):
+def test_nmr_1D_gm(NMR_source_1D):
 
     # first test gm
-    source = NMR_source_1D_1H.copy()
+    source = NMR_source_1D.copy()
 
     source.plot(xlim=(0.,6000.))
 
@@ -270,7 +270,7 @@ def test_nmr_2D(NMR_source_2D):
 
     figure()
     source = NMR_source_2D
-    source.plot()
+    source.plot(nlevels=20) #, start=0.15)
     show()
     pass
 
@@ -280,8 +280,18 @@ def test_nmr_2D_imag(NMR_source_2D):
     #plt.ion()
     figure()
     source = NMR_source_2D.copy()
+    source.plot(imag=True)
+    show()
+    pass
+
+@show_do_not_block
+def test_nmr_2D_imag_compare(NMR_source_2D):
+
+    #plt.ion()
+    figure()
+    source = NMR_source_2D.copy()
     source.plot()
-    source.plot(imag=True, cmap='jet', data_only=True)
+    source.plot(imag=True, cmap='jet', data_only=True, alpha=.3)
                                 # better not to replot a second colorbar
     show()
     pass
@@ -301,8 +311,8 @@ def test_nmr_2D_em_(NMR_source_2D):
     figure()
     source = NMR_source_2D.copy()
     source.plot()
-    source.em(lb=20.*ur.Hz)
-    source.em(lb=10. * ur.Hz, axis=0)
+    source.em(lb=100.*ur.Hz)
+    source.em(lb=50. * ur.Hz, axis=0)
     source.plot(cmap='copper',data_only=True)
     show()
     pass

@@ -7,7 +7,7 @@ nmr_valid_meta = [
     ('bf1', 'MHz'),
     ('bf2', 'MHz'),
     ('bf3', 'MHz'),
-    #  		('bf4', 'MHz'),
+    ('bf4', 'MHz'),
     #  		('bf5', 'MHz'),
     #  		('bf6', 'MHz'),
     #  		('bf7', 'MHz'),
