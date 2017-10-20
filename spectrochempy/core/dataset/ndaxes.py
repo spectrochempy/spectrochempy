@@ -279,7 +279,7 @@ class Axis(NDMath, NDArray):
             log.debug("init mask from the passed data")
             self._data_passed_with_mask = True
             self._data = np.array(data.data, subok=True, copy=self._iscopy)
-            self.mask = data.mask
+            self._mask = data.mask
 
         elif (not hasattr(data, 'shape') or
                   not hasattr(data, '__getitem__') or
@@ -440,6 +440,14 @@ class Axis(NDMath, NDArray):
         # as they are not usefull for Axis.
         return ['data', 'mask', 'labels', 'units',
                 'meta', 'name', 'title']
+
+
+    def __eq__(self, other):
+        attrs = self.__dir__()
+        for attr in ['name',]:
+            attrs.remove(attr)
+        #some attrib are not important for equality
+        return super(Axis, self).__eq__(other, attrs)
 
     def __str__(self):
         units = '{:~K}'.format(self._units) \

@@ -227,9 +227,11 @@ def test_uncertainties_and_units(nd1d):
 def test_initializing_from_nddataset():
     d1 = NDDataset(np.ones((5, 5)))
     d2 = NDDataset(d1)
+    assert d1.data is not d2.data # by default perfomr a copy of data
 
+    d1 = NDDataset(np.ones((2, 2)))
+    d2 = NDDataset(d1, iscopy=False)   # change the default behavior
     assert d1.data is d2.data
-
 
 # Test an array and a scalar because a scalar Quantity does not always
 # behaves the same way as an array.

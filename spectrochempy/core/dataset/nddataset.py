@@ -186,7 +186,7 @@ class NDDataset(
 
         Metadata for this object.
 
-    iscopy :  `bool`, optional, default = `False`.
+    is_copy :  `bool`, optional, default = `False`.
 
         `False` means that the initializer try to keep reference
         to the passed `data`
@@ -238,97 +238,28 @@ class NDDataset(
                  axesunits=None,
                  axestitles=None,
                  is_complex=None,
+                 is_copy = True,
                  **kwargs):
 
-        self._iscopy = False  # kwargs.pop('iscopy', False)
 
-        if is_complex is not None:
-            self._data_is_complex = is_complex
+        super(NDDataset, self).__init__(
+                 data=data,
+                 mask=mask,
+                 uncertainty=uncertainty,
+                 units=units,
+                 meta=meta,
+                 name=name,
+                 title=title,
+                 is_complex=is_complex,
+                 is_copy=is_copy,
+                 **kwargs)
 
-        super(NDDataset, self).__init__(**kwargs)
-
-        self._modified = self._date
-
-        self._description = ''
-        self._history = []
-
-        # If we want a deepcopy of the passed data
-        if self._iscopy:
-            data = copy.deepcopy(data)
-            axes = copy.deepcopy(axes)
-            mask = copy.deepcopy(mask)
-            uncertainty = copy.deepcopy(uncertainty)
-            units = copy.copy(units)  # FIX:? deepcopy not working
-            meta = copy.deepcopy(meta)
-            axesunits = copy.deepcopy(axesunits)
-            axestitles = copy.deepcopy(axestitles)
-
-        self.data = data
-
-        self.name = name
-
-        self.meta = meta
-
-        self.title = title
-
-        if mask is not None:
-            if self._data_passed_with_mask and self._mask != mask:
-                log.info("NDDataset was created with a masked array, and a "
-                         "mask was explicitly provided to Axis. The  "
-                         "explicitly passed-in mask will be used and the "
-                         "masked array's mask will be ignored.")
-            self.mask = mask
-
-        if units is not None:
-            if self._data_passed_is_quantity and self._units != units:
-                raise ValueError(
-                        "Cannot use the units argument "
-                        "when passed data is a Quantity")
-            self.units = units
-
+        self.modified = self._date
+        self.description = ''
+        self.history = []
         self.axes = axes
-
         self.axestitles = axestitles
-
         self.axesunits = axesunits
-
-        # This must come after self's units has been set so that the units
-        # of the uncertainty, if any, can be converted to the units of the
-        # units of self.
-        self.uncertainty = uncertainty
-
-    def _check_for_complex_data(self, data):
-
-        if data.dtype != np.complex:
-            # given data in the last dimension are not complex!
-            self._data = data
-            if self._data_is_complex is None:
-                self._is_complex = [False] * data.ndim
-            else:
-                self._is_complex = self._data_is_complex
-            return
-
-        # input complex values are only accepted for the last dimension
-        # They will be interlaced in the final dataset
-
-        if self._data_is_complex is None:
-            # make the data in the last dimension (or the dimension
-            # specified by is complex)
-            # compatible with the structure of
-            # NDDataset which does not accept complex data (must be interlaced)
-            self._is_complex = [False] * data.ndim
-        else:
-            self._is_complex = self._data_is_complex
-
-        self.set_complex(axis=-1)
-
-        newshape = list(data.shape)
-        newshape[-1] = newshape[-1] * 2
-        newdata = np.zeros(newshape)
-        newdata[..., ::2] = data.real
-        newdata[..., 1::2] = data.imag
-
-        self._data = newdata[:]
 
     @property
     def data(self):
@@ -337,9 +268,8 @@ class NDDataset(
         contained in this object.
 
         """
-        #ua = self._uarray(self._data, self.uncertainty, self.units)
-        #return self._umasked(ua, self.mask)
-        return self._data
+        return super(NDDataset, self).data
+
 
     @data.setter
     def data(self, data):
@@ -354,7 +284,7 @@ class NDDataset(
             # initialized.
             self._name = "copy of {}".format(data._name) if self._iscopy \
                 else data._name
-            self._check_for_complex_data(data._data)
+            self._validate(data._data)
             self._mask = data._mask
             self._axes = data._axes
             self._units = data._units
@@ -364,26 +294,26 @@ class NDDataset(
 
         elif isinstance(data, NDFrame):  # pandas object
             log.debug("init data with data from pandas NDFrame object")
-            self._check_for_complex_data(data.values)
+            self._validate(data.values)
             self.axes = data.axes
 
         elif isinstance(data, pd.Index):  # pandas index object
             log.debug("init data with data from a pandas Index")
-            self._check_for_complex_data(np.array(data.values, subok=True,
-                                                  copy=self._iscopy))
+            self._validate(np.array(data.values, subok=True,
+                                    copy=self._iscopy))
 
         elif isinstance(data, Quantity):
             log.debug("init data with data from a Quantity object")
             self._data_passed_is_quantity = True
-            self._check_for_complex_data(np.array(data.magnitude, subok=True,
-                                                  copy=self._iscopy))
+            self._validate(np.array(data.magnitude, subok=True,
+                                    copy=self._iscopy))
             self._units = data.units
 
         elif hasattr(data, 'mask'):  # an object with data and mask attributes
             log.debug("init mask from the passed data")
             self._data_passed_with_mask = True
-            self._check_for_complex_data(np.array(data.data, subok=True,
-                                                  copy=self._iscopy))
+            self._validate(np.array(data.data, subok=True,
+                                    copy=self._iscopy))
             if isinstance(data.mask, np.ndarray) and \
                             data.mask.shape == data.data.shape:
                 self._mask = np.array(data.mask, dtype=np.bool_, copy=False)
@@ -396,76 +326,12 @@ class NDDataset(
             log.debug("init data with a non numpy-like array object")
             # Data doesn't look like a numpy array, try converting it to
             # one. Non-numerical input are converted to an array of objects.
-            self._check_for_complex_data(np.array(data, subok=True, copy=False))
+            self._validate(np.array(data, subok=True, copy=False))
 
         else:
             log.debug("init data with a numpy array")
-            self._check_for_complex_data(np.array(data, subok=True,
-                                                  copy=self._iscopy))
-
-    @property
-    def mask(self):
-        """
-        :class:`~numpy.ndarray`-like - Mask for the data.
-
-        The values must be `False` where
-        the data is *valid* and `True` when it is not (like Numpy
-        masked arrays). If `data` is a numpy masked array, providing
-        `mask` here will causes the mask from the masked array to be
-        ignored.
-
-        """
-
-        return self._mask
-
-    @mask.setter
-    def mask(self, mask):
-        # property.setter for mask
-        if mask is not None:
-            if self._mask is not None:
-                log.info("Overwriting NDDataset's current "
-                         "mask with specified mask")
-
-            # Check that value is not either type of null mask.
-            if mask is not np.ma.nomask:
-                mask = np.array(mask, dtype=np.bool_, copy=False)
-                if mask.shape != self.shape:
-                    raise ValueError("dimensions of mask do not match data")
-                else:
-                    self._mask = mask
-        else:
-            # internal representation should be one numpy understands
-            self._mask = np.ma.nomask
-
-    @property
-    def uncertainty(self):
-        """
-        :class:`~numpy.ndarray` -  Uncertainty (std deviation) on the data.
-
-        """
-        return self._uncertainty
-
-    @uncertainty.setter
-    def uncertainty(self, value):
-        # property setter for uncertainty
-        if value is not None:
-            if self.uncertainty is not None and self.uncertainty.size > 0:
-                log.info("Overwriting NDDataset's current uncertainty being"
-                         " overwritten with specified uncertainty")
-            if not isinstance(value, np.ndarray):
-                raise ValueError('Uncertainty must be specified as a ndarray')
-                # TODO: make this a little less strict
-                # so it accept other list structure
-
-            if value.shape != self._data.shape:
-
-                if not self.has_complex_dims:
-                    raise ValueError(
-                            'uncertainty shape does not match array data shape')
-                else:  # complex data
-                    pass
-
-            self._uncertainty = value
+            self._validate(np.array(data, subok=True,
+                                    copy=self._iscopy))
 
     # --------------------------------------------------------------------------
     # additional properties (not in the NDArray base class)
@@ -1160,11 +1026,6 @@ class NDDataset(
                                    'modified'
                                    ]
 
-    def __repr__(self):
-        prefix = type(self).__name__ + '('
-        body = np.array2string(self._data, separator=', ', prefix=prefix)
-        return ''.join([prefix, body, ')'])
-
     def __str__(self):
         # Display the metadata of the object and partially the data
 
@@ -1318,13 +1179,11 @@ class NDDataset(
         return new
 
     def __eq__(self, other):
-        eq = super(NDDataset, self).__eq__(other)
-        eq &= (np.all(self._uncertainty == other._uncertainty))
-        return eq
-
-    def __hash__(self):
-        # all instance of this class has same hash, so they can be compared
-        return str(type(self)) + "1234567890"
+        attrs = self.__dir__()
+        for attr in ('name', 'description', 'history', 'date', 'modified'):
+            attrs.remove(attr)
+        #some attrib are not important for equality
+        return super(NDDataset, self).__eq__(other, attrs)
 
     # def __iter__(self):
     #     if self.ndim == 0:

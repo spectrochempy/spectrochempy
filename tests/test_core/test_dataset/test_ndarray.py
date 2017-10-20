@@ -55,6 +55,11 @@ from tests.utils import NumpyRNGContext
 
 # fixtures
 # --------
+
+class MinimalSubclass(NDArray):
+    # in principle NDArray is not used directly and should be subclassed
+    pass
+
 @pytest.fixture(scope="module")
 def ndarraysubclass():
     # return a simple ndarray
@@ -63,6 +68,17 @@ def ndarraysubclass():
         dx = 10.*np.random.random((10, 10))-5.
     _nd = MinimalSubclass()
     _nd.data = dx
+    return _nd.copy()
+
+@pytest.fixture(scope="module")
+def ndarraysubclassunit():
+    # return a simple ndarray
+    # with some data
+    with NumpyRNGContext(12345):
+        dx = 10.*np.random.random((10, 10))-5.
+    _nd = MinimalSubclass()
+    _nd.data = dx
+    _nd.units = 'm/s'
     return _nd.copy()
 
 @pytest.fixture(scope="module")
@@ -79,10 +95,6 @@ def ndarraysubclasscplx():
 
 # test initialization
 # --------------------
-
-class MinimalSubclass(NDArray):
-    # in principle NDArray is not used directly and should be subclassed
-    pass
 
 def test_init_ndarray_subclass():
     # test initialization of an empty ndarray
@@ -209,23 +221,20 @@ def test_deepcopy_of_ndarray(ndarraysubclasscplx):
 def test_ndarray_with_uncertaincy(ndarraysubclass):
     nd = ndarraysubclass.copy()
     assert not nd.is_uncertain
-    assert repr(nd).startswith('NDArray:')
+    assert repr(nd).startswith('MinimalSubclass: ')
     nd._uncertainty = np.abs(nd._data * .01)
     nd.change_units('second') # force a change of units
     assert nd.is_uncertain
-    assert str(nd).startswith('NDArray:')
+    assert str(nd).startswith('MinimalSubclass: ')
     assert str(nd.values[0,0]) == "4.30+/-0.04 second"
-    print(nd)
 
 
 def test_ndarray_with_mask(ndarraysubclass):
     nd = ndarraysubclass.copy()
-    print(nd)
     assert not nd.is_masked
-    assert str(nd).startswith('NDArray:')
+    assert str(nd).startswith('MinimalSubclass: ')
     nd._mask[0] = True
     assert nd.is_masked
-    print(nd)
 
 
 def test_ndarray_units(ndarraysubclass):
@@ -243,16 +252,15 @@ def test_ndarray_with_uncertaincy_and_units(ndarraysubclass):
     nd.change_units('m')
     assert nd.units == ur.meter
     assert not nd.is_uncertain
-    assert repr(nd).startswith('NDArray:')
+    assert repr(nd).startswith('MinimalSubclass: ')
     nd._uncertainty = np.abs(nd._data * .01)
     assert nd.is_uncertain
-    assert str(nd).startswith('NDArray:')
+    assert str(nd).startswith('MinimalSubclass: ')
     units = nd.units
     nd.units = None # should change nothing
     assert nd.units == units
     nd._mask[1,1] = True
     assert nd.is_masked
-    print(nd)
 
 
 def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraysubclasscplx):
@@ -260,11 +268,10 @@ def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraysubclasscplx):
     nd.units = 'm'
     assert nd.units == ur.meter
     assert not nd.is_uncertain
-    assert repr(nd).startswith('NDArray:')
+    assert repr(nd).startswith('MinimalSubclass: ')
     nd._uncertainty = nd._data * .01
     assert nd.is_uncertain
-    assert str(nd).startswith('NDArray:')
-    #print(nd)
+    assert str(nd).startswith('MinimalSubclass: ')
     assert nd._uncertainty.size == nd.data.size
 
 
@@ -278,7 +285,6 @@ def test_ndarray_len_and_sizes(ndarraysubclass, ndarraysubclasscplx):
     assert nd.ndim == 2
 
     nd = ndarraysubclasscplx.copy()
-    #print(nd.is_complex)
     assert nd.is_complex[1]
     assert len(nd) == 10
     assert nd.shape == (10, 10)
@@ -286,7 +292,82 @@ def test_ndarray_len_and_sizes(ndarraysubclass, ndarraysubclasscplx):
     assert nd.ndim == 2
 
 
+### TEST SLICING
+
 def test_slicing_byindex(ndarraysubclass):
+
     nd = ndarraysubclass.copy()
-    nd3 = nd[7:10]
-    assert_equal(nd3.data,nd.data[7:10])
+    assert not any(nd.is_complex) and not nd.is_masked and not nd.is_uncertain
+    nd1 = nd[0,0]
+    assert_equal(nd1.data, nd.data[0,0])
+    nd2 = nd[7:10]
+    assert_equal(nd2.data,nd.data[7:10])
+    assert not nd.is_masked
+    nd.mask[1] = True
+    assert nd.is_masked
+    nd3 = nd[1,0]
+
+### TEST __REPR__
+
+def test_repr(ndarraysubclass, ndarraysubclassunit):
+    nd = ndarraysubclass.copy()
+    assert '4.3,' in nd.__repr__()
+    nd = ndarraysubclassunit.copy()
+    assert '4.3,' in nd.__repr__()
+    nd._mask[1] = True
+    nd._uncertainty = np.abs(nd._data * .1)
+    assert nd.is_masked
+    assert nd.is_uncertain
+    assert '4.296+/-0.430,' in nd.__repr__()
+
+### TEST_COMPARISON
+
+def test_comparison(ndarraysubclass, ndarraysubclassunit):
+    nd1 = ndarraysubclass.copy()
+    print(nd1)
+    nd2 = ndarraysubclassunit.copy()
+    print(nd2)
+    assert nd1 != nd2
+    assert not nd1==nd2
+
+### TEST ITERATIONS
+
+def test_iteration(ndarraysubclassunit):
+    nd = ndarraysubclassunit.copy()
+    nd.mask[1] = True
+    nd._uncertainty = np.abs(nd._data * .01)
+    for item in nd:
+        print(item)
+
+### TEST INITIALIZATION
+
+def test_init_ndarray():
+
+    d1 = NDArray(np.ones((5, 5)))
+    assert not np.any(d1.is_complex)
+    d2 = NDArray(d1)
+    assert not np.any(d2.is_complex)
+    assert d1.data is not d2.data  # by default perfomr a copy of data
+
+    d1 = NDArray(np.ones((2, 2)))
+    assert not np.any(d1.is_complex)
+    d2 = NDArray(d1, is_copy=False) # change the default behavior
+    assert not np.any(d1.is_complex)
+    assert d1.data is d2.data
+
+    # test with complex data in the last dimension
+    d = np.ones((2, 2))*np.exp(.1j)
+    d1 = NDArray(d)
+    assert np.any(d1.is_complex)
+    d2 = NDArray(d1)
+    assert d1.data is not d2.data
+    assert np.all(d1.data == d2.data)
+    assert d2.is_complex==[False, True]
+    assert d2.shape == (2,2)
+
+    print()
+    print(d1)
+    print(d2)
+
+    print(d2[1, 1], d[1, 1])
+    assert d2[1, 1].data == float(d[1,1])

@@ -126,18 +126,19 @@ import matplotlib.pyplot as plt
 # optional libraries
 try:
     import sympy as sym
-
+    HAS_SYMPY = True
     __all__.append('sym')
 except ImportError:
-    pass
+    HAS_SYMPY = True
+__all__.append('HAS_SYMPY')
 
 try:
     import sklearn as skl
-
+    HAS_SCIKITLEARN = True
     __all__.append('skl')
 except ImportError:
-    pass
-
+    HAS_SCIKITLEARN = False
+__all__.append('HAS_SCIKITLEARN')
 
 def APIref():
     """
