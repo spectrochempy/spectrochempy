@@ -64,7 +64,7 @@ def ndcplx():
     _nd = NDDataset()
     with NumpyRNGContext(1234):
         _nd._data = np.random.random((10, 10))
-    _nd.set_complex(axis=-1)  # this means that the data are complex in
+    _nd.make_complex(axis=-1)  # this means that the data are complex in
     # the last dimension
     return _nd
 
@@ -1209,7 +1209,7 @@ def test_real_imag():
 
     # in another dimension
     with raises(ValueError):
-        nd.set_complex(axis=0)  # cannot be complex as the number of row
+        nd.make_complex(axis=0)  # cannot be complex as the number of row
         # doesn't match an even number
 
     na = np.array(
@@ -1217,7 +1217,7 @@ def test_real_imag():
              [1. + 4.2j, 2. + 3j], [5. + 4.2j, 2. + 3j]])
 
     nd = NDDataset(na)
-    nd.set_complex(axis=0)
+    nd.make_complex(axis=0)
     assert nd.is_complex == [True, True]
     assert_array_equal(nd.real(), na.real)
     assert_array_equal(nd.imag(), na.imag)
@@ -1253,7 +1253,7 @@ def test_complex_full():
     assert nd.shape == (4, 6)
     nd.axes = axes
     # print(nd)
-    nd.set_complex(axis=0)
+    nd.make_complex(axis=0)
     # print(nd)
 
     # test swapaxes
@@ -1325,7 +1325,7 @@ def test_complex_dataset_slicing_by_index():
     assert nd1.data.shape == (2, 4)
     # print(nd1)
 
-    nd.set_complex(0)
+    nd.make_complex(0)
     assert nd.shape == (3, 4)
     assert nd.data.shape == (6, 8)
     # print(nd)
@@ -1349,7 +1349,7 @@ def test_absolute_of_complex():
     axes = Axes([np.linspace(-1, 1, 4), np.linspace(-10., 10., 6)])
     assert nd.shape == (4, 6)
     nd.axes = axes
-    nd.set_complex(axis=0)
+    nd.make_complex(axis=0)
     # print(nd)
 
     val = np.abs(nd)  # this dimension (the last is ot complex)

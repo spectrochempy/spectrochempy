@@ -74,7 +74,7 @@ from spectrochempy.core.units import Unit, ur, Quantity, Measurement
 
 from spectrochempy.utils import EPSILON, is_number, is_sequence, numpyprintoptions
 from spectrochempy.utils import SpectroChemPyWarning, deprecated
-from spectrochempy.utils.traittypes import Array
+from spectrochempy.utils.traittypes import Array, HyperComplexArray
 
 # =============================================================================
 # Constants
@@ -88,19 +88,6 @@ _classes = __all__[:]
 # =============================================================================
 
 numpyprintoptions()  # set up the numpy print format
-
-# =============================================================================
-# The NDComplex class
-# =============================================================================
-
-class NDComplexData(HasTraits):
-    """A NDComplex object providing a multidimensional complex object
-    """
-
-    _value = Any
-    _ndim = Integer
-    _is_complex = List
-
 
 # =============================================================================
 # The basic NDArray class
@@ -151,10 +138,10 @@ class NDArray(HasTraits):
     """
 
     _ax = Instance(plt.Axes, allow_none=True)
-    _data = Array()
+    _data = HyperComplexArray(allow_none=True)
     _date = Instance(datetime)
     _fig = Instance(plt.Figure, allow_none=True)
-    _is_complex = List(Bool(), allow_none=True)
+    #_is_complex = List(Bool(), allow_none=True)
     _labels = Array(allow_none=True)
     _mask = Array(allow_none=True)
     _meta = Instance(Meta, allow_none=True)
@@ -169,7 +156,6 @@ class NDArray(HasTraits):
     _data_passed_is_measurement = Bool()
     _data_passed_is_quantity = Bool()
     _data_passed_with_mask = Bool()
-    #_data_is_complex = List(allow_none=True)
 
     # -------------------------------------------------------------------------
     # Initialization
@@ -183,16 +169,13 @@ class NDArray(HasTraits):
                  meta=None,
                  name=None,
                  title=None,
-                 is_complex=None,
-                 is_copy = True,
+                 #is_complex=None,
                  **kwargs):
 
         #super(NDArray, self).__init__(**kwargs)
 
-        self._is_copy = is_copy
-
-        if is_complex is not None:
-            self._is_complex = is_complex
+        #if is_complex is not None:
+        #    self._is_complex = is_complex
 
         self.data = data
 
@@ -239,7 +222,7 @@ class NDArray(HasTraits):
 
     def __dir__(self):
         return ['data', 'mask', 'units', 'uncertainty', 'labels', \
-                'meta', 'name', 'title', 'is_complex']
+                'meta', 'name', 'title'] #, 'is_complex']
 
     def __eq__(self, other, attrs=None):
         if not (other.__hash__()==self.__hash__()):
@@ -363,9 +346,9 @@ class NDArray(HasTraits):
     def _get_date_default(self):
         return datetime(1, 1, 1, 0, 0)
 
-    @default('_is_complex')
-    def _get_is_complex_default(self):
-        return None # list([False for _ in self._data.shape])
+    #@default('_is_complex')
+    #def _get_is_complex_default(self):
+    #    return None # list([False for _ in self._data.shape])
 
     @default('_labels')
     def _get_labels_default(self):
@@ -418,12 +401,10 @@ class NDArray(HasTraits):
             # successfully initialized for the passed NDArray.data
             for attr in self.__dir__():
                 val = getattr(data, "_%s"%attr)
-                if self._is_copy:
-                    val = copy.deepcopy(val)
+                val = copy.deepcopy(val)
                 setattr(self, "_%s"%attr, val)
 
-            self._name = "copy of {}".format(data._name) \
-                if self._is_copy else data._name
+            self._name = "copy of {}".format(data._name)
 
         elif isinstance(data, NDFrame):  # pandas object
             log.debug("init data with data from pandas NDFrame object")
@@ -433,20 +414,20 @@ class NDArray(HasTraits):
         elif isinstance(data, pd.Index):  # pandas index object
             log.debug("init data with data from a pandas Index")
             self._validate(np.array(data.values, subok=True,
-                                    copy=self._is_copy))
+                                    copy=True))
 
         elif isinstance(data, Quantity):
             log.debug("init data with data from a Quantity object")
             self._data_passed_is_quantity = True
             self._validate(np.array(data.magnitude, subok=True,
-                                    copy=self._is_copy))
+                                    copy=True))
             self._units = data.units
 
         elif hasattr(data, 'mask'):  # an object with data and mask attributes
             log.debug("init mask from the passed data")
             self._data_passed_with_mask = True
             self._validate(np.array(data.data, subok=True,
-                                    copy=self._is_copy))
+                                    copy=True))
             if isinstance(data.mask, np.ndarray) and \
                             data.mask.shape == data.data.shape:
                 self._mask = np.array(data.mask, dtype=np.bool_, copy=False)
@@ -464,7 +445,7 @@ class NDArray(HasTraits):
         else:
             log.debug("init data with a numpy array")
             self._validate(np.array(data, subok=True,
-                                    copy=self._is_copy))
+                                    copy=True))
 
     @property
     def date(self):
@@ -516,7 +497,7 @@ class NDArray(HasTraits):
             self._labels = labels
         else:
             self._labels = np.array(labels, subok=True,
-                                    copy=self._iscopy).astype(object)
+                                    copy=True).astype(object)
 
     @property
     def mask(self):
@@ -707,7 +688,7 @@ class NDArray(HasTraits):
         """`dtype`, read-only property - data type of the underlying array
 
         """
-        if np.sum(self.is_complex) > 0:
+        if np.sum(self._data.is_complex) > 0:
             return np.complex
         else:
             return self._data.dtype
@@ -717,8 +698,7 @@ class NDArray(HasTraits):
         """`bool` - Check if any of the dimension is complex
 
         """
-        if self._is_complex is not None:
-            return np.sum(self.is_complex) > 0
+        return np.sum(self._data.is_complex) > 0
 
     @property
     def is_complex(self):
@@ -728,8 +708,7 @@ class NDArray(HasTraits):
         in the `data` array.
 
         """
-
-        return self._is_complex
+        return self._data.is_complex
 
     @property
     def is_empty(self):
@@ -799,17 +778,18 @@ class NDArray(HasTraits):
 
         """
         # read the actual shape of the underlying array
-        shape = list(self._data.shape)
+        # shape = list(self._data.shape)
+        #
+        # # take into account that the data may be complex,
+        # # so that the real and imag data are stored sequentially
+        # if self._is_complex is not None:
+        #     for dim, is_complex in enumerate(self._is_complex):
+        #         if is_complex:
+        #             # here we divide by 2 tha apparent shape
+        #             shape[dim] //= 2
+        #return tuple(shape)
+        return self._data.trueshape
 
-        # take into account that the data may be complex,
-        # so that the real and imag data are stored sequentially
-        if self._is_complex is not None:
-            for dim, is_complex in enumerate(self._is_complex):
-                if is_complex:
-                    # here we divide by 2 tha apparent shape
-                    shape[dim] //= 2
-
-        return tuple(shape)
 
     @property
     def size(self):
@@ -819,11 +799,11 @@ class NDArray(HasTraits):
         (possibly complex or hyper-complex in the array).
 
         """
-        size = self._data.size
-        if self._is_complex is not None:
-            for is_complex in self._is_complex:
-                if is_complex:
-                    size //= 2
+        size = self._data.truesize
+        # if self._is_complex is not None:
+        #     for is_complex in self._is_complex:
+        #         if is_complex:
+        #             size //= 2
         return size
 
     @property
@@ -964,7 +944,7 @@ class NDArray(HasTraits):
         """
         return self.to(other, inplace=True)
 
-    def set_complex(self, axis=-1):
+    def make_complex(self, axis=-1):
         """Make a dimension complex
 
         Parameters
@@ -973,13 +953,7 @@ class NDArray(HasTraits):
             The axis to make complex
 
         """
-        if self._data.shape[axis] % 2 == 0:
-            # we have a pair number of element along this axis. It can be complex
-            # data are then supossed to be interlaced (real, imag, real, imag ..
-            self._is_complex[axis] = True
-        else:
-            raise ValueError('The odd size along axis {} is not compatible with'
-                             ' complex interlaced data'.format(axis))
+        self._data.make_complex(axis)
 
     def to(self, other, inplace=True):
         """Return the object with data rescaled to different units.
@@ -1026,38 +1000,14 @@ class NDArray(HasTraits):
 
         try:
             if len(data) == 0:  # self._data.any():
-                self._is_complex = None
                 return
         except:
             if data.size == 0:  # self._data.any():
-                self._is_complex = None
                 return
-
-        if self._is_complex is None:
-            # nothing specified or already known
-            self._is_complex = [False] * data.ndim
-        else:
-            # something was specified or is already set
-            pass # self._is_complex must be already set
-
-        # just be sure that the last dimension
-        # is set accordingly to the dtype, which is the only thing we can
-        # determine
-        if data.dtype == np.complex:
-            self._is_complex[-1] = True
 
         self._data = data
         return
 
-        #
-        self.set_complex(axis=-1)
-        newshape = list(data.shape)
-        newshape[-1] = newshape[-1] * 2
-        newdata = np.zeros(newshape)
-        newdata[..., ::2] = data.real
-        newdata[..., 1::2] = data.imag
-
-        self._data = newdata[:]
 
     def _argsort(self, by='value', pos=None, descend=False):
         # found the indices sorted by values or labels

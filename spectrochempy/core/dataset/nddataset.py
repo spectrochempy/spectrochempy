@@ -986,7 +986,7 @@ class NDDataset(
 
     absolute = abs
 
-    def set_complex(self, axis=-1):
+    def make_complex(self, axis=-1):
         """
         Make a dimension complex
 

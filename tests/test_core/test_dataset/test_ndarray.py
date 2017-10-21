@@ -51,6 +51,7 @@ from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
 from tests.utils import NumpyRNGContext
+from spectrochempy.utils.traittypes import HasTraits, HyperComplexArray, hcarray
 
 
 # fixtures
@@ -89,7 +90,7 @@ def ndarraysubclasscplx():
         dx = np.random.random((10, 20))
     _nd = MinimalSubclass()
     _nd.data = dx
-    _nd.set_complex(axis=-1)  # this means that the data are complex in
+    _nd.make_complex(axis=-1)  # this means that the data are complex in
     # the last dimension
     return _nd.copy()
 
@@ -343,17 +344,29 @@ def test_iteration(ndarraysubclassunit):
 
 def test_init_ndarray():
 
-    d1 = NDArray(np.ones((5, 5)))
-    assert not np.any(d1.is_complex)
-    d2 = NDArray(d1)
-    assert not np.any(d2.is_complex)
-    assert d1.data is not d2.data  # by default perfomr a copy of data
+    d0 = NDArray(None) # void initialization
+    assert d0.shape == (0,)
+    assert d0.size == 0
+    assert not d0.is_complex[-1]
 
-    d1 = NDArray(np.ones((2, 2)))
+    d0 = NDArray((2,3,4)) # initialisation with a sequence
+    print(d0.shape)
+    assert d0.shape == (3,)
+    assert d0.size == 3
+    assert not d0.is_complex[-1]
+
+    d0 = NDArray([2,3,4,5]) # initialisation with a sequence
+    assert d0.shape == (4,)
+    assert not d0.is_complex[-1]
+
+    d1 = NDArray(np.ones((5, 5))) #initialization with an array
+    assert d1.shape == (5, 5)
     assert not np.any(d1.is_complex)
-    d2 = NDArray(d1, is_copy=False) # change the default behavior
-    assert not np.any(d1.is_complex)
-    assert d1.data is d2.data
+
+    d2 = NDArray(d1) # initialization with an NDArray object
+    assert d2.shape == (5,5)
+    assert not np.any(d2.is_complex)
+    assert d1.data is not d2.data
 
     # test with complex data in the last dimension
     d = np.ones((2, 2))*np.exp(.1j)
