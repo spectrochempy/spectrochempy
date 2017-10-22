@@ -52,7 +52,7 @@ from tests.utils import (assert_equal, assert_array_equal,
                          raises)
 from tests.utils import NumpyRNGContext
 from spectrochempy.utils.traittypes import \
-    HasTraits, HyperComplexArray, hcarray, Range
+    HasTraits, HyperComplexArray, Range
 
 
 def test_range():
@@ -66,17 +66,6 @@ def test_range():
     with raises(TraitError):
         c.r = [10, 5, 1]
     pass
-
-
-def test_hcarray():
-    a = np.array([1, 2, 3, 4])
-    b = hcarray(a, is_complex=[True])
-    print()
-    print(a)
-    print(b)
-    assert b.is_complex[-1]
-    print(b * a)
-    assert b.is_complex[-1]
 
 
 def test_hypercomplex():

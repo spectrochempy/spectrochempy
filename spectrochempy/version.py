@@ -1,1 +1,1 @@
-version = '0.1a2.post57' 
+version = '0.1a2.post58' 

@@ -347,6 +347,7 @@ def test_init_ndarray():
     d0 = NDArray(None) # void initialization
     assert d0.shape == (0,)
     assert d0.size == 0
+    assert d0.dtype == 'float64'
     assert not d0.is_complex[-1]
 
     d0 = NDArray((2,3,4)) # initialisation with a sequence
@@ -354,6 +355,7 @@ def test_init_ndarray():
     assert d0.shape == (3,)
     assert d0.size == 3
     assert not d0.is_complex[-1]
+    print(d0)
 
     d0 = NDArray([2,3,4,5]) # initialisation with a sequence
     assert d0.shape == (4,)
@@ -382,5 +384,19 @@ def test_init_ndarray():
     print(d1)
     print(d2)
 
-    print(d2[1, 1], d[1, 1])
+    np.random.seed(12345)
+    d = np.random.random((2, 2)) * np.exp(.1j)
+    d3 = NDArray(d, units=ur.Hz,
+                 mask=[[False, True], [False, False]])  # with units & mask
+    assert d3.shape == (2, 2)
+    assert d3.size == 4
+    assert d3.dtype == np.complex
+    assert np.any(d3.is_complex)
+
+    print(d3)
+
+
+    a= d2[1, 1]
+
+    print(a , d[1, 1])
     assert d2[1, 1].data == float(d[1,1])

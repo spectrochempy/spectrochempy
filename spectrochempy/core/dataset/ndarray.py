@@ -70,6 +70,7 @@ import matplotlib.pyplot as plt
 from spectrochempy.application import log
 
 from spectrochempy.core.dataset.ndmeta import Meta
+from spectrochempy.core.dataset.hcarray import hcarray
 from spectrochempy.core.units import Unit, ur, Quantity, Measurement
 
 from spectrochempy.utils import EPSILON, is_number, is_sequence, numpyprintoptions
@@ -141,13 +142,18 @@ class NDArray(HasTraits):
     _data = HyperComplexArray(allow_none=True)
     _date = Instance(datetime)
     _fig = Instance(plt.Figure, allow_none=True)
-    #_is_complex = List(Bool(), allow_none=True)
     _labels = Array(allow_none=True)
-    _mask = Array(allow_none=True)
+
+    _mask = Array(allow_none=True)              # apparent (shape=data.shape)
+    _realmask = Array(allow_none=True)          # real mask (shape=data.trueshape)
+
     _meta = Instance(Meta, allow_none=True)
     _name = Unicode()
     _title = Unicode()
-    _uncertainty = Array(allow_none=True)
+
+    _uncertainty = Array(allow_none=True)       # apparent (shape=data.shape)
+    _realuncertainty = Array(allow_none=True)   # real uncertainty (shape=data.trueshape)
+
     _units = Instance(Unit, allow_none=True)
 
     # _scaling = Float(1.)
@@ -169,13 +175,7 @@ class NDArray(HasTraits):
                  meta=None,
                  name=None,
                  title=None,
-                 #is_complex=None,
                  **kwargs):
-
-        #super(NDArray, self).__init__(**kwargs)
-
-        #if is_complex is not None:
-        #    self._is_complex = is_complex
 
         self.data = data
 
@@ -210,6 +210,8 @@ class NDArray(HasTraits):
                         "when passed data is already with uncertainty")
             self.uncertainty = uncertainty
 
+        super(NDArray, self).__init__(**kwargs)
+
     # -------------------------------------------------------------------------
     # special methods
     # -------------------------------------------------------------------------
@@ -222,7 +224,7 @@ class NDArray(HasTraits):
 
     def __dir__(self):
         return ['data', 'mask', 'units', 'uncertainty', 'labels', \
-                'meta', 'name', 'title'] #, 'is_complex']
+                'meta', 'name', 'title']
 
     def __eq__(self, other, attrs=None):
         if not (other.__hash__()==self.__hash__()):
@@ -323,6 +325,12 @@ class NDArray(HasTraits):
     def __repr__(self):
         prefix = type(self).__name__ + ': '
         data = self.uncert_data
+
+        if self.is_complex[-1]:
+            data = np.array(data.real + data.imag*1j)
+        else:
+            data = np.array(data)
+
         if self.is_masked:
             data = data.astype(object)
         body = np.array2string( \
@@ -346,17 +354,17 @@ class NDArray(HasTraits):
     def _get_date_default(self):
         return datetime(1, 1, 1, 0, 0)
 
-    #@default('_is_complex')
-    #def _get_is_complex_default(self):
-    #    return None # list([False for _ in self._data.shape])
-
     @default('_labels')
     def _get_labels_default(self):
         return np.empty_like(self._data, dtype='str')
 
     @default('_mask')
     def _get_mask_default(self):
-        return np.zeros(self._data.shape, dtype=bool)
+        return np.ma.nomask #np.zeros(self._data.shape, dtype=bool)
+
+    @default('_truemask')
+    def _get_truemask_default(self):
+        return np.ma.nomask
 
     @default('_meta')
     def _get_meta_default(self):
@@ -510,7 +518,7 @@ class NDArray(HasTraits):
         ignored.
 
         """
-        return self._mask
+        return self._truemask
 
     @mask.setter
     def mask(self, mask):
@@ -523,13 +531,27 @@ class NDArray(HasTraits):
             # Check that value is not either type of null mask.
             if mask is not np.ma.nomask:
                 mask = np.array(mask, dtype=np.bool_, copy=False)
-                if mask.shape != self.shape:
+                if mask.shape != self._data.trueshape:
                     raise ValueError("dimensions of mask do not match data")
                 else:
-                    self._mask = mask
+                    self._truemask = mask
+                    # make the real mask taking account complexity
+                    # we want to mask both real and imaginary part
+                    # for complex dimensions
+                    self._mask = np.zeros(self._data.shape).astype(bool)
+                    for axis in range(self.ndim):
+                        if self._data.is_complex[axis]:
+                            self._mask.swapaxes(axis,-1)
+                            self._truemask.swapaxes(axis, -1)
+                            self._mask[..., ::2] = self._mask[..., 1::2] = \
+                                self._truemask
+                            self._mask.swapaxes(axis,-1)
+                            self._truemask.swapaxes(axis, -1)
+
         else:
             # internal representation should be one numpy understands
             self._mask = np.ma.nomask
+            self._truemask = np.ma.nomask
 
     @property
     def meta(self):
@@ -652,8 +674,8 @@ class NDArray(HasTraits):
                 self.to(units)
             except:
                 raise ValueError(
-                        "Unit provided in initializer does not match data units.\n "
-                        "To force a change - use the change_units() method")
+                    "Unit provided in initializer does not match data units.\n "
+                    "To force a change - use the change_units() method")
 
         self._units = units
 
@@ -688,8 +710,8 @@ class NDArray(HasTraits):
         """`dtype`, read-only property - data type of the underlying array
 
         """
-        if np.sum(self._data.is_complex) > 0:
-            return np.complex
+        if np.sum(self.is_complex) > 0:
+            return np.complex  # TODO: create a hypercomplex dtype?
         else:
             return self._data.dtype
 
@@ -698,7 +720,7 @@ class NDArray(HasTraits):
         """`bool` - Check if any of the dimension is complex
 
         """
-        return np.sum(self._data.is_complex) > 0
+        return np.sum(self.is_complex) > 0
 
     @property
     def is_complex(self):
@@ -778,18 +800,9 @@ class NDArray(HasTraits):
 
         """
         # read the actual shape of the underlying array
-        # shape = list(self._data.shape)
-        #
-        # # take into account that the data may be complex,
-        # # so that the real and imag data are stored sequentially
-        # if self._is_complex is not None:
-        #     for dim, is_complex in enumerate(self._is_complex):
-        #         if is_complex:
-        #             # here we divide by 2 tha apparent shape
-        #             shape[dim] //= 2
-        #return tuple(shape)
+        # taking into account that the data may be complex,
+        # so that the real and imag data are stored sequentially
         return self._data.trueshape
-
 
     @property
     def size(self):
@@ -799,12 +812,7 @@ class NDArray(HasTraits):
         (possibly complex or hyper-complex in the array).
 
         """
-        size = self._data.truesize
-        # if self._is_complex is not None:
-        #     for is_complex in self._is_complex:
-        #         if is_complex:
-        #             size //= 2
-        return size
+        return self._data.truesize
 
     @property
     def uncert_data(self):
@@ -1068,9 +1076,9 @@ class NDArray(HasTraits):
         # This ensures that a masked array is returned if self is masked.
 
         if mask is not None and np.any(mask):
-            data = np.ma.masked_array(data, mask)
+            data = hcarray(np.ma.masked_array(data, mask), data.is_complex)
         else:
-            data = np.array(data)
+            data = hcarray(data)
         return data
 
     @staticmethod
@@ -1078,9 +1086,9 @@ class NDArray(HasTraits):
         # return the array with uncertainty and units if any
 
         if uncertainty is None or np.all(uncertainty <= EPSILON):
-            uar = data
+            uar = hcarray(data)
         else:
-            uar = unp.uarray(data, uncertainty)
+            uar = hcarray(unp.uarray(data, uncertainty), data.is_complex)
 
         if units:
             return Quantity(uar, units)
