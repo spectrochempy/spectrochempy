@@ -63,6 +63,7 @@ import sys
 from contextlib import contextmanager
 from uncertainties.core import Variable
 
+
 # =============================================================================
 # Ignored context
 # =============================================================================
@@ -249,20 +250,26 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
                       formatter=None, spc=4, linewidth=130, **kargs):
 
     def _format_object(x):
-        if isinstance(x, float):
+
+        if hasattr(x, 'uncert_data'):
+            x = x.uncert_data[()]
+
+        if isinstance(x, (float, np.float)) :
             fmt = '{:{l}.0{prec}f}'.format(x,
                                 prec=precision - 1,
                                 l=precision + spc)
-        elif isinstance(x, complex):
+        elif isinstance(x, np.complex) :
             fmt =  '({:^{l}.0{prec}f}{:^+{lc}.0{prec}f}j)'.format(
                     x.real, x.imag,
                     prec=precision - 1, l=precision + spc, lc=precision)
         elif isinstance(x, np.ma.core.MaskedConstant):
-            fmt = '  masked'
+            fmt = '  {}'.format(x)
         elif isinstance(x, Variable):
             fmt = '{:{l}.0{prec}f}+/-{:.0{prec}f}'.format(
                     x.nominal_value, x.std_dev,
                     prec=precision - 1, l=precision + spc)
+        elif isinstance(x, (int, np.int, np.int64)) :
+            fmt = '{:>{l}d}'.format(x, l=precision + spc)
         else:
             fmt = '{}'.format(x)
 
@@ -270,19 +277,10 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
 
     if not formatter:
         spc = 4
-
         formatter = {
-             'object': _format_object,
-             'float_kind': lambda x: '{:{l}.{prec}g}'.format(x.real,
-                                                             prec=precision - 1,
-                                                             l=precision + spc),
-             'int_kind': lambda x: '{:>{l}d}'.format(x, l=precision + spc),
-             'str_kind': lambda x: '{}'.format(x),
-             'complex_kind': lambda
-                 x: '({:^{l}.{prec}g}{:^+{lc}.{prec}g}j)'.format(
-                     x.real, x.imag,
-                     prec=precision - 1, l=precision + spc, lc=precision)
+            'all': _format_object,
         }
+
     np.set_printoptions(precision=precision, threshold=threshold,
                         edgeitems=edgeitems, suppress=suppress,
                         formatter=formatter, linewidth=linewidth, **kargs)

@@ -35,9 +35,6 @@
 # =============================================================================
 
 from traitlets import TraitType, TraitError, List, class_of, HasTraits
-from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils import is_sequence, EPSILON
-from spectrochempy.core.dataset.hcarray import hcarray
 
 import numpy as np
 import copy
@@ -116,69 +113,3 @@ class Range(List):
         value = self.validate_elements(obj, value)
 
         return value
-
-
-# =============================================================================
-# HyperComplexArray trait type
-# =============================================================================
-
-class HyperComplexArray(Array):
-    """A HyperComplexArray trait representing a np.ndarray or nd.array-like
-
-    Examples
-    --------
-
-    >>> class MyClass(HasTraits):
-    ...
-    ...     r = HyperComplexArray(allow_none=True)
-
-    Initialize with a ndarray (default)
-    >>> mc = MyClass(r=[1])
-    >>> print(mc.r)
-    [ 1.]
-    >>> mc.r.is_complex
-    [False]
-
-    Initialize with the list using casting
-    >>> mc = MyClass(r=[1,2])
-    >>> print(mc.r)
-    [ 1.  2.]
-
-
-    Until there, there is no difference with Array traits
-    Let's try with complex data
-    Initialize with the list using casting
-    >>> mc = MyClass(r=[1+0j,2+1j])
-    >>> mc.r # internal representation
-    hcarray([ 1.,  0.,  2.,  1.])
-    >>> print(mc.r)
-    [ 1.+0.j  2.+1.j]
-    >>> mc.r.is_complex
-    [True]
-
-    Cast using another HyperComplexArray
-    >>> r3 = mc.r.copy() * 2
-    >>> mc.r = r3
-    >>> mc.r
-    hcarray([ 2.,  0.,  4.,  2.])
-    >>> mc.r.is_complex
-    [True]
-
-    """
-
-    klass = hcarray
-    _cast_types = (np.ndarray, list, tuple,)
-
-    # Describe the trait type
-    info_text = 'an hypercomplex array trait'
-    allow_none = True
-
-    def set(self, obj, value):
-        is_complex = None
-        if isinstance(value, hcarray):
-            is_complex = value.is_complex
-        new_value = hcarray(self._validate(obj, value), is_complex)
-        old_value = obj._trait_values.get(self.name, self.default_value)
-        obj._trait_values[self.name] = new_value
-        if not np.array_equal(old_value, new_value):
-            obj._notify_trait(self.name, old_value, new_value)
