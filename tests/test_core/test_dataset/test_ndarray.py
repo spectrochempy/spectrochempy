@@ -42,8 +42,7 @@ from traitlets import TraitError
 from datetime import datetime
 
 from pint import DimensionalityError
-from spectrochempy.api import NDArray
-from spectrochempy.api import ur
+from spectrochempy.api import *
 from tests.utils import (raises)
 from spectrochempy.core.units import ur
 from spectrochempy.utils import SpectroChemPyWarning
@@ -58,7 +57,7 @@ from spectrochempy.extern.traittypes import Array
 # --------
 
 class MinimalSubclass(NDArray):
-    # in principle NDArray is not used directly and should be subclassed
+    # for testing subclaissing
     pass
 
 @pytest.fixture(scope="module")
@@ -90,12 +89,96 @@ def ndarraysubclasscplx():
         dx = np.random.random((10, 20))
     _nd = MinimalSubclass()
     _nd.data = dx
-    _nd.make_complex(axis=-1)  # this means that the data are complex in
+    _nd.set_complex(axis=-1)  # this means that the data are complex in
     # the last dimension
     return _nd.copy()
 
-# test initialization
-# --------------------
+### TEST INITIALIZATION
+
+def test_init_ndarray():
+
+    d0 = NDArray(None) # void initialization
+    assert d0.shape == (0,)
+    assert d0.size == 0
+    assert d0.mask == nomask
+    assert d0.dtype == 'float64'
+    assert not d0.is_complex
+    assert (repr(d0)=='NDArray: []')
+    assert (str(d0) == '[]')
+
+    d0 = NDArray((2,3,4)) # initialisation with a sequence
+    assert d0.shape == (3,)
+    assert d0.size == 3
+    assert not d0.is_complex
+    assert str(d0) == '[       2        3        4]'
+
+    d0 = NDArray([2,3,4,5]) # initialisation with a sequence
+    assert d0.shape == (4,)
+    assert not d0.is_complex
+
+    d1 = NDArray(np.ones((5, 5))) #initialization with an array
+    assert d1.shape == (5, 5)
+    assert not d1.is_complex
+
+    d2 = NDArray(d1) # initialization with an NDArray object
+    assert d2.shape == (5,5)
+    assert not d2.is_complex
+    assert d1.data is not d2.data
+
+    d0mask = NDArray([2, 3, 4, 5], mask=[1,0,0,0])  # sequence + mask
+    assert d0mask.shape == (4,)
+    assert not d0mask.is_complex
+    assert d0mask.is_masked
+    assert d0mask.mask.shape == d0mask.shape
+    assert str(d0mask).startswith('[  --        3        4        5]')
+    assert repr(d0mask).startswith(
+            'NDArray: [  --,        3,        4,        5]')
+
+    d0unc = NDArray([2, 3, 4, 5], uncertainty=[.1,.2,.15,.21],
+                     mask=[1,0,0,0])  # sequence + mask + uncert
+    assert d0unc.shape == (4,)
+    assert not d0unc.is_complex
+    assert d0unc.is_masked
+    assert str(d0unc).startswith('[  --    3.000+/-0.200 ')
+    assert repr(d0unc).startswith(
+            'NDArray: [  --,    3.000+/-0.200,    4.000+/-0.150,')
+
+    # test with complex data in the last dimension
+    d = np.ones((2, 2))*np.exp(.1j)
+    d1 = NDArray(d)
+    assert d1.is_complex
+    assert d1.is_complex[-1]
+    assert d1.shape == (2, 2)
+    assert d1.size == 4
+    assert repr(d1).startswith('NDArray: [[   0.995,    0.100, ')
+
+    d2 = NDArray(d1)
+    assert d1.data is not d2.data
+    assert np.all(d1.data == d2.data)
+    assert d2.is_complex==[False, True]
+    assert d2.shape == (2,2)
+    assert str(d2).startswith('RR[[   0.995    0.995]')
+    assert 'RI[[   0.100    0.100]' in str(d2)
+
+    np.random.seed(12345)
+    d = np.random.random((2, 2)) * np.exp(.1j)
+    d3 = NDArray(d, units=ur.Hz,
+                 mask=[[False, True], [False, False]])  # with units & mask
+    assert d3.shape == (2, 2)
+    assert d3._data.shape == (2,4)
+    assert d3.size == 4
+    assert d3.dtype == np.complex
+    assert d3.is_complex
+    assert d3.mask.shape == d3.shape
+    d3RR = d3.part('RR')
+    assert not d3RR.is_complex
+    assert d3RR._data.shape == (2,2)
+    assert str(d3).startswith("RR[[   0.925   --]")
+    assert str(d3).endswith("[   0.018    0.020]] Hz")
+
+    a= d3[1, 1]
+    print(a , d[1, 1])
+    assert d3[1, 1].data == d[1,1]
 
 def test_init_ndarray_subclass():
     # test initialization of an empty ndarray
@@ -340,87 +423,3 @@ def test_iteration(ndarraysubclassunit):
     for item in nd:
         print(item)
 
-### TEST INITIALIZATION
-
-def test_init_ndarray():
-
-    d0 = NDArray(None) # void initialization
-    assert d0.shape == (0,)
-    assert d0.size == 0
-    assert d0.dtype == 'float64'
-    assert not d0.is_complex[-1]
-    assert (repr(d0)=='NDArray: []')
-    assert (str(d0) == '[]')
-
-    d0 = NDArray((2,3,4)) # initialisation with a sequence
-    assert d0.shape == (3,)
-    assert d0.size == 3
-    assert not d0.is_complex[-1]
-    assert str(d0) == '[       2        3        4]'
-
-    d0 = NDArray([2,3,4,5]) # initialisation with a sequence
-    assert d0.shape == (4,)
-    assert not d0.is_complex[-1]
-
-    d1 = NDArray(np.ones((5, 5))) #initialization with an array
-    assert d1.shape == (5, 5)
-    assert not np.any(d1.is_complex)
-
-    d2 = NDArray(d1) # initialization with an NDArray object
-    assert d2.shape == (5,5)
-    assert not np.any(d2.is_complex)
-    assert d1.data is not d2.data
-
-    d0mask = NDArray([2, 3, 4, 5], mask=[1,0,0,0])  # sequence + mask
-    assert d0mask.shape == (4,)
-    assert not d0mask.is_complex[-1]
-    assert d0mask.is_masked
-    assert str(d0mask).startswith('[  --        3        4        5]')
-    assert repr(d0mask).startswith(
-            'NDArray: [  --,        3,        4,        5]')
-
-    d0unc = NDArray([2, 3, 4, 5], uncertainty=[.1,.2,.15,.21],
-                     mask=[1,0,0,0])  # sequence + mask + uncert
-    assert d0unc.shape == (4,)
-    assert not d0unc.is_complex[-1]
-    assert d0unc.is_masked
-    assert str(d0unc).startswith('[  --    3.000+/-0.200 ')
-    assert repr(d0unc).startswith(
-            'NDArray: [  --,    3.000+/-0.200,    4.000+/-0.150,')
-
-    # test with complex data in the last dimension
-    d = np.ones((2, 2))*np.exp(.1j)
-    d1 = NDArray(d)
-    assert np.any(d1.is_complex)
-    assert d1.shape == (2, 2)
-    assert d1.size == 4
-    assert repr(d1).startswith('NDArray: [[   0.995,    0.100, ')
-
-    d2 = NDArray(d1)
-    assert d1.data is not d2.data
-    assert np.all(d1.data == d2.data)
-    assert d2.is_complex==[False, True]
-    assert d2.shape == (2,2)
-    assert str(d2).startswith('RR[[   0.995    0.995]')
-    assert 'RI[[   0.100    0.100]' in str(d2)
-
-    np.random.seed(12345)
-    d = np.random.random((2, 2)) * np.exp(.1j)
-    d3 = NDArray(d, units=ur.Hz,
-                 mask=[[False, True], [False, False]])  # with units & mask
-    assert d3.shape == (2, 2)
-    assert d3._data.shape == (2,4)
-    assert d3.size == 4
-    assert d3.dtype == np.complex
-    assert np.any(d3.is_complex)
-    d3RR = d3.part('RR')
-    assert not d3RR.is_complex[-1]
-    assert d3RR.shape == (2,2)
-    assert d3RR._data.shape == (2,2)
-    assert str(d3).startswith("RR[[   0.925   --]")
-    assert str(d3).endswith("[   0.018    0.020]] Hz")
-
-    a= d3[1, 1]
-
-    print(a , d[1, 1])
-    assert d3[1, 1].data == d[1,1]
