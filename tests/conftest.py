@@ -24,7 +24,7 @@ import os
 import sys
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndaxes import Axes, Axis
+from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.api import data, plotoptions
 
 plotoptions.do_not_block = True
@@ -85,19 +85,19 @@ def ds1():
         # make complex along first dimension
         is_complex = [False, False, False]  # TODO: check with complex
 
-    axe0 = Axis(coords=np.linspace(4000., 1000., 10),
-                labels='a b c d e f g h i j'.split(),
-                units="cm^-1",
-                title='wavenumber')
+    axe0 = Coord(coords=np.linspace(4000., 1000., 10),
+                 labels='a b c d e f g h i j'.split(),
+                 units="cm^-1",
+                 title='wavenumber')
 
-    axe1 = Axis(coords=np.linspace(0., 60., 100),
-                units="s",
-                title='time-on-stream')
+    axe1 = Coord(coords=np.linspace(0., 60., 100),
+                 units="s",
+                 title='time-on-stream')
 
-    axe2 = Axis(coords=np.linspace(200., 300., 3),
-                labels=['cold', 'normal', 'hot'],
-                units="K",
-                title='temperature')
+    axe2 = Coord(coords=np.linspace(200., 300., 3),
+                 labels=['cold', 'normal', 'hot'],
+                 units="K",
+                 title='temperature')
 
     da = NDDataset(dx,
                    is_complex=is_complex,
@@ -116,19 +116,19 @@ def ds2():
         # make complex along first dimension
         is_complex = [False, False, False]  # TODO: check with complex
 
-    axe0 = Axis(coords=np.linspace(4000., 1000., 9),
-                labels='a b c d e f g h i'.split(),
-                units="cm^-1",
-                title='wavenumber')
+    axe0 = Coord(coords=np.linspace(4000., 1000., 9),
+                 labels='a b c d e f g h i'.split(),
+                 units="cm^-1",
+                 title='wavenumber')
 
-    axe1 = Axis(coords=np.linspace(0., 60., 50),
-                units="s",
-                title='time-on-stream')
+    axe1 = Coord(coords=np.linspace(0., 60., 50),
+                 units="s",
+                 title='time-on-stream')
 
-    axe2 = Axis(coords=np.linspace(200., 1000., 4),
-                labels=['cold', 'normal', 'hot', 'veryhot'],
-                units="K",
-                title='temperature')
+    axe2 = Coord(coords=np.linspace(200., 1000., 4),
+                 labels=['cold', 'normal', 'hot', 'veryhot'],
+                 units="K",
+                 title='temperature')
 
     da = NDDataset(dx,
                    is_complex=is_complex,
@@ -148,20 +148,20 @@ def dsm():  # dataset with axes containing several axis
         # make complex along first dimension
         is_complex = [False, False]  # TODO: check with complex
 
-    axe0 = Axis(coords=np.linspace(4000., 1000., 9),
-                labels='a b c d e f g h i'.split(),
-                units="cm^-1",
-                title='wavenumber')
+    axe0 = Coord(coords=np.linspace(4000., 1000., 9),
+                 labels='a b c d e f g h i'.split(),
+                 units="cm^-1",
+                 title='wavenumber')
 
-    axe11 = Axis(coords=np.linspace(0., 60., 50),
-                 units="s",
-                 title='time-on-stream')
+    axe11 = Coord(coords=np.linspace(0., 60., 50),
+                  units="s",
+                  title='time-on-stream')
 
-    axe12 = Axis(coords=np.logspace(1., 4., 50),
-                 units="K",
-                 title='temperature')
+    axe12 = Coord(coords=np.logspace(1., 4., 50),
+                  units="K",
+                  title='temperature')
 
-    axemultiple = Axes(axe11, axe12)
+    axemultiple = CoordSet(axe11, axe12)
     da = NDDataset(dx,
                    is_complex=is_complex,
                    axes=[axe0, axemultiple],

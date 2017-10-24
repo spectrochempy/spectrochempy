@@ -41,7 +41,7 @@ import datetime as datetime
 import scipy.interpolate
 import numpy as np
 
-from ...dataset.ndaxes import AxisRange
+from ...dataset.ndcoords import CoordsRange
 
 __all__ = ['basecor']
 
@@ -86,7 +86,7 @@ def basecor(source, *ranges, axis=-1,
 
     coords = new.coords(-1)
     baseline = np.zeros_like(new)
-    ranges = AxisRange(*ranges)
+    ranges = CoordsRange(*ranges)
 
     # Extract: Sbase: the matrix of data correponding to ranges
     #          xbase: the xaxis values corresponding to ranges

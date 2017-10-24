@@ -41,7 +41,7 @@
 import numpy as np
 from scipy.optimize import minimize_scalar
 
-from spectrochempy.core.dataset.ndaxes import AxisRange
+from spectrochempy.core.dataset.ndcoords import CoordsRange
 
 __all__ = ['autosub']
 
@@ -59,7 +59,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
          (axis parameter) #TODO : optionally use title of axis
 
     xrange : pair(s) of values. Any number of pairs is allowed.
-        Axis range(s) in which the variance is minimized
+        Coord range(s) in which the variance is minimized
 
     inplace : `bool`, optional, default = False.
         True if the subtraction is done in place.
@@ -138,7 +138,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
                             dtype=float))  # must be float to be considered
     # as frequency for instance
     coords = new.coords(-1)
-    xrange = AxisRange(*ranges, reversed=coords.is_reversed).ranges
+    xrange = CoordsRange(*ranges, reversed=coords.is_reversed).ranges
 
     s = []
     r = []

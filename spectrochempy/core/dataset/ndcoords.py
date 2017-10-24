@@ -37,7 +37,7 @@
 
 #
 
-"""This module provides Axis related classes
+"""This module provides Coord related classes
 
 """
 
@@ -61,13 +61,13 @@ from spectrochempy.utils import (is_sequence, numpyprintoptions,
                                  SpectroChemPyWarning)
 from spectrochempy.utils.traittypes import Range
 
-__all__ = ['Axes',
-           'Axis',
-           'AxisRange',
-           'AxisRangeError',
-           'AxisError',
-           'AxisError',
-           'AxisWarning']
+__all__ = ['CoordSet',
+           'Coord',
+           'CoordsRange',
+           'CoordsRangeError',
+           'CoordsError',
+           'CoordsError',
+           'CoordsWarning']
 _classes = __all__[:]
 
 # =============================================================================
@@ -81,41 +81,41 @@ numpyprintoptions()
 #  Errors and warnings
 # =============================================================================
 
-class AxisRangeError(ValueError):
-    """An exception that is raised when something is wrong with the axisrange.
+class CoordsRangeError(ValueError):
+    """An exception that is raised when something is wrong with the CoordsRange.
     """
 
 
-class AxisError(ValueError):
-    """An exception that is raised when something is wrong with the axis or
-    axes.
+class CoordsError(ValueError):
+    """An exception that is raised when something is wrong with the Coord or
+    CoordSet.
     """
 
 
-class AxisWarning(SpectroChemPyWarning):
-    """A warning that is raised when something is wrong with the axis or
-    axes definitions but do not necessarily need to raise an error.
+class CoordsWarning(SpectroChemPyWarning):
+    """A warning that is raised when something is wrong with the Coord or
+    CoordSet definitions but do not necessarily need to raise an error.
     """
 
 
 # =============================================================================
-# Axis
+# Coord
 # =============================================================================
 
-class Axis(NDMath, NDArray):
-    """A class describing the axes of the data along a given axis.
+class Coord(NDMath, NDArray):
+    """A class describing the coords of the data along a given axis.
 
     Parameters
     -----------
-    coords : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like,
-        or another `Axis` object.
+    data : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like,
+        or another `Coord` object.
 
-        The actual data contained in this `Axis` object.
+        The actual data contained in this `Coord` object.
 
     labels : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like of the
         same length as coords, optional
 
-        It contains the axes labels. If only labels are provided during
+        It contains the coords labels. If only labels are provided during
         initialisation of an axis, a numerical axis is automatically created
         with the labels indices
 
@@ -146,15 +146,15 @@ class Axis(NDMath, NDArray):
 
     Notes
     -----
-    The data in a `Axis` object should be accessed through the coords (
+    The data in a `Coord` object should be accessed through the coords (
     which is an alias of data) attribute.
 
     For example::
 
-    >>> from spectrochempy.api import Axis
+    >>> from spectrochempy.api import Coord
 
 
-    >>> x = Axis([1,2,3], title='time on stream', units='hours')
+    >>> x = Coord([1,2,3], title='time on stream', units='hours')
     >>> x.coords # doctest: +NORMALIZE_WHITESPACE
     array([ 1, 2, 3])
 
@@ -166,7 +166,7 @@ class Axis(NDMath, NDArray):
     # initialization
     # -------------------------------------------------------------------------
     def __init__(self,
-                 coords=None,
+                 data=None,
                  labels=None,
                  mask=None,
                  units=None,
@@ -177,18 +177,18 @@ class Axis(NDMath, NDArray):
 
         _iscopy = kwargs.pop('iscopy', False)
 
-        super(Axis, self).__init__(**kwargs)
+        super(Coord, self).__init__(**kwargs)
 
         if _iscopy:
             self._iscopy = True
-            coords = copy.deepcopy(coords)
+            data = copy.deepcopy(data)
             labels = copy.deepcopy(labels)
             mask = copy.deepcopy(mask)
             units = copy.copy(units)  # deepcopy not working for units?
             meta = copy.deepcopy(meta)
 
-        if coords is not None:
-            self.coords = coords
+        if data is not None:
+            self.data = data
             if labels is not None:
                 self.labels = labels
 
@@ -199,8 +199,8 @@ class Axis(NDMath, NDArray):
 
         if mask is not None:
             if self._data_passed_with_mask and self._mask != mask:
-                log.info("Axis was created with a masked array, and a "
-                         "mask was explicitly provided to Axis. The  "
+                log.info("Coord was created with a masked array, and a "
+                         "mask was explicitly provided to Coord. The  "
                          "explicitly passed-in mask will be used and the "
                          "masked array's mask will be ignored.")
             self.mask = mask
@@ -222,7 +222,7 @@ class Axis(NDMath, NDArray):
     # -------------------------------------------------------------------------
     @default('_name')
     def _get_name_default(self):
-        return u"Axis_" + str(uuid.uuid1()).split('-')[0]  # a unique id
+        return u"Coords_" + str(uuid.uuid1()).split('-')[0]  # a unique id
 
     @property
     def is_reversed(self):
@@ -233,74 +233,68 @@ class Axis(NDMath, NDArray):
         """
         return bool(self.data[0] > self.data[-1])
 
-    @property
-    def coords(self):
-        """:class:`~numpy.ndarray`-like object - The axis coordinates.
-        (alias of `data`)
+    # @data.setter
+    # def coords(self, data):
+    #     # property.setter for data
+    #
+    #     if data is None:
+    #         self._data = np.array([]).astype(float)
+    #         log.debug("init axis with an empty array of type float")
+    #         return
+    #
+    #     elif isinstance(data, Coord):
+    #         log.debug("init axis with data from another Coord")
+    #         # No need to check the data because data must have successfully
+    #         # initialized.
+    #         self._name = "copy of {}".format(data._name) if self._iscopy \
+    #             else data._name
+    #         self._title = data._title
+    #         self._mask = data._mask
+    #         self._data = data._data
+    #         self._units = data._units
+    #         self._meta = data._meta
+    #         self._labels = data._labels
+    #
+    #
+    #     elif isinstance(data, Index):  # pandas Index object
+    #         self._data = data.values
+    #         if data.name is not None:
+    #             self._title = data.name
+    #
+    #     elif isinstance(data, Quantity):
+    #         log.debug("init data with data from a Quantity object")
+    #         self._data_passed_is_quantity = True
+    #         self._data = np.array(data.magnitude, subok=True, copy=self._iscopy)
+    #         self.units = data.units  # we use the property setter for checking
+    #
+    #     elif hasattr(data, 'mask'):  # an object with data and mask attributes
+    #         log.debug("init mask from the passed data")
+    #         self._data_passed_with_mask = True
+    #         self._data = np.array(data.data, subok=True, copy=self._iscopy)
+    #         self._mask = data.mask
+    #
+    #     elif (not hasattr(data, 'shape') or
+    #               not hasattr(data, '__getitem__') or
+    #               not hasattr(data, '__array_struct__')):
+    #         # Data doesn't look like a numpy array, try converting it to
+    #         # one.
+    #         log.debug("init axis with a non numpy-like array object")
+    #         self._data = np.array(data, subok=True, copy=False)
+    #         # Quick check to see if what we got out looks like an array
+    #         # rather than an object (since numpy will convert a
+    #         # non-numerical input to an array of objects).
+    #         if self._data.dtype == 'O':
+    #             raise CoordsError(
+    #                     "Could not convert data to numpy array.")
+    #     else:
+    #         log.debug("init data axis a numpy array")
+    #         self._data = np.array(data, subok=True, copy=self._iscopy)
 
-        """
-        return self._data
-
-    @coords.setter
-    def coords(self, data):
-        # property.setter for data
-
-        if data is None:
-            self._data = np.array([]).astype(float)
-            log.debug("init axis with an empty array of type float")
-            return
-
-        elif isinstance(data, Axis):
-            log.debug("init axis with data from another Axis")
-            # No need to check the data because data must have successfully
-            # initialized.
-            self._name = "copy of {}".format(data._name) if self._iscopy \
-                else data._name
-            self._title = data._title
-            self._mask = data._mask
-            self._data = data._data
-            self._units = data._units
-            self._meta = data._meta
-            self._labels = data._labels
-
-
-        elif isinstance(data, Index):  # pandas Index object
-            self._data = data.values
-            if data.name is not None:
-                self._title = data.name
-
-        elif isinstance(data, Quantity):
-            log.debug("init data with data from a Quantity object")
-            self._data_passed_is_quantity = True
-            self._data = np.array(data.magnitude, subok=True, copy=self._iscopy)
-            self.units = data.units  # we use the property setter for checking
-
-        elif hasattr(data, 'mask'):  # an object with data and mask attributes
-            log.debug("init mask from the passed data")
-            self._data_passed_with_mask = True
-            self._data = np.array(data.data, subok=True, copy=self._iscopy)
-            self._mask = data.mask
-
-        elif (not hasattr(data, 'shape') or
-                  not hasattr(data, '__getitem__') or
-                  not hasattr(data, '__array_struct__')):
-            # Data doesn't look like a numpy array, try converting it to
-            # one.
-            log.debug("init axis with a non numpy-like array object")
-            self._data = np.array(data, subok=True, copy=False)
-            # Quick check to see if what we got out looks like an array
-            # rather than an object (since numpy will convert a
-            # non-numerical input to an array of objects).
-            if self._data.dtype == 'O':
-                raise AxisError(
-                        "Could not convert data to numpy array.")
-        else:
-            log.debug("init data axis a numpy array")
-            self._data = np.array(data, subok=True, copy=self._iscopy)
-
+    ########
     # hidden properties (for the documentation, only - we remove the docs)
     # some of the property of NDArray has to be hidden because they are not
-    # usefull for this Axis class
+    # usefull for this Coord class
+
     @property
     def is_complex(self):
         return None  # always real
@@ -309,17 +303,13 @@ class Axis(NDMath, NDArray):
     def ndim(self):
         return 1
 
-    #@property
-    #def uncertainty(self):
-    #    return None
+    @property
+    def uncertainty(self):
+        return None
 
     @property
     def T(self):  # no transpose
         return self
-
-    #@property
-    #def data(self):
-    #    return self._data
 
     @property
     def shape(self):
@@ -328,87 +318,6 @@ class Axis(NDMath, NDArray):
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
-
-    # def _argsort(self, by='axis', pos=None, descend=False):
-    #     # found the indices sorted by axes or labels
-    #
-    #     if not self.is_labeled:
-    #         by = 'axis'
-    #         pos = None
-    #         warnings.warn('no label to sort, use `axis` by default',
-    #                       AxisWarning)
-    #
-    #     if by == 'axis':
-    #         args = np.argsort(self._data)
-    #
-    #     elif by == 'label':
-    #         labels = self._labels
-    #         if len(self._labels.shape) > 1:
-    #             # multidimentional labels
-    #             if not pos: pos = 0
-    #             labels = self._labels[pos]  # TODO: this must be checked
-    #         args = np.argsort(labels)
-    #
-    #     else:
-    #         by = 'axis'
-    #         warnings.warn(
-    #                 'parameter `by` should be set to `axis` or `label`, use `axis` by default',
-    #                 AxisWarning)
-    #         args = np.argsort(self._data)
-    #
-    #     if descend:
-    #         args = args[::-1]
-    #
-    #     return args
-    #
-    # def _sort(self, by='axis', pos=None, descend=False, inplace=False):
-    #     # sort axis in place using data or label values
-    #
-    #     if not inplace:
-    #         new = self.copy()
-    #     else:
-    #         new = self
-    #
-    #     args = self._argsort(by, pos, descend)
-    #
-    #     return self._take(args)
-    #
-    # def _take(self, indices):
-    #     # get an axis with indices
-    #
-    #     new = self.copy()
-    #     new._data = new._data[indices]
-    #     new._labels = new._labels[..., indices]
-    #     new._mask = new._mask[indices]
-    #
-    #     return new
-
-    # def _loc2index(self, loc):
-    #     # Return the index of a location (label or coordinates) along the axis
-    #
-    #     if isinstance(loc, string_types):
-    #         # it's probably a label
-    #         indexes = np.argwhere(self._labels == loc).flatten()
-    #         if indexes.size > 0:
-    #             return indexes[0]
-    #         else:
-    #             raise ValueError('Could not find this label: {}'.format(loc))
-    #
-    #     elif isinstance(loc, datetime):
-    #         # not implemented yet
-    #         return None  # TODO: date!
-    #
-    #     elif is_number(loc):
-    #         index = (np.abs(self._data - loc)).argmin()
-    #         if loc > self._data.max() or loc < self._data.min():
-    #             warnings.warn(
-    #                     '\nThis coordinate ({}) is outside the axis limits.\n'
-    #                     'The closest limit index is returned'.format(loc),
-    #                     AxisWarning)
-    #         return index
-    #
-    #     else:
-    #         raise ValueError('Could not find this location: {}'.format(loc))
 
     def _repr_html_(self):
 
@@ -422,7 +331,7 @@ class Axis(NDMath, NDArray):
         out = '<table>\n'
         out += tr.format("Title", self.title.capitalize())
         out += tr.format("Coordinates",
-                         np.array2string(self.coords, separator=' '))
+                         np.array2string(self.data, separator=' '))
         out += tr.format("Units", units)
         if self.is_labeled:
             out += tr.format("Labels", self.labels)
@@ -437,36 +346,27 @@ class Axis(NDMath, NDArray):
 
     def __dir__(self):
         # with remove some methods with respect to the full NDArray
-        # as they are not usefull for Axis.
-        return ['data', 'mask', 'labels', 'units',
-                'meta', 'name', 'title']
-
-
-    def __eq__(self, other):
-        attrs = self.__dir__()
-        for attr in ['name',]:
-            attrs.remove(attr)
-        #some attrib are not important for equality
-        return super(Axis, self).__eq__(other, attrs)
+        # as they are not usefull for Coord.
+        return ['data', 'mask', 'labels', 'units', 'meta', 'name', 'title']
 
     def __str__(self):
         units = '{:~K}'.format(self._units) \
             if self._units is not None else 'unitless'
         out = '      title: %s\n' % (self.title.capitalize())
-        out += 'coordinates: %s\n' % np.array2string(self.coords, separator=' ')
+        out += 'coordinates: %s\n' % np.array2string(self.data, separator=' ')
         out += '      units: %s\n' % units
         if self.is_labeled:
             out += '     labels: %s\n' % str(self.labels)
         out += '\n'
         return out
 
-    def __repr__(self):
-        units = '{:~K}'.format(self._units) \
-            if self._units is not None else 'unitless'
-        prefix = self.__class__.__name__ + '('
-        body = np.array2string(self.coords, separator=', ', prefix=prefix)
-        return ''.join([prefix, body, ') {}'.format(units)])
-
+    # def __repr__(self):
+    #     units = '{:~f}'.format(self._units) \
+    #         if self._units is not None else 'unitless'
+    #     prefix = self.__class__.__name__ + '('
+    #     body = np.array2string(self.data, separator=', ', prefix=prefix)
+    #     return ''.join([prefix, body, ') {}'.format(units)])
+    #
 
         # def __lt__(self, other):
         #     # hack to make axis sortable
@@ -480,15 +380,15 @@ class Axis(NDMath, NDArray):
 
 
 # =============================================================================
-# Axes
+# CoordSet
 # =============================================================================
 
-class Axes(HasTraits):
-    """A collection of axes for a dataset with a validation method.
+class CoordSet(HasTraits):
+    """A collection of Coord for a dataset with a validation method.
 
     Parameters
     ----------
-    axes : list of Axis objects.
+    coords : list of Coord objects.
 
     issamedim : bool, optional, default=False
 
@@ -497,15 +397,15 @@ class Axes(HasTraits):
 
     """
 
-    # Hidden attributes containing the collection of Axis instance
-    _axes = List(Instance(Axis), allow_none=True)
+    # Hidden attributes containing the collection of Coord instance
+    _coords = List(Instance(Coord), allow_none=True)
 
     # Hidden name of the object
     _name = Unicode
 
     @default('_name')
     def _get_name_default(self):
-        return u"Axes_" + str(uuid.uuid1()).split('-')[0]  # a unique id
+        return u"CoordSet_" + str(uuid.uuid1()).split('-')[0]  # a unique id
 
     # Hidden attribute to specify if the collection is for a single dimension
     _issamedim = Bool
@@ -513,51 +413,51 @@ class Axes(HasTraits):
     # -------------------------------------------------------------------------
     # initialization
     # -------------------------------------------------------------------------
-    def __init__(self, *axes, **kwargs):
+    def __init__(self, *coords, **kwargs):
 
         _iscopy = kwargs.pop('iscopy', False)
 
-        super(Axes, self).__init__(**kwargs)
+        super(CoordSet, self).__init__(**kwargs)
 
-        self._axes = []
+        self._coords = []
 
-        if all([isinstance(axes[i], (Axis, Axes)) for i in range(len(axes))]):
-            axes = list(axes)
-        elif len(axes) == 1:
-            # this a set of axis or axes passed as a list
-            axes = axes[0]
+        if all([isinstance(coords[i], (Coord, CoordSet)) for i in range(len(coords))]):
+            coords = list(coords)
+        elif len(coords) == 1:
+            # this a set of CoordsSet or Coord passed as a list
+            coords = coords[0]
         else:
             # not implemented yet -
             # a list of list of object have been passed
             # TODO: try to ipmplement this
-            raise AxisError(
+            raise CoordsError(
                     'a list of list of object have been passed - this not yet implemented')
 
-        if len(axes) == 1 and isinstance(axes[0], Axes):
+        if len(coords) == 1 and isinstance(coords[0], CoordSet):
             if _iscopy:
-                axes = copy.deepcopy(axes)
-            self._axes = axes[0]._axes
+                coords = copy.deepcopy(coords)
+            self._coords = coords[0]._coords
 
         else:
-            for item in axes:
+            for item in coords:
 
-                if not isinstance(item, (Axis, Axes)):
-                    item = Axis(item, iscopy=_iscopy)
+                if not isinstance(item, (Coord, CoordSet)):
+                    item = Coord(item, iscopy=_iscopy)
                     # full validation of the item
-                    # will be done in Axis
+                    # will be done in Coord
                 if self._validation(item):
-                    self._axes.append(item)
+                    self._coords.append(item)
 
         # check if we have single dimension axis
 
-        for item in self._axes:
-            if isinstance(item, Axes):
+        for item in self._coords:
+            if isinstance(item, CoordSet):
                 # it must be a single dimension axis
                 item._issamedim = True
-                # in this case we must have same length axes
+                # in this case we must have same length coords
                 siz = item[0].size
-                if np.any([elt.size != siz for elt in item._axes]):
-                    raise AxisError('axis must be of the same size '
+                if np.any([elt.size != siz for elt in item._coords]):
+                    raise CoordsError('axis must be of the same size '
                                     'for a dimension with multiple axis dimension')
 
     # -------------------------------------------------------------------------
@@ -571,12 +471,12 @@ class Axes(HasTraits):
     def names(self):
         """`list`, read-only property - Get the list of axis names.
         """
-        if len(self._axes) < 1:
+        if len(self._coords) < 1:
             return []
         try:
-            return [item.name for item in self._axes]
+            return [item.name for item in self._coords]
         except:
-            log.critical(self._axes)
+            log.critical(self._coords)
 
     @property
     def titles(self):
@@ -584,14 +484,14 @@ class Axes(HasTraits):
 
         """
         _titles = []
-        for item in self._axes:
-            if isinstance(item, Axis):
+        for item in self._coords:
+            if isinstance(item, Coord):
                 _titles.append(item.title if item.title else item.name)
-            elif isinstance(item, Axes):
+            elif isinstance(item, CoordSet):
                 _titles.append([el.title if el.title else el.name
                                 for el in item])
             else:
-                raise AxisError('Something wrong with the titles!')
+                raise CoordsError('Something wrong with the titles!')
 
         return _titles
 
@@ -600,46 +500,46 @@ class Axes(HasTraits):
         # Set the titles at once
         if is_sequence(value):
             for i, item in enumerate(value):
-                self._axes[i].title = item
+                self._coords[i].title = item
 
     @property
     def labels(self):
         """`list` - Get/Set a list of axis labels.
 
         """
-        return [item.label for item in self._axes]
+        return [item.label for item in self._coords]
 
     @labels.setter
     def labels(self, value):
         # Set the labels at once
         if is_sequence(value):
             for i, item in enumerate(value):
-                self._axes[i].label = item
+                self._coords[i].label = item
 
     @property
     def units(self):
         """`list` - Get/Set a list of axis units.
 
         """
-        return [item.units for item in self._axes]
+        return [item.units for item in self._coords]
 
     @units.setter
     def units(self, value):
         if is_sequence(value):
             for i, item in enumerate(value):
-                self._axes[i].units = item
+                self._coords[i].units = item
 
     @property
     def isempty(self):
-        """`bool`, read-only property - `True` if there is no axes defined.
+        """`bool`, read-only property - `True` if there is no coords defined.
 
         """
-        return len(self._axes) == 0
+        return len(self._coords) == 0
 
     @property
     def issamedim(self):
         """`bool`, read-only property -
-        `True` if the axes define a single dimension.
+        `True` if the coords define a single dimension.
 
         """
         return self._issamedim
@@ -647,12 +547,12 @@ class Axes(HasTraits):
     @property
     def sizes(self):
         """`int`, read-only property -
-        gives the size of the axis or axes for each dimention"""
+        gives the size of the axis or coords for each dimention"""
         _sizes = []
-        for i, item in enumerate(self._axes):
-            if isinstance(item, Axis):
+        for i, item in enumerate(self._coords):
+            if isinstance(item, Coord):
                 _sizes.append(item.size)
-            elif isinstance(item, Axes):
+            elif isinstance(item, CoordSet):
                 _sizes.append(item.sizes[i][0])
         return _sizes
 
@@ -667,11 +567,11 @@ class Axes(HasTraits):
     # public methods
     # -------------------------------------------------------------------------
     def copy(self):
-        """Make a disconnected copy of the current axes.
+        """Make a disconnected copy of the current coords.
 
         Returns
         -------
-        axes : same type
+        coords : same type
             an exact copy of the current object
 
         """
@@ -680,33 +580,33 @@ class Axes(HasTraits):
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
-    def _transpose(self, axes=None):
+    def _transpose(self, coords=None):
         # in principle it is not directly called by the user as it is intimately
         # linked to a dataset
         if self._issamedim:
-            # not applicable for same dimension axes
-            warnings.warn('Axes for a single dimentsion are not transposable',
-                          AxisWarning)
+            # not applicable for same dimension coords
+            warnings.warn('CoordSet for a single dimentsion are not transposable',
+                          CoordsWarning)
             return
-        if axes is None:
-            self._axes.reverse()
+        if coords is None:
+            self._coords.reverse()
         else:
-            self._axes = [self._axes[axis] for axis in axes]
+            self._coords = [self._coords[axis] for axis in coords]
 
     def _validation(self, item):
         # To be valid any added axis must have a different name
 
-        if not isinstance(item, (Axis, Axes)):
-            raise AxisError('The elements of must be Axis or '
-                            'Axes objects only!')
+        if not isinstance(item, (Coord, CoordSet)):
+            raise CoordsError('The elements of must be Coord or '
+                            'CoordSet objects only!')
 
         if item._name in self.names:
-            raise AxisError('The axis name must be unique!')
+            raise CoordsError('The axis name must be unique!')
 
-        if isinstance(item, Axis) and item.ndim > 1:
-            raise AxisError('An axis should be a 1D array!')
+        if isinstance(item, Coord) and item.ndim > 1:
+            raise CoordsError('An axis should be a 1D array!')
 
-        # TODO: add more validation for Axes objects
+        # TODO: add more validation for CoordSet objects
 
         return True
 
@@ -716,55 +616,55 @@ class Axes(HasTraits):
 
     @staticmethod
     def __dir__():
-        return ['_axes']
+        return ['_coords']
 
     def __call__(self, *args):
-        # allow the following syntax: axes(0,2), or axes(axis=(0,2))
-        axes = []
+        # allow the following syntax: coords(0,2), or coords(axis=(0,2))
+        coords = []
         if args:
             for idx in args:
-                axes.append(self._axes[idx])
-        if len(axes) == 1:
-            return axes[0]
+                coords.append(self._coords[idx])
+        if len(coords) == 1:
+            return coords[0]
         else:
-            return Axes(axes)
+            return CoordSet(coords)
 
     def __len__(self):
-        return len(self._axes)
+        return len(self._coords)
 
     def __getitem__(self, index):
 
         if isinstance(index, string_types):
             if index in self.titles:
                 # selection by axis title
-                return self._axes.__getitem__(self.titles.index(index))
+                return self._coords.__getitem__(self.titles.index(index))
             # may be it is in a multiple axis
-            for item in self._axes:
-                if isinstance(item, Axes) and index in item.titles:
+            for item in self._coords:
+                if isinstance(item, CoordSet) and index in item.titles:
                     # selection by subaxis title
                     return item.__getitem__(item.titles.index(index))
 
-        res = self._axes.__getitem__(index)
+        res = self._coords.__getitem__(index)
         if isinstance(index, slice):
-            return Axes(res)
+            return CoordSet(res)
         else:
             return res
 
-    def __setitem__(self, index, axes):
-        self._axes[index] = axes
+    def __setitem__(self, index, coords):
+        self._coords[index] = coords
 
     def __iter__(self):
-        for item in self._axes:
+        for item in self._coords:
             yield item
 
     def __repr__(self):
-        out = ("Axes object <" + ', '.join(['<Axis object {}>']
-                                           * len(self._axes)) + ">")
+        out = ("CoordSet object <" + ', '.join(['<Coord object {}>']
+                                           * len(self._coords)) + ">")
         out = out.format(*self.names)
         return out
 
     def __str__(self):
-        out = "(" + ', '.join(['[{}]'] * len(self._axes)) + ")"
+        out = "(" + ', '.join(['[{}]'] * len(self._coords)) + ")"
         out = out.format(*self.titles)
         return out
 
@@ -775,17 +675,17 @@ class Axes(HasTraits):
         return self.__class__([copy.copy(ax) for ax in self])
 
     def __eq__(self, other):
-        return self._axes == other._axes  # TODO: check the case of compatible units
+        return self._coords == other._coords  # TODO: check the case of compatible units
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
 
 # =============================================================================
-# AxisRange
+# CoordsRange
 # =============================================================================
 
-class AxisRange(HasTraits):
+class CoordsRange(HasTraits):
     """An axisrange is a set of ordered, non intersecting intervals,\
     e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
 
@@ -811,10 +711,10 @@ class AxisRange(HasTraits):
     reversed = Bool
 
     def __init__(self, *ranges, **kwargs):
-        """ Constructs Axisrange with default values
+        """ Constructs Coordsrange with default values
 
         """
-        super(AxisRange, self).__init__(**kwargs)
+        super(CoordsRange, self).__init__(**kwargs)
 
         self.reversed = kwargs.get('reversed', False)
 
@@ -902,13 +802,13 @@ class AxisRange(HasTraits):
 # Set the operators
 # =============================================================================
 
-set_operators(Axis, priority=50)
+set_operators(Coord, priority=50)
 
 # =============================================================================
 # Modify the doc to include Traits
 # =============================================================================
-# create_traitsdoc(Axes)
-# create_traitsdoc(Axis)
+# create_traitsdoc(CoordSet)
+# create_traitsdoc(Coord)
 
 if __name__ == '__main__':
     pass

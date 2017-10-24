@@ -68,7 +68,7 @@ from spectrochempy.utils import is_sequence, is_number
 from spectrochempy.utils import (numpyprintoptions,
                                  get_user_and_node)
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndaxes import Axis, Axes, AxisError
+from spectrochempy.core.dataset.ndcoords import Coord, CoordSet, CoordsError
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 # from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.dataset.ndio import NDIO
@@ -157,13 +157,13 @@ class NDDataset(
         a `mask` here will causes the mask from the masked array to be
         ignored.
 
-    axes : An instance of :class:`~spectrochempy.core.dataset.ndaxes.Axes`,
+    coords : An instance of :class:`~spectrochempy.core.dataset.ndcoords.CoordSet`,
     optional
 
-        It contains the `axis` coordinates and `labels` for the different
-        dimensions of the `data`. if `axes` is provided, it must specified
-        the `axis` and `labels` for all dimensions of the `data`.
-        Multiple axis can be specified in an Axes instance for each dimension.
+        It contains the `coord` coordinates and `labels` for the different
+        dimensions of the `data`. if `coords` is provided, it must specified
+        the `coord` and `labels` for all dimensions of the `data`.
+        Multiple coord can be specified in an CoordSet instance for each dimension.
 
     uncertainty : :class:`~numpy.ndarray`, optional
 
@@ -218,7 +218,7 @@ class NDDataset(
     _description = Unicode
     _history = List
 
-    _axes = Instance(Axes, allow_none=True)
+    _coords = Instance(CoordSet, allow_none=True)
 
     _iscopy = Bool(False)
 
@@ -228,15 +228,15 @@ class NDDataset(
 
     def __init__(self,
                  data=None,
-                 axes=None,
+                 coords=None,
                  mask=None,
                  uncertainty=None,
                  units=None,
                  meta=None,
                  name=None,
                  title=None,
-                 axesunits=None,
-                 axestitles=None,
+                 coordsunits=None,
+                 coordstitles=None,
                  is_complex=None,
                  is_copy = True,
                  **kwargs):
@@ -254,12 +254,12 @@ class NDDataset(
                  is_copy=is_copy,
                  **kwargs)
 
-        self.modified = self._date
+        self._modified = self._date
         self.description = ''
         self.history = []
-        self.axes = axes
-        self.axestitles = axestitles
-        self.axesunits = axesunits
+        self.coords = coords
+        self.coordstitles = coordstitles
+        self.coordsunits = coordsunits
 
     @property
     def data(self):
@@ -286,7 +286,7 @@ class NDDataset(
                 else data._name
             self._validate(data._data)
             self._mask = data._mask
-            self._axes = data._axes
+            self._coords = data._coords
             self._units = data._units
             self._meta = data._meta
             self._title = data._title
@@ -295,7 +295,7 @@ class NDDataset(
         elif isinstance(data, NDFrame):  # pandas object
             log.debug("init data with data from pandas NDFrame object")
             self._validate(data.values)
-            self.axes = data.axes
+            self.coords = data.coords
 
         elif isinstance(data, pd.Index):  # pandas index object
             log.debug("init data with data from a pandas Index")
@@ -365,70 +365,70 @@ class NDDataset(
         self._history.append(value)
 
     @property
-    def axes(self):
+    def coords(self):
         """
-        :class:`~spectrochempy.core.dataset.ndaxes.Axes` instance
+        :class:`~spectrochempy.core.dataset.ndcoords.CoordSet` instance
 
-        Contain the axes of the dataset
+        Contain the coords of the dataset
 
         """
-        return self._axes
+        return self._coords
 
-    @axes.setter
-    def axes(self, value):
+    @coords.setter
+    def coords(self, value):
         if value is not None:
-            if self._axes is not None:
+            if self._coords is not None:
                 log.info("Overwriting NDDataset's current "
-                         "axes with specified axes")
+                         "coords with specified coords")
 
-            for i, axis in enumerate(value):
-                if isinstance(axis, Axes):
-                    size = axis.sizes[i]
+            for i, coord in enumerate(value):
+                if isinstance(coord, CoordSet):
+                    size = coord.sizes[i]
                 else:
-                    size = axis.size
+                    size = coord.size
                 if size != self.shape[i]:
-                    raise AxisError(
-                            'the size of each axis coordinates must '
+                    raise CoordsError(
+                            'the size of each coord coordinates must '
                             'be equal to that of the respective data dimension')
 
-            if not isinstance(value, Axes):
-                self._axes = Axes(value)
+            if not isinstance(value, CoordSet):
+                self._coords = CoordSet(value)
             else:
-                self._axes = value
+                self._coords = value
 
-    @default('_axes')
-    def _get_axes_default(self):
-        return None  # Axes([None for dim in self.shape])
+    @default('_coords')
+    def _get_coords_default(self):
+        return None  # CoordSet([None for dim in self.shape])
 
     @property
-    def axestitles(self):
+    def coordstitles(self):
         """
-        `List` - A list of the :class:`~spectrochempy.core.dataset.ndaxes.Axis`
+        `List` - A list of the :class:`~spectrochempy.core.dataset.ndcoords.Coord`
         titles.
 
         """
-        if self.axes is not None:
-            return self.axes.titles
+        if self.coords is not None:
+            return self.coords.titles
 
-    @axestitles.setter
-    def axestitles(self, value):
-        if self.axes is not None:
-            self.axes.titles = value
+    @coordstitles.setter
+    def coordstitles(self, value):
+        if self.coords is not None:
+            self.coords.titles = value
 
     @property
-    def axesunits(self):
+    def coordsunits(self):
         """
-        `List`- A list of the :class:`~spectrochempy.core.dataset.ndaxes.Axis`
+        `List`- A list of the :class:`~spectrochempy.core.dataset.ndcoords.Coord`
         units
         """
-        if self.axes is not None:
-            return self.axes.units
+        if self.coords is not None:
+            return self.coords.units
 
-    @axesunits.setter
-    def axesunits(self, value):
+    @coordsunits.setter
+    def coordsunits(self, value):
 
-        if self.axes is not None:
-            self.axes.units = value
+        if self.coords is not None:
+            self.coords.units = value
 
     @property
     def T(self):
@@ -445,48 +445,48 @@ class NDDataset(
         """
         Read-pnly properties
 
-        Return the x axis, i.e. coords(-1)
+        Return the x coord, i.e. coords(-1)
 
         """
-        return self.axes[-1]
+        return self.coords[-1]
 
     @x.setter
     def x(self, value):
-        self.axes[-1] = value
+        self.coords[-1] = value
 
     @property
     def y(self):
         """
-        Read-pnly properties
-
-        Return the y axis, i.e. coords(-2) for 2D dataset.
+        Return the y coord, i.e. coords(-2) for 2D dataset.
 
         """
         if self.ndim > 1:
-            return self.axes[-2]
+            return self.coords[-2]
 
     @y.setter
     def y(self, value):
-        self.axes[-2] = value
+        self.coords[-2] = value
 
     @property
     def z(self):
         """
-        Read-pnly properties
+        Read-Only properties
 
-        Return the z axis, i.e. coords(-3) fpr 3D dataset
+        Return the z coord, i.e. coords(-3) fpr 3D dataset
 
         """
         if self.ndim > 2:
-            return self.axes[-3]
+            return self.coords[-3]
 
     @z.setter
     def z(self, value):
-        self.axes[-3] = value
+        self.coords[-3] = value
 
     @property
     def date(self):
         """
+        Read-Only properties
+
         Date of the dataset creation
         """
         return self._date
@@ -494,6 +494,8 @@ class NDDataset(
     @property
     def modified(self):
         """
+        Read-Only properties
+
         Date of modification
 
         """
@@ -555,19 +557,19 @@ class NDDataset(
         new._mask = self._mask.squeeze(tuple(squeeze_axis))
         new._uncertainty = self._uncertainty.squeeze(tuple(squeeze_axis))
 
-        axes = []
+        coords = []
         cplx = []
         for axis in range(self.ndim):
             if axis not in squeeze_axis:
-                axes.append(self.axes[axis])
+                coords.append(self.coords[axis])
                 cplx.append(self._is_complex[axis])
 
         new._is_complex = cplx
-        new._axes = Axes(axes)
+        new._coords = CoordSet(coords)
 
         return new
 
-    def coords(self, axis=-1):
+    def coord(self, axis=-1):
         """
         This method return the the coordinates along the given axis
 
@@ -582,7 +584,7 @@ class NDDataset(
         coords : :class:`~numpy.ndarray`
 
         """
-        return self.axes[axis]  # .coords
+        return self.coords[axis]  # .coords
 
     def transpose(self, axes=None, inplace=False):
         """
@@ -592,7 +594,7 @@ class NDDataset(
         ----------
         axes : list of ints, optional
 
-            By default, reverse the dimensions, otherwise permute the axes
+            By default, reverse the dimensions, otherwise permute the coords
             according to the values given.
 
         inplace : `bool`, optional, default = `False`.
@@ -605,7 +607,7 @@ class NDDataset(
         transposed_dataset : same type
 
             The nd-dataset or a new nd-dataset (inplace=False)
-            is returned with axes
+            is returned with coords
             transposed
 
         See Also
@@ -628,7 +630,7 @@ class NDDataset(
         new._mask = np.transpose(new._mask, axes)
         new._uncertainty = np.transpose(new._uncertainty, axes)
 
-        new._axes._transpose(axes)
+        new._coords._transpose(axes)
         new._is_complex = [new._is_complex[axis] for axis in axes]
 
         # TODO: Add transpose of meta
@@ -637,7 +639,7 @@ class NDDataset(
 
     def swapaxes(self, axis1, axis2, inplace=False):
         """
-        Interchange two axes of the NDDataset.
+        Interchange two coords of the NDDataset.
 
         Parameters
         ----------
@@ -657,7 +659,7 @@ class NDDataset(
         -------
         swapped_dataset : same type
 
-            The object or a new object (inplace=False) is returned with axes
+            The object or a new object (inplace=False) is returned with coords
             swapped
 
         See Also
@@ -688,9 +690,9 @@ class NDDataset(
         if new._uncertainty is not None:
             new._uncertainty = np.swapaxes(new._uncertainty, axis1, axis2)
 
-        if new._axes:
-            new._axes[axis1], new._axes[axis2] = \
-                new._axes[axis2], new._axes[axis1]
+        if new._coords:
+            new._coords[axis1], new._coords[axis2] = \
+                new._coords[axis2], new._coords[axis1]
 
         new._is_complex[axis1], new._is_complex[axis2] = \
             new._is_complex[axis2], new._is_complex[axis1]
@@ -708,7 +710,7 @@ class NDDataset(
         ----------
         axis : `int` , optional, default = 0.
 
-            Axis id along which to sort.
+            axis id along which to sort.
 
         pos: `int` , optional
 
@@ -731,7 +733,7 @@ class NDDataset(
         -------
         sorted_dataset : same type
 
-            The object or a new object (inplace=False) is returned with axes
+            The object or a new object (inplace=False) is returned with coords
             sorted
 
         """
@@ -747,8 +749,8 @@ class NDDataset(
         indexes = []
         for i in range(self.ndim):
             if i == axis:
-                args = self.axes[axis]._argsort(by=by, pos=pos, descend=descend)
-                new.axes[axis] = self.axes[axis]._take(args)
+                args = self.coords[axis]._argsort(by=by, pos=pos, descend=descend)
+                new.coords[axis] = self.coords[axis]._take(args)
                 indexes.append(args)
             else:
                 indexes.append(slice(None))
@@ -1008,9 +1010,9 @@ class NDDataset(
             raise ValueError('The odd size along axis {} is not compatible with'
                              ' complex interlaced data'.format(axis))
 
-        if self.axes:
-            new_axis = self.axes[axis][::2]
-            self.axes[axis] = new_axis
+        if self.coords:
+            new_axis = self.coords[axis][::2]
+            self.coords[axis] = new_axis
 
     # Create the returned values of functions should be same class as input.
     # The units should have been handled by __array_wrap__ already
@@ -1022,7 +1024,7 @@ class NDDataset(
     def __dir__(self):
         return NDIO().__dir__() + ['data', 'mask', 'units', 'uncertainty',
                                    'meta', 'name', 'title', 'is_complex',
-                                   'axes', 'description', 'history', 'date',
+                                   'coords', 'description', 'history', 'date',
                                    'modified'
                                    ]
 
@@ -1087,8 +1089,8 @@ class NDDataset(
                                                                      '\n')
         out += '  data values:\n'
         out += '{}\n'.format(textwrap.indent(str(data_str), ' ' * 9))
-        if self.axes is not None:
-            for i, axis in enumerate(self.axes):
+        if self.coords is not None:
+            for i, axis in enumerate(self.coords):
                 axis_str = str(axis).replace('\n\n', '\n')
                 out += '       axis {}:\n'.format(i)
                 out += textwrap.indent(axis_str, ' ' * 9)
@@ -1114,25 +1116,25 @@ class NDDataset(
             # log.warning('not found attribute: %s' % item)
 
     def __getitem__(self, item):
-        # we need axes (but they might be not present...
-        # in this case axes are simply the indexes
-        if self.axes is None:
-            # create temp axes
-            axes = Axes([Axis(np.arange(l)) for l in self._data.shape])
+        # we need coords (but they might be not present...
+        # in this case coords are simply the indexes
+        if self.coords is None:
+            # create temp coords
+            coords = CoordSet([Coord(np.arange(l)) for l in self._data.shape])
         else:
-            axes = self.axes
+            coords = self.coords
 
         # transform the passed index (if necessary) to integer indexes
-        key = self._make_index(axes, item)
+        key = self._make_index(coords, item)
 
         # normal integer based slicing
         new_data = self._data[key].squeeze()
         new_mask = self._mask[key].squeeze()
         new_uncertainty = self._uncertainty[key].squeeze()
 
-        # perform the axes slicing (and unsqueeze the data!)
-        new_axes = axes.copy()
-        for i, ax in enumerate(new_axes):
+        # perform the coords slicing (and unsqueeze the data!)
+        new_coords = coords.copy()
+        for i, ax in enumerate(new_coords):
             if self.is_complex[i]:
                 # the slice has been multiplied by 2 in _get_slice
                 # (see below)
@@ -1147,13 +1149,13 @@ class NDDataset(
                 _key = slice(start, stop, step)
             else:
                 _key = key[i]
-            new_axes[i] = ax[_key]
+            new_coords[i] = ax[_key]
 
         sh = list(new_data.shape)
-        for i, ax in enumerate(new_axes):
+        for i, ax in enumerate(new_coords):
             cplx = self.is_complex[i]
-            if (ax.size == 1) and not cplx:  # and len(new_axes)>1:
-                # new_axes.remove(ax)
+            if (ax.size == 1) and not cplx:  # and len(new_coords)>1:
+                # new_coords.remove(ax)
                 # we don't want to squeeze the extraction by default
                 # we will possibly squeeze them later
                 sh.insert(i, 1)
@@ -1173,7 +1175,7 @@ class NDDataset(
         new._name = '*' + self._name
         new._data = new_data
         new._mask = new_mask
-        new._axes = new_axes
+        new._coords = new_coords
         new._uncertainty = new_uncertainty
 
         return new
@@ -1274,8 +1276,8 @@ class NDDataset(
 
         out += tr.format('data', data)
 
-        if self.axes is not None:
-            for i, axis in enumerate(self.axes):
+        if self.coords is not None:
+            for i, axis in enumerate(self.coords):
                 axis_str = axis._repr_html_().replace('\n\n', '\n')
                 out += tr.format("axis %i" % i,
                                  textwrap.indent(axis_str, ' ' * 9))
@@ -1352,7 +1354,7 @@ class NDDataset(
 
         return newkey
 
-    def _make_index(self, axes, key):
+    def _make_index(self, coords, key):
 
         if isinstance(key, np.ndarray) and key.dtype == np.bool:
             # this is a boolean selection
@@ -1385,7 +1387,7 @@ class NDDataset(
 
         # replace the non index slice or non slide by index slices
         for i_axis, key in enumerate(keys):
-            axis = axes[i_axis]
+            axis = coords[i_axis]
             keys[i_axis] = self._get_slice(key, axis,
                                            iscomplex=self.is_complex[i_axis])
 
@@ -1415,7 +1417,7 @@ class NDDataset(
 
         # change to complex
         # change type of data to complex
-        # require modification of the axes, if any
+        # require modification of the coords, if any
         if change['name'] == '_is_complex':
             pass
 

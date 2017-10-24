@@ -103,8 +103,10 @@ def test_init_ndarray():
     assert not d0.is_masked
     assert d0.dtype == 'float64'
     assert not d0.is_complex
-    assert (repr(d0)=='NDArray: []')
+    assert (repr(d0)=='NDArray: [] unitless')
     assert (str(d0) == '[]')
+
+    d0 = NDArray(13. * ur.tesla) #initialisation with a quantity
 
     d0 = NDArray((2,3,4)) # initialisation with a sequence
     assert d0.shape == (3,)
@@ -185,11 +187,37 @@ def test_init_ndarray():
     assert str(d3).endswith("[   0.018    0.020]] Hz")
     assert d3[1, 1].data == d[1,1]
 
+def test_labels_and_sort():
+    d0 = NDArray(np.linspace(4000, 1000, 10),
+                 labels='a b c d e f g h i j'.split(),
+                 units='s',
+                 mask=False,
+                 title='wavelength')
+    assert d0.is_labeled
+    d1 = d0._sort()
+    assert (d1.data[0] == 1000)
+    d0._sort(descend=True, inplace=True)
+    assert (d0.data[0] == 4000)
+    d1 = d0._sort(by='label', descend=True)
+    assert (d1.labels[0] == 'j')
+
+def test_real_imag():
+    np.random.seed(12345)
+    d = np.random.random((2, 2)) * np.exp(.1j)
+    d3 = NDArray(d)
+    d3r = d3.real
+    d3i = d3.imag
+    from spectrochempy.utils.arrayutils import interleave
+    new = d3.copy()
+    new.data = d3.real.data + 1j * d3.imag.data
+    assert_equal( d3.data, new.data)
+
 def test_init_with_complex_information():
     np.random.seed(12345)
     d = np.random.random((4, 3)) * np.exp(.1j)
     d3 = NDArray(d, units=ur.Hz,
-                 mask=[[False, True, False], [True, False, False]],
+                 mask=[[False, True, False],
+                       [True, False, False]],
                  is_complex= [True, True]
 
                  )  # with units & mask

@@ -40,5 +40,5 @@ rst_epilog = """
 
 .. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
 
-.. |Axis| replace:: :class:`~spectrochempy.core.dataset.nddaxes.Axis`
+.. |Coord| replace:: :class:`~spectrochempy.core.dataset.nddaxes.Coord`
 """

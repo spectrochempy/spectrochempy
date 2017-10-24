@@ -40,7 +40,7 @@ _classes = __all__[:]
 
 from traitlets import HasTraits, Instance
 
-from spectrochempy.core.dataset.nddataset import NDDataset, Axis, Axes
+from spectrochempy.core.dataset.nddataset import NDDataset, Coord, CoordSet
 
 import numpy as np
 
@@ -127,22 +127,22 @@ class Svd(HasTraits):
             # Returns ur as a Dataset object
         U = NDDataset(U)
         U.name = 'left singular vectors of ' + X.name
-        U.axes = Axes(Axis(X.axes[0]),
-                      Axis(None,
-                           labels=['# %s' % i for i in range(len(s))],
-                           title='Unitary vectors')
-                      )
+        U.axes = CoordSet(Coord(X.axes[0]),
+                          Coord(None,
+                                labels=['# %s' % i for i in range(len(s))],
+                                title='Unitary vectors')
+                          )
         U.description = 'left singular vectors of ' + X.name
         U.history = str(U.modified) + ': created by Svd \n'
 
         # Returns the loadings (Vt) as a Dataset object
         Vt = NDDataset(Vt)
         Vt.name = 'Loadings (V.t) of ' + X.name
-        Vt.axes = Axes(Axis(None,
-                            labels=['# %s' % i for i in range(len(s))],
-                            title='Unitary vectors'),
-                       Axis(X.axes[1])
-                       )
+        Vt.axes = CoordSet(Coord(None,
+                                 labels=['# %s' % i for i in range(len(s))],
+                                 title='Unitary vectors'),
+                           Coord(X.axes[1])
+                           )
         Vt.description = (
             'Loadings obtained by singular value decomposition of ' + X.name)
         Vt.history = (str(Vt.modified) + ': created by Svd \n')

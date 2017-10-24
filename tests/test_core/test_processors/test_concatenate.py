@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-from spectrochempy.api import ur, concatenate, AxisRange
+from spectrochempy.api import ur, concatenate, CoordsRange
 
 import pytest
 
@@ -78,7 +78,7 @@ def test_concatenate_along_axis1(IR_source_1):
     # test along axis 1
     ranges = ([6000., 3500.], [1800., 1500.])
 
-    ranges = AxisRange(*ranges, reversed=coords.is_reversed)
+    ranges = CoordsRange(*ranges, reversed=coords.is_reversed)
 
     s = []
     for pair in ranges:

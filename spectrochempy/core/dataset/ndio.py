@@ -71,7 +71,7 @@ from numpy.lib.format import write_array, MAGIC_PREFIX
 # ------------
 
 import spectrochempy
-from spectrochempy.core.dataset.ndaxes import Axes, Axis
+from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
 from spectrochempy.utils import is_sequence
@@ -207,7 +207,7 @@ class NDIO(HasTraits):
                         write_array(fid, np.asanyarray(val))
                         zipf.write(tmpfile, arcname=level + key + '.npy')
 
-                elif isinstance(val, Axis):
+                elif isinstance(val, Coord):
 
                     _objnames = dir(val)
                     _loop_on_obj(_objnames, level=key + '.')
@@ -352,7 +352,7 @@ class NDIO(HasTraits):
             for key, val in obj.items():
                 if key.startswith('axis'):
                     if not axes:
-                        axes = [Axis() for _ in range(ndim)]
+                        axes = [Coord() for _ in range(ndim)]
                     els = key.split('_')
                     setattr(axes[int(els[1])], "_" + els[2], val)
                 elif key == "pars.json":

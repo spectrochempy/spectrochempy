@@ -156,10 +156,10 @@ def read_dso(filename='', **kwargs):
             if len(j[0]):
                 if len(f[dso]['axisscale'][0][0][i][1]):
                     out.dims[i].appendaxis(
-                        Axis(j[0], f[dso]['axisscale'][0][0][i][1][nj][
-                            0]))  # sometimes: Axis(j, f[dso]... , i.e. no j[0]    and  [nj] i.e. no [nj][0][0]
+                        Coords(j[0], f[dso]['axisscale'][0][0][i][1][nj][
+                            0]))  # sometimes: Coord(j, f[dso]... , i.e. no j[0]    and  [nj] i.e. no [nj][0][0]
                 else:
-                    out.dims[i].appendaxis(Axis(j[0], '*unammed*'))
+                    out.dims[i].appendaxis(Coords(j[0], '*unammed*'))
 
     for i in f[dso]['description'][0][0]:
         out.description += i + ' \n'

@@ -274,7 +274,7 @@ def read_jdx(filename='', sortbydate=True):
     out.datalabel = yunits[0]
     out.appendlabels(Labels(alltitles, 'Title'))
     out.appendlabels(Labels(allacquisitiondates, 'Acquisition date (GMT)'))
-    out.appendaxis(Axis(xaxis, 'Wavenumbers (cm-1)'), dim=1)
+    out.appendaxis(Coords(xaxis, 'Wavenumbers (cm-1)'), dim=1)
     if sortbydate:
         out.addtimeaxis()
         out.sort(0, 0)

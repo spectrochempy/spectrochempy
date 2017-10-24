@@ -43,7 +43,7 @@ import matplotlib.pyplot as plt
 from traitlets import HasTraits, Instance
 
 from ..core.dataset.nddataset import NDDataset
-from ..core.dataset.ndaxes import Axes, Axis
+from ..core.dataset.ndcoords import CoordSet, Coord
 from .svd import Svd
 
 import numpy as np
@@ -101,11 +101,11 @@ class Pca(HasTraits):
         T = np.dot(Xsvd.U.data[:, 0:npc], np.diag(Xsvd.s)[0:npc, 0:npc])
         T = NDDataset(T)
         T.name = 'scores (T) of ' + Xc.name
-        T.axes = Axes(Axis(X.axes[0]),
-                      Axis(None,
-                           labels=['# %s' % i for i in range(len(Xsvd.s))],
-                           title='PC')
-                      )
+        T.axes = CoordSet(Coord(X.axes[0]),
+                          Coord(None,
+                                labels=['# %s' % i for i in range(len(Xsvd.s))],
+                                title='PC')
+                          )
         T.description = 'scores (T) of ' + Xc.name
         T.history = str(T.modified) + ': created by Pca \n'
 
@@ -163,7 +163,7 @@ class Pca(HasTraits):
         X = self.center + np.dot(self.T.data[:, 0:npc], self.Pt.data[0:npc, :])
         X = NDDataset(X)
         X.name = 'PCA constructed Dataset with {} PCs'.format(npc)
-        X.axes = Axes(self.T.coords(0).copy(), self.Pt.coords(1).copy())
+        X.axes = CoordSet(self.T.coords(0).copy(), self.Pt.coords(1).copy())
         return X
 
     def printev(self, npc=10):

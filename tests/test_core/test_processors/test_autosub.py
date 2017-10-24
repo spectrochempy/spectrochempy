@@ -42,8 +42,8 @@ import numpy as np
 import pandas as pd
 
 from pint import DimensionalityError
-from spectrochempy.api import (NDDataset, Axes, Axis,
-                                            AxisError, Meta, ur, figure, show)
+from spectrochempy.api import (NDDataset, Axes, Coords,
+                                            CoordsError, Meta, ur, figure, show)
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,

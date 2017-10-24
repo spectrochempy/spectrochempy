@@ -323,7 +323,7 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
                                    tzinfo=timezone.utc) + timedelta(
                     seconds=int(timestamp))
                 allacquisitiondates.append(acqdate)
-                timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Axis object
+                timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Coord object
                 #  use datetime.fromtimestamp(d, timezone.utc))
                 # to transform back to datetime obkct
 
@@ -404,7 +404,7 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
                                    tzinfo=timezone.utc) + timedelta(
                     seconds=int(timestamp))
                 allacquisitiondates.append(acqdate)
-                timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Axis object
+                timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Coord object
                 # use datetime.fromtimestamp(d, timezone.utc))
                 # to transform back to datetime obkct
 
@@ -518,7 +518,7 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
 
         out.appendlabels(Labels(alltitles, 'Title'))
         out.appendlabels(Labels(allacquisitiondates, 'Acquisition date (GMT)'))
-        out.appendaxis(Axis(xaxis, 'Wavenumbers (cm-1)'), dim=1)
+        out.appendaxis(Coords(xaxis, 'Wavenumbers (cm-1)'), dim=1)
         indexFirstSpectrum = 0
         if sortbydate:
             out.addtimeaxis()

@@ -36,7 +36,7 @@
 
 
 """This module implements the basic `NDArray` class  which is an array
-container.  :class:`~spectrochempy.core.dataset.ndaxes.Axis` and
+container.  :class:`~spectrochempy.core.dataset.ndcoords.Coord` and
 :class:`~spectrochempy.core.dataset.nddataset.NDDataset` classes are derived
 from it.
 
@@ -57,10 +57,10 @@ from datetime import datetime
 import numpy as np
 from pint.errors import DimensionalityError, UndefinedUnitError
 from traitlets import (Union, List, Unicode, Instance, Bool, HasTraits, default,
-                       Any, Integer, Sentinel)
+                       Any, Integer, Sentinel, Float)
 from uncertainties import unumpy as unp
-import pandas as pd
-from pandas.core.generic import NDFrame
+from pandas.core.generic import NDFrame, Index
+from spectrochempy.core.units import Quantity
 import matplotlib.pyplot as plt
 
 # =============================================================================
@@ -131,10 +131,10 @@ class NDArray(HasTraits):
 
     _ax = Instance(plt.Axes, allow_none=True)
 
-    _data = Array()
+    _data = Array(Float())
     _mask = Union((NPBool, Array(Bool())), allow_none=False)
-    _uncertainty = Union((NPBool, Array()), allow_none=False)
-    _labels = Union((NPBool, Array()), allow_none=False)
+    _uncertainty = Union((NPBool, Array(Float())), allow_none=False)
+    _labels = Union((NPBool, Array(Any())), allow_none=False)
 
     _date = Instance(datetime)
     _fig = Instance(plt.Figure, allow_none=True)
@@ -151,6 +151,7 @@ class NDArray(HasTraits):
     _data_passed_is_measurement = Bool()
     _data_passed_is_quantity = Bool()
     _data_passed_with_mask = Bool()
+    _data_passed_with_labels = Bool()
     _is_complex = Union((NPBool,List(Bool())), allow_none=False)
 
     # -------------------------------------------------------------------------
@@ -180,6 +181,7 @@ class NDArray(HasTraits):
 
         self.title = title
 
+        #TODO: the flags _data_passed_with_ are not really used! TODO
         if np.any(mask):
             if self._data_passed_with_mask and self._mask != mask:
                 log.info("{0} was created with a masked array, but a "+
@@ -189,7 +191,7 @@ class NDArray(HasTraits):
                          "combined with the current array's mask.")
             self.mask = mask
 
-        if np.any(labels):
+        if labels is not nolabel:
             if self._data_passed_with_labels and self._labels != labels:
                 log.info("{0} was created with a labeled array, but " +
                          "labels were explicitly provided to {0}.\n".format(
@@ -242,11 +244,32 @@ class NDArray(HasTraits):
 
     def __eq__(self, other, attrs=None):
 
-        if not (other.__hash__()==self.__hash__()):
-            return False
+        if not isinstance(other, NDArray):
+
+            # probably other is not of the same type:
+            # try to make some assumption to make usefull comarison.
+            if isinstance(other, Quantity):
+                otherdata = other.magnitude
+                otherunits = other.units
+            elif isinstance(other, (float, int, np.ndarray)):
+                otherdata = other
+                otherunits = None
+            else:
+                raise TypeError("I do not know how to compare with type: " % type(other))
+
+            if self._units is None and otherunits is None:
+                eq = np.all(self._data == otherdata)
+            elif self._units is not None and otherunits is not None:
+                eq = np.all(self._data * self._units == otherdata * otherunits)
+            else:
+                return False
+
+            return eq
+
         eq = True
         if attrs is None:
             attrs = self.__dir__()
+            attrs.remove('name') # name will not be suded for comparison
         for attr in attrs:
             if hasattr(other, "_%s" % attr):
                 eq &= np.all(
@@ -279,14 +302,20 @@ class NDArray(HasTraits):
             new._uncertainty = np.array(self._uncertainty[keys])
 
         if self.is_labeled:
-            new._labels = np.array(self._labels[..., keys])
+            if self._labels.ndim > 1:
+                pass
+            if self._labels.ndim > self._data.ndim:
+                #TODO: check multilabels
+                new._labels = np.array(self._labels[..., keys])
+            else:
+                new._labels = np.array(self._labels[keys])
 
         return new.squeeze()
 
     def __hash__(self):
         # all instance of this class has same hash, so they can be compared
 
-        return str(type(self)) + "1234567890"
+        return type(self).__name__ + "1234567890"
 
     def __iter__(self):
 
@@ -312,10 +341,8 @@ class NDArray(HasTraits):
                 data, separator=', ', \
                 prefix=prefix)  # this allow indentation of len of the prefix
 
-        if self.units:
-            units = ' {:~.3f}'.format(self.units)
-        else:
-            units = ''
+        units = ' {:~K}'.format(self.units) if self._units is not None \
+            else ' unitless'
         return ''.join([prefix, body, units])
 
     def __str__(self):
@@ -330,10 +357,9 @@ class NDArray(HasTraits):
                     if self.is_complex[axis]:
                         prefix.append(item+'I')
 
-        if self.units:
-            units = ' {:~.3f}'.format(self.units)
-        else:
-            units = ''
+        units = ' {:~K}'.format(self.units) if self._units is not None \
+                else ''
+
 
         def mkbody(d, pref, units):
             body = np.array2string( \
@@ -441,11 +467,14 @@ class NDArray(HasTraits):
             log.debug("init data with data from pandas NDFrame object")
             self._validate(data.values)
             self.axes = data.axes
+            if data.name is not None:
+                self._title = data.name
 
-        elif isinstance(data, pd.Index):  # pandas index object
+        elif isinstance(data, Index):  # pandas index object
             log.debug("init data with data from a pandas Index")
-            self._validate(np.array(data.values, subok=True,
-                                    copy=True))
+            self._validate(data.values)
+            if data.name is not None:
+                self._title = data.name
 
         elif isinstance(data, Quantity):
             log.debug("init data with data from a Quantity object")
@@ -497,20 +526,6 @@ class NDArray(HasTraits):
                 self._date = datetime.strptime(date, "%d/%m/%Y")
 
     @property
-    def is_labeled(self):
-        """`bool`, read-only property - Whether the axis has labels or not.
-
-        """
-
-        if self._labels is nolabel:
-            return False
-        elif self._labels.size == 0:
-            return False
-        elif np.any(self._labels != ''):
-            return True
-        return False
-
-    @property
     def labels(self):
         """:class:`~numpy.ndarray` - An array of objects of any type (but most
         generally string).
@@ -519,7 +534,7 @@ class NDArray(HasTraits):
         which complements the coordinates
 
         """
-        if np.any(self._labels):
+        if not np.any(self._labels):
             self._labels = nolabel
 
         return self._labels
@@ -528,7 +543,7 @@ class NDArray(HasTraits):
     def labels(self, labels):
         # Property setter for labels
 
-        if np.any(labels):
+        if labels is nolabel:
             self._labels = nolabel
 
         elif isinstance(labels, np.ndarray):
@@ -769,6 +784,20 @@ class NDArray(HasTraits):
 
         """
         return self._data.size == 0
+
+    @property
+    def is_labeled(self):
+        """`bool`, read-only property - Whether the axis has labels or not.
+
+        """
+
+        if self._labels is nolabel:
+            return False
+        elif self._labels.size == 0:
+            return False
+        elif np.any(self._labels != ''):
+            return True
+        return False
 
     @property
     def is_masked(self):
@@ -1401,7 +1430,8 @@ class NDArray(HasTraits):
         new._data = new._data[indices]
         if new.is_labeled:
             new._labels = new._labels[..., indices]
-        new._mask = new._mask[indices]
+        if new.is_masked:
+            new._mask = new._mask[indices]
 
         return new
 

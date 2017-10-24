@@ -58,7 +58,7 @@ from ..fileio.bruker import read, read_pdata, read_lowmem
 # Local imports
 # =============================================================================
 from ...dataset.api import Meta
-from ...dataset.api import Axis, NDDataset
+from ...dataset.api import Coord, NDDataset
 from ...units import ur, Quantity
 from .parameter import nmr_valid_meta
 
@@ -658,7 +658,7 @@ def read_bruker_nmr(source, *args, **kwargs):
                 # the axis is in time units
                 dw = (1. / meta.sw_h[axis]).to('us')
                 axespoints = np.arange(meta.td[axis])
-                axe = Axis(axespoints * dw,
+                axe = Coords(axespoints * dw,
                            name='F{}'.format(axis),
                            title="acquisition time")
                 axes.append(axe)
@@ -790,7 +790,7 @@ def read_bruker_nmr(source, *args, **kwargs):
             else:
                 ax = np.arange(newdata.shape[0])
                 title = '-nd-'
-            axis = Axis(ax, title=title)
+            axis = Coord(ax, title=title)
 
             labels = []
             for i in range(len(ax)):

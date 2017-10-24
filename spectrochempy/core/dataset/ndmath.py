@@ -201,7 +201,7 @@ class NDMath(object):
         # in the other dimensions tahn the last
 
         # case our first object is a NDArray
-        # (Axis or NDDataset derive from NDArray)
+        # (Coord or NDDataset derive from NDArray)
         if isinstance(obj, NDArray):
 
             d = obj._data  # The underlying data
@@ -227,7 +227,7 @@ class NDMath(object):
 
             else:
 
-                # Ok it's an NDArray but not a NDDataset, then it's an Axis.
+                # Ok it's an NDArray but not a NDDataset, then it's an Coord.
                 isdataset = False
 
             # mask?
@@ -262,17 +262,17 @@ class NDMath(object):
         for o in objs:
             other = copy.deepcopy(o)
 
-            # is other a NDDataset or Axis?
+            # is other a NDDataset or Coord?
             if isinstance(other, NDArray):
 
                 # if isaxe:
-                #     raise TypeError('when the first argument is an Axis, '
-                #                      'second argument cannot be an Axis or '
+                #     raise TypeError('when the first argument is an Coord, '
+                #                      'second argument cannot be an Coord or '
                 #                      'NDDataset instance')
                 #
                 # if isdataset and not hasattr(other, '_axes'):
                 #     raise TypeError('when the first argument is a NDDataset, '
-                #                     'second argument cannot be an Axis'
+                #                     'second argument cannot be an Coord'
                 #                     ' instance')
                 # if the first arg (obj) is a nddataset
                 if isdataset and other._axes != obj._axes:

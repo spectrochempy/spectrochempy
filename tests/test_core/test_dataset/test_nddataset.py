@@ -45,7 +45,7 @@ import pandas as pd
 import pytest
 
 from pint import DimensionalityError, UndefinedUnitError
-from spectrochempy.api import (NDDataset, Axes, Axis, AxisError, Meta)
+from spectrochempy.api import (NDDataset, CoordSet, Coord, CoordsError, Meta)
 from spectrochempy.core.units import ur
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
@@ -129,31 +129,31 @@ def test_nddataset_repr():
 
 
 def test_nddataset_axes_invalid():
-    axe1 = Axis(np.arange(10), name='hello')  # , units='m')
-    axe2 = Axis(np.arange(20), name='hello')  # , units='s')
-    with pytest.raises(AxisError):
+    axe1 = Coord(np.arange(10), name='hello')  # , units='m')
+    axe2 = Coord(np.arange(20), name='hello')  # , units='s')
+    with pytest.raises(CoordsError):
         # a different name must be provided for each axis
         # print(axe1.name, axe2.name)
         ndd1 = NDDataset(np.random.random((10, 20)), axes=[axe1, axe2])
 
 
 def test_nddataset_axes_valid():
-    axe1 = Axis(np.arange(10), title='wavelengths')  # , units='m')
-    axe2 = Axis(np.arange(20), title='time')  # , units='s')
+    axe1 = Coord(np.arange(10), title='wavelengths')  # , units='m')
+    axe2 = Coord(np.arange(20), title='time')  # , units='s')
     ndd1 = NDDataset(np.random.random((10, 20)), axes=[axe1, axe2])
 
 
 def test_nddataset_axes_with_units_valid():
-    axe1 = Axis(np.arange(10), title='wavelengths', units='cm^-1')
-    axe2 = Axis(np.arange(20), title='time', units='s')
+    axe1 = Coord(np.arange(10), title='wavelengths', units='cm^-1')
+    axe2 = Coord(np.arange(20), title='time', units='s')
     ndd1 = NDDataset(np.random.random((10, 20)), title='absorbance',
                      axes=[axe1, axe2])
 
 
 def test_nddataset_axes_invalid_length():
-    axe1 = Axis(np.arange(9), title='wavelengths')  # , units='m')
-    axe2 = Axis(np.arange(20), title='time')  # , units='s')
-    with pytest.raises(AxisError):
+    axe1 = Coord(np.arange(9), title='wavelengths')  # , units='m')
+    axe2 = Coord(np.arange(20), title='time')  # , units='s')
+    with pytest.raises(CoordsError):
         ndd1 = NDDataset(np.random.random((10, 20)), axes=[axe1, axe2])
 
 
@@ -353,11 +353,11 @@ def test_init_panel(panelnoaxename, panel):
     assert_equal(da.coords(axis='z'), panel.axes[0].values)
 
     # selection of the axis
-    assert isinstance(da.axes[1], Axis)
-    assert isinstance(da.axes[1:], Axes)
-    assert isinstance(da.axes(0, 2), Axes)
-    assert isinstance(da.axes(0, 2)[0], Axis)
-    assert isinstance(da.axes(2), Axis)
+    assert isinstance(da.axes[1], Coord)
+    assert isinstance(da.axes[1:], CoordSet)
+    assert isinstance(da.axes(0, 2), CoordSet)
+    assert isinstance(da.axes(0, 2)[0], Coord)
+    assert isinstance(da.axes(2), Coord)
 
 
 def test_set_axes_parameters(panel):
@@ -436,7 +436,7 @@ def test_axes_indexer():
     axe1 = np.linspace(0, 60, 10)  # wrong length
     axe2 = np.linspace(20, 30, 10)
 
-    with pytest.raises(AxisError):
+    with pytest.raises(CoordsError):
         da = NDDataset(dx,
                        axes=[axe0, axe1, axe2],
                        title='absorbance',
@@ -478,12 +478,12 @@ def test_axes_indexer():
 
 ################################### TEST SLICING################################
 
-# Datasets and Axes
+# Datasets and CoordSet
 @pytest.fixture()
 def dataset1d():
     # create a simple 1D
     length = 10.
-    x_axis = Axis(np.arange(length) * 1000.,
+    x_axis = Coord(np.arange(length) * 1000.,
                   title='wavelengths',
                   units='cm^-1')
     with NumpyRNGContext(125):
@@ -499,19 +499,19 @@ def dataset3d():
     with NumpyRNGContext(12345):
         dx = np.random.random((10, 100, 3))
 
-    axe0 = Axis(coords=np.linspace(4000., 1000., 10),
+    axe0 = Coord(coords=np.linspace(4000., 1000., 10),
                 labels='a b c d e f g h i j'.split(),
                 mask=None,
                 units="cm^-1",
                 title='wavelength')
 
-    axe1 = Axis(coords=np.linspace(0., 60., 100),
+    axe1 = Coord(coords=np.linspace(0., 60., 100),
                 labels=None,
                 mask=None,
                 units="s",
                 title='time-on-stream')
 
-    axe2 = Axis(coords=np.linspace(200., 300., 3),
+    axe2 = Coord(coords=np.linspace(200., 300., 3),
                 labels=['cold', 'normal', 'hot'],
                 mask=None,
                 units="K",
@@ -765,8 +765,8 @@ def test_nddataset_add_inplace():
 
 
 def test_nddataset_add_mismatch_axes():
-    axe1 = Axis(np.arange(5.))
-    axe2 = Axis(np.arange(1., 5.5, 1.))
+    axe1 = Coord(np.arange(5.))
+    axe2 = Coord(np.arange(1., 5.5, 1.))
     d1 = NDDataset(np.ones((5, 5)), axes=[axe1, axe2])
     d2 = NDDataset(np.ones((5, 5)), axes=[axe2, axe1])
     with pytest.raises(ValueError) as exc:
@@ -842,8 +842,8 @@ def test_nddataset_substract_with_numpy_array():
 
 
 def test_nddataset_subtract_mismatch_axes():
-    axe1 = Axis(np.arange(5.))
-    axe2 = Axis(np.arange(1., 5.5, 1.))
+    axe1 = Coord(np.arange(5.))
+    axe2 = Coord(np.arange(1., 5.5, 1.))
     d1 = NDDataset(np.ones((5, 5)), axes=[axe1, axe2])
     d2 = NDDataset(np.ones((5, 5)), axes=[axe2, axe1])
     with pytest.raises(ValueError) as exc:
@@ -1149,7 +1149,7 @@ def test_create_from_complex_data():
 
 
 def test_make_complex_1D_during_math_op():
-    nd = NDDataset([1., 2.], axes=[Axis([10, 20])], units='meter')
+    nd = NDDataset([1., 2.], axes=[Coord([10, 20])], units='meter')
     assert nd.data.size == 2
     assert nd.size == 2
     assert nd.shape == (2,)
@@ -1248,7 +1248,7 @@ def test_complex_full():
                     [5., 4.2, 2., 3., 3., 3.]])
 
     nd = NDDataset(na0)
-    axes = Axes([np.linspace(-1, 1, 4), np.linspace(-10., 10., 6)])
+    axes = CoordSet([np.linspace(-1, 1, 4), np.linspace(-10., 10., 6)])
     assert nd.shape == (4, 6)
     nd.axes = axes
     # print(nd)
@@ -1278,7 +1278,7 @@ def test_complex_dataset_slicing_by_index():
     na0 = np.array([1. + 2.j, 2., 0., 0., -1.j, 1j] * 4)
 
     nd = NDDataset(na0)
-    axes = Axes([np.linspace(-10., 10., 24)])
+    axes = CoordSet([np.linspace(-10., 10., 24)])
     nd.axes = axes
 
     assert nd.shape == (24,)
@@ -1300,7 +1300,7 @@ def test_complex_dataset_slicing_by_index():
 
     na0 = na0.reshape(6, 4)
     nd = NDDataset(na0)
-    axes = Axes([np.linspace(-10., 10., 6), np.linspace(-1., 1., 4)])
+    axes = CoordSet([np.linspace(-10., 10., 6), np.linspace(-1., 1., 4)])
     nd.axes = axes
     assert nd.shape == (6, 4)
     assert nd.data.shape == (6, 8)
@@ -1345,7 +1345,7 @@ def test_absolute_of_complex():
                     [1, 4.2, 2., 3., 2., 2.],
                     [5., 4.2, 2., 3., 3., 3.]])
     nd = NDDataset(na0)
-    axes = Axes([np.linspace(-1, 1, 4), np.linspace(-10., 10., 6)])
+    axes = CoordSet([np.linspace(-1, 1, 4), np.linspace(-10., 10., 6)])
     assert nd.shape == (4, 6)
     nd.axes = axes
     nd.make_complex(axis=0)
@@ -1382,19 +1382,19 @@ def test_repr_html():
     #
     dx = np.random.random((10, 100, 3))
 
-    axe0 = Axis(coords=np.linspace(4000., 1000., 10),
+    axe0 = Coord(coords=np.linspace(4000., 1000., 10),
                 labels='a b c d e f g h i j'.split(),
                 mask=None,
                 units="cm^-1",
                 title='wavelength')
 
-    axe1 = Axis(coords=np.linspace(0., 60., 100),
+    axe1 = Coord(coords=np.linspace(0., 60., 100),
                 labels=None,
                 mask=None,
                 units="s",
                 title='time-on-stream')
 
-    axe2 = Axis(coords=np.linspace(200., 300., 3),
+    axe2 = Coord(coords=np.linspace(200., 300., 3),
                 labels=['cold', 'normal', 'hot'],
                 mask=None,
                 units="K",
@@ -1524,3 +1524,12 @@ def test_bug_fixe_figopeninnotebookwithoutplot():
     da = NDDataset([1, 2, 3])
     da2 = np.sqrt(da ** 3)
     assert da2._fig is None  # no figure should open
+
+
+def test_coords_manipulation(IR_source_1):
+    source = IR_source_1
+    coord0 = source.coords[0]
+
+    coord0 -= coord0[0]
+
+    print(coord0)
