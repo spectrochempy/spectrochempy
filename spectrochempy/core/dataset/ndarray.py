@@ -185,8 +185,8 @@ class NDArray(HasTraits):
                 log.info("{0} was created with a masked array, but a "+
                          "mask was explicitly provided to {0}.\n".format(
                                                     type(self).__name__)+
-                         "The explicitly passed-in mask will be used and the "+
-                         "masked array's mask will be ignored.")
+                         "The explicitly passed-in mask will be "+
+                         "combined with the current array's mask.")
             self.mask = mask
 
         if np.any(labels):
@@ -210,7 +210,7 @@ class NDArray(HasTraits):
         # to the current units.
         if np.any(uncertainty):
 
-            if self.has_complex_dims:
+            if self.is_complex:
                 raise NotImplementedError(
                         "Cannot use uncertainty with complex data")
 
@@ -321,7 +321,7 @@ class NDArray(HasTraits):
     def __str__(self):
 
         prefix = ['']
-        if self.has_complex_dims:
+        if self.is_complex:
             for axis in self.iterdims:
                 for item in prefix[:]: # work on a copy of prefix as it will
                     # change during execution of this loop
@@ -551,21 +551,28 @@ class NDArray(HasTraits):
 
         # Get the real mask taking account complexity
         if not np.any(self._mask):
-            return nomask
+            self._mask = np.zeros_like(self._data, dtype=bool)
 
-        mask = np.zeros_like(self._data, dtype=bool)
-        for axis in self.iterdims:
-            self._mask.swapaxes(axis, -1)
-            mask.swapaxes(axis, -1)
-            if self._is_complex[axis]:
-                mask[..., ::2] = self._mask.copy()
-                mask[..., 1::2] = self._mask.copy()
-            else:
-                mask = self._mask.copy()
-            self._mask.swapaxes(axis, -1)
-            mask.swapaxes(axis, -1)
+        # mask = np.zeros_like(self._data, dtype=bool)
+        # for axis in self.iterdims:
+        #     self._mask.swapaxes(axis, -1)
+        #     mask.swapaxes(axis, -1)
+        #     if self._is_complex[axis]:
+        #         mask[..., ::2] = self._mask.copy()
+        #         mask[..., 1::2] = self._mask.copy()
+        #     else:
+        #         mask = self._mask.copy()
+        #     self._mask.swapaxes(axis, -1)
+        #     mask.swapaxes(axis, -1)
 
-        return mask
+        _mask = self._mask.view()
+        if self.is_complex:
+            for axis in self.iterdims:
+                if self.is_complex[axis]:
+                    _mask = _mask.swapaxes(axis,-1)
+                    _mask = _mask[..., ::2] | _mask[..., 1::2]
+                    _mask = _mask.swapaxes(axis, -1)
+        return _mask
 
     @mask.setter
     def mask(self, mask):
@@ -576,13 +583,7 @@ class NDArray(HasTraits):
             if mask.shape != self.shape:
                 raise ValueError("mask shape do not match data shape")
 
-            if np.any(self._mask):
-                log.info("combining {} ".format(type(self).__name__) +
-                         "the current mask with the specified mask")
-                self._validate_mask(mask)
-                self._mask &= mask
-            else:
-                self._mask = mask
+            self._validate_mask(mask)
         else:
             # internal representation should be one numpy understands
             self._mask = nomask
@@ -661,7 +662,7 @@ class NDArray(HasTraits):
 
             if uncertainty.shape != self._data.shape:
 
-                if not self.has_complex_dims:
+                if not self.is_complex:
                     raise ValueError(
                             'uncertainty shape does not match array data shape')
                 else:  # complex data
@@ -749,16 +750,6 @@ class NDArray(HasTraits):
             return self._data.dtype
 
     @property
-    def has_complex_dims(self):
-        """`bool` - Check if any of the dimension is complex
-(
-        """
-        if np.any(self._is_complex):
-            return np.any(np.array(self.is_complex))
-        else:
-            return False
-
-    @property
     def is_complex(self):
         """`tuple` of `bool` - Indicate if any dimension is is_complex.
 
@@ -798,7 +789,7 @@ class NDArray(HasTraits):
         or not.
 
         """
-        if self._uncertainty is None or self._uncertainty.size == 0:
+        if not np.any(self._uncertainty):
             return False
 
         if np.any(self._uncertainty > EPSILON):
@@ -827,7 +818,7 @@ class NDArray(HasTraits):
 
         """
         if self.is_masked:
-            return self._umasked(self._data, self.mask)
+            return self._umasked(self._data, self._mask)
         else:
             return self._data
         # here we use .mask not ._mask to get the correct shape
@@ -853,7 +844,7 @@ class NDArray(HasTraits):
         # taking into account that the data may be complex,
         # so that the real and imag data are stored sequentially
         shape = list(self._data.shape)
-        if self.has_complex_dims:
+        if self.is_complex:
             for i in self.iterdims:
                 if self.is_complex[i]:
                     shape[i] = shape[i] // 2
@@ -869,7 +860,7 @@ class NDArray(HasTraits):
         """
 
         size = self._data.size
-        if self.has_complex_dims:
+        if self.is_complex:
             for complex in self.is_complex:
                 if complex:
                     size = size // 2
@@ -902,7 +893,13 @@ class NDArray(HasTraits):
 
         new = self.copy()
         new._is_complex[-1]=False
-        new._data = self._data[..., ::2]
+        ma = self.masked_data
+        ma = ma[..., ::2]
+        if isinstance(ma, np.ma.masked_array):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
         return new
 
     @property
@@ -911,12 +908,15 @@ class NDArray(HasTraits):
         imaginary part of the data contained in this object.
         """
 
-        if not self.is_complex[-1]:
-            return self.copy()
-
         new = self.copy()
-        new._is_complex[-1] = False
-        new._data = self._data[..., 1::2]
+        new._is_complex[-1]=False
+        ma = self.masked_data
+        ma = ma[..., 1::2]
+        if isinstance(ma, np.ma.masked_array):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
         return new
 
     @property
@@ -1098,16 +1098,21 @@ class NDArray(HasTraits):
         new = self.copy()
         if select=='ALL':
             select = 'R'*self.ndim
+        ma= self.masked_data
         for axis, component in enumerate(select):
             if self.is_complex[axis]:
-                data = new._data.swapaxes(axis,-1)
+                data = ma.swapaxes(axis,-1)
                 if component == 'R':
                     data = data[..., ::2]
                 elif component == 'I':
                     data = data[..., 1::2]
-                data = data.swapaxes(axis, -1)
-                new._data = data
+                ma = data.swapaxes(axis, -1)
                 new._is_complex[axis] = False
+        if isinstance(ma, np.ma.masked_array):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
         return new
 
     def set_complex(self, axis):
@@ -1126,7 +1131,7 @@ class NDArray(HasTraits):
         if axis < 0:
             axis = self.ndim + axis
 
-        if self.is_complex[axis]:
+        if self.is_complex and self.is_complex[axis]:
             # not necessary in this case, it is already complex
             return
 
@@ -1368,8 +1373,11 @@ class NDArray(HasTraits):
         # replace the non index slice or non slide by index slices
         for axis, key in enumerate(keys):
 
-
-            keys[axis] = self._get_slice(key, axis, self.is_complex[axis],
+            if self.is_complex:
+                complex = self.is_complex[axis]
+            else:
+                complex=False
+            keys[axis] = self._get_slice(key, axis, complex,
                                          ignore_complex)
 
         return tuple(keys)
@@ -1410,7 +1418,7 @@ class NDArray(HasTraits):
     def _uarray(data, uncertainty, units=None):
         # return the array with uncertainty and units if any
 
-        if uncertainty is None or np.all(uncertainty <= EPSILON):
+        if not np.any(uncertainty) or np.all(uncertainty <= EPSILON):
             uar = data
         else:
             uar = unp.uarray(data, uncertainty)
@@ -1446,60 +1454,23 @@ class NDArray(HasTraits):
 
     def _validate_mask(self, mask):
         # mask validation
-        try:
-            if len(data) == 0:  # self._data.any():
-                self._mask = [False]
-                return
-        except:
-            if data.size == 0:  # self._data.any():
-                self._is_complex = [False]
-                return
 
-        self._data, complex = interleave(data)
+        if not np.any(mask):
+            self._mask = nomask
 
-        if not self.is_complex:
-            self._is_complex = [False] * self._data.ndim
+        if mask.shape != self.shape:
+            raise ValueError("mask {} and data {} shape mismatch!".format(
+                                                        mask.shape,self.shape))
 
-        if complex:
-            self._is_complex[-1] = complex
+        if self.is_complex:
+            for axis in self.iterdims:
+                mask = mask.swapaxes(axis, -1)
+                if self._is_complex[axis]:
+                    mask = mask.repeat(2, axis=-1)
+                mask = mask.swapaxes(axis, -1)
 
-        if is_sequence(self._is_complex) and \
-                        len(self._is_complex) != self._data.ndim:
-            raise ValueError("size of the `is_complex` list argument "
-                             "doesn't match the nb of dims")
-
-
-
-
-
-
-
-
-
-
-                    # def _loc2index(self, loc, axis):
-        #     # Return the index of a location (label or coordinates) along the axis
-        #
-        #     if isinstance(loc, string_types):
-        #         # it's probably a label
-        #         indexes = np.argwhere(self._labels == loc).flatten()
-        #         if indexes.size > 0:
-        #             return indexes[0]
-        #         else:
-        #             raise ValueError('Could not find this label: {}'.format(loc))
-        #
-        #     elif isinstance(loc, datetime):
-        #         # not implemented yet
-        #         return None  # TODO: date!
-        #
-        #     elif is_number(loc):
-        #         index = (np.abs(self._data - loc)).argmin()
-        #         if loc > self._data.max() or loc < self._data.min():
-        #             warnings.warn(
-        #                     '\nThis coordinate ({}) is outside the axis limits.\n'
-        #                     'The closest limit index is returned'.format(loc), )
-        #             # AxisWarning)
-        #         return index
-        #
-        #     else:
-        #         raise ValueError('Could not find this location: {}'.format(loc))
+        if self._mask:
+            self._mask = self._mask | mask # combine`
+        else:
+            self._mask = mask
+        pass

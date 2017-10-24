@@ -100,7 +100,7 @@ def test_init_ndarray():
     d0 = NDArray(None) # void initialization
     assert d0.shape == (0,)
     assert d0.size == 0
-    assert d0.mask == nomask
+    assert not d0.is_masked
     assert d0.dtype == 'float64'
     assert not d0.is_complex
     assert (repr(d0)=='NDArray: []')
@@ -110,19 +110,25 @@ def test_init_ndarray():
     assert d0.shape == (3,)
     assert d0.size == 3
     assert not d0.is_complex
+    assert not d0.is_masked
     assert str(d0) == '[       2        3        4]'
 
     d0 = NDArray([2,3,4,5]) # initialisation with a sequence
     assert d0.shape == (4,)
+    assert not d0.is_masked
     assert not d0.is_complex
 
     d1 = NDArray(np.ones((5, 5))) #initialization with an array
     assert d1.shape == (5, 5)
+    assert d1.size == 25
+    assert not d1.is_masked
     assert not d1.is_complex
 
     d2 = NDArray(d1) # initialization with an NDArray object
     assert d2.shape == (5,5)
     assert not d2.is_complex
+    assert d2.size == 25
+    assert not d2.is_masked
     assert d1.data is not d2.data
 
     d0mask = NDArray([2, 3, 4, 5], mask=[1,0,0,0])  # sequence + mask
@@ -139,6 +145,7 @@ def test_init_ndarray():
     assert d0unc.shape == (4,)
     assert not d0unc.is_complex
     assert d0unc.is_masked
+    assert d0unc.is_uncertain
     assert str(d0unc).startswith('[  --    3.000+/-0.200 ')
     assert repr(d0unc).startswith(
             'NDArray: [  --,    3.000+/-0.200,    4.000+/-0.150,')
@@ -173,12 +180,22 @@ def test_init_ndarray():
     d3RR = d3.part('RR')
     assert not d3RR.is_complex
     assert d3RR._data.shape == (2,2)
+    assert d3RR._mask.shape == (2, 2)
     assert str(d3).startswith("RR[[   0.925   --]")
     assert str(d3).endswith("[   0.018    0.020]] Hz")
-
-    a= d3[1, 1]
-    print(a , d[1, 1])
     assert d3[1, 1].data == d[1,1]
+
+def test_init_with_complex_information():
+    np.random.seed(12345)
+    d = np.random.random((4, 3)) * np.exp(.1j)
+    d3 = NDArray(d, units=ur.Hz,
+                 mask=[[False, True, False], [True, False, False]],
+                 is_complex= [True, True]
+
+                 )  # with units & mask
+    assert d3.shape == (2, 3)
+    assert d3._data.shape == (4, 6)
+
 
 def test_init_ndarray_subclass():
     # test initialization of an empty ndarray
@@ -216,7 +233,7 @@ def test_set_simple_ndarray(ndarraysubclass):
     assert nd.shape == (10, 10)
     assert nd.size == 100
     assert nd.ndim == 2
-    assert nd.is_complex == [False, False]
+    assert not nd.is_complex
     assert nd.data[1,1] == 4.6130673607282127
 
 def test_set_ndarray_with_units(ndarraysubclass):
@@ -309,15 +326,15 @@ def test_ndarray_with_uncertainty(ndarraysubclass):
     nd._uncertainty = np.abs(nd._data * .01)
     nd.change_units('second') # force a change of units
     assert nd.is_uncertain
-    assert str(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('MinimalSubclass: ')
     assert str(nd.values[0,0]) == "4.30+/-0.04 second"
 
 
 def test_ndarray_with_mask(ndarraysubclass):
     nd = ndarraysubclass.copy()
     assert not nd.is_masked
-    assert str(nd).startswith('MinimalSubclass: ')
-    nd._mask[0] = True
+    assert repr(nd).startswith('MinimalSubclass: ')
+    nd.mask[0] = True
     assert nd.is_masked
 
 
@@ -339,13 +356,14 @@ def test_ndarray_with_uncertaincy_and_units(ndarraysubclass):
     assert repr(nd).startswith('MinimalSubclass: ')
     nd._uncertainty = np.abs(nd._data * .01)
     assert nd.is_uncertain
-    assert str(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('MinimalSubclass: ')
     units = nd.units
     nd.units = None # should change nothing
     assert nd.units == units
-    nd._mask[1,1] = True
+    nd.mask[1,1] = True
     assert nd.is_masked
-
+    nd.mask[1, 2] = True
+    print(nd)
 
 def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraysubclasscplx):
     nd = ndarraysubclasscplx.copy()
@@ -355,14 +373,14 @@ def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraysubclasscplx):
     assert repr(nd).startswith('MinimalSubclass: ')
     nd._uncertainty = nd._data * .01
     assert nd.is_uncertain
-    assert str(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('MinimalSubclass: ')
     assert nd._uncertainty.size == nd.data.size
 
 
 def test_ndarray_len_and_sizes(ndarraysubclass, ndarraysubclasscplx):
     nd = ndarraysubclass.copy()
     #print(nd.is_complex)
-    assert not nd.is_complex[0]
+    assert not nd.is_complex
     assert len(nd) == 10
     assert nd.shape == (10, 10)
     assert nd.size == 100
@@ -381,7 +399,7 @@ def test_ndarray_len_and_sizes(ndarraysubclass, ndarraysubclasscplx):
 def test_slicing_byindex(ndarraysubclass):
 
     nd = ndarraysubclass.copy()
-    assert not any(nd.is_complex) and not nd.is_masked and not nd.is_uncertain
+    assert not np.any(nd.is_complex) and not nd.is_masked and not nd.is_uncertain
     nd1 = nd[0,0]
     assert_equal(nd1.data, nd.data[0,0])
     nd2 = nd[7:10]
@@ -395,11 +413,11 @@ def test_slicing_byindex(ndarraysubclass):
 
 def test_repr(ndarraysubclass, ndarraysubclassunit):
     nd = ndarraysubclass.copy()
-    assert '4.3,' in nd.__repr__()
+    assert '-1.836,' in nd.__repr__()
     nd = ndarraysubclassunit.copy()
-    assert '4.3,' in nd.__repr__()
-    nd._mask[1] = True
-    nd._uncertainty = np.abs(nd._data * .1)
+    assert '-1.836,' in nd.__repr__()
+    nd.mask[1] = True
+    nd.uncertainty = np.abs(nd._data * .1)
     assert nd.is_masked
     assert nd.is_uncertain
     assert '4.296+/-0.430,' in nd.__repr__()
@@ -423,3 +441,47 @@ def test_iteration(ndarraysubclassunit):
     for item in nd:
         print(item)
 
+#### Squeezing #################################################################
+def test_squeeze(ndarraysubclassunit):  # ds2 is defined in conftest
+
+    nd = ndarraysubclassunit.copy()
+    assert nd.shape == (10, 10)
+
+    d = nd[..., 0]
+    d = d.squeeze()
+    assert d.shape == (10, )
+
+    d = nd[0]
+    d = d.squeeze()
+    assert d.shape == (10, )
+
+    nd.set_complex(-1)
+    assert nd.shape == (10, 5)
+
+    d = nd[..., 0]
+    d = d.squeeze() # cannot be squeezed in the complex dimension (in reality 2 values)
+    assert d.shape == (10, 1)
+
+    d = nd[0]
+    d1 = d.squeeze()
+    assert d1.shape == (5, )
+    assert d1 is not d
+
+    d = nd[...,0:1].RR
+    d1 = d.squeeze(inplace=True, axis=-1)
+    assert d1.shape == (10, )
+    assert d1 is d
+
+    nd.set_complex(-1)
+    assert nd.shape == (10, 5)
+
+    nd.set_real(-1)
+    assert nd.shape == (10, 10)
+
+    nd.set_complex(0)
+    assert nd.shape == (5, 10)
+
+    d = nd[0:1].RR
+    d1 = d.squeeze(inplace=True, axis=0)
+    assert d1.shape == (10, )
+    assert d1 is d

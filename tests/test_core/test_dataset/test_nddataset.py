@@ -223,7 +223,6 @@ def test_uncertainties_and_units(nd1d):
     assert nd2.units == ur.m ** .5
     assert np.round(nd2.uncertainty[1], 4) == 0.0071
 
-
 def test_initializing_from_nddataset():
     d1 = NDDataset(np.ones((5, 5)))
     d2 = NDDataset(d1)
