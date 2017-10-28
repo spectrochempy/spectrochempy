@@ -427,10 +427,11 @@ class NDArray(HasTraits):
             log.debug("init data with an empty ndarray of type float")
 
         elif isinstance(data, NDArray):
-            log.debug("init data with data from another NDArray")
+            log.debug("init data with data from another NDArray or NDArray subclass")
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
+
             for attr in self.__dir__():
                 val = getattr(data, "_%s"%attr)
                 if self._copy:

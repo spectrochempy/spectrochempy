@@ -93,6 +93,7 @@ def test_init_ndarray_array():
 def test_init_ndarray_NDArray():
 
     d1 = NDArray(np.ones((5, 5)))
+    assert d1.shape == (5, 5)
     d2 = NDArray(d1) # initialization with an NDArray object
     assert d2.shape == (5,5)
     assert not d2.has_complex_dims

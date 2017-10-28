@@ -139,7 +139,7 @@ class Coord(NDMath, NDArray):
         Additional metadata for this object. Must be dict-like but no further
         restriction is placed on meta.
 
-    iscopy : bool
+    copy : bool
 
         Perform a copy of the passed object. By default, objects are not
         copied if possible
@@ -181,45 +181,6 @@ class Coord(NDMath, NDArray):
             raise CoordsError("Number of dimension for coordinate's array "
                               "should be 1!")
 
-
-        # if self._copy:
-        #     self._copy = True
-        #     data = copy.deepcopy(data)
-        #     labels = copy.deepcopy(labels)
-        #     mask = copy.deepcopy(mask)
-        #     units = copy.copy(units)  # deepcopy not working for units?
-        #     meta = copy.deepcopy(meta)
-        #
-        # if data is not None:
-        #     self.data = data
-        #     if labels is not nolabel:
-        #         self.labels = labels
-        #
-        # else:
-        #     if labels is not nolabel:
-        #         self.coords = range(len(labels))
-        #         self.labels = labels
-        #
-        # if mask is not None:
-        #     if self._data_passed_with_mask and self._mask != mask:
-        #         log.info("Coord was created with a masked array, and a "
-        #                  "mask was explicitly provided to Coord. The  "
-        #                  "explicitly passed-in mask will be used and the "
-        #                  "masked array's mask will be ignored.")
-        #     self.mask = mask
-        #
-        # if units is not None:
-        #     if self._data_passed_is_quantity and self._units != units:
-        #         raise ValueError(
-        #                 "Cannot use the units argument when passed data "
-        #                 "is a Quantity")
-        #
-        #     self.units = units
-        #
-        # self.title = title
-        # self.name = name
-        # self.meta = meta
-
     # -------------------------------------------------------------------------
     # properties
     # -------------------------------------------------------------------------
@@ -236,63 +197,6 @@ class Coord(NDMath, NDArray):
         """
         return bool(self.data[0] > self.data[-1])
 
-    # @data.setter
-    # def coords(self, data):
-    #     # property.setter for data
-    #
-    #     if data is None:
-    #         self._data = np.array([]).astype(float)
-    #         log.debug("init axis with an empty array of type float")
-    #         return
-    #
-    #     elif isinstance(data, Coord):
-    #         log.debug("init axis with data from another Coord")
-    #         # No need to check the data because data must have successfully
-    #         # initialized.
-    #         self._name = "copy of {}".format(data._name) if self._iscopy \
-    #             else data._name
-    #         self._title = data._title
-    #         self._mask = data._mask
-    #         self._data = data._data
-    #         self._units = data._units
-    #         self._meta = data._meta
-    #         self._labels = data._labels
-    #
-    #
-    #     elif isinstance(data, Index):  # pandas Index object
-    #         self._data = data.values
-    #         if data.name is not None:
-    #             self._title = data.name
-    #
-    #     elif isinstance(data, Quantity):
-    #         log.debug("init data with data from a Quantity object")
-    #         self._data_passed_is_quantity = True
-    #         self._data = np.array(data.magnitude, subok=True, copy=self._iscopy)
-    #         self.units = data.units  # we use the property setter for checking
-    #
-    #     elif hasattr(data, 'mask'):  # an object with data and mask attributes
-    #         log.debug("init mask from the passed data")
-    #         self._data_passed_with_mask = True
-    #         self._data = np.array(data.data, subok=True, copy=self._iscopy)
-    #         self._mask = data.mask
-    #
-    #     elif (not hasattr(data, 'shape') or
-    #               not hasattr(data, '__getitem__') or
-    #               not hasattr(data, '__array_struct__')):
-    #         # Data doesn't look like a numpy array, try converting it to
-    #         # one.
-    #         log.debug("init axis with a non numpy-like array object")
-    #         self._data = np.array(data, subok=True, copy=False)
-    #         # Quick check to see if what we got out looks like an array
-    #         # rather than an object (since numpy will convert a
-    #         # non-numerical input to an array of objects).
-    #         if self._data.dtype == 'O':
-    #             raise CoordsError(
-    #                     "Could not convert data to numpy array.")
-    #     else:
-    #         log.debug("init data axis a numpy array")
-    #         self._data = np.array(data, subok=True, copy=self._iscopy)
-
     ########
     # hidden properties (for the documentation, only - we remove the docs)
     # some of the property of NDArray has to be hidden because they are not
@@ -300,7 +204,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def is_complex(self):
-        return False  # always real
+        return [False]  # always real
 
     @property
     def ndim(self):
@@ -308,7 +212,11 @@ class Coord(NDMath, NDArray):
 
     @property
     def uncertainty(self):
-        return None
+        return np.zeros_like(self._data, dtype=float)
+
+    @uncertainty.setter
+    def uncertainty(self, uncertainty):
+        pass
 
     @property
     def T(self):  # no transpose
@@ -365,24 +273,6 @@ class Coord(NDMath, NDArray):
             out = out[:-1]
         return out
 
-    # def __repr__(self):
-    #     units = '{:~f}'.format(self._units) \
-    #         if self._units is not None else 'unitless'
-    #     prefix = self.__class__.__name__ + '('
-    #     body = np.array2string(self.data, separator=', ', prefix=prefix)
-    #     return ''.join([prefix, body, ') {}'.format(units)])
-    #
-
-        # def __lt__(self, other):
-        #     # hack to make axis sortable
-        #     this = self.data
-        #     if hasattr(other, '_data'):
-        #         other = other._data
-        #     try:
-        #         return self[0] < other[0]
-        #     except IndexError:
-        #         return this < other
-
 
 # =============================================================================
 # CoordSet
@@ -420,7 +310,7 @@ class CoordSet(HasTraits):
     # -------------------------------------------------------------------------
     def __init__(self, *coords, **kwargs):
 
-        _iscopy = kwargs.pop('iscopy', False)
+        _copy = kwargs.pop('copy', False)
 
         super(CoordSet, self).__init__(**kwargs)
 
@@ -439,7 +329,7 @@ class CoordSet(HasTraits):
                     'a list of list of object have been passed - this not yet implemented')
 
         if len(coords) == 1 and isinstance(coords[0], CoordSet):
-            if _iscopy:
+            if _copy:
                 coords = copy.deepcopy(coords)
             self._coords = coords[0]._coords
 
@@ -447,7 +337,7 @@ class CoordSet(HasTraits):
             for item in coords:
 
                 if not isinstance(item, (Coord, CoordSet)):
-                    item = Coord(item, iscopy=_iscopy)
+                    item = Coord(item, copy=_copy)
                     # full validation of the item
                     # will be done in Coord
                 if self._validation(item):

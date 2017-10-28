@@ -187,7 +187,7 @@ def test_coord_equal():
                    mask=None,
                    title='titi')
     coord2 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels='a b c d e f g h i j a'.split(),
+                   labels='b c d e f g h i j a'.split(),
                    mask=None,
                    title='wavelength')
     coord3 = Coord(data=np.linspace(4000, 1000, 10),
@@ -211,7 +211,7 @@ def test_coords_equal():
                    mask=None,
                    title='titi')
     coord2 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels='a b c d e f g h i j a'.split(),
+                   labels='b c d e f g h i j a'.split(),
                    mask=None,
                    title='wavelength')
     coord3 = Coord(data=np.linspace(4000, 1000, 10),
@@ -235,10 +235,9 @@ def test_set_coord_from_another_coord():
                    mask=None,
                    title='wavelength')
 
-    coord1 = Coord(coord0)  # copy by default
-    assert coord1 is not coord0  # todo: is this really necessary?
-
-    coord1 = Coord(coord0, iscopy=True)
+    coord1 = Coord(coord0)
+    assert coord1.data is coord0.data
+    coord1 = Coord(coord0, copy=True)
     assert coord1.data is not coord0.data
     assert_array_equal(coord1.data, coord0.data)
     assert isinstance(coord0, Coord)
