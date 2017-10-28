@@ -57,7 +57,7 @@ from datetime import datetime
 import numpy as np
 from pint.errors import DimensionalityError, UndefinedUnitError
 from traitlets import (Union, List, Unicode, Instance, Bool, HasTraits, default,
-                       Any, Integer, Sentinel, Float)
+                       Any, Integer, Sentinel, Float, validate, observe)
 from uncertainties import unumpy as unp
 from pandas.core.generic import NDFrame, Index
 from spectrochempy.core.units import Quantity
@@ -72,17 +72,19 @@ from spectrochempy.application import log
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit, ur, Quantity, Measurement
 
-from spectrochempy.utils import EPSILON, is_number, is_sequence, numpyprintoptions
-from spectrochempy.utils import SpectroChemPyWarning, deprecated, \
-    interleaved2complex, interleave
+from spectrochempy.utils import (EPSILON, is_number, is_sequence,
+                                 numpyprintoptions)
+from spectrochempy.utils import (SpectroChemPyWarning, deprecated,
+                                 interleaved2complex, interleave)
 from spectrochempy.extern.traittypes import Array
 
 # =============================================================================
 # Constants
 # =============================================================================
 
-__all__ = ['NDArray','nomask','nouncertainty','nolabel','nocomplex']
-_classes = __all__[:]
+__all__ = ['NDArray']
+
+_classes = ['NDArray']
 
 # =============================================================================
 # Some initializations
@@ -90,12 +92,7 @@ _classes = __all__[:]
 
 numpyprintoptions()  # set up the numpy print format
 
-nomask = np.bool_(0)
-nouncertainty = np.bool_(0)
-nolabel = np.bool_(0)
-nocomplex = np.bool_(0)
-
-NPBool = Instance(np.bool_)
+gt_eps = lambda arr : np.any(arr > EPSILON)
 
 # =============================================================================
 # The basic NDArray class
@@ -121,145 +118,121 @@ class NDArray(HasTraits):
     Let's see the string representation of this newly created `ndd` object.
 
     >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    NDArray: [[    0.93,    0.316, ...,    0.749,    0.654],
-                      [   0.748,    0.961, ...,    0.965,    0.724],
-                      ...,
-                      [   0.945,    0.533, ...,    0.651,    0.313],
-                      [   0.769,    0.782, ...,    0.898,   0.0427]]
+    [[   0.930    0.316 ...,    0.749    0.654]
+     [   0.748    0.961 ...,    0.965    0.724]
+     ...,
+     [   0.945    0.533 ...,    0.651    0.313]
+     [   0.769    0.782 ...,    0.898    0.043]]
+
+    NDArray can be also created using keywords arguments. Here is a masked array:
+    >>> ndd = NDArray( data = np.random.random((3, 3)),
+    ...                mask = [[True, False, True],
+    ...                        [False, True, False],
+    ...                        [False, False, True]],
+    ...                units = 'absorbance')
+    >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    [[  --    0.295   --]
+     [   0.086   --    0.516]
+     [   0.689    0.857   --]] dimensionless
 
     """
 
     _ax = Instance(plt.Axes, allow_none=True)
 
-    _data = Array(Float())
-    _mask = Union((NPBool, Array(Bool())), allow_none=False)
-    _uncertainty = Union((NPBool, Array(Float())), allow_none=False)
-    _labels = Union((NPBool, Array(Any())), allow_none=False)
+    _data = Array(Float(), allow_none=True)
+
+    _mask = Array(Bool(), allow_none=True)
+    _uncertainty = Array(Float(), allow_none=True)
+    _labels = Array(Any(), allow_none=True)
+    _units = Instance(Unit, allow_none=True)
+    _is_complex = List(Bool(), allow_none=True)
 
     _date = Instance(datetime)
     _fig = Instance(plt.Figure, allow_none=True)
 
     _meta = Instance(Meta, allow_none=True)
+    _title = Unicode(allow_none=True)
+
+    _id = Unicode()
     _name = Unicode()
-    _title = Unicode()
-
-    _units = Instance(Unit, allow_none=True)
-
-    # _scaling = Float(1.)
-
-    # private flags
-    _data_passed_is_measurement = Bool()
-    _data_passed_is_quantity = Bool()
-    _data_passed_with_mask = Bool()
-    _data_passed_with_labels = Bool()
-    _is_complex = Union((NPBool,List(Bool())), allow_none=False)
+    _copy = Bool()
 
     # -------------------------------------------------------------------------
     # Initialization
     # -------------------------------------------------------------------------
 
-    def __init__(self,
-                 data=None,
-                 mask=nomask,
-                 uncertainty=nouncertainty,
-                 labels = nolabel,
-                 units=None,
-                 meta=None,
-                 name=None,
-                 title=None,
-                 is_complex = False,
-                 **kwargs):
+    # .........................................................................
+    def __init__(self, data=None, **kwargs):
 
-        if np.any(is_complex):
-            self._is_complex = list(is_complex)
+
+        self._copy = kwargs.pop('copy', False)   # by default
+                                            # we try to keep the same data
+
+        self._is_complex = kwargs.pop('is_complex', None)
 
         self.data = data
 
-        self.name = name
+        self.mask = kwargs.pop('mask', None)
 
-        self.meta = meta
+        self.labels = kwargs.pop('labels', None)
 
-        self.title = title
-
-        #TODO: the flags _data_passed_with_ are not really used! TODO
-        if np.any(mask):
-            if self._data_passed_with_mask and self._mask != mask:
-                log.info("{0} was created with a masked array, but a "+
-                         "mask was explicitly provided to {0}.\n".format(
-                                                    type(self).__name__)+
-                         "The explicitly passed-in mask will be "+
-                         "combined with the current array's mask.")
-            self.mask = mask
-
-        if labels is not nolabel:
-            if self._data_passed_with_labels and self._labels != labels:
-                log.info("{0} was created with a labeled array, but " +
-                         "labels were explicitly provided to {0}.\n".format(
-                                 type(self).__name__) +
-                         "The explicitly passed-in labels will be appended "
-                         "to the current labels")
-            self.labels = labels
-
-        if units is not None:
-            if self._data_passed_is_quantity and self._units != units:
-                raise ValueError(
-                        "Cannot use the units argument "
-                        "when passed data is a Quantity")
-            self.units = units
+        self.units = kwargs.pop('units', None)
 
         # Setup of uncertainties must come after setting units of the NDArray
         # so that the units of the uncertainty, if any, can be converted
         # to the current units.
-        if np.any(uncertainty):
 
-            if self.is_complex:
-                raise NotImplementedError(
-                        "Cannot use uncertainty with complex data")
+        self.uncertainty = kwargs.pop('uncertainty', None)
 
-            if self._data_passed_is_measurement \
-                    and self._uncertainty != uncertainty:
-                raise ValueError(
-                        "Cannot use the uncertainty argument "
-                        "when passed data is already with uncertainty")
-            self.uncertainty = uncertainty
+        self.meta = kwargs.pop('meta', None)
+        self.title = kwargs.pop('title', None)
 
+        # a unique id / name
+        self.name = kwargs.pop('name', self._id)
+
+        # process eventual kwargs, adressing HasTrait class
         super(NDArray, self).__init__(**kwargs)
 
     # -------------------------------------------------------------------------
     # special methods
     # -------------------------------------------------------------------------
 
+    # .........................................................................
     def __copy__(self):
 
         return self.copy(deep=False)
 
+    # .........................................................................
     def __deepcopy__(self, memo=None):
 
         return self.copy(deep=True, memo=memo)
 
+    # .........................................................................
     def __dir__(self):
 
         return ['data', 'mask', 'labels', 'units', 'uncertainty',
                 'meta', 'name', 'title', 'is_complex']
 
+    # .........................................................................
     def __eq__(self, other, attrs=None):
 
         if not isinstance(other, NDArray):
 
-            # probably other is not of the same type:
-            # try to make some assumption to make usefull comarison.
+            # try to make some assumption to make usefull comparison.
             if isinstance(other, Quantity):
                 otherdata = other.magnitude
                 otherunits = other.units
             elif isinstance(other, (float, int, np.ndarray)):
                 otherdata = other
-                otherunits = None
+                otherunits = False
             else:
-                raise TypeError("I do not know how to compare with type: " % type(other))
+                raise TypeError("I do not know how to compare "
+                "{} object with objets of type {} ".format(type(self).__name__,
+                                                          type(other).__name__))
 
-            if self._units is None and otherunits is None:
+            if not self.has_units and not otherunits:
                 eq = np.all(self._data == otherdata)
-            elif self._units is not None and otherunits is not None:
+            elif self.has_units and otherunits:
                 eq = np.all(self._data * self._units == otherdata * otherunits)
             else:
                 return False
@@ -280,20 +253,21 @@ class NDArray(HasTraits):
                     return False
         return eq
 
+    # .........................................................................
     def __getitem__(self, items):
 
         # to avoid slicing error when there is only one element
         if items == slice(None, None, None) and self.size == 1:
-            return self.__copy__()
+            return self.copy()
 
         new = self.copy()
 
         # The actual index depends on the complexity of the dimension
-        keys = self._make_index(items, ignore_complex=True)
-        newkeys = self._make_index(items)
+        keys, internkeys = self._make_index(items)
 
         # slicing by index of all internal array
-        new._data = np.array(self._data[newkeys])
+        new._data = np.array(self._data[internkeys])
+        new._is_complex = self._is_complex
 
         if self.is_masked:
             new._mask = np.array(self._mask[keys])
@@ -312,11 +286,21 @@ class NDArray(HasTraits):
 
         return new.squeeze()
 
+    # .........................................................................
+    def __setitem__(self, items, value):
+
+        keys, internkeys = self._make_index(items)
+
+        self._data[internkeys] = value
+
+
+    # .........................................................................
     def __hash__(self):
         # all instance of this class has same hash, so they can be compared
 
         return type(self).__name__ + "1234567890"
 
+    # .........................................................................
     def __iter__(self):
 
         if self.ndim == 0:
@@ -324,14 +308,17 @@ class NDArray(HasTraits):
         for n in range(len(self)):
             yield self[n]
 
+    # .........................................................................
     def __len__(self):
 
         return self.shape[0]
 
+    # .........................................................................
     def __ne__(self, other, attrs=None):
 
         return not self.__eq__(other, attrs)
 
+    # .........................................................................
     def __repr__(self):
 
         prefix = type(self).__name__ + ': '
@@ -341,14 +328,15 @@ class NDArray(HasTraits):
                 data, separator=', ', \
                 prefix=prefix)  # this allow indentation of len of the prefix
 
-        units = ' {:~K}'.format(self.units) if self._units is not None \
+        units = ' {:~K}'.format(self.units) if self.has_units \
             else ' unitless'
         return ''.join([prefix, body, units])
 
+    # .........................................................................
     def __str__(self):
 
         prefix = ['']
-        if self.is_complex:
+        if self.has_complex_dims:
             for axis in self.iterdims:
                 for item in prefix[:]: # work on a copy of prefix as it will
                     # change during execution of this loop
@@ -357,13 +345,13 @@ class NDArray(HasTraits):
                     if self.is_complex[axis]:
                         prefix.append(item+'I')
 
-        units = ' {:~K}'.format(self.units) if self._units is not None \
+        units = ' {:~K}'.format(self.units) if self.has_units \
                 else ''
 
 
         def mkbody(d, pref, units):
-            body = np.array2string( \
-                    d, separator=' ', \
+            body = np.array2string(
+                    d, separator=' ',
                     prefix=pref)
             text = ''.join([pref, body, units])
             text += '\n'
@@ -380,61 +368,48 @@ class NDArray(HasTraits):
         text = text[:-1] # remove the trailing '\n'
         return text
 
-    # --------------------------------------------------------------------------
-    # Defaults
-    # --------------------------------------------------------------------------
-
-    @default('_date')
-    def _get_date_default(self):
-
-        return datetime(1, 1, 1, 0, 0)
-
-    @default('_labels')
-    def _get_labels_default(self):
-
-        return nolabel #np.zeros_like(self._data, dtype='str')
-
-    @default('_mask')
-    def _get_mask_default(self):
-
-        return nomask # np.zeros(self._data.shape, dtype=bool)
-
-    @default('_meta')
-    def _get_meta_default(self):
-
-        return Meta()
-
-    @default('_name')
-    def _get_name_default(self):
-
-        return str(uuid.uuid1()).split('-')[0]  # a unique id
-
-    @default('_uncertainty')
-    def _get_uncertainty_default(self):
-
-        return nouncertainty # np.zeros(self._data.shape, dtype=float)
-
-    @default('_units')
-    def _get_units_default(self):
-
-        return None  # ur.dimensionless
-
-    @default('_is_complex')
-    def _get_is_complex_default(self):
-
-        return nocomplex # [False] * self.ndim  # ur.dimensionless
-
     # -------------------------------------------------------------------------
-    # Properties
+    # Properties / validators
     # -------------------------------------------------------------------------
 
+    # .........................................................................
+    # For reference: the proposal directory is
+    # {
+    #     'trait': the trait type instance being validated
+    #     'value': the proposed value,
+    #     'owner': the underlying HasTraits instance,
+    # }
+    @validate('_data')
+    def _valid__data(self, proposal):
+        pv = proposal['value']
+        data, complex = interleave(pv)
+        if not self._is_complex or len(self._is_complex) != data.ndim:
+            self._is_complex = [False] * data.ndim
+        if data.ndim > 0 and self._is_complex:
+            self._is_complex[-1] = complex
+        if self._copy:
+            return data.copy()
+        else:
+            return data
+
+    # # .........................................................................
+    # @validate('_is_complex')
+    # def _valid__is_complex(self, proposal):
+    #     pv = proposal['value']
+    #     if not pv and self._data:
+    #             pv = [False] * self._data.ndim
+    #     return pv
+
+    # .........................................................................
     @property
     def data(self):
         """:class:`~numpy.ndarray`-like object - The array data
         contained in this object.
+
         """
+
         if self.shape == (1,):
-            if self.is_complex==[True]:
+            if self.has_complex_dims:
                 # only a single complex
                 return interleaved2complex(self._data).squeeze()[()]
             else:
@@ -442,13 +417,13 @@ class NDArray(HasTraits):
 
         return self._data
 
+    # .........................................................................
     @data.setter
     def data(self, data):
         # property.setter for data
 
         if data is None:
             self._data = np.array([]).astype(float)  # reinit data
-            self._is_complex = nocomplex
             log.debug("init data with an empty ndarray of type float")
 
         elif isinstance(data, NDArray):
@@ -458,41 +433,39 @@ class NDArray(HasTraits):
             # successfully initialized for the passed NDArray.data
             for attr in self.__dir__():
                 val = getattr(data, "_%s"%attr)
-                val = copy.deepcopy(val)
+                if self._copy:
+                    val = copy.deepcopy(val)
                 setattr(self, "_%s"%attr, val)
 
             self._name = "copy of {}".format(data._name)
 
         elif isinstance(data, NDFrame):  # pandas object
             log.debug("init data with data from pandas NDFrame object")
-            self._validate(data.values)
+            self._data = data.values
             self.axes = data.axes
             if data.name is not None:
                 self._title = data.name
 
         elif isinstance(data, Index):  # pandas index object
             log.debug("init data with data from a pandas Index")
-            self._validate(data.values)
+            self._data = data.values
             if data.name is not None:
                 self._title = data.name
 
         elif isinstance(data, Quantity):
             log.debug("init data with data from a Quantity object")
             self._data_passed_is_quantity = True
-            self._validate(np.array(data.magnitude, subok=True,
-                                    copy=True))
+            self._data = np.array(data.magnitude, subok=True,
+                                    copy=self._copy)
             self._units = data.units
 
         elif hasattr(data, 'mask'):  # an object with data and mask attributes
             log.debug("init mask from the passed data")
-            self._data_passed_with_mask = True
-            self._validate(np.array(data.data, subok=True,
-                                    copy=True))
+            self._data = np.array(data.data, subok=True,
+                                    copy=self._copy)
             if isinstance(data.mask, np.ndarray) and \
                             data.mask.shape == data.data.shape:
                 self._mask = np.array(data.mask, dtype=np.bool_, copy=False)
-            else:
-                self._data_passed_with_mask = False  # not succesfull
 
         elif (not hasattr(data, 'shape') or
                   not hasattr(data, '__getitem__') or
@@ -500,12 +473,18 @@ class NDArray(HasTraits):
             log.debug("init data with a non numpy-like array object")
             # Data doesn't look like a numpy array, try converting it to
             # one. Non-numerical input are converted to an array of objects.
-            self._validate(np.array(data, subok=True, copy=False))
+            self._data = np.array(data, subok=True, copy=False)
 
         else:
             log.debug("init data with a numpy array")
-            self._validate(np.array(data, subok=True, copy=True))
+            self._data = np.array(data, subok=True, copy=self._copy)
 
+    # .........................................................................
+    @default('_date')
+    def _get_date_default(self):
+        return datetime(1970, 1, 1, 0, 0)
+
+    # .........................................................................
     @property
     def date(self):
         """A datetime object containing date information
@@ -514,6 +493,7 @@ class NDArray(HasTraits):
 
         return self._date
 
+    # .........................................................................
     @date.setter
     def date(self, date):
 
@@ -525,84 +505,174 @@ class NDArray(HasTraits):
             except ValueError:
                 self._date = datetime.strptime(date, "%d/%m/%Y")
 
+    # .........................................................................
+    @default('_id')
+    def _get_id_default(self):
+
+        return str(uuid.uuid1()).split('-')[0]  # a unique id
+
+    # .........................................................................
+    @property
+    def id(self):
+        return self._id
+
+    # .........................................................................
+    @default('_labels')
+    def _get_labels_default(self):
+        return None
+
+    # .........................................................................
     @property
     def labels(self):
         """:class:`~numpy.ndarray` - An array of objects of any type (but most
-        generally string).
-
-        The array contains the labels for the axis (if any)
-        which complements the coordinates
+        generally string), with the last dimension size equal
+        to that of the dimension of data.
+        Note that's labelling is possible only for 1D data
 
         """
-        if not np.any(self._labels):
-            self._labels = nolabel
-
+        if not self.is_labeled:
+            self._labels = np.zeros_like(self._data).astype(object)
         return self._labels
 
+        #
+        # # Get the real labels taking account complexity
+        # # internally it has the same dim as the full data shape,
+        # # but a view is given here where it appears with only as single label
+        # # for a complex value, not two
+        #
+        # _labels = self._labels.copy()
+        # if self.has_complex_dims:
+        #     for axis in self.iterdims:
+        #         if self.is_complex[axis]:
+        #             _labels = _labels.swapaxes(axis,-1)
+        #             _labels = _labels[..., ::2]
+        #             _labels = _labels.swapaxes(axis, -1)
+        # return _labels
+
+    # .........................................................................
     @labels.setter
     def labels(self, labels):
         # Property setter for labels
 
-        if labels is nolabel:
-            self._labels = nolabel
+        if labels is None:
+            return
 
-        elif isinstance(labels, np.ndarray):
-            self._labels = labels
+        if self._data.ndim>1:
+            raise ValueError('We cannot set the labels for '
+                             '                           multidimentional data')
+
+        # make sure labels array is of type np.ndarray
+        if not isinstance(labels, np.ndarray):
+            labels = np.array(labels, subok=True, copy=True).astype(object)
+
+        if not np.any(labels):
+            # no labels
+            return
+
+        if labels.shape[-1] != self.shape[-1]:
+            raise ValueError("labels {} and data {} shape mismatch!".format(
+                                                      labels.shape, self.shape))
+
+        if self.has_complex_dims:
+            for axis in self.iterdims:
+                labels = labels.swapaxes(axis, -1)
+                if self._is_complex[axis]:
+                    labels = labels.repeat(2, axis=-1)
+                labels = labels.swapaxes(axis, -1)
+
+        if np.any(self._labels):
+            log.info("{0} is already a labeled array.\n".format(
+                                 type(self).__name__) +
+                         "The explicitly passed-in labels will be appended "
+                         "to the current labels")
+            self._labels = np.stack((self._labels, labels))
         else:
-            self._labels = np.array(labels, subok=True,
-                                    copy=True).astype(object)
+            if self._copy:
+                self._labels = labels.copy()
+            else:
+                self._labels = labels
 
+    # .........................................................................
+    @default('_mask')
+    def _get_mask_default(self):
+        return None
+
+    # .........................................................................
     @property
     def mask(self):
-        """:class:`~numpy.ndarray`-like - Mask for the data.
+        """ Mask for the data.
 
-        The values must be `False` where
+        The values in the mask array must be `False` where
         the data is *valid* and `True` when it is not (like Numpy
-        masked arrays). If `data` is a numpy masked array, providing
-        `mask` here will causes the mask from the masked array to be
-        ignored.
+        masked arrays).
 
         """
 
-        # Get the real mask taking account complexity
-        if not np.any(self._mask):
-            self._mask = np.zeros_like(self._data, dtype=bool)
+        if not self.is_masked:
+            self._mask = np.zeros_like(self._data).astype(bool)
+        return self._mask
 
-        # mask = np.zeros_like(self._data, dtype=bool)
-        # for axis in self.iterdims:
-        #     self._mask.swapaxes(axis, -1)
-        #     mask.swapaxes(axis, -1)
-        #     if self._is_complex[axis]:
-        #         mask[..., ::2] = self._mask.copy()
-        #         mask[..., 1::2] = self._mask.copy()
-        #     else:
-        #         mask = self._mask.copy()
-        #     self._mask.swapaxes(axis, -1)
-        #     mask.swapaxes(axis, -1)
 
-        _mask = self._mask.view()
-        if self.is_complex:
-            for axis in self.iterdims:
-                if self.is_complex[axis]:
-                    _mask = _mask.swapaxes(axis,-1)
-                    _mask = _mask[..., ::2] | _mask[..., 1::2]
-                    _mask = _mask.swapaxes(axis, -1)
-        return _mask
+            # # Get the real mask taking account complexity
+            # # internally it has the same dim as the full data shape,
+            # # but a view is given here where it appears with only as single mask
+            # # for a complex value, not two
+            #
+            # _mask = self._mask.copy()
+            # if self.has_complex_dims:
+            #     for axis in self.iterdims:
+            #         if self.is_complex[axis]:
+            #             _mask = _mask.swapaxes(axis,-1)
+            #             _mask = _mask[..., ::2] | _mask[..., 1::2]
+            #             _mask = _mask.swapaxes(axis, -1)
+            #
 
+    # .........................................................................
     @mask.setter
     def mask(self, mask):
         # property.setter for mask
-        if np.any(mask):
 
-            mask = np.array(mask, dtype=np.bool_, copy=False)
-            if mask.shape != self.shape:
-                raise ValueError("mask shape do not match data shape")
+        if mask is None:
+            return
 
-            self._validate_mask(mask)
+        # make sure mask is of type np.ndarray
+        if not isinstance(mask, np.ndarray) and not isinstance(mask, bool):
+            mask = np.array(mask, dtype=np.bool_)
+
+        if not np.any(mask):
+            # no mask
+            return
+
+        if not isinstance(mask, bool) and mask.shape != self.shape:
+            raise ValueError("mask {} and data {} shape mismatch!".format(
+                                                        mask.shape, self.shape))
+
+        if self.has_complex_dims:
+            for axis in self.iterdims:
+                mask = mask.swapaxes(axis, -1)
+                if self._is_complex[axis]:
+                    mask = mask.repeat(2, axis=-1)
+                mask = mask.swapaxes(axis, -1)
+
+        if np.any(self._mask):
+            # this should happen when a new mask is added to an existing one
+            # mask to be combined to an existing one
+            log.info("{0} is already a masked array.\n".format(
+                             type(self).__name__) +
+                     "The new mask will be combined with the current array's mask.")
+            self._mask &= mask # combine (is a copy!)
         else:
-            # internal representation should be one numpy understands
-            self._mask = nomask
+            if self._copy:
+                self._mask = mask.copy()
+            else:
+                self._mask = mask
 
+    # .........................................................................
+    @default('_meta')
+    def _get_meta_default(self):
+        return Meta()
+
+    # .........................................................................
     @property
     def meta(self):
         """:class:`~spectrochempy.core.dataset.ndmeta.Meta` instance object -
@@ -611,12 +681,14 @@ class NDArray(HasTraits):
         """
         return self._meta
 
+    # .........................................................................
     @meta.setter
     def meta(self, meta):
         # property.setter for meta
         if meta is not None:
             self._meta.update(meta)
 
+    # .........................................................................
     @property
     def name(self):
         """`str` - An user friendly name for this object (often not necessary,
@@ -627,14 +699,22 @@ class NDArray(HasTraits):
         For most usage, the object name needs to be unique.
 
         """
+
         return self._name
 
+    # .........................................................................
     @name.setter
     def name(self, name):
         # property.setter for name
         if name is not None:
             self._name = name
 
+    # .........................................................................
+    @default('_title')
+    def _get_title_default(self):
+        return None
+
+    # .........................................................................
     @property
     def title(self):
         """`str` - An user friendly title for this object.
@@ -644,47 +724,87 @@ class NDArray(HasTraits):
         e.g. axe title in a matplotlib plot.
 
         """
-        return self._title
+        if not self.is_untitled:
+            return self._title
 
+    # .........................................................................
     @title.setter
     def title(self, title):
         # property.setter for title
         if title is not None:
-            if self._title is not None:
-                log.info(
-                        "Overwriting ndarray current title with specified title")
+            if self._title:
+                log.info("Overwriting current title")
             self._title = title
 
+    # .........................................................................
+    @default('_uncertainty')
+    def _get_uncertainty_default(self):
+        return None
+
+    # .........................................................................
     @property
     def uncertainty(self):
-        """:class:`~numpy.ndarray` -  Uncertainty (std deviation) on the data.
+        """ Uncertainty (std deviation) on the data.
 
         """
+        if not self.is_uncertain:
+            self._uncertainty = np.zeros_like(self._data).astype(float)
         return self._uncertainty
 
+        #
+        # # Get the real labels taking account complexity
+        # # internally it has the same dim as the full data shape,
+        # # but a view is given here where it appears with only as single label
+        # # for a complex value, not two
+        #
+        # _uncertain = self._uncertain.copy()
+        # if self.has_complex_dims:
+        #     for axis in self.iterdims:
+        #         if self.is_complex[axis]:
+        #             _uncertain = _uncertain.swapaxes(axis,-1)
+        #             _uncertain = _uncertain[..., ::2]
+        #             _uncertain = _uncertain.swapaxes(axis, -1)
+        # return _uncertain
+
+    # .........................................................................
     @uncertainty.setter
     def uncertainty(self, uncertainty):
         # property setter for uncertainty
 
-        if uncertainty is not None:
-            if self.is_uncertain and np.any(uncertainty != self._uncertainty):
-                log.info("Overwriting {} ".format(type(self).__name__) +
-                         "current uncertainty with specified uncertainty")
+        if uncertainty is None:
+            return
 
-            uncertainty = np.asanyarray(uncertainty)
-            if not isinstance(uncertainty, np.ndarray):
-                raise ValueError('Uncertainty cannot be casted as a ndarray!')
+        # make sure uncertainty is of type np.ndarray or bool
+        if not isinstance(uncertainty, np.ndarray):
+            uncertainty = np.array(uncertainty, dtype=np.float_)
 
-            if uncertainty.shape != self._data.shape:
+        if not gt_eps(uncertainty):
+            # no uncertainty
+            return
 
-                if not self.is_complex:
-                    raise ValueError(
-                            'uncertainty shape does not match array data shape')
-                else:  # complex data
-                    pass
+        if uncertainty.shape != self.shape:
+            raise ValueError(
+                    "uncertainty {} and data {} shape mismatch!".format(
+                                                 uncertainty.shape, self.shape))
 
+        if self.has_complex_dims:
+            for axis in self.iterdims:
+                uncertainty = uncertainty.swapaxes(axis, -1)
+                if self._is_complex[axis]:
+                    uncertainty = uncertainty.repeat(2, axis=-1)
+                uncertainty = uncertainty.swapaxes(axis, -1)
+
+        if self.is_uncertain and np.any(uncertainty != self._uncertainty):
+            log.info("Overwriting {} ".format(type(self).__name__) +
+                     "current uncertainty with specified uncertainty")
+
+
+        if self._copy:
+            self._uncertainty = uncertainty.copy()
+        else:
             self._uncertainty = uncertainty
 
+    # .........................................................................
     @property
     def units(self):
         """An instance of `Unit` or `str` - The units of the data.
@@ -698,6 +818,7 @@ class NDArray(HasTraits):
         """
         return self._units
 
+    # .........................................................................
     @units.setter
     def units(self, units):
 
@@ -717,29 +838,37 @@ class NDArray(HasTraits):
         except UndefinedUnitError as und:
             raise UndefinedUnitError(und.unit_names)
 
-        if self._units is not None and units != self._units:
+        if self.has_units and units != self._units:
             # first try to cast
             try:
                 self.to(units)
             except:
                 raise ValueError(
-                    "Unit provided in initializer does not match data units.\n "
-                    "To force a change - use the change_units() method")
+                    "Provided units does not match data units.\n "
+                    "To force a change - use the to() method, "
+                    "with force flag set to True")
 
         self._units = units
 
+    # .........................................................................
     @property
-    def values(self):
-        """:class:`~numpy.ndarray`-like object - The actual values (data, units,
-        + uncertainties) contained in this object.
+    def is_complex(self):
+        """`tuple` of `bool` - Indicate if which dimension is complex.
+
+        If a dimension is complex, real and imaginary part are interlaced
+        in the `data` array.
 
         """
-        return self._uarray(self._data, self._uncertainty, self._units)
+        #if not np.any(self._is_complex):
+        #    return None
+
+        return self._is_complex
 
     # -------------------------------------------------------------------------
     # read-only properties / attributes
     # -------------------------------------------------------------------------
 
+    # .........................................................................
     @property
     def dimensionless(self):
         """`bool`, read-only property - Whether the array is dimensionless
@@ -754,29 +883,40 @@ class NDArray(HasTraits):
 
         return self._units.dimensionless
 
+    # .........................................................................
     @property
     def dtype(self):
         """`dtype`, read-only property - data type of the underlying array
 
         """
+        if self._data is None:
+            return None
         if self.is_complex and np.sum(self.is_complex) > 0:
             return np.complex  # TODO: create a hypercomplex dtype?
         else:
             return self._data.dtype
 
+    # .........................................................................
     @property
-    def is_complex(self):
-        """`tuple` of `bool` - Indicate if any dimension is is_complex.
-
-        If a dimension is is_complex, real and imaginary part are interlaced
-        in the `data` array.
+    def has_complex_dims(self):
+        """ `bool` indicating if at least one of the dimension is complex
 
         """
-        if not np.any(self._is_complex):
-            return nocomplex
+        return np.any(self.is_complex)
 
-        return self._is_complex
+    # .........................................................................
+    @property
+    def has_units(self):
+        """ `bool` indicating if the data have units
 
+        """
+        if self._units:
+            if not str(self.units).strip():
+                return False
+            return True
+        return False
+
+    # .........................................................................
     @property
     def is_empty(self):
         """`bool`, read-only property - Whether the array is empty (size==0)
@@ -785,61 +925,56 @@ class NDArray(HasTraits):
         """
         return self._data.size == 0
 
+    # .........................................................................
     @property
     def is_labeled(self):
         """`bool`, read-only property - Whether the axis has labels or not.
 
         """
-
-        if self._labels is nolabel:
-            return False
-        elif self._labels.size == 0:
-            return False
-        elif np.any(self._labels != ''):
+        if self._labels is not None and np.any(self._labels):
             return True
-        return False
+        else:
+            return False
 
+    # .........................................................................
     @property
     def is_masked(self):
         """`bool`, read-only property - Whether the array is masked or not.
 
         """
-        if not np.any(self._mask) or self._mask.size == 0:
+        if self._mask is not None and np.any(self._mask):
+            return True
+        else:
             return False
 
-        if np.any(self._mask):
-            return True
-
-        return False
-
+    # .........................................................................
     @property
     def is_uncertain(self):
         """`bool`, read-only property - Whether the array has uncertainty
         or not.
 
         """
-        if not np.any(self._uncertainty):
+        if self._uncertainty is not None and gt_eps(self._uncertainty):
+            return True
+        else:
             return False
 
-        if np.any(self._uncertainty > EPSILON):
-            return True
-
-        return False
-
+    # .........................................................................
     @property
     def is_untitled(self):
         """`bool`, read-only property - Whether the array has `title` or not.
 
         """
-
-        if self.title:
+        if self._title:
             return False
         return True
 
+    # .........................................................................
     @property
     def iterdims(self):
         return range(self._data.ndim)
 
+    # .........................................................................
     @property
     def masked_data(self):
         """:class:`~numpy.ndarray`-like object - The actual masked array of data
@@ -852,6 +987,7 @@ class NDArray(HasTraits):
             return self._data
         # here we use .mask not ._mask to get the correct shape
 
+    # .........................................................................
     @property
     def ndim(self):
         """`int`, read-only property - The number of dimensions of
@@ -861,6 +997,7 @@ class NDArray(HasTraits):
 
         return self._data.ndim
 
+    # .........................................................................
     @property
     def shape(self):
         """`tuple`, read-only property - A `tuple` with the size of each axis.
@@ -872,13 +1009,16 @@ class NDArray(HasTraits):
         # read the actual shape of the underlying array
         # taking into account that the data may be complex,
         # so that the real and imag data are stored sequentially
+        if self._data is None:
+            return ()
         shape = list(self._data.shape)
-        if self.is_complex:
+        if self.has_complex_dims:
             for i in self.iterdims:
                 if self.is_complex[i]:
                     shape[i] = shape[i] // 2
         return tuple(shape)
 
+    # .........................................................................
     @property
     def size(self):
         """`int`, read-only property - Size of the underlying `ndarray`.
@@ -887,14 +1027,16 @@ class NDArray(HasTraits):
         (possibly complex or hyper-complex in the array).
 
         """
-
+        if self._data is None:
+            return 0
         size = self._data.size
-        if self.is_complex:
+        if self.has_complex_dims:
             for complex in self.is_complex:
                 if complex:
                     size = size // 2
         return size
 
+    # .........................................................................
     @property
     def uncert_data(self):
         """:class:`~numpy.ndarray`-like object - The actual array with
@@ -904,14 +1046,16 @@ class NDArray(HasTraits):
 
         return self._uarray(self.masked_data, self._uncertainty)
 
+    # .........................................................................
     @property
     def unitless(self):
         """`bool`, read-only property - Whether the array has `units` or not.
 
         """
 
-        return self._units is None
+        return not self.has_units
 
+    # .........................................................................
     @property
     def real(self):
         """:class:`~numpy.ndarray`-like object - The array with
@@ -931,6 +1075,7 @@ class NDArray(HasTraits):
             new._data = ma
         return new
 
+    # .........................................................................
     @property
     def imag(self):
         """:class:`~numpy.ndarray`-like object - The array with
@@ -948,6 +1093,7 @@ class NDArray(HasTraits):
             new._data = ma
         return new
 
+    # .........................................................................
     @property
     def RR(self):
         """:class:`~numpy.ndarray`-like object - The array with
@@ -957,6 +1103,7 @@ class NDArray(HasTraits):
         if self.ndim != 2: raise TypeError('Not a two dimensional array')
         return self.part('RR')
 
+    # .........................................................................
     @property
     def RI(self):
         """:class:`~numpy.ndarray`-like object - The array with
@@ -966,6 +1113,7 @@ class NDArray(HasTraits):
         if self.ndim != 2: raise TypeError('Not a two dimensional array')
         return self.part('RI')
 
+    # .........................................................................
     @property
     def IR(self):
         """:class:`~numpy.ndarray`-like object - The array with
@@ -975,6 +1123,7 @@ class NDArray(HasTraits):
         if self.ndim != 2: raise TypeError('Not a two dimensional array')
         return self.part('IR')
 
+    # .........................................................................
     @property
     def II(self):
         """:class:`~numpy.ndarray`-like object - The array with
@@ -984,44 +1133,20 @@ class NDArray(HasTraits):
         if self.ndim != 2: raise TypeError('Not a two dimensional array')
         return self.part('II')
 
+    # .........................................................................
+    @property
+    def values(self):
+        """:class:`~numpy.ndarray`-like object - The actual values (data, units,
+        + uncertainties) contained in this object.
+
+        """
+        return self._uarray(self._data, self._uncertainty, self._units)
+
     # -------------------------------------------------------------------------
     # Public methods
     # -------------------------------------------------------------------------
-    def change_units(self, units):
-        """
-        Force a chnage of units
 
-        Parameters
-        ----------
-        units : cccccc
-
-        Returns
-        -------
-
-        """
-        if self._units is None:
-            self.units = units
-            return
-
-        try:
-            if isinstance(units, str):
-                units = ur.Unit(units)
-            elif isinstance(units, Quantity):
-                raise TypeError("Units or string representation "
-                                "of unit is expected, not Quantity")
-
-        except DimensionalityError:
-            raise DimensionalityError
-
-        except UndefinedUnitError as und:
-            raise UndefinedUnitError(und.unit_names)
-
-        try:
-            self.to(units)
-        except DimensionalityError:
-            self._units = units
-            log.info('units forced to change')
-
+    # .........................................................................
     def copy(self, deep=True, memo=None):
         """Make a disconnected copy of the current object.
 
@@ -1041,6 +1166,19 @@ class NDArray(HasTraits):
         object : same type.
             an exact copy of the current object.
 
+        Examples
+        --------
+        >>> nd1 = NDArray([1.+2.j,2.+ 3.j])
+        >>> print(nd1)
+        R[   1.000    2.000]
+        I[   2.000    3.000]
+        >>> nd2 = nd1
+        >>> nd2 is nd1
+        True
+        >>> nd3 = nd1.copy()
+        >>> nd3 is not nd1
+        True
+
         """
         if deep:
             do_copy = copy.deepcopy
@@ -1050,7 +1188,6 @@ class NDArray(HasTraits):
         new = type(self)()
         new._data = do_copy(self._data)
         for attr in self.__dir__():
-
             try:
                 setattr(new, "_" + attr, do_copy(getattr(self, "_" + attr)))
             except:
@@ -1060,6 +1197,7 @@ class NDArray(HasTraits):
         new._date = datetime.now()
         return new
 
+    # .........................................................................
     def is_units_compatible(self, other):
         """
         Check the compatibility of units with another NDArray
@@ -1072,6 +1210,19 @@ class NDArray(HasTraits):
         -------
         compat : `bool`
 
+        >>> nd1 = NDArray([1.+2.j,2.+ 3.j], units='meters')
+        >>> print(nd1)
+        R[   1.000    2.000] m
+        I[   2.000    3.000] m
+        >>> nd2 = NDArray([1.+2.j,2.+ 3.j], units='seconds')
+        >>> nd1.is_units_compatible(nd2)
+        False
+        >>> nd1.to('minutes', force=True)
+        >>> nd1.is_units_compatible(nd2)
+        True
+        >>> nd2[0].data == nd1[0].data
+        True
+
         """
         _other = other.copy()
 
@@ -1082,9 +1233,10 @@ class NDArray(HasTraits):
 
         return True
 
+    # .........................................................................
     @deprecated('use `to` instead')
     def ito(self, other):
-        """Rescale the current object data to different units.
+        """Inplace scaling of the current object data to different units.
 
         (same as :attr:`to` with inplace=`True`).
 
@@ -1105,6 +1257,7 @@ class NDArray(HasTraits):
         """
         return self.to(other, inplace=True)
 
+    # .........................................................................
     def part(self, select='ALL'):
         """
         Take selected components of an hypercomplex array (RRR, RIR, ...)
@@ -1117,7 +1270,9 @@ class NDArray(HasTraits):
             has to be selected along a specific axis. For instance,
             a string such as 'RRI' for a 2D hypercomplex array indicated
             that we take the real component in each dimension except the last
-            one, for wich imaginary component is preferred.
+            one, for wich imaginary component is preferred. A star (*)
+            indicates that we keep the complex structure along a given
+            axis, e.g. R*R
 
         Returns
         -------
@@ -1135,6 +1290,8 @@ class NDArray(HasTraits):
                     data = data[..., ::2]
                 elif component == 'I':
                     data = data[..., 1::2]
+                elif component != '*':
+                    raise ValueError('components mlust be indicated with R, I or *')
                 ma = data.swapaxes(axis, -1)
                 new._is_complex[axis] = False
         if isinstance(ma, np.ma.masked_array):
@@ -1144,6 +1301,7 @@ class NDArray(HasTraits):
             new._data = ma
         return new
 
+    # .........................................................................
     def set_complex(self, axis):
         """
         Set the data along the given dimension as complex
@@ -1169,6 +1327,7 @@ class NDArray(HasTraits):
                              "must be even, not %d"%self.shape[axis])
         self._is_complex[axis] = True
 
+    # .........................................................................
     def set_real(self, axis):
         """
         Set the data along the given dimension as real
@@ -1183,6 +1342,7 @@ class NDArray(HasTraits):
 
         self._is_complex[axis] = False
 
+    # .........................................................................
     def squeeze(self, axis=None, inplace=False):
         """
         Remove single-dimensional entries from the shape of an array.
@@ -1223,7 +1383,8 @@ class NDArray(HasTraits):
                             'cannot be squeezed' % axis)
         else:
             squeeze_axis = []
-            for axis, dim in enumerate(self._data.shape):  # we need the real shape here
+            for axis, dim in enumerate(self._data.shape):
+                # we need the real shape here
                 if dim == 1:
                     squeeze_axis.append(axis)
 
@@ -1250,7 +1411,8 @@ class NDArray(HasTraits):
 
         return new
 
-    def to(self, other, inplace=True):
+    # .........................................................................
+    def to(self, other, inplace=True, force=False):
         """Return the object with data rescaled to different units.
 
         Parameters
@@ -1262,36 +1424,96 @@ class NDArray(HasTraits):
             if inplace is True, the object itself is returned with
             the new units. If `False` a copy is created.
 
+        force: `bool`, optional, default: False
+            If True the change of units is forced, even for imcompatible units
+
         Returns
         -------
         object : same type
             same object or a copy depending on `ìnplace` with new units.
 
+        Examples
+        --------
+        >>> np.random.seed(12345)
+        >>> ndd = NDArray( data = np.random.random((3, 3)),
+        ...                mask = [[True, False, False],
+        ...                        [False, True, False],
+        ...                        [False, False, True]],
+        ...                units = 'meters')
+        >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        [[  --    0.316    0.184]
+         [   0.205   --    0.596]
+         [   0.965    0.653   --]] m
+
+        We want to change the units to seconds for instance
+        but there is no relation with meters,
+        so an error is generated during the change
+
+        >>> ndd.to('second')
+        Traceback (most recent call last):
+        ...
+        Exception: Cannot set this unit
+
+        However, we can force the change
+        >>> ndd.to('second', force=True) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        >>> print(ndd)
+        [[  --    0.316    0.184]
+         [   0.205   --    0.596]
+         [   0.965    0.653   --]] s
 
         """
-        if self._units is not None:
-            q = Quantity(1., self._units).to(other)
-            scale = q.magnitude
-            if inplace:
-                new = self
-            else:
-                new = self.copy()
-            new._data = new._data * scale  # new * scale #
-            if new._uncertainty is not None:
-                new._uncertainty = new._uncertainty * scale
-            new._units = q.units
-            return new
+        if inplace:
+            new = self
         else:
-            warnings.warn("There is no units for this NDArray!",
+            new = self.copy()
+
+        try:
+            if isinstance(other, str):
+                units = ur.Unit(other)
+            elif hasattr(other, 'units'):
+                units = other.units
+            else:
+                units = ur.Unit(other)
+
+        except DimensionalityError:
+            raise DimensionalityError
+
+        except UndefinedUnitError as und:
+            raise UndefinedUnitError(und.unit_names)
+
+        if self.has_units:
+            try:
+                q = Quantity(1., self._units).to(units)
+                scale = q.magnitude
+                new._data = new._data * scale  # new * scale #
+                if new._uncertainty is not None:
+                    new._uncertainty = new._uncertainty * scale
+                new._units = q.units
+
+            except DimensionalityError as dimerr:
+
+                if force:
+                    new._units = units
+                    log.info('units forced to change')
+                else:
+                    raise dimerr
+
+        else:
+            if force:
+                new._units = units
+            else:
+                warnings.warn("There is no units for this NDArray!",
                           SpectroChemPyWarning)
 
-        return self
+        #if not inplace:
+        return new
 
 
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
 
+    # .........................................................................
     def _argsort(self, by='value', pos=None, descend=False):
         # found the indices sorted by values or labels
 
@@ -1324,6 +1546,7 @@ class NDArray(HasTraits):
         return args
 
 
+    # .........................................................................
     def _loc2index(self, loc, axis):
         # Return the index of a location along the axis
         # Not implemented in this base class
@@ -1331,7 +1554,8 @@ class NDArray(HasTraits):
         raise IndexError('not implemented for {} objects'.format(
                 type(self).__name__))
 
-    def _get_slice(self, key, axis, iscomplex=False, ignore_complex=False):
+    # .........................................................................
+    def _get_slice(self, key, axis, iscomplex=False):
 
         if not isinstance(key, slice):
             start = key
@@ -1339,9 +1563,9 @@ class NDArray(HasTraits):
                 start = self._loc2index(key, axis)
             else:
                 if key < 0:  # reverse indexing
-                    start = axis.size + key
+                    start = self.shape[axis] + key
             stop = start + 1
-            step = None
+            step = 1
         else:
             start, stop, step = key.start, key.stop, key.step
 
@@ -1352,23 +1576,28 @@ class NDArray(HasTraits):
                 stop = self._loc2index(stop, axis) + 1
 
             if step is not None and not isinstance(step, (int, np.int)):
-                warn('step in location slicing is not yet possible. Set to 1')
+                raise KeyError('step in location slicing is not yet possible.')
                 # TODO: we have may be a special case with datetime
-                step = None
+                step = 1
 
-        if iscomplex and not ignore_complex:
+        if step is None:
+            step = 1
+
+        keys = slice(start, stop, step)
+
+        if iscomplex:
             if start is not None:
                 start = start * 2
             if stop is not None:
                 stop = stop * 2
-            if step is not None:
-                step = step * 2
 
-        newkey = slice(start, stop, step)
+        internkeys = slice(start, stop, step)
 
-        return newkey
+        return keys, internkeys
 
-    def _make_index(self, key, ignore_complex=False):
+    # .........................................................................
+    def _make_index(self, key):
+
         if isinstance(key, np.ndarray) and key.dtype == np.bool:
             # this is a boolean selection
             # we can proceed directly
@@ -1399,18 +1628,20 @@ class NDArray(HasTraits):
         for i in range(len(keys), self.ndim):
             keys.append(slice(None))
 
-        # replace the non index slice or non slide by index slices
+        # replace all keys by index slices (and get internal slice index for
+        # complex array)
+
+        internkeys = keys[:]
+
         for axis, key in enumerate(keys):
 
-            if self.is_complex:
-                complex = self.is_complex[axis]
-            else:
-                complex=False
-            keys[axis] = self._get_slice(key, axis, complex,
-                                         ignore_complex)
+            complex = self.is_complex[axis]
 
-        return tuple(keys)
+            keys[axis], internkeys[axis] = self._get_slice(key, axis, complex)
 
+        return tuple(keys), tuple(internkeys)
+
+    # .........................................................................
     def _sort(self, by='value', pos=None, descend=False, inplace=False):
         # sort an ndarray in place using data or label values
 
@@ -1423,6 +1654,7 @@ class NDArray(HasTraits):
 
         return self._take(args)
 
+    # .........................................................................
     def _take(self, indices):
         # get a ndarray with passed indices
 
@@ -1435,6 +1667,7 @@ class NDArray(HasTraits):
 
         return new
 
+    # .........................................................................
     @staticmethod
     def _umasked(data, mask):
         # This ensures that a masked array is returned if self is masked.
@@ -1444,11 +1677,12 @@ class NDArray(HasTraits):
 
         return data
 
+    # .........................................................................
     @staticmethod
     def _uarray(data, uncertainty, units=None):
         # return the array with uncertainty and units if any
 
-        if not np.any(uncertainty) or np.all(uncertainty <= EPSILON):
+        if uncertainty is None or not gt_eps(uncertainty):
             uar = data
         else:
             uar = unp.uarray(data, uncertainty)
@@ -1458,49 +1692,3 @@ class NDArray(HasTraits):
         else:
             return uar
 
-    def _validate(self, data):
-        # data validation
-        try:
-            if len(data) == 0:  # self._data.any():
-                self._is_complex = [False]
-                return
-        except:
-            if data.size == 0:  # self._data.any():
-                self._is_complex = [False]
-                return
-
-        self._data, complex = interleave(data)
-
-        if not self.is_complex:
-            self._is_complex = [False] * self._data.ndim
-
-        if complex:
-            self._is_complex[-1] = complex
-
-        if is_sequence(self._is_complex) and \
-                        len(self._is_complex)!=self._data.ndim:
-            raise ValueError("size of the `is_complex` list argument "
-                             "doesn't match the nb of dims")
-
-    def _validate_mask(self, mask):
-        # mask validation
-
-        if not np.any(mask):
-            self._mask = nomask
-
-        if mask.shape != self.shape:
-            raise ValueError("mask {} and data {} shape mismatch!".format(
-                                                        mask.shape,self.shape))
-
-        if self.is_complex:
-            for axis in self.iterdims:
-                mask = mask.swapaxes(axis, -1)
-                if self._is_complex[axis]:
-                    mask = mask.repeat(2, axis=-1)
-                mask = mask.swapaxes(axis, -1)
-
-        if self._mask:
-            self._mask = self._mask | mask # combine`
-        else:
-            self._mask = mask
-        pass

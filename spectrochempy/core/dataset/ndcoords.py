@@ -52,7 +52,7 @@ from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
 
 from spectrochempy.application import log
 
-from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndarray import (NDArray)
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 from spectrochempy.core.units import Quantity
 # from ...utils import create_traitsdoc
@@ -151,71 +151,74 @@ class Coord(NDMath, NDArray):
 
     For example::
 
-    >>> from spectrochempy.api import Coord
-
+    >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+            SpectroChemPy's API
+            Version   : ...
+    <BLANKLINE>
 
     >>> x = Coord([1,2,3], title='time on stream', units='hours')
-    >>> x.coords # doctest: +NORMALIZE_WHITESPACE
-    array([ 1, 2, 3])
+    >>> print(x) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+              title: Time on stream
+    coordinates: [       1        2        3]
+          units: hr
 
+    >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
+    [       1        2        3]
 
     """
-    _iscopy = Bool
+    _copy = Bool
 
     # -------------------------------------------------------------------------
     # initialization
     # -------------------------------------------------------------------------
-    def __init__(self,
-                 data=None,
-                 labels=None,
-                 mask=None,
-                 units=None,
-                 title=None,
-                 name=None,
-                 meta=None,
-                 **kwargs):
+    def __init__(self, data=None, **kwargs):
 
-        _iscopy = kwargs.pop('iscopy', False)
+        super(Coord, self).__init__(data, **kwargs)
 
-        super(Coord, self).__init__(**kwargs)
+        # some checking
+        if self._data.ndim >1:
+            raise CoordsError("Number of dimension for coordinate's array "
+                              "should be 1!")
 
-        if _iscopy:
-            self._iscopy = True
-            data = copy.deepcopy(data)
-            labels = copy.deepcopy(labels)
-            mask = copy.deepcopy(mask)
-            units = copy.copy(units)  # deepcopy not working for units?
-            meta = copy.deepcopy(meta)
 
-        if data is not None:
-            self.data = data
-            if labels is not None:
-                self.labels = labels
-
-        else:
-            if labels is not None:
-                self.coords = range(len(labels))
-                self.labels = labels
-
-        if mask is not None:
-            if self._data_passed_with_mask and self._mask != mask:
-                log.info("Coord was created with a masked array, and a "
-                         "mask was explicitly provided to Coord. The  "
-                         "explicitly passed-in mask will be used and the "
-                         "masked array's mask will be ignored.")
-            self.mask = mask
-
-        if units is not None:
-            if self._data_passed_is_quantity and self._units != units:
-                raise ValueError(
-                        "Cannot use the units argument when passed data "
-                        "is a Quantity")
-
-            self.units = units
-
-        self.title = title
-        self.name = name
-        self.meta = meta
+        # if self._copy:
+        #     self._copy = True
+        #     data = copy.deepcopy(data)
+        #     labels = copy.deepcopy(labels)
+        #     mask = copy.deepcopy(mask)
+        #     units = copy.copy(units)  # deepcopy not working for units?
+        #     meta = copy.deepcopy(meta)
+        #
+        # if data is not None:
+        #     self.data = data
+        #     if labels is not nolabel:
+        #         self.labels = labels
+        #
+        # else:
+        #     if labels is not nolabel:
+        #         self.coords = range(len(labels))
+        #         self.labels = labels
+        #
+        # if mask is not None:
+        #     if self._data_passed_with_mask and self._mask != mask:
+        #         log.info("Coord was created with a masked array, and a "
+        #                  "mask was explicitly provided to Coord. The  "
+        #                  "explicitly passed-in mask will be used and the "
+        #                  "masked array's mask will be ignored.")
+        #     self.mask = mask
+        #
+        # if units is not None:
+        #     if self._data_passed_is_quantity and self._units != units:
+        #         raise ValueError(
+        #                 "Cannot use the units argument when passed data "
+        #                 "is a Quantity")
+        #
+        #     self.units = units
+        #
+        # self.title = title
+        # self.name = name
+        # self.meta = meta
 
     # -------------------------------------------------------------------------
     # properties
@@ -297,7 +300,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def is_complex(self):
-        return None  # always real
+        return False  # always real
 
     @property
     def ndim(self):
@@ -357,7 +360,9 @@ class Coord(NDMath, NDArray):
         out += '      units: %s\n' % units
         if self.is_labeled:
             out += '     labels: %s\n' % str(self.labels)
-        out += '\n'
+        #out += '\n'
+        if out[-1]=='\n':
+            out = out[:-1]
         return out
 
     # def __repr__(self):

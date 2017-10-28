@@ -63,11 +63,10 @@ from traitlets import (List, Unicode, Instance, default,
                        Bool, observe, All)
 
 from spectrochempy.core.units import Quantity
-from spectrochempy.utils import SpectroChemPyWarning
-from spectrochempy.utils import is_sequence, is_number
-from spectrochempy.utils import (numpyprintoptions,
-                                 get_user_and_node)
-from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.utils import (SpectroChemPyWarning,
+                                 is_sequence, is_number,
+                                 numpyprintoptions, get_user_and_node)
+from spectrochempy.core.dataset.ndarray import (NDArray)
 from spectrochempy.core.dataset.ndcoords import Coord, CoordSet, CoordsError
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 # from spectrochempy.core.dataset.ndmeta import Meta
@@ -160,7 +159,7 @@ class NDDataset(
     coords : An instance of :class:`~spectrochempy.core.dataset.ndcoords.CoordSet`,
     optional
 
-        It contains the `coord` coordinates and `labels` for the different
+        `coords` contains the coordinates for the different
         dimensions of the `data`. if `coords` is provided, it must specified
         the `coord` and `labels` for all dimensions of the `data`.
         Multiple coord can be specified in an CoordSet instance for each dimension.
@@ -205,8 +204,8 @@ class NDDataset(
 
     >>> from spectrochempy.api import NDDataset
     >>> x = NDDataset([1,2,3])
-    >>> x.data
-    array([       1,        2,        3])
+    >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
+    [       1        2        3])
 
     """
     author = Unicode(get_user_and_node(),
@@ -216,122 +215,113 @@ class NDDataset(
     # private metadata in addition to those of the base NDArray class
     _modified = Instance(datetime)
     _description = Unicode
-    _history = List
+    _history = List(Unicode())
 
     _coords = Instance(CoordSet, allow_none=True)
 
-    _iscopy = Bool(False)
+    _copy = Bool(False)
 
-    @default('_iscopy')
-    def _get_iscopy_default(self):
-        return False
-
-    def __init__(self,
-                 data=None,
+    def __init__(self, data=None,
                  coords=None,
-                 mask=None,
-                 uncertainty=None,
-                 units=None,
-                 meta=None,
-                 name=None,
-                 title=None,
                  coordsunits=None,
                  coordstitles=None,
-                 is_complex=None,
-                 is_copy = True,
                  **kwargs):
 
-
-        super(NDDataset, self).__init__(
-                 data=data,
-                 mask=mask,
-                 uncertainty=uncertainty,
-                 units=units,
-                 meta=meta,
-                 name=name,
-                 title=title,
-                 is_complex=is_complex,
-                 is_copy=is_copy,
-                 **kwargs)
+        super(NDDataset, self).__init__(data, **kwargs)
 
         self._modified = self._date
-        self.description = ''
-        self.history = []
+        self._description = ''
+        self._history = ['']
         self.coords = coords
         self.coordstitles = coordstitles
         self.coordsunits = coordsunits
 
-    @property
-    def data(self):
-        """
-        :class:`~numpy.ndarray`-like object - The actual array data
-        contained in this object.
+    # @property
+    # def data(self):
+    #     """
+    #     :class:`~numpy.ndarray`-like object - The actual array data
+    #     contained in this object.
+    #
+    #     """
+    #     return super(NDDataset, self).data
+    #
+    #
+    # @data.setter
+    # def data(self, data):
+    #     # property.setter for data
+    #
+    #     super(NDDataset, self).data = data
+    #
+        # if data is None:
+        #     self._data = np.array([]).astype(float)  # reinit data
+        #     log.debug("init data with an empty array of type float")
+        #
+        # elif isinstance(data, (NDDataset, NDArray)):
+        #     log.debug("init data with data from another NDArray")
+        #     # No need to check the data because data must have successfully
+        #     # initialized.
+        #     self._name = "copy of {}".format(data._name) if self._iscopy \
+        #         else data._name
+        #     self._validate(data._data)
+        #     self._mask = data._mask
+        #     self._coords = data._coords
+        #     self._units = data._units
+        #     self._meta = data._meta
+        #     self._title = data._title
+        #     self.uncertainty = data.uncertainty
+        #
+        # elif isinstance(data, NDFrame):  # pandas object
+        #     log.debug("init data with data from pandas NDFrame object")
+        #     self._validate(data.values)
+        #     self.coords = data.axes  # get axes from Pandas
+        #
+        # elif isinstance(data, pd.Index):  # pandas index object
+        #     log.debug("init data with data from a pandas Index")
+        #     self._validate(np.array(data.values, subok=True,
+        #                             copy=self._iscopy))
+        #
+        # elif isinstance(data, Quantity):
+        #     log.debug("init data with data from a Quantity object")
+        #     self._data_passed_is_quantity = True
+        #     self._validate(np.array(data.magnitude, subok=True,
+        #                             copy=self._iscopy))
+        #     self._units = data.units
+        #
+        # elif hasattr(data, 'mask'):  # an object with data and mask attributes
+        #     log.debug("init mask from the passed data")
+        #     self._data_passed_with_mask = True
+        #     self._validate(np.array(data.data, subok=True,
+        #                             copy=self._iscopy))
+        #     if isinstance(data.mask, np.ndarray) and \
+        #                     data.mask.shape == data.data.shape:
+        #         self._mask = np.array(data.mask, dtype=np.bool_, copy=False)
+        #     else:
+        #         self._data_passed_with_mask = False  # not succesfull
+        #
+        # elif (not hasattr(data, 'shape') or
+        #           not hasattr(data, '__getitem__') or
+        #           not hasattr(data, '__array_struct__')):
+        #     log.debug("init data with a non numpy-like array object")
+        #     # Data doesn't look like a numpy array, try converting it to
+        #     # one. Non-numerical input are converted to an array of objects.
+        #     self._validate(np.array(data, subok=True, copy=False))
+        #
+        # else:
+        #     log.debug("init data with a numpy array")
+        #     self._validate(np.array(data, subok=True,
+        #                             copy=self._iscopy))
 
-        """
-        return super(NDDataset, self).data
+    #
+    # Default values
+    #
+    @default('_coords')
+    def _get_coords_default(self):
+        return None  # CoordSet([None for dim in self.shape])
 
 
-    @data.setter
-    def data(self, data):
-        # property.setter for data
-        if data is None:
-            self._data = np.array([]).astype(float)  # reinit data
-            log.debug("init data with an empty array of type float")
-
-        elif isinstance(data, (NDDataset, NDArray)):
-            log.debug("init data with data from another NDArray")
-            # No need to check the data because data must have successfully
-            # initialized.
-            self._name = "copy of {}".format(data._name) if self._iscopy \
-                else data._name
-            self._validate(data._data)
-            self._mask = data._mask
-            self._coords = data._coords
-            self._units = data._units
-            self._meta = data._meta
-            self._title = data._title
-            self.uncertainty = data.uncertainty
-
-        elif isinstance(data, NDFrame):  # pandas object
-            log.debug("init data with data from pandas NDFrame object")
-            self._validate(data.values)
-            self.coords = data.coords
-
-        elif isinstance(data, pd.Index):  # pandas index object
-            log.debug("init data with data from a pandas Index")
-            self._validate(np.array(data.values, subok=True,
-                                    copy=self._iscopy))
-
-        elif isinstance(data, Quantity):
-            log.debug("init data with data from a Quantity object")
-            self._data_passed_is_quantity = True
-            self._validate(np.array(data.magnitude, subok=True,
-                                    copy=self._iscopy))
-            self._units = data.units
-
-        elif hasattr(data, 'mask'):  # an object with data and mask attributes
-            log.debug("init mask from the passed data")
-            self._data_passed_with_mask = True
-            self._validate(np.array(data.data, subok=True,
-                                    copy=self._iscopy))
-            if isinstance(data.mask, np.ndarray) and \
-                            data.mask.shape == data.data.shape:
-                self._mask = np.array(data.mask, dtype=np.bool_, copy=False)
-            else:
-                self._data_passed_with_mask = False  # not succesfull
-
-        elif (not hasattr(data, 'shape') or
-                  not hasattr(data, '__getitem__') or
-                  not hasattr(data, '__array_struct__')):
-            log.debug("init data with a non numpy-like array object")
-            # Data doesn't look like a numpy array, try converting it to
-            # one. Non-numerical input are converted to an array of objects.
-            self._validate(np.array(data, subok=True, copy=False))
-
-        else:
-            log.debug("init data with a numpy array")
-            self._validate(np.array(data, subok=True,
-                                    copy=self._iscopy))
+    @default('_copy')
+    def _get_iscopy_default(self):
+        return False
 
     # --------------------------------------------------------------------------
     # additional properties (not in the NDArray base class)
@@ -395,10 +385,6 @@ class NDDataset(
                 self._coords = CoordSet(value)
             else:
                 self._coords = value
-
-    @default('_coords')
-    def _get_coords_default(self):
-        return None  # CoordSet([None for dim in self.shape])
 
     @property
     def coordstitles(self):
@@ -761,156 +747,156 @@ class NDDataset(
 
         return new
 
-    def real(self, axis=-1, inplace=False):
-        """
-        Compute the real part of the elements of the NDDataset.
-
-        Parameters
-        ----------
-        axis : `int`, Optional, default: -1.
-            The axis along which the absolute value should be calculated.
-
-        inplace : `bool`, optional, default=``False``
-            should we return a new dataset (default) or not (inplace=True)
-
-        Returns
-        -------
-        real_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`RR`, :meth:`IR`, :meth:`imag`, :meth:`conj`, :meth:`abs`
-
-        """
-        if not inplace:  # default is to return a new array
-            new = self.copy()
-        else:
-            new = self  # work inplace
-
-        if new._is_complex[axis]:
-            new.swapaxes(-1, axis, inplace=True)
-            new._data = new._data[..., ::2]
-            new._mask = new._mask[..., ::2]
-            new._uncertainty = new._uncertainty[..., ::2]
-            new.swapaxes(-1, axis, inplace=True)
-            new._is_complex[axis] = False
-
-        return new
-
-    def RR(self, inplace=False):
-        """
-        Compute the real (RR...) part of the elements of the NDDataset
-        in all dimensions.
-
-        Equivalent to real for 1D data, it will differ for
-        hypercomplex multidimensional data.
-
-        Parameters
-        ----------
-        inplace : `bool`, optional, default=``False``
-            should we return a new dataset (default) or not (inplace=True)
-
-        Returns
-        -------
-        real_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`IR`, :meth:`real`, :meth:`imag`, :meth:`conj`, :meth:`abs`
-
-        """
-        if not inplace:  # default is to return a new array
-            new = self.copy()
-        else:
-            new = self  # work inplace
-
-        for axis in range(self.ndim):
-            if not new._is_complex[axis]:
-                continue
-            new = new.real(inplace=True)
-
-        return new
-
-    def imag(self, axis=-1, inplace=False):
-        """
-        Compute the imaginary part of the elements of the NDDataset
-        along the specified axis
-
-        Parameters
-        ----------
-        axis : `int`, Optional, default: -1.
-            The axis along which the absolute value should be calculated.
-
-        inplace : `bool`, optional, default=``False``
-            should we return a new dataset (default) or not (inplace=True)
-
-        Returns
-        -------
-        imag_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`RR`, :meth:`IR`, :meth:`real`,:meth:`conj`, :meth:`abs`
-
-        """
-        if not inplace:  # default is to return a new array
-            new = self.copy()
-        else:
-            new = self  # work inplace
-
-        if new._is_complex[axis]:
-            new.swapaxes(-1, axis, inplace=True)
-            new._data = new._data[..., 1::2]
-            new._mask = new._mask[..., 1::2]
-            new._uncertainty = new._uncertainty[..., 1::2]
-            new.swapaxes(-1, axis, inplace=True)
-            new._is_complex[axis] = False
-
-        return new
-
-    def IR(self, inplace=False):
-        """
-        Imaginary (IRR...) part
-
-        Compute the imaginary part of the elements of the NDDataset
-        along the last dimension. For hypercomplex multidimensional data,
-        the real part will be taken in all dimensions other than the last
-
-        Parameters
-        ----------
-        inplace : `bool`, optional, default=``False``
-            should we return a new dataset (default) or not (inplace=True)
-
-        Returns
-        -------
-        imag_dataset : same type
-
-            Output array.
-
-        See Also
-        --------
-        :meth:`RR`, :meth:`imag`, :meth:`real`,:meth:`conj`, :meth:`abs`
-
-        """
-        if not inplace:  # default is to return a new array
-            new = self.copy()
-        else:
-            new = self  # work inplace
-
-        new = new.imag(axis=-1, inplace=True)
-
-        for axis in range(self.ndim-1):
-            if not new._is_complex[axis]:
-                continue
-            new = new.real(inplace=True)
-
-        return new
+    # def real(self, axis=-1, inplace=False):
+    #     """
+    #     Compute the real part of the elements of the NDDataset.
+    #
+    #     Parameters
+    #     ----------
+    #     axis : `int`, Optional, default: -1.
+    #         The axis along which the absolute value should be calculated.
+    #
+    #     inplace : `bool`, optional, default=``False``
+    #         should we return a new dataset (default) or not (inplace=True)
+    #
+    #     Returns
+    #     -------
+    #     real_dataset : same type
+    #
+    #         Output array.
+    #
+    #     See Also
+    #     --------
+    #     :meth:`RR`, :meth:`IR`, :meth:`imag`, :meth:`conj`, :meth:`abs`
+    #
+    #     """
+    #     if not inplace:  # default is to return a new array
+    #         new = self.copy()
+    #     else:
+    #         new = self  # work inplace
+    #
+    #     if new._is_complex[axis]:
+    #         new.swapaxes(-1, axis, inplace=True)
+    #         new._data = new._data[..., ::2]
+    #         new._mask = new._mask[..., ::2]
+    #         new._uncertainty = new._uncertainty[..., ::2]
+    #         new.swapaxes(-1, axis, inplace=True)
+    #         new._is_complex[axis] = False
+    #
+    #     return new
+    #
+    # def RR(self, inplace=False):
+    #     """
+    #     Compute the real (RR...) part of the elements of the NDDataset
+    #     in all dimensions.
+    #
+    #     Equivalent to real for 1D data, it will differ for
+    #     hypercomplex multidimensional data.
+    #
+    #     Parameters
+    #     ----------
+    #     inplace : `bool`, optional, default=``False``
+    #         should we return a new dataset (default) or not (inplace=True)
+    #
+    #     Returns
+    #     -------
+    #     real_dataset : same type
+    #
+    #         Output array.
+    #
+    #     See Also
+    #     --------
+    #     :meth:`IR`, :meth:`real`, :meth:`imag`, :meth:`conj`, :meth:`abs`
+    #
+    #     """
+    #     if not inplace:  # default is to return a new array
+    #         new = self.copy()
+    #     else:
+    #         new = self  # work inplace
+    #
+    #     for axis in range(self.ndim):
+    #         if not new._is_complex[axis]:
+    #             continue
+    #         new = new.real(inplace=True)
+    #
+    #     return new
+    #
+    # def imag(self, axis=-1, inplace=False):
+    #     """
+    #     Compute the imaginary part of the elements of the NDDataset
+    #     along the specified axis
+    #
+    #     Parameters
+    #     ----------
+    #     axis : `int`, Optional, default: -1.
+    #         The axis along which the absolute value should be calculated.
+    #
+    #     inplace : `bool`, optional, default=``False``
+    #         should we return a new dataset (default) or not (inplace=True)
+    #
+    #     Returns
+    #     -------
+    #     imag_dataset : same type
+    #
+    #         Output array.
+    #
+    #     See Also
+    #     --------
+    #     :meth:`RR`, :meth:`IR`, :meth:`real`,:meth:`conj`, :meth:`abs`
+    #
+    #     """
+    #     if not inplace:  # default is to return a new array
+    #         new = self.copy()
+    #     else:
+    #         new = self  # work inplace
+    #
+    #     if new._is_complex[axis]:
+    #         new.swapaxes(-1, axis, inplace=True)
+    #         new._data = new._data[..., 1::2]
+    #         new._mask = new._mask[..., 1::2]
+    #         new._uncertainty = new._uncertainty[..., 1::2]
+    #         new.swapaxes(-1, axis, inplace=True)
+    #         new._is_complex[axis] = False
+    #
+    #     return new
+    #
+    # def IR(self, inplace=False):
+    #     """
+    #     Imaginary (IRR...) part
+    #
+    #     Compute the imaginary part of the elements of the NDDataset
+    #     along the last dimension. For hypercomplex multidimensional data,
+    #     the real part will be taken in all dimensions other than the last
+    #
+    #     Parameters
+    #     ----------
+    #     inplace : `bool`, optional, default=``False``
+    #         should we return a new dataset (default) or not (inplace=True)
+    #
+    #     Returns
+    #     -------
+    #     imag_dataset : same type
+    #
+    #         Output array.
+    #
+    #     See Also
+    #     --------
+    #     :meth:`RR`, :meth:`imag`, :meth:`real`,:meth:`conj`, :meth:`abs`
+    #
+    #     """
+    #     if not inplace:  # default is to return a new array
+    #         new = self.copy()
+    #     else:
+    #         new = self  # work inplace
+    #
+    #     new = new.imag(axis=-1, inplace=True)
+    #
+    #     for axis in range(self.ndim-1):
+    #         if not new._is_complex[axis]:
+    #             continue
+    #         new = new.real(inplace=True)
+    #
+    #     return new
 
     def conj(self, axis=-1, inplace=False):
         """
@@ -977,7 +963,7 @@ class NDDataset(
 
         """
         new = self.copy()
-        if not new.has_complex_dims or not new.is_complex[axis]:
+        if not new.is_complex or not new.is_complex[axis]:
             return np.fabs(new)  # not a complex, return fabs should be faster
 
         new = new.real(axis) ** 2 + new.imag(axis) ** 2
@@ -988,7 +974,7 @@ class NDDataset(
 
     absolute = abs
 
-    def make_complex(self, axis=-1):
+    def set_complex(self, axis=-1):
         """
         Make a dimension complex
 
@@ -1054,7 +1040,7 @@ class NDDataset(
         if not out.endswith('\n'):
             out += '\n'
 
-        if self._history:
+        if self._history != ['']:
             pars = self.history
             out += '      history: '
             if pars:
@@ -1065,30 +1051,37 @@ class NDDataset(
             if not out.endswith('\n'):
                 out += '\n'
 
-        uncertainty = "(+/-%s)" % self.uncertainty if \
-            self.uncertainty is not None else ""
-        units = '{:~K}'.format(
-                self.units) if self.units is not None else 'unitless'
+        #if uncertainty is not nouncertainty:
+        #    uncertainty = "(+/-%s)" % self.uncertainty
+
+        # units = '{:~K}'.format(
+        #         self.units) if self.units is not None else 'unitless'
+
         sh = ' size' if self.ndim < 2 else 'shape'
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
-                             zip(self.shape, self.is_complex)))
+                             zip(self.shape,
+                                 [False]*self.ndim
+                                 if not self.is_complex else self.is_complex)))
         shape = (' x '.join(['{}{}'] * len(self.shape))).format(
                 *shapecplx).replace(
                 'False', '').replace('True', '(complex)')
         size = self.size
-        sizecplx = '' if not self.has_complex_dims else " (complex)"
+        sizecplx = '' if not self.is_complex else " (complex)"
 
         out += '   data title: {}\n'.format(self.title)
         out += '    data size: {}{}\n'.format(size, sizecplx) if self.ndim < 2 \
             else '   data shape: {}\n'.format(shape)
 
-        out += '   data units: {}\n'.format(units)
-        data_str = str(
-                self._uarray(self._data, self._uncertainty)).replace('\n\n',
-                                                                     '\n')
+        #out += '   data units: {}\n'.format(units)
+        #data_str = str(
+        #        self._uarray(self._data, self._uncertainty)).replace('\n\n',
+        #                                                 '\n')
+
+        data_str = super(NDDataset, self).__str__()
         out += '  data values:\n'
         out += '{}\n'.format(textwrap.indent(str(data_str), ' ' * 9))
+
         if self.coords is not None:
             for i, axis in enumerate(self.coords):
                 axis_str = str(axis).replace('\n\n', '\n')
@@ -1119,18 +1112,24 @@ class NDDataset(
         # we need coords (but they might be not present...
         # in this case coords are simply the indexes
         if self.coords is None:
-            # create temp coords
+            # create coords from indexes
             coords = CoordSet([Coord(np.arange(l)) for l in self._data.shape])
         else:
             coords = self.coords
 
         # transform the passed index (if necessary) to integer indexes
-        key = self._make_index(coords, item)
+        keys = self._make_index(coords, item)
 
         # normal integer based slicing
-        new_data = self._data[key].squeeze()
-        new_mask = self._mask[key].squeeze()
-        new_uncertainty = self._uncertainty[key].squeeze()
+        new_data = self._data[keys].squeeze()
+        if self.is_masked:
+            new_mask = self._mask[keys].squeeze()
+        else:
+            new_mask = nomask
+        if self.is_uncertain:
+            new_uncertainty = self._uncertainty[keys].squeeze()
+        else:
+            new_uncertainty = nouncertainty
 
         # perform the coords slicing (and unsqueeze the data!)
         new_coords = coords.copy()
@@ -1139,7 +1138,7 @@ class NDDataset(
                 # the slice has been multiplied by 2 in _get_slice
                 # (see below)
                 # so we have to get back to a nowmal slice for the axis
-                start, stop, step = key[i].start, key[i].stop, key[i].step
+                start, stop, step = keys[i].start, keys[i].stop, keys[i].step
                 if start is not None:
                     start = start // 2
                 if stop is not None:
@@ -1148,7 +1147,7 @@ class NDDataset(
                     step = step // 2
                 _key = slice(start, stop, step)
             else:
-                _key = key[i]
+                _key = keys[i]
             new_coords[i] = ax[_key]
 
         sh = list(new_data.shape)
@@ -1160,9 +1159,9 @@ class NDDataset(
                 # we will possibly squeeze them later
                 sh.insert(i, 1)
         new_data = new_data.reshape(tuple(sh))
-        if new_mask is not None:
+        if new_mask is not nomask:
             new_mask = new_mask.reshape(tuple(sh))
-        if new_uncertainty is not None:
+        if new_uncertainty is not nouncertainty:
             new_uncertainty = new_uncertainty.reshape(tuple(sh))
 
         if new_data.size == 0:
@@ -1261,7 +1260,7 @@ class NDDataset(
                 *shapecplx).replace('False', '').replace('True', '(complex)')
 
         size = self.size
-        sizecplx = '' if not self.has_complex_dims else " (complex)"
+        sizecplx = '' if not self.is_complex else " (complex)"
         size = '{}{}'.format(size, sizecplx) \
             if self.ndim < 2 else '{}'.format(shape)
 
@@ -1317,81 +1316,90 @@ class NDDataset(
         else:
             raise ValueError('Could not find this location: {}'.format(loc))
 
-    def _get_slice(self, key, axis, iscomplex=False):
+    # def _get_slice(self, key, axis, iscomplex=False):
+    #
+    #     if not isinstance(key, slice):
+    #         start = key
+    #         if not isinstance(key, (int, np.int)):
+    #             start = self._loc2index(key, axis)
+    #         else:
+    #             if key < 0:  # reverse indexing
+    #                 start = axis.size + key
+    #         stop = start + 1
+    #         step = None
+    #     else:
+    #         start, stop, step = key.start, key.stop, key.step
+    #
+    #         if not (start is None or isinstance(start, (int, np.int))):
+    #             start = self._loc2index(start, axis)
+    #
+    #         if not (stop is None or isinstance(stop, (int, np.int))):
+    #             stop = self._loc2index(stop, axis) + 1
+    #
+    #         if step is not None and not isinstance(step, (int, np.int)):
+    #             warn('step in location slicing is not yet possible. Set to 1')
+    #             # TODO: we have may be a special case with datetime
+    #             step = None
+    #
+    #     if iscomplex:
+    #         if start is not None:
+    #             start = start * 2
+    #         if stop is not None:
+    #             stop = stop * 2
+    #         if step is not None:
+    #             step = step * 2
+    #
+    #     newkey = slice(start, stop, step)
+    #
+    #     return newkey
 
-        if not isinstance(key, slice):
-            start = key
-            if not isinstance(key, (int, np.int)):
-                start = self._loc2index(key, axis)
-            else:
-                if key < 0:  # reverse indexing
-                    start = axis.size + key
-            stop = start + 1
-            step = None
-        else:
-            start, stop, step = key.start, key.stop, key.step
+    def _make_index(self, coords, key, ignore_complex=False):
 
-            if not (start is None or isinstance(start, (int, np.int))):
-                start = self._loc2index(start, axis)
+        keys = super(NDDataset, self)._make_index(key, ignore_complex)
 
-            if not (stop is None or isinstance(stop, (int, np.int))):
-                stop = self._loc2index(stop, axis) + 1
+        return keys
 
-            if step is not None and not isinstance(step, (int, np.int)):
-                warn('step in location slicing is not yet possible. Set to 1')
-                # TODO: we have may be a special case with datetime
-                step = None
 
-        if iscomplex:
-            if start is not None:
-                start = start * 2
-            if stop is not None:
-                stop = stop * 2
-            if step is not None:
-                step = step * 2
-
-        newkey = slice(start, stop, step)
-
-        return newkey
-
-    def _make_index(self, coords, key):
-
-        if isinstance(key, np.ndarray) and key.dtype == np.bool:
-            # this is a boolean selection
-            # we can proceed directly
-            return key
-
-        # we need to have a list of slice for each argument or a single slice
-        #  acting on the axis=0
-        # the given key can be a single argument or a single slice:
-
-        # we need a list in all cases
-        if not is_sequence(key):
-            keys = [key, ]
-        else:
-            keys = list(key)
-
-        # Ellipsis
-        while Ellipsis in keys:
-            i = keys.index(Ellipsis)
-            keys.pop(i)
-            for j in range(self.ndim - len(keys)):
-                keys.insert(i, slice(None))
-
-        if len(keys) > self.ndim:
-            raise IndexError("invalid index")
-
-        # pad the list with additional dimensions
-        for i in range(len(keys), self.ndim):
-            keys.append(slice(None))
-
-        # replace the non index slice or non slide by index slices
-        for i_axis, key in enumerate(keys):
-            axis = coords[i_axis]
-            keys[i_axis] = self._get_slice(key, axis,
-                                           iscomplex=self.is_complex[i_axis])
-
-        return tuple(keys)
+        # if isinstance(key, np.ndarray) and key.dtype == np.bool:
+        #     # this is a boolean selection
+        #     # we can proceed directly
+        #     return key
+        #
+        # # we need to have a list of slice for each argument or a single slice
+        # #  acting on the axis=0
+        # # the given key can be a single argument or a single slice:
+        #
+        # # we need a list in all cases
+        # if not is_sequence(key):
+        #     keys = [key, ]
+        # else:
+        #     keys = list(key)
+        #
+        # # Ellipsis
+        # while Ellipsis in keys:
+        #     i = keys.index(Ellipsis)
+        #     keys.pop(i)
+        #     for j in range(self.ndim - len(keys)):
+        #         keys.insert(i, slice(None))
+        #
+        # if len(keys) > self.ndim:
+        #     raise IndexError("invalid index")
+        #
+        # # pad the list with additional dimensions
+        # for i in range(len(keys), self.ndim):
+        #     keys.append(slice(None))
+        #
+        # # replace the non index slice or non slide by index slices
+        # if self.is_complex:
+        #     complex = self.is_complex[axis]
+        # else:
+        #     complex = False
+        # for i_axis, key in enumerate(keys):
+        #     axis = coords[i_axis]
+        #     keys[i_axis] = self._get_slice(key, axis,
+        #                                    iscomplex=self.is_complex[i_axis])
+        #
+        # return tuple(keys)
 
     # -------------------------------------------------------------------------
     # events

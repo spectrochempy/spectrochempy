@@ -57,7 +57,7 @@ class MinimalCoordSetSubclass(Coord):
     pass
 
 
-def test_axisarray_subclass():
+def test_coordarray_subclass():
     a = MinimalCoordSetSubclass([1, 2, 3])
     assert a.name is not None
     assert a.is_untitled
@@ -80,7 +80,7 @@ def test_axisarray_subclass():
 
 
 # noinspection PyProtectedMember
-def test_axisarray_withlabels():
+def test_coordarray_withlabels():
     x = np.arange(10)
     y = [i for i in 'abcdefghij']
     a = MinimalCoordSetSubclass(x, labels=y, title='processors')
@@ -94,7 +94,7 @@ def test_axisarray_withlabels():
     assert a._labels[3][2] == 2
 
 
-def test_axisarray_with_datetime():
+def test_coordarray_with_datetime():
     from datetime import datetime
     x = np.arange(10)
     y = [datetime(2017, 6, 2 * (i + 1)) for i in x]
@@ -107,7 +107,7 @@ def test_axisarray_with_datetime():
     # print(b)
 
 
-def test_axis_init_unitless():
+def test_coord_init_unitless():
     # unitless
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels='a b c d e f g h i j'.split(),
@@ -120,7 +120,7 @@ def test_axis_init_unitless():
         coord0) == "Coord: [4000.000, 3666.667, ..., 1333.333, 1000.000] unitless"
 
 
-def test_axis_init_dimensionless():
+def test_coord_init_dimensionless():
     # dimensionless specified
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels='a b c d e f g h i j'.split(),
@@ -134,7 +134,7 @@ def test_axis_init_dimensionless():
         coord0) == "Coord: [4000.000, 3666.667, ..., 1333.333, 1000.000] dimensionless"
 
 
-def test_axis_init_dimensionless_scaled():
+def test_coord_init_dimensionless_scaled():
     # scaled dimensionless implicit
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels='a b c d e f g h i j'.split(),
@@ -160,7 +160,7 @@ def test_axis_init_dimensionless_scaled():
         coord0) == "Coord: [4000.000, 3666.667, ..., 1333.333, 1000.000] scaled-dimensionless (0.001)"
 
 
-def test_axis_init_specific_units():
+def test_coord_init_specific_units():
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels='a b c d e f g h i j'.split(),
                    mask=None,
@@ -173,7 +173,7 @@ def test_axis_init_specific_units():
         coord0) == "Coord: [4000.000, 3666.667, ..., 1333.333, 1000.000] m^2.s^-1"
 
 
-def test_axis_equal():
+def test_coord_equal():
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels='a b c d e f g h i j'.split(),
                    mask=None,
@@ -228,7 +228,7 @@ def test_coords_equal():
     assert coordsa != coordsc
 
 
-def test_set_axis_from_another_axis():
+def test_set_coord_from_another_coord():
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels='a b c d e f g h i j'.split(),
                    units='s',
@@ -245,7 +245,7 @@ def test_set_axis_from_another_axis():
     assert isinstance(coord1, Coord)
 
 
-def test_axis_sort():
+def test_coord_sort():
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels='a b c d e f g h i j'.split(),
                    units='s',
@@ -260,7 +260,7 @@ def test_axis_sort():
     assert (ax1.labels[0] == 'j')
 
 
-def test_axis_copy():
+def test_coord_copy():
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels='a b c d e f g h i j'.split(),
                    units='s',
@@ -461,7 +461,7 @@ def testinterval():
     testRangeTrait()
 
 
-def test_axisrange():
+def test_coordrange():
     r = CoordsRange()
     assert r.ranges == []
 
@@ -480,8 +480,8 @@ def test_axisrange():
 
 # multicoords
 
-def test_multiaxis_for_a_single_dim():
-    # normal axis (single numerical array for a anxis)
+def test_multicoord_for_a_single_dim():
+    # normal coord (single numerical array for a anxis)
 
     coord0 = Coord(data=np.linspace(1000., 4000., 5),
                    labels='a b c d e'.split(),
@@ -495,7 +495,7 @@ def test_multiaxis_for_a_single_dim():
                    units='K',
                    title='temperature')
 
-    # pass as a list of axis
+    # pass as a list of coord
     coordsa = CoordSet([coord0, coord1])
     assert str(coordsa) == '([wavelengths], [temperature])'
 
@@ -503,7 +503,7 @@ def test_multiaxis_for_a_single_dim():
     coordsb = CoordSet(coordsa)
     assert str(coordsb) == '([wavelengths], [temperature])'
 
-    # try to pass a arguments, each being an axis
+    # try to pass a arguments, each being an coord
     coordsc = CoordSet(coord0, coord1)
     assert not coordsc.issamedim
     assert str(coordsc) == '([wavelengths], [temperature])'

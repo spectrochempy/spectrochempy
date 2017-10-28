@@ -150,7 +150,7 @@ class NDMath(object):
         f, objs, huh = args[1]
 
         # case of complex data
-        if self.is_complex is not None:
+        if self.is_complex:
 
             if self.is_complex[-1] and \
                             f.__name__ in ['real', 'imag',
@@ -213,15 +213,17 @@ class NDMath(object):
                 q = 1.
 
             # Check if our NDArray is actually a NDDataset
-            # (it must have an attribute _axes)
-            if hasattr(obj, '_axes'):
+            # (it must have an attribute _coords)
+            if hasattr(obj, '_coords'):
 
                 # do we have uncertainties on our data ?
                 # if any create an UFloat type if any uncertainty
                 d = obj._uarray(d, obj._uncertainty)
 
                 # Our data may be complex
-                iscomplex = obj.is_complex[-1]
+                iscomplex = False
+                if np.any(obj.is_complex):
+                    iscomplex = obj.is_complex[-1]
 
                 objcomplex.append(obj.is_complex)
 
@@ -275,7 +277,7 @@ class NDMath(object):
                 #                     'second argument cannot be an Coord'
                 #                     ' instance')
                 # if the first arg (obj) is a nddataset
-                if isdataset and other._axes != obj._axes:
+                if isdataset and other._coords != obj._coords:
                     raise ValueError("axes properties do not match")
 
                 # rescale according to units
@@ -391,8 +393,8 @@ class NDMath(object):
                 # some adaptation will be necessary
                 # TODO: adapt array if necessary
                 # for complex dimension
-
-                data_iscomplex[i] |= item[i]  # `or` operation
+                if item:
+                    data_iscomplex[i] |= item[i]  # `or` operation
 
         return data, uncertainty, units, mask, data_iscomplex
 

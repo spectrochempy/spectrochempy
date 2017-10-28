@@ -38,133 +38,115 @@ from copy import copy, deepcopy
 
 import numpy as np
 import pytest
-from traitlets import TraitError
 from datetime import datetime
 
 from pint import DimensionalityError
-from spectrochempy.api import *
-from tests.utils import (raises)
+from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.units import ur
-from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.utils import SpectroChemPyWarning, \
+    SpectroChemPyDeprecationWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
-from tests.utils import NumpyRNGContext
+from tests.utils import NumpyRNGContext, catch_warnings
 from spectrochempy.extern.traittypes import Array
-
-
-# fixtures
-# --------
-
-class MinimalSubclass(NDArray):
-    # for testing subclaissing
-    pass
-
-@pytest.fixture(scope="module")
-def ndarraysubclass():
-    # return a simple ndarray
-    # with some data
-    with NumpyRNGContext(12345):
-        dx = 10.*np.random.random((10, 10))-5.
-    _nd = MinimalSubclass()
-    _nd.data = dx
-    return _nd.copy()
-
-@pytest.fixture(scope="module")
-def ndarraysubclassunit():
-    # return a simple ndarray
-    # with some data
-    with NumpyRNGContext(12345):
-        dx = 10.*np.random.random((10, 10))-5.
-    _nd = MinimalSubclass()
-    _nd.data = dx
-    _nd.units = 'm/s'
-    return _nd.copy()
-
-@pytest.fixture(scope="module")
-def ndarraysubclasscplx():
-    # return a complex ndarray
-    # with some complex data
-    with NumpyRNGContext(1245):
-        dx = np.random.random((10, 20))
-    _nd = MinimalSubclass()
-    _nd.data = dx
-    _nd.set_complex(axis=-1)  # this means that the data are complex in
-    # the last dimension
-    return _nd.copy()
 
 ### TEST INITIALIZATION
 
-def test_init_ndarray():
+def test_init_ndarray_void():
 
     d0 = NDArray(None) # void initialization
     assert d0.shape == (0,)
     assert d0.size == 0
     assert not d0.is_masked
     assert d0.dtype == 'float64'
-    assert not d0.is_complex
+    assert not d0.has_complex_dims
     assert (repr(d0)=='NDArray: [] unitless')
     assert (str(d0) == '[]')
 
-    d0 = NDArray(13. * ur.tesla) #initialisation with a quantity
+def test_init_ndarray_quantity():
 
+    d0 = NDArray(13. * ur.tesla) #initialisation with a quantity
+    assert d0.units == 'tesla'
     d0 = NDArray((2,3,4)) # initialisation with a sequence
     assert d0.shape == (3,)
     assert d0.size == 3
-    assert not d0.is_complex
+    assert not d0.has_complex_dims
     assert not d0.is_masked
     assert str(d0) == '[       2        3        4]'
+
+def test_init_ndarray_sequence():
 
     d0 = NDArray([2,3,4,5]) # initialisation with a sequence
     assert d0.shape == (4,)
     assert not d0.is_masked
-    assert not d0.is_complex
+    assert not d0.has_complex_dims
+
+def test_init_ndarray_array():
 
     d1 = NDArray(np.ones((5, 5))) #initialization with an array
     assert d1.shape == (5, 5)
     assert d1.size == 25
     assert not d1.is_masked
-    assert not d1.is_complex
+    assert not d1.has_complex_dims
 
+def test_init_ndarray_NDArray():
+
+    d1 = NDArray(np.ones((5, 5)))
     d2 = NDArray(d1) # initialization with an NDArray object
     assert d2.shape == (5,5)
-    assert not d2.is_complex
+    assert not d2.has_complex_dims
     assert d2.size == 25
     assert not d2.is_masked
-    assert d1.data is not d2.data
+    assert d1.data is d2.data # by default we do not copy
+
+def test_init_ndarray_NDArray_copy():
+
+    d1 = NDArray(np.ones((5, 5)))
+    d2 = NDArray(d1, copy=True) # initialization with an NDArray object
+    assert d2.shape == (5,5)
+    assert not d2.has_complex_dims
+    assert d2.size == 25
+    assert not d2.is_masked
+    assert d1.data is not d2.data # we have forced a copy
+
+def test_init_ndarray_with_a_mask():
 
     d0mask = NDArray([2, 3, 4, 5], mask=[1,0,0,0])  # sequence + mask
     assert d0mask.shape == (4,)
-    assert not d0mask.is_complex
+    assert not d0mask.has_complex_dims
     assert d0mask.is_masked
     assert d0mask.mask.shape == d0mask.shape
     assert str(d0mask).startswith('[  --        3        4        5]')
     assert repr(d0mask).startswith(
             'NDArray: [  --,        3,        4,        5]')
 
+def test_init_ndarray_with_a_mask_and_uncertainty():
     d0unc = NDArray([2, 3, 4, 5], uncertainty=[.1,.2,.15,.21],
                      mask=[1,0,0,0])  # sequence + mask + uncert
     assert d0unc.shape == (4,)
-    assert not d0unc.is_complex
+    assert not d0unc.has_complex_dims
     assert d0unc.is_masked
     assert d0unc.is_uncertain
     assert str(d0unc).startswith('[  --    3.000+/-0.200 ')
     assert repr(d0unc).startswith(
             'NDArray: [  --,    3.000+/-0.200,    4.000+/-0.150,')
 
+def test_init_complex_ndarray():
+
     # test with complex data in the last dimension
     d = np.ones((2, 2))*np.exp(.1j)
     d1 = NDArray(d)
-    assert d1.is_complex
+    assert d1.has_complex_dims
     assert d1.is_complex[-1]
     assert d1.shape == (2, 2)
     assert d1.size == 4
     assert repr(d1).startswith('NDArray: [[   0.995,    0.100, ')
 
     d2 = NDArray(d1)
-    assert d1.data is not d2.data
+    assert d1.data is d2.data
     assert np.all(d1.data == d2.data)
-    assert d2.is_complex==[False, True]
+    assert np.all(d2.is_complex==[False, True])
     assert d2.shape == (2,2)
     assert str(d2).startswith('RR[[   0.995    0.995]')
     assert 'RI[[   0.100    0.100]' in str(d2)
@@ -177,10 +159,10 @@ def test_init_ndarray():
     assert d3._data.shape == (2,4)
     assert d3.size == 4
     assert d3.dtype == np.complex
-    assert d3.is_complex
-    assert d3.mask.shape == d3.shape
+    assert d3.has_complex_dims
+    assert d3.mask.shape[-1] == d3.shape[-1] * 2
     d3RR = d3.part('RR')
-    assert not d3RR.is_complex
+    assert not d3RR.has_complex_dims
     assert d3RR._data.shape == (2,2)
     assert d3RR._mask.shape == (2, 2)
     assert str(d3).startswith("RR[[   0.925   --]")
@@ -228,7 +210,7 @@ def test_init_with_complex_information():
 def test_init_ndarray_subclass():
     # test initialization of an empty ndarray
     # check some of its properties
-    a = MinimalSubclass()
+    a = NDArray()
     assert isinstance(a, NDArray)
     assert a.name != u'<no name>'  # must be the uuid in this case
     assert a.is_empty
@@ -237,7 +219,7 @@ def test_init_ndarray_subclass():
     assert a.unitless
     assert a.is_untitled
     assert not a.meta
-    assert a.date == datetime(1, 1, 1, 0, 0)
+    assert a.date == datetime(1970, 1, 1, 0, 0)
     a.date = datetime(2005,10,12)
     a.date = "25/12/2025"
     assert a.date == datetime(2025, 12, 25, 0, 0)
@@ -245,7 +227,7 @@ def test_init_ndarray_subclass():
 def test_set_ndarray_subclass():
     # test of setting some attributes of an empty ndarray
     # check some of its properties
-    a = MinimalSubclass()
+    a = NDArray()
     a.name = 'xxxx'
     assert a.name == u'xxxx'
     a.title = 'yyyy'
@@ -255,24 +237,24 @@ def test_set_ndarray_subclass():
     a.meta.something = "a_value"
     assert a.meta.something == "a_value"
 
-def test_set_simple_ndarray(ndarraysubclass):
-    nd = ndarraysubclass.copy()
+def test_set_simple_ndarray(ndarray):
+    nd = ndarray.copy()
     assert nd.data.size == 100
     assert nd.shape == (10, 10)
     assert nd.size == 100
     assert nd.ndim == 2
-    assert not nd.is_complex
+    assert not nd.has_complex_dims
     assert nd.data[1,1] == 4.6130673607282127
 
-def test_set_ndarray_with_units(ndarraysubclass):
-    nd = ndarraysubclass.copy()
+def test_set_ndarray_with_units(ndarray):
+    nd = ndarray.copy()
 
     assert nd.unitless # ,o units
     assert not nd.dimensionless # no unit so no dimension has no sense
 
-    #with catch_warnings() as w:
-    nd.to('m')  # should not change anything (but raise a warning)
-    #assert w[0].category == SpectroChemPyWarning
+    with catch_warnings() as w:
+        nd.to('m')  # should not change anything (but raise a warning)
+        assert w[0].category == SpectroChemPyWarning
 
     assert nd.unitless
 
@@ -282,9 +264,9 @@ def test_set_ndarray_with_units(ndarraysubclass):
     nd1 = nd.to('km')
     assert nd.units == ur.kilometer
     assert nd1.units == ur.kilometer
-    #with catch_warnings() as w:
-    nd.ito('m')
-    #assert w[0].category == SpectroChemPyDeprecationWarning
+    with catch_warnings() as w:
+        nd.ito('m')
+        assert w[0].category == SpectroChemPyDeprecationWarning
     nd.to('m')
     assert nd.units == ur.meter
 
@@ -296,7 +278,7 @@ def test_set_ndarray_with_units(ndarraysubclass):
         nd.units = 'radian'
 
     # we can force them
-    nd.change_units('radian')
+    nd.to('radian', force=True)
 
     assert 1 * nd.units == 1. * ur.dimensionless
     assert nd.units.dimensionless
@@ -307,12 +289,12 @@ def test_set_ndarray_with_units(ndarraysubclass):
     assert nd.units.dimensionless
     assert nd.units.scaling == 0.001
 
-    with raises(TypeError):
-        nd.change_units(1 * ur.m)  # cannot use a quantity to set units
+    #with raises(TypeError):
+    nd.to(1 * ur.m, force=True)
 
 
-def test_set_ndarray_with_complex(ndarraysubclasscplx):
-    nd = ndarraysubclasscplx.copy()
+def test_set_ndarray_with_complex(ndarraycplx):
+    nd = ndarraycplx.copy()
     assert nd.data.size == 200
     assert nd.size == 100
     assert nd.data.shape == (10, 20)
@@ -323,9 +305,9 @@ def test_set_ndarray_with_complex(ndarraysubclasscplx):
     assert nd.units == ur.meter
 
 
-def test_copy_of_ndarray(ndarraysubclasscplx):
-    nd = copy(ndarraysubclasscplx)
-    assert nd is not ndarraysubclasscplx
+def test_copy_of_ndarray(ndarraycplx):
+    nd = copy(ndarraycplx)
+    assert nd is not ndarraycplx
     assert nd.data.size == 200
     assert nd.size == 100
     assert nd.data.shape == (10, 20)
@@ -334,9 +316,9 @@ def test_copy_of_ndarray(ndarraysubclasscplx):
     assert nd.ndim == 2
 
 
-def test_deepcopy_of_ndarray(ndarraysubclasscplx):
+def test_deepcopy_of_ndarray(ndarraycplx):
     # for this example there is no diif with copy (write another test for this)
-    nd1 = ndarraysubclasscplx.copy()
+    nd1 = ndarraycplx.copy()
     nd = deepcopy(nd1)
     assert nd is not nd1
     assert nd.data.size == 200
@@ -347,44 +329,44 @@ def test_deepcopy_of_ndarray(ndarraysubclasscplx):
     assert nd.ndim == 2
 
 
-def test_ndarray_with_uncertainty(ndarraysubclass):
-    nd = ndarraysubclass.copy()
+def test_ndarray_with_uncertainty(ndarray):
+    nd = ndarray.copy()
     assert not nd.is_uncertain
-    assert repr(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('NDArray: ')
     nd._uncertainty = np.abs(nd._data * .01)
-    nd.change_units('second') # force a change of units
+    nd.to('second', force=True) # force a change of units
     assert nd.is_uncertain
-    assert repr(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('NDArray: ')
     assert str(nd.values[0,0]) == "4.30+/-0.04 second"
 
 
-def test_ndarray_with_mask(ndarraysubclass):
-    nd = ndarraysubclass.copy()
+def test_ndarray_with_mask(ndarray):
+    nd = ndarray.copy()
     assert not nd.is_masked
-    assert repr(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('NDArray: ')
     nd.mask[0] = True
     assert nd.is_masked
 
 
-def test_ndarray_units(ndarraysubclass):
-    nd = ndarraysubclass.copy()
-    nd2 = ndarraysubclass.copy()
+def test_ndarray_units(ndarray):
+    nd = ndarray.copy()
+    nd2 = ndarray.copy()
     nd.units = 'm'
     nd2.units = 'km'
     assert nd.is_units_compatible(nd2)
-    nd2.change_units('radian')
+    nd2.to('radian',  force=True)
     assert not nd.is_units_compatible(nd2)
 
 
-def test_ndarray_with_uncertaincy_and_units(ndarraysubclass):
-    nd = ndarraysubclass.copy()
-    nd.change_units('m')
+def test_ndarray_with_uncertaincy_and_units(ndarray):
+    nd = ndarray.copy()
+    nd.to('m', force=True)
     assert nd.units == ur.meter
     assert not nd.is_uncertain
-    assert repr(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('NDArray: ')
     nd._uncertainty = np.abs(nd._data * .01)
     assert nd.is_uncertain
-    assert repr(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('NDArray: ')
     units = nd.units
     nd.units = None # should change nothing
     assert nd.units == units
@@ -393,56 +375,66 @@ def test_ndarray_with_uncertaincy_and_units(ndarraysubclass):
     nd.mask[1, 2] = True
     print(nd)
 
-def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraysubclasscplx):
-    nd = ndarraysubclasscplx.copy()
+def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraycplx):
+    nd = ndarraycplx.copy()
     nd.units = 'm'
     assert nd.units == ur.meter
     assert not nd.is_uncertain
-    assert repr(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('NDArray: ')
     nd._uncertainty = nd._data * .01
     assert nd.is_uncertain
-    assert repr(nd).startswith('MinimalSubclass: ')
+    assert repr(nd).startswith('NDArray: ')
     assert nd._uncertainty.size == nd.data.size
 
 
-def test_ndarray_len_and_sizes(ndarraysubclass, ndarraysubclasscplx):
-    nd = ndarraysubclass.copy()
-    #print(nd.is_complex)
-    assert not nd.is_complex
+def test_ndarray_len_and_sizes(ndarray, ndarraycplx):
+    nd = ndarray.copy()
+    assert not nd.has_complex_dims
     assert len(nd) == 10
     assert nd.shape == (10, 10)
     assert nd.size == 100
     assert nd.ndim == 2
 
-    nd = ndarraysubclasscplx.copy()
-    assert nd.is_complex[1]
-    assert len(nd) == 10
-    assert nd.shape == (10, 10)
-    assert nd.size == 100
-    assert nd.ndim == 2
+    ndc = ndarraycplx.copy()
+    assert ndc.has_complex_dims
+    assert ndc.is_complex[1]
+    assert len(ndc) == 10
+    assert ndc.shape == (10, 10)
+    assert ndc.size == 100
+    assert ndc.ndim == 2
 
 
 ### TEST SLICING
 
-def test_slicing_byindex(ndarraysubclass):
+def test_slicing_byindex(ndarray, ndarraycplx):
 
-    nd = ndarraysubclass.copy()
+    nd = ndarray.copy()
     assert not np.any(nd.is_complex) and not nd.is_masked and not nd.is_uncertain
     nd1 = nd[0,0]
     assert_equal(nd1.data, nd.data[0,0])
     nd2 = nd[7:10]
     assert_equal(nd2.data,nd.data[7:10])
     assert not nd.is_masked
+
+    # set item
+    nd[1] = 2.
+    assert nd[1,0] == 2
+
     nd.mask[1] = True
     assert nd.is_masked
-    nd3 = nd[1,0]
+
+    ndc = ndarraycplx.copy()
+    ndc1 = ndc[1,1]
+    assert_equal(ndc1.data, ndc.RR[1,1].data + ndc.RI[1,1].data*1.j)
+
+    ndc.set_complex
 
 ### TEST __REPR__
 
-def test_repr(ndarraysubclass, ndarraysubclassunit):
-    nd = ndarraysubclass.copy()
+def test_repr(ndarray, ndarrayunit):
+    nd = ndarray.copy()
     assert '-1.836,' in nd.__repr__()
-    nd = ndarraysubclassunit.copy()
+    nd = ndarrayunit.copy()
     assert '-1.836,' in nd.__repr__()
     nd.mask[1] = True
     nd.uncertainty = np.abs(nd._data * .1)
@@ -452,27 +444,27 @@ def test_repr(ndarraysubclass, ndarraysubclassunit):
 
 ### TEST_COMPARISON
 
-def test_comparison(ndarraysubclass, ndarraysubclassunit):
-    nd1 = ndarraysubclass.copy()
+def test_comparison(ndarray, ndarrayunit):
+    nd1 = ndarray.copy()
     print(nd1)
-    nd2 = ndarraysubclassunit.copy()
+    nd2 = ndarrayunit.copy()
     print(nd2)
     assert nd1 != nd2
     assert not nd1==nd2
 
 ### TEST ITERATIONS
 
-def test_iteration(ndarraysubclassunit):
-    nd = ndarraysubclassunit.copy()
+def test_iteration(ndarrayunit):
+    nd = ndarrayunit.copy()
     nd.mask[1] = True
     nd._uncertainty = np.abs(nd._data * .01)
     for item in nd:
         print(item)
 
 #### Squeezing #################################################################
-def test_squeeze(ndarraysubclassunit):  # ds2 is defined in conftest
+def test_squeeze(ndarrayunit):  # ds2 is defined in conftest
 
-    nd = ndarraysubclassunit.copy()
+    nd = ndarrayunit.copy()
     assert nd.shape == (10, 10)
 
     d = nd[..., 0]
@@ -513,3 +505,16 @@ def test_squeeze(ndarraysubclassunit):  # ds2 is defined in conftest
     d1 = d.squeeze(inplace=True, axis=0)
     assert d1.shape == (10, )
     assert d1 is d
+
+def test_with_units_and_forc_to_change():
+
+    np.random.seed(12345)
+    ndd = NDArray(data=np.random.random((3, 3)),
+                  mask = [[True, False, False],
+                        [False, True, False],
+                        [False, False, True]],
+                  units = 'meters')
+
+    with raises(Exception):
+        ndd.to('second')
+    ndd.to('second', force=True)

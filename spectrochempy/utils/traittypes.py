@@ -34,7 +34,8 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from traitlets import TraitType, TraitError, List, class_of, HasTraits
+from traitlets import (TraitType, TraitError, List, Bool,
+                       Union, class_of, HasTraits)
 
 import numpy as np
 import copy

@@ -57,12 +57,12 @@ def interleave(data):
     """
     if np.any(np.iscomplex(data)) or data.dtype == np.complex:
         # unpack (we must double the last dimension)
-        newshape = list(data.shape)
-        newshape[-1] *= 2
-        new = np.empty(newshape)
-        new[..., ::2] = data.real
-        new[..., 1::2] = data.imag
-        return new, True
+        # newshape = list(data.shape)
+        # newshape[-1] *= 2
+        # new = np.empty(newshape)
+        # new[..., ::2] = data.real
+        # new[..., 1::2] = data.imag
+        return data.view(dtype=np.float_), True
     else:
         return data, False
 
