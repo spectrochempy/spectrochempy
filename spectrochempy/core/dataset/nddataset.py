@@ -62,6 +62,9 @@ from six import string_types
 from traitlets import (List, Unicode, Instance,  Bool, All, Float,
                       validate, observe, default)
 
+# =============================================================================
+# Local imports
+# =============================================================================
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils import (SpectroChemPyWarning,
                                  is_sequence, is_number,
@@ -73,10 +76,6 @@ from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 # from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.application import log
-
-# =============================================================================
-# Local imports
-# =============================================================================
 
 # =============================================================================
 # Constants
@@ -222,6 +221,7 @@ class NDDataset(
     _modeldata = Array(Float(), allow_none=True)
 
     _copy = Bool(False)
+    _labels_allowed = Bool(False)  # no labels for NDDataset
 
     def __init__(self, data=None,
                  coordset=None,
@@ -447,6 +447,17 @@ class NDDataset(
         return self._modified
 
     # -------------------------------------------------------------------------
+    # hidden properties (for the documentation, only - we remove the docs)
+    # some of the property of NDArray has to be hidden because they are not
+    # usefull for this Coord class
+    # -------------------------------------------------------------------------
+
+    @property
+    def labels(self):
+        # not valid for NDDataset
+        raise NDDatasetError("There is no label for nd-dataset")
+
+    # -------------------------------------------------------------------------
     # public methods
     # -------------------------------------------------------------------------
 
@@ -573,7 +584,7 @@ class NDDataset(
 
         pos: `int` , optional
 
-            If labels are multidimentional  - allow to sort on a define
+            If labels are multidimensional  - allow to sort on a define
             row of labels: labels[pos]. Experimental: Not yet checked
 
         by : `str` among ['axis', 'label'], optional, default = ``axis``.
@@ -906,34 +917,6 @@ class NDDataset(
 
         coord = self.coordset[axis]
         return coord._loc2index(loc)
-
-        # data = coord._data
-        # labels = coord._labels
-        #
-        # if isinstance(loc, string_types) and labels is not None:
-        #     # it's probably a label
-        #     indexes = np.argwhere(labels == loc).flatten()
-        #     if indexes.size > 0:
-        #         return indexes[0]
-        #     else:
-        #         raise ValueError(
-        #                 'Could not find this label: {}'.format(loc))
-        #
-        # elif isinstance(loc, datetime):
-        #     # not implemented yet
-        #     return None  # TODO: date!
-        #
-        # elif is_number(loc):
-        #     # get the index of this coordinate
-        #     if loc > data.max() or loc < data.min():
-        #         warn('This coordinate ({}) is outside the axis limits.\n'
-        #              'The closest limit index is returned'.format(loc),
-        #              NDDatasetWarning)
-        #     index = (np.abs(data - loc)).argmin()
-        #     return index
-        #
-        # else:
-        #     raise ValueError('Could not find this location: {}'.format(loc))
 
     # -------------------------------------------------------------------------
     # events

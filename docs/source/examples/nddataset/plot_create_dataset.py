@@ -1,59 +1,68 @@
 # coding: utf-8
 """
-Simple example for NDDataset creation and plotting
-==================================================
+NDDataset creation and plotting example
+=======================================
 
 In this example, we create a 3D NDDataset from scratch,
-and then we plot one section
+and then we plot one section (a 2D plane)
 
 """
 
-#############################################
+###############################################################################
 # As usual, we start by loading the api
-from spectrochempy.api import NDDataset, Coord, figure, show
+from spectrochempy.api import *
 
-##############################################
-import numpy as np
-import matplotlib.pyplot as plt
-
-##############################################
-# Another faster way to do this would be to use:
+###############################################################################
+# Creation
+# --------
+# Now we will create a 3D NDDataset from scratch
 #
-# from spectrochempy.api import *
+# Data
+# ++++++
+# here we make use of numpy array functions to create the data fot coordinates
+# axis and the array of data
 
-###############################################
-# However it may be a problem because it may
-# provoque some collisions between different namespaces.
-
-
-###############################################
-# Now we create a 3D NDDataset from scratch
-
-axe0 = Coord(data=np.linspace(200., 300., 3),
-            labels=['cold', 'normal', 'hot'],
-            mask=None,
-            units="K",
-            title='temperature')
-
-axe1 = Coord(data=np.linspace(0., 60., 100),
-            labels=None,
-            mask=None,
-            units="minutes",
-            title='time-on-stream')
-
-axe2 = Coord(data=np.linspace(4000., 1000., 100),
-            labels=None,
-            mask=None,
-            units="cm^-1",
-            title='wavenumber')
-
+c0 = np.linspace(200., 300., 3)
+c1 = np.linspace(0., 60., 100)
+c2 = np.linspace(4000., 1000., 100)
 nd_data = np.array([np.array(
-        [np.sin(axe2.data * 2. * np.pi / 4000.) * np.exp(-y / 60.) for y in
-         axe1.data]) * float(t)
-                    for t in axe0.data]) ** 2
+        [np.sin(2. * np.pi * c2 / 4000.) * np.exp(-y / 60) for y in
+         c1]) * t for t in c0])
+
+###############################################################################
+# Coordinates
+# +++++++++++
+# The `Coord` object allow making an array of coordinates
+# with additional metadata such as units, labels, title, etc
+
+coord0 = Coord(data=c0,
+               labels=['cold', 'normal', 'hot'],
+               units="K",
+               title='temperature')
+
+coord1 = Coord(data=c1,
+               labels=None,
+               units="minutes",
+               title='time-on-stream')
+
+coord2 = Coord(data=c2,
+               labels=None,
+               units="cm^-1",
+               title='wavenumber')
+
+###############################################################################
+# Labels can be useful for instance for indexing
+
+a = coord0['normal']
+print(a)
+
+####################################################
+# nd-Dataset
+# +++++++++++
+# The `NDDataset` object allow making the array of data with units, etc...
 
 mydataset = NDDataset(nd_data,
-                      coordset=[axe0, axe1, axe2],
+                      coordset=[coord0, coord1, coord2],
                       title='Absorbance',
                       units='absorbance'
                       )
@@ -64,6 +73,8 @@ It's a 3-D dataset (with dimensionless intensity : absorbance )"""
 mydataset.name = 'An example from scratch'
 
 mydataset.author = 'Blake and Mortimer'
+
+print(mydataset)
 
 ##################################################################
 # We want to plot a section of this 3D NDDataset:
@@ -89,21 +100,21 @@ new = new.squeeze()
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 
 figure()
-new.plot(style='paper')
-show()
+new.plot()
 
 ##################################################################
 # But it is possible to display image
 #
-# sphinx_gallery_thumbnail_number = 2
 
+# sphinx_gallery_thumbnail_number = 2
 figure()
 new.plot(kind='image')
-show()
 
 ##################################################################
 # or stacked plot
 
 figure()
 new.plot(kind='stack')
-show()
+
+if __name__ == '__main__':
+    show()

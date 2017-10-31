@@ -4,7 +4,7 @@
 Examples Gallery
 ================
 
-Many example of use of the API can be found in the following examples
+Many example on how to use of the API can be found in this gallery
 
 .. contents:: Contents
    :local:

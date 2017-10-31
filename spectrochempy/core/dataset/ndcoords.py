@@ -294,11 +294,10 @@ class Coord(NDMath, NDArray):
         units = '{:~K}'.format(self._units) \
             if self._units is not None else 'unitless'
         out = '      title: %s\n' % (self.title.capitalize())
-        out += 'coordinates: %s\n' % np.array2string(self.data, separator=' ')
-        out += '      units: %s\n' % units
+        data_str = super(Coord, self).__str__()
+        out += 'coordinates: %s\n' % data_str
         if self.is_labeled:
             out += '     labels: %s\n' % str(self.labels)
-        #out += '\n'
         if out[-1]=='\n':
             out = out[:-1]
         return out

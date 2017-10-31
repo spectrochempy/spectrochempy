@@ -183,6 +183,8 @@ class NDArray(HasTraits):
     _name = Unicode()
     _copy = Bool()
 
+    _labels_allowed = Bool(True)
+
     # -------------------------------------------------------------------------
     # Initialization
     # -------------------------------------------------------------------------
@@ -204,7 +206,8 @@ class NDArray(HasTraits):
 
         self.mask = kwargs.pop('mask', None)
 
-        self.labels = kwargs.pop('labels', None)
+        if self._labels_allowed:
+            self.labels = kwargs.pop('labels', None)
 
         self.units = kwargs.pop('units', None)
 
