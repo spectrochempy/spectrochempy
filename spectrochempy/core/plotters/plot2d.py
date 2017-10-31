@@ -161,9 +161,9 @@ def plot_2D(source, **kwargs):
 
     # ordinates (by default we plot real part of the data)
     if not kwargs.get('imag', False):
-        z = source.RR()
+        z = source.RR
     else:
-        z = source.IR()
+        z = source.RI
 
     # abscissa axis
     x = source.x
@@ -172,10 +172,10 @@ def plot_2D(source, **kwargs):
     y = source.y
 
     # limits to tdeff
-    tdeff = z.meta.tdeff
-    xeff = x.coords[:tdeff[1]]
-    yeff = y.coords[:tdeff[0]]
-    zeff = z.data[:tdeff[0],:tdeff[1]]
+    # tdeff = z.meta.tdeff    # this is NMR related, make it more generic
+    xeff = x.coords #[:tdeff[1]]
+    yeff = y.coords #[:tdeff[0]]
+    zeff = z.data   #[:tdeff[0],:tdeff[1]]
 
     if kind in ['map', 'image']:
         vmax = zeff.max()

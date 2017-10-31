@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-from spectrochempy.api import ur, concatenate, CoordsRange
+from spectrochempy.api import ur, concatenate, CoordRange
 
 import pytest
 
@@ -48,12 +48,12 @@ def test_concatenate(IR_source_1):
     s2 = source[20:]
 
     # check with derived units
-    s1.change_units(ur.m)
-    s2.change_units(ur.dm)
+    s1.to(ur.m, force=True)
+    s2.to(ur.dm, force=True)
     s = concatenate(s1, s2)
     assert s.units==s1.units
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
-    assert s.coords(0).size==(s1.coords(0).size+s2.coords(0).size)
+    assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
     s = s.sort(axis=0)
     s.plot()
 
@@ -61,24 +61,24 @@ def test_concatenate(IR_source_1):
     s = s1.concatenate(s2)
     assert s.units==s1.units
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
-    assert s.coords(0).size==(s1.coords(0).size+s2.coords(0).size)
+    assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
 
     # third syntax
     s = concatenate((s1, s2))
     assert s.units==s1.units
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
-    assert s.coords(0).size==(s1.coords(0).size+s2.coords(0).size)
+    assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
 
 def test_concatenate_along_axis1(IR_source_1):
 
     source = IR_source_1
 
-    coords = source.coords(-1)
+    coord = source.coordset(-1)
 
     # test along axis 1
     ranges = ([6000., 3500.], [1800., 1500.])
 
-    ranges = CoordsRange(*ranges, reversed=coords.is_reversed)
+    ranges = CoordRange(*ranges, reversed=coord.is_reversed)
 
     s = []
     for pair in ranges:
@@ -87,8 +87,8 @@ def test_concatenate_along_axis1(IR_source_1):
         s.append(source[..., sl])
 
     sbase = concatenate( *s, axis=-1)
-    xbase = sbase.coords(-1)
+    xbase = sbase.coordset(-1)
 
     assert sbase.shape[-1] == (s[0].shape[-1] + s[1].shape[-1])
-    assert xbase.size == (s[0].coords(-1).size + s[1].coords(-1).size)
+    assert xbase.size == (s[0].coordset(-1).size + s[1].coordset(-1).size)
 

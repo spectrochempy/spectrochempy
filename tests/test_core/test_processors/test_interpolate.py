@@ -35,14 +35,15 @@
 # =============================================================================
 
 
-""" Tests for the ndplugin module
+""" Tests for the interpolate module
 
 """
+from spectrochempy.api import align
+
 # align
 #-------
 def test_align(ds1, ds2):
 
-    from spectrochempy.api import align
     ds3 = ds2.align(ds1, axis=1, inplace=True)
     assert(ds3.shape == (9,100,4))
     assert(ds3 is ds2)

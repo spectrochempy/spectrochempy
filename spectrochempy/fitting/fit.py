@@ -62,7 +62,7 @@ from IPython import display
 from spectrochempy.fitting.parameters import ParameterScript
 from spectrochempy.fitting.models import getmodel
 from spectrochempy.fitting.optimization import optimize
-from spectrochempy.utils.misc import htmldoc
+from spectrochempy.utils import SpectroChemPyError, htmldoc
 
 __all__ = ['Fit']
 _classes = __all__[:]
@@ -141,7 +141,6 @@ class Fit(HasTraits):
         for exp_idx, source in enumerate(self.sources):
             source.modeldata, source.modelnames, source.model_A, source.model_a, source.model_b = \
                 self._get_modeldata(source, exp_idx)
-            # TODO: add a plugin to dataset to Handle such modeldata properly
 
     # *******************************************************************************
     # public methodss
@@ -249,7 +248,7 @@ class Fit(HasTraits):
                 #                 if v > constraints[0]['max_connections']:
                 #                     merror *= v * 10.
 
-                diff = data[0] - mdata
+                diff = data - mdata
                 chi2 += np.sum(diff ** 2) * merror
                 som += np.sum(data[0] ** 2)
 
@@ -345,12 +344,12 @@ class Fit(HasTraits):
         # This name must always be 'modeldata'
         # which will be returned to the main program.
 
-        expedata = source.real().data
-        x = source.axes[1].data
+        expedata = source.real.data
+        x = source.coordset[-1].data
 
-        if source.shape[-2] > 1:
-            # 2D data
-            raise ValueError("Fit not implemented for 2D data yet!")
+        if source.ndim > 1:
+            # nD data
+            raise SpectroChemPyError("Fit not implemented for nD data yet!")
 
         modeldata = np.zeros((nbmodels + 2, x.size)).astype(float)
 
@@ -381,8 +380,8 @@ class Fit(HasTraits):
         modeldata = modeldata[:row + 2]
 
         xi = np.arange(float(x.size))
-        A, a, b = self._ampbas(xi, expedata[-1], modeldata[
-            -1])  # (fitzone-fitzone[0], data.take(fitzone),
+        A, a, b = self._ampbas(xi, expedata, modeldata[-1])
+        # (fitzone-fitzone[0], data.take(fitzone),
         # modeldata[-1].take(fitzone))
 
         modeldata = A * modeldata
@@ -411,7 +410,6 @@ class Fit(HasTraits):
         # This function is needed for the script related to modelfunction
         #
         # exp_idx: int, contains the index of the experiment
-
 
         new_param = param.copy()
 

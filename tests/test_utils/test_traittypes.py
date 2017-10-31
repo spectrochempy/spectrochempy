@@ -51,8 +51,7 @@ from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
 from tests.utils import NumpyRNGContext
-from spectrochempy.utils.traittypes import \
-    HasTraits, HyperComplexArray, Range
+from spectrochempy.utils.traittypes import HasTraits, Range
 
 
 def test_range():
@@ -65,59 +64,3 @@ def test_range():
     assert c.r == [5,10]
     with raises(TraitError):
         c.r = [10, 5, 1]
-    pass
-
-
-def test_hypercomplex():
-    class MyClass(HasTraits):
-        r = HyperComplexArray(allow_none=True)
-
-    c = MyClass(r=np.array([1, 2]) * np.exp(-.1j))
-    print()
-    print(c.r)
-    assert c.r.is_complex[-1]
-
-    r3 = c.r.copy() * 2
-    c.r = r3
-    print()
-    print(c.r)
-    assert c.r.is_complex[-1]
-
-    c.r = np.array([[1, 2], [3, 4]])
-    print()
-    print(c.r)
-    assert not c.r.is_complex[-1]
-    assert not c.r.is_complex[-2]
-
-    c.r = np.array([[1, 2], [3, 4]])
-    c.r.make_complex(0)
-    c.r.make_complex(1)
-    print()
-    print(c.r)
-    assert c.r.is_complex[1]
-    assert c.r.is_complex[0]
-
-    c.r = np.array([[1, 2], [3, 4], [5, 6]])
-    with raises(ValueError):  # odd number of row
-        c.r.make_complex(0)
-    c.r.make_complex(1)
-    print()
-    print(c.r)
-    assert c.r.is_complex[1]
-    assert not c.r.is_complex[0]
-
-    c.r = np.array([[1, 2.3], [3, 0], [4, 1], [6, 9]]) * np.exp(-.1j)
-    print()
-    print(c.r)
-    assert c.r.is_complex[-1]
-
-    print()
-    print(c.r.part('RR'))
-    print(c.r.trueshape)
-    assert c.r.trueshape == (4, 2)
-
-    assert c.r.RR.shape == (4, 2)
-
-    c.r.make_complex(0)
-    assert c.r.trueshape == (2, 2)
-    assert c.r.RR.shape == (2, 2)

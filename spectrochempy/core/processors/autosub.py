@@ -41,7 +41,7 @@
 import numpy as np
 from scipy.optimize import minimize_scalar
 
-from spectrochempy.core.dataset.ndcoords import CoordsRange
+from spectrochempy.core.dataset.ndcoords import CoordRange
 
 __all__ = ['autosub']
 
@@ -89,9 +89,8 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     >>> A = NDDataset.load(path_A, protocol='omnic')
     >>> ref = A[0]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
-    >>> B
-    ... #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    NDDataset([[-4.98e-08, -4.99e-08, ... -0.479,    -0.48]])
+    >>> B #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    NDDataset: [[...]] dimensionless
 
     """
 
@@ -137,8 +136,8 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     ranges = tuple(np.array(ranges,
                             dtype=float))  # must be float to be considered
     # as frequency for instance
-    coords = new.coords(-1)
-    xrange = CoordsRange(*ranges, reversed=coords.is_reversed).ranges
+    coords = new.coordset[-1]
+    xrange = CoordRange(*ranges, reversed=coords.is_reversed).ranges
 
     s = []
     r = []
@@ -177,7 +176,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     if not new.name.startswith('*'):
         new.name = '*' + new.name
 
-    new._data -= np.dot(x.reshape(*shape[:-1], 1), ref.data)
+    new._data -= np.dot(x.reshape(-1, 1), ref.data.reshape(1,-1))
 
     if swaped:
         new = new.swapaxes(axis, -1)

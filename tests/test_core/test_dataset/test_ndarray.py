@@ -218,7 +218,6 @@ def test_init_ndarray_subclass():
     assert not a.is_masked
     assert not a.is_uncertain
     assert a.unitless
-    assert a.is_untitled
     assert not a.meta
     assert a.date == datetime(1970, 1, 1, 0, 0)
     a.date = datetime(2005,10,12)
@@ -232,7 +231,6 @@ def test_set_ndarray_subclass():
     a.name = 'xxxx'
     assert a.name == u'xxxx'
     a.title = 'yyyy'
-    assert not a.is_untitled
     assert a.title == u"yyyy"
     a.meta = []
     a.meta.something = "a_value"
@@ -296,38 +294,25 @@ def test_set_ndarray_with_units(ndarray):
 
 def test_set_ndarray_with_complex(ndarraycplx):
     nd = ndarraycplx.copy()
-    assert nd.data.size == 200
-    assert nd.size == 100
-    assert nd.data.shape == (10, 20)
-    assert nd.shape == (10, 10)  # the real shape
-    assert nd.is_complex == [False, True]
-    assert nd.ndim == 2
     nd.units = 'meter'
     assert nd.units == ur.meter
 
 
 def test_copy_of_ndarray(ndarraycplx):
-    nd = copy(ndarraycplx)
-    assert nd is not ndarraycplx
-    assert nd.data.size == 200
-    assert nd.size == 100
-    assert nd.data.shape == (10, 20)
-    assert nd.shape == (10, 10)  # the real shape
-    assert nd.is_complex == [False, True]
-    assert nd.ndim == 2
+    nd1 = ndarraycplx
+    nd2 = copy(ndarraycplx)
+    assert nd2 is not nd1
+    assert nd2.shape == nd1.shape
+    assert nd2.is_complex == nd1.is_complex
+    assert nd2.ndim == nd1.ndim
 
 
 def test_deepcopy_of_ndarray(ndarraycplx):
     # for this example there is no diif with copy (write another test for this)
     nd1 = ndarraycplx.copy()
-    nd = deepcopy(nd1)
-    assert nd is not nd1
-    assert nd.data.size == 200
-    assert nd.size == 100
-    assert nd.data.shape == (10, 20)
-    assert nd.shape == (10, 10)  # the real shape
-    assert nd.is_complex == [False, True]
-    assert nd.ndim == 2
+    nd2 = deepcopy(nd1)
+    assert nd2 is not nd1
+    assert nd2.data.size == 100
 
 
 def test_ndarray_with_uncertainty(ndarray):
@@ -400,8 +385,8 @@ def test_ndarray_len_and_sizes(ndarray, ndarraycplx):
     assert ndc.has_complex_dims
     assert ndc.is_complex[1]
     assert len(ndc) == 10
-    assert ndc.shape == (10, 10)
-    assert ndc.size == 100
+    assert ndc.shape == (10, 5)
+    assert ndc.size == 50
     assert ndc.ndim == 2
 
 
@@ -519,3 +504,102 @@ def test_with_units_and_forc_to_change():
     with raises(Exception):
         ndd.to('second')
     ndd.to('second', force=True)
+
+def test_swapaxes():
+        np.random.seed(12345)
+        d = np.random.random((4, 3)) * np.exp(.1j)
+        d3 = NDArray(d, units=ur.Hz,
+                     mask=[[False, True, False],
+                           [False, True, False],
+                           [False, True, False],
+                           [True, False, False]],
+                     is_complex=[False, True]
+
+                     )  # with units & mask
+        assert d3.shape == (4, 3)
+        assert d3._data.shape == (4, 6)
+        assert d3.is_complex == [False, True]
+
+        d4 = d3.swapaxes(0,1)
+
+        assert d4.shape == (3, 4)
+        assert d4._data.shape == (6, 4)
+        assert d4.is_complex == [True, False]
+
+def test_ndarray_complex(ndarraycplx):
+    nd = ndarraycplx.copy()
+
+    ndr = nd.real
+    assert_array_equal(ndr.data, nd.data[..., ::2])
+    assert ndr.size == nd.size
+    assert ndr.is_complex == [False, False]
+
+    nd = ndarraycplx.copy()
+
+    ndc = nd.conj()
+    assert_array_equal(ndc.data.imag, -ndc.data.imag)
+    assert ndc.is_complex == [False, True]
+    assert ndc.size == nd.size
+
+###
+# CoordSet testing
+####
+
+# multicoords
+from spectrochempy.api import CoordSet, CoordSetWarning
+
+def test_multicoord_for_a_single_dim():
+    # normal coord (single numerical array for a anxis)
+
+    coord0 = NDArray(data=np.linspace(1000., 4000., 5),
+                   labels='a b c d e'.split(),
+                   mask=None,
+                   units='cm^1',
+                   title='wavelengths')
+
+    coord1 = NDArray(data=np.linspace(20, 500, 5),
+                   labels='very low-low-normal-high-very high'.split('-'),
+                   mask=None,
+                   units='K',
+                   title='temperature')
+
+    # pass as a list of coord
+    coordsa = CoordSet([coord0, coord1])
+    assert str(coordsa) == '[wavelengths, temperature]'
+    assert not coordsa.is_same_dim
+
+    # try to pass as an CoordSet
+    coordsb = CoordSet(coordsa)
+    assert str(coordsb) == '[wavelengths, temperature]'
+    assert not coordsb.is_same_dim
+
+    # try to pass a arguments, each being an coord
+    coordsc = CoordSet(coord0, coord1)
+    assert not coordsc.is_same_dim
+    assert str(coordsc) == '[wavelengths, temperature]'
+    assert not coordsa.is_same_dim
+
+    # try to pass arguments where each are a coordset
+    coordsc._transpose()
+    coordsd = CoordSet(coordsa, coordsc)
+    assert str(coordsd) == "[[wavelengths, temperature], " \
+                         "[temperature, wavelengths]]"
+
+    assert not coordsd.is_same_dim
+    assert np.all([item.is_same_dim for item in coordsd])
+
+    coordse = CoordSet(coordsa, coord0)
+    pass
+    assert str(coordse) == "[[wavelengths, temperature], " \
+                         "wavelengths]"
+
+    assert not coordse.is_same_dim
+    assert coordse[0].is_same_dim
+
+    coordsd._transpose()
+    assert str(coordsd) == "[[temperature, wavelengths], " \
+                         "[wavelengths, temperature]]"
+
+    with pytest.warns(CoordSetWarning):
+        coordsd[0]._transpose()
+

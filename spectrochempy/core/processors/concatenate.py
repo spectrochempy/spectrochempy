@@ -139,8 +139,8 @@ def concatenate(*sources, axis=None):
                     'units of the datasets to concatenate are not compatible')
         source.to(sources[0].units)
 
-        sax = sources[0].axes
-        for i, ax in enumerate(source.axes):
+        sax = sources[0].coordset
+        for i, ax in enumerate(source.coordset):
             if not ax.is_units_compatible(sax[i]):
                 raise TypeError(
                         "units of the dataset's axis are not compatible")
@@ -162,7 +162,7 @@ def concatenate(*sources, axis=None):
 
     # initialize dataset based on the 1st passed dataset
     out = sources[0].copy()
-    outaxis = out.axes[axis]  # axis for concatenation
+    outaxis = out.coordset[axis]  # axis for concatenation
 
     out.description = 'Concatenation of ' + str(len(sources)) + ' datasets :\n'
     out.description += ' ->' + sources[0].name + ' : ' + sources[
@@ -189,8 +189,8 @@ def concatenate(*sources, axis=None):
 
         # concatenate axes
 
-        axes = out.axes
-        for i, saxe in enumerate(source.axes):
+        axes = out.coordset
+        for i, saxe in enumerate(source.coordset):
 
             if saxe.title != axes[i].title:
                 warn(
@@ -206,7 +206,7 @@ def concatenate(*sources, axis=None):
                                                  axis=-1)
 
         # TODO: not sure yet what to do here
-        # for i, labels in enumerate(out.axes[i].labels):
+        # for i, labels in enumerate(out.coordset[i].labels):
         #     if labels.name != .labels[i].name:
         #         print('warning: different labels names =>
         # the labels name is that of the 1st dataset')

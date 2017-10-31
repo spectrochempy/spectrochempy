@@ -41,7 +41,7 @@ import datetime as datetime
 import scipy.interpolate
 import numpy as np
 
-from ...dataset.ndcoords import CoordsRange
+from ...dataset.ndcoords import CoordRange
 
 __all__ = ['basecor']
 
@@ -77,16 +77,16 @@ def basecor(source, *ranges, axis=-1,
         swaped = True
 
     # most of the time we need sorted axis, so let's do it now
-    coords = new.coords(-1)
+    coords = new.coordset(-1)
 
     sorted = False
-    if new.coords(-1).is_reversed:
+    if new.coordset(-1).is_reversed:
         new.sort(axis=-1, inplace=True)
         sorted = True
 
-    coords = new.coords(-1)
+    coords = new.coordset(-1)
     baseline = np.zeros_like(new)
-    ranges = CoordsRange(*ranges)
+    ranges = CoordRange(*ranges)
 
     # Extract: Sbase: the matrix of data correponding to ranges
     #          xbase: the xaxis values corresponding to ranges
@@ -101,7 +101,7 @@ def basecor(source, *ranges, axis=-1,
     sbase = s[0].concatenate(*s[1:],
                              axis=-1)  # TODO: probably we could use masked
     # data instead of concatenating
-    xbase = sbase.coords(-1)
+    xbase = sbase.coordset(-1)
 
     if method == 'sequential':
 

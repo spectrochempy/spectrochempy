@@ -24,8 +24,8 @@ import os
 import sys
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
+from spectrochempy.core.dataset.ndarray import CoordSet, NDArray
+from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.api import data, plotoptions
 
 plotoptions.do_not_block = True
@@ -55,15 +55,27 @@ def ndarrayunit(): #ndarraysubclassunit():
 
 @pytest.fixture(scope="module")
 def ndarraycplx():
+
     # return a complex ndarray
     # with some complex data
-    with NumpyRNGContext(1245):
-        dx = np.random.random((10, 20))
-    _nd = NDArray()
-    _nd.data = dx
-    _nd.set_complex(axis=-1)  # this means that the data are complex in
-    # the last dimension
-    return _nd.copy()
+
+    with NumpyRNGContext(12345):
+        dx = np.random.random((10, 10))
+    nd = NDArray()
+    nd.data = dx
+    nd.set_complex(axis=-1)  # this means that the data are complex in
+                              # the last dimension
+
+    # some checking
+    assert nd.data.size == 100
+    assert nd.size == 50
+    assert nd.data.shape == (10, 10)
+    assert nd.shape == (10, 5)  # the real shape
+    assert nd.is_complex == [False, True]
+    assert nd.ndim == 2
+
+    # return
+    return nd.copy()
 
 #########################
 # FIXTURES: some datasets
@@ -74,7 +86,7 @@ def ndcplx():
     _nd = NDDataset()
     with NumpyRNGContext(1234):
         _nd._data = np.random.random((10, 10))
-    _nd.make_complex(axis=-1)  # this means that the data are complex in
+    _nd.set_complex(axis=-1)  # this means that the data are complex in
     # the last dimension
     return _nd
 
@@ -125,7 +137,7 @@ def ds1():
 
     da = NDDataset(dx,
                    is_complex=is_complex,
-                   coords=[coord0, coord1, coord2],
+                   coordset=[coord0, coord1, coord2],
                    title='Absorbance',
                    units='absorbance',
                    uncertainty=dx * 0.1,
@@ -156,7 +168,7 @@ def ds2():
 
     da = NDDataset(dx,
                    is_complex=is_complex,
-                   coords=[coord0, coord1, coord2],
+                   coordset=[coord0, coord1, coord2],
                    title='Absorbance',
                    units='absorbance',
                    uncertainty=dx * 0.1,
@@ -188,12 +200,62 @@ def dsm():  # dataset with coords containing several axis
     coordmultiple = CoordSet(coord11, coord12)
     da = NDDataset(dx,
                    is_complex=is_complex,
-                   coords=[coord0, coordmultiple],
+                   coordset=[coord0, coordmultiple],
                    title='Absorbance',
                    units='absorbance',
                    uncertainty=dx * 0.1,
                    )
     return da.copy()
+
+
+# Datasets and CoordSet
+@pytest.fixture()
+def dataset1d():
+    # create a simple 1D
+    length = 10.
+    x_axis = Coord(np.arange(length) * 1000.,
+                  title='wavelengths',
+                  units='cm^-1')
+    with NumpyRNGContext(125):
+        ds = NDDataset(np.random.randn(length),
+                       coordset=[x_axis],
+                       title='absorbance',
+                       units='dimensionless')
+    return ds.copy()
+
+
+@pytest.fixture()
+def dataset3d():
+    with NumpyRNGContext(12345):
+        dx = np.random.random((10, 100, 3))
+
+    coord0 = Coord(np.linspace(4000., 1000., 10),
+                labels='a b c d e f g h i j'.split(),
+                mask=None,
+                units="cm^-1",
+                title='wavelength')
+
+    coord1 = Coord(np.linspace(0., 60., 100),
+                labels=None,
+                mask=None,
+                units="s",
+                title='time-on-stream')
+
+    coord2 = Coord(np.linspace(200., 300., 3),
+                labels=['cold', 'normal', 'hot'],
+                mask=None,
+                units="K",
+                title='temperature')
+
+    da = NDDataset(dx,
+                   coordset=[coord0, coord1, coord2],
+                   title='absorbance',
+                   units='dimensionless',
+                   uncertainty=dx * 0.1,
+                   mask=np.zeros_like(dx)  # no mask
+                   )
+    return da.copy()
+
 
 ############################
 # Fixture:  IR spectra (SPG)

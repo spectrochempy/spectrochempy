@@ -45,61 +45,62 @@ from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises, show_do_not_block)
 
-
 from spectrochempy.api import *
 from spectrochempy.api import figure, show
 from spectrochempy.utils import SpectroChemPyWarning
 
 
-
 @show_do_not_block
 def test_nmr_2D(NMR_source_2D):
-
     figure()
     source = NMR_source_2D
-    source.plot(nlevels=20) #, start=0.15)
+    source.plot(nlevels=20)  # , start=0.15)
     show()
     pass
 
+
 @show_do_not_block
 def test_nmr_2D_imag(NMR_source_2D):
-
-    #plt.ion()
+    # plt.ion()
     figure()
     source = NMR_source_2D.copy()
     source.plot(imag=True)
     show()
     pass
 
+
 @show_do_not_block
 def test_nmr_2D_imag_compare(NMR_source_2D):
-
-    #plt.ion()
+    # plt.ion()
     figure()
     source = NMR_source_2D.copy()
     source.plot()
     source.plot(imag=True, cmap='jet', data_only=True, alpha=.3)
-                                # better not to replot a second colorbar
+    # better not to replot a second colorbar
     show()
     pass
+
 
 @show_do_not_block
 def test_nmr_2D_hold(NMR_source_2D):
-
     source = NMR_source_2D
     figure()
     source.plot()
-    source.imag().plot(cmap='jet', data_only=True)
+    source.imag.plot(cmap='jet', data_only=True)
     show()
     pass
+
 
 @show_do_not_block
 def test_nmr_2D_em_(NMR_source_2D):
     figure()
     source = NMR_source_2D.copy()
     source.plot()
-    source.em(lb=100.*ur.Hz)
+    assert source.shape == (96, 948)
+    source.em(lb=100. * ur.Hz)
+    assert source.shape == (96, 948)
     source.em(lb=50. * ur.Hz, axis=0)
-    source.plot(cmap='copper',data_only=True)
+    assert source.shape == (96, 948)
+    source.plot(cmap='copper', data_only=True)
     show()
     pass

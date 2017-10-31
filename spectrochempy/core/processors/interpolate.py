@@ -93,13 +93,13 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
     refordered = ref.sort(refaxis)
 
     try:
-        sourceordered.coords(axis).to(refordered.coords(refaxis).units)
+        sourceordered.coordset(axis).to(refordered.coordset(refaxis).units)
     except:
         raise TypeError(
                 'units of the dataset and reference axes on which interpolate are not compatible')
 
-    oldaxisdata = sourceordered.coords(axis).data
-    refaxisdata = refordered.coords(
+    oldaxisdata = sourceordered.coordset(axis).data
+    refaxisdata = refordered.coordset(
             refaxis).data  # TODO: at the end restore the original order
 
     if kind == 'linear':
@@ -126,10 +126,10 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
     interpolate_uncertainty = interpolator(sourceordered.uncertainty, axis)
     newuncertainty = interpolate_uncertainty(refaxisdata)
 
-    interpolate_axis = interpolator(sourceordered.coords(axis).data)
+    interpolate_axis = interpolator(sourceordered.coordset(axis).data)
     newaxisdata = interpolate_axis(refaxisdata)
 
-    interpolate_axis_mask = interpolator(sourceordered.coords(axis).mask)
+    interpolate_axis_mask = interpolator(sourceordered.coordset(axis).mask)
     newaxismask = interpolate_axis_mask(refaxisdata)
 
     if kind == 'pchip' and not np.isnan(fill_value):
@@ -140,7 +140,7 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
         newaxisdata[index] = fill_value
 
     # create the new axis
-    newaxes = source.axes.copy()
+    newaxes = source.coordset.copy()
     newaxes[axis]._data = newaxisdata
     newaxes[axis]._mask = newaxismask
     newaxes[axis]._labels = np.array([''] * newaxisdata.size)
@@ -152,14 +152,14 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
         out = source.copy()
 
     out._data = newdata
-    out._axes = newaxes
+    out._coordset = newaxes
     out._mask = newmask
     out._uncertainty = newuncertainty
 
     out.name = '*' + source.name
     out.title = '*' + source.title
 
-    out.history = '{}: aligned along dim {} with respect to dataset {} using axis {} \n'.format(
-            str(source.modified), axis, ref.name, ref.axes[refaxis].title)
+    out.history = '{}: aligned along dim {} with respect to dataset {} using coords {} \n'.format(
+            str(source.modified), axis, ref.name, ref.coordset[refaxis].title)
 
     return out

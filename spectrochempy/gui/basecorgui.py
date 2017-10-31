@@ -25,7 +25,7 @@ from matplotlib.widgets import SpanSelector
 # local import
 
 from ..core.processors.baseline.basecor import basecor
-from ..core.api import CoordsRange
+from ..core.api import CoordRange
 
 
 def basecorgui(X, display='all'):

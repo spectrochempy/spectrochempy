@@ -134,6 +134,40 @@ class NDMath(object):
 
         return func(self, *args, **kwargs)
 
+    # .........................................................................
+    def abs(self, axis=-1):
+        """
+        Returns the absolute value of a complex array.
+
+        Parameters
+        ----------
+        axis : int
+
+            Optional, default: 1.
+
+            The axis along which the absolute value should be calculated.
+
+        Returns
+        -------
+        array : same type,
+
+            Output array.
+
+
+        """
+        new = self.copy()
+        if not new.has_complex_dims or not new.is_complex[axis]:
+            return np.fabs(new)  # not a complex, return fabs should be faster
+
+        new.swapaxes(axis, -1, inplace=True)
+        new = np.sqrt(new.real ** 2 + new.imag ** 2)
+        new.swapaxes(axis, -1, inplace=True)
+        new._is_complex[axis] = False
+
+        return new
+
+    absolute = abs
+
     # -------------------------------------------------------------------------
     # special methods
     # -------------------------------------------------------------------------
@@ -150,7 +184,7 @@ class NDMath(object):
         f, objs, huh = args[1]
 
         # case of complex data
-        if self.is_complex:
+        if self.has_complex_dims:
 
             if self.is_complex[-1] and \
                             f.__name__ in ['real', 'imag',
@@ -207,14 +241,14 @@ class NDMath(object):
             d = obj._data  # The underlying data
 
             # do we have units?
-            if not obj.unitless:
+            if obj.has_units:
                 q = Quantity(1., obj.units)  # create a Quantity from the units
             else:
                 q = 1.
 
             # Check if our NDArray is actually a NDDataset
-            # (it must have an attribute _coords)
-            if hasattr(obj, '_coords'):
+            # (it must have an attribute _coordset)
+            if hasattr(obj, '_coordset'):
 
                 # do we have uncertainties on our data ?
                 # if any create an UFloat type if any uncertainty
@@ -222,7 +256,7 @@ class NDMath(object):
 
                 # Our data may be complex
                 iscomplex = False
-                if np.any(obj.is_complex):
+                if obj.has_complex_dims:
                     iscomplex = obj.is_complex[-1]
 
                 objcomplex.append(obj.is_complex)
@@ -277,8 +311,8 @@ class NDMath(object):
                 #                     'second argument cannot be an Coord'
                 #                     ' instance')
                 # if the first arg (obj) is a nddataset
-                if isdataset and other._coords != obj._coords:
-                    raise ValueError("axes properties do not match")
+                if isdataset and other._coordset != obj._coordset:
+                    raise ValueError("coordset properties do not match")
 
                 # rescale according to units
                 if not other.unitless:
@@ -347,8 +381,10 @@ class NDMath(object):
                 # TODO: check the complex nature of the result to return it
 
         else:
-
+            # make a simple opration
             data = f(d, *args)
+
+            # restore interleaving of complex data
             data, iscomplex = interleave(data)
 
         # unpack the data

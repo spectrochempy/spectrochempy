@@ -10,7 +10,7 @@ and then we plot one section
 
 #############################################
 # As usual, we start by loading the api
-from spectrochempy.api import NDDataset, Coords, figure, show
+from spectrochempy.api import NDDataset, Coord, figure, show
 
 ##############################################
 import numpy as np
@@ -29,19 +29,19 @@ import matplotlib.pyplot as plt
 ###############################################
 # Now we create a 3D NDDataset from scratch
 
-axe0 = Coords(coords=np.linspace(200., 300., 3),
+axe0 = Coord(data=np.linspace(200., 300., 3),
             labels=['cold', 'normal', 'hot'],
             mask=None,
             units="K",
             title='temperature')
 
-axe1 = Coords(coords=np.linspace(0., 60., 100),
+axe1 = Coord(data=np.linspace(0., 60., 100),
             labels=None,
             mask=None,
             units="minutes",
             title='time-on-stream')
 
-axe2 = Coords(coords=np.linspace(4000., 1000., 100),
+axe2 = Coord(data=np.linspace(4000., 1000., 100),
             labels=None,
             mask=None,
             units="cm^-1",
@@ -53,7 +53,7 @@ nd_data = np.array([np.array(
                     for t in axe0.data]) ** 2
 
 mydataset = NDDataset(nd_data,
-                      axes=[axe0, axe1, axe2],
+                      coordset=[axe0, axe1, axe2],
                       title='Absorbance',
                       units='absorbance'
                       )

@@ -42,8 +42,8 @@ import numpy as np
 import pandas as pd
 
 from pint import DimensionalityError
-from spectrochempy.api import (NDDataset, Axes, Coords,
-                                            CoordsError, Meta, ur, figure, show)
+from spectrochempy.api import (NDDataset, CoordSet, Coord,
+                                            CoordError, Meta, ur, figure, show)
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
@@ -69,9 +69,11 @@ def test_autosub(IR_source_1):
     ref = s1[0]
 
     figure()
-    source.plot()
-    ref.plot()
+    source.plot_stack()
 
+    figure()
+    ref.plot()
+    #show()
 
     s2 = source.copy()
 
@@ -82,7 +84,7 @@ def test_autosub(IR_source_1):
     s3.name="varfit"
 
     figure()
-    s3.plot()
+    s3.plot_stack()
 
     s4 = source.copy()
     s4.autosub(ref, *ranges, method='chi2', inplace=True)
@@ -90,7 +92,7 @@ def test_autosub(IR_source_1):
     assert np.round(s4.data[0,0],4) == 0.0000
 
     figure()
-    s4.plot()  #true avoid blocking due to graphs
+    s4.plot_stack()  #true avoid blocking due to graphs
 
     s4 = source.copy()
     from spectrochempy.api import autosub
@@ -100,7 +102,7 @@ def test_autosub(IR_source_1):
     s.name = 'chi2 direct call'
 
     figure()
-    s.plot()
+    s.plot_stack()
 
     show()
 

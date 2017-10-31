@@ -43,8 +43,13 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy.core.units import ur, Quantity
-from spectrochempy.core.dataset.ndcoords import Coord, CoordSet, CoordsWarning
+from spectrochempy.api import *
+
+from spectrochempy.utils.traittypes import Range
+
+from traitlets import HasTraits
+from traitlets import TraitError
+
 
 from tests.utils import (assert_array_equal,
                          assert_equal_units)
@@ -60,7 +65,6 @@ class MinimalCoordSetSubclass(Coord):
 def test_coordarray_subclass():
     a = MinimalCoordSetSubclass([1, 2, 3])
     assert a.name is not None
-    assert a.is_untitled
     assert not a.is_empty
     assert not a.is_masked
     assert_array_equal(a.data, np.array([1, 2, 3]))
@@ -196,7 +200,7 @@ def test_coord_equal():
                    title='wavelength')
 
     assert coord0 == coord0b
-    assert coord0 != coord1  # but different title
+    assert coord0 == coord1  # but different title (not important)
     assert coord0 != coord2  # different labels
     assert coord0 != coord3  # one coord has no label
 
@@ -293,8 +297,8 @@ def test_coords_str_repr():
         coord0) == "Coord: [4000.000, 3666.667, ..., 1333.333, 1000.000] cm^-1"
 
     coords = CoordSet([coord0, coord0.copy()])
-    assert str(coords) == "([wavelength], [wavelength])"
-    assert repr(coords).startswith("CoordSet object <<Coord object ")
+    assert str(coords) == "[wavelength, wavelength]"
+    assert repr(coords).startswith("CoordSet object <<object ")
 
     print(coord0)
 
@@ -423,13 +427,6 @@ def test_unit_conversion_operators(operation, result_units):
     assert_equal_units(combined.units, result_units)
 
 
-from spectrochempy.core.api import CoordsRange, CoordsRangeError
-from spectrochempy.utils.traittypes import Range
-
-from traitlets import HasTraits
-from traitlets import TraitError
-
-
 class testRangeTrait(HasTraits):
     x = Range()
 
@@ -461,13 +458,13 @@ def testinterval():
 
 
 def test_coordrange():
-    r = CoordsRange()
+    r = CoordRange()
     assert r.ranges == []
 
-    r = CoordsRange(3, 2)
+    r = CoordRange(3, 2)
     assert r.ranges[0] == [2, 3]
 
-    r = CoordsRange((3, 2), (4.4, 10), (4, 5))
+    r = CoordRange((3, 2), (4.4, 10), (4, 5))
     assert r.ranges[-1] == [4, 10]
     assert r.ranges == [[2, 3], [4, 10]]
 
@@ -475,51 +472,4 @@ def test_coordrange():
     assert r.ranges == [[10, 4], [3, 2]]
 
 
-######
-
-# multicoords
-
-def test_multicoord_for_a_single_dim():
-    # normal coord (single numerical array for a anxis)
-
-    coord0 = Coord(data=np.linspace(1000., 4000., 5),
-                   labels='a b c d e'.split(),
-                   mask=None,
-                   units='cm^1',
-                   title='wavelengths')
-
-    coord1 = Coord(data=np.linspace(20, 500, 5),
-                   labels='very low-low-normal-high-very high'.split('-'),
-                   mask=None,
-                   units='K',
-                   title='temperature')
-
-    # pass as a list of coord
-    coordsa = CoordSet([coord0, coord1])
-    assert str(coordsa) == '([wavelengths], [temperature])'
-
-    # try to pass as an CoordSet
-    coordsb = CoordSet(coordsa)
-    assert str(coordsb) == '([wavelengths], [temperature])'
-
-    # try to pass a arguments, each being an coord
-    coordsc = CoordSet(coord0, coord1)
-    assert not coordsc.issamedim
-    assert str(coordsc) == '([wavelengths], [temperature])'
-
-    # try to pass a arguments, each being an coords
-    coordsc._transpose()
-    coordsd = CoordSet(coordsa, coordsc)
-    assert str(coordsd) == "([['wavelengths', 'temperature']], " \
-                         "[['temperature', 'wavelengths']])"
-
-    assert not coordsd.issamedim
-    assert np.all([item.issamedim for item in coordsd])
-
-    coordsd._transpose()
-    assert str(coordsd) == "([['temperature', 'wavelengths']], " \
-                         "[['wavelengths', 'temperature']])"
-
-    with pytest.warns(CoordsWarning):
-        coordsd[0]._transpose()
 

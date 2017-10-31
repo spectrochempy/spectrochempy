@@ -40,7 +40,9 @@ _classes = __all__[:]
 
 from traitlets import HasTraits, Instance
 
-from spectrochempy.core.dataset.nddataset import NDDataset, Coord, CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset, CoordSet
+from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.utils import SpectroChemPyError
 
 import numpy as np
 
@@ -102,19 +104,28 @@ class Svd(HasTraits):
     s = Instance(np.ndarray)
     Vt = Instance(NDDataset)
 
-    def __init__(self, X, full_matrices=False, compute_uv=True):
+    def __init__(self, source, full_matrices=False, compute_uv=True):
         """ constructor of svd object """
 
-        # retains valid columns
-        NaNColumns = np.any(np.isnan(X.data), axis=0)
-        data = X.data[:, ~ NaNColumns]
+        # check if we have the correct input
+        if isinstance(source, NDDataset):
+            data = source.data
+        else:
+            raise SpectroChemPyError('A dataset of type NDDataset is  '
+                               'expected as a source of data, but an object'
+                               ' of type {} has been provided'.format(
+                               type(source).__name__))
+
+        # retains valid columns #TODO: mask can do this already
+        NaNColumns = np.any(np.isnan(data), axis=0)
+        data = data[:, ~ NaNColumns]
 
         # makes SVD
         U, s, Vt = np.linalg.svd(data, full_matrices, compute_uv)
 
         # Put back columns with NaN in Vt
         if any(NaNColumns):
-            Vt2 = np.zeros((s.shape[0], X.shape[1]))
+            Vt2 = np.zeros((s.shape[0], data.shape[1]))
             j = 0
             for i in np.arange(len(NaNColumns)):
                 if ~ NaNColumns[i]:
@@ -122,29 +133,28 @@ class Svd(HasTraits):
                     j = j + 1
                 else:
                     Vt2[:, i] = float('nan') * np.ones((Vt2.shape[0],))
-            Vt = Vt2
+            Vt_ = Vt2
 
-            # Returns ur as a Dataset object
+        # Returns U as a NDDataset object
         U = NDDataset(U)
-        U.name = 'left singular vectors of ' + X.name
-        U.axes = CoordSet(Coord(X.axes[0]),
-                          Coord(None,
-                                labels=['# %s' % i for i in range(len(s))],
+        U.title = 'left singular vectors of ' + source.name
+        U.coordset = CoordSet(source.coordset[0],
+                              Coord([i+1 for i in range(len(s))],
+                                labels=['#%d' % (i+1) for i in range(len(s))],
                                 title='Unitary vectors')
                           )
-        U.description = 'left singular vectors of ' + X.name
-        U.history = str(U.modified) + ': created by Svd \n'
+        U.description = 'left singular vectors of ' + source.name
+        U.history = 'created by Svd \n'
 
-        # Returns the loadings (Vt) as a Dataset object
+        # Returns the loadings (Vt) as a NDDataset object
         Vt = NDDataset(Vt)
-        Vt.name = 'Loadings (V.t) of ' + X.name
-        Vt.axes = CoordSet(Coord(None,
-                                 labels=['# %s' % i for i in range(len(s))],
+        Vt.title = 'Loadings (V.t) of ' + source.name
+        Vt.coordset = CoordSet(Coord([i+1 for i in range(len(s))],
+                                 labels=['#%d' % (i+1) for i in range(len(s))],
                                  title='Unitary vectors'),
-                           Coord(X.axes[1])
-                           )
+                           source.coordset[1])
         Vt.description = (
-            'Loadings obtained by singular value decomposition of ' + X.name)
+            'Loadings obtained by singular value decomposition of ' + source.name)
         Vt.history = (str(Vt.modified) + ': created by Svd \n')
 
         self.U = U
@@ -155,7 +165,7 @@ class Svd(HasTraits):
     # -----------------
 
     def __repr__(self):
-        return '<spectrochempy.svd: ur%s , s(%s), Vt%s>' % (
+        return '<svd: ur%s, s(%s), Vt%s>' % (
             self.U.shape, len(self.s), self.Vt.shape)
 
     # Properties

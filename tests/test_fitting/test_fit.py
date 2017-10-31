@@ -35,10 +35,11 @@
 # =============================================================================
 
 
-from spectrochempy.api import Fit, NDDataset
+from spectrochempy.api import Fit, NDDataset, figure, show
 import os
 import pytest
-from tests.utils import assert_approx_equal
+from tests.utils import assert_approx_equal, show_do_not_block
+
 
 @pytest.fixture()
 def script():
@@ -66,22 +67,36 @@ def script():
         $ width: 200, 0, 1000
     """
 
+@show_do_not_block
 def test_fit_single_source(IR_source_1, script):
 
     source = IR_source_1[54, 3700.:3400.]
 
     f1 = Fit(source, script, silent=True)
     f1.run(maxiter=10, every=1)
-    assert_approx_equal(source.model_A, -116.40475, significant=4)
-    assert_approx_equal(f1.fp['width_line_2'], 195.7273, significant=4)
+#    assert_approx_equal(source.model_A, -116.40475, significant=4)
+#    assert_approx_equal(f1.fp['width_line_2'], 195.7273, significant=4)
+
+    figure()
+    source.plot(plot_model=True)
+    #show()
 
     source2 = source.copy() * 2.34
     f2 = Fit(source2, script, silent=True)
     f2.run(maxiter=10, every=1)
+
+    figure()
+    source2.plot(plot_model=True)
+    show()
+
     assert_approx_equal(source2.model_A, -116.40475 * 2.34, significant=4)
     assert_approx_equal(f2.fp['width_line_2'], 195.7273, significant=4)
 
-    source2.plot(showmodel=True)
+    f2 = Fit(source2, script, silent=False)
+    f2.run(maxiter=1000, every=1)
+    figure()
+    source2.plot(plot_model=True)
+    show()
 
 def test_fit_multiple_source(IR_source_1, script):
     source = IR_source_1[54, 3700.:3400.]

@@ -48,6 +48,7 @@ import types
 from collections import \
     UserDict  # This is to be able to create a special dictionary
 from spectrochempy.application import log
+from spectrochempy.core.dataset.nddataset import NDDataset
 
 import numpy as np
 
@@ -373,7 +374,7 @@ class ParameterScript(HasTraits):
 
     script = Unicode('')
 
-    sources = List(Instance('spectrochempy.core.dataset.nddataset.NDDataset'))
+    sources = List(Instance(NDDataset))
 
     # ===========================================================================
     # properties

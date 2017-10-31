@@ -254,7 +254,7 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
         if hasattr(x, 'uncert_data'):
             x = x.uncert_data[()]
 
-        if isinstance(x, (float, np.float)) :
+        if isinstance(x, (float, np.float_, np.float32)) :
             fmt = '{:{l}.0{prec}f}'.format(x,
                                 prec=precision - 1,
                                 l=precision + spc)
@@ -268,7 +268,7 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
             fmt = '{:{l}.0{prec}f}+/-{:.0{prec}f}'.format(
                     x.nominal_value, x.std_dev,
                     prec=precision - 1, l=precision + spc)
-        elif isinstance(x, (int, np.int, np.int64)) :
+        elif isinstance(x, np.int_) :
             fmt = '{:>{l}d}'.format(x, l=precision + spc)
         else:
             fmt = '{}'.format(x)

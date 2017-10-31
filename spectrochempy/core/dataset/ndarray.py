@@ -56,8 +56,9 @@ from datetime import datetime
 
 import numpy as np
 from pint.errors import DimensionalityError, UndefinedUnitError
-from traitlets import (Union, List, Unicode, Instance, Bool, HasTraits, default,
-                       Any, Integer, Sentinel, Float, validate, observe)
+from traitlets import (List, Unicode, Instance, Bool, HasTraits, default,
+                       Any, Float, validate, observe,
+                       ForwardDeclaredInstance)
 from uncertainties import unumpy as unp
 from pandas.core.generic import NDFrame, Index
 from spectrochempy.core.units import Quantity
@@ -74,7 +75,8 @@ from spectrochempy.core.units import Unit, ur, Quantity, Measurement
 
 from spectrochempy.utils import (EPSILON, is_number, is_sequence,
                                  numpyprintoptions)
-from spectrochempy.utils import (SpectroChemPyWarning, deprecated,
+from spectrochempy.utils import (SpectroChemPyWarning, SpectroChemPyError,
+                                 deprecated,
                                  interleaved2complex, interleave)
 from spectrochempy.extern.traittypes import Array
 
@@ -82,9 +84,10 @@ from spectrochempy.extern.traittypes import Array
 # Constants
 # =============================================================================
 
-__all__ = ['NDArray']
+__all__ = ['NDArray', 'CoordSet', 'NDArrayError', 'CoordSetError',
+           'CoordSetWarning']
 
-_classes = ['NDArray']
+_classes = __all__[:]
 
 # =============================================================================
 # Some initializations
@@ -92,7 +95,30 @@ _classes = ['NDArray']
 
 numpyprintoptions()  # set up the numpy print format
 
-gt_eps = lambda arr : np.any(arr > EPSILON)
+gt_eps = lambda arr: np.any(arr > EPSILON)
+
+
+# =============================================================================
+#  Errors and warnings
+# =============================================================================
+
+class NDArrayError(SpectroChemPyError):
+    """An exception that is raised when something is wrong with the NDArray.
+
+    """
+
+
+class CoordSetError(SpectroChemPyError):
+    """An exception that is raised when something is wrong with the CoordSet
+
+    """
+
+
+class CoordSetWarning(SpectroChemPyWarning):
+    """A warning that is raised when something is wrong with the CoordSet 
+     but do not necessarily need to raise an error.
+    """
+
 
 # =============================================================================
 # The basic NDArray class
@@ -140,7 +166,7 @@ class NDArray(HasTraits):
     _ax = Instance(plt.Axes, allow_none=True)
 
     _data = Array(Float(), allow_none=True)
-
+    _coordset = Instance(List, allow_none=True)
     _mask = Array(Bool(), allow_none=True)
     _uncertainty = Array(Float(), allow_none=True)
     _labels = Array(Any(), allow_none=True)
@@ -164,13 +190,17 @@ class NDArray(HasTraits):
     # .........................................................................
     def __init__(self, data=None, **kwargs):
 
-
-        self._copy = kwargs.pop('copy', False)   # by default
-                                            # we try to keep the same data
+        self._copy = kwargs.pop('copy', False)  # by default
+        # we try to keep the same data
 
         self._is_complex = kwargs.pop('is_complex', None)
 
         self.data = data
+
+        self.title = kwargs.pop('title', None)
+
+        # a unique id / name
+        self.name = kwargs.pop('name', self._id)
 
         self.mask = kwargs.pop('mask', None)
 
@@ -185,10 +215,6 @@ class NDArray(HasTraits):
         self.uncertainty = kwargs.pop('uncertainty', None)
 
         self.meta = kwargs.pop('meta', None)
-        self.title = kwargs.pop('title', None)
-
-        # a unique id / name
-        self.name = kwargs.pop('name', self._id)
 
         # process eventual kwargs, adressing HasTrait class
         super(NDArray, self).__init__(**kwargs)
@@ -227,8 +253,9 @@ class NDArray(HasTraits):
                 otherunits = False
             else:
                 raise TypeError("I do not know how to compare "
-                "{} object with objets of type {} ".format(type(self).__name__,
-                                                          type(other).__name__))
+                                "{} object with objets of type {} ".format(
+                        type(self).__name__,
+                        type(other).__name__))
 
             if not self.has_units and not otherunits:
                 eq = np.all(self._data == otherdata)
@@ -236,20 +263,22 @@ class NDArray(HasTraits):
                 eq = np.all(self._data * self._units == otherdata * otherunits)
             else:
                 return False
-
             return eq
 
         eq = True
         if attrs is None:
             attrs = self.__dir__()
-            attrs.remove('name') # name will not be suded for comparison
+            attrs.remove('name')
+            attrs.remove('title')  # name and title will
+                                          # not be used for comparison
         for attr in attrs:
-            if hasattr(other, "_%s" % attr):
+            if hasattr(other, "%s" % attr):
                 eq &= np.all(
-                getattr(self, "_%s" % attr) == getattr(other, "_%s" % attr))
+                        getattr(self, "%s" % attr) == getattr(other,
+                                                               "%s" % attr))
                 if not eq:
-                    print("attributes '%s' are not equals "
-                          "or one is missing" % attr)
+                    #print("attributes '%s' are not equals "
+                    #      "or one is missing" % attr)
                     return False
         return eq
 
@@ -279,8 +308,9 @@ class NDArray(HasTraits):
             if self._labels.ndim > 1:
                 pass
             if self._labels.ndim > self._data.ndim:
-                #TODO: check multilabels
-                new._labels = np.array(self._labels[..., keys])
+                # TODO: check multilabels
+                newkeys = tuple((Ellipsis, *keys))
+                new._labels = np.array(self._labels[newkeys])
             else:
                 new._labels = np.array(self._labels[keys])
 
@@ -292,7 +322,6 @@ class NDArray(HasTraits):
         keys, internkeys = self._make_index(items)
 
         self._data[internkeys] = value
-
 
     # .........................................................................
     def __hash__(self):
@@ -338,16 +367,15 @@ class NDArray(HasTraits):
         prefix = ['']
         if self.has_complex_dims:
             for axis in self.iterdims:
-                for item in prefix[:]: # work on a copy of prefix as it will
+                for item in prefix[:]:  # work on a copy of prefix as it will
                     # change during execution of this loop
                     prefix.remove(item)
-                    prefix.append(item+'R')
+                    prefix.append(item + 'R')
                     if self.is_complex[axis]:
-                        prefix.append(item+'I')
+                        prefix.append(item + 'I')
 
         units = ' {:~K}'.format(self.units) if self.has_units \
-                else ''
-
+            else ''
 
         def mkbody(d, pref, units):
             body = np.array2string(
@@ -357,15 +385,16 @@ class NDArray(HasTraits):
             text += '\n'
             return text
 
-        if 'I' not in ''.join(prefix): # case of pure real data (not hypercomplex)
-            text = mkbody(self.uncert_data, '', units )
+        if 'I' not in ''.join(
+                prefix):  # case of pure real data (not hypercomplex)
+            text = mkbody(self.uncert_data, '', units)
         else:
             text = ''
             for pref in prefix:
                 data = self.part(pref).uncert_data
-                text += mkbody(data, pref, units )
+                text += mkbody(data, pref, units)
 
-        text = text[:-1] # remove the trailing '\n'
+        text = text[:-1]  # remove the trailing '\n'
         return text
 
     # -------------------------------------------------------------------------
@@ -373,20 +402,14 @@ class NDArray(HasTraits):
     # -------------------------------------------------------------------------
 
     # .........................................................................
-    # For reference: the proposal directory is
-    # {
-    #     'trait': the trait type instance being validated
-    #     'value': the proposed value,
-    #     'owner': the underlying HasTraits instance,
-    # }
     @validate('_data')
-    def _valid__data(self, proposal):
+    def _data_validate(self, proposal):
         pv = proposal['value']
         data, complex = interleave(pv)
-        if not self._is_complex or len(self._is_complex) != data.ndim:
+        if not self.has_complex_dims or len(self._is_complex) != data.ndim:
             self._is_complex = [False] * data.ndim
-        if data.ndim > 0 and self._is_complex:
-            self._is_complex[-1] = complex
+        if data.ndim > 0:
+            self._is_complex[-1] |= complex
         if self._copy:
             return data.copy()
         else:
@@ -399,6 +422,16 @@ class NDArray(HasTraits):
     #     if not pv and self._data:
     #             pv = [False] * self._data.ndim
     #     return pv
+
+    # .........................................................................
+    @property
+    def coordset(self):
+        return None
+
+    # .........................................................................
+    @coordset.setter
+    def coordset(self, values):
+        raise NotImplementedError('Should be implemented in a subclass')
 
     # .........................................................................
     @property
@@ -427,43 +460,43 @@ class NDArray(HasTraits):
             log.debug("init data with an empty ndarray of type float")
 
         elif isinstance(data, NDArray):
-            log.debug("init data with data from another NDArray or NDArray subclass")
+            log.debug(
+                    "init data with data from another NDArray or NDArray subclass")
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
 
             for attr in self.__dir__():
-                val = getattr(data, "_%s"%attr)
+                val = getattr(data, "_%s" % attr)
                 if self._copy:
                     val = copy.deepcopy(val)
-                setattr(self, "_%s"%attr, val)
+                setattr(self, "_%s" % attr, val)
 
-            self._name = "copy of {}".format(data._name)
+            if self._copy:
+                self._name = "copy of {}".format(data._name)
+                self._date = data._date
 
         elif isinstance(data, NDFrame):  # pandas object
             log.debug("init data with data from pandas NDFrame object")
             self._data = data.values
-            self.axes = data.axes
-            if data.name is not None:
-                self._title = data.name
+            self.coordset = data.axes
 
         elif isinstance(data, Index):  # pandas index object
             log.debug("init data with data from a pandas Index")
             self._data = data.values
-            if data.name is not None:
-                self._title = data.name
+            self._title = data.name
 
         elif isinstance(data, Quantity):
             log.debug("init data with data from a Quantity object")
             self._data_passed_is_quantity = True
             self._data = np.array(data.magnitude, subok=True,
-                                    copy=self._copy)
+                                  copy=self._copy)
             self._units = data.units
 
         elif hasattr(data, 'mask'):  # an object with data and mask attributes
             log.debug("init mask from the passed data")
             self._data = np.array(data.data, subok=True,
-                                    copy=self._copy)
+                                  copy=self._copy)
             if isinstance(data.mask, np.ndarray) and \
                             data.mask.shape == data.data.shape:
                 self._mask = np.array(data.mask, dtype=np.bool_, copy=False)
@@ -480,9 +513,12 @@ class NDArray(HasTraits):
             log.debug("init data with a numpy array")
             self._data = np.array(data, subok=True, copy=self._copy)
 
+    # alias
+    coords = data
+
     # .........................................................................
     @default('_date')
-    def _get_date_default(self):
+    def _date_default(self):
         return datetime(1970, 1, 1, 0, 0)
 
     # .........................................................................
@@ -508,7 +544,7 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @default('_id')
-    def _get_id_default(self):
+    def _id_default(self):
 
         return str(uuid.uuid1()).split('-')[0]  # a unique id
 
@@ -519,7 +555,7 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @default('_labels')
-    def _get_labels_default(self):
+    def _labels_default(self):
         return None
 
     # .........................................................................
@@ -558,7 +594,7 @@ class NDArray(HasTraits):
         if labels is None:
             return
 
-        if self._data.ndim>1:
+        if self._data.ndim > 1:
             raise ValueError('We cannot set the labels for '
                              '                           multidimentional data')
 
@@ -570,9 +606,9 @@ class NDArray(HasTraits):
             # no labels
             return
 
-        if labels.shape[-1] != self.shape[-1]:
+        if self.data is None and labels.shape[-1] != self.shape[-1]:
             raise ValueError("labels {} and data {} shape mismatch!".format(
-                                                      labels.shape, self.shape))
+                    labels.shape, self.shape))
 
         if self.has_complex_dims:
             for axis in self.iterdims:
@@ -583,9 +619,9 @@ class NDArray(HasTraits):
 
         if np.any(self._labels):
             log.info("{0} is already a labeled array.\n".format(
-                                 type(self).__name__) +
-                         "The explicitly passed-in labels will be appended "
-                         "to the current labels")
+                    type(self).__name__) +
+                     "The explicitly passed-in labels will be appended "
+                     "to the current labels")
             self._labels = np.stack((self._labels, labels))
         else:
             if self._copy:
@@ -595,7 +631,7 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @default('_mask')
-    def _get_mask_default(self):
+    def _mask_default(self):
         return None
 
     # .........................................................................
@@ -614,19 +650,19 @@ class NDArray(HasTraits):
         return self._mask
 
 
-            # # Get the real mask taking account complexity
-            # # internally it has the same dim as the full data shape,
-            # # but a view is given here where it appears with only as single mask
-            # # for a complex value, not two
-            #
-            # _mask = self._mask.copy()
-            # if self.has_complex_dims:
-            #     for axis in self.iterdims:
-            #         if self.is_complex[axis]:
-            #             _mask = _mask.swapaxes(axis,-1)
-            #             _mask = _mask[..., ::2] | _mask[..., 1::2]
-            #             _mask = _mask.swapaxes(axis, -1)
-            #
+        # # Get the real mask taking account complexity
+        # # internally it has the same dim as the full data shape,
+        # # but a view is given here where it appears with only as single mask
+        # # for a complex value, not two
+        #
+        # _mask = self._mask.copy()
+        # if self.has_complex_dims:
+        #     for axis in self.iterdims:
+        #         if self.is_complex[axis]:
+        #             _mask = _mask.swapaxes(axis,-1)
+        #             _mask = _mask[..., ::2] | _mask[..., 1::2]
+        #             _mask = _mask.swapaxes(axis, -1)
+        #
 
     # .........................................................................
     @mask.setter
@@ -646,7 +682,7 @@ class NDArray(HasTraits):
 
         if not isinstance(mask, bool) and mask.shape != self.shape:
             raise ValueError("mask {} and data {} shape mismatch!".format(
-                                                        mask.shape, self.shape))
+                    mask.shape, self.shape))
 
         if self.has_complex_dims:
             for axis in self.iterdims:
@@ -659,9 +695,9 @@ class NDArray(HasTraits):
             # this should happen when a new mask is added to an existing one
             # mask to be combined to an existing one
             log.info("{0} is already a masked array.\n".format(
-                             type(self).__name__) +
+                    type(self).__name__) +
                      "The new mask will be combined with the current array's mask.")
-            self._mask &= mask # combine (is a copy!)
+            self._mask &= mask  # combine (is a copy!)
         else:
             if self._copy:
                 self._mask = mask.copy()
@@ -670,7 +706,7 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @default('_meta')
-    def _get_meta_default(self):
+    def _meta_default(self):
         return Meta()
 
     # .........................................................................
@@ -725,8 +761,13 @@ class NDArray(HasTraits):
         e.g. axe title in a matplotlib plot.
 
         """
-        if not self.is_untitled:
-            return self._title
+        if not self._title:
+            if self._name != self._id:
+                self._title = self._name
+            else:
+                self._title = 'untitled'
+        return self._title
+
 
     # .........................................................................
     @title.setter
@@ -752,21 +793,6 @@ class NDArray(HasTraits):
             self._uncertainty = np.zeros_like(self._data).astype(float)
         return self._uncertainty
 
-        #
-        # # Get the real labels taking account complexity
-        # # internally it has the same dim as the full data shape,
-        # # but a view is given here where it appears with only as single label
-        # # for a complex value, not two
-        #
-        # _uncertain = self._uncertain.copy()
-        # if self.has_complex_dims:
-        #     for axis in self.iterdims:
-        #         if self.is_complex[axis]:
-        #             _uncertain = _uncertain.swapaxes(axis,-1)
-        #             _uncertain = _uncertain[..., ::2]
-        #             _uncertain = _uncertain.swapaxes(axis, -1)
-        # return _uncertain
-
     # .........................................................................
     @uncertainty.setter
     def uncertainty(self, uncertainty):
@@ -786,7 +812,7 @@ class NDArray(HasTraits):
         if uncertainty.shape != self.shape:
             raise ValueError(
                     "uncertainty {} and data {} shape mismatch!".format(
-                                                 uncertainty.shape, self.shape))
+                            uncertainty.shape, self.shape))
 
         if self.has_complex_dims:
             for axis in self.iterdims:
@@ -798,7 +824,6 @@ class NDArray(HasTraits):
         if self.is_uncertain and np.any(uncertainty != self._uncertainty):
             log.info("Overwriting {} ".format(type(self).__name__) +
                      "current uncertainty with specified uncertainty")
-
 
         if self._copy:
             self._uncertainty = uncertainty.copy()
@@ -845,25 +870,11 @@ class NDArray(HasTraits):
                 self.to(units)
             except:
                 raise ValueError(
-                    "Provided units does not match data units.\n "
-                    "To force a change - use the to() method, "
-                    "with force flag set to True")
+                        "Provided units does not match data units.\n "
+                        "To force a change - use the to() method, "
+                        "with force flag set to True")
 
         self._units = units
-
-    # .........................................................................
-    @property
-    def is_complex(self):
-        """`tuple` of `bool` - Indicate if which dimension is complex.
-
-        If a dimension is complex, real and imaginary part are interlaced
-        in the `data` array.
-
-        """
-        #if not np.any(self._is_complex):
-        #    return None
-
-        return self._is_complex
 
     # -------------------------------------------------------------------------
     # read-only properties / attributes
@@ -928,6 +939,20 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @property
+    def is_complex(self):
+        """`tuple` of `bool` - Indicate if which dimension is complex.
+
+        If a dimension is complex, real and imaginary part are interlaced
+        in the `data` array.
+
+        """
+        # if not np.any(self._is_complex):
+        #    return None
+
+        return self._is_complex
+
+    # .........................................................................
+    @property
     def is_labeled(self):
         """`bool`, read-only property - Whether the axis has labels or not.
 
@@ -962,16 +987,6 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @property
-    def is_untitled(self):
-        """`bool`, read-only property - Whether the array has `title` or not.
-
-        """
-        if self._title:
-            return False
-        return True
-
-    # .........................................................................
-    @property
     def iterdims(self):
         return range(self._data.ndim)
 
@@ -986,7 +1001,7 @@ class NDArray(HasTraits):
             return self._umasked(self._data, self._mask)
         else:
             return self._data
-        # here we use .mask not ._mask to get the correct shape
+            # here we use .mask not ._mask to get the correct shape
 
     # .........................................................................
     @property
@@ -1066,7 +1081,7 @@ class NDArray(HasTraits):
             return self.copy()
 
         new = self.copy()
-        new._is_complex[-1]=False
+        new._is_complex[-1] = False
         ma = self.masked_data
         ma = ma[..., ::2]
         if isinstance(ma, np.ma.masked_array):
@@ -1084,7 +1099,7 @@ class NDArray(HasTraits):
         """
 
         new = self.copy()
-        new._is_complex[-1]=False
+        new._is_complex[-1] = False
         ma = self.masked_data
         ma = ma[..., 1::2]
         if isinstance(ma, np.ma.masked_array):
@@ -1148,6 +1163,44 @@ class NDArray(HasTraits):
     # -------------------------------------------------------------------------
 
     # .........................................................................
+    def conj(self, axis=-1, inplace=False):
+        """
+        Return the conjugate of the NDDataset in the specified dimension
+
+        Parameters
+        ----------
+        axis : `int`, Optional, default: -1.
+            The axis along which the absolute value should be calculated.
+
+        inplace : `bool`, optional, default=``False``
+            should we return a new dataset (default) or not (inplace=True)
+
+        Returns
+        -------
+        array : same type
+
+            Output array.
+
+        See Also
+        --------
+        :meth:`real`, :meth:`imag`
+
+        """
+        if not inplace:  # default is to return a new array
+            new = self.copy()
+        else:
+            new = self  # work inplace
+
+        if new._is_complex[axis]:
+            new.swapaxes(axis, -1, inplace=True)
+            new._data[..., 1::2] = - new._data[..., 1::2]
+            new.swapaxes(axis, -1, inplace=True)
+
+        return new
+
+    conjugate = conj
+
+    # .........................................................................
     def copy(self, deep=True, memo=None):
         """Make a disconnected copy of the current object.
 
@@ -1187,7 +1240,7 @@ class NDArray(HasTraits):
             do_copy = copy.copy
 
         new = type(self)()
-        new._data = do_copy(self._data)
+        # new._data = do_copy(self._data)
         for attr in self.__dir__():
             try:
                 setattr(new, "_" + attr, do_copy(getattr(self, "_" + attr)))
@@ -1281,18 +1334,19 @@ class NDArray(HasTraits):
 
         """
         new = self.copy()
-        if select=='ALL':
-            select = 'R'*self.ndim
-        ma= self.masked_data
+        if select == 'ALL':
+            select = 'R' * self.ndim
+        ma = self.masked_data
         for axis, component in enumerate(select):
             if self.is_complex[axis]:
-                data = ma.swapaxes(axis,-1)
+                data = ma.swapaxes(axis, -1)
                 if component == 'R':
                     data = data[..., ::2]
                 elif component == 'I':
                     data = data[..., 1::2]
                 elif component != '*':
-                    raise ValueError('components mlust be indicated with R, I or *')
+                    raise ValueError(
+                            'components mlust be indicated with R, I or *')
                 ma = data.swapaxes(axis, -1)
                 new._is_complex[axis] = False
         if isinstance(ma, np.ma.masked_array):
@@ -1325,7 +1379,7 @@ class NDArray(HasTraits):
 
         if self.shape[axis] % 2 != 0:
             raise ValueError("Size of complex indirect dimension "
-                             "must be even, not %d"%self.shape[axis])
+                             "must be even, not %d" % self.shape[axis])
         self._is_complex[axis] = True
 
     # .........................................................................
@@ -1401,14 +1455,92 @@ class NDArray(HasTraits):
         if self.is_uncertain:
             new._uncertainty = self._uncertainty.squeeze(tuple(squeeze_axis))
         if self.is_labeled:
-            new._labels = self._labels.squeeze(tuple(squeeze_axis))
+            # labels is a special case, as several row of label can be presents.
+            squeeze_labels_axis = []
+            for axis, dim in enumerate(self._labels.shape):
+                if dim == 1:
+                    squeeze_labels_axis.append(axis)
+            new._labels = self._labels.squeeze(tuple(squeeze_labels_axis))
 
         cplx = []
+        coordset = []
         for axis in range(self.ndim):
             if axis not in squeeze_axis:
                 cplx.append(self._is_complex[axis])
+                if self.coordset:
+                    coordset.append(self.coordset[axis])
 
         new._is_complex = cplx
+        if coordset:
+            new._coordset = CoordSet(coordset)
+
+        return new
+
+    # .........................................................................
+    def swapaxes(self, axis1, axis2, inplace=False):
+        """
+        Interchange two dims of a NDArray.
+
+        Parameters
+        ----------
+        axis1 : int
+
+            First axis.
+
+        axis2 : int
+
+            Second axis.
+
+        inplace : bool, optional, default = False
+
+            if False a new object is returned
+
+        Returns
+        -------
+        swapped : same type
+
+            The object or a new object (inplace=False) is returned with all
+            components swapped
+
+        See Also
+        --------
+        :meth:`transpose`
+
+        """
+
+        if not inplace:
+            new = self.copy()
+        else:
+            new = self
+
+        if self.ndim < 2:  # cannot swap axe for 1D data
+            return new
+
+        if axis1 == -1:
+            axis1 = self.ndim - 1
+
+        if axis2 == -1:
+            axis2 = self.ndim - 1
+
+        new._data = np.swapaxes(new._data, axis1, axis2)
+
+        # all other arrays, except labels have also to be swapped to reflect
+        # changes of data ordering.
+        # labels are presents only for 1D array, so we do not have to swap them
+
+        if self.is_masked:
+            new._mask = np.swapaxes(new._mask, axis1, axis2)
+
+        if new.is_uncertain:
+            new._uncertainty = np.swapaxes(new._uncertainty, axis1, axis2)
+
+        # we need also to swap the is_complex list, as well has the metadata
+
+        if self.has_complex_dims:
+            new._is_complex[axis1], new._is_complex[axis2] = \
+                self._is_complex[axis2], self._is_complex[axis1]
+
+        new._meta = new._meta.swapaxes(axis1, axis2, inplace=False)
 
         return new
 
@@ -1504,11 +1636,10 @@ class NDArray(HasTraits):
                 new._units = units
             else:
                 warnings.warn("There is no units for this NDArray!",
-                          SpectroChemPyWarning)
+                              SpectroChemPyWarning)
 
-        #if not inplace:
+        # if not inplace:
         return new
-
 
     # -------------------------------------------------------------------------
     # private methods
@@ -1546,7 +1677,6 @@ class NDArray(HasTraits):
 
         return args
 
-
     # .........................................................................
     def _loc2index(self, loc, axis):
         # Return the index of a location along the axis
@@ -1570,13 +1700,13 @@ class NDArray(HasTraits):
         else:
             start, stop, step = key.start, key.stop, key.step
 
-            if not (start is None or isinstance(start, (int, np.int))):
+            if start is not None and not isinstance(start, (int, np.int_)):
                 start = self._loc2index(start, axis)
 
-            if not (stop is None or isinstance(stop, (int, np.int))):
+            if stop is not None and not isinstance(stop, (int, np.int_)):
                 stop = self._loc2index(stop, axis) + 1
 
-            if step is not None and not isinstance(step, (int, np.int)):
+            if step is not None and not isinstance(step, (int, np.int_)):
                 raise KeyError('step in location slicing is not yet possible.')
                 # TODO: we have may be a special case with datetime
                 step = 1
@@ -1635,7 +1765,6 @@ class NDArray(HasTraits):
         internkeys = keys[:]
 
         for axis, key in enumerate(keys):
-
             complex = self.is_complex[axis]
 
             keys[axis], internkeys[axis] = self._get_slice(key, axis, complex)
@@ -1693,3 +1822,366 @@ class NDArray(HasTraits):
         else:
             return uar
 
+
+# =============================================================================
+# CoordSet
+# =============================================================================
+
+class CoordSet(HasTraits):
+    """A collection of Coordinates for a NDArray object
+     with a validation method.
+
+    Parameters
+    ----------
+    coords : NDarray or NDArray subclass objects.
+
+       Any instance of a NDArray can be accepted as coordinates for a
+       given dimension.
+
+       If an instance of CoordSet is found, instead, this means that all
+       coordinates in this set describe the same axis
+
+    is_same_dim : bool, optional, default=False
+
+        if true, all elements of coords describes a single dimension.
+        By default, this is false, which means that each item describes
+        a different dimension.
+
+    """
+
+    # Hidden attributes containing the collection of objects
+    _coords = List(Instance(NDArray), allow_none=True)
+
+    # Hidden name of the object
+    _name = Unicode()
+
+    # .........................................................................
+    @default('_name')
+    def _get_name_default(self):
+        return u"CoordSet_" + str(uuid.uuid1()).split('-')[0]  # a unique id
+
+    # Hidden attribute to specify if the collection is for a single dimension
+    _is_same_dim = Bool
+
+    # -------------------------------------------------------------------------
+    # initialization
+    # -------------------------------------------------------------------------
+
+    # .........................................................................
+    def __init__(self, *coords, **kwargs):
+        _copy = kwargs.pop('copy', False)
+
+        super(CoordSet, self).__init__(**kwargs)
+
+        self._coords = []
+
+        if all([isinstance(coords[i], (NDArray, CoordSet))
+                for i in range(len(coords))]):
+            # Any instance of a NDArray can be accepted as coordinates for a
+            # dimension.
+            # If an instance of CoordSet is found, this means that all
+            # coordinates in this set describe the same axis
+
+            coords = list(coords)
+
+        elif len(coords) == 1:
+            # this a set of CoordSet or NDArray passed as a list
+            coords = coords[0]
+
+        else:
+            # not implemented yet -
+            # a list of list of object have been passed
+            # TODO: try to ipmplement this
+            raise CoordSetError(
+                    'a list of list of object have been passed - '
+                    'this not yet implemented')
+
+        if len(coords) == 1 and isinstance(coords[0], CoordSet):
+            if _copy:
+                coords = copy.deepcopy(coords)
+            self._coords = coords[0]._coords
+
+        else:
+            for item in coords:
+
+                if not isinstance(item, (NDArray, CoordSet)):
+                    item = NDArray(item, copy=_copy)
+                    # full validation of the item
+                    # will be done in NDArray.__init__
+
+                if self._validation(item):
+                    self._coords.append(item)
+
+        # check if we have single dimension axis
+
+        for item in self._coords:
+            if isinstance(item, CoordSet):
+                # it must be a single dimension axis
+                item._is_same_dim = True
+                # in this case we must have same length for all coordinates
+                siz = item[0].size
+                if np.any([elt.size != siz for elt in item._coords]):
+                    raise CoordSetError('Coordinates must be of the same size '
+                                        'for a dimension with multiple '
+                                        'coordinates')
+
+    # -------------------------------------------------------------------------
+    # Properties
+    # -------------------------------------------------------------------------
+
+    # .........................................................................
+    @property
+    def name(self):
+        return self._name
+
+    # .........................................................................
+    @property
+    def names(self):
+        """`list`, read-only property - Get the list of axis names.
+        """
+        if len(self._coords) < 1:
+            return []
+        try:
+            return [item.name for item in self._coords]
+        except:
+            log.critical(self._coords)
+
+    # .........................................................................
+    @property
+    def titles(self):
+        """`list` - Get/Set a list of axis titles.
+
+        """
+        _titles = []
+        for item in self._coords:
+            if isinstance(item, NDArray):
+                _titles.append(item.title if item.title else item.name)
+            elif isinstance(item, CoordSet):
+                _titles.append([el.title if el.title else el.name
+                                for el in item])
+            else:
+                raise CoordSetError('Something wrong with the titles!')
+
+        return _titles
+
+    # .........................................................................
+    @titles.setter
+    def titles(self, value):
+        # Set the titles at once
+        if is_sequence(value):
+            for i, item in enumerate(value):
+                self._coords[i].title = item
+
+    # .........................................................................
+    @property
+    def labels(self):
+        """`list` - Get/Set a list of axis labels.
+
+        """
+        return [item.label for item in self._coords]
+
+    # .........................................................................
+    @labels.setter
+    def labels(self, value):
+        # Set the labels at once
+        if is_sequence(value):
+            for i, item in enumerate(value):
+                self._coords[i].label = item
+
+    # .........................................................................
+    @property
+    def units(self):
+        """`list` - Get/Set a list of axis units.
+
+        """
+        return [item.units for item in self._coords]
+
+    # .........................................................................
+    @units.setter
+    def units(self, value):
+        if is_sequence(value):
+            for i, item in enumerate(value):
+                self._coords[i].units = item
+
+    # .........................................................................
+    @property
+    def isempty(self):
+        """`bool`, read-only property - `True` if there is no coords defined.
+
+        """
+        return len(self._coords) == 0
+
+    # .........................................................................
+    @property
+    def is_same_dim(self):
+        """`bool`, read-only property -
+        `True` if the coords define a single dimension.
+
+        """
+        return self._is_same_dim
+
+    # .........................................................................
+    @property
+    def sizes(self):
+        """`int`, read-only property -
+        gives the size of the axis or coords for each dimention"""
+        _sizes = []
+        for i, item in enumerate(self._coords):
+            if isinstance(item, NDArray):
+                _sizes.append(item.size)
+            elif isinstance(item, CoordSet):
+                _sizes.append(item.sizes[i][0])
+        return _sizes
+
+    # .........................................................................
+    @property
+    def data(self):
+        """:class:`~numpy.ndarray`-like object - The first axis coordinates.
+
+        """
+        return self[0]._data
+
+    # -------------------------------------------------------------------------
+    # public methods
+    # -------------------------------------------------------------------------
+
+    # .........................................................................
+    def copy(self):
+        """Make a disconnected copy of the current coords.
+
+        Returns
+        -------
+        coords : same type
+            an exact copy of the current object
+
+        """
+        return self.__copy__()
+
+    # -------------------------------------------------------------------------
+    # private methods
+    # -------------------------------------------------------------------------
+
+    # .........................................................................
+    def _transpose(self, coords=None):
+        # in principle it is not directly called by the user as it is intimately
+        # linked to a dataset
+        if self._is_same_dim:
+            # not applicable for same dimension coords
+            warnings.warn(
+                    'CoordSet for a single dimension are not transposable',
+                    CoordSetWarning)
+            return
+        if coords is None:
+            self._coords.reverse()
+        else:
+            self._coords = [self._coords[axis] for axis in coords]
+
+    # .........................................................................
+    def _validation(self, item):
+        # To be valid any added axis must have a different name
+
+        if not isinstance(item, (NDArray, CoordSet)):
+            raise CoordSetError('The elements of must be NDArray or '
+                                'CoordSet objects only!')
+
+        if item._name in self.names:
+            raise CoordSetError('The axis name must be unique!')
+
+        if isinstance(item, NDArray) and item.ndim > 1:
+            raise CoordSetError('An axis should be a 1D array!')
+
+        # TODO: add more validation for CoordSet objects
+
+        return True
+
+    # -------------------------------------------------------------------------
+    # special methods
+    # -------------------------------------------------------------------------
+
+    # .........................................................................
+    @staticmethod
+    def __dir__():
+        return ['_coords']
+
+    # .........................................................................
+    def __call__(self, *args, **kwargs):
+        # allow the following syntax: coords(0,2), or coords(axis=(0,2))
+        coords = []
+        if args:
+            for idx in args:
+                coords.append(self[idx])
+        axis = kwargs.get('axis', None)
+        if axis is not None:
+            coords.append(self[axis])
+        if len(coords) == 1:
+            return coords[0]
+        else:
+            return CoordSet(coords)
+
+    # .........................................................................
+    def __len__(self):
+        return len(self._coords)
+
+    # .........................................................................
+    def __getitem__(self, index):
+        if isinstance(index, str):
+            if index in self.titles:
+                # selection by axis title
+                return self._coords.__getitem__(self.titles.index(index))
+            # may be it is in a multiple axis
+            for item in self._coords:
+                if isinstance(item, CoordSet) and index in item.titles:
+                    # selection by subaxis title
+                    return item.__getitem__(item.titles.index(index))
+
+        res = self._coords.__getitem__(index)
+        if isinstance(index, slice):
+            return CoordSet(res)
+        else:
+            return res
+
+    # .........................................................................
+    def __setitem__(self, index, coords):
+        self._coords[index] = coords
+
+    # .........................................................................
+    def __iter__(self):
+        for item in self._coords:
+            yield item
+
+    # .........................................................................
+    def __repr__(self):
+        out = ("CoordSet object <" + ', '.join(['<object {}>']
+                                               * len(self._coords)) + ">")
+        out = out.format(*self.names)
+        return out
+
+    # .........................................................................
+    def __str__(self):
+        out = "[" + ', '.join(['{}'] * len(self._coords)) + "]"
+        s = []
+        for item in self._coords:
+            if isinstance(item, CoordSet):
+                s.append(item.__str__())
+            else:
+                s.append(item.title)
+        out = out.format(*s)
+        return out
+
+    # .........................................................................
+    def __deepcopy__(self, memo):
+        return self.__class__([copy.deepcopy(ax, memo=memo) for ax in self])
+
+    # .........................................................................
+    def __copy__(self):
+        return self.__class__([copy.copy(ax) for ax in self])
+
+    # .........................................................................
+    def __eq__(self, other):
+        return self._coords == other._coords
+        # TODO: check the case of compatible units
+
+    # .........................................................................
+    def __ne__(self, other):
+        return not self.__eq__(
+                other)

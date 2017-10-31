@@ -58,7 +58,7 @@ from ..fileio.bruker import read, read_pdata, read_lowmem
 # Local imports
 # =============================================================================
 from ...dataset.api import Meta
-from ...dataset.api import Coord, NDDataset
+from ...dataset.api import CoordSet, Coord, NDDataset
 from ...units import ur, Quantity
 from .parameter import nmr_valid_meta
 
@@ -424,7 +424,7 @@ def read_bruker_nmr(source, *args, **kwargs):
 
     list_data = []
     list_meta = []
-    list_axes = []
+    list_coordset = []
 
     for idx, path in enumerate(paths):
 
@@ -650,21 +650,21 @@ def read_bruker_nmr(source, *args, **kwargs):
         list_meta.append(meta)
 
         # make the corresponding axis
-        log.debug('Create axis...')
-        axes = []
+        log.debug('Create coordset...')
+        coordset = []
         axe_range = range(parmode + 1)
         for axis in axe_range:
             if not meta.isfreq[axis]:
                 # the axis is in time units
                 dw = (1. / meta.sw_h[axis]).to('us')
-                axespoints = np.arange(meta.td[axis])
-                axe = Coords(axespoints * dw,
+                coordpoints = np.arange(meta.td[axis])
+                coord = Coord(coordpoints * dw,
                            name='F{}'.format(axis),
                            title="acquisition time")
-                axes.append(axe)
+                coordset.append(coord)
             else:
                 raise NotImplementedError('Not yet implemented')
-        list_axes.append(axes)
+        list_coordset.append(coordset)
 
         # # store also the varpars of the series
         # varpars = kargs.get('varpars')
@@ -702,7 +702,7 @@ def read_bruker_nmr(source, *args, **kwargs):
 
         source.meta.update(list_meta[0])
         source.meta.readonly = True
-        source.axes = list_axes[0]
+        source.coordset = list_coordset[0]
         source.title = 'intensity'
 
     else:
@@ -717,10 +717,10 @@ def read_bruker_nmr(source, *args, **kwargs):
                 diff = True
 
         if not diff:
-            # find difference in axes
-            axes = list_axes[0]
-            for a in list_axes[1:]:
-                if np.any(a != axes):
+            # find difference in coordsets
+            coordset = list_coordset[0]
+            for a in list_coordset[1:]:
+                if np.any(a != coordset):
                     diff = True
 
         if not diff:
@@ -780,7 +780,7 @@ def read_bruker_nmr(source, *args, **kwargs):
                 if iscomplex:
                     source.set_complex(axis)
 
-            # new axes
+            # new coordset
             vkey = kwargs.get('var_key', None)
             vkey = vkey.lower()
 
@@ -804,11 +804,11 @@ def read_bruker_nmr(source, *args, **kwargs):
             labels = np.array(labels, dtype=object)
             axis.labels = labels
 
-            # now make the axes it in the current dataset
-            # only one axes of the list is taken: they are all the same
+            # now make the coordset it in the current dataset
+            # only one coordset of the list is taken: they are all the same
             # in principle... if not problem above or the experiments
             # are not compatibles
-            source.axes = [axis] + list_axes[-1]
+            source.coordset = [axis] + list_coordset[-1]
 
     return source
 

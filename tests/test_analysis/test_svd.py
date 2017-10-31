@@ -48,7 +48,11 @@ from tests.utils import show_do_not_block
 def test_svd(IR_source_1):
 
     source = IR_source_1.copy()
+    print(source)
+
     svd = Svd(source)
+
+    print()
     print(svd.U)
     print(svd.Vt)
     print(svd.s)

@@ -42,8 +42,11 @@ import matplotlib.pyplot as plt
 
 from traitlets import HasTraits, Instance
 
-from ..core.dataset.nddataset import NDDataset
-from ..core.dataset.ndcoords import CoordSet, Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndarray import CoordSet
+from spectrochempy.utils import SpectroChemPyError
+
 from .svd import Svd
 
 import numpy as np
@@ -84,34 +87,43 @@ class Pca(HasTraits):
     # private attributes
     _ev = Instance(np.ndarray)
 
-    def __init__(self, X, npc=None):
+    def __init__(self, source, npc=None):
         """Constructor"""
 
+        # check if we have the correct input
+        if isinstance(source, NDDataset):
+            data = source.data
+        else:
+            raise SpectroChemPyError('A dataset of type NDDataset is  '
+                               'expected as a source of data, but an object'
+                               ' of type {} has been provided'.format(
+                               type(source).__name__))
+
         # mean center the dataset
-        self.center = Xmean = np.nanmean(X.data, axis=0)
-        Xc = X.copy()
-        Xc.data = X.data - Xmean
+        self.center = center = np.nanmean(source.data, axis=0)
+        X = source.copy()
+        X.data = source.data - center
 
         if npc is None:
-            npc = min(Xc.shape)
+            npc = min(X.shape)
 
-        Xsvd = Svd(Xc)
+        Xsvd = Svd(X)
 
         # select npc loadings & compute scores
         T = np.dot(Xsvd.U.data[:, 0:npc], np.diag(Xsvd.s)[0:npc, 0:npc])
         T = NDDataset(T)
-        T.name = 'scores (T) of ' + Xc.name
-        T.axes = CoordSet(Coord(X.axes[0]),
-                          Coord(None,
-                                labels=['# %s' % i for i in range(len(Xsvd.s))],
+        T.title = 'scores (T) of ' + X.name
+        T.coordset = CoordSet(source.coordset[0],
+                              Coord([ i+1 for i in range(len(Xsvd.s))],
+                                labels=['#%d' % (i+1) for i in range(len(Xsvd.s))],
                                 title='PC')
-                          )
-        T.description = 'scores (T) of ' + Xc.name
-        T.history = str(T.modified) + ': created by Pca \n'
+                              )
+        T.description = 'scores (T) of ' + X.name
+        T.history = 'created by Pca'
 
         Pt = Xsvd.Vt[0:npc]
-        Pt.name = 'Loadings (P.t) of ' + Xc.name
-        Pt.history = str(T.modified) + ': created by Pca \n'
+        Pt.title = 'Loadings (P.t) of ' + X.name
+        Pt.history = 'created by Pca'
 
         # scores (T) and loading (Pt) matrixes
         self.T = T
@@ -160,14 +172,17 @@ class Pca(HasTraits):
             The number of PC to use for the reconstruction
 
         """
+        #TODO: make a function to performs dot on two datasets
+
         X = self.center + np.dot(self.T.data[:, 0:npc], self.Pt.data[0:npc, :])
         X = NDDataset(X)
         X.name = 'PCA constructed Dataset with {} PCs'.format(npc)
-        X.axes = CoordSet(self.T.coords(0).copy(), self.Pt.coords(1).copy())
+        X.coordset = CoordSet(self.T.coords(0).copy(), self.Pt.coords(1).copy())
         return X
 
     def printev(self, npc=10):
-        """prints figures of merit: eigenvalues and explained variance for the first npc PS's
+        """prints figures of merit: eigenvalues and explained variance
+        for the first npc PS's
 
         Parameters
         ----------
@@ -215,7 +230,7 @@ class Pca(HasTraits):
         else:
             fig = plt.figure(nfig)
 
-        col = self.T.axes[0]
+        col = self.T.coordset[0]
 
         plt.title('Score plot')
         if len(pcs) == 2:

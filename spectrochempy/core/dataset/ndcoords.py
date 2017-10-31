@@ -34,9 +34,6 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-#
-
 """This module provides Coord related classes
 
 """
@@ -61,13 +58,12 @@ from spectrochempy.utils import (is_sequence, numpyprintoptions,
                                  SpectroChemPyWarning)
 from spectrochempy.utils.traittypes import Range
 
-__all__ = ['CoordSet',
-           'Coord',
-           'CoordsRange',
-           'CoordsRangeError',
-           'CoordsError',
-           'CoordsError',
-           'CoordsWarning']
+__all__ = ['Coord',
+           'CoordRange',
+           'CoordRangeError',
+           'CoordError',
+           'CoordError',
+           'CoordWarning']
 _classes = __all__[:]
 
 # =============================================================================
@@ -76,27 +72,26 @@ _classes = __all__[:]
 
 numpyprintoptions()
 
-
 # =============================================================================
 #  Errors and warnings
 # =============================================================================
 
-class CoordsRangeError(ValueError):
-    """An exception that is raised when something is wrong with the CoordsRange.
+class CoordRangeError(ValueError):
+    """An exception that is raised when something is wrong with the CoordRange.
+
     """
 
 
-class CoordsError(ValueError):
-    """An exception that is raised when something is wrong with the Coord or
-    CoordSet.
+class CoordError(ValueError):
+    """An exception that is raised when something is wrong with the Coord
+
     """
 
 
-class CoordsWarning(SpectroChemPyWarning):
-    """A warning that is raised when something is wrong with the Coord or
-    CoordSet definitions but do not necessarily need to raise an error.
+class CoordWarning(SpectroChemPyWarning):
+    """A warning that is raised when something is wrong with the Coord
+     but do not necessarily need to raise an error.
     """
-
 
 # =============================================================================
 # Coord
@@ -178,7 +173,7 @@ class Coord(NDMath, NDArray):
 
         # some checking
         if self._data.ndim >1:
-            raise CoordsError("Number of dimension for coordinate's array "
+            raise CoordError("Number of dimension for coordinate's array "
                               "should be 1!")
 
     # -------------------------------------------------------------------------
@@ -186,7 +181,7 @@ class Coord(NDMath, NDArray):
     # -------------------------------------------------------------------------
     @default('_name')
     def _get_name_default(self):
-        return u"Coords_" + str(uuid.uuid1()).split('-')[0]  # a unique id
+        return u"Coord_" + str(uuid.uuid1()).split('-')[0]  # a unique id
 
     @property
     def is_reversed(self):
@@ -275,312 +270,10 @@ class Coord(NDMath, NDArray):
 
 
 # =============================================================================
-# CoordSet
+# CoordRange
 # =============================================================================
 
-class CoordSet(HasTraits):
-    """A collection of Coord for a dataset with a validation method.
-
-    Parameters
-    ----------
-    coords : list of Coord objects.
-
-    issamedim : bool, optional, default=False
-
-        if true, all axis describes a single dimension.
-        By default, each item describes a different dimension.
-
-    """
-
-    # Hidden attributes containing the collection of Coord instance
-    _coords = List(Instance(Coord), allow_none=True)
-
-    # Hidden name of the object
-    _name = Unicode
-
-    @default('_name')
-    def _get_name_default(self):
-        return u"CoordSet_" + str(uuid.uuid1()).split('-')[0]  # a unique id
-
-    # Hidden attribute to specify if the collection is for a single dimension
-    _issamedim = Bool
-
-    # -------------------------------------------------------------------------
-    # initialization
-    # -------------------------------------------------------------------------
-    def __init__(self, *coords, **kwargs):
-
-        _copy = kwargs.pop('copy', False)
-
-        super(CoordSet, self).__init__(**kwargs)
-
-        self._coords = []
-
-        if all([isinstance(coords[i], (Coord, CoordSet)) for i in range(len(coords))]):
-            coords = list(coords)
-        elif len(coords) == 1:
-            # this a set of CoordsSet or Coord passed as a list
-            coords = coords[0]
-        else:
-            # not implemented yet -
-            # a list of list of object have been passed
-            # TODO: try to ipmplement this
-            raise CoordsError(
-                    'a list of list of object have been passed - this not yet implemented')
-
-        if len(coords) == 1 and isinstance(coords[0], CoordSet):
-            if _copy:
-                coords = copy.deepcopy(coords)
-            self._coords = coords[0]._coords
-
-        else:
-            for item in coords:
-
-                if not isinstance(item, (Coord, CoordSet)):
-                    item = Coord(item, copy=_copy)
-                    # full validation of the item
-                    # will be done in Coord
-                if self._validation(item):
-                    self._coords.append(item)
-
-        # check if we have single dimension axis
-
-        for item in self._coords:
-            if isinstance(item, CoordSet):
-                # it must be a single dimension axis
-                item._issamedim = True
-                # in this case we must have same length coords
-                siz = item[0].size
-                if np.any([elt.size != siz for elt in item._coords]):
-                    raise CoordsError('axis must be of the same size '
-                                    'for a dimension with multiple axis dimension')
-
-    # -------------------------------------------------------------------------
-    # Properties
-    # -------------------------------------------------------------------------
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def names(self):
-        """`list`, read-only property - Get the list of axis names.
-        """
-        if len(self._coords) < 1:
-            return []
-        try:
-            return [item.name for item in self._coords]
-        except:
-            log.critical(self._coords)
-
-    @property
-    def titles(self):
-        """`list` - Get/Set a list of axis titles.
-
-        """
-        _titles = []
-        for item in self._coords:
-            if isinstance(item, Coord):
-                _titles.append(item.title if item.title else item.name)
-            elif isinstance(item, CoordSet):
-                _titles.append([el.title if el.title else el.name
-                                for el in item])
-            else:
-                raise CoordsError('Something wrong with the titles!')
-
-        return _titles
-
-    @titles.setter
-    def titles(self, value):
-        # Set the titles at once
-        if is_sequence(value):
-            for i, item in enumerate(value):
-                self._coords[i].title = item
-
-    @property
-    def labels(self):
-        """`list` - Get/Set a list of axis labels.
-
-        """
-        return [item.label for item in self._coords]
-
-    @labels.setter
-    def labels(self, value):
-        # Set the labels at once
-        if is_sequence(value):
-            for i, item in enumerate(value):
-                self._coords[i].label = item
-
-    @property
-    def units(self):
-        """`list` - Get/Set a list of axis units.
-
-        """
-        return [item.units for item in self._coords]
-
-    @units.setter
-    def units(self, value):
-        if is_sequence(value):
-            for i, item in enumerate(value):
-                self._coords[i].units = item
-
-    @property
-    def isempty(self):
-        """`bool`, read-only property - `True` if there is no coords defined.
-
-        """
-        return len(self._coords) == 0
-
-    @property
-    def issamedim(self):
-        """`bool`, read-only property -
-        `True` if the coords define a single dimension.
-
-        """
-        return self._issamedim
-
-    @property
-    def sizes(self):
-        """`int`, read-only property -
-        gives the size of the axis or coords for each dimention"""
-        _sizes = []
-        for i, item in enumerate(self._coords):
-            if isinstance(item, Coord):
-                _sizes.append(item.size)
-            elif isinstance(item, CoordSet):
-                _sizes.append(item.sizes[i][0])
-        return _sizes
-
-    @property
-    def coords(self):
-        """:class:`~numpy.ndarray`-like object - The first axis coordinates.
-
-        """
-        return self[0]._data
-
-    # -------------------------------------------------------------------------
-    # public methods
-    # -------------------------------------------------------------------------
-    def copy(self):
-        """Make a disconnected copy of the current coords.
-
-        Returns
-        -------
-        coords : same type
-            an exact copy of the current object
-
-        """
-        return self.__copy__()
-
-    # -------------------------------------------------------------------------
-    # private methods
-    # -------------------------------------------------------------------------
-    def _transpose(self, coords=None):
-        # in principle it is not directly called by the user as it is intimately
-        # linked to a dataset
-        if self._issamedim:
-            # not applicable for same dimension coords
-            warnings.warn('CoordSet for a single dimentsion are not transposable',
-                          CoordsWarning)
-            return
-        if coords is None:
-            self._coords.reverse()
-        else:
-            self._coords = [self._coords[axis] for axis in coords]
-
-    def _validation(self, item):
-        # To be valid any added axis must have a different name
-
-        if not isinstance(item, (Coord, CoordSet)):
-            raise CoordsError('The elements of must be Coord or '
-                            'CoordSet objects only!')
-
-        if item._name in self.names:
-            raise CoordsError('The axis name must be unique!')
-
-        if isinstance(item, Coord) and item.ndim > 1:
-            raise CoordsError('An axis should be a 1D array!')
-
-        # TODO: add more validation for CoordSet objects
-
-        return True
-
-    # -------------------------------------------------------------------------
-    # special methods
-    # -------------------------------------------------------------------------
-
-    @staticmethod
-    def __dir__():
-        return ['_coords']
-
-    def __call__(self, *args):
-        # allow the following syntax: coords(0,2), or coords(axis=(0,2))
-        coords = []
-        if args:
-            for idx in args:
-                coords.append(self._coords[idx])
-        if len(coords) == 1:
-            return coords[0]
-        else:
-            return CoordSet(coords)
-
-    def __len__(self):
-        return len(self._coords)
-
-    def __getitem__(self, index):
-
-        if isinstance(index, string_types):
-            if index in self.titles:
-                # selection by axis title
-                return self._coords.__getitem__(self.titles.index(index))
-            # may be it is in a multiple axis
-            for item in self._coords:
-                if isinstance(item, CoordSet) and index in item.titles:
-                    # selection by subaxis title
-                    return item.__getitem__(item.titles.index(index))
-
-        res = self._coords.__getitem__(index)
-        if isinstance(index, slice):
-            return CoordSet(res)
-        else:
-            return res
-
-    def __setitem__(self, index, coords):
-        self._coords[index] = coords
-
-    def __iter__(self):
-        for item in self._coords:
-            yield item
-
-    def __repr__(self):
-        out = ("CoordSet object <" + ', '.join(['<Coord object {}>']
-                                           * len(self._coords)) + ">")
-        out = out.format(*self.names)
-        return out
-
-    def __str__(self):
-        out = "(" + ', '.join(['[{}]'] * len(self._coords)) + ")"
-        out = out.format(*self.titles)
-        return out
-
-    def __deepcopy__(self, memo):
-        return self.__class__([copy.deepcopy(ax, memo=memo) for ax in self])
-
-    def __copy__(self):
-        return self.__class__([copy.copy(ax) for ax in self])
-
-    def __eq__(self, other):
-        return self._coords == other._coords  # TODO: check the case of compatible units
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-
-# =============================================================================
-# CoordsRange
-# =============================================================================
-
-class CoordsRange(HasTraits):
+class CoordRange(HasTraits):
     """An axisrange is a set of ordered, non intersecting intervals,\
     e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
 
@@ -606,10 +299,10 @@ class CoordsRange(HasTraits):
     reversed = Bool
 
     def __init__(self, *ranges, **kwargs):
-        """ Constructs Coordsrange with default values
+        """ Constructs CoordRange with default values
 
         """
-        super(CoordsRange, self).__init__(**kwargs)
+        super(CoordRange, self).__init__(**kwargs)
 
         self.reversed = kwargs.get('reversed', False)
 

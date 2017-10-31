@@ -169,9 +169,9 @@ def plot_1D(source, **kwargs):
 
     # ordinates (by default we plot real part of the data)
     if not kwargs.get('imag', False) or kwargs.get('show_complex', False):
-        z = source.real()
+        z = source.real
     else:
-        z = source.imag()
+        z = source.imag
 
     # offset
     offset = kwargs.get('offset', 0.0)
@@ -181,8 +181,13 @@ def plot_1D(source, **kwargs):
     line, = source.ax.plot(x.coords, z.data)
 
     if kwargs.get('show_complex', False):
-        zimag = source.imag()
+        zimag = source.imag
         source.ax.plot(x.coords, zimag.data, ls='--')
+
+    if kwargs.get('plot_model', False):
+        modeldata = source.modeldata
+        source.ax.plot(x.coords, modeldata.T, ls=':', lw='2')
+        #TODO: improve this!!!
 
     # line attributes
     c = kwargs.get('color', kwargs.get('c'))

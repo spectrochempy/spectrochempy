@@ -351,11 +351,11 @@ def read_omnic(source, filename='', sortbydate=True, **kwargs):
         source.units = 'absorbance'
         source.title = 'Absorbance'
         source.name = spg_title
-        source.axes = (np.array(alltimestamps), xaxis)
-        source.axes.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
-        source.axes[1].units = 'cm^-1'
-        source.axes[0].labels = (allacquisitiondates, alltitles)
-        source.axes[0].units = 's'
+        source.coordset = (np.array(alltimestamps), xaxis)
+        source.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
+        source.coordset[1].units = 'cm^-1'
+        source.coordset[0].labels = (allacquisitiondates, alltitles)
+        source.coordset[0].units = 's'
 
         # Set description and history
         source.description = (

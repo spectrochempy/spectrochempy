@@ -148,9 +148,9 @@ def apodize(source, **kwargs):
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    lastaxe = new.axes[-1]
-    if (lastaxe.unitless or lastaxe.dimensionless or
-                lastaxe.units.dimensionality != '[time]'):
+    lastcoord = new.coordset[-1]
+    if (lastcoord.unitless or lastcoord.dimensionless or
+                lastcoord.units.dimensionality != '[time]'):
         log.error('apodization functions apply only to dimensions '
                   'with [time] dimensionality')
         return source
@@ -181,14 +181,14 @@ def apodize(source, **kwargs):
 
     # convert (1./apod) to the axis time units
     if apod.magnitude > epsilon:
-        tc1 = (1. / apod).to(lastaxe.units)
+        tc1 = (1. / apod).to(lastcoord.units)
         args.append(tc1)
     else:
         args.append(0 * ur.us)
 
     # convert (1./apod2) to the axis time units
     if np.abs(apod2.magnitude) > epsilon:
-        tc2 = (1. / apod2).to(lastaxe.units)
+        tc2 = (1. / apod2).to(lastcoord.units)
         args.append(tc2)
     else:
         args.append(0 * ur.us)
@@ -196,14 +196,14 @@ def apodize(source, **kwargs):
     # should we shift the time origin? (should be in axis units)
     shifted = kwargs.get('shifted', kwargs.get('apod3', 0))
     if not isinstance(shifted, Quantity):
-        # we default to lastaxe.units
-        shifted = shifted * lastaxe.units
+        # we default to lastcoord.units
+        shifted = shifted * lastcoord.units
     else:
-        shifted = shifted.to(lastaxe.units)
+        shifted = shifted.to(lastcoord.units)
     args.append(shifted)
 
     # compute the apodization function
-    x = lastaxe
+    x = lastcoord
     method = kwargs.pop('method', None)
     if method is None or method == 'em':
         # em by default

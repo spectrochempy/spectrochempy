@@ -71,7 +71,8 @@ from numpy.lib.format import write_array, MAGIC_PREFIX
 # ------------
 
 import spectrochempy
-from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
+from spectrochempy.core.dataset.ndarray import CoordSet
+from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
 from spectrochempy.utils import is_sequence
@@ -212,9 +213,9 @@ class NDIO(HasTraits):
                     _objnames = dir(val)
                     _loop_on_obj(_objnames, level=key + '.')
 
-                elif isinstance(val, Axes):
+                elif isinstance(val, CoordSet):
 
-                    for i, val in enumerate(val._axes):
+                    for i, val in enumerate(val._coords):
                         _objnames = dir(val)
                         _loop_on_obj(_objnames, obj=val, level="axis_%d_" % i)
 
@@ -346,21 +347,21 @@ class NDIO(HasTraits):
 
             # interpret
             ndim = obj["data"].ndim
-            axes = None
+            coordset = None
             new = cls()
 
             for key, val in obj.items():
                 if key.startswith('axis'):
-                    if not axes:
-                        axes = [Coord() for _ in range(ndim)]
+                    if not coordset:
+                        coordset = [Coord() for _ in range(ndim)]
                     els = key.split('_')
-                    setattr(axes[int(els[1])], "_" + els[2], val)
+                    setattr(coordset[int(els[1])], "_" + els[2], val)
                 elif key == "pars.json":
                     pars = json.loads(asstr(val))
                 else:
                     setattr(new, "_" + key, val)
-            if axes:
-                new.axes = axes
+            if coordset:
+                new.coordset = coordset
 
             def setattributes(clss, key, val):
                 # utility function to set the attributes
@@ -379,7 +380,7 @@ class NDIO(HasTraits):
                 if key.startswith('axis'):
 
                     els = key.split('_')
-                    setattributes(axes[int(els[1])], els[2], val)
+                    setattributes(coordset[int(els[1])], els[2], val)
 
                 else:
 

@@ -129,12 +129,12 @@ def test_nmr_em_calculated_notapplied(NMR_source_1D):
     assert isinstance(arr, NDDataset)
 
     # here we assume it is 100 Hz
-    x = source.axes[-1]
+    x = source.coordset[-1]
     tc = (1./(lb * ur.Hz)).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
 
-    assert_equal(arr.real().data, arrcalc)  # note that we have to compare
+    assert_equal(arr.real.data, arrcalc)  # note that we have to compare
     # to the real part data because of the complex nature of the data
 
 def test_nmr_em_calculated_applied(NMR_source_1D):
@@ -145,7 +145,7 @@ def test_nmr_em_calculated_applied(NMR_source_1D):
     arr = source.em(lb=lb, apply=False)
 
     # here we assume it is 100 Hz
-    x = source.axes[-1]
+    x = source.coordset[-1]
     tc = (1. / (lb * ur.Hz)).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
@@ -158,13 +158,15 @@ def test_nmr_em_calculated_applied(NMR_source_1D):
     assert_equal(source3.data, (arrcalc*source2).data)
 
     # but also the sources as whole entity
-    assert(source3 == arrcalc*source2)
+    source4 = arrcalc * source2
+    source3 == source4
+    assert(source3 == source4)
 
 def test_nmr_em_calculated_Hz(NMR_source_1D):
     source = NMR_source_1D.copy()
 
     lb = 200 * ur.Hz
-    x = source.axes[-1]
+    x = source.coordset[-1]
     tc = (1. / lb).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
@@ -183,7 +185,7 @@ def test_nmr_em_calculated_inplace(NMR_source_1D):
 
     lb = 200 * ur.Hz
 
-    x = source.axes[-1]
+    x = source.coordset[-1]
     tc = (1. / lb).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
