@@ -41,6 +41,7 @@
 import copy
 import uuid
 import warnings
+from datetime import datetime
 
 import numpy as np
 from pandas import Index
@@ -54,7 +55,7 @@ from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 from spectrochempy.core.units import Quantity
 # from ...utils import create_traitsdoc
 
-from spectrochempy.utils import (is_sequence, numpyprintoptions,
+from spectrochempy.utils import (is_number, numpyprintoptions,
                                  SpectroChemPyWarning)
 from spectrochempy.utils.traittypes import Range
 
@@ -224,6 +225,40 @@ class Coord(NDMath, NDArray):
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
+
+    def _loc2index(self, loc, axis=None):
+        # Return the index of a location (label or coordinates) along the axis
+        # axis is not use here as wa are already ib a coord axis.
+
+        # underlying axis array and labels
+        data = self._data
+        labels = self._labels
+
+        if isinstance(loc, string_types) and labels is not None:
+            # it's probably a label
+            indexes = np.argwhere(labels == loc).flatten()
+            if indexes.size > 0:
+                return indexes[0]
+            else:
+                raise ValueError(
+                        'Could not find this label: {}'.format(loc))
+
+        elif isinstance(loc, datetime):
+            # not implemented yet
+            return None  # TODO: date!
+
+        elif is_number(loc):
+            # get the index of this coordinate
+            if loc > data.max() or loc < data.min():
+                warnings.warn('This coordinate ({}) is outside the axis limits.\n'
+                     'The closest limit index is returned'.format(loc),
+                     CoordWarning)
+            index = (np.abs(data - loc)).argmin()
+            return index
+
+        else:
+            raise ValueError('Could not find this location: {}'.format(loc))
+
 
     def _repr_html_(self):
 
