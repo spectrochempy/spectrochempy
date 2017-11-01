@@ -58,7 +58,7 @@ import numpy as np
 # =============================================================================
 # Local imports
 # =============================================================================
-from uncertainties import unumpy as unp
+from spectrochempy.extern.uncertainties import unumpy as unp
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import interleave, interleaved2complex

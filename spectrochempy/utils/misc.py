@@ -61,7 +61,7 @@ import os
 import numpy as np
 import sys
 from contextlib import contextmanager
-from uncertainties.core import Variable
+from spectrochempy.extern.uncertainties.core import Variable
 
 
 # =============================================================================

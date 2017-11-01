@@ -40,7 +40,7 @@ import numpy as np
 import pytest
 from datetime import datetime
 
-from pint import DimensionalityError
+from spectrochempy.extern.pint import DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.units import ur
 from spectrochempy.utils import SpectroChemPyWarning, \
@@ -213,7 +213,7 @@ def test_init_ndarray_subclass():
     # check some of its properties
     a = NDArray()
     assert isinstance(a, NDArray)
-    assert a.name != u'<no name>'  # must be the uuid in this case
+    assert a.name != '<no name>'  # must be the uuid in this case
     assert a.is_empty
     assert not a.is_masked
     assert not a.is_uncertain
@@ -229,9 +229,9 @@ def test_set_ndarray_subclass():
     # check some of its properties
     a = NDArray()
     a.name = 'xxxx'
-    assert a.name == u'xxxx'
+    assert a.name == 'xxxx'
     a.title = 'yyyy'
-    assert a.title == u"yyyy"
+    assert a.title == "yyyy"
     a.meta = []
     a.meta.something = "a_value"
     assert a.meta.something == "a_value"

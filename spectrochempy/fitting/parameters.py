@@ -148,7 +148,7 @@ class FitParameters(UserDict):
 
     # -------------------
     def iteritems(self):
-        return self.data.iteritems()
+        return iter(self.data.items())
 
     # --------------------------
     def _checkerror(self, key):
@@ -199,7 +199,7 @@ class FitParameters(UserDict):
             message += "\texperiment_variables: %s \n" % var
 
         # look for common parameters
-        for key in self.keys():
+        for key in list(self.keys()):
             keysp = key.split('_')[0]
             if self.common[keysp]:
                 message += makestr(key)

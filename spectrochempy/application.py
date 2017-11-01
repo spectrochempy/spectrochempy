@@ -142,7 +142,7 @@ class Data(Configurable):
                 fb = os.path.basename(f)
                 if not fb.startswith('acqu') and \
                         not fb.startswith('pulse') and fb not in ['ser', 'fid']:
-                    s += "   " * ns + "|__" + u"%s\n" % fb
+                    s += "   " * ns + "|__" + "%s\n" % fb
                 if os.path.isdir(f):
                     s = _listdir(s, f, ns)
             return s
@@ -183,8 +183,8 @@ class SpectroChemPy(Application):
 
     # info _____________________________________________________________________
 
-    name = Unicode(u'SpectroChemPy')
-    description = Unicode(u'This is the main SpectroChemPy application ')
+    name = Unicode('SpectroChemPy')
+    description = Unicode('This is the main SpectroChemPy application ')
 
     version = Unicode('0.1').tag(config=True)
 
@@ -215,8 +215,8 @@ class SpectroChemPy(Application):
 
     @default('copyright')
     def _get_copyright(self):
-        copyright = u'2014-2017'  # TODO put current year%
-        copyright += u' - LCS (Laboratory for Catalysis and Spectrochempy)'
+        copyright = '2014-2017'  # TODO put current year%
+        copyright += ' - LCS (Laboratory for Catalysis and Spectrochempy)'
         return copyright
 
     classes = List([PlotOptions, ])
@@ -232,7 +232,7 @@ class SpectroChemPy(Application):
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
-        return self.name + u'_config.py'
+        return self.name + '_config.py'
 
     config_dir = Unicode(None,
                          help="Set the configuration dir location").tag(
@@ -478,7 +478,7 @@ class SpectroChemPy(Application):
                 self.log.debug('API already started. Nothing done!')
                 return
 
-            for key in kwargs.keys():
+            for key in list(kwargs.keys()):
                 if hasattr(self, key):
                     setattr(self, key, kwargs[key])
 
@@ -491,7 +491,7 @@ class SpectroChemPy(Application):
                 self.log_level = logging.DEBUG
                 self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
 
-            info_string = u"""
+            info_string = """
         SpectroChemPy's API
         Version   : {}
         Copyright : {}

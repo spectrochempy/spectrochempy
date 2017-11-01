@@ -66,7 +66,7 @@ class PostDevelopCommand(develop):
             nhook = os.path.join(path(), 'git_hooks', item)
             sh.copy(nhook, hook)
 
-            print('installation of `.git/hooks/{}` made.'.format(item))
+            print(('installation of `.git/hooks/{}` made.'.format(item)))
 
 
 def read(fname):

@@ -126,7 +126,7 @@ def make_docs(*options):
             log.info(res)
 
         log.info(
-        u"\n\nBuild finished. The {0} pages are in {1}/www/{2}.".format(
+        "\n\nBuild finished. The {0} pages are in {1}/www/{2}.".format(
             builder.upper(), BUILDDIR, builder))
 
     if 'release' in options:
@@ -143,7 +143,7 @@ def release():
     # upload docs to the remote web server
     if SERVER:
 
-        log.info(u"uploads to the server of the html/pdf files")
+        log.info("uploads to the server of the html/pdf files")
         cmd = 'rsync -e ssh -avz  --exclude="~*"    ' \
               '../../spectrochempy_doc/*   '+SERVER+':spectrochempy/'
         print(cmd)
@@ -270,7 +270,7 @@ def update_rest():
 
     pack = packages[:]  # remove api librairies
     for package in pack:
-        if 'api' in package:
+        if 'api' in package or 'extern' in package:
             packages.remove(package)
 
     for package in packages:

@@ -58,7 +58,6 @@ from pandas.core.generic import NDFrame
 # =============================================================================
 # third-party imports
 # =============================================================================
-from six import string_types
 from traitlets import (List, Unicode, Instance,  Bool, All, Float,
                       validate, observe, default)
 
@@ -516,7 +515,7 @@ class NDDataset(
             return new
 
         if axes is None:
-            axes = range(self.ndim - 1, -1, -1)
+            axes = list(range(self.ndim - 1, -1, -1))
 
         new._data = np.transpose(new._data, axes)
         if new.is_masked:
@@ -719,9 +718,9 @@ class NDDataset(
         sh = ' size' if self.ndim < 2 else 'shape'
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
-                             zip(self.shape,
+                             list(zip(self.shape,
                                  [False]*self.ndim
-                                 if not self.is_complex else self.is_complex)))
+                                 if not self.is_complex else self.is_complex))))
         shape = (' x '.join(['{}{}'] * len(self.shape))).format(
                 *shapecplx).replace(
                 'False', '').replace('True', '(complex)')
@@ -881,7 +880,7 @@ class NDDataset(
         sh = ' size' if self.ndim < 2 else 'shape'
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
-                             zip(self.shape, self.is_complex)))
+                             list(zip(self.shape, self.is_complex))))
 
         shape = (' x '.join(['{}{}'] * len(self.shape))).format(
                 *shapecplx).replace('False', '').replace('True', '(complex)')

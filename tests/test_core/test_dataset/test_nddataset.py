@@ -44,7 +44,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pint import DimensionalityError, UndefinedUnitError
+from spectrochempy.extern.pint import DimensionalityError, UndefinedUnitError
 from spectrochempy.api import (NDDataset, CoordSet, Coord, CoordError,
                                CoordSetError, Meta)
 from spectrochempy.core.units import ur
@@ -103,7 +103,7 @@ def test_nddataset_axes_invalid():
     coord2 = Coord(np.arange(20), name='hello')  # , units='s')
     with pytest.raises(CoordSetError):
         # a different name must be provided for each axis
-        print(coord1.name, coord2.name)
+        print((coord1.name, coord2.name))
         ndd1 = NDDataset(np.random.random((10, 20)), coordset=[coord1, coord2])
 
 
@@ -493,7 +493,7 @@ def test_dataset_slicing_by_index(dataset3d):
     # and again selection
     element = row0[..., 0]
     assert type(element) == type(da)
-    print("element: ", element)
+    print(("element: ", element))
 
     # now a slicing in multi direction
     matrix = da[1:4, 10:40:2, :2]

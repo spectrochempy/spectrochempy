@@ -41,7 +41,7 @@ import pytest
 from traitlets import TraitError
 from datetime import datetime
 
-from pint import DimensionalityError
+from spectrochempy.extern.pint import DimensionalityError
 from spectrochempy.api import NDArray
 from spectrochempy.api import ur
 from tests.utils import (raises)

@@ -44,14 +44,14 @@ __all__ = ['Unit', 'Quantity', 'Measurement', 'ur', 'set_nmr_context',
 
 from warnings import warn
 
-from pint import set_application_registry
-from pint import UnitRegistry, DimensionalityError
-from pint.unit import UnitsContainer
-from pint.quantity import _Quantity as Quantity
-from pint.unit import _Unit as Unit
-from pint import formatting
-from pint.formatting import siunitx_format_unit
-from pint import Context
+from spectrochempy.extern.pint import set_application_registry
+from spectrochempy.extern.pint import UnitRegistry, DimensionalityError
+from spectrochempy.extern.pint.unit import UnitsContainer
+from spectrochempy.extern.pint.quantity import _Quantity as Quantity
+from spectrochempy.extern.pint.unit import _Unit as Unit
+from spectrochempy.extern.pint import formatting
+from spectrochempy.extern.pint.formatting import siunitx_format_unit
+from spectrochempy.extern.pint import Context
 
 # Modify the pint behaviour ####################################################
 #  TODO: better ways ??
@@ -127,7 +127,7 @@ def __format__(self, spec):
         else:
             units = UnitsContainer(dict((self._REGISTRY._get_symbol(key),
                                          value)
-                                        for key, value in self._units.items()))
+                                        for key, value in list(self._units.items())))
         spec = spec.replace('~', '')
     else:
         units = self._units
@@ -214,7 +214,7 @@ def set_nmr_context(larmor):
     if not isinstance(larmor, U_.Quantity):
         larmor = larmor * U_.MHz
 
-    if 'nmr' not in U_._contexts.keys():
+    if 'nmr' not in list(U_._contexts.keys()):
         c = Context('nmr', defaults={'larmor': larmor})
 
         c.add_transformation('[]', '[frequency]',

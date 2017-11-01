@@ -10,7 +10,7 @@ matplotlib_backend = mpl.get_backend()
 import numpy as np
 import pandas as pd
 
-from pint import DimensionalityError
+from spectrochempy.extern.pint import DimensionalityError
 
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,

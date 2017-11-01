@@ -284,15 +284,15 @@ class Isotopes(HasTraits):
 
 if __name__ == '__main__':
     isotope = Isotopes('129Xe')
-    print(isotope.name)
-    print(isotope.spin)
-    print(isotope.symbol)
+    print((isotope.name))
+    print((isotope.spin))
+    print((isotope.symbol))
     isotope.nucleus = '27Al'  # we change the isotope`inplace`
-    print(isotope.name)
-    print(isotope.spin)
-    print(isotope.symbol)
-    print(isotope.H_2.Q)
-    print(isotope.H_2.gamma.to('MHz/T') / 2. / np.pi)
+    print((isotope.name))
+    print((isotope.spin))
+    print((isotope.symbol))
+    print((isotope.H_2.Q))
+    print((isotope.H_2.gamma.to('MHz/T') / 2. / np.pi))
 # =============================================================================
 # EOF
 # =============================================================================

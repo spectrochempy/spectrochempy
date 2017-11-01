@@ -41,7 +41,7 @@
 import numpy as np
 import pandas as pd
 
-from pint import DimensionalityError
+from spectrochempy.extern.pint import DimensionalityError
 from spectrochempy.api import (NDDataset, CoordSet, Coord,
                                             CoordError, Meta, ur, figure, show)
 from spectrochempy.utils import SpectroChemPyWarning

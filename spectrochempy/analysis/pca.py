@@ -191,7 +191,7 @@ class Pca(HasTraits):
           The number of PC to print
 
         """
-        print(self.__str__(npc))
+        print((self.__str__(npc)))
 
     def screeplot(self, npc=5, nfig=None):
         """scree plot of explained variance + cummulative variance by pca or svd
@@ -250,7 +250,7 @@ class Pca(HasTraits):
             ax.set_zlabel(
                     'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio[pcs[2]]))
             ax.scatter(self.T.data[:, pcs[0]], self.T.data[:, pcs[1]],
-                       self.T.data[:, pcs[2]], zdir=u'z', s=30, c=col,
+                       self.T.data[:, pcs[2]], zdir='z', s=30, c=col,
                        depthshade=True)
 
         if not _do_not_block:

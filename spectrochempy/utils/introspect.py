@@ -9,9 +9,6 @@ import inspect
 import re
 import types
 
-import six
-from six.moves import range, zip
-
 __all__ = _methods = ['resolve_name', 'minversion', 'find_current_module',
                       'isinstancemethod']
 
@@ -132,7 +129,7 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
 
     if isinstance(module, types.ModuleType):
         module_name = module.__name__
-    elif isinstance(module, six.string_types):
+    elif isinstance(module, str):
         module_name = module
         try:
             module = resolve_name(module_name)
@@ -327,7 +324,7 @@ def find_mod_objs(modname, onlylocals=False):
     fqnames = []
     for obj, lnm in zip(objs, localnames):
         if hasattr(obj, '__module__') and hasattr(obj, '__name__'):
-            print(obj.__module__, " (((%s)))" % obj.__name__)
+            print((obj.__module__, " (((%s)))" % obj.__name__))
             fqnames.append(str(obj.__module__) + '.' + str(obj.__name__))
         else:
             fqnames.append(modname + '.' + lnm)
@@ -363,7 +360,7 @@ def isinstancemethod(cls, obj):
         but this function will always return `False` if the given object is not
         a member of the given class).
 
-    Examples
+    Examples   #TODO: suppress need for six
     --------
     >>> import six
     >>> class MetaClass(type):
@@ -391,29 +388,25 @@ def isinstancemethod(cls, obj):
     return _isinstancemethod(cls, obj)
 
 
-if not six.PY2:
-    def _isinstancemethod(cls, obj):
-        if not isinstance(obj, types.FunctionType):
-            return False
+def _isinstancemethod(cls, obj):
+    if not isinstance(obj, types.FunctionType):
+        return False
 
-        # Unfortunately it seems the easiest way to get to the original
-        # staticmethod object is to look in the class's __dict__, though we
-        # also need to look up the MRO in case the method is not in the given
-        # class's dict
-        name = obj.__name__
-        for basecls in cls.mro():  # This includes cls
-            if name in basecls.__dict__:
-                return not isinstance(basecls.__dict__[name], staticmethod)
+    # Unfortunately it seems the easiest way to get to the original
+    # staticmethod object is to look in the class's __dict__, though we
+    # also need to look up the MRO in case the method is not in the given
+    # class's dict
+    name = obj.__name__
+    for basecls in cls.mro():  # This includes cls
+        if name in basecls.__dict__:
+            return not isinstance(basecls.__dict__[name], staticmethod)
 
-        # This shouldn't happen, though this is the most sensible response if
-        # it does.
-        raise AttributeError(name)
-else:
-    def _isinstancemethod(cls, obj):
-        return isinstance(obj, types.MethodType) and obj.im_class is cls
+    # This shouldn't happen, though this is the most sensible response if
+    # it does.
+    raise AttributeError(name)
 
 if __name__ == '__main__':
     array = find_mod_objs('spectrochempy.api', onlylocals=False)
     log = array[2][34]
     log.error("xxxxxxxx")
-    print(array[0])
+    print((array[0]))

@@ -52,9 +52,9 @@ class PlotOptions(Configurable):
     All options relative to plotting and views
 
     """
-    name = Unicode(u'PlotOptions')
+    name = Unicode('PlotOptions')
 
-    description = Unicode(u'Options for plotting datasets')
+    description = Unicode('Options for plotting datasets')
 
     # -------------------------------------------------------------------------
     style = Unicode('lcs',

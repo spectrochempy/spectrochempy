@@ -58,15 +58,13 @@ import types
 import warnings
 
 # TODO: we should remove this as we will use only PY3
-import six
-
 from numpy.testing import (assert_equal,
                            assert_array_equal,
                            assert_array_almost_equal,
                            assert_approx_equal)
 
 from spectrochempy.utils.exceptions import SpectroChemPyDeprecationWarning
-from pint.errors import DimensionalityError
+from spectrochempy.extern.pint.errors import DimensionalityError
 
 
 # =============================================================================
@@ -193,9 +191,7 @@ def treat_deprecations_as_exceptions():
     warning state.
     """
     # First, totally reset the warning state
-    for module in list(six.itervalues(sys.modules)):
-        # We don't want to deal with six.MovedModules, only "real"
-        # modules.
+    for module in list(sys.modules.values()):
         if (isinstance(module, types.ModuleType) and
                 hasattr(module, '__warningregistry__')):
             del module.__warningregistry__

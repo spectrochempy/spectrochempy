@@ -47,7 +47,7 @@ def test_api():
     # TODO: modify this for each release
 
     # test application
-    print('\n\nRunning : ', spectrochempy.application.running)
+    print(('\n\nRunning : ', spectrochempy.application.running))
     assert version.startswith('0.1')
     assert "Laboratory for Catalysis and Spectrochempy" in copyright
 

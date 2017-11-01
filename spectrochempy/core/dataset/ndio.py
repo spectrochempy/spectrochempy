@@ -350,7 +350,7 @@ class NDIO(HasTraits):
             coordset = None
             new = cls()
 
-            for key, val in obj.items():
+            for key, val in list(obj.items()):
                 if key.startswith('axis'):
                     if not coordset:
                         coordset = [Coord() for _ in range(ndim)]
@@ -375,7 +375,7 @@ class NDIO(HasTraits):
                 else:
                     setattr(clss, "_" + key, val)
 
-            for key, val in pars.items():
+            for key, val in list(pars.items()):
 
                 if key.startswith('axis'):
 

@@ -51,7 +51,7 @@ import os
 import numpy as np
 
 from spectrochempy.application import log
-from ..fileio.bruker import read, read_pdata, read_lowmem
+from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
 # unit_conversion,
 # =============================================================================
@@ -84,14 +84,14 @@ def _get_par_files(_dir, _procno, _processed=False):
     parfiles = []
     pdir = os.path.join(_dir, "pdata", _procno)
     la = glob.glob(os.path.join(_dir, "acqu*"))
-    la = map(os.path.basename, la)
+    la = list(map(os.path.basename, la))
     for _item in la:
         if not _processed:
             parfiles.append(_item)
         else:
             parfiles.append(os.path.join('..', '..', _item))
     lp = glob.glob(os.path.join(pdir, "proc*"))
-    lp = map(os.path.basename, lp)
+    lp = list(map(os.path.basename, lp))
     for _item in lp:
         if not _processed:
             parfiles.append(os.path.join('pdata', _procno, _item))
@@ -652,7 +652,7 @@ def read_bruker_nmr(source, *args, **kwargs):
         # make the corresponding axis
         log.debug('Create coordset...')
         coordset = []
-        axe_range = range(parmode + 1)
+        axe_range = list(range(parmode + 1))
         for axis in axe_range:
             if not meta.isfreq[axis]:
                 # the axis is in time units

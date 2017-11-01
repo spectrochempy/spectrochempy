@@ -85,8 +85,8 @@ def test_get_keys_items():
     meta = Meta()
     meta.td = [200, 400]
     meta.si = 1024
-    assert meta.keys() == ['si', 'td']
-    assert meta.items() == [('si', 1024), ('td', [200, 400])]
+    assert list(meta.keys()) == ['si', 'td']
+    assert list(meta.items()) == [('si', 1024), ('td', [200, 400])]
 
 def test_iterator():
     meta = Meta()

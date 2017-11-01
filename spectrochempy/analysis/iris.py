@@ -119,11 +119,11 @@ class Iris:
         RSST = np.zeros((n_lambda, 1))
         SMT = np.zeros((n_lambda, 1))
 
-        print('Solving for ' + str(
-            n_lambda) + ' regularization parameters (lambda) \n')
+        print(('Solving for ' + str(
+            n_lambda) + ' regularization parameters (lambda) \n'))
 
         for i, lambdaR in enumerate(lambdaReg):
-            print('... Solving for lambda = ' + str(lambdaR) + '...')
+            print(('... Solving for lambda = ' + str(lambdaR) + '...'))
             Q = 2 * (np.dot(K.T, np.dot(W, K)) + lambdaR * S)
             c = -2 * np.dot(X.data.T, np.dot(W, K))
 

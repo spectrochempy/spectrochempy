@@ -84,7 +84,7 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
 
     def restore_external(fp, p, keys):
         # restore external parameters
-        for key in fp.keys():
+        for key in list(fp.keys()):
             keysp = key.split('_')
             if keysp[0] in fp.expvars:
                 ps = []

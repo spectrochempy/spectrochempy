@@ -345,8 +345,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'spectrochempy.tex', u'SpectroChemPy Documentation',
-     u'LCS', 'manual'),
+    ('index', 'spectrochempy.tex', 'SpectroChemPy Documentation',
+     'LCS', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -376,7 +376,7 @@ latex_logo = "_static/logo.png"
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'spectrochempy', 'SpectroChemPy Documentation',
-     [u'LCS'], 1)
+     ['LCS'], 1)
 ]
 
 # If true, show URL addresses after external links.

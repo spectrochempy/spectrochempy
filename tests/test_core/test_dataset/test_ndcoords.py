@@ -72,7 +72,7 @@ def test_coordarray_subclass():
     assert a.units is None
     assert a.unitless
     assert not a.is_uncertain
-    print(a.meta)
+    print((a.meta))
     assert not a.meta
 
     # set
@@ -339,10 +339,10 @@ def test_coords_slicing_with_labels():
     assert coord0[0] == 4000.0 * (1. / ur.cm)
     assert type(coord0[0]) == Coord
 
-    print(Quantity("4000 cm^-1").m)
+    print((Quantity("4000 cm^-1").m))
     assert isinstance(coord0[0].data, np.ndarray)
 
-    print(coord0[0].values)
+    print((coord0[0].values))
     assert isinstance(coord0[0].values, Quantity)
     assert isinstance(coord0.values, Quantity)
 

@@ -1,16 +1,12 @@
 matplotlib
 traitlets
-pint
-uncertainties
-sympy
-scikit-learn
 numpy
 scipy
 pandas
 xlrd
 pyqt
 setuptools_scm
-six
+h5py
 
 pytest
 pytest-runner
@@ -28,3 +24,7 @@ nbbrowserpdf
 nbsphinx
 jupyter_nbextensions_configurator
 ipython_genutils
+
+pint
+uncertainties
+

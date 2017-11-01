@@ -274,8 +274,8 @@ class Fit(HasTraits):
             log.info(args)
             if not self.silent:
                 display.clear_output(wait=True)
-                print("Iterations: %d, Calls: %d (chi2: %.5f)" % (
-                niter, ncalls, chi2))
+                print(("Iterations: %d, Calls: %d (chi2: %.5f)" % (
+                niter, ncalls, chi2)))
                 sys.stdout.flush()
 
         # end callback function ---------------------------------------------------

@@ -45,7 +45,6 @@ from datetime import datetime
 
 import numpy as np
 from pandas import Index
-from six import string_types
 from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
 
 from spectrochempy.application import log
@@ -182,7 +181,7 @@ class Coord(NDMath, NDArray):
     # -------------------------------------------------------------------------
     @default('_name')
     def _get_name_default(self):
-        return u"Coord_" + str(uuid.uuid1()).split('-')[0]  # a unique id
+        return "Coord_" + str(uuid.uuid1()).split('-')[0]  # a unique id
 
     @property
     def is_reversed(self):
@@ -234,7 +233,7 @@ class Coord(NDMath, NDArray):
         data = self._data
         labels = self._labels
 
-        if isinstance(loc, string_types) and labels is not None:
+        if isinstance(loc, str) and labels is not None:
             # it's probably a label
             indexes = np.argwhere(labels == loc).flatten()
             if indexes.size > 0:

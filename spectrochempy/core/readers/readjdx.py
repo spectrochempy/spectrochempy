@@ -226,9 +226,9 @@ def read_jdx(filename='', sortbydate=True):
                         'Error: Inconsistant data set - the x axis should end at same value')
                     return
         else:
-            print(
+            print((
                 'Error: ##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°',
-                i + 1)
+                i + 1))
             return
 
             # Creation of the acquisition date
@@ -243,14 +243,14 @@ def read_jdx(filename='', sortbydate=True):
         # Check the consistency of xunits and yunits
         if i > 0:
             if yunits[i] != yunits[i - 1]:
-                print(
+                print((
                     'Error: ##YUNITS sould be the same for all spectra (check spectrum n°',
-                    i + 1, ')')
+                    i + 1, ')'))
                 return
             elif xunits[i] != xunits[i - 1]:
-                print(
+                print((
                     'Error: ##XUNITS sould be the same for all spectra (check spectrum n°',
-                    i + 1, ')')
+                    i + 1, ')'))
                 return
 
     # Determine xaxis name ****************************************************

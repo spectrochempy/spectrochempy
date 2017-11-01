@@ -47,7 +47,7 @@ import os
 import shutil
 import stat
 import sys
-import six
+
 from glob import glob
 from pkgutil import walk_packages
 
@@ -350,12 +350,7 @@ def _find_home():
         directories.
     """
 
-    # this is used below to make fix up encoding issues that sometimes crop up
-    # in py2.x but not in py3.x
-    if six.PY2:
-        decodepath = lambda pth: pth.decode(sys.getfilesystemencoding())
-    elif six.PY3:
-        decodepath = lambda pth: pth
+    decodepath = lambda pth: pth
 
     # First find the home directory - this is inspired by the scheme ipython
     # uses to identify "home"
@@ -384,7 +379,7 @@ def _find_home():
             homedir = decodepath(os.path.join(os.environ['USERPROFILE']))
         else:
             try:
-                from six.moves import winreg as wreg
+                import winreg as wreg
                 shell_folders = r'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
                 key = wreg.OpenKey(wreg.HKEY_CURRENT_USER, shell_folders)
 

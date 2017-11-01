@@ -75,6 +75,6 @@ if __name__ == '__main__':
     guiapp = QApplication(sys.argv)
 
     ex = Gui()
-    print(ex.openFileNameDialog())
+    print((ex.openFileNameDialog()))
 
     # guiapp.exec_()

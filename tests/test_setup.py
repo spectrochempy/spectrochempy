@@ -53,6 +53,6 @@ def test_setup():
         sys.argv = sys._argv
 
     with redirect_argv('develop'):
-        print (sys.argv)
+        print((sys.argv))
         import __setup__ as s
         s.run_setup()

@@ -123,7 +123,7 @@ def plots(ax, specs, t=None, w=None,
             norm = mpl.colors.Normalize(vmin=y[0], vmax=y[-1])
 
         line_segments = LineCollection(
-                [list(zip(x, s[:, i].tolist())) for i in xrange(len(y))][::-1],
+                [list(zip(x, s[:, i].tolist())) for i in range(len(y))][::-1],
                 # Make a sequence of x,s[i] pairs
                 # linewidths    = (0.5,1,1.5,2),
                 linewidths=lw,

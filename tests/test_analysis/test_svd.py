@@ -53,12 +53,12 @@ def test_svd(IR_source_1):
     svd = Svd(source)
 
     print()
-    print(svd.U)
-    print(svd.Vt)
-    print(svd.s)
-    print(svd.ev)
-    print(svd.ev_cum)
-    print(svd.ev_ratio)
+    print((svd.U))
+    print((svd.Vt))
+    print((svd.s))
+    print((svd.ev))
+    print((svd.ev_cum))
+    print((svd.ev_ratio))
 
     figure()
     svd.Vt[:10].plot()

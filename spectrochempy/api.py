@@ -140,6 +140,7 @@ except ImportError:
     HAS_SCIKITLEARN = False
 __all__.append('HAS_SCIKITLEARN')
 
+
 def APIref():
     """
     Helper to display public objects and methods from the API

@@ -55,11 +55,11 @@ from datetime import datetime
 # =============================================================================
 
 import numpy as np
-from pint.errors import DimensionalityError, UndefinedUnitError
+from spectrochempy.extern.pint.errors import DimensionalityError, UndefinedUnitError
 from traitlets import (List, Unicode, Instance, Bool, HasTraits, default,
                        Any, Float, validate, observe,
                        ForwardDeclaredInstance)
-from uncertainties import unumpy as unp
+from spectrochempy.extern.uncertainties import unumpy as unp
 from pandas.core.generic import NDFrame, Index
 from spectrochempy.core.units import Quantity
 import matplotlib.pyplot as plt
@@ -991,7 +991,7 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def iterdims(self):
-        return range(self._data.ndim)
+        return list(range(self._data.ndim))
 
     # .........................................................................
     @property
@@ -1861,7 +1861,7 @@ class CoordSet(HasTraits):
     # .........................................................................
     @default('_name')
     def _get_name_default(self):
-        return u"CoordSet_" + str(uuid.uuid1()).split('-')[0]  # a unique id
+        return "CoordSet_" + str(uuid.uuid1()).split('-')[0]  # a unique id
 
     # Hidden attribute to specify if the collection is for a single dimension
     _is_same_dim = Bool
