@@ -45,56 +45,77 @@ from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.units import ur
 from spectrochempy.utils import SpectroChemPyWarning, \
     SpectroChemPyDeprecationWarning
-from tests.utils import (assert_equal, assert_array_equal,
-                         assert_array_almost_equal, assert_equal_units,
-                         raises)
-from tests.utils import NumpyRNGContext, catch_warnings
 from spectrochempy.extern.traittypes import Array
 
-### TEST INITIALIZATION
+from tests.utils import (assert_equal, assert_array_equal,
+                         assert_array_almost_equal, assert_equal_units,
+                         raises, NumpyRNGContext, catch_warnings)
+
+
+#########################
+#  TEST INITIALIZATION  #
+#########################
 
 def test_init_ndarray_void():
+    # null initialisation
 
-    d0 = NDArray(None) # void initialization
+    d0 = NDArray()
+    assert isinstance(d0, NDArray)
+    assert d0.is_empty
     assert d0.shape == (0,)
+    assert d0.name != '<no name>'  # must be the uuid in this case
     assert d0.size == 0
     assert not d0.is_masked
+    assert not d0.is_uncertain
     assert d0.dtype == 'float64'
     assert not d0.has_complex_dims
+    assert d0.unitless
     assert (repr(d0)=='NDArray: [] unitless')
     assert (str(d0) == '[]')
+    assert not d0.meta
+    assert d0.date == datetime(1970, 1, 1, 0, 0)
+    d0.date = datetime(2005,10,12)
+    d0.date = "25/12/2025"
+    assert d0.date == datetime(2025, 12, 25, 0, 0)
+    d0.name = 'xxxx'
+    assert d0.name == 'xxxx'
+    d0.title = 'yyyy'
+    assert d0.title == "yyyy"
+    d0.meta = []
+    d0.meta.something = "a_value"
+    assert d0.meta.something == "a_value"
 
 def test_init_ndarray_quantity():
+    # initialisation with a quantity
 
-    d0 = NDArray(13. * ur.tesla) #initialisation with a quantity
+    d0 = NDArray(13. * ur.tesla)
     assert d0.units == 'tesla'
-    d0 = NDArray((2,3,4)) # initialisation with a sequence
+
+def test_init_ndarray_sequence():
+    # initialisation with a sequence
+
+    d0 = NDArray((2,3,4))
     assert d0.shape == (3,)
     assert d0.size == 3
     assert not d0.has_complex_dims
     assert not d0.is_masked
     assert str(d0) == '[       2        3        4]'
 
-def test_init_ndarray_sequence():
-
-    d0 = NDArray([2,3,4,5]) # initialisation with a sequence
-    assert d0.shape == (4,)
-    assert not d0.is_masked
-    assert not d0.has_complex_dims
-
 def test_init_ndarray_array():
+    # initialization with an array
 
-    d1 = NDArray(np.ones((5, 5))) #initialization with an array
+    d1 = NDArray(np.ones((5, 5)))
     assert d1.shape == (5, 5)
     assert d1.size == 25
     assert not d1.is_masked
     assert not d1.has_complex_dims
 
 def test_init_ndarray_NDArray():
+    # initialization with an NDArray object
 
     d1 = NDArray(np.ones((5, 5)))
     assert d1.shape == (5, 5)
-    d2 = NDArray(d1) # initialization with an NDArray object
+    d2 = NDArray(d1)
     assert d2.shape == (5,5)
     assert not d2.has_complex_dims
     assert d2.size == 25
@@ -102,9 +123,10 @@ def test_init_ndarray_NDArray():
     assert d1.data is d2.data # by default we do not copy
 
 def test_init_ndarray_NDArray_copy():
+    # initialization with an NDArray object with copy
 
     d1 = NDArray(np.ones((5, 5)))
-    d2 = NDArray(d1, copy=True) # initialization with an NDArray object
+    d2 = NDArray(d1, copy=True)
     assert d2.shape == (5,5)
     assert not d2.has_complex_dims
     assert d2.size == 25
@@ -112,8 +134,9 @@ def test_init_ndarray_NDArray_copy():
     assert d1.data is not d2.data # we have forced a copy
 
 def test_init_ndarray_with_a_mask():
+    # initialisation with a sequence and a mask
 
-    d0mask = NDArray([2, 3, 4, 5], mask=[1,0,0,0])  # sequence + mask
+    d0mask = NDArray([2, 3, 4, 5], mask=[1,0,0,0])
     assert d0mask.shape == (4,)
     assert not d0mask.has_complex_dims
     assert d0mask.is_masked
@@ -123,8 +146,9 @@ def test_init_ndarray_with_a_mask():
             'NDArray: [  --,        3,        4,        5]')
 
 def test_init_ndarray_with_a_mask_and_uncertainty():
-    d0unc = NDArray([2, 3, 4, 5], uncertainty=[.1,.2,.15,.21],
-                     mask=[1,0,0,0])  # sequence + mask + uncert
+    # initialisation with a sequence + mask + uncertainty
+
+    d0unc = NDArray([2, 3, 4, 5], uncertainty=[.1,.2,.15,.21], mask=[1,0,0,0])
     assert d0unc.shape == (4,)
     assert not d0unc.has_complex_dims
     assert d0unc.is_masked
@@ -134,16 +158,33 @@ def test_init_ndarray_with_a_mask_and_uncertainty():
             'NDArray: [  --,    3.000+/-0.200,    4.000+/-0.150,')
 
 def test_init_complex_ndarray():
-
     # test with complex data in the last dimension
-    d = np.ones((2, 2))*np.exp(.1j)
-    d1 = NDArray(d)
-    assert d1.has_complex_dims
-    assert d1.is_complex[-1]
-    assert d1.shape == (2, 2)
-    assert d1.size == 4
-    assert repr(d1).startswith('NDArray: [[   0.995,    0.100, ')
 
+    d = np.ones((2, 2))*np.exp(.1j)
+    d0 = NDArray(d)
+    assert d0.has_complex_dims
+    assert d0.is_complex[-1]
+    assert d0.shape == (2, 2)
+    assert d0.size == 4
+    assert repr(d0).startswith('NDArray: [[   0.995,    0.100, ')
+
+def test_init_complex_ndarray():
+    # test with complex data in all dimension
+
+    np.random.seed(12345)
+    d = np.random.random((4, 3)) * np.exp(.1j)
+    d0 = NDArray(d, units=ur.Hz,
+                 mask=[[False, True, False],
+                       [True, False, False]],
+                 is_complex= [True, True])  # with units & mask
+    assert d0.shape == (2, 3)
+    assert d0._data.shape == (4, 6)
+
+def test_init_complex_with_copy_of_ndarray():
+    # test with complex from copy of another ndArray
+
+    d = np.ones((2, 2)) * np.exp(.1j)
+    d1 = NDArray(d)
     d2 = NDArray(d1)
     assert d1.data is d2.data
     assert np.all(d1.data == d2.data)
@@ -151,6 +192,9 @@ def test_init_complex_ndarray():
     assert d2.shape == (2,2)
     assert str(d2).startswith('RR[[   0.995    0.995]')
     assert 'RI[[   0.100    0.100]' in str(d2)
+
+def test_init_complex_with_mask():
+    # test with complex with mask and units
 
     np.random.seed(12345)
     d = np.random.random((2, 2)) * np.exp(.1j)
@@ -170,20 +214,6 @@ def test_init_complex_ndarray():
     assert str(d3).endswith("[   0.018    0.020]] Hz")
     assert d3[1, 1].data == d[1,1]
 
-def test_labels_and_sort():
-    d0 = NDArray(np.linspace(4000, 1000, 10),
-                 labels='a b c d e f g h i j'.split(),
-                 units='s',
-                 mask=False,
-                 title='wavelength')
-    assert d0.is_labeled
-    d1 = d0._sort()
-    assert (d1.data[0] == 1000)
-    d0._sort(descend=True, inplace=True)
-    assert (d0.data[0] == 4000)
-    d1 = d0._sort(by='label', descend=True)
-    assert (d1.labels[0] == 'j')
-
 def test_real_imag():
     np.random.seed(12345)
     d = np.random.random((2, 2)) * np.exp(.1j)
@@ -194,47 +224,6 @@ def test_real_imag():
     new = d3.copy()
     new.data = d3.real.data + 1j * d3.imag.data
     assert_equal( d3.data, new.data)
-
-def test_init_with_complex_information():
-    np.random.seed(12345)
-    d = np.random.random((4, 3)) * np.exp(.1j)
-    d3 = NDArray(d, units=ur.Hz,
-                 mask=[[False, True, False],
-                       [True, False, False]],
-                 is_complex= [True, True]
-
-                 )  # with units & mask
-    assert d3.shape == (2, 3)
-    assert d3._data.shape == (4, 6)
-
-
-def test_init_ndarray_subclass():
-    # test initialization of an empty ndarray
-    # check some of its properties
-    a = NDArray()
-    assert isinstance(a, NDArray)
-    assert a.name != '<no name>'  # must be the uuid in this case
-    assert a.is_empty
-    assert not a.is_masked
-    assert not a.is_uncertain
-    assert a.unitless
-    assert not a.meta
-    assert a.date == datetime(1970, 1, 1, 0, 0)
-    a.date = datetime(2005,10,12)
-    a.date = "25/12/2025"
-    assert a.date == datetime(2025, 12, 25, 0, 0)
-
-def test_set_ndarray_subclass():
-    # test of setting some attributes of an empty ndarray
-    # check some of its properties
-    a = NDArray()
-    a.name = 'xxxx'
-    assert a.name == 'xxxx'
-    a.title = 'yyyy'
-    assert a.title == "yyyy"
-    a.meta = []
-    a.meta.something = "a_value"
-    assert a.meta.something == "a_value"
 
 def test_set_simple_ndarray(ndarray):
     nd = ndarray.copy()
@@ -540,6 +529,40 @@ def test_ndarray_complex(ndarraycplx):
     assert_array_equal(ndc.data.imag, -ndc.data.imag)
     assert ndc.is_complex == [False, True]
     assert ndc.size == nd.size
+
+def test_labels_and_sort():
+    d0 = NDArray(np.linspace(4000, 1000, 10),
+                 labels='a b c d e f g h i j'.split(),
+                 units='s',
+                 mask=False,
+                 title='wavelength')
+    assert d0.is_labeled
+    d1 = d0._sort()
+    assert (d1.data[0] == 1000)
+    d0._sort(descend=True, inplace=True)
+    assert (d0.data[0] == 4000)
+    d1 = d0._sort(by='label', descend=True)
+    assert (d1.labels[0] == 'j')
+
+def test_multilabels():
+    d0 = NDArray(np.linspace(4000, 1000, 10),
+                 labels='a b c d e f g h i j'.split(),
+                 units='s',
+                 mask=False,
+                 title='wavelength')
+    assert d0.is_labeled
+    # add a row of labels
+    d0.labels = 'bc cd de ef ab fg gh hi ja ij '.split()
+
+    d1 = d0._sort()
+    assert (d1.data[0] == 1000)
+    d0._sort(descend=True, inplace=True)
+    assert (d0.data[0] == 4000)
+    d1 = d0._sort(by='label[1]', descend=True)
+    assert np.all(d1.labels[...,0] == ['i','ja'])
+    # other way
+    d2 = d0._sort(by='label', pos=1, descend=True)
+    assert np.all(d2.labels[..., 0] == d1.labels[..., 0])
 
 ###
 # CoordSet testing

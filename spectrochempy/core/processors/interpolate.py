@@ -52,8 +52,7 @@ def interpolate(source, axis=0, size=None):
 
 def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
           inplace=False):
-    """
-    Align the current dataset on a reference dataset along a given axis by
+    """Align the current dataset on a reference dataset along a given axis by
     interpolation
 
     Parameters

@@ -48,6 +48,7 @@ from spectrochempy.extern.pint import set_application_registry
 from spectrochempy.extern.pint import UnitRegistry, DimensionalityError
 from spectrochempy.extern.pint.unit import UnitsContainer
 from spectrochempy.extern.pint.quantity import _Quantity as Quantity
+from spectrochempy.extern.pint.measurement import _Measurement as Measure
 from spectrochempy.extern.pint.unit import _Unit as Unit
 from spectrochempy.extern.pint import formatting
 from spectrochempy.extern.pint.formatting import siunitx_format_unit
@@ -68,13 +69,13 @@ formats = {
         'parentheses_fmt': r'({0})',
     },
 
-    'T': {  # spectrochempy HTML format.
+    'H': {  # spectrochempy HTML format.
         'as_ratio': False,
         'single_denominator': False,
         'product_fmt': r'.',
         'division_fmt': r'{0}/{1}',
         'power_fmt': '{0}<sup>{1}</sup>',
-        'parentheses_fmt': r'({0})',
+        'parentheses_fmt': r'{0}',
     },
 
     'L': {  # Latex format.
@@ -91,8 +92,10 @@ formats = {
 formatting._FORMATS.update(formats)
 formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ['~'])
 
-setattr(Quantity, '_repr_html_', lambda cls: cls.__format__('~T'))
+setattr(Quantity, '_repr_html_', lambda cls: cls.__format__('~H'))
 setattr(Quantity, '_repr_latex_', lambda cls: "$" + cls.__format__('~L') + "$")
+
+setattr(Measure, '_repr_html_', lambda cls: cls.__format__('~H'))
 
 # TODO: work on this latex format
 

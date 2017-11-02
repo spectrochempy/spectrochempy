@@ -38,7 +38,8 @@
 """
 
 """
-from spectrochempy.api import ur, set_nmr_context, Quantity
+from spectrochempy.api import ur, set_nmr_context, Quantity, np
+from tests.utils import raises
 
 def test_ppm():
 
@@ -47,7 +48,6 @@ def test_ppm():
 
 def test_nmr_context():
 
-    #print('\n')
     set_nmr_context(larmor=104.3 * ur.MHz)
 
     fhz = 10000 * ur.Hz
@@ -55,12 +55,13 @@ def test_nmr_context():
         fppm = fhz.to('ppm')
 
     assert "{:~.3f}".format(fppm) == '95.877 ppm'
+    print("{:.1f}".format(fppm))
 
     with ur.context('nmr'):
         fhz = fppm.to('Hz')
 
     assert "{:~.3f}".format(fhz) == '10000.000 Hz'
-
+    print("{:.1f}".format(fhz))
 
 def test_units():
 
@@ -82,4 +83,41 @@ def test_repr_html():
 def test_unit_dimensionality():
     a = Quantity(1., 'cm')
     b = a/Quantity(1., 'km')
-    #print(b)
+    print(b._repr_html_())
+
+def test_unit_measurement():
+    a = Quantity(1., 'cm')
+    b = a.plus_minus(.1)
+    print(b ** 2)
+    print(b._repr_html_())
+
+    xa = Quantity(np.array((1, 2)), 'km')
+    with raises(AttributeError):
+        ba = xa.plus_minus(.1)
+
+def test_matplotlib():
+
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from spectrochempy.extern import pint
+
+    ureg = pint.UnitRegistry()
+    ureg.setup_matplotlib(True)
+
+    y = np.linspace(0, 30) * ureg.miles
+    x = np.linspace(0, 5) * ureg.hours
+
+    fig, ax = plt.subplots()
+    ax.yaxis.set_units(ureg.inches)
+    ax.xaxis.set_units(ureg.seconds)
+
+    ax.plot(x, y, 'tab:blue')
+
+    ax.axhline(26400 * ureg.feet, color='tab:red')
+    ax.axvline(120 * ureg.minutes, color='tab:green')
+
+    # here we just test that we can add some label to the default unit labeling
+    ax.set_xlabel('xxx ({})'.format(ax.get_xlabel()))
+    assert ax.get_xlabel() == 'xxx (second)'
+
+    plt.show()

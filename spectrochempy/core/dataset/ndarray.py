@@ -48,6 +48,7 @@ from it.
 import copy
 import uuid
 import warnings
+import re
 from datetime import datetime
 
 # =============================================================================
@@ -1660,11 +1661,17 @@ class NDArray(HasTraits):
         if by == 'value':
             args = np.argsort(self._data)
 
-        elif by == 'label':
+        elif 'label' in by:
             labels = self._labels
             if len(self._labels.shape) > 1:
                 # multidimentional labels
-                if not pos: pos = 0
+                if not pos:
+                    pos = 0
+                    #try to find a pos in the by string
+                    pattern = re.compile("label\[(\d)\]")
+                    p = pattern.search(by)
+                    if p is not None:
+                        pos = int(p[1])
                 labels = self._labels[pos]  # TODO: this must be checked
             args = np.argsort(labels)
 
