@@ -542,6 +542,9 @@ def test_dataset_slicing_by_values(dataset3d):
     # print(y)
     assert y.shape == (4, 100)
 
+    # slicing by values should also work using reverse order
+    yr = da[2000.0:3000.0, :, 210.]
+
 
 @raises(IndexError)
 def test_dataset_slicing_out_limits(dataset3d):

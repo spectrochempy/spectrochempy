@@ -1714,7 +1714,10 @@ class NDArray(HasTraits):
                 start = self._loc2index(start, axis)
 
             if stop is not None and not isinstance(stop, (int, np.int_)):
-                stop = self._loc2index(stop, axis) + 1
+                stop = self._loc2index(stop, axis)
+                if stop < start and self.coordset[axis].is_reversed:
+                    start, stop = stop, start
+                stop = stop + 1
 
             if step is not None and not isinstance(step, (int, np.int_)):
                 raise KeyError('step in location slicing is not yet possible.')
