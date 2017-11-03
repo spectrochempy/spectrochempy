@@ -49,8 +49,8 @@ __all__ = ['basecor']
 def basecor(source, *ranges, axis=-1,
             method='sequential',
             interpolation='polynomial',
-            order=0,
-            npc=1):
+            order=6,
+            npc=5):
     """Base function for dataset baseline correction.
 
     2 methods are proposed:
@@ -127,6 +127,9 @@ def basecor(source, *ranges, axis=-1,
         U, s, Vt = np.linalg.svd(sbase.data, full_matrices=False,
                                  compute_uv=True)
 
+        # npc cannot be higher than the size of s
+        npc = min(npc, s.shape[0])
+        
         # select npc loadings & compute scores
         Pt = (Vt[0:npc, :])
         T = np.dot(U[:, 0:npc], np.diag(s)[0:npc, 0:npc])
