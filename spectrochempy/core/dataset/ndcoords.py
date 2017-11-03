@@ -261,21 +261,21 @@ class Coord(NDMath, NDArray):
 
     def _repr_html_(self):
 
-        tr = "<tr style='border-bottom: 1px solid lightgray;" \
-             "border-top: 1px solid lightgray;'>" \
-             "<td style='padding-right:5px'><strong>{}</strong></td>" \
-             "<td>{}</td><tr>\n"
+        tr = "<tr style='border: 1px solid lightgray;'>" \
+              "<td style='padding-right:5px; width:100px'><strong>{}</strong></td>" \
+              "<td style='text-align:left'>{}</td><tr>\n"
 
-        units = '{:~T}'.format(self._units) \
+
+        units = '{:~H}'.format(self._units) \
             if self._units is not None else 'unitless'
-        out = '<table>\n'
+        out = "<table style='width:100%'>\n"
         out += tr.format("Title", self.title.capitalize())
-        out += tr.format("Coordinates",
+        out += tr.format("Data",
                          np.array2string(self.data, separator=' '))
         out += tr.format("Units", units)
         if self.is_labeled:
             out += tr.format("Labels", self.labels)
-        out += '</table><br/>\n'
+        out += '</table>\n'
         return out
 
     # TODO: _repr_latex
@@ -294,7 +294,7 @@ class Coord(NDMath, NDArray):
             if self._units is not None else 'unitless'
         out = '      title: %s\n' % (self.title.capitalize())
         data_str = super(Coord, self).__str__()
-        out += 'coordinates: %s\n' % data_str
+        out += '       data: %s\n' % data_str
         if self.is_labeled:
             out += '     labels: %s\n' % str(self.labels)
         if out[-1]=='\n':

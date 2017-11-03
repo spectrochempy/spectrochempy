@@ -845,36 +845,30 @@ class NDDataset(
     # -------------------------------------------------------------------------
 
     def _repr_html_(self):
-        tr = "<tr style='border-bottom: 1px solid lightgray;" \
-             "border-top: 1px solid lightgray;'>" \
-             "<td style='padding-right:5px'><strong>{}</strong></td>" \
-             "<td>{}</td><tr>\n"
+        tr = "<tr style='border: 1px solid lightgray;'>" \
+              "<td style='padding-right:5px; width:100px'><strong>{}</strong></td>" \
+              "<td style='text-align:left'>{}</td><tr>\n"
 
-        out = '<table>\n'
+        out = "<table style='width:100%'>\n"
 
         out += tr.format("Id/Name", self.name)
         out += tr.format("Author", self.author)
         out += tr.format("Created", str(self.date))
         out += tr.format("Last Modified", self.modified)
-
-        wrapper1 = textwrap.TextWrapper(initial_indent='',
-                                        subsequent_indent=' ' * 15,
-                                        replace_whitespace=True)
-
-        out += tr.format("Description", wrapper1.fill(self.description))
+        out += tr.format("Description", self.description)
 
         if self.history:
             pars = self.history
             hist = ""
             if pars:
-                hist += '{}'.format(wrapper1.fill(pars[0]))
+                hist += '{}'.format(pars[0])
             for par in pars[1:]:
-                hist += '{}'.format(textwrap.indent(par, ' ' * 15))
+                hist += '{}'.format(par)
             out += tr.format("History", hist)
 
         uncertainty = "(+/-%s)" % self.uncertainty \
             if self.uncertainty is not None else ""
-        units = '{:~T}'.format(
+        units = '{:~H}'.format(
                 self.units) if self.units is not None else 'unitless'
 
         sh = ' size' if self.ndim < 2 else 'shape'
@@ -890,13 +884,14 @@ class NDDataset(
         size = '{}{}'.format(size, sizecplx) \
             if self.ndim < 2 else '{}'.format(shape)
 
-        data = '<table>\n'
+        data = "<table style='width:100%'>\n"
+
         data += tr.format("Title", self.title)
         data += tr.format("Size", size)
         data += tr.format("Units", units)
         data_str = str(self._uarray(self._data, self._uncertainty))
         data_str = data_str.replace('\n\n', '\n')
-        data += tr.format("Values", textwrap.indent(str(data_str), ' ' * 9))
+        data += tr.format("Values", data_str)
         data += '</table>\n'  # end of row data
 
         out += tr.format('data', data)
@@ -904,9 +899,9 @@ class NDDataset(
         if self.coordset is not None:
             for i, axis in enumerate(self.coordset):
                 axis_str = axis._repr_html_().replace('\n\n', '\n')
-                out += tr.format("axis %i" % i,
-                                 textwrap.indent(axis_str, ' ' * 9))
-
+                out += tr.format("Coordinate %i" % i, axis_str)
+                if out.endswith("\n\n"):
+                    out=out[:-1]
         out += '</table><br/>\n'
 
         return out
