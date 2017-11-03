@@ -53,11 +53,11 @@ Documentation
 
 Html documentation is available here:
 
-* `https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
+* `http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
 
 Pdf documentation can also be downloaded here:
 
-* `spectrochempy.pdf <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/pdf/spectrochempy.pdf>`_
+* `spectrochempy.pdf <http://www-lcs.ensicaen.fr/cfnews/spectrochempy/pdf/spectrochempy.pdf>`_
 
 
 .. _main_user_guides:

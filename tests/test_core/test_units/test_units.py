@@ -38,8 +38,8 @@
 """
 
 """
-from spectrochempy.api import ur, set_nmr_context, Quantity, np
-from tests.utils import raises
+from spectrochempy.api import ur, set_nmr_context, Quantity, np, show
+from tests.utils import raises, show_do_not_block
 
 def test_ppm():
 
@@ -95,6 +95,7 @@ def test_unit_measurement():
     with raises(AttributeError):
         ba = xa.plus_minus(.1)
 
+@show_do_not_block
 def test_matplotlib():
 
     import matplotlib.pyplot as plt
@@ -120,4 +121,4 @@ def test_matplotlib():
     ax.set_xlabel('xxx ({})'.format(ax.get_xlabel()))
     assert ax.get_xlabel() == 'xxx (second)'
 
-    plt.show()
+    show()
