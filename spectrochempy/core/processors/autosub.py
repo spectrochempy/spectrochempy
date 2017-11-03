@@ -126,7 +126,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     shape = list(new.shape)
     ranges = tuple(np.array(ranges, dtype=float))
     # must be float to be considered as frequency for instance
-    
+
     coords = new.coordset[-1]
     xrange = CoordRange(*ranges, reversed=coords.is_reversed).ranges
 

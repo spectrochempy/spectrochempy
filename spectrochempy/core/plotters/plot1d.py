@@ -60,7 +60,11 @@ def plot_1D(source, **kwargs):
     ----------
     source: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
-    reverse: `bool` [optional, default=`True`]
+    reverse: `bool` or None [optional, default= None/False
+        In principle, coordinates run from left to right, except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
 
     hold: `bool` [optional, default=`False`]
 
@@ -201,7 +205,7 @@ def plot_1D(source, **kwargs):
         line.set_linestyle(ls)
 
     if kwargs.get('data_only', False):
-        # if data only (we will  ot set axes and labels
+        # if data only (we will not set axes and labels
         # it was probably done already in a previous plot
         source._plot_resume(**kwargs)
         return True
@@ -212,6 +216,7 @@ def plot_1D(source, **kwargs):
 
     # abscissa limits?
     xl = [x.coords[0], x.coords[-1]]
+    xl.sort()
     xlim = list(kwargs.get('xlim', xl))
     xlim.sort()
     xlim[-1] = min(xlim[-1], xl[-1])
