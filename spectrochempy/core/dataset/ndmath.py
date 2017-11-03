@@ -312,7 +312,12 @@ class NDMath(object):
                 #                     ' instance')
                 # if the first arg (obj) is a nddataset
                 if isdataset and other._coordset != obj._coordset:
-                    raise ValueError("coordset properties do not match")
+                    # here it can be several situations
+                    # One acceptable is that e.g., we suppress or add
+                    # a row to the whole dataset
+                    if not(other.ndim < obj.ndim and \
+                        other.shape == obj.shape[-other.ndim:]):
+                        raise ValueError("coordset properties do not match")
 
                 # rescale according to units
                 if not other.unitless:

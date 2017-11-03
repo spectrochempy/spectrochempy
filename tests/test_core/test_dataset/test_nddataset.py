@@ -1437,3 +1437,12 @@ def test_coords_manipulation(IR_source_1):
     coord0 -= coord0[0]
 
     print(coord0)
+
+def test_simple_arithmetic_on_full_dataset():
+    # due to a bug in notebook with the following
+    import os
+    from spectrochempy.api import data
+    source = NDDataset.read_omnic(os.path.join(data, 'irdata', 'NH4Y-activation.SPG'))
+    d = source - source[0]
+    # suppress the first spectrum to all other spectra in the series
+
