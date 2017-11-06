@@ -106,7 +106,7 @@ def make_docs(*options):
         outdir = "{0}/{1}".format(BUILDDIR, builder)
         doctreedir = "{0}/~doctrees".format(BUILDDIR)
 
-        write_download_page()
+        write_download_rst()
 
         #with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
@@ -343,7 +343,7 @@ The following sub-packages are available in this package:
                                     ))
 
 
-def write_download_page():
+def write_download_rst():
     """
     Modify the download item of the sidebars
 
