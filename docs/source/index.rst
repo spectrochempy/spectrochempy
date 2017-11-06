@@ -20,8 +20,8 @@ What is |scp|?
 data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
 running on Linux, Windows or OS X.
 
-  1.  A |NDDataset| object embedding array of data with labeled axes and metadata.
-  2. `Units` and `Uncertainties` for |NDDataset| and |NDDataset| axes.
+  1.  A |NDDataset| object embedding array of data with coordinates and metadata.
+  2. `Units` and `Uncertainties` for |NDDataset| and |NDDataset| coordinates.
   3.  Mathematical operations over |NDDataset| such addition, multiplication and many more ...
   4.  Import functions to read data from experiments or modelling programs ...
   5.  Display functions such as ``print``, ``plot`` ...

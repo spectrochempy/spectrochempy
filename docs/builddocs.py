@@ -145,7 +145,8 @@ def release():
 
         log.info("uploads to the server of the html/pdf files")
         cmd = 'rsync -e ssh -avz  --exclude="~*"    ' \
-              '../../spectrochempy_doc/*   '+SERVER+':spectrochempy/'
+              '../spectrochempy_doc/*   '+SERVER+':spectrochempy/'
+        print(call(['pwd'], shell=True, executable='/bin/bash'))
         print(cmd)
         res = call([cmd], shell=True, executable='/bin/bash')
         log.info(res)
@@ -158,6 +159,7 @@ def release():
 def clean():
     """Clean/remove the built documentation.
     """
+
     shutil.rmtree(BUILDDIR + '/html', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/pdf', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/latex', ignore_errors=True)

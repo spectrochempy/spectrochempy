@@ -72,17 +72,10 @@ If you prefer **Canopy** here it is:
 Installation
 =============
 
-.. _binaries:
-
-Installation from Binaries
-**************************
-
-Not yet available, sorry.
-
 .. _conda:
 
-Standard installation from Conda sources
-*****************************************
+Standard installation using Conda
+*********************************
 
 Very simple, use the following command in a terminal:
 
@@ -101,8 +94,8 @@ Very simple, use the following command in a terminal:
 
 .. _pypi:
 
-Standard Installation from PyPi sources
-***************************************
+Standard Installation from PyPi using pip
+*****************************************
 
 Again very simple, use the following command in a terminal:
 
@@ -123,7 +116,7 @@ or to update a previous installation with the latest stable release:
 
 .. _dev:
 
-Installation from Developpement Sources
+Installation from downloaded sources
 ***************************************
 
 .. warning::

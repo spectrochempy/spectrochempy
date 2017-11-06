@@ -8,10 +8,9 @@
 # run test for python 3.6
 #-------------------------
 
-
 # to make it work with SourceTree (assuming anaconda is used)
 # probably need to change this to account for windows developper..
-#TODO: activate in windows?
+# TODO: activate in windows?
 
 source ~/.bash_profile
 
@@ -19,20 +18,20 @@ source ~/.bash_profile
 export PATH=$PATH:/Library/TeX/texbin/
 
 # test everything and do not commit if erros
-py.test -x tests || exit 1
+# py.test -x tests || exit 1
 
 # install to check setup
 pip uninstall -y spectrochempy
 pip install -e . || exit 1
 
 # make docs and do not commit if doc fails to build
-python docs/builddocs.py clean pdf html release || exit 1
+#python docs/builddocs.py clean
+# python docs/builddocs.py html    || exit 1
+python docs/builddocs.py release || exit 1
+#python docs/builddocs.py pdf
 
 # add files modified
 git add -A
-
-# test also python35
-#--------------------
 
 
 
