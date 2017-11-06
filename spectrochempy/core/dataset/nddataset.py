@@ -863,7 +863,7 @@ class NDDataset(
             if pars:
                 hist += '{}'.format(pars[0])
             for par in pars[1:]:
-                hist += '{}'.format(par)
+                hist += '<br/>{}'.format(par)
             out += tr.format("History", hist)
 
         uncertainty = "(+/-%s)" % self.uncertainty \
@@ -880,7 +880,7 @@ class NDDataset(
                 *shapecplx).replace('False', '').replace('True', '(complex)')
 
         size = self.size
-        sizecplx = '' if not self.is_complex else " (complex)"
+        sizecplx = '' if not np.all(self.is_complex) else " (complex)"
         size = '{}{}'.format(size, sizecplx) \
             if self.ndim < 2 else '{}'.format(shape)
 

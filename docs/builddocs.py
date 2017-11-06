@@ -47,6 +47,7 @@ from glob import glob
 from pkgutil import walk_packages
 from subprocess import call, getoutput
 from warnings import warn
+import setuptools_scm
 
 from sphinx.util.docutils import docutils_namespace, patch_docutils
 from ipython_genutils.text import indent, dedent, wrap_paragraphs
@@ -130,10 +131,10 @@ def make_docs(*options):
             builder.upper(), BUILDDIR, builder))
 
     if 'release' in options:
-        release()
+        do_release()
 
 
-def release():
+def do_release():
     """Release/publish the documentation to the webpage.
     """
 
@@ -354,24 +355,20 @@ def write_download_rst():
     date_release = getoutput("git log -1 --tags --date='short' --format='%ad'")
     date_version = getoutput("git log -1 --date='short' --format='%ad'")
 
-    rpls = """<h3>Download</h3>
-    <ul>
-      <li><a itemprop="downloadUrl"
-             href="https://bitbucket.org/spectrocat/spectrochempy/get/{0}.zip"
-             rel="nofollow">Latest release <br>{0} ({1})</a>
-      </li>
-      <li><a itemprop="downloadUrl"
-             href="https://bitbucket.org/spectrocat/spectrochempy/get/master.zip"
-             rel="nofollow">Latest development version <br>{2} ({3})</a>
-      </li>
-    </ul>
+    version = setuptools_scm.get_version(
+            version_scheme='post-release',
+            root='..',
+            relative_to=__file__).split('+')[0]
 
+    release = version.split('.post')[0]
+
+    rpls = """
+* `Latest stable release {0} ({1}) <https://bitbucket.org/spectrocat/spectrochempy/get/{0}.zip>`_
+            
+* `Development sources {2} ({3}) <https://bitbucket.org/spectrocat/spectrochempy/get/master.zip>`_
     """.format(release, date_release, version, date_version)
-    
-#TODO: correct the above release... for know this information is missing
 
-
-    with open(os.path.join(DOCDIR, 'source', '_templates', 'download.html'),
+    with open(os.path.join(DOCDIR, 'source', 'download.rst'),
               "w") as f:
         f.write(rpls)
 

@@ -40,3 +40,12 @@ NMR processing
 	:maxdepth: 1
 
 	nmr_intro
+
+Databases
+----------
+
+.. toctree::
+	:maxdepth: 1
+
+	isotope_database
+

@@ -1449,3 +1449,11 @@ def test_simple_arithmetic_on_full_dataset():
     d = source - source[0]
     # suppress the first spectrum to all other spectra in the series
 
+def test_repr_html_bug_undesired_display_complex():
+
+    da = NDDataset([1, 2, 3])
+    da.title = 'intensity'
+    da.description = 'Some experimental measurements'
+    da.units = 'dimensionless'
+    assert "(complex)" not in da._repr_html_()
+    pass

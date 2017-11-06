@@ -12,8 +12,6 @@ Where to Get |scp|
 To get a working installation of |scp| , on any platform (windows, mac OS X, Linux ... ),
 several solutions are (*or will be soon*) available.
 
-* :ref:`binaries`
-
 * :ref:`pypi`
 
 * :ref:`conda`
@@ -83,7 +81,7 @@ Very simple, use the following command in a terminal:
 
 	$ conda config –add channels conda-forge
 	$ conda config –add channels fernandezc  #TODO: create a channel spectrocat
-    $ conda install spectrochempy
+	$ conda install spectrochempy
 
 .. note::
 
@@ -101,38 +99,30 @@ Again very simple, use the following command in a terminal:
 
 .. sourcecode:: bash
 
-    $ pip install spectrochempy
+	$ pip install spectrochempy
 
 or to update a previous installation with the latest stable release:
 
 .. sourcecode:: bash
 
-    $ pip install -U spectrochempy
+	$ pip install -U spectrochempy
 
 .. note::
 
 	the Pypi installer doesn't exist right now. It will be present for version 1.b1.
 
-
 .. _dev:
 
-Installation from downloaded sources
-***************************************
+Installation from zip archives
+*******************************
 
-.. warning::
+Downloads of zip source archives working for all platforms are available, on Bitbucket
 
-   These sources may be unstable or even broken.
-
-
-Downloads zip/tar archives working for all platforms are available.
-
-	* `tar archives <xxx>`_
-
-	* `zip archives <xxx>`_
+.. include:: download.rst
 
 or on PyPi:
 
-	* `Download tar.gz archives from PyPi <http://pypi.python.org/pypi/spectrochempy>`_
+* `Download tar.gz archives from PyPi <http://pypi.python.org/pypi/spectrochempy>`_
 
 Ungzip and untar the source package and execute:
 
@@ -180,9 +170,9 @@ Then execute two commands as following:
 
 .. sourcecode:: ipython
 
-    In [1]: from spectrochempy.api import *
+	In [1]: from spectrochempy.api import *
 
-    In [2]: NDDataset()
+	In [2]: NDDataset()
 
 If this goes well, the |scp| application is likely functional.
 
