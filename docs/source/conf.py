@@ -240,7 +240,7 @@ html_theme_options = {
     #
     # Options are nothing (default) or the name of a valid theme
     # such as "amelia" or "cosmo".
-    'bootswatch_theme': "united",
+    'bootswatch_theme': "sandstone",
 
     # Choose Bootstrap version.
     # Values: "3" (default) or "2" (in quotes)
@@ -287,11 +287,8 @@ html_last_updated_fmt = '%b %d, %Y'
 # html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-# html_sidebars = {'**': ['info.html',
-#                        'api.html',
-#                        'links.html',
-#                        'searchbox.html',
-#                        'download.html']}
+# html_sidebars = {}
+
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 # html_additional_pages = {}
@@ -306,7 +303,7 @@ html_last_updated_fmt = '%b %d, %Y'
 html_split_index = True
 
 # If true, links to the reST sources are added to the pages.
-html_show_sourcelink = True
+# html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 # html_show_sphinx = True
