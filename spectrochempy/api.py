@@ -159,6 +159,9 @@ from spectrochempy.application import app
 
 _started = app.start(debug=False, reset_config=True)
 
+# load the default style
+plt.style.use(app.plotoptions.style)
+
 log.info("API activated "
          if _started else "API was not started!")
 

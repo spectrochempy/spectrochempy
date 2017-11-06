@@ -254,7 +254,7 @@ def plot_2D(source, **kwargs):
             if ylim is not None:
                 vmin, vmax = ylim
             else:
-                vmin, vmax = yeff[0], yeff[-1]
+                vmin, vmax = sorted([yeff[0], yeff[-1]])
             norm = mpl.colors.Normalize(vmin=vmin,
                                         vmax=vmax)  # we normalize to the max time
             if normalize is not None:

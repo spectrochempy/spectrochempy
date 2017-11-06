@@ -613,7 +613,11 @@ class NDIO(HasTraits):
         else:
             self._updateplot = True  # fig exist: updateplot
             self._fig = curfig()
-            if ndim > 1 and self._fig.get_axes():
+            ax = kwargs.pop('ax', None)
+            if ax is not None:
+                self._ax = ax
+
+            elif ndim > 1 and self._fig.get_axes():
                 self._ax, self._axec = self._fig.get_axes()
 
             else:

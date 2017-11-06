@@ -18,6 +18,7 @@ numpydoc
 sphinx_bootstrap_theme
 
 ipython
+ipympl
 ipykernel
 nb_conda
 nbbrowserpdf

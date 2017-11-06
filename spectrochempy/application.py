@@ -62,7 +62,6 @@ from IPython import get_ipython
 from IPython.core.display import HTML
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 # local
 # =============================================================================
@@ -292,8 +291,6 @@ class SpectroChemPy(Application):
         # also install style to be sure everything is set
         install_styles()
 
-        # load the default style
-        plt.style.use(self.plotoptions.style)
 
     # --------------------------------------------------------------------------
     # Initialisation of the application
@@ -319,13 +316,13 @@ class SpectroChemPy(Application):
         # ------------------------------------------------------------------
         # we performs this before any call to matplotlib that are performed
         # later in this application
-        import matplotlib as mpl
-        backend = mpl.get_backend()
+
 
         # if we are building the docs, in principle it should be done using
         # the builddocs.py located in the scripts folder
         if not 'builddocs.py' in sys.argv[0]:
             # the normal backend
+            backend = mpl.get_backend()
             if backend == 'module://ipykernel.pylab.backend_inline':
                 mpl.use('Qt5Agg')
                 mpl.rcParams['backend.qt5'] = 'PyQt5'
@@ -335,13 +332,22 @@ class SpectroChemPy(Application):
 
         ip = get_ipython()
         if ip is not None:
-
-            if is_kernel() and backend == 'module://ipykernel.pylab.backend_inline':
+            #backend = mpl.get_backend()
+            if is_kernel(): # and backend == 'module://ipykernel.pylab.backend_inline':
 
                 # set the ipython matplotlib environments
                 try:
+                    import ipympl
                     ip.magic('matplotlib notebook')  # nbagg')
-                except UsageError:
+                    #if 'IPython' in sys.modules:
+                    #from IPython.core.pylabtools import backend2gui
+                    #backend2gui['module://ipympl.backend_nbagg'] = 'ipympl'
+                    #mpl.use('module://ipympl.backend_nbagg')
+                    #
+                    #print('OK FOR THE BACKEND')
+
+                except UsageError as e:
+                    print(e)
                     try:
                         ip.magic('matplotlib osx')
                     except:

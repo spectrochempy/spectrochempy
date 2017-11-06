@@ -349,7 +349,7 @@ class CoordRange(HasTraits):
             # second case: a pair of scalars has been passed
             # using the Interval class, we have autochecking of the interval validity
 
-            self.ranges = [list(ranges)]
+            self.ranges = [list(map(float,ranges))]
 
         else:
             # third case: a set of pairs of scalars has been passed
@@ -359,6 +359,8 @@ class CoordRange(HasTraits):
         if self.reversed:
             self.reverse()
 
+        if self.ranges:
+            self.ranges = self._cleanranges(self.ranges)
 
     def __iter__(self):
         """
