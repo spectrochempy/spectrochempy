@@ -163,6 +163,7 @@ def plot_1D(source, **kwargs):
     # ---------------
 
     source._figure_setup(**kwargs)
+    ax = source.axes[source._axdest]
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -182,15 +183,15 @@ def plot_1D(source, **kwargs):
     z = z - offset
 
     # plot
-    line, = source.ax.plot(x.coords, z.data)
+    line, = ax.plot(x.coords, z.data)
 
     if kwargs.get('show_complex', False):
         zimag = source.imag
-        source.ax.plot(x.coords, zimag.data, ls='--')
+        ax.plot(x.coords, zimag.data, ls='--')
 
     if kwargs.get('plot_model', False):
         modeldata = source.modeldata
-        source.ax.plot(x.coords, modeldata.T, ls=':', lw='2')
+        ax.plot(x.coords, modeldata.T, ls=':', lw='2')
         #TODO: improve this!!!
 
     # line attributes
@@ -233,14 +234,14 @@ def plot_1D(source, **kwargs):
     zlim.sort()
 
     # set the limits
-    source.ax.set_xlim(xlim)
-    source.ax.set_ylim(zlim)
+    ax.set_xlim(xlim)
+    ax.set_ylim(zlim)
 
     number_x_labels = plotoptions.number_of_x_labels  # get from config
     number_y_labels = plotoptions.number_of_y_labels
 
-    source.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-    source.ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
 
     # -------------------------------------------------------------------------
     # labels
@@ -251,24 +252,24 @@ def plot_1D(source, **kwargs):
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
         xlabel = make_label(source.x, 'x')
-    source.ax.set_xlabel(xlabel)
+    ax.set_xlabel(xlabel)
 
     # z label
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         zlabel = make_label(source, 'z')
 
-    source.ax.set_ylabel(zlabel)
+    ax.set_ylabel(zlabel)
 
     # do we display the ordinate axis?
     if kwargs.get('show_z', True):
-        source.ax.set_ylabel(zlabel)
+        ax.set_ylabel(zlabel)
     else:
-        source.ax.set_yticks([])
+        ax.set_yticks([])
 
     # do we display the zero line
     if kwargs.get('show_zero', False):
-        source.ax.haxlines()
+        ax.haxlines()
 
     source._plot_resume(**kwargs)
 

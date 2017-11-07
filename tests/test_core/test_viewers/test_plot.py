@@ -51,7 +51,7 @@ def test_plot_generic(IR_source_1):
 def test_plot_generic_1D(IR_source_1):
     source = IR_source_1[0].copy()
 
-    figure()
+    #figure()
     source.plot()
     show()
 
@@ -114,4 +114,20 @@ def test_plot_stack_generic(IR_source_1):
     source = IR_source_1.copy()
     figure()
     source.plot(kind='stack')
+    show()
+
+@show_do_not_block
+def test_plot_stack_multiple(IR_source_1):
+
+    source = IR_source_1.copy()
+    s1 = source[-10:]
+    s2 = source[:10]
+
+    row = s1[-1]
+    row.plot()
+    show()
+
+    figure()
+    s1.plot_stack()
+    s2.plot_stack(data_only=True)
     show()

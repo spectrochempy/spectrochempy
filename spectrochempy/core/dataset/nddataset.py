@@ -65,7 +65,7 @@ from traitlets import (List, Unicode, Instance,  Bool, All, Float,
 # Local imports
 # =============================================================================
 from spectrochempy.core.units import Quantity
-from spectrochempy.utils import (SpectroChemPyWarning,
+from spectrochempy.utils import (SpectroChemPyWarning, SpectroChemPyError,
                                  is_sequence, is_number,
                                  numpyprintoptions, get_user_and_node)
 from spectrochempy.extern.traittypes import Array
@@ -111,7 +111,7 @@ numpyprintoptions()
 # NDDataset class definition
 # =============================================================================
 
-class NDDatasetError(ValueError):
+class NDDatasetError(SpectroChemPyError):
     """
     An exception that is raised when something is wrong with the NDDataset`
     definitions.

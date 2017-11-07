@@ -51,16 +51,12 @@ import json
 import datetime
 import warnings
 
-from traitlets import Unicode, Bool, HasTraits, Instance, observe, default
+from traitlets import Unicode, Bool, Dict, HasTraits, Instance, observe, default
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.pyplot import isinteractive, Figure, Axes as Ax
-# change the name to avoid
-# collisions with
-# spectrochempy Axes objets
+from matplotlib.pyplot import isinteractive, Figure, Axes
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from spectrochempy.utils import is_kernel
 
 import numpy as np
 from numpy.compat import asbytes, asstr
@@ -75,7 +71,9 @@ from spectrochempy.core.dataset.ndarray import CoordSet
 from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
-from spectrochempy.utils import is_sequence
+from spectrochempy.utils import is_sequence, is_kernel
+from spectrochempy.utils import SpectroChemPyWarning, SpectroChemPyError
+
 from spectrochempy.gui import gui
 from spectrochempy.application import plotoptions
 from spectrochempy.application import options
@@ -88,6 +86,7 @@ __all__ = ['NDIO',
            'curfig',
            'show',
            'figure',
+           'subplots',
 
            'plot',
            'load',
@@ -116,8 +115,10 @@ class NDIO(HasTraits):
 
     """
 
-    _ax = Instance(Ax, allow_none=True)
+    # _ax = Instance(Axes, allow_none=True)
     _fig = Instance(Figure, allow_none=True)
+
+    _axes = Dict(Instance(Axes))
 
     # --------------------------------------------------------------------------
     # Generic save function
@@ -519,7 +520,7 @@ class NDIO(HasTraits):
             For instance, for 2D data, it can be `map`, `stack' or 'image'
             among other kind.
 
-        ax : :class:`matplotlib.Axe` instance. Optional, default = current or new one)
+        ax : :class:`matplotlib.Axes` instance. Optional, default = current or new one)
             The axe where to plot
 
         figsize : `tuple`, optional, default is mpl.rcParams['figure.figsize']
@@ -569,8 +570,6 @@ class NDIO(HasTraits):
         if not _plotter(**kwargs):
             return None
 
-        return self._ax
-
     # --------------------------------------------------------------------------
     # setup figure properties
     # --------------------------------------------------------------------------
@@ -603,28 +602,45 @@ class NDIO(HasTraits):
 
         # Get current figure information
         # ------------------------------
-        # if (self._fig is None and self._ax is None):
-        if curfig() is None:
-            self._updateplot = False  # the figure doesn't yet exists.
-            self._fignum = kwargs.pop('fignum', None)  # self._fignum)
-            # if no figure present, then create one with the fignum number
-            self._fig = plt.figure(self._fignum, figsize=self._figsize)
-            self._ax = self._fig.gca()
-        else:
-            self._updateplot = True  # fig exist: updateplot
-            self._fig = curfig()
-            ax = kwargs.pop('ax', None)
-            if ax is not None:
-                self._ax = ax
+        # if curfig() is None:
+        #     self._updateplot = False  # the figure doesn't yet exists.
+        #     self._fignum = kwargs.pop('fignum', None)  # self._fignum)
+        #     # if no figure present, then create one with the fignum number
+        #     self._fig = plt.figure(self._fignum, figsize=self._figsize)
+        #     self.axes['main'] = self._fig.gca()
+        # else:
+        log.debug('update plot')
+        # self._updateplot = True  # fig exist: updateplot
 
-            elif ndim > 1 and self._fig.get_axes():
-                self._ax, self._axec = self._fig.get_axes()
+        # get the current figure
+        self._fig = curfig()
 
+        # most of the time the plot destination will be on the main axe
+        self._axdest = 'main'
+
+        # is ax in the keywords ?
+        ax = kwargs.pop('ax', None)
+        if ax is not None:
+            # in this case we will plot on this ax
+            if isinstance(ax, Axes):
+                ax.name = 'main'
+                self.axes['main'] = ax
+                self._axdest = 'main'
+            elif isinstance(ax, str) and ax in self.axes.keys():
+                # next plot commands will be applied if possible to this ax
+                self._axdest = ax
             else:
-                self._ax = self._fig.gca()
+                raise SpectroChemPyError('{} is not recognized'.format(ax))
 
-        # elif self._ax is not None:
-        #    self._fig = fig = self._ax.figure
+        elif self._fig.get_axes():
+            # no ax parameters in keywords, so we need to get those existing
+            # We assume that the existing axes have a name
+            self.axes = self._fig.get_axes()
+        else:
+            # or create a new subplot
+            ax = self._fig.gca()
+            ax.name = 'main'
+            self.axes['main']=ax
 
         # Get the number of the present figure
         self._fignum = self._fig.number
@@ -651,9 +667,9 @@ class NDIO(HasTraits):
         #
         # other plot class may take care of other needs
 
-        ax = self._ax
+        ax = self.axes['main']
 
-        if ndim == 2 and kind in ['map', 'image'] and self._divider is None:
+        if ndim == 2 and self._divider is None:
             # create new axes on the right and on the top of the current axes
             # The first argument of the new_vertical(new_horizontal) method is
             # the height (width) of the axes to be created in inches.
@@ -663,21 +679,23 @@ class NDIO(HasTraits):
             self._divider = divider = make_axes_locatable(ax)
             # print divider.append_axes.__doc__
 
-            if proj or xproj:
+            if (proj or xproj) and kind in ['map', 'image'] :
                 axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
                                            frameon=0, yticks=[])
                 axex.tick_params(bottom='off', top='off')
                 plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
                          visible=False)
-                self._axex = axex
+                axex.name = 'xproj'
+                self.axes['xproj'] = axex
 
-            if proj or yproj:
+            if (proj or yproj) and kind in ['map', 'image'] :
                 axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
                                            frameon=0, xticks=[])
                 axey.tick_params(right='off', left='off')
                 plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
                          visible=False)
-                self._axey = axey
+                axey.name = 'yproj'
+                self.axes['yproj'] = axey
 
             if colorbar:
                 axec = divider.append_axes("right", .15, pad=0.3, frameon=0,
@@ -685,9 +703,8 @@ class NDIO(HasTraits):
                 axec.tick_params(right='off', left='off')
                 # plt.setp(axec.get_xticklabels(), visible=False)
 
-                self._axec = axec
-
-        return
+                axec.name = 'colorbar'
+                self.axes['colorbar']=axec
 
     # --------------------------------------------------------------------------
     # resume the plot
@@ -710,7 +727,7 @@ class NDIO(HasTraits):
                         kws[k.strip()] = eval(v)
                     else:
                         ags.append(eval(item))
-                getattr(self.ax, com)(*ags, **kws)
+                getattr(self.axes['main'], com)(*ags, **kws)  #TODO:improve this
 
         # adjust the plots
 
@@ -771,14 +788,10 @@ class NDIO(HasTraits):
             log.error('Cannot guess an adequate plotter. I did nothing!')
             return False
 
-        self._ax = temp._ax
-        self._axec = temp._axec
-        self._axex = temp._axex
-        self._axey = temp._axey
+        self._axes = temp._axes
         self._fig = temp._fig
         self._fignum = temp._fignum
 
-        return True  # Everything was OK
 
     # -------------------------------------------------------------------------
     # Special attributes
@@ -805,7 +818,7 @@ class NDIO(HasTraits):
         return state
 
     def __dir__(self):
-        return ['fignum', 'ax', 'axec', 'axex', 'axey', 'divider']
+        return ['fignum', 'axes', 'divider']
 
     # -------------------------------------------------------------------------
     # Properties
@@ -828,14 +841,38 @@ class NDIO(HasTraits):
         return self._fignum
 
     @property
+    def axes(self):
+        """
+        A dictionary containing all the axes of the current figures
+        """
+        return self._axes
+
+    @axes.setter
+    def axes(self, axes):
+        # we assume that the axes have a name
+        if isinstance(axes, list):
+            # a list a axes have been passed
+            for ax in axes:
+                log.debug('add axe: {}'.format(ax.name))
+                self._axes[ax.name]=ax
+        elif isinstance(axes, dict):
+            self._axes.update(axes)
+        elif isinstance(axes, Axes):
+            # it's an axe! add it to our list
+            self._axes[axes.name]=axes
+
+    @property
     def ax(self):
         """
-        Matplotlib axe associated to this dataset
+        the main matplotlib axe associated to this dataset
 
         """
-        if self._ax is None:
-            self._ax = self._fig.gca()
-        return self._ax
+        if 'main' not in self.axes.keys():
+            ax = self._fig.gca()
+            ax.name = 'main'
+            self.axes['main'] = ax
+
+        return self._axes['main']
 
     @property
     def axec(self):
@@ -843,7 +880,7 @@ class NDIO(HasTraits):
         Matplotlib colorbar axe associated to this dataset
 
         """
-        return self._axec
+        return self._axes['colorbar']
 
     @property
     def axex(self):
@@ -851,7 +888,7 @@ class NDIO(HasTraits):
         Matplotlib projection x axe associated to this dataset
 
         """
-        return self._axex
+        return self._axes['xproj']
 
     @property
     def axey(self):
@@ -859,7 +896,7 @@ class NDIO(HasTraits):
         Matplotlib projection y axe associated to this dataset
 
         """
-        return self._axey
+        return self._axes['yproj']
 
     @property
     def divider(self):
@@ -873,7 +910,7 @@ class NDIO(HasTraits):
 def curfig():
     n = plt.get_fignums()
     if not n:
-        return None
+        plt.figure() # create a figure
     fig = plt.gcf()
     return fig
 
@@ -886,6 +923,19 @@ def show():
     if not plotoptions.do_not_block or isinteractive():
         if curfig():
             plt.show()
+
+def subplots(nrow=1, ncol=1):
+    fig = curfig()
+    axes = {}
+    for i in range(nrow):
+        for j in range(ncol):
+            ax = fig.add_subplot(nrow, ncol, i*ncol+j+1)
+            if i*ncol+j+1==1:
+                ax.name = 'main'
+            else:
+                ax.name = 'axe{}'.format(i*ncol+j+1)
+            axes[ax.name] = ax
+    return axes
 
 
 def available_styles():

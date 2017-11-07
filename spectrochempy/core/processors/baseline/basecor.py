@@ -51,6 +51,7 @@ from matplotlib.widgets import SpanSelector
 # -----------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndcoords import CoordRange
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndio import subplots
 
 
 
@@ -252,14 +253,20 @@ class BaselineCorrection(HasTraits):
         """
         self._setup(**kwargs)
 
-        fig, (ax1, ax2) = plt.subplots(2,1, figsize=(9, 6))
+        fig = plt.figure(figsize=(9, 6))
+        fig.suptitle('INTERACTIVE BASELINE CORRECTION')
 
-        ax1.set_title('INTERACTIVE BASELINE CORRECTION'
-                      '\nClick & span with left mouse button to set a baseline region.'
+        axes = subplots(2, 1)
+        self.source.axes = axes
+
+        ax1 = axes['main']
+        ax2 = axes['axe2']
+
+        ax1.set_title('\nClick & span with left mouse button to set a baseline region.'
                       '\nClick on right button on a region to remove it.',
                       fontweight='bold')
 
-        ax1 = self.source.plot_stack(ax=ax1, colorbar=False)
+        self.source.plot_stack(ax=ax1, colorbar=False)
 
         sps = []
 
@@ -276,6 +283,8 @@ class BaselineCorrection(HasTraits):
 
         def show_basecor(ax2):
             corrected = self.compute()
+            corrected.axes = axes
+
             ax2.clear()
             ax2.set_title('Baseline corrected dataset preview',
                           fontweight='bold')

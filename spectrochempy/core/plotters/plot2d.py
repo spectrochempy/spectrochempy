@@ -140,6 +140,7 @@ def plot_2D(source, **kwargs):
     # --------------
 
     source._figure_setup(ndim=2, **kwargs)
+    ax = source.axes[source._axdest]
 
     # kind of plot
     # ------------
@@ -277,7 +278,7 @@ def plot_2D(source, **kwargs):
             line_segments.set_cmap(colormap)
             line_segments.set_norm(norm)
 
-            source.ax.add_collection(line_segments)
+            ax.add_collection(line_segments)
 
     if data_only:
         # if data only (we will  ot set axes and labels
@@ -304,7 +305,7 @@ def plot_2D(source, **kwargs):
 
     # set the limits
     # ---------------
-    source.ax.set_xlim(xlim)
+    ax.set_xlim(xlim)
 
     # ordinates limits?
     # ------------------
@@ -320,7 +321,7 @@ def plot_2D(source, **kwargs):
 
         # set the limits
         # ---------------
-        source.ax.set_ylim(zlim)
+        ax.set_ylim(zlim)
 
     else:
         # the y axis info
@@ -333,7 +334,7 @@ def plot_2D(source, **kwargs):
 
         # set the limits
         # ----------------
-        source.ax.set_ylim(ylim)
+        ax.set_ylim(ylim)
 
     number_x_labels = plotoptions.number_of_x_labels
     number_y_labels = plotoptions.number_of_y_labels
@@ -349,50 +350,47 @@ def plot_2D(source, **kwargs):
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
         xlabel = make_label(x, 'x')
-    source.ax.set_xlabel(xlabel)
+    ax.set_xlabel(xlabel)
 
     # y label
     # --------
     ylabel = kwargs.get("ylabel", None)
     if not ylabel:
-        ylabel = make_label(y, 'y')
+        if kind in ['stack']:
+            ylabel = make_label(z, 'z')
+        else:
+            ylabel = make_label(y, 'y')
 
     # z label
     # --------
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
-        zlabel = make_label(z, 'z')
+        if kind in ['stack']:
+            zlabel = make_label(y, 'y')
+        else:
+            zlabel = make_label(z, 'z')
 
     # do we display the ordinate axis?
     if kwargs.get('show_y', True):
-        if kind not in ['stack']:
-            source.ax.set_ylabel(ylabel)
-        else:
-            source.ax.set_ylabel(zlabel)
+        ax.set_ylabel(ylabel)
     else:
-        source.ax.set_yticks([])
+        ax.set_yticks([])
 
     if colorbar:
 
-        if kind in ['stack']:
-            source._axcb = source.fig.colorbar(line_segments, ax=source.ax)
-            source._axcb.set_ticks(np.linspace(int(vmin), int(vmax), 5))
-            source._axcb.set_label(ylabel)
-        else:
-            if not source._axcb:
-                source._axcb = mpl.colorbar.ColorbarBase(source.axec,
-                                                                cmap=cmap,
-                                                                norm=norm)
-                source._axcb.set_label(zlabel)
-            pass
+        if not source._axcb:
+            axec = source.axes['colorbar']
+            source._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
+            source._axcb.set_label(zlabel)
+        pass
 
     # do we display the zero line
     if kwargs.get('show_zero', False):
-        source.ax.haxlines()
+        ax.haxlines()
 
     source._plot_resume(**kwargs)
 
-    return source.ax
+    return True
 
 
 # ===========================================================================

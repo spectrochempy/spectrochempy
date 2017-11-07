@@ -58,7 +58,6 @@ def test_nmr_1D_show(NMR_source_1D):
     source = NMR_source_1D.copy()
     figure()
     ax1 = source.plot()
-    assert ax1 is not None
     assert source.is_complex[-1]
     show()
     pass
