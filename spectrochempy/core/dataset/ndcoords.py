@@ -190,6 +190,10 @@ class Coord(NDMath, NDArray):
         return a correct result only if the data are sorted
 
         """
+        if "wavenumber" in self.title.lower() or "ppm" in self.title.lower():
+            return True
+        return False
+
         return bool(self.data[0] > self.data[-1])
 
     ########
@@ -239,7 +243,7 @@ class Coord(NDMath, NDArray):
             if indexes.size > 0:
                 return indexes[0]
             else:
-                raise ValueError(
+                raise CoordError(
                         'Could not find this label: {}'.format(loc))
 
         elif isinstance(loc, datetime):

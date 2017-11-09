@@ -97,6 +97,17 @@ def test_coordarray_withlabels():
     a._labels[3] = x
     assert a._labels[3][2] == 2
 
+def test_coordarray_withonlylabels():
+    y = [i for i in 'abcdefghij']
+    a = MinimalCoordSetSubclass(labels=y, title='processors')
+    assert a.title == 'processors'
+    assert not a.data
+    assert isinstance(a.labels, np.ndarray)
+    # any kind of object can be a label
+    assert a.labels.dtype == 'O'
+    # even an array
+    a._labels[3] = range(10)
+    assert a._labels[3][2] == 2
 
 def test_coordarray_with_datetime():
     from datetime import datetime
@@ -340,7 +351,7 @@ def test_coords_slicing_with_labels():
     assert type(coord0[0]) == Coord
 
     print((Quantity("4000 cm^-1").m))
-    assert isinstance(coord0[0].data, np.ndarray)
+    assert isinstance(coord0[0].data, float)
 
     print((coord0[0].values))
     assert isinstance(coord0[0].values, Quantity)

@@ -315,8 +315,9 @@ class NDMath(object):
                     # here it can be several situations
                     # One acceptable is that e.g., we suppress or add
                     # a row to the whole dataset
-                    if not(other.ndim < obj.ndim and \
-                        other.shape == obj.shape[-other.ndim:]):
+                    #TODO: go a little further on these checking
+                    if not( other.squeeze().ndim < obj.squeeze().ndim  and \
+                        other.shape[-1] == obj.shape[-1]):
                         raise ValueError("coordset properties do not match")
 
                 # rescale according to units

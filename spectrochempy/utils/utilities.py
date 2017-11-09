@@ -35,11 +35,14 @@
 # =============================================================================
 
 
-__all__ = _methods = ['readXlCellRange']
+__all__ = _methods = ['unzip', 'readfilename', 'readXlCellRange']
 
 import xlrd
+import os
+import zipfile
 import numpy as np
 
+from spectrochempy.gui import gui
 
 def readXlCellRange(xlFileName, cellRange, sheetNumber=0):
     """ reads data in a cellrange: A23:AD23 ''"""
@@ -78,3 +81,56 @@ def readXlCellRange(xlFileName, cellRange, sheetNumber=0):
         raise ValueError('Cell range must be within a single column or line...')
 
     return out
+
+# =============================================================================
+# Utility function
+# =============================================================================
+
+def unzip(source_filename, dest_dir):
+    with zipfile.ZipFile(source_filename) as zf:
+        for member in zf.infolist():
+            # Path traversal defense copied from
+            # http://hg.python.org/cpython/file/tip/Lib/http/server.py#l789
+            words = member.filename.split('/')
+            path = dest_dir
+            for word in words[:-1]:
+                drive, word = os.path.splitdrive(word)
+                head, word = os.path.split(word)
+                if word in (os.curdir, os.pardir, ''): continue
+                path = os.path.join(path, word)
+            zf.extract(member, path)
+
+def readfilename(filename, directory='', filter=''):
+
+    if os.path.isdir(filename):
+        directory = filename
+        filename = None
+
+    if not filename:
+
+        filenames = gui.openFileNamesDialog(directory=directory, filter=filter)
+
+        if not filenames:
+            raise IOError('no filename provided!')
+
+    else:
+        filenames = [filename]
+
+    # filenames passed
+    files = {}
+    for filename in filenames:
+        _, extension = os.path.splitext(filename)
+        extension = extension.lower()
+        if extension in files.keys():
+            files[extension].append(filename)
+        else:
+            files[extension]=[filename]
+
+    return files
+
+
+if __name__ == '__main__':
+
+    res = readfilename(None, filter='OMNIC file (*.spg);;'
+                                         'OMNIC file (*.spa)')
+    print(res)

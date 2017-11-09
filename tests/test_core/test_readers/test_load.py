@@ -62,4 +62,3 @@ def test_methods_read_access():
 
     # alternatively
     ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-

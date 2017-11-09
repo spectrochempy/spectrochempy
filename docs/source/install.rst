@@ -156,6 +156,23 @@ Alternatively, you can make a clone/fork of the github sources at:
 This is the recommended solution for developpers
 and those who would like to contribute
 
+Install ipyparallel in Jupyter notebook
+=========================================
+
+Before using parallel computing in the notebbok, one have to install the module
+from pypi or conda
+
+.. sourcecode:: bash
+
+	$ conda install ipyparallel
+
+To enable the IPython Clusters tab in Jupyter Notebook:
+
+.. sourcecode:: bash
+
+	$ ipcluster nbextension enable
+	$ ipcluster start
+
 
 Check the Installation
 ======================
@@ -184,3 +201,7 @@ The recommended next step is to proceed to the :ref:`userguide`
 
 .. _`easy_install`: http://pypi.python.org/pypi/setuptools
 .. _`pip`: http://pypi.python.org/pypi/pip
+
+
+
+

@@ -387,11 +387,15 @@ class NDDataset(
     @property
     def x(self):
         """
-        Read-pnly properties
+        Read-only properties
 
         Return the x coord, i.e. coordset(-1)
 
         """
+        if self.coordset[-1].data.size == 0:
+            new = self.coordset[-1].copy()
+            new._data = range(self.shape[-1])
+            return new
         return self.coordset[-1]
 
     @x.setter
@@ -405,6 +409,10 @@ class NDDataset(
 
         """
         if self.ndim > 1:
+            if self.coordset[-2].data.size == 0:
+                new = self.coordset[-2].copy()
+                new._data = range(self.shape[-2])
+                return new
             return self.coordset[-2]
 
     @y.setter
@@ -420,6 +428,10 @@ class NDDataset(
 
         """
         if self.ndim > 2:
+            if self.coordset[-3].data.size == 0:
+                new = self.coordset[-3].copy()
+                new._data = range(self.shape[-3])
+                return new
             return self.coordset[-3]
 
     @z.setter
@@ -618,6 +630,14 @@ class NDDataset(
         indexes = []
         for i in range(self.ndim):
             if i == axis:
+                if self.coordset[axis].data.size == 0:
+                    if self.coordset[axis].is_labeled:
+                        by = 'label'
+                    else:
+                        # nothing to do for sorting
+                        # return self itself
+                        return self
+
                 args = self.coordset[axis]._argsort(by=by, pos=pos, descend=descend)
                 new.coordset[axis] = self.coordset[axis]._take(args)
                 indexes.append(args)
@@ -693,7 +713,7 @@ class NDDataset(
         if pars:
             out += '{}\n'.format(wrapper1.fill(pars[0]))
         for par in pars[1:]:
-            out += '{}'.format(textwrap.indent(par, ' ' * 15))
+            out += '{}\n'.format(textwrap.indent(par, ' ' * 15))
 
         if not out.endswith('\n'):
             out += '\n'
@@ -704,7 +724,7 @@ class NDDataset(
             if pars:
                 out += '{}\n'.format(wrapper1.fill(pars[0]))
             for par in pars[1:]:
-                out += '{}'.format(textwrap.indent(par, ' ' * 15))
+                out += '{}\n'.format(textwrap.indent(par, ' ' * 15))
 
             if not out.endswith('\n'):
                 out += '\n'
@@ -803,7 +823,7 @@ class NDDataset(
 
         new._name = '*' + self._name
 
-        return new.squeeze()
+        return new #.squeeze()
 
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()

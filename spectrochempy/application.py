@@ -256,6 +256,9 @@ class SpectroChemPy(Application):
     _data = Instance(Data,
                      help="Set a data directory where to look for data")
 
+    csv_delimiter = Unicode(';',
+                 help='set csv delimiter').tag(config=True)
+
     @default('_data')
     def _get__data_default(self):
         # look for the testdata path in package tests

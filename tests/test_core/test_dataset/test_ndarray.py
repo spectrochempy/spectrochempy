@@ -481,6 +481,8 @@ def test_squeeze(ndarrayunit):  # ds2 is defined in conftest
     assert d1.shape == (10, )
     assert d1 is d
 
+
+
 def test_with_units_and_forc_to_change():
 
     np.random.seed(12345)

@@ -124,7 +124,7 @@ class NDIO(HasTraits):
     # Generic save function
     # --------------------------------------------------------------------------
 
-    def save(self, path='',
+    def save(self, filename='',
              **kwargs
              ):
         """
@@ -134,17 +134,20 @@ class NDIO(HasTraits):
         Parameters
         ----------
         path : `str`
-            The path to the file to be save
+            The filename to the file to be save
 
         directory : `str` [optional, default=`True`]
-            It specified, the given path (generally a file name) fill be
+            It specified, the given filename (generally a file name) fill be
             appended to the ``dir``.
 
         Examples
         ---------
         Read some experimental data and then save in our proprietary format **scp**
 
-        >>> from spectrochempy.api import NDDataset, data
+        >>> from spectrochempy.api import NDDataset, data # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        <BLANKLINE>
+            SpectroChemPy's API
+            Version   : 0.1...
         >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
         >>> mydataset.save('mydataset.scp', directory=data)
 
@@ -159,9 +162,9 @@ class NDIO(HasTraits):
         """
 
         # open file dialog box
-        filename = path
+        filename = filename
 
-        if not path:
+        if not filename:
             filename = gui.saveFileDialog()
 
         if not filename:
@@ -253,7 +256,7 @@ class NDIO(HasTraits):
     # --------------------------------------------------------------------------
     @classmethod
     def load(cls,
-             path='',
+             filename='',
              protocol='scp',
              **kwargs
              ):
@@ -266,7 +269,7 @@ class NDIO(HasTraits):
         ----------
         path : `str`
 
-            The path to the file to be read.
+            The filename to the file to be read.
 
         protocol : `str`
 
@@ -313,13 +316,12 @@ class NDIO(HasTraits):
         """
 
         if protocol not in ['scp']:
-            return cls.read(path, protocol=protocol)
+            return cls.read(filename, protocol=protocol)
 
         # open file dialog box
 
-        filename = path
         directory = kwargs.get("directory", options.data)
-        if not path:
+        if not filename:
             filename = gui.openFileNameDialog(directory=directory)
             if not filename:
                 raise IOError('no filename provided!')
@@ -398,13 +400,13 @@ class NDIO(HasTraits):
     # Generic read function
     # --------------------------------------------------------------------------
     @classmethod
-    def read(cls, path, **kwargs):
+    def read(cls, filename=None, **kwargs):
         """
         Generic read function. It's like load a class method.
 
         Parameters
         ----------
-        path : `str`
+        filename : `str`
             The path to the file to be read
 
         protocol : `str`
@@ -420,46 +422,46 @@ class NDIO(HasTraits):
 
         """
 
-        if path is None:
-            raise ValueError('read method require a parameter `path`!')
+        if filename is None:
+            raise ValueError('read method require a parameter `filename`!')
 
         protocol = kwargs.pop('protocol', None)
         sortbydate = kwargs.pop('sortbydate', True)
 
         if protocol is None:
             # try to estimate the protocol from the file name extension
-            _, extension = os.path.splitext(path)
+            _, extension = os.path.splitext(filename)
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
         if protocol == 'scp':
             # default reader
-            return cls.load(path)
+            return cls.load(filename)
 
-        try:
+        #try:
             # find the adequate reader
-            _reader = getattr(cls, 'read_{}'.format(protocol))
-            return _reader(path, protocol='protocol',
+        _reader = getattr(cls, 'read_{}'.format(protocol))
+        return _reader(filename, protocol='protocol',
                            sortbydate=sortbydate,
                            **kwargs)
 
-        except:
-            raise ValueError('The specified importer '
-                             'for protocol `{}` was not found!'.format(
-                    protocol))
+        #except:
+        #    raise ValueError('The specified importer '
+        #                     'for protocol `{}` was not found!'.format(
+        #            protocol))
 
     # --------------------------------------------------------------------------
     # Generic write function
     # --------------------------------------------------------------------------
 
-    def write(self, path, **kwargs):
+    def write(self, filename, **kwargs):
         """
         Generic write function which actually delegate the work to an
         writer defined by the parameter ``protocol``.
 
         Parameters
         ----------
-        path : `str`
+        filename : `str`
             The path to the file to be read
 
         protocol : `str`
@@ -479,19 +481,19 @@ class NDIO(HasTraits):
 
         if not protocol:
             # try to estimate the protocol from the file name extension
-            _, extension = os.path.splitext(path)
+            _, extension = os.path.splitext(filename)
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
         if protocol == 'scp':
-            return self.save(path)
+            return self.save(filename)
 
         # find the adequate reader
 
         try:
             # find the adequate reader
             _writer = getattr(self, 'write_{}'.format(protocol))
-            return _writer(path, protocol='protocol',
+            return _writer(filename, protocol='protocol',
                            **kwargs)
 
         except:

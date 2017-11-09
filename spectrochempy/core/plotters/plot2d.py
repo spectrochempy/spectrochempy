@@ -181,9 +181,9 @@ def plot_2D(source, **kwargs):
     y = source.y
 
     # limits to tdeff
-    # tdeff = z.meta.tdeff    # this is NMR related, make it more generic
-    xeff = x.coords #[:tdeff[1]]
-    yeff = y.coords #[:tdeff[0]]
+    # tdeff = z.meta.tdeff    # TODO: this is NMR related, make it more generic
+    xeff = x.data #[:tdeff[1]]
+    yeff = y.data #[:tdeff[0]]
     zeff = z.data   #[:tdeff[0],:tdeff[1]]
 
     if kind in ['map', 'image']:
@@ -263,11 +263,11 @@ def plot_2D(source, **kwargs):
 
             sp = z.sort(inplace=False)
 
-            ys = [sp.data[i] for i in range(len(sp.y.coords))]
-            sc = sp.y.coords
+            ys = [sp.data[i] for i in range(len(sp.y.data))]
+            sc = sp.y.data
 
             line_segments = LineCollection(
-                    [list(zip(sp.x.coords, y)) for y in ys[::-1]],
+                    [list(zip(sp.x.data, y)) for y in ys[::-1]],
                     # Make a sequence of x,s[i] pairs
                     # linewidths    = (0.5,1,1.5,2),
                     linewidths=(lw,),
@@ -290,7 +290,7 @@ def plot_2D(source, **kwargs):
     # axis limits and labels
     # -------------------------------------------------------------------------
     # abscissa limits?
-    xl = [x.coords[0], x.coords[-1]]
+    xl = [x.data[0], x.data[-1]]
     xl.sort()
     xlim = list(kwargs.get('xlim', xl))
     xlim.sort()
@@ -456,3 +456,12 @@ def clevels(data, **kwargs):
         clevelc = sorted(list(np.concatenate((clevel,clevelneg))))
 
     return clevelc
+
+if __name__ == '__main__':
+
+    from spectrochempy.api import NDDataset, data, show, figure
+
+    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
+    figure()
+    A.plot_stack()
+    show()

@@ -30,3 +30,4 @@ docs/source/_templates_old
 tartempion.scp
 todo.txt
 *.bak
+*.pkl

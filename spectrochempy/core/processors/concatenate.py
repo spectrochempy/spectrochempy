@@ -38,13 +38,13 @@ import datetime as datetime
 from warnings import warn
 import numpy as np
 
-from ..dataset.api import NDDataset
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import is_sequence
 
-__all__ = ['concatenate']
+__all__ = ['concatenate','stack']
 
 
-def concatenate(*sources, axis=None):
+def concatenate(*sources, axis=None, **kwargs):
     """Concatenation of DataSet objects along a given axis (by default the fisrt)
 
     Any number of DataSet objects can be concatenated. For this operation
@@ -64,7 +64,7 @@ def concatenate(*sources, axis=None):
         The dataset to be concatenated to the current dataset
 
 
-    axis : `ìnt`, optional, default = 0
+    axis : `int`, optional, default = 0
         The axis along which the datasets are concatenated
 
     Returns
@@ -76,15 +76,19 @@ def concatenate(*sources, axis=None):
     Examples
     --------
 
-    >>> import spectrochempy.api as scp
-    >>> A = scp.load('spec.spg', protocol='omnic')
-    >>> B = scp.load('mydataset.scp')
-    >>> C = scp.concatenate( A, B, axis=0)
+    >>> from spectrochempy.api import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+            ...
+    >>> A = NDDataset.load('spec.spg', protocol='omnic')
+    >>> B = NDDataset.load('mydataset.scp')
+    >>> C = NDDataset.concatenate( A, B, axis=0)
+    >>> C # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    NDDataset: ...
 
     or
 
-    >>> A = scp.load('spec.spg', protocol='omnic')
-    >>> B = scp.load('mydataset.scp')
+    >>> A = NDDataset.load('spec.spg', protocol='omnic')
+    >>> B = NDDataset.load('mydataset.scp')
     >>> C = A.concatenate(B, axis=0)
 
     Notes
@@ -124,6 +128,8 @@ def concatenate(*sources, axis=None):
         if is_sequence(source):  # numpy style of passing args
             sources = source
 
+    units = sources[0].units
+
     for source in sources:
 
         if not isinstance(source, NDDataset):
@@ -137,7 +143,7 @@ def concatenate(*sources, axis=None):
         if not source.is_units_compatible(sources[0]):
             raise TypeError(
                     'units of the datasets to concatenate are not compatible')
-        source.to(sources[0].units)
+        source.to(units)
 
         sax = sources[0].coordset
         for i, ax in enumerate(source.coordset):
@@ -148,7 +154,6 @@ def concatenate(*sources, axis=None):
 
         shapes.append(source.shape)
 
-    # guess ndim
     if axis is None:
         try:
             # should work whatever the number of dimensions
@@ -160,19 +165,35 @@ def concatenate(*sources, axis=None):
     if axis < 0:
         axis = sources[0].ndim + axis
 
-    # initialize dataset based on the 1st passed dataset
-    out = sources[0].copy()
-    outaxis = out.coordset[axis]  # axis for concatenation
+    # concatenate or stack the data array + mask and uncertainty
+    data = np.concatenate(sources, axis=axis)
+    mask = np.concatenate(tuple((source.mask for source in sources)), axis=axis)
+    uncertainty = np.concatenate(tuple((source.uncertainty for source in sources)), axis=axis)
 
-    out.description = 'Concatenation of ' + str(len(sources)) + ' datasets :\n'
-    out.description += ' ->' + sources[0].name + ' : ' + sources[
-        0].description + ' \n'
+    # concatenate coordset
+    stack = kwargs.get('force_stack', False)
+    coordset = sources[0].copy().coordset
 
+    c2arr = lambda x: x if isinstance(x, np.ndarray) else np.array([x])
+    coordset[axis]._data = np.concatenate(
+            tuple((c2arr(source.coordset[axis].data) for source in sources)))
+    coordset[axis]._mask = np.concatenate(
+            tuple((c2arr(source.coordset[axis].mask) for source in sources)))
+    coordset[axis]._labels = np.concatenate(
+            tuple((c2arr(source.coordset[axis].labels) for source in sources)),axis=-1)
+
+
+    out = NDDataset(data, coordset=coordset, mask=mask, uncertainty=uncertainty,
+                    units = units)
+
+    t = 'Stack' if axis==0 else 'Concatenation'
+
+    out.description = '{} of {}  datasets :\n'.format(t,len(sources))
+    out.description += '( {}'.format(sources[0].name)
+    out.title = sources[0].title
     authortuple = (sources[0].author,)
 
     for source in sources[1:]:
-
-        out.name = out.name + ' & ' + source.name
 
         if out.title != source.title:
             warn('Different data title => the title is that of the 1st dataset')
@@ -181,43 +202,70 @@ def concatenate(*sources, axis=None):
             authortuple = authortuple + (source.author,)
             out.author = out.author + ' & ' + source.author
 
-        # concatenate the data array
-        out._data = np.concatenate((out.data, source.data), axis=axis)
-        out._mask = np.concatenate((out.mask, source.mask), axis=axis)
-        out._uncertainty = np.concatenate((out.uncertainty, source.uncertainty),
-                                          axis=axis)
-
-        # concatenate axes
-
-        axes = out.coordset
-        for i, saxe in enumerate(source.coordset):
-
-            if saxe.title != axes[i].title:
-                warn(
-                        'Different axis title [%s] => the axis name is that of the 1st dataset [%s]' % (
-                            outaxis.title,
-                            saxe.title))
-
-            if i == axis:  # concatenation axis
-
-                outaxis._data = np.concatenate((outaxis.data, saxe.data))
-                outaxis._mask = np.concatenate((outaxis.mask, saxe.mask))
-                outaxis._labels = np.concatenate((outaxis.labels, saxe.labels),
-                                                 axis=-1)
-
-        # TODO: not sure yet what to do here
-        # for i, labels in enumerate(out.coordset[i].labels):
-        #     if labels.name != .labels[i].name:
-        #         print('warning: different labels names =>
-        # the labels name is that of the 1st dataset')
-        #     # labels.labels =
-        # labels.labels.append(X.dims[ndim].labels[i].labels)
-        #     labels.labels.append(source.dims[ndim].labels[i].labels)
-
-        out.description = out.description + ' \n->' + source.title + ' : ' + \
-                          source.description + ' \n'
-
-    out._date = datetime.datetime.now()
+        out.description += ', {}'.format(source.name)
+    out.description += ' )'
+    out._date = out._modified = datetime.datetime.now()
     out._history = [str(out.date) + ':created by concatenate()']
 
     return out
+
+
+def stack(*sources):
+    """Stack of DataSet objects along the fisrt dimension
+
+    Any number of DataSet objects can be stacked. For this operation
+    to be defined the following must be true:
+
+    #. all inputs must be valid dataset objects,
+    #. units of data and axis must be compatible (rescaling is applied
+       automatically if necessary)
+
+    The remaining dimension sizes must match along all dimension but the first.
+
+    Parameters
+    ----------
+
+    *sources : a series of :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        The dataset to be stacked to the current dataset
+
+    Returns
+    --------
+
+    out : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+        A dataset created from the stack of the `sources` datasets
+
+    Examples
+    --------
+
+    >>> from spectrochempy.api import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+            SpectroChemPy's API...
+    >>> A = NDDataset.load('spec.spg', protocol='omnic')
+    >>> B = NDDataset.load('mydataset.scp')
+    >>> C = NDDataset.stack( A, B)
+    >>> print(C) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+    --------------------------------------------------------------------------------
+          name/id: ...
+                   title: Wavenumbers
+                    data: [5999.556 5998.591 ...,  650.868  649.904] cm^-1
+    --------------------------------------------------------------------------------
+    <BLANKLINE>
+
+    """
+
+    return concatenate(*sources, axis=0, force_stack=True)
+
+
+if __name__ == '__main__':
+
+    from spectrochempy.api import *
+    A = NDDataset.load('spec.spg', protocol='omnic')
+    B = NDDataset.load('mydataset.scp')
+    C = concatenate( A, B, axis=0)
+    print(C)
+
+
+    A = NDDataset.load('spec.spg', protocol='omnic')
+    B = NDDataset.load('mydataset.scp')
+    C = A.concatenate(B, axis=0)

@@ -347,7 +347,7 @@ class Fit(HasTraits):
         expedata = source.real.data
         x = source.coordset[-1].data
 
-        if source.ndim > 1:
+        if source.squeeze().ndim > 1:
             # nD data
             raise SpectroChemPyError("Fit not implemented for nD data yet!")
 
@@ -448,7 +448,7 @@ class Fit(HasTraits):
         # Automatically calculate correct amplitude A and baseline
         # (baseline linear model a*i+b) by detemining the zero of the first derivative
         # with respect to A, a, and b
-
+        expe = expe.squeeze()
         n = xi.size
         sE = sum(expe)
         sF = sum(calc)

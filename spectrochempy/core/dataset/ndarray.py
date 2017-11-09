@@ -318,7 +318,7 @@ class NDArray(HasTraits):
             else:
                 new._labels = np.array(self._labels[keys])
 
-        return new.squeeze()
+        return new #.squeeze()
 
     # .........................................................................
     def __setitem__(self, items, value):
@@ -445,7 +445,7 @@ class NDArray(HasTraits):
 
         """
 
-        if self.shape == (1,):
+        if self.size == 1:
             if self.has_complex_dims:
                 # only a single complex
                 return interleaved2complex(self._data).squeeze()[()]
@@ -650,7 +650,7 @@ class NDArray(HasTraits):
         """
 
         if not self.is_masked:
-            self._mask = np.zeros_like(self._data).astype(bool)
+            self._mask = np.zeros(self._data.shape).astype(bool)
         return self._mask
 
 
@@ -961,7 +961,7 @@ class NDArray(HasTraits):
         """`bool`, read-only property - Whether the axis has labels or not.
 
         """
-        if self._labels is not None and np.any(self._labels):
+        if self._labels is not None and np.any(self._labels != ''):
             return True
         else:
             return False
@@ -1047,7 +1047,10 @@ class NDArray(HasTraits):
         (possibly complex or hyper-complex in the array).
 
         """
-        if self._data is None:
+        if self._data is None or self._data.size == 0:
+            # no data but it be that labels are present
+            if np.any(self._labels):
+                return self._labels.size
             return 0
         size = self._data.size
         if self.has_complex_dims:
@@ -1282,10 +1285,9 @@ class NDArray(HasTraits):
         True
 
         """
-        _other = other.copy()
 
         try:
-            _other.to(self.units)
+            other.to(self.units, inplace=False)
         except:
             return False
 
@@ -1478,6 +1480,9 @@ class NDArray(HasTraits):
         if coordset:
             new._coordset = CoordSet(coordset)
 
+        #if new.ndim ==1 and new.size > 1 :
+        #    new.data = new.data.reshape((1,self._data.size))
+
         return new
 
     # .........................................................................
@@ -1605,7 +1610,11 @@ class NDArray(HasTraits):
             new = self.copy()
 
         try:
-            if isinstance(other, str):
+            if other is None:
+                units = None
+                if self.units is None:
+                    return new
+            elif isinstance(other, str):
                 units = ur.Unit(other)
             elif hasattr(other, 'units'):
                 units = other.units
@@ -1715,7 +1724,7 @@ class NDArray(HasTraits):
 
             if stop is not None and not isinstance(stop, (int, np.int_)):
                 stop = self._loc2index(stop, axis)
-                if stop < start and self.coordset[axis].is_reversed:
+                if stop < start: # and self.coordset[axis].is_reversed:
                     start, stop = stop, start
                 stop = stop + 1
 
@@ -1802,7 +1811,8 @@ class NDArray(HasTraits):
         # get a ndarray with passed indices
 
         new = self.copy()
-        new._data = new._data[indices]
+        if new._data.size > 0:
+            new._data = new._data[indices]
         if new.is_labeled:
             new._labels = new._labels[..., indices]
         if new.is_masked:

@@ -472,6 +472,7 @@ def test_dataset_slicing_by_index(dataset3d):
     assert da.shape == (10, 100, 3)
 
     plane0 = da[0]
+    plane0 = plane0.squeeze()
     assert type(plane0) == type(da)  # should return a dataset
     assert plane0.ndim == 2
     assert plane0.shape == (100,3)
@@ -479,7 +480,7 @@ def test_dataset_slicing_by_index(dataset3d):
     # print("Plane0: ", plane0)
 
     # a plane but without reduction
-    plane1 = da[1:2]
+    plane1 = da[1:2].squeeze()
     assert type(plane1) == type(da)
     assert plane1.ndim == 2
     assert plane1.size == 300
@@ -488,7 +489,7 @@ def test_dataset_slicing_by_index(dataset3d):
     # another selection
     row0 = plane0[:, 0]
     assert type(row0) == type(da)
-    assert row0.shape == (100,)
+    assert row0.shape == (100, 1)
 
     # and again selection
     element = row0[..., 0]
@@ -519,14 +520,14 @@ def test_dataset_slicing_by_label(dataset3d):
     assert type(planeb) == type(da)
     plane1 = da[1]
     assert_equal(planeb.data, plane1.data)
-    assert planeb.ndim == 2
+    assert planeb.ndim == 3
     assert planeb.size == 300
     bd = da['b':'f']  # the last index is included
     assert bd.shape == (5, 100, 3)
     # print(bd)
     b1 = da[1:6]
     assert_equal(bd.data, b1.data)
-    bc = da['b':'f', :, "hot"]
+    bc = da['b':'f', :, "hot"].squeeze()
     assert bc.shape == (5, 100)
     assert bc.coordset(0).labels[0] == 'b'
 
@@ -536,11 +537,11 @@ def test_dataset_slicing_by_values(dataset3d):
 
     x = da[3000.]
     # print(x)
-    assert x.shape == (100, 3)
+    assert x.shape == (1, 100, 3)
 
     y = da[3000.0:2000.0, :, 210.]
     # print(y)
-    assert y.shape == (4, 100)
+    assert y.shape == (4, 100, 1)
 
     # slicing by values should also work using reverse order
     yr = da[2000.0:3000.0, :, 210.]
@@ -565,7 +566,7 @@ def test_dataset_slicing_by_index_nocoords(dataset3d):
     da._coords = None  # clear coords
     plane0 = da[1]
     assert type(plane0) == type(da)  # should return a dataset
-    assert plane0.ndim == 2
+    assert plane0.ndim == 3
     assert plane0.size == 300
     # print("Plane0: ", plane0)
     plane1 = da[3666.7]
@@ -589,7 +590,7 @@ def test_simple_slicing():
     assert d1.shape == (5, 5)
     d2 = d1[2:3, 2:3]
     assert d2.data.shape == ()
-    assert d2.uncertainty.shape == ()
+    assert d2.uncertainty.shape == (1,1)
     assert_array_equal(d2.uncertainty, u1[2:3, 2:3])
     assert (d1 is not d2)
     d3 = d1[2, 2]
@@ -599,14 +600,14 @@ def test_simple_slicing():
 def test_slicing_with_mask():
     ndd = NDDataset(np.array([1., 2., 3.]),
                     mask=np.array([False, False, False]))
-    assert ndd[0].shape == ()
-    assert ndd[0].mask.shape == ()
+    assert ndd[0].shape == (1, )
+    assert ndd[0].mask.shape == (1, )
     assert not ndd[0].mask
 
 
 def test_slicing_with_coords(dataset3d):
     da = dataset3d
-    assert da[0, 0].shape == ( 3,)
+    assert da[0, 0].shape == ( 1,1, 3,)
     assert_array_equal(da[0, 0].coordset[-1].data, da.coordset[-1].data)
 
 
@@ -1215,8 +1216,8 @@ def test_complex_dataset_slicing_by_index():
 
     # slicing 2D
     nd1 = nd[0]
-    assert nd1.shape == (4,)
-    assert nd1.data.shape == (8,)
+    assert nd1.shape == (1, 4)
+    assert nd1.data.shape == (1, 8)
     # print(nd1)
 
     # slicing range
@@ -1369,13 +1370,11 @@ def test_sorting(ds1):  # ds1 is defined in conftest
     new = ds1.copy()
     new.sort(axis=1, inplace=True, descend=False)
     assert_array_equal(new.data, source.data)
-    assert not new.coordset(1).is_reversed
     assert (new[0, 0, 0] == source[0, 0, 0])
 
     new = source.copy()
     new.sort(axis=1, inplace=True, descend=True)
     assert_array_equal(new.data, source.data[:, ::-1, :])
-    assert new.coordset(1).is_reversed
     assert (new[0, -1, 0] == source[0, 0, 0])
 
 

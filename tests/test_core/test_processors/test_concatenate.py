@@ -35,7 +35,8 @@
 # =============================================================================
 
 
-from spectrochempy.api import ur, concatenate, CoordRange
+from spectrochempy.api import ur, concatenate, stack,\
+    CoordRange
 
 import pytest
 
@@ -68,6 +69,33 @@ def test_concatenate(IR_source_1):
     assert s.units==s1.units
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
     assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
+
+def test_concatenate_1D_along_axis0(IR_source_1):
+
+    source = IR_source_1
+
+    # split all rows
+    rows = []
+    for s in source:
+        rows.append(s)
+
+    assert len(rows)==source.shape[0]
+
+    # reconstruct
+    new = stack(rows)
+    assert new.shape == source.shape
+
+    # #TODO: fix bug when ndim=1 (squeezed data)
+    # using stack we should have a concatenation along a new axis 0 in this case.
+    # for now it doesnt work.
+
+    rows = []
+    for s in source:
+        rows.append(s.squeeze())
+
+    # reconstruct from squeezed data
+    new = stack(rows)
+    assert new.shape == (source.size,)
 
 def test_concatenate_along_axis1(IR_source_1):
 
