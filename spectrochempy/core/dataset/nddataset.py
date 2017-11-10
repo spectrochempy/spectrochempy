@@ -44,35 +44,37 @@ This module implements the base `NDDataset` class.
 # Standard python imports
 # =============================================================================
 
-import copy
 import itertools
-import logging
 import textwrap
 from datetime import datetime
 from warnings import warn
 
-import numpy as np
-import pandas as pd
-from pandas.core.generic import NDFrame
-
 # =============================================================================
 # third-party imports
 # =============================================================================
-from traitlets import (List, Unicode, Instance,  Bool, All, Float,
-                      validate, observe, default)
+
+import numpy as np
+from traitlets import (List, Unicode, Instance,  Bool, All, Float, validate,
+                       observe, default)
+import matplotlib.pyplot as plt
 
 # =============================================================================
 # Local imports
 # =============================================================================
-from spectrochempy.core.units import Quantity
-from spectrochempy.utils import (SpectroChemPyWarning, SpectroChemPyError,
-                                 is_sequence, is_number,
-                                 numpyprintoptions, get_user_and_node)
+
+from spectrochempy.utils import (SpectroChemPyWarning,
+                                 is_sequence,
+                                 is_number,
+                                 numpyprintoptions,
+                                 get_user_and_node)
+
 from spectrochempy.extern.traittypes import Array
+
 from spectrochempy.core.dataset.ndarray import NDArray, CoordSet
-from spectrochempy.core.dataset.ndcoords import Coord, CoordError
+from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
-# from spectrochempy.core.dataset.ndmeta import Meta
+from spectrochempy.core.dataset.ndmeta import Meta
+
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.application import log
 
@@ -81,10 +83,9 @@ from spectrochempy.application import log
 # =============================================================================
 
 __all__ = ['NDDataset',
-           'NDDatasetError',
-           'NDDatasetWarning',
-           # dataset
-           'squeeze',
+
+           # dataset methods
+           #'squeeze',
            'sort',
            'swapaxes',
            'transpose',
@@ -94,11 +95,7 @@ __all__ = ['NDDataset',
            'real',
            ]
 
-_classes = [
-    'NDDataset',
-    'NDDatasetError',
-    'NDDatasetWarning'
-]
+_classes = ['NDDataset']
 
 # =============================================================================
 # numpy print options
@@ -110,20 +107,6 @@ numpyprintoptions()
 # =============================================================================
 # NDDataset class definition
 # =============================================================================
-
-class NDDatasetError(SpectroChemPyError):
-    """
-    An exception that is raised when something is wrong with the NDDataset`
-    definitions.
-    """
-
-
-class NDDatasetWarning(SpectroChemPyWarning):
-    """
-    A warning that is raised when something is wrong with the `NDDataset`
-    definitions but do not necessarily need to raise an error.
-    """
-
 
 class NDDataset(
         NDIO,
@@ -222,14 +205,21 @@ class NDDataset(
     _copy = Bool(False)
     _labels_allowed = Bool(False)  # no labels for NDDataset
 
-    def __init__(self, data=None,
+
+    # _ax is a hidden variable containing the matplotlib axis defined
+    # for a NDArray object.
+    # most generally it is accessed using the public read-only property ax
+
+    _ax = Instance(plt.Axes, allow_none=True)
+
+    _fig = Instance(plt.Figure, allow_none=True)
+
+    def __init__(self,
+                 data=None,
                  coordset=None,
                  coordunits=None,
                  coordtitles=None,
                  **kwargs):
-
-        if 'coords' in kwargs:
-            raise KeyError()
 
         super(NDDataset, self).__init__(data, **kwargs)
 
@@ -312,25 +302,35 @@ class NDDataset(
 
     @coordset.setter
     def coordset(self, value):
+
         if value is not None:
             if self._coordset is not None:
                 log.info("Overwriting NDDataset's current "
                          "coordset with one specified")
 
-            for i, coord in enumerate(value):
+            if not isinstance(value, CoordSet):
+                value = CoordSet(value)
+
+            coordset = CoordSet(
+                    [[None] for s in self._data.shape])  # basic coordset
+
+            for i,item in enumerate(value[::-1]):
+                coordset[self._data.ndim-1-i]=item
+
+            for i, coord in enumerate(coordset):
+
                 if isinstance(coord, CoordSet):
                     size = coord.sizes[i]
                 else:
                     size = coord.size
-                if size != self.shape[i]:
-                    raise CoordError(
+                if self.has_complex_dims and self._is_complex[i]:
+                    size = size*2
+                if size != self._data.shape[i]:
+                    raise ValueError(
                             'the size of each coordinates array must '
                             'be equal to that of the respective data dimension')
 
-            if not isinstance(value, CoordSet):
-                self._coordset = CoordSet(value)
-            else:
-                self._coordset = value
+            self._coordset = coordset
 
     @property
     def coordtitles(self):
@@ -466,7 +466,7 @@ class NDDataset(
     @property
     def labels(self):
         # not valid for NDDataset
-        raise NDDatasetError("There is no label for nd-dataset")
+        raise ValueError("There is no label for nd-dataset")
 
     # -------------------------------------------------------------------------
     # public methods
@@ -582,7 +582,7 @@ class NDDataset(
 
         return new
 
-    def sort(self, axis=0, pos=None, by='axis', descend=False, inplace=False):
+    def sort(self, axis=0, pos=None, by='value', descend=False, inplace=False):
         """
         Returns a copy of the dataset sorted along a given axis
         using the numeric or label values.
@@ -598,10 +598,10 @@ class NDDataset(
             If labels are multidimensional  - allow to sort on a define
             row of labels: labels[pos]. Experimental: Not yet checked
 
-        by : `str` among ['axis', 'label'], optional, default = ``axis``.
+        by : `str` among ['value', 'label'], optional, default = ``value``.
 
             Indicate if the sorting is following the order of labels or
-            numeric axis values.
+            numeric coord values.
 
         descend : `bool`, optional, default = ``False``.
 
@@ -630,7 +630,9 @@ class NDDataset(
         indexes = []
         for i in range(self.ndim):
             if i == axis:
-                if self.coordset[axis].data.size == 0:
+                if self.coordset[axis].size == 0:
+                    # sometimes we have only label for Coord objects.
+                    # in this case, we sort labels if they exist!
                     if self.coordset[axis].is_labeled:
                         by = 'label'
                     else:
@@ -665,7 +667,7 @@ class NDDataset(
         """
         # override the ndarray function because we must care about the axis too.
 
-        if self.data.shape[axis] % 2 == 0:
+        if self._data.shape[axis] % 2 == 0:
             # we have a pair number of element along this axis.
             # It can be complex
             # data are then supposed to be interlaced (real, imag, real, imag ..
@@ -741,11 +743,11 @@ class NDDataset(
                              list(zip(self.shape,
                                  [False]*self.ndim
                                  if not self.is_complex else self.is_complex))))
-        shape = (' x '.join(['{}{}'] * len(self.shape))).format(
+        shape = (' x '.join(['{}{}'] * self.ndim)).format(
                 *shapecplx).replace(
                 'False', '').replace('True', '(complex)')
         size = self.size
-        sizecplx = '' if not self.is_complex else " (complex)"
+        sizecplx = '' if not self.has_complex_dims else " (complex)"
 
         out += '   data title: {}\n'.format(self.title)
         out += '    data size: {}{}\n'.format(size, sizecplx) if self.ndim < 2 \
@@ -803,14 +805,14 @@ class NDDataset(
         new._data = np.array(self._data[internkeys])
         new._is_complex = self._is_complex
 
-        if self.is_masked:
-            new._mask = np.array(self._mask[keys])
+        #if self.is_masked:
+        new._mask = np.array(self._mask[keys])
 
-        if self.is_uncertain:
-            new._uncertainty = np.array(self._uncertainty[keys])
+        #if self.is_uncertain:
+        new._uncertainty = np.array(self._uncertainty[keys])
 
         if new._data.size == 0:
-            raise IndexError("Empty array of shape {} resulted from slicing.\n"
+            raise ValueError("Empty array of shape {} resulted from slicing.\n"
                              "Check the indexes and make "
                              "sure to use floats for "
                              "location slicing".format(str(new._data.shape)))
@@ -831,34 +833,6 @@ class NDDataset(
             attrs.remove(attr)
         #some attrib are not important for equality
         return super(NDDataset, self).__eq__(other, attrs)
-
-    # def __iter__(self):
-    #     if self.ndim == 0:
-    #         raise TypeError('iteration over a 0-d array')
-    #     for n in range(len(self)):
-    #         yield self[n]
-
-    # # the following methods are to give NDArray based class
-    # # a behavior similar to np.ndarray regarding the ufuncs
-    # def __array_prepare(self, *args, **kwargs):
-    #     pass
-    #
-    # def __array_wrap__(self, *args):
-    #     # called when element-wise ufuncs are applied to the array
-    #
-    #     f, objs, huh = args[1]
-    #
-    #     # case of complex dataset
-    #     if f.__name__ in ['real', 'imag', 'conjugate', 'absolute']:
-    #         return getattr(objs[0], f.__name__)()
-    #
-    #     if  self.iscomplex[-1]:
-    #         if f.__name__ in ["fabs",]:
-    #  fonction not available for complex data
-    #             raise ValueError("{} does not accept complex data ".format(f))
-    #
-    #     data, uncertainty, units, mask = self._op(f, objs, ufunc=True)
-    #     return self._op_result(data, uncertainty, units, mask)
 
     # -------------------------------------------------------------------------
     # private methods
@@ -967,7 +941,7 @@ class NDDataset(
 
 
 # make some function also accessiibles from the module
-squeeze = NDDataset.squeeze
+#squeeze = NDDataset.squeeze
 sort = NDDataset.sort
 swapaxes = NDDataset.swapaxes
 transpose = NDDataset.transpose
@@ -981,3 +955,11 @@ real = NDDataset.real
 # =============================================================================
 
 set_operators(NDDataset, priority=50)
+
+if __name__ == '__main__':
+
+    from spectrochempy.api import *
+
+    # test with wrong units
+    NDDataset([1, 2, 3] * ur.adu, units=ur.adu)
+

@@ -41,17 +41,10 @@ spectrochempy. Exceptions that are specific to a given subpackage should *not*
 be here, but rather in the particular subpackage.
 """
 
-all = _classes = ['SpectroChemPyError',
-                  'SpectroChemPyWarning',
+all = _classes = ['SpectroChemPyWarning',
                   'SpectroChemPyDeprecationWarning',
                   ]
 
-
-class SpectroChemPyError(Exception):
-    """
-    The base Error class from which all SpectroChemPy Error should inherit.
-
-    """
 
 
 class SpectroChemPyWarning(Warning):

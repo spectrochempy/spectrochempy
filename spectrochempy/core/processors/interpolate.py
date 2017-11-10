@@ -38,7 +38,7 @@
 import scipy.interpolate
 import numpy as np
 
-# from ..dataset import NDDataset
+from spectrochempy.utils import SpectroChemPyWarning
 
 
 __all__ = ['interpolate', 'align']
@@ -94,7 +94,7 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
     try:
         sourceordered.coordset(axis).to(refordered.coordset(refaxis).units)
     except:
-        raise TypeError(
+        raise ValueError(
                 'units of the dataset and reference axes on which interpolate are not compatible')
 
     oldaxisdata = sourceordered.coordset(axis).data
@@ -114,7 +114,7 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
                 oldaxisdata, data,
                 axis=ax, extrapolate=False)
     else:
-        raise TypeError('Not recognised option kind for `align`')
+        raise AttributeError('Not recognised option kind for `align`')
 
     interpolate_data = interpolator(sourceordered.data, axis)
     newdata = interpolate_data(refaxisdata)

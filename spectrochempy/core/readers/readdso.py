@@ -44,6 +44,8 @@ from datetime import datetime, timezone, timedelta
 
 from traitlets import HasTraits, Unicode, List
 
+from spectrochempy.utils import SpectroChemPyWarning
+
 __all__ = ['read_dso']
 
 

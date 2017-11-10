@@ -45,7 +45,7 @@ from traitlets import HasTraits, Instance
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.dataset.ndarray import CoordSet
-from spectrochempy.utils import SpectroChemPyError
+from spectrochempy.utils import SpectroChemPyWarning
 
 from .svd import Svd
 
@@ -94,7 +94,7 @@ class Pca(HasTraits):
         if isinstance(source, NDDataset):
             data = source.data
         else:
-            raise SpectroChemPyError('A dataset of type NDDataset is  '
+            raise TypeError('A dataset of type NDDataset is  '
                                'expected as a source of data, but an object'
                                ' of type {} has been provided'.format(
                                type(source).__name__))

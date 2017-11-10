@@ -38,9 +38,9 @@
 
 """
 
-
 from spectrochempy.api import Meta
-from ...utils import raises
+from spectrochempy.utils import SpectroChemPyWarning
+from tests.utils import  raises
 
 def test_init():
     meta = Meta()
@@ -65,7 +65,7 @@ def test_readonly():
     meta.chaine = "a string"
     assert meta.chaine == 'a string'
     meta.readonly = True
-    with raises(KeyError):
+    with raises(ValueError):
         meta.chaine = "a modified string"
     assert meta.chaine != "a modified string"
 

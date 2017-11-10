@@ -116,7 +116,7 @@ def plot_3D(source,
     elif step == 'all':
         ishowed = slice(None)
     else:
-        raise ValueError(
+        raise TypeError(
                 'step parameter was not recognized. Should be: an int, "all"')
 
     s = s[:, ishowed]

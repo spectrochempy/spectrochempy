@@ -251,10 +251,10 @@ def test_set_coord_from_another_coord():
                    title='wavelength')
 
     coord1 = Coord(coord0)
-    assert coord1.data is coord0.data
+    assert coord1._data is coord0._data
     coord1 = Coord(coord0, copy=True)
-    assert coord1.data is not coord0.data
-    assert_array_equal(coord1.data, coord0.data)
+    assert coord1._data is not coord0._data
+    assert_array_equal(coord1._data, coord0._data)
     assert isinstance(coord0, Coord)
     assert isinstance(coord1, Coord)
 
@@ -329,10 +329,10 @@ def test_coords_copy():
 def test_coords_slicing():
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    # labels='a b c d e f g h i j'.split(),
-                units='cm^-1',
+                   units='cm^-1',
                    mask=None,
                    title='wavelength')
-
+    c0 = coord0[0]
     assert coord0[0].data == 4000.0
     assert coord0[0] == 4000.0 * (1. / ur.cm)
 

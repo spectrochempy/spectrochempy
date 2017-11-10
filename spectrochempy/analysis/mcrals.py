@@ -40,7 +40,8 @@ import logging
 log = logging.getLogger(__name__)
 import numpy as np
 
-from ..core.api import NDDataset
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import SpectroChemPyWarning
 
 __all__ = ['McrAls']
 _methods = __all__[:]

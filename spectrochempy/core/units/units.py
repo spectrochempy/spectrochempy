@@ -53,6 +53,9 @@ from spectrochempy.extern.pint.unit import _Unit as Unit
 from spectrochempy.extern.pint import formatting
 from spectrochempy.extern.pint.formatting import siunitx_format_unit
 from spectrochempy.extern.pint import Context
+from spectrochempy.extern.pint.converters import ScaleConverter
+from spectrochempy.extern.pint.unit import UnitDefinition
+from spectrochempy.extern import pint
 
 # Modify the pint behaviour ####################################################
 #  TODO: better ways ??
@@ -103,7 +106,6 @@ setattr(Unit, 'scaling', property(lambda u:
                                   u._REGISTRY.Quantity(1.,
                                                        u._units).to_base_units().magnitude))
 
-
 def __format__(self, spec):
     spec = spec or self.default_format
 
@@ -121,6 +123,10 @@ def __format__(self, spec):
 
             if self._units == 'ppm':
                 units = UnitsContainer({'ppm': 1})
+            elif self._units == 'percent':
+                units = UnitsContainer({'%': 1})
+            elif self._units == 'weight_percent':
+                units = UnitsContainer({'wt.%': 1})
             elif abs(self.scaling - 1.) < 1.e-10:
                 units = UnitsContainer({'dimensionless': 1})
             else:
@@ -157,11 +163,15 @@ U_.define(
 U_.define('ppm = 1. = ppm')
 U_.define('absorbance = 1. = AU')
 
+U_.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
+U_.define(UnitDefinition('weight_percent', 'wt_pct', (), ScaleConverter(1 / 100.0)))
+
 U_.default_format = ''  # .2fK'
 Q_ = U_.Quantity
 Q_.default_format = ''  # .2fK'
 M_ = U_.Measurement
 M_.default_format = 'uK'
+
 
 
 # Context for NMR

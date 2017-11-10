@@ -54,8 +54,8 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.application import options, log
-from spectrochempy.utils import readfilename, unzip, \
-                                SpectroChemPyWarning, SpectroChemPyError
+from spectrochempy.utils import (readfilename, unzip, is_sequence,
+                                SpectroChemPyWarning)
 
 __all__ = ['read_zip', 'read_csv']
 
@@ -184,15 +184,23 @@ def _read(source, filename='',
 
         for filename in files[extension]:
             if extension == '.zip':
+                # zip returns a list, so we extend the list of sources
                 sources.extend(_read_zip(source, filename, **kwargs))
 
             elif extension == '.csv':
-                sources.extend(_read_csv(source, filename, **kwargs))
-
+                csv = _read_csv(source, filename, **kwargs)
+                # check is it is a list of sources or a single
+                if isinstance(csv, NDDataset):
+                    sources.append(csv)
+                elif is_sequence(csv):
+                    sources.extend(csv)
             else:
                 # try another format!
-                sources.extend(
-                        source.read(filename, protocol=extension, **kwargs))
+                dat = source.read(filename, protocol=extension, **kwargs)
+                if isinstance(dat, NDDataset):
+                    sources.append(dat)
+                elif is_sequence(dat):
+                    sources.extend(dat)
 
     # and stack them into a single file - this assume they are compatibles
     new = stack(sources)
@@ -216,8 +224,12 @@ def _read_zip(source, filename, **kwargs):
     filelist = os.listdir(unzipfilename)
     filelist.sort()
 
-    # read all .csv files
+    # read all .csv files?
+    only = kwargs.pop('only',None)
+    if only is not None:
+        filelist = filelist[:only+1]
     sources = []
+
     for i, f in enumerate(filelist):
         f = os.path.basename(f)
 
@@ -229,7 +241,6 @@ def _read_zip(source, filename, **kwargs):
 
         sources.append(_read_csv(source, pth, **kwargs))
 
-    #delete the temporary directory
     try:
         shutil.rmtree(temp)
     except:
@@ -242,7 +253,7 @@ def _read_csv(source, filename='', **kwargs):
     # this is limited to 1D array (two columns reading!)
 
     if not os.path.exists(filename):
-        raise SpectroChemPyError("{} file doesn't exists!".format(filename))
+        raise IOError("{} file doesn't exists!".format(filename))
 
     new = source.copy() # important
     delimiter = kwargs.get("csv_delimiter", options.csv_delimiter)
@@ -261,7 +272,7 @@ def _read_csv(source, filename='', **kwargs):
             try:
                 d = np.loadtxt(fil, delimiter=delimiter)
             except:
-                raise SpectroChemPyError(
+                raise IOError(
                   '{} is not a .csv file or its structure cannot be recognized')
 
     # transpose d so the the rows becomes the last dimensions
@@ -269,7 +280,7 @@ def _read_csv(source, filename='', **kwargs):
 
     # First row should now be the coordinates, and data the rest of the array
     coord1 = d[0]
-    data = np.array([d[1]])
+    data = d[1]
 
     # create the dataset
     new.data = data
@@ -280,13 +291,13 @@ def _read_csv(source, filename='', **kwargs):
     new.description = kwargs.get('description',
                                     '"name" '+ 'read from .csv file')
     coord0 = Coord(labels=[new.name])
-    new.coordset = [coord0, coord1]
+    new.coordset = [coord0, coord1] #[coord0, coord1]
     new.history = str(datetime.now()) + ':read from .csv file \n'
     new._date = datetime.now()
     new._modified = new.date
 
     # here we can check some particular format
-    origin = kwargs.get('origin', None)
+    origin = kwargs.get('origin', '')
     if 'omnic' in origin:
         # this will be treated as csv export from omnic (IR data)
         new = _add_omnic_info(new, **kwargs)
@@ -352,17 +363,27 @@ if __name__ == '__main__':
 
     options.log_level = ERROR
 
-    A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
-                           directory=data,
-                           origin='omnic_export')
-    print(A)
+    # A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
+    #                        directory=data,
+    #                        origin='omnic_export')
+    # print(A)
+    # figure()
+    # A.plot_stack()
+
+
+    B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=data)
+    print(B)
+
+    B = B[-0.5:60.0]
+
+    B.x.units = 'hour'
+    B.x.title = 'time on stream'
+    B.units = 'weight_percent'
+    B.title = 'loss of mass'
+
     figure()
-    A.plot_stack()
+    B.plot()
     show()
-
-
-    #B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=data)
-    #print(B)
 
     # to open the file dialog editor
     #C = NDDataset.read_csv(directory=data)

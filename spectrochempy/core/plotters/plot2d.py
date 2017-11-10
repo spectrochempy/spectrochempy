@@ -53,6 +53,7 @@ import numpy as np
 
 from spectrochempy.application import plotoptions, log
 from spectrochempy.core.plotters.utils import make_label
+from spectrochempy.utils import SpectroChemPyWarning
 
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
 _methods = __all__[:]
@@ -230,7 +231,7 @@ def plot_2D(source, **kwargs):
         elif step == 'all':
             ishowed = slice(None)
         else:
-            raise ValueError(
+            raise TypeError(
                     'step parameter was not recognized. Should be: an int, "all"')
 
         zeffs = zeff[ishowed]

@@ -49,6 +49,8 @@ __all__ = ["assert_equal",
            "enable_deprecations_as_exceptions",
            "treat_deprecations_as_exceptions",
            "NumpyRNGContext",
+           "SpectroChemPyWarning",
+           "SpectroChemPyDeprecationWarning",
            ]
 
 import pytest
@@ -63,8 +65,8 @@ from numpy.testing import (assert_equal,
                            assert_array_almost_equal,
                            assert_approx_equal)
 
-from spectrochempy.utils.exceptions import SpectroChemPyDeprecationWarning
-from spectrochempy.extern.pint.errors import DimensionalityError
+from spectrochempy.utils import SpectroChemPyWarning, \
+    SpectroChemPyDeprecationWarning
 
 
 # =============================================================================

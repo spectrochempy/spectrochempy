@@ -46,9 +46,10 @@ def test_read_csv():
 
     A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
                            directory=data,
-                           origin='omnic_export')
+                           origin='omnic_export',
+                           only=10)
     print(A)
-    assert A.shape == (178,3736)
+    assert A.shape == (10,3736)
 
     figure()
     A.plot_stack()
@@ -57,7 +58,7 @@ def test_read_csv():
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
                            directory=data,
                            origin='tga')
-    assert B.shape == (1,3446)
+    assert B.shape == (3446,)
     print(B)
     figure()
     B.plot()

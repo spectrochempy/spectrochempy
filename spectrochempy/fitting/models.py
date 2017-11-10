@@ -40,6 +40,7 @@
 import os
 import numpy as np
 from spectrochempy.application import log
+from spectrochempy.utils import SpectroChemPyWarning
 
 _classes = ['polynomialbaseline', 'gaussianmodel', 'lorentzianmodel',
             'assymvoigtmodel', 'voigtmodel']
@@ -289,7 +290,7 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
                 # due to a limited polynomial degree
                 pass
             else:
-                raise KeyError(e.message)
+                raise ValueError(e.message)
 
     x = np.array(x, dtype=np.float64)
     if y is not None:

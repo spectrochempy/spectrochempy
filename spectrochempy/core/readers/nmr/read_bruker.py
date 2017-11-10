@@ -53,14 +53,16 @@ import numpy as np
 from spectrochempy.application import log
 from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
-# unit_conversion,
 # =============================================================================
 # Local imports
 # =============================================================================
-from ...dataset.api import Meta
-from ...dataset.api import CoordSet, Coord, NDDataset
-from ...units import ur, Quantity
-from .parameter import nmr_valid_meta
+from spectrochempy.core.dataset.ndmeta import Meta
+from spectrochempy.core.dataset.ndarray import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.units import ur, Quantity
+from spectrochempy.core.readers.nmr.parameter import nmr_valid_meta
+from spectrochempy.utils import SpectroChemPyWarning
 
 __all__ = ['read_bruker_nmr']
 
@@ -217,14 +219,14 @@ def _remove_digital_filter(dic, data):
     log.debug('Bruker digital filter...')
 
     if 'acqus' not in dic:
-        raise ValueError("dictionary does not contain acqus parameters")
+        raise KeyError("dictionary does not contain acqus parameters")
 
     if 'DECIM' not in dic['acqus']:
-        raise ValueError("dictionary does not contain DECIM parameter")
+        raise KeyError("dictionary does not contain DECIM parameter")
     decim = dic['acqus']['DECIM']
 
     if 'DSPFVS' not in dic['acqus']:
-        raise ValueError("dictionary does not contain DSPFVS parameter")
+        raise KeyError("dictionary does not contain DSPFVS parameter")
     dspfvs = dic['acqus']['DSPFVS']
 
     if 'GRPDLY' not in dic['acqus']:
@@ -241,9 +243,9 @@ def _remove_digital_filter(dic, data):
             phase = 0.
         else:  # loop up the phase in the table
             if dspfvs not in bruker_dsp_table:
-                raise ValueError("dspfvs not in lookup table")
+                raise KeyError("dspfvs not in lookup table")
             if decim not in bruker_dsp_table[dspfvs]:
-                raise ValueError("decim not in lookup table")
+                raise KeyError("decim not in lookup table")
             phase = bruker_dsp_table[dspfvs][decim]
 
     # fft
@@ -381,11 +383,11 @@ def read_bruker_nmr(source, *args, **kwargs):
 
     # path must be pointing to a valid bruker directory
     if not os.path.exists(path):
-        raise IOError("This path '{}' doesn't exist".format(path))
+        raise KeyError("This path '{}' doesn't exist".format(path))
 
     # path is expected to be a directory
     if os.path.isdir(path) is not True:
-        raise IOError("directory '{}' does not exist".format(path))
+        raise KeyError("directory '{}' does not exist".format(path))
 
     # Determine some parameter automatically
     processed = kwargs.get('processed', False)  # read unprocessed by default
@@ -460,7 +462,7 @@ def read_bruker_nmr(source, *args, **kwargs):
                 datatype = '3D'
         else:
             if not datatype:
-                raise IOError(
+                raise KeyError(
                         "No Bruker binary file could be found in %s" % path)
             elif processed:
                 log.warning("No processed Bruker binary file could be found"
@@ -490,7 +492,7 @@ def read_bruker_nmr(source, *args, **kwargs):
                         td = dic['acqu']['TD'] // 2
                         data = data.reshape(-1, td)
                     except ValueError:
-                        raise ValueError(
+                        raise KeyError(
                                 "Inconsistency between TD's and data size")
 
                 # reduce to td
@@ -529,7 +531,7 @@ def read_bruker_nmr(source, *args, **kwargs):
         # we need the ndim of the data
         parmode = int(dic['acqus']['PARMODE'])
         if parmode+1 != data.ndim:
-            raise IOError("The NMR data were not read properly "
+            raise KeyError("The NMR data were not read properly "
                           "as the PARMODE+1 parameter ({}) doesn't fit "
                           "the actual number of dimensions ({})".format(
                     parmode+1, data.ndim))
@@ -696,9 +698,10 @@ def read_bruker_nmr(source, *args, **kwargs):
         source.data = list_data[0]  # complex data will be transformed
         # automatically into an interleaved
         # data array
-        for axis, cplex in enumerate(meta.iscomplex):
+        # we can set also the complexity for the other dimensions
+        for axis, cplex in enumerate(meta.iscomplex[::-1]):
             if cplex:
-                source.set_complex(axis)
+                source.set_complex(source._data.ndim-1-axis)
 
         source.meta.update(list_meta[0])
         source.meta.readonly = True

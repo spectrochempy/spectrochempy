@@ -50,7 +50,8 @@ from traitlets import HasTraits, Dict, Bool, default
 import numpy as np
 
 from spectrochempy.application import log
-from spectrochempy.utils import is_sequence
+from spectrochempy.utils import (is_sequence,
+                                 SpectroChemPyWarning)
 
 # contants
 # ----------
@@ -141,7 +142,7 @@ class Meta(object):  # HasTraits):
         elif not self.readonly:
             self._data.update({key: value})
         else:
-            raise KeyError('the metadata `{}` is read only'.format(key))
+            raise ValueError('the metadata `{}` is read only'.format(key))
 
     def __getitem__(self, key):
         return self._data.get(key, None)

@@ -42,6 +42,7 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 
 from spectrochempy.core.dataset.ndcoords import CoordRange
+from spectrochempy.utils import SpectroChemPyWarning
 
 __all__ = ['autosub']
 
@@ -111,7 +112,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     try:
         ref.to(source.units)
     except:
-        raise TypeError('Units of the dataset and reference are not compatible')
+        raise ValueError('Units of the dataset and reference are not compatible')
 
     swaped = False
     if axis != -1:

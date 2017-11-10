@@ -62,7 +62,7 @@ from IPython import display
 from spectrochempy.fitting.parameters import ParameterScript
 from spectrochempy.fitting.models import getmodel
 from spectrochempy.fitting.optimization import optimize
-from spectrochempy.utils import SpectroChemPyError, htmldoc
+from spectrochempy.utils import htmldoc
 
 __all__ = ['Fit']
 _classes = __all__[:]
@@ -347,9 +347,9 @@ class Fit(HasTraits):
         expedata = source.real.data
         x = source.coordset[-1].data
 
-        if source.squeeze().ndim > 1:
+        if source.ndim > 1:
             # nD data
-            raise SpectroChemPyError("Fit not implemented for nD data yet!")
+            raise NotImplementedError("Fit not implemented for nD data yet!")
 
         modeldata = np.zeros((nbmodels + 2, x.size)).astype(float)
 

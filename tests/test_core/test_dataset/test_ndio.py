@@ -42,6 +42,7 @@
 
 from spectrochempy.api import NDDataset
 from spectrochempy.api import data
+from ...utils import SpectroChemPyWarning
 
 import pytest
 import os

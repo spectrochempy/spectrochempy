@@ -72,7 +72,7 @@ from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
 from spectrochempy.utils import is_sequence, is_kernel
-from spectrochempy.utils import SpectroChemPyWarning, SpectroChemPyError
+from spectrochempy.utils import SpectroChemPyWarning
 
 from spectrochempy.gui import gui
 from spectrochempy.application import plotoptions
@@ -181,7 +181,8 @@ class NDIO(HasTraits):
             filename = os.path.expanduser(os.path.join(directory, filename))
         else:
             warnings.warn('Provided directory is a file, '
-                          'so we use its parent directory')
+                          'so we use its parent directory',
+                              SpectroChemPyWarning)
             filename = os.path.join(os.path.dirname(directory), filename)
 
         # Import is postponed to here since zipfile depends on gzip, an optional
@@ -445,11 +446,6 @@ class NDIO(HasTraits):
                            sortbydate=sortbydate,
                            **kwargs)
 
-        #except:
-        #    raise ValueError('The specified importer '
-        #                     'for protocol `{}` was not found!'.format(
-        #            protocol))
-
     # --------------------------------------------------------------------------
     # Generic write function
     # --------------------------------------------------------------------------
@@ -498,7 +494,7 @@ class NDIO(HasTraits):
 
         except:
 
-            raise ValueError('The specified writter '
+            raise AttributeError('The specified writter '
                              'for protocol `{}` was not found!'.format(
                     protocol))
 
@@ -632,7 +628,7 @@ class NDIO(HasTraits):
                 # next plot commands will be applied if possible to this ax
                 self._axdest = ax
             else:
-                raise SpectroChemPyError('{} is not recognized'.format(ax))
+                raise ValueError('{} is not recognized'.format(ax))
 
         elif self._fig.get_axes():
             # no ax parameters in keywords, so we need to get those existing
@@ -772,7 +768,7 @@ class NDIO(HasTraits):
         # reduce 2D data with  only one row to 1D
         # the same for ND that must be reduce to the minimal form.
 
-        temp = self.squeeze()  # create a copy by default while squeezing
+        temp = self.copy()
 
         if temp.ndim == 1:
 

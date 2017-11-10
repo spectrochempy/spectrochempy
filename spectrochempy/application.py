@@ -61,6 +61,8 @@ from IPython.core.magic import UsageError
 from IPython import get_ipython
 from IPython.core.display import HTML
 
+# import ipyparallel as ipp
+
 import matplotlib as mpl
 
 # local
@@ -90,10 +92,15 @@ __all__ = [
     'data', 'list_data',
     'options', 'plotoptions',
     'running',
+    # 'pcl',
+
     # ## Info
     'copyright', 'version',
 ]
 
+# add iparallel client
+
+# pcl = ipp.Client()[:]  #TODO: parallelization
 
 # some useful objects
 # -------------------
@@ -420,10 +427,12 @@ class SpectroChemPy(Application):
         # ---------------------------------------
         self._make_default_config_file()
 
-        if not self.log_level == logging.DEBUG:
+        if True: #not self.log_level == logging.DEBUG:
+            # we catch warnings and error for a lighter display to the end-user.
+            # except if we are in debugging mode
 
             # warning handler
-
+            # ---------------
             def send_warnings_to_log(message, category, filename, lineno,
                                      *args):
                 self.log.warning(
@@ -454,9 +463,11 @@ class SpectroChemPy(Application):
                         debug_hook(exception_type, exception, traceback)
                     else:
                         self.log.error(
-                                "%s: %s" % (exception_type.__name__, exception))
+                                "%s: %s" % (exception_type.__name__,
+                                            exception))
 
-                        # sys.excepthook = exceptionHandler
+                sys.excepthook = exceptionHandler
+
 
     # --------------------------------------------------------------------------
     # start the application
@@ -513,6 +524,7 @@ class SpectroChemPy(Application):
             self.log.debug(
                     "The application was launched with ARGV : %s" % str(
                             sys.argv))
+
 
             self.running = True
 

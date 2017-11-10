@@ -61,7 +61,8 @@ import numpy as np
 from spectrochempy.extern.uncertainties import unumpy as unp
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.utils import interleave, interleaved2complex
+from spectrochempy.utils import (interleave, interleaved2complex,
+                                 SpectroChemPyWarning)
 
 # =============================================================================
 # Constants
@@ -127,7 +128,7 @@ class NDMath(object):
         if isinstance(func, tuple):
             func, target = func
             if target in kwargs:
-                raise ValueError('%s is both the pipe target and a keyword '
+                raise TypeError('%s is both the pipe target and a keyword '
                                  'argument' % target)
             kwargs[target] = self
             return func(*args, **kwargs)
@@ -186,13 +187,13 @@ class NDMath(object):
         # case of complex data
         if self.has_complex_dims:
 
-            if self.is_complex[-1] and \
+            if self._is_complex[-1] and \
                             f.__name__ in ['real', 'imag',
                                            'conjugate', 'absolute',
                                            'conj', 'abs']:
                 return getattr(objs[0], f.__name__)()
 
-            if self.is_complex[-1] and f.__name__ in ["fabs", ]:
+            if self._is_complex[-1] and f.__name__ in ["fabs", ]:
                 # fonction not available for complex data
                 raise ValueError("{} does not accept complex data ".format(f))
 
@@ -257,9 +258,9 @@ class NDMath(object):
                 # Our data may be complex
                 iscomplex = False
                 if obj.has_complex_dims:
-                    iscomplex = obj.is_complex[-1]
+                    iscomplex = obj._is_complex[-1]
 
-                objcomplex.append(obj.is_complex)
+                objcomplex.append(obj._is_complex)
 
             else:
 
@@ -301,24 +302,23 @@ class NDMath(object):
             # is other a NDDataset or Coord?
             if isinstance(other, NDArray):
 
-                # if isaxe:
-                #     raise TypeError('when the first argument is an Coord, '
-                #                      'second argument cannot be an Coord or '
-                #                      'NDDataset instance')
-                #
-                # if isdataset and not hasattr(other, '_axes'):
-                #     raise TypeError('when the first argument is a NDDataset, '
-                #                     'second argument cannot be an Coord'
-                #                     ' instance')
                 # if the first arg (obj) is a nddataset
                 if isdataset and other._coordset != obj._coordset:
                     # here it can be several situations
                     # One acceptable is that e.g., we suppress or add
                     # a row to the whole dataset
-                    #TODO: go a little further on these checking
-                    if not( other.squeeze().ndim < obj.squeeze().ndim  and \
-                        other.shape[-1] == obj.shape[-1]):
-                        raise ValueError("coordset properties do not match")
+                    for i, (s1,s2) in enumerate(
+                            zip(obj._data.shape, other._data.shape)):
+                        # we obviously have to work on the real shapes
+                        if s1!=1 and s2!=1:
+                            if s1!=s2:
+                                raise ValueError(
+                                        "coordinate's sizes do not match")
+                            elif not np.all(obj._coordset[i]._data==
+                                      other._coordset[i]._data):
+                                raise ValueError(
+                                        "coordinate's values do not match")
+
 
                 # rescale according to units
                 if not other.unitless:
@@ -340,12 +340,12 @@ class NDMath(object):
 
                 # complex?
                 if hasattr(other, '_is_complex') and \
-                                other.is_complex is not None:
-                    if other.is_complex[-1]:
+                                other._is_complex is not None:
+                    if other._is_complex[-1]:
                         # pack arg to complex
                         arg = interleaved2complex(arg)
 
-                    objcomplex.append(other.is_complex)
+                    objcomplex.append(other._is_complex)
 
             else:
                 # Not a NDArray.
@@ -387,8 +387,11 @@ class NDMath(object):
                 # TODO: check the complex nature of the result to return it
 
         else:
-            # make a simple opration
-            data = f(d, *args)
+            # make a simple operation
+            try:
+                data = f(d, *args)
+            except Exception as e:
+                raise ArithmeticError(e.args[0])
 
             # restore interleaving of complex data
             data, iscomplex = interleave(data)

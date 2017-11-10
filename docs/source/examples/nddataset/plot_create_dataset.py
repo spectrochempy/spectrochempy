@@ -89,13 +89,6 @@ new = mydataset[..., 0]
 new = mydataset['hot']
 
 ##################################################################
-# The dataset is still 3D (but with a dimension containing a single element...
-#
-# It can be squeezed easily:
-
-new = new.squeeze()
-
-##################################################################
 # To plot a dataset, use the `plot` command (generic plot).
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 

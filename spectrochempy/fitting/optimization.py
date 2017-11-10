@@ -43,9 +43,10 @@ import sys
 
 import scipy.optimize
 from warnings import warn
-from spectrochempy.application import log
 
+from spectrochempy.application import log
 from spectrochempy.fitting.parameters import FitParameters
+from spectrochempy.utils import SpectroChemPyWarning
 
 __all__ = ["optimize", ]
 _methods = ['optimize', ]

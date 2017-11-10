@@ -54,6 +54,7 @@ def make_label(ss, lab='<no_axe_label>'):
             units = r'/\ a.u.'
         else:
             units = r"/\ {:~L}".format(ss.units)
+            units = units.replace('%',r'\%')
     else:
         units = ''
 

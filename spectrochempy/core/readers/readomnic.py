@@ -46,7 +46,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.application import options
 from spectrochempy.utils import readfilename, \
-                                SpectroChemPyWarning, SpectroChemPyError
+                                SpectroChemPyWarning
 
 __all__ = ['read_omnic','read_spg', 'read_spa']
 
@@ -135,9 +135,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
     sources = []
 
     for extension in files.keys():
-        # if extension not in ['.spg','.spa']:
-        #     raise SpectroChemPyError('Something went wrong!: probably the'
-        #                              'opened file is not from OMNIC.')
+
         for filename in files[extension]:
             if extension == '.spg':
                 sources.append(_read_spg(source, filename))
@@ -218,7 +216,7 @@ def _read_spg(source, filename, sortbydate=True, **kwargs):
         nspec = np.count_nonzero((keys == 2))
 
         if nspec == 0:
-            raise SpectroChemPyError('Error: File format not recognized'
+            raise IOError('Error: File format not recognized'
                                      ' - information markers not found')
 
         ##Get xaxis (e.g. wavenumbers)
@@ -255,15 +253,15 @@ def _read_spg(source, filename, sortbydate=True, **kwargs):
 
         # check the consistency of xaxis
         if np.ptp(nx) != 0:
-            raise SpectroChemPyError('Inconsistant data set'
+            raise ValueError('Inconsistant data set'
                      ' - number of wavenumber per spectrum should be identical')
 
         elif np.ptp(firstx) != 0:
-            raise SpectroChemPyError('Inconsistant data set'
+            raise ValueError('Inconsistant data set'
                                      ' - the x axis should start at same value')
 
         elif np.ptp(lastx) != 0:
-            raise SpectroChemPyError('Inconsistant data set'
+            raise ValueError('Inconsistant data set'
                                      ' - the x axis should end at same value')
 
 
@@ -292,13 +290,13 @@ def _read_spg(source, filename, sortbydate=True, **kwargs):
         # check the consistency of intensities
         # (probably redundent w/ xaxis check above)
         if np.ptp(intensity_size) != 0:
-            raise SpectroChemPyError('Inconsistent data set'
+            raise ValueError('Inconsistent data set'
                            ' - number of data per spectrum should be identical')
 
         nintensities = int(intensity_size[0] / 4)  # 4 = size of uint32
 
         if nintensities != nx[0]:
-            raise SpectroChemPyError('Inconsistent file'
+            raise ValueError('Inconsistent file'
 ' - number of wavenumber per spectrum should be equal to number of intensities')
 
         # Read spectral intensities

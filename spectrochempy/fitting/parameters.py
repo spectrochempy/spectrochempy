@@ -49,6 +49,7 @@ from collections import \
     UserDict  # This is to be able to create a special dictionary
 from spectrochempy.application import log
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import SpectroChemPyWarning
 
 import numpy as np
 
@@ -256,10 +257,10 @@ class FitParameters(UserDict):
                 except NameError:
                     message = "Cannot evaluate '" + strg + "' >> " + m[
                         1] + " is not defined"
-                    raise ValueError(message)
+                    raise NameError(message)
                 except SyntaxError:
                     message = "Syntax error in '" + strg + "'"
-                    raise ValueError(message)
+                    raise SyntaxError(message)
         else:
             # not a string (probably a scalar that can be return as it is)
             res = strg
@@ -418,7 +419,7 @@ class ParameterScript(HasTraits):
             # split around the semi-column
             s = line.split(':')
             if len(s) != 2:
-                raise SyntaxError(
+                raise ValueError(
                     'Cannot interpret line %d : A semi-column is missing?' % lc)
 
             key, values = s
@@ -436,14 +437,14 @@ class ParameterScript(HasTraits):
             elif key.startswith('shape'):
                 shape = values.lower().strip()
                 if shape is None:  # or (shape not in self._list_of_models and shape not in self._list_of_baselines):
-                    raise SyntaxError(
+                    raise ValueError(
                         'Shape of this model "%s" was not specified or is not implemented' % shape)
                 fp.model[modlabel] = shape
                 common = False
                 continue
             elif key.startswith("experiment"):  # must be in common
                 if not common:
-                    raise SyntaxError(
+                    raise ValueError(
                             "'experiment_...' specification was found outside the common block.")
                 if "variables" in key:
                     expvars = values.lower().strip()
@@ -453,7 +454,7 @@ class ParameterScript(HasTraits):
                 continue
             else:
                 if modlabel is None and not common:
-                    raise SyntaxError(
+                    raise ValueError(
                             "The first definition should be a label for a model or a block of variables or constants.")
                 # get the parameters
                 if key.startswith('*'):
@@ -469,7 +470,7 @@ class ParameterScript(HasTraits):
                     reference = True
                     key = key[1:].strip()
                 else:
-                    raise SyntaxError(
+                    raise ValueError(
                         'Cannot interpret line %d: A parameter definition must start with *,$ or >' % lc)
 
                 # store this parameter
@@ -480,10 +481,10 @@ class ParameterScript(HasTraits):
                     if len(s) > 2:
                         s[1:] = s[2:]
                 if len(s) > 3:
-                    raise SyntaxError(
+                    raise ValueError(
                         'line %d: value, min, max should be defined in this order' % lc)
                 elif len(s) == 2:
-                    raise SyntaxError('only two items in line %d' % lc)
+                    raise ValueError('only two items in line %d' % lc)
                     #s.append('none')
                 elif len(s) == 1:
                     s.extend(['none', 'none'])

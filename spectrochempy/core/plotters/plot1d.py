@@ -183,15 +183,15 @@ def plot_1D(source, **kwargs):
     z = z - offset
 
     # plot
-    line, = ax.plot(x.coords, z.data)
+    line, = ax.plot(x.data, z.data)
 
     if kwargs.get('show_complex', False):
         zimag = source.imag
-        ax.plot(x.coords, zimag.data, ls='--')
+        ax.plot(x.data, zimag.data, ls='--')
 
     if kwargs.get('plot_model', False):
         modeldata = source.modeldata
-        ax.plot(x.coords, modeldata.T, ls=':', lw='2')
+        ax.plot(x.data, modeldata.T, ls=':', lw='2')
         #TODO: improve this!!!
 
     # line attributes
@@ -216,7 +216,7 @@ def plot_1D(source, **kwargs):
     # -------------------------------------------------------------------------
 
     # abscissa limits?
-    xl = [x.coords[0], x.coords[-1]]
+    xl = [x.data[0], x.data[-1]]
     xl.sort()
     xlim = list(kwargs.get('xlim', xl))
     xlim.sort()

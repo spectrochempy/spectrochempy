@@ -39,7 +39,7 @@ from warnings import warn
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import is_sequence
+from spectrochempy.utils import (is_sequence, SpectroChemPyWarning)
 
 __all__ = ['concatenate','stack']
 
@@ -138,17 +138,18 @@ def concatenate(*sources, axis=None, **kwargs):
                             source).__name__)
 
         if source.ndim != sources[0].ndim:
-            raise ValueError("All datasets must have the same number of dims")
+            raise ValueError(
+                    "All datasets must have the same number of dims")
 
         if not source.is_units_compatible(sources[0]):
-            raise TypeError(
+            raise ValueError(
                     'units of the datasets to concatenate are not compatible')
         source.to(units)
 
         sax = sources[0].coordset
         for i, ax in enumerate(source.coordset):
             if not ax.is_units_compatible(sax[i]):
-                raise TypeError(
+                raise ValueError(
                         "units of the dataset's axis are not compatible")
             ax.to(sax[i].units)
 
@@ -167,8 +168,12 @@ def concatenate(*sources, axis=None, **kwargs):
 
     # concatenate or stack the data array + mask and uncertainty
     data = np.concatenate(sources, axis=axis)
-    mask = np.concatenate(tuple((source.mask for source in sources)), axis=axis)
-    uncertainty = np.concatenate(tuple((source.uncertainty for source in sources)), axis=axis)
+    # for the concatenation to work we need to take the real _mask
+    #twod = lambda x: x #if x.ndim>1 else np.array([x])
+    mask = np.concatenate(tuple((source._mask
+                                 for source in sources)), axis=axis)
+    uncertainty = np.concatenate(tuple((source._uncertainty)
+                                        for source in sources), axis=axis)
 
     # concatenate coordset
     stack = kwargs.get('force_stack', False)

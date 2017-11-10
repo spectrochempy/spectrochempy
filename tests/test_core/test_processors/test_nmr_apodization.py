@@ -117,7 +117,7 @@ def test_nmr_em_nothing_calculated(NMR_source_1D):
     # we should get an array of ones only , as apply = False mean
     # that we do not apply the apodization, but just make the
     # calculation of the apodization function
-    assert_equal(arr, np.ones_like(source.data))
+    assert_equal(arr.data, np.ones_like(source.data))
 
 def test_nmr_em_calculated_notapplied(NMR_source_1D):
     # em calculated but not applied

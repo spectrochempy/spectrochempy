@@ -54,16 +54,13 @@ from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 from spectrochempy.core.units import Quantity
 # from ...utils import create_traitsdoc
 
-from spectrochempy.utils import (is_number, numpyprintoptions,
+from spectrochempy.utils import (is_number,
+                                 numpyprintoptions,
                                  SpectroChemPyWarning)
 from spectrochempy.utils.traittypes import Range
 
 __all__ = ['Coord',
-           'CoordRange',
-           'CoordRangeError',
-           'CoordError',
-           'CoordError',
-           'CoordWarning']
+           'CoordRange']
 _classes = __all__[:]
 
 # =============================================================================
@@ -71,27 +68,6 @@ _classes = __all__[:]
 # =============================================================================
 
 numpyprintoptions()
-
-# =============================================================================
-#  Errors and warnings
-# =============================================================================
-
-class CoordRangeError(ValueError):
-    """An exception that is raised when something is wrong with the CoordRange.
-
-    """
-
-
-class CoordError(ValueError):
-    """An exception that is raised when something is wrong with the Coord
-
-    """
-
-
-class CoordWarning(SpectroChemPyWarning):
-    """A warning that is raised when something is wrong with the Coord
-     but do not necessarily need to raise an error.
-    """
 
 # =============================================================================
 # Coord
@@ -155,8 +131,7 @@ class Coord(NDMath, NDArray):
     >>> x = Coord([1,2,3], title='time on stream', units='hours')
     >>> print(x) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
               title: Time on stream
-    coordinates: [       1        2        3]
-          units: hr
+           data: [       1        2        3] hr
 
     >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
     [       1        2        3]
@@ -172,8 +147,8 @@ class Coord(NDMath, NDArray):
         super(Coord, self).__init__(data, **kwargs)
 
         # some checking
-        if self._data.ndim >1:
-            raise CoordError("Number of dimension for coordinate's array "
+        if self.ndim >1:
+            raise ValueError("Number of dimension for coordinate's array "
                               "should be 1!")
 
     # -------------------------------------------------------------------------
@@ -203,7 +178,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def is_complex(self):
-        return [False]  # always real
+        return [False, False]  # always real (the first dimension is of size 1)
 
     @property
     def ndim(self):
@@ -243,7 +218,7 @@ class Coord(NDMath, NDArray):
             if indexes.size > 0:
                 return indexes[0]
             else:
-                raise CoordError(
+                raise IndexError(
                         'Could not find this label: {}'.format(loc))
 
         elif isinstance(loc, datetime):
@@ -255,12 +230,12 @@ class Coord(NDMath, NDArray):
             if loc > data.max() or loc < data.min():
                 warnings.warn('This coordinate ({}) is outside the axis limits.\n'
                      'The closest limit index is returned'.format(loc),
-                     CoordWarning)
+                     SpectroChemPyWarning)
             index = (np.abs(data - loc)).argmin()
             return index
 
         else:
-            raise ValueError('Could not find this location: {}'.format(loc))
+            raise IndexError('Could not find this location: {}'.format(loc))
 
 
     def _repr_html_(self):

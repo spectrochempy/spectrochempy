@@ -41,14 +41,13 @@
 import numpy as np
 import pandas as pd
 
-from spectrochempy.extern.pint import DimensionalityError
-from spectrochempy.api import (NDDataset, CoordSet, Coord,
-                                            CoordError, Meta, ur, figure, show)
+from spectrochempy.api import (NDDataset, CoordSet, Coord, Meta, ur, figure, show)
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises, show_do_not_block)
 
+from spectrochempy.api import autosub
 
 import pytest
 import numpy as np
@@ -95,7 +94,6 @@ def test_autosub(IR_source_1):
     s4.plot_stack()  #true avoid blocking due to graphs
 
     s4 = source.copy()
-    from spectrochempy.api import autosub
     s = autosub(s4, ref, *ranges, method='chi2')
     assert np.round(s4.data[0, 0], 4) != 0.0000
     assert np.round(s.data[0, 0], 4) == 0.0000

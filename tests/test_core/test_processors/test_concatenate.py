@@ -91,11 +91,13 @@ def test_concatenate_1D_along_axis0(IR_source_1):
 
     rows = []
     for s in source:
-        rows.append(s.squeeze())
+        rows.append(s)
+        assert s.shape == (5549,)
+        assert s._mask.shape == (1, 5549)
 
-    # reconstruct from squeezed data
+    # reconstruct from rows
     new = stack(rows)
-    assert new.shape == (source.size,)
+    assert new.shape == source.shape
 
 def test_concatenate_along_axis1(IR_source_1):
 
