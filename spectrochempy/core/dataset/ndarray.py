@@ -257,13 +257,15 @@ class NDArray(HasTraits):
             attrs.remove('title')  # name and title will
                                           # not be used for comparison
         for attr in attrs:
-            if hasattr(other, "%s" % attr):
+            if hasattr(other, "_%s" % attr):
                 eq &= np.all(
-                        getattr(self, "%s" % attr) == getattr(other,
-                                                               "%s" % attr))
+                        getattr(self, "_%s" % attr) == getattr(other,
+                                                               "_%s" % attr))
                 if not eq:
-                    #print("attributes '%s' are not equals "
-                    #      "or one is missing" % attr)
+                    log.debug("attributes '{}' are not equals "
+                        "or one is missing: {}, {}" .format(attr,
+                                            getattr(self,  "_%s" % attr),
+                                            getattr(other, "_%s" % attr)))
                     return False
         return eq
 
@@ -345,38 +347,8 @@ class NDArray(HasTraits):
 
     # .........................................................................
     def __str__(self):
+        return self._str()
 
-        prefix = ['']
-        if self.has_complex_dims:
-            for axis in self.iterdims:
-                for item in prefix[:]:  # work on a copy of prefix as it will
-                    # change during execution of this loop
-                    prefix.remove(item)
-                    prefix.append(item + 'R')
-                    if self.is_complex[axis]:
-                        prefix.append(item + 'I')
-
-        units = ' {:~K}'.format(self.units) if self.has_units else ''
-
-        def mkbody(d, pref, units):
-            body = np.array2string(
-                    d.squeeze(), separator=' ',
-                    prefix=pref)
-            text = ''.join([pref, body, units])
-            text += '\n'
-            return text
-
-        if 'I' not in ''.join(
-                prefix):  # case of pure real data (not hypercomplex)
-            text = mkbody(self.uncert_data, '', units)
-        else:
-            text = ''
-            for pref in prefix:
-                data = self.part(pref).uncert_data
-                text += mkbody(data, pref, units)
-
-        text = text[:-1]  # remove the trailing '\n'
-        return text
 
     # -------------------------------------------------------------------------
     # Properties / validators
@@ -434,7 +406,6 @@ class NDArray(HasTraits):
 
         if data is None:
             self._data = np.array([[]]).astype(float)  # reinit data
-            log.debug("init data with an empty ndarray of type float")
 
         elif isinstance(data, NDArray):
             log.debug(
@@ -1662,19 +1633,65 @@ class NDArray(HasTraits):
     # -------------------------------------------------------------------------
 
     # .........................................................................
+    def _str(self, sep='\n', ufmt=' {:~K}'):
+
+        prefix = ['']
+        if self.has_complex_dims:
+            for axis in self.iterdims:
+                for item in prefix[:]:  # work on a copy of prefix as it will
+                    # change during execution of this loop
+                    prefix.remove(item)
+                    prefix.append(item + 'R')
+                    if self.is_complex[axis]:
+                        prefix.append(item + 'I')
+
+        units = ufmt.format(self.units) if self.has_units else ''
+
+        def mkbody(d, pref, units):
+            body = np.array2string(
+                    d.squeeze(), separator=' ',
+                    prefix=pref)
+            body = body.replace('\n',sep)
+            text = ''.join([pref, body, units])
+            text += sep
+            return text
+
+        if 'I' not in ''.join(
+                prefix):  # case of pure real data (not hypercomplex)
+            text = mkbody(self.uncert_data, '', units)
+        else:
+            text = ''
+            for pref in prefix:
+                data = self.part(pref).uncert_data
+                text += mkbody(data, pref, units)
+
+        text = text[:-1]  # remove the trailing '\n'
+        return text
+
+    # .........................................................................
+    def _repr_html_(self):
+
+        prefix = ['']
+        sep = '<br/>'
+        ufmt = ' {:~H}'
+
+        return self._str(sep=sep, ufmt=ufmt)
+
+    # .........................................................................
     def _argsort(self, by='value', pos=None, descend=False):
         # found the indices sorted by values or labels
-
-        if not self.is_labeled:
-            by = 'value'
-            pos = None
-            warnings.warn('no label to sort, use `axis` by default',
-                              SpectroChemPyWarning)
 
         if by == 'value':
             args = np.argsort(self.data)
 
-        elif 'label' in by:
+        elif 'label' in by and not self.is_labeled:
+            by = 'value'
+            pos = None
+            warnings.warn('no label to sort, use `value` by default',
+                              SpectroChemPyWarning)
+            args = np.argsort(self.data)
+
+        elif 'label' in by and self.is_labeled:
             labels = self._labels
             if len(self._labels.shape) > 1:
                 # multidimentional labels
@@ -1734,7 +1751,7 @@ class NDArray(HasTraits):
                 stop = stop + 1
 
             if step is not None and not isinstance(step, (int, np.int_)):
-                raise ValueError('step in location slicing is not yet possible.')
+                raise NotImplementedError('step in location slicing is not yet possible.')
                 # TODO: we have may be a special case with datetime
                 step = 1
 
@@ -1780,7 +1797,7 @@ class NDArray(HasTraits):
                 keys.insert(i, slice(None))
 
         if len(keys) > self.ndim:
-            raise ValueError("invalid index")
+            raise IndexError("invalid index")
 
         #
         if self._data.ndim != self.ndim:
@@ -1927,10 +1944,10 @@ class CoordSet(HasTraits):
 
         if all([isinstance(coords[i], (NDArray, CoordSet))
                 for i in range(len(coords))]):
-            # Any instance of a NDArray can be accepted as coordinates for a
-            # dimension.
-            # If an instance of CoordSet is found, this means that all
-            # coordinates in this set describe the same axis
+                # Any instance of a NDArray can be accepted as coordinates for a
+                # dimension.
+                # If an instance of CoordSet is found, this means that all
+                # coordinates in this set describe the same axis
 
             coords = list(coords)
 
@@ -2086,11 +2103,12 @@ class CoordSet(HasTraits):
 
     # .........................................................................
     @property
-    def data(self):
-        """:class:`~numpy.ndarray`-like object - The first axis coordinates.
+    def coords(self):
+        """:class:`~numpy.ndarray`-like object - A list of the Coord object
+        present in this coordset
 
         """
-        return self[0]._data.squeeze()
+        return self._coords
 
     # -------------------------------------------------------------------------
     # public methods
@@ -2136,10 +2154,10 @@ class CoordSet(HasTraits):
                                 'CoordSet objects only!')
 
         if item._name in self.names:
-            raise ValueError('The axis name must be unique!')
+            raise ValueError('The Coord name must be unique!')
 
         if isinstance(item, NDArray) and item.ndim > 1:
-            raise ValueError('An axis should be a 1D array!')
+            raise ValueError('A Coord should be a 1D array!')
 
         # TODO: add more validation for CoordSet objects
 
@@ -2156,14 +2174,22 @@ class CoordSet(HasTraits):
 
     # .........................................................................
     def __call__(self, *args, **kwargs):
-        # allow the following syntax: coords(0,2), or coords(axis=(0,2))
+        # allow the following syntax:
+        #              coordset(), coordset(0,2) or coordset(axis=(0,2))
         coords = []
+        axis = kwargs.get('axis', None)
+
         if args:
             for idx in args:
                 coords.append(self[idx])
-        axis = kwargs.get('axis', None)
-        if axis is not None:
-            coords.append(self[axis])
+        elif axis is not None:
+            if not is_sequence(axis):
+                axis = [axis]
+            for i in axis:
+                coords.append(self[i])
+        else:
+            coords = self._coords
+
         if len(coords) == 1:
             return coords[0]
         else:

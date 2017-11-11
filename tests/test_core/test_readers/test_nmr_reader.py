@@ -1,7 +1,7 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2018 LCS
+# Copyright (©) 2015-2017 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # This software is a computer program whose purpose is to [describe
@@ -34,35 +34,18 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+
+from spectrochempy.api import NDDataset, scpdata, figure, show
+
+from tests.utils import assert_approx_equal, show_do_not_block
+import os
 import pytest
-from glob import glob
-from docs import builddocs as bd
-from tests.utils import notebook_run, example_run, show_do_not_block
-import sys
-do_it = 'builddocs' in sys.argv[1]   # this test is run alone
-
-@pytest.mark.skipif(not do_it, reason="too long test")
-def test_buildocs_html():
-    bd.make_docs('clean')
-    bd.make_docs('html')
-
-@pytest.mark.skipif(not do_it, reason="too long test")
-def test_buildocs_pdf():
-    bd.make_docs('pdf')
-
-def test_notebooks():
-  for notebook in glob("../docs/source/userguide/*.ipynb"):
-    print(notebook)
-    nb, errors = notebook_run(notebook)
-    assert errors == []
 
 @show_do_not_block
-def test_example():
+def test_nmr():
+    path = os.path.join(scpdata, 'nmrdata','bruker', 'tests', 'nmr','bruker_1d')
 
-    for example in glob("../docs/source/examples/*/*.py"):
-
-        e, message = example_run(example)
-        if e:
-            print(example,'\n', e)
-
-        assert not e, message
+    # load the data in a new dataset
+    ndd = NDDataset()
+    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    ndd._repr_html_()

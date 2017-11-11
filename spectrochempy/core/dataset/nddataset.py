@@ -699,7 +699,7 @@ class NDDataset(
 
         # print field names/values (class/sizes)
         # data.name, .author, .date,
-        out = '\n' + '-' * 80 + '\n'
+        out = ''
         out += '      name/id: {}\n'.format(self.name)
         out += '       author: {}\n'.format(self.author)
         out += '      created: {}\n'.format(self._date)
@@ -759,6 +759,7 @@ class NDDataset(
         #                                                 '\n')
 
         data_str = super(NDDataset, self).__str__()
+
         out += '  data values:\n'
         out += '{}\n'.format(textwrap.indent(str(data_str), ' ' * 9))
 
@@ -771,7 +772,6 @@ class NDDataset(
 
         if not out.endswith('\n'):
             out += '\n'
-        out += '-' * 80
         out += '\n'
 
         return out
@@ -812,7 +812,7 @@ class NDDataset(
         new._uncertainty = np.array(self._uncertainty[keys])
 
         if new._data.size == 0:
-            raise ValueError("Empty array of shape {} resulted from slicing.\n"
+            raise IndexError("Empty array of shape {} resulted from slicing.\n"
                              "Check the indexes and make "
                              "sure to use floats for "
                              "location slicing".format(str(new._data.shape)))
@@ -845,11 +845,12 @@ class NDDataset(
 
         out = "<table style='width:100%'>\n"
 
-        out += tr.format("Id/Name", self.name)
+        out += tr.format("Name/Id", self.name)
         out += tr.format("Author", self.author)
         out += tr.format("Created", str(self.date))
         out += tr.format("Last Modified", self.modified)
-        out += tr.format("Description", self.description)
+        out += tr.format("Description",
+                self.description.replace('\n', '<br/>'))
 
         if self.history:
             pars = self.history
@@ -860,40 +861,38 @@ class NDDataset(
                 hist += '<br/>{}'.format(par)
             out += tr.format("History", hist)
 
-        uncertainty = "(+/-%s)" % self.uncertainty \
-            if self.uncertainty is not None else ""
-        units = '{:~H}'.format(
-                self.units) if self.units is not None else 'unitless'
+        data = "<table style='width:100%'>\n"
+        data += tr.format("Title", self.title)
 
-        sh = ' size' if self.ndim < 2 else 'shape'
+        sh = 'Size' if self.ndim < 2 else 'Shape'
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
-                             list(zip(self.shape, self.is_complex))))
+                             list(zip(self.shape,
+                                      [False] * self.ndim
+                                 if not self.is_complex else self.is_complex))))
 
-        shape = (' x '.join(['{}{}'] * len(self.shape))).format(
-                *shapecplx).replace('False', '').replace('True', '(complex)')
+        shape = (' x '.join(['{}{}'] * self.ndim)).format(
+                *shapecplx).replace(
+                'False', '').replace('True', '(complex)')
 
         size = self.size
-        sizecplx = '' if not np.all(self.is_complex) else " (complex)"
-        size = '{}{}'.format(size, sizecplx) \
-            if self.ndim < 2 else '{}'.format(shape)
+        sizecplx = '' if not self.has_complex_dims else " (complex)"
+        sizetxt = '{}{}'.format(size, sizecplx) if self.ndim < 2 \
+                             else '{}'.format(shape)
 
-        data = "<table style='width:100%'>\n"
+        data += tr.format(sh, sizetxt)
 
-        data += tr.format("Title", self.title)
-        data += tr.format("Size", size)
-        data += tr.format("Units", units)
-        data_str = str(self._uarray(self._data, self._uncertainty))
-        data_str = data_str.replace('\n\n', '\n')
+        data_str = super(NDDataset, self)._repr_html_()
         data += tr.format("Values", data_str)
+
         data += '</table>\n'  # end of row data
 
         out += tr.format('data', data)
 
         if self.coordset is not None:
-            for i, axis in enumerate(self.coordset):
-                axis_str = axis._repr_html_().replace('\n\n', '\n')
-                out += tr.format("Coordinate %i" % i, axis_str)
+            for i, coord in enumerate(self.coordset):
+                coord_str = coord._repr_html_()
+                out += tr.format("Coordinate %i" % i, coord_str)
                 if out.endswith("\n\n"):
                     out=out[:-1]
         out += '</table><br/>\n'

@@ -334,7 +334,7 @@ if __name__ == '__main__':
     from spectrochempy.api import *
     import os
     nd = NDDataset.read_omnic(
-        os.path.join(data, 'irdata', 'NH4Y-activation.SPG'))
+        os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
 
     ndp = (nd - nd[-1])[:,
           1290.0:5999.0]  # Important note that we use foating point number

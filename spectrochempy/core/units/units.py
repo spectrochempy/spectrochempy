@@ -104,7 +104,7 @@ setattr(Measure, '_repr_html_', lambda cls: cls.__format__('~H'))
 
 setattr(Unit, 'scaling', property(lambda u:
                                   u._REGISTRY.Quantity(1.,
-                                                       u._units).to_base_units().magnitude))
+                                           u._units).to_base_units().magnitude))
 
 def __format__(self, spec):
     spec = spec or self.default_format
@@ -127,6 +127,8 @@ def __format__(self, spec):
                 units = UnitsContainer({'%': 1})
             elif self._units == 'weight_percent':
                 units = UnitsContainer({'wt.%': 1})
+            elif self._units == 'absorbance':
+                units = UnitsContainer({'a.u.': 1})
             elif abs(self.scaling - 1.) < 1.e-10:
                 units = UnitsContainer({'dimensionless': 1})
             else:

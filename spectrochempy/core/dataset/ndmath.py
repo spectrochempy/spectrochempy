@@ -63,6 +63,7 @@ from spectrochempy.core.units import Quantity
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import (interleave, interleaved2complex,
                                  SpectroChemPyWarning)
+from spectrochempy.application import log
 
 # =============================================================================
 # Constants
@@ -72,8 +73,12 @@ __all__ = ['NDMath', ]
 
 _classes = ['NDMath']
 
-from spectrochempy.application import log
 
+# =============================================================================
+# utility
+# =============================================================================
+
+get_name = lambda x: str(x.name if hasattr(x, 'name') else x)
 
 class NDMath(object):
     """
@@ -443,6 +448,7 @@ class NDMath(object):
 
         return data, uncertainty, units, mask, data_iscomplex
 
+
     @staticmethod
     def _unary_op(f):
         @functools.wraps(f)
@@ -466,7 +472,7 @@ class NDMath(object):
             data, uncertainty, units, mask, iscomplex = self._op(f, objs)
             if hasattr(self, 'history'):
                 history = 'binary operation ' + f.__name__ + \
-                          ' with `%s` has been performed' % str(other)
+                          ' with `%s` has been performed' % get_name(other)
             else:
                 history = None
             return self._op_result(data, uncertainty, units, mask, history,
@@ -487,7 +493,7 @@ class NDMath(object):
             self._iscomplex = iscomplex
 
             self.history = 'inplace binary op : ' + f.__name__ + \
-                           ' with %s ' % str(other)
+            ' with %s ' % get_name(other)
             return self
 
         return func

@@ -144,7 +144,7 @@ class NDIO(HasTraits):
         ---------
         Read some experimental data and then save in our proprietary format **scp**
 
-        >>> from spectrochempy.api import NDDataset, data # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         <BLANKLINE>
             SpectroChemPy's API
             Version   : 0.1...
@@ -173,7 +173,7 @@ class NDIO(HasTraits):
         if not filename.endswith('.scp'):
             filename = filename + '.scp'
 
-        directory = kwargs.get("directory", options.data)
+        directory = kwargs.get("directory", options.scpdata)
         if not os.path.exists(directory):
             raise IOError("directory doesn't exists!")
 
@@ -191,6 +191,7 @@ class NDIO(HasTraits):
         # Import deferred for startup time improvement
         import tempfile
 
+
         zipf = zipfile_factory(filename, mode="w",
                                compression=zipfile.ZIP_DEFLATED)
 
@@ -206,12 +207,15 @@ class NDIO(HasTraits):
 
             for key in _names:
 
-                val = getattr(obj, key)
+                val = getattr(obj, "_%s"%key)
+
                 if isinstance(val, np.ndarray):
 
+
                     with open(tmpfile, 'wb') as fid:
-                        write_array(fid, np.asanyarray(val))
-                        zipf.write(tmpfile, arcname=level + key + '.npy')
+                        write_array(fid, np.asanyarray(val), allow_pickle=True)
+
+                    zipf.write(tmpfile, arcname=level + key + '.npy')
 
                 elif isinstance(val, Coord):
 
@@ -222,7 +226,7 @@ class NDIO(HasTraits):
 
                     for i, val in enumerate(val._coords):
                         _objnames = dir(val)
-                        _loop_on_obj(_objnames, obj=val, level="axis_%d_" % i)
+                        _loop_on_obj(_objnames, obj=val, level="coord_%d_" % i)
 
                 elif isinstance(val, datetime.datetime):
 
@@ -289,8 +293,8 @@ class NDIO(HasTraits):
         Examples
         --------
 
-        >>> from spectrochempy.api import NDDataset,data
-        >>> mydataset = NDDataset.load('mydataset.scp', directory=data)
+        >>> from spectrochempy.api import NDDataset,scpdata
+        >>> mydataset = NDDataset.load('mydataset.scp', directory=scpdata)
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
         ...
@@ -298,7 +302,7 @@ class NDIO(HasTraits):
         by default, directory for saving is the `data`.
         So the same thing can be done simply by:
 
-        >>> from spectrochempy.api import NDDataset,data
+        >>> from spectrochempy.api import NDDataset,scpdata
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -321,7 +325,7 @@ class NDIO(HasTraits):
 
         # open file dialog box
 
-        directory = kwargs.get("directory", options.data)
+        directory = kwargs.get("directory", options.scpdata)
         if not filename:
             filename = gui.openFileNameDialog(directory=directory)
             if not filename:
@@ -347,7 +351,7 @@ class NDIO(HasTraits):
         if magic.startswith(_ZIP_PREFIX):
 
             # get zip file
-            obj = NpzFile(fid, own_fid=True)
+            obj = NpzFile(fid, allow_pickle=True)
 
             # interpret
             ndim = obj["data"].ndim
@@ -355,15 +359,15 @@ class NDIO(HasTraits):
             new = cls()
 
             for key, val in list(obj.items()):
-                if key.startswith('axis'):
+                if key.startswith('coord_'):
                     if not coordset:
                         coordset = [Coord() for _ in range(ndim)]
                     els = key.split('_')
-                    setattr(coordset[int(els[1])], "_" + els[2], val)
+                    setattr(coordset[int(els[1])], "_%s"%els[2], val)
                 elif key == "pars.json":
                     pars = json.loads(asstr(val))
                 else:
-                    setattr(new, "_" + key, val)
+                    setattr(new, "_%s"%key, val)
             if coordset:
                 new.coordset = coordset
 
@@ -371,17 +375,17 @@ class NDIO(HasTraits):
                 # utility function to set the attributes
                 if key in ['modified', 'date']:
                     val = datetime.datetime.fromtimestamp(val)
-                    setattr(clss, "_" + key, val)
+                    setattr(clss, "_%s"%key, val)
                 elif key == 'meta':
                     clss.meta.update(val)
                 elif key in ['units']:
                     setattr(clss, key, val)
                 else:
-                    setattr(clss, "_" + key, val)
+                    setattr(clss, "_%s"%key, val)
 
             for key, val in list(pars.items()):
 
-                if key.startswith('axis'):
+                if key.startswith('coord_'):
 
                     els = key.split('_')
                     setattributes(coordset[int(els[1])], els[2], val)

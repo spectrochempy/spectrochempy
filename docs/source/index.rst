@@ -62,13 +62,14 @@ Pdf documentation can also be downloaded here:
 
 .. _main_user_guides:
 
-User Guide
+User Guide & tutorials
 =========================
 
 .. toctree::
     :maxdepth: 1
 
     userguide/index
+    tutorial/index
     faq
 
 Gallery of examples

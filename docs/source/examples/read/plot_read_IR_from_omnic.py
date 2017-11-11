@@ -8,11 +8,12 @@ Here we load an experimental SPG file (OMNIC) and plot it.
 """
 import os
 from spectrochempy.api import *
+plotoptions.do_not_block = True
 
 ###################################################################
 # Loading and stacked plot of the original
 
-source = NDDataset.read_omnic(os.path.join(data,
+source = NDDataset.read_omnic(os.path.join(scpdata,
                                            'irdata', 'NH4Y-activation.SPG'))
 
 figure()

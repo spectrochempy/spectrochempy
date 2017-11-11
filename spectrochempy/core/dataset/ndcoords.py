@@ -237,23 +237,21 @@ class Coord(NDMath, NDArray):
         else:
             raise IndexError('Could not find this location: {}'.format(loc))
 
-
     def _repr_html_(self):
 
         tr = "<tr style='border: 1px solid lightgray;'>" \
               "<td style='padding-right:5px; width:100px'><strong>{}</strong></td>" \
               "<td style='text-align:left'>{}</td><tr>\n"
 
-
-        units = '{:~H}'.format(self._units) \
-            if self._units is not None else 'unitless'
         out = "<table style='width:100%'>\n"
         out += tr.format("Title", self.title.capitalize())
-        out += tr.format("Data",
-                         np.array2string(self.data, separator=' '))
-        out += tr.format("Units", units)
+        if self.data is not None:
+            data_str = super(Coord, self)._repr_html_()
+            out += tr.format("Data", data_str )
+
         if self.is_labeled:
             out += tr.format("Labels", self.labels)
+
         out += '</table>\n'
         return out
 
@@ -269,11 +267,10 @@ class Coord(NDMath, NDArray):
         return ['data', 'mask', 'labels', 'units', 'meta', 'name', 'title']
 
     def __str__(self):
-        units = '{:~K}'.format(self._units) \
-            if self._units is not None else 'unitless'
         out = '      title: %s\n' % (self.title.capitalize())
-        data_str = super(Coord, self).__str__()
-        out += '       data: %s\n' % data_str
+        if self.data is not None:
+            data_str = super(Coord, self).__str__()
+            out += '       data: %s\n' % data_str
         if self.is_labeled:
             out += '     labels: %s\n' % str(self.labels)
         if out[-1]=='\n':

@@ -1,7 +1,7 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2018 LCS
+# Copyright (©) 2015-2017 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # This software is a computer program whose purpose is to [describe
@@ -34,35 +34,39 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-import pytest
-from glob import glob
-from docs import builddocs as bd
-from tests.utils import notebook_run, example_run, show_do_not_block
-import sys
-do_it = 'builddocs' in sys.argv[1]   # this test is run alone
+from spectrochempy.api import *
 
-@pytest.mark.skipif(not do_it, reason="too long test")
-def test_buildocs_html():
-    bd.make_docs('clean')
-    bd.make_docs('html')
+import os
 
-@pytest.mark.skipif(not do_it, reason="too long test")
-def test_buildocs_pdf():
-    bd.make_docs('pdf')
+def test_agir_application():
 
-def test_notebooks():
-  for notebook in glob("../docs/source/userguide/*.ipynb"):
-    print(notebook)
-    nb, errors = notebook_run(notebook)
-    assert errors == []
+    samples = {'P350':{'label':'$\mathrm{M_P}\,(623\,K)$'},
+               'A350':{'label':'$\mathrm{M_A}\,(623\,K)$'},
+               'B350':{'label':'$\mathrm{M_B}\,(623\,K)$'}}
 
-@show_do_not_block
-def test_example():
+    for key in samples.keys():
+        basename = os.path.join(scpdata,'agirdata/{}/TGA/tg'.format(key))
+        if os.path.exists(basename+'.scp'):
+            os.remove(basename + '.scp')
 
-    for example in glob("../docs/source/examples/*/*.py"):
+        # else read the original csv file
+        filename = basename + '.csv'
+        ss = samples[key]['TGA'] = NDDataset.read_csv(filename)
+        # lets keep only data from somrthing close to 0.
+        s = samples[key]['TGA'] = ss[-0.5:60.0]
+        # for TGA, some information are missing.
+        # we add them here
+        s.x.units = 'hour'
+        s.units = 'weight_percent'
+        s.x.title = 'Time on stream'
+        s.title = 'Mass variation'
 
-        e, message = example_run(example)
-        if e:
-            print(example,'\n', e)
+        # save
+        samples[key]['TGA'].save(basename + '.scp')
 
-        assert not e, message
+        # load
+        samples[key]['TGA1'] = NDDataset.read(basename + '.scp')
+        assert samples[key]['TGA1'] == samples[key]['TGA']
+
+        # delete scp
+        os.remove(basename + '.scp')

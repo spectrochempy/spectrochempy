@@ -83,7 +83,7 @@ def read_zip(source, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.api import NDDataset, data # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
         SpectroChemPy's API ...
     >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip', directory=data)
@@ -126,7 +126,7 @@ def read_csv(source, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.api import NDDataset, data # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
         SpectroChemPy's API ...
     >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=data)
@@ -158,7 +158,7 @@ def _read(source, filename='',
 
         source = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", options.data)
+    directory = kwargs.get("directory", options.scpdata)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 
@@ -196,7 +196,7 @@ def _read(source, filename='',
                     sources.extend(csv)
             else:
                 # try another format!
-                dat = source.read(filename, protocol=extension, **kwargs)
+                dat = source.read(filename, protocol=extension[1:], **kwargs)
                 if isinstance(dat, NDDataset):
                     sources.append(dat)
                 elif is_sequence(dat):

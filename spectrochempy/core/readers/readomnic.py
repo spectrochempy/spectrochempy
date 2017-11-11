@@ -90,7 +90,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.api import NDDataset, data # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
         SpectroChemPy's API ...
     >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
@@ -112,7 +112,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
         source = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", options.data)
+    directory = kwargs.get("directory", options.scpdata)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 
@@ -556,7 +556,7 @@ def _read_spa(source, filename):
 
 if __name__ == '__main__':
 
-    from spectrochempy.api import NDDataset, data
+    from spectrochempy.api import NDDataset, scpdata
 
     A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
     print(A)

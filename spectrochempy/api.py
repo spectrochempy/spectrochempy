@@ -80,7 +80,7 @@ __all__ += [
 
     ### Helpers
     'log', 'log_level', 'DEBUG', 'WARN', 'ERROR', 'CRITICAL', 'INFO',
-    'data', 'list_data',
+    'scpdata', 'list_scpdata',
     'plotoptions',
     'options',
     #'pcl',

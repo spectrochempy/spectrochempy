@@ -110,4 +110,5 @@ figure()
 new.plot(kind='stack')
 
 if __name__ == '__main__':
+    plotoptions.do_not_block = True
     show()

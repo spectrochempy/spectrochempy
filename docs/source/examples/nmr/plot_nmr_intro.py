@@ -9,6 +9,7 @@ Here we explain how to display and perform basic processing of NMR file
 
 from spectrochempy.api import *
 import os
+plotoptions.do_not_block = True
 
 
 ##########################################################
@@ -23,7 +24,7 @@ import os
 
 def get_source1D():
     source1D = NDDataset()
-    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
     source1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return source1D
 
@@ -34,7 +35,7 @@ def get_source1D():
 
 def get_source2D():
     source2D = NDDataset()
-    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
+    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
     source2D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return source2D
 
@@ -107,7 +108,7 @@ lb_source = source1D.em(lb=100. * ur.Hz)
 
 p = lb_source.plot(xlim=(0, 25000), zlim=(-2, 2))
 
-t = p.text(12500, 1.70, 'Dual display (original & apodized fids)', ha='center',
+lb_source.ax.text(12500, 1.70, 'Dual display (original & apodized fids)', ha='center',
            fontsize=16)
 
 show()
@@ -147,12 +148,11 @@ figure()
 
 apodfunc = source1D.em(lb=100. * ur.Hz, apply=False)
 
-p = apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2))
+apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2))
 
 source1D.em(lb=100. * ur.Hz, apply=True)
-p = source1D.plot(data_only=True)
-
-t = p.text(12500, 1.70,
+source1D.plot(data_only=True)
+source1D.ax.text(12500, 1.70,
            'Multiple display (original & em apodized fids + apod.function)',
            ha='center', fontsize=14)
 show()
@@ -169,12 +169,12 @@ LB = 50. * ur.Hz
 GB = 100. * ur.Hz
 apodfunc = source1D.gm(gb=GB, lb=LB, apply=False)
 
-p = apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2))
+apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2))
 
 source1D.gm(gb=GB, lb=LB)  # apply=True by default
-p = source1D.plot(data_only=True)
+source1D.plot(data_only=True)
 
-t = p.text(12500, 1.70,
+source1D.ax.text(12500, 1.70,
            'Multiple display (original & gm apodized fids + apod.function)',
            ha='center', fontsize=14)
 
@@ -188,38 +188,15 @@ show()
 figure()
 
 source2D = get_source2D()
-ax = source2D.plot(xlim=(0., 25000.))
+source2D.plot(xlim=(0., 25000.))
 
 LB = 20. * ur.Hz
 source2D.em(lb=LB)
 source2D.em(lb=LB / 2, axis=0)
-ax = source2D.plot(data_only=True, cmap='copper')
+source2D.plot(data_only=True, cmap='copper')
 
 show()
 
-################################################
-# Time-frequency trasforms : FFT
-
-figure()
-
-source1D = get_source1D()  # restore original
-LB = 10. * ur.Hz
-source1D.em(lb=LB)
-source1D.zf_auto(inplace=True)
-transf1 = source1D.fft()  # by defauut fft create a new dataset
-
-source1D = get_source1D()  # restore original
-LB = 10. * ur.Hz
-GB = 50. * ur.Hz
-source1D.gm(gb=GB, lb=LB)
-source1D.zf_auto()
-transf2 = source1D.fft()
-
-transf1.plot()
-p = transf2.plot()
-t = p.text(12500, 1.70, 'fft transform after em or gm broadening', ha='center',
-           fontsize=14)
-show()
 
 
 

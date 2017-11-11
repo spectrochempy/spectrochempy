@@ -75,10 +75,10 @@ def test_nddataset_simple(nd):
 def test_nddataset_str():
     arr1d = NDDataset([1, 2, 3])
     # print(arr1d)
-    assert str(arr1d).splitlines()[2].strip().startswith('name/id:')
+    assert str(arr1d).splitlines()[0].strip().startswith('name/id:')
 
     arr2d = NDDataset(np.array([[1, 2], [3, 4]]))
-    assert str(arr2d).splitlines()[2].strip().startswith('name/id:')
+    assert str(arr2d).splitlines()[0].strip().startswith('name/id:')
 
     d0unc = NDDataset([2, 3, 4, 5], uncertainty=[.1,.2,.15,.21],
                      mask=[1,0,0,0])  # sequence + mask + uncert
@@ -86,7 +86,7 @@ def test_nddataset_str():
     assert not d0unc.has_complex_dims
     assert d0unc.is_masked
     assert d0unc.is_uncertain
-    assert str(d0unc).splitlines()[11].strip().startswith('[  --    3.000+/-0.200 ')
+    assert str(d0unc).splitlines()[9].strip().startswith('[  --    3.000+/-0.200 ')
     assert repr(d0unc).startswith(
             'NDDataset: [  --,    3.000+/-0.200,    4.000+/-0.150,')
 
@@ -545,13 +545,13 @@ def test_dataset_slicing_by_values(dataset3d):
     yr = da[2000.0:3000.0, :, 210.]
 
 
-@raises(ValueError)
+@raises(IndexError)
 def test_dataset_slicing_out_limits(dataset3d):
     da = dataset3d
     y = da[3000:2000, :, 210.]
 
 
-@raises(ValueError)
+@raises(IndexError)
 def test_dataset_slicing_toomanyindex(dataset3d):
     da = dataset3d
     y = da[:, 3000.:2000., :, 210.]
@@ -1289,10 +1289,8 @@ def test_comparison():
     # print( 'ok = behave like a bool')
 
 
-def test_repr_html():
-    #
-    #
-    #
+def test_nddataset_repr_html():
+
     dx = np.random.random((10, 100, 3))
 
     coord0 = Coord(data=np.linspace(4000., 1000., 10),
@@ -1316,10 +1314,13 @@ def test_repr_html():
     da = NDDataset(dx,
                    coordset=[coord0, coord1, coord2],
                    title='absorbance',
-                   units='dimensionless'
+                   units='absorbance'
                    )
 
-    # print (da._repr_html_())
+    print(da)
+    a = da._repr_html_()
+    print(a)
+    #assert "<strong>Units</strong></td><td style='text-align:left'>absorbance</td>" in a
 
 
 #### Squeezing #################################################################
@@ -1331,7 +1332,7 @@ def test_repr_html():
 
 
 #### Metadata ##################################################################
-def test_dataset_with_meta(ds1):
+def test_nddataset_with_meta(ds1):
     da = ds1.copy()
 
     meta = Meta()
@@ -1344,7 +1345,7 @@ def test_dataset_with_meta(ds1):
 
 
 #### sorting ###################################################################
-def test_sorting(ds1):  # ds1 is defined in conftest
+def test_nddataset_sorting(ds1):  # ds1 is defined in conftest
 
     source = ds1[:3, :3, 0].copy()
     source.sort(inplace=True)
@@ -1395,39 +1396,38 @@ def test_multiple_axis(dsm):  # dsm is defined in conftest
 
     #
     assert_array_equal(coordset[0].data, np.linspace(4000., 1000., 9),
-                       "get axis by index failed")
+                       "get a Coord from Coordset by index failed")
 
     assert_array_equal(da.coordset['wavenumber'].data,
                        np.linspace(4000., 1000., 9),
-                       "get axis by title failed")
+                       "get a Coord from Coordset by title failed")
 
-    # for multiple coordinates by default, the returned numerical coordinates
-    # will be the first axis (in the coordedset)
-    assert_array_equal(da.coordset[1].data.data , np.linspace(0., 60., 50),
-                       "get axis by index failed")
+    # for multiple coordinates
+    assert_array_equal(da.coordset[1].coords[0].data , np.linspace(0., 60., 50),
+                       "get a Coord from Coordset by index failed")
 
     # but we can also specify, which axis shuld be returned explicitely
     # by an index or a label
     assert_array_equal(da.coordset[1][1].data, np.logspace(1., 4., 50),
-                       "get axis by index failed")
+                       "get a Coord from Coordset by index failed")
 
     assert_array_equal(da.coordset[1]['temperature'].data,
                        np.logspace(1., 4., 50),
-                       "get axis by index failed")
+                       "get a Coord from Coordset by index failed")
 
     # even simlper we can specify any of the axis title and get it ...
     assert_array_equal(da.coordset['time-on-stream'].data,
                        np.linspace(0., 60., 50),
-                       "get axis by title failed")
+                       "get a Coord from Coordset by title failed")
 
     assert_array_equal(da.coordset['temperature'].data, np.logspace(1., 4., 50),
-                       "get axis by title failed")
+                       "get a Coord from Coordset by title failed")
 
     da.coordset['temperature'].data += 273.15
 
     assert_array_equal(da.coordset['temperature'].data,
                        np.logspace(1., 4., 50) + 273.15,
-                       "get axis by title failed")
+                       "get a Coord from Coordset by title failed")
 
 
 def test_bug_fixe_figopeninnotebookwithoutplot():
@@ -1447,8 +1447,8 @@ def test_coords_manipulation(IR_source_1):
 def test_simple_arithmetic_on_full_dataset():
     # due to a bug in notebook with the following
     import os
-    from spectrochempy.api import data
-    source = NDDataset.read_omnic(os.path.join(data, 'irdata', 'NH4Y-activation.SPG'))
+    from spectrochempy.api import scpdata
+    source = NDDataset.read_omnic(os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
     d = source - source[0]
     # suppress the first spectrum to all other spectra in the series
 

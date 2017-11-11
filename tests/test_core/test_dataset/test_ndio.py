@@ -41,7 +41,7 @@
 """
 
 from spectrochempy.api import NDDataset
-from spectrochempy.api import data
+from spectrochempy.api import scpdata
 from ...utils import SpectroChemPyWarning
 
 import pytest
@@ -57,7 +57,7 @@ def test_save_and_load(IR_source_1):
     A = IR_source_1.copy()
     A.save('tartempion.scp')
     # no directory for saving passed ... it must be in data
-    path = os.path.join(data, 'tartempion.scp')
+    path = os.path.join(scpdata, 'tartempion.scp')
     assert os.path.exists(path)
 
     B = NDDataset.load('tartempion.scp')

@@ -81,7 +81,7 @@ from spectrochempy.core.processors.processorsoptions import ProcessOptions
 # doc info
 # --------
 _classes = [
-    'Data',
+    'SCPData',
     'SpectroChemPy',
 ]
 
@@ -89,7 +89,7 @@ __all__ = [
 
     # ## Helpers
     'log', 'log_level', 'DEBUG', 'WARN', 'ERROR', 'CRITICAL', 'INFO',
-    'data', 'list_data',
+    'scpdata', 'list_scpdata',
     'options', 'plotoptions',
     'running',
     # 'pcl',
@@ -105,24 +105,20 @@ __all__ = [
 # some useful objects
 # -------------------
 
-class Data(Configurable):
+class SCPData(Configurable):
     """
-    This class is used to determine the path to the data directory.
+    This class is used to determine the path to the scp_data directory.
 
     {attributes}
 
     Examples
     --------
-    >>> data = Data()
-    >>> print(os.path.basename(data.data))
+    >>> scpdata = SCPData()
+    >>> print(os.path.basename(scpdata.data))
     testdata
-    >>> print(data) # doctest: +ELLIPSIS
+    >>> print(scpdata) # doctest: +ELLIPSIS
     testdata
-    |__irdata
-       |__NH4Y-activation.SPG
-    |__nmrdata
-       |__bruker
-          ...
+    |__...
     <BLANKLINE>
 
     """
@@ -260,24 +256,24 @@ class SpectroChemPy(Application):
     quiet = Bool(False,
                  help='set Quiet mode, with minimal outputs').tag(config=True)
 
-    _data = Instance(Data,
+    _scpdata = Instance(SCPData,
                      help="Set a data directory where to look for data")
 
     csv_delimiter = Unicode(';',
                  help='set csv delimiter').tag(config=True)
 
-    @default('_data')
+    @default('_scpdata')
     def _get__data_default(self):
         # look for the testdata path in package tests
-        return Data()
+        return SCPData()
 
     @property
-    def data(self):
-        return self._data.data
+    def scpdata(self):
+        return self._scpdata.data
 
     @property
-    def list_data(self):
-        return self._data
+    def list_scpdata(self):
+        return self._scpdata
 
     # --------------------------------------------------------------------------
     # Initialisation of the plot options
@@ -427,46 +423,32 @@ class SpectroChemPy(Application):
         # ---------------------------------------
         self._make_default_config_file()
 
-        if True: #not self.log_level == logging.DEBUG:
-            # we catch warnings and error for a lighter display to the end-user.
-            # except if we are in debugging mode
+        # we catch warnings and error for a lighter display to the end-user.
+        # except if we are in debugging mode
 
-            # warning handler
-            # ---------------
-            def send_warnings_to_log(message, category, filename, lineno,
-                                     *args):
-                self.log.warning(
-                        '%s:  %s' %
-                        (category.__name__, message))
-                return
+        # warning handler
+        # ---------------
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 *args):
+            self.log.warning(
+                    '%s:  %s' %
+                    (category.__name__, message))
+            return
 
-            warnings.showwarning = send_warnings_to_log
+        warnings.showwarning = send_warnings_to_log
 
-            # exception handler
-            # ------------------
-            if ip is not None:
+        # exception handler
+        # ------------------
+        if ip is not None:
 
-                def custom_exc(shell, etype, evalue, tb, tb_offset=None):
-                    if self.log_level == logging.DEBUG:
-                        shell.showtraceback((etype, evalue, tb),
-                                            tb_offset=tb_offset)
-                    else:
-                        self.log.error("%s: %s" % (etype.__name__, evalue))
+            def _custom_exc(shell, etype, evalue, tb, tb_offset=None):
+                if self.log_level == logging.DEBUG:
+                    shell.showtraceback((etype, evalue, tb),
+                                        tb_offset=tb_offset)
+                else:
+                    self.log.error("%s: %s" % (etype.__name__, evalue))
 
-                ip.set_custom_exc((Exception,), custom_exc)
-
-            else:
-
-                def exceptionHandler(exception_type, exception, traceback,
-                                     debug_hook=sys.excepthook):
-                    if self.log_level == logging.DEBUG:
-                        debug_hook(exception_type, exception, traceback)
-                    else:
-                        self.log.error(
-                                "%s: %s" % (exception_type.__name__,
-                                            exception))
-
-                sys.excepthook = exceptionHandler
+            ip.set_custom_exc((Exception,), _custom_exc)
 
 
     # --------------------------------------------------------------------------
@@ -562,7 +544,6 @@ class SpectroChemPy(Application):
         self.log.level = self.log_level
         self.log.debug("changed default loglevel to {}".format(change.new))
 
-
 # ==============================================================================
 # matplotlib use directive to set before calling matplotlib backends
 # ==============================================================================
@@ -585,8 +566,8 @@ options = app
 
 _do_not_block = plotoptions.do_not_block
 
-data = app.data
-list_data = app.list_data
+scpdata = app.scpdata
+list_scpdata = app.list_scpdata
 
 # log levels
 # ----------

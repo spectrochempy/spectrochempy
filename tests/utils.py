@@ -34,8 +34,6 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-
 """
 
 """
@@ -59,7 +57,6 @@ import sys
 import types
 import warnings
 
-# TODO: we should remove this as we will use only PY3
 from numpy.testing import (assert_equal,
                            assert_array_equal,
                            assert_array_almost_equal,
@@ -67,6 +64,13 @@ from numpy.testing import (assert_equal,
 
 from spectrochempy.utils import SpectroChemPyWarning, \
     SpectroChemPyDeprecationWarning
+
+from spectrochempy.extern.pint.errors import DimensionalityError, UndefinedUnitError
+
+import os
+import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
+from nbconvert.preprocessors.execute import CellExecutionError
 
 
 # =============================================================================
@@ -368,3 +372,47 @@ def show_do_not_block(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+def notebook_run(path):
+    """
+    Execute a notebook via nbconvert and collect output.
+    :returns (parsed nb object, execution errors)
+    """
+    kernel_name = 'python%d' % sys.version_info[0]
+    this_file_directory = os.path.dirname(__file__)
+    errors = []
+
+    with open(path) as f:
+        nb = nbformat.read(f, as_version=4)
+        nb.metadata.get('kernelspec', {})['name'] = kernel_name
+        ep = ExecutePreprocessor(kernel_name=kernel_name, timeout=10) #, allow_errors=True
+
+        try:
+            ep.preprocess(nb, {'metadata': {'path': this_file_directory}})
+
+        except CellExecutionError as e:
+            if "SKIP" in e.traceback:
+                print(str(e.traceback).split("\n")[-2])
+            else:
+                raise e
+
+    return nb, errors
+
+
+def example_run(path):
+
+    import subprocess
+
+    return subprocess.getstatusoutput("python %s"%path)
+
+
+if __name__ == '__main__':
+
+    from glob import glob
+
+
+    for example in glob("../docs/source/examples/*/*.py"):
+        example_run(example)
+
+
+

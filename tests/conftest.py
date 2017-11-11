@@ -26,7 +26,7 @@ import sys
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndarray import CoordSet, NDArray
 from spectrochempy.core.dataset.ndcoords import Coord
-from spectrochempy.api import data, plotoptions
+from spectrochempy.api import scpdata, plotoptions
 
 plotoptions.do_not_block = True
 
@@ -263,7 +263,7 @@ def dataset3d():
 @pytest.fixture(scope="function")
 def IR_source_1():
     source = NDDataset.read_omnic(
-            os.path.join(data, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
     return source
 
 
@@ -271,14 +271,14 @@ def IR_source_1():
 @pytest.fixture(scope="function")
 def IR_scp_1():
     source = NDDataset.load(
-            os.path.join(data, 'irdata', 'NH4Y-activation.scp'))
+            os.path.join(scpdata, 'irdata', 'nh4.scp'))
     return source
 
 
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D():
-    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
+    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
     source = NDDataset.read_bruker_nmr(
             path, expno=1, remove_digital_filter=True)
@@ -288,7 +288,7 @@ def NMR_source_1D():
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D_1H():
-    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
+    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'tpa')
     source = NDDataset.read_bruker_nmr(
             path, expno=10, remove_digital_filter=True)
@@ -297,7 +297,7 @@ def NMR_source_1D_1H():
 
 @pytest.fixture(scope="function")
 def NMR_source_2D():
-    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
+    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')
     source = NDDataset.read_bruker_nmr(
             path, expno=1, remove_digital_filter=True)

@@ -48,4 +48,3 @@ Databases
 	:maxdepth: 1
 
 	isotope_database
-

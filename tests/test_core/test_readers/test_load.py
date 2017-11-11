@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-from spectrochempy.api import NDDataset, data
+from spectrochempy.api import NDDataset, scpdata, log, DEBUG, ERROR
 
 from tests.utils import assert_approx_equal
 import os
@@ -43,7 +43,7 @@ import pytest
 
 #sources are defined in conftest as fixture
 
-def test_load(IR_source_1, IR_scp_1):
+def test_load(IR_source_1):
 
     source = IR_source_1
     assert_approx_equal(source.data[0,0], 2.05, significant=2)
@@ -51,9 +51,17 @@ def test_load(IR_source_1, IR_scp_1):
     assert_approx_equal(B.data[0, 0], 2.05 * 1.98, significant=2)
     assert "binary operation mul with `1.98` has been performed" in B.history
 
+    filename = os.path.join(scpdata, 'irdata', 'nh4.scp')
+    source.save(filename)
+    source2 = NDDataset.read(filename)
+
+    log.loglevel=DEBUG
+    assert source == source2
+    log.loglevel = ERROR
+
 def test_methods_read_access():
 
-    path = os.path.join(data, 'nmrdata', 'bruker', 'tests', 'nmr',
+    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
 
     # load the data in a new dataset

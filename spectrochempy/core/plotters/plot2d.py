@@ -460,7 +460,7 @@ def clevels(data, **kwargs):
 
 if __name__ == '__main__':
 
-    from spectrochempy.api import NDDataset, data, show, figure
+    from spectrochempy.api import NDDataset, scpdata, show, figure
 
     A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
     figure()
