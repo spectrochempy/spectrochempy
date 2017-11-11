@@ -43,7 +43,7 @@
 import sys
 
 from matplotlib.collections import LineCollection
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
@@ -119,7 +119,7 @@ def plot_2D(source, **kwargs):
 
     projections: `bool` [optional, default=False]
 
-    kind: `str` [optional among ``map``, ``stack`` or ``3d`` , default=``stack``]
+    kind: `str` [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
 
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
@@ -341,6 +341,9 @@ def plot_2D(source, **kwargs):
     number_y_labels = plotoptions.number_of_y_labels
     source.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     source.ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    # the next two line are to avoid multipliers in axis scale
+    y_formatter = ScalarFormatter(useOffset=False)
+    source.ax.yaxis.set_major_formatter(y_formatter)
 
     # -------------------------------------------------------------------------
     # labels
@@ -383,6 +386,7 @@ def plot_2D(source, **kwargs):
             axec = source.axes['colorbar']
             source._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
             source._axcb.set_label(zlabel)
+            # source._axcb.ax.yaxis.set_major_formatter(y_formatter) #this doesn't work
         pass
 
     # do we display the zero line

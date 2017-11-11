@@ -43,10 +43,49 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 
 from spectrochempy.application import plotoptions
-from spectrochempy.core.plotters.utils import make_label
+from spectrochempy.core.plotters.utils import make_label, cmyk2rgb
 
-__all__ = ['plot_1D']
+__all__ = ['plot_1D','plot_lines','plot_scatter', 'NBlack', 'NRed', 'NBlue',
+           'NGreen']
+
 _methods = __all__[:]
+
+# For color blind people, it is safe to use only 4 colors in graphs:
+# see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
+#   Black CMYK=0,0,0,0
+#   Red CMYK= 0, 77, 100, 0 %
+#   Blue CMYK= 100, 30, 0, 0 %
+#   Green CMYK= 85, 0, 60, 10 %
+NBlack = (0, 0, 0)
+NRed = cmyk2rgb(0, 77, 100, 0)
+NBlue = cmyk2rgb(100, 30, 0, 0)
+NGreen = cmyk2rgb(100, 30, 0, 0)  # <- Blue cmyk2rgb(85,0,60,10)
+
+
+# plot lines (default) --------------------------------------------------------
+
+def plot_lines(source, **kwargs):
+    """
+    Plot a 1D dataset with solid lines by default.
+
+    Alias of plot_1D (with `kind` argument set to ``lines``.
+
+    """
+    kwargs['kind'] = 'lines'
+    return plot_1D(source, **kwargs)
+
+
+# plot scatter ----------------------------------------------------------------
+
+def plot_scatter(source, **kwargs):
+    """
+    Plot a 1D dataset as a scatter plot (points can be added on lines).
+
+    Alias of plot_1D (with `kind` argument set to ``scatter``.
+
+    """
+    kwargs['kind'] = 'scatter'
+    return plot_1D(source, **kwargs)
 
 
 # ------------------------------------------------------------------------------
@@ -59,6 +98,12 @@ def plot_1D(source, **kwargs):
     Parameters
     ----------
     source: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
+
+    kind: `str` [optional among ``lines`, ``scatter``]
+
+    style : str, optional, default = 'notebook'
+        Matplotlib stylesheet (use `available_style` to get a list of available
+        styles for plotting
 
     reverse: `bool` or None [optional, default= None/False
         In principle, coordinates run from left to right, except for wavenumbers
@@ -169,6 +214,23 @@ def plot_1D(source, **kwargs):
     # plot the source
     # -------------------------------------------------------------------------
 
+    kind = kwargs.get('kind','lines')
+    lines = kwargs.get('lines',False) # in case it is scatter,
+                                      # we can also show the lines
+    lines = kind=='lines' or lines
+    scatter = kind=='scatter' and not lines
+    scatlines = kind=='scatter' and lines
+
+    show_complex = kwargs.get('show_complex', False)
+
+    color = kwargs.get('color', kwargs.get('c'))
+    lw = kwargs.get('linewidth', kwargs.get('lw', 1.))
+    ls = kwargs.get('linestyle', kwargs.get('ls', '-'))
+
+    marker = kwargs.get('marker', kwargs.get('m', 'o'))
+    markersize = kwargs.get('markersize', kwargs.get('ms', 5.))
+    markevery = kwargs.get('markevery', kwargs.get('me', 1))
+
     # abscissa axis
     x = source.x
 
@@ -182,10 +244,18 @@ def plot_1D(source, **kwargs):
     offset = kwargs.get('offset', 0.0)
     z = z - offset
 
-    # plot
-    line, = ax.plot(x.data, z.data)
+    # plot_lines
+    # -----------------------------
+    if scatlines:
+        line, = ax.plot(x.data, z.data, marker = marker, markersize = markersize,
+                                        markevery = markevery)
+    elif scatter:
+        line, = ax.plot(x.data, z.data, lw=0, marker = marker, markersize = markersize,
+                                        markevery = markevery)
+    elif lines:
+        line, = ax.plot(x.data, z.data)
 
-    if kwargs.get('show_complex', False):
+    if show_complex and lines:
         zimag = source.imag
         ax.plot(x.data, zimag.data, ls='--')
 
@@ -195,25 +265,25 @@ def plot_1D(source, **kwargs):
         #TODO: improve this!!!
 
     # line attributes
-    c = kwargs.get('color', kwargs.get('c'))
-    if c:
-        line.set_color(c)
-    lw = kwargs.get('linewidth', kwargs.get('lw', 1.))
-    if lw:
+    if lines and color:
+        line.set_color(color)
+
+    if lines and lw:
         line.set_linewidth(lw)
-    ls = kwargs.get('linestyle', kwargs.get('ls', '-'))
-    if ls:
+
+    if lines and ls:
         line.set_linestyle(ls)
+
+
+    # -------------------------------------------------------------------------
+    # axis limits and labels
+    # -------------------------------------------------------------------------
 
     if kwargs.get('data_only', False):
         # if data only (we will not set axes and labels
         # it was probably done already in a previous plot
         source._plot_resume(**kwargs)
         return True
-
-    # -------------------------------------------------------------------------
-    # axis limits and labels
-    # -------------------------------------------------------------------------
 
     # abscissa limits?
     xl = [x.data[0], x.data[-1]]
