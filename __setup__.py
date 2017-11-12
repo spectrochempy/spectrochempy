@@ -47,7 +47,6 @@ import warnings
 
 from spectrochempy.api import version
 
-
 def path():
     return os.path.dirname(__file__)
 
@@ -59,7 +58,7 @@ class PostDevelopCommand(develop):
 
         develop.run(self)
 
-        for item in ['pre-commit']:
+        for item in ['pre-commit','pre-push']:
             hook = os.path.join(path(), '.git', 'hooks', item)
             if os.path.exists(hook):
                 os.remove(hook)
