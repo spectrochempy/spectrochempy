@@ -58,7 +58,7 @@ class PostDevelopCommand(develop):
 
         develop.run(self)
 
-        for item in ['pre-commit','pre-push']:
+        for item in ['pre-commit']:
             hook = os.path.join(path(), '.git', 'hooks', item)
             if os.path.exists(hook):
                 os.remove(hook)
