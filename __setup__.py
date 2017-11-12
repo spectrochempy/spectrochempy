@@ -47,7 +47,6 @@ import warnings
 
 from spectrochempy.api import version
 
-
 def path():
     return os.path.dirname(__file__)
 
