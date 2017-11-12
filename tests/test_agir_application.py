@@ -37,12 +37,16 @@
 from spectrochempy.api import *
 
 import os
+import pytest
 
-def test_agir_application():
-
-    samples = {'P350':{'label':'$\mathrm{M_P}\,(623\,K)$'},
+@pytest.fixture(scope="module")
+def samples():
+    _samples = {'P350':{'label':'$\mathrm{M_P}\,(623\,K)$'},
                'A350':{'label':'$\mathrm{M_A}\,(623\,K)$'},
                'B350':{'label':'$\mathrm{M_B}\,(623\,K)$'}}
+    return  _samples
+
+def test_agir_application(samples):
 
     for key in samples.keys():
         basename = os.path.join(scpdata,'agirdata/{}/TGA/tg'.format(key))
@@ -68,5 +72,50 @@ def test_agir_application():
         samples[key]['TGA1'] = NDDataset.read(basename + '.scp')
         assert samples[key]['TGA1'] == samples[key]['TGA']
 
-        # delete scp
-        os.remove(basename + '.scp')
+
+def test_slicing_agir(samples):
+
+    for key in samples.keys():
+        # our data are in our test `scpdata` directory.
+        basename = os.path.join(scpdata, 'agirdata/{}/FTIR/FTIR'.format(key))
+        filename = basename + '.scp'
+        samples[key]['IR'] = NDDataset.read(filename)
+
+    for key in samples.keys():
+        figure()  # this is necessary to prevent the plot of the spectra on the same figure
+        s = samples[key]['IR']
+        s.plot(kind='stack')
+        label = samples[key]['label']
+        title = 'IR spectra for sample {}'.format(label)
+        s.ax.set_title(title, fontsize=16)
+
+    # We will resize the data in the interesting region of wavenumbers
+
+    for key in samples.keys():
+        s = samples[key]['IR']
+
+        # reduce to a useful windoww of wavenumbers
+        W = (1290., 3990.)
+        s = s[:, W[0]:W[1]]
+
+        samples[key]['IR'] = s
+
+    options.log_level = DEBUG
+
+    figure(figsize=(9, 3))
+    axes = subplots(nrow=1, ncol=3)
+
+    for key in samples.keys():
+        s = samples[key]['IR']
+        s.axes = axes  # store the axes information in each dataset
+
+    i = 1
+    for key in samples.keys():
+        s = samples[key]['IR']
+        s.plot_stack(ax=i, colorbar=False)
+        i += 1
+        label = samples[key]['label']
+        title = 'sample {}'.format(label)
+        s.ax.set_title(title, fontsize=16)
+
+

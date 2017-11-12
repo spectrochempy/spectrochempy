@@ -148,8 +148,8 @@ class NDIO(HasTraits):
         <BLANKLINE>
             SpectroChemPy's API
             Version   : 0.1...
-        >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
-        >>> mydataset.save('mydataset.scp', directory=data)
+        >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
+        >>> mydataset.save('mydataset.scp', directory=scpdata)
 
         Notes
         -----
@@ -609,7 +609,7 @@ class NDIO(HasTraits):
         #     self._fignum = kwargs.pop('fignum', None)  # self._fignum)
         #     # if no figure present, then create one with the fignum number
         #     self._fig = plt.figure(self._fignum, figsize=self._figsize)
-        #     self.axes['main'] = self._fig.gca()
+        #     self.axes['axe1'] = self._fig.gca()
         # else:
         log.debug('update plot')
         # self._updateplot = True  # fig exist: updateplot
@@ -618,18 +618,22 @@ class NDIO(HasTraits):
         self._fig = curfig()
 
         # most of the time the plot destination will be on the main axe
-        self._axdest = 'main'
+        self._axdest = 'axe1'
 
         # is ax in the keywords ?
         ax = kwargs.pop('ax', None)
         if ax is not None:
             # in this case we will plot on this ax
             if isinstance(ax, Axes):
-                ax.name = 'main'
-                self.axes['main'] = ax
-                self._axdest = 'main'
+                ax.name = 'axe1'
+                self.axes['axe1'] = ax
+                self._axdest = 'axe1'
             elif isinstance(ax, str) and ax in self.axes.keys():
                 # next plot commands will be applied if possible to this ax
+                self._axdest = ax
+            elif isinstance(ax, int) and ax>0 and ax <= len(self.axes.keys()):
+                # next plot commands will be applied if possible to this ax
+                ax = "axe%d"%ax
                 self._axdest = ax
             else:
                 raise ValueError('{} is not recognized'.format(ax))
@@ -641,8 +645,8 @@ class NDIO(HasTraits):
         else:
             # or create a new subplot
             ax = self._fig.gca()
-            ax.name = 'main'
-            self.axes['main']=ax
+            ax.name = 'axe1'
+            self.axes['axe1']=ax
 
         # Get the number of the present figure
         self._fignum = self._fig.number
@@ -669,7 +673,7 @@ class NDIO(HasTraits):
         #
         # other plot class may take care of other needs
 
-        ax = self.axes['main']
+        ax = self.axes['axe1']
 
         if ndim == 2 and self._divider is None:
             # create new axes on the right and on the top of the current axes
@@ -729,7 +733,7 @@ class NDIO(HasTraits):
                         kws[k.strip()] = eval(v)
                     else:
                         ags.append(eval(item))
-                getattr(self.axes['main'], com)(*ags, **kws)  #TODO:improve this
+                getattr(self.axes['axe1'], com)(*ags, **kws)  #TODO:improve this
 
         # adjust the plots
 
@@ -869,12 +873,12 @@ class NDIO(HasTraits):
         the main matplotlib axe associated to this dataset
 
         """
-        if 'main' not in self.axes.keys():
+        if 'axe1' not in self.axes.keys():
             ax = self._fig.gca()
-            ax.name = 'main'
-            self.axes['main'] = ax
+            ax.name = 'axe1'
+            self.axes['axe1'] = ax
 
-        return self._axes['main']
+        return self._axes['axe1']
 
     @property
     def axec(self):
@@ -932,10 +936,7 @@ def subplots(nrow=1, ncol=1):
     for i in range(nrow):
         for j in range(ncol):
             ax = fig.add_subplot(nrow, ncol, i*ncol+j+1)
-            if i*ncol+j+1==1:
-                ax.name = 'main'
-            else:
-                ax.name = 'axe{}'.format(i*ncol+j+1)
+            ax.name = 'axe{}'.format(i*ncol+j+1)
             axes[ax.name] = ax
     return axes
 

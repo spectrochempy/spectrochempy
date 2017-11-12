@@ -53,7 +53,8 @@ __all__ = _methods = ["closer_power_of_two",
                       "multisort",
                       "numpyprintoptions",
                       'makestr',
-                      'srepr']
+                      'srepr',
+                      'largest_power_of_2']
 
 import re
 from operator import itemgetter
@@ -380,3 +381,47 @@ def makestr(l):
     l = l.replace(' ', '\ ')
     l = r'$%s$' % l
     return l
+
+def primefactors(n):
+    from itertools import chain
+    result = []
+    for i in chain([2], range(3, n + 1, 2)):
+        s = 0
+        while n % i == 0:  # a good place for mod
+            n /= i
+            s += 1
+        result.extend([i] * s)  # avoid another for loop
+        if n == 1:
+            return result
+
+
+def largest_power_of_2(value):
+    """
+    Find the largest and nearest power of two of a value
+
+    Parameters
+    ----------
+    value: int
+
+    Returns
+    -------
+    pw: int
+        Power of 2.
+
+    Examples
+    --------
+
+        >>> largest_power_of_2(1020)
+        1024
+        >>> largest_power_of_2(1025)
+        2048
+        >>> largest_power_of_2(0)
+        2
+        >>> largest_power_of_2(1)
+        2
+
+
+    """
+    value = max(2, value)
+    p = int(pow(2, np.ceil(np.log(value) / np.log(2))))
+    return p

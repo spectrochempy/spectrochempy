@@ -259,7 +259,7 @@ class BaselineCorrection(HasTraits):
         axes = subplots(2, 1)
         self.source.axes = axes
 
-        ax1 = axes['main']
+        ax1 = axes['axe1']
         ax2 = axes['axe2']
 
         ax1.set_title('\nClick & span with left mouse button to set a baseline region.'
