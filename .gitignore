@@ -27,6 +27,8 @@ docs/source/_templates_old
 #ressources/
 #tests/testdata/nmrdata/bruker/tests/nmr/tpa/
 
+*.sample
+
 tartempion.scp
 todo.txt
 *.bak
@@ -34,3 +36,4 @@ todo.txt
 FTIR.scp
 tg.scp
 nh4.scp
+
