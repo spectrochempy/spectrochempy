@@ -35,10 +35,9 @@
 # =============================================================================
 
 
-from spectrochempy.api import NDDataset, scpdata, figure, show
+from spectrochempy.api import *
 
 from tests.utils import assert_approx_equal, show_do_not_block
-import os
 import pytest
 
 @show_do_not_block
@@ -51,7 +50,6 @@ def test_read_csv():
     print(A)
     assert A.shape == (10,3736)
 
-    figure()
     A.plot_stack()
 
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
@@ -59,6 +57,5 @@ def test_read_csv():
                            origin='tga')
     assert B.shape == (3446,)
     print(B)
-    figure()
     B.plot()
     show()

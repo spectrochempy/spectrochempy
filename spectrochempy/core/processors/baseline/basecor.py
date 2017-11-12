@@ -253,11 +253,9 @@ class BaselineCorrection(HasTraits):
         """
         self._setup(**kwargs)
 
-        fig = plt.figure(figsize=(9, 6))
-        fig.suptitle('INTERACTIVE BASELINE CORRECTION')
 
-        axes = subplots(2, 1)
-        self.source.axes = axes
+        axes = subplots(2, 1, figsize=(9, 6))
+        fig = plt.gcf()
 
         ax1 = axes['axe1']
         ax2 = axes['axe2']
@@ -265,8 +263,9 @@ class BaselineCorrection(HasTraits):
         ax1.set_title('\nClick & span with left mouse button to set a baseline region.'
                       '\nClick on right button on a region to remove it.',
                       fontweight='bold')
+        fig.suptitle('INTERACTIVE BASELINE CORRECTION')
 
-        self.source.plot_stack(ax=ax1, colorbar=False)
+        self.source.plot_stack(ax=ax1, colorbar=False, hold=True)
 
         sps = []
 
@@ -283,7 +282,6 @@ class BaselineCorrection(HasTraits):
 
         def show_basecor(ax2):
             corrected = self.compute()
-            corrected.axes = axes
 
             ax2.clear()
             ax2.set_title('Baseline corrected dataset preview',
@@ -291,9 +289,10 @@ class BaselineCorrection(HasTraits):
             if self.zoompreview>1:
                 zb = self.zoompreview
                 ylim = [corrected.data.min()/zb,corrected.data.max()/zb]
-                ax2 = corrected.plot_stack(ax=ax2, colorbar=False, zlim=ylim)
+                ax2 = corrected.plot_stack(ax=ax2, colorbar=False,
+                                           zlim=ylim, hold=True)
             else:
-                ax2 = corrected.plot_stack(ax=ax2, colorbar=False)
+                ax2 = corrected.plot_stack(ax=ax2, colorbar=False, hold=True)
 
         show_basecor(ax2)
 

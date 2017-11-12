@@ -92,23 +92,19 @@ new = mydataset['hot']
 # To plot a dataset, use the `plot` command (generic plot).
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 
-figure()
 new.plot()
+show()
 
 ##################################################################
 # But it is possible to display image
 #
 
 # sphinx_gallery_thumbnail_number = 2
-figure()
 new.plot(kind='image')
+show()
 
 ##################################################################
 # or stacked plot
 
-figure()
 new.plot(kind='stack')
-
-if __name__ == '__main__':
-    plotoptions.do_not_block = True
-    show()
+show()

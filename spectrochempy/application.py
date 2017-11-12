@@ -236,6 +236,9 @@ class SpectroChemPy(Application):
     running = Bool(False,
                    help="Is SpectrochemPy running?").tag(config=True)
 
+    test = Bool(False,
+                 help='set application in testing mode').tag(config=True)
+
     debug = Bool(False,
                  help='set DEBUG mode, with full outputs').tag(config=True)
 
@@ -260,6 +263,15 @@ class SpectroChemPy(Application):
     @property
     def list_scpdata(self):
         return self._scpdata
+
+
+    aliases = Dict(
+        dict(test='SpectroChemPy.test', log_level='SpectroChemPy.log_level'))
+
+    flags = Dict(dict(
+                      debug=(
+                      {'SpectroChemPy': {'log_level': 10}}, "Set loglevel to DEBUG")
+                      ))
 
     # --------------------------------------------------------------------------
     # Initialisation of the plot options
@@ -374,7 +386,7 @@ class SpectroChemPy(Application):
         # print("*" * 50, "\n", sys.argv, "\n", "*" * 50)
 
         if _do_parse:
-            self.parse_command_line(argv)
+            self.parse_command_line(sys.argv)
 
         # Get options from the config file
         # ---------------------------------------------------------------------
@@ -400,11 +412,17 @@ class SpectroChemPy(Application):
                 # with sphinx-gallery and doctests
 
                 _do_not_block = self.plotoptions.do_not_block = True
-                self.log.warning(
-                        'Running {} - set do_not_block: {}'.format(
-                                caller, _do_not_block))
+                break
+                
+        # case we have passed -test arguments to a script
+        if len(sys.argv)>1 and "-test" in sys.argv[1]:
+            _do_not_block = self.plotoptions.do_not_block = True
+            caller = sys.argv[0]
 
-        self.log.debug("DO NOT BLOCK : %s " % _do_not_block)
+        if _do_not_block:
+            self.log.warning(
+                    'Running {} - set do_not_block: {}'.format(
+                            caller, _do_not_block))
 
         # Possibly write the default config file
         # ---------------------------------------------------------------------
