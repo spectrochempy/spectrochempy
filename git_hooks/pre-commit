@@ -12,12 +12,8 @@ source ~/.bash_profile
 # test everything and do not commit if errors
 py.test -x tests || exit 1
 
-# install to check setup
-pip uninstall -y spectrochempy
-pip install -e . || exit 1
-
 # add files modified
-git add spectrochempy/version.py
+git add -A
 
 
 

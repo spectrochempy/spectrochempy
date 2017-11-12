@@ -9,17 +9,18 @@ source ~/.bash_profile
 # to make it work with matplotlib/latex
 export PATH=$PATH:/Library/TeX/texbin/
 
-# make docs and do not push if doc fails to build
+#python docs/builddocs.py clean
+#python docs/builddocs.py html || exit 1
+#python docs/builddocs.py pdf || exit 1
+#python docs/builddocs.py release || exit 1
 
+# add last file
 git add -A
-git commit --no-verify --amend
 
-python docs/builddocs.py clean
-python docs/builddocs.py html || exit 1
-python docs/builddocs.py pdf || exit 1
-python docs/builddocs.py release || exit 1
+# getb last commit message
+OUTPUT="$(git log -1 --pretty=%B)"
+git commit --no-verify --amend -m "${OUTPUT}"
 
-
-
-
-
+# install to check setup
+pip uninstall -y spectrochempy
+pip install -e . || exit 1
