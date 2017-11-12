@@ -96,12 +96,12 @@ class Coord(NDMath, NDArray):
         `unit` is set to the unit of the data; if a unit is also explicitly
         provided an error is raised.
 
-    title : unicode.
+    title : ``str`.
 
         The title of the axis. It will be used for instance to label the axe
         in plots
 
-    name : unicode.
+    name : `str`
 
         The name of the axis. Default is set automatically.
 
@@ -110,7 +110,7 @@ class Coord(NDMath, NDArray):
         Additional metadata for this object. Must be dict-like but no further
         restriction is placed on meta.
 
-    copy : bool
+    copy : `bool`
 
         Perform a copy of the passed object. By default, objects are not
         copied if possible
@@ -137,6 +137,7 @@ class Coord(NDMath, NDArray):
     [       1        2        3]
 
     """
+
     _copy = Bool
 
     # -------------------------------------------------------------------------

@@ -62,7 +62,7 @@ from spectrochempy.utils import (list_packages, get_version, get_release,
 from traitlets import import_item
 
 import logging
-log_level = logging.INFO
+log_level = logging.DEBUG
 
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
@@ -103,10 +103,11 @@ def gitcommands():
         OUTPUT = so.decode("ascii")
 
         pipe = subprocess.Popen(
-                ["git", "commit", "--no-verify", "--amend", "-m", "'%s'" % OUTPUT],
+                ["git", "commit", "--no-verify", "--amend", "-m", '%s' % OUTPUT],
                 stdout=subprocess.PIPE)
         (so, serr) = pipe.communicate()
 
+        pass
 
 def make_docs(*options):
     """Make the html and pdf documentation
@@ -141,6 +142,7 @@ def make_docs(*options):
         doctreedir = "{0}/~doctrees".format(BUILDDIR)
 
         write_download_rst()
+        gitcommands()  # update repository
 
         #with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
@@ -419,7 +421,7 @@ if __name__ == '__main__':
         sys.argv.append('clean')
         sys.argv.append('html')
         sys.argv.append('pdf')
-        sys.argv.append('realease')
+        sys.argv.append('release')
 
     action = sys.argv[1]
 
