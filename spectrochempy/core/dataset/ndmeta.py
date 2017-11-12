@@ -42,7 +42,7 @@
 Such object is particularly used in `SpectrochemPy` by the `NDDataset` object
 to store metadata. Like a regular dictionary, the
 elements can be accessed by key, but also by attributes, *e.g.*
-`a = meta['key']` give the same results as `a = meta.key`.
+``a = meta['key']`` give the same results as ``a = meta.key``.
 
 """
 

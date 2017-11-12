@@ -74,29 +74,29 @@ numpyprintoptions()
 # =============================================================================
 
 class Coord(NDMath, NDArray):
+
     """A class describing the coords of the data along a given axis.
 
     Parameters
     -----------
-    data : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like,
-        or another `Coord` object.
+
+    data : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like, or another `Coord` object.
 
         The actual data contained in this `Coord` object.
 
-    labels : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like of the
-        same length as coords, optional
+    labels : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like of the same length as coords, optional
 
         It contains the coords labels. If only labels are provided during
         initialisation of an axis, a numerical axis is automatically created
         with the labels indices
 
-    units : :class:`pint.unit.Unit` instance or str, optional
+    units : :class:`pint.unit.Unit` instance or `str`, optional
 
         The units of the data. If data is a :class:`pint.quantity.Quantity` then
         `unit` is set to the unit of the data; if a unit is also explicitly
         provided an error is raised.
 
-    title : ``str`.
+    title : `str`.
 
         The title of the axis. It will be used for instance to label the axe
         in plots
@@ -117,10 +117,13 @@ class Coord(NDMath, NDArray):
 
     Notes
     -----
-    The data in a `Coord` object should be accessed through the coords (
-    which is an alias of data) attribute.
 
-    For example::
+    The data in a `Coord` object should be accessed through the coords
+    (which is an alias of data) attribute.
+
+
+    Examples
+    ---------
 
     >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
@@ -290,19 +293,23 @@ class CoordRange(HasTraits):
     Parameters
     -----------
 
-   ranges :  iterable,  an interval or a set of intervals.
-            an interval or a set of intervals.
-            set of  intervals. If none is given, the axisrange \
-            will be a set of an empty interval [[]]. The interval limits do not \
-            need to be ordered, and the intervals do not need to be distincts.
+    ranges :  iterable,  an interval or a set of intervals.
 
-   reversed : (`bool`) the intervals are ranked by decreasing order if True \
-     or increasing order if False.
+        An interval or a set of intervals.
+        set of  intervals. If none is given, the axisrange
+        will be a set of an empty interval [[]]. The interval limits do not
+        need to be ordered, and the intervals do not need to be distincts.
 
-   nranges:  int
-        number of distinct ranges
+    reversed : `bool`, optional.
 
-   """
+        The intervals are ranked by decreasing order if True
+        or increasing order if False.
+
+    nranges :  `int`
+
+        Number of distinct ranges
+
+    """
     # TODO: May use also units ???
 
     ranges = List(Range)
@@ -369,11 +376,12 @@ class CoordRange(HasTraits):
     def _cleanranges(ranges):
         """ sort and merge overlaping ranges
 
-        works as follows:
-         1. orders each interval
-         2. sorts intervals
-         3. merge overlapping intervals
-         4. reverse the orders if required
+        works as follows::
+
+        1. orders each interval
+        2. sorts intervals
+        3. merge overlapping intervals
+        4. reverse the orders if required
 
         """
 

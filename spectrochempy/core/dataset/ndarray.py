@@ -113,7 +113,8 @@ class NDArray(HasTraits):
 
     Parameters
     ----------
-    data :
+
+    data : array
 
     Examples
     --------
@@ -129,10 +130,10 @@ class NDArray(HasTraits):
 
     >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     [[   0.930    0.316 ...,    0.749    0.654]
-     [   0.748    0.961 ...,    0.965    0.724]
-     ...,
-     [   0.945    0.533 ...,    0.651    0.313]
-     [   0.769    0.782 ...,    0.898    0.043]]
+    [   0.748    0.961 ...,    0.965    0.724]
+    ...,
+    [   0.945    0.533 ...,    0.651    0.313]
+    [   0.769    0.782 ...,    0.898    0.043]]
 
     NDArray can be also created using keywords arguments. Here is a masked array:
     >>> ndd = NDArray( data = np.random.random((3, 3)),
@@ -142,8 +143,8 @@ class NDArray(HasTraits):
     ...                units = 'absorbance')
     >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     [[  --    0.295   --]
-     [   0.086   --    0.516]
-     [   0.689    0.857   --]] dimensionless
+    [   0.086   --    0.516]
+    [   0.689    0.857   --]] dimensionless
 
     """
 
@@ -1276,7 +1277,7 @@ class NDArray(HasTraits):
         return True
 
     # .........................................................................
-    @deprecated('use `to` instead')
+    @deprecated('use ``to`` instead')
     def ito(self, other):
         """Inplace scaling of the current object data to different units.
 
@@ -1541,23 +1542,30 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
+
         other : :class:`Quantity` or `str`.
+
             destination units.
 
         inplace : `bool`, optional, default = `True`.
+
             if inplace is True, the object itself is returned with
             the new units. If `False` a copy is created.
 
         force: `bool`, optional, default: False
+
             If True the change of units is forced, even for imcompatible units
 
         Returns
         -------
+
         object : same type
+
             same object or a copy depending on `ìnplace` with new units.
 
         Examples
         --------
+
         >>> np.random.seed(12345)
         >>> ndd = NDArray( data = np.random.random((3, 3)),
         ...                mask = [[True, False, False],
@@ -1566,8 +1574,8 @@ class NDArray(HasTraits):
         ...                units = 'meters')
         >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         [[  --    0.316    0.184]
-         [   0.205   --    0.596]
-         [   0.965    0.653   --]] m
+        [   0.205   --    0.596]
+        [   0.965    0.653   --]] m
 
         We want to change the units to seconds for instance
         but there is no relation with meters,
@@ -1582,8 +1590,8 @@ class NDArray(HasTraits):
         >>> ndd.to('second', force=True) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         >>> print(ndd)
         [[  --    0.316    0.184]
-         [   0.205   --    0.596]
-         [   0.965    0.653   --]] s
+        [   0.205   --    0.596]
+        [   0.965    0.653   --]] s
 
         """
         if inplace:
@@ -1687,7 +1695,7 @@ class NDArray(HasTraits):
         elif 'label' in by and not self.is_labeled:
             by = 'value'
             pos = None
-            warnings.warn('no label to sort, use `value` by default',
+            warnings.warn('no label to sort, use ``value`` by default',
                               SpectroChemPyWarning)
             args = np.argsort(self.data)
 
@@ -1709,7 +1717,7 @@ class NDArray(HasTraits):
             by = 'value'
             warnings.warn(
                     'parameter `by` should be set to `value` or `label`, '
-                    'use `value` by default',
+                    'use ``value`` by default',
                               SpectroChemPyWarning)
             args = np.argsort(self.data)
 
