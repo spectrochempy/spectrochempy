@@ -46,13 +46,12 @@ from tests.utils import (assert_equal, assert_array_equal,
                          raises, show_do_not_block)
 
 from spectrochempy.api import *
-from spectrochempy.api import figure, show
+
 from spectrochempy.utils import SpectroChemPyWarning
 
 
 @show_do_not_block
 def test_nmr_2D(NMR_source_2D):
-    figure()
     source = NMR_source_2D
     source.plot(nlevels=20)  # , start=0.15)
     show()
@@ -62,7 +61,6 @@ def test_nmr_2D(NMR_source_2D):
 @show_do_not_block
 def test_nmr_2D_imag(NMR_source_2D):
     # plt.ion()
-    figure()
     source = NMR_source_2D.copy()
     source.plot(imag=True)
     show()
@@ -72,7 +70,6 @@ def test_nmr_2D_imag(NMR_source_2D):
 @show_do_not_block
 def test_nmr_2D_imag_compare(NMR_source_2D):
     # plt.ion()
-    figure()
     source = NMR_source_2D.copy()
     source.plot()
     source.plot(imag=True, cmap='jet', data_only=True, alpha=.3)
@@ -84,7 +81,6 @@ def test_nmr_2D_imag_compare(NMR_source_2D):
 @show_do_not_block
 def test_nmr_2D_hold(NMR_source_2D):
     source = NMR_source_2D
-    figure()
     source.plot()
     source.imag.plot(cmap='jet', data_only=True)
     show()
@@ -93,7 +89,6 @@ def test_nmr_2D_hold(NMR_source_2D):
 
 @show_do_not_block
 def test_nmr_2D_em_(NMR_source_2D):
-    figure()
     source = NMR_source_2D.copy()
     source.plot()
     assert source.shape == (96, 948)

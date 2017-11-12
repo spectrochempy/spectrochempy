@@ -141,7 +141,7 @@ def plot_2D(source, **kwargs):
     # --------------
 
     source._figure_setup(ndim=2, **kwargs)
-    ax = source.axes[source._axdest]
+    ax = source.axes['main']
 
     # kind of plot
     # ------------
@@ -467,6 +467,5 @@ if __name__ == '__main__':
     from spectrochempy.api import NDDataset, scpdata, show, figure
 
     A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
-    figure()
     A.plot_stack()
     show()

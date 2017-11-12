@@ -63,7 +63,7 @@ from pytest import raises
 __all__ = ['raises',
            'APIref',
            ### imported library
-           'np', 'plt', 'scipy'
+           'np', 'plt', 'scipy', 'os', 'sys',
 
            ### methods and objects from other packages will be added
            ### later on this module (see below)

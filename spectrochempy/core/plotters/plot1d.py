@@ -208,7 +208,7 @@ def plot_1D(source, **kwargs):
     # ---------------
 
     source._figure_setup(**kwargs)
-    ax = source.axes[source._axdest]
+    ax = source.axes['main']
 
     # -------------------------------------------------------------------------
     # plot the source

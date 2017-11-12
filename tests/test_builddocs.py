@@ -36,7 +36,7 @@
 
 import pytest
 from glob import glob
-import sys
+import os, sys
 
 from docs import builddocs as bd
 from tests.utils import notebook_run, example_run, show_do_not_block
@@ -61,8 +61,10 @@ def test_notebooks():
 @show_do_not_block
 def test_example():
     for example in glob("../docs/source/examples/*/*.py"):
-        e, message = example_run(example)
-        if e:
-            print(example,'\n', e)
-        assert not e, message
+        print(example)
+        if not os.path.exists(example) or os.path.splitext(example)[-1]!='.py':
+            continue
+        e, message, err = example_run(example)
+        print(e, message.decode('ascii'), err )
+        assert not e, message.decode('ascii')
 

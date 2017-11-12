@@ -85,7 +85,6 @@ __all__ = ['NDIO',
 
            'curfig',
            'show',
-           'figure',
            'subplots',
 
            'plot',
@@ -115,9 +114,11 @@ class NDIO(HasTraits):
 
     """
 
-    # _ax = Instance(Axes, allow_none=True)
+    # The figure on which this dataset can be plotted
     _fig = Instance(Figure, allow_none=True)
 
+    # The axes on which this dataset and other elements such as projections 
+    # and colorbar can be plotted
     _axes = Dict(Instance(Axes))
 
     # --------------------------------------------------------------------------
@@ -572,6 +573,7 @@ class NDIO(HasTraits):
         if not _plotter(**kwargs):
             return None
 
+
     # --------------------------------------------------------------------------
     # setup figure properties
     # --------------------------------------------------------------------------
@@ -609,32 +611,29 @@ class NDIO(HasTraits):
         #     self._fignum = kwargs.pop('fignum', None)  # self._fignum)
         #     # if no figure present, then create one with the fignum number
         #     self._fig = plt.figure(self._fignum, figsize=self._figsize)
-        #     self.axes['axe1'] = self._fig.gca()
+        #     self.axes['main'] = self._fig.gca()
         # else:
         log.debug('update plot')
         # self._updateplot = True  # fig exist: updateplot
 
         # get the current figure
-        self._fig = curfig()
-
-        # most of the time the plot destination will be on the main axe
-        self._axdest = 'axe1'
+        hold = kwargs.get('hold',False)
+        self._fig = curfig(hold)
 
         # is ax in the keywords ?
         ax = kwargs.pop('ax', None)
         if ax is not None:
             # in this case we will plot on this ax
             if isinstance(ax, Axes):
-                ax.name = 'axe1'
-                self.axes['axe1'] = ax
-                self._axdest = 'axe1'
-            elif isinstance(ax, str) and ax in self.axes.keys():
-                # next plot commands will be applied if possible to this ax
-                self._axdest = ax
-            elif isinstance(ax, int) and ax>0 and ax <= len(self.axes.keys()):
-                # next plot commands will be applied if possible to this ax
-                ax = "axe%d"%ax
-                self._axdest = ax
+                ax.name = 'main'
+                self.axes['main'] = ax
+            # elif isinstance(ax, str) and ax in self.axes.keys():
+            #     # next plot commands will be applied if possible to this ax
+            #     self._axdest = ax
+            # elif isinstance(ax, int) and ax>0 and ax <= len(self.axes.keys()):
+            #     # next plot commands will be applied if possible to this ax
+            #     ax = "axe%d"%ax
+            #     self._axdest = ax
             else:
                 raise ValueError('{} is not recognized'.format(ax))
 
@@ -645,8 +644,8 @@ class NDIO(HasTraits):
         else:
             # or create a new subplot
             ax = self._fig.gca()
-            ax.name = 'axe1'
-            self.axes['axe1']=ax
+            ax.name = 'main'
+            self.axes['main']=ax
 
         # Get the number of the present figure
         self._fignum = self._fig.number
@@ -673,7 +672,7 @@ class NDIO(HasTraits):
         #
         # other plot class may take care of other needs
 
-        ax = self.axes['axe1']
+        ax = self.axes['main']
 
         if ndim == 2 and self._divider is None:
             # create new axes on the right and on the top of the current axes
@@ -733,7 +732,7 @@ class NDIO(HasTraits):
                         kws[k.strip()] = eval(v)
                     else:
                         ags.append(eval(item))
-                getattr(self.axes['axe1'], com)(*ags, **kws)  #TODO:improve this
+                getattr(self.axes['main'], com)(*ags, **kws)  #TODO:improve this
 
         # adjust the plots
 
@@ -852,7 +851,7 @@ class NDIO(HasTraits):
         A dictionary containing all the axes of the current figures
         """
         return self._axes
-
+    
     @axes.setter
     def axes(self, axes):
         # we assume that the axes have a name
@@ -873,12 +872,7 @@ class NDIO(HasTraits):
         the main matplotlib axe associated to this dataset
 
         """
-        if 'axe1' not in self.axes.keys():
-            ax = self._fig.gca()
-            ax.name = 'axe1'
-            self.axes['axe1'] = ax
-
-        return self._axes['axe1']
+        return self._axes['main']
 
     @property
     def axec(self):
@@ -913,10 +907,30 @@ class NDIO(HasTraits):
         return self._divider
 
 
-def curfig():
+def curfig(hold=False, figsize=None):
+    """
+    Get the figure where to plot.
+
+    Parameters
+    ----------
+    hold : `bool`, optioanl, False by default
+        If hold is True, the plot will be issued on the last drawn figure
+
+    figsize : `tuple`, optional
+        A tuple representing the size of the figure in inch
+
+    Returns
+    -------
+    fig : the figure object on wich following plotting command will eb issued
+
+    """
     n = plt.get_fignums()
-    if not n:
-        plt.figure() # create a figure
+
+    if not n or not hold:
+        # create a figure
+        plt.figure(figsize=figsize)
+
+    # figure already exists
     fig = plt.gcf()
     return fig
 
@@ -927,11 +941,11 @@ def show():
 
     """
     if not plotoptions.do_not_block or isinteractive():
-        if curfig():
+        if curfig(True):  # True to avoid opening a new one
             plt.show()
 
-def subplots(nrow=1, ncol=1):
-    fig = curfig()
+def subplots(nrow=1, ncol=1, figsize=None):
+    fig = curfig(figsize=figsize)
     axes = {}
     for i in range(nrow):
         for j in range(ncol):
@@ -945,7 +959,6 @@ def available_styles():
     return ['notebook', 'paper', 'poster', 'talk', 'sans']
 
 
-figure = plt.figure
 plot = NDIO.plot
 load = NDIO.load
 read = NDIO.read

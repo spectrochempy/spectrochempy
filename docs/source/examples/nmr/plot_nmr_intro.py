@@ -8,9 +8,6 @@ Here we explain how to display and perform basic processing of NMR file
 """
 
 from spectrochempy.api import *
-import os
-plotoptions.do_not_block = True
-
 
 ##########################################################
 #
@@ -54,25 +51,17 @@ source2D
 ##########################################################
 # Plot the 1D dataset raw data
 
-figure()
-
 # plot the real data
 source1D.plot(xlim=(0, 25000), style='paper')
-# `hold=True` to make that the following plot commands will be on the same graph
 
 # plot the imaginary data on the same plot
-source1D.plot(imag=True, data_only=True)
+source1D.plot(imag=True, data_only=True, hold=True)
 # `data_only=True` to plot only the additional data, without updating the figure setting
 # such as xlim and so on.
 show()
 
 ##########################################################
 # To display the imaginary part, one can also simply use the show_complex commands.
-
-
-figure()  # this is necessary to create a new figure
-# and so avoid that the output of the next command
-# is displayed on the previous figure
 
 ax = source1D.plot(show_complex=True, color='green',
                    xlim=(0., 20000.), zlim=(-2., 2.))
@@ -82,23 +71,18 @@ show()
 ###############################@@
 # Plot the 2D dataset raw data
 
-figure()
 source2D = get_source2D()
 ax = source2D.plot(xlim=(0., 25000.))
-show()
 
 ##############################
 # probably less util, but multiple display is also possible for 2D
 
-figure()
 source2D.plot()
-ax = source2D.plot(imag=True, cmap='jet', data_only=True)
+ax = source2D.plot(imag=True, cmap='jet', data_only=True, hold=True)
 show()
 
 #################
 # Apodization
-
-figure()  # again becessary
 
 source1D = get_source1D()  # restore original
 p = source1D.plot()
@@ -133,8 +117,6 @@ lb2_source is not source1D
 ###############################################
 # We can also get only the apodization function
 
-figure()  # again necessary to start a new figure
-
 source1D = get_source1D()  # restore original
 p = source1D.plot()
 
@@ -144,14 +126,12 @@ show()
 # create the apodized dataset (if apply is False, the apodization function is not applied to the dataset,
 # but returned)
 
-figure()
-
 apodfunc = source1D.em(lb=100. * ur.Hz, apply=False)
 
 apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2))
 
 source1D.em(lb=100. * ur.Hz, apply=True)
-source1D.plot(data_only=True)
+source1D.plot(data_only=True, hold=True)
 source1D.ax.text(12500, 1.70,
            'Multiple display (original & em apodized fids + apod.function)',
            ha='center', fontsize=14)
@@ -160,8 +140,6 @@ show()
 ######################################
 # Apodization function can be em, gm, sp ...
 
-figure()  # again necessary to start a new figure
-
 source1D = get_source1D()  # restore original
 p = source1D.plot()
 
@@ -169,10 +147,10 @@ LB = 50. * ur.Hz
 GB = 100. * ur.Hz
 apodfunc = source1D.gm(gb=GB, lb=LB, apply=False)
 
-apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2))
+apodfunc.plot(xlim=(0, 25000), hold=True, zlim=(-2, 2))
 
 source1D.gm(gb=GB, lb=LB)  # apply=True by default
-source1D.plot(data_only=True)
+source1D.plot(data_only=True, hold=True)
 
 source1D.ax.text(12500, 1.70,
            'Multiple display (original & gm apodized fids + apod.function)',
@@ -185,15 +163,13 @@ show()
 ################################################
 # Apodization of 2D data
 
-figure()
-
 source2D = get_source2D()
-source2D.plot(xlim=(0., 25000.))
+source2D.plot(xlim=(0., 5000.))
 
 LB = 20. * ur.Hz
 source2D.em(lb=LB)
 source2D.em(lb=LB / 2, axis=0)
-source2D.plot(data_only=True, cmap='copper')
+source2D.plot(data_only=True, xlim=(0, 5000), cmap='copper', hold=True)
 
 show()
 
