@@ -40,15 +40,19 @@ This module define the `application` on which the API rely
 
 """
 
+# ==============================================================================
+# standard library import
+# ==============================================================================
+
 import os
 import glob
 import sys
 import logging
 import warnings
-import setuptools_scm
-from pkg_resources import get_distribution, DistributionNotFound
 
-from copy import deepcopy
+# ==============================================================================
+# third imports
+# ==============================================================================
 
 from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, catch_config_error
@@ -59,17 +63,15 @@ from traitlets import (HasTraits, Instance,
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
-from IPython.core.display import HTML
-
-# import ipyparallel as ipp
 
 import matplotlib as mpl
 
-# local
-# =============================================================================
+# ==============================================================================
+# local imports
+# ==============================================================================
 
 from spectrochempy.utils import is_kernel
-from spectrochempy.utils import get_config_dir, get_pkg_data_dir
+from spectrochempy.utils import get_config_dir, get_pkg_data_dir, get_version
 from spectrochempy.utils import get_pkg_data_filename
 from spectrochempy.utils import install_styles
 
@@ -102,8 +104,10 @@ __all__ = [
 
 # pcl = ipp.Client()[:]  #TODO: parallelization
 
-# some useful objects
-# -------------------
+
+# ==============================================================================
+# SCP class
+# ==============================================================================
 
 class SCPData(Configurable):
     """
@@ -183,7 +187,7 @@ class SpectroChemPy(Application):
 
     """
 
-    # info _____________________________________________________________________
+    # info ____________________________________________________________________
 
     name = Unicode('SpectroChemPy')
     description = Unicode('This is the main SpectroChemPy application ')
@@ -193,25 +197,7 @@ class SpectroChemPy(Application):
     @default('version')
     def _get_version(self):
 
-        try:
-            # let's first try to get version from git
-            version = setuptools_scm.get_version(
-                    version_scheme='post-release',
-                    root='..',
-                    relative_to=__file__).split('+')[0]
-
-        except:
-            try:
-                # let's try with the distribution version
-                version = get_distribution('spectrochempy').version
-            except DistributionNotFound:
-                from spectrochempy.version import version
-
-        path = os.path.join(os.path.dirname(__file__), 'version.py')
-        with open(path, "w") as f:
-            f.write("version = '%s' " % version)
-
-        return version
+        return get_version()
 
     copyright = Unicode('').tag(config=True)
 
@@ -319,7 +305,7 @@ class SpectroChemPy(Application):
 
         """
         # matplotlib use directive to set before calling matplotlib backends
-        # ------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # we performs this before any call to matplotlib that are performed
         # later in this application
 
@@ -339,7 +325,8 @@ class SpectroChemPy(Application):
         ip = get_ipython()
         if ip is not None:
             #backend = mpl.get_backend()
-            if is_kernel(): # and backend == 'module://ipykernel.pylab.backend_inline':
+            if is_kernel():
+                # and backend == 'module://ipykernel.pylab.backend_inline':
 
                 # set the ipython matplotlib environments
                 try:
@@ -372,7 +359,7 @@ class SpectroChemPy(Application):
                         pass
 
         # parse the argv
-        # --------------
+        # ---------------------------------------------------------------------
 
         # if we are running this under ipython and jupyter notebooks
         # deactivate potential command line arguments
@@ -390,19 +377,19 @@ class SpectroChemPy(Application):
             self.parse_command_line(argv)
 
         # Get options from the config file
-        # --------------------------------
+        # ---------------------------------------------------------------------
 
         if self.config_file_name:
             config_file = os.path.join(self.config_dir, self.config_file_name)
             self.load_config_file(config_file)
 
         # add other options
-        # -----------------
+        # ---------------------------------------------------------------------
 
         self._init_plotoptions()
 
         # Test, Sphinx,  ...  detection
-        # ------------------------------
+        # ---------------------------------------------------------------------
 
         _do_not_block = self.plotoptions.do_not_block
 
@@ -420,14 +407,14 @@ class SpectroChemPy(Application):
         self.log.debug("DO NOT BLOCK : %s " % _do_not_block)
 
         # Possibly write the default config file
-        # ---------------------------------------
+        # ---------------------------------------------------------------------
         self._make_default_config_file()
 
         # we catch warnings and error for a lighter display to the end-user.
         # except if we are in debugging mode
 
         # warning handler
-        # ---------------
+        # ---------------------------------------------------------------------
         def send_warnings_to_log(message, category, filename, lineno,
                                  *args):
             self.log.warning(
@@ -438,7 +425,7 @@ class SpectroChemPy(Application):
         warnings.showwarning = send_warnings_to_log
 
         # exception handler
-        # ------------------
+        # ---------------------------------------------------------------------
         if ip is not None:
 
             def _custom_exc(shell, etype, evalue, tb, tb_offset=None):
@@ -547,13 +534,14 @@ class SpectroChemPy(Application):
 # ==============================================================================
 # matplotlib use directive to set before calling matplotlib backends
 # ==============================================================================
-# from spectrochempy.application import SpectroChemPy
+
 app = SpectroChemPy()
 app.initialize()
 
 # ==============================================================================
 # API namespace
 # ==============================================================================
+
 running = app.running
 version = app.version
 copyright = app.copyright
@@ -569,8 +557,8 @@ _do_not_block = plotoptions.do_not_block
 scpdata = app.scpdata
 list_scpdata = app.list_scpdata
 
-# log levels
-# ----------
+# Log levels
+# -----------------------------------------------------------------------------
 DEBUG = logging.DEBUG
 INFO = logging.INFO
 WARN = logging.WARNING
