@@ -412,7 +412,8 @@ class SpectroChemPy(Application):
                 # with sphinx-gallery and doctests
 
                 _do_not_block = self.plotoptions.do_not_block = True
-
+                break
+                
         # case we have passed -test arguments to a script
         if len(sys.argv)>1 and "-test" in sys.argv[1]:
             _do_not_block = self.plotoptions.do_not_block = True
