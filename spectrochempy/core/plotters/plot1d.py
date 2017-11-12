@@ -48,7 +48,7 @@ from spectrochempy.core.plotters.utils import make_label, cmyk2rgb
 __all__ = ['plot_1D','plot_lines','plot_scatter', 'NBlack', 'NRed', 'NBlue',
            'NGreen']
 
-_methods = __all__[:]
+_methods = ['plot_1D','plot_lines','plot_scatter']
 
 # For color blind people, it is safe to use only 4 colors in graphs:
 # see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf

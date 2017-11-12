@@ -134,15 +134,19 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
+
         path : `str`
+
             The filename to the file to be save
 
-        directory : `str` [optional, default=`True`]
+        directory : `str` [optional, default = `True`]
+
             It specified, the given filename (generally a file name) fill be
             appended to the ``dir``.
 
         Examples
         ---------
+
         Read some experimental data and then save in our proprietary format **scp**
 
         >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -158,7 +162,8 @@ class NDIO(HasTraits):
 
         See Also
         ---------
-        write
+
+        :meth:`write`
 
         """
 
@@ -266,13 +271,13 @@ class NDIO(HasTraits):
              protocol='scp',
              **kwargs
              ):
-        """
-        Load a dataset object saved as a pickle file ( ``.scp`` file).
+        """Load a dataset object saved as a pickle file ( ``.scp`` file).
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
         Parameters
         ----------
+
         path : `str`
 
             The filename to the file to be read.
@@ -284,8 +289,8 @@ class NDIO(HasTraits):
 
         directory : `str`
 
-            optional, default=``data``
-            The directory from where to load hhe file.
+            optional, default= ``data``
+            The directory from where to load the file.
 
         kwargs : optional keyword parameters.
 
@@ -312,11 +317,13 @@ class NDIO(HasTraits):
 
         Notes
         -----
+
         adapted from `numpy.load`
 
         See Also
         --------
-        read, save
+
+        :meth:`read`, :meth:`save`
 
 
         """
@@ -413,23 +420,27 @@ class NDIO(HasTraits):
         Parameters
         ----------
         filename : `str`
+
             The path to the file to be read
 
         protocol : `str`
+
             Protocol used for reading. If not provided, the correct protocol
             is evaluated from the file name extension.
 
         kwargs : optional keyword parameters
+
             Any additional keyword to pass to the actual reader
 
         See Also
         --------
+
         :meth:`load`
 
         """
 
         if filename is None:
-            raise ValueError('read method require a parameter `filename`!')
+            raise ValueError('read method require a parameter ``filename``!')
 
         protocol = kwargs.pop('protocol', None)
         sortbydate = kwargs.pop('sortbydate', True)
@@ -462,19 +473,24 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
+
         filename : `str`
+
             The path to the file to be read
 
         protocol : `str`
+
             The protocol used to write the
             :class:`~spectrochempy.core.dataset.nddataset.NDDataset` in a file,
             which will determine the exporter to use.
 
         kwargs : optional keyword parameters
+
             Any additional keyword to pass to the actual exporter
 
         See Also
         --------
+
         :meth:`save`
 
         """
@@ -510,26 +526,30 @@ class NDIO(HasTraits):
     def plot(self, **kwargs):
 
         """
-        Generic plot function for a
-        :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-        which actually delegate
-        the work to a plotter defined by the parameter ``kind``.
+        Generic plot function for
+        a :class:`~spectrochempy.core.dataset.nddataset.NDDataset` which
+        actually delegate the work to a plotter defined by the parameter ``kind``.
 
         Parameters
         ----------
+
         kind : `str`, optional
+
             The kind of plot of the dataset,
             which will determine the plotter to use.
-            For instance, for 2D data, it can be `map`, `stack' or 'image'
+            For instance, for 2D data, it can be `map`, `stack` or `image`
             among other kind.
 
-        ax : :class:`matplotlib.Axes` instance. Optional, default = current or new one)
+        ax : :class:`matplotlib.Axes` instance. Optional, default = current or new one
+
             The axe where to plot
 
         figsize : `tuple`, optional, default is mpl.rcParams['figure.figsize']
+
             The figure size
 
         fontsize : `int`, optional
+
             The font size in pixels, default is 10 (or read from preferences)
 
         hold : `bool`, optional, default = `False`.
@@ -539,9 +559,12 @@ class NDIO(HasTraits):
 
         style : `str`
 
+
         See Also
         --------
+
         :meth:`show`
+
 
         """
 
@@ -761,7 +784,8 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-        ax : :class:`matplotlib.axe'
+
+        ax : :class:`matplotlib.axe`
 
             the viewplot where to plot.
 
@@ -913,15 +937,19 @@ def curfig(hold=False, figsize=None):
 
     Parameters
     ----------
+
     hold : `bool`, optioanl, False by default
+
         If hold is True, the plot will be issued on the last drawn figure
 
     figsize : `tuple`, optional
+
         A tuple representing the size of the figure in inch
 
     Returns
     -------
-    fig : the figure object on wich following plotting command will eb issued
+
+    fig : the figure object on wich following plotting command will be issued
 
     """
     n = plt.get_fignums()

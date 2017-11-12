@@ -62,7 +62,7 @@ from spectrochempy.utils import (list_packages, get_version, get_release,
 from traitlets import import_item
 
 import logging
-log_level = logging.INFO
+log_level = logging.DEBUG
 
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
@@ -79,7 +79,35 @@ DOCTREES = os.path.join(DOCDIR, '..', '..','spectrochempy_doc', '~doctrees')
 
 def gitcommands():
 
-    pass
+    COMMIT = False
+
+    pipe = subprocess.Popen(
+            ["git", "status"],
+            stdout=subprocess.PIPE)
+    (so, serr) = pipe.communicate()
+
+    if "nothing to commit" not in so.decode("ascii"):
+        COMMIT = True
+
+    if COMMIT:
+
+        pipe = subprocess.Popen(
+                ["git", "add", "-A"],
+                stdout=subprocess.PIPE)
+        (so, serr) = pipe.communicate()
+
+        pipe = subprocess.Popen(
+                ["git", "log", "-1", "--pretty=%B"],
+                stdout=subprocess.PIPE)
+        (so, serr) = pipe.communicate()
+        OUTPUT = so.decode("ascii")
+
+        pipe = subprocess.Popen(
+                ["git", "commit", "--no-verify", "--amend", "-m", '%s' % OUTPUT],
+                stdout=subprocess.PIPE)
+        (so, serr) = pipe.communicate()
+
+        pass
 
 def make_docs(*options):
     """Make the html and pdf documentation
@@ -114,6 +142,7 @@ def make_docs(*options):
         doctreedir = "{0}/~doctrees".format(BUILDDIR)
 
         write_download_rst()
+        gitcommands()  # update repository
 
         #with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
@@ -331,9 +360,16 @@ The following sub-packages are available in this package:
         if hasattr(pkg, '_methods'):
             methods += "\nMethods\n---------------\n"
             methods += "This module contains the following methods:\n\n"
+
             for item in pkg._methods:
+                # check if it is really a method:
+                #if hasattr(getattr(spectrochempy.api,
+                #                   '{}'.format(item)), '__call__'):
                 _item = "%s.%s"%(package,item)
                 methods += "\n.. automethod:: %s\n\n" % _item
+                #else:
+                #    print(item)
+                #    # may be add this in the doc to
 
 
         title = "_".join(package.split('.')[1:])
@@ -385,7 +421,7 @@ if __name__ == '__main__':
         sys.argv.append('clean')
         sys.argv.append('html')
         sys.argv.append('pdf')
-        sys.argv.append('realease')
+        sys.argv.append('release')
 
     action = sys.argv[1]
 

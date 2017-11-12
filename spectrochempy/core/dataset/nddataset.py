@@ -137,8 +137,7 @@ class NDDataset(
         a `mask` here will causes the mask from the masked array to be
         ignored.
 
-    coords : An instance of :class:`~spectrochempy.core.dataset.ndcoords.CoordSet`,
-    optional
+    coords : An instance of :class:`~spectrochempy.core.dataset.ndcoords.CoordSet`, optional
 
         `coords` contains the coordinates for the different
         dimensions of the `data`. if `coords` is provided, it must specified
@@ -152,8 +151,7 @@ class NDDataset(
         `uncertainties <http://pythonhosted.org/uncertainties/>`_
         package (BSD Licence) which is embedded in |scp|.
 
-    units : an instance of :class:`~spectrochempy.core.units.Unit` or string,
-    optional
+    units : an instance of :class:`~spectrochempy.core.units.Unit` or string, optional
 
         The units of the data. If `data` is a `Quantity` then
         `units` is set to the units of the `data`; if a `unit`
@@ -352,6 +350,7 @@ class NDDataset(
         """
         `List`- A list of the :class:`~spectrochempy.core.dataset.ndcoords.Coord`
         units
+
         """
         if self.coordset is not None:
             return self.coordset.units
@@ -478,6 +477,7 @@ class NDDataset(
 
         Parameters
         ----------
+
         axis : `int` or `unicode`
 
             An axis index or name, default=-1 for the last axis
@@ -485,6 +485,7 @@ class NDDataset(
         Returns
         -------
         coord : :class:`~numpy.ndarray`
+
 
         """
         return self.coordset[axis]
@@ -495,7 +496,8 @@ class NDDataset(
 
         Parameters
         ----------
-        axes : list of ints, optional
+
+        axes : `list` of `int`, optional
 
             By default, reverse the dimensions, otherwise permute the coordset
             according to the values given.
@@ -507,6 +509,7 @@ class NDDataset(
 
         Returns
         -------
+
         transposed_dataset : same type
 
             The nd-dataset or a new nd-dataset (inplace=False)
@@ -515,6 +518,7 @@ class NDDataset(
 
         See Also
         --------
+
         :meth:`swapaxes`
 
         """
@@ -546,6 +550,7 @@ class NDDataset(
 
         Parameters
         ----------
+
         axis1 : int
 
             First axis.
@@ -560,6 +565,7 @@ class NDDataset(
 
         Returns
         -------
+
         swapped_dataset : same type
 
             The object or a new object (inplace=False) is returned with coordset
@@ -567,6 +573,7 @@ class NDDataset(
 
         See Also
         --------
+
         :meth:`transpose`
 
         """
@@ -589,6 +596,7 @@ class NDDataset(
 
         Parameters
         ----------
+
         axis : `int` , optional, default = 0.
 
             axis id along which to sort.
@@ -612,6 +620,7 @@ class NDDataset(
 
         Returns
         -------
+
         sorted_dataset : same type
 
             The object or a new object (inplace=False) is returned with coordset
@@ -660,6 +669,7 @@ class NDDataset(
 
         Parameters
         ----------
+
         axis : `int`, optional, default = -1
 
             The axis to make complex
