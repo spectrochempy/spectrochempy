@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-from spectrochempy.api import NDDataset, scpdata, figure, show
+from spectrochempy.api import *
 
 from tests.utils import assert_approx_equal, show_do_not_block
 import os

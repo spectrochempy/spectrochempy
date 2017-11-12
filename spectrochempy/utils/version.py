@@ -1,7 +1,7 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2018 LCS
+# Copyright (©) 2015-2017 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # This software is a computer program whose purpose is to [describe
@@ -33,97 +33,70 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
-import pytest
 
-from spectrochempy.api import *
-from tests.utils import show_do_not_block
+import os
+import subprocess
+import setuptools_scm
+from pkg_resources import get_distribution, DistributionNotFound
 
-import matplotlib as mpl
+# .............................................................................
+def get_version():
 
-@show_do_not_block
-def test_plot_generic(IR_source_1):
-    source = IR_source_1.copy()
-    source.plot()
-    show()
+    root = os.path.join(os.path.dirname(__file__), '../..')
+    try:
+        # let's first try to get version from git
+        version = setuptools_scm.get_version(
+                version_scheme='post-release',
+                root=root,
+                relative_to=__file__).split('+')[0]
+    except:
+        try:
+            # let's try with the distribution version
+            version = get_distribution('spectrochempy').version
 
-@show_do_not_block
-def test_plot_generic_1D(IR_source_1):
-    source = IR_source_1[0].copy()
+        except DistributionNotFound:
 
-    #figure()
-    source.plot()
-    show()
+            from spectrochempy.version import version
 
-    assert mpl.rcParams['figure.figsize']==[6.8,4.4]
-    source.plot(style='sans')
-    show()
+    path = os.path.join(root, 'spectrochempy', 'version.py')
+    with open(path, "w") as f:
+        f.write("version = '%s' " % version)
 
-    assert mpl.rcParams['font.family'] == ['sans-serif']
+    return version
 
+def get_release():
 
-@show_do_not_block
-def test_plot_2D(IR_source_1):
+    version = get_version()
+    release = version.split('.post')[0]
+    return release
 
-    source = IR_source_1.copy()
+# .............................................................................
+def get_release_date():
+    try:
+        return subprocess.getoutput(
+            "git log -1 --tags --date='short' --format='%ad'")
+    except:
+        pass
 
-    source.plot_2D()
-
-    source = IR_source_1.copy()
-    source.plot_2D(kind='map')
-
-    source = IR_source_1.copy()
-
-    source.plot_2D(kind='image')
-
-    source = IR_source_1.copy()
-
-    source.plot_2D(kind='stack')
-    show()
-    pass
-
-@show_do_not_block
-def test_plot_map(IR_source_1):
-
-
-    source = IR_source_1.copy()
-    source.plot_map()  # plot_map is an alias of plot_2D
-    show()
-
-@show_do_not_block
-def test_plot_image(IR_source_1):
-
-    source = IR_source_1.copy()
-
-    source.plot_image(start=0.1)  # plot_image is an alias of plot_2D
-    show()
-
-@show_do_not_block
-def test_plot_stack(IR_source_1):
-
-    source = IR_source_1.copy()
-
-    source.plot_stack()  # plot_map is an alias of plot_2D
-    show()
-
-@show_do_not_block
-def test_plot_stack_generic(IR_source_1):
-    source = IR_source_1.copy()
-
-    source.plot(kind='stack')
-    show()
-
-@show_do_not_block
-def test_plot_stack_multiple(IR_source_1):
-
-    source = IR_source_1.copy()
-    s1 = source[-10:]
-    s2 = source[:10]
-
-    row = s1[-1]
-    row.plot()
-    show()
+# .............................................................................
+def get_version_date():
+    try:
+        return subprocess.getoutput(
+            "git log -1 --date='short' --format='%ad'")
+    except:
+        pass
 
 
-    s1.plot_stack()
-    s2.plot_stack(data_only=True)
-    show()
+
+# =============================================================================
+# __main__
+# =============================================================================
+if __name__ == '__main__':
+
+    print("release :", get_release())
+    print("release data: ",get_release_date())
+
+    print("version :", get_version())
+    print("version date: ", get_version_date())
+
+

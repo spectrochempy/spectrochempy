@@ -82,7 +82,6 @@ def test_slicing_agir(samples):
         samples[key]['IR'] = NDDataset.read(filename)
 
     for key in samples.keys():
-        figure()  # this is necessary to prevent the plot of the spectra on the same figure
         s = samples[key]['IR']
         s.plot(kind='stack')
         label = samples[key]['label']
@@ -102,19 +101,12 @@ def test_slicing_agir(samples):
 
     options.log_level = DEBUG
 
-    figure(figsize=(9, 3))
-    axes = subplots(nrow=1, ncol=3)
+    axes = subplots(nrow=1, ncol=3, figsize=(9, 3))
 
-    for key in samples.keys():
-        s = samples[key]['IR']
-        s.axes = axes  # store the axes information in each dataset
-
-    i = 1
-    for key in samples.keys():
-        s = samples[key]['IR']
-        s.plot_stack(ax=i, colorbar=False)
-        i += 1
-        label = samples[key]['label']
+    for ax, sample in zip(axes.values(), samples.values()):
+        s = sample['IR']
+        s.plot_stack(ax=ax, colorbar=False)
+        label = sample['label']
         title = 'sample {}'.format(label)
         s.ax.set_title(title, fontsize=16)
 

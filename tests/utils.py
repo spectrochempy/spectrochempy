@@ -403,7 +403,16 @@ def example_run(path):
 
     import subprocess
 
-    return subprocess.getstatusoutput("python %s"%path)
+    pipe = None
+    try:
+        pipe = subprocess.Popen(
+            ["python", path, " --test=True"],
+            stdout=subprocess.PIPE)
+        (so, serr) = pipe.communicate()
+    except:
+        pass
+
+    return pipe.returncode, so, serr
 
 
 if __name__ == '__main__':

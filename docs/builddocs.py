@@ -34,8 +34,6 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-
 """Clean, build, and release the HTML documentation for spectrochempy.
 """
 
@@ -45,7 +43,7 @@ import shutil
 from collections import namedtuple
 from glob import glob
 from pkgutil import walk_packages
-from subprocess import call, getoutput
+import subprocess
 from warnings import warn
 import setuptools_scm
 
@@ -59,7 +57,8 @@ import matplotlib as mpl
 mpl.use('agg')
 
 from spectrochempy.api import *
-from spectrochempy.utils import list_packages
+from spectrochempy.utils import (list_packages, get_version, get_release,
+                                 get_release_date, get_version_date)
 from traitlets import import_item
 
 import logging
@@ -123,7 +122,7 @@ def make_docs(*options):
             cmd = "cd {}/latex; " \
               "make; mv spectrochempy.pdf " \
               " ../pdf/spectrochempy.pdf".format(BUILDDIR)
-            res = call([cmd], shell=True, executable='/bin/bash')
+            res = subprocess.call([cmd], shell=True, executable='/bin/bash')
             log.info(res)
 
         log.info(
@@ -147,9 +146,9 @@ def do_release():
         log.info("uploads to the server of the html/pdf files")
         cmd = 'rsync -e ssh -avz  --exclude="~*"    ' \
               '../spectrochempy_doc/*   '+SERVER+':spectrochempy/'
-        print(call(['pwd'], shell=True, executable='/bin/bash'))
+        print(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
         print(cmd)
-        res = call([cmd], shell=True, executable='/bin/bash')
+        res = subprocess.call([cmd], shell=True, executable='/bin/bash')
         log.info(res)
         log.info('\n'+cmd + "Finished")
 
@@ -352,15 +351,12 @@ def write_download_rst():
     -------
 
     """
-    date_release = getoutput("git log -1 --tags --date='short' --format='%ad'")
-    date_version = getoutput("git log -1 --date='short' --format='%ad'")
 
-    version = setuptools_scm.get_version(
-            version_scheme='post-release',
-            root='..',
-            relative_to=__file__).split('+')[0]
+    date_release = get_release_date()
+    date_version = get_version_date()
 
-    release = version.split('.post')[0]
+    version = get_version()
+    release = get_release()
 
     rpls = """
 * `Latest stable release {0} ({1}) <https://bitbucket.org/spectrocat/spectrochempy/get/{0}.zip>`_
@@ -368,11 +364,12 @@ def write_download_rst():
 * `Development sources {2} ({3}) <https://bitbucket.org/spectrocat/spectrochempy/get/master.zip>`_
     """.format(release, date_release, version, date_version)
 
-    with open(os.path.join(DOCDIR, 'source', 'download.rst'),
-              "w") as f:
+    dwn = os.path.join(DOCDIR, 'source', 'download.rst')
+    with open(dwn,"w") as f:
         f.write(rpls)
 
-
+    subprocess.getoutput("git add %s" % dwn)
+    subprocess.getoutput("git commit --no-verify --amend")
 
 if __name__ == '__main__':
 
@@ -380,6 +377,8 @@ if __name__ == '__main__':
         # full make
         sys.argv.append('clean')
         sys.argv.append('html')
+        sys.argv.append('pdf')
+        sys.argv.append('realease')
 
     action = sys.argv[1]
 

@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-from spectrochempy.api import Fit, NDDataset, figure, show
+from spectrochempy.api import *
 import os
 import pytest
 from tests.utils import assert_approx_equal, show_do_not_block
@@ -77,7 +77,7 @@ def test_fit_single_source(IR_source_1, script):
 #    assert_approx_equal(source.model_A, -116.40475, significant=4)
 #    assert_approx_equal(f1.fp['width_line_2'], 195.7273, significant=4)
 
-    figure()
+
     source.plot(plot_model=True)
     #show()
 
@@ -85,7 +85,7 @@ def test_fit_single_source(IR_source_1, script):
     f2 = Fit(source2, script, silent=True)
     f2.run(maxiter=10, every=1)
 
-    figure()
+
     source2.plot(plot_model=True)
     show()
 
@@ -94,7 +94,7 @@ def test_fit_single_source(IR_source_1, script):
 
     f2 = Fit(source2, script, silent=False)
     f2.run(maxiter=1000, every=1)
-    figure()
+
     source2.plot(plot_model=True)
     show()
 

@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# to use the pre-commit in the source git_hooks directory
-# in the Spectrochempy/.git/hooks  directory
-# ln -s ../../git_hooks/pre-commit pre-commit
-# or run pip install -e . to install it automatically
-
 # run test for python 3.6
 #-------------------------
 
@@ -17,22 +12,30 @@ source ~/.bash_profile
 # to make it work with matplotlib/latex
 export PATH=$PATH:/Library/TeX/texbin/
 
-# test everything and do not commit if erros
+# test everything and do not commit if errors
 py.test -x tests || exit 1
+
+# add last file
+git add -A
+
+# getb last commit message
+OUTPUT="$(git log -1 --pretty=%B)"
+git commit --no-verify --amend -m "${OUTPUT}"
+
+python docs/builddocs.py clean
+python docs/builddocs.py html || exit 1
+
+# add last file
+git add -A
+
+# getb last commit message
+OUTPUT="$(git log -1 --pretty=%B)"
+git commit --no-verify --amend -m "${OUTPUT}"
 
 # install to check setup
 pip uninstall -y spectrochempy
 pip install -e . || exit 1
 
-# make docs and do not commit if doc fails to build
-#python docs/builddocs.py clean
-python docs/builddocs.py html || exit 1
-python docs/builddocs.py pdf || exit 1
-python docs/builddocs.py release || exit 1
-
-
-# add files modified
-git add -A
 
 
 

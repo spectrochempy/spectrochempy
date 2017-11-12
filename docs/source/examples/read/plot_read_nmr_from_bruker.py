@@ -8,10 +8,7 @@ In this example, we load a NMR dataset (in the Bruker format) and plot it.
 
 """
 
-import os
-
 from spectrochempy.api import *
-plotoptions.do_not_block = True
 
 ##########################################################
 # ``data`` contains the path to a default data directory.
@@ -26,6 +23,5 @@ ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 ##########################################################
 # view it...
 
-figure()
 plot(ndd, style='paper')
 show()

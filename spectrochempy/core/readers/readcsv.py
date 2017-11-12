@@ -367,7 +367,6 @@ if __name__ == '__main__':
     #                        directory=data,
     #                        origin='omnic_export')
     # print(A)
-    # figure()
     # A.plot_stack()
 
 
@@ -381,7 +380,6 @@ if __name__ == '__main__':
     B.units = 'weight_percent'
     B.title = 'loss of mass'
 
-    figure()
     B.plot()
     show()
 

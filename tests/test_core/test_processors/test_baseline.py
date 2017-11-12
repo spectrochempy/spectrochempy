@@ -34,7 +34,7 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from spectrochempy.api import NDDataset, BaselineCorrection, figure, show
+from spectrochempy.api import *
 from tests.utils import show_do_not_block
 
 import pytest
@@ -50,7 +50,6 @@ def test_basecor_sequential(IR_source_1):
     basc = BaselineCorrection(source)
     s = basc([6000.,3500.],[1800.,1500.])
 
-    figure()
     s.plot()
     show()
 
@@ -62,7 +61,6 @@ def test_basecor_sequential_pchip(IR_source_1):
     basc = BaselineCorrection(source)
     s = basc([6000., 3500.], [1800., 1500.],
                               interpolation='pchip')
-    figure()
     s.plot()
     show()
 
@@ -75,7 +73,6 @@ def test_basecor_multivariate(IR_source_1):
     s = basc([6000., 3500.], [1800., 1500.],
                               method='multivariate',
                               interpolation='polynomial')
-    figure()
     s.plot()
     show()
 
@@ -88,6 +85,5 @@ def test_basecor_multivariate_pchip(IR_source_1):
     s = basc([6000., 3500.], [1800., 1500.],
                               method='multivariate',
                               interpolation='pchip')
-    figure()
     s.plot()
     show()

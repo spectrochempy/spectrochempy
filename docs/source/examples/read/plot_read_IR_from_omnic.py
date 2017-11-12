@@ -6,9 +6,7 @@ Loading an IR (omnic SPG) exerimental file
 Here we load an experimental SPG file (OMNIC) and plot it.
 
 """
-import os
 from spectrochempy.api import *
-plotoptions.do_not_block = True
 
 ###################################################################
 # Loading and stacked plot of the original
@@ -16,7 +14,6 @@ plotoptions.do_not_block = True
 source = NDDataset.read_omnic(os.path.join(scpdata,
                                            'irdata', 'NH4Y-activation.SPG'))
 
-figure()
 source.plot_stack(style='paper')
 show()
 
@@ -27,6 +24,5 @@ source.y.to('hour')
 source.y -= source.y[0]
 source.y.title = 'acquisition time'
 
-figure()
 source.plot_stack()
 show()

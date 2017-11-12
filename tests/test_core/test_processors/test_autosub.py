@@ -41,13 +41,11 @@
 import numpy as np
 import pandas as pd
 
-from spectrochempy.api import (NDDataset, CoordSet, Coord, Meta, ur, figure, show)
+from spectrochempy.api import *
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises, show_do_not_block)
-
-from spectrochempy.api import autosub
 
 import pytest
 import numpy as np
@@ -67,10 +65,8 @@ def test_autosub(IR_source_1):
     s1 = source.copy()
     ref = s1[0]
 
-    figure()
     source.plot_stack()
 
-    figure()
     ref.plot()
     #show()
 
@@ -82,7 +78,6 @@ def test_autosub(IR_source_1):
     assert np.round(s3.data[0,0],4) == 0.0000
     s3.name="varfit"
 
-    figure()
     s3.plot_stack()
 
     s4 = source.copy()
@@ -90,7 +85,6 @@ def test_autosub(IR_source_1):
     s4.name = "chi2, inplace"
     assert np.round(s4.data[0,0],4) == 0.0000
 
-    figure()
     s4.plot_stack()  #true avoid blocking due to graphs
 
     s4 = source.copy()
@@ -99,7 +93,6 @@ def test_autosub(IR_source_1):
     assert np.round(s.data[0, 0], 4) == 0.0000
     s.name = 'chi2 direct call'
 
-    figure()
     s.plot_stack()
 
     show()

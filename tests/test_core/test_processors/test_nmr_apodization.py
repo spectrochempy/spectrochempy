@@ -47,7 +47,6 @@ from tests.utils import (assert_equal, assert_array_equal,
 
 
 from spectrochempy.api import *
-from spectrochempy.api import figure, show
 from spectrochempy.utils import SpectroChemPyWarning
 
 
@@ -56,7 +55,6 @@ from spectrochempy.utils import SpectroChemPyWarning
 @show_do_not_block
 def test_nmr_1D_show(NMR_source_1D):
     source = NMR_source_1D.copy()
-    figure()
     ax1 = source.plot()
     assert source.is_complex[-1]
     show()
@@ -65,7 +63,6 @@ def test_nmr_1D_show(NMR_source_1D):
 @show_do_not_block
 def test_nmr_1D_show_hold(NMR_source_1D):
     source = NMR_source_1D.copy()
-    figure()
     # test if we can plot on the same figure
     source.plot(xlim=(0.,25000.))
     # we want to superpose a second spectrum
@@ -82,14 +79,12 @@ def test_nmr_1D_show_dualdisplay(NMR_source_1D):
     source.plot()
     show()
 
-    figure()
     source.plot()
     show()
 
 @show_do_not_block
 def test_nmr_1D_show_dualdisplay_apodfun(NMR_source_1D):
     source = NMR_source_1D.copy()
-    figure()
     # test if we can plot on the same figure
     source.plot(xlim=(0.,25000.))
     # we want to superpose a second spectrum wich is the apodization function
