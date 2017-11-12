@@ -77,10 +77,17 @@ SOURCE = os.path.join(DOCDIR, 'source')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','spectrochempy_doc')
 DOCTREES = os.path.join(DOCDIR, '..', '..','spectrochempy_doc', '~doctrees')
 
+def gitcommands():
+
+    pass
+
 def make_docs(*options):
     """Make the html and pdf documentation
 
     """
+    # make sure commits have been done
+    gitcommands()
+
     options = list(options)
 
     DEBUG = 'DEBUG' in options
