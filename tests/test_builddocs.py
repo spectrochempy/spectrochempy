@@ -36,9 +36,11 @@
 
 import pytest
 from glob import glob
+import sys
+
 from docs import builddocs as bd
 from tests.utils import notebook_run, example_run, show_do_not_block
-import sys
+
 do_it = 'builddocs' in sys.argv[1]   # this test is run alone
 
 @pytest.mark.skipif(not do_it, reason="too long test")
@@ -50,19 +52,17 @@ def test_buildocs_html():
 def test_buildocs_pdf():
     bd.make_docs('pdf')
 
+@show_do_not_block
 def test_notebooks():
-  for notebook in glob("../docs/source/userguide/*.ipynb"):
-    print(notebook)
-    nb, errors = notebook_run(notebook)
-    assert errors == []
+    for notebook in glob("../docs/source/userguide/*.ipynb"):
+        nb, errors = notebook_run(notebook)
+        assert errors == []
 
 @show_do_not_block
 def test_example():
-
     for example in glob("../docs/source/examples/*/*.py"):
-
         e, message = example_run(example)
         if e:
             print(example,'\n', e)
-
         assert not e, message
+
