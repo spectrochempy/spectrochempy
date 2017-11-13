@@ -287,7 +287,7 @@ class NDArray(HasTraits):
         udata = new._uncert_data(force=True)[internkeys]
 
         #if isinstance(udata, Quantity):
-        new._data = unp.nominal_values(udata)
+        new._data = unp.nominal_values(np.asarray(udata))
 
         #else:
         #    pass
@@ -314,7 +314,7 @@ class NDArray(HasTraits):
         new._mask = udata.mask # np.array(self._mask[keys])
 
         #if isinstance(udata, Quantity):
-        new._uncertainty = unp.std_devs(udata) # np.array(self._uncertainty[keys])
+        new._uncertainty = unp.std_devs(np.asarray(udata)) # np.array(self._uncertainty[keys])
 
         if self._coordset is not None:
             new_coordset = self.coordset.copy()
@@ -342,7 +342,7 @@ class NDArray(HasTraits):
     # .........................................................................
     def __iter__(self):
 
-        if self.ndim == 0:
+        if self._data.ndim == 0:
             raise ValueError('iteration over a 0-d array')
         for n in range(len(self)):
             yield self[n]
@@ -350,7 +350,7 @@ class NDArray(HasTraits):
     # .........................................................................
     def __len__(self):
 
-        return self.shape[0]
+        return self._data.shape[0]
 
     # .........................................................................
     def __ne__(self, other, attrs=None):
@@ -362,7 +362,8 @@ class NDArray(HasTraits):
 
         prefix = type(self).__name__ + ': '
         data = self.uncert_data
-
+        if isinstance(data, Quantity):
+            data = data.magnitude
         body = np.array2string( \
                 data.squeeze(), separator=', ', \
                 prefix=prefix)  # this allow indentation of len of the prefix
@@ -646,8 +647,8 @@ class NDArray(HasTraits):
     def mask(self, mask):
         # property.setter for mask
 
-        if mask is None:
-            return
+        #if mask is None:
+        #    return
 
         # make sure mask is of type np.ndarray
         if not isinstance(mask, np.ndarray) and not isinstance(mask, bool):
@@ -1008,10 +1009,10 @@ class NDArray(HasTraits):
         contained in this object.
 
         """
-        if self.is_masked:
-            return self._umasked(self._data, self._mask)
-        else:
-            return self._data
+        #if self.is_masked:
+        return self._umasked(self._data, self._mask)
+        #else:
+        #    return self._data
             # here we use .mask not ._mask to get the correct shape
 
     # .........................................................................
@@ -1355,7 +1356,7 @@ class NDArray(HasTraits):
         new = self.copy()
         if select == 'ALL':
             select = 'R' * self.ndim
-        ma = self.masked_data
+        ma = self._uncert_data(force=True) #self.masked_data
         for axis, component in enumerate(select):
             if self._is_complex[axis]:
                 data = ma.swapaxes(axis, -1)
@@ -1368,11 +1369,16 @@ class NDArray(HasTraits):
                             'components must be indicated with R, I or *')
                 ma = data.swapaxes(axis, -1)
                 new._is_complex[axis] = False
-        if isinstance(ma, np.ma.masked_array):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
+        #if isinstance(ma, np.ma.masked_array):
+        #    new._data = ma.data
+        #    new._mask = ma.mask
+        #else:
+        #    new._data = ma
+        new._mask = ma.mask
+
+        new._uncertainty = unp.std_devs(ma)
+        new._data = unp.nominal_values(ma)
+
         return new
 
     # .........................................................................
@@ -1726,11 +1732,16 @@ class NDArray(HasTraits):
 
         if 'I' not in ''.join(
                 prefix):  # case of pure real data (not hypercomplex)
-            text = mkbody(self.uncert_data, '', units)
+            data = self.uncert_data
+            if isinstance(data, Quantity):
+                data = data.magnitude
+            text = mkbody(data, '', units)
         else:
             text = ''
             for pref in prefix:
                 data = self.part(pref).uncert_data
+                if isinstance(data, Quantity):
+                    data = data.magnitude
                 text += mkbody(data, pref, units)
 
         text = text[:-1]  # remove the trailing '\n'
@@ -1938,6 +1949,8 @@ class NDArray(HasTraits):
         # This ensures that a masked array is returned.
 
         if np.any(mask) or force:
+            if not np.any(mask):
+                mask = np.zeros_like(data).astype(bool)
             data = np.ma.masked_array(data, mask)
 
         return data
@@ -1947,10 +1960,16 @@ class NDArray(HasTraits):
     def _uarray(data, uncertainty, units=None, force=False):
         # return the array with uncertainty and units if any
 
-        if uncertainty is None or not gt_eps(uncertainty) or not force:
+        if (uncertainty is None or not gt_eps(uncertainty)) and not force:
             uar = data
         else:
-            uar = unp.uarray(data, uncertainty)
+            try:
+                if not np.any(uncertainty):
+                    uncertainty = np.zeros_like(data).astype(float)
+                uar = unp.uarray(data, uncertainty)
+            except TypeError:
+                uar = data
+
 
         if units:
             return Quantity(uar, units)
