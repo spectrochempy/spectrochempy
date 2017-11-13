@@ -795,48 +795,6 @@ class NDDataset(
             # with arithmetic operators and more
             raise AttributeError
 
-
-    def __getitem__(self, item):
-        # we need coordset (but they might be not present...
-        # in this case coordset are simply the indexes
-
-        #if self.coordset is None:
-        #    # create coordset from indexes
-        #    coordset = CoordSet([Coord(np.arange(l)) for l in self._data.shape])
-        #else:
-        #    coordset = self.coordset
-
-        # transform the passed index (if necessary) to integer indexes
-        keys, internkeys = self._make_index(item)
-
-        new = self.copy()
-
-        # slicing by index of all internal array
-        new._data = np.array(self._data[internkeys])
-        new._is_complex = self._is_complex
-
-        #if self.is_masked:
-        new._mask = np.array(self._mask[keys])
-
-        #if self.is_uncertain:
-        new._uncertainty = np.array(self._uncertainty[keys])
-
-        if new._data.size == 0:
-            raise IndexError("Empty array of shape {} resulted from slicing.\n"
-                             "Check the indexes and make "
-                             "sure to use floats for "
-                             "location slicing".format(str(new._data.shape)))
-
-        if self._coordset is not None:
-            new_coordset = self.coordset.copy()
-            for i, coord in enumerate(new_coordset):
-                new_coordset[i] = coord[keys[i]]
-            new._coordset = new_coordset
-
-        new._name = '*' + self._name
-
-        return new #.squeeze()
-
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
         for attr in ('name', 'description', 'history', 'date', 'modified'):

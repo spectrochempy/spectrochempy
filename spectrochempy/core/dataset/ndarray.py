@@ -274,8 +274,8 @@ class NDArray(HasTraits):
     def __getitem__(self, items):
 
         # to avoid slicing error when there is only one element
-        if items == slice(None, None, None) and self.size == 1:
-            return self.copy()
+        #if items == slice(None, None, None) and self.size == 1:
+        #    return self.copy()
 
         new = self.copy()
 
@@ -284,13 +284,6 @@ class NDArray(HasTraits):
 
         # slicing by index of all internal array
         new._data = np.array(self._data[internkeys])
-        new._is_complex = self._is_complex
-
-        if self.is_masked:
-            new._mask = np.array(self._mask[keys])
-
-        if self.is_uncertain:
-            new._uncertainty = np.array(self._uncertainty[keys])
 
         if self.is_labeled:
             # case only of 1D dataset such as Coord
@@ -299,7 +292,30 @@ class NDArray(HasTraits):
             newkeys = tuple((Ellipsis, keys[-1]))
             new._labels = np.array(self._labels[newkeys])
 
-        return new #.squeeze()
+        if new._data.size == 0:
+            if not new.is_labeled or new._labels.size ==0:
+                raise IndexError("Empty array of shape {}".format(
+                                str(new._data.shape)) + \
+                             "resulted from slicing.\n"
+                             "Check the indexes and make "
+                             "sure to use floats for "
+                             "location slicing")
+
+        new._is_complex = self._is_complex
+
+        new._mask = np.array(self._mask[keys])
+
+        new._uncertainty = np.array(self._uncertainty[keys])
+
+        if self._coordset is not None:
+            new_coordset = self.coordset.copy()
+            for i, coord in enumerate(new_coordset):
+                new_coordset[i] = coord[keys[i]]
+            new._coordset = new_coordset
+
+        new._name = '*' + self._name.lstrip('*')
+
+        return new
 
     # .........................................................................
     def __setitem__(self, items, value):
@@ -1372,6 +1388,36 @@ class NDArray(HasTraits):
         self._is_complex[axis] = True
 
     # .........................................................................
+    def set_mask(self, start, end=None, step=None, axis=-1):
+        """
+        Mask a given region
+
+        Parameters
+        ----------
+
+        start : `ìnt`, `float` `slice` , `str` or any keys allowing slicing a ndarray
+
+            Specify the region or the start of the region
+            of the ndarray to be masked
+
+        stop : `ìnt`, `float`, `str` or any keys allowing slicing a ndarray
+
+            Specify the end region of the ndarray to be masked
+
+        """
+
+        try:
+            s = self[keys]
+        except IndexError:
+            warnings.warn('Specified indexes raised an error. Mask not set',
+                          SpectroChemPyWarning)
+
+        pass
+
+
+
+
+    # .........................................................................
     def set_real(self, axis):
         """
         Set the data along the given dimension as real
@@ -1386,87 +1432,87 @@ class NDArray(HasTraits):
 
         self._is_complex[axis] = False
 
-    # .........................................................................
-    def _old_squeeze(self, axis=None, inplace=False):
-        """
-        Remove single-dimensional entries from the shape of an array.
-
-        Parameters
-        ----------
-        axis :   `None` or `int` or `tuple` of ints, optional
-
-            Selects a subset of the single-dimensional entries in the shape.
-            If an axis is selected with shape entry greater than one,
-            an error is raised.
-
-        inplace : `bool`, optional, default = False
-
-            if False a new object is returned
-
-        Returns
-        -------
-        squeezed_dataset : same type
-
-            The input array, but with all or a subset of the dimensions
-            of length 1 removed.
-
-        """
-
-        if axis is not None:
-            if not is_sequence(axis):
-                axis = [axis]
-            squeeze_axis = list(axis)
-
-            for axis in squeeze_axis:
-                if axis < 0:
-                    axis = self._data.ndim + axis
-
-                if self._data.shape[axis] > 1:
-                    raise ValueError(
-                            '%d is of length greater than one: '
-                            'cannot be squeezed' % axis)
-        else:
-            squeeze_axis = []
-            for axis, dim in enumerate(self._data.shape):
-                # we need the real shape here
-                if dim == 1:
-                    squeeze_axis.append(axis)
-
-        if not inplace:
-            new = self.copy()
-        else:
-            new = self
-
-        new._data = self._data.squeeze(tuple(squeeze_axis))
-
-        if self.is_masked:
-            new._mask = self._mask.squeeze(tuple(squeeze_axis))
-        if self.is_uncertain:
-            new._uncertainty = self._uncertainty.squeeze(tuple(squeeze_axis))
-        if self.is_labeled:
-            # labels is a special case, as several row of label can be presents.
-            squeeze_labels_axis = []
-            for axis, dim in enumerate(self._labels.shape):
-                if dim == 1:
-                    squeeze_labels_axis.append(axis)
-            new._labels = self._labels.squeeze(tuple(squeeze_labels_axis))
-
-        cplx = []
-        coordset = []
-        for axis in range(self._data.ndim):
-            if axis not in squeeze_axis:
-                cplx.append(self._is_complex[axis])
-                if self.coordset:
-                    coordset.append(self.coordset[axis])
-
-        new._is_complex = cplx
-        if coordset:
-            new._coordset = CoordSet(coordset)
-
-        #if new.ndim ==1 and new.size > 1 :
-        #    new.data = new.data.reshape((1,self._data.size))
-
-        return new
+    # # .........................................................................
+    # def _old_squeeze(self, axis=None, inplace=False):
+    #     """
+    #     Remove single-dimensional entries from the shape of an array.
+    #
+    #     Parameters
+    #     ----------
+    #     axis :   `None` or `int` or `tuple` of ints, optional
+    #
+    #         Selects a subset of the single-dimensional entries in the shape.
+    #         If an axis is selected with shape entry greater than one,
+    #         an error is raised.
+    #
+    #     inplace : `bool`, optional, default = False
+    #
+    #         if False a new object is returned
+    #
+    #     Returns
+    #     -------
+    #     squeezed_dataset : same type
+    #
+    #         The input array, but with all or a subset of the dimensions
+    #         of length 1 removed.
+    #
+    #     """
+    #
+    #     if axis is not None:
+    #         if not is_sequence(axis):
+    #             axis = [axis]
+    #         squeeze_axis = list(axis)
+    #
+    #         for axis in squeeze_axis:
+    #             if axis < 0:
+    #                 axis = self._data.ndim + axis
+    #
+    #             if self._data.shape[axis] > 1:
+    #                 raise ValueError(
+    #                         '%d is of length greater than one: '
+    #                         'cannot be squeezed' % axis)
+    #     else:
+    #         squeeze_axis = []
+    #         for axis, dim in enumerate(self._data.shape):
+    #             # we need the real shape here
+    #             if dim == 1:
+    #                 squeeze_axis.append(axis)
+    #
+    #     if not inplace:
+    #         new = self.copy()
+    #     else:
+    #         new = self
+    #
+    #     new._data = self._data.squeeze(tuple(squeeze_axis))
+    #
+    #     if self.is_masked:
+    #         new._mask = self._mask.squeeze(tuple(squeeze_axis))
+    #     if self.is_uncertain:
+    #         new._uncertainty = self._uncertainty.squeeze(tuple(squeeze_axis))
+    #     if self.is_labeled:
+    #         # labels is a special case, as several row of label can be presents.
+    #         squeeze_labels_axis = []
+    #         for axis, dim in enumerate(self._labels.shape):
+    #             if dim == 1:
+    #                 squeeze_labels_axis.append(axis)
+    #         new._labels = self._labels.squeeze(tuple(squeeze_labels_axis))
+    #
+    #     cplx = []
+    #     coordset = []
+    #     for axis in range(self._data.ndim):
+    #         if axis not in squeeze_axis:
+    #             cplx.append(self._is_complex[axis])
+    #             if self.coordset:
+    #                 coordset.append(self.coordset[axis])
+    #
+    #     new._is_complex = cplx
+    #     if coordset:
+    #         new._coordset = CoordSet(coordset)
+    #
+    #     #if new.ndim ==1 and new.size > 1 :
+    #     #    new.data = new.data.reshape((1,self._data.size))
+    #
+    #     return new
 
     # .........................................................................
     def swapaxes(self, axis1, axis2, inplace=False):
