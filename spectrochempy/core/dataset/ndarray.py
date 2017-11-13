@@ -283,7 +283,14 @@ class NDArray(HasTraits):
         keys, internkeys = self._make_index(items)
 
         # slicing by index of all internal array
-        new._data = np.array(self._data[internkeys])
+        #new._data = np.array(self._data[internkeys])
+        udata = new._uncert_data(force=True)[internkeys]
+
+        #if isinstance(udata, Quantity):
+        new._data = unp.nominal_values(udata)
+
+        #else:
+        #    pass
 
         if self.is_labeled:
             # case only of 1D dataset such as Coord
@@ -303,9 +310,11 @@ class NDArray(HasTraits):
 
         new._is_complex = self._is_complex
 
-        new._mask = np.array(self._mask[keys])
+        #if isinstance(udata, Quantity):
+        new._mask = udata.mask # np.array(self._mask[keys])
 
-        new._uncertainty = np.array(self._uncertainty[keys])
+        #if isinstance(udata, Quantity):
+        new._uncertainty = unp.std_devs(udata) # np.array(self._uncertainty[keys])
 
         if self._coordset is not None:
             new_coordset = self.coordset.copy()
@@ -1058,11 +1067,16 @@ class NDArray(HasTraits):
     @property
     def uncert_data(self):
         """:class:`~numpy.ndarray`-like object - The actual array with
-        uncertainty of the data contained in this object.
-
+                uncertainty of the data contained in this object.
         """
+        return self._uncert_data()
 
-        return self._uarray(self.masked_data, self._uncertainty)
+    def _uncert_data(self, force=False):
+        # private function that allow to force the masked and uncertainty
+        # representation. Useful for slicing
+
+        return self._uarray(self._umasked(self._data, self._mask, force= force),
+                            self._uncertainty, self._units, force = force)
 
     # .........................................................................
     @property
@@ -1388,7 +1402,7 @@ class NDArray(HasTraits):
         self._is_complex[axis] = True
 
     # .........................................................................
-    def set_mask(self, start, end=None, step=None, axis=-1):
+    def set_mask(self, items, axis=-1):
         """
         Mask a given region
 
@@ -1407,7 +1421,7 @@ class NDArray(HasTraits):
         """
 
         try:
-            s = self[keys]
+            s = self[start:stop:step]
         except IndexError:
             warnings.warn('Specified indexes raised an error. Mask not set',
                           SpectroChemPyWarning)
@@ -1920,20 +1934,20 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @staticmethod
-    def _umasked(data, mask):
-        # This ensures that a masked array is returned if self is masked.
+    def _umasked(data, mask, force=False):
+        # This ensures that a masked array is returned.
 
-        if np.any(mask):
+        if np.any(mask) or force:
             data = np.ma.masked_array(data, mask)
 
         return data
 
     # .........................................................................
     @staticmethod
-    def _uarray(data, uncertainty, units=None):
+    def _uarray(data, uncertainty, units=None, force=False):
         # return the array with uncertainty and units if any
 
-        if uncertainty is None or not gt_eps(uncertainty):
+        if uncertainty is None or not gt_eps(uncertainty) or not force:
             uar = data
         else:
             uar = unp.uarray(data, uncertainty)
