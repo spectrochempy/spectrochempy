@@ -94,7 +94,7 @@ def test_concatenate_1D_along_axis0(IR_source_1):
         rows.append(s)
         assert s.shape == (5549,)
         print(s._mask)
-        assert not s._mask
+        assert not s.is_masked
 
     # reconstruct from rows
     new = stack(rows)

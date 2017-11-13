@@ -284,6 +284,7 @@ class NDArray(HasTraits):
 
         # slicing by index of all internal array
         #new._data = np.array(self._data[internkeys])
+
         udata = new._uncert_data(force=True)[internkeys]
 
         #if isinstance(udata, Quantity):
@@ -1077,7 +1078,7 @@ class NDArray(HasTraits):
         # representation. Useful for slicing
 
         return self._uarray(self._umasked(self._data, self._mask, force= force),
-                            self._uncertainty, self._units, force = force)
+                            self._uncertainty, self._units) #, force = force)
 
     # .........................................................................
     @property
@@ -1960,21 +1961,41 @@ class NDArray(HasTraits):
     def _uarray(data, uncertainty, units=None, force=False):
         # return the array with uncertainty and units if any
 
-        if (uncertainty is None or not gt_eps(uncertainty)) and not force:
+        # the handling of uncertainties have a great price in performance.
+        # Let's avoid it if not necessary
+
+        if (uncertainty is None or not gt_eps(uncertainty)):
             uar = data
         else:
-            try:
-                if not np.any(uncertainty):
-                    uncertainty = np.zeros_like(data).astype(float)
-                uar = unp.uarray(data, uncertainty)
-            except TypeError:
-                uar = data
-
+            uar = unp.uarray(data, uncertainty)
 
         if units:
             return Quantity(uar, units)
         else:
             return uar
+
+    # # .........................................................................
+    # @staticmethod
+    # def _uarray(data, uncertainty, units=None, force=False):
+    #     # return the array with uncertainty and units if any
+    #
+    #     # the handling of uncertainties have a great price in performance.
+    #     # Let's avoid it if not necessary
+    #
+    #     if (uncertainty is None or not gt_eps(uncertainty)) and not force:
+    #         uar = data
+    #     else:
+    #         try:
+    #             if not np.any(uncertainty):
+    #                 uncertainty = np.zeros_like(data).astype(float)
+    #             uar = unp.uarray(data, uncertainty)
+    #         except TypeError:
+    #             uar = data
+    #
+    #     if units:
+    #         return Quantity(uar, units)
+    #     else:
+    #         return uar
 
 
 # =============================================================================
