@@ -57,7 +57,7 @@ import matplotlib as mpl
 mpl.use('agg')
 
 from spectrochempy.api import *
-from spectrochempy.utils import (list_packages, get_version, get_release,
+from spectrochempy.utils import (list_packages, get_version,
                                  get_release_date, get_version_date)
 from traitlets import import_item
 
@@ -385,34 +385,6 @@ The following sub-packages are available in this package:
                                     subpackages=subpackages,
                                     ))
 
-
-def write_download_rst():
-    """
-    Modify the download item of the sidebars
-
-    Returns
-    -------
-
-    """
-
-    date_release = get_release_date()
-    date_version = get_version_date()
-
-    version = get_version()
-    release = get_release()
-
-    rpls = """
-* `Latest stable release {0} ({1}) <https://bitbucket.org/spectrocat/spectrochempy/get/{0}.zip>`_
-            
-* `Development sources {2} ({3}) <https://bitbucket.org/spectrocat/spectrochempy/get/master.zip>`_
-    """.format(release, date_release, version, date_version)
-
-    dwn = os.path.join(DOCDIR, 'source', 'download.rst')
-    with open(dwn,"w") as f:
-        f.write(rpls)
-
-    subprocess.getoutput("git add %s" % dwn)
-    subprocess.getoutput("git commit --no-verify --amend")
 
 if __name__ == '__main__':
 

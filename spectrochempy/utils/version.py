@@ -45,30 +45,32 @@ def get_version():
     root = os.path.join(os.path.dirname(__file__), '../..')
     try:
         # let's first try to get version from git
-        version = setuptools_scm.get_version(
+        dev_version = setuptools_scm.get_version(
                 version_scheme='post-release',
                 root=root,
                 relative_to=__file__).split('+')[0]
     except:
         try:
             # let's try with the distribution version
-            version = get_distribution('spectrochempy').version
+            dev_version = get_distribution('spectrochempy').version
 
         except DistributionNotFound:
 
             from spectrochempy.version import version
+            dev_version = version
 
     path = os.path.join(root, 'spectrochempy', 'version.py')
+
     with open(path, "w") as f:
-        f.write("version = '%s' " % version)
+        _v = dev_version.split('.post')
+        version = release = _v[0]
+        if len(_v) > 1:
+            version = _v[0] + ".dev"
+        f.write("version = '%s'\n" % version)
+        #f.write("dev_version = '%s'\n" % dev_version)
+        f.write("release = '%s' " % release)
 
-    return version
-
-def get_release():
-
-    version = get_version()
-    release = version.split('.post')[0]
-    return release
+    return version, dev_version, release
 
 # .............................................................................
 def get_release_date():
@@ -93,10 +95,5 @@ def get_version_date():
 # =============================================================================
 if __name__ == '__main__':
 
-    print("release :", get_release())
-    print("release data: ",get_release_date())
-
-    print("version :", get_version())
-    print("version date: ", get_version_date())
-
+    pass
 

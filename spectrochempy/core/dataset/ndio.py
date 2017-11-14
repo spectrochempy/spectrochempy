@@ -673,6 +673,14 @@ class NDIO(HasTraits):
         # Get the number of the present figure
         self._fignum = self._fig.number
 
+        # for generic plot, we assume only a single axe with possible projections
+        # and colobar
+        #
+        # other plot class may take care of other needs
+
+        ax = self.axes['main']
+
+
         if ndim == 2:
             # TODO: also the case of 3D
 
@@ -690,18 +698,9 @@ class NDIO(HasTraits):
 
             kind = kwargs.get('kind', plotoptions.kind_2D)
 
-        # for generic plot, we assume only a single axe with possible projections
-        # and colobar
-        #
-        # other plot class may take care of other needs
+            SHOWXPROJ = (proj or xproj) and kind in ['map', 'image']
+            SHOWYPROJ = (proj or yproj) and kind in ['map', 'image']
 
-        ax = self.axes['main']
-
-        SHOWXPROJ = (proj or xproj) and kind in ['map', 'image']
-        SHOWYPROJ = (proj or yproj) and kind in ['map', 'image']
-
-
-        if ndim == 2:
             # create new axes on the right and on the top of the current axes
             # The first argument of the new_vertical(new_horizontal) method is
             # the height (width) of the axes to be created in inches.

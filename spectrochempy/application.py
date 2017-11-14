@@ -97,7 +97,7 @@ __all__ = [
     # 'pcl',
 
     # ## Info
-    'copyright', 'version',
+    'copyright', 'version', 'dev_version', 'release'
 ]
 
 # add iparallel client
@@ -193,11 +193,23 @@ class SpectroChemPy(Application):
     description = Unicode('This is the main SpectroChemPy application ')
 
     version = Unicode('0.1').tag(config=True)
+    dev_version = Unicode('0.1').tag(config=True)
+    release = Unicode('0.1').tag(config=True)
 
     @default('version')
     def _get_version(self):
 
-        return get_version()
+        return get_version()[0]
+
+    @default('dev_version')
+    def _get_dev_version(self):
+
+        return get_version()[1]
+
+    @default('release')
+    def _get_release(self):
+
+        return get_version()[2]
 
     copyright = Unicode('').tag(config=True)
 
@@ -561,7 +573,7 @@ app.initialize()
 # ==============================================================================
 
 running = app.running
-version = app.version
+version, dev_version, release = app.version, app.dev_version, app.release
 copyright = app.copyright
 log = app.log
 log_level = app.log_level

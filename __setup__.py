@@ -46,7 +46,7 @@ import shutil as sh
 import warnings
 
 from spectrochempy.api import version
-
+print (version)
 def path():
     return os.path.dirname(__file__)
 

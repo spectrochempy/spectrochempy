@@ -107,7 +107,7 @@ __all__ += [
     #'pcl',
 
     ### Info
-    'copyright', 'version',
+    'copyright', 'version', 'dev_version', 'release'
 ]
 
 # core
