@@ -72,7 +72,11 @@ def plot_lines(source, **kwargs):
 
     """
     kwargs['kind'] = 'lines'
-    return plot_1D(source, **kwargs)
+    temp = source.copy()
+    plot_1D(temp, **kwargs)
+    source._axes = temp._axes
+    source._fig = temp._fig
+    source._fignum = temp._fignum
 
 
 # plot scatter ----------------------------------------------------------------
@@ -85,7 +89,11 @@ def plot_scatter(source, **kwargs):
 
     """
     kwargs['kind'] = 'scatter'
-    return plot_1D(source, **kwargs)
+    temp = source.copy()
+    plot_1D(temp, **kwargs)
+    source._axes = temp._axes
+    source._fig = temp._fig
+    source._fignum = temp._fignum
 
 
 # ------------------------------------------------------------------------------

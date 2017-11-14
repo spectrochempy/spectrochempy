@@ -150,3 +150,21 @@ def test_successive_plot_bug_1a3_28(IR_source_1):
     source.plot()  # in 0.1a3.28 bug because key colorbar is missing.
 
     show()
+
+@show_do_not_block
+def test_successive_plot_bug_with_colorbars(IR_source_1):
+
+    # TODO: make real tests comparing figures
+    source = IR_source_1.copy()*2.
+
+    source[:, 1300.:900.] = masked
+    source.plot_stack()
+
+    source.plot()
+
+    source.plot()  # bug colorbars stacked on the first plot
+
+    source.plot(kind='map') # bug : no colorbar
+
+
+    show()

@@ -73,7 +73,11 @@ def plot_map(source, **kwargs):
 
     """
     kwargs['kind'] = 'map'
-    return plot_2D(source, **kwargs)
+    temp = source.copy()
+    plot_2D(temp, **kwargs)
+    source._axes = temp._axes
+    source._fig = temp._fig
+    source._fignum = temp._fignum
 
 
 # stack plot  -----------------------------------------------------------------
@@ -86,7 +90,11 @@ def plot_stack(source, **kwargs):
 
     """
     kwargs['kind'] = 'stack'
-    return plot_2D(source, **kwargs)
+    temp = source.copy()
+    plot_2D(temp, **kwargs)
+    source._axes = temp._axes
+    source._fig = temp._fig
+    source._fignum = temp._fignum
 
 
 # image plot --------------------------------------------------------
@@ -99,7 +107,11 @@ def plot_image(source, **kwargs):
 
     """
     kwargs['kind'] = 'image'
-    return plot_2D(source, **kwargs)
+    temp = source.copy()
+    plot_2D(temp, **kwargs)
+    source._axes = temp._axes
+    source._fig = temp._fig
+    source._fignum = temp._fignum
 
 
 # generic plot (default stack plot) -------------------------------------------
@@ -150,7 +162,6 @@ def plot_2D(source, **kwargs):
 
     # Other properties
     # ------------------
-
 
     kind = kwargs.get('kind', plotoptions.kind_2D)
 

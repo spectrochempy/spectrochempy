@@ -588,13 +588,13 @@ class NDIO(HasTraits):
         except:  # no plotter found
             log.error('The specified plotter '
                       'for kind `{}` was not found!'.format(kind))
-            return None
+            return False
 
         # Execute the plotter
         # --------------------
 
         if not _plotter(**kwargs):
-            return None
+            return False
 
 
     # --------------------------------------------------------------------------
@@ -645,6 +645,10 @@ class NDIO(HasTraits):
 
         # is ax in the keywords ?
         ax = kwargs.pop('ax', None)
+        if not hold:
+            self._axes = {} # reset axes
+            self._divider = None
+
         if ax is not None:
             # in this case we will plot on this ax
             if isinstance(ax, Axes):
@@ -712,6 +716,7 @@ class NDIO(HasTraits):
 
             divider = self._divider
 
+
             if SHOWXPROJ:
                 axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
                                            frameon=0, yticks=[])
@@ -719,7 +724,6 @@ class NDIO(HasTraits):
                 plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
                          visible=False)
                 axex.name = 'xproj'
-                self.axes['xproj'] = axex
 
             if SHOWYPROJ:
                 axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
@@ -800,9 +804,6 @@ class NDIO(HasTraits):
         -------
 
         """
-
-        # reduce 2D data with  only one row to 1D
-        # the same for ND that must be reduce to the minimal form.
 
         temp = self.copy()
 
