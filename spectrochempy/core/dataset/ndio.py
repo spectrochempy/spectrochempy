@@ -697,17 +697,23 @@ class NDIO(HasTraits):
 
         ax = self.axes['main']
 
-        if ndim == 2 and self._divider is None:
+        SHOWXPROJ = (proj or xproj) and kind in ['map', 'image']
+        SHOWYPROJ = (proj or yproj) and kind in ['map', 'image']
+
+
+        if ndim == 2:
             # create new axes on the right and on the top of the current axes
             # The first argument of the new_vertical(new_horizontal) method is
             # the height (width) of the axes to be created in inches.
             #
             # This is necessary for projections and colorbar
 
-            self._divider = divider = make_axes_locatable(ax)
-            # print divider.append_axes.__doc__
+            if (SHOWXPROJ or SHOWYPROJ or colorbar) and self._divider is None:
+                self._divider = make_axes_locatable(ax)
 
-            if (proj or xproj) and kind in ['map', 'image'] :
+            divider = self._divider
+
+            if SHOWXPROJ:
                 axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
                                            frameon=0, yticks=[])
                 axex.tick_params(bottom='off', top='off')
@@ -716,7 +722,7 @@ class NDIO(HasTraits):
                 axex.name = 'xproj'
                 self.axes['xproj'] = axex
 
-            if (proj or yproj) and kind in ['map', 'image'] :
+            if SHOWYPROJ:
                 axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
                                            frameon=0, xticks=[])
                 axey.tick_params(right='off', left='off')

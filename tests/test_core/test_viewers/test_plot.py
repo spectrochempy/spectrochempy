@@ -103,8 +103,7 @@ def test_plot_stack_masked(IR_source_1):
     source = IR_source_1.copy()*2.
 
     source[:, 1300.:900.] = masked
-    source.plot_stack()
-
+    source.plot_stack(colorbar=False)
     show()
 
 @show_do_not_block
@@ -136,4 +135,18 @@ def test_plot_stack_multiple(IR_source_1):
 
     s1.plot_stack()
     s2.plot_stack(data_only=True)
+    show()
+
+# BUG FIXES IN PLOTS
+
+@show_do_not_block
+def test_successive_plot_bug_1a3_28(IR_source_1):
+
+    source = IR_source_1.copy()*2.
+
+    source[:, 1300.:900.] = masked
+    source.plot_stack(colorbar=False)
+
+    source.plot()  # in 0.1a3.28 bug because key colorbar is missing.
+
     show()
