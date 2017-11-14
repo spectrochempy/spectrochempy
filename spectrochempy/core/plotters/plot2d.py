@@ -53,6 +53,7 @@ import numpy as np
 
 from spectrochempy.application import plotoptions, log
 from spectrochempy.core.plotters.utils import make_label
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import SpectroChemPyWarning
 
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
@@ -405,10 +406,8 @@ def plot_2D(source, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
+
     source._plot_resume(**kwargs)
-
-    return True
-
 
 # ===========================================================================
 # clevels

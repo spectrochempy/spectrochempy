@@ -268,9 +268,8 @@ def plot_1D(source, **kwargs):
         ax.plot(x.data, zimag.masked_data, ls='--')
 
     if kwargs.get('plot_model', False):
-        modeldata = source.modeldata  #TODO: what's about mask?
-        ax.plot(x.data, modeldata.T, ls=':', lw='2')
-        #TODO: improve this!!!
+        modeldata = source.modeldata                   #TODO: what's about mask?
+        ax.plot(x.data, modeldata.T, ls=':', lw='2')   #TODO: improve this!!!
 
     # line attributes
     if lines and color:
@@ -350,5 +349,3 @@ def plot_1D(source, **kwargs):
         ax.haxlines()
 
     source._plot_resume(**kwargs)
-
-    return True

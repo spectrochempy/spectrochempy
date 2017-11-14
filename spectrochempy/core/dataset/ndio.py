@@ -586,15 +586,13 @@ class NDIO(HasTraits):
             _plotter = getattr(self, 'plot_{}'.format(kind))
 
         except:  # no plotter found
-            log.error('The specified plotter '
-                      'for kind `{}` was not found!'.format(kind))
-            return False
+            raise IOError('The specified plotter '
+                          'for kind `{}` was not found!'.format(kind))
 
         # Execute the plotter
         # --------------------
 
-        if not _plotter(**kwargs):
-            return False
+        _plotter(**kwargs)
 
 
     # --------------------------------------------------------------------------
@@ -784,8 +782,11 @@ class NDIO(HasTraits):
         if savename is not None:
             self._fig.savefig(savename)
 
-        # if not plotoptions.do_not_block:
         plt.draw()
+
+        cid = self._fig.canvas.mpl_connect(
+                'button_press_event', NDIO._onclick)
+
 
     def plot_generic(self, **kwargs):
         """
@@ -936,6 +937,14 @@ class NDIO(HasTraits):
         """
         return self._divider
 
+    # -------------------------------------------------------------------------
+    # events
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def _onclick(cls, event):
+        pass
+
 
 def curfig(hold=False, figsize=None):
     """
@@ -991,6 +1000,7 @@ def subplots(nrow=1, ncol=1, figsize=None):
 
 def available_styles():
     return ['notebook', 'paper', 'poster', 'talk', 'sans']
+
 
 
 plot = NDIO.plot
