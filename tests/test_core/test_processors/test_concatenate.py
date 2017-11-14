@@ -71,13 +71,13 @@ def test_concatenate(IR_source_1):
     assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
 
 def test_concatenate_1D_along_axis0(IR_source_1):
-
-    source = IR_source_1
+    # TODO: very long process - try to optimize this
+    source = IR_source_1[3:]
 
     # split all rows
     rows = []
-    for s in source:
-        rows.append(s)
+    for i in range(len(source)):
+        rows.append(source[i])
 
     assert len(rows)==source.shape[0]
 
@@ -93,7 +93,8 @@ def test_concatenate_1D_along_axis0(IR_source_1):
     for s in source:
         rows.append(s)
         assert s.shape == (5549,)
-        assert s._mask.shape == (1, 5549)
+        print(s._mask)
+        assert not s.is_masked
 
     # reconstruct from rows
     new = stack(rows)

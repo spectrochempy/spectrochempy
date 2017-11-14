@@ -40,19 +40,18 @@
 
 """
 
-import numpy as np
 import pandas as pd
 import pytest
 
+from spectrochempy.api import *
+from spectrochempy.api import NDDataset, Coord, CoordSet, Meta, show
 from spectrochempy.extern.pint.errors import (UndefinedUnitError,
                                               DimensionalityError)
-from spectrochempy.api import (NDDataset, CoordSet, Coord, Meta)
-from spectrochempy.core.units import ur
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
-from tests.utils import NumpyRNGContext
+from tests.utils import NumpyRNGContext, show_do_not_block
 
 
 def test_fix_crossvalidate_bug():
@@ -581,26 +580,39 @@ def test_nddataset_uncertainty_init_invalid_shape_1():
                0] == 'uncertainty (6, 6) and data (5, 5) shape mismatch!'
 
 # slicing tests
-def test_simple_slicing():
-    u1 = np.ones((5, 5)) * 3
-    d1 = NDDataset(np.ones((5, 5)), uncertainty=u1)
+def test_nddataset_simple_slicing():
+
+    d1 = NDDataset(np.ones((5, 5)))
     assert d1.data.shape == (5, 5)
     assert d1.shape == (5, 5)
+
     d2 = d1[2:3, 2:3]
     assert d2.data.shape == ()
-    assert d2.uncertainty.shape == ()
-    assert_array_equal(d2.uncertainty, u1[2:3, 2:3])
     assert (d1 is not d2)
     d3 = d1[2, 2]
     assert d3.data.shape == ()
 
+    d3 = d1[0]
+    assert d3.shape == (5,)
 
-def test_slicing_with_mask():
-    ndd = NDDataset(np.array([1., 2., 3.]),
-                    mask=np.array([False, False, False]))
-    assert ndd[0].shape == ()
-    assert ndd[0].mask.shape == ()
-    assert not ndd[0].mask
+def test_ndataset_slicing_with_uncertainty():
+    u1 = np.ones((5, 5)) * 3
+    d1 = NDDataset(np.ones((5, 5)), uncertainty=u1)
+    assert d1[0].shape==(5,)
+
+def test_ndataset_slicing_with_mask():
+    mask = np.zeros((5, 5)).astype(bool)
+    mask[1,1]=True
+    d1 = NDDataset(np.ones((5, 5)), mask=mask)
+    assert d1[1].shape==(5,)
+    assert d1[1,1].mask
+
+def test_ndataset_slicing_with_mask_and_uncertainty_and_units():
+    u1 = np.ones((5, 5)) * 3
+    mask = np.zeros((5, 5)).astype(bool)
+    mask[1, 1] = True
+    d1 = NDDataset(np.ones((5, 5)), uncertainty=u1, mask=mask, units='m')
+    assert d1[0].shape==(5,)
 
 
 def test_slicing_with_coords(dataset3d):
@@ -1460,3 +1472,19 @@ def test_repr_html_bug_undesired_display_complex():
     da.units = 'dimensionless'
     assert "(complex)" not in da._repr_html_()
     pass
+
+#### Test masks ######
+
+
+@show_do_not_block
+#@pytest.mark.skip('not yet finished')
+def test_nddataset_use_of_mask(IR_source_1):
+
+    nd = IR_source_1[0]
+
+    nd[950.:1260.] = masked
+    print(nd)
+
+    nd.plot()
+    show()
+

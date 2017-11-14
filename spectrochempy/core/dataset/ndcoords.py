@@ -232,8 +232,9 @@ class Coord(NDMath, NDArray):
         elif is_number(loc):
             # get the index of this coordinate
             if loc > data.max() or loc < data.min():
-                warnings.warn('This coordinate ({}) is outside the axis limits.\n'
-                     'The closest limit index is returned'.format(loc),
+                warnings.warn('This coordinate ({}) is outside the axis limits '
+                              '({}-{}).\nThe closest limit index is '
+                              'returned'.format(loc, data.min(), data.max()),
                      SpectroChemPyWarning)
             index = (np.abs(data - loc)).argmin()
             return index

@@ -40,6 +40,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import (is_sequence, SpectroChemPyWarning)
+from spectrochempy.extern.uncertainties import unumpy as unp
 
 __all__ = ['concatenate','stack']
 
@@ -167,13 +168,22 @@ def concatenate(*sources, axis=None, **kwargs):
         axis = sources[0].ndim + axis
 
     # concatenate or stack the data array + mask and uncertainty
-    data = np.concatenate(sources, axis=axis)
-    # for the concatenation to work we need to take the real _mask
-    #twod = lambda x: x #if x.ndim>1 else np.array([x])
-    mask = np.concatenate(tuple((source._mask
-                                 for source in sources)), axis=axis)
-    uncertainty = np.concatenate(tuple((source._uncertainty)
-                                        for source in sources), axis=axis)
+    sss = []
+    for source in sources:
+        sss.append(source._uncert_data)
+
+    sconcat = np.ma.concatenate(sss, axis=axis)
+    data = unp.nominal_values(np.asarray(sconcat))
+    mask = sconcat.mask  # np.array(self._mask[keys])
+    uncertainty = unp.std_devs(np.asarray(sconcat))
+
+    # data = np.concatenate(sources, axis=axis)
+    # # for the concatenation to work we need to take the real _mask
+    # #twod = lambda x: x #if x.ndim>1 else np.array([x])
+    # mask = np.concatenate(tuple((source._mask
+    #                              for source in sources)), axis=axis)
+    # uncertainty = np.concatenate(tuple((source._uncertainty)
+    #                                     for source in sources), axis=axis)
 
     # concatenate coordset
     stack = kwargs.get('force_stack', False)

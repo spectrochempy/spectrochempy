@@ -51,7 +51,7 @@ import logging
 import warnings
 
 # ==============================================================================
-# third imports
+# third party imports
 # ==============================================================================
 
 from traitlets.config.configurable import Configurable
@@ -90,7 +90,7 @@ _classes = [
 __all__ = [
 
     # ## Helpers
-    'log', 'log_level', 'DEBUG', 'WARN', 'ERROR', 'CRITICAL', 'INFO',
+    'log', 'log_level', 'DEBUG', 'WARN', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
     'scpdata', 'list_scpdata',
     'options', 'plotoptions',
     'running',
@@ -579,7 +579,7 @@ list_scpdata = app.list_scpdata
 # -----------------------------------------------------------------------------
 DEBUG = logging.DEBUG
 INFO = logging.INFO
-WARN = logging.WARNING
+WARNING = WARN = logging.WARNING
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
 

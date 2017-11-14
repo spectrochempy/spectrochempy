@@ -399,6 +399,7 @@ def test_slicing_byindex(ndarray, ndarraycplx):
 
     ndc = ndarraycplx.copy()
     ndc1 = ndc[1,1]
+    ndc.RR[1,1]
     assert_equal(ndc1.data, ndc.RR[1,1].data + ndc.RI[1,1].data*1.j)
 
     ndc.set_complex
@@ -410,6 +411,7 @@ def test_repr(ndarray, ndarrayunit):
     assert '-1.836,' in nd.__repr__()
     nd = ndarrayunit.copy()
     assert '-1.836,' in nd.__repr__()
+    assert nd.__repr__().startswith("NDArray: [[   4.296,"  )
     nd.mask[1] = True
     nd.uncertainty = np.abs(nd._data * .1)
     assert nd.is_masked
