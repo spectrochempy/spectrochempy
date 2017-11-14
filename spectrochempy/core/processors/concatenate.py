@@ -170,7 +170,7 @@ def concatenate(*sources, axis=None, **kwargs):
     # concatenate or stack the data array + mask and uncertainty
     sss = []
     for source in sources:
-        sss.append(source._uncert_data(force=True))
+        sss.append(source._uncert_data)
 
     sconcat = np.ma.concatenate(sss, axis=axis)
     data = unp.nominal_values(np.asarray(sconcat))

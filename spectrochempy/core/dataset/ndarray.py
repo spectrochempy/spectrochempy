@@ -56,8 +56,10 @@ from datetime import datetime
 # =============================================================================
 
 import numpy as np
-from traitlets import (List, Unicode, Instance, Bool, HasTraits, default,
-                       Any, Float, validate, observe)
+from numpy.ma.core import MaskedConstant, masked, nomask
+from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float,
+                       HasTraits,
+                       default, validate, observe)
 
 # =============================================================================
 # local imports
@@ -87,9 +89,9 @@ from pandas.core.generic import NDFrame, Index
 # Constants
 # =============================================================================
 
-__all__ = ['NDArray', 'CoordSet']
+_classes = ['NDArray', 'CoordSet', 'StdDev']
 
-_classes = __all__[:]
+__all__ = _classes + ['masked', 'nomask', 'EPSILON']
 
 # =============================================================================
 # Some initializations
@@ -98,6 +100,22 @@ _classes = __all__[:]
 numpyprintoptions()  # set up the numpy print format
 
 gt_eps = lambda arr: np.any(arr > EPSILON)
+
+
+# =============================================================================
+# helper class
+# =============================================================================
+
+class StdDev(HasTraits):
+    """
+    A helper class used to set the uncertainty on array values
+
+    Examples
+    --------
+
+
+    """
+    data = Float(0.)
 
 
 # =============================================================================
@@ -150,14 +168,13 @@ class NDArray(HasTraits):
 
     _data = Array(Float(), allow_none=True)
     _coordset = Instance(List, allow_none=True)
-    _mask = Array(Bool(), allow_none=True)
+    _mask = Union((Array(Bool()), Instance(MaskedConstant)))
     _uncertainty = Array(Float(), allow_none=True)
     _labels = Array(Any(), allow_none=True)
     _units = Instance(Unit, allow_none=True)
     _is_complex = List(Bool(), allow_none=True)
 
     _date = Instance(datetime)
-
 
     _meta = Instance(Meta, allow_none=True)
     _title = Unicode(allow_none=True)
@@ -176,7 +193,7 @@ class NDArray(HasTraits):
     def __init__(self, data=None, **kwargs):
 
         self._copy = kwargs.pop('copy', False)  # by default
-        # we try to keep the same data
+                        # we try to keep a reference to the data, not copy them
 
         self._is_complex = kwargs.pop('is_complex', None)
 
@@ -187,7 +204,7 @@ class NDArray(HasTraits):
         # a unique id / name
         self.name = kwargs.pop('name', self._id)
 
-        self.mask = kwargs.pop('mask', None)
+        self.mask = kwargs.pop('mask', nomask)
 
         if self._labels_allowed:
             self.labels = kwargs.pop('labels', None)
@@ -273,25 +290,14 @@ class NDArray(HasTraits):
     # .........................................................................
     def __getitem__(self, items):
 
-        # to avoid slicing error when there is only one element
-        #if items == slice(None, None, None) and self.size == 1:
-        #    return self.copy()
-
         new = self.copy()
 
         # The actual index depends on the complexity of the dimension
         keys, internkeys = self._make_index(items)
 
         # slicing by index of all internal array
-        #new._data = np.array(self._data[internkeys])
-
-        udata = new._uncert_data(force=True)[internkeys]
-
-        #if isinstance(udata, Quantity):
+        udata = new._uncert_data[internkeys]
         new._data = unp.nominal_values(np.asarray(udata))
-
-        #else:
-        #    pass
 
         if self.is_labeled:
             # case only of 1D dataset such as Coord
@@ -311,11 +317,12 @@ class NDArray(HasTraits):
 
         new._is_complex = self._is_complex
 
-        #if isinstance(udata, Quantity):
-        new._mask = udata.mask # np.array(self._mask[keys])
+        if hasattr(udata, 'mask'):
+            new._mask = udata.mask
+        else:
+            new._mask = nomask
 
-        #if isinstance(udata, Quantity):
-        new._uncertainty = unp.std_devs(np.asarray(udata)) # np.array(self._uncertainty[keys])
+        new._uncertainty = unp.std_devs(np.asarray(udata))
 
         if self._coordset is not None:
             new_coordset = self.coordset.copy()
@@ -323,6 +330,7 @@ class NDArray(HasTraits):
                 new_coordset[i] = coord[keys[i]]
             new._coordset = new_coordset
 
+        # this is a modified dataset
         new._name = '*' + self._name.lstrip('*')
 
         return new
@@ -330,9 +338,27 @@ class NDArray(HasTraits):
     # .........................................................................
     def __setitem__(self, items, value):
 
+        # TODO: this may not work for complex data in other dimensions than the
+        # last
         keys, internkeys = self._make_index(items)
-
-        self._data[internkeys] = value
+        if self.ndim == 1:
+            keys = keys[-1]
+        if isinstance(value, (bool, np.bool_, MaskedConstant)):
+            # the mask is modified, not the data
+            if value is masked:
+                value = True
+            if not np.any(self._mask):
+                self._mask = np.zeros_like(self._data).astype(np.bool_)
+            self._mask[internkeys] = value
+        elif isinstance(value, StdDev):
+            # the uncertainties are modified
+            self._uncertainty[internkeys] = value.data
+        else:
+            if self.ndim>1 and np.any(self.is_complex[:-1]):
+                raise NotImplementedError("Sorry but setting values for"
+                                          "hypercomplex array "
+                                          "is not yet possible")
+            self.data[keys] = value
 
     # .........................................................................
     def __hash__(self):
@@ -648,36 +674,53 @@ class NDArray(HasTraits):
     def mask(self, mask):
         # property.setter for mask
 
-        #if mask is None:
-        #    return
+        if mask is nomask or mask is masked:
+            pass
 
-        # make sure mask is of type np.ndarray
-        if not isinstance(mask, np.ndarray) and not isinstance(mask, bool):
-            mask = np.array(mask, dtype=np.bool_)
+        elif isinstance(mask, (np.bool_, bool)):
+            if not mask:
+                mask = nomask
+            else:
+                mask = masked
 
-        if not np.any(mask):
-            # no mask
+        else:
+
+            # from now, make sure mask is of type np.ndarray if it provided
+
+            if not isinstance(mask, np.ndarray):
+                mask = np.array(mask, dtype=np.bool_)
+
+            if not np.any(mask):
+                # all element of the mask are false
+                mask = nomask
+
+            elif mask.shape != self.shape:
+                raise ValueError(
+                        "mask {} and data {} shape mismatch!".format(
+                        mask.shape, self.shape))
+
+            # mask need to be replicated on the imaginary part if data are complex
+            if self.has_complex_dims and mask is not nomask:
+                for axis in self.iterdims:
+                    mask = mask.swapaxes(axis, -1)
+                    if self._is_complex[axis]:
+                        mask = mask.repeat(2, axis=-1)
+                    mask = mask.swapaxes(axis, -1)
+
+        # finally set the mask of the object
+
+        if isinstance(mask, MaskedConstant):
+            self._mask = mask
             return
 
-        if not isinstance(mask, bool) and mask.shape != self.shape:
-            raise ValueError(
-                    "mask {} and data {} shape mismatch!".format(
-                    mask.shape, self.shape))
-
-        if self.has_complex_dims:
-            for axis in self.iterdims:
-                mask = mask.swapaxes(axis, -1)
-                if self._is_complex[axis]:
-                    mask = mask.repeat(2, axis=-1)
-                mask = mask.swapaxes(axis, -1)
-
-        if np.any(self._mask):
+        elif np.any(self._mask):
             # this should happen when a new mask is added to an existing one
             # mask to be combined to an existing one
             log.info("{0} is already a masked array.\n".format(
                     type(self).__name__) +
                      "The new mask will be combined with the current array's mask.")
-            self._mask &= mask  # combine (is a copy!)
+            self._mask |= mask  # combine (is a copy!)
+
         else:
             if self._copy:
                 self._mask = mask.copy()
@@ -981,7 +1024,13 @@ class NDArray(HasTraits):
         """`bool`, read-only property - Whether the array is masked or not.
 
         """
-        if self._mask is not None and np.any(self._mask):
+        if self._mask is nomask or self._mask is None:
+            return False
+
+        if isinstance(self._mask, (np.bool_, bool)):
+            return self._mask
+
+        if isinstance(self._mask, np.ndarray) and np.any(self._mask):
             return True
         else:
             return False
@@ -1010,11 +1059,16 @@ class NDArray(HasTraits):
         contained in this object.
 
         """
-        #if self.is_masked:
+        return self._umasked(self.data, self.mask)
+
+    # .........................................................................
+    @property
+    def _masked_data(self):
+        """:class:`~numpy.ndarray`-like object - The actual masked array of data
+        contained in this object.
+
+        """
         return self._umasked(self._data, self._mask)
-        #else:
-        #    return self._data
-            # here we use .mask not ._mask to get the correct shape
 
     # .........................................................................
     @property
@@ -1071,14 +1125,15 @@ class NDArray(HasTraits):
         """:class:`~numpy.ndarray`-like object - The actual array with
                 uncertainty of the data contained in this object.
         """
-        return self._uncert_data()
+        return self._uarray(self.masked_data, self.uncertainty, self._units)
 
-    def _uncert_data(self, force=False):
+    # .........................................................................
+    @property
+    def _uncert_data(self):
         # private function that allow to force the masked and uncertainty
         # representation. Useful for slicing
 
-        return self._uarray(self._umasked(self._data, self._mask, force= force),
-                            self._uncertainty, self._units) #, force = force)
+        return self._uarray(self._masked_data, self._uncertainty, self._units)
 
     # .........................................................................
     @property
@@ -1100,7 +1155,7 @@ class NDArray(HasTraits):
 
         new = self.copy()
         new._is_complex[-1] = False
-        ma = self.masked_data
+        ma = self._masked_data
         ma = ma[..., ::2]
         if isinstance(ma, np.ma.masked_array):
             new._data = ma.data
@@ -1115,10 +1170,13 @@ class NDArray(HasTraits):
         """:class:`~numpy.ndarray`-like object - The array with
         imaginary part of the data contained in this object.
         """
+        if not self._is_complex[-1]:
+            warnings("This array is not complex, so we can't get imaginary data",
+                     SpectroChemPyWarning)
 
         new = self.copy()
         new._is_complex[-1] = False
-        ma = self.masked_data
+        ma = self._masked_data
         ma = ma[..., 1::2]
         if isinstance(ma, np.ma.masked_array):
             new._data = ma.data
@@ -1357,7 +1415,7 @@ class NDArray(HasTraits):
         new = self.copy()
         if select == 'ALL':
             select = 'R' * self.ndim
-        ma = self._uncert_data(force=True) #self.masked_data
+        ma = self._uncert_data
         for axis, component in enumerate(select):
             if self._is_complex[axis]:
                 data = ma.swapaxes(axis, -1)
@@ -1375,7 +1433,10 @@ class NDArray(HasTraits):
         #    new._mask = ma.mask
         #else:
         #    new._data = ma
-        new._mask = ma.mask
+        if hasattr(ma, 'mask'):
+            new._mask = ma.mask
+        else:
+            new._mask = nomask
 
         new._uncertainty = unp.std_devs(ma)
         new._data = unp.nominal_values(ma)
@@ -1946,10 +2007,10 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @staticmethod
-    def _umasked(data, mask, force=False):
+    def _umasked(data, mask):
         # This ensures that a masked array is returned.
 
-        if np.any(mask) or force:
+        if np.any(mask):
             if not np.any(mask):
                 mask = np.zeros_like(data).astype(bool)
             data = np.ma.masked_array(data, mask)
@@ -1958,7 +2019,7 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @staticmethod
-    def _uarray(data, uncertainty, units=None, force=False):
+    def _uarray(data, uncertainty, units=None):
         # return the array with uncertainty and units if any
 
         # the handling of uncertainties have a great price in performance.

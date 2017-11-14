@@ -98,6 +98,16 @@ def test_plot_image(IR_source_1):
     show()
 
 @show_do_not_block
+def test_plot_stack_masked(IR_source_1):
+
+    source = IR_source_1.copy()*2.
+
+    source[:, 1300.:900.] = masked
+    source.plot_stack()
+
+    show()
+
+@show_do_not_block
 def test_plot_stack(IR_source_1):
 
     source = IR_source_1.copy()

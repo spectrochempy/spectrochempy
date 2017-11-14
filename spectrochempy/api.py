@@ -46,7 +46,10 @@ Examples
     >>> mynewdataset = NDDataset()   # create an empty dataset
 
 """
-# python imports
+
+# ==============================================================================
+# standard library import
+# ==============================================================================
 
 import os
 import sys
@@ -55,23 +58,42 @@ import warnings
 
 warnings.simplefilter('ignore', (DeprecationWarning,
                                  FutureWarning, UserWarning))
+
+# ==============================================================================
+# third party import
+# ==============================================================================
+
+import numpy as np
 from pytest import raises
+import numpy as np
+import scipy
+import matplotlib.pyplot as plt
 
 # ==============================================================================
 # Tells here the methods or object we allow to import from this library
 # ==============================================================================
-__all__ = ['raises',
-           'APIref',
-           ### imported library
+
+__all__ = [
+           # Useful librairies alias for the end user avoiding to load them
+           # --------------------------------------------------------------
+
            'np', 'plt', 'scipy', 'os', 'sys',
 
-           ### methods and objects from other packages will be added
-           ### later on this module (see below)
+           # useful methods from external library
+           # ------------------------------------
+
+           'raises',
+
+
+            ### methods and objects from other packages will be added
+            ### later on this module (see below)
 
            ]
 
+# ==============================================================================
 # loading module libraries
-# ------------------------
+# ==============================================================================
+
 # here we also construct the __all__ list automatically
 
 from spectrochempy.application import *
@@ -81,8 +103,7 @@ __all__ += [
     ### Helpers
     'log', 'log_level', 'DEBUG', 'WARN', 'ERROR', 'CRITICAL', 'INFO',
     'scpdata', 'list_scpdata',
-    'plotoptions',
-    'options',
+    'plotoptions', 'options',
     #'pcl',
 
     ### Info
@@ -117,14 +138,10 @@ from spectrochempy.fitting import api
 
 __all__ += api.__all__
 
-# Useful librairies alias for the end user avoiding to load them
-# --------------------------------------------------------------
-import numpy as np
-import scipy
-
-import matplotlib.pyplot as plt
 
 # optional libraries
+# ------------------
+
 try:
     import sympy as sym
     HAS_SYMPY = True
@@ -142,6 +159,9 @@ except ImportError:
 __all__.append('HAS_SCIKITLEARN')
 
 
+# Helpers
+# -------
+
 def APIref():
     """
     Helper to display public objects and methods from the API
@@ -149,11 +169,11 @@ def APIref():
     """
     a = __all__[:]
     a = sorted(a)
-
     return a
 
-
 APIref = APIref()
+
+__all__.append('APIref')
 
 # START THE APPLICATION ========================================================
 from spectrochempy.application import app

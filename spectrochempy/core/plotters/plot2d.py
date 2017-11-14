@@ -185,7 +185,7 @@ def plot_2D(source, **kwargs):
     # tdeff = z.meta.tdeff    # TODO: this is NMR related, make it more generic
     xeff = x.data #[:tdeff[1]]
     yeff = y.data #[:tdeff[0]]
-    zeff = z.data   #[:tdeff[0],:tdeff[1]]
+    zeff = z.masked_data   #[:tdeff[0],:tdeff[1]]
 
     if kind in ['map', 'image']:
         vmax = zeff.max()
@@ -262,9 +262,9 @@ def plot_2D(source, **kwargs):
             if normalize is not None:
                 norm.vmax = normalize
 
-            sp = z.sort(inplace=False)
+            sp = z.sort(inplace=False)[ishowed]   #TODO: ishowed  to put here????
 
-            ys = [sp.data[i] for i in range(len(sp.y.data))]
+            ys = [sp.masked_data[i] for i in range(len(sp.y.data))]
             sc = sp.y.data
 
             line_segments = LineCollection(
@@ -313,7 +313,8 @@ def plot_2D(source, **kwargs):
     if kind in ['stack']:
         # the z axis info
         # ----------------
-        zl = (np.amin(np.amin(ys)), np.amax(np.amax(ys)))
+
+        zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
         zlim = list(kwargs.get('zlim', zl))
         zlim.sort()
         z_reverse = kwargs.get('z_reverse', False)

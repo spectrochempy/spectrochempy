@@ -44,7 +44,7 @@ import pandas as pd
 import pytest
 
 from spectrochempy.api import *
-from spectrochempy.api import NDDataset, Coord, CoordSet, Meta,  show
+from spectrochempy.api import NDDataset, Coord, CoordSet, Meta, show
 from spectrochempy.extern.pint.errors import (UndefinedUnitError,
                                               DimensionalityError)
 from spectrochempy.utils import SpectroChemPyWarning
@@ -1481,8 +1481,10 @@ def test_repr_html_bug_undesired_display_complex():
 def test_nddataset_use_of_mask(IR_source_1):
 
     nd = IR_source_1[0]
-    nd[950.:1260.].mask = True
+
+    nd[950.:1260.] = masked
     print(nd)
 
+    nd.plot()
     show()
 

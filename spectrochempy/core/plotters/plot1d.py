@@ -247,20 +247,20 @@ def plot_1D(source, **kwargs):
     # plot_lines
     # -----------------------------
     if scatlines:
-        line, = ax.plot(x.data, z.data, marker = marker, markersize = markersize,
+        line, = ax.plot(x.data, z.masked_data, marker = marker, markersize = markersize,
                                         markevery = markevery)
     elif scatter:
-        line, = ax.plot(x.data, z.data, lw=0, marker = marker, markersize = markersize,
+        line, = ax.plot(x.data, z.masked_data, lw=0, marker = marker, markersize = markersize,
                                         markevery = markevery)
     elif lines:
-        line, = ax.plot(x.data, z.data)
+        line, = ax.plot(x.data, z.masked_data)
 
     if show_complex and lines:
         zimag = source.imag
-        ax.plot(x.data, zimag.data, ls='--')
+        ax.plot(x.data, zimag.masked_data, ls='--')
 
     if kwargs.get('plot_model', False):
-        modeldata = source.modeldata
+        modeldata = source.modeldata  #TODO: what's about mask?
         ax.plot(x.data, modeldata.T, ls=':', lw='2')
         #TODO: improve this!!!
 
@@ -299,7 +299,7 @@ def plot_1D(source, **kwargs):
         xlim.reverse()
 
     # ordinates limits?
-    zl = [np.amin(z.data), np.amax(z.data)]
+    zl = [np.ma.min(z.masked_data), np.ma.max(z.masked_data)]
     zlim = list(kwargs.get('zlim', kwargs.get('ylim', zl)))
     zlim.sort()
 
