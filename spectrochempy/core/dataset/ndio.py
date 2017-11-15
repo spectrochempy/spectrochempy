@@ -523,6 +523,21 @@ class NDIO(HasTraits):
     # generic plotter and plot related methods or properties
     # --------------------------------------------------------------------------
 
+    _general_parameters_doc_ = """
+    
+savefig: `str`
+
+    A string containing a path to a filename. The output format is deduced 
+    from the extension of the filename. If the filename has no extension, 
+    the value of the rc parameter savefig.format is used.
+
+dpi : [ None | scalar > 0]
+
+    The resolution in dots per inch. If None it will default to the 
+    value savefig.dpi in the matplotlibrc file.
+    
+    """
+
     def plot(self, **kwargs):
 
         """
@@ -558,12 +573,6 @@ class NDIO(HasTraits):
             or create a new figure?
 
         style : `str`
-
-
-        See Also
-        --------
-
-        :meth:`show`
 
 
         """
@@ -779,8 +788,17 @@ class NDIO(HasTraits):
 
         # should be after all plot commands
         savename = kwargs.get('savefig', None)
+
         if savename is not None:
-            self._fig.savefig(savename)
+            # we save the figure with options found in kwargs
+            # starting with `save`
+
+            kw = {}
+            for key, value in kwargs.items():
+                if key.startswith('save'):
+                    key = key[4:]
+                    kw[key]=value
+            self._fig.savefig(savename, **kw)
 
         plt.draw()
 

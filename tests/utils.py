@@ -57,6 +57,11 @@ import sys
 import types
 import warnings
 
+import os
+import nbformat
+from nbconvert.preprocessors import ExecutePreprocessor
+from nbconvert.preprocessors.execute import CellExecutionError
+import numpy as np
 from numpy.testing import (assert_equal,
                            assert_array_equal,
                            assert_array_almost_equal,
@@ -64,13 +69,11 @@ from numpy.testing import (assert_equal,
 
 from spectrochempy.utils import SpectroChemPyWarning, \
     SpectroChemPyDeprecationWarning
-
-from spectrochempy.extern.pint.errors import DimensionalityError, UndefinedUnitError
-
-import os
-import nbformat
-from nbconvert.preprocessors import ExecutePreprocessor
-from nbconvert.preprocessors.execute import CellExecutionError
+from spectrochempy.extern.pint.errors import DimensionalityError, \
+    UndefinedUnitError
+from spectrochempy.application import scpdata, log
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.application import plotoptions
 
 
 # =============================================================================
@@ -83,7 +86,7 @@ class NumpyRNGContext(object):
     numpy random number generator (RNG) to a specific value, and then restore
     the RNG state back to whatever it was before.
 
-    Copied from Astropy
+    Copied from Astropy,
 
     Parameters
     ----------
@@ -350,20 +353,26 @@ class ignore_warnings(catch_warnings):
         return retval
 
 
-# -------------------------------------------------------------------------------
-
-from spectrochempy.api import plotoptions
-
+# -----------------------------------------------------------------------------
+# Matplotlib testing utilities
+# -----------------------------------------------------------------------------
 
 def show_do_not_block(func):
     """
     A decorator to allow non blocking testing of matplotlib figures-
     set the plotoption.do_not_block
+
+    This doesn't work with pytest in parallel mode because the sys.argv
+    contain only the flag -c and that's all!
+
+    To make it work, the only way I found for now is to remove the option
+    -nauto in pythest.ini adopts= nauto etc...
+
     """
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        if func.__name__ in sys.argv[1]:
+        if not '-c' in sys.argv[0] and func.__name__ in sys.argv[1]:
             # The individual test has been called - then we show figures
             # we do not show for full tests
             plotoptions.do_not_block = False
@@ -372,6 +381,119 @@ def show_do_not_block(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def _compute_rms(x, y):
+    return np.linalg.norm(x - y) / x.size ** 2
+
+
+def _init_reference_image(force=False):
+    # generate some basic reference image
+
+    source = NDDataset.read_omnic(os.path.join(scpdata, 'irdata',
+                                               'NH4Y-activation.SPG'))
+    figures = os.path.join(scpdata, "figures")
+    os.makedirs(exist_ok=True)
+    for extension in ['png', 'jpg']:
+        for kind in ['stack', 'map', 'images']:
+            filename = os.path.join(figures,
+                                    "{}_IRsource.{}".format(kind, extension))
+            if not os.path.exists(filename) and not force:
+                source.plot(savefig=filename)
+            filename = os.path.join(figures,
+                                    "{}_IRsource_dpi75.{}".format(kind,
+                                                                  extension))
+            if not os.path.exists(filename) and not force:
+                source.plot(savefig=filename, savedpi=75)
+
+
+def _image_comparison(imgpath1, imgpath2):
+    # compare two images saved in files imgpath1 and imgpath2
+
+    from scipy.misc import imread
+    from skimage.measure import compare_ssim as ssim
+
+    # read image
+    try:
+        img1 = imread(imgpath1)
+    except IOError:
+        img1 = imread(imgpath1 + '.png')
+    try:
+        img2 = imread(imgpath2)
+    except IOError:
+        img2 = imread(imgpath2 + '.png')
+
+    rms = -1
+    try:
+        res = ssim(img1, img2,
+                   data_range=img1.max() - img2.min(),
+                   multichannel=True)
+        rms = _compute_rms(img1, img2)
+
+    except ValueError as e:
+        if not e.args[0] == "Input images must have the same dimensions.":
+            raise ValueError(e.args[0])
+
+    mess = "(sim: {.2f}%, rms: {.2f})".format(res * 100, rms)
+    if res == 1:
+        message = "identical images"
+    elif res > .90:
+        message = "almost identical {}".format(mess)
+    elif res < 0:
+        message = "Sizes of the images are different"
+    elif res > .5:
+        message = "poor similarity {}".format(mess)
+    else:
+        message = "probably different {}".format(mess)
+
+    return res, rms, message
+
+
+def image_comparison(reference=[], force_creation=False, **kwargs):
+    """
+    image file comparison decorator
+
+    Parameters
+    ----------
+    reference : list of image filename for the references
+
+        List the image filenames of the reference figures
+        (located in ``scpdata/figures``) which correspond in the same order to
+        the various figures created in the decorated fonction. if
+        these files doesn't exist an error is generated, except if the
+        force_creation argument is True. This should allow the creation
+        of a reference figures, the first time the corresponding figures are
+        created.
+
+    force_creation : `bool`, optional, default=``False``.
+
+        if this flag is True, the figures created in the decorated function are
+        save in the reference figures directory (``scpdata/figures``)
+
+    kwargs : other keyword arguments
+
+
+    Returns
+    -------
+
+    """
+
+    def make_image_comparison(func):
+        def wrapper(*args, **kwargs):
+            # Pré-traitement
+
+            response = func(*args, **kwargs)
+            # Post-traitement
+            return response
+
+        return wrapper
+
+    return make_image_comparison
+
+
+# -----------------------------------------------------------------------------
+# Testing examples and notebooks in docs
+# -----------------------------------------------------------------------------
 
 def notebook_run(path):
     """
@@ -385,7 +507,8 @@ def notebook_run(path):
     with open(path) as f:
         nb = nbformat.read(f, as_version=4)
         nb.metadata.get('kernelspec', {})['name'] = kernel_name
-        ep = ExecutePreprocessor(kernel_name=kernel_name, timeout=10) #, allow_errors=True
+        ep = ExecutePreprocessor(kernel_name=kernel_name,
+                                 timeout=10)  # , allow_errors=True
 
         try:
             ep.preprocess(nb, {'metadata': {'path': this_file_directory}})
@@ -400,14 +523,13 @@ def notebook_run(path):
 
 
 def example_run(path):
-
     import subprocess
 
     pipe = None
     try:
         pipe = subprocess.Popen(
-            ["python", path, " --test=True"],
-            stdout=subprocess.PIPE)
+                ["python", path, " --test=True"],
+                stdout=subprocess.PIPE)
         (so, serr) = pipe.communicate()
     except:
         pass
@@ -419,9 +541,5 @@ if __name__ == '__main__':
 
     from glob import glob
 
-
     for example in glob("../docs/source/examples/*/*.py"):
         example_run(example)
-
-
-

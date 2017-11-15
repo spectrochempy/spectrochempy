@@ -61,7 +61,14 @@ switch to the installation directory
 	$ cd <wokspace>/spectrochempy
 
 
-run the pip command in developper mode
+Execute the setup.py in developper mode
+
+.. sourcecode:: bash
+
+	$ python setup.py develop
+
+
+or use the pip command in developper mode (flag `-e`)
 
 .. sourcecode:: bash
 
@@ -72,6 +79,38 @@ run the pip command in developper mode
 Setup PyCharm
 --------------
 
+
+
+Testing SpectroChemPy
+---------------------
+
+Tests for SpectroChemPy are executed using pytest.
+It should then be present on the system.
+
+.. sourcecode:: bash
+
+	$ conda install pytest
+
+In order to accelerate the tests, it is useful to install the plugin
+``pytest-xdist`` for parallelization of the tests.
+
+.. sourcecode:: bash
+
+	$ conda install pytest-xdist
+
+To run the full suite of tests or only some of them, the best way is to do this using py charm.
+
+However it is possible to execute also the full suite of test, using the following command
+from inside the main spectrochempy directory (where the folder ``tests`` resides.
+
+.. sourcecode:: bash
+
+	$ cd <wokspace>/spectrochempy
+	$ pytest tests
+
+Currently it is not possible to use arguments in this command line, as they
+will be interpreted by spectrochempy and then produce errors.
+To add arguments/options to pytest, use the ``pystest.ini`` file in the ``tests`` folder.
 
 
 Commit and push to the Bitbucket repository

@@ -40,25 +40,7 @@ from tests.utils import show_do_not_block
 
 import matplotlib as mpl
 
-@show_do_not_block
-def test_plot_savefig_map(IR_source_1):
-    source = IR_source_1.copy()
-    source.plot_map(savefig="../../figures/map_IR_source_1")
 
-@show_do_not_block
-def test_plot_savefig_image(IR_source_1):
-    source = IR_source_1.copy()
-    source.plot_image(savefig="../../figures/image_IR_source_1")
-
-@show_do_not_block
-def test_plot_savefig_stack(IR_source_1):
-    source = IR_source_1.copy()
-    source.plot_stack(savefig="../../figures/stack_IR_source_1")
-
-@show_do_not_block
-def test_plot_savefig_stack_dpi_less(IR_source_1):
-    source = IR_source_1.copy()
-    source.plot_stack(savefig="../../figures/stack_IR_source_1_dpi_less", dpi=75)
 
 @show_do_not_block
 def test_plot_generic(IR_source_1):

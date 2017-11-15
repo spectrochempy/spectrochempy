@@ -148,8 +148,10 @@ def plot_2D(source, **kwargs):
 
     kwargs : additional keywords
 
+    {}
 
-    """
+    """.format(source._general_parameters_doc_)
+
     # where to plot?
     # --------------
 

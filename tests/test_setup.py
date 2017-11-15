@@ -39,7 +39,8 @@ import contextlib
 
 import sys
 import pytest
-do_it = 'setup' in sys.argv[1]   # this test is run alone
+
+do_it = False
 
 @pytest.mark.skipif(not do_it, reason="ignore this during all tests")
 def test_setup():

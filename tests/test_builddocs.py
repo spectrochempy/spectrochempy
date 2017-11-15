@@ -40,17 +40,8 @@ import os, sys
 
 from docs import builddocs as bd
 from tests.utils import notebook_run, example_run, show_do_not_block
+from spectrochempy.api import log
 
-do_it = 'builddocs' in sys.argv[1]   # this test is run alone
-
-@pytest.mark.skipif(not do_it, reason="too long test")
-def test_buildocs_html():
-    bd.make_docs('clean')
-    bd.make_docs('html')
-
-@pytest.mark.skipif(not do_it, reason="too long test")
-def test_buildocs_pdf():
-    bd.make_docs('pdf')
 
 @show_do_not_block
 def test_notebooks():

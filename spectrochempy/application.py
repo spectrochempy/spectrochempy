@@ -391,11 +391,9 @@ class SpectroChemPy(Application):
 
         _do_parse = True
         for arg in ['egg_info', '--egg-base',
-                    'pip-egg-info', 'develop', '-f', '-x']:
+                    'pip-egg-info', 'develop', '-f', '-x', '-c']:
             if arg in sys.argv:
                 _do_parse = False
-
-        # print("*" * 50, "\n", sys.argv, "\n", "*" * 50)
 
         if _do_parse:
             self.parse_command_line(sys.argv)
@@ -417,7 +415,9 @@ class SpectroChemPy(Application):
 
         _do_not_block = self.plotoptions.do_not_block
 
-        for caller in ['builddocs.py', 'pytest', 'py.test']:
+        for caller in ['builddocs.py', 'pytest', 'py.test', '-c']:
+            # `-c` happen if the pytest is executed in parallel mode
+            # using the plugin pytest-xdist
 
             if caller in sys.argv[0]:
                 # this is necessary to build doc

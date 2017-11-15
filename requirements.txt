@@ -9,7 +9,9 @@ setuptools_scm
 h5py
 
 pytest
+pytest-xdist
 pytest-runner
+scikit-image
 
 sphinx
 sphinx-gallery

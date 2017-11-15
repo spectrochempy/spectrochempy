@@ -2,9 +2,6 @@
 import matplotlib as mpl
 import sys
 
-if 'builddocs' in sys.argv[1]:
-    mpl.use('agg')
-
 matplotlib_backend = mpl.get_backend()
 
 import numpy as np
