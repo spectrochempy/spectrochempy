@@ -43,9 +43,9 @@ import os
 path = os.path.dirname(os.path.abspath(__file__))
 
 @show_do_not_block
-def test_basecor_sequential(IR_source_1):
+def test_basecor_sequential(IR_source_2D):
 
-    source = IR_source_1[:5]
+    source = IR_source_2D[:5]
 
     basc = BaselineCorrection(source)
     s = basc([6000.,3500.],[1800.,1500.])
@@ -54,9 +54,9 @@ def test_basecor_sequential(IR_source_1):
     show()
 
 @show_do_not_block
-def test_basecor_sequential_pchip(IR_source_1):
+def test_basecor_sequential_pchip(IR_source_2D):
 
-    source = IR_source_1[:5]
+    source = IR_source_2D[:5]
 
     basc = BaselineCorrection(source)
     s = basc([6000., 3500.], [1800., 1500.],
@@ -65,9 +65,9 @@ def test_basecor_sequential_pchip(IR_source_1):
     show()
 
 @show_do_not_block
-def test_basecor_multivariate(IR_source_1):
+def test_basecor_multivariate(IR_source_2D):
 
-    source = IR_source_1[:5]
+    source = IR_source_2D[:5]
 
     basc = BaselineCorrection(source)
     s = basc([6000., 3500.], [1800., 1500.],
@@ -77,9 +77,9 @@ def test_basecor_multivariate(IR_source_1):
     show()
 
 @show_do_not_block
-def test_basecor_multivariate_pchip(IR_source_1):
+def test_basecor_multivariate_pchip(IR_source_2D):
 
-    source = IR_source_1[:5]
+    source = IR_source_2D[:5]
 
     basc = BaselineCorrection(source)
     s = basc([6000., 3500.], [1800., 1500.],

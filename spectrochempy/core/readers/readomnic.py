@@ -93,7 +93,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
     >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
         SpectroChemPy's API ...
-    >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
+    >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
     --------------------------------------------------------------------------------
@@ -558,8 +558,9 @@ if __name__ == '__main__':
 
     from spectrochempy.api import NDDataset, scpdata
 
-    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
+    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
     print(A)
 
-    B = NDDataset.read('irdata/NH4Y-activation.spg', directory=data)
+    B = NDDataset.read('irdata/NH4Y-activation.spg', directory=scpdata)
     print(B)
+

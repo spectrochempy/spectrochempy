@@ -43,9 +43,9 @@ import pytest
 
 #sources are defined in conftest as fixture
 
-def test_load(IR_source_1):
+def test_load(IR_source_2D):
 
-    source = IR_source_1
+    source = IR_source_2D
     assert_approx_equal(source.data[0,0], 2.05, significant=2)
     B = source * 1.98
     assert_approx_equal(B.data[0, 0], 2.05 * 1.98, significant=2)
@@ -55,9 +55,7 @@ def test_load(IR_source_1):
     source.save(filename)
     source2 = NDDataset.read(filename)
 
-    log.loglevel=DEBUG
     assert source == source2
-    log.loglevel = ERROR
 
 def test_methods_read_access():
 

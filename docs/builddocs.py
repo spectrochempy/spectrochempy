@@ -34,7 +34,14 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-"""Clean, build, and release the HTML documentation for spectrochempy.
+"""Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
+
+usage::
+
+    python builddocs clean html pdf release
+
+where optional parameters idincates which job to perfom.
+
 """
 
 import os, sys
@@ -62,7 +69,7 @@ from spectrochempy.utils import (list_packages, get_version,
 from traitlets import import_item
 
 import logging
-log_level = logging.DEBUG
+log_level = logging.ERROR
 
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py

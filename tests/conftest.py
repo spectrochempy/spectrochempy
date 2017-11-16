@@ -13,7 +13,7 @@ from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
 
-from tests.utils import NumpyRNGContext
+from tests.utils import RandomSeedContext
 
 import pytest
 import numpy as np
@@ -34,7 +34,7 @@ plotoptions.do_not_block = True
 @pytest.fixture(scope="module")
 def ndarray(): #ndarraysubclass():
     # return a simple ndarray with some data
-    with NumpyRNGContext(12345):
+    with RandomSeedContext(12345):
         dx = 10.*np.random.random((10, 10))-5.
     _nd = NDArray()
     _nd.data = dx
@@ -43,7 +43,7 @@ def ndarray(): #ndarraysubclass():
 @pytest.fixture(scope="module")
 def ndarrayunit(): #ndarraysubclassunit():
     # return a simple ndarray with some data
-    with NumpyRNGContext(12345):
+    with RandomSeedContext(12345):
         dx = 10.*np.random.random((10, 10))-5.
     _nd = NDArray()
     _nd.data = dx
@@ -56,7 +56,7 @@ def ndarraycplx():
     # return a complex ndarray
     # with some complex data
 
-    with NumpyRNGContext(12345):
+    with RandomSeedContext(12345):
         dx = np.random.random((10, 10))
     nd = NDArray()
     nd.data = dx
@@ -81,7 +81,7 @@ def ndarraycplx():
 def ndcplx():
     # return a complex ndarray
     _nd = NDDataset()
-    with NumpyRNGContext(1234):
+    with RandomSeedContext(1234):
         _nd._data = np.random.random((10, 10))
     _nd.set_complex(axis=-1)  # this means that the data are complex in
     # the last dimension
@@ -107,13 +107,13 @@ def nd2d():
 def nd():
     # return a simple (positive) ndarray
     _nd = NDDataset()
-    with NumpyRNGContext(145):
+    with RandomSeedContext(145):
         _nd._data = np.random.random((10, 10))
     return _nd.copy()
 
 @pytest.fixture()
 def ds1():
-    with NumpyRNGContext(12345):
+    with RandomSeedContext(12345):
         dx = np.random.random((10, 100, 3))
         # make complex along first dimension
         is_complex = [False, False, False]  # TODO: check with complex
@@ -144,7 +144,7 @@ def ds1():
 
 @pytest.fixture()
 def ds2():
-    with NumpyRNGContext(12345):
+    with RandomSeedContext(12345):
         dx = np.random.random((9, 50, 4))
         # make complex along first dimension
         is_complex = [False, False, False]  # TODO: check with complex
@@ -176,7 +176,7 @@ def ds2():
 @pytest.fixture()
 def dsm():  # dataset with coords containing several axis
 
-    with NumpyRNGContext(12345):
+    with RandomSeedContext(12345):
         dx = np.random.random((9, 50))
         # make complex along first dimension
         is_complex = [False, False]  # TODO: check with complex
@@ -213,7 +213,7 @@ def dataset1d():
     x_axis = Coord(np.arange(length) * 1000.,
                   title='wavelengths',
                   units='cm^-1')
-    with NumpyRNGContext(125):
+    with RandomSeedContext(125):
         ds = NDDataset(np.random.randn(length),
                        coordset=[x_axis],
                        title='absorbance',
@@ -223,7 +223,7 @@ def dataset1d():
 
 @pytest.fixture()
 def dataset3d():
-    with NumpyRNGContext(12345):
+    with RandomSeedContext(12345):
         dx = np.random.random((10, 100, 3))
 
     coord0 = Coord(np.linspace(4000., 1000., 10),
@@ -258,11 +258,16 @@ def dataset3d():
 # Fixture:  IR spectra (SPG)
 ############################
 @pytest.fixture(scope="function")
-def IR_source_1():
+def IR_source_1D():
+    source = NDDataset.read_omnic(
+            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+    return source[0]
+
+@pytest.fixture(scope="function")
+def IR_source_2D():
     source = NDDataset.read_omnic(
             os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
     return source
-
 
 # Fixture:  IR spectra
 @pytest.fixture(scope="function")

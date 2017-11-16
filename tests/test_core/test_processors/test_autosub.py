@@ -55,9 +55,9 @@ import os
 # autosub
 #------
 @show_do_not_block
-def test_autosub(IR_source_1):
+def test_autosub(IR_source_2D):
 
-    source = IR_source_1
+    source = IR_source_2D
 
     ranges = [5000., 6000.], [1940., 1820.]
 

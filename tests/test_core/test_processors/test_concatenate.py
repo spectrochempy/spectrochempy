@@ -40,9 +40,9 @@ from spectrochempy.api import ur, concatenate, stack,\
 
 import pytest
 
-def test_concatenate(IR_source_1):
+def test_concatenate(IR_source_2D):
 
-    source = IR_source_1
+    source = IR_source_2D
 
     #print(source)
     s1 = source[:10]
@@ -70,9 +70,9 @@ def test_concatenate(IR_source_1):
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
     assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
 
-def test_concatenate_1D_along_axis0(IR_source_1):
+def test_concatenate_1D_along_axis0(IR_source_2D):
     # TODO: very long process - try to optimize this
-    source = IR_source_1[3:]
+    source = IR_source_2D[3:]
 
     # split all rows
     rows = []
@@ -100,9 +100,9 @@ def test_concatenate_1D_along_axis0(IR_source_1):
     new = stack(rows)
     assert new.shape == source.shape
 
-def test_concatenate_along_axis1(IR_source_1):
+def test_concatenate_along_axis1(IR_source_2D):
 
-    source = IR_source_1
+    source = IR_source_2D
 
     coord = source.coordset(-1)
 

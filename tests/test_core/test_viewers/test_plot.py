@@ -34,141 +34,93 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 import pytest
+import tempfile
 
 from spectrochempy.api import *
-from tests.utils import show_do_not_block
+from tests.utils import show_do_not_block, image_comparison
 
 import matplotlib as mpl
 
+# To regenerate the reference figures, set FORCE to True
+FORCE=False
+
+@image_comparison(reference=['IR_source_2D_stack', 'IR_source_2D_map',
+                             'IR_source_2D_image'], force_creation=FORCE)
+def test_plot_generic_2D(IR_source_2D):
+    for kind in ['stack', 'map', 'image']:
+        source = IR_source_2D.copy()
+        source.plot(kind=kind)
 
 
-@show_do_not_block
-def test_plot_generic(IR_source_1):
-    source = IR_source_1.copy()
+@image_comparison(reference=['IR_source_1D', 'IR_source_1D_sans'],
+                  force_creation=FORCE)
+def test_plot_generic_1D(IR_source_1D):
+    source = IR_source_1D.copy()
     source.plot()
-    show()
-
-
-
-
-@show_do_not_block
-def test_plot_generic_1D(IR_source_1):
-    source = IR_source_1[0].copy()
-
-    #figure()
-    source.plot()
-    show()
-
     assert mpl.rcParams['figure.figsize']==[6.8,4.4]
     source.plot(style='sans')
-    show()
-
     assert mpl.rcParams['font.family'] == ['sans-serif']
 
+@image_comparison(reference=['IR_source_2D_stack'])
+def test_plot_stack(IR_source_2D):
+    source = IR_source_2D.copy()
+    source.plot_stack()  # plot_stack is an alias of plot(kind='stack')
+
+@image_comparison(reference=['IR_source_2D_map'])
+def test_plot_map(IR_source_2D):
+    source = IR_source_2D.copy()
+    source.plot_map()  # plot_map is an alias of plot(kind='map')
+
+@image_comparison(reference=['IR_source_2D_image'])
+def test_plot_image(IR_source_2D):
+    source = IR_source_2D.copy()
+    source.plot_image(start=0.1)  # plot_image is an alias of plot(kind='image')
+
+@image_comparison(reference=['IR_source_2D_map'])
+def test_plot_stack_generic(IR_source_2D):
+    source = IR_source_2D.copy()
+    source.plot()  # generic plot default to map
 
 @show_do_not_block
-def test_plot_2D(IR_source_1):
-
-    source = IR_source_1.copy()
-
-    source.plot_2D()
-
-    source = IR_source_1.copy()
-    source.plot_2D(kind='map')
-
-    source = IR_source_1.copy()
-
-    source.plot_2D(kind='image')
-
-    source = IR_source_1.copy()
-
-    source.plot_2D(kind='stack')
-    show()
-    pass
-
-@show_do_not_block
-def test_plot_map(IR_source_1):
-
-
-    source = IR_source_1.copy()
-    source.plot_map()  # plot_map is an alias of plot_2D
-    show()
-
-@show_do_not_block
-def test_plot_image(IR_source_1):
-
-    source = IR_source_1.copy()
-
-    source.plot_image(start=0.1)  # plot_image is an alias of plot_2D
-    show()
-
-@show_do_not_block
-def test_plot_stack_masked(IR_source_1):
-
-    source = IR_source_1.copy()*2.
-
+def test_plot_stack_masked(IR_source_2D):
+    # just to see if masked area do not apppear on the figure
+    source = IR_source_2D.copy()*2.
     source[:, 1300.:900.] = masked
     source.plot_stack(colorbar=False)
+    source.plot_map(colorbar=False)
     show()
 
 @show_do_not_block
-def test_plot_stack(IR_source_1):
+def test_plot_stack_multiple(IR_source_2D):
 
-    source = IR_source_1.copy()
-
-    source.plot_stack()  # plot_map is an alias of plot_2D
-    show()
-
-@show_do_not_block
-def test_plot_stack_generic(IR_source_1):
-    source = IR_source_1.copy()
-
-    source.plot(kind='stack')
-    show()
-
-@show_do_not_block
-def test_plot_stack_multiple(IR_source_1):
-
-    source = IR_source_1.copy()
+    source = IR_source_2D.copy()
     s1 = source[-10:]
     s2 = source[:10]
 
     row = s1[-1]
     row.plot()
-    show()
 
-
+    # two on the same plot
     s1.plot_stack()
-    s2.plot_stack(data_only=True)
+    s2.plot_stack(data_only=True, hold=True)
     show()
 
 # BUG FIXES IN PLOTS
 
 @show_do_not_block
-def test_successive_plot_bug_1a3_28(IR_source_1):
-
-    source = IR_source_1.copy()*2.
-
+def test_successive_plot_bug_1a3_28(IR_source_2D):
+    source = IR_source_2D.copy()*2.
     source[:, 1300.:900.] = masked
     source.plot_stack(colorbar=False)
-
     source.plot()  # in 0.1a3.28 bug because key colorbar is missing.
-
     show()
 
 @show_do_not_block
-def test_successive_plot_bug_with_colorbars(IR_source_1):
-
-    # TODO: make real tests comparing figures
-    source = IR_source_1.copy()*2.
-
+def test_successive_plot_bug_with_colorbars(IR_source_2D):
+    source = IR_source_2D.copy()*2.
     source[:, 1300.:900.] = masked
     source.plot_stack()
-
     source.plot()
-
     source.plot()  # bug colorbars stacked on the first plot
-
     source.plot(kind='map') # bug : no colorbar
-
     show()

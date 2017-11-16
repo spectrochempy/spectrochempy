@@ -43,9 +43,9 @@ from spectrochempy.api import Pca
 # test pca
 #---------
 
-def test_pca(IR_source_1):
+def test_pca(IR_source_2D):
 
-    source = IR_source_1.copy()
+    source = IR_source_2D.copy()
     pca = Pca(source)
 
     print(pca)

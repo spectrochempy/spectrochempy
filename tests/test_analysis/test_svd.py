@@ -45,9 +45,9 @@ from tests.utils import show_do_not_block
 #-----------
 
 @show_do_not_block
-def test_svd(IR_source_1):
+def test_svd(IR_source_2D):
 
-    source = IR_source_1.copy()
+    source = IR_source_2D.copy()
     print(source)
 
     svd = Svd(source)

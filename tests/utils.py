@@ -42,11 +42,8 @@ __all__ = ["assert_equal",
            "assert_array_almost_equal",
            "assert_approx_equal",
            "raises",
-           "ignore_warnings",
            "catch_warnings",
-           "enable_deprecations_as_exceptions",
-           "treat_deprecations_as_exceptions",
-           "NumpyRNGContext",
+           "RandomSeedContext",
            "SpectroChemPyWarning",
            "SpectroChemPyDeprecationWarning",
            ]
@@ -66,27 +63,33 @@ from numpy.testing import (assert_equal,
                            assert_array_equal,
                            assert_array_almost_equal,
                            assert_approx_equal)
+from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
+import matplotlib.pyplot as plt
 
 from spectrochempy.utils import SpectroChemPyWarning, \
-    SpectroChemPyDeprecationWarning
+    SpectroChemPyDeprecationWarning, is_sequence
 from spectrochempy.extern.pint.errors import DimensionalityError, \
     UndefinedUnitError
 from spectrochempy.application import scpdata, log
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndarray import masked
+
 from spectrochempy.application import plotoptions
 
 
+
 # =============================================================================
-# NumpyRNGContext
+# RandomSeedContext
 # =============================================================================
 
-class NumpyRNGContext(object):
+# .............................................................................
+class RandomSeedContext(object):
     """
     A context manager (for use with the ``with`` statement) that will seed the
     numpy random number generator (RNG) to a specific value, and then restore
     the RNG state back to whatever it was before.
 
-    Copied from Astropy,
+    (Copied from Astropy, licence BSD-3)
 
     Parameters
     ----------
@@ -97,16 +100,11 @@ class NumpyRNGContext(object):
     --------
     A typical use case might be::
 
-        with NumpyRNGContext(<some seed value you pick>):
+        with RandomSeedContext(<some seed value you pick>):
             from numpy import random
 
             randarr = random.randn(100)
             ... run your test using `randarr` ...
-
-        #Any code using numpy.random at this indent level will act just as it
-        #would have if it had been before the with statement - e.g. whatever
-        #the default seed is.
-
 
     """
 
@@ -129,7 +127,9 @@ class NumpyRNGContext(object):
 # raises and assertions (mostly copied from astropy)
 # =============================================================================
 
+# .............................................................................
 def assert_equal_units(unit1, unit2):
+
     try:
         x = (1. * unit1) / (1. * unit2)
     except DimensionalityError:
@@ -138,7 +138,7 @@ def assert_equal_units(unit1, unit2):
         return True
     return False
 
-
+# .............................................................................
 class raises(object):
     """
     A decorator to mark that a test should raise a given exception.
@@ -152,6 +152,9 @@ class raises(object):
     an alias for the ``pytest.raises`` context manager (because the
     two have the same name this help avoid confusion by being
     flexible).
+
+    (Copied from Astropy, licence BSD-3)
+
     """
 
     # pep-8 naming exception -- this is a decorator class
@@ -173,110 +176,7 @@ class raises(object):
     def __exit__(self, *exc_info):
         return self._ctx.__exit__(*exc_info)
 
-
-_deprecations_as_exceptions = False
-_include_spectrochempy_deprecations = True
-
-
-def enable_deprecations_as_exceptions(include_spectrochempy_deprecations=True):
-    """
-    Turn on the feature that turns deprecations into exceptions.
-    """
-    global _deprecations_as_exceptions
-    _deprecations_as_exceptions = True
-
-    global _include_spectrochempy_deprecations
-    _include_spectrochempy_deprecations = include_spectrochempy_deprecations
-
-
-def treat_deprecations_as_exceptions():
-    """
-    Turn all DeprecationWarnings (which indicate deprecated uses of
-    Python itself or Numpy, but not within SpectroChemPy, where we use our
-    own deprecation warning class) into exceptions so that we find
-    out about them early.
-
-    This completely resets the warning filters and any "already seen"
-    warning state.
-    """
-    # First, totally reset the warning state
-    for module in list(sys.modules.values()):
-        if (isinstance(module, types.ModuleType) and
-                hasattr(module, '__warningregistry__')):
-            del module.__warningregistry__
-
-    if not _deprecations_as_exceptions:
-        return
-
-    warnings.resetwarnings()
-
-    # Hide the next couple of DeprecationWarnings
-    warnings.simplefilter('ignore', DeprecationWarning)
-    # Here's the wrinkle: a couple of our third-party dependencies
-    # (py.test and scipy) are still using deprecated features
-    # themselves, and we'd like to ignore those.  Fortunately, those
-    # show up only at import time, so if we import those things *now*,
-    # before we turn the warnings into exceptions, we're golden.
-    try:
-        # A deprecated stdlib module used by py.test
-        import compiler
-    except ImportError:
-        pass
-
-    try:
-        import scipy
-    except ImportError:
-        pass
-
-    # Now, start over again with the warning filters
-    warnings.resetwarnings()
-    # Now, turn DeprecationWarnings into exceptions
-    warnings.filterwarnings("error", ".*", DeprecationWarning)
-
-    # Only turn spectrochempy deprecation warnings into exceptions if requested
-    if _include_spectrochempy_deprecations:
-        warnings.filterwarnings("error", ".*", SpectroChemPyDeprecationWarning)
-
-    if sys.version_info[:2] == (2, 6):
-        # py.test's warning.showwarning does not include the line argument
-        # on Python 2.6, so we need to explicitly ignore this warning.
-        warnings.filterwarnings(
-                "ignore",
-                r"functions overriding warnings\.showwarning\(\) must support "
-                r"the 'line' argument",
-                DeprecationWarning)
-
-    if sys.version_info[:2] >= (3, 4):
-        # py.test reads files with the 'ur' flag, which is now
-        # deprecated in Python 3.4.
-        warnings.filterwarnings(
-                "ignore",
-                r"'ur' mode is deprecated",
-                DeprecationWarning)
-
-        # BeautifulSoup4 triggers a DeprecationWarning in stdlib's
-        # html module.x
-        warnings.filterwarnings(
-                "ignore",
-                r"The strict argument and mode are deprecated\.",
-                DeprecationWarning)
-        warnings.filterwarnings(
-                "ignore",
-                r"The value of convert_charrefs will become True in 3\.5\. "
-                r"You are encouraged to set the value explicitly\.",
-                DeprecationWarning)
-
-    if sys.version_info[:2] >= (3, 5):
-        # py.test raises this warning on Python 3.5.
-        # This can be removed when fixed in py.test.
-        # See https://github.com/pytest-dev/pytest/pull/1009
-        warnings.filterwarnings(
-                "ignore",
-                r"inspect\.getargspec\(\) is deprecated, use "
-                r"inspect\.signature\(\) instead",
-                DeprecationWarning)
-
-
+# .............................................................................
 class catch_warnings(warnings.catch_warnings):
     """
     A high-powered version of warnings.catch_warnings to use for testing
@@ -294,6 +194,9 @@ class catch_warnings(warnings.catch_warnings):
         with catch_warnings(MyCustomWarning) as w:
             do.something.bad()
         assert len(w) > 0
+
+    (Copied from Astropy, licence BSD-3)
+
     """
 
     def __init__(self, *classes):
@@ -302,7 +205,6 @@ class catch_warnings(warnings.catch_warnings):
 
     def __enter__(self):
         warning_list = super(catch_warnings, self).__enter__()
-        treat_deprecations_as_exceptions()
         if len(self.classes) == 0:
             warnings.simplefilter('always')
         else:
@@ -312,51 +214,66 @@ class catch_warnings(warnings.catch_warnings):
         return warning_list
 
     def __exit__(self, type, value, traceback):
-        treat_deprecations_as_exceptions()
+        pass
 
 
-class ignore_warnings(catch_warnings):
+# -----------------------------------------------------------------------------
+# Testing examples and notebooks in docs
+# -----------------------------------------------------------------------------
+
+# .............................................................................
+def notebook_run(path):
     """
-    This can be used either as a context manager or function decorator to
-    ignore all warnings that occur within a function or block of code.
+    Execute a notebook via nbconvert and collect output.
 
-    An optional category option can be supplied to only ignore warnings of a
-    certain category or categories (if a list is provided).
+    returns
+    -------
+
+     results : (parsed nb object, execution errors)
+
     """
+    kernel_name = 'python%d' % sys.version_info[0]
+    this_file_directory = os.path.dirname(__file__)
+    errors = []
 
-    def __init__(self, category=None):
-        super(ignore_warnings, self).__init__()
+    with open(path) as f:
+        nb = nbformat.read(f, as_version=4)
+        nb.metadata.get('kernelspec', {})['name'] = kernel_name
+        ep = ExecutePreprocessor(kernel_name=kernel_name,
+                                 timeout=10)  # , allow_errors=True
 
-        if isinstance(category, type) and issubclass(category, Warning):
-            self.category = [category]
-        else:
-            self.category = category
+        try:
+            ep.preprocess(nb, {'metadata': {'path': this_file_directory}})
 
-    def __call__(self, func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # Originally this just reused self, but that doesn't work if the
-            # function is called more than once so we need to make a new
-            # context manager instance for each call
-            with self.__class__(category=self.category):
-                return func(*args, **kwargs)
+        except CellExecutionError as e:
+            if "SKIP" in e.traceback:
+                print(str(e.traceback).split("\n")[-2])
+            else:
+                raise e
 
-        return wrapper
+    return nb, errors
 
-    def __enter__(self):
-        retval = super(ignore_warnings, self).__enter__()
-        if self.category is not None:
-            for category in self.category:
-                warnings.simplefilter('ignore', category)
-        else:
-            warnings.simplefilter('ignore')
-        return retval
+# .............................................................................
+def example_run(path):
+    import subprocess
+
+    pipe = None
+    try:
+        pipe = subprocess.Popen(
+                ["python", path, " --test=True"],
+                stdout=subprocess.PIPE)
+        (so, serr) = pipe.communicate()
+    except:
+        pass
+
+    return pipe.returncode, so, serr
 
 
 # -----------------------------------------------------------------------------
 # Matplotlib testing utilities
 # -----------------------------------------------------------------------------
 
+# .............................................................................
 def show_do_not_block(func):
     """
     A decorator to allow non blocking testing of matplotlib figures-
@@ -382,32 +299,13 @@ def show_do_not_block(func):
 
     return wrapper
 
-
+# .............................................................................
 def _compute_rms(x, y):
-    return np.linalg.norm(x - y) / x.size ** 2
+    #return np.linalg.norm(x - y) / x.size ** 2
+    return calculate_rms(x,y)
 
-
-def _init_reference_image(force=False):
-    # generate some basic reference image
-
-    source = NDDataset.read_omnic(os.path.join(scpdata, 'irdata',
-                                               'NH4Y-activation.SPG'))
-    figures = os.path.join(scpdata, "figures")
-    os.makedirs(exist_ok=True)
-    for extension in ['png', 'jpg']:
-        for kind in ['stack', 'map', 'images']:
-            filename = os.path.join(figures,
-                                    "{}_IRsource.{}".format(kind, extension))
-            if not os.path.exists(filename) and not force:
-                source.plot(savefig=filename)
-            filename = os.path.join(figures,
-                                    "{}_IRsource_dpi75.{}".format(kind,
-                                                                  extension))
-            if not os.path.exists(filename) and not force:
-                source.plot(savefig=filename, savedpi=75)
-
-
-def _image_comparison(imgpath1, imgpath2):
+# .............................................................................
+def _image_compare(imgpath1, imgpath2):
     # compare two images saved in files imgpath1 and imgpath2
 
     from scipy.misc import imread
@@ -423,33 +321,21 @@ def _image_comparison(imgpath1, imgpath2):
     except IOError:
         img2 = imread(imgpath2 + '.png')
 
-    rms = -1
+
     try:
-        res = ssim(img1, img2,
+        sim = ssim(img1, img2,
                    data_range=img1.max() - img2.min(),
                    multichannel=True)
         rms = _compute_rms(img1, img2)
 
     except ValueError as e:
-        if not e.args[0] == "Input images must have the same dimensions.":
-            raise ValueError(e.args[0])
+        rms = sim = -1
 
-    mess = "(sim: {.2f}%, rms: {.2f})".format(res * 100, rms)
-    if res == 1:
-        message = "identical images"
-    elif res > .90:
-        message = "almost identical {}".format(mess)
-    elif res < 0:
-        message = "Sizes of the images are different"
-    elif res > .5:
-        message = "poor similarity {}".format(mess)
-    else:
-        message = "probably different {}".format(mess)
+    return sim, rms
 
-    return res, rms, message
-
-
-def image_comparison(reference=[], force_creation=False, **kwargs):
+# .............................................................................
+def image_comparison(reference=None, extension=None, tol=1e-6,
+                     force_creation=False, **kws):
     """
     image file comparison decorator
 
@@ -465,10 +351,15 @@ def image_comparison(reference=[], force_creation=False, **kwargs):
         of a reference figures, the first time the corresponding figures are
         created.
 
+    extension : `str`, optional, default=``png``
+
+        Extension to be used to save figure, among
+        (eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff)
+
     force_creation : `bool`, optional, default=``False``.
 
         if this flag is True, the figures created in the decorated function are
-        save in the reference figures directory (``scpdata/figures``)
+        saved in the reference figures directory (``scpdata/figures``)
 
     kwargs : other keyword arguments
 
@@ -477,69 +368,161 @@ def image_comparison(reference=[], force_creation=False, **kwargs):
     -------
 
     """
+    if not reference:
+        raise ValueError('no reference image provided. Stopped')
+
+    if not extension:
+        extension = 'png'
+
+    if not is_sequence(reference):
+        reference = list(reference)
+
+    figures = os.path.join(scpdata, "figures")
+    os.makedirs(figures, exist_ok=True)
+
+    # check the existence of the file if force creation is False
+    for ref in reference:
+        filename = os.path.join(figures, '{}.{}'.format(ref,extension))
+        if not os.path.exists(filename) and not force_creation:
+            raise ValueError('One or more reference file do not exist.'
+                             'Creation can be force from the generated'
+                             'figure, by setting force_creation flag to True')
 
     def make_image_comparison(func):
-        def wrapper(*args, **kwargs):
-            # Pré-traitement
 
-            response = func(*args, **kwargs)
-            # Post-traitement
-            return response
+        import tempfile
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+
+            # get the nums of the already existing figures
+            # that, obviously,should not considered in
+            # this comparison
+            fignums = plt.get_fignums()
+
+            # execute the function generating the figures
+            res = func(*args, **kwargs)
+
+            # get the new fignums if any
+            curfignums = plt.get_fignums()
+            for x in fignums:
+                # remove not newly created
+                curfignums.remove(x)
+
+            if not curfignums:
+                # no figure where generated
+                raise RuntimeError('No figure was generated '
+                         'by the "{}" function. Stopped'.format(func.__name__))
+
+            if len(reference)!=len(curfignums):
+                raise ValueError('number of reference figures provided desn\'t'
+                                 ' match the number of generated figures.')
+
+            # Comparison
+
+            errors = ""
+            for fignum, ref in zip(curfignums, reference):
+                fileref = os.path.join(figures,
+                                       '{}.{}'.format(ref,extension))
+                filetemp = os.path.join(figures,
+                                        '~temp{}.{}'.format(fignum, extension))
+
+                fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.tmp')
+                os.close(fd)
+
+                fig = plt.figure(fignum)
+
+                if force_creation :
+                    # make the figure for,reference and bypass the rest of the test
+                    filetemp = fileref
+
+                fig.savefig(filetemp)
+
+                sim, rms = 1.0, 0.0
+                if not force_creation:
+                    # we do not need to loose time
+                    # if we have jsut created the figure
+                    sim, rms = _image_compare(fileref, filetemp)
+
+                sim = sim * 100.
+                mess = "(similarity: {:.2f}%, rms: {:.2f})".format(sim, rms)
+                if sim < 0 or rms < 0:
+                    message = "Sizes of the images are different"
+                elif sim >= 100.-tol and rms <= tol:
+                    message = "identical images {}".format(mess)
+                elif sim > 100.-5.*tol and rms <= 5.*tol:
+                    message = "almost identical {}".format(mess)
+                else:
+                    message = "probably very different {}".format(mess)
+
+                message += "\n\t reference: {}".format(os.path.basename(fileref))
+                message += "\n\t generated: {}\n".format(
+                    os.path.basename(filetemp))
+
+                if not message.startswith("identical"):
+                    errors += message
+                else:
+                    log.info(message)
+
+            if errors:
+                # raise an error if one of the image is different from the
+                # reference image
+                raise ImageComparisonFailure("\n"+errors)
+
+            return
 
         return wrapper
+
 
     return make_image_comparison
 
 
+
 # -----------------------------------------------------------------------------
-# Testing examples and notebooks in docs
+# main
 # -----------------------------------------------------------------------------
-
-def notebook_run(path):
-    """
-    Execute a notebook via nbconvert and collect output.
-    :returns (parsed nb object, execution errors)
-    """
-    kernel_name = 'python%d' % sys.version_info[0]
-    this_file_directory = os.path.dirname(__file__)
-    errors = []
-
-    with open(path) as f:
-        nb = nbformat.read(f, as_version=4)
-        nb.metadata.get('kernelspec', {})['name'] = kernel_name
-        ep = ExecutePreprocessor(kernel_name=kernel_name,
-                                 timeout=10)  # , allow_errors=True
-
-        try:
-            ep.preprocess(nb, {'metadata': {'path': this_file_directory}})
-
-        except CellExecutionError as e:
-            if "SKIP" in e.traceback:
-                print(str(e.traceback).split("\n")[-2])
-            else:
-                raise e
-
-    return nb, errors
-
-
-def example_run(path):
-    import subprocess
-
-    pipe = None
-    try:
-        pipe = subprocess.Popen(
-                ["python", path, " --test=True"],
-                stdout=subprocess.PIPE)
-        (so, serr) = pipe.communicate()
-    except:
-        pass
-
-    return pipe.returncode, so, serr
-
-
 if __name__ == '__main__':
 
     from glob import glob
+    from spectrochempy.api import *
 
-    for example in glob("../docs/source/examples/*/*.py"):
-        example_run(example)
+    @image_comparison(reference=['essai1','essai2'], force_creation=True)
+    def test_compare():
+        source = NDDataset.read_omnic(
+                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+        source.plot()
+        source.plot_image()
+
+    @image_comparison(reference=['essai1','essai2'], force_creation=False)
+    def test_compare_exact():
+        source = NDDataset.read_omnic(
+                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+        source.plot()
+        source.plot_image()
+
+    @image_comparison(reference=['essai2','essai2','essai2'],
+                      force_creation=False)
+    def test_compare_different():
+        source = NDDataset.read_omnic(
+                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+
+        source[10:11,3000.:3001] = masked
+        source.plot_image()
+        source[10:20,3000.:3020.] = masked
+        source.plot_image()
+        source.plot_image()
+        fig = plt.figure(plt.get_fignums()[-1])
+        xlim = source.axes['main'].get_xlim()
+        # change a little bit the limits
+        source.axes['main'].set_xlim(np.array(xlim) * .98)
+
+
+    #test_compare()
+    options.log_level = INFO
+    log.info("exact:")
+    test_compare_exact()
+    log.info("different:")
+    test_compare_different()
+
+    plt.close('all')
+

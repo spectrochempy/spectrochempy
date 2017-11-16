@@ -52,9 +52,9 @@ from tests.utils import assert_array_equal
 
 # Basic
 # -------
-def test_save_and_load(IR_source_1):
+def test_save_and_load(IR_source_2D):
 
-    A = IR_source_1.copy()
+    A = IR_source_2D.copy()
     A.save('tartempion.scp')
     # no directory for saving passed ... it must be in data
     path = os.path.join(scpdata, 'tartempion.scp')

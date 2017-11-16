@@ -68,9 +68,9 @@ def script():
     """
 
 @show_do_not_block
-def test_fit_single_source(IR_source_1, script):
+def test_fit_single_source(IR_source_2D, script):
 
-    source = IR_source_1[54, 3700.:3400.]
+    source = IR_source_2D[54, 3700.:3400.]
 
     f1 = Fit(source, script, silent=True)
     f1.run(maxiter=10, every=1)
@@ -98,8 +98,8 @@ def test_fit_single_source(IR_source_1, script):
     source2.plot(plot_model=True)
     show()
 
-def test_fit_multiple_source(IR_source_1, script):
-    source = IR_source_1[54, 3700.:3400.]
+def test_fit_multiple_source(IR_source_2D, script):
+    source = IR_source_2D[54, 3700.:3400.]
     sources = [source.copy(), source.copy() * 2.23456]
     f = Fit(sources, script, silent=True)
     f.run(maxiter=10, every=1)

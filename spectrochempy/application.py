@@ -90,7 +90,7 @@ _classes = [
 __all__ = [
 
     # ## Helpers
-    'log', 'log_level', 'DEBUG', 'WARN', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
+    'log', 'log_level', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
     'scpdata', 'list_scpdata',
     'options', 'plotoptions',
     'running',
@@ -265,7 +265,6 @@ class SpectroChemPy(Application):
 
     @default('_scpdata')
     def _get__data_default(self):
-        # look for the testdata path in package tests
         return SCPData()
 
     @property
@@ -591,7 +590,7 @@ list_scpdata = app.list_scpdata
 # -----------------------------------------------------------------------------
 DEBUG = logging.DEBUG
 INFO = logging.INFO
-WARNING = WARN = logging.WARNING
+WARNING = logging.WARNING
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
 

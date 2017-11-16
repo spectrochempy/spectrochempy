@@ -34,15 +34,15 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 # run setup in develop mode
-import sys
-import contextlib
 
+import contextlib
 import sys
 import pytest
 
-do_it = False
+do_it = ('-c' not in sys.argv[0] ) # pytest not in parallel mode
 
-@pytest.mark.skipif(not do_it, reason="ignore this during all tests")
+print (sys.argv)
+@pytest.mark.skipif(not do_it, reason="ignore this during all tests in parallel")
 def test_setup():
 
     @contextlib.contextmanager
