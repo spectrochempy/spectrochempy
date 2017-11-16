@@ -40,3 +40,4 @@ nh4.scp
 tests/figures
 .coverage*
 scp_data/testdata/figures
+.gitignore_*

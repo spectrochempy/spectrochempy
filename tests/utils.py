@@ -390,9 +390,6 @@ def image_comparison(reference=None, extension=None, tol=1e-6,
 
     def make_image_comparison(func):
 
-        import tempfile
-
-        @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
             # get the nums of the already existing figures
@@ -426,10 +423,6 @@ def image_comparison(reference=None, extension=None, tol=1e-6,
                                        '{}.{}'.format(ref,extension))
                 filetemp = os.path.join(figures,
                                         '~temp{}.{}'.format(fignum, extension))
-
-                fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.tmp')
-                os.close(fd)
-
                 fig = plt.figure(fignum)
 
                 if force_creation :
@@ -438,7 +431,7 @@ def image_comparison(reference=None, extension=None, tol=1e-6,
 
                 fig.savefig(filetemp)
 
-                sim, rms = 1.0, 0.0
+                res, rms = 1.0, 0.0
                 if not force_creation:
                     # we do not need to loose time
                     # if we have jsut created the figure
