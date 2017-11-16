@@ -99,7 +99,7 @@ def test_slicing_agir(samples):
 
         samples[key]['IR'] = s
 
-    options.log_level = DEBUG
+    #options.log_level = DEBUG
 
     axes = subplots(nrow=1, ncol=3, figsize=(9, 3))
 

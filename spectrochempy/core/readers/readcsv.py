@@ -357,7 +357,7 @@ def _add_omnic_info(source, **kwargs):
 #===============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.api import (NDDataset, data, options, DEBUG, INFO, ERROR,
+    from spectrochempy.api import (NDDataset, scpdata, options, DEBUG, INFO, ERROR,
                                    figure, show)
 
 
@@ -370,7 +370,7 @@ if __name__ == '__main__':
     # A.plot_stack()
 
 
-    B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=data)
+    B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=scpdata)
     print(B)
 
     B = B[-0.5:60.0]

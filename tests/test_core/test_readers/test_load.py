@@ -55,9 +55,7 @@ def test_load(IR_source_1):
     source.save(filename)
     source2 = NDDataset.read(filename)
 
-    log.loglevel=DEBUG
     assert source == source2
-    log.loglevel = ERROR
 
 def test_methods_read_access():
 

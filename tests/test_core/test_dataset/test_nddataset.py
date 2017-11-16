@@ -51,7 +51,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
-from tests.utils import NumpyRNGContext, show_do_not_block
+from tests.utils import RandomSeedContext, show_do_not_block
 
 
 def test_fix_crossvalidate_bug():
@@ -242,7 +242,7 @@ def test_masked_array_input():
 # Some panda structure for dataset initialization
 @pytest.fixture()
 def series():
-    with NumpyRNGContext(2345):
+    with RandomSeedContext(2345):
         arr = pd.Series(np.random.randn(4), index=np.arange(4) * 10.)
     arr.index.name = 'un nom'
     return arr
@@ -250,7 +250,7 @@ def series():
 
 @pytest.fixture()
 def dataframe():
-    with NumpyRNGContext(23451):
+    with RandomSeedContext(23451):
         arr = pd.DataFrame(np.random.randn(6, 4), index=np.arange(6) * 10.,
                            columns=np.arange(4) * 10.)
     for ax, name in zip(arr.axes, ['y', 'x']):
@@ -261,7 +261,7 @@ def dataframe():
 @pytest.fixture()
 def panel():
     shape = (7, 6, 5)
-    with NumpyRNGContext(23452):
+    with RandomSeedContext(23452):
         # TODO: WARNING: pd.Panel is deprecated in pandas
         arr = pd.Panel(np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
                        major_axis=np.arange(shape[1]) * 10.,
@@ -275,7 +275,7 @@ def panel():
 @pytest.fixture()
 def panelnocoordname():
     shape = (7, 6, 5)
-    with NumpyRNGContext(2452):
+    with RandomSeedContext(2452):
         arr = pd.Panel(np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
                        major_axis=np.arange(shape[1]) * 10.,
                        minor_axis=np.arange(shape[2]) * 10.)
@@ -897,7 +897,7 @@ def test_nddataset_unmasked_in_operation_with_masked_numpy_array():
 @pytest.mark.parametrize('shape', [(10,), (5, 5), (3, 10, 10)])
 def test_nddataset_mask_invalid_shape(shape):
     with pytest.raises(ValueError) as exc:
-        with NumpyRNGContext(789):
+        with RandomSeedContext(789):
             NDDataset(np.random.random((10, 10)),
                       mask=np.random.random(shape) > 0.5)
     assert exc.value.args[0] == 'mask {} and data (10, 10) shape mismatch!'.format(shape)

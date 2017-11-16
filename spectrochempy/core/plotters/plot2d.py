@@ -479,6 +479,6 @@ if __name__ == '__main__':
 
     from spectrochempy.api import NDDataset, scpdata, show, figure
 
-    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=data)
+    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
     A.plot_stack()
     show()

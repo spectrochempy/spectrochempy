@@ -38,3 +38,4 @@ tg.scp
 nh4.scp
 
 tests/figures
+.coverage*

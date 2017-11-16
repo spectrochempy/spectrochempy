@@ -50,7 +50,7 @@ from spectrochempy.extern.traittypes import Array
 
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
-                         raises, NumpyRNGContext, catch_warnings)
+                         raises, RandomSeedContext, catch_warnings)
 
 
 #########################

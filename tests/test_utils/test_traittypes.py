@@ -50,7 +50,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
-from tests.utils import NumpyRNGContext
+from tests.utils import RandomSeedContext
 from spectrochempy.utils.traittypes import HasTraits, Range
 
 

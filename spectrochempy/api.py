@@ -101,7 +101,7 @@ from spectrochempy.application import *
 __all__ += [
 
     ### Helpers
-    'log', 'log_level', 'DEBUG', 'WARN', 'ERROR', 'CRITICAL', 'INFO',
+    'log', 'log_level', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
     'scpdata', 'list_scpdata',
     'plotoptions', 'options',
     #'pcl',
