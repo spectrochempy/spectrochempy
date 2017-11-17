@@ -31,20 +31,12 @@ _methods = ['get_log_dir',
             'list_packages',
             ]
 
-# Standard/built-in imports.
-import mimetypes
 import os
-import shutil
-import stat
 import sys
-
-from glob import glob
 from pkgutil import walk_packages
 
-from traitlets import Bool, HasTraits, Instance, List, Unicode
-
-# from .decorators import wraps
 from .introspect import find_current_module, resolve_name
+
 
 def _find_home():
     """ Locates and return the home directory (or best approximation) on this
@@ -164,14 +156,6 @@ def get_log_dir(create=True):
 
     # symlink will be set to this if the directory is created
     linkto = None
-
-    # If using set_temp_config, that overrides all
-    if set_temp_config._temp_path is not None:
-        xch = set_temp_config._temp_path
-        log_path = os.path.join(xch, 'spectrochempy')
-        if not os.path.exists(log_path):
-            os.mkdir(log_path)
-        return os.path.abspath(log_path)
 
     # first look for XDG_LOG_HOME
     xch = os.environ.get('XDG_LOG_HOME')

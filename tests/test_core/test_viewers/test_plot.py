@@ -43,7 +43,9 @@ from spectrochempy.api import *
 options.log_level = INFO
 
 # To regenerate the reference figures, set FORCE to True
-FORCE = True
+FORCE = False
+# for this regeneration it is advised to set non parallel testing.
+# (remove option -nauto in pytest.ini)
 
 @image_comparison(reference=['IR_source_2D_stack', 'IR_source_2D_map',
                              'IR_source_2D_image'], force_creation=FORCE)
@@ -83,7 +85,7 @@ def test_plot_image(IR_source_2D):
 
 @image_comparison(reference=['IR_source_2D_image'], min_similarity=98.0)
 def test_plot_image_offset(IR_source_2D):
-    source = IR_source_2D.copy() + .05
+    source = IR_source_2D.copy() + .01
     source.plot_image()  # plot_image with offset
 
 
