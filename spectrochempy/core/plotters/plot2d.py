@@ -276,11 +276,17 @@ def plot_2D(source, **kwargs):
 
             _colormap = cm = plt.get_cmap(colormap)
             scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
-            print(scalarMap.get_clim())
+
+            # we display the line in the reverse order, so that the last
+            # are behind the first.
 
             lines = source.ax.plot(xeff, zeffs.T[:,::-1], lw=lw, picker=True)
+
+            i = len(yeff)-1 # we have to label them also in the reverse order
             for l, a in zip(lines, yeff[::-1]):
                 l.set_color(scalarMap.to_rgba(a))
+                l.set_label(i)
+                i -= 1
 
     if data_only:
         # if data only (we will  ot set axes and labels
@@ -316,7 +322,8 @@ def plot_2D(source, **kwargs):
         # ----------------
 
         #zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
-        zl = (np.min(np.ma.min(zeffs)), np.max(np.ma.max(zeffs)))
+        amp = np.ma.ptp(zeffs)/100.
+        zl = (np.min(np.ma.min(zeffs)-amp), np.max(np.ma.max(zeffs))+amp)
         zlim = list(kwargs.get('zlim', zl))
         zlim.sort()
         z_reverse = kwargs.get('z_reverse', False)

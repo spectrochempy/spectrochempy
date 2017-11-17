@@ -306,7 +306,8 @@ def plot_1D(source, **kwargs):
         xlim.reverse()
 
     # ordinates limits?
-    zl = [np.ma.min(z.masked_data), np.ma.max(z.masked_data)]
+    amp = np.ma.ptp(z.masked_data) / 100.
+    zl = [np.ma.min(z.masked_data)-amp, np.ma.max(z.masked_data)+amp]
     zlim = list(kwargs.get('zlim', kwargs.get('ylim', zl)))
     zlim.sort()
 

@@ -102,8 +102,6 @@ def test_plot_stack_masked(IR_source_2D):
     source[:, 1300.:900.] = masked
     source.plot_stack(colorbar=False)
     source.plot_map(colorbar=False)
-    show()
-
 
 @show_do_not_block
 def test_plot_stack_multiple(IR_source_2D):
@@ -117,7 +115,6 @@ def test_plot_stack_multiple(IR_source_2D):
     s2.plot_stack(data_only=True, hold=True)
     show()
 
-
 # BUG FIXES IN PLOTS
 
 @show_do_not_block
@@ -128,7 +125,6 @@ def test_successive_plot_bug_1a3_28(IR_source_2D):
     source.plot()  # in 0.1a3.28 bug because key colorbar is missing.
     show()
 
-
 @show_do_not_block
 def test_successive_plot_bug_with_colorbars(IR_source_2D):
     source = IR_source_2D.copy() * 2.
@@ -137,4 +133,10 @@ def test_successive_plot_bug_with_colorbars(IR_source_2D):
     source.plot()
     source.plot()  # bug colorbars stacked on the first plot
     source.plot(kind='map')  # bug : no colorbar
+    show()
+
+@show_do_not_block
+def test_for_interactive_masks(IR_source_1D, IR_source_2D):
+    source = IR_source_2D.copy()
+    source.interactive_masks()
     show()

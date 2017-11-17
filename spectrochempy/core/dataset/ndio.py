@@ -44,39 +44,32 @@ are defined.
 # Python and third parties imports
 # ----------------------------------
 
-import os
-import copy
-import logging
-import json
 import datetime
-import warnings
-
-from traitlets import Unicode, Bool, Dict, HasTraits, Instance, observe, default
-
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib.pyplot import isinteractive, Figure, Axes
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+import json
+import os
 
 import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.widgets import SpanSelector
+from matplotlib.lines import Line2D
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from numpy.compat import asbytes, asstr
-from numpy.lib.npyio import zipfile_factory, NpzFile
 from numpy.lib.format import write_array, MAGIC_PREFIX
+from numpy.lib.npyio import zipfile_factory, NpzFile
+from traitlets import Dict, List, HasTraits, Instance
 
 # local import
 # ------------
 
-import spectrochempy
-from spectrochempy.core.dataset.ndarray import CoordSet
+from spectrochempy.core.dataset.ndarray import CoordSet, masked
 from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
-from spectrochempy.utils import is_sequence, is_kernel
-from spectrochempy.utils import SpectroChemPyWarning
-
 from spectrochempy.gui import gui
-from spectrochempy.application import plotoptions
-from spectrochempy.application import options
+from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.utils import is_sequence
+from spectrochempy.application import plotoptions, log, options
 
 # Constants
 # ---------
@@ -92,12 +85,12 @@ __all__ = ['NDIO',
            'read',
            'write',
 
+           # 'interactive_masks',
+
            'available_styles'
 
            ]
 _classes = ['NDIO']
-
-from spectrochempy.application import log
 
 
 # ==============================================================================
@@ -115,11 +108,13 @@ class NDIO(HasTraits):
     """
 
     # The figure on which this dataset can be plotted
-    _fig = Instance(Figure, allow_none=True)
+    _fig = Instance(plt.Figure, allow_none=True)
 
     # The axes on which this dataset and other elements such as projections 
     # and colorbar can be plotted
-    _axes = Dict(Instance(Axes))
+    _axes = Dict(Instance(plt.Axes))
+
+    _selected = List()
 
     # --------------------------------------------------------------------------
     # Generic save function
@@ -188,7 +183,7 @@ class NDIO(HasTraits):
         else:
             warnings.warn('Provided directory is a file, '
                           'so we use its parent directory',
-                              SpectroChemPyWarning)
+                          SpectroChemPyWarning)
             filename = os.path.join(os.path.dirname(directory), filename)
 
         # Import is postponed to here since zipfile depends on gzip, an optional
@@ -196,7 +191,6 @@ class NDIO(HasTraits):
         import zipfile
         # Import deferred for startup time improvement
         import tempfile
-
 
         zipf = zipfile_factory(filename, mode="w",
                                compression=zipfile.ZIP_DEFLATED)
@@ -213,10 +207,9 @@ class NDIO(HasTraits):
 
             for key in _names:
 
-                val = getattr(obj, "_%s"%key)
+                val = getattr(obj, "_%s" % key)
 
                 if isinstance(val, np.ndarray):
-
 
                     with open(tmpfile, 'wb') as fid:
                         write_array(fid, np.asanyarray(val), allow_pickle=True)
@@ -265,6 +258,7 @@ class NDIO(HasTraits):
     # --------------------------------------------------------------------------
     # Generic load function
     # --------------------------------------------------------------------------
+
     @classmethod
     def load(cls,
              filename='',
@@ -347,7 +341,7 @@ class NDIO(HasTraits):
                     # TODO: add possibility to search in several directory
                     fid = open(
                             os.path.expanduser(
-                                os.path.join(directory, filename)),
+                                    os.path.join(directory, filename)),
                             'rb')
             except:
                 raise IOError('no valid filename provided')
@@ -371,11 +365,11 @@ class NDIO(HasTraits):
                     if not coordset:
                         coordset = [Coord() for _ in range(ndim)]
                     els = key.split('_')
-                    setattr(coordset[int(els[1])], "_%s"%els[2], val)
+                    setattr(coordset[int(els[1])], "_%s" % els[2], val)
                 elif key == "pars.json":
                     pars = json.loads(asstr(val))
                 else:
-                    setattr(new, "_%s"%key, val)
+                    setattr(new, "_%s" % key, val)
             if coordset:
                 new.coordset = coordset
 
@@ -383,13 +377,13 @@ class NDIO(HasTraits):
                 # utility function to set the attributes
                 if key in ['modified', 'date']:
                     val = datetime.datetime.fromtimestamp(val)
-                    setattr(clss, "_%s"%key, val)
+                    setattr(clss, "_%s" % key, val)
                 elif key == 'meta':
                     clss.meta.update(val)
                 elif key in ['units']:
                     setattr(clss, key, val)
                 else:
-                    setattr(clss, "_%s"%key, val)
+                    setattr(clss, "_%s" % key, val)
 
             for key, val in list(pars.items()):
 
@@ -412,8 +406,10 @@ class NDIO(HasTraits):
     # --------------------------------------------------------------------------
     # Generic read function
     # --------------------------------------------------------------------------
+
     @classmethod
-    def read(cls, filename=None, **kwargs):
+    def read(cls,
+             filename=None, **kwargs):
         """
         Generic read function. It's like load a class method.
 
@@ -455,12 +451,12 @@ class NDIO(HasTraits):
             # default reader
             return cls.load(filename)
 
-        #try:
+            # try:
             # find the adequate reader
         _reader = getattr(cls, 'read_{}'.format(protocol))
         return _reader(filename, protocol='protocol',
-                           sortbydate=sortbydate,
-                           **kwargs)
+                       sortbydate=sortbydate,
+                       **kwargs)
 
     # --------------------------------------------------------------------------
     # Generic write function
@@ -516,7 +512,7 @@ class NDIO(HasTraits):
         except:
 
             raise AttributeError('The specified writter '
-                             'for protocol `{}` was not found!'.format(
+                                 'for protocol `{}` was not found!'.format(
                     protocol))
 
     # --------------------------------------------------------------------------
@@ -603,10 +599,10 @@ dpi : [ None | scalar > 0]
 
         _plotter(**kwargs)
 
-
     # --------------------------------------------------------------------------
     # setup figure properties
     # --------------------------------------------------------------------------
+
     def _figure_setup(self, ndim=1, **kwargs):
 
         # set temporarity a new style if any
@@ -647,18 +643,18 @@ dpi : [ None | scalar > 0]
         # self._updateplot = True  # fig exist: updateplot
 
         # get the current figure
-        hold = kwargs.get('hold',False)
+        hold = kwargs.get('hold', False)
         self._fig = curfig(hold)
 
         # is ax in the keywords ?
         ax = kwargs.pop('ax', None)
         if not hold:
-            self._axes = {} # reset axes
+            self._axes = {}  # reset axes
             self._divider = None
 
         if ax is not None:
             # in this case we will plot on this ax
-            if isinstance(ax, Axes):
+            if isinstance(ax, plt.Axes):
                 ax.name = 'main'
                 self.axes['main'] = ax
             # elif isinstance(ax, str) and ax in self.axes.keys():
@@ -679,7 +675,7 @@ dpi : [ None | scalar > 0]
             # or create a new subplot
             ax = self._fig.gca()
             ax.name = 'main'
-            self.axes['main']=ax
+            self.axes['main'] = ax
 
         # Get the number of the present figure
         self._fignum = self._fig.number
@@ -690,7 +686,6 @@ dpi : [ None | scalar > 0]
         # other plot class may take care of other needs
 
         ax = self.axes['main']
-
 
         if ndim == 2:
             # TODO: also the case of 3D
@@ -723,7 +718,6 @@ dpi : [ None | scalar > 0]
 
             divider = self._divider
 
-
             if SHOWXPROJ:
                 axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
                                            frameon=0, yticks=[])
@@ -748,11 +742,12 @@ dpi : [ None | scalar > 0]
                 # plt.setp(axec.get_xticklabels(), visible=False)
 
                 axec.name = 'colorbar'
-                self.axes['colorbar']=axec
+                self.axes['colorbar'] = axec
 
     # --------------------------------------------------------------------------
-    # resume the plot
+    # resume a figure plot
     # --------------------------------------------------------------------------
+
     def _plot_resume(self, **kwargs):
 
         # Additional matplotlib commands on the current plot
@@ -771,7 +766,8 @@ dpi : [ None | scalar > 0]
                         kws[k.strip()] = eval(v)
                     else:
                         ags.append(eval(item))
-                getattr(self.axes['main'], com)(*ags, **kws)  #TODO:improve this
+                getattr(self.axes['main'], com)(*ags,
+                                                **kws)  # TODO:improve this
 
         # adjust the plots
 
@@ -797,7 +793,7 @@ dpi : [ None | scalar > 0]
             for key, value in kwargs.items():
                 if key.startswith('save'):
                     key = key[4:]
-                    kw[key]=value
+                    kw[key] = value
             self._fig.savefig(savename, **kw)
 
         plt.draw()
@@ -805,10 +801,14 @@ dpi : [ None | scalar > 0]
         cid = self._fig.canvas.mpl_connect(
                 'button_press_event', NDIO._onclick)
 
+    # --------------------------------------------------------------------------
+    # plotter: plot_generic
+    # --------------------------------------------------------------------------
 
     def plot_generic(self, **kwargs):
         """
-        The generic plotter. It try to guess an adequate basic plot for the data
+        The generic plotter. It try to guess an adequate basic plot for the data.
+        Other kind of plotters are defined explicitely in the `viewer` package.
 
         Parameters
         ----------
@@ -846,13 +846,200 @@ dpi : [ None | scalar > 0]
         self._fig = temp._fig
         self._fignum = temp._fignum
 
+    # --------------------------------------------------------------------------
+    # interactive functions
+    # --------------------------------------------------------------------------
+
+    def interactive_masks(self, **kwargs):
+
+        # TODO: make it for 1D too!
+
+        kwargs.pop('kind', None)
+        self.plot_stack(**kwargs)
+
+        fig = self.fig
+        ax = self.axes['main']
+        ax.set_title(
+                'INTERACTIVE MASK SELECTION (press `h` for help)',
+                fontsize='12', color='red')
+
+        _message = \
+""" ============================================
+ HELP
+ ============================================
+
+ --------- KEYS -----------------------------
+ h: this help
+ u: undo the last set mask.
+ x: to apply mask selections and exit. 
+ esc : to hide displayed window help
+ 
+ --------- MOUSE ----------------------------
+ * click left button to pick a single row
+ * click right button to pick a single column
+ * click right button and move for a range 
+   selection 
+
+ ============================================
+"""
+
+        self._helptext = ax.text(0.02, 0.02, _message, fontsize=10,
+                                 transform=fig.transFigure, color='blue',
+                                 bbox={'facecolor': 'white',
+                                       'edgecolor': 'blue'})
+
+        _messclick = 'Click on a line\n' \
+                     'with the left button\n' \
+                     'to mask a row.\n' \
+                     'Click and/or span \n' \
+                     'with the right \n' \
+                     'or middle button\n' \
+                     'for column(s) selection.\n' \
+                     'Press `u` to undo\n' \
+                     'the last selection mask.' \
+                     'Press `x` to exit \n' \
+                     'and apply masks.\n' \
+                     '`esc` to hide this help.'
+
+        self._tpos = ax.text(0.01, 0.55, _messclick, fontsize=10,
+                             transform=fig.transFigure, color='green',
+                             bbox={'facecolor': 'white',
+                                   'edgecolor': 'green'})
+
+        self._helptext.set_visible(False)
+        self._tpos.set_visible(False)
+
+        self._selected = []
+
+        # mouse events
+        # ------------
+        def _onclick(event):
+            # fired on a mouse click.
+
+            # if it is nopt fired in a given axe, return
+            # immediately and do nothing
+            self._helptext.set_visible(False)
+            self._tpos.set_visible(False)
+
+            if event.inaxes.name not in ['main', 'xproj', 'yproj', 'colorbar']:
+                return
+
+            if event.button == 3:
+                self._tpos.set_visible(False)
+                x = event.xdata
+                axv = ax.axvline(x, lw=.1, color='white')
+                self._selected.append(('col', axv, x))
+            else:
+                self._tpos.set_visible(True)
+
+            plt.draw()
+
+            pass
+
+        self.fig.canvas.mpl_connect('button_press_event', _onclick)
+
+        # key events
+        # ----------
+
+        def _on_key(event):
+            self._tpos.set_visible(False)
+            if event.key == 'h':
+                # we show the help.
+                self._helptext.set_visible(True)
+                plt.draw()
+
+
+        def _on_key_release(event):
+            self._helptext.set_visible(False)
+            self._tpos.set_visible(False)
+
+            if event.key in ['u']:
+                if self._selected:
+                    last = list(self._selected.pop(-1))
+                    if last[0] in ['span','col']:
+                        last[1].remove()
+                    else:
+                        last[1].set_color(last[3])
+                        last[1].set_linewidth(last[4])
+
+            if event.key == 'esc':
+                self._helptext.set_visible(False)
+                self._tpos.set_visible(False)
+
+            if event.key in ['x']:
+                log.info("apply all selected mask")
+
+                for item in self._selected:
+                    _item = list(item)
+                    if _item[0] in ['span']:
+                        xmin, xmax = _item[2:]
+                        self[:, xmin:xmax]=masked
+                    elif _item[0] in ['col']:
+                        x = _item[2]
+                        self[:, x] = masked
+                    elif _item[0] in ['row']:
+                        y = int(_item[2])
+                        self[y] = masked
+
+
+                plt.close(self._fig)
+
+            plt.draw()
+
+        self.fig.canvas.mpl_connect('key_press_event', _on_key)
+        self.fig.canvas.mpl_connect('key_release_event', _on_key_release)
+
+        # pick event
+        # ----------
+
+        def _onpick(event):
+
+            if isinstance(event.artist, Line2D):
+                button = event.mouseevent.button
+                sel = event.artist
+                y = sel.get_label()
+                x = event.mouseevent.xdata
+                if button == 1:
+                    # left button -> row selection
+                    color = sel.get_color()
+                    lw = sel.get_linewidth()
+                    # save these setting to undo
+                    self._selected.append(('row', sel, y, color, lw))
+                    sel.set_color('gray')
+                    sel.set_linewidth(.1)
+                elif button == 3:
+                    # right button -> column selection
+                    axv = ax.axvline(x, lw= .1, color='white')
+                    self._selected.append(('col', axv, x))
+                self._tpos.set_visible(False)
+
+            plt.draw()
+
+        self.fig.canvas.mpl_connect('pick_event', _onpick)
+
+        def _onspan(xmin, xmax):
+            xmin, xmax = sorted((xmin, xmax))
+            sp = ax.axvspan(xmin, xmax, facecolor='white',
+                            edgecolor='white', alpha=.95,
+                            zorder=10000)
+            self._selected.append(('span', sp, xmin, xmax))
+            self._tpos.set_visible(False)
+            plt.draw()
+
+        span = SpanSelector(ax, _onspan, 'horizontal',  minspan=1, button=[2,3],
+                            useblit=True, rectprops=dict(alpha=0.95,
+                                                         facecolor='white',
+                                                         edgecolor='w'))
+
+        show()
+        return span
 
     # -------------------------------------------------------------------------
     # Special attributes
     # -------------------------------------------------------------------------
 
     def __getstate__(self):
-        # needed to remove some entry to avoid picling them
+        # needed to remove some entry to avoid pickling them
         state = super(NDIO, self).__getstate__()
 
         for key in self._all_func_names:
@@ -900,7 +1087,7 @@ dpi : [ None | scalar > 0]
         A dictionary containing all the axes of the current figures
         """
         return self._axes
-    
+
     @axes.setter
     def axes(self, axes):
         # we assume that the axes have a name
@@ -908,12 +1095,12 @@ dpi : [ None | scalar > 0]
             # a list a axes have been passed
             for ax in axes:
                 log.debug('add axe: {}'.format(ax.name))
-                self._axes[ax.name]=ax
+                self._axes[ax.name] = ax
         elif isinstance(axes, dict):
             self._axes.update(axes)
         elif isinstance(axes, Axes):
             # it's an axe! add it to our list
-            self._axes[axes.name]=axes
+            self._axes[axes.name] = axes
 
     @property
     def ax(self):
@@ -961,6 +1148,7 @@ dpi : [ None | scalar > 0]
 
     @classmethod
     def _onclick(cls, event):
+        # not implemented here but in subclass
         pass
 
 
@@ -982,18 +1170,17 @@ def curfig(hold=False, figsize=None):
     Returns
     -------
 
-    fig : the figure object on wich following plotting command will be issued
+    fig : the figure object on which following plotting command will be issued
 
     """
     n = plt.get_fignums()
 
     if not n or not hold:
         # create a figure
-        plt.figure(figsize=figsize)
+        return plt.figure(figsize=figsize)
 
-    # figure already exists
-    fig = plt.gcf()
-    return fig
+    # a figure already exists - if several we take the last
+    return plt.figure(n[-1])
 
 
 def show():
@@ -1001,17 +1188,18 @@ def show():
     Method to force the `matplotlib` figure display
 
     """
-    if not plotoptions.do_not_block or isinteractive():
+    if not plotoptions.do_not_block or plt.isinteractive():
         if curfig(True):  # True to avoid opening a new one
             plt.show()
+
 
 def subplots(nrow=1, ncol=1, figsize=None):
     fig = curfig(figsize=figsize)
     axes = {}
     for i in range(nrow):
         for j in range(ncol):
-            ax = fig.add_subplot(nrow, ncol, i*ncol+j+1)
-            ax.name = 'axe{}'.format(i*ncol+j+1)
+            ax = fig.add_subplot(nrow, ncol, i * ncol + j + 1)
+            ax.name = 'axe{}'.format(i * ncol + j + 1)
             axes[ax.name] = ax
     return axes
 
@@ -1020,8 +1208,17 @@ def available_styles():
     return ['notebook', 'paper', 'poster', 'talk', 'sans']
 
 
-
 plot = NDIO.plot
 load = NDIO.load
 read = NDIO.read
 write = NDIO.write
+
+if __name__ == '__main__':
+    # test interactive masks
+    from spectrochempy.api import *
+
+    source = NDDataset.read_omnic(
+        os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+
+    source.interactive_masks(kind='stack', colorbar=True, figsize=(9,4))
+
