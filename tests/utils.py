@@ -75,8 +75,6 @@ from spectrochempy.application import scpdata, log, plotoptions
 figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
 os.makedirs(figures_dir, exist_ok=True)
 
-REDO = False
-
 # =============================================================================
 # RandomSeedContext
 # =============================================================================
@@ -307,7 +305,7 @@ def _compute_rms(x, y):
 
 
 # .............................................................................
-def _image_compare(imgpath1, imgpath2):
+def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
     # compare two images saved in files imgpath1 and imgpath2
 
     from scipy.misc import imread
@@ -333,14 +331,16 @@ def _image_compare(imgpath1, imgpath2):
         rms = sim = -1
 
     except TypeError as e:
-        # this happen sometimes and erratically during testing using pytest-xdist
+        # this happen sometimes and erratically during testing using
+        # pytest-xdist (parallele testing). This is work-around the problem
         if e.args[0]=="unsupported operand type(s) " \
-                      "for -: 'PngImageFile' and 'int'" and not REDO:
-            REDO = True
+                   "for -: 'PngImageFile' and 'int'" and not REDO_ON_TYPEERROR:
+            REDO_ON_TYPEERROR = True
+            rms = sim = -1
         else:
             raise
 
-    return sim, rms
+    return sim, rms, REDO_ON_TYPEERROR
 
 
 # .............................................................................
@@ -349,7 +349,7 @@ def image_comparison(reference=None,
                      max_rms=None,
                      min_similarity=None,
                      force_creation=False,
-                     **kws):
+                     savedpi = 150):
     """
     image file comparison decorator.
 
@@ -389,13 +389,18 @@ def image_comparison(reference=None,
         rms stands for `Root Mean Square`. If set, then it will be used to decide if an image is the same
         (less than the acceptable rms). Not used if min_similarity also set.
 
-    kwargs : other keyword arguments
+    savedpi : `int`, optional, default=150
+
+        dot per inch of the generated figures
 
 
     Returns
     -------
 
     """
+
+    plotoptions.do_not_block = True
+
     if not reference:
         raise ValueError('no reference image provided. Stopped')
 
@@ -445,6 +450,7 @@ def image_comparison(reference=None,
                                  ' match the number of generated figures.')
 
             # Comparison
+            REDO_ON_TYPEERROR = False
 
             while True:
                 errors = ""
@@ -464,13 +470,15 @@ def image_comparison(reference=None,
                                 suffix='.{}'.format(extension), text=True)
                         os.close(fd)
 
-                    fig.savefig(tmpfile)
+                    fig.savefig(tmpfile, dpi=savedpi)
 
                     sim, rms = 100.0, 0.0
                     if not force_creation:
                         # we do not need to loose time
                         # if we have just created the figure
-                        sim, rms = _image_compare(referfile, tmpfile)
+                        sim, rms, REDO_ON_TYPEERROR = _image_compare(referfile,
+                                                                     tmpfile,
+                                                              REDO_ON_TYPEERROR)
 
                     CHECKSIM = (min_similarity is not None)
                     SIM = min_similarity if CHECKSIM else 100. - EPSILON
@@ -498,12 +506,12 @@ def image_comparison(reference=None,
                     else:
                         log.info(message)
 
-                if errors and not REDO:
+                if errors and not REDO_ON_TYPEERROR:
                     # raise an error if one of the image is different from the
                     # reference image
                     raise ImageComparisonFailure("\n" + errors)
 
-                if not REDO:
+                if not REDO_ON_TYPEERROR:
                     break
 
             return

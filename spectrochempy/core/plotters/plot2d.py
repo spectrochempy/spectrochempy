@@ -255,45 +255,38 @@ def plot_2D(source, **kwargs):
         if color is None:
             # very basic plot (likely the faster)
             # use the matplotlib color cycler
-            source.ax.plot(xeff, zeffs, lw=lw)
+            source.ax.plot(xeff, zeffs.T, lw=lw)
 
         elif color != 'colormap':
             # just add a color to the line (the same for all)
-            source.ax.plot(xeff, zeffs, c=color, lw=lw)
+            source.ax.plot(xeff, zeffs.T, c=color, lw=lw)
 
         elif color == 'colormap':
-            # here we map the color of each line to the colormap
-            # according to the y axis values
-            # if not source._updateplot:
+            # map colors using the colormap
             ylim = kwargs.get("ylim", None)
 
             if ylim is not None:
-                vmin, vmax = ylim
+                 vmin, vmax = ylim
             else:
-                vmin, vmax = sorted([yeff[0], yeff[-1]])
+                 vmin, vmax = sorted([yeff[0], yeff[-1]])
             norm = mpl.colors.Normalize(vmin=vmin,
-                                        vmax=vmax)  # we normalize to the max time
+                                         vmax=vmax)  # we normalize to the max time
             if normalize is not None:
-                norm.vmax = normalize
+                 norm.vmax = normalize
 
-            sp = z.sort(inplace=False)[ishowed]   #TODO: ishowed  to put here????
+            _colormap = cm = plt.get_cmap(colormap)
+            scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
-            ys = [sp.masked_data[i] for i in range(len(sp.y.data))]
-            sc = sp.y.data
+            # we display the line in the reverse order, so that the last
+            # are behind the first.
 
-            line_segments = LineCollection(
-                    [list(zip(sp.x.data, y)) for y in ys[::-1]],
-                    # Make a sequence of x,s[i] pairs
-                    # linewidths    = (0.5,1,1.5,2),
-                    linewidths=(lw,),
-                    linestyles='solid',
-                    # alpha=.5,
-            )
-            line_segments.set_array(sc[::-1])
-            line_segments.set_cmap(colormap)
-            line_segments.set_norm(norm)
+            lines = source.ax.plot(xeff, zeffs.T[:,::-1], lw=lw, picker=True)
 
-            ax.add_collection(line_segments)
+            i = len(yeff)-1 # we have to label them also in the reverse order
+            for l, a in zip(lines, yeff[::-1]):
+                l.set_color(scalarMap.to_rgba(a))
+                l.set_label(i)
+                i -= 1
 
     if data_only:
         # if data only (we will  ot set axes and labels
@@ -328,7 +321,9 @@ def plot_2D(source, **kwargs):
         # the z axis info
         # ----------------
 
-        zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
+        #zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
+        amp = np.ma.ptp(zeffs)/100.
+        zl = (np.min(np.ma.min(zeffs)-amp), np.max(np.ma.max(zeffs))+amp)
         zlim = list(kwargs.get('zlim', zl))
         zlim.sort()
         z_reverse = kwargs.get('z_reverse', False)
@@ -411,44 +406,11 @@ def plot_2D(source, **kwargs):
 
     source._plot_resume(**kwargs)
 
-# ===========================================================================
+
+# =============================================================================
 # clevels
-# ===========================================================================
-def clevels_old(data, **kwargs):
-    """Utility function to determine contours levels
-    """
-    # avoid circular call to this module
-    from spectrochempy.application import plotoptions
+# =============================================================================
 
-    # contours
-    maximum = data.max()
-    minimum = -maximum
-
-    nlevels = kwargs.get('nlevels', kwargs.get('nc',
-                                               plotoptions.number_of_contours))
-    exponent = kwargs.get('exponent', plotoptions.cexponent)
-    if 'start' in kwargs:
-        log.info("'start' is deprecated, use 'negative' instead.")
-    negative = kwargs.get('start', kwargs.get('negative', True))
-    if negative < 0:
-        negative = True
-
-
-    maximum = data.max()
-    ms = maximum / nlevels
-    for xi in range(100):
-        if ms * exponent ** xi > maximum:
-            xl = xi
-            break
-    clevelc = [ms * exponent ** xi for xi in range(xl)]
-    if negative:
-        clevelc = [- ms * exponent ** xi for xi in range(xl)[::-1]] + clevelc
-
-    return sorted(clevelc)
-
-# ===========================================================================
-# clevels
-# ===========================================================================
 def clevels(data, **kwargs):
     """Utility function to determine contours levels
     """
