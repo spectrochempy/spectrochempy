@@ -1470,36 +1470,6 @@ class NDArray(HasTraits):
         self._is_complex[axis] = True
 
     # .........................................................................
-    def set_mask(self, items, axis=-1):
-        """
-        Mask a given region
-
-        Parameters
-        ----------
-
-        start : `ìnt`, `float` `slice` , `str` or any keys allowing slicing a ndarray
-
-            Specify the region or the start of the region
-            of the ndarray to be masked
-
-        stop : `ìnt`, `float`, `str` or any keys allowing slicing a ndarray
-
-            Specify the end region of the ndarray to be masked
-
-        """
-
-        try:
-            s = self[start:stop:step]
-        except IndexError:
-            warnings.warn('Specified indexes raised an error. Mask not set',
-                          SpectroChemPyWarning)
-
-        pass
-
-
-
-
-    # .........................................................................
     def set_real(self, axis):
         """
         Set the data along the given dimension as real
