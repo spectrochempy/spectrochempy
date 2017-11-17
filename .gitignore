@@ -24,8 +24,6 @@ docs/source/modules/
 docs/source/savefig/
 docs/source/_templates_old
 *.pyc
-#ressources/
-#tests/testdata/nmrdata/bruker/tests/nmr/tpa/
 
 *.sample
 
@@ -41,3 +39,5 @@ tests/figures
 .coverage*
 scp_data/testdata/figures
 .gitignore_*
+*.orig
+Untitled.ipynb
