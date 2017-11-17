@@ -398,6 +398,9 @@ def image_comparison(reference=None,
     -------
 
     """
+
+    plotoptions.do_not_block = True
+
     if not reference:
         raise ValueError('no reference image provided. Stopped')
 
