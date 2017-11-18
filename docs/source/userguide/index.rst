@@ -24,22 +24,17 @@ The NDDataset object
 	:maxdepth: 1
 
 	nddataset
-
-Plotting
----------------------
-
-.. toctree::
-	:maxdepth: 1
-
 	plotting
+	baseline_correction
 
-NMR processing
----------------------
+Units and uncertainty
+----------------------
 
 .. toctree::
 	:maxdepth: 1
 
-	nmr_intro
+	units_and_uncertainties
+
 
 Databases
 ----------
@@ -48,3 +43,12 @@ Databases
 	:maxdepth: 1
 
 	isotope_database
+
+
+NMR
+----
+
+.. toctree::
+	:maxdepth: 1
+
+	nmr_intro
