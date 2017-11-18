@@ -153,7 +153,9 @@ class NDArray(HasTraits):
     [   0.945    0.533 ...,    0.651    0.313]
     [   0.769    0.782 ...,    0.898    0.043]]
 
-    NDArray can be also created using keywords arguments. Here is a masked array:
+    NDArray can be also created using keywords arguments.
+    Here is a masked array, with units:
+
     >>> ndd = NDArray( data = np.random.random((3, 3)),
     ...                mask = [[True, False, True],
     ...                        [False, True, False],
@@ -162,7 +164,7 @@ class NDArray(HasTraits):
     >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     [[  --    0.295   --]
     [   0.086   --    0.516]
-    [   0.689    0.857   --]] dimensionless
+    [   0.689    0.857   --]] a.u.
 
     """
 
@@ -1354,6 +1356,7 @@ class NDArray(HasTraits):
         >>> nd1.is_units_compatible(nd2)
         False
         >>> nd1.to('minutes', force=True)
+        NDArray: [   1.000,    2.000,    2.000,    3.000] min
         >>> nd1.is_units_compatible(nd2)
         True
         >>> nd2[0].data == nd1[0].data
@@ -1676,8 +1679,8 @@ class NDArray(HasTraits):
         ...                units = 'meters')
         >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         [[  --    0.316    0.184]
-        [   0.205   --    0.596]
-        [   0.965    0.653   --]] m
+         [   0.205   --    0.596]
+         [   0.965    0.653   --]] m
 
         We want to change the units to seconds for instance
         but there is no relation with meters,
@@ -1686,14 +1689,17 @@ class NDArray(HasTraits):
         >>> ndd.to('second')
         Traceback (most recent call last):
         ...
-        Exception: Cannot set this unit
+        spectrochempy.extern.pint.errors.DimensionalityError: Cannot convert from 'meter' ([length]) to 'second' ([time])
 
         However, we can force the change
-        >>> ndd.to('second', force=True) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        >>> print(ndd)
+        >>> ndd.to('second', force=True)
+        NDArray: [[  --,    0.316,    0.184],
+                  [   0.205,   --,    0.596],
+                  [   0.965,    0.653,   --]] s
+        >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         [[  --    0.316    0.184]
-        [   0.205   --    0.596]
-        [   0.965    0.653   --]] s
+         [   0.205   --    0.596]
+         [   0.965    0.653   --]] s
 
         """
         if inplace:

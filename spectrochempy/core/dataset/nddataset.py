@@ -181,10 +181,15 @@ class NDDataset(
 
     Usage by an end-user:
 
-    >>> from spectrochempy.api import NDDataset
+    >>> from spectrochempy.api import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    <BLANKLINE>
+            SpectroChemPy's API
+            ...
+            Copyright : 2014-2017 - LCS (Laboratory for Catalysis and Spectrochempy)
+    <BLANKLINE>
     >>> x = NDDataset([1,2,3])
     >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
-    [       1        2        3])
+    [       1        2        3]
 
     """
     author = Unicode(get_user_and_node(),
