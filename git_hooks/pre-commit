@@ -15,27 +15,13 @@ export PATH=$PATH:/Library/TeX/texbin/
 # test everything and do not commit if errors
 py.test -x tests || exit 1
 
-## add last file
-#git add -A
-#
-## getb last commit message
-#OUTPUT="$(git log -1 --pretty=%B)"
-#git commit --no-verify --amend -m "${OUTPUT}"
-#
-#python docs/builddocs.py clean
-#python docs/builddocs.py html || exit 1
-#
-## add last file
-#git add -A
-#
-## getb last commit message
-#OUTPUT="$(git log -1 --pretty=%B)"
-#git commit --no-verify --amend -m "${OUTPUT}" > commit.log
-#
 ## install to check setup
-#pip uninstall -y spectrochempy
-#pip install -e . || exit 1
+pip uninstall -y spectrochempy
+pip install -e . || exit 1
 
+python docs/builddocs.py clean
+python docs/builddocs.py html || exit 1
+python docs/builddocs.py release
 
 
 
