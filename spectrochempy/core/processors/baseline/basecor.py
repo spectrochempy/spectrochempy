@@ -51,8 +51,7 @@ from matplotlib.widgets import SpanSelector
 # -----------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndcoords import CoordRange
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndio import subplots
-
+from spectrochempy.core.plotters.multiplot import subplots
 
 
 __all__ = ['BaselineCorrection']

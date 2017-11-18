@@ -354,6 +354,9 @@ def plot_2D(source, **kwargs):
     # the next two line are to avoid multipliers in axis scale
     y_formatter = ScalarFormatter(useOffset=False)
     source.ax.yaxis.set_major_formatter(y_formatter)
+    source.ax.xaxis.set_ticks_position('bottom')
+    source.ax.yaxis.set_ticks_position('left')
+
 
     # -------------------------------------------------------------------------
     # labels

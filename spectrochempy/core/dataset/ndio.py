@@ -48,16 +48,18 @@ import datetime
 import json
 import os
 
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.widgets import SpanSelector
 from matplotlib.lines import Line2D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+import numpy as np
 from numpy.compat import asbytes, asstr
 from numpy.lib.format import write_array, MAGIC_PREFIX
 from numpy.lib.npyio import zipfile_factory, NpzFile
 from traitlets import Dict, List, HasTraits, Instance
+
 
 # local import
 # ------------
@@ -78,7 +80,6 @@ __all__ = ['NDIO',
 
            'curfig',
            'show',
-           'subplots',
 
            'plot',
            'load',
@@ -86,7 +87,7 @@ __all__ = ['NDIO',
            'write',
 
            # 'interactive_masks',
-
+           'set_figure_style',
            'available_styles'
 
            ]
@@ -570,6 +571,9 @@ dpi : [ None | scalar > 0]
 
         style : `str`
 
+        autolayout : `bool`, optional, default=``True``
+
+            if True, layout will be set automatically
 
         """
 
@@ -605,30 +609,13 @@ dpi : [ None | scalar > 0]
 
     def _figure_setup(self, ndim=1, **kwargs):
 
-        # set temporarity a new style if any
-        # ----------------------------------
-        plt.style.use('classic')
-        plt.style.use(plotoptions.style)
-        style = kwargs.pop('style', None)
+        set_figure_style(**kwargs)
 
-        if style:
-            if not is_sequence(style):
-                style = [style]
-            if isinstance(style, dict):
-                style = [style]
-            style = [plotoptions.style] + list(style)
-            plt.style.use(style)
-
-        # size of the figure and other properties
-        # ---------------------------------------
         self._figsize = mpl.rcParams['figure.figsize'] = \
-            kwargs.pop('figsize', mpl.rcParams['figure.figsize'])
+            kwargs.get('figsize', mpl.rcParams['figure.figsize'])
 
-        fontsize = mpl.rcParams['font.size'] = \
-            kwargs.pop('fontsize', mpl.rcParams['font.size'])
-        mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
-        mpl.rcParams['xtick.labelsize'] = int(fontsize)
-        mpl.rcParams['ytick.labelsize'] = int(fontsize)
+        mpl.rcParams[
+            'figure.autolayout'] = kwargs.pop('autolayout', True)
 
         # Get current figure information
         # ------------------------------
@@ -845,6 +832,7 @@ dpi : [ None | scalar > 0]
         self._axes = temp._axes
         self._fig = temp._fig
         self._fignum = temp._fignum
+
 
     # --------------------------------------------------------------------------
     # interactive functions
@@ -1182,6 +1170,36 @@ def curfig(hold=False, figsize=None):
     # a figure already exists - if several we take the last
     return plt.figure(n[-1])
 
+def curfig(hold=False, figsize=None):
+    """
+    Get the figure where to plot.
+
+    Parameters
+    ----------
+
+    hold : `bool`, optioanl, False by default
+
+        If hold is True, the plot will be issued on the last drawn figure
+
+    figsize : `tuple`, optional
+
+        A tuple representing the size of the figure in inch
+
+    Returns
+    -------
+
+    fig : the figure object on which following plotting command will be issued
+
+    """
+    n = plt.get_fignums()
+
+    if not n or not hold:
+        # create a figure
+        return plt.figure(figsize=figsize)
+
+    # a figure already exists - if several we take the last
+    return plt.figure(n[-1])
+
 
 def show():
     """
@@ -1192,16 +1210,30 @@ def show():
         if curfig(True):  # True to avoid opening a new one
             plt.show()
 
+def set_figure_style(**kwargs):
 
-def subplots(nrow=1, ncol=1, figsize=None):
-    fig = curfig(figsize=figsize)
-    axes = {}
-    for i in range(nrow):
-        for j in range(ncol):
-            ax = fig.add_subplot(nrow, ncol, i * ncol + j + 1)
-            ax.name = 'axe{}'.format(i * ncol + j + 1)
-            axes[ax.name] = ax
-    return axes
+    # set temporarity a new style if any
+    # ----------------------------------
+    plt.style.use('classic')
+    plt.style.use(plotoptions.style)
+    style = kwargs.get('style', None)
+
+    if style:
+        if not is_sequence(style):
+            style = [style]
+        if isinstance(style, dict):
+            style = [style]
+        style = [plotoptions.style] + list(style)
+        plt.style.use(style)
+
+    # other properties
+    # ---------------------------------------
+
+    fontsize = mpl.rcParams['font.size'] = \
+        kwargs.get('fontsize', mpl.rcParams['font.size'])
+    mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
+    mpl.rcParams['xtick.labelsize'] = int(fontsize)
+    mpl.rcParams['ytick.labelsize'] = int(fontsize)
 
 
 def available_styles():
@@ -1218,7 +1250,7 @@ if __name__ == '__main__':
     from spectrochempy.api import *
 
     source = NDDataset.read_omnic(
-        os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+         os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
 
     source.interactive_masks(kind='stack', colorbar=True, figsize=(9,4))
 

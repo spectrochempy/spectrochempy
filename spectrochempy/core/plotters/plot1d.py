@@ -320,6 +320,9 @@ def plot_1D(source, **kwargs):
 
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
 
     # -------------------------------------------------------------------------
     # labels
