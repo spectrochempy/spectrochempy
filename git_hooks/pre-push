@@ -6,8 +6,6 @@ source ~/.bash_profile
 # to make it work with matplotlib/latex
 export PATH=$PATH:/Library/TeX/texbin/
 
-python docs/builddocs.py clean
-python docs/builddocs.py html || exit 1
 python docs/builddocs.py release
 
 
