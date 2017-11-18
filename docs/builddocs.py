@@ -148,9 +148,6 @@ def make_docs(*options):
         outdir = "{0}/{1}".format(BUILDDIR, builder)
         doctreedir = "{0}/~doctrees".format(BUILDDIR)
 
-        write_download_rst()
-        gitcommands()  # update repository
-
         #with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
         sp.verbosity = 0
@@ -167,6 +164,8 @@ def make_docs(*options):
               " ../pdf/spectrochempy.pdf".format(BUILDDIR)
             res = subprocess.call([cmd], shell=True, executable='/bin/bash')
             log.info(res)
+
+        gitcommands()  # update repository
 
         log.info(
         "\n\nBuild finished. The {0} pages are in {1}/www/{2}.".format(
