@@ -647,8 +647,18 @@ def test_vector():
     assert_array_equal(v.data.T, np.array([1., 2., 3.]))
     assert_array_equal(v._data.T, np.array([[1.], [2.], [3.]]))
 
-def test_bug_str_representation():
+def test_ndarray_str_representation_for_complex():
     nd1 = NDArray([1. + 2.j, 2. + 3.j])
     assert nd1.__repr__() == \
            "NDArray: [   1.000,    2.000,    2.000,    3.000] unitless"
     assert nd1.__str__() == "R[   1.000    2.000]\nI[   2.000    3.000]"
+
+def test_ndarray_plusminus():
+    ds = NDArray([1.,2.,3.])
+    ds.plus_minus(.1)
+    assert str(ds[0])=="1.0+/-0.1"
+    np.random.seed(12345)
+    ndd = NDArray(data=np.random.random((3, 3)), units='m')
+    ndd.plus_minus(.2)
+    assert str(ndd).startswith('[[   0.930+/-0.200')
+    assert str(ndd).endswith('0.749+/-0.200]] m')

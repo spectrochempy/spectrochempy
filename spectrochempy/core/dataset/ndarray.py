@@ -854,6 +854,9 @@ class NDArray(HasTraits):
             # no uncertainty
             return
 
+        if self.ndim == 1:
+            uncertainty = uncertainty.squeeze()
+
         if uncertainty.shape != self.shape:
             raise ValueError(
                     "uncertainty {} and data {} shape mismatch!".format(
@@ -1745,7 +1748,7 @@ class NDArray(HasTraits):
         return new
 
     # .........................................................................
-    def plus_minus(self, uncertainty):
+    def plus_minus(self, uncertainty, inplace=True):
         """
         Set the uncertainty of a NDArray
 
@@ -1760,16 +1763,29 @@ class NDArray(HasTraits):
         Examples
         --------
         >>> np.random.seed(12345)
-        >>> ndd = NDArray( data = np.random.random((3, 3)))
+        >>> ndd = NDArray( data = np.random.random((3)))
         >>> ndd.plus_minus(.2)
         >>> ndd # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        NDArray: [[   0.930+/-0.200,  ...  0.749+/-0.200]] unitless
+        NDArray: [   0.930+/-0.200,  ...  0.184+/-0.200] unitless
+
+        >>> np.random.seed(12345)
+        >>> ndd = NDArray( data = np.random.random((3,3)), units='m')
+        >>> ndd.plus_minus(.2)
+        >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        [[   0.930+/-0.200    ...  0.749+/-0.200]] m
 
         """
-        if isinstance(uncertainty, float):
-            self.uncertainty = np.ones(self._data.shape)*uncertainty
+        if inplace:
+            new = self
         else:
-            self.uncertainty = uncertainty
+            new = self.copy()
+
+        if isinstance(uncertainty, float):
+            new.uncertainty = np.ones(new._data.shape)*uncertainty
+        else:
+            new.uncertainty = uncertainty
+
+        return new
 
     # -------------------------------------------------------------------------
     # private methods
