@@ -19,9 +19,7 @@ py.test -x tests || exit 1
 pip uninstall -y spectrochempy
 pip install -e . || exit 1
 
-python docs/builddocs.py clean
-python docs/builddocs.py html || exit 1
-python docs/builddocs.py release
+
 
 
 
