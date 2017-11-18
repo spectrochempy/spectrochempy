@@ -647,3 +647,8 @@ def test_vector():
     assert_array_equal(v.data.T, np.array([1., 2., 3.]))
     assert_array_equal(v._data.T, np.array([[1.], [2.], [3.]]))
 
+def test_bug_str_representation():
+    nd1 = NDArray([1. + 2.j, 2. + 3.j])
+    assert nd1.__repr__() == \
+           "NDArray: [   1.000,    2.000,    2.000,    3.000] unitless"
+    assert nd1.__str__() == "R[   1.000    2.000]\nI[   2.000    3.000]"

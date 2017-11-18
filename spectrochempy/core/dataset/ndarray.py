@@ -1303,6 +1303,8 @@ class NDArray(HasTraits):
         Examples
         --------
         >>> nd1 = NDArray([1.+2.j,2.+ 3.j])
+        >>> nd1
+        NDArray: [   1.000,    2.000,    2.000,    3.000] unitless
         >>> print(nd1)
         R[   1.000    2.000]
         I[   2.000    3.000]
@@ -1415,6 +1417,8 @@ class NDArray(HasTraits):
         new = self.copy()
         if select == 'ALL':
             select = 'R' * self.ndim
+        if self.ndim == 1:
+            select = '*'+select
         ma = self._uncert_data
         for axis, component in enumerate(select):
             if self._is_complex[axis]:
@@ -1733,6 +1737,33 @@ class NDArray(HasTraits):
 
         # if not inplace:
         return new
+
+    # .........................................................................
+    def plus_minus(self, uncertainty):
+        """
+        Set the uncertainty of a NDArray
+
+        Parameters
+        -----------
+
+        uncertainty: `float` or `array`
+
+            Uncertainty to apply to the array. If it's an array, it must have
+            the same shape as the NDArray shape.
+
+        Examples
+        --------
+        >>> np.random.seed(12345)
+        >>> ndd = NDArray( data = np.random.random((3, 3)))
+        >>> ndd.plus_minus(.2)
+        >>> ndd # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        NDArray: [[   0.930+/-0.200,  ...  0.749+/-0.200]] unitless
+
+        """
+        if isinstance(uncertainty, float):
+            self.uncertainty = np.ones(self._data.shape)*uncertainty
+        else:
+            self.uncertainty = uncertainty
 
     # -------------------------------------------------------------------------
     # private methods
