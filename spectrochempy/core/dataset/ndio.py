@@ -236,13 +236,23 @@ class NDIO(HasTraits):
 
                     pars[level + key] = str(val)
 
-
                 elif isinstance(val, Meta):
 
                     pars[level + key] = val.to_dict()
 
-                else:
+                elif val is None:
 
+                    continue
+
+                elif isinstance(val, dict) and key == 'axes':
+                        # do not save the matplotlib axes
+                        continue
+
+                elif isinstance(val, (plt.Figure, plt.Axes)):
+                    # pass the figures and Axe
+                    continue
+
+                else:
                     pars[level + key] = val
 
         _loop_on_obj(objnames)
@@ -1246,11 +1256,28 @@ read = NDIO.read
 write = NDIO.write
 
 if __name__ == '__main__':
+
     # test interactive masks
+
     from spectrochempy.api import *
 
     source = NDDataset.read_omnic(
-         os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+    os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
 
-    source.interactive_masks(kind='stack', colorbar=True, figsize=(9,4))
+    def _test_interactive_masks():
+
+        source.interactive_masks(kind='stack', colorbar=True, figsize=(9,4))
+
+    def _test_save():
+
+        source.save('essai')
+
+        source.plot_stack()
+        source.save('essai2')
+
+        os.remove(os.path.join(scpdata, 'essai.scp'))
+        os.remove(os.path.join(scpdata, 'essai2.scp'))
+
+    _test_save()
+
 

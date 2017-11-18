@@ -69,3 +69,12 @@ def test_save_and_load(IR_source_2D):
 
     #C=NDDataset.load()
 
+def _test_save(IR_source_2D):
+
+    source = IR_source_2D.copy()
+    source.save('essai')
+
+    source.plot_stack()
+    source.save('essai')  # there was a bug due to the saving of mpl axes
+
+    os.remove(os.path.join(scpdata, 'essai.scp'))
