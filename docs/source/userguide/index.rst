@@ -25,6 +25,14 @@ The NDDataset object
 
 	nddataset
 
+Units and uncertainty
+_____________________
+
+.. toctree::
+	:maxdepth: 1
+
+	units_and_uncertainties
+
 Plotting
 ---------------------
 
@@ -34,7 +42,7 @@ Plotting
 	plotting
 
 NMR processing
----------------------
+---------------
 
 .. toctree::
 	:maxdepth: 1
@@ -48,3 +56,12 @@ Databases
 	:maxdepth: 1
 
 	isotope_database
+
+Processing
+___________
+
+
+.. toctree::
+	:maxdepth: 1
+
+	baseline_correction
