@@ -54,7 +54,7 @@ from warnings import warn
 # =============================================================================
 
 import numpy as np
-from traitlets import (List, Unicode, Instance,  Bool, All, Float, validate,
+from traitlets import (List, Unicode, Instance, Bool, All, Float, validate,
                        observe, default)
 import matplotlib.pyplot as plt
 
@@ -85,7 +85,7 @@ from spectrochempy.application import log
 __all__ = ['NDDataset',
 
            # dataset methods
-           #'squeeze',
+           # 'squeeze',
            'sort',
            'swapaxes',
            'transpose',
@@ -208,7 +208,6 @@ class NDDataset(
     _copy = Bool(False)
     _labels_allowed = Bool(False)  # no labels for NDDataset
 
-
     # _ax is a hidden variable containing the matplotlib axis defined
     # for a NDArray object.
     # most generally it is accessed using the public read-only property ax
@@ -240,7 +239,6 @@ class NDDataset(
     @default('_coordset')
     def _coordset_default(self):
         return None  # CoordSet([None for dim in self.shape])
-
 
     @default('_copy')
     def _copy_default(self):
@@ -288,10 +286,9 @@ class NDDataset(
             return
         for i, item in enumerate(coordset):
             if isinstance(item, NDArray) and \
-                                    not isinstance(item, Coord):
+                    not isinstance(item, Coord):
                 coordset[i] = Coord(item)
         return coordset
-
 
     @property
     def coordset(self):
@@ -317,8 +314,8 @@ class NDDataset(
             coordset = CoordSet(
                     [[None] for s in self._data.shape])  # basic coordset
 
-            for i,item in enumerate(value[::-1]):
-                coordset[self._data.ndim-1-i]=item
+            for i, item in enumerate(value[::-1]):
+                coordset[self._data.ndim - 1 - i] = item
 
             for i, coord in enumerate(coordset):
 
@@ -327,7 +324,7 @@ class NDDataset(
                 else:
                     size = coord.size
                 if self.has_complex_dims and self._is_complex[i]:
-                    size = size*2
+                    size = size * 2
                 if size != self._data.shape[i]:
                     raise ValueError(
                             'the size of each coordinates array must '
@@ -510,7 +507,7 @@ class NDDataset(
         inplace : `bool`, optional, default = `False`.
 
             By default a new dataset is returned.
-            Change to `True` to chnage data inplace.
+            Change to `True` to change data inplace.
 
         Returns
         -------
@@ -654,7 +651,8 @@ class NDDataset(
                         # return self itself
                         return self
 
-                args = self.coordset[axis]._argsort(by=by, pos=pos, descend=descend)
+                args = self.coordset[axis]._argsort(by=by, pos=pos,
+                                                    descend=descend)
                 new.coordset[axis] = self.coordset[axis]._take(args)
                 indexes.append(args)
             else:
@@ -746,7 +744,7 @@ class NDDataset(
             if not out.endswith('\n'):
                 out += '\n'
 
-        #if uncertainty is not nouncertainty:
+        # if uncertainty is not nouncertainty:
         #    uncertainty = "(+/-%s)" % self.uncertainty
 
         # units = '{:~K}'.format(
@@ -756,8 +754,8 @@ class NDDataset(
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
                              list(zip(self.shape,
-                                 [False]*self.ndim
-                                 if not self.is_complex else self.is_complex))))
+                                      [False] * self.ndim
+                                      if not self.is_complex else self.is_complex))))
         shape = (' x '.join(['{}{}'] * self.ndim)).format(
                 *shapecplx).replace(
                 'False', '').replace('True', '(complex)')
@@ -768,8 +766,8 @@ class NDDataset(
         out += '    data size: {}{}\n'.format(size, sizecplx) if self.ndim < 2 \
             else '   data shape: {}\n'.format(shape)
 
-        #out += '   data units: {}\n'.format(units)
-        #data_str = str(
+        # out += '   data units: {}\n'.format(units)
+        # data_str = str(
         #        self._uarray(self._data, self._uncertainty)).replace('\n\n',
         #                                                 '\n')
 
@@ -804,7 +802,7 @@ class NDDataset(
         attrs = self.__dir__()
         for attr in ('name', 'description', 'history', 'date', 'modified'):
             attrs.remove(attr)
-        #some attrib are not important for equality
+        # some attrib are not important for equality
         return super(NDDataset, self).__eq__(other, attrs)
 
     # -------------------------------------------------------------------------
@@ -813,8 +811,8 @@ class NDDataset(
 
     def _repr_html_(self):
         tr = "<tr style='border: 1px solid lightgray;'>" \
-              "<td style='padding-right:5px; width:100px'><strong>{}</strong></td>" \
-              "<td style='text-align:left'>{}</td><tr>\n"
+             "<td style='padding-right:5px; width:100px'><strong>{}</strong></td>" \
+             "<td style='text-align:left'>{}</td><tr>\n"
 
         out = "<table style='width:100%'>\n"
 
@@ -823,7 +821,7 @@ class NDDataset(
         out += tr.format("Created", str(self.date))
         out += tr.format("Last Modified", self.modified)
         out += tr.format("Description",
-                self.description.replace('\n', '<br/>'))
+                         self.description.replace('\n', '<br/>'))
 
         if self.history:
             pars = self.history
@@ -842,7 +840,7 @@ class NDDataset(
                      itertools.chain.from_iterable(
                              list(zip(self.shape,
                                       [False] * self.ndim
-                                 if not self.is_complex else self.is_complex))))
+                                      if not self.is_complex else self.is_complex))))
 
         shape = (' x '.join(['{}{}'] * self.ndim)).format(
                 *shapecplx).replace(
@@ -851,7 +849,7 @@ class NDDataset(
         size = self.size
         sizecplx = '' if not self.has_complex_dims else " (complex)"
         sizetxt = '{}{}'.format(size, sizecplx) if self.ndim < 2 \
-                             else '{}'.format(shape)
+            else '{}'.format(shape)
 
         data += tr.format(sh, sizetxt)
 
@@ -867,7 +865,7 @@ class NDDataset(
                 coord_str = coord._repr_html_()
                 out += tr.format("Coordinate %i" % i, coord_str)
                 if out.endswith("\n\n"):
-                    out=out[:-1]
+                    out = out[:-1]
         out += '</table><br/>\n'
 
         return out
@@ -896,7 +894,8 @@ class NDDataset(
             return
 
         # changes in data -> update dates
-        if change['name'] == '_data' and self._date == datetime(1970, 1, 1, 0, 0):
+        if change['name'] == '_data' and self._date == datetime(1970, 1, 1, 0,
+                                                                0):
             self._date = datetime.now()
             self._modified = datetime.now()
 
@@ -913,7 +912,7 @@ class NDDataset(
 
 
 # make some function also accessiibles from the module
-#squeeze = NDDataset.squeeze
+# squeeze = NDDataset.squeeze
 sort = NDDataset.sort
 swapaxes = NDDataset.swapaxes
 transpose = NDDataset.transpose
@@ -929,9 +928,7 @@ real = NDDataset.real
 set_operators(NDDataset, priority=50)
 
 if __name__ == '__main__':
-
     from spectrochempy.api import *
 
     # test with wrong units
     NDDataset([1, 2, 3] * ur.adu, units=ur.adu)
-

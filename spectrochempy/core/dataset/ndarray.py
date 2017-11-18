@@ -84,7 +84,6 @@ from spectrochempy.extern.pint.errors import (DimensionalityError,
 from spectrochempy.extern.uncertainties import unumpy as unp
 from pandas.core.generic import NDFrame, Index
 
-
 # =============================================================================
 # Constants
 # =============================================================================
@@ -195,7 +194,7 @@ class NDArray(HasTraits):
     def __init__(self, data=None, **kwargs):
 
         self._copy = kwargs.pop('copy', False)  # by default
-                        # we try to keep a reference to the data, not copy them
+        # we try to keep a reference to the data, not copy them
 
         self._is_complex = kwargs.pop('is_complex', None)
 
@@ -258,7 +257,7 @@ class NDArray(HasTraits):
                 otherunits = False
             else:
                 raise ValueError("I do not know how to compare "
-                                "{} object with objets of type {} ".format(
+                                 "{} object with objets of type {} ".format(
                         type(self).__name__,
                         type(other).__name__))
 
@@ -275,7 +274,7 @@ class NDArray(HasTraits):
             attrs = self.__dir__()
             attrs.remove('name')
             attrs.remove('title')  # name and title will
-                                          # not be used for comparison
+            # not be used for comparison
         for attr in attrs:
             if hasattr(other, "_%s" % attr):
                 eq &= np.all(
@@ -283,9 +282,11 @@ class NDArray(HasTraits):
                                                                "_%s" % attr))
                 if not eq:
                     log.debug("attributes '{}' are not equals "
-                        "or one is missing: {}, {}" .format(attr,
-                                            getattr(self,  "_%s" % attr),
-                                            getattr(other, "_%s" % attr)))
+                              "or one is missing: {}, {}".format(attr,
+                                                                 getattr(self,
+                                                                         "_%s" % attr),
+                                                                 getattr(other,
+                                                                         "_%s" % attr)))
                     return False
         return eq
 
@@ -309,13 +310,13 @@ class NDArray(HasTraits):
             new._labels = np.array(self._labels[newkeys])
 
         if new._data.size == 0:
-            if not new.is_labeled or new._labels.size ==0:
+            if not new.is_labeled or new._labels.size == 0:
                 raise IndexError("Empty array of shape {}".format(
-                                str(new._data.shape)) + \
-                             "resulted from slicing.\n"
-                             "Check the indexes and make "
-                             "sure to use floats for "
-                             "location slicing")
+                        str(new._data.shape)) + \
+                                 "resulted from slicing.\n"
+                                 "Check the indexes and make "
+                                 "sure to use floats for "
+                                 "location slicing")
 
         new._is_complex = self._is_complex
 
@@ -356,7 +357,7 @@ class NDArray(HasTraits):
             # the uncertainties are modified
             self._uncertainty[internkeys] = value.data
         else:
-            if self.ndim>1 and np.any(self.is_complex[:-1]):
+            if self.ndim > 1 and np.any(self.is_complex[:-1]):
                 raise NotImplementedError("Sorry but setting values for"
                                           "hypercomplex array "
                                           "is not yet possible")
@@ -405,7 +406,6 @@ class NDArray(HasTraits):
     def __str__(self):
         return self._str()
 
-
     # -------------------------------------------------------------------------
     # Properties / validators
     # -------------------------------------------------------------------------
@@ -427,7 +427,7 @@ class NDArray(HasTraits):
         data, complex = interleave(pv)
         # if we have a 1D vector, make a 1 row matrix internally
         if data.ndim == 1:
-            data = data.reshape((1,-1))
+            data = data.reshape((1, -1))
         # handle the complexity
         if not self.has_complex_dims or len(self._is_complex) != data.ndim:
             # init the _is_complex list
@@ -597,7 +597,7 @@ class NDArray(HasTraits):
 
         if self.ndim > 1:
             warnings.warn('We cannot set the labels for '
-                                     'multidimentional data - '
+                          'multidimentional data - '
                           'Thus, these labels are ignored',
                           SpectroChemPyWarning)
             return None
@@ -613,7 +613,7 @@ class NDArray(HasTraits):
         if self.data is None and labels.shape[-1] != self.shape[-1]:
             raise ValueError(
                     "labels {} and data {} shape mismatch!".format(
-                    labels.shape, self.shape))
+                            labels.shape, self.shape))
 
         if self.has_complex_dims:
             for axis in self.iterdims:
@@ -699,7 +699,7 @@ class NDArray(HasTraits):
             elif mask.shape != self.shape:
                 raise ValueError(
                         "mask {} and data {} shape mismatch!".format(
-                        mask.shape, self.shape))
+                                mask.shape, self.shape))
 
             # mask need to be replicated on the imaginary part if data are complex
             if self.has_complex_dims and mask is not nomask:
@@ -797,7 +797,6 @@ class NDArray(HasTraits):
                 self._title = 'untitled'
         return self._title
 
-
     # .........................................................................
     @title.setter
     def title(self, title):
@@ -819,6 +818,7 @@ class NDArray(HasTraits):
             return uncertainty.copy()
         else:
             return uncertainty
+
     # .........................................................................
     @default('_uncertainty')
     def _get_uncertainty_default(self):
@@ -880,8 +880,7 @@ class NDArray(HasTraits):
 
         # if we have a 1D vector, make a 1 row matrix internally
         if self._data.ndim == 1:
-            self._uncertainty = self._uncertainty.reshape((1,-1))
-
+            self._uncertainty = self._uncertainty.reshape((1, -1))
 
     # .........................................................................
     @property
@@ -986,7 +985,7 @@ class NDArray(HasTraits):
     # .........................................................................
     @default('_is_complex')
     def _get_is_complex_default(self):
-        return [False]*self._data.ndim
+        return [False] * self._data.ndim
 
     # .........................................................................
     @property
@@ -1176,8 +1175,9 @@ class NDArray(HasTraits):
         imaginary part of the data contained in this object.
         """
         if not self._is_complex[-1]:
-            warnings("This array is not complex, so we can't get imaginary data",
-                     SpectroChemPyWarning)
+            warnings(
+                "This array is not complex, so we can't get imaginary data",
+                SpectroChemPyWarning)
 
         new = self.copy()
         new._is_complex[-1] = False
@@ -1255,10 +1255,12 @@ class NDArray(HasTraits):
         Parameters
         ----------
         axis : `int`, Optional, default: -1.
+
             The axis along which the absolute value should be calculated.
 
         inplace : `bool`, optional, default=``False``
-            should we return a new dataset (default) or not (inplace=True)
+
+            function return a new object (default) or not (inplace=True)
 
         Returns
         -------
@@ -1303,10 +1305,12 @@ class NDArray(HasTraits):
         Returns
         -------
         object : same type.
+
             an exact copy of the current object.
 
         Examples
         --------
+
         >>> nd1 = NDArray([1.+2.j,2.+ 3.j])
         >>> nd1
         NDArray: [   1.000,    2.000,    2.000,    3.000] unitless
@@ -1347,9 +1351,15 @@ class NDArray(HasTraits):
         ----------
         other : NDArray
 
+            The NDArray for which we want to compare units compatibility
+
         Returns
         -------
+
         compat : `bool`
+
+        Examples
+        --------
 
         >>> nd1 = NDArray([1.+2.j,2.+ 3.j], units='meters')
         >>> print(nd1)
@@ -1358,7 +1368,7 @@ class NDArray(HasTraits):
         >>> nd2 = NDArray([1.+2.j,2.+ 3.j], units='seconds')
         >>> nd1.is_units_compatible(nd2)
         False
-        >>> nd1.to('minutes', force=True)
+        >>> nd1.ito('minutes', force=True)
         NDArray: [   1.000,    2.000,    2.000,    3.000] min
         >>> nd1.is_units_compatible(nd2)
         True
@@ -1375,8 +1385,7 @@ class NDArray(HasTraits):
         return True
 
     # .........................................................................
-    @deprecated('use ``to`` instead')
-    def ito(self, other):
+    def ito(self, other, force=False):
         """Inplace scaling of the current object data to different units.
 
         (same as :attr:`to` with inplace=`True`).
@@ -1384,11 +1393,17 @@ class NDArray(HasTraits):
         Parameters
         ----------
         other : `Quantity` or `str`.
+
             destination units.
+
+        force: `bool`, optional, default: False
+
+            If True the change of units is forced, even for imcompatible units
 
         Returns
         -------
         object : same type
+
             same object with new units.
 
         See Also
@@ -1396,7 +1411,7 @@ class NDArray(HasTraits):
         to
 
         """
-        return self.to(other, inplace=True)
+        return self.to(other, inplace=True, force=force)
 
     # .........................................................................
     def part(self, select='ALL'):
@@ -1424,7 +1439,7 @@ class NDArray(HasTraits):
         if select == 'ALL':
             select = 'R' * self.ndim
         if self.ndim == 1:
-            select = '*'+select
+            select = '*' + select
         ma = self._uncert_data
         for axis, component in enumerate(select):
             if self._is_complex[axis]:
@@ -1438,10 +1453,10 @@ class NDArray(HasTraits):
                             'components must be indicated with R, I or *')
                 ma = data.swapaxes(axis, -1)
                 new._is_complex[axis] = False
-        #if isinstance(ma, np.ma.masked_array):
+        # if isinstance(ma, np.ma.masked_array):
         #    new._data = ma.data
         #    new._mask = ma.mask
-        #else:
+        # else:
         #    new._data = ma
         if hasattr(ma, 'mask'):
             new._mask = ma.mask
@@ -1488,6 +1503,7 @@ class NDArray(HasTraits):
         ----------
         axis :  `int`
             The axis along which the data must be considered real.
+
         """
         if axis < 0:
             axis = self.ndim + axis
@@ -1591,9 +1607,9 @@ class NDArray(HasTraits):
 
             Second axis.
 
-        inplace : bool, optional, default = False
+        inplace : `bool`, optional, default=``False``
 
-            if False a new object is returned
+            function return a new object (default) or not (inplace=True)
 
         Returns
         -------
@@ -1645,7 +1661,7 @@ class NDArray(HasTraits):
         return new
 
     # .........................................................................
-    def to(self, other, inplace=True, force=False):
+    def to(self, other, inplace=False, force=False):
         """Return the object with data rescaled to different units.
 
         Parameters
@@ -1655,10 +1671,9 @@ class NDArray(HasTraits):
 
             destination units.
 
-        inplace : `bool`, optional, default = `True`.
+        inplace : `bool`, optional, default=``False``
 
-            if inplace is True, the object itself is returned with
-            the new units. If `False` a copy is created.
+            function return a new object (default) or not (inplace=True)
 
         force: `bool`, optional, default: False
 
@@ -1699,10 +1714,15 @@ class NDArray(HasTraits):
         NDArray: [[  --,    0.316,    0.184],
                   [   0.205,   --,    0.596],
                   [   0.965,    0.653,   --]] s
+
+        By default the conversion is not done inplace, so the original is not
+        modified:
         >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         [[  --    0.316    0.184]
          [   0.205   --    0.596]
-         [   0.965    0.653   --]] s
+         [   0.965    0.653   --]] m
+
+
 
         """
         if inplace:
@@ -1748,7 +1768,7 @@ class NDArray(HasTraits):
         return new
 
     # .........................................................................
-    def plus_minus(self, uncertainty, inplace=True):
+    def plus_minus(self, uncertainty, inplace=False):
         """
         Set the uncertainty of a NDArray
 
@@ -1760,17 +1780,30 @@ class NDArray(HasTraits):
             Uncertainty to apply to the array. If it's an array, it must have
             the same shape as the NDArray shape.
 
+        inplace : `bool`, optional, default=``False``
+
+            function return a new object (default) or not (inplace=True)
+
+        Returns
+        -------
+        array: a NDArray with uncertainty
+
         Examples
         --------
+
         >>> np.random.seed(12345)
         >>> ndd = NDArray( data = np.random.random((3)))
         >>> ndd.plus_minus(.2)
+        NDArray: [   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200] unitless
         >>> ndd # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        NDArray: [   0.930+/-0.200,  ...  0.184+/-0.200] unitless
+        NDArray: [   0.930,  ...  0.184] unitless
 
         >>> np.random.seed(12345)
         >>> ndd = NDArray( data = np.random.random((3,3)), units='m')
-        >>> ndd.plus_minus(.2)
+        >>> ndd.plus_minus(.2, inplace=True) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        NDArray: [[   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200],
+              [   0.205+/-0.200,    0.568+/-0.200,    0.596+/-0.200],
+              [   0.965+/-0.200,    0.653+/-0.200,    0.749+/-0.200]] m
         >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         [[   0.930+/-0.200    ...  0.749+/-0.200]] m
 
@@ -1781,7 +1814,7 @@ class NDArray(HasTraits):
             new = self.copy()
 
         if isinstance(uncertainty, float):
-            new.uncertainty = np.ones(new._data.shape)*uncertainty
+            new.uncertainty = np.ones(new._data.shape) * uncertainty
         else:
             new.uncertainty = uncertainty
 
@@ -1810,7 +1843,7 @@ class NDArray(HasTraits):
             body = np.array2string(
                     d.squeeze(), separator=' ',
                     prefix=pref)
-            body = body.replace('\n',sep)
+            body = body.replace('\n', sep)
             text = ''.join([pref, body, units])
             text += sep
             return text
@@ -1852,7 +1885,7 @@ class NDArray(HasTraits):
             by = 'value'
             pos = None
             warnings.warn('no label to sort, use ``value`` by default',
-                              SpectroChemPyWarning)
+                          SpectroChemPyWarning)
             args = np.argsort(self.data)
 
         elif 'label' in by and self.is_labeled:
@@ -1861,7 +1894,7 @@ class NDArray(HasTraits):
                 # multidimentional labels
                 if not pos:
                     pos = 0
-                    #try to find a pos in the by string
+                    # try to find a pos in the by string
                     pattern = re.compile("label\[(\d)\]")
                     p = pattern.search(by)
                     if p is not None:
@@ -1874,7 +1907,7 @@ class NDArray(HasTraits):
             warnings.warn(
                     'parameter `by` should be set to `value` or `label`, '
                     'use ``value`` by default',
-                              SpectroChemPyWarning)
+                    SpectroChemPyWarning)
             args = np.argsort(self.data)
 
         if descend:
@@ -1910,12 +1943,13 @@ class NDArray(HasTraits):
 
             if stop is not None and not isinstance(stop, (int, np.int_)):
                 stop = self._loc2index(stop, axis)
-                if stop < start: # and self.coordset[axis].is_reversed:
+                if stop < start:  # and self.coordset[axis].is_reversed:
                     start, stop = stop, start
                 stop = stop + 1
 
             if step is not None and not isinstance(step, (int, np.int_)):
-                raise NotImplementedError('step in location slicing is not yet possible.')
+                raise NotImplementedError(
+                    'step in location slicing is not yet possible.')
                 # TODO: we have may be a special case with datetime
                 step = 1
 
@@ -1968,8 +2002,8 @@ class NDArray(HasTraits):
             # case or 1D spectra or of array with complex dimensions
             # this need some attention to have a correct slicing
             # because, the user is not aware of the internal representation
-            newkeys=[]
-            i=0
+            newkeys = []
+            i = 0
             for size in self._data.shape:
                 # loop on the real shape, and make the keys correspondind to
                 # dimension which are not of lenght one.
@@ -1978,7 +2012,7 @@ class NDArray(HasTraits):
                     newkeys.append(slice(None))
                 else:
                     if not keys:
-                        #list of keys already completely used
+                        # list of keys already completely used
                         newkeys.append(slice(None))
                     else:
                         newkeys.append(keys.pop(0))
@@ -2058,28 +2092,28 @@ class NDArray(HasTraits):
         else:
             return uar
 
-    # # .........................................................................
-    # @staticmethod
-    # def _uarray(data, uncertainty, units=None, force=False):
-    #     # return the array with uncertainty and units if any
-    #
-    #     # the handling of uncertainties have a great price in performance.
-    #     # Let's avoid it if not necessary
-    #
-    #     if (uncertainty is None or not gt_eps(uncertainty)) and not force:
-    #         uar = data
-    #     else:
-    #         try:
-    #             if not np.any(uncertainty):
-    #                 uncertainty = np.zeros_like(data).astype(float)
-    #             uar = unp.uarray(data, uncertainty)
-    #         except TypeError:
-    #             uar = data
-    #
-    #     if units:
-    #         return Quantity(uar, units)
-    #     else:
-    #         return uar
+            # # .........................................................................
+            # @staticmethod
+            # def _uarray(data, uncertainty, units=None, force=False):
+            #     # return the array with uncertainty and units if any
+            #
+            #     # the handling of uncertainties have a great price in performance.
+            #     # Let's avoid it if not necessary
+            #
+            #     if (uncertainty is None or not gt_eps(uncertainty)) and not force:
+            #         uar = data
+            #     else:
+            #         try:
+            #             if not np.any(uncertainty):
+            #                 uncertainty = np.zeros_like(data).astype(float)
+            #             uar = unp.uarray(data, uncertainty)
+            #         except TypeError:
+            #             uar = data
+            #
+            #     if units:
+            #         return Quantity(uar, units)
+            #     else:
+            #         return uar
 
 
 # =============================================================================
@@ -2136,10 +2170,10 @@ class CoordSet(HasTraits):
 
         if all([isinstance(coords[i], (NDArray, CoordSet))
                 for i in range(len(coords))]):
-                # Any instance of a NDArray can be accepted as coordinates for a
-                # dimension.
-                # If an instance of CoordSet is found, this means that all
-                # coordinates in this set describe the same axis
+            # Any instance of a NDArray can be accepted as coordinates for a
+            # dimension.
+            # If an instance of CoordSet is found, this means that all
+            # coordinates in this set describe the same axis
 
             coords = list(coords)
 
@@ -2181,9 +2215,9 @@ class CoordSet(HasTraits):
                 siz = item[0].size
                 if np.any([elt.size != siz for elt in item._coords]):
                     raise ValueError(
-                                        'Coordinates must be of the same size '
-                                        'for a dimension with multiple '
-                                        'coordinates')
+                            'Coordinates must be of the same size '
+                            'for a dimension with multiple '
+                            'coordinates')
 
     # -------------------------------------------------------------------------
     # Properties
@@ -2330,7 +2364,7 @@ class CoordSet(HasTraits):
             # not applicable for same dimension coords
             warnings.warn(
                     'CoordSet for a single dimension are not transposable',
-                              SpectroChemPyWarning)
+                    SpectroChemPyWarning)
             return
         if coords is None:
             self._coords.reverse()
@@ -2343,7 +2377,7 @@ class CoordSet(HasTraits):
 
         if not isinstance(item, (NDArray, CoordSet)):
             raise ValueError('The elements of must be NDArray or '
-                                'CoordSet objects only!')
+                             'CoordSet objects only!')
 
         if item._name in self.names:
             raise ValueError('The Coord name must be unique!')

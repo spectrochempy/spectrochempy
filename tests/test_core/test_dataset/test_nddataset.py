@@ -185,12 +185,12 @@ def test_uncertainties_and_units(nd1d):
 
     nd.units = 'cm'
     nd2 = np.sqrt(nd)
-    nd.to('m')
+    nd.ito('m')
     nd2 = np.sqrt(nd)
     assert isinstance(nd2, type(nd))
     assert nd2.data[1] == np.sqrt(nd.data[1])
     assert nd2.units == ur.m ** .5
-    assert np.round(nd2.uncertainty[1], 4) == 0.0071
+    assert np.round(nd2.uncertainty[1], 4) == 0.0007
 
 def test_initializing_from_nddataset():
     d1 = NDDataset(np.ones((5, 5)))

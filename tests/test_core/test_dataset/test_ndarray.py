@@ -251,12 +251,9 @@ def test_set_ndarray_with_units(ndarray):
     assert nd.units == ur.meter
 
     nd1 = nd.to('km')
-    assert nd.units == ur.kilometer
+    assert nd.units != ur.kilometer # not inplace
     assert nd1.units == ur.kilometer
-    with catch_warnings() as w:
-        nd.ito('m')
-        assert w[0].category == SpectroChemPyDeprecationWarning
-    nd.to('m')
+    nd.ito('m')
     assert nd.units == ur.meter
 
     # change of units - ok if it can be casted to the current one
@@ -267,7 +264,7 @@ def test_set_ndarray_with_units(ndarray):
         nd.units = 'radian'
 
     # we can force them
-    nd.to('radian', force=True)
+    nd.ito('radian', force=True)
 
     assert 1 * nd.units == 1. * ur.dimensionless
     assert nd.units.dimensionless
@@ -308,7 +305,7 @@ def test_ndarray_with_uncertainty(ndarray):
     assert not nd.is_uncertain
     assert repr(nd).startswith('NDArray: ')
     nd._uncertainty = np.abs(nd._data * .01)
-    nd.to('second', force=True) # force a change of units
+    nd.ito('second', force=True) # force a change of units
     assert nd.is_uncertain
     assert repr(nd).startswith('NDArray: ')
     assert str(nd.values[0,0]) == "4.30+/-0.04 second"
@@ -328,13 +325,13 @@ def test_ndarray_units(ndarray):
     nd.units = 'm'
     nd2.units = 'km'
     assert nd.is_units_compatible(nd2)
-    nd2.to('radian',  force=True)
+    nd2.ito('radian',  force=True)
     assert not nd.is_units_compatible(nd2)
 
 
 def test_ndarray_with_uncertaincy_and_units(ndarray):
     nd = ndarray.copy()
-    nd.to('m', force=True)
+    nd.ito('m', force=True)
     assert nd.units == ur.meter
     assert not nd.is_uncertain
     assert repr(nd).startswith('NDArray: ')
@@ -655,10 +652,11 @@ def test_ndarray_str_representation_for_complex():
 
 def test_ndarray_plusminus():
     ds = NDArray([1.,2.,3.])
-    ds.plus_minus(.1)
-    assert str(ds[0])=="1.0+/-0.1"
+    dsu = ds.plus_minus(.1)
+    assert str(ds[0]) == "1.0" # not  inplace
+    assert str(dsu[0])=="1.0+/-0.1"
     np.random.seed(12345)
     ndd = NDArray(data=np.random.random((3, 3)), units='m')
-    ndd.plus_minus(.2)
+    ndd.plus_minus(.2, inplace=True)
     assert str(ndd).startswith('[[   0.930+/-0.200')
     assert str(ndd).endswith('0.749+/-0.200]] m')
