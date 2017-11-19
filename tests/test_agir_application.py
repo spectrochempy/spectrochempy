@@ -101,13 +101,5 @@ def test_slicing_agir(samples):
 
     #options.log_level = DEBUG
 
-    axes = subplots(nrow=1, ncol=3, figsize=(9, 3))
-
-    for ax, sample in zip(axes.values(), samples.values()):
-        s = sample['IR']
-        s.plot_stack(ax=ax, colorbar=False)
-        label = sample['label']
-        title = 'sample {}'.format(label)
-        s.ax.set_title(title, fontsize=16)
 
 

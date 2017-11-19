@@ -120,10 +120,15 @@ def make_docs(*options):
     """Make the html and pdf documentation
 
     """
-    # make sure commits have been done
-    gitcommands()
+
 
     options = list(options)
+    if 'release' in options:
+        do_release()
+        return
+
+    # make sure commits have been done
+    gitcommands()
 
     DEBUG = 'DEBUG' in options
 
@@ -171,8 +176,7 @@ def make_docs(*options):
         "\n\nBuild finished. The {0} pages are in {1}/www/{2}.".format(
             builder.upper(), BUILDDIR, builder))
 
-    if 'release' in options:
-        do_release()
+
 
 
 def do_release():
