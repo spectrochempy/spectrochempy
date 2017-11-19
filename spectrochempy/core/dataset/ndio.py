@@ -241,12 +241,11 @@ class NDIO(HasTraits):
                     pars[level + key] = val.to_dict()
 
                 elif val is None:
-
                     continue
 
                 elif isinstance(val, dict) and key == 'axes':
-                        # do not save the matplotlib axes
-                        continue
+                    # do not save the matplotlib axes
+                    continue
 
                 elif isinstance(val, (plt.Figure, plt.Axes)):
                     # pass the figures and Axe

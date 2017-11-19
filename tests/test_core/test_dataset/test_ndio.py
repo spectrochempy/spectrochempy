@@ -69,7 +69,7 @@ def test_save_and_load(IR_source_2D):
 
     #C=NDDataset.load()
 
-def _test_save(IR_source_2D):
+def test_save(IR_source_2D):
 
     source = IR_source_2D.copy()
     source.save('essai')
