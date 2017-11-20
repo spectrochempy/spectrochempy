@@ -43,24 +43,13 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 
 from spectrochempy.application import plotoptions
-from spectrochempy.core.plotters.utils import make_label, cmyk2rgb
+from spectrochempy.core.plotters.utils import make_label
+from spectrochempy.utils import is_sequence
 
-__all__ = ['plot_1D','plot_lines','plot_scatter', 'NBlack', 'NRed', 'NBlue',
-           'NGreen']
 
-_methods = ['plot_1D','plot_lines','plot_scatter']
+__all__ = ['plot_1D','plot_lines','plot_scatter', 'plot_multiple']
 
-# For color blind people, it is safe to use only 4 colors in graphs:
-# see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
-#   Black CMYK=0,0,0,0
-#   Red CMYK= 0, 77, 100, 0 %
-#   Blue CMYK= 100, 30, 0, 0 %
-#   Green CMYK= 85, 0, 60, 10 %
-NBlack = (0, 0, 0)
-NRed = cmyk2rgb(0, 77, 100, 0)
-NBlue = cmyk2rgb(100, 30, 0, 0)
-NGreen = cmyk2rgb(100, 30, 0, 0)  # <- Blue cmyk2rgb(85,0,60,10)
-
+_methods = __all__[:]
 
 # plot lines (default) --------------------------------------------------------
 
@@ -73,10 +62,11 @@ def plot_lines(source, **kwargs):
     """
     kwargs['kind'] = 'lines'
     temp = source.copy()
-    plot_1D(temp, **kwargs)
+    ax = plot_1D(temp, **kwargs)
     source._axes = temp._axes
     source._fig = temp._fig
     source._fignum = temp._fignum
+    return ax
 
 
 # plot scatter ----------------------------------------------------------------
@@ -90,10 +80,87 @@ def plot_scatter(source, **kwargs):
     """
     kwargs['kind'] = 'scatter'
     temp = source.copy()
-    plot_1D(temp, **kwargs)
+    ax = plot_1D(temp, **kwargs)
     source._axes = temp._axes
     source._fig = temp._fig
     source._fignum = temp._fignum
+    return ax
+
+
+# plot lines (default) --------------------------------------------------------
+
+def plot_lines(source, **kwargs):
+    """
+    Plot a 1D dataset with solid lines by default.
+
+    Alias of plot_1D (with `kind` argument set to ``lines``.
+
+    """
+    kwargs['kind'] = 'lines'
+    temp = source.copy()
+    ax = plot_1D(temp, **kwargs)
+    source._axes = temp._axes
+    source._fig = temp._fig
+    source._fignum = temp._fignum
+    return ax
+
+# plot multiple ----------------------------------------------------------------
+
+def plot_multiple(sources, kind='scatter', lines=True,
+                  labels = None, **kwargs):
+    """
+    Plot a series of 1D datasets as a scatter plot
+    (points can be added on lines).
+
+    Parameters
+    ----------
+
+    sources : a list of ndatasets
+
+    kind : `str` among [scatter, lines]
+
+    lines : `bool`, optional, default=``True``
+
+        if kind is scatter, this flag tells to draw also the lines
+        between the marks.
+
+    labels : a list of str, optional
+
+        labels used for the legend.
+
+    **kwargs : other parameters that will be passed to the plot1D function
+
+    """
+    if not is_sequence(sources):
+        # we need a sequence. Else it is a single plot.
+        return sources.plot(**kwargs)
+
+    if not is_sequence(labels) or len(labels)!=len(sources):
+        # we need a sequence of labels of same lentgh as sources
+        raise ValueError('the list of labels must be of same length '
+                         'as the sources list')
+
+    for source in sources:
+        if source.ndim > 1:
+            raise NotImplementedError('plot multiple is designed to work on '
+                                      '1D dataset only. you may achieved '
+                                      'several plots with '
+                                      'the `hold` parameter as a work around '
+                                      'solution')
+
+    hold = False
+    for s in sources : #, colors, markers):
+
+        ax = s.plot(kind= kind, lines=True, hold=hold, **kwargs)
+        hold = True
+        # hold is necessary for the next plot to say
+        # that we will plot on the same figure
+
+    legend = kwargs.get('legend', None)
+    if legend is not None:
+        leg = ax.legend(ax.lines, labels, shadow=True, loc=legend,
+                        frameon=True, facecolor='lightyellow')
+    return ax
 
 
 # ------------------------------------------------------------------------------
@@ -222,20 +289,20 @@ def plot_1D(source, **kwargs):
     # plot the source
     # -------------------------------------------------------------------------
 
-    kind = kwargs.get('kind','lines')
-    lines = kwargs.get('lines',False) # in case it is scatter,
+    kind = kwargs.pop('kind','lines')
+    lines = kwargs.pop('lines',False) # in case it is scatter,
                                       # we can also show the lines
     lines = kind=='lines' or lines
     scatter = kind=='scatter' and not lines
     scatlines = kind=='scatter' and lines
 
-    show_complex = kwargs.get('show_complex', False)
+    show_complex = kwargs.pop('show_complex', False)
 
-    color = kwargs.get('color', kwargs.get('c'))
-    lw = kwargs.get('linewidth', kwargs.get('lw', 1.))
-    ls = kwargs.get('linestyle', kwargs.get('ls', '-'))
+    color = kwargs.get('color', kwargs.get('c', None))    # default to rc
+    lw = kwargs.get('linewidth', kwargs.get('lw', None))  # default to rc
+    ls = kwargs.get('linestyle', kwargs.get('ls', None))  # default to rc
 
-    marker = kwargs.get('marker', kwargs.get('m', 'o'))
+    marker = kwargs.get('marker', kwargs.get('m', None))  # default to rc
     markersize = kwargs.get('markersize', kwargs.get('ms', 5.))
     markevery = kwargs.get('markevery', kwargs.get('me', 1))
 
@@ -243,22 +310,22 @@ def plot_1D(source, **kwargs):
     x = source.x
 
     # ordinates (by default we plot real part of the data)
-    if not kwargs.get('imag', False) or kwargs.get('show_complex', False):
+    if not kwargs.pop('imag', False) or kwargs.get('show_complex', False):
         z = source.real
     else:
         z = source.imag
 
     # offset
-    offset = kwargs.get('offset', 0.0)
+    offset = kwargs.pop('offset', 0.0)
     z = z - offset
 
     # plot_lines
     # -----------------------------
     if scatlines:
-        line, = ax.plot(x.data, z.masked_data, marker = marker, markersize = markersize,
+        line, = ax.plot(x.data, z.masked_data,  markersize = markersize,
                                         markevery = markevery)
     elif scatter:
-        line, = ax.plot(x.data, z.masked_data, lw=0, marker = marker, markersize = markersize,
+        line, = ax.plot(x.data, z.masked_data, lw=0,  markersize = markersize,
                                         markevery = markevery)
     elif lines:
         line, = ax.plot(x.data, z.masked_data)
@@ -353,3 +420,22 @@ def plot_1D(source, **kwargs):
         ax.haxlines()
 
     source._plot_resume(**kwargs)
+
+    return ax
+
+if __name__ == '__main__':
+
+    from spectrochempy.api import *
+    source = NDDataset.read_omnic(
+            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))[:,::100]
+
+    source.plot_stack()
+
+    sources = [source[0], source[10], source[20], source[50], source[53]]
+    labels = ['sample {}'.format(label) for label in
+              ["S1", "S10", "S20", "S50", "S53"]]
+
+    plot_multiple(kind = 'scatter', sources=sources, labels=labels, legend=True)
+
+
+    plt.show()

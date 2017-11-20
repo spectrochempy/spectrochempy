@@ -53,6 +53,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import SpanSelector
 from matplotlib.lines import Line2D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from cycler import cycler
 
 import numpy as np
 from numpy.compat import asbytes, asstr
@@ -71,6 +72,7 @@ from spectrochempy.core.units import Unit
 from spectrochempy.gui import gui
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
+from spectrochempy.core.plotters.utils import  cmyk2rgb
 from spectrochempy.application import plotoptions, log, options
 
 # Constants
@@ -88,7 +90,10 @@ __all__ = ['NDIO',
 
            # 'interactive_masks',
            'set_figure_style',
-           'available_styles'
+           'available_styles',
+
+           'NBlack', 'NRed', 'NBlue', 'NGreen',
+
 
            ]
 _classes = ['NDIO']
@@ -610,7 +615,8 @@ dpi : [ None | scalar > 0]
         # Execute the plotter
         # --------------------
 
-        _plotter(**kwargs)
+        return _plotter(**kwargs)
+
 
     # --------------------------------------------------------------------------
     # setup figure properties
@@ -672,6 +678,22 @@ dpi : [ None | scalar > 0]
             ax = self._fig.gca()
             ax.name = 'main'
             self.axes['main'] = ax
+
+        if ax is not None and kwargs.get('kind') in ['scatter']:
+            ax.set_prop_cycle(
+                        cycler('color',
+                               [NBlack, NBlue, NRed, NGreen]*3) +
+                        cycler('linestyle',
+                               ['-', '--', ':', '-.']*3) +
+                        cycler('marker',
+                               ['o', 's', '^']*4))
+        elif ax is not None and kwargs.get('kind') in ['lines']:
+            ax.set_prop_cycle(
+                    cycler('color',
+                           [NBlack, NBlue, NRed, NGreen] ) +
+                    cycler('linestyle',
+                           ['-', '--', ':', '-.']) )
+
 
         # Get the number of the present figure
         self._fignum = self._fig.number
@@ -824,15 +846,15 @@ dpi : [ None | scalar > 0]
 
         if temp.ndim == 1:
 
-            temp.plot_1D(**kwargs)
+            ax = temp.plot_1D(**kwargs)
 
         elif temp.ndim == 2:
 
-            temp.plot_2D(**kwargs)
+            ax = temp.plot_2D(**kwargs)
 
         elif temp.ndim == 3:
 
-            temp.plot_3D(**kwargs)
+            ax = temp.plot_3D(**kwargs)
 
         else:
             log.error('Cannot guess an adequate plotter. I did nothing!')
@@ -842,6 +864,7 @@ dpi : [ None | scalar > 0]
         self._fig = temp._fig
         self._fignum = temp._fignum
 
+        return ax
 
     # --------------------------------------------------------------------------
     # interactive functions
@@ -1219,12 +1242,22 @@ def show():
         if curfig(True):  # True to avoid opening a new one
             plt.show()
 
+# For color blind people, it is safe to use only 4 colors in graphs:
+# see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
+#   Black CMYK=0,0,0,0
+#   Red CMYK= 0, 77, 100, 0 %
+#   Blue CMYK= 100, 30, 0, 0 %
+#   Green CMYK= 85, 0, 60, 10 %
+NBlack = (0, 0, 0)
+NRed = cmyk2rgb(0, 77, 100, 0)
+NBlue = cmyk2rgb(100, 30, 0, 0)
+NGreen = cmyk2rgb(85,0,60,10)
+
 def set_figure_style(**kwargs):
+
 
     # set temporarity a new style if any
     # ----------------------------------
-    plt.style.use('classic')
-    plt.style.use(plotoptions.style)
     style = kwargs.get('style', None)
 
     if style:
@@ -1234,16 +1267,16 @@ def set_figure_style(**kwargs):
             style = [style]
         style = [plotoptions.style] + list(style)
         plt.style.use(style)
-
-    # other properties
-    # ---------------------------------------
-
-    fontsize = mpl.rcParams['font.size'] = \
-        kwargs.get('fontsize', mpl.rcParams['font.size'])
-    mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
-    mpl.rcParams['xtick.labelsize'] = int(fontsize)
-    mpl.rcParams['ytick.labelsize'] = int(fontsize)
-
+    else:
+        plt.style.use('classic')
+        plt.style.use(plotoptions.style)
+        fontsize = mpl.rcParams['font.size'] = \
+            kwargs.get('fontsize', mpl.rcParams['font.size'])
+        mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
+        mpl.rcParams['xtick.labelsize'] = int(fontsize)
+        mpl.rcParams['ytick.labelsize'] = int(fontsize)
+        mpl.rcParams['axes.prop_cycle']=(
+                               cycler('color', [NBlack, NBlue, NRed, NGreen]))
 
 def available_styles():
     return ['notebook', 'paper', 'poster', 'talk', 'sans']

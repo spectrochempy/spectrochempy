@@ -111,3 +111,5 @@ class PlotOptions(Configurable):
 
     cexponent = Float(1.2).tag(config=True)
     calpha = Float(1).tag(config=True)
+
+    #TODO : make some use of these options! not the case for now

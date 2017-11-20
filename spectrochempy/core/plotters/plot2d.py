@@ -75,10 +75,11 @@ def plot_map(source, **kwargs):
     """
     kwargs['kind'] = 'map'
     temp = source.copy()
-    plot_2D(temp, **kwargs)
+    ax = plot_2D(temp, **kwargs)
     source._axes = temp._axes
     source._fig = temp._fig
     source._fignum = temp._fignum
+    return ax
 
 
 # stack plot  -----------------------------------------------------------------
@@ -92,10 +93,11 @@ def plot_stack(source, **kwargs):
     """
     kwargs['kind'] = 'stack'
     temp = source.copy()
-    plot_2D(temp, **kwargs)
+    ax = plot_2D(temp, **kwargs)
     source._axes = temp._axes
     source._fig = temp._fig
     source._fignum = temp._fignum
+    return ax
 
 
 # image plot --------------------------------------------------------
@@ -109,10 +111,11 @@ def plot_image(source, **kwargs):
     """
     kwargs['kind'] = 'image'
     temp = source.copy()
-    plot_2D(temp, **kwargs)
+    ax = plot_2D(temp, **kwargs)
     source._axes = temp._axes
     source._fig = temp._fig
     source._fignum = temp._fignum
+    return  ax
 
 
 # generic plot (default stack plot) -------------------------------------------
@@ -406,8 +409,9 @@ def plot_2D(source, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
-
     source._plot_resume(**kwargs)
+
+    return ax
 
 
 # =============================================================================
