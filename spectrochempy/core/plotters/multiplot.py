@@ -292,7 +292,7 @@ def multiplot( sources=[], labels=[],
     x0 = ybox.x0
     transx = mpl.transforms.blended_transform_factory(
                             mpl.transforms.IdentityTransform(), fig.transFigure)
-    xpad = axy.get_text_widths(renderer)[0]-fsize/1.5
+    xpad = axy.get_text_widths(renderer)[0]-fsize
     axy.set_label_coords(x0-xpad, ym, transform=transx)
 
     return axes

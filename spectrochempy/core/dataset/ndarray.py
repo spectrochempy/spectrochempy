@@ -1469,6 +1469,14 @@ class NDArray(HasTraits):
         return new
 
     # .........................................................................
+    def remove_masks(self):
+        """
+        Remove all masks previously set on this array
+
+        """
+        self._mask = nomask
+        
+    # .........................................................................
     def set_complex(self, axis):
         """
         Set the data along the given dimension as complex
