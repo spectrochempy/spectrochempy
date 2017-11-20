@@ -51,7 +51,7 @@ from matplotlib.widgets import SpanSelector
 # -----------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndcoords import CoordRange
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.plotters.multiplot import subplots
+from spectrochempy.core.plotters.multiplot import multiplot
 
 
 __all__ = ['BaselineCorrection']
@@ -251,20 +251,30 @@ class BaselineCorrection(HasTraits):
 
         """
         self._setup(**kwargs)
+        sources = [self.source, self.source]
+        labels = ['\nClick & span with left mouse button to set a baseline region.'
+                      '\nClick on right button on a region to remove it.',
+                  'Baseline corrected dataset preview']
+        axes = multiplot(sources, labels,
+                  kind='stack',
+                  sharex=True,
+                  nrow = 2,
+                  ncol = 1,
+                  figsize=(9, 6),
+                  suptitle = 'INTERACTIVE BASELINE CORRECTION')
 
-
-        axes = subplots(2, 1, figsize=(9, 6))
+        #axes = subplots(2, 1, figsize=(9, 6))
         fig = plt.gcf()
 
-        ax1 = axes['axe1']
-        ax2 = axes['axe2']
+        ax1 = axes['axe11']
+        ax2 = axes['axe21']
 
-        ax1.set_title('\nClick & span with left mouse button to set a baseline region.'
-                      '\nClick on right button on a region to remove it.',
-                      fontweight='bold')
-        fig.suptitle('INTERACTIVE BASELINE CORRECTION')
+        #ax1.set_title('\nClick & span with left mouse button to set a baseline region.'
+        #              '\nClick on right button on a region to remove it.',
+        #              fontweight='bold')
+        #fig.suptitle('INTERACTIVE BASELINE CORRECTION')
 
-        self.source.plot_stack(ax=ax1, colorbar=False, hold=True)
+        #self.source.plot_stack(ax=ax1, colorbar=False, hold=True)
 
         sps = []
 
