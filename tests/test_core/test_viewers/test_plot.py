@@ -43,7 +43,7 @@ from spectrochempy.api import *
 options.log_level = INFO
 
 # To regenerate the reference figures, set FORCE to True
-FORCE = False
+FORCE = True
 # for this regeneration it is advised to set non parallel testing.
 # (remove option -nauto in pytest.ini)
 

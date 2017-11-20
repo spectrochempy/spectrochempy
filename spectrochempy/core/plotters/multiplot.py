@@ -231,7 +231,6 @@ def multiplot( sources=[], labels=[],
     ylims = []
 
     for (axkey, ax), s, label in zip(axes.items(), sources, labels):
-        s = s * 2000.
         s.plot(kind=kind, ax=ax, colorbar=False, hold=True, autolayout=False,
                **kwargs)
         ax.set_title(label, fontsize=12)

@@ -263,18 +263,9 @@ class BaselineCorrection(HasTraits):
                   figsize=(9, 6),
                   suptitle = 'INTERACTIVE BASELINE CORRECTION')
 
-        #axes = subplots(2, 1, figsize=(9, 6))
         fig = plt.gcf()
-
         ax1 = axes['axe11']
         ax2 = axes['axe21']
-
-        #ax1.set_title('\nClick & span with left mouse button to set a baseline region.'
-        #              '\nClick on right button on a region to remove it.',
-        #              fontweight='bold')
-        #fig.suptitle('INTERACTIVE BASELINE CORRECTION')
-
-        #self.source.plot_stack(ax=ax1, colorbar=False, hold=True)
 
         sps = []
 
@@ -296,10 +287,10 @@ class BaselineCorrection(HasTraits):
             ax2.set_title('Baseline corrected dataset preview',
                           fontweight='bold')
             if self.zoompreview>1:
-                zb = self.zoompreview
-                ylim = [corrected.data.min()/zb,corrected.data.max()/zb]
+                zb = 1. # self.zoompreview
+                zlim = [corrected.data.min()/zb,corrected.data.max()/zb]
                 ax2 = corrected.plot_stack(ax=ax2, colorbar=False,
-                                           zlim=ylim, hold=True)
+                                           zlim=zlim, hold=True)
             else:
                 ax2 = corrected.plot_stack(ax=ax2, colorbar=False, hold=True)
 
@@ -333,7 +324,7 @@ class BaselineCorrection(HasTraits):
 
         fig.canvas.draw()
 
-        return span, cid
+        return
 
 
 
