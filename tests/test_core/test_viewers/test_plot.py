@@ -140,3 +140,19 @@ def test_for_interactive_masks(IR_source_1D, IR_source_2D):
     source = IR_source_2D.copy()
     source.interactive_masks()
     show()
+
+@image_comparison(reference=['multiplot1','multiplot2'], force_creation=FORCE)
+def test_multiplot(IR_source_2D):
+
+    source = IR_source_2D.copy()
+
+    sources=[source, source*1.1, source*1.2, source*1.3]
+    labels = ['sample {}'.format(label) for label in
+              ["1", "2", "3", "4"]]
+
+    multiplot(sources=sources, kind='stack', labels=labels, nrow=2, ncol=2,
+                    figsize=(9, 5), sharex=True, sharey=True)
+
+    multiplot(sources=sources, kind='map', labels=labels, nrow=2, ncol=2,
+                    figsize=(9, 3), sharex=True, sharey=True)
+

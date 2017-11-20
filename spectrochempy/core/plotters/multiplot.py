@@ -42,6 +42,7 @@ Module containing multiplot function(s)
 import  numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.font_manager import FontProperties
 from matplotlib.tight_layout import (get_renderer, get_tight_layout_figure,
                                      get_subplotspec_list)
 from spectrochempy.core.dataset.ndio import set_figure_style
@@ -60,7 +61,7 @@ def multiplot_scatter(sources, **kwargs):
 
     """
     kwargs['kind'] = 'scatter'
-    multiplot(sources, **kwargs)
+    return multiplot(sources, **kwargs)
 
 # .............................................................................
 def multiplot_lines(sources, **kwargs):
@@ -71,7 +72,7 @@ def multiplot_lines(sources, **kwargs):
 
     """
     kwargs['kind'] = 'lines'
-    multiplot(sources, **kwargs)
+    return multiplot(sources, **kwargs)
 
 # .............................................................................
 def multiplot_stack(sources, **kwargs):
@@ -82,7 +83,7 @@ def multiplot_stack(sources, **kwargs):
 
     """
     kwargs['kind'] = 'stack'
-    multiplot(sources, **kwargs)
+    return multiplot(sources, **kwargs)
 
 # .............................................................................
 def multiplot_map(sources, **kwargs):
@@ -93,7 +94,7 @@ def multiplot_map(sources, **kwargs):
 
     """
     kwargs['kind'] = 'map'
-    multiplot(sources, **kwargs)
+    return multiplot(sources, **kwargs)
 
 
 # .............................................................................
@@ -105,13 +106,107 @@ def multiplot_image(sources, **kwargs):
 
     """
     kwargs['kind'] = 'image'
-    multiplot(sources, **kwargs)
+    return multiplot(sources, **kwargs)
 
 # .............................................................................
 def multiplot( sources=[], labels=[],
-                    kind='stack', nrow=1, ncol=1, figsize=None,
-                    sharex=True, sharey=False,
-                    pad=0.8, wpad=0, hpad=0, **kwargs):
+               kind='stack', nrow=1, ncol=1, figsize=None,
+               sharex=False, sharey=False, **kwargs):
+
+    """
+    Generate a figure with multiple axes arranged in array (n rows, n columns)
+
+    Parameters
+    ----------
+
+    sources : list of dataset
+
+    labels : list of `str`.
+
+        The labels that will be used as title of each axes.
+
+    kind : `str`, default to `map` for 2D and `lines`for 1D data
+
+        Type of plot to draw in all axes (`lines`, `scatter`, `stack`, `map`,
+        `image`.
+
+    nrows, ncols : int, default: 1
+
+        Number of rows/cols of the subplot grid. ncol*nrow must be equal
+        to the number of sources to plot
+
+    sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default: False
+
+        Controls sharing of properties among x (`sharex`) or y (`sharey`)
+        axes:
+
+        - True or 'all': x- or y-axis will be shared among all
+        subplots.
+        - False or 'none': each subplot x- or y-axis will be
+        independent.
+        - 'row': each subplot row will share an x- or y-axis.
+        - 'col': each subplot column will share an x- or y-axis.
+
+        When subplots have a shared x-axis along a column, only the x tick
+        labels of the bottom subplot are visible.  Similarly, when
+        subplots have a shared y-axis along a row, only the y tick labels
+        of the first column subplot are visible.
+
+    figsize : 2-tuple of floats
+
+        ``(width, height)`` tuple in inches
+
+    dpi : float
+
+        Dots per inch
+
+    facecolor
+
+        The figure patch facecolor; defaults to rc ``figure.facecolor``
+
+    edgecolor
+
+        The figure patch edge color; defaults to rc ``figure.edgecolor``
+
+    linewidth : float
+
+        The figure patch edge linewidth; the default linewidth of the frame
+
+    frameon : bool
+
+        If ``False``, suppress drawing the figure frame
+
+    left : `float` in the [0-1] interval
+
+        The left side of the subplots of the figure
+
+    right : `float` in the [0-1] interval
+
+        The right side of the subplots of the figure
+
+    bottom : `float` in the [0-1] interval
+
+        The bottom of the subplots of the figure
+
+    top : `float` in the [0-1] interval
+
+        The top of the subplots of the figure
+
+    wspace : `float` in the [0-1] interval
+
+        The amount of width reserved for blank space between subplots,
+        expressed as a fraction of the average axis width
+
+    hspace : `float` in the [0-1] interval
+
+        The amount of height reserved for white space between subplots,
+        expressed as a fraction of the average axis height
+
+    suptitle : `str`
+
+        title of the figure to display on top
+
+    """
     if len(sources) < nrow * ncol:
         # not enough sources given in this list.
         raise ValueError('Not enough sources given in this list')
@@ -127,8 +222,9 @@ def multiplot( sources=[], labels=[],
     # create the suplots
     set_figure_style(**kwargs)
 
-    axes = subplots(nrow=nrow, ncol=ncol, figsize=figsize, sharex=sharex,
-                    sharey=sharey)
+    axes = _subplots(nrow=nrow, ncol=ncol,
+                    figsize=figsize,
+                    sharex=sharex, sharey=sharey)
 
     fig = plt.figure(plt.get_fignums()[-1])
     # axes is dictionary with keys such as 'axe12', where  the fist number
@@ -144,61 +240,129 @@ def multiplot( sources=[], labels=[],
         ax.xaxis.label.set_visible(False)
         ax.yaxis.label.set_visible(False)
         ylims.append(ax.get_ylim())
-    axes['axe11'].yaxis.label.set_visible(True)
-    axes['axe{}{}'.format(nrow, ncol)].xaxis.label.set_visible(True)
+
+    axy = axes['axe11'].yaxis
+    axy.label.set_visible(True)
+    axx = axes['axe{}{}'.format(nrow, ncol)].xaxis
+    axx.label.set_visible(True)
+
     # TODO: add a common color bar (set vmin and vmax)
 
     ylim = [np.min(np.array(ylims)), np.max(np.array(ylims))]
     for ax in axes.values():
         ax.set_ylim(ylim)
 
+    suptitle= kwargs.get('suptitle', None)
+    if suptitle is not None:
+        fig.suptitle(suptitle)
+
     # tight_layout
     renderer = get_renderer(fig)
     axeslist = list(axes.values())
     subplots_list = list(get_subplotspec_list(axeslist))
     kw = get_tight_layout_figure(fig, axeslist, subplots_list, renderer,
-                                 pad=pad, h_pad=hpad, w_pad=wpad, rect=None)
+                                 pad=.8, h_pad=0, w_pad=0, rect=None)
 
-    plt.subplots_adjust(left=kw['left'], bottom=kw['bottom'],
-                        right=kw['right'], top=kw['top'],
-                        wspace=kw.get('wspace',0), hspace=kw.get('hspace',0))
+    left = kw['left']
+    bottom = kw['bottom']
+    right = kw['right']
+    top = kw['top']
+    ws = kw.get('wspace',0)
+    hs = kw.get('hspace',0)
 
-    axes['axe11'].yaxis.set_label_coords(0.03, 0.5, transform=fig.transFigure)
-    axes['axe{}{}'.format(nrow, ncol)].xaxis.set_label_coords(
-                           0.5, 0.08, transform=fig.transFigure)
+    plt.subplots_adjust(left=left, bottom=bottom, right=right, top=top,
+                        wspace=ws, hspace=hs)
 
+    xm = (right + left)/2.
+    ym = (top + bottom)/2.
+    fsize = FontProperties(
+        size=mpl.rcParams["font.size"]).get_size_in_points() * fig.dpi / 72.
 
-    mpl.rcParams['figure.autolayout'] = True # restore the default param
+    _, y = axx.label.get_position()
+    xspine = axx.axes.spines['bottom']
+    xbox = xspine.get_transform().transform_path(
+            xspine.get_path()).get_extents()
+    y0 = xbox.y0
+    transy = mpl.transforms.blended_transform_factory(fig.transFigure,
+                                             mpl.transforms.IdentityTransform())
+    ypad = 2 * fsize
+    axx.set_label_coords(xm, y0-ypad , transform=transy)
 
-def subplots(nrow=1, ncol=1, figsize=None, sharex=False, sharey=False):
+    x, _ = axy.label.get_position()
+    yspine = axy.axes.spines['left']
+    ybox = yspine.get_transform().transform_path(
+            yspine.get_path()).get_extents()
+    x0 = ybox.x0
+    transx = mpl.transforms.blended_transform_factory(
+                            mpl.transforms.IdentityTransform(), fig.transFigure)
+    xpad = axy.get_text_widths(renderer)[0]-fsize/1.5
+    axy.set_label_coords(x0-xpad, ym, transform=transx)
+
+    return axes
+
+# .............................................................................
+def _subplots(nrow=1, ncol=1,
+              figsize=None,
+              sharex=False, sharey=False,
+              **kwargs):
+    # add all subplots
 
     mpl.rcParams['figure.autolayout'] = False
-    fig = plt.figure(figsize=figsize)
+
+    fig = plt.figure(figsize=figsize, **kwargs)
     axes = {}
+
+    if sharex: sharex='all'
+    if sharey: sharey='all'
 
     for i in range(nrow):
         for j in range(ncol):
-            if i == j and i == 0:
+
+            if ((i == j and i == 0) or # axe11
+               (sharex == 'col' and i == 0) or # axe1*
+               (sharey == 'row' and j == 0)) :  # axe*1
+
                 ax = fig.add_subplot(nrow, ncol, i * ncol + j + 1)
             else:
-                if sharex:
-                    sharex = axes['axe11']
+
+                if sharex == 'all':
+                    _sharex = axes['axe11']
+                elif sharex == 'col':
+                    _sharex = axes['axe1{}'.format(j+1)]
+                elif sharex:
+                    raise ValueError("invalid option for sharex. Should be"
+                                     " among (None, True, 'all' or 'col")
                 else:
-                    sharex = None
-                if sharey:
-                    sharey = axes['axe11']
+                    _sharex = None
+
+                if sharey == 'all':
+                    _sharey = axes['axe11']
+                elif sharey == 'row':
+                    _sharey = axes['axe{}1'.format(i + 1)]
+                elif sharey:
+                    raise ValueError("invalid option for sharey. Should be"
+                                     " among (None, True, 'all' or 'row")
                 else:
-                    sharey = None
+                    _sharey = None
+
                 ax = fig.add_subplot(nrow, ncol, i * ncol + j + 1,
-                                     sharex=sharex, sharey=sharey)
+                                     sharex=_sharex, sharey=_sharey)
+
             ax.name = 'axe{}{}'.format(i + 1, j + 1)
             axes[ax.name] = ax
-            if j > 0 and sharey is not None:
+            if j > 0 and sharey:
                 # hide the redondant ticklabels on left side of interior figures
                 plt.setp(axes[ax.name].get_yticklabels(), visible=False)
+                axes[ax.name].yaxis.set_tick_params(which='both',
+                                         labelleft=False, labelright=False)
+                axes[ax.name].yaxis.offsetText.set_visible(False)
             if i < nrow - 1 and sharex:
                 # hide the bottom ticklabels of interior rows
                 plt.setp(axes[ax.name].get_xticklabels(), visible=False)
+                axes[ax.name].xaxis.set_tick_params(which='both',
+                                                    labelbottom=False,
+                                                    labeltop=False)
+                axes[ax.name].xaxis.offsetText.set_visible(False)
 
     return axes
 
@@ -208,7 +372,7 @@ if __name__ == '__main__':
     from spectrochempy.api import *
 
     source = NDDataset.read_omnic(
-         os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+         os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))[2:5]
 
     sources=[source, source*1.1, source*1.2, source*1.3]
     labels = ['sample {}'.format(label) for label in
@@ -216,7 +380,7 @@ if __name__ == '__main__':
     multiplot(sources=sources, kind='stack', labels=labels, nrow=2, ncol=2,
                     figsize=(9, 5), sharex=True, sharey=True)
 
-    multiplot(sources=sources, kind='stack', labels=labels, nrow=2, ncol=2,
+    multiplot(sources=sources, kind='image', labels=labels, nrow=2, ncol=2,
                     figsize=(9, 5), sharex=True, sharey=True)
 
     sources = [source * 1.2, source * 1.3,
