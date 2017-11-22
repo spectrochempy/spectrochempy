@@ -45,7 +45,7 @@ import matplotlib as mpl
 from matplotlib.font_manager import FontProperties
 from matplotlib.tight_layout import (get_renderer, get_tight_layout_figure,
                                      get_subplotspec_list)
-from spectrochempy.core.dataset.ndio import set_figure_style
+from spectrochempy.core.dataset.ndplot import set_figure_style
 from spectrochempy.utils import is_sequence
 
 

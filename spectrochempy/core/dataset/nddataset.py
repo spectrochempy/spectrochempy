@@ -74,8 +74,9 @@ from spectrochempy.core.dataset.ndarray import NDArray, CoordSet
 from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators
 from spectrochempy.core.dataset.ndmeta import Meta
-
 from spectrochempy.core.dataset.ndio import NDIO
+from spectrochempy.core.dataset.ndplot import NDPlot
+
 from spectrochempy.application import log
 
 # =============================================================================
@@ -110,6 +111,7 @@ numpyprintoptions()
 
 class NDDataset(
         NDIO,
+        NDPlot,
         NDMath,
         NDArray,
 ):
