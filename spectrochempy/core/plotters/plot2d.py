@@ -204,6 +204,8 @@ def plot_2D(source, **kwargs):
     yeff = y.data #[:tdeff[0]]
     zeff = z.masked_data   #[:tdeff[0],:tdeff[1]]
 
+    y_showed = kwargs.get('y_showed')
+
     if kind in ['map', 'image']:
         vmax = zeff.max()
         vmin = zeff.min()
@@ -258,11 +260,11 @@ def plot_2D(source, **kwargs):
         if color is None:
             # very basic plot (likely the faster)
             # use the matplotlib color cycler
-            source.ax.plot(xeff, zeffs.T, lw=lw)
+            lines = source.ax.plot(xeff, zeffs.T[:,::-1], lw=lw)
 
         elif color != 'colormap':
             # just add a color to the line (the same for all)
-            source.ax.plot(xeff, zeffs.T, c=color, lw=lw)
+            lines = source.ax.plot(xeff, zeffs.T[:,::-1], c=color, lw=lw)
 
         elif color == 'colormap':
             # map colors using the colormap
@@ -285,11 +287,13 @@ def plot_2D(source, **kwargs):
 
             lines = source.ax.plot(xeff, zeffs.T[:,::-1], lw=lw, picker=True)
 
-            i = len(yeff)-1 # we have to label them also in the reverse order
             for l, a in zip(lines, yeff[::-1]):
                 l.set_color(scalarMap.to_rgba(a))
-                l.set_label(i)
-                i -= 1
+
+        #i = len(yeff) - 1  # we have to label them also in the reverse order
+        for l, a in zip(lines, yeff[::-1]):
+            l.set_label("{:.5f}".format(a))
+            #i -= 1
 
     if data_only:
         # if data only (we will  ot set axes and labels
@@ -446,8 +450,12 @@ def clevels(data, **kwargs):
 
 if __name__ == '__main__':
 
-    from spectrochempy.api import NDDataset, scpdata, show, figure
+    from spectrochempy.api import NDDataset, scpdata, show
 
     A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
-    A.plot_stack()
+    A.y -= A.y[0]
+    A.y.to('hour', inplace=True)
+    A.y.title = u'Aquisition time'
+    ax = A.plot_stack(y_showed = [2.,6.])
     show()
+    pass

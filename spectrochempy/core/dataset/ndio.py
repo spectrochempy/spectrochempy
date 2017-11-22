@@ -45,6 +45,7 @@ are defined.
 # ----------------------------------
 
 import datetime
+import time
 import json
 import os
 
@@ -59,7 +60,7 @@ import numpy as np
 from numpy.compat import asbytes, asstr
 from numpy.lib.format import write_array, MAGIC_PREFIX
 from numpy.lib.npyio import zipfile_factory, NpzFile
-from traitlets import Dict, List, HasTraits, Instance
+from traitlets import Dict, List, Float, HasTraits, Instance, observe, All
 
 
 # local import
@@ -120,7 +121,6 @@ class NDIO(HasTraits):
     # and colorbar can be plotted
     _axes = Dict(Instance(plt.Axes))
 
-    _selected = List()
 
     # --------------------------------------------------------------------------
     # Generic save function
@@ -869,111 +869,195 @@ dpi : [ None | scalar > 0]
     # --------------------------------------------------------------------------
     # interactive functions
     # --------------------------------------------------------------------------
+    _selected = List()      # to store temporary the mask positions
+
+    _xlim = List() # used to detect zoom in axe
+    _ylim = List()  # used to detect zoom in axe Transposed
 
     def interactive_masks(self, **kwargs):
 
         # TODO: make it for 1D too!
 
         kwargs.pop('kind', None)
-        self.plot_stack(**kwargs)
+        from spectrochempy.core.plotters.multiplot import multiplot_stack
+        axes = multiplot_stack(sources=self,
+                               transposed=True,
+                               colorbar=True,
+                               suptitle = 'INTERACTIVE MASK SELECTION '
+                                          '(press `a` for help)',
+                               suptitle_color=NBlue)
 
         fig = self.fig
-        ax = self.axes['main']
-        ax.set_title(
-                'INTERACTIVE MASK SELECTION (press `h` for help)',
-                fontsize='12', color='red')
+        ax, axT = axes.values()
+        self.axT = axT
 
-        _message = \
-""" ============================================
- HELP
- ============================================
+        help_message = \
+            """ 
+             ================================================================
+             HELP
+             ================================================================
+    
+             --------- KEYS -------------------------------------------------
+             * Press and hold 'a' for this help
+             * Press 'ctrl+z' to undo the last set or last selected mask.
+             * Press 'ctrl+x' to apply all mask selections and exit. 
+    
+             --------- MOUSE ------------------------------------------------
+             * click the right button to pick a row and mask it
+             * click the left button on a mask to select it
+             * double-click the left button to pick and mask a single column
+             * Press the left button, move and release for a range selection 
+    
+             ================================================================
+            """
 
- --------- KEYS -----------------------------
- h: this help
- u: undo the last set mask.
- x: to apply mask selections and exit. 
- esc : to hide displayed window help
- 
- --------- MOUSE ----------------------------
- * click left button to pick a single row
- * click right button to pick a single column
- * click right button and move for a range 
-   selection 
-
- ============================================
-"""
-
-        self._helptext = ax.text(0.02, 0.02, _message, fontsize=10,
+        self._helptext = axT.text(0.02, 0.02, help_message, fontsize=10,
+                                 fontweight='bold',
                                  transform=fig.transFigure, color='blue',
                                  bbox={'facecolor': 'white',
                                        'edgecolor': 'blue'})
-
-        _messclick = 'Click on a line\n' \
-                     'with the left button\n' \
-                     'to mask a row.\n' \
-                     'Click and/or span \n' \
-                     'with the right \n' \
-                     'or middle button\n' \
-                     'for column(s) selection.\n' \
-                     'Press `u` to undo\n' \
-                     'the last selection mask.' \
-                     'Press `x` to exit \n' \
-                     'and apply masks.\n' \
-                     '`esc` to hide this help.'
-
-        self._tpos = ax.text(0.01, 0.55, _messclick, fontsize=10,
+        self._tpos = axT.text(0.01, 0.05, '', fontsize=12,
+                             fontweight='bold',
                              transform=fig.transFigure, color='green',
                              bbox={'facecolor': 'white',
                                    'edgecolor': 'green'})
 
-        self._helptext.set_visible(False)
-        self._tpos.set_visible(False)
+        def show_help():
+            self._helptext.set_visible(True)
+            plt.draw()
 
+        def show_action(message):
+            self._tpos.set_text(message)
+            self._tpos.set_visible(True)
+            plt.draw()
+            log.debug("show action : "+message)
+            time.sleep(.2)
+
+        def hide_help():
+            try:
+                self._helptext.set_visible(False)
+            except:
+                pass
+
+        def hide_action():
+            try:
+                self._tpos.set_visible(False)
+            except:
+                pass
+
+        # get the limits of the normal plot
+        self._xlim = ax.get_xlim()
+        # get the limits of the transposed plot (they must correspond to the
+        # indirect dimension of the normal one)
+        self._ylim = axT.get_xlim()
+
+        def get_limits():
+            # get limits (if they change, they will triger a change observed
+            # below in the self._limits_changed function
+
+            self._xlim = ax.get_xlim()
+            self._ylim = axT.get_xlim()
+
+        def exact_coord_x(c):
+            # set x to the closest nddataset x coordinate
+            idx = self._loc2index(c, -1)
+            return (idx, self.x.data[idx])
+
+        def exact_coord_y(c):
+            # set x to the closest nddataset x coordinate
+            idx = self._loc2index(c, 0)
+            return (idx, self.y.data[idx])
+
+        # self._selected will contain informations about the selected masks
         self._selected = []
+
+        # initialize show action to null : ''
+        show_action('')
 
         # mouse events
         # ------------
+
+        def _onmove(event):
+            # fired on a mouse motion
+            # we use this event to remove
+            # all displayed information (help, actions)
+            hide_help()
+            hide_action()
+            # and to get the new limts in case for example
+            # of an interative zoom
+            get_limits()
+            # to make actually the change take an effect, we must redraw
+            plt.draw()
+
         def _onclick(event):
             # fired on a mouse click.
 
-            # if it is nopt fired in a given axe, return
-            # immediately and do nothing
-            self._helptext.set_visible(False)
-            self._tpos.set_visible(False)
-
-            if event.inaxes.name not in ['main', 'xproj', 'yproj', 'colorbar']:
+            # if it is not fired in a given axe, return
+            # immediately and do nothing, except ot hide the 'help' text.
+            hide_help()
+            if event.inaxes and event.inaxes.name \
+                    not in ['main', 'xproj', 'yproj', 'colorbar']:
                 return
 
-            if event.button == 3:
-                self._tpos.set_visible(False)
+            # check which button was pressed
+            if event.button == 1 and event.dblclick: # double-click left button
+                ax = event.inaxes
                 x = event.xdata
-                axv = ax.axvline(x, lw=.1, color='white')
-                self._selected.append(('col', axv, x))
-            else:
-                self._tpos.set_visible(True)
 
-            plt.draw()
+                if ax is self.axT:
+                    # set x to the closest original nddataset y coordinate
+                    idx, x = exact_coord_y(x)
+                    axvT = ax.axvline(x, lw=2, color='white', alpha=.75, picker=True)
+                    self._selected.append(('row', axvT, x))
+                    # corresponding value in the original display
+                    # it is a complete row - remember that the lines
+                    # are plotted in reverse order with respect to the idx
+                    # so we need to reverse the lines list
+                    # before slicing using idx
+                    line = self.ax.lines[::-1][idx]
+                    line.set_color('gray')
+                    line.set_linewidth(.1)
+
+                    ax.axvline(self.x[idx], lw=2, color='white', alpha=.75, picker=True)
+                    show_action('selected nddataset row at {:.2f}'.format(x))
+                    plt.draw()
+
+                else:
+                    idx, x = exact_coord_x(x)
+                    axv = ax.axvline(x, lw=2, color='white', alpha=.75, picker=True)
+                    self._selected.append(('col', axv, x))
+                    show_action('selected nddataset col at {:.2f}'.format(x))
+                    # corresponding value in the transposed display
+                    # it is a complete row - remember that the lines
+                    # are plotted in reverse order with respect to the idx
+                    # so we need to reverse the lines list
+                    # before slicing using idx
+                    transposed_line = self.axT.lines[::-1][idx]
+                    transposed_line.set_color('gray')
+                    transposed_line.set_linewidth(.1)
+                    plt.draw()
+
 
             pass
 
         self.fig.canvas.mpl_connect('button_press_event', _onclick)
+        self.fig.canvas.mpl_connect('motion_notify_event', _onmove)
 
         # key events
         # ----------
 
         def _on_key(event):
-            self._tpos.set_visible(False)
-            if event.key == 'h':
+            #print(event.key)
+            if event.key in ['h','a']:
                 # we show the help.
-                self._helptext.set_visible(True)
-                plt.draw()
-
+                show_help()
 
         def _on_key_release(event):
-            self._helptext.set_visible(False)
-            self._tpos.set_visible(False)
 
-            if event.key in ['u']:
+            if event.key in ['a','h']:
+                hide_help()
+
+            if event.key in ['ctrl+z']:
                 if self._selected:
                     last = list(self._selected.pop(-1))
                     if last[0] in ['span','col']:
@@ -981,12 +1065,10 @@ dpi : [ None | scalar > 0]
                     else:
                         last[1].set_color(last[3])
                         last[1].set_linewidth(last[4])
+                    show_action('deleted {} selection at {:.2f}'.format(last[0],
+                                                                    last[-1]))
 
-            if event.key == 'esc':
-                self._helptext.set_visible(False)
-                self._tpos.set_visible(False)
-
-            if event.key in ['x']:
+            if event.key in ['ctrl+x']:
                 log.info("apply all selected mask")
 
                 for item in self._selected:
@@ -994,13 +1076,19 @@ dpi : [ None | scalar > 0]
                     if _item[0] in ['span']:
                         xmin, xmax = _item[2:]
                         self[:, xmin:xmax]=masked
+                        log.debug("span {}:{}".format(xmin, xmax))
+
                     elif _item[0] in ['col']:
                         x = _item[2]
                         self[:, x] = masked
-                    elif _item[0] in ['row']:
-                        y = int(_item[2])
-                        self[y] = masked
+                        log.debug("col {}".format(x))
 
+                    elif _item[0] in ['row']:
+                        y = eval(_item[2])
+                        self[y] = masked
+                        log.debug("row {}".format(y))
+
+                show_action('Masks applied')
 
                 plt.close(self._fig)
 
@@ -1014,24 +1102,30 @@ dpi : [ None | scalar > 0]
 
         def _onpick(event):
 
+            ax = event.mouseevent.inaxes
+
             if isinstance(event.artist, Line2D):
                 button = event.mouseevent.button
                 sel = event.artist
                 y = sel.get_label()
                 x = event.mouseevent.xdata
-                if button == 1:
-                    # left button -> row selection
+                if button == 3:
+                    # right button -> row selection
                     color = sel.get_color()
                     lw = sel.get_linewidth()
                     # save these setting to undo
                     self._selected.append(('row', sel, y, color, lw))
                     sel.set_color('gray')
                     sel.set_linewidth(.1)
-                elif button == 3:
-                    # right button -> column selection
-                    axv = ax.axvline(x, lw= .1, color='white')
+                    show_action("picked row {}".format(y))
+
+                elif button == 1 and event.mouseevent.dblclick:
+
+                    # left button -> column selection
+                    idx, x = exact_coord_y(x)
+                    axv = ax.axvline(x, lw= .1, color='white', picker=True)
                     self._selected.append(('col', axv, x))
-                self._tpos.set_visible(False)
+                    show_action("picked col {}".format(x))
 
             plt.draw()
 
@@ -1041,18 +1135,39 @@ dpi : [ None | scalar > 0]
             xmin, xmax = sorted((xmin, xmax))
             sp = ax.axvspan(xmin, xmax, facecolor='white',
                             edgecolor='white', alpha=.95,
-                            zorder=10000)
+                            zorder=10000, picker=True)
             self._selected.append(('span', sp, xmin, xmax))
-            self._tpos.set_visible(False)
+            show_action("span betwwen {} and {}".format(xmin, xmax))
             plt.draw()
 
-        span = SpanSelector(ax, _onspan, 'horizontal',  minspan=1, button=[2,3],
+        span = SpanSelector(ax, _onspan, 'horizontal',  minspan=5, button=[1],
                             useblit=True, rectprops=dict(alpha=0.95,
                                                          facecolor='white',
                                                          edgecolor='w'))
 
         show()
-        return span
+        return ax
+
+    @observe('_xlim', '_ylim')
+    def _limits_changed(self, change):
+
+        # ex: change {
+        #   'owner': object, # The HasTraits instance
+        #   'new': 6, # The new value
+        #   'old': 5, # The old value
+        #   'name': "foo", # The name of the changed trait
+        #   'type': 'change', # The event type of the notification, usually 'change'
+        # }
+
+        print(change['name'])
+        if change['name']=='_xlim':
+            self.axT.cla()
+            x1, x2 = self._xlim
+            self.T[x1:x2].plot_stack(ax=self.axT, hold=True, colorbar=False)
+        if change['name']=='_ylim':
+            self.ax.cla()
+            y1, y2 = self._ylim
+            self[y1:y2].plot_stack(ax=self.ax, hold=True, colorbar=False)
 
     # -------------------------------------------------------------------------
     # Special attributes
@@ -1293,23 +1408,30 @@ if __name__ == '__main__':
 
     from spectrochempy.api import *
 
-    source = NDDataset.read_omnic(
-    os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+    A = NDDataset.read_omnic(
+                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+    A.y -= A.y[0]
+    A.y.to('hour', inplace=True)
+    A.y.title = u'Aquisition time'
+    ax = A[:,1600.:4000.].plot_stack(y_showed = [2.,6.])
 
     def _test_interactive_masks():
-
-        source.interactive_masks(kind='stack', colorbar=True, figsize=(9,4))
+        options.log_level=DEBUG
+        A.interactive_masks(kind='stack', figsize=(9,4))
+        pass
 
     def _test_save():
 
-        source.save('essai')
+        A.save('essai')
 
-        source.plot_stack()
-        source.save('essai2')
+        A.plot_stack()
+        A.save('essai2')
 
         os.remove(os.path.join(scpdata, 'essai.scp'))
         os.remove(os.path.join(scpdata, 'essai2.scp'))
 
-    _test_save()
+    #_test_save()
+    _test_interactive_masks()
+
 
 

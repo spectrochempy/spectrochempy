@@ -1475,7 +1475,7 @@ class NDArray(HasTraits):
 
         """
         self._mask = nomask
-        
+
     # .........................................................................
     def set_complex(self, axis):
         """
