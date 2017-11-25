@@ -65,7 +65,7 @@ def get_version():
         _v = dev_version.split('.post')
         version = release = _v[0]
         if len(_v) > 1:
-            version = _v[0] + ".dev"
+            version = "%s%d.dev"%(_v[0][:-1],int(_v[0][-1:])+1)
         f.write("version = '%s'\n" % version)
         #f.write("dev_version = '%s'\n" % dev_version)
         f.write("release = '%s' " % release)

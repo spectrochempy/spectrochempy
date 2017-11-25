@@ -52,3 +52,4 @@ from .introspect import *
 from .matplolib_utils import *
 from .arrayutils import *
 from .version import *
+from .docstring import *

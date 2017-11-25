@@ -278,6 +278,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
     mpl.rcParams['figure.autolayout'] = False
 
     fig = plt.figure(figsize=figsize)
+    fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
     if suptitle is not None:
         fig.suptitle(suptitle, color=suptitle_color)

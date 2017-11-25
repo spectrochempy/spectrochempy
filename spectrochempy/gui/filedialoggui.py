@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, \
 from PyQt5.QtGui import QIcon
 
 
-class Gui(QWidget):
+class FileDialogGui(QWidget):
     def __init__(self):
 
         super().__init__()
@@ -72,9 +72,10 @@ class Gui(QWidget):
 
 
 if __name__ == '__main__':
-    guiapp = QApplication(sys.argv)
 
-    ex = Gui()
+    guiapp = QApplication(sys.argv)
+    ex = FileDialogGui()
+
     print((ex.openFileNameDialog()))
 
-    # guiapp.exec_()
+    #guiapp.exec_()

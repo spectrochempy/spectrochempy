@@ -283,6 +283,7 @@ dpi : [ None | scalar > 0]
         # get the current figure
         hold = kwargs.get('hold', False)
         self._fig = _curfig(hold)
+        self._fig.rcParams = plt.rcParams.copy()
 
         # is ax in the keywords ?
         ax = kwargs.pop('ax', None)
@@ -403,6 +404,24 @@ dpi : [ None | scalar > 0]
 
         log.debug('resume plot')
 
+        # put back the axes in the original source
+        # (we have worked on a copy in plot)
+        if not kwargs.get('data_transposed', False):
+            origin.ndaxes = self.ndaxes
+            origin._ax_lines = self._ax_lines
+            if hasattr(self, "_axcb"):
+                origin._axcb = origin._axcb
+        else:
+            nda = {}
+            for k, v in self.ndaxes.items():
+                nda[k + 'T'] = v
+            origin.ndaxes = nda
+            origin._axT_lines = self._ax_lines
+            if hasattr(self, "_axcb"):
+                origin._axcbT = origin._axcb
+
+        origin._fig = self._fig
+
         # Additional matplotlib commands on the current plot
         # ---------------------------------------------------------------------
 
@@ -436,24 +455,7 @@ dpi : [ None | scalar > 0]
                     kw[key] = value
             self._fig.savefig(savename, **kw)
 
-        # put back the axes in the original source
-        # (we have worked on a copy in plot)
-        if not kwargs.get('data_transposed', False):
-            origin.ndaxes = self.ndaxes
-            origin._ax_lines = self._ax_lines
-            if hasattr(self, "_axcb"):
-                origin._axcb = origin._axcb
-        else:
-            nda = {}
-            for k, v in self.ndaxes.items():
-                nda[k + 'T'] = v
-            origin.ndaxes = nda
-            origin._axT_lines = self._ax_lines
-            if hasattr(self, "_axcb"):
-                origin._axcbT = origin._axcb
-
-        origin._fig = self._fig
-
+        #mpl.interactive(True)
         plt.draw()
 
     # -------------------------------------------------------------------------
@@ -604,6 +606,13 @@ dpi : [ None | scalar > 0]
         from spectrochempy.core.plotters.multiplot import plot_with_transposed
 
         colorbar = kwargs.get('colorbar', True)
+
+        # simplify plot for better interactivity
+        plt.rcParams['path.simplify_threshold'] = 0
+
+        # reduce the number of lines (max = max_lines_in_stack per default)
+        self._maxlines = kwargs.get('maxlines', plotoptions.max_lines_in_stack)
+
         plot_with_transposed(
                 source=self,
                 colorbar=colorbar,
@@ -611,6 +620,7 @@ dpi : [ None | scalar > 0]
                          '(press `a` for help)',
                 suptitle_color=NBlue,
                 **kwargs)
+
 
         ax = self.ax
         axT = self.axT
@@ -1079,7 +1089,7 @@ dpi : [ None | scalar > 0]
                 val1, val2 = sorted(_item[2:])
                 if direction=='row':
                     lines = self.ax_lines[:]
-                    ax = self.ax_lines
+                    axlines = self.ax_lines
                 elif direction=='col':
                     lines = self.axT_lines[:]
                     axlines = self.axT_lines
@@ -1118,11 +1128,8 @@ dpi : [ None | scalar > 0]
         (masked_lines, masked_T_lines,
          masked_markers, masked_T_markers) = self._get_masked_lines()
 
-        # reduce the number of lines (max = max_lines_in_stack per default)
-        maxlines = plotoptions.max_lines_in_stack
-
         self.ax.lines = []
-        setpy = max(len(self.ax_lines) // maxlines, 1)
+        setpy = max(len(self.ax_lines) // self._maxlines, 1)
         self.ax.lines = self.ax_lines[::setpy]  # displayed ax lines
 
         for line in masked_lines.values():  # remove masked line
@@ -1140,7 +1147,7 @@ dpi : [ None | scalar > 0]
             self.ax.lines.append(line)
 
         self.axT.lines = []
-        setpx = max(len(self.axT_lines) // maxlines, 1)
+        setpx = max(len(self.axT_lines) // self._maxlines, 1)
         self.axT.lines = self.axT_lines[::setpx]  # displayed axTlines
 
         for line in masked_T_lines.values():
@@ -1228,11 +1235,13 @@ def _set_figure_style(**kwargs):
             style = [style]
         if isinstance(style, dict):
             style = [style]
-        style = [plotoptions.style] + list(style)
+        style = ['classic', plotoptions.style] + list(style)
         plt.style.use(style)
     else:
-        plt.style.use('classic')
+        style = ['classic', plotoptions.style]
+        plt.style.use(style)
         plt.style.use(plotoptions.style)
+
         fontsize = mpl.rcParams['font.size'] = \
             kwargs.get('fontsize', mpl.rcParams['font.size'])
         mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
@@ -1241,6 +1250,7 @@ def _set_figure_style(**kwargs):
         mpl.rcParams['axes.prop_cycle'] = (
             cycler('color', [NBlack, NBlue, NRed, NGreen]))
 
+        return mpl.rcParams
 
 # .............................................................................
 def available_styles():
@@ -1287,7 +1297,6 @@ if __name__ == '__main__':
     def _interactive_masks():
         A[:, :].interactive_masks(
                 kind='stack', figsize=(9, 6),
-                maxlines=500,
                 right=.905,  # to lease space for the labels of the colorbar
         )
         pass

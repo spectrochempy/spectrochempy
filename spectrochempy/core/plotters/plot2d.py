@@ -147,7 +147,7 @@ def plot_2D(source, **kwargs):
     # where to plot?
     # --------------
 
-    mpl.interactive(False)
+    #mpl.interactive(False)
 
     # kind of plot
     # ------------
@@ -177,15 +177,23 @@ def plot_2D(source, **kwargs):
 
     colorbar = kwargs.get('colorbar', True)
 
-    if kind in ['map','image']:
-        cmap = colormap = kwargs.get('colormap',
-                        kwargs.get('cmap', plotoptions.colormap))
-    elif data_transposed:
-        cmap = colormap = kwargs.get('colormap',
-                        kwargs.get('cmap', plotoptions.colormap_transposed))
-    else:
-        cmap = colormap = kwargs.get('colormap',
-                        kwargs.get('cmap', plotoptions.colormap_stack))
+    cmap = colormap = mpl.rcParams['image.cmap']
+
+    # viridis is the default setting, so we assume that it must be overload here
+    # except if style is grayscale which is a particular case.
+
+    if not "grayscale" in kwargs.get('style',[] ) and cmap == 'viridis':
+
+        if kind in ['map','image']:
+            cmap = colormap = kwargs.get('colormap',
+                            kwargs.get('cmap', plotoptions.colormap))
+        elif data_transposed:
+            cmap = colormap = kwargs.get('colormap',
+                            kwargs.get('cmap', plotoptions.colormap_transposed))
+        else:
+            cmap = colormap = kwargs.get('colormap',
+                            kwargs.get('cmap', plotoptions.colormap_stack))
+
 
     lw = kwargs.get('linewidth', kwargs.get('lw', plotoptions.linewidth))
 
@@ -260,13 +268,18 @@ def plot_2D(source, **kwargs):
         if normalize is not None:
              norm.vmax = normalize
 
-        _colormap = cm = plt.get_cmap(colormap)
+        _colormap = cm = plt.get_cmap(cmap)
         scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
         # we display the line in the reverse order, so that the last
         # are behind the first.
-        line0, = ax.plot(x, z[0], lw=lw, picker=True)
+
+        hold = kwargs.get('hold', False)
         lines = []
+        if hold and not data_transposed:
+            lines.extend(new.ax.lines)  # keep the old lines
+
+        line0, = ax.plot(x, z[0], lw=lw, picker=True)
 
         for i in range(z.shape[0]):
             l = copy(line0)
@@ -281,6 +294,7 @@ def plot_2D(source, **kwargs):
 
         # but display only a subset of them in order to accelerate the drawing
         maxlines = kwargs.get('maxlines', plotoptions.max_lines_in_stack)
+        log.debug('max number of lines %d'% maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         new.ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 
@@ -288,7 +302,7 @@ def plot_2D(source, **kwargs):
         # if data only (we will  ot set axes and labels
         # it was probably done already in a previous plot
         new._plot_resume(source, **kwargs)
-        return True
+        return ax
 
     # -------------------------------------------------------------------------
     # axis limits and labels
@@ -318,7 +332,7 @@ def plot_2D(source, **kwargs):
         # ----------------
 
         #zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
-        amp = np.ma.ptp(z)/100.
+        amp = np.ma.ptp(z)/50.
         zl = (np.min(np.ma.min(z)-amp), np.max(np.ma.max(z))+amp)
         zlim = list(kwargs.get('zlim', zl))
         zlim.sort()
@@ -446,8 +460,16 @@ if __name__ == '__main__':
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'
-    ax = A.plot_stack()
-    show()
-    axT = A.plot_stack(data_transposed=True)
+    ax = A.copy().plot_stack()
+    axT = A.copy().plot_stack(data_transposed=True)
+    ax2 = A.copy().plot_image(style=['sans', 'paper'], fontsize=9)
+
+    mystyle = {'image.cmap': 'magma',
+               'font.size': 10,
+               'font.weight': 'bold',
+               'axes.grid': True}
+    # TODO: store these styles for further use
+    A.plot(style=mystyle)
+    A.plot(style=['sans', 'paper', 'grayscale'], colorbar=False)
     show()
     pass

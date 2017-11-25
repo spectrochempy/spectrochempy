@@ -138,17 +138,30 @@ def plot_multiple(sources, kind='scatter', lines=True,
                                       'solution')
 
     hold = False
+
+    # do not save during this plots, nor apply any commands
+    savefig = kwargs.get('savefig', None)
+    kwargs['savefig']=None
+    commands = kwargs.get('commands', [])
+    kwargs['commands'] = []
+
     for s in sources : #, colors, markers):
 
-        ax = s.plot(kind= kind, lines=True, hold=hold, **kwargs)
+        ax = s.plot(kind= kind,
+                    lines=True,
+                    hold=hold, **kwargs)
         hold = True
         # hold is necessary for the next plot to say
         # that we will plot on the same figure
 
+    # scale all plots
     legend = kwargs.get('legend', None)
     if legend is not None:
         leg = ax.legend(ax.lines, labels, shadow=True, loc=legend,
                         frameon=True, facecolor='lightyellow')
+    kw = {'savefig': savefig, 'commands': commands}
+    sources[0]._plot_resume(sources[-1], **kw)
+
     return ax
 
 
@@ -338,39 +351,58 @@ def plot_1D(source, **kwargs):
     if lines and ls:
         line.set_linestyle(ls)
 
-
     # -------------------------------------------------------------------------
-    # axis limits and labels
+    # axis limits
     # -------------------------------------------------------------------------
-
-    if kwargs.get('data_only', False):
-        # if data only (we will not set axes and labels
-        # it was probably done already in a previous plot
-        new._plot_resume(source, **kwargs)
-        return True
 
     # abscissa limits?
     xl = [x.data[0], x.data[-1]]
     xl.sort()
-    xlim = list(kwargs.get('xlim', xl))
+
+    # ordinates limits?
+    amp = np.ma.ptp(z.masked_data) / 50.
+    zl = [np.ma.min(z.masked_data) - amp, np.ma.max(z.masked_data) + amp]
+
+    # check if some data ar not already present on the graph
+    # and take care of their limits
+    multiplelines = 2 if kwargs.get('show_zero', False) else 1
+    if len(ax.lines) > multiplelines:
+        # get the previous xlim and zlim
+        xlim = ax.get_xlim()
+        xl[-1] = max(xlim[-1], xl[-1])
+        xl[0] = min(xlim[0], xl[0])
+
+        zlim = ax.get_ylim()
+        zl[-1] = max(zlim[-1], zl[-1])
+        zl[0] = min(zlim[0], zl[0])
+
+    xlim = list(kwargs.get('xlim', xl))  # we read the argument xlim
+                                         # that should have the priority
     xlim.sort()
-    xlim[-1] = min(xlim[-1], xl[-1])
-    xlim[0] = max(xlim[0], xl[0])
 
     # reversed axis?
     reverse = new.x.is_reversed
     if kwargs.get('reverse', reverse):
         xlim.reverse()
 
-    # ordinates limits?
-    amp = np.ma.ptp(z.masked_data) / 100.
-    zl = [np.ma.min(z.masked_data)-amp, np.ma.max(z.masked_data)+amp]
     zlim = list(kwargs.get('zlim', kwargs.get('ylim', zl)))
+                                # we read the argument zlim or ylim
+                                # which have the priority
     zlim.sort()
 
     # set the limits
     ax.set_xlim(xlim)
     ax.set_ylim(zlim)
+
+    # -------------------------------------------------------------------------
+    # labels
+    # -------------------------------------------------------------------------
+
+    if kwargs.get('data_only', False):
+        # if data only (we will not set labels
+        # it was probably done already in a previous plot
+        new._plot_resume(source, **kwargs)
+        return True
 
     number_x_labels = plotoptions.number_of_x_labels  # get from config
     number_y_labels = plotoptions.number_of_y_labels
@@ -379,11 +411,6 @@ def plot_1D(source, **kwargs):
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-
-
-    # -------------------------------------------------------------------------
-    # labels
-    # -------------------------------------------------------------------------
 
     # x label
 
@@ -407,7 +434,7 @@ def plot_1D(source, **kwargs):
 
     # do we display the zero line
     if kwargs.get('show_zero', False):
-        ax.haxlines()
+        ax.haxlines(label='zero_line')
 
     new._plot_resume(source, **kwargs)
 
@@ -416,16 +443,65 @@ def plot_1D(source, **kwargs):
 if __name__ == '__main__':
 
     from spectrochempy.api import *
-    source = NDDataset.read_omnic(
-            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))[:,::100]
+    from tests.utils import figures_dir, same_images
+    options.log_level=DEBUG
 
-    source.plot_stack()
+
+    source = NDDataset.read_omnic(
+            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+
+
+    # plot generic
+    ax = source[0].plot(savefig=os.path.join(figures_dir, 'IR_source_1D'),
+                         savedpi=150)
+
+    # plot generic style
+    ax = source[0].plot(style='sans',
+                        savefig=os.path.join(figures_dir, 'IR_source_1D_sans'),
+                        savedpi=150)
+
+    # check that style reinit to default
+    ax = source[0].plot(savefig='IR_source_1D', savedpi=150)
+    try:
+        assert same_images('IR_source_1D.png',
+                             os.path.join(figures_dir, 'IR_source_1D.png'))
+    except:
+        os.remove('IR_source_1D.png')
+        raise AssertionError('comparison fails')
+    os.remove('IR_source_1D.png')
+
+    source = source[:,::100]
 
     sources = [source[0], source[10], source[20], source[50], source[53]]
     labels = ['sample {}'.format(label) for label in
               ["S1", "S10", "S20", "S50", "S53"]]
 
-    plot_multiple(kind = 'scatter', sources=sources, labels=labels, legend='best')
+    # plot multiple
+    plot_multiple(kind = 'scatter',
+                  sources=sources, labels=labels, legend='best',
+                  savefig=os.path.join(figures_dir,
+                                       'multiple_IR_source_1D_scatter'),
+                  savedpi=150)
 
+    # plot mupltiple with  style
+    plot_multiple(kind='scatter', style='sans',
+                  sources=sources, labels=labels, legend='best',
+                  savefig=os.path.join(figures_dir,
+                                       'multiple_IR_source_1D_scatter_sans'),
+                  savedpi=150)
+
+    # check that style reinit to default
+    plot_multiple(kind='scatter',
+                  sources=sources, labels=labels, legend='best',
+                  savefig='multiple_IR_source_1D_scatter',
+                  savedpi=150)
+    try:
+        assert same_images('multiple_IR_source_1D_scatter',
+                             os.path.join(figures_dir,
+                                          'multiple_IR_source_1D_scatter'))
+    except:
+        os.remove('multiple_IR_source_1D_scatter.png')
+        raise AssertionError('comparison fails')
+    os.remove('multiple_IR_source_1D_scatter.png')
 
     plt.show()

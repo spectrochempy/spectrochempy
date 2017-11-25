@@ -35,6 +35,6 @@
 # =============================================================================
 
 # create an instance
-from .gui import Gui
+from .filedialoggui import FileDialogGui
 
-gui = Gui()
+gui = FileDialogGui()

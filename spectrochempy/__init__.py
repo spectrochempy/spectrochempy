@@ -37,7 +37,7 @@
 """
 The Spectrochempy package.
 
-The only things made here is to setup a gui PyQt5.QApplication
+The main things made here is to setup a gui PyQt5.QApplication
 
 Attributes
 ==========

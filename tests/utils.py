@@ -57,6 +57,7 @@ import warnings
 import nbformat
 import pytest
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors.execute import CellExecutionError
@@ -340,8 +341,37 @@ def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
         else:
             raise
 
-    return sim, rms, REDO_ON_TYPEERROR
+    return (sim, rms, REDO_ON_TYPEERROR)
 
+# .............................................................................
+def compare_images(imgpath1, imgpath2,
+                max_rms=None,
+                min_similarity=None,):
+
+    sim, rms, _ = _image_compare(imgpath1, imgpath2, False)
+
+    CHECKSIM = (min_similarity is not None)
+    SIM = min_similarity if CHECKSIM else 100. - EPSILON
+    MESSSIM = mess = "(similarity: {:.2f}%)".format(sim)
+    CHECKRMS = (max_rms is not None and not CHECKSIM)
+    RMS = max_rms if CHECKRMS else EPSILON
+    MESSRMS = "(rms: {:.2f})".format(rms)
+
+    if sim < 0 or rms < 0:
+        message = "Sizes of the images are different"
+    elif CHECKRMS and rms <= RMS:
+        message = "identical images {}".format(MESSRMS)
+    elif (CHECKSIM or not CHECKRMS) and sim >= SIM:
+        message = "identical/similar images {}".format(MESSSIM)
+    else:
+        message = "different images {}".format(MESSSIM)
+
+    return message
+
+# .............................................................................
+def same_images(imgpath1, imgpath2):
+    if compare_images(imgpath1, imgpath2).startswith('identical'):
+        return True
 
 # .............................................................................
 def image_comparison(reference=None,
@@ -377,7 +407,7 @@ def image_comparison(reference=None,
     force_creation : `bool`, optional, default=``False``.
 
         if this flag is True, the figures created in the decorated function are
-        saved in the reference figures directory (``scpdata/figures``)
+        saved in the reference figures directory (``.spectrocchempy/figures``)
 
     min_similarity : `float` (percent).
 
@@ -386,7 +416,8 @@ def image_comparison(reference=None,
 
     max_rms : `float`
 
-        rms stands for `Root Mean Square`. If set, then it will be used to decide if an image is the same
+        rms stands for `Root Mean Square`. If set, then it will
+        be used to decide if an image is the same
         (less than the acceptable rms). Not used if min_similarity also set.
 
     savedpi : `int`, optional, default=150
@@ -431,6 +462,7 @@ def image_comparison(reference=None,
             fignums = plt.get_fignums()
 
             # execute the function generating the figures
+            # rest style to basic 'lcs' style
             res = func(*args, **kwargs)
 
             # get the new fignums if any
@@ -458,10 +490,16 @@ def image_comparison(reference=None,
                     referfile = os.path.join(figures_dir,
                                              '{}.{}'.format(ref, extension))
 
+                    fig = plt.figure(fignum)   # work around to set
+                                               # the correct style: we
+                                               # we have saved the rcParams
+                                               # in the figure attributes
+                    plt.rcParams.update(fig.rcParams)
                     fig = plt.figure(fignum)
 
                     if force_creation:
-                        # make the figure for reference and bypass the rest of the test
+                        # make the figure for reference and bypass
+                        # the rest of the test
                         tmpfile = referfile
                     else:
                         # else we create a temporary file to save the figure
@@ -478,7 +516,7 @@ def image_comparison(reference=None,
                         # if we have just created the figure
                         sim, rms, REDO_ON_TYPEERROR = _image_compare(referfile,
                                                                      tmpfile,
-                                                              REDO_ON_TYPEERROR)
+                                                                     REDO_ON_TYPEERROR)
 
                     CHECKSIM = (min_similarity is not None)
                     SIM = min_similarity if CHECKSIM else 100. - EPSILON
@@ -499,7 +537,7 @@ def image_comparison(reference=None,
                     message += "\n\t reference: {}".format(
                             os.path.basename(referfile))
                     message += "\n\t generated: {}\n".format(
-                            os.path.basename(tmpfile))
+                            tmpfile)
 
                     if not message.startswith("identical"):
                         errors += message

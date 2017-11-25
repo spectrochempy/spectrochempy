@@ -15,10 +15,10 @@ savefig.dpi       : 600
 savefig.facecolor : white
 savefig.edgecolor : white
 
-font.family: serif
-font.sans-serif: Arial, Liberation Sans, DejaVu Sans, Bitstream Vera Sans, sans-serif
-font.serif: Times New Roman, Times, Palatino, DejaVu Serif, Computer Modern Roman, New Century Schoolbook,serif
-font.size         : 12
+font.family       : serif
+font.sans-serif   : DejaVu Sans, Arial, Liberation Sans, Bitstream Vera Sans, sans-serif
+font.serif        : Times New Roman, Times, Palatino, DejaVu Serif, Computer Modern Roman, New Century Schoolbook,serif
+font.size         : 11
 font.style        : normal
 font.weight       : normal
 
@@ -55,8 +55,10 @@ ytick.direction: out
 ytick.labelsize: 11
 
 mathtext.fontset  : stix
-mathtext.bf       : bold
+mathtext.bf       : serif:bold
 mathtext.cal      : cursive
 mathtext.default  : rm
+mathtext.rm       : serif
+mathtext.it       : serif:italic
 
 text.usetex       : False

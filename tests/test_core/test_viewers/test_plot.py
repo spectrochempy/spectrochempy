@@ -44,6 +44,7 @@ options.log_level = INFO
 
 # To regenerate the reference figures, set FORCE to True
 FORCE = False
+
 # for this regeneration it is advised to set non parallel testing.
 # (remove option -nauto in pytest.ini)
 
@@ -77,16 +78,21 @@ def test_plot_map(IR_source_2D):
     source.plot_map()  # plot_map is an alias of plot(kind='map')
 
 
-@image_comparison(reference=['IR_source_2D_image'])
+@image_comparison(reference=['IR_source_2D_image',
+                             'IR_source_2D_image_sanspaper'],
+                  force_creation=FORCE)
 def test_plot_image(IR_source_2D):
     source = IR_source_2D.copy()
     source.plot_image()  # plot_image is an alias of plot(kind='image')
+    source.plot_image(style=['sans', 'paper'], fontsize=9)
 
-
-@image_comparison(reference=['IR_source_2D_image'], min_similarity=98.0)
+@image_comparison(reference=['IR_source_2D_image',
+                             'IR_source_2D_image_sanspaper'],
+                  min_similarity=90.0)
 def test_plot_image_offset(IR_source_2D):
-    source = IR_source_2D.copy() + .01
+    source = IR_source_2D.copy() + .0005
     source.plot_image()  # plot_image with offset
+    source.plot_image(style=['sans','paper'])
 
 
 @image_comparison(reference=['IR_source_2D_map'])
@@ -154,5 +160,43 @@ def test_multiplot(IR_source_2D):
                     figsize=(9, 5), sharex=True, sharey=True)
 
     multiplot(sources=sources, kind='map', labels=labels, nrow=2, ncol=2,
-                    figsize=(9, 3), sharex=True, sharey=True)
+                    figsize=(9, 5), sharex=True, sharey=True)
 
+@image_comparison(reference=['IR_source_1D',
+                             'IR_source_1D_sans',
+                             'IR_source_1D',
+                             'multiple_IR_source_1D_scatter',
+                             'multiple_IR_source_1D_scatter_sans',
+                             'multiple_IR_source_1D_scatter',
+                             ], force_creation=FORCE)
+def tests_multipleplots_and_styles():
+    source = NDDataset.read_omnic(
+            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+
+
+    # plot generic
+    ax = source[0].copy().plot()
+
+    # plot generic style
+    ax = source[0].copy().plot(style='sans')
+
+    # check that style reinit to default
+    ax = source[0].copy().plot()
+
+    source = source[:,::100]
+
+    sources = [source[0], source[10], source[20], source[50], source[53]]
+    labels = ['sample {}'.format(label) for label in
+              ["S1", "S10", "S20", "S50", "S53"]]
+
+    # plot multiple
+    plot_multiple(kind = 'scatter',
+                  sources=sources, labels=labels, legend='best')
+
+    # plot mupltiple with  style
+    plot_multiple(kind='scatter', style='sans',
+                  sources=sources, labels=labels, legend='best')
+
+    # check that style reinit to default
+    plot_multiple(kind='scatter',
+                  sources=sources, labels=labels, legend='best')
