@@ -92,6 +92,17 @@ class PlotOptions(Configurable):
     kind_2D = Unicode('map', help='default kind of plot for 2D').tag(
             config=True)
 
+    colormap = Unicode('jet',
+            help='default colormap for contour plots').tag(config=True)
+
+    colormap_stack = Unicode('viridis',
+                       help='default colormap for stack plots').tag(
+        config=True)
+
+    colormap_transposed = Unicode('magma',
+                       help='default colormap for stack plots').tag(
+        config=True)
+
     show_projections = Bool(False, help='show all projections').tag(
             config=True)
     show_projection_x = Bool(False, help='show projection along x').tag(
@@ -108,8 +119,9 @@ class PlotOptions(Configurable):
     number_of_z_labels = Integer(5).tag(config=True)
 
     number_of_contours = Integer(50).tag(config=True)
+    contour_alpha = Float(1, help='Transparency of the contours').tag(config=True)
+    contour_start = Float(0.05, help='percentage of the maximum '
+                              'for starting contour levels').tag(config=False)
 
-    cexponent = Float(1.2).tag(config=True)
-    calpha = Float(1).tag(config=True)
-
-    #TODO : make some use of these options! not the case for now
+    max_lines_in_stack = Integer(500, help='maximum number of lines to'
+                                       ' plot in a stack plot').tag(config=True)

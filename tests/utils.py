@@ -557,9 +557,9 @@ if __name__ == '__main__':
         source.plot_image()
         source.plot_image()
         fig = plt.figure(plt.get_fignums()[-1])
-        xlim = source.axes['main'].get_xlim()
+        xlim = source.ndaxes['main'].get_xlim()
         # change a little bit the limits
-        source.axes['main'].set_xlim(np.array(xlim) * .98)
+        source.ndaxes['main'].set_xlim(np.array(xlim) * .98)
 
 
     options.log_level = INFO

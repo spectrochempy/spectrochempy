@@ -44,6 +44,7 @@ are defined.
 # Python and third parties imports
 # ----------------------------------
 
+import copy
 import datetime
 import time
 import json
@@ -60,8 +61,8 @@ import numpy as np
 from numpy.compat import asbytes, asstr
 from numpy.lib.format import write_array, MAGIC_PREFIX
 from numpy.lib.npyio import zipfile_factory, NpzFile
-from traitlets import Dict, List, Float, HasTraits, Instance, observe, All
-
+from traitlets import Dict, List, Bool, Float, HasTraits, \
+    Instance, observe, All, Int
 
 # local import
 # ------------
@@ -73,7 +74,7 @@ from spectrochempy.core.units import Unit
 from spectrochempy.gui import gui
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
-from spectrochempy.core.plotters.utils import  cmyk2rgb
+from spectrochempy.core.plotters.utils import cmyk2rgb
 from spectrochempy.application import plotoptions, log, options
 
 # Constants
@@ -81,25 +82,35 @@ from spectrochempy.application import plotoptions, log, options
 
 __all__ = ['NDPlot',
 
-           'curfig',
+           'figure',
            'show',
-
            'plot',
 
            # 'interactive_masks',
-           'set_figure_style',
+           '_set_figure_style',
+
+           # styles and colors
            'available_styles',
-
            'NBlack', 'NRed', 'NBlue', 'NGreen',
-
 
            ]
 _classes = ['NDPlot']
 
+# For color blind people, it is safe to use only 4 colors in graphs:
+# see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
+#   Black CMYK=0,0,0,0
+#   Red CMYK= 0, 77, 100, 0 %
+#   Blue CMYK= 100, 30, 0, 0 %
+#   Green CMYK= 85, 0, 60, 10 %
+NBlack = (0, 0, 0)
+NRed = cmyk2rgb(0, 77, 100, 0)
+NBlue = cmyk2rgb(100, 30, 0, 0)
+NGreen = cmyk2rgb(85, 0, 60, 10)
 
-# ==============================================================================
+
+# =============================================================================
 # Class NDPlot to handle plotting of datasets
-# ==============================================================================
+# =============================================================================
 
 class NDPlot(HasTraits):
     """
@@ -116,13 +127,13 @@ class NDPlot(HasTraits):
 
     # The axes on which this dataset and other elements such as projections 
     # and colorbar can be plotted
-    _axes = Dict(Instance(plt.Axes))
+    _ndaxes = Dict(Instance(plt.Axes))
 
-
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # generic plotter and plot related methods or properties
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
+    # TODO: work on a better way to have correct docs
     _general_parameters_doc_ = """
     
 savefig: `str`
@@ -138,6 +149,7 @@ dpi : [ None | scalar > 0]
     
     """
 
+    # .........................................................................
     def plot(self, **kwargs):
 
         """
@@ -180,8 +192,6 @@ dpi : [ None | scalar > 0]
 
         """
 
-        log.debug('Standard Plot...')
-
         # color cycle
         # prop_cycle = options.prop_cycle
         # mpl.rcParams['axes.prop_cycle']= r" cycler('color', %s) " % prop_cycle
@@ -190,6 +200,7 @@ dpi : [ None | scalar > 0]
         # select plotter depending on the dimension of the data
         # -------------------------------------------------------------------------
         kind = kwargs.pop('kind', 'generic')
+        log.debug('Call to plot_{}'.format(kind))
 
         # Find or guess the adequate plotter
         # -----------------------------------
@@ -206,212 +217,11 @@ dpi : [ None | scalar > 0]
 
         return _plotter(**kwargs)
 
-
-    # --------------------------------------------------------------------------
-    # setup figure properties
-    # --------------------------------------------------------------------------
-
-    def _figure_setup(self, ndim=1, **kwargs):
-
-        set_figure_style(**kwargs)
-
-        self._figsize = mpl.rcParams['figure.figsize'] = \
-            kwargs.get('figsize', mpl.rcParams['figure.figsize'])
-
-        mpl.rcParams[
-            'figure.autolayout'] = kwargs.pop('autolayout', True)
-
-        # Get current figure information
-        # ------------------------------
-        # if curfig() is None:
-        #     self._updateplot = False  # the figure doesn't yet exists.
-        #     self._fignum = kwargs.pop('fignum', None)  # self._fignum)
-        #     # if no figure present, then create one with the fignum number
-        #     self._fig = plt.figure(self._fignum, figsize=self._figsize)
-        #     self.axes['main'] = self._fig.gca()
-        # else:
-        log.debug('update plot')
-        # self._updateplot = True  # fig exist: updateplot
-
-        # get the current figure
-        hold = kwargs.get('hold', False)
-        self._fig = curfig(hold)
-
-        # is ax in the keywords ?
-        ax = kwargs.pop('ax', None)
-        if not hold:
-            self._axes = {}  # reset axes
-            self._divider = None
-
-        if ax is not None:
-            # in this case we will plot on this ax
-            if isinstance(ax, plt.Axes):
-                ax.name = 'main'
-                self.axes['main'] = ax
-            # elif isinstance(ax, str) and ax in self.axes.keys():
-            #     # next plot commands will be applied if possible to this ax
-            #     self._axdest = ax
-            # elif isinstance(ax, int) and ax>0 and ax <= len(self.axes.keys()):
-            #     # next plot commands will be applied if possible to this ax
-            #     ax = "axe%d"%ax
-            #     self._axdest = ax
-            else:
-                raise ValueError('{} is not recognized'.format(ax))
-
-        elif self._fig.get_axes():
-            # no ax parameters in keywords, so we need to get those existing
-            # We assume that the existing axes have a name
-            self.axes = self._fig.get_axes()
-        else:
-            # or create a new subplot
-            ax = self._fig.gca()
-            ax.name = 'main'
-            self.axes['main'] = ax
-
-        if ax is not None and kwargs.get('kind') in ['scatter']:
-            ax.set_prop_cycle(
-                        cycler('color',
-                               [NBlack, NBlue, NRed, NGreen]*3) +
-                        cycler('linestyle',
-                               ['-', '--', ':', '-.']*3) +
-                        cycler('marker',
-                               ['o', 's', '^']*4))
-        elif ax is not None and kwargs.get('kind') in ['lines']:
-            ax.set_prop_cycle(
-                    cycler('color',
-                           [NBlack, NBlue, NRed, NGreen] ) +
-                    cycler('linestyle',
-                           ['-', '--', ':', '-.']) )
-
-
-        # Get the number of the present figure
-        self._fignum = self._fig.number
-
-        # for generic plot, we assume only a single axe with possible projections
-        # and colobar
-        #
-        # other plot class may take care of other needs
-
-        ax = self.axes['main']
-
-        if ndim == 2:
-            # TODO: also the case of 3D
-
-            # show projections (only useful for maps)
-            # ---------------------------------------
-
-            colorbar = kwargs.get('colorbar', True)
-
-            proj = kwargs.get('proj', plotoptions.show_projections)
-            # TODO: tell the axis by title.
-
-            xproj = kwargs.get('xproj', plotoptions.show_projection_x)
-
-            yproj = kwargs.get('yproj', plotoptions.show_projection_y)
-
-            kind = kwargs.get('kind', plotoptions.kind_2D)
-
-            SHOWXPROJ = (proj or xproj) and kind in ['map', 'image']
-            SHOWYPROJ = (proj or yproj) and kind in ['map', 'image']
-
-            # create new axes on the right and on the top of the current axes
-            # The first argument of the new_vertical(new_horizontal) method is
-            # the height (width) of the axes to be created in inches.
-            #
-            # This is necessary for projections and colorbar
-
-            if (SHOWXPROJ or SHOWYPROJ or colorbar) and self._divider is None:
-                self._divider = make_axes_locatable(ax)
-
-            divider = self._divider
-
-            if SHOWXPROJ:
-                axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
-                                           frameon=0, yticks=[])
-                axex.tick_params(bottom='off', top='off')
-                plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
-                         visible=False)
-                axex.name = 'xproj'
-
-            if SHOWYPROJ:
-                axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
-                                           frameon=0, xticks=[])
-                axey.tick_params(right='off', left='off')
-                plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
-                         visible=False)
-                axey.name = 'yproj'
-                self.axes['yproj'] = axey
-
-            if colorbar:
-                axec = divider.append_axes("right", .15, pad=0.3, frameon=0,
-                                           xticks=[], yticks=[])
-                axec.tick_params(right='off', left='off')
-                # plt.setp(axec.get_xticklabels(), visible=False)
-
-                axec.name = 'colorbar'
-                self.axes['colorbar'] = axec
-
-    # --------------------------------------------------------------------------
-    # resume a figure plot
-    # --------------------------------------------------------------------------
-
-    def _plot_resume(self, **kwargs):
-
-        # Additional matplotlib commands on the current plot
-        # ----------------------------------------------------------------------
-
-        commands = kwargs.get('commands', [])
-        if commands:
-            for command in commands:
-                com, val = command.split('(')
-                val = val.split(')')[0].split(',')
-                ags = []
-                kws = {}
-                for item in val:
-                    if '=' in item:
-                        k, v = item.split('=')
-                        kws[k.strip()] = eval(v)
-                    else:
-                        ags.append(eval(item))
-                getattr(self.axes['main'], com)(*ags,
-                                                **kws)  # TODO:improve this
-
-        # adjust the plots
-
-        # subplot dimensions
-        # top = kwargs.pop('top', mpl.rcParams['figure.subplot.top'])
-        # bottom = kwargs.pop('bottom', mpl.rcParams['figure.subplot.bottom'])
-        # left = kwargs.pop('left', mpl.rcParams['figure.subplot.left'])
-        # right = kwargs.pop('right', mpl.rcParams['figure.subplot.right'])
-
-        # plt.subplots_adjust(left=left, right=right, top=top, bottom=bottom)
-        # self.fig.tight_layout()
-
-        # finally return the current fig for further manipulation.
-
-        # should be after all plot commands
-        savename = kwargs.get('savefig', None)
-
-        if savename is not None:
-            # we save the figure with options found in kwargs
-            # starting with `save`
-
-            kw = {}
-            for key, value in kwargs.items():
-                if key.startswith('save'):
-                    key = key[4:]
-                    kw[key] = value
-            self._fig.savefig(savename, **kw)
-
-        plt.draw()
-
-        cid = self._fig.canvas.mpl_connect(
-                'button_press_event', NDPlot._onclick)
-
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # plotter: plot_generic
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
+    # .........................................................................
     def plot_generic(self, **kwargs):
         """
         The generic plotter. It try to guess an adequate basic plot for the data.
@@ -429,98 +239,437 @@ dpi : [ None | scalar > 0]
         Returns
         -------
 
+        ax : return the handler to ax where the main plot was done
+
         """
 
-        temp = self.copy()
+        if self.ndim == 1:
 
-        if temp.ndim == 1:
+            ax = self.plot_1D(**kwargs)
 
-            ax = temp.plot_1D(**kwargs)
+        elif self.ndim == 2:
 
-        elif temp.ndim == 2:
+            ax = self.plot_2D(**kwargs)
 
-            ax = temp.plot_2D(**kwargs)
+        elif self.ndim == 3:
 
-        elif temp.ndim == 3:
-
-            ax = temp.plot_3D(**kwargs)
+            ax = self.plot_3D(**kwargs)
 
         else:
-            log.error('Cannot guess an adequate plotter. I did nothing!')
+            log.error('Cannot guess an adequate plotter, nothing done!')
             return False
-
-        self._axes = temp._axes
-        self._fig = temp._fig
-        self._fignum = temp._fignum
 
         return ax
 
-    # --------------------------------------------------------------------------
-    # interactive functions
-    # --------------------------------------------------------------------------
-    _selected = List()      # to store temporary the mask positions
+    # -------------------------------------------------------------------------
+    # setup figure properties
+    # -------------------------------------------------------------------------
 
-    _xlim = List() # used to detect zoom in axe
-    _ylim = List()  # used to detect zoom in axe Transposed
+    # .........................................................................
+    def _figure_setup(self, ndim=1, **kwargs):
 
+        _set_figure_style(**kwargs)
+
+        self._figsize = mpl.rcParams['figure.figsize'] = \
+            kwargs.get('figsize', mpl.rcParams['figure.figsize'])
+
+        mpl.rcParams[
+            'figure.autolayout'] = kwargs.pop('autolayout', True)
+
+        # Get current figure information
+        # ------------------------------
+        log.debug('update plot')
+
+        # get the current figure
+        hold = kwargs.get('hold', False)
+        self._fig = _curfig(hold)
+
+        # is ax in the keywords ?
+        ax = kwargs.pop('ax', None)
+        if not hold:
+            self._ndaxes = {}  # reset ndaxes
+            self._divider = None
+
+        if ax is not None:
+            # ax given in the plot parameters,
+            # in this case we will plot on this ax
+            if isinstance(ax, plt.Axes):
+                ax.name = 'main'
+                self.ndaxes['main'] = ax
+            else:
+                raise ValueError('{} is not recognized'.format(ax))
+
+        elif self._fig.get_axes():
+            # no ax parameters in keywords, so we need to get those existing
+            # We assume that the existing axes have a name
+            self.ndaxes = self._fig.get_axes()
+        else:
+            # or create a new subplot
+            ax = self._fig.gca()
+            ax.name = 'main'
+            self.ndaxes['main'] = ax
+
+        if ax is not None and kwargs.get('kind') in ['scatter']:
+            ax.set_prop_cycle(
+                    cycler('color',
+                           [NBlack, NBlue, NRed, NGreen] * 3) +
+                    cycler('linestyle',
+                           ['-', '--', ':', '-.'] * 3) +
+                    cycler('marker',
+                           ['o', 's', '^'] * 4))
+        elif ax is not None and kwargs.get('kind') in ['lines']:
+            ax.set_prop_cycle(
+                    cycler('color',
+                           [NBlack, NBlue, NRed, NGreen]) +
+                    cycler('linestyle',
+                           ['-', '--', ':', '-.']))
+
+        # Get the number of the present figure
+        self._fignum = self._fig.number
+
+        # for generic plot, we assume only a single axe
+        # with possible projections
+        # and an optional colobar.
+        # other plot class may take care of other needs
+
+        ax = self.ndaxes['main']
+
+        if ndim == 2:
+            # TODO: also the case of 3D
+
+            kind = kwargs.get('kind', plotoptions.kind_2D)
+
+            # show projections (only useful for map or image)
+            # ------------------------------------------------
+
+            colorbar = kwargs.get('colorbar', True)
+
+            proj = kwargs.get('proj', plotoptions.show_projections)
+            # TODO: tell the axis by title.
+
+            xproj = kwargs.get('xproj', plotoptions.show_projection_x)
+
+            yproj = kwargs.get('yproj', plotoptions.show_projection_y)
+
+            SHOWXPROJ = (proj or xproj) and kind in ['map', 'image']
+            SHOWYPROJ = (proj or yproj) and kind in ['map', 'image']
+
+            # Create the various axes
+            # -------------------------
+            # create new axes on the right and on the top of the current axes
+            # The first argument of the new_vertical(new_horizontal) method is
+            # the height (width) of the axes to be created in inches.
+            #
+            # This is necessary for projections and colorbar
+
+            if (SHOWXPROJ or SHOWYPROJ or colorbar) \
+                    and self._divider is None:
+                self._divider = make_axes_locatable(ax)
+
+            divider = self._divider
+
+            if SHOWXPROJ:
+                axex = divider.append_axes("top", 1.01, pad=0.01, sharex=ax,
+                                           frameon=0, yticks=[])
+                axex.tick_params(bottom='off', top='off')
+                plt.setp(axex.get_xticklabels() + axex.get_yticklabels(),
+                         visible=False)
+                axex.name = 'xproj'
+                self.ndaxes['xproj'] = axex
+
+            if SHOWYPROJ:
+                axey = divider.append_axes("right", 1.01, pad=0.01, sharey=ax,
+                                           frameon=0, xticks=[])
+                axey.tick_params(right='off', left='off')
+                plt.setp(axey.get_xticklabels() + axey.get_yticklabels(),
+                         visible=False)
+                axey.name = 'yproj'
+                self.ndaxes['yproj'] = axey
+
+            if colorbar:
+                axec = divider.append_axes("right", .15, pad=0.1, frameon=0,
+                                           xticks=[], yticks=[])
+                axec.tick_params(right='off', left='off')
+                # plt.setp(axec.get_xticklabels(), visible=False)
+                axec.name = 'colorbar'
+                self.ndaxes['colorbar'] = axec
+
+    # -------------------------------------------------------------------------
+    # resume a figure plot
+    # -------------------------------------------------------------------------
+
+    # .........................................................................
+    def _plot_resume(self, origin, **kwargs):
+
+        log.debug('resume plot')
+
+        # Additional matplotlib commands on the current plot
+        # ---------------------------------------------------------------------
+
+        commands = kwargs.get('commands', [])
+        if commands:
+            for command in commands:
+                com, val = command.split('(')
+                val = val.split(')')[0].split(',')
+                ags = []
+                kws = {}
+                for item in val:
+                    if '=' in item:
+                        k, v = item.split('=')
+                        kws[k.strip()] = eval(v)
+                    else:
+                        ags.append(eval(item))
+                getattr(self.ndaxes['main'], com)(*ags,
+                                                  **kws)  # TODO:improve this
+
+        # savefig command should be after all plot commands
+
+        savename = kwargs.get('savefig', None)
+        if savename is not None:
+            # we save the figure with options found in kwargs
+            # starting with `save`
+            log.debug('save plot to {}'.format(savename))
+            kw = {}
+            for key, value in kwargs.items():
+                if key.startswith('save'):
+                    key = key[4:]
+                    kw[key] = value
+            self._fig.savefig(savename, **kw)
+
+        # put back the axes in the original source
+        # (we have worked on a copy in plot)
+        if not kwargs.get('data_transposed', False):
+            origin.ndaxes = self.ndaxes
+            origin._ax_lines = self._ax_lines
+            if hasattr(self, "_axcb"):
+                origin._axcb = origin._axcb
+        else:
+            nda = {}
+            for k, v in self.ndaxes.items():
+                nda[k + 'T'] = v
+            origin.ndaxes = nda
+            origin._axT_lines = self._ax_lines
+            if hasattr(self, "_axcb"):
+                origin._axcbT = origin._axcb
+
+        origin._fig = self._fig
+
+        plt.draw()
+
+    # -------------------------------------------------------------------------
+    # Special attributes
+    # -------------------------------------------------------------------------
+
+    # .........................................................................
+    def __dir__(self):
+        return ['fignum', 'ndaxes', 'divider']
+
+    # -------------------------------------------------------------------------
+    # Properties
+    # -------------------------------------------------------------------------
+
+    # .........................................................................
+    @property
+    def fig(self):
+        """
+        Matplotlib figure associated to this dataset
+
+        """
+        return self._fig
+
+    # .........................................................................
+    @property
+    def fignum(self):
+        """
+        Matplotlib figure associated to this dataset
+
+        """
+        return self._fignum
+
+    # .........................................................................
+    @property
+    def ndaxes(self):
+        """
+        A dictionary containing all the axes of the current figures
+        """
+        return self._ndaxes
+
+    # .........................................................................
+    @ndaxes.setter
+    def ndaxes(self, axes):
+        # we assume that the axes have a name
+        if isinstance(axes, list):
+            # a list a axes have been passed
+            for ax in axes:
+                log.debug('add axe: {}'.format(ax.name))
+                self._ndaxes[ax.name] = ax
+        elif isinstance(axes, dict):
+            self._ndaxes.update(axes)
+        elif isinstance(axes, Axes):
+            # it's an axe! add it to our list
+            self._ndaxes[axes.name] = axes
+
+    # .........................................................................
+    @property
+    def ax(self):
+        """
+        the main matplotlib axe associated to this dataset
+
+        """
+        return self._ndaxes['main']
+
+    # .........................................................................
+    @property
+    def axT(self):
+        """
+        the matplotlib axe associated to the transposed dataset
+
+        """
+        return self._ndaxes['mainT']
+
+    # .........................................................................
+    @property
+    def axec(self):
+        """
+        Matplotlib colorbar axe associated to this dataset
+
+        """
+        return self._ndaxes['colorbar']
+
+    # .........................................................................
+    @property
+    def axecT(self):
+        """
+        Matplotlib colorbar axe associated to the transposed dataset
+
+        """
+        return self._ndaxes['colorbarT']
+
+    # .........................................................................
+    @property
+    def axex(self):
+        """
+        Matplotlib projection x axe associated to this dataset
+
+        """
+        return self._ndaxes['xproj']
+
+    # .........................................................................
+    @property
+    def axey(self):
+        """
+        Matplotlib projection y axe associated to this dataset
+
+        """
+        return self._ndaxes['yproj']
+
+    # .........................................................................
+    @property
+    def divider(self):
+        """
+        Matplotlib plot divider
+
+        """
+        return self._divider
+
+    # -------------------------------------------------------------------------
+    # events and interactive functions
+    # -------------------------------------------------------------------------
+
+    # a flag to say if we act on zoom
+    # (useful for 'with_transposed' kind of plot).
+    _zoom_detection = Bool
+
+    _all_masks = List()  # to store temporary the mask positions
+
+    _xlim = List()  # used to detect zoom in ax
+    _ylim = List()  # used to detect zoom in transposed axT
+
+    # .........................................................................
     def interactive_masks(self, **kwargs):
+        """
+        Set mask interactively
 
+        Parameters
+        ----------
+        colorbar
+
+        kwargs
+
+
+        """
         # TODO: make it for 1D too!
 
-        kwargs.pop('kind', None)
-        from spectrochempy.core.plotters.multiplot import multiplot_stack
-        axes = multiplot_stack(sources=self,
-                               transposed=True,
-                               colorbar=True,
-                               suptitle = 'INTERACTIVE MASK SELECTION '
-                                          '(press `a` for help)',
-                               suptitle_color=NBlue)
+        # delayed import to avoir circular import
+        from spectrochempy.core.plotters.multiplot import plot_with_transposed
+
+        colorbar = kwargs.get('colorbar', True)
+        plot_with_transposed(
+                source=self,
+                colorbar=colorbar,
+                suptitle='INTERACTIVE MASK SELECTION '
+                         '(press `a` for help)',
+                suptitle_color=NBlue,
+                **kwargs)
+
+        ax = self.ax
+        axT = self.axT
+        axec = self.axec
+        axecT = self.axecT
 
         fig = self.fig
-        ax, axT = axes.values()
-        self.axT = axT
+
+        # set the working set of lines (a copy to preserve original list)
+        # ax_lines and axT_lines are the displayed set that can be modified
+        # while _ax_lines and _axT_lines are the original
+
+        self.ax_lines = ax_lines = self._ax_lines[:]
+        self.axT_lines = axT_lines = self._axT_lines[:]
+        self.ax_zorder = len(self._ax_lines) + 2
+        self.axT_zorder = len(self._axT_lines) + 2
 
         help_message = \
             """ 
              ================================================================
              HELP
              ================================================================
-    
+
              --------- KEYS -------------------------------------------------
-             * Press and hold 'a' for this help
+             * Press and hold 'a' for this help.
+             * Press 'esc' to force redraw and hide any displayed text.
              * Press 'ctrl+z' to undo the last set or last selected mask.
              * Press 'ctrl+x' to apply all mask selections and exit. 
-    
+
              --------- MOUSE ------------------------------------------------
-             * click the right button to pick a row and mask it
-             * click the left button on a mask to select it
-             * double-click the left button to pick and mask a single column
-             * Press the left button, move and release for a range selection 
-    
+             * click the right button to pick a row and mask it.
+             * click the left button on a mask to select it.
+             * double-click the left button to pick and mask a single column.
+             * Press the left button, move and release for a range selection. 
+
              ================================================================
             """
 
         self._helptext = axT.text(0.02, 0.02, help_message, fontsize=10,
-                                 fontweight='bold',
-                                 transform=fig.transFigure, color='blue',
-                                 bbox={'facecolor': 'white',
-                                       'edgecolor': 'blue'})
-        self._tpos = axT.text(0.01, 0.05, '', fontsize=12,
-                             fontweight='bold',
-                             transform=fig.transFigure, color='green',
-                             bbox={'facecolor': 'white',
-                                   'edgecolor': 'green'})
+                                  fontweight='bold',
+                                  transform=fig.transFigure, color='blue',
+                                  bbox={'facecolor': 'white',
+                                        'edgecolor': 'blue'})
+        self._tpos = axT.text(0.5, 0.5, '', fontsize=12,
+                              ha='center', va='center',
+                              fontweight='bold',
+                              transform=fig.transFigure, color='green',
+                              bbox={'facecolor': 'white',
+                                    'edgecolor': 'green'})
 
         def show_help():
             self._helptext.set_visible(True)
-            plt.draw()
+            fig.canvas.draw()
 
         def show_action(message):
             self._tpos.set_text(message)
             self._tpos.set_visible(True)
-            plt.draw()
-            log.debug("show action : "+message)
-            time.sleep(.2)
+            fig.canvas.draw()
+            log.debug("show action : " + message)
 
         def hide_help():
             try:
@@ -534,138 +683,247 @@ dpi : [ None | scalar > 0]
             except:
                 pass
 
-        # get the limits of the normal plot
-        self._xlim = ax.get_xlim()
-        # get the limits of the transposed plot (they must correspond to the
-        # indirect dimension of the normal one)
-        self._ylim = axT.get_xlim()
-
         def get_limits():
             # get limits (if they change, they will triger a change observed
             # below in the self._limits_changed function
-
             self._xlim = ax.get_xlim()
             self._ylim = axT.get_xlim()
 
         def exact_coord_x(c):
-            # set x to the closest nddataset x coordinate
+            # get the closest nddataset x coordinate from c
             idx = self._loc2index(c, -1)
             return (idx, self.x.data[idx])
 
         def exact_coord_y(c):
-            # set x to the closest nddataset x coordinate
+            # get the closest nddataset y coordinate from c
             idx = self._loc2index(c, 0)
             return (idx, self.y.data[idx])
 
-        # self._selected will contain informations about the selected masks
-        self._selected = []
+        self._hover_T_line = None
 
-        # initialize show action to null : ''
-        show_action('')
+        def get_hover_T_line(c):
+            idx, _ = exact_coord_x(c)
+            self._hover_T_line = copy.copy(self._axT_lines[idx])
+            self._hover_T_line.set_linewidth(2)
+            self._hover_T_line.set_color(NGreen)
+            self._hover_T_line.set_zorder(self.axT_zorder)
+            self._update_axes()
+
+        self._hover_line = None
+
+        def get_hover_line(c):
+            idx, _ = exact_coord_y(c)
+            self._hover_line = copy.copy(self._ax_lines[idx])
+            self._hover_line.set_linewidth(2)
+            self._hover_line.set_color(NRed)
+            self._hover_line.set_zorder(self.ax_zorder)
+            self._update_axes()
+
+        # hide messages
+        # -------------
+
+        hide_help()
+        hide_action()
+
+        # utility transform for drawinfg on the colorbars
+        # ------------------------------------------------
+
+        ax_axis_to_data = ax.transAxes + ax.transData.inverted()
+        ax_data_to_axis = ax_axis_to_data.inverted()
+        axdata2axis = lambda x: ax_data_to_axis.transform((x, 0))[0]
+        axT_axis_to_data = axT.transAxes + axT.transData.inverted()
+        axT_data_to_axis = axT_axis_to_data.inverted()
+        axTdata2axis = lambda x: axT_data_to_axis.transform((x, 0))[0]
+
+        # cursors
+        # ---------
+
+        # init them out of the axes (not visible)
+        self.x0 = min(ax.get_xlim()) - 10.
+        self.y0 = min(axT.get_xlim()) - 10.
+
+        self.ax_cursor = ax.axvline(self.x0, alpha=.8, color=NRed, lw=1.5,
+                                    label='cursor',
+                                    zorder=self.ax_zorder)
+        self.axecT_cursor = axecT.axhline(axdata2axis(self.x0), alpha=.8,
+                                          color=NGreen,
+                                          lw=1.5,
+                                          label='cursor')
+
+        self.axT_cursor = axT.axvline(self.y0, alpha=.8, color=NGreen, lw=1.5,
+                                      label='cursor',
+                                      zorder=self.axT_zorder)
+        self.axec_cursor = axec.axhline(axTdata2axis(self.y0), alpha=.8,
+                                        color=NRed,
+                                        lw=1.5,
+                                        label='cursor')
+
+        # row or cols to be masked initialisation
+        # ---------------------------------------
+
+        # self._all_masks will contain full informations about the selected masks
+        self._all_masks = []
+
+        # update axes display data with a reduce number of lines
+        # -------------------------------------------------------
+
+        self._update_axes()
+
+        # now we can start to watch for changes (zoom, etc...)
+        # ----------------------------------------------------
+
+        self._zoom_detection = True
 
         # mouse events
         # ------------
 
+        def _onleaveaxes(event):
+            # fired on a mouse motion leading to leave an ax
+            # here we delete displayed cursor on all axes
+
+            self.axT_cursor.set_xdata(self.y0)
+            self.axec_cursor.set_ydata(axTdata2axis(self.y0))
+
+            self.ax_cursor.set_xdata(self.x0)
+            self.axecT_cursor.set_ydata(axdata2axis(self.y0))
+
+            self._hover_line = None
+            self._hover_T_line = None
+
+            self._update_axes()
+
         def _onmove(event):
             # fired on a mouse motion
-            # we use this event to remove
-            # all displayed information (help, actions)
+            # we use this event to display cursors
+            if not event.inaxes:
+                return
+
             hide_help()
             hide_action()
             # and to get the new limts in case for example
             # of an interative zoom
             get_limits()
-            # to make actually the change take an effect, we must redraw
-            plt.draw()
+
+            if event.inaxes is ax:
+                x = event.xdata
+                self.ax_cursor.set_xdata(x)
+                self.axecT_cursor.set_ydata(axdata2axis(x))
+                get_hover_T_line(x)
+
+            elif event.inaxes is axT:
+                x = event.xdata
+                self.axT_cursor.set_xdata(x)
+                self.axec_cursor.set_ydata(axTdata2axis(x))
+                get_hover_line(x)
 
         def _onclick(event):
             # fired on a mouse click.
 
-            # if it is not fired in a given axe, return
+            # if it is not fired in ax or the transposed axT, return
             # immediately and do nothing, except ot hide the 'help' text.
             hide_help()
-            if event.inaxes and event.inaxes.name \
-                    not in ['main', 'xproj', 'yproj', 'colorbar']:
+
+            if event.inaxes not in [self.ax, self.axT]:
                 return
 
             # check which button was pressed
-            if event.button == 1 and event.dblclick: # double-click left button
-                ax = event.inaxes
+
+            if event.button == 1 and event.dblclick:  # double-click left button
+                inax = event.inaxes
                 x = event.xdata
 
-                if ax is self.axT:
+                if inax is self.axT:
                     # set x to the closest original nddataset y coordinate
                     idx, x = exact_coord_y(x)
-                    axvT = ax.axvline(x, lw=2, color='white', alpha=.75, picker=True)
-                    self._selected.append(('row', axvT, x))
+                    axvT = inax.axvline(x,
+                                        lw=2, color='white', alpha=.9,
+                                        picker=True,
+                                        zorder=self.axT_zorder + 10,
+                                        label='mask_row_%d' % idx)
+                    self._all_masks.append(('row', axvT, x, idx))
+
                     # corresponding value in the original display
-                    # it is a complete row - remember that the lines
-                    # are plotted in reverse order with respect to the idx
-                    # so we need to reverse the lines list
-                    # before slicing using idx
-                    line = self.ax.lines[::-1][idx]
-                    line.set_color('gray')
-                    line.set_linewidth(.1)
+                    # it is a complete row that we remove
+                    line = self._ax_lines[idx]
+                    show_action('mask row at y={:.2f}'.format(x))
+                    self._update_axes()
 
-                    ax.axvline(self.x[idx], lw=2, color='white', alpha=.75, picker=True)
-                    show_action('selected nddataset row at {:.2f}'.format(x))
-                    plt.draw()
-
-                else:
+                elif inax is self.ax:
                     idx, x = exact_coord_x(x)
-                    axv = ax.axvline(x, lw=2, color='white', alpha=.75, picker=True)
-                    self._selected.append(('col', axv, x))
-                    show_action('selected nddataset col at {:.2f}'.format(x))
-                    # corresponding value in the transposed display
-                    # it is a complete row - remember that the lines
-                    # are plotted in reverse order with respect to the idx
-                    # so we need to reverse the lines list
-                    # before slicing using idx
-                    transposed_line = self.axT.lines[::-1][idx]
-                    transposed_line.set_color('gray')
-                    transposed_line.set_linewidth(.1)
-                    plt.draw()
+                    axv = inax.axvline(x,
+                                       lw=2, color='white', alpha=.9,
+                                       picker=True,
+                                       zorder=self.ax_zorder + 10,
+                                       label='mask_col_%d' % idx)
+                    self._all_masks.append(('col', axv, x, idx))
 
+                    # corresponding value in the transposed display
+                    # it is a complete row of axT
+
+                    # corresponding value in the original display
+                    # it is a complete row that we remove
+                    line = self._axT_lines[idx]
+                    show_action('mask column at x={:.2f}'.format(x))
+                    self._update_axes()
 
             pass
 
-        self.fig.canvas.mpl_connect('button_press_event', _onclick)
-        self.fig.canvas.mpl_connect('motion_notify_event', _onmove)
+        self._pressevent = self.fig.canvas.mpl_connect(
+                'button_press_event', _onclick)
+        self._motionevent = self.fig.canvas.mpl_connect(
+                'motion_notify_event', _onmove)
+        self._leaveevent = self.fig.canvas.mpl_connect(
+                'axes_leave_event', _onleaveaxes)
 
         # key events
         # ----------
 
         def _on_key(event):
-            #print(event.key)
-            if event.key in ['h','a']:
+
+            if event.key in ['h', 'a']:
                 # we show the help.
                 show_help()
 
+            if event.key in ['esc']:
+                # we show the help.
+                hide_help()
+                hide_action()
+                fig.canvas.draw()
+
         def _on_key_release(event):
 
-            if event.key in ['a','h']:
+            if event.key in ['a', 'h']:
                 hide_help()
 
             if event.key in ['ctrl+z']:
-                if self._selected:
-                    last = list(self._selected.pop(-1))
-                    if last[0] in ['span','col']:
-                        last[1].remove()
-                    else:
-                        last[1].set_color(last[3])
-                        last[1].set_linewidth(last[4])
-                    show_action('deleted {} selection at {:.2f}'.format(last[0],
-                                                                    last[-1]))
+                if self._all_masks:
+                    last = list(self._all_masks.pop(-1))
+                    #if last[0] in ['rowspan', 'colspan', '''col']:
+                    last[1].remove()
+                    #else:
+                    #    last[1].set_color(last[3])
+                    #    last[1].set_linewidth(last[4])
+                    show_action('removed {} selection at {:.2f}'.format(last[0],
+                                                                        last[
+                                                                            2]))
+                    fig.canvas.draw()
+                else:
+                    show_action('all masks were already removed')
 
             if event.key in ['ctrl+x']:
-                log.info("apply all selected mask")
+                log.info("apply all defined mask to the dataset")
 
-                for item in self._selected:
+                for item in self._all_masks:
                     _item = list(item)
-                    if _item[0] in ['span']:
+                    if _item[0] in ['colspan']:
                         xmin, xmax = _item[2:]
-                        self[:, xmin:xmax]=masked
+                        self[:, xmin:xmax] = masked
                         log.debug("span {}:{}".format(xmin, xmax))
+
+                    elif _item[0] in ['rowspan']:
+                        ymin, ymax = _item[2:]
+                        self[ymin:ymax] = masked
+                        log.debug("rowspan {}:{}".format(ymin, ymax))
 
                     elif _item[0] in ['col']:
                         x = _item[2]
@@ -677,11 +935,9 @@ dpi : [ None | scalar > 0]
                         self[y] = masked
                         log.debug("row {}".format(y))
 
-                show_action('Masks applied')
+                show_action('Masks applied to the dataset')
 
                 plt.close(self._fig)
-
-            plt.draw()
 
         self.fig.canvas.mpl_connect('key_press_event', _on_key)
         self.fig.canvas.mpl_connect('key_release_event', _on_key_release)
@@ -691,257 +947,280 @@ dpi : [ None | scalar > 0]
 
         def _onpick(event):
 
-            ax = event.mouseevent.inaxes
+            inax = event.mouseevent.inaxes
 
             if isinstance(event.artist, Line2D):
+
                 button = event.mouseevent.button
                 sel = event.artist
-                y = sel.get_label()
-                x = event.mouseevent.xdata
-                if button == 3:
-                    # right button -> row selection
-                    color = sel.get_color()
-                    lw = sel.get_linewidth()
-                    # save these setting to undo
-                    self._selected.append(('row', sel, y, color, lw))
-                    sel.set_color('gray')
-                    sel.set_linewidth(.1)
-                    show_action("picked row {}".format(y))
 
-                elif button == 1 and event.mouseevent.dblclick:
+                if sel.get_label().startswith('mask'):
+                    # TODO: offer the possibility of deleting this mask selection
+                    return
+
+                if inax is ax:
+                    y = eval(sel.get_label())
+                    x = event.mouseevent.xdata
+                    cond_row = (button == 3)
+                    cond_col = (button == 1 and event.mouseevent.dblclick)
+
+                elif inax is axT:
+                    x = eval(sel.get_label())
+                    y = event.mouseevent.xdata
+                    cond_col = (button == 3)
+                    cond_row = (button == 1 and event.mouseevent.dblclick)
+
+                if cond_row:
+                    # right button -> row selection
+                    idx, y = exact_coord_y(y)
+                    axvT = axT.axvline(y,
+                                       lw=2, color='white', alpha=.9,
+                                       picker=True,
+                                       zorder=self.axT_zorder + 10,
+                                       label='mask_row_%d' % idx)
+                    self._all_masks.append(('row', axvT, y, idx))
+                    show_action("mask row picked at y={:.2f}".format(y))
+
+                elif cond_col:
 
                     # left button -> column selection
-                    idx, x = exact_coord_y(x)
-                    axv = ax.axvline(x, lw= .1, color='white', picker=True)
-                    self._selected.append(('col', axv, x))
-                    show_action("picked col {}".format(x))
+                    idx, x = exact_coord_x(x)
+                    axv = ax.axvline(x, lw=2, color='white', alpha=.9,
+                                     picker=True,
+                                     zorder=self.ax_zorder + 10,
+                                     label='mask_col_%d' % idx)
+                    self._all_masks.append(('col', axv, x, idx))
+                    show_action("mask column picked at x={:.2f}".format(x))
 
-            plt.draw()
+                self._update_axes()
 
         self.fig.canvas.mpl_connect('pick_event', _onpick)
 
-        def _onspan(xmin, xmax):
+        def _onspanx(xmin, xmax):
             xmin, xmax = sorted((xmin, xmax))
             sp = ax.axvspan(xmin, xmax, facecolor='white',
-                            edgecolor='white', alpha=.95,
-                            zorder=10000, picker=True)
-            self._selected.append(('span', sp, xmin, xmax))
-            show_action("span betwwen {} and {}".format(xmin, xmax))
-            plt.draw()
+                            edgecolor='white',
+                            zorder=self.ax_zorder, picker=True)
+            self._all_masks.append(('colspan', sp, xmin, xmax))
+            show_action("col span between {:.2f} and {:.2f}".format(xmin, xmax))
+            self._donotupdate = False
+            self._pressevent = self.fig.canvas.mpl_connect(
+                    'button_press_event', _onclick)
+            self._motionevent = self.fig.canvas.mpl_connect(
+                    'motion_notify_event', _onmove)
+            self._leaveevent = self.fig.canvas.mpl_connect(
+                    'axes_leave_event', _onleaveaxes)
 
-        span = SpanSelector(ax, _onspan, 'horizontal',  minspan=5, button=[1],
-                            useblit=True, rectprops=dict(alpha=0.95,
-                                                         facecolor='white',
-                                                         edgecolor='w'))
+            self._update_axes()
 
-        show()
+        def _onmovesp(xmin, xmax):
+            try:
+
+                self.fig.canvas.mpl_disconnect(self._pressevent)
+                self.fig.canvas.mpl_discconnect(self._motionevent)
+                self.fig.canvas.mpl_disconnect(self._leaveevent)
+            except:
+                pass
+            self._donotupdate = True
+
+        min_x_span = np.diff(self.x.data)[0]*.1
+        self._spanx = SpanSelector(ax, _onspanx, 'horizontal',
+                                   minspan=min_x_span,
+                                   button=[1], onmove_callback=_onmovesp,
+                                   useblit=False,
+                                   rectprops=dict(alpha=0.5,
+                                                  zorder=self.axT_zorder,
+                                                  facecolor=NRed,
+                                                  edgecolor='w'))
+
+        def _onspany(ymin, ymax):
+            ymin, ymax = sorted((ymin, ymax))
+            sp = axT.axvspan(ymin, ymax, facecolor='white',
+                             edgecolor='white',
+                             zorder=self.axT_zorder, picker=True)
+            self._all_masks.append(('rowspan', sp, ymin, ymax))
+            show_action("row span between {:.2f} and {:.2f}".format(ymin, ymax))
+            self._donotupdate = False
+            self._pressevent = self.fig.canvas.mpl_connect(
+                    'button_press_event', _onclick)
+            self._motionevent = self.fig.canvas.mpl_connect(
+                    'motion_notify_event', _onmove)
+            self._leaveevent = self.fig.canvas.mpl_connect(
+                    'axes_leave_event', _onleaveaxes)
+            self._update_axes()
+
+        min_y_span = np.diff(self.y.data)[0]*.1
+        self._spany = SpanSelector(axT, _onspany, 'horizontal',
+                                   minspan=min_y_span,
+                                   button=[1], onmove_callback=_onmovesp,
+                                   useblit=False,
+                                   rectprops=dict(alpha=0.5,
+                                                  zorder=self.axT_zorder,
+                                                  facecolor=NGreen,
+                                                  edgecolor='w'))
         return ax
 
+    # .........................................................................
+    def _get_masked_lines(self):
+
+        # get the masks related lines and markers
+        masked_lines = {}
+        masked_T_lines = {}
+        masked_markers = []
+        masked_T_markers = []
+
+        for item in self._all_masks:
+
+            _item = list(item)
+
+            if _item[0].endswith('span'):
+
+                direction = _item[0][:3]
+                val1, val2 = sorted(_item[2:])
+                if direction=='row':
+                    lines = self.ax_lines[:]
+                    ax = self.ax_lines
+                elif direction=='col':
+                    lines = self.axT_lines[:]
+                    axlines = self.axT_lines
+                for line in lines:
+                    select = (eval(line.get_label()) >= val1
+                               and eval(line.get_label()) <= val2)
+                    if select and line in axlines:
+                            axlines.remove(line)
+
+            elif _item[0]=='col':
+
+                idx = _item[3]
+                line = self._axT_lines[idx]
+                masked_T_lines[line.get_label()] = line
+
+                axv = _item[1]
+                masked_markers.append(axv)
+
+            elif _item[0]=='row':
+
+                idx = _item[3]
+                line = self._ax_lines[idx]
+                masked_lines[line.get_label()] = line
+
+                axv = _item[1]
+                masked_T_markers.append(axv)
+
+        return (masked_lines, masked_T_lines, masked_markers, masked_T_markers)
+
+    # .........................................................................
+    def _update_axes(self):
+
+        if self._donotupdate:
+            return
+
+        (masked_lines, masked_T_lines,
+         masked_markers, masked_T_markers) = self._get_masked_lines()
+
+        # reduce the number of lines (max = max_lines_in_stack per default)
+        maxlines = plotoptions.max_lines_in_stack
+
+        self.ax.lines = []
+        setpy = max(len(self.ax_lines) // maxlines, 1)
+        self.ax.lines = self.ax_lines[::setpy]  # displayed ax lines
+
+        for line in masked_lines.values():  # remove masked line
+            if line in self.ax.lines:
+                self.ax.lines.remove(line)
+
+        self.ax.lines.append(self.ax_cursor)  # restore cursor line
+
+        if self._hover_line is not None: # \
+                #and self._hover_line.get_label() not in masked_lines.keys():  # show hover line
+            log.debug(self._hover_line.get_label())
+            self.ax.lines.append(self._hover_line)
+
+        for line in masked_markers:
+            self.ax.lines.append(line)
+
+        self.axT.lines = []
+        setpx = max(len(self.axT_lines) // maxlines, 1)
+        self.axT.lines = self.axT_lines[::setpx]  # displayed axTlines
+
+        for line in masked_T_lines.values():
+            if line in self.axT.lines:
+                self.axT.lines.remove(line)
+
+        self.axT.lines.append(self.axT_cursor)  # restore cursor line
+
+        if self._hover_T_line is not None:# \
+                #and self._hover_T_line.get_label() not in masked_T_lines.keys():
+            self.axT.lines.append(self._hover_T_line)
+
+        for line in masked_T_markers:
+            self.axT.lines.append(line)
+
+        self.fig.canvas.draw()
+
+    # .........................................................................
     @observe('_xlim', '_ylim')
     def _limits_changed(self, change):
+        if not self._zoom_detection:
+            return
+        self.ax_lines = self._ax_lines[:]
+        self.axT_lines = self._axT_lines[:]
 
-        # ex: change {
-        #   'owner': object, # The HasTraits instance
-        #   'new': 6, # The new value
-        #   'old': 5, # The old value
-        #   'name': "foo", # The name of the changed trait
-        #   'type': 'change', # The event type of the notification, usually 'change'
-        # }
+        if change['name'] == '_xlim':
+            x1, x2 = sorted(self._xlim)
+            lines = self.axT_lines[:]
+            for line in lines:
+                if eval(line.get_label()) < x1 or eval(line.get_label()) > x2:
+                    self.axT_lines.remove(line)
 
-        print(change['name'])
-        if change['name']=='_xlim':
-            self.axT.cla()
-            x1, x2 = self._xlim
-            self.T[x1:x2].plot_stack(ax=self.axT, hold=True, colorbar=False)
-        if change['name']=='_ylim':
-            self.ax.cla()
-            y1, y2 = self._ylim
-            self[y1:y2].plot_stack(ax=self.ax, hold=True, colorbar=False)
-
-    # -------------------------------------------------------------------------
-    # Special attributes
-    # -------------------------------------------------------------------------
-
-    def __dir__(self):
-        return ['fignum', 'axes', 'divider']
-
-    # -------------------------------------------------------------------------
-    # Properties
-    # -------------------------------------------------------------------------
-
-    @property
-    def fig(self):
-        """
-        Matplotlib figure associated to this dataset
-
-        """
-        return self._fig
-
-    @property
-    def fignum(self):
-        """
-        Matplotlib figure associated to this dataset
-
-        """
-        return self._fignum
-
-    @property
-    def axes(self):
-        """
-        A dictionary containing all the axes of the current figures
-        """
-        return self._axes
-
-    @axes.setter
-    def axes(self, axes):
-        # we assume that the axes have a name
-        if isinstance(axes, list):
-            # a list a axes have been passed
-            for ax in axes:
-                log.debug('add axe: {}'.format(ax.name))
-                self._axes[ax.name] = ax
-        elif isinstance(axes, dict):
-            self._axes.update(axes)
-        elif isinstance(axes, Axes):
-            # it's an axe! add it to our list
-            self._axes[axes.name] = axes
-
-    @property
-    def ax(self):
-        """
-        the main matplotlib axe associated to this dataset
-
-        """
-        return self._axes['main']
-
-    @property
-    def axec(self):
-        """
-        Matplotlib colorbar axe associated to this dataset
-
-        """
-        return self._axes['colorbar']
-
-    @property
-    def axex(self):
-        """
-        Matplotlib projection x axe associated to this dataset
-
-        """
-        return self._axes['xproj']
-
-    @property
-    def axey(self):
-        """
-        Matplotlib projection y axe associated to this dataset
-
-        """
-        return self._axes['yproj']
-
-    @property
-    def divider(self):
-        """
-        Matplotlib plot divider
-
-        """
-        return self._divider
-
-    # -------------------------------------------------------------------------
-    # events
-    # -------------------------------------------------------------------------
-
-    @classmethod
-    def _onclick(cls, event):
-        # not implemented here but in subclass
-        pass
+        if change['name'] == '_ylim':
+            y1, y2 = sorted(self._ylim)
+            lines = self.ax_lines[:]
+            for line in lines:
+                if eval(line.get_label()) < y1 or eval(line.get_label()) > y2:
+                    self.ax_lines.remove(line)
+        self._update_axes()
 
 
-def curfig(hold=False, figsize=None):
+# .............................................................................
+def figure(**kwargs):
     """
-    Get the figure where to plot.
-
-    Parameters
-    ----------
-
-    hold : `bool`, optioanl, False by default
-
-        If hold is True, the plot will be issued on the last drawn figure
-
-    figsize : `tuple`, optional
-
-        A tuple representing the size of the figure in inch
-
-    Returns
-    -------
-
-    fig : the figure object on which following plotting command will be issued
-
+    Method to open a new figure
     """
-    n = plt.get_fignums()
-
-    if not n or not hold:
-        # create a figure
-        return plt.figure(figsize=figsize)
-
-    # a figure already exists - if several we take the last
-    return plt.figure(n[-1])
-
-def curfig(hold=False, figsize=None):
-    """
-    Get the figure where to plot.
-
-    Parameters
-    ----------
-
-    hold : `bool`, optioanl, False by default
-
-        If hold is True, the plot will be issued on the last drawn figure
-
-    figsize : `tuple`, optional
-
-        A tuple representing the size of the figure in inch
-
-    Returns
-    -------
-
-    fig : the figure object on which following plotting command will be issued
-
-    """
-    n = plt.get_fignums()
-
-    if not n or not hold:
-        # create a figure
-        return plt.figure(figsize=figsize)
-
-    # a figure already exists - if several we take the last
-    return plt.figure(n[-1])
+    return _curfig(hold=False, **kwargs)
 
 
+# .............................................................................
 def show():
     """
     Method to force the `matplotlib` figure display
 
     """
     if not plotoptions.do_not_block or plt.isinteractive():
-        if curfig(True):  # True to avoid opening a new one
+        if _curfig(True):  # True to avoid opening a new one
             plt.show()
 
-# For color blind people, it is safe to use only 4 colors in graphs:
-# see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
-#   Black CMYK=0,0,0,0
-#   Red CMYK= 0, 77, 100, 0 %
-#   Blue CMYK= 100, 30, 0, 0 %
-#   Green CMYK= 85, 0, 60, 10 %
-NBlack = (0, 0, 0)
-NRed = cmyk2rgb(0, 77, 100, 0)
-NBlue = cmyk2rgb(100, 30, 0, 0)
-NGreen = cmyk2rgb(85,0,60,10)
 
-def set_figure_style(**kwargs):
+# .............................................................................
+def _curfig(hold=False, **kwargs):
+    # Get the figure where to plot.
+
+    n = plt.get_fignums()
+
+    if not n or not hold:
+        # create a figure
+        return plt.figure(**kwargs)
+
+    # a figure already exists - if several we take the last
+    return plt.figure(n[-1])
 
 
-    # set temporarity a new style if any
-    # ----------------------------------
+# .............................................................................
+def _set_figure_style(**kwargs):
+    # set temporarily a new style if any
+
+    log.debug('set style')
+
     style = kwargs.get('style', None)
 
     if style:
@@ -959,34 +1238,60 @@ def set_figure_style(**kwargs):
         mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
         mpl.rcParams['xtick.labelsize'] = int(fontsize)
         mpl.rcParams['ytick.labelsize'] = int(fontsize)
-        mpl.rcParams['axes.prop_cycle']=(
-                               cycler('color', [NBlack, NBlue, NRed, NGreen]))
+        mpl.rcParams['axes.prop_cycle'] = (
+            cycler('color', [NBlack, NBlue, NRed, NGreen]))
 
+
+# .............................................................................
 def available_styles():
+    """
+    Styles availables in SpectroChemPy
+
+    Todo
+    -----
+    Make this list extensible programmatically
+
+    Returns
+    -------
+    l : a list of style
+
+    """
     return ['notebook', 'paper', 'poster', 'talk', 'sans']
 
 
-plot = NDPlot.plot
+# .............................................................................
+plot = NDPlot.plot  # make plot accessible directly from the API
 
+# =============================================================================
 if __name__ == '__main__':
-
     # test interactive masks
 
     from spectrochempy.api import *
 
+    options.log_level = DEBUG
+
     A = NDDataset.read_omnic(
-                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'
-    ax = A[:,1600.:4000.].plot_stack(y_showed = [2.,6.])
 
-    def _test_interactive_masks():
-        options.log_level=DEBUG
-        A.interactive_masks(kind='stack', figsize=(9,4))
+
+    # ax = A[:, 1600.:4000.].plot()
+    # plt.show()
+
+    # ax = A[:, 1600.:4000.].plot_stack()
+    # plt.show()
+
+
+    def _interactive_masks():
+        A[:, :].interactive_masks(
+                kind='stack', figsize=(9, 6),
+                maxlines=500,
+                right=.905,  # to lease space for the labels of the colorbar
+        )
         pass
 
-    _test_interactive_masks()
 
-
-
+    _interactive_masks()
+    plt.show()

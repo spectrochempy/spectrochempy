@@ -44,7 +44,7 @@ from datetime import datetime, timezone, timedelta
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.application import options
+from spectrochempy.application import options, log
 from spectrochempy.utils import readfilename, \
                                 SpectroChemPyWarning
 
@@ -101,6 +101,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
     >>> B = NDDataset.read_omnic()
 
     """
+    log.debug("reading omnic file")
 
     # check if the first parameter is a dataset
     # because we allow not to pass it
@@ -385,6 +386,8 @@ def _read_spg(source, filename, sortbydate=True, **kwargs):
     # Set the NDDataset date
     source._date = datetime.now()
     source._modified = source.date
+
+    log.debug("end of reading")
 
     return source
 

@@ -41,6 +41,7 @@
 
 """
 import sys
+from copy import copy
 
 from matplotlib.collections import LineCollection
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
@@ -74,11 +75,7 @@ def plot_map(source, **kwargs):
 
     """
     kwargs['kind'] = 'map'
-    temp = source.copy()
-    ax = plot_2D(temp, **kwargs)
-    source._axes = temp._axes
-    source._fig = temp._fig
-    source._fignum = temp._fignum
+    ax = plot_2D(source, **kwargs)
     return ax
 
 
@@ -92,11 +89,7 @@ def plot_stack(source, **kwargs):
 
     """
     kwargs['kind'] = 'stack'
-    temp = source.copy()
-    ax = plot_2D(temp, **kwargs)
-    source._axes = temp._axes
-    source._fig = temp._fig
-    source._fignum = temp._fignum
+    ax = plot_2D(source, **kwargs)
     return ax
 
 
@@ -110,11 +103,7 @@ def plot_image(source, **kwargs):
 
     """
     kwargs['kind'] = 'image'
-    temp = source.copy()
-    ax = plot_2D(temp, **kwargs)
-    source._axes = temp._axes
-    source._fig = temp._fig
-    source._fignum = temp._fignum
+    ax = plot_2D(source, **kwargs)
     return  ax
 
 
@@ -158,13 +147,28 @@ def plot_2D(source, **kwargs):
     # where to plot?
     # --------------
 
-    source._figure_setup(ndim=2, **kwargs)
-    ax = source.axes['main']
+    mpl.interactive(False)
 
     # kind of plot
     # ------------
 
     data_only = kwargs.get('data_only', False)
+
+    data_transposed = kwargs.get('data_transposed', False)
+
+    if data_transposed:
+        new = source.T  # transpose source
+        nameadd='T'
+    else:
+        new = source.copy()
+        nameadd =''
+
+    # figure setup
+    # ------------
+
+    new._figure_setup(ndim=2, **kwargs)
+    ax = new.ndaxes['main']
+    ax.name = ax.name+nameadd
 
     # Other properties
     # ------------------
@@ -173,54 +177,54 @@ def plot_2D(source, **kwargs):
 
     colorbar = kwargs.get('colorbar', True)
 
-    cmap = colormap = kwargs.pop('colormap',
-                                 kwargs.pop('cmap',
-                                            mpl.rcParams['image.cmap']))
+    if kind in ['map','image']:
+        cmap = colormap = kwargs.get('colormap',
+                        kwargs.get('cmap', plotoptions.colormap))
+    elif data_transposed:
+        cmap = colormap = kwargs.get('colormap',
+                        kwargs.get('cmap', plotoptions.colormap_transposed))
+    else:
+        cmap = colormap = kwargs.get('colormap',
+                        kwargs.get('cmap', plotoptions.colormap_stack))
 
     lw = kwargs.get('linewidth', kwargs.get('lw', plotoptions.linewidth))
 
-    alpha = kwargs.get('calpha', plotoptions.calpha)
+    alpha = kwargs.get('calpha', plotoptions.contour_alpha)
 
     # -------------------------------------------------------------------------
     # plot the source
     # by default contours are plotted
     # -------------------------------------------------------------------------
 
-    # ordinates (by default we plot real part of the data)
-    if not kwargs.get('imag', False):
-        z = source.RR
-    else:
-        z = source.RI
-
     # abscissa axis
-    x = source.x
+    x = new.x.data
 
     # ordinates axis
-    y = source.y
+    y = new.y.data
 
-    # limits to tdeff
-    # tdeff = z.meta.tdeff    # TODO: this is NMR related, make it more generic
-    xeff = x.data #[:tdeff[1]]
-    yeff = y.data #[:tdeff[0]]
-    zeff = z.masked_data   #[:tdeff[0],:tdeff[1]]
-
-    y_showed = kwargs.get('y_showed')
+    # z intensity (by default we plot real part of the data)
+    if not kwargs.get('imag', False):
+        z = new.RR.masked_data
+    else:
+        z = new.RI.masked_data
+    zlim = kwargs.get('zlim', (z.min(), z.max()))
 
     if kind in ['map', 'image']:
-        vmax = zeff.max()
-        vmin = zeff.min()
-        if not kwargs.get('negative', True):
-            vmin=0
-        norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        zmin, zmax = zlim
+        #if not kwargs.get('negative', True):
+        zmin = min(zmin, -zmax)
+        zmax = max(-zmin, zmax)
+        norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
 
     if kind in ['map']:
 
         # contour plot
         # -------------
-        if z.clevels is None:
-            z.clevels = clevels(zeff, **kwargs)
-            c = source.ax.contour(xeff, yeff, zeff,
-                              z.clevels, linewidths=lw, alpha=alpha)
+        if new.clevels is None:
+            new.clevels = clevels(z, **kwargs)
+
+        c = ax.contour(x, y, z,
+                              new.clevels, linewidths=lw, alpha=alpha)
         c.set_cmap(cmap)
         c.set_norm(norm)
 
@@ -229,10 +233,10 @@ def plot_2D(source, **kwargs):
         # image plot
         # ----------
         kwargs['nlevels'] = 500
-        if z.clevels is None:
-            z.clevels = clevels(zeff, **kwargs)
-        c = source.ax.contourf(xeff, yeff, zeff,
-                               z.clevels, linewidths=lw, alpha=alpha)
+        if new.clevels is None:
+            new.clevels = clevels(z, **kwargs)
+        c = ax.contourf(x, y, z,
+                               new.clevels, linewidths=lw, alpha=alpha)
         c.set_cmap(cmap)
         c.set_norm(norm)
 
@@ -240,65 +244,50 @@ def plot_2D(source, **kwargs):
 
         # stack plot
         # ----------
-        step = kwargs.get("step", "all")
         normalize = kwargs.get('normalize', None)
-        color = kwargs.get('color', 'colormap')
-
-        if not isinstance(step, str):
-            showed = np.arange(yeff[0], yeff[-1], float(step))
-            ishowed = np.searchsorted(yeff, showed, 'left')
-        elif step == 'all':
-            ishowed = slice(None)
-        else:
-            raise TypeError(
-                    'step parameter was not recognized. Should be: an int, "all"')
-
-        zeffs = zeff[ishowed]
 
         # now plot the collection of lines
         # ---------------------------------
-        if color is None:
-            # very basic plot (likely the faster)
-            # use the matplotlib color cycler
-            lines = source.ax.plot(xeff, zeffs.T[:,::-1], lw=lw)
+        # map colors using the colormap
+        ylim = kwargs.get("ylim", None)
 
-        elif color != 'colormap':
-            # just add a color to the line (the same for all)
-            lines = source.ax.plot(xeff, zeffs.T[:,::-1], c=color, lw=lw)
+        if ylim is not None:
+             vmin, vmax = ylim
+        else:
+             vmin, vmax = sorted([y[0], y[-1]])
+        norm = mpl.colors.Normalize(vmin=vmin,
+                                     vmax=vmax)  # we normalize to the max time
+        if normalize is not None:
+             norm.vmax = normalize
 
-        elif color == 'colormap':
-            # map colors using the colormap
-            ylim = kwargs.get("ylim", None)
+        _colormap = cm = plt.get_cmap(colormap)
+        scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
-            if ylim is not None:
-                 vmin, vmax = ylim
-            else:
-                 vmin, vmax = sorted([yeff[0], yeff[-1]])
-            norm = mpl.colors.Normalize(vmin=vmin,
-                                         vmax=vmax)  # we normalize to the max time
-            if normalize is not None:
-                 norm.vmax = normalize
+        # we display the line in the reverse order, so that the last
+        # are behind the first.
+        line0, = ax.plot(x, z[0], lw=lw, picker=True)
+        lines = []
 
-            _colormap = cm = plt.get_cmap(colormap)
-            scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
+        for i in range(z.shape[0]):
+            l = copy(line0)
+            l.set_ydata(z[i])
+            lines.append(l)
+            l.set_color(scalarMap.to_rgba(y[i]))
+            l.set_label("{:.5f}".format(y[i]))
+            l.set_zorder(z.shape[0]+1-i)
 
-            # we display the line in the reverse order, so that the last
-            # are behind the first.
+        # store the full set of lines
+        new._ax_lines = lines[:]
 
-            lines = source.ax.plot(xeff, zeffs.T[:,::-1], lw=lw, picker=True)
-
-            for l, a in zip(lines, yeff[::-1]):
-                l.set_color(scalarMap.to_rgba(a))
-
-        #i = len(yeff) - 1  # we have to label them also in the reverse order
-        for l, a in zip(lines, yeff[::-1]):
-            l.set_label("{:.5f}".format(a))
-            #i -= 1
+        # but display only a subset of them in order to accelerate the drawing
+        maxlines = kwargs.get('maxlines', plotoptions.max_lines_in_stack)
+        setpy = max(len(new._ax_lines) // maxlines, 1)
+        new.ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 
     if data_only:
         # if data only (we will  ot set axes and labels
         # it was probably done already in a previous plot
-        source._plot_resume(**kwargs)
+        new._plot_resume(source, **kwargs)
         return True
 
     # -------------------------------------------------------------------------
@@ -315,7 +304,7 @@ def plot_2D(source, **kwargs):
     # reversed x axis?
     # -----------------
     if kwargs.get('x_reverse',
-                  kwargs.get('reverse', x.is_reversed)):
+                  kwargs.get('reverse', new.x.is_reversed)):
         xlim.reverse()
 
     # set the limits
@@ -329,8 +318,8 @@ def plot_2D(source, **kwargs):
         # ----------------
 
         #zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
-        amp = np.ma.ptp(zeffs)/100.
-        zl = (np.min(np.ma.min(zeffs)-amp), np.max(np.ma.max(zeffs))+amp)
+        amp = np.ma.ptp(z)/100.
+        zl = (np.min(np.ma.min(z)-amp), np.max(np.ma.max(z))+amp)
         zlim = list(kwargs.get('zlim', zl))
         zlim.sort()
         z_reverse = kwargs.get('z_reverse', False)
@@ -344,9 +333,9 @@ def plot_2D(source, **kwargs):
     else:
         # the y axis info
         # ----------------
-        ylim = list(kwargs.get('ylim', source.ax.get_ylim()))
+        ylim = list(kwargs.get('ylim', new.ax.get_ylim()))
         ylim.sort()
-        y_reverse = kwargs.get('y_reverse', y.is_reversed)
+        y_reverse = kwargs.get('y_reverse', new.y.is_reversed)
         if y_reverse:
             ylim.reverse()
 
@@ -356,13 +345,13 @@ def plot_2D(source, **kwargs):
 
     number_x_labels = plotoptions.number_of_x_labels
     number_y_labels = plotoptions.number_of_y_labels
-    source.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-    source.ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    new.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+    new.ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
     # the next two line are to avoid multipliers in axis scale
     y_formatter = ScalarFormatter(useOffset=False)
-    source.ax.yaxis.set_major_formatter(y_formatter)
-    source.ax.xaxis.set_ticks_position('bottom')
-    source.ax.yaxis.set_ticks_position('left')
+    new.ax.yaxis.set_major_formatter(y_formatter)
+    new.ax.xaxis.set_ticks_position('bottom')
+    new.ax.yaxis.set_ticks_position('left')
 
 
     # -------------------------------------------------------------------------
@@ -373,7 +362,7 @@ def plot_2D(source, **kwargs):
     # -------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        xlabel = make_label(x, 'x')
+        xlabel = make_label(new.x, 'x')
     ax.set_xlabel(xlabel)
 
     # y label
@@ -381,18 +370,18 @@ def plot_2D(source, **kwargs):
     ylabel = kwargs.get("ylabel", None)
     if not ylabel:
         if kind in ['stack']:
-            ylabel = make_label(z, 'z')
+            ylabel = make_label(new, 'z')
         else:
-            ylabel = make_label(y, 'y')
+            ylabel = make_label(new.y, 'y')
 
     # z label
     # --------
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         if kind in ['stack']:
-            zlabel = make_label(y, 'y')
+            zlabel = make_label(new.y, 'y')
         else:
-            zlabel = make_label(z, 'z')
+            zlabel = make_label(new, 'z')
 
     # do we display the ordinate axis?
     if kwargs.get('show_y', True):
@@ -402,18 +391,19 @@ def plot_2D(source, **kwargs):
 
     if colorbar:
 
-        if not source._axcb:
-            axec = source.axes['colorbar']
-            source._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
-            source._axcb.set_label(zlabel)
-            # source._axcb.ax.yaxis.set_major_formatter(y_formatter) #this doesn't work
+        if not new._axcb:
+            axec = new.ndaxes['colorbar']
+            axec.name = axec.name+nameadd
+            new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
+            new._axcb.set_label(zlabel)
+            # new._axcb.ax.yaxis.set_major_formatter(y_formatter) #this doesn't work
         pass
 
     # do we display the zero line
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
-    source._plot_resume(**kwargs)
+    new._plot_resume(source, **kwargs)
 
     return ax
 
@@ -426,7 +416,7 @@ def clevels(data, **kwargs):
     """Utility function to determine contours levels
     """
     # avoid circular call to this module
-    from spectrochempy.application import plotoptions
+    # from spectrochempy.application import plotoptions
 
     # contours
     maximum = data.max()
@@ -434,7 +424,7 @@ def clevels(data, **kwargs):
 
     nlevels = kwargs.get('nlevels', kwargs.get('nc',
                                                plotoptions.number_of_contours))
-    start = kwargs.get('start', maximum / 20.)
+    start = kwargs.get('start', plotoptions.contour_start) * maximum
     negative = kwargs.get('negative', True)
     if negative < 0:
         negative = True
@@ -456,6 +446,8 @@ if __name__ == '__main__':
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'
-    ax = A.plot_stack(y_showed = [2.,6.])
+    ax = A.plot_stack()
+    show()
+    axT = A.plot_stack(data_transposed=True)
     show()
     pass

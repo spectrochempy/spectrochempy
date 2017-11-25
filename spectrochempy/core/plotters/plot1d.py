@@ -61,11 +61,7 @@ def plot_lines(source, **kwargs):
 
     """
     kwargs['kind'] = 'lines'
-    temp = source.copy()
-    ax = plot_1D(temp, **kwargs)
-    source._axes = temp._axes
-    source._fig = temp._fig
-    source._fignum = temp._fignum
+    ax = plot_1D(source, **kwargs)
     return ax
 
 
@@ -79,11 +75,7 @@ def plot_scatter(source, **kwargs):
 
     """
     kwargs['kind'] = 'scatter'
-    temp = source.copy()
-    ax = plot_1D(temp, **kwargs)
-    source._axes = temp._axes
-    source._fig = temp._fig
-    source._fignum = temp._fignum
+    ax = plot_1D(source, **kwargs)
     return ax
 
 
@@ -97,12 +89,9 @@ def plot_lines(source, **kwargs):
 
     """
     kwargs['kind'] = 'lines'
-    temp = source.copy()
-    ax = plot_1D(temp, **kwargs)
-    source._axes = temp._axes
-    source._fig = temp._fig
-    source._fignum = temp._fignum
+    ax = plot_1D(source, **kwargs)
     return ax
+
 
 # plot multiple ----------------------------------------------------------------
 
@@ -172,7 +161,7 @@ def plot_1D(source, **kwargs):
 
     Parameters
     ----------
-    source: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
+    new: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
     kind: `str` [optional among ``lines`, ``scatter``]
 
@@ -281,9 +270,10 @@ def plot_1D(source, **kwargs):
     """
     # where to plot?
     # ---------------
+    new = source.copy()
 
-    source._figure_setup(**kwargs)
-    ax = source.axes['main']
+    new._figure_setup(**kwargs)
+    ax = new.ndaxes['main']
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -307,13 +297,13 @@ def plot_1D(source, **kwargs):
     markevery = kwargs.get('markevery', kwargs.get('me', 1))
 
     # abscissa axis
-    x = source.x
+    x = new.x
 
     # ordinates (by default we plot real part of the data)
     if not kwargs.pop('imag', False) or kwargs.get('show_complex', False):
-        z = source.real
+        z = new.real
     else:
-        z = source.imag
+        z = new.imag
 
     # offset
     offset = kwargs.pop('offset', 0.0)
@@ -331,11 +321,11 @@ def plot_1D(source, **kwargs):
         line, = ax.plot(x.data, z.masked_data)
 
     if show_complex and lines:
-        zimag = source.imag
+        zimag = new.imag
         ax.plot(x.data, zimag.masked_data, ls='--')
 
     if kwargs.get('plot_model', False):
-        modeldata = source.modeldata                   #TODO: what's about mask?
+        modeldata = new.modeldata                   #TODO: what's about mask?
         ax.plot(x.data, modeldata.T, ls=':', lw='2')   #TODO: improve this!!!
 
     # line attributes
@@ -356,7 +346,7 @@ def plot_1D(source, **kwargs):
     if kwargs.get('data_only', False):
         # if data only (we will not set axes and labels
         # it was probably done already in a previous plot
-        source._plot_resume(**kwargs)
+        new._plot_resume(source, **kwargs)
         return True
 
     # abscissa limits?
@@ -368,7 +358,7 @@ def plot_1D(source, **kwargs):
     xlim[0] = max(xlim[0], xl[0])
 
     # reversed axis?
-    reverse = source.x.is_reversed
+    reverse = new.x.is_reversed
     if kwargs.get('reverse', reverse):
         xlim.reverse()
 
@@ -399,13 +389,13 @@ def plot_1D(source, **kwargs):
 
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        xlabel = make_label(source.x, 'x')
+        xlabel = make_label(new.x, 'x')
     ax.set_xlabel(xlabel)
 
     # z label
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
-        zlabel = make_label(source, 'z')
+        zlabel = make_label(new, 'z')
 
     ax.set_ylabel(zlabel)
 
@@ -419,7 +409,7 @@ def plot_1D(source, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
-    source._plot_resume(**kwargs)
+    new._plot_resume(source, **kwargs)
 
     return ax
 
@@ -435,7 +425,7 @@ if __name__ == '__main__':
     labels = ['sample {}'.format(label) for label in
               ["S1", "S10", "S20", "S50", "S53"]]
 
-    plot_multiple(kind = 'scatter', sources=sources, labels=labels, legend=True)
+    plot_multiple(kind = 'scatter', sources=sources, labels=labels, legend='best')
 
 
     plt.show()

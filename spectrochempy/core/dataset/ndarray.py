@@ -300,7 +300,10 @@ class NDArray(HasTraits):
 
         # slicing by index of all internal array
         udata = new._uncert_data[internkeys]
-        new._data = unp.nominal_values(np.asarray(udata))
+        if new.is_uncertain:
+            new._data = unp.nominal_values(np.asarray(udata))
+        else:
+            new._data = np.asarray(udata)
 
         if self.is_labeled:
             # case only of 1D dataset such as Coord
@@ -325,7 +328,10 @@ class NDArray(HasTraits):
         else:
             new._mask = nomask
 
-        new._uncertainty = unp.std_devs(np.asarray(udata))
+        if new.is_uncertain:
+            new._uncertainty = unp.std_devs(np.asarray(udata))
+        else:
+            new._uncertainty = None
 
         if self._coordset is not None:
             new_coordset = self.coordset.copy()

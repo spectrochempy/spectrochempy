@@ -45,12 +45,14 @@ import matplotlib as mpl
 from matplotlib.font_manager import FontProperties
 from matplotlib.tight_layout import (get_renderer, get_tight_layout_figure,
                                      get_subplotspec_list)
-from spectrochempy.core.dataset.ndplot import set_figure_style
+from spectrochempy.core.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
+from spectrochempy.application import log
 
 
 __all__ = ['multiplot', 'multiplot_map', 'multiplot_stack',
-           'multiplot_image', 'multiplot_lines', 'multiplot_scatter']
+           'multiplot_image', 'multiplot_lines', 'multiplot_scatter',
+           'multiplot_with_transposed', 'plot_with_transposed']
 
 _methods = __all__[:]
 
@@ -110,12 +112,30 @@ def multiplot_image(sources, **kwargs):
     kwargs['kind'] = 'image'
     return multiplot(sources, **kwargs)
 
+
+# with transpose plot  -----------------------------------------------------------------
+
+def plot_with_transposed(source, **kwargs):
+    """
+    Plot a 2D dataset as a stacked plot with its transposition in a second
+    axe.
+
+    Alias of plot_2D (with `kind` argument set to ``with_transposed``).
+
+    """
+    kwargs['kind'] = 'with_transposed'
+    axes = multiplot(source, **kwargs)
+    return axes
+
+multiplot_with_transposed = plot_with_transposed
+
 # .............................................................................
-def multiplot( sources=[], labels=[],
-               kind='stack', nrow=1, ncol=1, figsize=None,
-               sharex=False, sharey=False, sharez=False, transposed=False,
+def multiplot( sources=[], labels=[], nrow=1, ncol=1,
+               kind='stack', figsize=None,
+               sharex=False, sharey=False, sharez=False,
                colorbar=False,
-               suptitle=None, suptitle_color=None, **kwargs):
+               suptitle=None, suptitle_color=None,
+               **kwargs):
 
     """
     Generate a figure with multiple axes arranged in array (n rows, n columns)
@@ -125,11 +145,6 @@ def multiplot( sources=[], labels=[],
 
     sources : nddataset or list of nddataset
 
-    transposed: `bool`, optional, default=``False``
-
-        If ``True``, a single source and its transposition will be displayed
-
-
     labels : list of `str`.
 
         The labels that will be used as title of each axes.
@@ -137,7 +152,7 @@ def multiplot( sources=[], labels=[],
     kind : `str`, default to `map` for 2D and `lines` for 1D data
 
         Type of plot to draw in all axes (`lines` , `scatter` , `stack` , `map`
-        ,`image` .
+        ,`image` or `with_transposed`).
 
     nrows, ncols : int, default: 1
 
@@ -224,16 +239,20 @@ def multiplot( sources=[], labels=[],
 
     # some basic checking
     # -------------------
+
+    show_transposed = False
+    if kind in 'with_transposed':
+        show_transposed = True
+        kind = 'stack'
+        nrow = 2
+        ncol = 1
+        sources = [sources, sources]   # we need to sources
+        sharez = True
+
     if not is_sequence(sources):
         sources = list([sources])  # make a list
 
-    if transposed:
-        nrow = 2
-        ncol = 1
-        sources = [sources[0], sources[0].T]
-        sharez = True
-
-    if len(sources) < nrow * ncol:
+    if len(sources) < nrow * ncol and not show_transposed:
         # not enough sources given in this list.
         raise ValueError('Not enough sources given in this list')
 
@@ -241,7 +260,7 @@ def multiplot( sources=[], labels=[],
     #     # not enough labels given in this list.
     #     raise ValueError('Not enough labels given in this list')
 
-    if nrow == ncol and nrow == 1 and not transposed:
+    if nrow == ncol and nrow == 1 and not show_transposed:
         # obviously a single plot, return it
         return sources[0].plot(**kwargs)
 
@@ -253,8 +272,8 @@ def multiplot( sources=[], labels=[],
     # create the subplots and plot the ndarrays
     # ------------------------------------------
 
-    # first read kwargs that will be suppressed
-    set_figure_style(**kwargs)
+    # first make style
+    _set_figure_style(**kwargs)
 
     mpl.rcParams['figure.autolayout'] = False
 
@@ -347,6 +366,7 @@ def multiplot( sources=[], labels=[],
                 ax = fig.add_subplot(nrow, ncol, idx+1,
                                      sharex=_sharex, sharey=_sharey)
 
+
             ax._sharez = _sharez  # we add a new share info to the ax.
             # wich will be useful for the interactive masks
 
@@ -366,9 +386,17 @@ def multiplot( sources=[], labels=[],
                                                     labeltop=False)
                 axes[ax.name].xaxis.offsetText.set_visible(False)
 
-            source.plot(kind=kind, ax=ax, colorbar=False,
-                        hold=True, autolayout=False,
+            if show_transposed and irow==1:
+                transposed = True
+            else:
+                transposed = False
+
+            source.plot(kind=kind,
+                        ax=ax, hold=True, autolayout=False,
+                        colorbar=colorbar,
+                        data_transposed = transposed,
                         **kwargs)
+
             ax.set_title(label, fontsize=12)
             if sharex and irow<nrow-1:
                 ax.xaxis.label.set_visible(False)
@@ -390,14 +418,14 @@ def multiplot( sources=[], labels=[],
         ylim = ylim[::-1]
     amp = np.ptp(np.array(xlims))
 
-    if not transposed:
+    if not show_transposed:
         xlim = [np.min(np.array(xlims)), np.max(np.array(xlims))]
         if xrev:
             xlim = xlim[::-1]
         for ax in axes.values():
             ax.set_xlim(xlim)
 
-    def do_tight_layout(fig, axes, suptitle):
+    def do_tight_layout(fig, axes, suptitle, **kwargs):
 
         # tight_layout
         renderer = get_renderer(fig)
@@ -406,64 +434,33 @@ def multiplot( sources=[], labels=[],
         kw = get_tight_layout_figure(fig, axeslist, subplots_list, renderer,
                                      pad=1.08, h_pad=0, w_pad=0, rect=None)
 
-        left = kw['left']
-        bottom = kw['bottom']
-        right = kw['right']
+        left = kwargs.get('left',kw['left'])
+        bottom = kwargs.get('bottom',kw['bottom'])
+        right = kwargs.get('right',kw['right'])
         top = kw['top']
-        ws = kw.get('wspace',0)
-        hs = kw.get('hspace',0)
         if suptitle:
             top = top*.95
-        plt.subplots_adjust(left=left, bottom=bottom, right=right, top=top,
-                            wspace=ws*1.1, hspace=hs*1.1)
+        top = kwargs.get('top',top)
+        ws = kwargs.get('wspace',kw.get('wspace',0)*1.1)
+        hs = kwargs.get('hspace',kw.get('hspace',0)*1.1)
 
-    do_tight_layout(fig, axes, suptitle)
+        plt.subplots_adjust(left=left, bottom=bottom, right=right, top=top,
+                            wspace=ws, hspace=hs)
+
+    do_tight_layout(fig, axes, suptitle, **kwargs)
 
     # make an event that will trigger subplot adjust each time the mouse leave
     # or enter the axes or figure
     def _onenter(event):
-        do_tight_layout(fig, axes, suptitle)
-        plt.draw()
+        do_tight_layout(fig, axes, suptitle, **kwargs)
+        fig.canvas.draw()
 
-    #fig.canvas.mpl_connect('axes_enter_event', _onenter)
-    #fig.canvas.mpl_connect('axes_leave_event', _onenter)
+    fig.canvas.mpl_connect('axes_enter_event', _onenter)
+    fig.canvas.mpl_connect('axes_leave_event', _onenter)
     fig.canvas.mpl_connect('figure_enter_event', _onenter)
     fig.canvas.mpl_connect('figure_leave_event', _onenter)
 
     return axes
-
-    # # to center only one label (does not work very well (disconnected for the moment)
-    # axy = axes['axe11'].yaxis
-    # axy.label.set_visible(True)
-    # axx = axes['axe{}{}'.format(nrow, ncol)].xaxis
-    # axx.label.set_visible(True)
-    # xm = (right + left)/2.
-    # ym = (top + bottom)/2.
-    # fsize = FontProperties(
-    #     size=mpl.rcParams["font.size"]).get_size_in_points() * fig.dpi / 72.
-    #
-    # _, y = axx.label.get_position()
-    # xspine = axx.axes.spines['bottom']
-    # xbox = xspine.get_transform().transform_path(
-    #         xspine.get_path()).get_extents()
-    # y0 = xbox.y0
-    # transy = mpl.transforms.blended_transform_factory(fig.transFigure,
-    #                                          mpl.transforms.IdentityTransform())
-    # ypad = 2 * fsize
-    # axx.set_label_coords(xm, y0-ypad , transform=transy)
-    #
-    # x, _ = axy.label.get_position()
-    # yspine = axy.axes.spines['left']
-    # ybox = yspine.get_transform().transform_path(
-    #         yspine.get_path()).get_extents()
-    # x0 = ybox.x0
-    # transx = mpl.transforms.blended_transform_factory(
-    #                         mpl.transforms.IdentityTransform(), fig.transFigure)
-    # xpad = axy.get_text_widths(renderer)[0]-fsize
-    # axy.set_label_coords(x0-xpad, ym, transform=transx)
-
-
-
 
 if __name__ == '__main__':
 
