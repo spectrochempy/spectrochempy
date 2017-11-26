@@ -1,11 +1,26 @@
-@import "sphinxdoc.css";
+body {
+    font-family: Georgia, "Times New Roman", Times, serif;
+    font-size: 12pt;
+    line-height: 1.43;
+    color: #777777;
+    background-color: #fefcf7;
+}
+
+blockquote {
+    padding: 10.5px 21px;
+    margin: 0 0 21px;
+    font-size: 12pt;
+    border-left: 5px solid #eeeeee;
+}
 
 /**
  * 	Separation between classes and functions
  */
 
 dl.class, dl.function {
-    border-top: 4px solid #888;
+    border-bottom: 4px solid #888;
+    padding-top: 20px;
+    background-color: #fff6e0;;
 }
 
 dl.method{
@@ -13,7 +28,9 @@ dl.method{
 }
 
 dt{
-    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+    padding-top: 10px;
+    background-color: #fff9f4;
 }
 
 /* dl.attribute, {
@@ -23,33 +40,4 @@ dt{
 dl.glossary dt {
     font-weight: bold;
     font-size: 1.1em;
-}
-
-/*
- * Title
- */
-h2 {
-    border-bottom:2px solid #ddd;
-    font-size:1.35em;
-    margin:1.3em 0 0.2em;
-    padding:0;
-}
-
-th {
-    background-color:#EDEFED;
-}
-
-table.field-list th {
-    border-left: 1px solid #AAAAAA !important;
-    padding-left:5px;
-}
-
-div.body a{
-    text-decoration: none;
-}
-p.rubric{
-    border-bottom:2px solid #ddd;
-    font-size:1.25em;
-    margin:1.3em 0 0.2em;
-    padding:0;
 }

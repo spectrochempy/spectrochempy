@@ -41,9 +41,9 @@ spectrochempy. Exceptions that are specific to a given subpackage should *not*
 be here, but rather in the particular subpackage.
 """
 
-all = _classes = ['SpectroChemPyWarning',
-                  'SpectroChemPyDeprecationWarning',
-                  ]
+__all__ =  ['SpectroChemPyWarning',
+            'SpectroChemPyDeprecationWarning',
+            ]
 
 
 

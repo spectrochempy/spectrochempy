@@ -52,6 +52,6 @@ FORCE = False
 
 @show_do_not_block
 def test_plot_generic_2D(IR_source_2D):
-    for kind in ['stack', 'map', 'image']:
+    for method in ['stack', 'map', 'image']:
         source = IR_source_2D.copy()
-        source.plot(kind=kind)
+        source.plot(method=method)

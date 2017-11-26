@@ -35,24 +35,32 @@
 # =============================================================================
 
 
-from spectrochempy.application import app
-plotoptions = app.plotoptions
-log = app.log
-options = app
+"""
+This package provides classes and functions
+to manage a project or a set of projects.
 
+"""
 
-from logging import WARNING
+import sys
+from traitlets import import_item
 
-def test_logger():
+from spectrochempy.utils import list_packages
 
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
+name = 'project'
+pkgs = sys.modules['spectrochempy.%s' % name]
+api = sys.modules['spectrochempy.%s.api' % name]
 
-    log.setLevel(WARNING)
+pkgs = list_packages(pkgs)
 
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+__all__ = []
+
+for pkg in pkgs:
+    if pkg.endswith('api'):
+        continue
+    pkg = import_item(pkg)
+    if not hasattr(pkg, '__all__'):
+        continue
+    a = getattr(pkg, '__all__')
+    __all__ += a
+    for item in a:
+        setattr(api, item, getattr(pkg, item))

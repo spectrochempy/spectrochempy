@@ -50,7 +50,10 @@ import os
 # =============================================================================
 import numpy as np
 
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
 # =============================================================================
@@ -74,7 +77,10 @@ FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI",
           "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 
 
 # =============================================================================

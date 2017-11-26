@@ -9,7 +9,7 @@ import inspect
 import re
 import types
 
-__all__ = _methods = ['resolve_name', 'minversion', 'find_current_module',
+__all__ =  ['resolve_name', 'minversion', 'find_current_module',
                       'isinstancemethod']
 
 

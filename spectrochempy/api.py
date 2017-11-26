@@ -34,19 +34,6 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-"""
-Pseudo-package for all of the core symbols from SpectroChemPy.
-
-Use this module for importing Spectrochempy names into your namespace.
-
-Examples
----------
-
-    >>> from spectrochempy.api import NDDataset
-    >>> mynewdataset = NDDataset()   # create an empty dataset
-
-"""
-
 # ==============================================================================
 # standard library import
 # ==============================================================================
@@ -67,6 +54,7 @@ import numpy as np
 from pytest import raises
 import numpy as np
 import scipy
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # ==============================================================================
@@ -77,7 +65,7 @@ __all__ = [
            # Useful librairies alias for the end user avoiding to load them
            # --------------------------------------------------------------
 
-           'np', 'plt', 'scipy', 'os', 'sys',
+           'np', 'plt', 'scipy', 'os', 'sys', 'mpl',
 
            # useful methods from external library
            # ------------------------------------
@@ -96,8 +84,32 @@ __all__ = [
 
 # here we also construct the __all__ list automatically
 
-from spectrochempy.application import *
+from spectrochempy import application
 
+running = application.app.running
+version, dev_version, release = (application.app.version,
+                                 application.app.dev_version,
+                                 application.app.release)
+copyright = application.app.copyright
+log = application.app.log
+log_level = application.app.log_level
+
+# give a user friendly name to the objects containing configurables options
+plotoptions = application.app.plotoptions
+guioptions = application.app.guioptions
+options = application.app
+scpdata = application.app.scpdata
+list_scpdata = application.app.list_scpdata
+
+# Log levels
+# -----------------------------------------------------------------------------
+DEBUG = logging.DEBUG
+INFO = logging.INFO
+WARNING = logging.WARNING
+ERROR = logging.ERROR
+CRITICAL = logging.CRITICAL
+
+__all__ += application.__all__
 __all__ += [
 
     ### Helpers
@@ -109,6 +121,7 @@ __all__ += [
     ### Info
     'copyright', 'version', 'dev_version', 'release'
 ]
+
 
 # core
 # ------
@@ -176,12 +189,10 @@ APIref = APIref()
 __all__.append('APIref')
 
 # START THE APPLICATION ========================================================
-from spectrochempy.application import app
-
-_started = app.start(debug=False, reset_config=True)
+_started = application.app.start(debug=True, reset_config=True)
 
 # load the default style
-plt.style.use(app.plotoptions.style)
+plt.style.use(application.app.plotoptions.style)
 
 log.info("API activated "
          if _started else "API was not started!")

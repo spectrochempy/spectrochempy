@@ -75,7 +75,11 @@ from spectrochempy.gui import gui
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
 from spectrochempy.core.plotters.utils import cmyk2rgb
-from spectrochempy.application import plotoptions, log, options
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
+from spectrochempy.utils import docstrings
 
 # Constants
 # ---------
@@ -114,10 +118,10 @@ NGreen = cmyk2rgb(85, 0, 60, 10)
 
 class NDPlot(HasTraits):
     """
-    Import/export interface
-    from :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+    Plotting interface
+    for :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
 
-    This class is used as basic import/export interface of the
+    This class is used as basic plotting interface of the
     :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
 
     """
@@ -133,39 +137,25 @@ class NDPlot(HasTraits):
     # generic plotter and plot related methods or properties
     # -------------------------------------------------------------------------
 
-    # TODO: work on a better way to have correct docs
-    _general_parameters_doc_ = """
-    
-savefig: `str`
-
-    A string containing a path to a filename. The output format is deduced 
-    from the extension of the filename. If the filename has no extension, 
-    the value of the rc parameter savefig.format is used.
-
-dpi : [ None | scalar > 0]
-
-    The resolution in dots per inch. If None it will default to the 
-    value savefig.dpi in the matplotlibrc file.
-    
-    """
-
     # .........................................................................
+    @docstrings.get_sectionsf('plot')
+    @docstrings.dedent
     def plot(self, **kwargs):
 
         """
         Generic plot function for
         a :class:`~spectrochempy.core.dataset.nddataset.NDDataset` which
-        actually delegate the work to a plotter defined by the parameter ``kind``.
+        actually delegate the work to a plotter defined by the parameter ``method``.
 
         Parameters
         ----------
 
-        kind : `str`, optional
+        method : `str`, optional
 
-            The kind of plot of the dataset,
+            The method of plot of the dataset,
             which will determine the plotter to use.
             For instance, for 2D data, it can be `map`, `stack` or `image`
-            among other kind.
+            among other method.
 
         ax : :class:`matplotlib.Axes` instance. Optional, default = current or new one
 
@@ -190,6 +180,17 @@ dpi : [ None | scalar > 0]
 
             if True, layout will be set automatically
 
+        output: `str`
+
+            A string containing a path to a filename. The output format is deduced
+            from the extension of the filename. If the filename has no extension,
+            the value of the rc parameter savefig.format is used.
+
+        dpi : [ None | scalar > 0]
+
+            The resolution in dots per inch. If None it will default to the
+            value savefig.dpi in the matplotlibrc file.
+
         """
 
         # color cycle
@@ -199,18 +200,18 @@ dpi : [ None | scalar > 0]
         # -------------------------------------------------------------------------
         # select plotter depending on the dimension of the data
         # -------------------------------------------------------------------------
-        kind = kwargs.pop('kind', 'generic')
-        log.debug('Call to plot_{}'.format(kind))
+        method = kwargs.pop('method', 'generic')
+        log.debug('Call to plot_{}'.format(method))
 
         # Find or guess the adequate plotter
         # -----------------------------------
 
-        try:
-            _plotter = getattr(self, 'plot_{}'.format(kind))
-
-        except:  # no plotter found
-            raise IOError('The specified plotter '
-                          'for kind `{}` was not found!'.format(kind))
+        _plotter = getattr(self, 'plot_{}'.format(method), None)
+        if _plotter is None:
+            # no plotter found
+            log.error('The specified plotter for method '
+                      '`{}` was not found!'.format(method))
+            raise IOError
 
         # Execute the plotter
         # --------------------
@@ -225,7 +226,7 @@ dpi : [ None | scalar > 0]
     def plot_generic(self, **kwargs):
         """
         The generic plotter. It try to guess an adequate basic plot for the data.
-        Other kind of plotters are defined explicitely in the `viewer` package.
+        Other method of plotters are defined explicitely in the `viewer` package.
 
         Parameters
         ----------
@@ -310,7 +311,7 @@ dpi : [ None | scalar > 0]
             ax.name = 'main'
             self.ndaxes['main'] = ax
 
-        if ax is not None and kwargs.get('kind') in ['scatter']:
+        if ax is not None and kwargs.get('method') in ['scatter']:
             ax.set_prop_cycle(
                     cycler('color',
                            [NBlack, NBlue, NRed, NGreen] * 3) +
@@ -318,7 +319,7 @@ dpi : [ None | scalar > 0]
                            ['-', '--', ':', '-.'] * 3) +
                     cycler('marker',
                            ['o', 's', '^'] * 4))
-        elif ax is not None and kwargs.get('kind') in ['lines']:
+        elif ax is not None and kwargs.get('method') in ['lines']:
             ax.set_prop_cycle(
                     cycler('color',
                            [NBlack, NBlue, NRed, NGreen]) +
@@ -338,7 +339,7 @@ dpi : [ None | scalar > 0]
         if ndim == 2:
             # TODO: also the case of 3D
 
-            kind = kwargs.get('kind', plotoptions.kind_2D)
+            method = kwargs.get('method', plotoptions.method_2D)
 
             # show projections (only useful for map or image)
             # ------------------------------------------------
@@ -352,8 +353,8 @@ dpi : [ None | scalar > 0]
 
             yproj = kwargs.get('yproj', plotoptions.show_projection_y)
 
-            SHOWXPROJ = (proj or xproj) and kind in ['map', 'image']
-            SHOWYPROJ = (proj or yproj) and kind in ['map', 'image']
+            SHOWXPROJ = (proj or xproj) and method in ['map', 'image']
+            SHOWYPROJ = (proj or yproj) and method in ['map', 'image']
 
             # Create the various axes
             # -------------------------
@@ -441,9 +442,9 @@ dpi : [ None | scalar > 0]
                 getattr(self.ndaxes['main'], com)(*ags,
                                                   **kws)  # TODO:improve this
 
-        # savefig command should be after all plot commands
+        # output command should be after all plot commands
 
-        savename = kwargs.get('savefig', None)
+        savename = kwargs.get('output', None)
         if savename is not None:
             # we save the figure with options found in kwargs
             # starting with `save`
@@ -579,7 +580,7 @@ dpi : [ None | scalar > 0]
     # -------------------------------------------------------------------------
 
     # a flag to say if we act on zoom
-    # (useful for 'with_transposed' kind of plot).
+    # (useful for 'with_transposed' method of plot).
     _zoom_detection = Bool
 
     _all_masks = List()  # to store temporary the mask positions
@@ -1296,7 +1297,7 @@ if __name__ == '__main__':
 
     def _interactive_masks():
         A[:, :].interactive_masks(
-                kind='stack', figsize=(9, 6),
+                method='stack', figsize=(9, 6),
                 right=.905,  # to lease space for the labels of the colorbar
         )
         pass

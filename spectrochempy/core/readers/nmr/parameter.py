@@ -1,3 +1,5 @@
+__all__ = []
+
 nmr_valid_meta = [
     #		('amp', ''),
     ('aq_mod', ''),

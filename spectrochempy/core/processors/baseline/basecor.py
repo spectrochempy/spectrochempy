@@ -256,7 +256,7 @@ class BaselineCorrection(HasTraits):
                       '\nClick on right button on a region to remove it.',
                   'Baseline corrected dataset preview']
         axes = multiplot(sources, labels,
-                  kind='stack',
+                  method='stack',
                   sharex=True,
                   nrow = 2,
                   ncol = 1,

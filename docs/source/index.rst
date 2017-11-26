@@ -20,14 +20,14 @@ What is |scp|?
 data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
 running on Linux, Windows or OS X.
 
-  1.  A |NDDataset| object embedding array of data with coordinates and metadata.
-  2. `Units` and `Uncertainties` for |NDDataset| and |NDDataset| coordinates.
-  3.  Mathematical operations over |NDDataset| such addition, multiplication and many more ...
-  4.  Import functions to read data from experiments or modelling programs ...
-  5.  Display functions such as ``print``, ``plot`` ...
-  6.  Export functions to ``csv``, ``xls`` ...
-  7.  Preprocessing funtions such as baseline correction, automatic subtraction and many more ...
-  8.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
+1.  A |NDDataset| object embedding array of data with coordinates and metadata.
+2. `Units` and `Uncertainties` for |NDDataset| and |NDDataset| coordinates.
+3.  Mathematical operations over |NDDataset| such addition, multiplication and many more ...
+4.  Import functions to read data from experiments or modelling programs ...
+5.  Display functions such as ``print``, ``plot`` ...
+6.  Export functions to ``csv``, ``xls`` ...
+7.  Preprocessing funtions such as baseline correction, automatic subtraction and many more ...
+8.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
 
 .. warning::
 
@@ -40,7 +40,7 @@ Installation
 ============
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     install
     license
@@ -53,7 +53,7 @@ Documentation
 
 Html documentation is available here:
 
-* `http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
+* `http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
 
 Pdf documentation can also be downloaded here:
 
@@ -70,6 +70,7 @@ User Guide & tutorials
 
     userguide/index
     tutorial/index
+    API reference <dev/apireference>
     faq
 
 Gallery of examples
@@ -119,7 +120,7 @@ Developper's Documentation
     :maxdepth: 1
 
     dev/develguide
-    dev/reference
+    API reference for developper's<dev/apireference>
 
 See also
 =========

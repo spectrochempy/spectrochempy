@@ -44,11 +44,13 @@ from datetime import datetime, timezone, timedelta
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.application import options, log
-from spectrochempy.utils import readfilename, \
-                                SpectroChemPyWarning
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
+from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
-__all__ = ['read_omnic','read_spg', 'read_spa']
+__all__ = ['read_omnic', 'read_spg', 'read_spa']
 
 
 # utility functions
@@ -157,6 +159,10 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 #alias
 read_spg = read_omnic
 read_spa = read_omnic
+
+# make also classmethod
+NDIO.read_spg = read_omnic
+NDIO.read_spa = read_omnic
 
 def _read_spg(source, filename, sortbydate=True, **kwargs):
 

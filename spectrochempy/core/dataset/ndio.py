@@ -66,7 +66,10 @@ from spectrochempy.core.units import Unit
 from spectrochempy.gui import gui
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
-from spectrochempy.application import plotoptions, log, options
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 
 # Constants
 # ---------

@@ -24,12 +24,6 @@ __all__ = ['get_log_dir',
            'list_packages',
            ]
 
-_methods = ['get_log_dir',
-            'get_config_dir',
-            'get_pkg_data_dir',
-            'get_pkg_data_filename',
-            'list_packages',
-            ]
 
 import os
 import sys

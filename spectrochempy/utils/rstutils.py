@@ -34,11 +34,17 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+__all__ = []
 
 rst_epilog = """
 .. |scp| replace:: **SpectroChemPy**
 
 .. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
 
-.. |Coord| replace:: :class:`~spectrochempy.core.dataset.nddaxes.Coord`
+.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
+
+.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
+
+.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndarray.CoordSet`
+
 """

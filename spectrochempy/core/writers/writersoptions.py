@@ -34,5 +34,7 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+__all__ = []
+
 class WriteOptions:
     pass

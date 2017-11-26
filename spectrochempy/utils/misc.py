@@ -40,7 +40,7 @@
 Various methods used in other part of the program
 
 """
-__all__ = _methods = ["closer_power_of_two",
+__all__ =  ["closer_power_of_two",
                       "create_traitsdoc",
                       "dict_compare",
                       'htmldoc',
@@ -54,7 +54,8 @@ __all__ = _methods = ["closer_power_of_two",
                       "numpyprintoptions",
                       'makestr',
                       'srepr',
-                      'largest_power_of_2']
+                      'largest_power_of_2',
+                      ]
 
 import re
 from operator import itemgetter

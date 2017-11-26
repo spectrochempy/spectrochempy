@@ -36,7 +36,7 @@
 
 
 """
-This module implements the base `NDDataset` class.
+This module implements the base |NDDataset\ class.
 
 """
 
@@ -66,18 +66,22 @@ from spectrochempy.utils import (SpectroChemPyWarning,
                                  is_sequence,
                                  is_number,
                                  numpyprintoptions,
-                                 get_user_and_node)
+                                 get_user_and_node,
+                                 set_operators,
+                                 docstrings)
 
 from spectrochempy.extern.traittypes import Array
 
 from spectrochempy.core.dataset.ndarray import NDArray, CoordSet
 from spectrochempy.core.dataset.ndcoords import Coord
-from spectrochempy.core.dataset.ndmath import NDMath, set_operators
+from spectrochempy.core.dataset.ndmath import NDMath
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
+from spectrochempy.application import app
 
-from spectrochempy.application import log
+log = app.log
+options = app
 
 # =============================================================================
 # Constants
@@ -86,7 +90,6 @@ from spectrochempy.application import log
 __all__ = ['NDDataset',
 
            # dataset methods
-           # 'squeeze',
            'sort',
            'swapaxes',
            'transpose',
@@ -96,14 +99,11 @@ __all__ = ['NDDataset',
            'real',
            ]
 
-_classes = ['NDDataset']
-
 # =============================================================================
 # numpy print options
 # =============================================================================
 
 numpyprintoptions()
-
 
 # =============================================================================
 # NDDataset class definition
@@ -116,82 +116,7 @@ class NDDataset(
         NDArray,
 ):
     """
-    The main N-dimensional dataset class used by |scp|.
-
-    Parameters
-    -----------
-    data : :class:`~numpy.ndarray`-like object.
-
-        If possible, the provided data will not be copied for `data` input,
-        but will be
-        passed by reference, so you should make a copy
-        the :attr:`data` before passing it in if that's the desired behavior
-        or set of the `iscopy` parameter to True.
-        Any size or shape of data is accepted.
-
-    mask : :class:`~numpy.ndarray`-like, optional
-
-        Mask for the data. The values must be `False` where
-        the data is *valid* and `True` when it is not (like Numpy
-        masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`,
-        or
-        any array object (such as a `NDDataset`), providing
-        a `mask` here will causes the mask from the masked array to be
-        ignored.
-
-    coords : An instance of :class:`~spectrochempy.core.dataset.ndcoords.CoordSet`, optional
-
-        `coords` contains the coordinates for the different
-        dimensions of the `data`. if `coords` is provided, it must specified
-        the `coord` and `labels` for all dimensions of the `data`.
-        Multiple coord can be specified in an CoordSet instance for each dimension.
-
-    uncertainty : :class:`~numpy.ndarray`, optional
-
-        standard deviation on the `data`. Handling of uncertainty
-        use a fork of the
-        `uncertainties <http://pythonhosted.org/uncertainties/>`_
-        package (BSD Licence) which is embedded in |scp|.
-
-    units : an instance of :class:`~spectrochempy.core.units.Unit` or string, optional
-
-        The units of the data. If `data` is a `Quantity` then
-        `units` is set to the units of the `data`; if a `unit`
-        is also explicitly
-        provided an error is raised. Handling of `units` use a fork of the
-        `pint <https://pint.readthedocs.org/en/0.6>`_ (BSD Licence) package
-        which is embedded in |scp|)
-
-    meta : :class:`~spectrochempy.core.dataset.ndmeta.Meta` object, optional
-
-        Metadata for this object.
-
-    is_copy :  `bool`, optional, default = `False`.
-
-        `False` means that the initializer try to keep reference
-        to the passed `data`
-
-
-    Notes
-    -----
-    The underlying array in a `NDDataset` object can be accessed
-    through the `data`
-    attribute, which will return a conventional :class:`~numpy.ndarray`.
-
-    Examples
-    --------
-
-    Usage by an end-user:
-
-    >>> from spectrochempy.api import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    <BLANKLINE>
-            SpectroChemPy's API
-            ...
-            Copyright : 2014-2017 - LCS (Laboratory for Catalysis and Spectrochempy)
-    <BLANKLINE>
-    >>> x = NDDataset([1,2,3])
-    >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
-    [       1        2        3]
+    The main N-dimensional dataset class used by Spectroch.
 
     """
     author = Unicode(get_user_and_node(),
@@ -218,13 +143,49 @@ class NDDataset(
 
     _fig = Instance(plt.Figure, allow_none=True)
 
+    docstrings.delete_params('NDArray.parameters', 'labels')
+
+    @docstrings.dedent
     def __init__(self,
                  data=None,
                  coordset=None,
                  coordunits=None,
                  coordtitles=None,
                  **kwargs):
+        """
+        Parameters
+        ----------
+        %(NDArray.parameters.no_labels)s
+        coordset : An instance of |CoordSet|, optional
+            `coords` contains the coordinates for the different
+            dimensions of the `data`. if `coords` is provided, it must specified
+            the `coord` and `labels` for all dimensions of the `data`.
+            Multiple `coord`'s can be specified in an CoordSet instance
+            for each dimension.
 
+        Notes
+        -----
+        The underlying array in a |NDDataset| object can be accessed
+        through the `data`
+        attribute, which will return a conventional :class:`~numpy.ndarray`.
+
+        Examples
+        --------
+
+        Usage by an end-user:
+
+        >>> from spectrochempy.api import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        <BLANKLINE>
+                SpectroChemPy's API
+                ...
+                Copyright : 2014-2017 - LCS (Laboratory for Catalysis and Spectrochempy)
+        <BLANKLINE>
+        >>> x = NDDataset([1,2,3])
+        >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
+        [       1        2        3]
+
+
+        """
         super(NDDataset, self).__init__(data, **kwargs)
 
         self._modified = self._date
@@ -295,9 +256,9 @@ class NDDataset(
     @property
     def coordset(self):
         """
-        :class:`~spectrochempy.core.dataset.ndarray.CoordSet` instance
+        |CoordSet| instance
 
-        Contain the coordinates of the various dimension of the dataset
+        Contains the coordinates of the various dimensions of the dataset
 
         """
         return self._coordset
@@ -337,8 +298,7 @@ class NDDataset(
     @property
     def coordtitles(self):
         """
-        `List` - A list of the :class:`~spectrochempy.core.dataset.ndcoords.Coord`
-        titles.
+        `List` - A list of the |Coord| titles.
 
         """
         if self.coordset is not None:
@@ -593,69 +553,64 @@ class NDDataset(
 
         return new
 
-    def sort(self, axis=0, pos=None, by='value', descend=False, inplace=False):
+    def sort(source,
+             axis=0, pos=None, by='value', descend=False, inplace=False):
         """
-        Returns a copy of the dataset sorted along a given axis
-        using the numeric or label values.
+        Returns the dataset sorted along a given dimension
+        (by default, the first dimension [axis=0]) using the numeric or label
+        values
 
         Parameters
         ----------
-
-        axis : `int` , optional, default = 0.
-
+        axis : `int` , optional, default = 0
             axis id along which to sort.
-
         pos: `int` , optional
-
             If labels are multidimensional  - allow to sort on a define
             row of labels: labels[pos]. Experimental: Not yet checked
-
         by : `str` among ['value', 'label'], optional, default = ``value``.
-
             Indicate if the sorting is following the order of labels or
             numeric coord values.
-
         descend : `bool`, optional, default = ``False``.
-
+            If true the dataset is sorted in a descending direction.
         inplace : bool, optional, default = ``False``.
-
             if False a new object is returned,
             else the data are modified inline.
 
         Returns
         -------
-
         sorted_dataset : same type
-
             The object or a new object (inplace=False) is returned with coordset
             sorted
 
         """
+        # because this method can be used as a class method (and
+        # because of the documentation needs) we use source instead of the usual
+        # self
 
         if not inplace:
-            new = self.copy()
+            new = source.copy()
         else:
-            new = self
+            new = source
 
         if axis == -1:
-            axis = self.ndim - 1
+            axis = source.ndim - 1
 
         indexes = []
-        for i in range(self.ndim):
+        for i in range(source.ndim):
             if i == axis:
-                if self.coordset[axis].size == 0:
+                if source.coordset[axis].size == 0:
                     # sometimes we have only label for Coord objects.
                     # in this case, we sort labels if they exist!
-                    if self.coordset[axis].is_labeled:
+                    if source.coordset[axis].is_labeled:
                         by = 'label'
                     else:
                         # nothing to do for sorting
-                        # return self itself
-                        return self
+                        # return source itself
+                        return source
 
-                args = self.coordset[axis]._argsort(by=by, pos=pos,
-                                                    descend=descend)
-                new.coordset[axis] = self.coordset[axis]._take(args)
+                args = source.coordset[axis]._argsort(by=by, pos=pos,
+                                                      descend=descend)
+                new.coordset[axis] = source.coordset[axis]._take(args)
                 indexes.append(args)
             else:
                 indexes.append(slice(None))
@@ -913,8 +868,8 @@ class NDDataset(
         return
 
 
-# make some function also accessiibles from the module
-# squeeze = NDDataset.squeeze
+# make some function also accessiible from the module
+
 sort = NDDataset.sort
 swapaxes = NDDataset.swapaxes
 transpose = NDDataset.transpose

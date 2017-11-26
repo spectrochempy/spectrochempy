@@ -39,19 +39,20 @@ from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple, \
 from traitlets.config.configurable import Configurable
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 
-_classes = ['PlotOptions']
+__all__ = []
 
 
 # =============================================================================
-# Plot Options
+# Gui Options
 # =============================================================================
 class PlotOptions(Configurable):
     """
     All options relative to plotting and views
 
     """
+    import matplotlib.pyplot as plt
+
     name = Unicode('PlotOptions')
 
     description = Unicode('Options for plotting datasets')
@@ -89,7 +90,7 @@ class PlotOptions(Configurable):
 
     offscreen = Bool(False)
 
-    kind_2D = Unicode('map', help='default kind of plot for 2D').tag(
+    method_2D = Unicode('map', help='default method of plot for 2D').tag(
             config=True)
 
     colormap = Unicode('jet',

@@ -36,9 +36,12 @@
 
 
 """This module implements the basic `NDArray` class  which is an array
-container.  :class:`~spectrochempy.core.dataset.ndcoords.Coord` and
-:class:`~spectrochempy.core.dataset.nddataset.NDDataset` classes are derived
-from it.
+(numpy like) container.
+
+The two classes :class:`~spectrochempy.core.dataset.ndcoords.Coord`
+which handles the coordinates in a given dimension and
+:class:`~spectrochempy.core.dataset.nddataset.NDDataset` wich implement a full
+dataset (with coordinates) are derived from it in |scp|.
 
 """
 # =============================================================================
@@ -65,18 +68,20 @@ from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float,
 # local imports
 # =============================================================================
 
-from spectrochempy.application import log
+from spectrochempy.application import app
 
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit, ur, Quantity, Measurement
 
 from spectrochempy.utils import (EPSILON,
+                                 StdDev,
                                  is_sequence,
                                  numpyprintoptions,
                                  deprecated,
                                  interleaved2complex,
                                  interleave,
-                                 SpectroChemPyWarning)
+                                 SpectroChemPyWarning,
+                                 docstrings)
 
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.extern.pint.errors import (DimensionalityError,
@@ -88,33 +93,21 @@ from pandas.core.generic import NDFrame, Index
 # Constants
 # =============================================================================
 
-_classes = ['NDArray', 'CoordSet', 'StdDev']
+__all__ = ['NDArray', 'CoordSet', 'masked', 'nomask', 'EPSILON']
 
-__all__ = _classes + ['masked', 'nomask', 'EPSILON']
+#: Logger
+log = app.log
 
 # =============================================================================
 # Some initializations
 # =============================================================================
 
+#: Options for printing data (numpy arrays) contained in a NDArray.
 numpyprintoptions()  # set up the numpy print format
 
+#: A lambda function to check that an array has at least some values
+#: greater than epsilon
 gt_eps = lambda arr: np.any(arr > EPSILON)
-
-
-# =============================================================================
-# helper class
-# =============================================================================
-
-class StdDev(HasTraits):
-    """
-    A helper class used to set the uncertainty on array values
-
-    Examples
-    --------
-
-
-    """
-    data = Float(0.)
 
 
 # =============================================================================
@@ -122,48 +115,16 @@ class StdDev(HasTraits):
 # =============================================================================
 
 class NDArray(HasTraits):
-    """A NDArray object
+    """
+    An |NDArray| object.
 
     The key distinction from raw numpy arrays is the presence of
-    optional properties such as labels, mask, uncertainties, units and/or
-    extensible metadata dictionary.
+    optional properties such as `labels`, `masks`, `uncertainties`, `units`
+    and/or extensible `metadata` dictionary.
 
-    Parameters
-    ----------
-
-    data : array
-
-    Examples
-    --------
-
-    >>> ndd = NDArray()
-
-
-    >>> np.random.seed(12345)
-    >>> ndd.data = np.random.random((10, 10))
-    ...
-
-    Let's see the string representation of this newly created `ndd` object.
-
-    >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    [[   0.930    0.316 ...,    0.749    0.654]
-    [   0.748    0.961 ...,    0.965    0.724]
-    ...,
-    [   0.945    0.533 ...,    0.651    0.313]
-    [   0.769    0.782 ...,    0.898    0.043]]
-
-    NDArray can be also created using keywords arguments.
-    Here is a masked array, with units:
-
-    >>> ndd = NDArray( data = np.random.random((3, 3)),
-    ...                mask = [[True, False, True],
-    ...                        [False, True, False],
-    ...                        [False, False, True]],
-    ...                units = 'absorbance')
-    >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    [[  --    0.295   --]
-    [   0.086   --    0.516]
-    [   0.689    0.857   --]] a.u.
+    This is a base class in |scp| on which for instance, the |Coord|  and
+    |NDDataset| are builded. This class is normaly intended to be subclassed,
+    but it can also be used at such.
 
     """
 
@@ -191,8 +152,109 @@ class NDArray(HasTraits):
     # -------------------------------------------------------------------------
 
     # .........................................................................
+    @docstrings.get_sectionsf('NDArray')
+    @docstrings.dedent
     def __init__(self, data=None, **kwargs):
+        """
+        Parameters
+        ----------
+        data : array of floats
+            Data array contained in the object.
+            The data can be a `list`, a `tuple`,
+            a :class:`~numpy.ndarray`, a :class:`~numpy.ndarray`-like,
+            a |NDArray| or any subclass of |NDArray|. Any size or shape of data
+            is accepted. If not given, an empty |NDArray| will be inited.
+            At the initialisation the provided data will casted to a
+            numpy-ndarray. If a subclass of |NDArray| is passed that contains
+            already mask, labels,units or uncertainties, these elements will be
+            used to accordingly set those of the created object.
+            If possible, the provided data  will not be copied for `data` input,
+            but will be passed by reference, so you should make a copy the
+            :attr:`data` before passing it in if that's the desired behavior or
+            set the `copy` argument to True.
+        labels : array of objects, optional
+            Label for the data. The label array must have at least the same
+            shape as the data array (or only differ by an
+            additional first dimension). The given array can be a `list`,
+            a `tuple`, a :class:`~numpy.ndarray`, a
+            :class:`~numpy.ndarray`-like, a |NDArray|
+            or any subclass of |NDArray|.
+        masks : array of bool or `nomask`, optional
+            Mask for the data. The mask array must have the same shape as
+            the data. The given array can be a `list`, a `tuple`,
+            a :class:`~numpy.ndarray`. Each values in the array must be `False`
+            where the data is *valid* and `True` when it is not (like in numpy
+            masked arrays). If `data` is already a
+            :class:`~numpy.ma.MaskedArray`, or any array object
+            (such as a |NDDarray| or subclass of it), providing a `mask` here
+            will causes the mask from the masked array to be ignored.
+        units : :class:`pint.unit.Unit` instance or `str`, optional
+            Units of the data. If data is a :class:`pint.quantity.Quantity`
+            then `unit` is set to the unit of the data; if a unit is also
+            explicitly provided an error is raised. If `data` is a `Quantity`
+            then `units` is set to the units of the `data`; if a `unit` is also
+            explicitly provided an error is raised. Handling of `units` use
+            a fork of the `pint <https://pint.readthedocs.org/en/0.6>`_
+            (BSD Licence) package which is embedded in |scp|)
+        uncertainty : array of floats, optional
+            Standard deviation on the `data`. An array giving the uncertainties
+            on each values of the data array.
+            The array must have the same shape as the data. The given array
+            can be a `list`, a `tuple`, a :class:`~numpy.ndarray`.
+            Handling of uncertainty use a fork of the `uncertainties
+            <http://pythonhosted.org/uncertainties/>`_ package (BSD Licence)
+            which is embedded in |scp|.
+        title : str, optional
+            The title of the axis. It will later be used for instance
+            for labelling plots of the data. It is optional but recommended to
+            give a title to each ndarray.
+        name : str
+            The name of the ndarray. Default is set automatically.
+            It must be unique.
+        meta : dict-like object, optional.
+            Additional metadata for this object. Must be dict-like but no further
+            restriction is placed on meta.
+        copy : bool
+            Perform a copy of the passed object.
 
+        Examples
+        --------
+        Empty initialization
+
+        >>> from spectrochempy.api import NDArray # doctest: +ELLIPSIS
+        SpectroChemPy's API ...
+        >>> ndd = NDArray()
+
+        Initialization with a ndarray
+
+        >>> np.random.seed(12345)
+        >>> ndd.data = np.random.random((10, 10))
+        ...
+
+        Let's see the string representation of this newly created `ndd` object.
+
+        >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        [[   0.930    0.316 ...,    0.749    0.654]
+        [   0.748    0.961 ...,    0.965    0.724]
+        ...,
+        [   0.945    0.533 ...,    0.651    0.313]
+        [   0.769    0.782 ...,    0.898    0.043]]
+
+        NDArray can be also created using keywords arguments.
+        Here is a masked array, with units:
+
+        >>> ndd = NDArray( data = np.random.random((3, 3)),
+        ...                mask = [[True, False, True],
+        ...                        [False, True, False],
+        ...                        [False, False, True]],
+        ...                units = 'absorbance')
+        >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        [[  --    0.295   --]
+        [   0.086   --    0.516]
+        [   0.689    0.857   --]] a.u.
+
+
+        """
         self._copy = kwargs.pop('copy', False)  # by default
         # we try to keep a reference to the data, not copy them
 
@@ -531,7 +593,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def date(self):
-        """A datetime object containing date information
+        """
+        A datetime object containing date information
         about the ndarray object, for example a creation date
         or a modification date"""
 
@@ -568,7 +631,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def labels(self):
-        """:class:`~numpy.ndarray` - An array of objects of any type (but most
+        """
+        :class:`~numpy.ndarray` - An array of objects of any type (but most
         generally string), with the last dimension size equal
         to that of the dimension of data.
         Note that's labelling is possible only for 1D data
@@ -661,7 +725,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def mask(self):
-        """ Mask for the data.
+        """
+        Mask for the data.
 
         The values in the mask array must be `False` where
         the data is *valid* and `True` when it is not (like Numpy
@@ -747,7 +812,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def meta(self):
-        """:class:`~spectrochempy.core.dataset.ndmeta.Meta` instance object -
+        """
+        :class:`~spectrochempy.core.dataset.ndmeta.Meta` instance object -
         Additional metadata for this object.
 
         """
@@ -763,7 +829,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def name(self):
-        """`str` - An user friendly name for this object (often not necessary,
+        """
+        str - An user friendly name for this object (often not necessary,
         as the title may be used for the same purpose).
 
         If the name is not provided, the object
@@ -789,7 +856,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def title(self):
-        """`str` - An user friendly title for this object.
+        """
+        str - An user friendly title for this object.
 
         Unlike the :attr:`name`, the title doesn't need to be unique.
         When the title is provided, it can be used for labelling the object,
@@ -833,7 +901,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def uncertainty(self):
-        """ Uncertainty (std deviation) on the data.
+        """
+        Uncertainty (std deviation) on the data.
 
         """
         if not self.is_uncertain:
@@ -891,7 +960,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def units(self):
-        """An instance of `Unit` or `str` - The units of the data.
+        """
+        An instance of `Unit` or `str` - The units of the data.
 
         If data is a
         :class:`~pint.units.Quantity` then
@@ -934,7 +1004,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def dimensionless(self):
-        """`bool`, read-only property - Whether the array is dimensionless
+        """
+        bool, read-only property - Whether the array is dimensionless
         or not.
 
         Equal to `True` if the `data` is dimensionless
@@ -949,7 +1020,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def dtype(self):
-        """`dtype`, read-only property - data type of the underlying array
+        """
+        dtype, read-only property - data type of the underlying array
 
         """
         if self._data is None:
@@ -962,7 +1034,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def has_complex_dims(self):
-        """ `bool` indicating if at least one of the dimension is complex
+        """
+        bool indicating if at least one of the dimension is complex
 
         """
         return np.any(self._is_complex)
@@ -970,7 +1043,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def has_units(self):
-        """ `bool` indicating if the data have units
+        """
+        bool indicating if the data have units
 
         """
         if self._units:
@@ -982,7 +1056,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def is_empty(self):
-        """`bool`, read-only property - Whether the array is empty (size==0)
+        """
+        bool, read-only property - Whether the array is empty (size==0)
         or not.
 
         """
@@ -996,7 +1071,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def is_complex(self):
-        """`tuple` of `bool` - Indicate if which dimension is complex.
+        """
+        tuple of `bool` - Indicate if which dimension is complex.
 
         If a dimension is complex, real and imaginary part are interlaced
         in the `data` array.
@@ -1015,7 +1091,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def is_labeled(self):
-        """`bool`, read-only property - Whether the axis has labels or not.
+        """
+        bool, read-only property - Whether the axis has labels or not.
 
         """
         # label cannot exists (for now for nD dataset - only 1D dataset, such
@@ -1031,7 +1108,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def is_masked(self):
-        """`bool`, read-only property - Whether the array is masked or not.
+        """
+        bool, read-only property - Whether the array is masked or not.
 
         """
         if self._mask is nomask or self._mask is None:
@@ -1048,7 +1126,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def is_uncertain(self):
-        """`bool`, read-only property - Whether the array has uncertainty
+        """
+        bool, read-only property - Whether the array has uncertainty
         or not.
 
         """
@@ -1065,7 +1144,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def masked_data(self):
-        """:class:`~numpy.ndarray`-like object - The actual masked array of data
+        """
+        :class:`~numpy.ndarray`-like object - The actual masked array of data
         contained in this object.
 
         """
@@ -1074,7 +1154,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def _masked_data(self):
-        """:class:`~numpy.ndarray`-like object - The actual masked array of data
+        """
+        :class:`~numpy.ndarray`-like object - The actual masked array of data
         contained in this object.
 
         """
@@ -1083,7 +1164,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def ndim(self):
-        """`int`, read-only property - The number of dimensions of
+        """
+        int, read-only property - The number of dimensions of
         the dataset.
 
         """
@@ -1093,7 +1175,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def shape(self):
-        """`tuple`, read-only property - A `tuple` with the size of each axis.
+        """
+        tuple, read-only property - A `tuple` with the size of each axis.
 
         i.e., the number of data element on each axis (possibly complex).
 
@@ -1111,7 +1194,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def size(self):
-        """`int`, read-only property - Size of the underlying `ndarray`.
+        """
+        int, read-only property - Size of the underlying `ndarray`.
 
         i.e., the total number of data element
         (possibly complex or hyper-complex in the array).
@@ -1132,7 +1216,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def uncert_data(self):
-        """:class:`~numpy.ndarray`-like object - The actual array with
+        """
+        :class:`~numpy.ndarray`-like object - The actual array with
                 uncertainty of the data contained in this object.
         """
         return self._uarray(self.masked_data, self.uncertainty, self._units)
@@ -1148,7 +1233,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def unitless(self):
-        """`bool`, read-only property - Whether the array has `units` or not.
+        """
+        bool, read-only property - Whether the array has `units` or not.
 
         """
 
@@ -1157,8 +1243,10 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def real(self):
-        """:class:`~numpy.ndarray`-like object - The array with
+        """
+        :class:`~numpy.ndarray`-like object - The array with
         real part of the data contained in this object.
+
         """
         if not self._is_complex[-1]:
             return self.copy()
@@ -1177,8 +1265,10 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def imag(self):
-        """:class:`~numpy.ndarray`-like object - The array with
+        """
+        :class:`~numpy.ndarray`-like object - The array with
         imaginary part of the data contained in this object.
+
         """
         if not self._is_complex[-1]:
             warnings(
@@ -1199,9 +1289,11 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def RR(self):
-        """:class:`~numpy.ndarray`-like object - The array with
+        """
+        :class:`~numpy.ndarray`-like object - The array with
         real part in both dimension of hypercomplex 2D data contained in this object.
-                """
+
+        """
 
         if self.ndim != 2:
             raise ValueError('Not a two dimensional array')
@@ -1210,8 +1302,10 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def RI(self):
-        """:class:`~numpy.ndarray`-like object - The array with
+        """
+        :class:`~numpy.ndarray`-like object - The array with
         real-imaginary part of hypercomplex 2D data contained in this object.
+
         """
 
         if self.ndim != 2:
@@ -1221,8 +1315,10 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def IR(self):
-        """:class:`~numpy.ndarray`-like object - The array with
+        """
+        :class:`~numpy.ndarray`-like object - The array with
         imaginary-real part of hypercomplex 2D data contained in this object.
+
         """
 
         if self.ndim != 2:
@@ -1232,8 +1328,10 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def II(self):
-        """:class:`~numpy.ndarray`-like object - The array with
+        """
+        :class:`~numpy.ndarray`-like object - The array with
         imaginary-imaginary part of hypercomplex 2D data contained in this object.
+
         """
 
         if self.ndim != 2:
@@ -1243,7 +1341,8 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def values(self):
-        """:class:`~numpy.ndarray`-like object - The actual values (data, units,
+        """
+        :class:`~numpy.ndarray`-like object - The actual values (data, units,
         + uncertainties) contained in this object.
 
         """
@@ -1254,29 +1353,28 @@ class NDArray(HasTraits):
     # -------------------------------------------------------------------------
 
     # .........................................................................
+    @docstrings.get_sectionsf('NDArray.conj')
+    @docstrings.dedent
     def conj(self, axis=-1, inplace=False):
         """
-        Return the conjugate of the NDDataset in the specified dimension
+        Conjugate of the NDDataset in the specified dimension
 
         Parameters
         ----------
-        axis : `int`, Optional, default: -1.
-
-            The axis along which the absolute value should be calculated.
-
-        inplace : `bool`, optional, default=``False``
-
-            function return a new object (default) or not (inplace=True)
+        axis : int, optional, default: -1
+            Dimension index along which the method should be applied.
+        inplace : bool, optional, default= ``False``
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
 
         Returns
         -------
-        array : same type
-
-            Output array.
+        object : same type
+            same object or a copy depending on the `ìnplace` flag.
 
         See Also
         --------
-        :meth:`real`, :meth:`imag`
+        real, imag, RR, RI, IR, II, part
 
         """
         if not inplace:  # default is to return a new array
@@ -1295,28 +1393,24 @@ class NDArray(HasTraits):
 
     # .........................................................................
     def copy(self, deep=True, memo=None):
-        """Make a disconnected copy of the current object.
+        """
+        Make a disconnected copy of the current object.
 
         Parameters
         ----------
-        deep : `bool`, optional.
-
+        deep : bool, optional
             If `True` a deepcopy is performed which is the default behavior
-
-        memo : Not used.
-
+        memo : Not used
             This parameter ensure compatibility with deepcopy() from the copy
             package.
 
         Returns
         -------
-        object : same type.
-
-            an exact copy of the current object.
+        object : same type
+            An exact copy of the current object.
 
         Examples
         --------
-
         >>> nd1 = NDArray([1.+2.j,2.+ 3.j])
         >>> nd1
         NDArray: [   1.000,    2.000,    2.000,    3.000] unitless
@@ -1351,22 +1445,20 @@ class NDArray(HasTraits):
     # .........................................................................
     def is_units_compatible(self, other):
         """
-        Check the compatibility of units with another NDArray
+        Check the compatibility of units with another object
 
         Parameters
         ----------
-        other : NDArray
-
-            The NDArray for which we want to compare units compatibility
+        other : ndarray
+            The ndarray object for which we want to compare units compatibility
 
         Returns
         -------
-
-        compat : `bool`
+        compat : bool
+            Return ``True`` is units are compatible
 
         Examples
         --------
-
         >>> nd1 = NDArray([1.+2.j,2.+ 3.j], units='meters')
         >>> print(nd1)
         R[   1.000    2.000] m
@@ -1392,24 +1484,21 @@ class NDArray(HasTraits):
 
     # .........................................................................
     def ito(self, other, force=False):
-        """Inplace scaling of the current object data to different units.
+        """
+        Inplace scaling of the current object data to different units.
 
-        (same as :attr:`to` with inplace=`True`).
+        (same as `to` with inplace= ``True``).
 
         Parameters
         ----------
-        other : `Quantity` or `str`.
-
-            destination units.
-
-        force: `bool`, optional, default: False
-
+        other : `Quantity` or str.
+            Destination units.
+        force: bool, optional, default: False
             If True the change of units is forced, even for imcompatible units
 
         Returns
         -------
         object : same type
-
             same object with new units.
 
         See Also
@@ -1483,17 +1572,22 @@ class NDArray(HasTraits):
         self._mask = nomask
 
     # .........................................................................
+    docstrings.keep_params('NDArray.conj.parameters', 'axis')
+
+    @docstrings.dedent
     def set_complex(self, axis):
         """
         Set the data along the given dimension as complex
 
         Parameters
         ----------
-        axis :  `int`
-            The axis along which the data must be considered complex.
-            The R and I part of the data are supposed to be interlaced, and so
-            the effective size of the array along this axis must be even
-            or an error will be raised
+        %(NDArray.conj.parameters.axis)s
+
+        Notes
+        -----
+        The R and I part of the data are supposed to be interlaced, and so
+        the effective size of the array along this axis must be even
+        or an error will be raised
 
         """
         if axis < 0:
@@ -1509,14 +1603,14 @@ class NDArray(HasTraits):
         self._is_complex[axis] = True
 
     # .........................................................................
+    @docstrings.dedent
     def set_real(self, axis):
         """
         Set the data along the given dimension as real
 
         Parameters
         ----------
-        axis :  `int`
-            The axis along which the data must be considered real.
+        %(NDArray.conj.parameters.axis)s
 
         """
         if axis < 0:
@@ -1524,89 +1618,11 @@ class NDArray(HasTraits):
 
         self._is_complex[axis] = False
 
-    # # .........................................................................
-    # def _old_squeeze(self, axis=None, inplace=False):
-    #     """
-    #     Remove single-dimensional entries from the shape of an array.
-    #
-    #     Parameters
-    #     ----------
-    #     axis :   `None` or `int` or `tuple` of ints, optional
-    #
-    #         Selects a subset of the single-dimensional entries in the shape.
-    #         If an axis is selected with shape entry greater than one,
-    #         an error is raised.
-    #
-    #     inplace : `bool`, optional, default = False
-    #
-    #         if False a new object is returned
-    #
-    #     Returns
-    #     -------
-    #     squeezed_dataset : same type
-    #
-    #         The input array, but with all or a subset of the dimensions
-    #         of length 1 removed.
-    #
-    #     """
-    #
-    #     if axis is not None:
-    #         if not is_sequence(axis):
-    #             axis = [axis]
-    #         squeeze_axis = list(axis)
-    #
-    #         for axis in squeeze_axis:
-    #             if axis < 0:
-    #                 axis = self._data.ndim + axis
-    #
-    #             if self._data.shape[axis] > 1:
-    #                 raise ValueError(
-    #                         '%d is of length greater than one: '
-    #                         'cannot be squeezed' % axis)
-    #     else:
-    #         squeeze_axis = []
-    #         for axis, dim in enumerate(self._data.shape):
-    #             # we need the real shape here
-    #             if dim == 1:
-    #                 squeeze_axis.append(axis)
-    #
-    #     if not inplace:
-    #         new = self.copy()
-    #     else:
-    #         new = self
-    #
-    #     new._data = self._data.squeeze(tuple(squeeze_axis))
-    #
-    #     if self.is_masked:
-    #         new._mask = self._mask.squeeze(tuple(squeeze_axis))
-    #     if self.is_uncertain:
-    #         new._uncertainty = self._uncertainty.squeeze(tuple(squeeze_axis))
-    #     if self.is_labeled:
-    #         # labels is a special case, as several row of label can be presents.
-    #         squeeze_labels_axis = []
-    #         for axis, dim in enumerate(self._labels.shape):
-    #             if dim == 1:
-    #                 squeeze_labels_axis.append(axis)
-    #         new._labels = self._labels.squeeze(tuple(squeeze_labels_axis))
-    #
-    #     cplx = []
-    #     coordset = []
-    #     for axis in range(self._data.ndim):
-    #         if axis not in squeeze_axis:
-    #             cplx.append(self._is_complex[axis])
-    #             if self.coordset:
-    #                 coordset.append(self.coordset[axis])
-    #
-    #     new._is_complex = cplx
-    #     if coordset:
-    #         new._coordset = CoordSet(coordset)
-    #
-    #     #if new.ndim ==1 and new.size > 1 :
-    #     #    new.data = new.data.reshape((1,self._data.size))
-    #
-    #     return new
 
     # .........................................................................
+    docstrings.keep_params('NDArray.conj.parameters', 'inplace')
+
+    @docstrings.dedent
     def swapaxes(self, axis1, axis2, inplace=False):
         """
         Interchange two dims of a NDArray.
@@ -1614,27 +1630,18 @@ class NDArray(HasTraits):
         Parameters
         ----------
         axis1 : int
-
-            First axis.
-
+            First dimension index
         axis2 : int
-
-            Second axis.
-
-        inplace : `bool`, optional, default=``False``
-
-            function return a new object (default) or not (inplace=True)
+            Second dimension index
+        %(NDArray.conj.parameters.inplace)s
 
         Returns
         -------
-        swapped : same type
-
-            The object or a new object (inplace=False) is returned with all
-            components swapped
+        %(NDArray.conj.returns)s
 
         See Also
         --------
-        :meth:`transpose`
+        transpose
 
         """
 
@@ -1676,29 +1683,22 @@ class NDArray(HasTraits):
 
     # .........................................................................
     def to(self, other, inplace=False, force=False):
-        """Return the object with data rescaled to different units.
+        """
+        Return the object with data rescaled to different units.
 
         Parameters
         ----------
-
         other : :class:`Quantity` or `str`.
-
-            destination units.
-
+            Destination units.
         inplace : `bool`, optional, default=``False``
-
-            function return a new object (default) or not (inplace=True)
-
+            Function return a new object (default) or not (inplace=True)
         force: `bool`, optional, default: False
-
             If True the change of units is forced, even for imcompatible units
 
         Returns
         -------
-
         object : same type
-
-            same object or a copy depending on `ìnplace` with new units.
+            same object or a copy depending on the `ìnplace` flag.
 
         Examples
         --------
@@ -1724,6 +1724,7 @@ class NDArray(HasTraits):
         spectrochempy.extern.pint.errors.DimensionalityError: Cannot convert from 'meter' ([length]) to 'second' ([time])
 
         However, we can force the change
+
         >>> ndd.to('second', force=True)
         NDArray: [[  --,    0.316,    0.184],
                   [   0.205,   --,    0.596],
@@ -1731,11 +1732,11 @@ class NDArray(HasTraits):
 
         By default the conversion is not done inplace, so the original is not
         modified:
+
         >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         [[  --    0.316    0.184]
          [   0.205   --    0.596]
          [   0.965    0.653   --]] m
-
 
 
         """
@@ -2135,21 +2136,18 @@ class NDArray(HasTraits):
 # =============================================================================
 
 class CoordSet(HasTraits):
-    """A collection of Coord objects for a NDArray object
-     with a validation method.
+    """
+    A collection of Coord objects for a NDArray object
+    with a validation method.
 
     Parameters
     ----------
     coords : NDarray or NDArray subclass objects.
-
        Any instance of a NDArray can be accepted as coordinates for a
        given dimension.
-
        If an instance of CoordSet is found, instead, this means that all
        coordinates in this set describe the same axis
-
     is_same_dim : bool, optional, default=False
-
         if true, all elements of coords describes a single dimension.
         By default, this is false, which means that each item describes
         a different dimension.
@@ -2245,7 +2243,8 @@ class CoordSet(HasTraits):
     # .........................................................................
     @property
     def names(self):
-        """`list`, read-only property - Get the list of axis names.
+        """
+        `list`, read-only property - Get the list of axis names.
         """
         if len(self._coords) < 1:
             return []
@@ -2502,3 +2501,9 @@ class CoordSet(HasTraits):
     def __ne__(self, other):
         return not self.__eq__(
                 other)
+
+if __name__ == '__main__':
+
+    from spectrochempy.api import Coord
+    print(NDArray.__init__.__doc__)
+    docstrings

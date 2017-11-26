@@ -67,7 +67,10 @@ from spectrochempy.utils import htmldoc
 __all__ = ['Fit']
 _classes = __all__[:]
 
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 
 
 # *******************************************************************************
@@ -136,7 +139,7 @@ class Fit(HasTraits):
         # self.sequence = PulseSequence(type=sequence)
 
         self.mode = kargs.get('mode', None)
-        self.kind = kargs.get('kind', None)
+        self.method = kargs.get('method', None)
 
         for exp_idx, source in enumerate(self.sources):
             source.modeldata, source.modelnames, source.model_A, source.model_a, source.model_b = \

@@ -51,9 +51,9 @@ FORCE = False
 @image_comparison(reference=['IR_source_2D_stack', 'IR_source_2D_map',
                              'IR_source_2D_image'], force_creation=FORCE)
 def test_plot_generic_2D(IR_source_2D):
-    for kind in ['stack', 'map', 'image']:
+    for method in ['stack', 'map', 'image']:
         source = IR_source_2D.copy()
-        source.plot(kind=kind)
+        source.plot(method=method)
 
 
 @image_comparison(reference=['IR_source_1D', 'IR_source_1D_sans'],
@@ -69,13 +69,13 @@ def test_plot_generic_1D(IR_source_1D):
 @image_comparison(reference=['IR_source_2D_stack'])
 def test_plot_stack(IR_source_2D):
     source = IR_source_2D.copy()
-    source.plot_stack()  # plot_stack is an alias of plot(kind='stack')
+    source.plot_stack()  # plot_stack is an alias of plot(method='stack')
 
 
 @image_comparison(reference=['IR_source_2D_map'])
 def test_plot_map(IR_source_2D):
     source = IR_source_2D.copy()
-    source.plot_map()  # plot_map is an alias of plot(kind='map')
+    source.plot_map()  # plot_map is an alias of plot(method='map')
 
 
 @image_comparison(reference=['IR_source_2D_image',
@@ -83,7 +83,7 @@ def test_plot_map(IR_source_2D):
                   force_creation=FORCE)
 def test_plot_image(IR_source_2D):
     source = IR_source_2D.copy()
-    source.plot_image()  # plot_image is an alias of plot(kind='image')
+    source.plot_image()  # plot_image is an alias of plot(method='image')
     source.plot_image(style=['sans', 'paper'], fontsize=9)
 
 @image_comparison(reference=['IR_source_2D_image',
@@ -138,7 +138,7 @@ def test_successive_plot_bug_with_colorbars(IR_source_2D):
     source.plot_stack()
     source.plot()
     source.plot()  # bug colorbars stacked on the first plot
-    source.plot(kind='map')  # bug : no colorbar
+    source.plot(method='map')  # bug : no colorbar
     show()
 
 @show_do_not_block
@@ -156,10 +156,10 @@ def test_multiplot(IR_source_2D):
     labels = ['sample {}'.format(label) for label in
               ["1", "2", "3", "4"]]
 
-    multiplot(sources=sources, kind='stack', labels=labels, nrow=2, ncol=2,
+    multiplot(sources=sources, method='stack', labels=labels, nrow=2, ncol=2,
                     figsize=(9, 5), sharex=True, sharey=True)
 
-    multiplot(sources=sources, kind='map', labels=labels, nrow=2, ncol=2,
+    multiplot(sources=sources, method='map', labels=labels, nrow=2, ncol=2,
                     figsize=(9, 5), sharex=True, sharey=True)
 
 @image_comparison(reference=['IR_source_1D',
@@ -190,13 +190,13 @@ def tests_multipleplots_and_styles():
               ["S1", "S10", "S20", "S50", "S53"]]
 
     # plot multiple
-    plot_multiple(kind = 'scatter',
+    plot_multiple(method = 'scatter',
                   sources=sources, labels=labels, legend='best')
 
     # plot mupltiple with  style
-    plot_multiple(kind='scatter', style='sans',
+    plot_multiple(method='scatter', style='sans',
                   sources=sources, labels=labels, legend='best')
 
     # check that style reinit to default
-    plot_multiple(kind='scatter',
+    plot_multiple(method='scatter',
                   sources=sources, labels=labels, legend='best')

@@ -42,6 +42,7 @@
 """
 import sys
 from copy import copy
+from spectrochempy.application import app # must come before plt import
 
 from matplotlib.collections import LineCollection
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
@@ -52,7 +53,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from spectrochempy.application import plotoptions, log
 from spectrochempy.core.plotters.utils import make_label
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import SpectroChemPyWarning
@@ -60,6 +60,8 @@ from spectrochempy.utils import SpectroChemPyWarning
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
 _methods = __all__[:]
 
+plotoptions = app.plotoptions
+log = app.log
 
 # =============================================================================
 # nddataset plot2D functions
@@ -71,10 +73,10 @@ def plot_map(source, **kwargs):
     """
     Plot a 2D dataset as a contoured map.
 
-    Alias of plot_2D (with `kind` argument set to ``map``.
+    Alias of plot_2D (with `method` argument set to ``map``.
 
     """
-    kwargs['kind'] = 'map'
+    kwargs['method'] = 'map'
     ax = plot_2D(source, **kwargs)
     return ax
 
@@ -85,10 +87,10 @@ def plot_stack(source, **kwargs):
     """
     Plot a 2D dataset as a stacked plot.
 
-    Alias of plot_2D (with `kind` argument set to ``stack``).
+    Alias of plot_2D (with `method` argument set to ``stack``).
 
     """
-    kwargs['kind'] = 'stack'
+    kwargs['method'] = 'stack'
     ax = plot_2D(source, **kwargs)
     return ax
 
@@ -99,10 +101,10 @@ def plot_image(source, **kwargs):
     """
     Plot a 2D dataset as an image plot.
 
-    Alias of plot_2D (with `kind` argument set to ``image``).
+    Alias of plot_2D (with `method` argument set to ``image``).
 
     """
-    kwargs['kind'] = 'image'
+    kwargs['method'] = 'image'
     ax = plot_2D(source, **kwargs)
     return  ax
 
@@ -124,7 +126,7 @@ def plot_2D(source, **kwargs):
 
     projections: `bool` [optional, default=False]
 
-    kind: `str` [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
+    method: `str` [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
 
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
@@ -149,7 +151,7 @@ def plot_2D(source, **kwargs):
 
     #mpl.interactive(False)
 
-    # kind of plot
+    # method of plot
     # ------------
 
     data_only = kwargs.get('data_only', False)
@@ -173,7 +175,7 @@ def plot_2D(source, **kwargs):
     # Other properties
     # ------------------
 
-    kind = kwargs.get('kind', plotoptions.kind_2D)
+    method = kwargs.get('method', plotoptions.method_2D)
 
     colorbar = kwargs.get('colorbar', True)
 
@@ -181,10 +183,10 @@ def plot_2D(source, **kwargs):
 
     # viridis is the default setting, so we assume that it must be overload here
     # except if style is grayscale which is a particular case.
+    styles = kwargs.get('style',[] )
+    if styles and not "grayscale" in styles and cmap == 'viridis':
 
-    if not "grayscale" in kwargs.get('style',[] ) and cmap == 'viridis':
-
-        if kind in ['map','image']:
+        if method in ['map','image']:
             cmap = colormap = kwargs.get('colormap',
                             kwargs.get('cmap', plotoptions.colormap))
         elif data_transposed:
@@ -217,14 +219,14 @@ def plot_2D(source, **kwargs):
         z = new.RI.masked_data
     zlim = kwargs.get('zlim', (z.min(), z.max()))
 
-    if kind in ['map', 'image']:
+    if method in ['map', 'image']:
         zmin, zmax = zlim
         #if not kwargs.get('negative', True):
         zmin = min(zmin, -zmax)
         zmax = max(-zmin, zmax)
         norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
 
-    if kind in ['map']:
+    if method in ['map']:
 
         # contour plot
         # -------------
@@ -236,7 +238,7 @@ def plot_2D(source, **kwargs):
         c.set_cmap(cmap)
         c.set_norm(norm)
 
-    elif kind in ['image']:
+    elif method in ['image']:
 
         # image plot
         # ----------
@@ -248,7 +250,7 @@ def plot_2D(source, **kwargs):
         c.set_cmap(cmap)
         c.set_norm(norm)
 
-    elif kind in ['stack']:
+    elif method in ['stack']:
 
         # stack plot
         # ----------
@@ -327,7 +329,7 @@ def plot_2D(source, **kwargs):
 
     # ordinates limits?
     # ------------------
-    if kind in ['stack']:
+    if method in ['stack']:
         # the z axis info
         # ----------------
 
@@ -383,7 +385,7 @@ def plot_2D(source, **kwargs):
     # --------
     ylabel = kwargs.get("ylabel", None)
     if not ylabel:
-        if kind in ['stack']:
+        if method in ['stack']:
             ylabel = make_label(new, 'z')
         else:
             ylabel = make_label(new.y, 'y')
@@ -392,7 +394,7 @@ def plot_2D(source, **kwargs):
     # --------
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
-        if kind in ['stack']:
+        if method in ['stack']:
             zlabel = make_label(new.y, 'y')
         else:
             zlabel = make_label(new, 'z')
@@ -429,8 +431,6 @@ def plot_2D(source, **kwargs):
 def clevels(data, **kwargs):
     """Utility function to determine contours levels
     """
-    # avoid circular call to this module
-    # from spectrochempy.application import plotoptions
 
     # contours
     maximum = data.max()

@@ -47,15 +47,18 @@ import numpy as np
 from pandas import Index
 from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
 
-from spectrochempy.application import log
+from spectrochempy.application import app
+log = app.log
 
 from spectrochempy.core.dataset.ndarray import (NDArray)
-from spectrochempy.core.dataset.ndmath import NDMath, set_operators
+from spectrochempy.core.dataset.ndmath import NDMath
+from spectrochempy.utils import set_operators
 from spectrochempy.core.units import Quantity
 # from ...utils import create_traitsdoc
 
 from spectrochempy.utils import (is_number,
                                  numpyprintoptions,
+                                 docstrings,
                                  SpectroChemPyWarning)
 from spectrochempy.utils.traittypes import Range
 
@@ -74,70 +77,7 @@ numpyprintoptions()
 # =============================================================================
 
 class Coord(NDMath, NDArray):
-
     """A class describing the coords of the data along a given axis.
-
-    Parameters
-    -----------
-
-    data : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like, or another `Coord` object.
-
-        The actual data contained in this `Coord` object.
-
-    labels : :class:`~numpy.ndarray`, :class:`~numpy.ndarray`-like of the same length as coords, optional
-
-        It contains the coords labels. If only labels are provided during
-        initialisation of an axis, a numerical axis is automatically created
-        with the labels indices
-
-    units : :class:`pint.unit.Unit` instance or `str`, optional
-
-        The units of the data. If data is a :class:`pint.quantity.Quantity` then
-        `unit` is set to the unit of the data; if a unit is also explicitly
-        provided an error is raised.
-
-    title : `str`.
-
-        The title of the axis. It will be used for instance to label the axe
-        in plots
-
-    name : `str`
-
-        The name of the axis. Default is set automatically.
-
-    meta : `dict`-like object, optional.
-
-        Additional metadata for this object. Must be dict-like but no further
-        restriction is placed on meta.
-
-    copy : `bool`
-
-        Perform a copy of the passed object. By default, objects are not
-        copied if possible
-
-    Notes
-    -----
-
-    The data in a `Coord` object should be accessed through the coords
-    (which is an alias of data) attribute.
-
-
-    Examples
-    ---------
-
-    >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    <BLANKLINE>
-            SpectroChemPy's API
-            Version   : ...
-    <BLANKLINE>
-
-    >>> x = Coord([1,2,3], title='time on stream', units='hours')
-    >>> print(x) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-              title: Time on stream
-           data: [       1        2        3] hr
-
-    >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
-    [       1        2        3]
 
     """
 
@@ -146,8 +86,48 @@ class Coord(NDMath, NDArray):
     # -------------------------------------------------------------------------
     # initialization
     # -------------------------------------------------------------------------
-    def __init__(self, data=None, **kwargs):
+    docstrings.delete_params('NDArray.parameters', 'data', 'masks',
+                             'uncertainty')
 
+    @docstrings.dedent
+    def __init__(self, data=None, **kwargs):
+        """
+        Parameters
+        -----------
+        data : array of floats
+            The actual data array contained in the Coord object.
+            The given array (with a single dimension) can be a `list`, a `tuple`,
+            a :class:`~numpy.ndarray`, a :class:`~numpy.ndarray`-like,
+            a `NDArray` or any subclass of `NDArray`.
+            If a subclass of NDArray is passed that contains
+            already mask, labels, or units these elements will be
+            used to accordingly set those of the created object.
+            If possible, the provided data  will not be copied for `data` input,
+            but will be passed by reference, so you should make a copy the
+            :attr:`data` before passing it in if that's the desired behavior or
+            set the `copy` argument to True.
+        %(NDArray.parameters.no_masks|uncertainty)s
+
+        Notes
+        -----
+        If only labels are provided during initialisation of a Coord object,
+        a numerical axis is automatically created with the labels indices.
+
+        Examples
+        ---------
+        >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        SpectroChemPy's API  ...
+
+        >>> x = Coord([1,2,3], title='time on stream', units='hours')
+        >>> print(x) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+                  title: Time on stream
+               data: [       1        2        3] hr
+
+        >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
+        [       1        2        3]
+
+
+        """
         super(Coord, self).__init__(data, **kwargs)
 
         # some checking
@@ -413,11 +393,8 @@ class CoordRange(HasTraits):
 
 set_operators(Coord, priority=50)
 
-# =============================================================================
-# Modify the doc to include Traits
-# =============================================================================
-# create_traitsdoc(CoordSet)
-# create_traitsdoc(Coord)
 
 if __name__ == '__main__':
-    pass
+
+    from spectrochempy.api import Coord
+    print(Coord.__init__.__doc__)

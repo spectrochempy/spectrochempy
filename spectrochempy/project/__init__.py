@@ -1,7 +1,7 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2018 LCS
+# Copyright (©) 2015-2017 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # This software is a computer program whose purpose is to [describe
@@ -34,25 +34,3 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-
-from spectrochempy.application import app
-plotoptions = app.plotoptions
-log = app.log
-options = app
-
-
-from logging import WARNING
-
-def test_logger():
-
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
-
-    log.setLevel(WARNING)
-
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')

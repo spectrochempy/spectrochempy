@@ -49,7 +49,7 @@ elements can be accessed by key, but also by attributes, *e.g.*
 from traitlets import HasTraits, Dict, Bool, default
 import numpy as np
 
-from spectrochempy.application import log
+from spectrochempy.application import app
 from spectrochempy.utils import (is_sequence,
                                  SpectroChemPyWarning)
 
@@ -59,6 +59,7 @@ from spectrochempy.utils import (is_sequence,
 __all__ = ['Meta']
 _classes = __all__[:]
 
+log= app.log
 
 # =============================================================================
 # Class Meta

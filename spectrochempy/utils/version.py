@@ -35,14 +35,18 @@
 # =============================================================================
 
 import os
+import sys
 import subprocess
 import setuptools_scm
 from pkg_resources import get_distribution, DistributionNotFound
 
-# .............................................................................
-def get_version():
+__all__ = ['get_version','get_version_date', 'get_release_date']
 
-    root = os.path.join(os.path.dirname(__file__), '../..')
+
+# .............................................................................
+def get_version(root=os.path.join(os.path.dirname(__file__), '../..'),
+                dist = 'spectrochempy'):
+
     try:
         # let's first try to get version from git
         dev_version = setuptools_scm.get_version(
@@ -52,17 +56,22 @@ def get_version():
     except:
         try:
             # let's try with the distribution version
-            dev_version = get_distribution('spectrochempy').version
+            dev_version = get_distribution(dist).version
 
         except DistributionNotFound:
+            from importlib import import_module
+            version = import_module('version', dist+'.version')
+            # this is a hack in order to be able to reuse this
+            # function from different package
+            #from spectrochempy.version import version
+            dev_version = version.version
 
-            from spectrochempy.version import version
-            dev_version = version
-
-    path = os.path.join(root, 'spectrochempy', 'version.py')
+    path = os.path.join(root, dist, '__version__.py')
 
     with open(path, "w") as f:
         _v = dev_version.split('.post')
+        if _v[0].endswith('.dev'):
+            _v = _v[0].split('.dev')
         version = release = _v[0]
         if len(_v) > 1:
             version = "%s%d.dev"%(_v[0][:-1],int(_v[0][-1:])+1)
@@ -95,5 +104,5 @@ def get_version_date():
 # =============================================================================
 if __name__ == '__main__':
 
-    pass
+    print( get_version() )
 

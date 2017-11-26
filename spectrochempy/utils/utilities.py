@@ -35,7 +35,7 @@
 # =============================================================================
 
 
-__all__ = _methods = ['unzip', 'readfilename', 'readXlCellRange']
+__all__ = ['unzip', 'readfilename', 'readXlCellRange']
 
 import xlrd
 import os

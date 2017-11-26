@@ -35,7 +35,11 @@
 # =============================================================================
 
 """
-This module define the `application` on which the API rely
+This module define the `application` on which the API rely.
+
+This module has no public members and so is not intended to be
+accessed directly by the end user.
+
 
 
 """
@@ -49,6 +53,7 @@ import glob
 import sys
 import logging
 import warnings
+from collections import defaultdict
 
 # ==============================================================================
 # third party imports
@@ -70,35 +75,19 @@ import matplotlib as mpl
 # local imports
 # ==============================================================================
 
-from spectrochempy.utils import is_kernel
+from spectrochempy.utils import is_kernel, is_sequence
 from spectrochempy.utils import get_config_dir, get_pkg_data_dir, get_version
 from spectrochempy.utils import get_pkg_data_filename
 from spectrochempy.utils import install_styles
+from spectrochempy.utils import docstrings
+from spectrochempy.utils import SpectroChemPyWarning
 
 from spectrochempy.core.plotters.plottersoptions import PlotOptions
 from spectrochempy.core.readers.readersoptions import ReadOptions
 from spectrochempy.core.writers.writersoptions import WriteOptions
 from spectrochempy.core.processors.processorsoptions import ProcessOptions
 
-# doc info
-# --------
-_classes = [
-    'SCPData',
-    'SpectroChemPy',
-]
-
-__all__ = [
-
-    # ## Helpers
-    'log', 'log_level', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
-    'scpdata', 'list_scpdata',
-    'options', 'plotoptions',
-    'running',
-    # 'pcl',
-
-    # ## Info
-    'copyright', 'version', 'dev_version', 'release'
-]
+__all__ = []  # no public methods
 
 # add iparallel client
 
@@ -109,21 +98,9 @@ __all__ = [
 # SCP class
 # ==============================================================================
 
-class SCPData(Configurable):
+class _SCPData(Configurable):
     """
     This class is used to determine the path to the scp_data directory.
-
-    {attributes}
-
-    Examples
-    --------
-    >>> scpdata = SCPData()
-    >>> print(os.path.basename(scpdata.data))
-    testdata
-    >>> print(scpdata) # doctest: +ELLIPSIS
-    testdata
-    |__...
-    <BLANKLINE>
 
     """
 
@@ -177,20 +154,19 @@ class SCPData(Configurable):
 # Main application and configurators
 # ==============================================================================
 
-class SpectroChemPy(Application):
+class _SpectroChemPy(Application):
     """
-    SpectroChemPy is the main class, containing most of the setup, configuration,
+    _SpectroChemPy is the main class, containing most of the setup, configuration,
     and more.
 
-    {attributes}
 
 
     """
 
     # info ____________________________________________________________________
 
-    name = Unicode('SpectroChemPy')
-    description = Unicode('This is the main SpectroChemPy application ')
+    name = Unicode('SpectroChemPyApp')
+    description = Unicode('This is the main SpectroChemPy Application ')
 
     version = Unicode('0.1').tag(config=True)
     dev_version = Unicode('0.1').tag(config=True)
@@ -219,7 +195,7 @@ class SpectroChemPy(Application):
         copyright += ' - LCS (Laboratory for Catalysis and Spectrochempy)'
         return copyright
 
-    classes = List([PlotOptions, ])
+    classes = List([PlotOptions, ]) # TODO: check if this still usefull
 
     # configuration parameters  ________________________________________________
 
@@ -257,15 +233,18 @@ class SpectroChemPy(Application):
     quiet = Bool(False,
                  help='set Quiet mode, with minimal outputs').tag(config=True)
 
-    _scpdata = Instance(SCPData,
-                     help="Set a data directory where to look for data")
+    workspace = Unicode(os.path.expanduser(os.path.join('~','scpworkspace'))
+                        ).tag(config=True)
+
+    _scpdata = Instance(_SCPData,
+                        help="Set a data directory where to look for data")
 
     csv_delimiter = Unicode(';',
                  help='set csv delimiter').tag(config=True)
 
     @default('_scpdata')
     def _get__data_default(self):
-        return SCPData()
+        return _SCPData()
 
     @property
     def scpdata(self):
@@ -275,14 +254,18 @@ class SpectroChemPy(Application):
     def list_scpdata(self):
         return self._scpdata
 
-
     aliases = Dict(
-        dict(test='SpectroChemPy.test', log_level='SpectroChemPy.log_level'))
+        dict(test='SpectroChemPy.test',
+             log_level='SpectroChemPy.log_level'))
 
     flags = Dict(dict(
                       debug=(
-                      {'SpectroChemPy': {'log_level': 10}}, "Set loglevel to DEBUG")
+                      {'SpectroChemPy': {'log_level': 10}},
+                       "Set loglevel to DEBUG")
                       ))
+
+    backend = Unicode('spectrochempy', help='backend to be used in the '
+                                            'application').tag(config=True)
 
     # --------------------------------------------------------------------------
     # Initialisation of the plot options
@@ -306,6 +289,18 @@ class SpectroChemPy(Application):
         # also install style to be sure everything is set
         install_styles()
 
+    def _init_guioptions(self):
+        # This will be used only if the application is launch from the GUI
+        # (see package 'spectrochempy_gui') - this fonction will be subclassed
+        self.guioptions = None
+
+    def __init__(self, *args, **kwargs):
+        super(_SpectroChemPy, self).__init__(*args, **kwargs)
+        if kwargs.get('debug', False):
+            self.log_level=logging.DEBUG
+
+        self.initialize()
+
 
     # --------------------------------------------------------------------------
     # Initialisation of the application
@@ -327,59 +322,6 @@ class SpectroChemPy(Application):
             The application handler.
 
         """
-        # matplotlib use directive to set before calling matplotlib backends
-        # ---------------------------------------------------------------------
-        # we performs this before any call to matplotlib that are performed
-        # later in this application
-
-
-        # if we are building the docs, in principle it should be done using
-        # the builddocs.py located in the scripts folder
-        if not 'builddocs.py' in sys.argv[0]:
-            # the normal backend
-            backend = mpl.get_backend()
-            if backend == 'module://ipykernel.pylab.backend_inline':
-                mpl.use('Qt5Agg')
-                mpl.rcParams['backend.qt5'] = 'PyQt5'
-        else:
-            # 'agg' backend is necessary to build docs with sphinx-gallery
-            mpl.use('agg')
-
-        ip = get_ipython()
-        if ip is not None:
-            #backend = mpl.get_backend()
-            if is_kernel():
-                # and backend == 'module://ipykernel.pylab.backend_inline':
-
-                # set the ipython matplotlib environments
-                try:
-                    import ipympl
-                    ip.magic('matplotlib notebook')  # nbagg')
-                    #if 'IPython' in sys.modules:
-                    #from IPython.core.pylabtools import backend2gui
-                    #backend2gui['module://ipympl.backend_nbagg'] = 'ipympl'
-                    #mpl.use('module://ipympl.backend_nbagg')
-                    #
-                    #print('OK FOR THE BACKEND')
-
-                except UsageError as e:
-                    print(e)
-                    try:
-                        ip.magic('matplotlib osx')
-                    except:
-                        try:
-                            ip.magic('matplotlib qt5')
-                        except:
-                            pass
-
-            else:
-                try:
-                    ip.magic('matplotlib osx')
-                except:
-                    try:
-                        ip.magic('matplotlib qt5')
-                    except:
-                        pass
 
         # parse the argv
         # ---------------------------------------------------------------------
@@ -387,6 +329,8 @@ class SpectroChemPy(Application):
         # if we are running this under ipython and jupyter notebooks
         # deactivate potential command line arguments
         # (such that those from jupyter which cause problems here)
+
+        self.log.debug('initialization of SpectroChemPy')
 
         _do_parse = True
         for arg in ['egg_info', '--egg-base',
@@ -396,6 +340,7 @@ class SpectroChemPy(Application):
 
         if _do_parse:
             self.parse_command_line(sys.argv)
+
 
         # Get options from the config file
         # ---------------------------------------------------------------------
@@ -408,6 +353,8 @@ class SpectroChemPy(Application):
         # ---------------------------------------------------------------------
 
         self._init_plotoptions()
+        self._init_guioptions()
+
 
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
@@ -435,16 +382,13 @@ class SpectroChemPy(Application):
                     'Running {} - set do_not_block: {}'.format(
                             caller, _do_not_block))
 
-        # Possibly write the default config file
-        # ---------------------------------------------------------------------
-        self._make_default_config_file()
-
-        # we catch warnings and error for a lighter display to the end-user.
+        # we catch warnings and error for a ligther display to the end-user.
         # except if we are in debugging mode
 
         # warning handler
         # ---------------------------------------------------------------------
-        def send_warnings_to_log(message, category, filename, lineno,
+        def send_warnings_to_log(message, category, filename,
+                                 lineno,
                                  *args):
             self.log.warning(
                     '%s:  %s' %
@@ -455,32 +399,53 @@ class SpectroChemPy(Application):
 
         # exception handler
         # ---------------------------------------------------------------------
+        ip = get_ipython()
         if ip is not None:
 
-            def _custom_exc(shell, etype, evalue, tb, tb_offset=None):
+            def _custom_exc(shell, etype, evalue, tb,
+                            tb_offset=None):
                 if self.log_level == logging.DEBUG:
                     shell.showtraceback((etype, evalue, tb),
                                         tb_offset=tb_offset)
                 else:
-                    self.log.error("%s: %s" % (etype.__name__, evalue))
+                    self.log.error(
+                            "%s: %s" % (etype.__name__, evalue))
 
             ip.set_custom_exc((Exception,), _custom_exc)
+
+        # Possibly write the default config file
+        # ---------------------------------------------------------------------
+        self._make_default_config_file()
+
+
 
 
     # --------------------------------------------------------------------------
     # start the application
     # --------------------------------------------------------------------------
 
+    @docstrings.get_sectionsf('SpectroChemPy.start')
+    @docstrings.dedent
     def start(self, **kwargs):
         """
+        Start the SpectroChemPy API or only make a plot if an
+        `output` filename is given
 
         Parameters
         ----------
-        kwargs : options to pass to the application.
+        debug : `bool`
+            Set application in debugging mode (log debug message
+            are displayed in the standart output console).
+        quiet : `bool`
+            Set the application in minimal messaging mode. Only errors are
+            displayed (bu no warnings). If both bebug and quiet are set
+            (which is contradictory) debug has the priority.
+        reset_config : `bool`
+            Reset the configuration file to default values.
 
         Examples
         --------
-        >>> app = SpectroChemPy()
+        >>> app = _SpectroChemPy()
         >>> app.initialize()
         >>> app.start(
         ...    reset_config=True,   # option for restoring default configuration
@@ -503,17 +468,14 @@ class SpectroChemPy(Application):
             self.log_format = '%(highlevel)s %(message)s'
 
             if self.quiet:
-                self.log_level = logging.CRITICAL
+                self.log_level = logging.ERROR
 
             if self.debug:
                 self.log_level = logging.DEBUG
                 self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
 
-            info_string = """
-        SpectroChemPy's API
-        Version   : {}
-        Copyright : {}
-            """.format(self.version, self.copyright)
+            info_string = "SpectroChemPy's API - v.{}, " \
+                          "Copyright {}".format(self.version, self.copyright)
 
             if self.info_on_loading and \
                     not self.plotoptions.do_not_block:
@@ -522,7 +484,6 @@ class SpectroChemPy(Application):
             self.log.debug(
                     "The application was launched with ARGV : %s" % str(
                             sys.argv))
-
 
             self.running = True
 
@@ -560,31 +521,11 @@ class SpectroChemPy(Application):
         self.log.level = self.log_level
         self.log.debug("changed default loglevel to {}".format(change.new))
 
-# ==============================================================================
-# matplotlib use directive to set before calling matplotlib backends
-# ==============================================================================
 
-app = SpectroChemPy()
-app.initialize()
-
-# ==============================================================================
-# API namespace
-# ==============================================================================
-
-running = app.running
-version, dev_version, release = app.version, app.dev_version, app.release
-copyright = app.copyright
-log = app.log
-log_level = app.log_level
-
-# give a user friendly name to the objects containing configurables options
-plotoptions = app.plotoptions
-options = app
-
-_do_not_block = plotoptions.do_not_block
-
-scpdata = app.scpdata
-list_scpdata = app.list_scpdata
+#: Main application object that should not be called directly by a end user.
+#: It is advisable to use the main `api`import to access all public methods of
+#: this object.
+app = _SpectroChemPy()
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -593,6 +534,7 @@ INFO = logging.INFO
 WARNING = logging.WARNING
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
+
 
 # TODO: look at the subcommands capabilities of traitlets
 if __name__ == "__main__":

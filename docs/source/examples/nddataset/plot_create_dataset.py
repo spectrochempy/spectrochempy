@@ -100,11 +100,11 @@ show()
 #
 
 # sphinx_gallery_thumbnail_number = 2
-new.plot(kind='image')
+new.plot(method='image')
 show()
 
 ##################################################################
 # or stacked plot
 
-new.plot(kind='stack')
+new.plot(method='stack')
 show()

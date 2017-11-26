@@ -10,6 +10,7 @@ We use the docrep_ package for managing our docstrings
 
 from docrep import DocstringProcessor, dedents, safe_modulo
 
+__all__ = ['docstrings','dedent','dedents','indent','append_original_doc']
 
 def dedent(func):
     """

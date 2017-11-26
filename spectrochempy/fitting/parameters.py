@@ -47,7 +47,10 @@ import string
 import types
 from collections import \
     UserDict  # This is to be able to create a special dictionary
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import SpectroChemPyWarning
 

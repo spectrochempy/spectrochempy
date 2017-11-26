@@ -47,7 +47,10 @@ from matplotlib.tight_layout import (get_renderer, get_tight_layout_figure,
                                      get_subplotspec_list)
 from spectrochempy.core.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 
 
 __all__ = ['multiplot', 'multiplot_map', 'multiplot_stack',
@@ -61,10 +64,10 @@ def multiplot_scatter(sources, **kwargs):
     """
     Plot a multiplot with 1D scatter type plots.
 
-    Alias of multiplot (with `kind` argument set to ``scatter``.
+    Alias of multiplot (with `method` argument set to ``scatter``.
 
     """
-    kwargs['kind'] = 'scatter'
+    kwargs['method'] = 'scatter'
     return multiplot(sources, **kwargs)
 
 # .............................................................................
@@ -72,10 +75,10 @@ def multiplot_lines(sources, **kwargs):
     """
     Plot a multiplot with 1D linetype plots.
 
-    Alias of multiplot (with `kind` argument set to ``lines``.
+    Alias of multiplot (with `method` argument set to ``lines``.
 
     """
-    kwargs['kind'] = 'lines'
+    kwargs['method'] = 'lines'
     return multiplot(sources, **kwargs)
 
 # .............................................................................
@@ -83,10 +86,10 @@ def multiplot_stack(sources, **kwargs):
     """
     Plot a multiplot with 2D stack type plots.
 
-    Alias of multiplot (with `kind` argument set to ``stack``.
+    Alias of multiplot (with `method` argument set to ``stack``.
 
     """
-    kwargs['kind'] = 'stack'
+    kwargs['method'] = 'stack'
     return multiplot(sources, **kwargs)
 
 # .............................................................................
@@ -94,10 +97,10 @@ def multiplot_map(sources, **kwargs):
     """
     Plot a multiplot with 2D map type plots.
 
-    Alias of multiplot (with `kind` argument set to ``map``.
+    Alias of multiplot (with `method` argument set to ``map``.
 
     """
-    kwargs['kind'] = 'map'
+    kwargs['method'] = 'map'
     return multiplot(sources, **kwargs)
 
 
@@ -106,10 +109,10 @@ def multiplot_image(sources, **kwargs):
     """
     Plot a multiplot with 2D image type plots.
 
-    Alias of multiplot (with `kind` argument set to ``image``.
+    Alias of multiplot (with `method` argument set to ``image``.
 
     """
-    kwargs['kind'] = 'image'
+    kwargs['method'] = 'image'
     return multiplot(sources, **kwargs)
 
 
@@ -120,10 +123,10 @@ def plot_with_transposed(source, **kwargs):
     Plot a 2D dataset as a stacked plot with its transposition in a second
     axe.
 
-    Alias of plot_2D (with `kind` argument set to ``with_transposed``).
+    Alias of plot_2D (with `method` argument set to ``with_transposed``).
 
     """
-    kwargs['kind'] = 'with_transposed'
+    kwargs['method'] = 'with_transposed'
     axes = multiplot(source, **kwargs)
     return axes
 
@@ -131,7 +134,7 @@ multiplot_with_transposed = plot_with_transposed
 
 # .............................................................................
 def multiplot( sources=[], labels=[], nrow=1, ncol=1,
-               kind='stack', figsize=None,
+               method='stack', figsize=None,
                sharex=False, sharey=False, sharez=False,
                colorbar=False,
                suptitle=None, suptitle_color=None,
@@ -149,7 +152,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
         The labels that will be used as title of each axes.
 
-    kind : `str`, default to `map` for 2D and `lines` for 1D data
+    method : `str`, default to `map` for 2D and `lines` for 1D data
 
         Type of plot to draw in all axes (`lines` , `scatter` , `stack` , `map`
         ,`image` or `with_transposed`).
@@ -241,15 +244,17 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
     # -------------------
 
     show_transposed = False
-    if kind in 'with_transposed':
+    if method in 'with_transposed':
         show_transposed = True
-        kind = 'stack'
+        method = 'stack'
         nrow = 2
         ncol = 1
         sources = [sources, sources]   # we need to sources
         sharez = True
 
+    single=False
     if not is_sequence(sources):
+        single=True
         sources = list([sources])  # make a list
 
     if len(sources) < nrow * ncol and not show_transposed:
@@ -260,9 +265,13 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
     #     # not enough labels given in this list.
     #     raise ValueError('Not enough labels given in this list')
 
-    if nrow == ncol and nrow == 1 and not show_transposed:
+    if nrow == ncol and nrow == 1 and not show_transposed and single:
         # obviously a single plot, return it
         return sources[0].plot(**kwargs)
+    elif nrow*ncol <len(sources):
+        nrow = ncol = len(sources)//2
+        if nrow*ncol<len(sources):
+            ncol+=1
 
     ndims = set([source.ndim for source in sources])
     if len(ndims) > 1:
@@ -303,7 +312,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
     textsharey = "sharey"
     textsharez = "sharez"
-    if kind in ['stack']:
+    if method in ['stack']:
         sharez, sharey = sharey, sharez  # we echange them
         zlims, ylims = ylims, zlims
         # for our internal needs as only sharex and sharey are recognized by
@@ -392,7 +401,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
             else:
                 transposed = False
 
-            source.plot(kind=kind,
+            source.plot(method=method,
                         ax=ax, hold=True, autolayout=False,
                         colorbar=colorbar,
                         data_transposed = transposed,
@@ -473,11 +482,11 @@ if __name__ == '__main__':
     sources=[source, source*1.1, source*1.2, source*1.3]
     labels = ['sample {}'.format(label) for label in
               ["1", "2", "3", "4"]]
-    multiplot(sources=sources, kind='stack', labels=labels, nrow=2, ncol=2,
+    multiplot(sources=sources, method='stack', labels=labels, nrow=2, ncol=2,
               figsize=(9, 5), style='sans',
               sharex=True, sharey=True, sharez=True)
 
-    multiplot(sources=sources, kind='image', labels=labels, nrow=2, ncol=2,
+    multiplot(sources=sources, method='image', labels=labels, nrow=2, ncol=2,
                     figsize=(9, 5), sharex=True, sharey=True, sharez=True)
 
     sources = [source * 1.2, source * 1.3,
@@ -501,7 +510,7 @@ if __name__ == '__main__':
                     figsize=(9, 5), sharex=True,
                     sharey=True, sharez=True)
 
-    multiplot(kind='lines', sources=[source[0], source[10]*1.1,
+    multiplot(method='lines', sources=[source[0], source[10]*1.1,
                                      source[19]*1.2, source[15]*1.3],
               nrow=2, ncol=2, figsize=(9, 5),
               labels=labels, sharex=True)

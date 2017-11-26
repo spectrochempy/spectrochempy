@@ -37,11 +37,12 @@
 from traitlets import (TraitType, TraitError, List, Bool,
                        Union, class_of, HasTraits)
 
+from spectrochempy.core.dataset.ndarray import NDArray
+
 import numpy as np
 import copy
 
-_classes = ['Range']
-
+__all__ = []
 
 # =============================================================================
 # Range trait type
@@ -111,6 +112,59 @@ class Range(List):
     def validate(self, obj, value):
 
         value = super(Range, self).validate(object, value)
+        value = self.validate_elements(obj, value)
+
+        return value
+
+# =============================================================================
+# ArrayList trait type
+# =============================================================================
+
+class ArrayList(List):
+    """
+    Create a trait with an ordered list of same types
+
+    Parameters
+    ----------
+    trait : TraitType [ optional ]
+        the type for restricting the contents of the Container.
+        If unspecified, types are not checked.
+
+    default_value : SequenceType [ optional ]
+        The default value for the Trait.  Must be list/tuple/set, and
+        will be cast to the container type.
+
+    """
+    klass = list
+    _cast_types = (tuple,)
+
+    # Describe the trait type
+    info_text = 'an ordered list of NDArray trait'
+    allow_none = True
+
+    def __init__(self, default_value=None, **kwargs):
+
+        super(ArrayList, self).__init__(trait=None, default_value=default_value,
+                                    **kwargs)
+        pass
+
+    def validate_elements(self, obj, value):
+        if value is None or len(value) == 0:
+            # we allow none so this is possible
+            return
+        if not isinstance(value, NDArray):
+            e = "The '%s' trait of %s instance must contains only NDArray's " \
+                "or subclass of NDArray's," \
+                " but a value of type `%s was specified." \
+                % (self.name, class_of(obj), class_of(value))
+            raise TraitError(e)
+        value.sort()
+        value = super(ArrayList, self).validate_elements(obj, value)
+        return value
+
+    def validate(self, obj, value):
+
+        value = super(ArrayList, self).validate(object, value)
         value = self.validate_elements(obj, value)
 
         return value

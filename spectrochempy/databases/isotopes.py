@@ -49,7 +49,10 @@ from pkg_resources import resource_filename
 import re
 from fractions import Fraction
 
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 
 # =============================================================================
 # Third-party imports

@@ -50,7 +50,7 @@ def interpolate(source, axis=0, size=None):
     raise NotImplementedError('Not yet implemented')
 
 
-def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
+def align(source, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan,
           inplace=False):
     """Align the current dataset on a reference dataset along a given axis by
     interpolation
@@ -66,8 +66,8 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
     axis : `int`, [optional, default = 0].
         Tells on which axis to perform the alignement.
 
-    kind: `str`[optional among [`linear`,`pchip`], default=`linear`].
-        Kind of interpolation to performs for the alignment.
+    method: `str`[optional among [`linear`,`pchip`], default=`linear`].
+        method of interpolation to performs for the alignment.
 
     Returns
     --------
@@ -101,20 +101,20 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
     refaxisdata = refordered.coordset(
             refaxis).data  # TODO: at the end restore the original order
 
-    if kind == 'linear':
+    if method == 'linear':
 
         interpolator = lambda data, ax=-1: scipy.interpolate.interp1d(
-                oldaxisdata, data, axis=ax, kind=kind,
+                oldaxisdata, data, axis=ax, kind=method,
                 bounds_error=False, fill_value=fill_value,
                 assume_sorted=True)
 
-    elif kind == 'pchip':
+    elif method == 'pchip':
 
         interpolator = lambda data, ax=-1: scipy.interpolate.PchipInterpolator(
                 oldaxisdata, data,
                 axis=ax, extrapolate=False)
     else:
-        raise AttributeError('Not recognised option kind for `align`')
+        raise AttributeError('Not recognised option method for `align`')
 
     interpolate_data = interpolator(sourceordered.data, axis)
     newdata = interpolate_data(refaxisdata)
@@ -131,7 +131,7 @@ def align(source, ref, axis=0, refaxis=None, kind='linear', fill_value=np.nan,
     interpolate_axis_mask = interpolator(sourceordered.coordset(axis).mask)
     newaxismask = interpolate_axis_mask(refaxisdata)
 
-    if kind == 'pchip' and not np.isnan(fill_value):
+    if method == 'pchip' and not np.isnan(fill_value):
         index = np.any(np.isnan(newdata))
         newdata[index] = fill_value
 

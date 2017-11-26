@@ -33,3 +33,22 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
+
+"""
+This package provides classes and functions to define datasets and axis.
+Mathematical functions, plotting, printing are among their methods.
+
+All public members of this package can be accessed directely from the main API
+
+>>> from spectrochempy.api import NDDataset
+
+However, it is also allowed to import single members from a subpackage
+
+>>> from spectrochempy.core.api import NDDataset
+
+or
+
+>>> from spectrochempy.core.dataset.api import NDDataset
+
+
+"""

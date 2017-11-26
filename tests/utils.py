@@ -70,7 +70,11 @@ from spectrochempy.core.dataset.ndarray import masked
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import SpectroChemPyWarning, \
     SpectroChemPyDeprecationWarning, is_sequence, EPSILON
-from spectrochempy.application import scpdata, log, plotoptions
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
+scpdata = app.scpdata
 
 
 figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")

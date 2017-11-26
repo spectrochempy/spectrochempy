@@ -42,7 +42,10 @@ Module containing 1D plotting function(s)
 import numpy as np
 from matplotlib.ticker import MaxNLocator
 
-from spectrochempy.application import plotoptions
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 from spectrochempy.core.plotters.utils import make_label
 from spectrochempy.utils import is_sequence
 
@@ -57,10 +60,10 @@ def plot_lines(source, **kwargs):
     """
     Plot a 1D dataset with solid lines by default.
 
-    Alias of plot_1D (with `kind` argument set to ``lines``.
+    Alias of plot_1D (with `method` argument set to ``lines``.
 
     """
-    kwargs['kind'] = 'lines'
+    kwargs['method'] = 'lines'
     ax = plot_1D(source, **kwargs)
     return ax
 
@@ -71,10 +74,10 @@ def plot_scatter(source, **kwargs):
     """
     Plot a 1D dataset as a scatter plot (points can be added on lines).
 
-    Alias of plot_1D (with `kind` argument set to ``scatter``.
+    Alias of plot_1D (with `method` argument set to ``scatter``.
 
     """
-    kwargs['kind'] = 'scatter'
+    kwargs['method'] = 'scatter'
     ax = plot_1D(source, **kwargs)
     return ax
 
@@ -85,17 +88,17 @@ def plot_lines(source, **kwargs):
     """
     Plot a 1D dataset with solid lines by default.
 
-    Alias of plot_1D (with `kind` argument set to ``lines``.
+    Alias of plot_1D (with `method` argument set to ``lines``.
 
     """
-    kwargs['kind'] = 'lines'
+    kwargs['method'] = 'lines'
     ax = plot_1D(source, **kwargs)
     return ax
 
 
 # plot multiple ----------------------------------------------------------------
 
-def plot_multiple(sources, kind='scatter', lines=True,
+def plot_multiple(sources, method='scatter', lines=True,
                   labels = None, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot
@@ -106,11 +109,11 @@ def plot_multiple(sources, kind='scatter', lines=True,
 
     sources : a list of ndatasets
 
-    kind : `str` among [scatter, lines]
+    method : `str` among [scatter, lines]
 
     lines : `bool`, optional, default=``True``
 
-        if kind is scatter, this flag tells to draw also the lines
+        if method is scatter, this flag tells to draw also the lines
         between the marks.
 
     labels : a list of str, optional
@@ -140,14 +143,14 @@ def plot_multiple(sources, kind='scatter', lines=True,
     hold = False
 
     # do not save during this plots, nor apply any commands
-    savefig = kwargs.get('savefig', None)
-    kwargs['savefig']=None
+    output = kwargs.get('output', None)
+    kwargs['output']=None
     commands = kwargs.get('commands', [])
     kwargs['commands'] = []
 
     for s in sources : #, colors, markers):
 
-        ax = s.plot(kind= kind,
+        ax = s.plot(method= method,
                     lines=True,
                     hold=hold, **kwargs)
         hold = True
@@ -159,7 +162,7 @@ def plot_multiple(sources, kind='scatter', lines=True,
     if legend is not None:
         leg = ax.legend(ax.lines, labels, shadow=True, loc=legend,
                         frameon=True, facecolor='lightyellow')
-    kw = {'savefig': savefig, 'commands': commands}
+    kw = {'output': output, 'commands': commands}
     sources[0]._plot_resume(sources[-1], **kw)
 
     return ax
@@ -176,7 +179,7 @@ def plot_1D(source, **kwargs):
     ----------
     new: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
-    kind: `str` [optional among ``lines`, ``scatter``]
+    method: `str` [optional among ``lines`, ``scatter``]
 
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
@@ -265,14 +268,9 @@ def plot_1D(source, **kwargs):
 
         show the zero basis
 
-    savename: str,
+    output: str,
 
         name of the file to save the figure
-
-    savefig: Bool,
-
-        save the fig if savename is defined,
-        should be executed after all other commands
 
     vshift: float, optional
         vertically shift the line from its baseline
@@ -292,12 +290,12 @@ def plot_1D(source, **kwargs):
     # plot the source
     # -------------------------------------------------------------------------
 
-    kind = kwargs.pop('kind','lines')
+    method = kwargs.pop('method','lines')
     lines = kwargs.pop('lines',False) # in case it is scatter,
                                       # we can also show the lines
-    lines = kind=='lines' or lines
-    scatter = kind=='scatter' and not lines
-    scatlines = kind=='scatter' and lines
+    lines = method=='lines' or lines
+    scatter = method=='scatter' and not lines
+    scatlines = method=='scatter' and lines
 
     show_complex = kwargs.pop('show_complex', False)
 
@@ -452,16 +450,16 @@ if __name__ == '__main__':
 
 
     # plot generic
-    ax = source[0].plot(savefig=os.path.join(figures_dir, 'IR_source_1D'),
+    ax = source[0].plot(output=os.path.join(figures_dir, 'IR_source_1D'),
                          savedpi=150)
 
     # plot generic style
     ax = source[0].plot(style='sans',
-                        savefig=os.path.join(figures_dir, 'IR_source_1D_sans'),
+                        output=os.path.join(figures_dir, 'IR_source_1D_sans'),
                         savedpi=150)
 
     # check that style reinit to default
-    ax = source[0].plot(savefig='IR_source_1D', savedpi=150)
+    ax = source[0].plot(output='IR_source_1D', savedpi=150)
     try:
         assert same_images('IR_source_1D.png',
                              os.path.join(figures_dir, 'IR_source_1D.png'))
@@ -477,23 +475,23 @@ if __name__ == '__main__':
               ["S1", "S10", "S20", "S50", "S53"]]
 
     # plot multiple
-    plot_multiple(kind = 'scatter',
+    plot_multiple(method = 'scatter',
                   sources=sources, labels=labels, legend='best',
-                  savefig=os.path.join(figures_dir,
+                  output=os.path.join(figures_dir,
                                        'multiple_IR_source_1D_scatter'),
                   savedpi=150)
 
     # plot mupltiple with  style
-    plot_multiple(kind='scatter', style='sans',
+    plot_multiple(method='scatter', style='sans',
                   sources=sources, labels=labels, legend='best',
-                  savefig=os.path.join(figures_dir,
+                  output=os.path.join(figures_dir,
                                        'multiple_IR_source_1D_scatter_sans'),
                   savedpi=150)
 
     # check that style reinit to default
-    plot_multiple(kind='scatter',
+    plot_multiple(method='scatter',
                   sources=sources, labels=labels, legend='best',
-                  savefig='multiple_IR_source_1D_scatter',
+                  output='multiple_IR_source_1D_scatter',
                   savedpi=150)
     try:
         assert same_images('multiple_IR_source_1D_scatter',

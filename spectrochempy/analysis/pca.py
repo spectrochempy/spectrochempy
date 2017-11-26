@@ -54,7 +54,10 @@ import numpy as np
 # ==============================================================================
 # Global preferences
 # ==============================================================================
-from spectrochempy.application import plotoptions
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 
 _do_not_block = plotoptions.do_not_block
 

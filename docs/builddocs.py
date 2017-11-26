@@ -53,7 +53,7 @@ from pkgutil import walk_packages
 import subprocess
 from warnings import warn
 import setuptools_scm
-
+import apigen
 from sphinx.util.docutils import docutils_namespace, patch_docutils
 from ipython_genutils.text import indent, dedent, wrap_paragraphs
 from sphinx.errors import SphinxError
@@ -80,9 +80,11 @@ SERVER = os.environ.get('SERVER_FOR_LCS', None)
 DOCDIR = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
 
-SOURCE = os.path.join(DOCDIR, 'source')
-BUILDDIR = os.path.join(DOCDIR, '..', '..','spectrochempy_doc')
-DOCTREES = os.path.join(DOCDIR, '..', '..','spectrochempy_doc', '~doctrees')
+PROJECT = "spectrochempy"
+SOURCE =   os.path.join(DOCDIR, 'source')
+BUILDDIR = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT)
+DOCTREES = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT, '~doctrees')
+
 
 def gitcommands():
 
@@ -157,23 +159,29 @@ def make_docs(*options):
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
         sp.verbosity = 0
 
-        update_rest()
+        # generate developper reference
+        apigen.main(PROJECT, tocdepth=1,
+             includeprivate=False,
+             destdir='./source/dev/generated',
+             exclude_patterns=['api.py'],
+             exclude_dirs=['extern', '~misc'],
+             developper=True)
 
         sp.build()
         res = sp.statuscode
         log.debug(res)
 
         if builder=='latex':
-            cmd = "cd {}/latex; " \
-              "make; mv spectrochempy.pdf " \
-              " ../pdf/spectrochempy.pdf".format(BUILDDIR)
+            cmd = "cd {BUILDDIR}/latex; " \
+              "make; mv {PROJECT}.pdf " \
+              " ../pdf/{PROJECT}.pdf".format(BUILDDIR=BUILDDIR,PROJECT=PROJECT)
             res = subprocess.call([cmd], shell=True, executable='/bin/bash')
             log.info(res)
 
         gitcommands()  # update repository
 
         log.info(
-        "\n\nBuild finished. The {0} pages are in {1}/www/{2}.".format(
+        "\n\nBuild finished. The {0} pages are in {1}/{2}.".format(
             builder.upper(), BUILDDIR, builder))
 
 
@@ -191,16 +199,17 @@ def do_release():
 
         log.info("uploads to the server of the html/pdf files")
         path = sys.argv[0]
-        while not path.endswith('spectrochempy'):
+        while not path.endswith(PROJECT):
             path, _ = os.path.split(path)
         path, _ = os.path.split(path)
         cmd = 'rsync -e ssh -avz  --exclude="~*" ' \
-              '{FROM} {SERVER}:spectrochempy/'.format(
-                     FROM=os.path.join(path,'spectrochempy_doc','*'),
+              '{FROM} {SERVER}:{PROJECT}/'.format(
+                     PROJECT=PROJECT,
+                     FROM=os.path.join(path,'%s_doc'%PROJECT,'*'),
                      SERVER=SERVER)
 
-        print(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
-        print(cmd)
+        log.debug(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
+        log.debug(cmd)
         res = subprocess.call([cmd], shell=True, executable='/bin/bash')
         log.info(res)
         log.info('\n'+cmd + "Finished")
@@ -219,7 +228,6 @@ def clean():
     shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
     shutil.rmtree(SOURCE + '/api/auto_examples', ignore_errors=True)
     shutil.rmtree(SOURCE + '/gen_modules', ignore_errors=True)
-    shutil.rmtree(SOURCE + '/api/auto_examples', ignore_errors=True)
     shutil.rmtree(SOURCE + '/modules/generated', ignore_errors=True)
     shutil.rmtree(SOURCE + '/dev/generated', ignore_errors=True)
 
@@ -234,7 +242,8 @@ def make_dirs():
                   os.path.join(BUILDDIR, 'latex'),
                   os.path.join(BUILDDIR, 'pdf'),
                   os.path.join(SOURCE, '_static'),
-                  os.path.join(SOURCE, 'dev', 'generated')
+                  os.path.join(SOURCE, 'dev', 'generated'),
+                  os.path.join(SOURCE, 'api', 'generated')
                   ]
     for d in build_dirs:
         try:
@@ -242,27 +251,6 @@ def make_dirs():
         except OSError:
             pass
 
-
-TEMPLATE = """{headerline}
-
-:mod:`{package}`
-{underline}
-
-
-.. automodule:: {package}
-
-{methods}
-
-{classes}    
-   
-{subpackages}
-
-"""  # This is important to align the text on the border
-
-#**Inheritance diagram**:
-
-#.. inheritance-diagram:: {package}
-#   :parts: 3
 
 def class_config_rst_doc(cls):
     """Generate rST documentation for the class `cls` config options.
@@ -308,100 +296,23 @@ def class_config_rst_doc(cls):
 
     return '\n'.join(lines)
 
-def update_rest():
-    """Update the Sphinx ReST files for the package .
-    """
-
-    # Remove the existing files.
-    files = glob(os.path.join(DOCDIR, 'source', 'dev', 'generated', 'auto_examples',
-                              'spectrochempy*.rst'))
-    for f in files:
-        os.remove(f)
-
-    # Create new files.
-    packages = []
-    import spectrochempy
-    packages += list_packages(spectrochempy)
-
-    pack = packages[:]  # remove api librairies
-    for package in pack:
-        if 'api' in package or 'extern' in package:
-            packages.remove(package)
-
-    for package in packages:
-        subs = set()
-        for subpackage in packages:
-            if subpackage.startswith(package) and \
-                            subpackage != package:
-                sub = subpackage.split(package)[1]
-                if sub.startswith('.'):
-                    sub = sub.split('.')[1]
-                    subs.add(sub)
-
-        if not subs:
-            subpackages = ""
-        else:
-            subpackages = """
-            
-Sub-Packages
--------------
-
-The following sub-packages are available in this package:
- 
-"""
-            subpackages += ".. toctree::\n\t:maxdepth: 1\n"
-            for sub in sorted(subs):
-                if 'api' in sub:
-                    continue
-                subpackages += "\n\t{0}".format(package + '.' + sub)
-
-        # temporary import as to check the presence of doc functions
-        pkg = import_item(package)
-
-        classes = ''
-        methods = ''
-
-        if hasattr(pkg, '_classes'):
-            classes += "\nClasses\n-------------\n"
-            classes += "This module contains the following classes:\n\n"
-            for item in pkg._classes:
-                _item = "%s.%s"%(package,item)
-                _imported_item = import_item(_item)
-                if hasattr(_imported_item,'class_config_rst_doc'):
-                    doc = "\n"+class_config_rst_doc(_imported_item)
-                    doc = doc.replace(item+".",'')
-                    doc = doc.replace(item + "\n", '\n\t')
-                    _imported_item.__doc__ = _imported_item.__doc__.format(attributes=doc) # "\n\tAttributes\n\t========================\n%s\n"%doc
-                classes += "\n.. autoclass:: %s\n\t:members:\n\t:inherited-members:\n\n" % _item
-
-        if hasattr(pkg, '_methods'):
-            methods += "\nMethods\n---------------\n"
-            methods += "This module contains the following methods:\n\n"
-
-            for item in pkg._methods:
-                # check if it is really a method:
-                #if hasattr(getattr(spectrochempy.api,
-                #                   '{}'.format(item)), '__call__'):
-                _item = "%s.%s"%(package,item)
-                methods += "\n.. automethod:: %s\n\n" % _item
-                #else:
-                #    print(item)
-                #    # may be add this in the doc to
-
-
-        title = "_".join(package.split('.')[1:])
-        headerline = ".. _mod_{}:".format(title)
-
-        with open(os.path.join(DOCDIR, "source", "dev", "generated",
-                               "%s.rst" % package), 'w') as f:
-            f.write(TEMPLATE.format(package=package,
-                                    headerline=headerline,
-                                    underline='#' * (len(package) + 7),
-                                    classes = classes,
-                                    methods=methods,
-                                    subpackages=subpackages,
-                                    ))
-
+        #
+        # # classes
+        # # -------
+        # if hasattr(pkg, '_classes') and pkg._classes:
+        #     classes += "\nClasses\n-------------\n"
+        #     classes += "This module contains the following classes:\n\n"
+        #     for item in pkg._classes:
+        #         _item = "%s.%s"%(package,item)
+        #         _imported_item = import_item(_item)
+        #         if hasattr(_imported_item,'class_config_rst_doc'):
+        #             doc = "\n"+class_config_rst_doc(_imported_item)
+        #             doc = doc.replace(item+".",'')
+        #             doc = doc.replace(item + "\n", '\n\t')
+        #             _imported_item.__doc__ = _imported_item.__doc__.format(
+        #                     attributes=doc)
+        #         classes += "\n.. autoclass:: %s\n\t:members:\n" \
+        #                    "\t:inherited-members:\n\n" % _item
 
 if __name__ == '__main__':
 

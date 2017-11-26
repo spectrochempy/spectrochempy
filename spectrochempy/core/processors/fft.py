@@ -35,11 +35,15 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+__all__ = []
 
 # =============================================================================
 # Standard python imports
 # =============================================================================
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 
 # =============================================================================
 # Third party imports

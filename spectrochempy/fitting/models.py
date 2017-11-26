@@ -39,8 +39,13 @@
 
 import os
 import numpy as np
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 from spectrochempy.utils import SpectroChemPyWarning
+
+__all__ = []
 
 _classes = ['polynomialbaseline', 'gaussianmodel', 'lorentzianmodel',
             'assymvoigtmodel', 'voigtmodel']

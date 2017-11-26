@@ -1,7 +1,7 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2018 LCS
+# Copyright (©) 2015-2017 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # This software is a computer program whose purpose is to [describe
@@ -34,25 +34,38 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
+from traitlets import (List, Instance, Unicode, Bool, HasTraits)
+from spectrochempy.core.dataset.ndarray import NDArray
 
-from spectrochempy.application import app
-plotoptions = app.plotoptions
-log = app.log
-options = app
+import matplotlib.pyplot as plt
 
+__all__ = ['Project']
+_classes = __all__[:]
 
-from logging import WARNING
+class Project(HasTraits):
+    """A manager of multiple datasets in a project
 
-def test_logger():
+    """
 
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
+    _arrays = List(Instance(NDArray), allow_none=True)
 
-    log.setLevel(WARNING)
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return self._arrays[item]
+        if isinstance(item, str):
+            # probably want the object by name
+            for arr in self._arrays:
+                if arr.name is item:
+                    return arr
 
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssssafter changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+    def __setitem__(self, key, value):
+        if isinstance(key, int):
+            self._arrays[key] = value
+            return
+
+        if isinstance(key, str):
+            # probably want the object by name
+            for arr in self._arrays:
+                if arr.name is key:
+                    arr = value
+

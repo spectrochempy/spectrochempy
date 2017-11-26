@@ -53,7 +53,10 @@ locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.processors.concatenate import concatenate, stack
-from spectrochempy.application import options, log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 from spectrochempy.utils import (readfilename, unzip, is_sequence,
                                 SpectroChemPyWarning)
 

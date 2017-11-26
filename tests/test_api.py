@@ -41,13 +41,14 @@ from spectrochempy.api import *
 
 def test_api():
     # test version
-    from spectrochempy.version import version
+    from spectrochempy.__version__ import version
     assert version.split('.')[0] == '0'
     assert version.split('.')[1][:2] == '1a'
     # TODO: modify this for each release
 
     # test application
-    print(('\n\nRunning : ', spectrochempy.application.running))
+
+    print(('\n\nRunning : ', spectrochempy.api.running))
     assert version.startswith('0.1')
     assert "Laboratory for Catalysis and Spectrochempy" in copyright
 

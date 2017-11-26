@@ -34,17 +34,7 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-"""
-This package provides classes and functions to define datasets and axis.
-Mathematical functions, plotting, printing are among their methods.
-
-Examples
---------
-
->>> from spectrochempy.core.api import NDDataset
-
-
-"""
+# here we load all sub packages routines
 
 import sys
 from traitlets import import_item

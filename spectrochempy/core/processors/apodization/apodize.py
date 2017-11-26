@@ -57,7 +57,10 @@ __all__ = ["apodize"]
 # =============================================================================
 # Constants
 # =============================================================================
-from spectrochempy.application import log
+from spectrochempy.application import app
+plotoptions = app.plotoptions
+log = app.log
+options = app
 
 
 # =============================================================================
