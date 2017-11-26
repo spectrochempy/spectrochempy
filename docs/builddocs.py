@@ -190,8 +190,15 @@ def do_release():
     if SERVER:
 
         log.info("uploads to the server of the html/pdf files")
-        cmd = 'rsync -e ssh -avz  --exclude="~*"    ' \
-              '../spectrochempy_doc/*   '+SERVER+':spectrochempy/'
+        path = sys.argv[0]
+        while not path.endswith('spectrochempy'):
+            path, _ = os.path.split(path)
+        path, _ = os.path.split(path)
+        cmd = 'rsync -e ssh -avz  --exclude="~*" ' \
+              '{FROM} {SERVER}:spectrochempy/'.format(
+                     FROM=os.path.join(path,'spectrochempy_doc','*'),
+                     SERVER=SERVER)
+
         print(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
         print(cmd)
         res = subprocess.call([cmd], shell=True, executable='/bin/bash')
