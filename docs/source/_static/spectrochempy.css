@@ -41,3 +41,12 @@ dl.glossary dt {
     font-weight: bold;
     font-size: 1.1em;
 }
+
+
+@media (min-width: 992px) {
+    .col-md-12 {
+        width: 100%;
+        padding-top: 35px;
+    }
+}
+

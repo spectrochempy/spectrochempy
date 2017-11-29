@@ -33,7 +33,6 @@ import inspect
 # automodule options
 OPTIONS = [
         'members',
-        'inherited-members', # disabled because there's a bug in sphinx
         'show-inheritance',
         'autosummary'
     ]
@@ -126,9 +125,9 @@ def create_module_file(package, module, opts):
     item = makename(package, module)
     text = ".. _mod_{}:\n\n".format("_".join(item.split('.')))
     if not opts.noheadings:
-        text = format_heading(1, '%s module' % module)
+        text += format_heading(1, '%s module' % module)
     else:
-        text = ''
+        text += ''
 
     # __all__ control which members will be shown to the end user
     text += format_directive(module, package)
@@ -136,7 +135,6 @@ def create_module_file(package, module, opts):
     if opts.developper:
 
         _imported_item = import_item(item)
-        text += ".. _mod_{}_dev:\n\n".format("_".join(item.split('.')[1:]))
 
         clsmembers = inspect.getmembers(_imported_item)
 
@@ -149,6 +147,7 @@ def create_module_file(package, module, opts):
         if not hasattr(_imported_item, '__all__'):
             print('missing __all__ in %s  - apigen skip this' % item)
         elif members:
+            text += "\n\n.. _mod_{}_dev:\n\n".format("_".join(item.split('.')[1:]))
             text += format_heading(2, "Additional information for developper's")
             for name, obj in members:
                 if inspect.isclass(obj):

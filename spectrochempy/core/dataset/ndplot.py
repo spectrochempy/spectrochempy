@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -67,8 +67,8 @@ from traitlets import Dict, List, Bool, Float, HasTraits, \
 # local import
 # ------------
 
-from spectrochempy.core.dataset.ndarray import CoordSet, masked
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndarray import masked
+from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
 from spectrochempy.gui import gui

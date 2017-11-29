@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -43,13 +43,6 @@
 
 
 """
-_classes = []
-_dev_classes = []
-_methods = []
-_dev_methods = ['_setup_backend_and_ipython']
-_attributes = ['guiApp','ip','backend']
-_dev_attributes = []
-
 import sys
 import warnings
 
@@ -133,6 +126,9 @@ ip = None
 #: Current backend
 backend = "Qt5Agg"
 
+# ==============================================================================
+# For documentation
+# ==============================================================================
 
 if __name__ == '__main__':
 

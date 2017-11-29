@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -36,7 +36,7 @@
 
 
 """
-This module implements the base |NDDataset\ class.
+This module implements the base |NDDataset| class.
 
 """
 
@@ -68,12 +68,13 @@ from spectrochempy.utils import (SpectroChemPyWarning,
                                  numpyprintoptions,
                                  get_user_and_node,
                                  set_operators,
-                                 docstrings)
+                                 docstrings,
+                                 make_func_from)
 
 from spectrochempy.extern.traittypes import Array
 
-from spectrochempy.core.dataset.ndarray import NDArray, CoordSet
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
 from spectrochempy.core.dataset.ndmath import NDMath
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.dataset.ndio import NDIO
@@ -87,23 +88,14 @@ options = app
 # Constants
 # =============================================================================
 
-__all__ = ['NDDataset',
-
-           # dataset methods
-           'sort',
-           'swapaxes',
-           'transpose',
-           'abs',
-           'conj',
-           'imag',
-           'real',
-           ]
+__all__ = ['NDDataset']
 
 # =============================================================================
 # numpy print options
 # =============================================================================
 
 numpyprintoptions()
+
 
 # =============================================================================
 # NDDataset class definition
@@ -116,7 +108,7 @@ class NDDataset(
         NDArray,
 ):
     """
-    The main N-dimensional dataset class used by Spectroch.
+    The main N-dimensional dataset class used by |scp|.
 
     """
     author = Unicode(get_user_and_node(),
@@ -160,14 +152,14 @@ class NDDataset(
             `coords` contains the coordinates for the different
             dimensions of the `data`. if `coords` is provided, it must specified
             the `coord` and `labels` for all dimensions of the `data`.
-            Multiple `coord`'s can be specified in an CoordSet instance
+            Multiple `coord`'s can be specified in an |CoordSet| instance
             for each dimension.
 
         Notes
         -----
         The underlying array in a |NDDataset| object can be accessed
         through the `data`
-        attribute, which will return a conventional :class:`~numpy.ndarray`.
+        attribute, which will return a conventional |ndarray|.
 
         Examples
         --------
@@ -402,15 +394,6 @@ class NDDataset(
         self.coordset[-3] = value
 
     @property
-    def date(self):
-        """
-        Read-Only properties
-
-        Date of the dataset creation
-        """
-        return self._date
-
-    @property
     def modified(self):
         """
         Read-Only properties
@@ -453,6 +436,55 @@ class NDDataset(
 
         """
         return self.coordset[axis]
+
+    # .........................................................................
+    @docstrings.dedent
+    def plus_minus(self, uncertainty, inplace=False):
+        """
+        Set the uncertainty of a NDArray
+
+        Parameters
+        -----------
+        uncertainty: `float` or |ndarray|
+            Uncertainty to apply to the array. If it's an array, it must have
+            the same shape as the `data` shape.
+        %(generic_method.parameters.inplace)s
+
+        Returns
+        -------
+        %(generic_method.parameters.inplace)s. The object will be the original
+        object with uncertainty.
+
+        Examples
+        --------
+        >>> np.random.seed(12345)
+        >>> ndd = NDArray( data = np.random.random((3)))
+        >>> ndd.plus_minus(.2)
+        NDArray: [   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200] unitless
+        >>> ndd # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        NDArray: [   0.930,  ...  0.184] unitless
+
+        >>> np.random.seed(12345)
+        >>> ndd = NDArray( data = np.random.random((3,3)), units='m')
+        >>> ndd.plus_minus(.2, inplace=True) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        NDArray: [[   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200],
+              [   0.205+/-0.200,    0.568+/-0.200,    0.596+/-0.200],
+              [   0.965+/-0.200,    0.653+/-0.200,    0.749+/-0.200]] m
+        >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        [[   0.930+/-0.200    ...  0.749+/-0.200]] m
+
+        """
+        if inplace:
+            new = self
+        else:
+            new = self.copy()
+
+        if isinstance(uncertainty, float):
+            new.uncertainty = np.ones(new._data.shape) * uncertainty
+        else:
+            new.uncertainty = uncertainty
+
+        return new
 
     def transpose(self, axes=None, inplace=False):
         """
@@ -553,7 +585,7 @@ class NDDataset(
 
         return new
 
-    def sort(source,
+    def sort(self,
              axis=0, pos=None, by='value', descend=False, inplace=False):
         """
         Returns the dataset sorted along a given dimension
@@ -583,34 +615,31 @@ class NDDataset(
             sorted
 
         """
-        # because this method can be used as a class method (and
-        # because of the documentation needs) we use source instead of the usual
-        # self
 
         if not inplace:
-            new = source.copy()
+            new = self.copy()
         else:
-            new = source
+            new = self
 
         if axis == -1:
-            axis = source.ndim - 1
+            axis = self.ndim - 1
 
         indexes = []
-        for i in range(source.ndim):
+        for i in range(self.ndim):
             if i == axis:
-                if source.coordset[axis].size == 0:
+                if self.coordset[axis].size == 0:
                     # sometimes we have only label for Coord objects.
                     # in this case, we sort labels if they exist!
-                    if source.coordset[axis].is_labeled:
+                    if self.coordset[axis].is_labeled:
                         by = 'label'
                     else:
                         # nothing to do for sorting
-                        # return source itself
-                        return source
+                        # return self itself
+                        return self
 
-                args = source.coordset[axis]._argsort(by=by, pos=pos,
-                                                      descend=descend)
-                new.coordset[axis] = source.coordset[axis]._take(args)
+                args = self.coordset[axis]._argsort(by=by, pos=pos,
+                                                    descend=descend)
+                new.coordset[axis] = self.coordset[axis]._take(args)
                 indexes.append(args)
             else:
                 indexes.append(slice(None))
@@ -629,9 +658,7 @@ class NDDataset(
 
         Parameters
         ----------
-
         axis : `int`, optional, default = -1
-
             The axis to make complex
 
         """
@@ -867,16 +894,29 @@ class NDDataset(
 
         return
 
+# =============================================================================
+# module function
+# =============================================================================
 
-# make some function also accessiible from the module
+# make some functions also accessible from the API
+# We want a slightly different docstring so we cannot just make:
+#     func = NDDataset.func
 
-sort = NDDataset.sort
-swapaxes = NDDataset.swapaxes
-transpose = NDDataset.transpose
-abs = NDDataset.abs
-conj = NDDataset.conj
-imag = NDDataset.imag
-real = NDDataset.real
+sort = make_func_from(NDDataset.sort, first='dataset')
+swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')
+transpose = make_func_from(NDDataset.transpose, first='dataset')
+
+abs = make_func_from(NDDataset.abs, first='dataset')
+conjugate = make_func_from(NDDataset.conjugate, first='dataset')  # defined in ndarray
+set_complex = make_func_from(NDArray.set_complex, first='dataset')
+
+__all__ += ['sort',
+            'swapaxes',
+            'transpose',
+            'abs',
+            'conjugate',
+            'set_complex',
+            ]
 
 # =============================================================================
 # Set the operators
@@ -888,4 +928,7 @@ if __name__ == '__main__':
     from spectrochempy.api import *
 
     # test with wrong units
-    NDDataset([1, 2, 3] * ur.adu, units=ur.adu)
+    x = NDDataset([1, 2, 3] * ur.adu, units=ur.adu)
+
+
+

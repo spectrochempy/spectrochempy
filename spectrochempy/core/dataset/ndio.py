@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -58,9 +58,7 @@ import matplotlib.pyplot as plt
 
 # local import
 # ------------
-
-from spectrochempy.core.dataset.ndarray import CoordSet
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit
 from spectrochempy.gui import gui
@@ -68,6 +66,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
 from spectrochempy.application import app
 plotoptions = app.plotoptions
+
 log = app.log
 options = app
 

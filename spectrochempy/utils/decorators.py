@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -35,10 +35,10 @@
 # =============================================================================
 
 import warnings
-from .exceptions import SpectroChemPyDeprecationWarning
+
+from spectrochempy.utils.exceptions import SpectroChemPyDeprecationWarning
 
 __all__ = ['deprecated']
-
 
 def deprecated(message):
     """
@@ -52,6 +52,7 @@ def deprecated(message):
     """
 
     def deprecation_decorator(func):
+
         def wrapper(*args, **kwargs):
             warnings.warn("The function `{} is deprecated: {}".format(
                     func.__name__, message),
@@ -61,7 +62,3 @@ def deprecated(message):
         return wrapper
 
     return deprecation_decorator
-
-
-if __name__ == '__main__':
-    pass

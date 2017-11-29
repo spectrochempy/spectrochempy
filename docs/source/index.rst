@@ -70,7 +70,7 @@ User Guide & tutorials
 
     userguide/index
     tutorial/index
-    API reference <dev/apireference>
+    API reference <api/apireference>
     faq
 
 Gallery of examples
@@ -120,7 +120,7 @@ Developper's Documentation
     :maxdepth: 1
 
     dev/develguide
-    API reference for developper's<dev/apireference>
+    Developper's reference <dev/devreference>
 
 See also
 =========

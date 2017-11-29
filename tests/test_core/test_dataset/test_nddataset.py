@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -1472,6 +1472,17 @@ def test_repr_html_bug_undesired_display_complex():
     da.units = 'dimensionless'
     assert "(complex)" not in da._repr_html_()
     pass
+
+def test_ndarray_plusminus():
+    ds = NDDataset([1.,2.,3.])
+    dsu = ds.plus_minus(.1)
+    assert repr(ds[0]) == "NDDataset: 1.0 unitless" # not  inplace
+    assert repr(dsu[0])== "NDDataset: 1.0+/-0.1 unitless"
+    np.random.seed(12345)
+    ndd = NDDataset(data=np.random.random((3, 3)), units='m')
+    ndd.plus_minus(.2, inplace=True)
+    assert repr(ndd).startswith('NDDataset: [[   0.930+/-0.200')
+    assert repr(ndd).endswith('0.749+/-0.200]] m')
 
 #### Test masks ######
 

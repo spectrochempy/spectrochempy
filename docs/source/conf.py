@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -43,6 +43,7 @@ global doc_building
 doc_building = True
 
 import sys, os
+import sphinx_rtd_theme
 import sphinx_gallery
 import spectrochempy
 from spectrochempy.api import version, copyright
@@ -80,20 +81,27 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
     'spectrochempy.sphinxext.extended_napoleon',
+    #'numpydoc',
     'spectrochempy.sphinxext.autodocsumm',
 ]
+
+# Numpy autodoc attributes
+numpydoc_show_class_members = False
+numpydoc_use_plots =  True
+numpydoc_class_members_toctree = False
+
 # Napoleon settings
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = False
 napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = True
+napoleon_include_special_with_doc = False
 napoleon_use_admonition_for_examples = True
 napoleon_use_admonition_for_notes = True
 napoleon_use_admonition_for_references = True
 napoleon_use_ivar = False
 napoleon_use_param = True
-napoleon_use_rtype = True
+napoleon_use_rtype = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -161,84 +169,87 @@ from spectrochempy.utils.rstutils import rst_epilog
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-# html_theme = 'sphinxdoc'
+
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
 
 # Activate the theme.
-import sphinx_bootstrap_theme
-
-html_theme = 'bootstrap'  # https://github.com/ryan-roemer/sphinx-bootstrap-theme
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-
-# (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
-# Path should be relative to the ``_static`` files directory.
-# html_logo = "_static/logo.png"
-
-# Theme options are theme-specific and customize the look and feel of a
-# theme further.
-html_theme_options = {
-    # Navigation bar title. (Default: ``project`` value)
-    'navbar_title': "SpectroChemPy",
-
-    # Tab name for entire site. (Default: "Site")
-    'navbar_site_name': "Documentation",
-
-    # A list of tuples containing pages or urls to link to.
-    # Valid tuples should be in the following forms:
-    #    (name, page)                 # a link to a page
-    #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
-    #    (name, "http://example.com", True) # arbitrary absolute url
-    # Note the "1" or "True" value above as the third argument to indicate
-    # an arbitrary url.
-    'navbar_links': [
-        # ("Examples", "examples"),
-        # ("Link", "http://example.com", True),
-    ],
-
-    # Render the next and previous page links in navbar. (Default: true)
-    'navbar_sidebarrel': True,
-
-    # Render the current pages TOC in the navbar. (Default: true)
-    'navbar_pagenav': True,
-
-    # Tab name for the current pages TOC. (Default: "Page")
-    'navbar_pagenav_name': "Page",
-
-    # Global TOC depth for "site" navbar tab. (Default: 1)
-    # Switching to -1 shows all levels.
-    'globaltoc_depth': -1,
-
-    # Include hidden TOCs in Site navbar?
-    #
-    # Note: If this is "false", you cannot have mixed ``:hidden:`` and
-    # non-hidden ``toctree`` directives in the same page, or else the build
-    # will break.
-    #
-    # Values: "true" (default) or "false"
-    'globaltoc_includehidden': "true",
-
-    # HTML navbar class (Default: "navbar") to attach to <div> element.
-    # For black navbar, do "navbar navbar-inverse"
-    'navbar_class': "navbar navbar-inverse",
-
-    # Fix navigation bar to top of page?
-    # Values: "true" (default) or "false"
-    'navbar_fixed_top': "true",
-
-    # Location of link to source.
-    # Options are "nav" (default), "footer" or anything else to exclude.
-    'source_link_position': "",  # "nav",
-
-    # Bootswatch (http://bootswatch.com/) theme.
-    #
-    # Options are nothing (default) or the name of a valid theme
-    # such as "amelia" or "cosmo".
-    'bootswatch_theme': "journal",
-
-    # Choose Bootstrap version.
-    # Values: "3" (default) or "2" (in quotes)
-    'bootstrap_version': "3",
-}
-
+# import sphinx_bootstrap_theme
+#
+# html_theme = 'bootstrap'  # https://github.com/ryan-roemer/sphinx-bootstrap-theme
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+#
+# # (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
+# # Path should be relative to the ``_static`` files directory.
+# # html_logo = "_static/logo.png"
+#
+# # Theme options are theme-specific and customize the look and feel of a
+# # theme further.
+# html_theme_options = {
+#     # Navigation bar title. (Default: ``project`` value)
+#     'navbar_title': "SpectroChemPy",
+#
+#     # Tab name for entire site. (Default: "Site")
+#     'navbar_site_name': "Documentation",
+#
+#     # A list of tuples containing pages or urls to link to.
+#     # Valid tuples should be in the following forms:
+#     #    (name, page)                 # a link to a page
+#     #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
+#     #    (name, "http://example.com", True) # arbitrary absolute url
+#     # Note the "1" or "True" value above as the third argument to indicate
+#     # an arbitrary url.
+#     'navbar_links': [
+#         # ("Examples", "examples"),
+#         # ("Link", "http://example.com", True),
+#     ],
+#
+#     # Render the next and previous page links in navbar. (Default: true)
+#     'navbar_sidebarrel': True,
+#
+#     # Render the current pages TOC in the navbar. (Default: true)
+#     'navbar_pagenav': True,
+#
+#     # Tab name for the current pages TOC. (Default: "Page")
+#     'navbar_pagenav_name': "Page",
+#
+#     # Global TOC depth for "site" navbar tab. (Default: 1)
+#     # Switching to -1 shows all levels.
+#     'globaltoc_depth': 2,
+#
+#     # Include hidden TOCs in Site navbar?
+#     #
+#     # Note: If this is "false", you cannot have mixed ``:hidden:`` and
+#     # non-hidden ``toctree`` directives in the same page, or else the build
+#     # will break.
+#     #
+#     # Values: "true" (default) or "false"
+#     'globaltoc_includehidden': "true",
+#
+#     # HTML navbar class (Default: "navbar") to attach to <div> element.
+#     # For black navbar, do "navbar navbar-inverse"
+#     'navbar_class': "navbar navbar-inverse",
+#
+#     # Fix navigation bar to top of page?
+#     # Values: "true" (default) or "false"
+#     'navbar_fixed_top': "true",
+#
+#     # Location of link to source.
+#     # Options are "nav" (default), "footer" or anything else to exclude.
+#     'source_link_position': "",  # "nav",
+#
+#     # Bootswatch (http://bootswatch.com/) theme.
+#     #
+#     # Options are nothing (default) or the name of a valid theme
+#     # such as "amelia" or "cosmo".
+#     'bootswatch_theme': "journal",
+#
+#     # Choose Bootstrap version.
+#     # Values: "3" (default) or "2" (in quotes)
+#     'bootstrap_version': "3",
+# }
+#
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -462,7 +473,7 @@ autosummary_generate = True
 autoclass_content = 'both'   #Both the class’ and the __init__ method’s
                         # docstring are concatenated and inserted.
 
-autodoc_default_flags = ['members', 'inherited-members', 'show-inheritance']
+autodoc_default_flags = ['autosummary']
 
 exclusions = ('with_traceback', 'with_traceback',
               'observe', 'unobserve', 'observe', 'cross_validation_lock',

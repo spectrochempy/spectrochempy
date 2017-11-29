@@ -60,9 +60,8 @@ from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, read_lo
 # Local imports
 # =============================================================================
 from spectrochempy.core.dataset.ndmeta import Meta
-from spectrochempy.core.dataset.ndarray import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
 from spectrochempy.core.units import ur, Quantity
 from spectrochempy.core.readers.nmr.parameter import nmr_valid_meta
 from spectrochempy.utils import SpectroChemPyWarning

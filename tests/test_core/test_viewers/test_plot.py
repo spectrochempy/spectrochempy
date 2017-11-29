@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -43,7 +43,7 @@ from spectrochempy.api import *
 options.log_level = INFO
 
 # To regenerate the reference figures, set FORCE to True
-FORCE = False
+FORCE = True
 
 # for this regeneration it is advised to set non parallel testing.
 # (remove option -nauto in pytest.ini)

@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -43,8 +43,7 @@ import matplotlib.pyplot as plt
 from traitlets import HasTraits, Instance
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord
-from spectrochempy.core.dataset.ndarray import CoordSet
+from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
 from spectrochempy.utils import SpectroChemPyWarning
 
 from .svd import Svd

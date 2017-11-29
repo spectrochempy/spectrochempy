@@ -1,12 +1,15 @@
-.. _api_reference:
+.. _dev_reference:
 
-API Reference and documentation
-###############################
+Developper reference pages
+###########################
 
-These pages serve as reference for the usage as well as the development
-of |scp|. To get started with |scp| it is advisable to look first at
-the :ref:`userguide`. For a more advanced use of |scp|, this guide is
-likely to be useful.
+These pages serve as reference for the development and for an advanced  use of
+|scp|.
+
+If instead, you just want to use |scp|, it is advisable to look at
+the :ref:`userguide` and the :ref:`apireference`.
+
+
 
 .. toctree::
     :maxdepth: 1
@@ -25,7 +28,7 @@ Table of content
 ================
 .. toctree::
 
-    generated/spectrochempy
+
 
 
 

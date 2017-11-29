@@ -8,7 +8,7 @@ We use the docrep_ package for managing our docstrings
 
 """
 
-from docrep import DocstringProcessor, dedents, safe_modulo
+from spectrochempy.extern.docrep import DocstringProcessor, dedents, safe_modulo
 
 __all__ = ['docstrings','dedent','dedents','indent','append_original_doc']
 
@@ -56,7 +56,7 @@ class SpectroChemPyDocstringProcessor(DocstringProcessor):
 
     @_docstrings.dedent
     def get_sections(self, s, base, sections=[
-            'Parameters', 'Other Parameters', 'Possible types']):
+            'Parameters', 'Other Parameters', 'Returns', 'Possible types']):
         """
         Extract the specified sections out of the given string
 
@@ -85,13 +85,13 @@ docstrings = SpectroChemPyDocstringProcessor()
 if __name__ == '__main__':
 
 
-    # exemples from the doc of docrep
+    # modified exemple from the doc of docrep
 
     @docstrings.get_sectionsf('do_something')
     @docstrings.dedent
-    def do_something(a, b):
+    def do_something(a, b, c, d):
         """
-        Add two numbers
+        Add tree numbers
 
         Parameters
         ----------
@@ -99,24 +99,28 @@ if __name__ == '__main__':
             The first number
         b: int
             The second number
+        c: int
+            The third number
+        d: int
+            Another number
 
         Returns
         -------
         int
-            `a` + `b`
+            `a` + `b` + `c` + `d`
 
         """
-        return a + b
+        return a + b + c + d
 
-
+    docstrings.delete_params('do_something.parameters', 'c', 'd')
     @docstrings.dedent
-    def do_more(a, b, **kwargs):
+    def do_more(*args, **kwargs):
         """
         Add two numbers and multiply it by 2
 
         Parameters
         ----------
-        %(do_something.parameters)s
+        %(do_something.parameters.no_c|d)s
 
         Returns
         -------
@@ -125,6 +129,6 @@ if __name__ == '__main__':
 
         """
 
-        return do_something(a, b) * 2
+        return do_something(*args[:1]) * 2
 
     print(do_more.__doc__)

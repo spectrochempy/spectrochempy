@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -650,13 +650,3 @@ def test_ndarray_str_representation_for_complex():
            "NDArray: [   1.000,    2.000,    2.000,    3.000] unitless"
     assert nd1.__str__() == "R[   1.000    2.000]\nI[   2.000    3.000]"
 
-def test_ndarray_plusminus():
-    ds = NDArray([1.,2.,3.])
-    dsu = ds.plus_minus(.1)
-    assert str(ds[0]) == "1.0" # not  inplace
-    assert str(dsu[0])=="1.0+/-0.1"
-    np.random.seed(12345)
-    ndd = NDArray(data=np.random.random((3, 3)), units='m')
-    ndd.plus_minus(.2, inplace=True)
-    assert str(ndd).startswith('[[   0.930+/-0.200')
-    assert str(ndd).endswith('0.749+/-0.200]] m')

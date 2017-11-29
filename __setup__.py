@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -48,81 +48,81 @@ import warnings
 from spectrochempy.api import version
 print (version)
 def path():
-    return os.path.dirname(__file__)
+	return os.path.dirname(__file__)
 
 
 class PostDevelopCommand(develop):
-    """Post-installation for development mode."""
+	"""Post-installation for development mode."""
 
-    def run(self):
+	def run(self):
 
-        develop.run(self)
+		develop.run(self)
 
-        for item in ['pre-commit', 'pre-push']:
-            hook = os.path.join(path(), '.git', 'hooks', item)
-            if os.path.exists(hook):
-                os.remove(hook)
-            nhook = os.path.join(path(), 'git_hooks', item)
-            sh.copy(nhook, hook)
+		for item in ['pre-commit', 'pre-push']:
+			hook = os.path.join(path(), '.git', 'hooks', item)
+			if os.path.exists(hook):
+				os.remove(hook)
+			nhook = os.path.join(path(), 'git_hooks', item)
+			sh.copy(nhook, hook)
 
-            print(('installation of `.git/hooks/{}` made.'.format(item)))
+			print(('installation of `.git/hooks/{}` made.'.format(item)))
 
 
 def read(fname):
-    with open(os.path.join(path(), fname), 'r') as f:
-        return f.read()
+	with open(os.path.join(path(), fname), 'r') as f:
+		return f.read()
 
 
 def get_dependencies():
-    with open(os.path.join(path(), "requirements.txt"), 'r') as f:
-        pkg = f.read().split("\n")
-        while '' in pkg:
-            pkg.remove('')
-        for item in pkg:
-            if item.startswith('#'):
-                pkg.remove(item)
-        # found a problem during pip install with pyqt (works when
-        # replaced by PyQt5)
-        pkg = ['PyQt5' if item.strip() == 'pyqt' else item for item in pkg]
+	with open(os.path.join(path(), "requirements.txt"), 'r') as f:
+		pkg = f.read().split("\n")
+		while '' in pkg:
+			pkg.remove('')
+		for item in pkg:
+			if item.startswith('#'):
+				pkg.remove(item)
+		# found a problem during pip install with pyqt (works when
+		# replaced by PyQt5)
+		pkg = ['PyQt5' if item.strip() == 'pyqt' else item for item in pkg]
 
-        return pkg
+		return pkg
 
 
 def run_setup():
-    setup(
-            name='spectrochempy',
-            version=version,
-            packages=find_packages(
-                    exclude=['docs', "*.tests", "*.tests.*", "tests.*",
-                             "tests"]),
-            include_package_data=True,
-            url='http:/www-lcs.ensicaen.fr/spectrochempy',
-            license='CeCILL-2.1',
-            author='Arnaud Travert & christian Fernandez',
-            author_email='spectrochempy@ensicaen.fr',
-            description='Spectra Analysis & Processing with Python',
-            long_description=read('README.rst'),
-            setup_requires=['pytest-runner'],
-            install_requires=get_dependencies(),
-            dependency_links=[
-                "git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
-            ],
-            tests_require=['pytest'],
-            classifiers=[
-                "Development Status :: 2 - Pre-Alpha",
-                "Topic :: Utilities",
-                "Topic :: Scientific/Engineering",
-                "Intended Audience :: Science/Research",
-                "License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
-                "Operating System :: OS Independent",
-                "Programming Language :: Python :: 3.5",
-            ],
-            cmdclass={
-                'develop': PostDevelopCommand,
-                # 'install': PostInstallCommand,
-            },
-    )
+	setup(
+			name='spectrochempy',
+			version=version,
+			packages=find_packages(
+					exclude=['docs', "*.tests", "*.tests.*", "tests.*",
+							 "tests"]),
+			include_package_data=True,
+			url='http:/www-lcs.ensicaen.fr/spectrochempy',
+			license='CeCILL-2.1',
+			author='Arnaud Travert & christian Fernandez',
+			author_email='spectrochempy@ensicaen.fr',
+			description='Spectra Analysis & Processing with Python',
+			long_description=read('README.rst'),
+			setup_requires=['pytest-runner'],
+			install_requires=get_dependencies(),
+			dependency_links=[
+				"git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
+			],
+			tests_require=['pytest'],
+			classifiers=[
+				"Development Status :: 2 - Pre-Alpha",
+				"Topic :: Utilities",
+				"Topic :: Scientific/Engineering",
+				"Intended Audience :: Science/Research",
+				"License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
+				"Operating System :: OS Independent",
+				"Programming Language :: Python :: 3.5",
+			],
+			cmdclass={
+				'develop': PostDevelopCommand,
+				# 'install': PostInstallCommand,
+			},
+	)
 
 
 if __name__ == '__main__':
-    run_setup()
+	run_setup()

@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -92,6 +92,43 @@ __all__ = []  # no public methods
 # add iparallel client
 
 # pcl = ipp.Client()[:]  #TODO: parallelization
+
+
+# =============================================================================
+# documentation utilities
+# =============================================================================
+# Important note to developper's : separation between sections in docstrings
+# must be a newline strictly (no whitespace!)
+
+docstrings.get_sections(docstrings.dedents(
+"""
+Note
+----
+To be completed with useful common parameters
+
+Parameters
+----------
+axis : int, optional, default: -1
+    Dimension index along which the method should be applied.
+inplace : bool, optional, default= ``False``
+    Flag to say that the method return a new object (default)
+    or not (inplace=True)
+
+Other Parameters
+----------------
+
+Returns
+-------
+object 
+    Same object or a copy depending on the `inplace` flag.
+
+"""
+), 'generic_method', sections=['Parameters', 'Returns'])
+
+docstrings.keep_params('generic_method.parameters', 'axis')
+docstrings.keep_params('generic_method.parameters', 'inplace')
+docstrings.keep_params('generic_method.parameters', 'axis', 'inplace')
+docstrings.keep_params('generic_method.returns', 'object')
 
 
 # ==============================================================================
@@ -195,13 +232,13 @@ class _SpectroChemPy(Application):
         copyright += ' - LCS (Laboratory for Catalysis and Spectrochempy)'
         return copyright
 
-    classes = List([PlotOptions, ]) # TODO: check if this still usefull
+    classes = List([PlotOptions, ])  # TODO: check if this still usefull
 
     # configuration parameters  ________________________________________________
 
     reset_config = Bool(False,
                         help='should we restaure a default configuration?').tag(
-            config=True)
+        config=True)
 
     config_file_name = Unicode(None,
                                help="Load this config file").tag(config=True)
@@ -212,7 +249,7 @@ class _SpectroChemPy(Application):
 
     config_dir = Unicode(None,
                          help="Set the configuration dir location").tag(
-            config=True)
+        config=True)
 
     @default('config_dir')
     def _get_config_dir_default(self):
@@ -225,7 +262,7 @@ class _SpectroChemPy(Application):
                    help="Is SpectrochemPy running?").tag(config=True)
 
     test = Bool(False,
-                 help='set application in testing mode').tag(config=True)
+                help='set application in testing mode').tag(config=True)
 
     debug = Bool(False,
                  help='set DEBUG mode, with full outputs').tag(config=True)
@@ -233,14 +270,14 @@ class _SpectroChemPy(Application):
     quiet = Bool(False,
                  help='set Quiet mode, with minimal outputs').tag(config=True)
 
-    workspace = Unicode(os.path.expanduser(os.path.join('~','scpworkspace'))
+    workspace = Unicode(os.path.expanduser(os.path.join('~', 'scpworkspace'))
                         ).tag(config=True)
 
     _scpdata = Instance(_SCPData,
                         help="Set a data directory where to look for data")
 
     csv_delimiter = Unicode(';',
-                 help='set csv delimiter').tag(config=True)
+                            help='set csv delimiter').tag(config=True)
 
     @default('_scpdata')
     def _get__data_default(self):
@@ -259,10 +296,10 @@ class _SpectroChemPy(Application):
              log_level='SpectroChemPy.log_level'))
 
     flags = Dict(dict(
-                      debug=(
-                      {'SpectroChemPy': {'log_level': 10}},
-                       "Set loglevel to DEBUG")
-                      ))
+        debug=(
+            {'SpectroChemPy': {'log_level': 10}},
+            "Set loglevel to DEBUG")
+    ))
 
     backend = Unicode('spectrochempy', help='backend to be used in the '
                                             'application').tag(config=True)
@@ -297,10 +334,9 @@ class _SpectroChemPy(Application):
     def __init__(self, *args, **kwargs):
         super(_SpectroChemPy, self).__init__(*args, **kwargs)
         if kwargs.get('debug', False):
-            self.log_level=logging.DEBUG
+            self.log_level = logging.DEBUG
 
         self.initialize()
-
 
     # --------------------------------------------------------------------------
     # Initialisation of the application
@@ -315,11 +351,6 @@ class _SpectroChemPy(Application):
         ----------
         argv :  List, [optional].
             List of configuration parameters.
-
-        Returns
-        -------
-        application : Application.
-            The application handler.
 
         """
 
@@ -341,7 +372,6 @@ class _SpectroChemPy(Application):
         if _do_parse:
             self.parse_command_line(sys.argv)
 
-
         # Get options from the config file
         # ---------------------------------------------------------------------
 
@@ -354,7 +384,6 @@ class _SpectroChemPy(Application):
 
         self._init_plotoptions()
         self._init_guioptions()
-
 
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
@@ -373,14 +402,14 @@ class _SpectroChemPy(Application):
                 break
 
         # case we have passed -test arguments to a script
-        if len(sys.argv)>1 and "-test" in sys.argv[1]:
+        if len(sys.argv) > 1 and "-test" in sys.argv[1]:
             _do_not_block = self.plotoptions.do_not_block = True
             caller = sys.argv[0]
 
         if _do_not_block:
             self.log.warning(
-                    'Running {} - set do_not_block: {}'.format(
-                            caller, _do_not_block))
+                'Running {} - set do_not_block: {}'.format(
+                    caller, _do_not_block))
 
         # we catch warnings and error for a ligther display to the end-user.
         # except if we are in debugging mode
@@ -391,8 +420,8 @@ class _SpectroChemPy(Application):
                                  lineno,
                                  *args):
             self.log.warning(
-                    '%s:  %s' %
-                    (category.__name__, message))
+                '%s:  %s' %
+                (category.__name__, message))
             return
 
         warnings.showwarning = send_warnings_to_log
@@ -409,16 +438,13 @@ class _SpectroChemPy(Application):
                                         tb_offset=tb_offset)
                 else:
                     self.log.error(
-                            "%s: %s" % (etype.__name__, evalue))
+                        "%s: %s" % (etype.__name__, evalue))
 
             ip.set_custom_exc((Exception,), _custom_exc)
 
         # Possibly write the default config file
         # ---------------------------------------------------------------------
         self._make_default_config_file()
-
-
-
 
     # --------------------------------------------------------------------------
     # start the application
@@ -428,8 +454,7 @@ class _SpectroChemPy(Application):
     @docstrings.dedent
     def start(self, **kwargs):
         """
-        Start the SpectroChemPy API or only make a plot if an
-        `output` filename is given
+        Start the |scp| API or only make a plot if an `output` filename is given
 
         Parameters
         ----------
@@ -482,8 +507,8 @@ class _SpectroChemPy(Application):
                 print(info_string)
 
             self.log.debug(
-                    "The application was launched with ARGV : %s" % str(
-                            sys.argv))
+                "The application was launched with ARGV : %s" % str(
+                    sys.argv))
 
             self.running = True
 
@@ -534,7 +559,6 @@ INFO = logging.INFO
 WARNING = logging.WARNING
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
-
 
 # TODO: look at the subcommands capabilities of traitlets
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -33,29 +33,32 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
+"""
 
-
-""".. _misc:
-
-Various methods used in other part of the program
+Various methods and classes used in other part of the program
 
 """
-__all__ =  ["closer_power_of_two",
-                      "create_traitsdoc",
-                      "dict_compare",
-                      'htmldoc',
-                      "ignored",
-                      "is_iterable",
-                      "is_sequence",
-                      "is_number",
-                      "silence",
-                      "makedirs",
-                      "multisort",
-                      "numpyprintoptions",
-                      'makestr',
-                      'srepr',
-                      'largest_power_of_2',
-                      ]
+__all__ =  [
+    "closer_power_of_two",
+    "create_traitsdoc",
+    "dict_compare",
+    'htmldoc',
+    "ignored",
+    "is_iterable",
+    "is_sequence",
+    "is_number",
+    "silence",
+    "makedirs",
+    "multisort",
+    "numpyprintoptions",
+    'makestr',
+    'srepr',
+    'largest_power_of_2',
+    # signature / funcs
+    'change_first_func_args',
+    'change_func_args',
+    'make_func_from',
+]
 
 import re
 from operator import itemgetter
@@ -64,7 +67,7 @@ import numpy as np
 import sys
 from contextlib import contextmanager
 from spectrochempy.extern.uncertainties.core import Variable
-
+import inspect
 
 # =============================================================================
 # Ignored context
@@ -317,23 +320,6 @@ def create_traitsdoc(klass):
     klass.__doc__ = doc.format(attributes=attr_doc)
 
 
-def closer_power_of_two(value):
-    """
-    Find the nearest power of two equal to or larger than a value.
-
-    Parameters
-    ----------
-    value : int
-        Value to find nearest power of two equal to or larger than.
-
-    Returns
-    -------
-    pw : int
-        Power of 2.
-
-    """
-    return int(pow(2, np.ceil(np.log(value) / np.log(2))))
-
 
 def htmldoc(text):
     """
@@ -426,3 +412,130 @@ def largest_power_of_2(value):
     value = max(2, value)
     p = int(pow(2, np.ceil(np.log(value) / np.log(2))))
     return p
+
+def closer_power_of_two(value):
+    """
+    Find the nearest power of two equal to or larger than a value.
+
+    Parameters
+    ----------
+    value : int
+        Value to find nearest power of two equal to or larger than.
+
+    Returns
+    -------
+    pw : int
+        Power of 2.
+
+    """
+    return int(pow(2, np.ceil(np.log(value) / np.log(2))))
+
+
+# =============================================================================
+# function signature
+# =============================================================================
+
+import types
+
+def change_func_args(func, new_args):
+    """
+    Create a new func with its arguments renamed to new_args.
+
+    """
+    # based on:
+    # https://stackoverflow.com/questions/20712403/creating-a-python-function-at-runtime-with-specified-argument-names
+    # https://stackoverflow.com/questions/16064409/how-to-create-a-code-object-in-python
+
+    code_obj = func.__code__
+    new_varnames = tuple(list(new_args))
+
+    new_code_obj = types.CodeType(
+            code_obj.co_argcount,             #   integer
+            code_obj.co_kwonlyargcount,       #   integer
+            code_obj.co_nlocals,              #   integer
+            code_obj.co_stacksize,            #   integer
+            code_obj.co_flags,                #   integer
+            code_obj.co_code,                 #   bytes
+            code_obj.co_consts,               #   tuple
+            code_obj.co_names,                #   tuple
+        new_varnames,                         #   tuple
+            code_obj.co_filename,             #   string
+            code_obj.co_name,                 #   string
+            code_obj.co_firstlineno,          #   integer
+            code_obj.co_lnotab,               #   bytes
+            code_obj.co_freevars,             #   tuple
+            code_obj.co_cellvars              #   tuple
+                                  )
+    modified = types.FunctionType(new_code_obj, func.__globals__)
+    func.__code__ = modified.__code__  # replace code portion of original
+
+def change_first_func_args(func, new_arg):
+    """ This will change the first argument of function
+     to the new_arg. This is essentially useful for documentation process
+
+    """
+    code_obj = func.__code__
+    new_varnames = tuple([new_arg] +
+                         list(code_obj.co_varnames[
+                              1:code_obj.co_argcount]))
+    change_func_args(func, new_varnames)
+
+def make_func_from(func, first=None):
+    """
+    Create a new func with its arguments from another func ansd a new signature
+
+    """
+    code_obj = func.__code__
+    new_varnames = list(code_obj.co_varnames)
+    if first:
+        new_varnames[0] = first
+    new_varnames = tuple(new_varnames)
+
+    new_code_obj = types.CodeType(
+            code_obj.co_argcount,  # integer
+            code_obj.co_kwonlyargcount,  # integer
+            code_obj.co_nlocals,  # integer
+            code_obj.co_stacksize,  # integer
+            code_obj.co_flags,  # integer
+            code_obj.co_code,  # bytes
+            code_obj.co_consts,  # tuple
+            code_obj.co_names,  # tuple
+            new_varnames,  # tuple
+            code_obj.co_filename,  # string
+            code_obj.co_name,  # string
+            code_obj.co_firstlineno,  # integer
+            code_obj.co_lnotab,  # bytes
+            code_obj.co_freevars,  # tuple
+            code_obj.co_cellvars  # tuple
+    )
+    modified = types.FunctionType(new_code_obj,
+                                  func.__globals__,
+                                  func.__name__,
+                                  func.__defaults__,
+                                  func.__closure__)
+    modified.__doc__ = func.__doc__
+    return modified
+
+
+if __name__ == '__main__':
+    from spectrochempy.api import NDDataset, swapaxes
+
+    func = NDDataset.swapaxes
+    newfunc = make_func_from(func, first='dataset')
+    print(inspect.getfullargspec(newfunc).args)
+    print(newfunc.__doc__)
+    assert func is not newfunc
+
+
+    def nd2d():
+        # a simple 2D ndarray with negative elements
+        _nd = NDDataset()
+        _nd._data = np.array([[1., 2., 3., -0.4], [-1., -.1, 1., 2.]])
+        return _nd
+
+    nd = nd2d()
+    print(NDDataset.swapaxes(nd,0,1))
+
+    print(newfunc(nd, 0, 1))
+
+

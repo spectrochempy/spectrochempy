@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -35,13 +35,14 @@
 # =============================================================================
 
 
-"""This module implements the basic `NDArray` class  which is an array
-(numpy like) container.
+"""The basic |NDArray| class is an array
+(numpy |ndarray|-like) container, usually not intended to be used directly,
+as its basic functionalities may be quite limited, but to be subclassed.
 
-The two classes :class:`~spectrochempy.core.dataset.ndcoords.Coord`
-which handles the coordinates in a given dimension and
-:class:`~spectrochempy.core.dataset.nddataset.NDDataset` wich implement a full
-dataset (with coordinates) are derived from it in |scp|.
+Indeed, both the class |Coord| which handles the coordinates in a given
+dimension and the class |NDDataset| which implements a full dataset (with
+coordinates) are derived from |NDArray| in |scp|.
+
 
 """
 # =============================================================================
@@ -81,7 +82,8 @@ from spectrochempy.utils import (EPSILON,
                                  interleaved2complex,
                                  interleave,
                                  SpectroChemPyWarning,
-                                 docstrings)
+                                 docstrings,
+                                 make_func_from)
 
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.extern.pint.errors import (DimensionalityError,
@@ -93,7 +95,7 @@ from pandas.core.generic import NDFrame, Index
 # Constants
 # =============================================================================
 
-__all__ = ['NDArray', 'CoordSet', 'masked', 'nomask', 'EPSILON']
+__all__ = ['NDArray', 'masked', 'nomask', 'EPSILON']
 
 #: Logger
 log = app.log
@@ -119,8 +121,8 @@ class NDArray(HasTraits):
     An |NDArray| object.
 
     The key distinction from raw numpy arrays is the presence of
-    optional properties such as `labels`, `masks`, `uncertainties`, `units`
-    and/or extensible `metadata` dictionary.
+    optional properties such as ``labels``, ``masks``, ``uncertainties``,
+    ``units`` and/or extensible ``metadata`` dictionary.
 
     This is a base class in |scp| on which for instance, the |Coord|  and
     |NDDataset| are builded. This class is normaly intended to be subclassed,
@@ -158,10 +160,10 @@ class NDArray(HasTraits):
         """
         Parameters
         ----------
-        data : array of floats
+        data : array of floats.
             Data array contained in the object.
             The data can be a `list`, a `tuple`,
-            a :class:`~numpy.ndarray`, a :class:`~numpy.ndarray`-like,
+            a |ndarray|, a |ndarray|-like,
             a |NDArray| or any subclass of |NDArray|. Any size or shape of data
             is accepted. If not given, an empty |NDArray| will be inited.
             At the initialisation the provided data will casted to a
@@ -169,52 +171,53 @@ class NDArray(HasTraits):
             already mask, labels,units or uncertainties, these elements will be
             used to accordingly set those of the created object.
             If possible, the provided data  will not be copied for `data` input,
-            but will be passed by reference, so you should make a copy the
-            :attr:`data` before passing it in if that's the desired behavior or
+            but will be passed by reference, so you should make a copy of the
+            `data` before passing them if that's the desired behavior or
             set the `copy` argument to True.
         labels : array of objects, optional
-            Label for the data. The label array must have at least the same
-            shape as the data array (or only differ by an
-            additional first dimension). The given array can be a `list`,
-            a `tuple`, a :class:`~numpy.ndarray`, a
-            :class:`~numpy.ndarray`-like, a |NDArray|
-            or any subclass of |NDArray|.
+            Labels for the `data`. labels can be used only for 1D-datasets.
+            The labels array may have an
+            additional dimension, meaning several series of labels for the same
+            data. The given array can be a `list`,
+            a `tuple`, a `ndarray`, a
+            `ndarray`-like, a `NDArray`
+            or any subclass of `NDArray`.
         masks : array of bool or `nomask`, optional
             Mask for the data. The mask array must have the same shape as
             the data. The given array can be a `list`, a `tuple`,
-            a :class:`~numpy.ndarray`. Each values in the array must be `False`
+            a |ndarray|. Each values in the array must be `False`
             where the data is *valid* and `True` when it is not (like in numpy
             masked arrays). If `data` is already a
             :class:`~numpy.ma.MaskedArray`, or any array object
-            (such as a |NDDarray| or subclass of it), providing a `mask` here
+            (such as a |NDArray| or subclass of it), providing a `mask` here
             will causes the mask from the masked array to be ignored.
-        units : :class:`pint.unit.Unit` instance or `str`, optional
-            Units of the data. If data is a :class:`pint.quantity.Quantity`
-            then `unit` is set to the unit of the data; if a unit is also
+        units : `Unit instance or `str`, optional
+            Units of the data. If data is a `Quantity`
+            then `unit` is set to the unit of the `data; if a unit is also
             explicitly provided an error is raised. If `data` is a `Quantity`
             then `units` is set to the units of the `data`; if a `unit` is also
             explicitly provided an error is raised. Handling of `units` use
             a fork of the `pint <https://pint.readthedocs.org/en/0.6>`_
-            (BSD Licence) package which is embedded in |scp|)
+            package (BSD Licence) which is embedded in |scp|)
         uncertainty : array of floats, optional
-            Standard deviation on the `data`. An array giving the uncertainties
+            Standard deviation on the `data`. An array giving the uncertainty
             on each values of the data array.
             The array must have the same shape as the data. The given array
-            can be a `list`, a `tuple`, a :class:`~numpy.ndarray`.
+            can be a `list`, a `tuple`, a |ndarray|.
             Handling of uncertainty use a fork of the `uncertainties
             <http://pythonhosted.org/uncertainties/>`_ package (BSD Licence)
             which is embedded in |scp|.
-        title : str, optional
+        title : `str`, optional
             The title of the axis. It will later be used for instance
             for labelling plots of the data. It is optional but recommended to
             give a title to each ndarray.
-        name : str
+        name : `str`, optional
             The name of the ndarray. Default is set automatically.
             It must be unique.
         meta : dict-like object, optional.
-            Additional metadata for this object. Must be dict-like but no further
-            restriction is placed on meta.
-        copy : bool
+            Additional metadata for this object. Must be dict-like but no
+            further restriction is placed on meta.
+        copy : `bool`, optional
             Perform a copy of the passed object.
 
         Examples
@@ -320,8 +323,8 @@ class NDArray(HasTraits):
             else:
                 raise ValueError("I do not know how to compare "
                                  "{} object with objets of type {} ".format(
-                        type(self).__name__,
-                        type(other).__name__))
+                    type(self).__name__,
+                    type(other).__name__))
 
             if not self.has_units and not otherunits:
                 eq = np.all(self._data == otherdata)
@@ -340,15 +343,16 @@ class NDArray(HasTraits):
         for attr in attrs:
             if hasattr(other, "_%s" % attr):
                 eq &= np.all(
-                        getattr(self, "_%s" % attr) == getattr(other,
-                                                               "_%s" % attr))
+                    getattr(self, "_%s" % attr) == getattr(other,
+                                                           "_%s" % attr))
                 if not eq:
                     log.debug("attributes '{}' are not equals "
-                              "or one is missing: {}, {}".format(attr,
-                                                                 getattr(self,
-                                                                         "_%s" % attr),
-                                                                 getattr(other,
-                                                                         "_%s" % attr)))
+                              "or one is missing: "
+                              "{}, {}".format(attr,
+                                              getattr(self,
+                                                      "_%s" % attr),
+                                              getattr(other,
+                                                      "_%s" % attr)))
                     return False
         return eq
 
@@ -377,7 +381,7 @@ class NDArray(HasTraits):
         if new._data.size == 0:
             if not new.is_labeled or new._labels.size == 0:
                 raise IndexError("Empty array of shape {}".format(
-                        str(new._data.shape)) + \
+                    str(new._data.shape)) + \
                                  "resulted from slicing.\n"
                                  "Check the indexes and make "
                                  "sure to use floats for "
@@ -459,15 +463,24 @@ class NDArray(HasTraits):
     def __repr__(self):
 
         prefix = type(self).__name__ + ': '
-        data = self.uncert_data
+        print_unit=True
+        if not (self.is_empty and self.is_labeled):
+            data = self.uncert_data
+        else:
+            data = self.get_labels()
+            print_unit=False
+
         if isinstance(data, Quantity):
             data = data.magnitude
-        body = np.array2string( \
-                data.squeeze(), separator=', ', \
-                prefix=prefix)  # this allow indentation of len of the prefix
 
-        units = ' {:~K}'.format(self.units) if self.has_units \
-            else ' unitless'
+        body = np.array2string( data.squeeze(), separator=', ', prefix=prefix)
+        # this allow indentation of len of the prefix
+
+        units = ''
+        if print_unit:
+            units = ' {:~K}'.format(self.units) \
+                                              if self.has_units else ' unitless'
+
         return ''.join([prefix, body, units])
 
     # .........................................................................
@@ -481,6 +494,7 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def coordset(self):
+        # not implemented in NDArray but in the NDDataset subclass
         return None
 
     # .........................................................................
@@ -510,8 +524,15 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def data(self):
-        """:class:`~numpy.ndarray`-like object - The array data
-        contained in this object.
+        """
+        |ndarray| of type `float` or `complex` or hypercomplex - The `data` array.
+
+        A special storage is used for hypercomplex data.
+        If a dimension is complex, real and imaginary part are interleaved
+        in the `data` array.
+
+        .. note:: See the :ref:`userguide` and :ref:`develguide` for more information
+
 
         """
         if self.size == 1:
@@ -533,7 +554,7 @@ class NDArray(HasTraits):
 
         elif isinstance(data, NDArray):
             log.debug(
-                    "init data with data from another NDArray or NDArray subclass")
+                "init data with data from another NDArray or NDArray subclass")
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
@@ -594,9 +615,9 @@ class NDArray(HasTraits):
     @property
     def date(self):
         """
-        A datetime object containing date information
-        about the ndarray object, for example a creation date
-        or a modification date"""
+        `Datetime` object - creation date
+
+        """
 
         return self._date
 
@@ -613,17 +634,6 @@ class NDArray(HasTraits):
                 self._date = datetime.strptime(date, "%d/%m/%Y")
 
     # .........................................................................
-    @default('_id')
-    def _id_default(self):
-
-        return str(uuid.uuid1()).split('-')[0]  # a unique id
-
-    # .........................................................................
-    @property
-    def id(self):
-        return self._id
-
-    # .........................................................................
     @default('_labels')
     def _labels_default(self):
         return None
@@ -632,7 +642,9 @@ class NDArray(HasTraits):
     @property
     def labels(self):
         """
-        :class:`~numpy.ndarray` - An array of objects of any type (but most
+        |ndarray| of type `object` - Labels for `data`.
+
+        An array of objects of any type (but most
         generally string), with the last dimension size equal
         to that of the dimension of data.
         Note that's labelling is possible only for 1D data
@@ -682,8 +694,8 @@ class NDArray(HasTraits):
 
         if self.data is None and labels.shape[-1] != self.shape[-1]:
             raise ValueError(
-                    "labels {} and data {} shape mismatch!".format(
-                            labels.shape, self.shape))
+                "labels {} and data {} shape mismatch!".format(
+                    labels.shape, self.shape))
 
         if self.has_complex_dims:
             for axis in self.iterdims:
@@ -694,8 +706,8 @@ class NDArray(HasTraits):
 
         if np.any(self._labels):
             log.info("{0} is already a labeled array.\n".format(
-                    type(self).__name__) +
-                     "The explicitly passed-in labels will be appended "
+                type(self).__name__) +
+                     "The explicitly provided labels will be appended "
                      "to the current labels")
             self._labels = np.stack((self._labels, labels))
         else:
@@ -726,11 +738,7 @@ class NDArray(HasTraits):
     @property
     def mask(self):
         """
-        Mask for the data.
-
-        The values in the mask array must be `False` where
-        the data is *valid* and `True` when it is not (like Numpy
-        masked arrays).
+        |ndarray| of `bool` - Mask for the data.
 
         """
 
@@ -769,8 +777,8 @@ class NDArray(HasTraits):
 
             elif mask.shape != self.shape:
                 raise ValueError(
-                        "mask {} and data {} shape mismatch!".format(
-                                mask.shape, self.shape))
+                    "mask {} and data {} shape mismatch!".format(
+                        mask.shape, self.shape))
 
             # mask need to be replicated on the imaginary part if data are complex
             if self.has_complex_dims and mask is not nomask:
@@ -790,7 +798,7 @@ class NDArray(HasTraits):
             # this should happen when a new mask is added to an existing one
             # mask to be combined to an existing one
             log.info("{0} is already a masked array.\n".format(
-                    type(self).__name__) +
+                type(self).__name__) +
                      "The new mask will be combined with the current array's mask.")
             self._mask |= mask  # combine (is a copy!)
 
@@ -813,8 +821,7 @@ class NDArray(HasTraits):
     @property
     def meta(self):
         """
-        :class:`~spectrochempy.core.dataset.ndmeta.Meta` instance object -
-        Additional metadata for this object.
+        |Meta| instance object - Additional metadata.
 
         """
         return self._meta
@@ -830,9 +837,9 @@ class NDArray(HasTraits):
     @property
     def name(self):
         """
-        str - An user friendly name for this object (often not necessary,
-        as the title may be used for the same purpose).
+        `str` - An user friendly name.
 
+        It is really optional as the title may be used for the same purpose).
         If the name is not provided, the object
         will automatically create a unique name.
         For most usage, the object name needs to be unique.
@@ -857,11 +864,11 @@ class NDArray(HasTraits):
     @property
     def title(self):
         """
-        str - An user friendly title for this object.
+        `str` - An user friendly title.
 
-        Unlike the :attr:`name`, the title doesn't need to be unique.
-        When the title is provided, it can be used for labelling the object,
-        e.g. axe title in a matplotlib plot.
+        Unlike the `name`, the title doesn't need to be unique.
+        When the title is provided, it can be used for labeling the object,
+        e.g., axe title in a matplotlib plot.
 
         """
         if not self._title:
@@ -902,7 +909,7 @@ class NDArray(HasTraits):
     @property
     def uncertainty(self):
         """
-        Uncertainty (std deviation) on the data.
+        |ndarray| of type `float` - Uncertainty (std deviation) on the data.
 
         """
         if not self.is_uncertain:
@@ -934,8 +941,8 @@ class NDArray(HasTraits):
 
         if uncertainty.shape != self.shape:
             raise ValueError(
-                    "uncertainty {} and data {} shape mismatch!".format(
-                            uncertainty.shape, self.shape))
+                "uncertainty {} and data {} shape mismatch!".format(
+                    uncertainty.shape, self.shape))
 
         if self.has_complex_dims:
             for axis in self.iterdims:
@@ -961,13 +968,7 @@ class NDArray(HasTraits):
     @property
     def units(self):
         """
-        An instance of `Unit` or `str` - The units of the data.
-
-        If data is a
-        :class:`~pint.units.Quantity` then
-        :class:`~pint.units.Unit` is set to the unit of the data;
-        if a unit is also explicitly
-        provided an error is raised.
+        |Unit| instance or `str` - The units of the data.
 
         """
         return self._units
@@ -991,9 +992,9 @@ class NDArray(HasTraits):
                 self.to(units)
             except:
                 raise TypeError(
-                        "Provided units does not match data units.\n "
-                        "To force a change - use the to() method, "
-                        "with force flag set to True")
+                    "Provided units does not match data units.\n "
+                    "To force a change - use the to() method, "
+                    "with force flag set to True")
 
         self._units = units
 
@@ -1002,14 +1003,33 @@ class NDArray(HasTraits):
     # -------------------------------------------------------------------------
 
     # .........................................................................
+    @default('_id')
+    def _id_default(self):
+
+        return str(uuid.uuid1()).split('-')[0]  # a unique id
+
+    # .........................................................................
+    @property
+    def id(self):
+        """
+        `str` -  Readonly object identifier.
+
+        """
+        return self._id
+
+    # .........................................................................
     @property
     def dimensionless(self):
         """
-        bool, read-only property - Whether the array is dimensionless
-        or not.
+        `bool` - ``True`` if the `data` array is dimensionless
+        (Readonly property).
 
-        Equal to `True` if the `data` is dimensionless
-        (warning : different of unitless, which means no unit).
+        .. note:: ``Dimensionless`` is different of ``unitless``,
+           which means no unit.
+
+        See Also
+        --------
+        unitless, has_units
 
         """
         if self.unitless:
@@ -1021,7 +1041,7 @@ class NDArray(HasTraits):
     @property
     def dtype(self):
         """
-        dtype, read-only property - data type of the underlying array
+        `dtype` - Type of the underlying `data` array (Readonly property).
 
         """
         if self._data is None:
@@ -1035,7 +1055,8 @@ class NDArray(HasTraits):
     @property
     def has_complex_dims(self):
         """
-        bool indicating if at least one of the dimension is complex
+        `bool` - ``True`` if at least one of the `data` array (Readonly property).
+        dimension is complex.
 
         """
         return np.any(self._is_complex)
@@ -1044,7 +1065,11 @@ class NDArray(HasTraits):
     @property
     def has_units(self):
         """
-        bool indicating if the data have units
+        `bool` - ``True`` if the `data` array have units (Readonly property).
+
+        See Also
+        --------
+        unitless, dimensionless
 
         """
         if self._units:
@@ -1057,8 +1082,8 @@ class NDArray(HasTraits):
     @property
     def is_empty(self):
         """
-        bool, read-only property - Whether the array is empty (size==0)
-        or not.
+        `bool` -  ``True`` if the `data` array is empty (size=0)
+        (Readonly property).
 
         """
         return self._data.size == 0
@@ -1072,10 +1097,11 @@ class NDArray(HasTraits):
     @property
     def is_complex(self):
         """
-        tuple of `bool` - Indicate if which dimension is complex.
+        `tuple of `bool` - ``True`` if one of the `data` dimensions is complex
+        (Readonly property).
 
-        If a dimension is complex, real and imaginary part are interlaced
-        in the `data` array.
+        .. note:: If a dimension is complex, real and imaginary part
+        are interleaved in the `data` array.
 
         """
         # if not np.any(self._is_complex):
@@ -1092,7 +1118,7 @@ class NDArray(HasTraits):
     @property
     def is_labeled(self):
         """
-        bool, read-only property - Whether the axis has labels or not.
+        `bool`- ``True`` if the `data` array have labels (Readonly property).
 
         """
         # label cannot exists (for now for nD dataset - only 1D dataset, such
@@ -1109,7 +1135,8 @@ class NDArray(HasTraits):
     @property
     def is_masked(self):
         """
-        bool, read-only property - Whether the array is masked or not.
+        `bool` - ``True`` if the `data` array has masked values
+        (Readonly property).
 
         """
         if self._mask is nomask or self._mask is None:
@@ -1127,8 +1154,10 @@ class NDArray(HasTraits):
     @property
     def is_uncertain(self):
         """
-        bool, read-only property - Whether the array has uncertainty
-        or not.
+        `bool` - ``True`` if the `data` array has uncertainty
+        (Readonly property).
+
+
 
         """
         if self._uncertainty is not None and gt_eps(self._uncertainty):
@@ -1145,8 +1174,7 @@ class NDArray(HasTraits):
     @property
     def masked_data(self):
         """
-        :class:`~numpy.ndarray`-like object - The actual masked array of data
-        contained in this object.
+        |ma_ndarray| - The actual masked `data` array (Readonly property).
 
         """
         return self._umasked(self.data, self.mask)
@@ -1154,19 +1182,14 @@ class NDArray(HasTraits):
     # .........................................................................
     @property
     def _masked_data(self):
-        """
-        :class:`~numpy.ndarray`-like object - The actual masked array of data
-        contained in this object.
-
-        """
-        return self._umasked(self._data, self._mask)
+         return self._umasked(self._data, self._mask)
 
     # .........................................................................
     @property
     def ndim(self):
         """
-        int, read-only property - The number of dimensions of
-        the dataset.
+        `int` - The number of dimensions of the `data` array (Readonly
+        property).
 
         """
 
@@ -1176,9 +1199,10 @@ class NDArray(HasTraits):
     @property
     def shape(self):
         """
-        tuple, read-only property - A `tuple` with the size of each axis.
+        `tuple` - A `tuple` with the size of each axis (Readonly property).
 
-        i.e., the number of data element on each axis (possibly complex).
+        The number of `data` element
+        on each dimensions (possibly complex).
 
         """
         if self._data is None:
@@ -1195,10 +1219,11 @@ class NDArray(HasTraits):
     @property
     def size(self):
         """
-        int, read-only property - Size of the underlying `ndarray`.
+        `int` - Size of the underlying `data` array (Readonly property).
 
-        i.e., the total number of data element
-        (possibly complex or hyper-complex in the array).
+        The total number
+        of data element
+        (possibly complex or hypercomplex in the array).
 
         """
         if self._data is None or self._data.size == 0:
@@ -1217,8 +1242,9 @@ class NDArray(HasTraits):
     @property
     def uncert_data(self):
         """
-        :class:`~numpy.ndarray`-like object - The actual array with
-                uncertainty of the data contained in this object.
+        |ndarray| - The actual array with
+        `uncertainty` of the `data` contained in this object (Readonly property).
+
         """
         return self._uarray(self.masked_data, self.uncertainty, self._units)
 
@@ -1234,7 +1260,7 @@ class NDArray(HasTraits):
     @property
     def unitless(self):
         """
-        bool, read-only property - Whether the array has `units` or not.
+        `bool`- ``True`` if the `data` have `units` (Readonly property).
 
         """
 
@@ -1244,8 +1270,7 @@ class NDArray(HasTraits):
     @property
     def real(self):
         """
-        :class:`~numpy.ndarray`-like object - The array with
-        real part of the data contained in this object.
+        |ndarray| - The array with real part of the `data` (Readonly property).
 
         """
         if not self._is_complex[-1]:
@@ -1266,8 +1291,8 @@ class NDArray(HasTraits):
     @property
     def imag(self):
         """
-        :class:`~numpy.ndarray`-like object - The array with
-        imaginary part of the data contained in this object.
+        |ndarray| - The array with imaginary part of the `data`
+        (Readonly property).
 
         """
         if not self._is_complex[-1]:
@@ -1290,8 +1315,8 @@ class NDArray(HasTraits):
     @property
     def RR(self):
         """
-        :class:`~numpy.ndarray`-like object - The array with
-        real part in both dimension of hypercomplex 2D data contained in this object.
+        |ndarray| - The array with real part in both dimension of
+        hypercomplex 2D `data` (Readonly property).
 
         """
 
@@ -1303,8 +1328,8 @@ class NDArray(HasTraits):
     @property
     def RI(self):
         """
-        :class:`~numpy.ndarray`-like object - The array with
-        real-imaginary part of hypercomplex 2D data contained in this object.
+        |ndarray| - The array with real-imaginary part of
+        hypercomplex 2D `data` (Readonly property).
 
         """
 
@@ -1316,8 +1341,8 @@ class NDArray(HasTraits):
     @property
     def IR(self):
         """
-        :class:`~numpy.ndarray`-like object - The array with
-        imaginary-real part of hypercomplex 2D data contained in this object.
+        |ndarray| - The array with imaginary-real part of
+        hypercomplex 2D `data` (Readonly property).
 
         """
 
@@ -1329,8 +1354,8 @@ class NDArray(HasTraits):
     @property
     def II(self):
         """
-        :class:`~numpy.ndarray`-like object - The array with
-        imaginary-imaginary part of hypercomplex 2D data contained in this object.
+        |ndarray| - The array with imaginary-imaginary part of
+        hypercomplex 2D data (Readonly property).
 
         """
 
@@ -1342,8 +1367,8 @@ class NDArray(HasTraits):
     @property
     def values(self):
         """
-        :class:`~numpy.ndarray`-like object - The actual values (data, units,
-        + uncertainties) contained in this object.
+        |ndarray| - The actual values (data, units, uncertainties)
+        contained in this object (Readonly property).
 
         """
         return self._uarray(self._data, self._uncertainty, self._units)
@@ -1353,28 +1378,22 @@ class NDArray(HasTraits):
     # -------------------------------------------------------------------------
 
     # .........................................................................
-    @docstrings.get_sectionsf('NDArray.conj')
     @docstrings.dedent
-    def conj(self, axis=-1, inplace=False):
+    def conjugate(self, axis=-1, inplace=False):
         """
         Conjugate of the NDDataset in the specified dimension
 
         Parameters
         ----------
-        axis : int, optional, default: -1
-            Dimension index along which the method should be applied.
-        inplace : bool, optional, default= ``False``
-            Flag to say that the method return a new object (default)
-            or not (inplace=True)
+        %(generic_method.parameters.axis|inplace)s
 
         Returns
         -------
-        object : same type
-            same object or a copy depending on the `ìnplace` flag.
+        %(generic_method.returns.object)s
 
         See Also
         --------
-        real, imag, RR, RI, IR, II, part
+        conj, real, imag, RR, RI, IR, II, part, set_complex, is_complex
 
         """
         if not inplace:  # default is to return a new array
@@ -1389,7 +1408,8 @@ class NDArray(HasTraits):
 
         return new
 
-    conjugate = conj
+    conj = make_func_from(conjugate)
+    conj.__doc__ = "Short alias of `conjugate`"
 
     # .........................................................................
     def copy(self, deep=True, memo=None):
@@ -1406,7 +1426,7 @@ class NDArray(HasTraits):
 
         Returns
         -------
-        object : same type
+        object
             An exact copy of the current object.
 
         Examples
@@ -1449,13 +1469,13 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : ndarray
+        other : |ndarray|
             The ndarray object for which we want to compare units compatibility
 
         Returns
         -------
-        compat : bool
-            Return ``True`` is units are compatible
+        result
+            ``True`` if units are compatible
 
         Examples
         --------
@@ -1491,14 +1511,14 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : `Quantity` or str.
+        other : |Units|, |Quantity| or `str`
             Destination units.
-        force: bool, optional, default: False
-            If True the change of units is forced, even for imcompatible units
+        force : `bool`, optional, default= ``False``
+            If True the change of units is forced, even for incompatible units
 
         Returns
         -------
-        object : same type
+        object
             same object with new units.
 
         See Also
@@ -1515,7 +1535,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        select : `str`, optional, default: 'ALL'
+        select : `str`, optional, default='ALL'
             if 'ALL', only real part in all dimensions will be selected.
             ELse a string must specify wich real (R) or imaginary (I) component
             has to be selected along a specific axis. For instance,
@@ -1527,7 +1547,7 @@ class NDArray(HasTraits):
 
         Returns
         -------
-        array : same type
+        %(generic_method.returns.object)s
 
         """
         new = self.copy()
@@ -1545,7 +1565,7 @@ class NDArray(HasTraits):
                     data = data[..., 1::2]
                 elif component != '*':
                     raise ValueError(
-                            'components must be indicated with R, I or *')
+                        'components must be indicated with R, I or *')
                 ma = data.swapaxes(axis, -1)
                 new._is_complex[axis] = False
         # if isinstance(ma, np.ma.masked_array):
@@ -1572,8 +1592,6 @@ class NDArray(HasTraits):
         self._mask = nomask
 
     # .........................................................................
-    docstrings.keep_params('NDArray.conj.parameters', 'axis')
-
     @docstrings.dedent
     def set_complex(self, axis):
         """
@@ -1581,7 +1599,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        %(NDArray.conj.parameters.axis)s
+        %(generic_method.parameters.axis)s
 
         Notes
         -----
@@ -1602,6 +1620,7 @@ class NDArray(HasTraits):
                              "must be even, not %d" % self.shape[axis])
         self._is_complex[axis] = True
 
+
     # .........................................................................
     @docstrings.dedent
     def set_real(self, axis):
@@ -1610,7 +1629,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        %(NDArray.conj.parameters.axis)s
+        %(generic_method.parameters.axis)s
 
         """
         if axis < 0:
@@ -1618,10 +1637,7 @@ class NDArray(HasTraits):
 
         self._is_complex[axis] = False
 
-
     # .........................................................................
-    docstrings.keep_params('NDArray.conj.parameters', 'inplace')
-
     @docstrings.dedent
     def swapaxes(self, axis1, axis2, inplace=False):
         """
@@ -1633,11 +1649,11 @@ class NDArray(HasTraits):
             First dimension index
         axis2 : int
             Second dimension index
-        %(NDArray.conj.parameters.inplace)s
+        %(generic_method.parameters.inplace)s
 
         Returns
         -------
-        %(NDArray.conj.returns)s
+        %(generic_method.returns)s
 
         See Also
         --------
@@ -1682,23 +1698,22 @@ class NDArray(HasTraits):
         return new
 
     # .........................................................................
+    @docstrings.dedent
     def to(self, other, inplace=False, force=False):
         """
         Return the object with data rescaled to different units.
 
         Parameters
         ----------
-        other : :class:`Quantity` or `str`.
+        other : |Quantity| or `str`.
             Destination units.
-        inplace : `bool`, optional, default=``False``
-            Function return a new object (default) or not (inplace=True)
+        %(generic_method.parameters.inplace)s
         force: `bool`, optional, default: False
             If True the change of units is forced, even for imcompatible units
 
         Returns
         -------
-        object : same type
-            same object or a copy depending on the `ìnplace` flag.
+        %(generic_method.returns.object)s
 
         Examples
         --------
@@ -1782,59 +1797,6 @@ class NDArray(HasTraits):
         # if not inplace:
         return new
 
-    # .........................................................................
-    def plus_minus(self, uncertainty, inplace=False):
-        """
-        Set the uncertainty of a NDArray
-
-        Parameters
-        -----------
-
-        uncertainty: `float` or `array`
-
-            Uncertainty to apply to the array. If it's an array, it must have
-            the same shape as the NDArray shape.
-
-        inplace : `bool`, optional, default=``False``
-
-            function return a new object (default) or not (inplace=True)
-
-        Returns
-        -------
-        array: a NDArray with uncertainty
-
-        Examples
-        --------
-
-        >>> np.random.seed(12345)
-        >>> ndd = NDArray( data = np.random.random((3)))
-        >>> ndd.plus_minus(.2)
-        NDArray: [   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200] unitless
-        >>> ndd # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        NDArray: [   0.930,  ...  0.184] unitless
-
-        >>> np.random.seed(12345)
-        >>> ndd = NDArray( data = np.random.random((3,3)), units='m')
-        >>> ndd.plus_minus(.2, inplace=True) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        NDArray: [[   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200],
-              [   0.205+/-0.200,    0.568+/-0.200,    0.596+/-0.200],
-              [   0.965+/-0.200,    0.653+/-0.200,    0.749+/-0.200]] m
-        >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        [[   0.930+/-0.200    ...  0.749+/-0.200]] m
-
-        """
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
-
-        if isinstance(uncertainty, float):
-            new.uncertainty = np.ones(new._data.shape) * uncertainty
-        else:
-            new.uncertainty = uncertainty
-
-        return new
-
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
@@ -1856,8 +1818,8 @@ class NDArray(HasTraits):
 
         def mkbody(d, pref, units):
             body = np.array2string(
-                    d.squeeze(), separator=' ',
-                    prefix=pref)
+                d.squeeze(), separator=' ',
+                prefix=pref)
             body = body.replace('\n', sep)
             text = ''.join([pref, body, units])
             text += sep
@@ -1882,7 +1844,7 @@ class NDArray(HasTraits):
 
     # .........................................................................
     def _repr_html_(self):
-
+        # probably not useful
         prefix = ['']
         sep = '<br/>'
         ufmt = ' {:~H}'
@@ -1920,9 +1882,9 @@ class NDArray(HasTraits):
         else:
             by = 'value'
             warnings.warn(
-                    'parameter `by` should be set to `value` or `label`, '
-                    'use ``value`` by default',
-                    SpectroChemPyWarning)
+                'parameter `by` should be set to `value` or `label`, '
+                'use ``value`` by default',
+                SpectroChemPyWarning)
             args = np.argsort(self.data)
 
         if descend:
@@ -1936,7 +1898,7 @@ class NDArray(HasTraits):
         # Not implemented in this base class
 
         raise NotImplementedError('not implemented for {} objects'.format(
-                type(self).__name__))
+            type(self).__name__))
 
     # .........................................................................
     def _get_slice(self, key, axis, iscomplex=False):
@@ -2095,7 +2057,9 @@ class NDArray(HasTraits):
         # return the array with uncertainty and units if any
 
         # the handling of uncertainties have a great price in performance.
+        # see discussion: https://github.com/lebigot/uncertainties/issues/57
         # Let's avoid it if not necessary
+        #
 
         if (uncertainty is None or not gt_eps(uncertainty)):
             uar = data
@@ -2107,403 +2071,10 @@ class NDArray(HasTraits):
         else:
             return uar
 
-            # # .........................................................................
-            # @staticmethod
-            # def _uarray(data, uncertainty, units=None, force=False):
-            #     # return the array with uncertainty and units if any
-            #
-            #     # the handling of uncertainties have a great price in performance.
-            #     # Let's avoid it if not necessary
-            #
-            #     if (uncertainty is None or not gt_eps(uncertainty)) and not force:
-            #         uar = data
-            #     else:
-            #         try:
-            #             if not np.any(uncertainty):
-            #                 uncertainty = np.zeros_like(data).astype(float)
-            #             uar = unp.uarray(data, uncertainty)
-            #         except TypeError:
-            #             uar = data
-            #
-            #     if units:
-            #         return Quantity(uar, units)
-            #     else:
-            #         return uar
-
-
-# =============================================================================
-# CoordSet
-# =============================================================================
-
-class CoordSet(HasTraits):
-    """
-    A collection of Coord objects for a NDArray object
-    with a validation method.
-
-    Parameters
-    ----------
-    coords : NDarray or NDArray subclass objects.
-       Any instance of a NDArray can be accepted as coordinates for a
-       given dimension.
-       If an instance of CoordSet is found, instead, this means that all
-       coordinates in this set describe the same axis
-    is_same_dim : bool, optional, default=False
-        if true, all elements of coords describes a single dimension.
-        By default, this is false, which means that each item describes
-        a different dimension.
-
-    """
-
-    # Hidden attributes containing the collection of objects
-    _coords = List(Instance(NDArray), allow_none=True)
-
-    # Hidden name of the object
-    _name = Unicode()
-
-    # .........................................................................
-    @default('_name')
-    def _get_name_default(self):
-        return "CoordSet_" + str(uuid.uuid1()).split('-')[0]  # a unique id
-
-    # Hidden attribute to specify if the collection is for a single dimension
-    _is_same_dim = Bool
-
-    # -------------------------------------------------------------------------
-    # initialization
-    # -------------------------------------------------------------------------
-
-    # .........................................................................
-    def __init__(self, *coords, **kwargs):
-        _copy = kwargs.pop('copy', False)
-
-        super(CoordSet, self).__init__(**kwargs)
-
-        self._coords = []
-
-        if all([isinstance(coords[i], (NDArray, CoordSet))
-                for i in range(len(coords))]):
-            # Any instance of a NDArray can be accepted as coordinates for a
-            # dimension.
-            # If an instance of CoordSet is found, this means that all
-            # coordinates in this set describe the same axis
-
-            coords = list(coords)
-
-        elif len(coords) == 1:
-            # this a set of CoordSet or NDArray passed as a list
-            coords = coords[0]
-
-        else:
-            # not implemented yet -
-            # a list of list of object have been passed
-            # TODO: try to ipmplement this
-            raise NotImplementedError(
-                    'a list of list of object have been passed - '
-                    'this not yet implemented')
-
-        if len(coords) == 1 and isinstance(coords[0], CoordSet):
-            if _copy:
-                coords = copy.deepcopy(coords)
-            self._coords = coords[0]._coords
-
-        else:
-            for item in coords:
-
-                if not isinstance(item, (NDArray, CoordSet)):
-                    item = NDArray(item, copy=_copy)
-                    # full validation of the item
-                    # will be done in NDArray.__init__
-
-                if self._validation(item):
-                    self._coords.append(item)
-
-        # check if we have single dimension axis
-
-        for item in self._coords:
-            if isinstance(item, CoordSet):
-                # it must be a single dimension axis
-                item._is_same_dim = True
-                # in this case we must have same length for all coordinates
-                siz = item[0].size
-                if np.any([elt.size != siz for elt in item._coords]):
-                    raise ValueError(
-                            'Coordinates must be of the same size '
-                            'for a dimension with multiple '
-                            'coordinates')
-
-    # -------------------------------------------------------------------------
-    # Properties
-    # -------------------------------------------------------------------------
-
-    # .........................................................................
-    @property
-    def name(self):
-        return self._name
-
-    # .........................................................................
-    @property
-    def names(self):
-        """
-        `list`, read-only property - Get the list of axis names.
-        """
-        if len(self._coords) < 1:
-            return []
-        try:
-            return [item.name for item in self._coords]
-        except:
-            log.critical(self._coords)
-
-    # .........................................................................
-    @property
-    def titles(self):
-        """`list` - Get/Set a list of axis titles.
-
-        """
-        _titles = []
-        for item in self._coords:
-            if isinstance(item, NDArray):
-                _titles.append(item.title if item.title else item.name)
-            elif isinstance(item, CoordSet):
-                _titles.append([el.title if el.title else el.name
-                                for el in item])
-            else:
-                raise ValueError('Something wrong with the titles!')
-
-        return _titles
-
-    # .........................................................................
-    @titles.setter
-    def titles(self, value):
-        # Set the titles at once
-        if is_sequence(value):
-            for i, item in enumerate(value):
-                self._coords[i].title = item
-
-    # .........................................................................
-    @property
-    def labels(self):
-        """`list` - Get/Set a list of axis labels.
-
-        """
-        return [item.label for item in self._coords]
-
-    # .........................................................................
-    @labels.setter
-    def labels(self, value):
-        # Set the labels at once
-        if is_sequence(value):
-            for i, item in enumerate(value):
-                self._coords[i].label = item
-
-    # .........................................................................
-    @property
-    def units(self):
-        """`list` - Get/Set a list of axis units.
-
-        """
-        return [item.units for item in self._coords]
-
-    # .........................................................................
-    @units.setter
-    def units(self, value):
-        if is_sequence(value):
-            for i, item in enumerate(value):
-                self._coords[i].units = item
-
-    # .........................................................................
-    @property
-    def isempty(self):
-        """`bool`, read-only property - `True` if there is no coords defined.
-
-        """
-        return len(self._coords) == 0
-
-    # .........................................................................
-    @property
-    def is_same_dim(self):
-        """`bool`, read-only property -
-        `True` if the coords define a single dimension.
-
-        """
-        return self._is_same_dim
-
-    # .........................................................................
-    @property
-    def sizes(self):
-        """`int`, read-only property -
-        gives the size of the axis or coords for each dimention"""
-        _sizes = []
-        for i, item in enumerate(self._coords):
-            if isinstance(item, NDArray):
-                _sizes.append(item.size)
-            elif isinstance(item, CoordSet):
-                _sizes.append(item.sizes[i][0])
-        return _sizes
-
-    # .........................................................................
-    @property
-    def coords(self):
-        """:class:`~numpy.ndarray`-like object - A list of the Coord object
-        present in this coordset
-
-        """
-        return self._coords
-
-    # -------------------------------------------------------------------------
-    # public methods
-    # -------------------------------------------------------------------------
-
-    # .........................................................................
-    def copy(self):
-        """Make a disconnected copy of the current coords.
-
-        Returns
-        -------
-        coords : same type
-            an exact copy of the current object
-
-        """
-        return self.__copy__()
-
-    # -------------------------------------------------------------------------
-    # private methods
-    # -------------------------------------------------------------------------
-
-    # .........................................................................
-    def _transpose(self, coords=None):
-        # in principle it is not directly called by the user as it is intimately
-        # linked to a dataset
-        if self._is_same_dim:
-            # not applicable for same dimension coords
-            warnings.warn(
-                    'CoordSet for a single dimension are not transposable',
-                    SpectroChemPyWarning)
-            return
-        if coords is None:
-            self._coords.reverse()
-        else:
-            self._coords = [self._coords[axis] for axis in coords]
-
-    # .........................................................................
-    def _validation(self, item):
-        # To be valid any added axis must have a different name
-
-        if not isinstance(item, (NDArray, CoordSet)):
-            raise ValueError('The elements of must be NDArray or '
-                             'CoordSet objects only!')
-
-        if item._name in self.names:
-            raise ValueError('The Coord name must be unique!')
-
-        if isinstance(item, NDArray) and item.ndim > 1:
-            raise ValueError('A Coord should be a 1D array!')
-
-        # TODO: add more validation for CoordSet objects
-
-        return True
-
-    # -------------------------------------------------------------------------
-    # special methods
-    # -------------------------------------------------------------------------
-
-    # .........................................................................
-    @staticmethod
-    def __dir__():
-        return ['_coords']
-
-    # .........................................................................
-    def __call__(self, *args, **kwargs):
-        # allow the following syntax:
-        #              coordset(), coordset(0,2) or coordset(axis=(0,2))
-        coords = []
-        axis = kwargs.get('axis', None)
-
-        if args:
-            for idx in args:
-                coords.append(self[idx])
-        elif axis is not None:
-            if not is_sequence(axis):
-                axis = [axis]
-            for i in axis:
-                coords.append(self[i])
-        else:
-            coords = self._coords
-
-        if len(coords) == 1:
-            return coords[0]
-        else:
-            return CoordSet(coords)
-
-    # .........................................................................
-    def __len__(self):
-        return len(self._coords)
-
-    # .........................................................................
-    def __getitem__(self, index):
-        if isinstance(index, str):
-            if index in self.titles:
-                # selection by axis title
-                return self._coords.__getitem__(self.titles.index(index))
-            # may be it is in a multiple axis
-            for item in self._coords:
-                if isinstance(item, CoordSet) and index in item.titles:
-                    # selection by subaxis title
-                    return item.__getitem__(item.titles.index(index))
-
-        res = self._coords.__getitem__(index)
-        if isinstance(index, slice):
-            return CoordSet(res)
-        else:
-            return res
-
-    # .........................................................................
-    def __setitem__(self, index, coords):
-        self._coords[index] = coords
-
-    # .........................................................................
-    def __iter__(self):
-        for item in self._coords:
-            yield item
-
-    # .........................................................................
-    def __repr__(self):
-        out = ("CoordSet object <" + ', '.join(['<object {}>']
-                                               * len(self._coords)) + ">")
-        out = out.format(*self.names)
-        return out
-
-    # .........................................................................
-    def __str__(self):
-        out = "[" + ', '.join(['{}'] * len(self._coords)) + "]"
-        s = []
-        for item in self._coords:
-            if isinstance(item, CoordSet):
-                s.append(item.__str__())
-            else:
-                s.append(item.title)
-        out = out.format(*s)
-        return out
-
-    # .........................................................................
-    def __deepcopy__(self, memo):
-        return self.__class__([copy.deepcopy(ax, memo=memo) for ax in self])
-
-    # .........................................................................
-    def __copy__(self):
-        return self.__class__([copy.copy(ax) for ax in self])
-
-    # .........................................................................
-    def __eq__(self, other):
-        return self._coords == other._coords
-        # TODO: check the case of compatible units
-
-    # .........................................................................
-    def __ne__(self, other):
-        return not self.__eq__(
-                other)
 
 if __name__ == '__main__':
 
     from spectrochempy.api import Coord
+
     print(NDArray.__init__.__doc__)
     docstrings

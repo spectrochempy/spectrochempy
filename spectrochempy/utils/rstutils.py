@@ -1,4 +1,4 @@
-# -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; python-indent: 4 -*-
+# -*- coding: utf-8 -*-
 #
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
@@ -37,14 +37,37 @@
 __all__ = []
 
 rst_epilog = """
+
+.. |ndarray| replace:: :class:`~numpy.ndarray`
+
+.. |ma_ndarray| replace:: :class:`~numpy.ma.array`
+
 .. |scp| replace:: **SpectroChemPy**
 
 .. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
 
 .. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
 
+.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoord.CoordRange`
+
 .. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
 
 .. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndarray.CoordSet`
+
+.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
+
+.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDNath`
+
+.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta`
+
+.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
+
+.. |Unit| replace:: :class:`pint.unit.Unit``
+
+.. |Quantity| replace:: :class:`pint.quantity.Quantity`
+
+
+
+
 
 """
