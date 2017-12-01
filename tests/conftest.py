@@ -21,8 +21,8 @@ import os
 import sys
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndarray import CoordSet, NDArray
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndarray import  NDArray
+from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.api import scpdata, plotoptions
 
 plotoptions.do_not_block = True

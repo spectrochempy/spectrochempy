@@ -147,8 +147,10 @@ def create_module_file(package, module, opts):
         if not hasattr(_imported_item, '__all__'):
             print('missing __all__ in %s  - apigen skip this' % item)
         elif members:
-            text += "\n\n.. _mod_{}_dev:\n\n".format("_".join(item.split('.')[1:]))
-            text += format_heading(2, "Additional information for developper's")
+            text += "\n\n.. _mod_{}_dev:\n\n".format(
+                    "_".join(item.split('.''')[1:]))
+            text += format_heading(3, "Additional information for "
+                                      "developper's")
             for name, obj in members:
                 if inspect.isclass(obj):
                     directive = '.. autoclass:: %s.%s\n' % (item, name)

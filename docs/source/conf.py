@@ -45,6 +45,7 @@ doc_building = True
 import sys, os
 import sphinx_rtd_theme
 import sphinx_gallery
+
 import spectrochempy
 from spectrochempy.api import version, copyright
 

@@ -41,7 +41,8 @@ import pytest
 from datetime import datetime
 
 from spectrochempy.extern.pint.errors import DimensionalityError
-from spectrochempy.core.dataset.ndarray import NDArray, CoordSet
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndcoords import CoordSet
 from spectrochempy.core.units import ur
 from spectrochempy.utils import (SpectroChemPyWarning,
                                  SpectroChemPyDeprecationWarning)

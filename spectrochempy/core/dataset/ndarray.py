@@ -182,7 +182,7 @@ class NDArray(HasTraits):
             a tuple, a `ndarray`, a
             `ndarray`-like, a `NDArray`
             or any subclass of `NDArray`.
-        masks : array of bool or `nomask`, optional
+        mask : array of bool or `nomask`, optional
             Mask for the data. The mask array must have the same shape as
             the data. The given array can be a list, a tuple,
             a |ndarray|. Each values in the array must be `False`
@@ -191,11 +191,9 @@ class NDArray(HasTraits):
             :class:`~numpy.ma.MaskedArray`, or any array object
             (such as a |NDArray| or subclass of it), providing a `mask` here
             will causes the mask from the masked array to be ignored.
-        unit : |Unit| instance or str, optional
-            Unit of the data. If data is a |Quantity|
-            then `unit` is set to the units of the `data`; if a unit is also
-            explicitly provided an error is raised. If `data` is a |Quantity|
-            then `unit` is set to the unit of the `data`; if a unit is also
+        units : |Unit| instance or str, optional
+            Units of the data. If data is a |Quantity|
+            then `units` is set to the unit of the `data`; if a unit is also
             explicitly provided an error is raised. Handling of units use
             a fork of the `pint <https://pint.readthedocs.org/en/0.6>`_
             package (BSD Licence) which is embedded in |scp|)
