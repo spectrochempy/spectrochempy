@@ -16,7 +16,6 @@ sphinx
 sphinx-gallery
 pandoc
 numpydoc
-sphinx_bootstrap_theme
 
 ipython
 ipympl

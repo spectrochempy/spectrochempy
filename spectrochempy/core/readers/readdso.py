@@ -54,7 +54,7 @@ def read_dso(filename='', **kwargs):
 
     Parameters
     ===========
-    filename : `str`
+    filename : str
         filename of file to load
 
     Returns

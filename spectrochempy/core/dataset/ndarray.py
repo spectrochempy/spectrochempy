@@ -162,7 +162,7 @@ class NDArray(HasTraits):
         ----------
         data : array of floats.
             Data array contained in the object.
-            The data can be a `list`, a `tuple`,
+            The data can be a list, a tuple,
             a |ndarray|, a |ndarray|-like,
             a |NDArray| or any subclass of |NDArray|. Any size or shape of data
             is accepted. If not given, an empty |NDArray| will be inited.
@@ -178,24 +178,24 @@ class NDArray(HasTraits):
             Labels for the `data`. labels can be used only for 1D-datasets.
             The labels array may have an
             additional dimension, meaning several series of labels for the same
-            data. The given array can be a `list`,
-            a `tuple`, a `ndarray`, a
+            data. The given array can be a list,
+            a tuple, a `ndarray`, a
             `ndarray`-like, a `NDArray`
             or any subclass of `NDArray`.
         masks : array of bool or `nomask`, optional
             Mask for the data. The mask array must have the same shape as
-            the data. The given array can be a `list`, a `tuple`,
+            the data. The given array can be a list, a tuple,
             a |ndarray|. Each values in the array must be `False`
             where the data is *valid* and `True` when it is not (like in numpy
             masked arrays). If `data` is already a
             :class:`~numpy.ma.MaskedArray`, or any array object
             (such as a |NDArray| or subclass of it), providing a `mask` here
             will causes the mask from the masked array to be ignored.
-        units : `Unit instance or `str`, optional
-            Units of the data. If data is a `Quantity`
-            then `unit` is set to the unit of the `data; if a unit is also
-            explicitly provided an error is raised. If `data` is a `Quantity`
-            then `units` is set to the units of the `data`; if a `unit` is also
+        units : |Unit| instance or str, optional
+            Units of the data. If data is a |Quantity|
+            then `units` is set to the units of the `data`; if a unit is also
+            explicitly provided an error is raised. If `data` is a |Quantity|
+            then `units` is set to the units of the `data`; if a unit is also
             explicitly provided an error is raised. Handling of `units` use
             a fork of the `pint <https://pint.readthedocs.org/en/0.6>`_
             package (BSD Licence) which is embedded in |scp|)
@@ -203,15 +203,15 @@ class NDArray(HasTraits):
             Standard deviation on the `data`. An array giving the uncertainty
             on each values of the data array.
             The array must have the same shape as the data. The given array
-            can be a `list`, a `tuple`, a |ndarray|.
+            can be a list, a tuple, a |ndarray|.
             Handling of uncertainty use a fork of the `uncertainties
             <http://pythonhosted.org/uncertainties/>`_ package (BSD Licence)
             which is embedded in |scp|.
-        title : `str`, optional
+        title : str, optional
             The title of the axis. It will later be used for instance
             for labelling plots of the data. It is optional but recommended to
             give a title to each ndarray.
-        name : `str`, optional
+        name : str, optional
             The name of the ndarray. Default is set automatically.
             It must be unique.
         meta : dict-like object, optional.
@@ -525,7 +525,7 @@ class NDArray(HasTraits):
     @property
     def data(self):
         """
-        |ndarray| of type `float` or `complex` or hypercomplex - The `data` array.
+        |ndarray| of type float or `complex` or hypercomplex - The `data` array.
 
         A special storage is used for hypercomplex data.
         If a dimension is complex, real and imaginary part are interleaved
@@ -837,7 +837,7 @@ class NDArray(HasTraits):
     @property
     def name(self):
         """
-        `str` - An user friendly name.
+        str - An user friendly name.
 
         It is really optional as the title may be used for the same purpose).
         If the name is not provided, the object
@@ -864,7 +864,7 @@ class NDArray(HasTraits):
     @property
     def title(self):
         """
-        `str` - An user friendly title.
+        str - An user friendly title.
 
         Unlike the `name`, the title doesn't need to be unique.
         When the title is provided, it can be used for labeling the object,
@@ -909,7 +909,7 @@ class NDArray(HasTraits):
     @property
     def uncertainty(self):
         """
-        |ndarray| of type `float` - Uncertainty (std deviation) on the data.
+        |ndarray| of type float - Uncertainty (std deviation) on the data.
 
         """
         if not self.is_uncertain:
@@ -968,7 +968,7 @@ class NDArray(HasTraits):
     @property
     def units(self):
         """
-        |Unit| instance or `str` - The units of the data.
+        |Unit| instance or str - The units of the data.
 
         """
         return self._units
@@ -1012,7 +1012,7 @@ class NDArray(HasTraits):
     @property
     def id(self):
         """
-        `str` -  Readonly object identifier.
+        str -  Readonly object identifier.
 
         """
         return self._id
@@ -1188,7 +1188,7 @@ class NDArray(HasTraits):
     @property
     def ndim(self):
         """
-        `int` - The number of dimensions of the `data` array (Readonly
+        int - The number of dimensions of the `data` array (Readonly
         property).
 
         """
@@ -1199,7 +1199,7 @@ class NDArray(HasTraits):
     @property
     def shape(self):
         """
-        `tuple` - A `tuple` with the size of each axis (Readonly property).
+        tuple - A tuple with the size of each axis (Readonly property).
 
         The number of `data` element
         on each dimensions (possibly complex).
@@ -1219,7 +1219,7 @@ class NDArray(HasTraits):
     @property
     def size(self):
         """
-        `int` - Size of the underlying `data` array (Readonly property).
+        int - Size of the underlying `data` array (Readonly property).
 
         The total number
         of data element
@@ -1511,7 +1511,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Units|, |Quantity| or `str`
+        other : |Units|, |Quantity| or str
             Destination units.
         force : `bool`, optional, default= ``False``
             If True the change of units is forced, even for incompatible units
@@ -1535,7 +1535,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        select : `str`, optional, default='ALL'
+        select : str, optional, default='ALL'
             if 'ALL', only real part in all dimensions will be selected.
             ELse a string must specify wich real (R) or imaginary (I) component
             has to be selected along a specific axis. For instance,
@@ -1705,7 +1705,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Quantity| or `str`.
+        other : |Quantity| or str.
             Destination units.
         %(generic_method.parameters.inplace)s
         force: `bool`, optional, default: False

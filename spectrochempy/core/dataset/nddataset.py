@@ -209,7 +209,7 @@ class NDDataset(
     @property
     def description(self):
         """
-        `str`,
+        str,
 
         Provides a description of the underlying data
 
@@ -425,7 +425,7 @@ class NDDataset(
         Parameters
         ----------
 
-        axis : `int` or `unicode`
+        axis : int or `unicode`
 
             An axis index or name, default=-1 for the last axis
 
@@ -445,7 +445,7 @@ class NDDataset(
 
         Parameters
         -----------
-        uncertainty: `float` or |ndarray|
+        uncertainty: float or |ndarray|
             Uncertainty to apply to the array. If it's an array, it must have
             the same shape as the `data` shape.
         %(generic_method.parameters.inplace)s
@@ -493,7 +493,7 @@ class NDDataset(
         Parameters
         ----------
 
-        axes : `list` of `int`, optional
+        axes : list of int, optional
 
             By default, reverse the dimensions, otherwise permute the coordset
             according to the values given.
@@ -594,12 +594,12 @@ class NDDataset(
 
         Parameters
         ----------
-        axis : `int` , optional, default = 0
+        axis : int , optional, default = 0
             axis id along which to sort.
-        pos: `int` , optional
+        pos: int , optional
             If labels are multidimensional  - allow to sort on a define
             row of labels: labels[pos]. Experimental: Not yet checked
-        by : `str` among ['value', 'label'], optional, default = ``value``.
+        by : str among ['value', 'label'], optional, default = ``value``.
             Indicate if the sorting is following the order of labels or
             numeric coord values.
         descend : `bool`, optional, default = ``False``.
@@ -658,7 +658,7 @@ class NDDataset(
 
         Parameters
         ----------
-        axis : `int`, optional, default = -1
+        axis : int, optional, default = -1
             The axis to make complex
 
         """

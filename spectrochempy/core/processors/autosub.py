@@ -66,10 +66,10 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
         True if the subtraction is done in place.
         In this case we do not need to catch the function output
 
-    axis : `int` [optional, default = -1].
+    axis : int [optional, default = -1].
         Tells on which axis to perform the subtraction
 
-    method  : `str` [optional, default = 'vardiff'].
+    method  : str [optional, default = 'vardiff'].
 
 
     Returns

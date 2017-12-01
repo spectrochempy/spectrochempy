@@ -403,7 +403,7 @@ def image_comparison(reference=None,
         of a reference figures, the first time the corresponding figures are
         created.
 
-    extension : `str`, optional, default=``png``
+    extension : str, optional, default=``png``
 
         Extension to be used to save figure, among
         (eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff)
@@ -413,18 +413,18 @@ def image_comparison(reference=None,
         if this flag is True, the figures created in the decorated function are
         saved in the reference figures directory (``.spectrocchempy/figures``)
 
-    min_similarity : `float` (percent).
+    min_similarity : float (percent).
 
         If set, then it will be used to decide if an image is the same (similar)
         or not. In this case max_rms is not used.
 
-    max_rms : `float`
+    max_rms : float
 
         rms stands for `Root Mean Square`. If set, then it will
         be used to decide if an image is the same
         (less than the acceptable rms). Not used if min_similarity also set.
 
-    savedpi : `int`, optional, default=150
+    savedpi : int, optional, default=150
 
         dot per inch of the generated figures
 

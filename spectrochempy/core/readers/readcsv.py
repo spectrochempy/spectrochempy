@@ -81,7 +81,7 @@ def read_zip(source, filename='', **kwargs):
 
         filename of the file to load
 
-    directory: `str` [optional, default=""].
+    directory: str [optional, default=""].
         From where to read the specified filename. If not sperfied, read i the current directory.
 
     Examples
@@ -124,7 +124,7 @@ def read_csv(source, filename='', **kwargs):
 
         filename of the file to load
 
-    directory: `str` [optional, default=""].
+    directory: str [optional, default=""].
         From where to read the specified filename. If not sperfied, read i the current directory.
 
     Examples

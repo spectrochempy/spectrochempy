@@ -65,7 +65,7 @@ def concatenate(*sources, axis=None, **kwargs):
         The dataset to be concatenated to the current dataset
 
 
-    axis : `int`, optional, default = 0
+    axis : int, optional, default = 0
         The axis along which the datasets are concatenated
 
     Returns

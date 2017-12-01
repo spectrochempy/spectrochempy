@@ -70,7 +70,7 @@ from traitlets import Dict, List, Bool, Float, HasTraits, \
 from spectrochempy.core.dataset.ndarray import masked
 from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.core.dataset.ndmeta import Meta
-from spectrochempy.core.units import Unit
+from spectrochempy.core.units.units import Unit
 from spectrochempy.gui import gui
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
@@ -150,7 +150,7 @@ class NDPlot(HasTraits):
         Parameters
         ----------
 
-        method : `str`, optional
+        method : str, optional
 
             The method of plot of the dataset,
             which will determine the plotter to use.
@@ -161,11 +161,11 @@ class NDPlot(HasTraits):
 
             The axe where to plot
 
-        figsize : `tuple`, optional, default is mpl.rcParams['figure.figsize']
+        figsize : tuple, optional, default is mpl.rcParams['figure.figsize']
 
             The figure size
 
-        fontsize : `int`, optional
+        fontsize : int, optional
 
             The font size in pixels, default is 10 (or read from preferences)
 
@@ -174,13 +174,13 @@ class NDPlot(HasTraits):
             Should we plot on the ax previously used
             or create a new figure?
 
-        style : `str`
+        style : str
 
         autolayout : `bool`, optional, default=``True``
 
             if True, layout will be set automatically
 
-        output: `str`
+        output: str
 
             A string containing a path to a filename. The output format is deduced
             from the extension of the filename. If the filename has no extension,

@@ -75,7 +75,7 @@ class Pca(HasTraits):
     X : :class:`~spectrochempy.core.dataset.nddataset.NDDataset` object of
     shape (``N``, ``M``)
 
-    npc : `int`, optional
+    npc : int, optional
 
         The number of components to compute. If not set all components
         are computed.
@@ -169,7 +169,7 @@ class Pca(HasTraits):
 
         Parameters
         ----------
-        npc : `int`, optional, default=10
+        npc : int, optional, default=10
 
             The number of PC to use for the reconstruction
 
@@ -188,7 +188,7 @@ class Pca(HasTraits):
 
         Parameters
         ----------
-        npc : `int`, optional, default=10
+        npc : int, optional, default=10
 
           The number of PC to print
 

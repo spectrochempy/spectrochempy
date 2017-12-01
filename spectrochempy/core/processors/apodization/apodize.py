@@ -49,7 +49,8 @@ import numpy as np
 # =============================================================================
 # Local imports
 # =============================================================================
-from spectrochempy.core.units import ur, Quantity, Measurement, set_nmr_context
+from spectrochempy.core.units.units import ur, Quantity, Measurement, \
+    set_nmr_context
 from spectrochempy.utils import epsilon, interleave, interleaved2complex
 
 __all__ = ["apodize"]
@@ -78,17 +79,17 @@ def apodize(source, **kwargs):
     method : Callable,
         Apodization function
 
-    apod : `float` or a `Quantity`, default 0, or list
+    apod : float or a `Quantity`, default 0, or list
 
         Apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
 
-    apod2 : `float` or a `Quantity`, optional, default 0, or list
+    apod2 : float or a `Quantity`, optional, default 0, or list
 
         Second apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
 
-    apod3 : `float` or a `Quantity`, optional, default 0, or list
+    apod3 : float or a `Quantity`, optional, default 0, or list
 
         third apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.

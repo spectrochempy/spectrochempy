@@ -63,10 +63,10 @@ def align(source, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan,
     ref : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
         Reference dataset on which to align
 
-    axis : `int`, [optional, default = 0].
+    axis : int, [optional, default = 0].
         Tells on which axis to perform the alignement.
 
-    method: `str`[optional among [`linear`,`pchip`], default=`linear`].
+    method: str[optional among [`linear`,`pchip`], default=`linear`].
         method of interpolation to performs for the alignment.
 
     Returns

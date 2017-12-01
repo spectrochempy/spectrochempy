@@ -53,7 +53,8 @@ import numpy as np
 # =============================================================================
 # Local imports
 # =============================================================================
-from spectrochempy.core.units import ur, Quantity, Measurement, set_nmr_context
+from spectrochempy.core.units.units import ur, Quantity, Measurement, \
+    set_nmr_context
 from spectrochempy.utils import closer_power_of_two
 
 epsilon = np.finfo(float).eps
@@ -74,7 +75,7 @@ def ft(self, **kwargs):
 
     Parameters
     ----------
-    size : `int`
+    size : int
 
         size of the transformed dataset dimension
 

@@ -147,11 +147,11 @@ class _SCPData(Configurable):
 
     def listing(self):
         """
-        Create a `str` representing a listing of the data repertory.
+        Create a str representing a listing of the data repertory.
 
         Returns
         -------
-        listing : `str`
+        listing : str
 
         """
         s = os.path.basename(self.data) + "\n"

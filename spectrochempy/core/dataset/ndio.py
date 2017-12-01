@@ -60,7 +60,7 @@ import matplotlib.pyplot as plt
 # ------------
 from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
 from spectrochempy.core.dataset.ndmeta import Meta
-from spectrochempy.core.units import Unit
+from spectrochempy.core.units.units import Unit
 from spectrochempy.gui import gui
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
@@ -112,11 +112,11 @@ class NDIO(HasTraits):
         Parameters
         ----------
 
-        path : `str`
+        path : str
 
             The filename to the file to be save
 
-        directory : `str` [optional, default = `True`]
+        directory : str [optional, default = `True`]
 
             It specified, the given filename (generally a file name) fill be
             appended to the ``dir``.
@@ -263,16 +263,16 @@ class NDIO(HasTraits):
         Parameters
         ----------
 
-        path : `str`
+        path : str
 
             The filename to the file to be read.
 
-        protocol : `str`
+        protocol : str
 
             optional, default= ``scp``
             The default type for saving,
 
-        directory : `str`
+        directory : str
 
             optional, default= ``data``
             The directory from where to load the file.
@@ -406,11 +406,11 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-        filename : `str`
+        filename : str
 
             The path to the file to be read
 
-        protocol : `str`
+        protocol : str
 
             Protocol used for reading. If not provided, the correct protocol
             is evaluated from the file name extension.
@@ -461,11 +461,11 @@ class NDIO(HasTraits):
         Parameters
         ----------
 
-        filename : `str`
+        filename : str
 
             The path to the file to be read
 
-        protocol : `str`
+        protocol : str
 
             The protocol used to write the
             :class:`~spectrochempy.core.dataset.nddataset.NDDataset` in a file,

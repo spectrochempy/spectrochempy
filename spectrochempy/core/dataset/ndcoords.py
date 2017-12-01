@@ -36,8 +36,8 @@
 
 """
 The coordinates of a |NDDataset| can be created using the |Coord| object.
-This is a single dimension array with either numerical (`float`) values or
-labels (`str`, `Datetime` objects, or any other kind of objects) to
+This is a single dimension array with either numerical (float) values or
+labels (str, `Datetime` objects, or any other kind of objects) to
 represent the coordinates. Only a one numerical axis can be defined, but labels
 can be multiple.
 
@@ -54,7 +54,7 @@ new |Coord| object.
 >>> c0                               # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
 Coord: [       1,        3,        5,        7,        9,       11] Hz
 
-We can take a series of `str` to create a non numerical but labelled axis:
+We can take a series of str to create a non numerical but labelled axis:
 
 >>> tarr = list('abcdef')
 >>> tarr
@@ -123,8 +123,8 @@ class Coord(NDMath, NDArray):
         -----------
         data : array of floats
             The actual data array contained in the |Coord| object.
-            The given array (with a single dimension) can be a `list`,
-            a `tuple`, a |ndarray|, or a |ndarray|-like object.
+            The given array (with a single dimension) can be a list,
+            a tuple, a |ndarray|, or a |ndarray|-like object.
             If an object is passed that contains
             already mask, labels, or units, these elements will be
             used to accordingly set those of the created object.
@@ -226,7 +226,7 @@ class Coord(NDMath, NDArray):
 
         Parameters
         ----------
-        level : `int`, optional, default=0
+        level : int, optional, default=0
 
         Returns
         -------
@@ -441,7 +441,7 @@ class CoordSet(HasTraits):
     @property
     def names(self):
         """
-        `list`, read-only property - Get the list of axis names.
+        list, read-only property - Get the list of axis names.
         """
         if len(self._coords) < 1:
             return []
@@ -453,7 +453,7 @@ class CoordSet(HasTraits):
     # .........................................................................
     @property
     def titles(self):
-        """`list` - Get/Set a list of axis titles.
+        """list - Get/Set a list of axis titles.
 
         """
         _titles = []
@@ -479,7 +479,7 @@ class CoordSet(HasTraits):
     # .........................................................................
     @property
     def labels(self):
-        """`list` - Get/Set a list of axis labels.
+        """list - Get/Set a list of axis labels.
 
         """
         return [item.label for item in self._coords]
@@ -495,7 +495,7 @@ class CoordSet(HasTraits):
     # .........................................................................
     @property
     def units(self):
-        """`list` - Get/Set a list of axis units.
+        """list - Get/Set a list of axis units.
 
         """
         return [item.units for item in self._coords]
@@ -527,7 +527,7 @@ class CoordSet(HasTraits):
     # .........................................................................
     @property
     def sizes(self):
-        """`int`, read-only property -
+        """int, read-only property -
         gives the size of the axis or coords for each dimention"""
         _sizes = []
         for i, item in enumerate(self._coords):
@@ -722,7 +722,7 @@ class CoordRange(HasTraits):
         The intervals are ranked by decreasing order if True
         or increasing order if False.
 
-    nranges :  `int`
+    nranges :  int
 
         Number of distinct ranges
 

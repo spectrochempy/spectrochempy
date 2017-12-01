@@ -44,7 +44,7 @@ import numpy as np
 # Local imports
 # =============================================================================
 from .apodize import apodize
-from spectrochempy.core.units import Quantity
+from spectrochempy.core.units.units import Quantity
 
 
 # =============================================================================

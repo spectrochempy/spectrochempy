@@ -87,7 +87,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
         filename of the file to load
 
-    directory: `str` [optional, default=""].
+    directory: str [optional, default=""].
         From where to read the specified filename. If not sperfied, read i the current directory.
 
     Examples

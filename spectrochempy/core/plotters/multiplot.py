@@ -148,11 +148,11 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
     sources : nddataset or list of nddataset
 
-    labels : list of `str`.
+    labels : list of str.
 
         The labels that will be used as title of each axes.
 
-    method : `str`, default to `map` for 2D and `lines` for 1D data
+    method : str, default to `map` for 2D and `lines` for 1D data
 
         Type of plot to draw in all axes (`lines` , `scatter` , `stack` , `map`
         ,`image` or `with_transposed`).
@@ -206,33 +206,33 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
         If ``False`` , suppress drawing the figure frame
 
-    left : `float` in the [0-1] interval
+    left : float in the [0-1] interval
 
         The left side of the subplots of the figure
 
-    right : `float` in the [0-1] interval
+    right : float in the [0-1] interval
 
         The right side of the subplots of the figure
 
-    bottom : `float` in the [0-1] interval
+    bottom : float in the [0-1] interval
 
         The bottom of the subplots of the figure
 
-    top : `float` in the [0-1] interval
+    top : float in the [0-1] interval
 
         The top of the subplots of the figure
 
-    wspace : `float` in the [0-1] interval
+    wspace : float in the [0-1] interval
 
         The amount of width reserved for blank space between subplots,
         expressed as a fraction of the average axis width
 
-    hspace : `float` in the [0-1] interval
+    hspace : float in the [0-1] interval
 
         The amount of height reserved for white space between subplots,
         expressed as a fraction of the average axis height
 
-    suptitle : `str`
+    suptitle : str
 
         title of the figure to display on top
 

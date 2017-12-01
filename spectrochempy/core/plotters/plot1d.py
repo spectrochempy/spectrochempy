@@ -109,7 +109,7 @@ def plot_multiple(sources, method='scatter', lines=True,
 
     sources : a list of ndatasets
 
-    method : `str` among [scatter, lines]
+    method : str among [scatter, lines]
 
     lines : `bool`, optional, default=``True``
 
@@ -179,7 +179,7 @@ def plot_1D(source, **kwargs):
     ----------
     new: :class:`~spectrochempy.core.ddataset.nddataset.NDDataset` to plot
 
-    method: `str` [optional among ``lines`, ``scatter``]
+    method: str [optional among ``lines`, ``scatter``]
 
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available

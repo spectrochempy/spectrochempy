@@ -53,7 +53,7 @@ def McrAls(X, guess, **options):
     Parameters
     -----------
 
-    tol : `float`, optional, defualt=1e-3
+    tol : float, optional, defualt=1e-3
 
         convergence tolerance
 

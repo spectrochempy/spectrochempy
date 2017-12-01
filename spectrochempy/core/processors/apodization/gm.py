@@ -72,19 +72,19 @@ def gm(source, *args, **kwargs):
 
     Parameters
     ----------
-    lb : `float` or `quantity`
+    lb : float or `quantity`
 
         Inverse exponential width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
 
-    gb : `float` or `quantity`
+    gb : float or `quantity`
 
         Gaussian broadening width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
 
-    shifted : `float` or `quantity`
+    shifted : float or `quantity`
 
         Shift the data time origin by this amount. If it is not a quantity
         it is assumed to be expressed in the data units of the last

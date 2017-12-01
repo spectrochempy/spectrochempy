@@ -26,7 +26,7 @@ def resolve_name(name, *additional_parts):
     Parameters
     ----------
 
-    name : `str`
+    name : str
         A dotted path to a Python object--that is, the name of a function,
         class, or other object in a module with the full path to that module,
         including parent modules, separated by dots.  Also known as the fully
@@ -101,12 +101,12 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
     Parameters
     ----------
 
-    module : module or `str`
+    module : module or str
         An imported module of which to check the version, or the name of
         that module (in which case an import of that module is attempted--
         if this fails `False` is returned).
 
-    version : `str`
+    version : str
         The version as a string that this module must have at a minimum (e.g.
         ``'0.12'``).
 
@@ -114,7 +114,7 @@ def minversion(module, version, inclusive=True, version_path='__version__'):
         The specified version meets the requirement inclusively (i.e. ``>=``)
         as opposed to strictly greater than (default: `True`).
 
-    version_path : `str`
+    version_path : str
         A dotted attribute path to follow in the module for the version.
         Defaults to just ``'__version__'``, which should work for most Python
         modules.

@@ -126,7 +126,7 @@ def plot_2D(source, **kwargs):
 
     projections: `bool` [optional, default=False]
 
-    method: `str` [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
+    method: str [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
 
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
