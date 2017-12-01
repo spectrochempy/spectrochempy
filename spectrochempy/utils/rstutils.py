@@ -62,7 +62,7 @@ rst_epilog = """
 
 .. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
 
-.. |Units| replace:: :class:`~spectrochempy.core.units.units.Unit``
+.. |Unit| replace:: :class:`~spectrochempy.core.units.units.Unit``
 
 .. |Quantity| replace:: :class:`~spectrochempy.core.units.units.Quantity`
 

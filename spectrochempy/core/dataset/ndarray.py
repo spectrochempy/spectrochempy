@@ -191,12 +191,12 @@ class NDArray(HasTraits):
             :class:`~numpy.ma.MaskedArray`, or any array object
             (such as a |NDArray| or subclass of it), providing a `mask` here
             will causes the mask from the masked array to be ignored.
-        units : |Unit| instance or str, optional
-            Units of the data. If data is a |Quantity|
-            then `units` is set to the units of the `data`; if a unit is also
+        unit : |Unit| instance or str, optional
+            Unit of the data. If data is a |Quantity|
+            then `unit` is set to the units of the `data`; if a unit is also
             explicitly provided an error is raised. If `data` is a |Quantity|
-            then `units` is set to the units of the `data`; if a unit is also
-            explicitly provided an error is raised. Handling of `units` use
+            then `unit` is set to the unit of the `data`; if a unit is also
+            explicitly provided an error is raised. Handling of units use
             a fork of the `pint <https://pint.readthedocs.org/en/0.6>`_
             package (BSD Licence) which is embedded in |scp|)
         uncertainty : array of floats, optional
@@ -1511,7 +1511,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Units|, |Quantity| or str
+        other : |Unit|, |Quantity| or str
             Destination units.
         force : `bool`, optional, default= ``False``
             If True the change of units is forced, even for incompatible units
