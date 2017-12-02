@@ -220,6 +220,7 @@ def plot_2D(source, **kwargs):
     zlim = kwargs.get('zlim', (z.min(), z.max()))
 
     if method in ['map', 'image']:
+
         zmin, zmax = zlim
         #if not kwargs.get('negative', True):
         zmin = min(zmin, -zmax)

@@ -38,6 +38,8 @@ from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple, \
     Unicode
 from traitlets.config.configurable import Configurable
 
+import matplotlib.pyplot as plt
+
 import matplotlib as mpl
 
 __all__ = []
@@ -124,5 +126,5 @@ class PlotOptions(Configurable):
     contour_start = Float(0.05, help='percentage of the maximum '
                               'for starting contour levels').tag(config=False)
 
-    max_lines_in_stack = Integer(500, help='maximum number of lines to'
+    max_lines_in_stack = Integer(1000, help='maximum number of lines to'
                                        ' plot in a stack plot').tag(config=True)
