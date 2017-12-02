@@ -27,8 +27,8 @@ running on Linux, Windows or OS X.
 4.  Import functions to read data from experiments or modelling programs ...
 5.  Display functions such as ``print``, ``plot`` ...
 6.  Export functions to ``csv``, ``xls`` ...
-7.  Preprocessing funtions such as baseline correction, automatic subtraction
-    and many more ...
+7.  Preprocessing functions such as baseline correction, masking bad data,
+    automatic subtraction and many more ...
 8.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
 
 .. warning::
@@ -136,7 +136,7 @@ way::
 .. _main_credits:
 
 Credits
-----------
+=======
 .. toctree::
     :maxdepth: 1
 

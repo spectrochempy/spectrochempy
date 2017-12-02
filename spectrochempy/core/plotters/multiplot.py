@@ -134,7 +134,7 @@ multiplot_with_transposed = plot_with_transposed
 
 # .............................................................................
 def multiplot( sources=[], labels=[], nrow=1, ncol=1,
-               method='stack', figsize=None,
+               method='stack',
                sharex=False, sharey=False, sharez=False,
                colorbar=False,
                suptitle=None, suptitle_color=None,
@@ -286,7 +286,11 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
     mpl.rcParams['figure.autolayout'] = False
 
-    fig = plt.figure(figsize=figsize)
+    figsize = kwargs.pop('figsize', None)
+    dpi = kwargs.pop('dpi', 150)
+
+    fig = kwargs.pop('fig', plt.figure(figsize=figsize, dpi=dpi))
+
     fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
     if suptitle is not None:
