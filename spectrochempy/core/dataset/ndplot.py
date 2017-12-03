@@ -71,7 +71,6 @@ from spectrochempy.core.dataset.ndarray import masked
 from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units.units import Unit
-from spectrochempy.gui import gui
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
 from spectrochempy.core.plotters.utils import cmyk2rgb
@@ -665,33 +664,6 @@ plot = NDPlot.plot  # make plot accessible directly from the API
 
 # =============================================================================
 if __name__ == '__main__':
-    # test interactive masks
-
-    from spectrochempy.api import *
-
-    options.log_level = DEBUG
-
-    A = NDDataset.read_omnic(
-            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
-    A.y -= A.y[0]
-    A.y.to('hour', inplace=True)
-    A.y.title = u'Aquisition time'
+    pass
 
 
-    # ax = A[:, 1600.:4000.].plot()
-    # plt.show()
-
-    # ax = A[:, 1600.:4000.].plot_stack()
-    # plt.show()
-
-
-    def _interactive_masks():
-        A[:, :].interactive_masks(
-                method='stack', figsize=(9, 6),
-                right=.905,  # to lease space for the labels of the colorbar
-        )
-        pass
-
-
-    _interactive_masks()
-    plt.show()

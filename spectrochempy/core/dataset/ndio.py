@@ -61,7 +61,6 @@ import matplotlib.pyplot as plt
 from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units.units import Unit
-from spectrochempy.gui import gui
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils import is_sequence
 from spectrochempy.application import app
@@ -147,8 +146,8 @@ class NDIO(HasTraits):
         # open file dialog box
         filename = filename
 
-        if not filename:
-            filename = gui.saveFileDialog()
+        #if not filename:
+        #    filename = gui.saveFileDialog()
 
         if not filename:
             raise IOError('no filename provided!')
@@ -320,9 +319,7 @@ class NDIO(HasTraits):
 
         directory = kwargs.get("directory", options.scpdata)
         if not filename:
-            filename = gui.openFileNameDialog(directory=directory)
-            if not filename:
-                raise IOError('no filename provided!')
+            raise IOError('no filename provided!')
         else:
             try:
                 if not directory:

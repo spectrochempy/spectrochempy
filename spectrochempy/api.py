@@ -96,7 +96,6 @@ log_level = application.app.log_level
 
 # give a user friendly name to the objects containing configurables options
 plotoptions = application.app.plotoptions
-guioptions = application.app.guioptions
 options = application.app
 scpdata = application.app.scpdata
 list_scpdata = application.app.list_scpdata
@@ -188,8 +187,12 @@ APIref = APIref()
 
 __all__.append('APIref')
 
-# START THE APPLICATION ========================================================
-_started = application.app.start(debug=True, reset_config=True)
+# START THE APPLICATION ======================================================
+
+_debug = False
+_reset_config = False
+
+_started = application.app.start(debug=_debug, reset_config=_reset_config)
 
 # load the default style
 plt.style.use(application.app.plotoptions.style)
@@ -198,6 +201,6 @@ log.info("API activated "
          if _started else "API was not started!")
 
 
-# ==============================================================================
+# ============================================================================
 if __name__ == '__main__':
     pass

@@ -34,27 +34,17 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-"""During the initialization of this package, two operations are performed:
-
-#. setup a gui `PyQt5.QApplication` needed for dialogs such as for
-   opening/saving files.
-
-#. setup a `matplotlib` backend and some `IPython` configurations.
+"""During the initialization of this package, a `matplotlib` backend is set
+and some `IPython` configurations are made.
 
 
 """
 import sys
 import warnings
 
-from PyQt5.QtWidgets import QApplication
-
-#: Handler to the GUI underlying application
-guiApp = QApplication(sys.argv)
-
 from IPython.core.magic import UsageError
 from IPython import get_ipython
 import matplotlib as mpl
-from spectrochempy.utils import is_kernel
 
 # .........................................................................
 def _setup_backend_and_ipython(backend=None):
@@ -77,60 +67,53 @@ def _setup_backend_and_ipython(backend=None):
     if backend == 'spectrochempy_gui':
         # this happen when the GUI is used
         backend = 'module://spectrochempy_gui.backend'
-    else:
-        # the current backend
-        backend = mpl.get_backend()
-        if backend == 'module://ipykernel.pylab.backend_inline' \
-                or backend == 'MacOSX':
-            # Force QT5
-            backend = 'Qt5Agg'
-            mpl.rcParams['backend.qt5'] = 'PyQt5'
+    # the current backend
+    backend = mpl.get_backend()
+    if backend == 'module://ipykernel.pylab.backend_inline'  or backend == \
+            'MacOSX':
+        # Force QT5
+        backend = 'Qt5Agg'
+        mpl.rcParams['backend.qt5'] = 'PyQt5'
 
     # if we are building the docs, in principle it should be done using
     # the builddocs.py located in the scripts folder
     if not 'builddocs.py' in sys.argv[0]:
-        mpl.use(backend)
+        mpl.use(backend, warn = False, force = True)
     else:
         # 'agg' backend is necessary to build docs with sphinx-gallery
-        mpl.use('agg')
+        mpl.use('agg', warn = False, force = True)
 
     ip = get_ipython()
     if ip is not None:
-        if is_kernel():
+        if getattr(get_ipython(), 'kernel', None) is not None:
             # set the ipython matplotlib environments
             try:
                 import ipympl
                 ip.magic('matplotlib notebook')
             except UsageError as e:
                 try:
-                    ip.magic('matplotlib osx')
-                except:
-                    try:
-                        ip.magic('matplotlib qt5')
-                    except:
-                        pass
-        else:
-            try:
-                ip.magic('matplotlib osx')  # on mac
-            except:
-                try:
                     ip.magic('matplotlib qt5')
                 except:
                     pass
+        else:
+            try:
+                ip.magic('matplotlib qt5')
+            except:
+                 pass
 
     return (ip, backend)
 
-#: handler to the IPython instance
-ip = None
+_setup_backend_and_ipython()
 
-#: Current backend
-backend = "Qt5Agg"
 
 # ==============================================================================
 # For documentation
 # ==============================================================================
 
 if __name__ == '__main__':
+    pass
 
-    ip, backend = _setup_backend_and_ipython()
+
+
+
 
