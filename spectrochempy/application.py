@@ -326,11 +326,6 @@ class _SpectroChemPy(Application):
         # also install style to be sure everything is set
         install_styles()
 
-    def _init_guioptions(self):
-        # This will be used only if the application is launch from the GUI
-        # (see package 'spectrochempy_gui') - this fonction will be subclassed
-        self.guioptions = None
-
     def __init__(self, *args, **kwargs):
         super(_SpectroChemPy, self).__init__(*args, **kwargs)
         if kwargs.get('debug', False):
@@ -383,7 +378,6 @@ class _SpectroChemPy(Application):
         # ---------------------------------------------------------------------
 
         self._init_plotoptions()
-        self._init_guioptions()
 
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------

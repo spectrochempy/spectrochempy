@@ -141,12 +141,6 @@ def test_successive_plot_bug_with_colorbars(IR_source_2D):
     source.plot(method='map')  # bug : no colorbar
     show()
 
-@show_do_not_block
-def test_for_interactive_masks(IR_source_1D, IR_source_2D):
-    source = IR_source_2D.copy()
-    source.interactive_masks()
-    show()
-
 @image_comparison(reference=['multiplot1','multiplot2'], force_creation=FORCE)
 def test_multiplot(IR_source_2D):
 

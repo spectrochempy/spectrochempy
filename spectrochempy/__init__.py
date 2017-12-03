@@ -34,27 +34,17 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-"""During the initialization of this package, two operations are performed:
-
-#. setup a gui `PyQt5.QApplication` needed for dialogs such as for
-   opening/saving files.
-
-#. setup a `matplotlib` backend and some `IPython` configurations.
+"""During the initialization of this package, a `matplotlib` backend is set
+and some `IPython` configurations are made.
 
 
 """
 import sys
 import warnings
 
-from PyQt5.QtWidgets import QApplication
-
-#: Handler to the GUI underlying application
-guiApp = QApplication(sys.argv)
-
 from IPython.core.magic import UsageError
 from IPython import get_ipython
 import matplotlib as mpl
-from spectrochempy.utils import is_kernel
 
 # .........................................................................
 def _setup_backend_and_ipython(backend=None):
@@ -96,11 +86,12 @@ def _setup_backend_and_ipython(backend=None):
 
     ip = get_ipython()
     if ip is not None:
-        if is_kernel():
+        if getattr(get_ipython(), 'kernel', None) is not None:
             # set the ipython matplotlib environments
             try:
                 import ipympl
                 ip.magic('matplotlib notebook')
+                warnings.warn('OK')
             except UsageError as e:
                 try:
                     ip.magic('matplotlib osx')
@@ -120,17 +111,16 @@ def _setup_backend_and_ipython(backend=None):
 
     return (ip, backend)
 
-#: handler to the IPython instance
-ip = None
-
-#: Current backend
-backend = "Qt5Agg"
+_setup_backend_and_ipython()
 
 # ==============================================================================
 # For documentation
 # ==============================================================================
 
 if __name__ == '__main__':
+    pass
 
-    ip, backend = _setup_backend_and_ipython()
+
+
+
 

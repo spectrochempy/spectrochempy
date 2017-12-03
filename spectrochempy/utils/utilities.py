@@ -42,8 +42,6 @@ import os
 import zipfile
 import numpy as np
 
-from spectrochempy.gui import gui
-
 def readXlCellRange(xlFileName, cellRange, sheetNumber=0):
     """ reads data in a cellrange: A23:AD23 ''"""
 
@@ -107,11 +105,7 @@ def readfilename(filename, directory='', filter=''):
         filename = None
 
     if not filename:
-
-        filenames = gui.openFileNamesDialog(directory=directory, filter=filter)
-
-        if not filenames:
-            raise IOError('no filename provided!')
+        raise IOError('no filename provided!')
 
     else:
         filenames = [filename]
