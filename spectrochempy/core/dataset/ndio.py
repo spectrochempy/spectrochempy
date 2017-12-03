@@ -48,12 +48,14 @@ import datetime
 import time
 import json
 import os
+import warnings
 
 import numpy as np
 from numpy.compat import asbytes, asstr
 from numpy.lib.format import write_array, MAGIC_PREFIX
 from numpy.lib.npyio import zipfile_factory, NpzFile
-from traitlets import Dict, List, Float, HasTraits, Instance, observe, All
+from traitlets import Dict, List, Float, HasTraits, Unicode, Instance, \
+    observe, All
 import matplotlib.pyplot as plt
 
 # local import
@@ -97,11 +99,13 @@ class NDIO(HasTraits):
 
     """
 
+    _file_name = Unicode
+
     # --------------------------------------------------------------------------
     # Generic save function
     # --------------------------------------------------------------------------
 
-    def save(self, filename='',
+    def save(self, filename='', directory=options.scpdata,
              **kwargs
              ):
         """
@@ -111,24 +115,21 @@ class NDIO(HasTraits):
         Parameters
         ----------
 
-        path : str
+        filename : str
 
-            The filename to the file to be save
+            The filename of the file where to save the current dataset
 
-        directory : str [optional, default = `True`]
-
-            It specified, the given filename (generally a file name) fill be
-            appended to the ``dir``.
+        directory : str, optional, default = ``options.scpdata``
+            If specified, the given `directory` and the `filename will be
+            appended.
 
         Examples
         ---------
 
         Read some experimental data and then save in our proprietary format **scp**
 
-        >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        <BLANKLINE>
-            SpectroChemPy's API
-            Version   : 0.1...
+        >>> from spectrochempy.api import NDDataset, scpdata #doctest: +ELLIPSIS
+        SpectroChemPy's API...
         >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
         >>> mydataset.save('mydataset.scp', directory=scpdata)
 
@@ -143,14 +144,13 @@ class NDIO(HasTraits):
 
         """
 
-        # open file dialog box
-        filename = filename
-
-        #if not filename:
-        #    filename = gui.saveFileDialog()
-
         if not filename:
-            raise IOError('no filename provided!')
+            # may be try the current file name
+            if self._file_name:
+                filename = os.path.basename(self._file_name)
+                directory = os.path.dirname(self._file_name)
+            else:
+                raise IOError('no filename provided!')
 
         if not filename.endswith('.scp'):
             filename = filename + '.scp'
@@ -245,6 +245,7 @@ class NDIO(HasTraits):
 
         zipf.close()
 
+
     # --------------------------------------------------------------------------
     # Generic load function
     # --------------------------------------------------------------------------
@@ -253,6 +254,7 @@ class NDIO(HasTraits):
     def load(cls,
              filename='',
              protocol='scp',
+             directory=options.scpdata,
              **kwargs
              ):
         """Load a dataset object saved as a pickle file ( ``.scp`` file).
@@ -262,7 +264,7 @@ class NDIO(HasTraits):
         Parameters
         ----------
 
-        path : str
+        filename : str
 
             The filename to the file to be read.
 
@@ -273,7 +275,7 @@ class NDIO(HasTraits):
 
         directory : str
 
-            optional, default= ``data``
+            optional, default= ``scpdata``
             The directory from where to load the file.
 
         kwargs : optional keyword parameters.

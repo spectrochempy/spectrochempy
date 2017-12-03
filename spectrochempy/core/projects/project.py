@@ -35,11 +35,12 @@
 # =============================================================================
 
 from traitlets import (List, Instance, Unicode, Bool, HasTraits)
-from spectrochempy.core.dataset.ndarray import NDArray
 
-import matplotlib.pyplot as plt
+from ..dataset.nddataset import NDDataset
+
 
 __all__ = ['Project']
+
 _classes = __all__[:]
 
 class Project(HasTraits):
@@ -47,7 +48,7 @@ class Project(HasTraits):
 
     """
 
-    _arrays = List(Instance(NDArray), allow_none=True)
+    _arrays = List(Instance(NDDataset), allow_none=True)
 
     def __getitem__(self, item):
         if isinstance(item, int):

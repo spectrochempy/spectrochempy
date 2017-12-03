@@ -44,7 +44,7 @@ to manage a project or a set of projects.
 import sys
 from traitlets import import_item
 
-from spectrochempy.utils import list_packages
+from ..utils import list_packages
 
 name = 'project'
 pkgs = sys.modules['spectrochempy.%s' % name]
@@ -64,3 +64,7 @@ for pkg in pkgs:
     __all__ += a
     for item in a:
         setattr(api, item, getattr(pkg, item))
+
+# ===========================================================================
+if __name__ == '__main__':
+    pass
