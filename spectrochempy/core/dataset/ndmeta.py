@@ -59,7 +59,7 @@ from spectrochempy.utils import (is_sequence,
 __all__ = ['Meta']
 _classes = __all__[:]
 
-log= app.log
+log = app.log
 
 # =============================================================================
 # Class Meta

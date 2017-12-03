@@ -69,11 +69,11 @@ from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float,
 # local imports
 # =============================================================================
 
-from spectrochempy.application import app
+#from spectrochempy.application import app
 
 from spectrochempy.core.dataset.ndmeta import Meta
 from spectrochempy.core.units import Unit, ur, Quantity, Measurement
-
+from spectrochempy.application import app
 from spectrochempy.utils import (EPSILON,
                                  StdDev,
                                  is_sequence,

@@ -37,7 +37,6 @@
 from traitlets import (TraitType, TraitError, List, Bool,
                        Union, class_of, HasTraits)
 
-from spectrochempy.core.dataset.ndarray import NDArray
 
 import numpy as np
 import copy
@@ -149,6 +148,8 @@ class ArrayList(List):
         pass
 
     def validate_elements(self, obj, value):
+        from spectrochempy.core.dataset.ndarray import NDArray
+
         if value is None or len(value) == 0:
             # we allow none so this is possible
             return

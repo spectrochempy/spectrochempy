@@ -43,7 +43,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from traitlets import (Enum, Int, Instance, Bool, HasTraits, default,
-                       Any, Float, validate, observe, Unicode)
+                       Any, Float, validate, observe, Unicode, Tuple)
 from matplotlib.widgets import SpanSelector
 
 
@@ -80,6 +80,7 @@ class BaselineCorrection(HasTraits):
     order = Int(6, min=1, allow_none=True)
     npc = Int(5, min=1, allow_none=True)
     zoompreview = Float(1.)
+    figsize=Tuple((8,6))
 
     def __init__(self,
                  source,
@@ -106,6 +107,7 @@ class BaselineCorrection(HasTraits):
         if self.method == 'multivariate':
             self.npc = int(kwargs.get('npc', self.npc))
         self.zoompreview = kwargs.get('zoompreview', self.zoompreview)
+        self.figsize = kwargs.get('figsize', self.figsize)
 
     def __call__(self, *ranges, **kwargs):
 
@@ -260,10 +262,12 @@ class BaselineCorrection(HasTraits):
                   sharex=True,
                   nrow = 2,
                   ncol = 1,
-                  figsize=(9, 6),
+                  figsize=self.figsize,
                   suptitle = 'INTERACTIVE BASELINE CORRECTION')
 
         fig = plt.gcf()
+        fig.canvas.draw()
+
         ax1 = axes['axe11']
         ax2 = axes['axe21']
 
@@ -318,9 +322,10 @@ class BaselineCorrection(HasTraits):
 
         cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
-        span = SpanSelector(ax1, onselect, 'horizontal',  minspan=5, button=[1],
-                            useblit=True, rectprops=dict(alpha=0.5,
-                                                         facecolor='blue'))
+        span =  SpanSelector(ax1, onselect, 'horizontal',  minspan=5,
+                             button=[1], useblit=True,
+                             rectprops=dict(alpha=0.5, facecolor='blue'))
+
 
         fig.canvas.draw()
 

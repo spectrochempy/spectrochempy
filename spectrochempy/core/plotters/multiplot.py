@@ -137,7 +137,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
                method='stack',
                sharex=False, sharey=False, sharez=False,
                colorbar=False,
-               suptitle=None, suptitle_color=None,
+               suptitle=None, suptitle_color='k',
                **kwargs):
 
     """
@@ -293,7 +293,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
     fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
-    if suptitle is not None:
+    if suptitle is not None :
         fig.suptitle(suptitle, color=suptitle_color)
 
     # axes is dictionary with keys such as 'axe12', where  the fist number

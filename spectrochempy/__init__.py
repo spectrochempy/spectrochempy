@@ -67,22 +67,21 @@ def _setup_backend_and_ipython(backend=None):
     if backend == 'spectrochempy_gui':
         # this happen when the GUI is used
         backend = 'module://spectrochempy_gui.backend'
-    else:
-        # the current backend
-        backend = mpl.get_backend()
-        if backend == 'module://ipykernel.pylab.backend_inline' \
-                or backend == 'MacOSX':
-            # Force QT5
-            backend = 'Qt5Agg'
-            mpl.rcParams['backend.qt5'] = 'PyQt5'
+    # the current backend
+    backend = mpl.get_backend()
+    if backend == 'module://ipykernel.pylab.backend_inline'  or backend == \
+            'MacOSX':
+        # Force QT5
+        backend = 'Qt5Agg'
+        mpl.rcParams['backend.qt5'] = 'PyQt5'
 
     # if we are building the docs, in principle it should be done using
     # the builddocs.py located in the scripts folder
     if not 'builddocs.py' in sys.argv[0]:
-        mpl.use(backend)
+        mpl.use(backend, warn = False, force = True)
     else:
         # 'agg' backend is necessary to build docs with sphinx-gallery
-        mpl.use('agg')
+        mpl.use('False', warn = False, force = True)
 
     ip = get_ipython()
     if ip is not None:
@@ -91,27 +90,21 @@ def _setup_backend_and_ipython(backend=None):
             try:
                 import ipympl
                 ip.magic('matplotlib notebook')
-                warnings.warn('OK')
             except UsageError as e:
-                try:
-                    ip.magic('matplotlib osx')
-                except:
-                    try:
-                        ip.magic('matplotlib qt5')
-                    except:
-                        pass
-        else:
-            try:
-                ip.magic('matplotlib osx')  # on mac
-            except:
                 try:
                     ip.magic('matplotlib qt5')
                 except:
                     pass
+        else:
+            try:
+                ip.magic('matplotlib qt5')
+            except:
+                 pass
 
     return (ip, backend)
 
 _setup_backend_and_ipython()
+
 
 # ==============================================================================
 # For documentation

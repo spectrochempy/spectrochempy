@@ -75,60 +75,12 @@ import matplotlib as mpl
 # local imports
 # ==============================================================================
 
-from spectrochempy.utils import is_kernel, is_sequence
-from spectrochempy.utils import get_config_dir, get_pkg_data_dir, get_version
-from spectrochempy.utils import get_pkg_data_filename
-from spectrochempy.utils import install_styles
-from spectrochempy.utils import docstrings
-from spectrochempy.utils import SpectroChemPyWarning
-
-from spectrochempy.core.plotters.plottersoptions import PlotOptions
-from spectrochempy.core.readers.readersoptions import ReadOptions
-from spectrochempy.core.writers.writersoptions import WriteOptions
-from spectrochempy.core.processors.processorsoptions import ProcessOptions
-
 __all__ = []  # no public methods
-
+#__slots__ = ['app']
 # add iparallel client
 
 # pcl = ipp.Client()[:]  #TODO: parallelization
 
-
-# =============================================================================
-# documentation utilities
-# =============================================================================
-# Important note to developper's : separation between sections in docstrings
-# must be a newline strictly (no whitespace!)
-
-docstrings.get_sections(docstrings.dedents(
-"""
-Note
-----
-To be completed with useful common parameters
-
-Parameters
-----------
-axis : int, optional, default: -1
-    Dimension index along which the method should be applied.
-inplace : bool, optional, default= ``False``
-    Flag to say that the method return a new object (default)
-    or not (inplace=True)
-
-Other Parameters
-----------------
-
-Returns
--------
-object 
-    Same object or a copy depending on the `inplace` flag.
-
-"""
-), 'generic_method', sections=['Parameters', 'Returns'])
-
-docstrings.keep_params('generic_method.parameters', 'axis')
-docstrings.keep_params('generic_method.parameters', 'inplace')
-docstrings.keep_params('generic_method.parameters', 'axis', 'inplace')
-docstrings.keep_params('generic_method.returns', 'object')
 
 
 # ==============================================================================
@@ -184,6 +136,7 @@ class _SCPData(Configurable):
     @default('_data')
     def _get__data_default(self):
         # the spectra path in package data
+        from spectrochempy.utils import get_pkg_data_dir
         return get_pkg_data_dir('testdata', 'scp_data')
 
 
@@ -199,6 +152,12 @@ class _SpectroChemPy(Application):
 
 
     """
+    from spectrochempy.utils import docstrings
+
+    from spectrochempy.core.plotters.plottersoptions import PlotOptions
+    #from spectrochempy.core.readers.readersoptions import ReadOptions
+    #from spectrochempy.core.writers.writersoptions import WriteOptions
+    #from spectrochempy.core.processors.processorsoptions import ProcessOptions
 
     # info ____________________________________________________________________
 
@@ -211,17 +170,17 @@ class _SpectroChemPy(Application):
 
     @default('version')
     def _get_version(self):
-
+        from spectrochempy.utils import get_version
         return get_version()[0]
 
     @default('dev_version')
     def _get_dev_version(self):
-
+        from spectrochempy.utils import get_version
         return get_version()[1]
 
     @default('release')
     def _get_release(self):
-
+        from spectrochempy.utils import get_version
         return get_version()[2]
 
     copyright = Unicode('').tag(config=True)
@@ -253,6 +212,7 @@ class _SpectroChemPy(Application):
 
     @default('config_dir')
     def _get_config_dir_default(self):
+        from spectrochempy.utils import get_config_dir
         return get_config_dir()
 
     info_on_loading = Bool(True,
@@ -309,6 +269,8 @@ class _SpectroChemPy(Application):
     # --------------------------------------------------------------------------
 
     def _init_plotoptions(self):
+        from spectrochempy.core.plotters.plottersoptions import PlotOptions
+        from spectrochempy.utils import install_styles
 
         # Pass config to other classes for them to inherit the config.
         self.plotoptions = PlotOptions(config=self.config)
@@ -505,6 +467,8 @@ class _SpectroChemPy(Application):
                     sys.argv))
 
             self.running = True
+
+            self.log.debug('MPL backend: ', mpl.get_backend())
 
             return True
 

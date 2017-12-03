@@ -82,6 +82,38 @@ del _docstrings
 docstrings = SpectroChemPyDocstringProcessor()
 
 
+## Set some general parameters
+docstrings.get_sections(docstrings.dedents(
+"""
+Note
+----
+To be completed with useful common parameters
+
+Parameters
+----------
+axis : int, optional, default: -1
+    Dimension index along which the method should be applied.
+inplace : bool, optional, default= ``False``
+    Flag to say that the method return a new object (default)
+    or not (inplace=True)
+
+Other Parameters
+----------------
+
+Returns
+-------
+object 
+    Same object or a copy depending on the `inplace` flag.
+
+"""
+), 'generic_method', sections=['Parameters', 'Returns'])
+
+docstrings.keep_params('generic_method.parameters', 'axis')
+docstrings.keep_params('generic_method.parameters', 'inplace')
+docstrings.keep_params('generic_method.parameters', 'axis', 'inplace')
+docstrings.keep_params('generic_method.returns', 'object')
+
+
 if __name__ == '__main__':
 
 
