@@ -81,7 +81,7 @@ def _setup_backend_and_ipython(backend=None):
         mpl.use(backend, warn = False, force = True)
     else:
         # 'agg' backend is necessary to build docs with sphinx-gallery
-        mpl.use('False', warn = False, force = True)
+        mpl.use('agg', warn = False, force = True)
 
     ip = get_ipython()
     if ip is not None:
