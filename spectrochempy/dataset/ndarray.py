@@ -61,7 +61,7 @@ from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float,
                        HasTraits, default, validate)
 from pandas.core.generic import NDFrame, Index
 
-from ..utils.meta import Meta
+from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, ur, Quantity
 from spectrochempy.application import app
 from spectrochempy.utils import (EPSILON, StdDev, is_sequence,
@@ -133,7 +133,7 @@ class NDArray(HasTraits):
     _title = Unicode(allow_none=True)
 
     _id = Unicode()
-    _name = Unicode()
+    _name = Unicode(allow_none=True)
     _copy = Bool()
 
     _labels_allowed = Bool(True)
@@ -255,7 +255,8 @@ class NDArray(HasTraits):
         self.title = kwargs.pop('title', None)
 
         # a unique id / name
-        self.name = kwargs.pop('name', self._id)
+        self.name = kwargs.pop('name', "{}_{}".format(type(self).__name__,
+                                                      self.id.split('-')[0]))
 
         self.mask = kwargs.pop('mask', nomask)
 
@@ -820,7 +821,7 @@ class NDArray(HasTraits):
         if meta is not None:
             self._meta.update(meta)
 
-    # .........................................................................
+    # ..................................................
     @property
     def name(self):
         """
@@ -832,7 +833,6 @@ class NDArray(HasTraits):
         For most usage, the object name needs to be unique.
 
         """
-
         return self._name
 
     # .........................................................................
@@ -844,7 +844,7 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @default('_title')
-    def _get_title_default(self):
+    def _title_default(self):
         return None
 
     # .........................................................................

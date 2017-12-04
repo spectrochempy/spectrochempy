@@ -163,12 +163,6 @@ class Coord(NDMath, NDArray):
                              "should be 1!")
 
     # -------------------------------------------------------------------------
-    # properties
-    # -------------------------------------------------------------------------
-    @default('_name')
-    def _get_name_default(self):
-        return "Coord_" + str(uuid.uuid1()).split('-')[0]  # a unique id
-
     @property
     def is_reversed(self):
         """`bool`, read-only property - Whether the axis is ascending or
