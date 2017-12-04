@@ -40,13 +40,13 @@ from traitlets.config.configurable import Configurable
 from ..dataset.api import NDDataset
 from ..utils import Meta
 
-__all__ = ['Project', 'ProjectsOptions']
+__all__ = [] #'Project', 'ProjectsOptions']
 
-class ProjectsOptions(Configurable):
-
-    default_directory = Unicode(help='location where all projects are '
-                                     'strored by defauult').tag(config=True)
-
+# class ProjectsOptions(Configurable):
+#
+#     default_directory = Unicode(help='location where all projects are '
+#                                      'strored by defauult').tag(config=True)
+#
 
 class Project(HasTraits):
     """A manager of multiple datasets in a project

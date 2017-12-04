@@ -55,16 +55,18 @@ from spectrochempy.application import app
 plotoptions = app.plotoptions
 log = app.log
 options = app
-from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
+
+from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, \
+    read_lowmem
 
 # =============================================================================
 # Local imports
 # =============================================================================
-from ...utils.meta import Meta
-from ...dataset.nddataset import NDDataset
-from ...dataset.ndcoords import Coord
-from ...units import ur, Quantity
-from ...readers.nmr.parameter import nmr_valid_meta
+from spectrochempy.utils.meta import Meta
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.dataset.ndcoords import Coord
+from spectrochempy.units import ur, Quantity
+from .parameter import nmr_valid_meta
 
 __all__ = ['read_bruker_nmr']
 
@@ -75,12 +77,6 @@ __all__ = ['read_bruker_nmr']
 FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI",
           "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
-
-from spectrochempy.application import app
-plotoptions = app.plotoptions
-log = app.log
-options = app
-
 
 # =============================================================================
 # Utilities

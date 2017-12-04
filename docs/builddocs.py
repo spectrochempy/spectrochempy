@@ -68,8 +68,7 @@ from spectrochempy.utils import (list_packages, get_version,
                                  get_release_date, get_version_date)
 from traitlets import import_item
 
-import logging
-log_level = logging.ERROR
+options.log_level = ERROR
 
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
@@ -118,36 +117,40 @@ def gitcommands():
 
         pass
 
-def make_docs(*options):
+def make_docs(*args):
     """Make the html and pdf documentation
 
     """
 
 
-    options = list(options)
-    if 'release' in options:
+    args = list(args)
+    if 'release' in args:
         do_release()
         return
 
-    # make sure commits have been done
-    gitcommands()
+    if 'nocommit' in args:
+        nocommit = True
 
-    DEBUG = 'DEBUG' in options
+    # make sure commits have been done (if not nocommit flag set)
+    if not nocommit:
+        gitcommands()
+
+    DEBUG = 'DEBUG' in args
 
     if DEBUG:
-        log_level = logging.DEBUG
+        options.log_level = ERROR
 
     builders = []
-    if  'html' in options:
+    if  'html' in args:
         builders.append('html')
 
-    if 'pdf' in options:
+    if 'pdf' in args:
         builders.append('latex')
 
-    if 'clean' in options:
+    if 'clean' in args:
         clean()
         make_dirs()
-        options.remove('clean')
+        args.remove('clean')
         log.info('\n\nOld documentation now erased.\n\n')
 
     for builder in builders:
@@ -178,7 +181,8 @@ def make_docs(*options):
             res = subprocess.call([cmd], shell=True, executable='/bin/bash')
             log.info(res)
 
-        gitcommands()  # update repository
+        if not nocommit:
+            gitcommands()  # update repository
 
         log.info(
         "\n\nBuild finished. The {0} pages are in {1}/{2}.".format(

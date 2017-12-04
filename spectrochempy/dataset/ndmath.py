@@ -78,15 +78,17 @@ get_name = lambda x: str(x.name if hasattr(x, 'name') else x)
 
 class NDMath(object):
     """
+
     Examples
     --------
 
     >>> from spectrochempy.api import *
     >>> source = NDDataset.load('mydataset.scp')
-    >>appource             #doctest: +ELLIPSIS
+    >>> source             #doctest: +ELLIPSIS
     NDDataset([[    2.06,...,     1.24]])
     >>> np.negative(source) #doctest: +ELLIPSIS
     NDDataset([[   -2.06,...,    -1.24]])
+
 
     """
 

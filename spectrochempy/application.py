@@ -498,7 +498,7 @@ class _SpectroChemPy(Application):
         self.log.debug("changed default loglevel to {}".format(change.new))
 
 #: Main application object that should not be called directly by a end user.
-#: It is advisable to use the main `api`import to access all public methods of
+#: It is advisable to use the main `api` import to access all public methods of
 #: this object.
 app = _SpectroChemPy()
 

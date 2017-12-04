@@ -204,7 +204,7 @@ class NDArray(HasTraits):
         meta : dict-like object, optional.
             Additional metadata for this object. Must be dict-like but no
             further restriction is placed on meta.
-        copy : `bool`, optional
+        copy : bool, optional
             Perform a copy of the passed object.
 
         Examples
@@ -725,7 +725,7 @@ class NDArray(HasTraits):
     @property
     def mask(self):
         """
-        |ndarray| of `bool` - Mask for the data.
+        |ndarray| of bool - Mask for the data.
 
         """
 
@@ -1008,7 +1008,7 @@ class NDArray(HasTraits):
     @property
     def dimensionless(self):
         """
-        `bool` - ``True`` if the `data` array is dimensionless
+        bool - ``True`` if the `data` array is dimensionless
         (Readonly property).
 
         .. note:: ``Dimensionless`` is different of ``unitless``,
@@ -1042,7 +1042,7 @@ class NDArray(HasTraits):
     @property
     def has_complex_dims(self):
         """
-        `bool` - ``True`` if at least one of the `data` array (Readonly property).
+        bool - ``True`` if at least one of the `data` array (Readonly property).
         dimension is complex.
 
         """
@@ -1052,7 +1052,7 @@ class NDArray(HasTraits):
     @property
     def has_units(self):
         """
-        `bool` - ``True`` if the `data` array have units (Readonly property).
+        bool - ``True`` if the `data` array have units (Readonly property).
 
         See Also
         --------
@@ -1069,8 +1069,8 @@ class NDArray(HasTraits):
     @property
     def is_empty(self):
         """
-        `bool` -  ``True`` if the `data` array is empty (size=0)
-        (Readonly property).
+        bool -  ``True`` if the `data` array is empty (size=0) (Readonly property).
+
 
         """
         return self._data.size == 0
@@ -1084,7 +1084,7 @@ class NDArray(HasTraits):
     @property
     def is_complex(self):
         """
-        `tuple of `bool` - ``True`` if one of the `data` dimensions is complex
+        tuple of bool - ``True`` i one of the `data` dimensions is complex
         (Readonly property).
 
         .. note:: If a dimension is complex, real and imaginary part
@@ -1105,7 +1105,7 @@ class NDArray(HasTraits):
     @property
     def is_labeled(self):
         """
-        `bool`- ``True`` if the `data` array have labels (Readonly property).
+        bool - ``True`` if the `data` array have labels (Readonly property).
 
         """
         # label cannot exists (for now for nD dataset - only 1D dataset, such
@@ -1122,7 +1122,7 @@ class NDArray(HasTraits):
     @property
     def is_masked(self):
         """
-        `bool` - ``True`` if the `data` array has masked values
+        bool - ``True`` if the `data` array has masked values
         (Readonly property).
 
         """
@@ -1141,7 +1141,7 @@ class NDArray(HasTraits):
     @property
     def is_uncertain(self):
         """
-        `bool` - ``True`` if the `data` array has uncertainty
+        bool - ``True`` if the `data` array has uncertainty
         (Readonly property).
 
 
@@ -1247,7 +1247,7 @@ class NDArray(HasTraits):
     @property
     def unitless(self):
         """
-        `bool`- ``True`` if the `data` have `units` (Readonly property).
+        bool- ``True`` if the `data` have `units` (Readonly property).
 
         """
 
@@ -1500,7 +1500,7 @@ class NDArray(HasTraits):
         ----------
         other : |Unit|, |Quantity| or str
             Destination units.
-        force : `bool`, optional, default= ``False``
+        force : bool, optional, default= ``False``
             If True the change of units is forced, even for incompatible units
 
         Returns
@@ -1695,7 +1695,7 @@ class NDArray(HasTraits):
         other : |Quantity| or str.
             Destination units.
         %(generic_method.parameters.inplace)s
-        force: `bool`, optional, default: False
+        force: bool, optional, default: False
             If True the change of units is forced, even for imcompatible units
 
         Returns

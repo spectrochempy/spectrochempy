@@ -39,7 +39,6 @@ __author__ = "Philipp Sommer"
 
 
 sphinx_version = list(map(float, re.findall('\d+', sphinx.__version__)[:3]))
-
 __all__ = []
 
 class AutosummaryDocumenter(object):
@@ -530,9 +529,14 @@ class AutoSummDirective(AutoDirective, Autosummary):
         base_documenter = self.autosummary_documenter
         base_documenter.analyzer = ModuleAnalyzer.for_module(
                 base_documenter.real_modname)
-        attr_docs = base_documenter.analyzer.find_attr_docs()
+        try:
+            attr_docs = base_documenter.analyzer.find_attr_docs()
+        except:
+            print("----", base_documenter.real_modname)
+            raise
 
         for documenter, check_module in documenters:
+            print(documenter.fullname)
             documenter.parse_name()
             documenter.import_object()
             documenter.real_modname = documenter.get_real_modname()
@@ -549,7 +553,7 @@ class AutoSummDirective(AutoDirective, Autosummary):
             else:
                 max_chars = max(10, max_item_chars - len(display_name))
                 sig = mangle_signature(sig, max_chars=max_chars)
-                #sig = sig.replace('*', r'\*')
+               # sig = sig.replace('*', r'\*')
 
             # -- Grab the documentation
 

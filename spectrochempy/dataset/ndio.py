@@ -89,7 +89,7 @@ class NDIO(HasTraits):
     from :class:`~spectrochempy.dataset.nddataset.NDDataset`
 
     This class is used as basic import/export interface of the
-    :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+    :class:`~spectrochempy.dataset.nddataset.NDDataset` .
 
     """
 
@@ -124,11 +124,10 @@ class NDIO(HasTraits):
         ----------
 
         filename : str
-
             The filename of the file where to save the current dataset
 
         directory : str, optional, default = ``options.scpdata``
-            If specified, the given `directory` and the `filename will be
+            If specified, the given `directory` and the `filename` will be
             appended.
 
         Examples
@@ -148,7 +147,7 @@ class NDIO(HasTraits):
         See Also
         ---------
 
-        :meth:`write`
+        write
 
         """
 
