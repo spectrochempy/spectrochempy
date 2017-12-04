@@ -43,16 +43,15 @@ Model parameters handling
 # ==============
 import sys
 import re  # For regular expression search
-import string
-import types
 from collections import \
     UserDict  # This is to be able to create a special dictionary
+
 from spectrochempy.application import app
+
 plotoptions = app.plotoptions
 log = app.log
 options = app
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.dataset.nddataset import NDDataset
 
 import numpy as np
 
@@ -65,7 +64,6 @@ from traitlets import (HasTraits, Unicode, Instance, List, observe)
 # constants
 # ==============
 __all__ = ['FitParameters', 'ParameterScript']
-_classes = __all__[:]
 
 
 # =============

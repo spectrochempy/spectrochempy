@@ -1,9 +1,9 @@
-.. _mod_spectrochempy_core_dataset_nddataset:
+.. _mod_nddataset:
 
 Dataset object
 ==============
 
-.. automodule:: spectrochempy.core.dataset.nddataset
+.. automodule:: spectrochempy.dataset.nddataset
     :no-members:
     :autosummary:
 

@@ -44,10 +44,10 @@ import pandas as pd
 import pytest
 
 from spectrochempy.api import *
-from spectrochempy.api import NDDataset, Coord, CoordSet, Meta, show
+from spectrochempy.api import NDDataset, Coord, CoordSet, show
 from spectrochempy.extern.pint.errors import (UndefinedUnitError,
                                               DimensionalityError)
-from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.utils import Meta, SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)

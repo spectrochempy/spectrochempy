@@ -41,7 +41,7 @@ _methods = __all__[:]
 
 import numpy as np
 
-from ..core.api import NDDataset
+from ..dataset.api import NDDataset
 
 
 def Lstsq(A, B, rcond=-1):

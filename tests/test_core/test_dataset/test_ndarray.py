@@ -35,23 +35,18 @@
 # =============================================================================
 
 from copy import copy, deepcopy
+from datetime import datetime
 
 import numpy as np
 import pytest
-from datetime import datetime
+from spectrochempy.dataset.ndarray import NDArray
 
 from spectrochempy.extern.pint.errors import DimensionalityError
-from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndcoords import CoordSet
-from spectrochempy.core.units import ur
-from spectrochempy.utils import (SpectroChemPyWarning,
-                                 SpectroChemPyDeprecationWarning)
-
-from spectrochempy.extern.traittypes import Array
-
-from tests.utils import (assert_equal, assert_array_equal,
-                         assert_array_almost_equal, assert_equal_units,
-                         raises, RandomSeedContext, catch_warnings)
+from spectrochempy.dataset.ndcoords import CoordSet
+from spectrochempy.units import ur
+from spectrochempy.utils import (SpectroChemPyWarning)
+from tests.utils import (assert_equal, assert_array_equal, raises,
+                         catch_warnings)
 
 
 #########################
@@ -222,7 +217,6 @@ def test_real_imag():
     d3 = NDArray(d)
     d3r = d3.real
     d3i = d3.imag
-    from spectrochempy.utils.arrayutils import interleave
     new = d3.copy()
     new.data = d3.real.data + 1j * d3.imag.data
     assert_equal( d3.data, new.data)

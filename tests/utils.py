@@ -56,21 +56,21 @@ import warnings
 
 import nbformat
 import pytest
+
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors.execute import CellExecutionError
-from numpy.testing import (assert_equal,
-                           assert_array_equal,
-                           assert_array_almost_equal,
-                           assert_approx_equal)
+from numpy.testing import (assert_equal, assert_array_equal,
+                           assert_array_almost_equal, assert_approx_equal)
+from spectrochempy.dataset.ndarray import masked
 
-from spectrochempy.core.dataset.ndarray import masked
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import SpectroChemPyWarning, \
-    SpectroChemPyDeprecationWarning, is_sequence, EPSILON
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.utils import (SpectroChemPyWarning,
+                                 SpectroChemPyDeprecationWarning, is_sequence,
+                                 EPSILON)
 from spectrochempy.application import app
+
 plotoptions = app.plotoptions
 log = app.log
 options = app

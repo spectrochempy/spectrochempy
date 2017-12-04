@@ -53,29 +53,22 @@ import glob
 import sys
 import logging
 import warnings
-from collections import defaultdict
+
+from traitlets.config.configurable import Configurable
+from traitlets.config.application import Application, catch_config_error
+from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe)
+from IPython import get_ipython
+import matplotlib as mpl
 
 # ==============================================================================
 # third party imports
 # ==============================================================================
 
-from traitlets.config.configurable import Configurable
-from traitlets.config.application import Application, catch_config_error
-
-from traitlets import (HasTraits, Instance,
-                       Bool, Unicode, Int, List, Dict, default, observe
-                       )
-
-from IPython.core.magic import UsageError
-from IPython import get_ipython
-
-import matplotlib as mpl
-
 # ==============================================================================
 # local imports
 # ==============================================================================
 
-__all__ = []  # no public methods
+__all__ = ['app']  # no public methods
 #__slots__ = ['app']
 # add iparallel client
 
@@ -154,10 +147,10 @@ class _SpectroChemPy(Application):
     """
     from spectrochempy.utils import docstrings
 
-    from spectrochempy.core.plotters.plottersoptions import PlotOptions
-    #from spectrochempy.core.readers.readersoptions import ReadOptions
-    #from spectrochempy.core.writers.writersoptions import WriteOptions
-    #from spectrochempy.core.processors.processorsoptions import ProcessOptions
+    from spectrochempy.plotters.plottersoptions import PlotOptions
+    #from spectrochempy.readers.readersoptions import ReadOptions
+    #from spectrochempy.writers.writersoptions import WriteOptions
+    #from spectrochempy.processors.processorsoptions import ProcessOptions
 
     # info ____________________________________________________________________
 
@@ -269,7 +262,7 @@ class _SpectroChemPy(Application):
     # --------------------------------------------------------------------------
 
     def _init_plotoptions(self):
-        from spectrochempy.core.plotters.plottersoptions import PlotOptions
+        from spectrochempy.plotters.plottersoptions import PlotOptions
         from spectrochempy.utils import install_styles
 
         # Pass config to other classes for them to inherit the config.
@@ -468,7 +461,7 @@ class _SpectroChemPy(Application):
 
             self.running = True
 
-            self.log.debug('MPL backend: ', mpl.get_backend())
+            self.log.debug('MPL backend: {}'.format(mpl.get_backend()))
 
             return True
 
@@ -503,7 +496,6 @@ class _SpectroChemPy(Application):
             self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
         self.log.level = self.log_level
         self.log.debug("changed default loglevel to {}".format(change.new))
-
 
 #: Main application object that should not be called directly by a end user.
 #: It is advisable to use the main `api`import to access all public methods of

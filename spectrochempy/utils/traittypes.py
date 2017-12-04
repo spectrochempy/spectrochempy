@@ -34,12 +34,7 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from traitlets import (TraitType, TraitError, List, Bool,
-                       Union, class_of, HasTraits)
-
-
-import numpy as np
-import copy
+from traitlets import (TraitType, TraitError, List, class_of, HasTraits)
 
 __all__ = []
 
@@ -148,7 +143,7 @@ class ArrayList(List):
         pass
 
     def validate_elements(self, obj, value):
-        from spectrochempy.core.dataset.ndarray import NDArray
+        from spectrochempy.dataset import NDArray
 
         if value is None or len(value) == 0:
             # we allow none so this is possible

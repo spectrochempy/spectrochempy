@@ -47,11 +47,6 @@ from spectrochempy.utils import SpectroChemPyWarning
 
 __all__ = []
 
-_classes = ['polynomialbaseline', 'gaussianmodel', 'lorentzianmodel',
-            'assymvoigtmodel', 'voigtmodel']
-
-_methods = ['getmodel']
-
 
 ############
 ###      ###

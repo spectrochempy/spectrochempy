@@ -34,23 +34,9 @@
 # knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
-from copy import copy, deepcopy
-
-import numpy as np
-import pytest
 from traitlets import TraitError
-from datetime import datetime
 
-from spectrochempy.extern.pint import DimensionalityError
-from spectrochempy.api import NDArray
-from spectrochempy.api import ur
 from tests.utils import (raises)
-from spectrochempy.core.units import ur
-from spectrochempy.utils import SpectroChemPyWarning
-from tests.utils import (assert_equal, assert_array_equal,
-                         assert_array_almost_equal, assert_equal_units,
-                         raises)
-from tests.utils import RandomSeedContext
 from spectrochempy.utils.traittypes import HasTraits, Range
 
 

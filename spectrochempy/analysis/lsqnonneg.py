@@ -39,7 +39,7 @@
 __all__ = ['Lsqnonneg']
 _methods = __all__[:]
 
-from ..core.api import NDDataset
+from ..dataset.api import NDDataset
 
 import numpy as np
 

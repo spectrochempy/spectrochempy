@@ -36,24 +36,19 @@
 
 
 __all__ = ['Pca']
-_classes = __all__[:]
 
 import matplotlib.pyplot as plt
-
 from traitlets import HasTraits, Instance
-
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
-from spectrochempy.utils import SpectroChemPyWarning
-
-from .svd import Svd
-
+from spectrochempy.dataset.nddataset import NDDataset
 import numpy as np
 
+from spectrochempy.dataset.ndcoords import Coord, CoordSet
+from .svd import Svd
 # ==============================================================================
 # Global preferences
 # ==============================================================================
 from spectrochempy.application import app
+
 plotoptions = app.plotoptions
 log = app.log
 options = app
@@ -72,7 +67,7 @@ class Pca(HasTraits):
 
     Parameters
     -----------
-    X : :class:`~spectrochempy.core.dataset.nddataset.NDDataset` object of
+    X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object of
     shape (``N``, ``M``)
 
     npc : int, optional

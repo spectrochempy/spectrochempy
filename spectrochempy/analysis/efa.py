@@ -35,12 +35,11 @@
 # =============================================================================
 
 __all__ = ['Efa']
-_classes = ['Efa']
 
 import numpy as np
 from scipy.linalg import svdvals
 
-from ..core.api import NDDataset
+from ..dataset.api import NDDataset
 
 
 class Efa:

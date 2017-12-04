@@ -65,7 +65,6 @@ from spectrochempy.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 
 __all__ = ['Fit']
-_classes = __all__[:]
 
 from spectrochempy.application import app
 plotoptions = app.plotoptions
@@ -106,7 +105,7 @@ class Fit(HasTraits):
 
     _ = Any
 
-    sources = List(Instance('spectrochempy.core.dataset.nddataset.NDDataset'))
+    sources = List(Instance('spectrochempy.dataset.nddataset.NDDataset'))
 
     parameterscript = Instance(ParameterScript)
 

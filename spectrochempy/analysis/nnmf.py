@@ -47,7 +47,6 @@ Licence ???
 # TODO: create  tests
 
 __all__ = ['Nnmf']
-_classes = __all__[:]
 
 import numpy as np
 from numpy.linalg import norm

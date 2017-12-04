@@ -36,15 +36,12 @@
 
 
 __all__ = ['Svd']
-_classes = __all__[:]
 
 from traitlets import HasTraits, Instance
-
-from spectrochempy.core.dataset.nddataset import NDDataset, CoordSet
-from spectrochempy.core.dataset.ndcoords import Coord
-from spectrochempy.utils import SpectroChemPyWarning
-
+from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 import numpy as np
+
+from spectrochempy.dataset.ndcoords import Coord
 
 
 class Svd(HasTraits):
@@ -58,7 +55,7 @@ class Svd(HasTraits):
     Parameters
     -----------
 
-    X : :class:`~spectrochempy.core.dataset.nddataset.NDDataset` object of
+    X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object of
     shape (``N``, ``M``)
 
     full_matrices : `bool`, optional, default=`False`.
@@ -74,14 +71,14 @@ class Svd(HasTraits):
     Attributes
     ----------
 
-    ur : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
+    ur : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
 
         ur contains the left unitary matrix.
         Its shape depends on `full_matrices`.
 
     s : `numpy.ndarray`. vector of singular values
 
-    Vt : :class:`~spectrochempy.core.dataset.dataset.NDDataset`.
+    Vt : :class:`~spectrochempy.dataset.dataset.NDDataset`.
 
         Vt contains a transpose matrix of the Loadings.
         Its shape depends on `full_matrices`

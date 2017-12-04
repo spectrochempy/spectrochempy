@@ -40,16 +40,18 @@ necessary features of NMR nuclei, such as their spin, larmor frequency and so on
 
 """
 
+import re
+from fractions import Fraction
+
 # =============================================================================
 # Standard imports
 # =============================================================================
 import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
-import re
-from fractions import Fraction
 
 from spectrochempy.application import app
+
 plotoptions = app.plotoptions
 log = app.log
 options = app
@@ -58,12 +60,12 @@ options = app
 # Third-party imports
 # =============================================================================
 from traitlets import (HasTraits,
-                       Unicode, Int, Float, Instance)
+                       Unicode, Instance)
 
 # =============================================================================
 # Local imports
 # =============================================================================
-from spectrochempy.core.units import ur
+from spectrochempy.units import ur
 
 # =============================================================================
 # Constants
@@ -71,7 +73,7 @@ from spectrochempy.core.units import ur
 
 # for the command : from .isotopes import *
 __all__ = ['Isotopes']
-_classes = __all__[:]
+
 
 # This module's package.
 PKG = 'spectrochempy.databases.isotopes'

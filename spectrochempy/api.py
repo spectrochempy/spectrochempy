@@ -84,21 +84,22 @@ __all__ = [
 
 # here we also construct the __all__ list automatically
 
+from spectrochempy.application import app
 from spectrochempy import application
 
-running = application.app.running
-version, dev_version, release = (application.app.version,
-                                 application.app.dev_version,
-                                 application.app.release)
-copyright = application.app.copyright
-log = application.app.log
-log_level = application.app.log_level
+running = app.running
+version, dev_version, release = (app.version,
+                                 app.dev_version,
+                                 app.release)
+copyright =  app.copyright
+log =  app.log
+log_level =  app.log_level
 
 # give a user friendly name to the objects containing configurables options
-plotoptions = application.app.plotoptions
-options = application.app
-scpdata = application.app.scpdata
-list_scpdata = application.app.list_scpdata
+plotoptions =  app.plotoptions
+options = app
+scpdata =  app.scpdata
+list_scpdata =  app.list_scpdata
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -112,6 +113,7 @@ __all__ += application.__all__
 __all__ += [
 
     ### Helpers
+    'app',
     'log', 'log_level', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
     'scpdata', 'list_scpdata',
     'plotoptions', 'options',
@@ -122,31 +124,74 @@ __all__ += [
 ]
 
 
-# core
-# ------
-from spectrochempy.core.api import *
-from spectrochempy.core import api
+# dataset
+# --------
+from spectrochempy.dataset.api import *
+from spectrochempy.dataset import api
 
 __all__ += api.__all__
 
-# databases
+# plotters
+# --------
+from spectrochempy.plotters.api import *
+from spectrochempy.plotters import api
+
+__all__ += api.__all__
+
+# processors
 # ----------
+from spectrochempy.processors.api import *
+from spectrochempy.processors import api
+
+__all__ += api.__all__
+
+# readers
+# -------
+from spectrochempy.readers.api import *
+from spectrochempy.readers import api
+
+__all__ += api.__all__
+
+# writers
+# -------
+from spectrochempy.writers.api import *
+from spectrochempy.writers import api
+
+__all__ += api.__all__
+
+# units
+# -----
+from spectrochempy.units.units import *
+from spectrochempy.units import units
+
+__all__ += units.__all__
+
+
+# databases
+# ---------
 from spectrochempy.databases.api import *
 from spectrochempy.databases import api
 
 __all__ += api.__all__
 
 # analysis
-# ---------
+# --------
 from spectrochempy.analysis.api import *
 from spectrochempy.analysis import api
 
 __all__ += api.__all__
 
 # fitting
-# --------
+# -------
 from spectrochempy.fitting.api import *
 from spectrochempy.fitting import api
+
+__all__ += api.__all__
+
+# project
+# -------
+from spectrochempy.projects.api import *
+from spectrochempy.projects import api
 
 __all__ += api.__all__
 

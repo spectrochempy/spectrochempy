@@ -1,28 +1,17 @@
 # coding=utf-8
 import matplotlib as mpl
-import sys
 
 matplotlib_backend = mpl.get_backend()
-
-import numpy as np
-import pandas as pd
-
-from spectrochempy.extern.pint import DimensionalityError
-
-from tests.utils import (assert_equal, assert_array_equal,
-                         assert_array_almost_equal, assert_equal_units,
-                         raises)
 
 from tests.utils import RandomSeedContext
 
 import pytest
 import numpy as np
 import os
-import sys
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndarray import  NDArray
-from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.dataset.ndarray import NDArray
+from spectrochempy.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.api import scpdata, plotoptions
 
 plotoptions.do_not_block = True

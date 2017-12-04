@@ -44,29 +44,29 @@ rst_epilog = """
 
 .. |scp| replace:: **SpectroChemPy**
 
-.. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+.. |NDDataset| replace:: :class:`~spectrochempy.dataset.nddataset.NDDataset`
 
-.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
+.. |Coord| replace:: :class:`~spectrochempy.dataset.ndcoord.Coord`
 
-.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoord.CoordRange`
+.. |CoordRange| replace:: :class:`~spectrochempy.dataset.ndcoord.CoordRange`
 
-.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
+.. |NDArray| replace:: :class:`~spectrochempy.dataset.ndarray.NDArray`
 
-.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndarray.CoordSet`
+.. |CoordSet| replace:: :class:`~spectrochempy.dataset.ndarray.CoordSet`
 
-.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
+.. |NDIO| replace:: :class:`~spectrochempy.dataset.ndio.NDIO`
 
-.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDNath`
+.. |NDMath| replace:: :class:`~spectrochempy.dataset.ndmath.NDNath`
 
-.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta`
+.. |Meta| replace:: :class:`~spectrochempy.dataset.ndmeta.Meta`
 
-.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
+.. |NDPlot| replace:: :class:`~spectrochempy.dataset.ndplot.NDPlot`
 
-.. |Unit| replace:: :class:`~spectrochempy.core.units.units.Unit``
+.. |Unit| replace:: :class:`~spectrochempy.units.units.Unit``
 
-.. |Quantity| replace:: :class:`~spectrochempy.core.units.units.Quantity`
+.. |Quantity| replace:: :class:`~spectrochempy.units.units.Quantity`
 
-.. |Measurement| replace:: :class:`~spectrochempy.core.units.units.Measurement`
+.. |Measurement| replace:: :class:`~spectrochempy.units.units.Measurement`
 
 
 

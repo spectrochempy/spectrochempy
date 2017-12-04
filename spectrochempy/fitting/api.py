@@ -63,3 +63,7 @@ for pkg in pkgs:
     __all__ += a
     for item in a:
         setattr(api, item, getattr(pkg, item))
+
+# ===========================================================================
+if __name__ == '__main__':
+    pass
