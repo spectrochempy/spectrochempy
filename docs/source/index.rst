@@ -20,16 +20,18 @@ What is |scp|?
 data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
 running on Linux, Windows or OS X.
 
-1.  A |NDDataset| object embedding array of data with coordinates and metadata.
-2.  `Units` and `Uncertainties` for |NDDataset| and |NDDataset| coordinates.
-3.  Mathematical operations over |NDDataset| such addition, multiplication
+#.  A |NDDataset| object embedding array of data with coordinates and metadata.
+#.  A |Project| manager to work on multiple |NDDataset| simultaneoulsly.
+#.  `Units` and `Uncertainties` for |NDDataset| and NDDataset coordinates
+    |Coord|.
+#.  Mathematical operations over |NDDataset| such addition, multiplication
     and many more ...
-4.  Import functions to read data from experiments or modelling programs ...
-5.  Display functions such as ``print``, ``plot`` ...
-6.  Export functions to ``csv``, ``xls`` ...
-7.  Preprocessing functions such as baseline correction, masking bad data,
+#.  Import functions to read data from experiments or modelling programs ...
+#.  Display functions such as ``print``, ``plot`` ...
+#.  Export functions to ``csv``, ``xls`` ...
+#.  Preprocessing functions such as baseline correction, masking bad data,
     automatic subtraction and many more ...
-8.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
+#.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
 
 .. warning::
 
@@ -54,29 +56,36 @@ Installation
 Documentation
 ===============
 
-Last updated Html documentation is always available here:
+Last updated Html documentation is always available there:
 
 * `http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
 
-Pdf documentation can also be downloaded here:
+Pdf documentation can also be downloaded there:
 
 * `spectrochempy.pdf <http://www-lcs.ensicaen.fr/cfnews/spectrochempy/pdf/spectrochempy.pdf>`_
 
 
 .. _main_user_documentation:
 
+User Documentation
+==================
+
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     user/index
+
+
+.. _gallery_of_examples:
 
 Gallery of examples
 =====================
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     auto_examples/index
+
 
 .. _main_issue_tracker:
 
@@ -87,13 +96,14 @@ You find a problem, want to suggest enhancement or want to look at the current i
 
 * `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
-.. _main_citing:
 
-
+Developper documentation
+========================
 .. _main_developper:
 
+
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     dev/index
 
@@ -104,7 +114,7 @@ See also
 =========
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     seealso
 
@@ -114,7 +124,7 @@ See also
 Changes in the last release
 =============================
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     changelog
 
@@ -128,9 +138,11 @@ When using |scp| for your own work, you are kindly requested to cite it this
 way::
 
      Arnaud Travert & Christian Fernandez,
-     **SpectroChemPy**, a framework for processing, analysing and modelling of Spectroscopic data for Chemistry with Python
-     https://bitbucket.org/spectrocat/spectrochempy, (version 0.1)
-     Laboratoire Catalyse and Spectrochemistry, ENSICAEN/Université de Caen/CNRS, 2017
+     SpectroChemPy, a framework for processing, analysing and modelling of
+     Spectroscopic data for Chemistry with Python
+     https://bitbucket.org/spectrocat/spectrochempy, (version 0.1a)
+     Laboratoire Catalyse and Spectrochemistry,
+     ENSICAEN/Université de Caen/CNRS, 2017
 
 
 .. _main_credits:
@@ -138,7 +150,7 @@ way::
 Credits
 =======
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     credits
 

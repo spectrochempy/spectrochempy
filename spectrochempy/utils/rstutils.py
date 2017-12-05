@@ -26,13 +26,17 @@ rst_epilog = """
 
 .. |scp| replace:: **SpectroChemPy**
 
+.. |Project| replace:: :class:`~spectrochempy.dataset.ndarray.Project`
+
+.. |Script| replace:: :class:`~spectrochempy.dataset.ndarray.Script`
+
+.. |NDArray| replace:: :class:`~spectrochempy.dataset.ndarray.NDArray`
+
 .. |NDDataset| replace:: :class:`~spectrochempy.dataset.nddataset.NDDataset`
 
 .. |Coord| replace:: :class:`~spectrochempy.dataset.ndcoord.Coord`
 
 .. |CoordRange| replace:: :class:`~spectrochempy.dataset.ndcoord.CoordRange`
-
-.. |NDArray| replace:: :class:`~spectrochempy.dataset.ndarray.NDArray`
 
 .. |CoordSet| replace:: :class:`~spectrochempy.dataset.ndarray.CoordSet`
 

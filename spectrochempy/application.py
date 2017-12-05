@@ -148,23 +148,25 @@ class _SpectroChemPy(Application):
         from spectrochempy.utils import get_version
         return get_version()[0]
 
-    @default('dev_version')
-    def _get_dev_version(self):
-        from spectrochempy.utils import get_version
-        return get_version()[1]
-
     @default('release')
     def _get_release(self):
         from spectrochempy.utils import get_version
-        return get_version()[2]
+        return get_version()[1]
 
-    copyright = Unicode('').tag(config=True)
+    @default('dev_version')
+    def _get_dev_version(self) :
+        from spectrochempy.utils import get_version
+        if len(get_version())>2:
+            return get_version()[2]
+        else:
+            return get_version()[0]
+
+    copyright = Unicode('')
 
     @default('copyright')
     def _get_copyright(self):
-        copyright = '2014-2017'  # TODO put current year%
-        copyright += ' - LCS (Laboratory for Catalysis and Spectrochempy)'
-        return copyright
+        from spectrochempy.utils import get_copyright
+        return get_copyright()[3]
 
     classes = List([PlotOptions, ])  # TODO: check if this still usefull
 

@@ -24,7 +24,7 @@ from traitlets import (Dict, List, Bool, Instance, Unicode, HasTraits, This,
 from traitlets.config.configurable import Configurable
 
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.pyscripts.pyscripts import PyScript
+from spectrochempy.scripts.scripts import Script
 from spectrochempy.utils.meta import Meta
 from .baseproject import AbstractProject
 
@@ -46,7 +46,7 @@ class Project(AbstractProject):
     _parent = This
     _projects = Dict(This)
     _datasets = Dict(Instance(NDDataset))
-    _scripts = Dict(Instance(PyScript))
+    _scripts = Dict(Instance(Script))
     _others = Dict()
     _meta = Instance(Meta)
 
@@ -58,7 +58,7 @@ class Project(AbstractProject):
         ----------
         args: series of objects, optional.
             argument type will be interpreted correctly if they are of type
-            |NDDataset|, |Project|, or other objects such as |Scripts|.
+            |NDDataset|, |Project|, or other objects such as |Script|.
             This is optional, as they can be added later.
         name : str, optional.
             The name of the project.  If the name is not provided, it will
@@ -89,7 +89,7 @@ class Project(AbstractProject):
         elif isinstance(obj ,type(self)):  # can not use Project here!
             self.add_project(obj, name)
 
-        elif isinstance(obj, PyScript):
+        elif isinstance(obj, Script):
             self.add_script(obj, name)
 
         elif hasattr(obj, 'name'):
@@ -103,7 +103,7 @@ class Project(AbstractProject):
     # ........................................................................
     def _get_from_type(self, name):
         pass
-
+        #TODO: ???
 
     # ------------------------------------------------------------------------
     # Special methods
@@ -222,7 +222,8 @@ class Project(AbstractProject):
     @property
     def name(self):
         """
-        str - An user friendly name for the project
+        str - An user friendly name for the project. The default is
+        automatically generated.
 
         """
         return self._name
@@ -239,6 +240,11 @@ class Project(AbstractProject):
     # ........................................................................
     @property
     def parent(self):
+        """
+        object - instance of the Project which is the parent (if any) of the
+        current project.
+
+        """
         return self._parent
 
     # ........................................................................
@@ -265,11 +271,21 @@ class Project(AbstractProject):
     # ........................................................................
     @property
     def meta(self):
+        """
+        meta - instance of Meta that contains all attribute except the name,
+        id and parent of the current Project
+
+        """
         return self._meta
 
     # ........................................................................
     @property
     def datasets_names(self) :
+        """
+        list - list of the datasets included in this project (do not return
+        those eventuallly located in sub-folders)
+
+        """
         lst = self._datasets.keys()
         lst = sorted(lst)
         return lst

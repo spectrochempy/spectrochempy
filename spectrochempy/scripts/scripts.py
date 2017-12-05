@@ -16,10 +16,10 @@
 
 from traitlets import HasTraits
 
-__all__ = ['PyScript']
+__all__ = ['Script']
 
 
-class PyScript(HasTraits):
+class Script(HasTraits):
 
     def __init__(self):
 

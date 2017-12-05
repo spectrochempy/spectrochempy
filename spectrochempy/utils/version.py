@@ -18,12 +18,20 @@
 
 import os
 import sys
+import datetime
 import subprocess
 import setuptools_scm
 from pkg_resources import get_distribution, DistributionNotFound
 
-__all__ = ['get_version','get_version_date', 'get_release_date']
+__all__ = ['get_version','get_version_date', 'get_release_date',
+           'get_copyright']
 
+# ............................................................................
+def get_copyright():
+    current_year = datetime.date.today().year
+    copyright = '2014-{}'.format(current_year)
+    copyright += ' - A.Travert and C.Fernandez @ LCS'
+    return copyright
 
 # .............................................................................
 def get_version(root=os.path.join(os.path.dirname(__file__), '../..'),
@@ -58,10 +66,12 @@ def get_version(root=os.path.join(os.path.dirname(__file__), '../..'),
         if len(_v) > 1:
             version = "%s%d.dev"%(_v[0][:-1],int(_v[0][-1:])+1)
         f.write("version = '%s'\n" % version)
-        #f.write("dev_version = '%s'\n" % dev_version)
+        # f.write("dev_version = '%s'\n" % dev_version) # finally we do
+        # number the revision, because of the mess. any commit, leading to a
+        #  new need for commit!
         f.write("release = '%s' " % release)
 
-    return version, dev_version, release
+    return version, release, dev_version
 
 # .............................................................................
 def get_release_date():
