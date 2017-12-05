@@ -1,11 +1,11 @@
 #!/bin/bash
 
 
-source ~/.bash_profile
+#source ~/.bash_profile
 
 # to make it work with matplotlib/latex
-export PATH=$PATH:/Library/TeX/texbin/
+#export PATH=$PATH:/Library/TeX/texbin/
 
-python docs/builddocs.py release
+#python docs/builddocs.py release
 
 
