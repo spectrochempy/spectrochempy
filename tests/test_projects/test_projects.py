@@ -4,34 +4,14 @@
 # Copyright (©) 2015-2017 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
-# This software is a computer program whose purpose is to [describe
-# functionalities and technical features of your software].
+# This software is a computer program whose purpose is to provide a general
+# API for displaying, processing and analysing spectrochemical data.
 #
 # This software is governed by the CeCILL license under French law and
 # abiding by the rules of distribution of free software. You can use,
 # modify and/ or redistribute the software under the terms of the CeCILL
 # license as circulated by CEA, CNRS and INRIA at the following URL
 # "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty and the software's author, the holder of the
-# economic rights, and the successive licensors have only limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading, using, modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean that it is complicated to manipulate, and that also
-# therefore means that it is reserved for developers and experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and, more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
 from spectrochempy.api import *
@@ -75,26 +55,66 @@ def test_project(ds1, ds2, dsm):
     ds2.name = 'tata'
     dsm.name = 'titi'
 
+    ds = ds1[:10,INPLACE]
+    assert ds is ds1
+    print(ds1.shape, ds.shape)
 
     myp.add_datasets(ds1, ds2, dsm)
 
-    assert myp.dataset_names()[-1]=='toto'
+    print(myp.datasets_names)
+    assert myp.datasets_names[-1]=='titi'  # because toto has changed to *toto
+    assert ds1.parent == myp
+
 
     # iteration
     d=[]
     for item in myp:
         d.append(item)
 
-    assert d[1][0] == 'titi'
+    assert d[1][0] == 'tata'
 
     ##
     # add sub project
     msp1 = Project(name='AGIR ATG')
     msp1.add_dataset(ds1)
+    assert ds1.parent == msp1   #ds1 has changed of project
+    assert ds1.name not in myp.datasets_names
 
     msp2 = Project(name='AGIR IR')
 
-    myp.add_subprojects(msp1, msp2)
+    myp.add_projects(msp1, msp2)
 
     print(myp)
+    # an object can be accessed by it's name whatever it's type
+    assert 'tata' in myp.allnames
+    myp['titi']
+    assert myp['titi'] == dsm
 
+    # import multiple objects in Project
+    myp2 = Project(msp1, msp2, ds1, ds2)  #multi dataset and project and no
+    # names
+
+    print(myp2)
+
+    # Example from tutorial agir notebook
+    proj = Project(
+            Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+            Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
+            Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
+            name='HIZECOKE' )
+
+    assert proj.projects_names == ['A350', 'B350', 'P350']
+
+
+    # add a dataset to a subproject
+    ir = NDDataset()
+    tg = NDDataset()
+    proj.A350['IR'] = ir
+
+
+
+    print(proj.A350)
+
+    print(proj)
+
+    print(proj.projects)
