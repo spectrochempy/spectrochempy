@@ -7,7 +7,7 @@ This is an extended documentation of |scp|.
 
 To get started with |scp| it is advisable to look first at
 the :ref:`userguide`. For a more advanced use of |scp|, you can also have a
-look at the :ref:`devguide`.
+look at the :ref:`develguide`.
 
 
 The NDDataset object

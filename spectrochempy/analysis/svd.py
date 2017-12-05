@@ -4,47 +4,26 @@
 # Copyright (©) 2015-2018 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
-# This software is a computer program whose purpose is to [describe
-# functionalities and technical features of your software].
+# This software is a computer program whose purpose is to provide a general
+# API for displaying, processing and analysing spectrochemical data.
 #
 # This software is governed by the CeCILL license under French law and
 # abiding by the rules of distribution of free software. You can use,
 # modify and/ or redistribute the software under the terms of the CeCILL
 # license as circulated by CEA, CNRS and INRIA at the following URL
 # "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty and the software's author, the holder of the
-# economic rights, and the successive licensors have only limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading, using, modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean that it is complicated to manipulate, and that also
-# therefore means that it is reserved for developers and experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and, more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
 
 
+
+
 __all__ = ['Svd']
-_classes = __all__[:]
 
 from traitlets import HasTraits, Instance
-
-from spectrochempy.core.dataset.nddataset import NDDataset, CoordSet
-from spectrochempy.core.dataset.ndcoords import Coord
-from spectrochempy.utils import SpectroChemPyWarning
-
+from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 import numpy as np
+
+from spectrochempy.dataset.ndcoords import Coord
 
 
 class Svd(HasTraits):
@@ -58,7 +37,7 @@ class Svd(HasTraits):
     Parameters
     -----------
 
-    X : :class:`~spectrochempy.core.dataset.nddataset.NDDataset` object of
+    X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object of
     shape (``N``, ``M``)
 
     full_matrices : `bool`, optional, default=`False`.
@@ -74,14 +53,14 @@ class Svd(HasTraits):
     Attributes
     ----------
 
-    ur : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`.
+    ur : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
 
         ur contains the left unitary matrix.
         Its shape depends on `full_matrices`.
 
     s : `numpy.ndarray`. vector of singular values
 
-    Vt : :class:`~spectrochempy.core.dataset.dataset.NDDataset`.
+    Vt : :class:`~spectrochempy.dataset.dataset.NDDataset`.
 
         Vt contains a transpose matrix of the Loadings.
         Its shape depends on `full_matrices`

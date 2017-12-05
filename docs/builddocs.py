@@ -4,35 +4,17 @@
 # Copyright (©) 2015-2018 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
-# This software is a computer program whose purpose is to [describe
-# functionalities and technical features of your software].
+# This software is a computer program whose purpose is to provide a general
+# API for displaying, processing and analysing spectrochemical data.
 #
 # This software is governed by the CeCILL license under French law and
 # abiding by the rules of distribution of free software. You can use,
 # modify and/ or redistribute the software under the terms of the CeCILL
 # license as circulated by CEA, CNRS and INRIA at the following URL
 # "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty and the software's author, the holder of the
-# economic rights, and the successive licensors have only limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading, using, modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean that it is complicated to manipulate, and that also
-# therefore means that it is reserved for developers and experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and, more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
+
+
 
 """Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 
@@ -68,8 +50,7 @@ from spectrochempy.utils import (list_packages, get_version,
                                  get_release_date, get_version_date)
 from traitlets import import_item
 
-import logging
-log_level = logging.ERROR
+options.log_level = ERROR
 
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
@@ -118,36 +99,40 @@ def gitcommands():
 
         pass
 
-def make_docs(*options):
+def make_docs(*args):
     """Make the html and pdf documentation
 
     """
 
 
-    options = list(options)
-    if 'release' in options:
+    args = list(args)
+    if 'release' in args:
         do_release()
         return
 
-    # make sure commits have been done
-    gitcommands()
+    if 'nocommit' in args:
+        nocommit = True
 
-    DEBUG = 'DEBUG' in options
+    # make sure commits have been done (if not nocommit flag set)
+    if not nocommit:
+        gitcommands()
+
+    DEBUG = 'DEBUG' in args
 
     if DEBUG:
-        log_level = logging.DEBUG
+        options.log_level = ERROR
 
     builders = []
-    if  'html' in options:
+    if  'html' in args:
         builders.append('html')
 
-    if 'pdf' in options:
+    if 'pdf' in args:
         builders.append('latex')
 
-    if 'clean' in options:
+    if 'clean' in args:
         clean()
         make_dirs()
-        options.remove('clean')
+        args.remove('clean')
         log.info('\n\nOld documentation now erased.\n\n')
 
     for builder in builders:
@@ -178,7 +163,8 @@ def make_docs(*options):
             res = subprocess.call([cmd], shell=True, executable='/bin/bash')
             log.info(res)
 
-        gitcommands()  # update repository
+        if not nocommit:
+            gitcommands()  # update repository
 
         log.info(
         "\n\nBuild finished. The {0} pages are in {1}/{2}.".format(

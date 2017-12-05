@@ -4,35 +4,17 @@
 # Copyright (©) 2015-2018 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
-# This software is a computer program whose purpose is to [describe
-# functionalities and technical features of your software].
+# This software is a computer program whose purpose is to provide a general
+# API for displaying, processing and analysing spectrochemical data.
 #
 # This software is governed by the CeCILL license under French law and
 # abiding by the rules of distribution of free software. You can use,
 # modify and/ or redistribute the software under the terms of the CeCILL
 # license as circulated by CEA, CNRS and INRIA at the following URL
 # "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty and the software's author, the holder of the
-# economic rights, and the successive licensors have only limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading, using, modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean that it is complicated to manipulate, and that also
-# therefore means that it is reserved for developers and experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and, more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL license and that you accept its terms.
 # =============================================================================
+
+
 
 """
 This module define the `application` on which the API rely.
@@ -53,29 +35,22 @@ import glob
 import sys
 import logging
 import warnings
-from collections import defaultdict
+
+from traitlets.config.configurable import Configurable
+from traitlets.config.application import Application, catch_config_error
+from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe)
+from IPython import get_ipython
+import matplotlib as mpl
 
 # ==============================================================================
 # third party imports
 # ==============================================================================
 
-from traitlets.config.configurable import Configurable
-from traitlets.config.application import Application, catch_config_error
-
-from traitlets import (HasTraits, Instance,
-                       Bool, Unicode, Int, List, Dict, default, observe
-                       )
-
-from IPython.core.magic import UsageError
-from IPython import get_ipython
-
-import matplotlib as mpl
-
 # ==============================================================================
 # local imports
 # ==============================================================================
 
-__all__ = []  # no public methods
+__all__ = ['app']  # no public methods
 #__slots__ = ['app']
 # add iparallel client
 
@@ -154,10 +129,10 @@ class _SpectroChemPy(Application):
     """
     from spectrochempy.utils import docstrings
 
-    from spectrochempy.core.plotters.plottersoptions import PlotOptions
-    #from spectrochempy.core.readers.readersoptions import ReadOptions
-    #from spectrochempy.core.writers.writersoptions import WriteOptions
-    #from spectrochempy.core.processors.processorsoptions import ProcessOptions
+    from spectrochempy.plotters.plottersoptions import PlotOptions
+    #from spectrochempy.readers.readersoptions import ReadOptions
+    #from spectrochempy.writers.writersoptions import WriteOptions
+    #from spectrochempy.processors.processorsoptions import ProcessOptions
 
     # info ____________________________________________________________________
 
@@ -269,7 +244,7 @@ class _SpectroChemPy(Application):
     # --------------------------------------------------------------------------
 
     def _init_plotoptions(self):
-        from spectrochempy.core.plotters.plottersoptions import PlotOptions
+        from spectrochempy.plotters.plottersoptions import PlotOptions
         from spectrochempy.utils import install_styles
 
         # Pass config to other classes for them to inherit the config.
@@ -468,7 +443,7 @@ class _SpectroChemPy(Application):
 
             self.running = True
 
-            self.log.debug('MPL backend: ', mpl.get_backend())
+            self.log.debug('MPL backend: {}'.format(mpl.get_backend()))
 
             return True
 
@@ -504,9 +479,8 @@ class _SpectroChemPy(Application):
         self.log.level = self.log_level
         self.log.debug("changed default loglevel to {}".format(change.new))
 
-
 #: Main application object that should not be called directly by a end user.
-#: It is advisable to use the main `api`import to access all public methods of
+#: It is advisable to use the main `api` import to access all public methods of
 #: this object.
 app = _SpectroChemPy()
 

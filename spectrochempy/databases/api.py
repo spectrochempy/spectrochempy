@@ -1,7 +1,7 @@
 import sys
+
 from traitlets import import_item
 
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import list_packages
 
 name = 'databases'
@@ -23,3 +23,7 @@ for pkg in pkgs:
     for item in a:
         # setattr(NDDataset, item, getattr(pkg, item))
         setattr(api, item, getattr(pkg, item))
+
+# ===========================================================================
+if __name__ == '__main__':
+    pass
