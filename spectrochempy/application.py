@@ -26,9 +26,9 @@ accessed directly by the end user.
 
 """
 
-# ==============================================================================
+# ============================================================================
 # standard library import
-# ==============================================================================
+# ============================================================================
 
 import os
 import glob
@@ -36,26 +36,22 @@ import sys
 import logging
 import warnings
 
+# ============================================================================
+# third party imports
+# ============================================================================
+
 from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, catch_config_error
-from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe)
+from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe,
+                       import_item)
 from IPython import get_ipython
 import matplotlib as mpl
 
-# ==============================================================================
-# third party imports
-# ==============================================================================
-
-# ==============================================================================
-# local imports
-# ==============================================================================
+# ============================================================================
+# constants
+# ============================================================================
 
 __all__ = ['app']  # no public methods
-#__slots__ = ['app']
-# add iparallel client
-
-# pcl = ipp.Client()[:]  #TODO: parallelization
-
 
 
 # ==============================================================================
@@ -111,8 +107,30 @@ class _SCPData(Configurable):
     @default('_data')
     def _get__data_default(self):
         # the spectra path in package data
-        from spectrochempy.utils import get_pkg_data_dir
-        return get_pkg_data_dir('testdata', 'scp_data')
+        return self._get_pkg_data_dir('testdata', 'scp_data')
+
+
+    def _get_pkg_data_dir(self, data_name, package=None) :
+
+        data_name = os.path.normpath(data_name)
+
+        datadir = self._find_pkg_data_path(data_name, package=package)
+
+        if not os.path.isdir(datadir) :
+            return os.path.dirname(datadir)
+
+        return datadir
+
+    def _find_pkg_data_path(self, data_name, package) :
+        """
+        Look for data in the source-included data directories and return the
+        path.
+        """
+
+        path = os.path.dirname(import_item(package).__file__)
+        path = os.path.join(path, data_name)
+
+        return path
 
 
 # ==============================================================================
@@ -129,6 +147,7 @@ class _SpectroChemPy(Application):
     """
     from spectrochempy.utils import docstrings
 
+    from spectrochempy.projects.projectsoptions import ProjectsOptions
     from spectrochempy.plotters.plottersoptions import PlotOptions
     #from spectrochempy.readers.readersoptions import ReadOptions
     #from spectrochempy.writers.writersoptions import WriteOptions
@@ -166,9 +185,9 @@ class _SpectroChemPy(Application):
     @default('copyright')
     def _get_copyright(self):
         from spectrochempy.utils import get_copyright
-        return get_copyright()[3]
+        return get_copyright()
 
-    classes = List([PlotOptions, ])  # TODO: check if this still usefull
+    classes = List([PlotOptions, ProjectsOptions])  # TODO: check if this still usefull
 
     # configuration parameters  ________________________________________________
 
@@ -189,8 +208,7 @@ class _SpectroChemPy(Application):
 
     @default('config_dir')
     def _get_config_dir_default(self):
-        from spectrochempy.utils import get_config_dir
-        return get_config_dir()
+        return self.get_config_dir()
 
     info_on_loading = Bool(True,
                            help='display info on loading').tag(config=True)
@@ -241,10 +259,6 @@ class _SpectroChemPy(Application):
     backend = Unicode('spectrochempy', help='backend to be used in the '
                                             'application').tag(config=True)
 
-    # --------------------------------------------------------------------------
-    # Initialisation of the plot options
-    # --------------------------------------------------------------------------
-
     def _init_plotoptions(self):
         from spectrochempy.plotters.plottersoptions import PlotOptions
         from spectrochempy.utils import install_styles
@@ -264,6 +278,12 @@ class _SpectroChemPy(Application):
 
         # also install style to be sure everything is set
         install_styles()
+
+    def _init_projectsoptions(self):
+
+        from spectrochempy.projects.projectsoptions import ProjectsOptions
+
+        self.projectsoptions = ProjectsOptions(config=self.config)
 
     def __init__(self, *args, **kwargs):
         super(_SpectroChemPy, self).__init__(*args, **kwargs)
@@ -317,6 +337,7 @@ class _SpectroChemPy(Application):
         # ---------------------------------------------------------------------
 
         self._init_plotoptions()
+        self._init_projectsoptions()
 
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
@@ -376,12 +397,12 @@ class _SpectroChemPy(Application):
             ip.set_custom_exc((Exception,), _custom_exc)
 
         # Possibly write the default config file
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------
         self._make_default_config_file()
 
-    # --------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # start the application
-    # --------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     @docstrings.get_sectionsf('SpectroChemPy.start')
     @docstrings.dedent
@@ -432,8 +453,8 @@ class _SpectroChemPy(Application):
                 self.log_level = logging.DEBUG
                 self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
 
-            info_string = "SpectroChemPy's API - v.{}, " \
-                          "Copyright {}".format(self.version, self.copyright)
+            info_string = "SpectroChemPy's API - v.{}\n" \
+                          "© Copyright {}".format(self.version, self.copyright)
 
             if self.info_on_loading and \
                     not self.plotoptions.do_not_block:
@@ -468,6 +489,49 @@ class _SpectroChemPy(Application):
             self.log.warning("Generating default config file: %r" % fname)
             with open(fname, 'w') as f:
                 f.write(s)
+
+    def _find_or_create_spectrochempy_dir(self, directory) :
+
+        directory = os.path.join(os.path.expanduser('~'),
+                                 '.spectrochempy', directory)
+
+        if not os.path.exists(directory) :
+            os.makedirs(directory, exist_ok=True)
+        elif not os.path.isdir(directory) :
+            msg = 'Intended SpectroChemPy directory `{0}` is ' \
+                  'actually a file.'
+            raise IOError(msg.format(directory))
+
+        return os.path.abspath(directory)
+
+    def get_config_dir(self, create=True) :
+        """
+        Determines the SpectroChemPy configuration directory name and
+        creates the directory if it doesn't exist.
+
+        This directory is typically ``$HOME/.spectrochempy/config``,
+        but if the
+        SCP_CONFIG_HOME environment variable is set and the
+        ``$SCP_CONFIG_HOME`` directory exists, it will be that
+        directory.
+
+        If neither exists, the former will be created.
+
+        Returns
+        -------
+        configdir : str
+            The absolute path to the configuration directory.
+
+        """
+
+        # first look for SCP_CONFIG_HOME
+        scp = os.environ.get('SCP_CONFIG_HOME')
+
+        if scp is not None and os.path.exists(scp) :
+            return os.path.abspath(scp)
+
+        return os.path.abspath(
+            self._find_or_create_spectrochempy_dir('config'))
 
     # --------------------------------------------------------------------------
     # Events from Application

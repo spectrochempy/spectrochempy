@@ -14,9 +14,6 @@
 # "http://www.cecill.info".
 # =============================================================================
 
-
-
-
 """
 This package provides classes and functions to perform spectral analysis.
 

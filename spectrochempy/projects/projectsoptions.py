@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2018 LCS
+# Copyright (©) 2015-2017 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # This software is a computer program whose purpose is to provide a general
@@ -14,13 +14,26 @@
 # "http://www.cecill.info".
 # =============================================================================
 
+import uuid
+
+from traitlets import (Dict, List, Bool, Instance, Unicode, HasTraits, This,
+                       Any, default)
+from traitlets.config.configurable import Configurable
 
 
-from spectrochempy.utils.file import get_pkg_data_dir as get_data
+__all__ = ['ProjectsOptions']
 
-def test_get_pkg_data():
 
-    f = get_data('testdata/essai.scp','tests')
-    print(f)
+# ============================================================================
+class ProjectsOptions(Configurable) :
 
+    projects_directory = Unicode(help='location where all projects are '
+                                     'strored by defauult').tag(config=True)
+
+import warnings
+
+__all__ = []
+
+# ============================================================================
+if __name__ == '__main__' :
     pass

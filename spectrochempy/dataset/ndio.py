@@ -522,26 +522,5 @@ write = NDIO.write
 
 if __name__ == '__main__':
 
-    # test interactive masks
-
-    from spectrochempy.api import *
-
-    A = NDDataset.read_omnic(
-                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
-    A.y -= A.y[0]
-    A.y.to('hour', inplace=True)
-    A.y.title = u'Aquisition time'
-    ax = A[:,1600.:4000.].plot_stack(y_showed = [2.,6.])
-
-    def _test_save():
-
-        A.save('essai')
-        A.save('essai2')
-
-        os.remove(os.path.join(scpdata, 'essai.scp'))
-        os.remove(os.path.join(scpdata, 'essai2.scp'))
-
-    _test_save()
-    show()
-
+    pass
 

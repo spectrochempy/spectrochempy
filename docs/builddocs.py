@@ -92,8 +92,9 @@ def gitcommands():
         (so, serr) = pipe.communicate()
         OUTPUT = so.decode("ascii")
 
-        pipe = subprocess.Popen(
-                ["git", "commit", "--no-verify", "--amend", "-m", '%s' % OUTPUT],
+        pipe = subprocess.Popen(  #-amend
+                ["git", "commit", "--no-verify", "-m 'DOC:updated'", '%s' %
+                 OUTPUT],
                 stdout=subprocess.PIPE)
         (so, serr) = pipe.communicate()
 
@@ -104,11 +105,7 @@ def make_docs(*args):
 
     """
 
-
     args = list(args)
-    if 'release' in args:
-        do_release()
-        return
 
     if 'nocommit' in args:
         nocommit = True
@@ -170,7 +167,10 @@ def make_docs(*args):
         "\n\nBuild finished. The {0} pages are in {1}/{2}.".format(
             builder.upper(), BUILDDIR, builder))
 
+    if 'release' in args:
+        do_release()
 
+    return True
 
 
 def do_release():

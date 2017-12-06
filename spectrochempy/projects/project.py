@@ -14,28 +14,24 @@
 # "http://www.cecill.info".
 # =============================================================================
 
-
-
-
 import uuid
 
-from traitlets import (Dict, List, Bool, Instance, Unicode, HasTraits, This,
+from traitlets import (Dict, List, Bool, Instance, Unicode, This,
                        Any, default)
-from traitlets.config.configurable import Configurable
 
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.scripts.scripts import Script
 from spectrochempy.utils.meta import Meta
 from .baseproject import AbstractProject
 
-__all__ = ['Project', 'ProjectsOptions']
 
-class ProjectsOptions(Configurable):
+__all__ = ['Project']
 
-    default_directory = Unicode(help='location where all projects are '
-                                     'strored by defauult').tag(config=True)
 
-class Project(AbstractProject):
+# ============================================================================
+# Project class
+# ============================================================================
+class Project(AbstractProject) :
     """A manager for multiple projects and datasets in a main project
 
     """
@@ -50,9 +46,8 @@ class Project(AbstractProject):
     _others = Dict()
     _meta = Instance(Meta)
 
-
     # ........................................................................
-    def __init__(self, *args, name=None, **meta):
+    def __init__(self, *args, name=None, **meta) :
         """
         Parameters
         ----------
@@ -69,10 +64,10 @@ class Project(AbstractProject):
         self.parent = None
         self.name = name
 
-        if meta:
+        if meta :
             self.meta.update(meta)
 
-        for obj in args:
+        for obj in args :
             self._set_from_type(obj)
 
     # ------------------------------------------------------------------------
@@ -80,123 +75,122 @@ class Project(AbstractProject):
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    def _set_from_type(self, obj, name=None):
+    def _set_from_type(self, obj, name=None) :
 
         if isinstance(obj, NDDataset) :
             # add it to the _datasets dictionary
             self.add_dataset(obj, name)
 
-        elif isinstance(obj ,type(self)):  # can not use Project here!
+        elif isinstance(obj, type(self)) :  # can not use Project here!
             self.add_project(obj, name)
 
-        elif isinstance(obj, Script):
+        elif isinstance(obj, Script) :
             self.add_script(obj, name)
 
-        elif hasattr(obj, 'name'):
-            self._others[obj.name]=obj
+        elif hasattr(obj, 'name') :
+            self._others[obj.name] = obj
 
-        else:
+        else :
             raise ValueError('objects of type {} has no name and so '
-                             'cannot be appended to the project '.format(type(
-                              obj).__name__))
+                             'cannot be appended to the project '.format(
+                type(obj).__name__))
 
     # ........................................................................
-    def _get_from_type(self, name):
+    def _get_from_type(self, name) :
         pass
-        #TODO: ???
+        # TODO: ???
 
     # ------------------------------------------------------------------------
     # Special methods
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    def __getitem__(self, key):
-
-        if not isinstance(key, str):
-            raise KeyError('The key must be a string.')
-
-        if key in self.datasets_names:
-            return self._datasets[key]
-        elif key in self.projects_names:
-            return self._projects[key]
-        elif key in self.scripts_names:
-            return self._scripts[key]
-        else:
-            raise KeyError("This object name does not exist in this project.")
-
-    # ........................................................................
-    def __setitem__(self, key, value):
+    def __getitem__(self, key) :
 
         if not isinstance(key, str) :
             raise KeyError('The key must be a string.')
 
-        if key in self.allnames and \
-                not isinstance(value, type(self[key])) :
+        if key in self.datasets_names :
+            return self._datasets[key]
+        elif key in self.projects_names :
+            return self._projects[key]
+        elif key in self.scripts_names :
+            return self._scripts[key]
+        else :
+            raise KeyError("This object name does not exist in this project.")
+
+    # ........................................................................
+    def __setitem__(self, key, value) :
+
+        if not isinstance(key, str) :
+            raise KeyError('The key must be a string.')
+
+        if key in self.allnames and not isinstance(value, type(self[key])) :
             raise ValueError('the key exists but for a different type '
                              'of object: {}'.format(type(self[key]).__name__))
 
-        if key in self.datasets_names:
+        if key in self.datasets_names :
             self._datasets[key] = value
         elif key in self.projects_names :
             self._projects[key] = value
         elif key in self.scripts_names :
             self._scripts[key] = value
-        else:
+        else :
             # the key does not exists
             self._set_from_type(value, name=key)
 
     # ........................................................................
-    def __getattr__(self, item):
+    def __getattr__(self, item) :
 
-        if "_validate" in item or "_changed" in item:
+        if "_validate" in item or "_changed" in item :
             # this avoid infinite recursion due to the traits management
             return super().__getattribute__(item)
 
-        elif item in self.allnames:
+        elif item in self.allnames :
             # allows to access project, dataset or script by attribute
             return self[item]
 
-        elif item in self.meta.keys():
+        elif item in self.meta.keys() :
             # return the attribute
             return self.meta[item]
 
-        else:
-            raise AttributeError("`%s` has no attribute `%s`"%(
-                type(self).__name__, item))
+        else :
+            raise AttributeError(
+                "`%s` has no attribute `%s`" % (type(self).__name__, item))
 
     # ........................................................................
-    def __iter__(self):
-        for items in sorted(self._datasets.items()):
+    def __iter__(self) :
+        for items in sorted(self._datasets.items()) :
             yield items
 
     # ........................................................................
-    def __str__(self):
+    def __str__(self) :
 
         s = "Project {}:\n".format(self.name)
 
         def _listproj(s, project, ns) :
             ns += 1
-            sep = "   "*ns
+            sep = "   " * ns
 
-            for k, v in project._projects.items():
+            for k, v in project._projects.items() :
                 s += "{} ⤷ {} (sub-project)\n".format(sep, k)
-                s = _listproj(s, v, ns) # recursive call
+                s = _listproj(s, v, ns)  # recursive call
 
-            for k, v in project._datasets.items():
+            for k, v in project._datasets.items() :
                 s += "{} ⤷ {} (dataset)\n".format(sep, k)
 
-            for k, v in project._scripts.items():
+            for k, v in project._scripts.items() :
                 s += "{} ⤷ {} (script)\n".format(sep, k)
 
             return s
 
         return _listproj(s, self, 0)
 
-    def _repr_html_(self):
+    def _repr_html_(self) :
 
         h = self.__str__()
-        h = h.replace('\n','<br/>\n')
-        h = h.replace(' ','&nbsp;')
+        h = h.replace('\n', '<br/>\n')
+        h = h.replace(' ', '&nbsp;')
 
         return h
 
@@ -206,12 +200,12 @@ class Project(AbstractProject):
 
     # ........................................................................
     @default('_id')
-    def _id_default(self):
+    def _id_default(self) :
         return str(uuid.uuid1())  # a unique id
 
     # ........................................................................
     @property
-    def id(self):
+    def id(self) :
         """
         str -  Readonly object identifier.
 
@@ -220,7 +214,7 @@ class Project(AbstractProject):
 
     # ..................................................
     @property
-    def name(self):
+    def name(self) :
         """
         str - An user friendly name for the project. The default is
         automatically generated.
@@ -230,16 +224,16 @@ class Project(AbstractProject):
 
     # .........................................................................
     @name.setter
-    def name(self, name):
+    def name(self, name) :
         # property.setter for name
-        if name is not None:
+        if name is not None :
             self._name = name
-        else:
+        else :
             self.name = "Project-" + self.id.split('-')[0]
 
     # ........................................................................
     @property
-    def parent(self):
+    def parent(self) :
         """
         object - instance of the Project which is the parent (if any) of the
         current project.
@@ -249,8 +243,8 @@ class Project(AbstractProject):
 
     # ........................................................................
     @parent.setter
-    def parent(self, value):
-        if self._parent is not None:
+    def parent(self, value) :
+        if self._parent is not None :
             # A parent project already exists for this sub-project but the
             # entered values gives a different parent. This is not allowed,
             # as it can produce impredictable results. We will fisrt remove it
@@ -260,17 +254,17 @@ class Project(AbstractProject):
 
     # ........................................................................
     @default('_parent')
-    def _get_parent(self):
+    def _get_parent(self) :
         return None
 
     # ........................................................................
     @default('_meta')
-    def _meta_default(self):
+    def _meta_default(self) :
         return Meta()
 
     # ........................................................................
     @property
-    def meta(self):
+    def meta(self) :
         """
         meta - instance of Meta that contains all attribute except the name,
         id and parent of the current Project
@@ -289,11 +283,12 @@ class Project(AbstractProject):
         lst = self._datasets.keys()
         lst = sorted(lst)
         return lst
+
     # ........................................................................
     @property
     def datasets(self) :
         d = []
-        for name in self.datasets_names:
+        for name in self.datasets_names :
             d.append(self._datasets[name])
         return d
 
@@ -306,9 +301,9 @@ class Project(AbstractProject):
 
     # ........................................................................
     @property
-    def projects(self):
+    def projects(self) :
         p = []
-        for name in self.projects_names:
+        for name in self.projects_names :
             p.append(self._projects[name])
         return p
 
@@ -321,17 +316,16 @@ class Project(AbstractProject):
 
     # ........................................................................
     property
+
     def scripts(self) :
         s = []
-        for name in self.scripts_names:
+        for name in self.scripts_names :
             s.append(self._scripts[name])
         return s
 
     @property
-    def allnames(self):
-        return self.datasets_names+self.projects_names+self.scripts_names
-
-
+    def allnames(self) :
+        return self.datasets_names + self.projects_names + self.scripts_names
 
     # ------------------------------------------------------------------------
     # Public methods
@@ -341,26 +335,26 @@ class Project(AbstractProject):
     # dataset items
 
     # ........................................................................
-    def add_datasets(self, *args):
+    def add_datasets(self, *args) :
 
-        for ds in args:
+        for ds in args :
             self.add_dataset(ds)
 
     # ........................................................................
-    def add_dataset(self, dataset, name=None):
+    def add_dataset(self, dataset, name=None) :
         dataset.parent = self
-        if name is None:
+        if name is None :
             name = dataset.name
         self._datasets[name] = dataset
 
     # ........................................................................
-    def remove_dataset(self, name):
+    def remove_dataset(self, name) :
         self._datasets[name]._parent = None  # remove the parent info
-        del self._datasets[name] # remove the object from the list of datasets
+        del self._datasets[name]  # remove the object from the list of datasets
 
     # ........................................................................
-    def remove_all_dataset(self):
-        for v in self._datasets.values():
+    def remove_all_dataset(self) :
+        for v in self._datasets.values() :
             v._parent = None
         self._datasets = {}
 
@@ -368,7 +362,7 @@ class Project(AbstractProject):
     # project items
 
     # ........................................................................
-    def add_projects(self, *args):
+    def add_projects(self, *args) :
         """
         Add one or a series of projects to the current project.
 
@@ -378,11 +372,11 @@ class Project(AbstractProject):
 
 
         """
-        for proj in args:
+        for proj in args :
             self.add_project(proj)
 
     # ........................................................................
-    def add_project(self, proj, name=None):
+    def add_project(self, proj, name=None) :
         """
         Add one project to the current project.
 
@@ -393,18 +387,31 @@ class Project(AbstractProject):
 
         """
         proj.parent = self
-        if name is None:
+        if name is None :
             name = proj.name
         self._projects[name] = proj
 
     # ........................................................................
-    def remove_project(self, name):
+    def remove_project(self, name) :
+        """
+        remove one project from the current project.
+
+        Parameters
+        ----------
+        name : str
+            Name of the project to remove
+
+        """
         self._projects[name]._parent = None
         del self._projects[name]
 
     # ........................................................................
-    def remove_all_project(self):
-        for v in self._projects.values():
+    def remove_all_project(self) :
+        """
+        remove all projects from the current project.
+
+        """
+        for v in self._projects.values() :
             v._parent = None
         self._projects = {}
 
@@ -420,7 +427,7 @@ class Project(AbstractProject):
     # ........................................................................
     def add_script(self, script, name=None) :
         script.parent = self
-        if name is None:
+        if name is None :
             name = script.name
         self._scripts[name] = script
 
@@ -431,12 +438,130 @@ class Project(AbstractProject):
 
     # ........................................................................
     def remove_all_script(self) :
-        for v in self._scripts.values():
+        for v in self._scripts.values() :
             v._parent = None
         self._scripts = {}
 
+    # ........................................................................
+    def save(self, filename=None, directory=None, **kwargs) :
+        """
+        Save the current project
+        (default extension: ``.pscp`` ).
+
+        Parameters
+        ----------
+        filename : str
+            The filename of the file where to save the current dataset
+        directory : str, optional.
+            If the destination path is not given, the project will be saved in
+            the default location defined in the configuration options.
+
+        """
+
+        directory = kwargs.get("directory", options.scpdata)
+
+        if not filename :
+            # the current file name or default filename (id)
+            filename = self.filename
+            if self.directory :
+                directory = self.directory
+
+        if not os.path.exists(directory) :
+            raise IOError("directory doesn't exists!")
+
+        if not filename.endswith('.scp') :
+            filename = filename + '.scp'
+
+        if os.path.isdir(directory) :
+            filename = os.path.expanduser(os.path.join(directory, filename))
+        else :
+            warnings.warn('Provided directory is a file, '
+                          'so we use its parent directory',
+                          SpectroChemPyWarning)
+            filename = os.path.join(os.path.dirname(directory), filename)
+
+        # Import is postponed to here since zipfile depends on gzip,
+        # an optional
+        # component of the so-called standard library.
+        import zipfile
+        # Import deferred for startup time improvement
+        import tempfile
+
+        zipf = zipfile_factory(filename, mode="w",
+                               compression=zipfile.ZIP_DEFLATED)
+
+        # Stage arrays in a temporary file on disk, before writing to zip.
+        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.tmp')
+        os.close(fd)
+
+        pars = {}
+        objnames = dir(self)
+
+        def _loop_on_obj(_names, obj=self, level='') :
+            """Recursive scan on NDDataset objects"""
+
+            for key in _names :
+
+                val = getattr(obj, "_%s" % key)
+
+                if isinstance(val, np.ndarray) :
+
+                    with open(tmpfile, 'wb') as fid :
+                        write_array(fid, np.asanyarray(val), allow_pickle=True)
+
+                    zipf.write(tmpfile, arcname=level + key + '.npy')
+
+                elif isinstance(val, Coord) :
+
+                    _objnames = dir(val)
+                    _loop_on_obj(_objnames, level=key + '.')
+
+                elif isinstance(val, CoordSet) :
+
+                    for i, val in enumerate(val._coords) :
+                        _objnames = dir(val)
+                        _loop_on_obj(_objnames, obj=val, level="coord_%d_" % i)
+
+                elif isinstance(val, datetime.datetime) :
+
+                    pars[level + key] = val.timestamp()
+
+                elif isinstance(val, Unit) :
+
+                    pars[level + key] = str(val)
+
+                elif isinstance(val, Meta) :
+
+                    pars[level + key] = val.to_dict()
+
+                elif val is None :
+                    continue
+
+                elif isinstance(val, dict) and key == 'axes' :
+                    # do not save the matplotlib axes
+                    continue
+
+                elif isinstance(val, (plt.Figure, plt.Axes)) :
+                    # pass the figures and Axe
+                    continue
+
+                else :
+                    pars[level + key] = val
+
+        _loop_on_obj(objnames)
+
+        with open(tmpfile, 'w') as f :
+            f.write(json.dumps(pars))
+
+        zipf.write(tmpfile, arcname='pars.json')
+
+        os.remove(tmpfile)
+
+        zipf.close()
+
+        self._filename = filename
 
 
 # =============================================================================
-if __name__ == '__main__':
+if __name__ == '__main__' :
     pass

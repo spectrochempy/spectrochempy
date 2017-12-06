@@ -22,7 +22,7 @@ import os, sys
 
 from tests.utils import notebook_run, example_run, show_do_not_block
 
-
+@pytest.mark.skip
 @pytest.mark.parametrize('notebook', glob("../docs/source/user/*/*.ipynb"))
 @show_do_not_block
 def test_notebooks(notebook):

@@ -14,17 +14,12 @@
 # "http://www.cecill.info".
 # =============================================================================
 
+import warnings
 
-
-
-"""
-This module contains errors/exceptions and warnings of general use for
-spectrochempy. Exceptions that are specific to a given subpackage should *not*
-be here, but rather in the particular subpackage.
-"""
 
 __all__ =  ['SpectroChemPyWarning',
             'SpectroChemPyDeprecationWarning',
+            'deprecated',
             ]
 
 
@@ -41,3 +36,28 @@ class SpectroChemPyDeprecationWarning(SpectroChemPyWarning):
     """
     A warning class to indicate a deprecated feature.
     """
+
+
+
+def deprecated(message):
+    """
+    Deprecation decorator
+
+    Parameters
+    ----------
+    message: str,
+        the deprecation message
+
+    """
+
+    def deprecation_decorator(func):
+
+        def wrapper(*args, **kwargs):
+            warnings.warn("The function `{} is deprecated: {}".format(
+                    func.__name__, message),
+                    SpectroChemPyDeprecationWarning)
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return deprecation_decorator
