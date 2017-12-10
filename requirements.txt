@@ -18,6 +18,7 @@ ipython
 jupyter
 # ipyparallel
 ipykernel
+nb_conda
 
 # for testing
 
@@ -29,12 +30,9 @@ scikit-image
 # for documentation
 
 sphinx
-
 pandoc
 numpydoc
-
-
-
+sphinx_rtd_theme
 
 # for gui
 

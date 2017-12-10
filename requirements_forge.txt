@@ -1,5 +1,15 @@
 # requirements accessible on conda-forge
 
+# matplotlib for notebook
+
 ipympl
-#nbbrowserpdf
-#jupyter_nbextensions_configurator
+
+# extension to notebooks (optional)
+
+nbbrowserpdf
+jupyter_nbextensions_configurator
+
+# docs
+
+sphinx-gallery
+nbsphinx
