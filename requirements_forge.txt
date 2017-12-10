@@ -1,4 +1,5 @@
 # requirements accessible on conda-forge
 
 ipympl
-jupyter_nbextensions_configurator
+#nbbrowserpdf
+#jupyter_nbextensions_configurator

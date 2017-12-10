@@ -16,6 +16,8 @@ setuptools_scm
 
 ipython
 jupyter
+# ipyparallel
+ipykernel
 
 # for testing
 
@@ -30,7 +32,7 @@ sphinx
 
 pandoc
 numpydoc
-ipykernel
+
 
 
 

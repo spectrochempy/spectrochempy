@@ -107,8 +107,9 @@ def make_docs(*args):
 
     args = list(args)
 
-    if 'nocommit' in args:
-        nocommit = True
+    nocommit = True
+    if 'commit' in args:
+        nocommit = False
 
     # make sure commits have been done (if not nocommit flag set)
     if not nocommit:
