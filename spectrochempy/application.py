@@ -53,12 +53,138 @@ import matplotlib as mpl
 
 __all__ = ['app']  # no public methods
 
+from IPython.core.magic import (Magics, magics_class, line_magic, cell_magic,
+                                line_cell_magic)
+from IPython.core.magics.code import extract_symbols
+from IPython.core.error import UsageError
+from IPython.utils.text import get_text_list
+
+# ============================================================================
+# Magic ipython function
+# ============================================================================
+@magics_class
+class SpectroChemPyMagics(Magics):
+
+    @line_cell_magic
+    def addscript(self, pars='', cell=None):
+        """This works both as %addscript and as %%addscript
+
+        This magic command can either take a local filename, element in the
+        namespace or history range (see %history),
+        or the current cell content
+
+        %addscript myscript.py
+        %addscript 7-27
+        %addscript -s MyClass,myfunction myscript.py
+        %addscript MyClass
+        %addscript mymodule.myfunction
+
+        Usage:\\
+          %addscript  -p project  n1-n2 n3-n4 ... n5 .. n6 ...
+
+        or
+
+        Usage:\\
+          %%addscript -p project
+          ...code lines ...
+
+        Options:
+
+          -p <string>: Name of the project where the script will be stored.
+                       If not provided, a project with a standard name:
+                       `proj` is searched.
+          -o <string>: script name
+
+          -s <symbols>: Specify function or classes to load from python source.
+
+          -a : append to the current script instead of overwriting it.
+
+          -n : search symbol in the current namespace
+
+        """
+        opts, args = self.parse_options(pars, 'p:o:s:n:a')
+        #print(opts)
+        #print(args)
+        #print(cell)
+
+        append = 'a' in opts
+        mode = 'a' if append else 'w'
+        search_ns = 'n' in opts
+
+        if not args and not cell and not search_ns:
+            raise UsageError('Missing filename, input history range, '
+                             'or element in the user namespace.\n '
+                             'If no argument are given then the cell content '
+                             'should '
+                             'not be empty')
+        name = 'script'
+        if 'o' in opts:
+            name = opts['o']
+
+        proj = 'proj'
+        if 'p' in opts:
+            proj = opts['p']
+        if not proj in self.shell.user_ns:
+            raise ValueError('Cannot find any project with name `{}` in the '
+                  'namespace.'.format(proj))
+        # get the proj object
+        projobj = self.shell.user_ns[proj]
+
+        contents = ""
+        if search_ns:
+            contents += "\n" + self.shell.find_user_code(opts['n'],
+                                                    search_ns=search_ns) + "\n"
+
+        args = " ".join(args)
+        if args.strip():
+            contents += "\n" + self.shell.find_user_code(args,
+                                                    search_ns=search_ns) + "\n"
+
+        if 's' in opts:
+            try:
+                blocks, not_found = extract_symbols(contents, opts['s'])
+            except SyntaxError:
+                # non python code
+                logging.error("Unable to parse the input as valid Python code")
+                return
+
+            if len(not_found) == 1:
+                warnings.warn('The symbol `%s` was not found' % not_found[0])
+            elif len(not_found) > 1:
+                warnings.warn('The symbols %s were not found' % get_text_list(
+                    not_found, wrap_item_with='`'))
+
+            contents = '\n'.join(blocks)
+
+        if cell:
+            contents += "\n" + cell
+
+        from spectrochempy.scripts.script import Script
+        script = Script(name, content=contents)
+        projobj[name]=script
+
+        return contents
+
+    @line_magic
+    def runscript(self, pars=''):
+        """
+
+        """
+        opts, args = self.parse_options(pars, '')
+
+        if not args:
+            raise UsageError('Missing script name')
+
+
+
+
+        return args
 
 # ==============================================================================
-# SCP class
+# SCPData class
 # ==============================================================================
 
-class _SCPData(Configurable):
+class SCPData(Configurable):
     """
     This class is used to determine the path to the scp_data directory.
 
@@ -67,6 +193,10 @@ class _SCPData(Configurable):
     data = Unicode(help="Directory where to look for data").tag(config=True)
 
     _data = Unicode()
+
+    # ------------------------------------------------------------------------
+    # public methods
+    # ------------------------------------------------------------------------
 
     def listing(self):
         """
@@ -92,12 +222,16 @@ class _SCPData(Configurable):
 
         return _listdir(s, self.data, -1)
 
+    # ------------------------------------------------------------------------
+    # special methods
+    # ------------------------------------------------------------------------
+
     def __str__(self):
         return self.listing()
 
-    def _repr_html_(self):
-        # _repr_html is needed to output in notebooks
-        return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
+    # ------------------------------------------------------------------------
+    # initialization
+    # ------------------------------------------------------------------------
 
     @default('data')
     def _get_data_default(self):
@@ -110,39 +244,35 @@ class _SCPData(Configurable):
         return self._get_pkg_data_dir('testdata', 'scp_data')
 
 
+    # ------------------------------------------------------------------------
+    # private methods
+    # ------------------------------------------------------------------------
+
+    def _repr_html_(self):
+        # _repr_html is needed to output in notebooks
+        return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
+
     def _get_pkg_data_dir(self, data_name, package=None) :
 
         data_name = os.path.normpath(data_name)
 
-        datadir = self._find_pkg_data_path(data_name, package=package)
+        datadir = os.path.dirname(import_item(package).__file__)
+        datadir = os.path.join(datadir, data_name)
 
         if not os.path.isdir(datadir) :
             return os.path.dirname(datadir)
 
         return datadir
 
-    def _find_pkg_data_path(self, data_name, package) :
-        """
-        Look for data in the source-included data directories and return the
-        path.
-        """
 
-        path = os.path.dirname(import_item(package).__file__)
-        path = os.path.join(path, data_name)
-
-        return path
-
-
-# ==============================================================================
+# ============================================================================
 # Main application and configurators
-# ==============================================================================
+# ============================================================================
 
-class _SpectroChemPy(Application):
+class SpectroChemPy(Application):
     """
-    _SpectroChemPy is the main class, containing most of the setup, configuration,
-    and more.
-
-
+    _SpectroChemPy is the main class, containing most of the setup,
+    configuration and more.
 
     """
     from spectrochempy.utils import docstrings
@@ -153,14 +283,79 @@ class _SpectroChemPy(Application):
     #from spectrochempy.writers.writersoptions import WriteOptions
     #from spectrochempy.processors.processorsoptions import ProcessOptions
 
-    # info ____________________________________________________________________
 
     name = Unicode('SpectroChemPyApp')
     description = Unicode('This is the main SpectroChemPy Application ')
 
-    version = Unicode('0.1').tag(config=True)
-    dev_version = Unicode('0.1').tag(config=True)
-    release = Unicode('0.1').tag(config=True)
+    version = Unicode
+    dev_version = Unicode
+    release = Unicode
+    copyright = Unicode
+
+    # configuration parameters  ______________________________________________
+
+    reset_config = Bool(False,
+                        help='should we restaure a default configuration?'
+                        ).tag(config=True)
+
+    config_file_name = Unicode(None,
+                               help="Load this config file"
+                               ).tag(config=True)
+
+    config_dir = Unicode(None,
+                         help="Set the configuration dir location"
+                         ).tag(config=True)
+
+    backend = Unicode('spectrochempy',
+                      help='backend to be used in the application'
+                      ).tag(config=True)
+
+    info_on_loading = Bool(True,
+                           help='display info on loading'
+                           ).tag(config=True)
+
+    running = Bool(False,
+                   help="Is SpectrochemPy running?"
+                   ).tag(config=True)
+
+    test = Bool(False,
+                help='set application in testing mode'
+                ).tag(config=True)
+
+    debug = Bool(False,
+                 help='set DEBUG mode, with full outputs'
+                 ).tag(config=True)
+
+    quiet = Bool(False,
+                 help='set Quiet mode, with minimal outputs'
+                 ).tag(config=True)
+
+    workspace = Unicode(os.path.expanduser(os.path.join('~', 'scpworkspace'))
+                        ).tag(config=True)
+
+    _scpdata = Instance(SCPData,
+                        help="Set a data directory where to look for data")
+
+    csv_delimiter = Unicode(';',
+                            help='set csv delimiter').tag(config=True)
+
+
+    aliases = Dict(
+        dict(test='SpectroChemPy.test',
+             log_level='SpectroChemPy.log_level'))
+
+    flags = Dict(dict(
+        debug=(
+            {'SpectroChemPy': {'log_level': 10}},
+            "Set loglevel to DEBUG")
+    ))
+
+    classes = List([PlotOptions,
+                    ProjectsOptions])  # TODO: check if this still usefull
+
+    # ------------------------------------------------------------------------
+    # initialization
+    # ------------------------------------------------------------------------
 
     @default('version')
     def _get_version(self):
@@ -180,63 +375,24 @@ class _SpectroChemPy(Application):
         else:
             return get_version()[0]
 
-    copyright = Unicode('')
-
     @default('copyright')
     def _get_copyright(self):
         from spectrochempy.utils import get_copyright
         return get_copyright()
 
-    classes = List([PlotOptions, ProjectsOptions])  # TODO: check if this still usefull
-
-    # configuration parameters  ________________________________________________
-
-    reset_config = Bool(False,
-                        help='should we restaure a default configuration?').tag(
-        config=True)
-
-    config_file_name = Unicode(None,
-                               help="Load this config file").tag(config=True)
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
         return self.name + '_config.py'
 
-    config_dir = Unicode(None,
-                         help="Set the configuration dir location").tag(
-        config=True)
 
     @default('config_dir')
     def _get_config_dir_default(self):
-        return self.get_config_dir()
-
-    info_on_loading = Bool(True,
-                           help='display info on loading').tag(config=True)
-
-    running = Bool(False,
-                   help="Is SpectrochemPy running?").tag(config=True)
-
-    test = Bool(False,
-                help='set application in testing mode').tag(config=True)
-
-    debug = Bool(False,
-                 help='set DEBUG mode, with full outputs').tag(config=True)
-
-    quiet = Bool(False,
-                 help='set Quiet mode, with minimal outputs').tag(config=True)
-
-    workspace = Unicode(os.path.expanduser(os.path.join('~', 'scpworkspace'))
-                        ).tag(config=True)
-
-    _scpdata = Instance(_SCPData,
-                        help="Set a data directory where to look for data")
-
-    csv_delimiter = Unicode(';',
-                            help='set csv delimiter').tag(config=True)
+        return self._get_config_dir()
 
     @default('_scpdata')
     def _get__data_default(self):
-        return _SCPData()
+        return SCPData()
 
     @property
     def scpdata(self):
@@ -246,55 +402,17 @@ class _SpectroChemPy(Application):
     def list_scpdata(self):
         return self._scpdata
 
-    aliases = Dict(
-        dict(test='SpectroChemPy.test',
-             log_level='SpectroChemPy.log_level'))
-
-    flags = Dict(dict(
-        debug=(
-            {'SpectroChemPy': {'log_level': 10}},
-            "Set loglevel to DEBUG")
-    ))
-
-    backend = Unicode('spectrochempy', help='backend to be used in the '
-                                            'application').tag(config=True)
-
-    def _init_plotoptions(self):
-        from spectrochempy.plotters.plottersoptions import PlotOptions
-        from spectrochempy.utils import install_styles
-
-        # Pass config to other classes for them to inherit the config.
-        self.plotoptions = PlotOptions(config=self.config)
-
-        if not self.plotoptions.latex_preamble:
-            self.plotoptions.latex_preamble = [
-                r'\usepackage{siunitx}',
-                r'\sisetup{detect-all}',
-                r'\usepackage{times}',  # set the normal font here
-                r'\usepackage{sansmath}',
-                # load up the sansmath so that math -> helvet
-                r'\sansmath'
-            ]
-
-        # also install style to be sure everything is set
-        install_styles()
-
-    def _init_projectsoptions(self):
-
-        from spectrochempy.projects.projectsoptions import ProjectsOptions
-
-        self.projectsoptions = ProjectsOptions(config=self.config)
 
     def __init__(self, *args, **kwargs):
-        super(_SpectroChemPy, self).__init__(*args, **kwargs)
+        super(SpectroChemPy, self).__init__(*args, **kwargs)
         if kwargs.get('debug', False):
             self.log_level = logging.DEBUG
 
         self.initialize()
 
-    # --------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # Initialisation of the application
-    # --------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     @catch_config_error
     def initialize(self, argv=None):
@@ -309,7 +427,7 @@ class _SpectroChemPy(Application):
         """
 
         # parse the argv
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------
 
         # if we are running this under ipython and jupyter notebooks
         # deactivate potential command line arguments
@@ -369,7 +487,7 @@ class _SpectroChemPy(Application):
         # except if we are in debugging mode
 
         # warning handler
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------
         def send_warnings_to_log(message, category, filename,
                                  lineno,
                                  *args):
@@ -381,7 +499,7 @@ class _SpectroChemPy(Application):
         warnings.showwarning = send_warnings_to_log
 
         # exception handler
-        # ---------------------------------------------------------------------
+        # --------------------------------------------------------------------
         ip = get_ipython()
         if ip is not None:
 
@@ -396,6 +514,11 @@ class _SpectroChemPy(Application):
 
             ip.set_custom_exc((Exception,), _custom_exc)
 
+        # load our custom magic extensions
+        # --------------------------------------------------------------------
+        if ip is not None:
+            ip.register_magics(SpectroChemPyMagics)
+
         # Possibly write the default config file
         # --------------------------------------------------------------------
         self._make_default_config_file()
@@ -408,7 +531,8 @@ class _SpectroChemPy(Application):
     @docstrings.dedent
     def start(self, **kwargs):
         """
-        Start the |scp| API or only make a plot if an `output` filename is given
+        Start the |scp| API or only make a plot if an `output` filename is
+        given.
 
         Parameters
         ----------
@@ -424,10 +548,10 @@ class _SpectroChemPy(Application):
 
         Examples
         --------
-        >>> app = _SpectroChemPy()
+        >>> app = SpectroChemPy()
         >>> app.initialize()
         >>> app.start(
-        ...    reset_config=True,   # option for restoring default configuration
+        ...    reset_config=True,   # for restoring default configuration
         ...    debug=True,          # debugging logs
         ...    )
         True
@@ -474,10 +598,39 @@ class _SpectroChemPy(Application):
 
             return False
 
-    # --------------------------------------------------------------------------
-    # Store default configuration file
-    # --------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------------
 
+    # ........................................................................
+    def _init_plotoptions(self):
+        from spectrochempy.plotters.plottersoptions import PlotOptions
+        from spectrochempy.utils import install_styles
+
+        # Pass config to other classes for them to inherit the config.
+        self.plotoptions = PlotOptions(config=self.config)
+
+        if not self.plotoptions.latex_preamble:
+            self.plotoptions.latex_preamble = [
+                r'\usepackage{siunitx}',
+                r'\sisetup{detect-all}',
+                r'\usepackage{times}',  # set the normal font here
+                r'\usepackage{sansmath}',
+                # load up the sansmath so that math -> helvet
+                r'\sansmath'
+            ]
+
+        # also install style to be sure everything is set
+        install_styles()
+
+    # ........................................................................
+    def _init_projectsoptions(self):
+
+        from spectrochempy.projects.projectsoptions import ProjectsOptions
+
+        self.projectsoptions = ProjectsOptions(config=self.config)
+
+    # ........................................................................
     def _make_default_config_file(self):
         """auto generate default config file."""
 
@@ -490,6 +643,7 @@ class _SpectroChemPy(Application):
             with open(fname, 'w') as f:
                 f.write(s)
 
+    # ........................................................................
     def _find_or_create_spectrochempy_dir(self, directory) :
 
         directory = os.path.join(os.path.expanduser('~'),
@@ -504,7 +658,8 @@ class _SpectroChemPy(Application):
 
         return os.path.abspath(directory)
 
-    def get_config_dir(self, create=True) :
+    # ........................................................................
+    def _get_config_dir(self, create=True) :
         """
         Determines the SpectroChemPy configuration directory name and
         creates the directory if it doesn't exist.
@@ -519,7 +674,7 @@ class _SpectroChemPy(Application):
 
         Returns
         -------
-        configdir : str
+        config_dir : str
             The absolute path to the configuration directory.
 
         """
@@ -533,9 +688,9 @@ class _SpectroChemPy(Application):
         return os.path.abspath(
             self._find_or_create_spectrochempy_dir('config'))
 
-    # --------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # Events from Application
-    # --------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     @observe('log_level')
     def _log_level_changed(self, change):
@@ -548,7 +703,7 @@ class _SpectroChemPy(Application):
 #: Main application object that should not be called directly by a end user.
 #: It is advisable to use the main `api` import to access all public methods of
 #: this object.
-app = _SpectroChemPy()
+app = SpectroChemPy()
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -558,6 +713,8 @@ WARNING = logging.WARNING
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
 
+
 # TODO: look at the subcommands capabilities of traitlets
 if __name__ == "__main__":
     pass
+

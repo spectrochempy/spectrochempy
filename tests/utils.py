@@ -26,9 +26,11 @@ __all__ = ["assert_equal",
            "raises",
            "catch_warnings",
            "RandomSeedContext",
-           "SpectroChemPyWarning",
-           "SpectroChemPyDeprecationWarning",
-           ]
+           "EPSILON",
+           "is_sequence",
+           "scpdata",
+           "plotoptions"
+          ]
 
 import os
 import sys
@@ -45,22 +47,30 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors.execute import CellExecutionError
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_approx_equal)
-from spectrochempy.dataset.ndarray import masked
 
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.utils import (SpectroChemPyWarning,
-                                 SpectroChemPyDeprecationWarning, is_sequence,
-                                 EPSILON)
-from spectrochempy.application import app
+#  we defer import in order to avoid importing them as well as the namespace
+#  in spectrochempy
 
-plotoptions = app.plotoptions
-log = app.log
-options = app
-scpdata = app.scpdata
+def plotoptions():
+    from spectrochempy.application import app
+    return app.plotoptions
+plotoptions = plotoptions()
+
+def scpdata():
+    from spectrochempy.application import app
+    return app.scpdata
+scpdata = scpdata()
 
 
 figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
 os.makedirs(figures_dir, exist_ok=True)
+
+# utilities
+is_sequence= lambda arg: (not hasattr(arg, 'strip')) and hasattr(arg,
+                                                                 "__iter__")
+
+import numpy as np
+EPSILON = epsilon = np.finfo(float).eps
 
 # =============================================================================
 # RandomSeedContext
@@ -528,7 +538,7 @@ def image_comparison(reference=None,
                     if not message.startswith("identical"):
                         errors += message
                     else:
-                        log.info(message)
+                        print(message)
 
                 if errors and not REDO_ON_TYPEERROR:
                     # raise an error if one of the image is different from the
@@ -549,50 +559,4 @@ def image_comparison(reference=None,
 # main
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    from spectrochempy.api import *
-
-    FORCE = True
-
-    @image_comparison(reference=['essai1', 'essai2'], force_creation=FORCE)
-    def t_compare():
-        source = NDDataset.read_omnic(
-                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
-        source.plot()
-        source.plot_image()
-
-
-    @image_comparison(reference=['essai1', 'essai2'], force_creation=False)
-    def t_compare_exact():
-        source = NDDataset.read_omnic(
-                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
-        source.plot()
-        source.plot_image()
-
-
-    @image_comparison(reference=['essai2', 'essai2', 'essai2'],
-                      force_creation=False)
-    def t_compare_different():
-        source = NDDataset.read_omnic(
-                os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
-
-        source[10:11, 3000.:3001] = masked
-        source.plot_image()
-        source[10:20, 3000.:3020.] = masked
-        source.plot_image()
-        source.plot_image()
-        fig = plt.figure(plt.get_fignums()[-1])
-        xlim = source.ndaxes['main'].get_xlim()
-        # change a little bit the limits
-        source.ndaxes['main'].set_xlim(np.array(xlim) * .98)
-
-
-    options.log_level = INFO
-
-    log.info("make refs:")
-    t_compare()
-    log.info("exact:")
-    t_compare_exact()
-    log.info("different:")
-    t_compare_different()
-
-    plt.close('all')
+    pass

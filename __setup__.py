@@ -35,20 +35,21 @@ def path():
 
 class PostDevelopCommand(develop):
 	"""Post-installation for development mode."""
-
 	def run(self):
-
 		develop.run(self)
-
 		for item in ['pre-commit', 'pre-push']:
 			hook = os.path.join(path(), '.git', 'hooks', item)
 			if os.path.exists(hook):
 				os.remove(hook)
 			nhook = os.path.join(path(), 'git_hooks', item)
 			sh.copy(nhook, hook)
-
 			print(('installation of `.git/hooks/{}` made.'.format(item)))
 
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+        install.run(self)
 
 def read(fname):
 	with open(os.path.join(path(), fname), 'r') as f:
@@ -101,7 +102,7 @@ def run_setup():
 			],
 			cmdclass={
 				'develop': PostDevelopCommand,
-				# 'install': PostInstallCommand,
+				'install': PostInstallCommand,
 			},
 	)
 

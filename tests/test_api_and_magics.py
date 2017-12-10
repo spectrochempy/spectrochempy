@@ -15,14 +15,10 @@
 # =============================================================================
 
 
-
-import spectrochempy
-
-from spectrochempy.api import *
-
-
 def test_api():
+    import spectrochempy
     # test version
+    from spectrochempy.api import APIref, log
     from spectrochempy.__version__ import version
     assert version.split('.')[0] == '0'
     assert version.split('.')[1][:2] == '1a'
@@ -38,3 +34,44 @@ def test_api():
     assert 'np' in APIref
     assert 'NDDataset' in APIref
     assert 'abs' in APIref
+
+def test_magic_addscript(ip):
+
+    assert "available_styles" in ip.user_ns.keys()
+    ip.run_cell("print(available_styles())", store_history=True)
+    ip.run_cell("project = Project()", store_history=True)
+    x = ip.magic('addscript -p project -o style -n available_styles 1')
+                    # script with the definition of the function
+                    # `available_styles` content of cell 2
+
+    expected = \
+'''
+def available_styles():
+    """
+    Styles availables in SpectroChemPy
+
+    Todo
+    -----
+    Make this list extensible programmatically
+
+    Returns
+    -------
+    l : a list of style
+
+    """
+    return [\'notebook\', \'paper\', \'poster\', \'talk\', \'sans\']
+
+print(available_styles())
+'''
+
+    print("expected", expected)
+    print("x", x)
+    assert x.strip() == expected.strip()
+
+    # with cell contents
+    x = ip.run_cell('%%%%addscript -p project -o essai -n available_styles\n'
+                    'print(available_styles())')
+
+    print('result\n',x.result)
+    assert x.result.strip() == expected.strip()
+

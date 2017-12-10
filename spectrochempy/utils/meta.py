@@ -98,8 +98,15 @@ class Meta(object):  # HasTraits):
     # -------------------------------------------------------------------------
     # special methods
     # -------------------------------------------------------------------------
-    def __init__(self):
-        self._data = dict()
+    def __init__(self, **data):
+        """
+        Parameters
+        ----------
+        **data : keywords
+            The dictionary can be already inited with some keywords.
+
+        """
+        self._data = dict(data)
 
     def __setattr__(self, key, value):
         if key not in ['readonly', '_data', '_trait_values', '_trait_notifiers',

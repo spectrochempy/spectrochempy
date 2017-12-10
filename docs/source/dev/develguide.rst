@@ -9,30 +9,51 @@ Installing a developper version
 The best to proceed with development is that we (the developers) all have a similar
 environment for each python version.
 
-The master is build on the 3.6 python version. 
+The master is build on the 3.6 python version. It may work with earlier
+version of python, e.g., 3.x but this has not yet been tested.
 
-1. Install anaconda3 or miniconda3
+For sure it will not work for python 2.7.x and no attempt to get such
+compatibility will be made.
 
-* OSX : `miniconda3 <https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh>`_
+1. Install anaconda3.
 
-2. create an environment called **scp36**
+Go to and choose your platform. Download one of the available graphical installer, *e.g.*, the 3.6 or + version.
+
+`anaconda <https://www.anaconda.com/download/>`_
+
+
+2.  Install the version of Anaconda which you downloaded, following the instructions on the download page.
+
+
+3. open a terminal and create an environment called, for example, **scp36**
+by entering the following command:
 
 .. sourcecode:: bash
 
-	$ conda create -n scp36 python=3.6 -\-file requirements.txt
+	$ conda create -n scp36 python=3.6
 
 
-3. switch to this environment
+4. switch to this environment
+
+On WINDOWS, you should use ``activate scp36``.
+
+On LINUX or macOS,  ``source activate scp36``.
 
 .. sourcecode:: bash
 
 	$ source activate scp36
 
 
-You can make it permanent by putting this command in you bash_profile (MAC)
+You can make it permanent by putting this command in you ``bash_profile``
+(MAC).
+
+..todo::
+
+    what's the equivalent for windows???
 
 
-4. If during set up or runtime, some package appear to miss, just install them using:
+4. If during set up or runtime, some package appear to miss, just install them
+using:
 
 .. sourcecode:: bash
 
@@ -52,14 +73,20 @@ where <workspace> is you programming workspace (any folder you like)
 	$ git clone git@bitbucket.org:spectrocat/spectrochempy.git
 
 
-6. Install the spectrochempy package
-
-switch to the installation directory
+6. Switch to the ``spectrchempy`` directory
 
 .. sourcecode:: bash
 
 	$ cd <wokspace>/spectrochempy
 
+
+7. Get the packages necessary for running |scp| of all required package:
+
+.. sourcecode:: bash
+
+    $ conda install -y -\-file requirements.txt
+
+6. Install the spectrochempy package
 
 Execute the setup.py in developper mode
 
@@ -73,11 +100,6 @@ or use the pip command in developper mode (flag `-e`)
 .. sourcecode:: bash
 
 	$ pip install -e .
-
-
-
-Setup PyCharm
---------------
 
 
 

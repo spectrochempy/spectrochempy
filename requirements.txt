@@ -1,43 +1,40 @@
-matplotlib
-traitlets
+# for the core package
+
 numpy
 scipy
+matplotlib
 pandas
+traitlets
 xlrd
+dill
+
+# mainly for install and a bit more...
+
 setuptools_scm
-h5py
-scikit-image
+
+# need this, because the API is mainly designed to run in Jupyter notebook
+
+ipython
+jupyter
+
+# for testing
 
 pytest
 pytest-xdist
 pytest-runner
+scikit-image
 
-# doc
+# for documentation
 
 sphinx
-sphinx-gallery
+
 pandoc
 numpydoc
-
-# IPython kernel
-#   https://ipython.readthedocs.io/en/stable/whatsnew/index.html
-
-ipython
-ipympl
 ipykernel
-nb_conda
-nbbrowserpdf
-nbsphinx
-jupyter_nbextensions_configurator
-ipython_genutils
 
-# QtConsole
-#   https://github.com/jupyter/qtconsole/blob/master/docs/source/changelog.rst
+
+
+# for gui
 
 qtconsole
-
-
-# PyQt5
-#   https://www.riverbankcomputing.com/static/Downloads/PyQt5/ChangeLog
-
-PyQt5
+pyqt

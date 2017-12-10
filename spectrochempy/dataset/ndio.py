@@ -23,11 +23,18 @@ are defined.
 
 """
 
-# Python and third parties imports
-# --------------------------------
+# ----------------------------------------------------------------------------
+# Python imports
+# ----------------------------------------------------------------------------
+
 import os
 import datetime
 import json
+import warnings
+
+# ----------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,22 +42,25 @@ from numpy.compat import asbytes, asstr
 from numpy.lib.format import write_array, MAGIC_PREFIX
 from numpy.lib.npyio import zipfile_factory, NpzFile
 from traitlets import HasTraits, Unicode
-from ..utils.meta import Meta
 
+# ----------------------------------------------------------------------------
 # local import
-# ------------
-from .ndcoords import Coord, CoordSet
-from ..utils import SpectroChemPyWarning
-from ..units import Unit, Quantity, Measurement
-from ..application import app
+# ----------------------------------------------------------------------------
+
+from spectrochempy.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.utils.meta import Meta
+from spectrochempy.units import Unit, Quantity, Measurement
+from spectrochempy.application import app
 
 plotoptions = app.plotoptions
 
+# ----------------------------------------------------------------------------
+# constants
+# ----------------------------------------------------------------------------
+
 log = app.log
 options = app
-
-# Constants
-# ---------
 
 __all__ = ['NDIO',
 
@@ -59,7 +69,6 @@ __all__ = ['NDIO',
            'write',
 
            ]
-
 
 # ==============================================================================
 # Class NDIO to handle I/O of datasets
@@ -79,6 +88,10 @@ class NDIO(HasTraits):
 
     @property
     def filename(self):
+        """
+        str - current filename for this dataset.
+
+        """
         if self._filename:
             return os.path.basename(self._filename)
         else:
@@ -86,6 +99,10 @@ class NDIO(HasTraits):
 
     @property
     def directory(self) :
+        """
+        str - current directory for this dataset.
+
+        """
         if self._filename :
             return os.path.dirname(self._filename)
         else:
@@ -241,7 +258,7 @@ class NDIO(HasTraits):
 
     @classmethod
     def load(cls,
-             filename='',
+             fid='',
              protocol='scp',
              directory=options.scpdata,
              **kwargs
@@ -252,24 +269,14 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-
-        filename : str
-
-            The filename to the file to be read.
-
-        protocol : str
-
-            optional, default= ``scp``
-            The default type for saving,
-
-        directory : str
-
-            optional, default= ``scpdata``
+        fid : str or file object
+            The name of the file to read (or a file object).
+        protocol : str, optional, default= ``scp``
+            The default type for saving.
+        directory : str, optional, default= ``scpdata``
             The directory from where to load the file.
-
         kwargs : optional keyword parameters.
-
-            Any additional keyword to pass to the actual reader.
+            Any additional keyword(s) to pass to the actual reader.
 
         Examples
         --------
@@ -302,82 +309,79 @@ class NDIO(HasTraits):
 
 
         """
+        filename = None
 
         if protocol not in ['scp']:
+            # TODO : case where fp is a file object
+            filename = fid
             return cls.read(filename, protocol=protocol)
 
-        # open file dialog box
+        if isinstance(fid, str):
+            # this is a filename
 
-        directory = kwargs.get("directory", options.scpdata)
-        if not filename:
-            raise IOError('no filename provided!')
-        else:
-            filename = os.path.expanduser(
-                                       os.path.join(directory, filename))
-            try:
-                # cast to  file in the testdata directory
-                # TODO: add possibility to search in several directory
-                fid = open(filename,'rb')
-            except:
-                raise IOError('no valid filename provided')
+            filename = fid
+            directory = kwargs.get("directory", options.scpdata)
+            if not filename:
+                raise IOError('no filename provided!')
+            else:
+                filename = os.path.expanduser(
+                                           os.path.join(directory, filename))
+                try:
+                    # cast to  file in the testdata directory
+                    # TODO: add possibility to search in several directory
+                    fid = open(filename,'rb')
+                except:
+                    raise IOError('no valid filename provided')
 
-        _ZIP_PREFIX = asbytes('PK\x03\x04')
-        N = len(MAGIC_PREFIX)
-        magic = fid.read(N)
-        fid.seek(-N, 1)  # back-up
-        if magic.startswith(_ZIP_PREFIX):
+        # get zip file
+        obj = NpzFile(fid, allow_pickle=True)
 
-            # get zip file
-            obj = NpzFile(fid, allow_pickle=True)
+        # interpret
+        ndim = obj["data"].ndim
+        coordset = None
+        new = cls()
 
-            # interpret
-            ndim = obj["data"].ndim
-            coordset = None
-            new = cls()
+        for key, val in list(obj.items()):
+            if key.startswith('coord_'):
+                if not coordset:
+                    coordset = [Coord() for _ in range(ndim)]
+                els = key.split('_')
+                setattr(coordset[int(els[1])], "_%s" % els[2], val)
+            elif key == "pars.json":
+                pars = json.loads(asstr(val))
+            else:
+                setattr(new, "_%s" % key, val)
+        if coordset:
+            new.coordset = coordset
 
-            for key, val in list(obj.items()):
-                if key.startswith('coord_'):
-                    if not coordset:
-                        coordset = [Coord() for _ in range(ndim)]
-                    els = key.split('_')
-                    setattr(coordset[int(els[1])], "_%s" % els[2], val)
-                elif key == "pars.json":
-                    pars = json.loads(asstr(val))
-                else:
-                    setattr(new, "_%s" % key, val)
-            if coordset:
-                new.coordset = coordset
+        def setattributes(clss, key, val):
+            # utility function to set the attributes
+            if key in ['modified', 'date']:
+                val = datetime.datetime.fromtimestamp(val)
+                setattr(clss, "_%s" % key, val)
+            elif key == 'meta':
+                clss.meta.update(val)
+            elif key in ['units']:
+                setattr(clss, key, val)
+            else:
+                setattr(clss, "_%s" % key, val)
 
-            def setattributes(clss, key, val):
-                # utility function to set the attributes
-                if key in ['modified', 'date']:
-                    val = datetime.datetime.fromtimestamp(val)
-                    setattr(clss, "_%s" % key, val)
-                elif key == 'meta':
-                    clss.meta.update(val)
-                elif key in ['units']:
-                    setattr(clss, key, val)
-                else:
-                    setattr(clss, "_%s" % key, val)
+        for key, val in list(pars.items()):
 
-            for key, val in list(pars.items()):
+            if key.startswith('coord_'):
 
-                if key.startswith('coord_'):
+                els = key.split('_')
+                setattributes(coordset[int(els[1])], els[2], val)
 
-                    els = key.split('_')
-                    setattributes(coordset[int(els[1])], els[2], val)
+            else:
 
-                else:
+                setattributes(new, key, val)
 
-                    setattributes(new, key, val)
-
+        if filename:
             new._filename = filename
-            return new
 
-        else:
-            raise IOError("Failed to load file %s " % filename)
-            # finally:
-            #    fid.close()
+        return new
+
 
     # --------------------------------------------------------------------------
     # Generic read function

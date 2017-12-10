@@ -62,7 +62,7 @@ def test_plot_map(IR_source_2D):
 
 @image_comparison(reference=['IR_source_2D_image',
                              'IR_source_2D_image_sanspaper'],
-                  force_creation=FORCE)
+                             force_creation=FORCE)
 def test_plot_image(IR_source_2D):
     source = IR_source_2D.copy()
     source.plot_image()  # plot_image is an alias of plot(method='image')
@@ -70,9 +70,9 @@ def test_plot_image(IR_source_2D):
 
 @image_comparison(reference=['IR_source_2D_image',
                              'IR_source_2D_image_sanspaper'],
-                  min_similarity=90.0)
+                  min_similarity=85.0)
 def test_plot_image_offset(IR_source_2D):
-    source = IR_source_2D.copy() + .0005
+    source = IR_source_2D.copy() + .0001
     source.plot_image()  # plot_image with offset
     source.plot_image(style=['sans','paper'])
 

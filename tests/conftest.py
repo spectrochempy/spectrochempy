@@ -3,18 +3,30 @@ import matplotlib as mpl
 
 matplotlib_backend = mpl.get_backend()
 
-from tests.utils import RandomSeedContext
 
 import pytest
 import numpy as np
 import os
 
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.dataset.ndarray import NDArray
-from spectrochempy.dataset.ndcoords import CoordSet, Coord
-from spectrochempy.api import scpdata, plotoptions
+#initialize a ipython session before calling spectrochempy
 
-plotoptions.do_not_block = True
+@pytest.fixture(scope="module")
+def ip():
+    from IPython.testing.globalipapp import get_ipython as getipy
+    ip = getipy()
+    ip.run_cell("from spectrochempy.api import *")
+    #from spectrochempy.application import SpectroChemPyMagics
+    #ip.register_magics(SpectroChemPyMagics)
+    return ip
+ip()    # we need to go into this before anything esle in the test to have the
+        #  IPhyton session available.
+
+def _set_do_not_block_true():
+    from tests.utils import plotoptions
+    plotoptions.do_not_block = True
+
+_set_do_not_block_true() # this must come after ip()
+
 
 #########################
 # FIXTURES: some arrays
@@ -23,8 +35,10 @@ plotoptions.do_not_block = True
 @pytest.fixture(scope="module")
 def ndarray(): #ndarraysubclass():
     # return a simple ndarray with some data
+    from tests.utils import RandomSeedContext
     with RandomSeedContext(12345):
         dx = 10.*np.random.random((10, 10))-5.
+    from spectrochempy.dataset.ndarray import NDArray
     _nd = NDArray()
     _nd.data = dx
     return _nd.copy()
@@ -32,8 +46,10 @@ def ndarray(): #ndarraysubclass():
 @pytest.fixture(scope="module")
 def ndarrayunit(): #ndarraysubclassunit():
     # return a simple ndarray with some data
+    from tests.utils import RandomSeedContext
     with RandomSeedContext(12345):
         dx = 10.*np.random.random((10, 10))-5.
+    from spectrochempy.dataset.ndarray import NDArray
     _nd = NDArray()
     _nd.data = dx
     _nd.units = 'm/s'
@@ -44,9 +60,10 @@ def ndarraycplx():
 
     # return a complex ndarray
     # with some complex data
-
+    from tests.utils import RandomSeedContext
     with RandomSeedContext(12345):
         dx = np.random.random((10, 10))
+    from spectrochempy.dataset.ndarray import NDArray
     nd = NDArray()
     nd.data = dx
     nd.set_complex(axis=-1)  # this means that the data are complex in
@@ -69,6 +86,8 @@ def ndarraycplx():
 @pytest.fixture()
 def ndcplx():
     # return a complex ndarray
+    from spectrochempy.dataset.nddataset import NDDataset
+    from tests.utils import RandomSeedContext
     _nd = NDDataset()
     with RandomSeedContext(1234):
         _nd._data = np.random.random((10, 10))
@@ -80,6 +99,7 @@ def ndcplx():
 @pytest.fixture()
 def nd1d():
     # a simple ndarray with negative elements
+    from spectrochempy.dataset.nddataset import NDDataset
     _nd = NDDataset()
     _nd._data = np.array([1., 2., 3., -0.4])
     return _nd
@@ -87,6 +107,7 @@ def nd1d():
 @pytest.fixture()
 def nd2d():
     # a simple 2D ndarray with negative elements
+    from spectrochempy.dataset.nddataset import NDDataset
     _nd = NDDataset()
     _nd._data = np.array([[1., 2., 3., -0.4], [-1., -.1, 1., 2.]])
     return _nd
@@ -95,6 +116,8 @@ def nd2d():
 @pytest.fixture()
 def nd():
     # return a simple (positive) ndarray
+    from spectrochempy.dataset.nddataset import NDDataset
+    from tests.utils import RandomSeedContext
     _nd = NDDataset()
     with RandomSeedContext(145):
         _nd._data = np.random.random((10, 10))
@@ -102,6 +125,9 @@ def nd():
 
 @pytest.fixture()
 def ds1():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.dataset.ndcoords import CoordSet, Coord
+    from tests.utils import RandomSeedContext
     with RandomSeedContext(12345):
         dx = np.random.random((10, 100, 3))
         # make complex along first dimension
@@ -133,6 +159,9 @@ def ds1():
 
 @pytest.fixture()
 def ds2():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.dataset.ndcoords import CoordSet, Coord
+    from tests.utils import RandomSeedContext
     with RandomSeedContext(12345):
         dx = np.random.random((9, 50, 4))
         # make complex along first dimension
@@ -164,6 +193,9 @@ def ds2():
 
 @pytest.fixture()
 def dsm():  # dataset with coords containing several axis
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.dataset.ndcoords import CoordSet, Coord
+    from tests.utils import RandomSeedContext
 
     with RandomSeedContext(12345):
         dx = np.random.random((9, 50))
@@ -197,6 +229,10 @@ def dsm():  # dataset with coords containing several axis
 # Datasets and CoordSet
 @pytest.fixture()
 def dataset1d():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.dataset.ndcoords import CoordSet, Coord
+    from tests.utils import RandomSeedContext
+
     # create a simple 1D
     length = 10.
     x_axis = Coord(np.arange(length) * 1000.,
@@ -212,6 +248,10 @@ def dataset1d():
 
 @pytest.fixture()
 def dataset3d():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.dataset.ndcoords import CoordSet, Coord
+    from tests.utils import RandomSeedContext
+
     with RandomSeedContext(12345):
         dx = np.random.random((10, 100, 3))
 
@@ -248,12 +288,16 @@ def dataset3d():
 ############################
 @pytest.fixture(scope="function")
 def IR_source_1D():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.api import scpdata
     source = NDDataset.read_omnic(
             os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
     return source[0]
 
 @pytest.fixture(scope="function")
 def IR_source_2D():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.api import scpdata
     source = NDDataset.read_omnic(
             os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
     return source
@@ -261,6 +305,8 @@ def IR_source_2D():
 # Fixture:  IR spectra
 @pytest.fixture(scope="function")
 def IR_scp_1():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.api import scpdata
     source = NDDataset.load(
             os.path.join(scpdata, 'irdata', 'nh4.scp'))
     return source
@@ -269,6 +315,8 @@ def IR_scp_1():
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.api import scpdata
     path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
     source = NDDataset.read_bruker_nmr(
@@ -279,6 +327,8 @@ def NMR_source_1D():
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D_1H():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.api import scpdata
     path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'tpa')
     source = NDDataset.read_bruker_nmr(
@@ -288,6 +338,8 @@ def NMR_source_1D_1H():
 
 @pytest.fixture(scope="function")
 def NMR_source_2D():
+    from spectrochempy.dataset.nddataset import NDDataset
+    from spectrochempy.api import scpdata
     path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')
     source = NDDataset.read_bruker_nmr(

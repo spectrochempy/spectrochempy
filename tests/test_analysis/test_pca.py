@@ -35,6 +35,7 @@ def test_pca(IR_source_2D):
 
     assert str(pca)[:3] == '\nPC'
 
-    pca.screeplot(npc=5)
+    #TODO: check those : it seems that colors are not correct!
+    #pca.screeplot(npc=5)
 
-    pca.scoreplot(pcs=(0,1))
+    #pca.scoreplot(pcs=(0,1))

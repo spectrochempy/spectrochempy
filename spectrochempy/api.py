@@ -75,10 +75,12 @@ log =  app.log
 log_level =  app.log_level
 
 # give a user friendly name to the objects containing configurables options
-plotoptions =  app.plotoptions
 options = app
 scpdata =  app.scpdata
 list_scpdata =  app.list_scpdata
+plotoptions =  app.plotoptions
+projectsoptions =  app.projectsoptions
+
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -174,6 +176,12 @@ from spectrochempy.projects import api
 
 __all__ += api.__all__
 
+# script
+# -------
+from spectrochempy.scripts.api import *
+from spectrochempy.scripts import api
+
+__all__ += api.__all__
 
 # optional libraries
 # ------------------

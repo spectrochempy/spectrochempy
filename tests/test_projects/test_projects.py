@@ -97,24 +97,47 @@ def test_project(ds1, ds2, dsm):
     print(myp2)
 
     # Example from tutorial agir notebook
-    proj = Project(
+    proj =  Project(
             Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
             Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
             Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
-            name='HIZECOKE' )
+            name='HIZECOKE_TEST' )
 
     assert proj.projects_names == ['A350', 'B350', 'P350']
 
 
     # add a dataset to a subproject
-    ir = NDDataset()
-    tg = NDDataset()
+    ir = NDDataset([1,2,3])
+    tg = NDDataset([1,3,4])
     proj.A350['IR'] = ir
-
-
+    proj['TG'] = tg
 
     print(proj.A350)
+    print(proj)
+    print(proj.A350.label)
+
+    proj.save('HIZECOKE_TEST')
+
+    newproj = Project.load('HIZECOKE_TEST')
+
+    print(newproj)
+
+    assert str(newproj)==str(proj)
+    assert newproj.A350.label == proj.A350.label
+
+    #proj = Project.load('HIZECOKE')
+    #assert proj.projects_names == ['A350', 'B350', 'P350']
+
+    script_source = \
+    'print("samples contained in the project are: %s"%proj.projects_names)'
+
+    from spectrochempy.scripts.script import Script
+    proj['print_info'] = Script('print_info',script_source)
 
     print(proj)
 
-    print(proj.projects)
+    proj.save()
+
+    # execute
+    run_script(proj.print_info, globals(), locals())
+    proj.print_info.execute(globals(), locals())
