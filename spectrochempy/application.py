@@ -163,7 +163,7 @@ class SpectroChemPyMagics(Magics):
         script = Script(name, content=contents)
         projobj[name]=script
 
-        return contents
+        return "Script {} created.".format(name)
 
     @line_magic
     def runscript(self, pars=''):

@@ -172,10 +172,13 @@ class Project(AbstractProject):
                              'of object: {}'.format(type(self[key]).__name__))
 
         if key in self.datasets_names:
+            value.parent = self
             self._datasets[key] = value
         elif key in self.projects_names:
+            value.parent = self
             self._projects[key] = value
         elif key in self.scripts_names:
+            value.parent = self
             self._scripts[key] = value
         else:
             # the key does not exists
@@ -607,7 +610,8 @@ class Project(AbstractProject):
         self._scripts = {}
 
     # ........................................................................
-    def save(self, filename=None, directory=None, **kwargs):
+    def save(self, filename=None, directory=None, overwrite_data=True,
+             **kwargs):
         """
         Save the current project
         (default extension: ``.pscp`` ).
@@ -619,6 +623,12 @@ class Project(AbstractProject):
         directory : str, optional.
             If the destination path is not given, the project will be saved in
             the default location defined in the configuration options.
+        overwrite_data : bool
+            If True the default, everything is saved, even if the data
+            already exists (overwrite. If False, only other object or
+            attributes can be changed. This allow to keep the original data
+            intact. Processing step that may change this data can be saved in
+            scripts.
 
         See Also
         --------
@@ -647,6 +657,16 @@ class Project(AbstractProject):
                           'so we use its parent directory',
                           SpectroChemPyWarning)
             filename = os.path.join(os.path.dirname(directory), filename)
+
+
+        global savedproj, keepdata
+        keepdata = False
+        if not overwrite_data and os.path.exists(filename):
+            # We need to check if the file already exists, as we want not to
+            # change the original data
+            keepdata = True
+            # get the original project
+            savedproj = Project.load(filename)
 
         # Imports deferred for startup time improvement
         import zipfile
@@ -683,7 +703,14 @@ class Project(AbstractProject):
                 elif key == 'datasets':
                     pars[level + key] = []
                     for k, ds in val.items():
-                        ds.save(filename=tmpfile)
+                        if not keepdata:
+                            ds.save(filename=tmpfile)
+                        else:
+                            # we take the saved version
+                            if level=='main.':
+                                savedproj[k].save(filename=tmpfile)
+                            else:
+                                savedproj[level[:-1]][k].save(filename=tmpfile)
                         fn = '%s%s.scp' % (level, k)
                         zipf.write(tmpfile, arcname=fn)
                         pars[level + key].append(fn)
@@ -712,7 +739,7 @@ class Project(AbstractProject):
         _loop_on_obj(objnames)
 
         with open(tmpfile, 'w') as f:
-            f.write(json.dumps(pars))
+            f.write(json.dumps(pars, sort_keys=True, indent=2))
 
         zipf.write(tmpfile, arcname='pars.json')
         os.remove(tmpfile)
@@ -790,7 +817,7 @@ class Project(AbstractProject):
 
             scripts = pars['%s.scripts' % pname]
             for item in scripts:
-                args.append(obj[item])
+                args.append(Script(item, pars['%s.content'%item]))
                 argnames.append(item)
 
             name = pars['%s.name' % pname]

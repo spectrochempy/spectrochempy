@@ -22,6 +22,7 @@ import ast
 from spectrochempy.projects.baseproject import AbstractProject
 __all__ = ['Script','run_script','run_all_scripts']
 
+from spectrochempy.api import *  # needed for script
 
 class Script(HasTraits):
     """
@@ -46,8 +47,20 @@ class Script(HasTraits):
         self.parent = parent
         self.priority = priority
 
+    # ------------------------------------------------------------------------
+    # special methods
+    # ------------------------------------------------------------------------
+
     def __dir__(self):
         return ['name', 'content', 'parent' ]
+
+    def __call__(self, *args):
+
+        return self.execute(*args)
+
+    # ------------------------------------------------------------------------
+    # properties
+    # ------------------------------------------------------------------------
 
     @property
     def name(self):
@@ -101,11 +114,35 @@ class Script(HasTraits):
     # ------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------
-    def execute(self, globals, locals):
+    def execute(self, localvars=None):
         code = compile(self._content, '<string>', 'exec')
-        return exec(code, globals, locals)
+        if localvars is None:
+            # locals was not passed, try to avoid missing values for name
+            # such as 'project', 'proj', 'newproj'...
+            # other missing name if they correspond to the parent project
+            # will be subtitued latter upon exception
+            localvars = locals()
+            #localvars['proj']=self.parent
+            #localvars['project']=self.parent
 
-def run_script(script, globals, locals):
+        try:
+            exec(code, globals(), localvars)
+            return
+
+        except NameError as e:
+            # most of the time, a script apply to a project
+            # let's try to substitute the parent to the missing name
+            regex = re.compile(r"'(\w+)'")
+            s = regex.search(e.args[0]).group(1)
+            localvars[s] = self.parent
+
+        try:
+            exec(code, globals(), localvars)
+        except NameError as e:
+            log.error(e + '. pass the variable `locals()` : this may solve '
+                          'this problem! ')
+
+def run_script(script, localvars):
     """
     Execute a given project script in the current context.
 
@@ -120,7 +157,7 @@ def run_script(script, globals, locals):
 
     """
 
-    return script.execute(globals, locals)
+    return script.execute(localvars)
 
 
 def run_all_scripts(project):

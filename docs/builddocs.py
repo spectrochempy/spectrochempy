@@ -194,7 +194,7 @@ def do_release():
                      PROJECT=PROJECT,
                      FROM=os.path.join(path,'%s_doc'%PROJECT,'*'),
                      SERVER=SERVER)
-
+        print(cmd)
         log.debug(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
         log.debug(cmd)
         res = subprocess.call([cmd], shell=True, executable='/bin/bash')

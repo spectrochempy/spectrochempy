@@ -44,34 +44,13 @@ def test_magic_addscript(ip):
                     # script with the definition of the function
                     # `available_styles` content of cell 2
 
-    expected = \
-'''
-def available_styles():
-    """
-    Styles availables in SpectroChemPy
-
-    Todo
-    -----
-    Make this list extensible programmatically
-
-    Returns
-    -------
-    l : a list of style
-
-    """
-    return [\'notebook\', \'paper\', \'poster\', \'talk\', \'sans\']
-
-print(available_styles())
-'''
-
-    print("expected", expected)
     print("x", x)
-    assert x.strip() == expected.strip()
+    assert x.strip() == 'Script style created.'
 
     # with cell contents
     x = ip.run_cell('%%%%addscript -p project -o essai -n available_styles\n'
                     'print(available_styles())')
 
     print('result\n',x.result)
-    assert x.result.strip() == expected.strip()
+    assert x.result.strip() == 'Script essai created.'
 
