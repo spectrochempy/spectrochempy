@@ -104,6 +104,8 @@ def make_docs(*args):
     """Make the html and pdf documentation
 
     """
+    #res = subprocess.call(['pip install -e ..'],
+    #                      shell=True, executable='/bin/bash')
 
     args = list(args)
 

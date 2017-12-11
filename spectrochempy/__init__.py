@@ -29,6 +29,7 @@ from IPython import get_ipython
 import matplotlib as mpl
 
 from pkg_resources import get_distribution, DistributionNotFound
+from setuptools_scm import get_version
 import  subprocess
 import datetime
 
@@ -102,13 +103,13 @@ _setup_backend_and_ipython()
 # ----------------------------------------------------------------------------
 
 try:
-    __version__ = get_distribution('spectrochempy').version
+    __release__ = get_distribution('spectrochempy').version
 
 except DistributionNotFound:
     # package is not installed
-    __version__ = '0.1.b0'
+    __release__ = '0.1'
 
-__release__ = ".".join(__version__.split(".")[:3])
+version = get_version(root='..', relative_to=__file__)
 
 # ............................................................................
 def _get_copyright():

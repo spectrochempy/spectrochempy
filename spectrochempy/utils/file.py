@@ -109,7 +109,7 @@ class ScpFile(object):
     """
     ScpFile(fid)
 
-    (largely inspired by ``NpzFile` object in numpy)
+    (largely inspired by ``NpzFile`` object in numpy)
 
     `ScpFile` is used to load files stored in ``.scp`` or ``.pscp``
     format.
