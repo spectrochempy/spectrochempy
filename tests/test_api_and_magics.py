@@ -19,9 +19,9 @@ def test_api():
     import spectrochempy
     # test version
     from spectrochempy.api import APIref, log
-    from spectrochempy.__version__ import version
+    from spectrochempy import __version__ as version
     assert version.split('.')[0] == '0'
-    assert version.split('.')[1][:2] == '1a'
+    assert version.split('.')[1][:1] == '1'
     # TODO: modify this for each release
 
     # test application
