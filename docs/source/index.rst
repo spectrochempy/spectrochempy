@@ -37,7 +37,8 @@ running on Linux, Windows or OS X.
 
     |scp| is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
-    bugs and crashes!!!.
+    bugs and crashes!!!. Please report any issues to the
+    `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
 
 .. _main_intallation:
