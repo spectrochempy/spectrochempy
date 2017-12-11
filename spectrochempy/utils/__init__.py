@@ -32,7 +32,6 @@ from .system import *
 from .utilities import *
 from .matplolib_utils import *
 from .arrayutils import *
-from .version import *
 from .docstring import *
 from .traittypes import *
 from .meta import *

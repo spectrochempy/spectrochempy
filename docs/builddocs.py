@@ -46,8 +46,8 @@ import matplotlib as mpl
 mpl.use('agg')
 
 from spectrochempy.api import *
-from spectrochempy.utils import (list_packages, get_version,
-                                 get_release_date, get_version_date)
+from spectrochempy import __version__ as version
+
 from traitlets import import_item
 
 options.log_level = ERROR
@@ -134,6 +134,9 @@ def make_docs(*args):
         log.info('\n\nOld documentation now erased.\n\n')
 
     for builder in builders:
+
+        print('building %s documentation (version: %s)'%(builder,
+                                                         version) )
         srcdir = confdir = SOURCE
         outdir = "{0}/{1}".format(BUILDDIR, builder)
         doctreedir = "{0}/~doctrees".format(BUILDDIR)
