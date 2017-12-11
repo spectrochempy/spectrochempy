@@ -63,7 +63,7 @@ Documentation
 
 the online Html documentation is available here:
 
-* `HTML documentation <https://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
+* `HTML documentation <http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
 
 
 Issue Tracker
