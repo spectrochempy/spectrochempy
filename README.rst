@@ -14,25 +14,24 @@ What is |scp|?
 data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
 running on Linux, Windows or OS X.
 
-  1.  A ``NDDataset`` object embedding array of data with labeled axes and
-  metadata.
-  2.  A ``Project`` manager to work on multiple ``NDDataset` simultaneoulsly.
-  3.  ``Units`` and ``Uncertainties`` for ``NDDataset``.
-  4.  Mathematical operations over ``NDDataset`` such addition,
-  multiplication and many more ...
-  5.  Import functions to read data from experiments or modelling programs ...
-  6.  Display functions such as ``plot`` ...
-  7.  Export functions to ``csv``, ``xls`` ... (NOT YET)
-  8.  Preprocessing funtions such as baseline correction, automatic
+#.  A ``NDDataset`` object embedding array of data with labeled axes and
+    metadata.
+#.  A ``Project`` manager to work on multiple ``NDDataset` simultaneoulsly.
+#.  ``Units`` and ``Uncertainties`` for ``NDDataset``.
+#.  Mathematical operations over ``NDDataset`` such addition,
+    multiplication and many more ...
+#.  Import functions to read data from experiments or modelling programs ...
+#.  Display functions such as ``plot`` ...
+#.  Export functions to ``csv``, ``xls`` ... (NOT YET)
+#.  Preprocessing funtions such as baseline correction, automatic
   subtraction and many more ...
-  9.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
+#.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
 
 .. warning::
 
 	|scp| is still experimental and under active development.
 	Its current design is subject to major changes, reorganizations, bugs
-	and crashes!!!. Please report any issues to the
-    `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
+	and crashes!!!. Please report any issues to the `Issue Tracker <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
 
 .. _main_installation:
@@ -40,8 +39,7 @@ running on Linux, Windows or OS X.
 Installation
 ============
 
-Installation can be performed using conda, pip or by cloning the sources
-from Bitbucket:
+Installation can be performed using conda, pip or by cloning the sources from Bitbucket:
 
 .. sourcecode:: bash
 
