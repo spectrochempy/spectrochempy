@@ -3,10 +3,6 @@
 Spectrochempy
 =============
 
-:release: |release|
-:version: |version| (|today|)
-
-
 What is |scp|?
 --------------
 
