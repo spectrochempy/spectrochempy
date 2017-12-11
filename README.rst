@@ -21,7 +21,9 @@ running on Linux, Windows or OS X.
 #.  Export functions to ``csv``, ``xls`` ... (NOT YET)
 #.  Preprocessing funtions such as baseline correction, automatic
     subtraction and many more ...
+#.  Fitting capabilities for single or multiple datasets ...
 #.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa``...
+
 
 .. warning::
 
