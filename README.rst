@@ -16,7 +16,7 @@ running on Linux, Windows or OS X.
 
 #.  A ``NDDataset`` object embedding array of data with labeled axes and
     metadata.
-#.  A ``Project`` manager to work on multiple ``NDDataset` simultaneoulsly.
+#.  A ``Project`` manager to work on multiple ``NDDataset`` simultaneoulsly.
 #.  ``Units`` and ``Uncertainties`` for ``NDDataset``.
 #.  Mathematical operations over ``NDDataset`` such addition,
     multiplication and many more ...
