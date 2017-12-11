@@ -41,13 +41,13 @@ Installation can be performed using conda, pip or by cloning the sources from Bi
 
 .. sourcecode:: bash
 
-	conda install spectrochempy
+	conda install spectrochempy  (NOT YET!)
 
 or
 
 .. sourcecode:: bash
 
-	pip install spectrochempy
+	pip install spectrochempy     (NOT YET!)
 
 
 License
