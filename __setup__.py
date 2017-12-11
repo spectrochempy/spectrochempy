@@ -27,11 +27,8 @@ import subprocess
 import shutil as sh
 import warnings
 
-from spectrochempy.api import version
-print (version)
 def path():
 	return os.path.dirname(__file__)
-
 
 class PostDevelopCommand(develop):
 	"""Post-installation for development mode."""
@@ -74,7 +71,8 @@ def get_dependencies():
 def run_setup():
 	setup(
 			name='spectrochempy',
-			version=version,
+			#version=version,
+            use_scm_version=True,
 			packages=find_packages(
 					exclude=['docs', "*.tests", "*.tests.*", "tests.*",
 							 "tests"]),
@@ -85,7 +83,8 @@ def run_setup():
 			author_email='spectrochempy@ensicaen.fr',
 			description='Spectra Analysis & Processing with Python',
 			long_description=read('README.rst'),
-			setup_requires=['pytest-runner'],
+			setup_requires=['setuptools_scm',
+							'pytest-runner'],
 			install_requires=get_dependencies(),
 			dependency_links=[
 				"git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",

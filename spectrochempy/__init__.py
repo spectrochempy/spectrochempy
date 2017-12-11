@@ -28,6 +28,16 @@ from IPython.core.magic import UsageError
 from IPython import get_ipython
 import matplotlib as mpl
 
+from pkg_resources import get_distribution, DistributionNotFound
+import  subprocess
+import datetime
+
+__all__ = ['__version__', '__release__', '__release_date__', '__copyright__']
+
+# ----------------------------------------------------------------------------
+# Backend
+# ----------------------------------------------------------------------------
+
 # .........................................................................
 def _setup_backend_and_ipython(backend=None):
     """Backend and IPython matplotlib environ setup
@@ -87,6 +97,37 @@ def _setup_backend_and_ipython(backend=None):
 
 _setup_backend_and_ipython()
 
+# ----------------------------------------------------------------------------
+# Version
+# ----------------------------------------------------------------------------
+
+try:
+    __version__ = get_distribution('spectrochempy').version
+
+except DistributionNotFound:
+    # package is not installed
+    __version__ = '0.1.b0'
+
+__release__ = ".".join(__version__.split(".")[:3])
+
+# ............................................................................
+def _get_copyright():
+    current_year = datetime.date.today().year
+    copyright = '2014-{}'.format(current_year)
+    copyright += ' - A.Travert and C.Fernandez @ LCS'
+    return copyright
+
+__copyright__ = _get_copyright()
+
+# .............................................................................
+def _get_release_date():
+    try:
+        return subprocess.getoutput(
+            "git log -1 --tags --date='short' --format='%ad'")
+    except:
+        pass
+
+__release_date__ = _get_release_date()
 
 # ==============================================================================
 # For documentation

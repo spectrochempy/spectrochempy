@@ -46,6 +46,7 @@ from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe,
                        import_item)
 from IPython import get_ipython
 import matplotlib as mpl
+from setuptools_scm import get_version
 
 # ============================================================================
 # constants
@@ -359,27 +360,18 @@ class SpectroChemPy(Application):
 
     @default('version')
     def _get_version(self):
-        from spectrochempy.utils import get_version
-        return get_version()[0]
+        from spectrochempy import __version__
+        return __version__
 
     @default('release')
     def _get_release(self):
-        from spectrochempy.utils import get_version
-        return get_version()[1]
-
-    @default('dev_version')
-    def _get_dev_version(self) :
-        from spectrochempy.utils import get_version
-        if len(get_version())>2:
-            return get_version()[2]
-        else:
-            return get_version()[0]
+        from spectrochempy import __release__
+        return __release__
 
     @default('copyright')
     def _get_copyright(self):
-        from spectrochempy.utils import get_copyright
-        return get_copyright()
-
+        from spectrochempy import __copyright__
+        return __copyright__
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
