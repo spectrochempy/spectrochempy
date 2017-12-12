@@ -31,7 +31,7 @@ from functools import wraps
 # ============================================================================
 
 from traitlets import (Dict, List, Bool, Instance, Unicode, This, Any, default)
-import dill
+#import dill
 
 # ============================================================================
 # local imports

@@ -331,18 +331,17 @@ class SpectroChemPy(Application):
                  help='set Quiet mode, with minimal outputs'
                  ).tag(config=True)
 
-    workspace = Unicode(os.path.expanduser(os.path.join('~', 'scpworkspace'))
-                        ).tag(config=True)
-
     _scpdata = Instance(SCPData,
                         help="Set a data directory where to look for data")
 
     csv_delimiter = Unicode(';',
                             help='set csv delimiter').tag(config=True)
 
+    project = Unicode('', help='project to load at startup').tag(config=True)
 
     aliases = Dict(
         dict(test='SpectroChemPy.test',
+             p='SpectroChemPy.project',
              log_level='SpectroChemPy.log_level'))
 
     flags = Dict(dict(

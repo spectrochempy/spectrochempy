@@ -423,6 +423,15 @@ class NDDataset(
     # public methods
     # -------------------------------------------------------------------------
 
+    def implements(self, name=None):
+        ## For compatibility with pyqtgraph
+        ## Rather than isinstance(obj, MetaArray) use object.implements('MetaArray')
+        ## This is usefull to check type without importing the module
+        if name is None:
+            return ['NDDataset']
+        else:
+            return name == 'NDDataset'
+
     def coord(self, axis=-1):
         """
         This method return the the coordinates along the given axis

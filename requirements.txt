@@ -6,7 +6,7 @@ matplotlib
 pandas
 traitlets
 xlrd
-dill
+# dill (not used for now)
 
 # mainly for install and a bit more...
 
