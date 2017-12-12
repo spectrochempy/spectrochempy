@@ -74,7 +74,16 @@ You find a problem, want to suggest enhancement or want to look at the current i
 * `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
 
-.. _main_citing :
+.. _roadmap:
+Road Map
+========
+
+The possible roadmap for this project is here:
+
+* `Roadmap <https://bitbucket.org/spectrocat/spectrochempy/wiki/>`_
+
+
+.. _main_citing:
 
 Citing |scp|
 ============
