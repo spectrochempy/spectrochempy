@@ -318,13 +318,13 @@ class NDArray(HasTraits):
                     getattr(self, "_%s" % attr) == getattr(other,
                                                            "_%s" % attr))
                 if not eq:
-                    log.debug("attributes '{}' are not equals "
-                              "or one is missing: "
-                              "{}, {}".format(attr,
-                                              getattr(self,
-                                                      "_%s" % attr),
-                                              getattr(other,
-                                                      "_%s" % attr)))
+                    # log.debug("attributes '{}' are not equals "
+                    #           "or one is missing: "
+                    #           "{}, {}".format(attr,
+                    #                           getattr(self,
+                    #                                   "_%s" % attr),
+                    #                           getattr(other,
+                    #                                   "_%s" % attr)))
                     return False
         return eq
 
@@ -534,8 +534,9 @@ class NDArray(HasTraits):
             self._data = np.array([[]]).astype(float)  # reinit data
 
         elif isinstance(data, NDArray):
-            log.debug(
-                "init data with data from another NDArray or NDArray subclass")
+            #log.debug(
+            #    "init data with data from another NDArray or NDArray
+            # subclass")
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
@@ -551,24 +552,24 @@ class NDArray(HasTraits):
                 self._date = data._date
 
         elif isinstance(data, NDFrame):  # pandas object
-            log.debug("init data with data from pandas NDFrame object")
+            #log.debug("init data with data from pandas NDFrame object")
             self._data = data.values
             self.coordset = data.axes
 
         elif isinstance(data, Index):  # pandas index object
-            log.debug("init data with data from a pandas Index")
+            #log.debug("init data with data from a pandas Index")
             self._data = data.values
             self._title = data.name
 
         elif isinstance(data, Quantity):
-            log.debug("init data with data from a Quantity object")
+            #log.debug("init data with data from a Quantity object")
             self._data_passed_is_quantity = True
             self._data = np.array(data.magnitude, subok=True,
                                   copy=self._copy)
             self._units = data.units
 
         elif hasattr(data, 'mask'):  # an object with data and mask attributes
-            log.debug("init mask from the passed data")
+            #log.debug("init mask from the passed data")
             self._data = np.array(data.data, subok=True,
                                   copy=self._copy)
             if isinstance(data.mask, np.ndarray) and \
@@ -578,13 +579,13 @@ class NDArray(HasTraits):
         elif (not hasattr(data, 'shape') or
                   not hasattr(data, '__getitem__') or
                   not hasattr(data, '__array_struct__')):
-            log.debug("init data with a non numpy-like array object")
+            #log.debug("init data with a non numpy-like array object")
             # Data doesn't look like a numpy array, try converting it to
             # one. Non-numerical input are converted to an array of objects.
             self._data = np.array(data, subok=True, copy=False)
 
         else:
-            log.debug("init data with a numpy array")
+            #log.debug("init data with a numpy array")
             self._data = np.array(data, subok=True, copy=self._copy)
 
     # .........................................................................

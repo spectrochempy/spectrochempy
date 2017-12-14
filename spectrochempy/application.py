@@ -22,8 +22,6 @@ This module define the `application` on which the API rely.
 This module has no public members and so is not intended to be
 accessed directly by the end user.
 
-
-
 """
 
 # ============================================================================
@@ -44,21 +42,21 @@ from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, catch_config_error
 from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe,
                        import_item)
-from IPython import get_ipython
 import matplotlib as mpl
 from setuptools_scm import get_version
+
+from IPython import get_ipython
+from IPython.core.magic import (Magics, magics_class, line_magic, cell_magic,
+                                line_cell_magic)
+from IPython.core.magics.code import extract_symbols
+from IPython.core.error import UsageError
+from IPython.utils.text import get_text_list
 
 # ============================================================================
 # constants
 # ============================================================================
 
 __all__ = ['app']  # no public methods
-
-from IPython.core.magic import (Magics, magics_class, line_magic, cell_magic,
-                                line_cell_magic)
-from IPython.core.magics.code import extract_symbols
-from IPython.core.error import UsageError
-from IPython.utils.text import get_text_list
 
 # ============================================================================
 # Magic ipython function
@@ -685,11 +683,15 @@ class SpectroChemPy(Application):
 
     @observe('log_level')
     def _log_level_changed(self, change):
+
         self.log_format = '%(highlevel)s %(message)s'
         if change.new == logging.DEBUG:
             self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
         self.log.level = self.log_level
-        self.log.debug("changed default loglevel to {}".format(change.new))
+        for handler in self.log.handlers:
+            handler.level = self.log_level
+        self.log.debug("changed default log_level to {}".format(
+                                             logging.getLevelName(change.new)))
 
 #: Main application object that should not be called directly by a end user.
 #: It is advisable to use the main `api` import to access all public methods of
