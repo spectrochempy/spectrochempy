@@ -3,7 +3,7 @@
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL FREE SOFTWARE LICENSE AGREEMENT (Version 2.1) 
+# CeCILL FREE SOFTWARE LICENSE AGREEMENT (Version B) 
 # See full LICENSE agreement in the root directory
 # =============================================================================
 

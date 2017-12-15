@@ -4,5 +4,5 @@ License
 #######
 
 .. raw:: html
-   :file: _static/license.html
+   :file: _static/Licence_CeCILL-B_V1.html
 

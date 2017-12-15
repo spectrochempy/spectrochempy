@@ -3,7 +3,7 @@
 # =============================================================================
 # Copyright (©) 2015-2018 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL FREE SOFTWARE LICENSE AGREEMENT (Version 2.1)
+# CeCILL FREE SOFTWARE LICENSE AGREEMENT (Version B)
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
@@ -71,7 +71,7 @@ def run_setup():
 							 "tests"]),
 			include_package_data=True,
 			url='http:/www-lcs.ensicaen.fr/spectrochempy',
-			license='CeCILL-2.1',
+			license='CeCILL-B',
 			author='Arnaud Travert & christian Fernandez',
 			author_email='spectrochempy@ensicaen.fr',
 			description='Spectra Analysis & Processing with Python',
@@ -81,11 +81,11 @@ def run_setup():
 			dependency_links=[
 			],
 			classifiers=[
-				"Development Status :: 2 - Pre-Alpha",
+				"Development Status :: 4 - Beta",
 				"Topic :: Utilities",
 				"Topic :: Scientific/Engineering",
 				"Intended Audience :: Science/Research",
-				"License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
+				"License :: CeCILL-B Free Software License Agreement (CECILL-B)",
 				"Operating System :: OS Independent",
 				"Programming Language :: Python :: 3.5",
 			],
