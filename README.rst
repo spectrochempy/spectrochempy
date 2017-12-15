@@ -83,10 +83,7 @@ Using pip
 License
 =======
 
-Note::
-
-	Fix the correct license to use. Not sure Cecill 2.1 is compatible
-	with BSD-3 code sometimes included (such as NMRGlue)
+CeCILL FREE SOFTWARE LICENSE AGREEMENT (Version B) -
 
 Documentation
 ===============
