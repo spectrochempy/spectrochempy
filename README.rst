@@ -83,7 +83,8 @@ Using pip
 License
 =======
 
-CeCILL FREE SOFTWARE LICENSE AGREEMENT (Version B) -
+CeCILL FREE SOFTWARE LICENSE AGREEMENT (Version B)
+
 
 Documentation
 ===============
