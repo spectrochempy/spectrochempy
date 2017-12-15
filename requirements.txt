@@ -27,14 +27,3 @@ pytest-xdist
 pytest-runner
 scikit-image
 
-# for documentation
-
-sphinx
-pandoc
-numpydoc
-sphinx_rtd_theme
-
-# for gui
-
-qtconsole
-pyqt
