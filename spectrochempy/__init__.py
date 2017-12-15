@@ -97,14 +97,15 @@ _setup_backend_and_ipython()
 
 try:
     __release__ = get_distribution('spectrochempy').version
-
-
 except DistributionNotFound:
     # package is not installed
-    __release__ = '0.1'
+    __release__ = '0.1.beta'
 
-__version__ = get_version(
-                        root='..', relative_to=__file__)
+try:
+    __version__ = get_version(root='..', relative_to=__file__)
+except:
+    __version__ = __release__
+
 
 # ............................................................................
 def _get_copyright():
@@ -131,6 +132,7 @@ __release_date__ = _get_release_date()
 
 if __name__ == '__main__':
     pass
+    print (__release__, __version__)
 
 
 

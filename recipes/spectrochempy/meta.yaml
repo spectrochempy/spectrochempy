@@ -1,18 +1,19 @@
 package:
   name: spectrochempy
-  version: {{GIT_FULL_HASH}}
+  version: 0.1.b1
 
 source:
-  git_tag: {{GIT_FULL_HASH}}
-  git_url: https://fernandezc@bitbucket.org/spectrocat/spectrochempy.git
+  path: ../../
 
 requirements:
   build:
     - python
+    - setuptools
+    - setuptools_scm
 
   run:
     - python        3.6.*
-    - matplotlib    2.0.*
+    - matplotlib
     - traitlets
     - numpy
     - scipy
@@ -21,9 +22,7 @@ requirements:
     - ipython
     - ipykernel
     - nb_conda
-    - pytest
-    - pytest-runner
-    - scikit-image
+    - setuptools_scm
 
 #test:
   # Python imports
@@ -38,12 +37,6 @@ requirements:
 
   # You can also put a file called run_test.py in the recipe that will be run
   # at test time.
-
-  requires:
-    # Put any additional test requirements here.  For example
-    - pytest
-    - pytest-runner
-    - scikit-image
 
 about:
   home: http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html

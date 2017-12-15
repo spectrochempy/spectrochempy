@@ -37,13 +37,39 @@ running on Linux, Windows or OS X.
 Installation
 ============
 
-Installation can be performed using conda, pip or by cloning the sources from Bitbucket:
+Installation can be performed using conda, pip or by cloning the sources from Bitbucket.
+
+Using Anaconda (recommended)
+-----------------------------
+If you have already installed ``anaconda`` or ``miniconda``
+you can follow these steps:
 
 .. sourcecode:: bash
+    conda create --name scp36 python=3.6
 
-	conda install spectrochempy  (NOT YET!)
+Activate the environment:
 
-or
+On Windows, in your Anaconda Prompt, run
+
+.. sourcecode:: bash
+    activate scp36
+
+On macOS and Linux, in your Terminal Window, run
+
+.. sourcecode:: bash
+    source activate scp36
+
+Now install spectrochempy (from the spectrocat channel)
+
+.. sourcecode:: bash
+    conda install -c spectrocat spectrochempy
+
+
+If you do not have Anaconda yet, get more information here: `<https://docs.anaconda.com/anaconda/>`_
+
+
+Using pip
+---------
 
 .. sourcecode:: bash
 
