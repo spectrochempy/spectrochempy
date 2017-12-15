@@ -50,7 +50,18 @@ Installation
     :maxdepth: 2
 
     install
-    license
+
+
+.. _main_license:
+
+License
+=======
+
+.. toctree::
+    :maxdepth: 2
+
+    CeCILL-B FREE SOFTWARE LICENSE AGREEMENT <license>
+
 
 .. _main_documentation:
 
