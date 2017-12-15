@@ -11,5 +11,19 @@ jupyter_nbextensions_configurator
 
 # docs
 
-sphinx-gallery
+"git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
+
 nbsphinx
+
+
+# requirement for documentation
+
+sphinx
+pandoc
+numpydoc
+sphinx_rtd_theme
+
+# for gui
+
+qtconsole
+pyqt

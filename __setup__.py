@@ -76,13 +76,10 @@ def run_setup():
 			author_email='spectrochempy@ensicaen.fr',
 			description='Spectra Analysis & Processing with Python',
 			long_description=read('README.rst'),
-			setup_requires=['setuptools_scm',
-							'pytest-runner'],
+			setup_requires=['setuptools_scm'],
 			install_requires=get_dependencies(),
 			dependency_links=[
-				"git+ssh://git@github.com:sphinx-gallery/sphinx-gallery.git",
 			],
-			tests_require=['pytest'],
 			classifiers=[
 				"Development Status :: 2 - Pre-Alpha",
 				"Topic :: Utilities",
