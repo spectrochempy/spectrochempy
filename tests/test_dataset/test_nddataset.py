@@ -1471,3 +1471,9 @@ def test_nddataset_use_of_mask(IR_source_1D):
     nd.plot()
     show()
 
+### Test for bugs ######
+
+def test_bug1():
+    ds = NDDataset([[1, 2, 3, 6, 8, 0]],
+                   coordset=[Coord(data=[1, 2, 3, 4, 5, 6])], units='m')
+    print(ds)

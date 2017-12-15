@@ -92,3 +92,10 @@ coverage.xml
 
 
 
+recipes/spectrochempy/linux-32
+recipes/spectrochempy/linux-64
+recipes/spectrochempy/linux-aarch64
+*.tar.bz2
+installed.txt
+installed2.txt
+installed3.txt

@@ -768,11 +768,15 @@ class NDDataset(
         out += '{}\n'.format(textwrap.indent(str(data_str), ' ' * 9))
 
         if self.coordset is not None:
-            for i, coord in enumerate(self.coordset):
-                coord_str = str(coord).replace('\n\n', '\n')
-                out += 'coordinates {}:\n'.format(i)
-                out += textwrap.indent(coord_str, ' ' * 9)
-                out += '\n'
+            idx = 0
+            for coord in self.coordset:
+                if isinstance(coord, list) or (hasattr(coord, 'data')
+                                               and coord.data is not None):
+                    coord_str = str(coord).replace('\n\n', '\n')
+                    out += 'coordinates {}:\n'.format(idx)
+                    out += textwrap.indent(coord_str, ' ' * 9)
+                    out += '\n'
+                    idx += 1
 
         if not out.endswith('\n'):
             out += '\n'

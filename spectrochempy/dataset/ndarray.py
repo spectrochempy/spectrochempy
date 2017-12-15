@@ -1778,6 +1778,9 @@ class NDArray(HasTraits):
     # .........................................................................
     def _str(self, sep='\n', ufmt=' {:~K}'):
 
+        if self.data is None:
+            return ''
+
         prefix = ['']
         if self.has_complex_dims:
             for axis in self.iterdims:

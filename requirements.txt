@@ -27,3 +27,4 @@ pytest-xdist
 pytest-runner
 scikit-image
 
+pyqt
