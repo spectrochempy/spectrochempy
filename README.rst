@@ -45,6 +45,7 @@ If you have already installed ``anaconda`` or ``miniconda``
 you can follow these steps:
 
 .. sourcecode:: bash
+
     conda create --name scp36 python=3.6
 
 Activate the environment:
@@ -52,16 +53,19 @@ Activate the environment:
 On Windows, in your Anaconda Prompt, run
 
 .. sourcecode:: bash
+
     activate scp36
 
 On macOS and Linux, in your Terminal Window, run
 
 .. sourcecode:: bash
+
     source activate scp36
 
 Now install spectrochempy (from the spectrocat channel)
 
 .. sourcecode:: bash
+
     conda install -c spectrocat spectrochempy
 
 
@@ -73,7 +77,7 @@ Using pip
 
 .. sourcecode:: bash
 
-	pip install spectrochempy     (NOT YET!)
+    pip install spectrochempy     (NOT YET!)
 
 
 License
