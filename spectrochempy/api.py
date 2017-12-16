@@ -60,19 +60,19 @@ from spectrochempy.application import app
 from spectrochempy import application
 
 running = app.running
-version, dev_version, release = (app.version,
-                                 app.dev_version,
-                                 app.release)
+version, release = (app.version, app.release)
 copyright =  app.copyright
+license = app.license
+
 log =  app.log
 log_level =  app.log_level
 
 # give a user friendly name to the objects containing configurables options
 options = app
-scpdata =  app.scpdata
-list_scpdata =  app.list_scpdata
-plotoptions =  app.plotoptions
-projectsoptions =  app.projectsoptions
+scpdata =  app.general_options.data
+list_scpdata =  app.general_options.list_scpdata
+plot_options =  app.plot_options
+project_options =  app.project_options
 
 
 # Log levels
@@ -90,11 +90,11 @@ __all__ += [
     'app',
     'log', 'log_level', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
     'scpdata', 'list_scpdata',
-    'plotoptions', 'options',
+    'plot_options', 'options',
     #'pcl',
 
     ### Info
-    'copyright', 'version', 'dev_version', 'release'
+    'copyright', 'version', 'release', 'license',
 ]
 
 
@@ -227,7 +227,7 @@ _reset_config = False
 _started = application.app.start(debug=_debug, reset_config=_reset_config)
 
 # load the default style
-plt.style.use(application.app.plotoptions.style)
+plt.style.use(application.app.plot_options.style)
 
 log.info("API activated "
          if _started else "API was not started!")

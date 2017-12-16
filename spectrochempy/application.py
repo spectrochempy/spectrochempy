@@ -34,9 +34,8 @@ import warnings
 from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, catch_config_error
 from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe,
-                       import_item)
+                       import_item, HasTraits)
 import matplotlib as mpl
-from setuptools_scm import get_version
 
 from IPython import get_ipython
 from IPython.core.magic import (Magics, magics_class, line_magic, cell_magic,
@@ -50,6 +49,9 @@ from IPython.utils.text import get_text_list
 # ============================================================================
 
 __all__ = ['app']  # no public methods
+
+from spectrochempy import __version__
+
 
 # ============================================================================
 # Magic ipython function
@@ -176,13 +178,13 @@ class SpectroChemPyMagics(Magics):
 # SCPData class
 # ==============================================================================
 
-class SCPData(Configurable):
+class SCPData(HasTraits):
     """
     This class is used to determine the path to the scp_data directory.
 
     """
 
-    data = Unicode(help="Directory where to look for data").tag(config=True)
+    data = Unicode(help="Directory where to look for data")
 
     _data = Unicode()
 
@@ -260,6 +262,41 @@ class SCPData(Configurable):
 # ============================================================================
 # Main application and configurators
 # ============================================================================
+class GeneralOptions(Configurable) :
+    """Options that apply to the |scp| application in general"""
+
+    _scpdata = Instance(SCPData,
+                    help="Set a data directory where to look for data"
+                    )
+
+    @default('_scpdata')
+    def _get__scpdata_default(self):
+        return SCPData()
+
+    @property
+    def list_scpdata(self):
+        return self._scpdata
+
+    # backend = Unicode('spectrochempy',
+    #                   help='backend to be used in the application'
+    #                   ).tag(config=True)
+
+    # configuration parameters
+    # ------------------------------------------------------------------------
+
+    show_info_on_loading = Bool(True,
+                                help='display info on loading'
+                                ).tag(config=True)
+
+    csv_delimiter = Unicode(';',
+                            help='set csv delimiter').tag(config=True)
+
+    data = Unicode(help="Directory where to look for data").tag(config=True)
+
+    @property
+    def data(self):
+        return self._scpdata.data
+
 
 class SpectroChemPy(Application):
     """
@@ -269,22 +306,92 @@ class SpectroChemPy(Application):
     """
     from spectrochempy.utils import docstrings
 
-    from spectrochempy.projects.projectsoptions import ProjectsOptions
-    from spectrochempy.plotters.plottersoptions import PlotOptions
+
+    from spectrochempy.projects.projectoptions import ProjectOptions
+    from spectrochempy.plotters.plottersoptions import plot_options
     #from spectrochempy.readers.readersoptions import ReadOptions
     #from spectrochempy.writers.writersoptions import WriteOptions
     #from spectrochempy.processors.processorsoptions import ProcessOptions
 
+    # applications attributes
+    # ------------------------------------------------------------------------
+    running = Bool(False)
 
-    name = Unicode('SpectroChemPyApp')
-    description = Unicode('This is the main SpectroChemPy Application ')
+    test = Bool(False)
+
+    name = Unicode('SpectroChemPy')
 
     version = Unicode
-    dev_version = Unicode
+
+    @default('version')
+    def _get_version(self):
+        return __version__
+
     release = Unicode
+
+    @default('release')
+    def _get_release(self):
+        from spectrochempy import __release__
+        return __release__
+
     copyright = Unicode
 
-    # configuration parameters  ______________________________________________
+    @default('copyright')
+    def _get_copyright(self):
+        from spectrochempy import __copyright__
+        return __copyright__
+
+    license = Unicode
+
+    @default('license')
+    def _get_licence(self):
+        from spectrochempy import __license__
+        return __license__
+
+    description = Unicode
+
+    @default('description')
+    def _get_description(self):
+        from spectrochempy import __license__, __author__, __release__
+
+        desc = """This is the main <b>SpectroChemPy</b> Application<br>
+<br>
+<b>SpectroChemPy</b> is a framework for processing, analysing and 
+modelling 
+<b>Spectro</>scopic data for <b>Chem</b>istry with <b>Py</b>thon. It is 
+is a cross platform software, running on Linux, Windows or OS X.
+<br>
+<b>version:</b> {version}
+<br>
+<b>Authors:</b> {authors}
+<br>
+<b>License:</b> {license}
+<br>
+<div class='warning'> SpectroChemPy is still experimental and under active 
+development.
+    Its current design is subject to major changes, reorganizations, bugs
+    and crashes!!!. Please report any issues to the 
+    <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker
+    <a>
+</div>
+<br>
+<br>
+When using |scp| for your own work, you are kindly requested 
+to cite it this way:
+<pre>
+ Arnaud Travert & Christian Fernandez,
+ SpectroChemPy, a framework for processing, analysing and modelling of 
+ Spectroscopic data for Chemistry with Python
+ https://bitbucket.org/spectrocat/spectrochempy, (version {version})
+ Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
+ Caen/CNRS, 2017
+</pre>
+
+""".format(version=__release__, authors=__author__, license=__license__)
+
+
+    # configuration parameters
+    # ------------------------------------------------------------------------
 
     reset_config = Bool(False,
                         help='should we restaure a default configuration?'
@@ -294,25 +401,18 @@ class SpectroChemPy(Application):
                                help="Load this config file"
                                ).tag(config=True)
 
+    @default('config_file_name')
+    def _get_config_file_name_default(self):
+        return self.name + '_config.py'
+
+
     config_dir = Unicode(None,
                          help="Set the configuration dir location"
                          ).tag(config=True)
 
-    backend = Unicode('spectrochempy',
-                      help='backend to be used in the application'
-                      ).tag(config=True)
-
-    info_on_loading = Bool(True,
-                           help='display info on loading'
-                           ).tag(config=True)
-
-    running = Bool(False,
-                   help="Is SpectrochemPy running?"
-                   ).tag(config=True)
-
-    test = Bool(False,
-                help='set application in testing mode'
-                ).tag(config=True)
+    @default('config_dir')
+    def _get_config_dir_default(self):
+        return self._get_config_dir()
 
     debug = Bool(False,
                  help='set DEBUG mode, with full outputs'
@@ -321,12 +421,6 @@ class SpectroChemPy(Application):
     quiet = Bool(False,
                  help='set Quiet mode, with minimal outputs'
                  ).tag(config=True)
-
-    _scpdata = Instance(SCPData,
-                        help="Set a data directory where to look for data")
-
-    csv_delimiter = Unicode(';',
-                            help='set csv delimiter').tag(config=True)
 
     startup_project = Unicode('', help='project to load at startup').tag(
         config=True)
@@ -342,49 +436,14 @@ class SpectroChemPy(Application):
             "Set loglevel to DEBUG")
     ))
 
-    classes = List([PlotOptions,
-                    ProjectsOptions])  # TODO: check if this still usefull
+    classes = List([GeneralOptions,
+                    ProjectOptions,
+                    plot_options,
+                    ])
 
     # ------------------------------------------------------------------------
     # initialization
     # ------------------------------------------------------------------------
-
-    @default('version')
-    def _get_version(self):
-        from spectrochempy import __version__
-        return __version__
-
-    @default('release')
-    def _get_release(self):
-        from spectrochempy import __release__
-        return __release__
-
-    @default('copyright')
-    def _get_copyright(self):
-        from spectrochempy import __copyright__
-        return __copyright__
-
-    @default('config_file_name')
-    def _get_config_file_name_default(self):
-        return self.name + '_config.py'
-
-
-    @default('config_dir')
-    def _get_config_dir_default(self):
-        return self._get_config_dir()
-
-    @default('_scpdata')
-    def _get__data_default(self):
-        return SCPData()
-
-    @property
-    def scpdata(self):
-        return self._scpdata.data
-
-    @property
-    def list_scpdata(self):
-        return self._scpdata
-
 
     def __init__(self, *args, **kwargs):
         super(SpectroChemPy, self).__init__(*args, **kwargs)
@@ -437,13 +496,14 @@ class SpectroChemPy(Application):
         # add other options
         # ---------------------------------------------------------------------
 
-        self._init_plotoptions()
-        self._init_projectsoptions()
+        self._init_general_options()
+        self._init_plot_options()
+        self._init_project_options()
 
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
 
-        _do_not_block = self.plotoptions.do_not_block
+        _do_not_block = self.plot_options.do_not_block
 
         for caller in ['builddocs.py', 'pytest', 'py.test', '-c']:
             # `-c` happen if the pytest is executed in parallel mode
@@ -453,12 +513,12 @@ class SpectroChemPy(Application):
                 # this is necessary to build doc
                 # with sphinx-gallery and doctests
 
-                _do_not_block = self.plotoptions.do_not_block = True
+                _do_not_block = self.plot_options.do_not_block = True
                 break
 
         # case we have passed -test arguments to a script
         if len(sys.argv) > 1 and "-test" in sys.argv[1]:
-            _do_not_block = self.plotoptions.do_not_block = True
+            _do_not_block = self.plot_options.do_not_block = True
             caller = sys.argv[0]
 
         if _do_not_block:
@@ -563,8 +623,8 @@ class SpectroChemPy(Application):
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(self.version, self.copyright)
 
-            if self.info_on_loading and \
-                    not self.plotoptions.do_not_block:
+            if self.show_info_on_loading and \
+                    not self.plot_options.do_not_block:
                 print(info_string)
 
             self.log.debug(
@@ -586,15 +646,28 @@ class SpectroChemPy(Application):
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    def _init_plotoptions(self):
-        from spectrochempy.plotters.plottersoptions import PlotOptions
+    def _init_general_options(self):
+
+        self.general_options = GeneralOptions(config=self.config)
+
+    # ........................................................................
+    def _init_project_options(self):
+
+        from spectrochempy.projects.projectoptions import ProjectOptions
+
+        self.project_options = ProjectOptions(config=self.config)
+
+    # ........................................................................
+    def _init_plot_options(self):
+
+        from spectrochempy.plotters.plottersoptions import plot_options
         from spectrochempy.utils import install_styles
 
         # Pass config to other classes for them to inherit the config.
-        self.plotoptions = PlotOptions(config=self.config)
+        self.plot_options = plot_options(config=self.config)
 
-        if not self.plotoptions.latex_preamble:
-            self.plotoptions.latex_preamble = [
+        if not self.plot_options.latex_preamble:
+            self.plot_options.latex_preamble = [
                 r'\usepackage{siunitx}',
                 r'\sisetup{detect-all}',
                 r'\usepackage{times}',  # set the normal font here
@@ -606,12 +679,6 @@ class SpectroChemPy(Application):
         # also install style to be sure everything is set
         install_styles()
 
-    # ........................................................................
-    def _init_projectsoptions(self):
-
-        from spectrochempy.projects.projectsoptions import ProjectsOptions
-
-        self.projectsoptions = ProjectsOptions(config=self.config)
 
     # ........................................................................
     def _make_default_config_file(self):
@@ -703,5 +770,6 @@ CRITICAL = logging.CRITICAL
 
 # TODO: look at the subcommands capabilities of traitlets
 if __name__ == "__main__":
+    print('start application')
     pass
 

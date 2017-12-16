@@ -19,3 +19,5 @@ class AbstractProject(HasTraits):
     """
     Project class will subclass it. This is mainly for type comparison purpose
     """
+
+#TODO: replace this by an implement attributes in such classes

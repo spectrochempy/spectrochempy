@@ -20,7 +20,7 @@ import scipy.optimize
 from warnings import warn
 
 from spectrochempy.application import app
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 log = app.log
 options = app
 from spectrochempy.fitting.parameters import FitParameters

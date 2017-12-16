@@ -24,7 +24,7 @@ from spectrochempy.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
 from spectrochempy.application import app
 
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 log = app.log
 options = app
 

@@ -24,11 +24,11 @@ from .svd import Svd
 # ==============================================================================
 from spectrochempy.application import app
 
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 log = app.log
 options = app
 
-_do_not_block = plotoptions.do_not_block
+_do_not_block = plot_options.do_not_block
 
 
 # ==============================================================================

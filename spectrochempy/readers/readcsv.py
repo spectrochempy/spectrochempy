@@ -26,7 +26,8 @@ locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
 from ..dataset.api import Coord, NDDataset
 from ..processors.api import stack
 from ..application import app
-plotoptions = app.plotoptions
+plot_options = app.plot_options
+general_options = app.general_options
 log = app.log
 options = app
 from ..utils import (readfilename, unzip, is_sequence,
@@ -133,7 +134,7 @@ def _read(source, filename='',
 
         source = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", options.scpdata)
+    directory = kwargs.get("directory", general_options.data)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 
@@ -231,7 +232,7 @@ def _read_csv(source, filename='', **kwargs):
         raise IOError("{} file doesn't exists!".format(filename))
 
     new = source.copy() # important
-    delimiter = kwargs.get("csv_delimiter", options.csv_delimiter)
+    delimiter = kwargs.get("csv_delimiter", general_options.csv_delimiter)
     try:
         d = np.loadtxt(filename, delimiter=delimiter)
     except ValueError:

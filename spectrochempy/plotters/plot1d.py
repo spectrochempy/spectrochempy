@@ -20,7 +20,7 @@ from matplotlib.ticker import MaxNLocator
 
 from spectrochempy.application import app
 
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 log = app.log
 options = app
 from spectrochempy.plotters.utils import make_label
@@ -379,8 +379,8 @@ def plot_1D(source, **kwargs):
         new._plot_resume(source, **kwargs)
         return True
 
-    number_x_labels = plotoptions.number_of_x_labels  # get from config
-    number_y_labels = plotoptions.number_of_y_labels
+    number_x_labels = plot_options.number_of_x_labels  # get from config
+    number_y_labels = plot_options.number_of_y_labels
 
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))

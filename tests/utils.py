@@ -22,7 +22,7 @@ __all__ = ["assert_equal",
            "EPSILON",
            "is_sequence",
            "scpdata",
-           "plotoptions"
+           "plot_options"
           ]
 
 import os
@@ -44,14 +44,14 @@ from numpy.testing import (assert_equal, assert_array_equal,
 #  we defer import in order to avoid importing them as well as the namespace
 #  in spectrochempy
 
-def plotoptions():
+def plot_options():
     from spectrochempy.application import app
-    return app.plotoptions
-plotoptions = plotoptions()
+    return app.plot_options
+plot_options = plot_options()
 
 def scpdata():
     from spectrochempy.application import app
-    return app.scpdata
+    return app.general_options.data
 scpdata = scpdata()
 
 
@@ -281,9 +281,9 @@ def show_do_not_block(func):
         if not '-c' in sys.argv[0] and func.__name__ in sys.argv[1]:
             # The individual test has been called - then we show figures
             # we do not show for full tests
-            plotoptions.do_not_block = False
+            plot_options.do_not_block = False
         else:
-            plotoptions.do_not_block = True
+            plot_options.do_not_block = True
         return func(*args, **kwargs)
 
     return wrapper
@@ -419,7 +419,7 @@ def image_comparison(reference=None,
 
     """
 
-    plotoptions.do_not_block = True
+    plot_options.do_not_block = True
 
     if not reference:
         raise ValueError('no reference image provided. Stopped')
