@@ -142,8 +142,6 @@ __all__ = core.__all__
 # ==============================================================================
 
 if __name__ == '__main__':
-<<<<<<< HEAD
-=======
     print(__version__)
     print(__copyright__)
     print(__license__)
@@ -154,9 +152,7 @@ if __name__ == '__main__':
     gui.start()
 
 
->>>>>>> WIP
 
-    pass
 
 
 
