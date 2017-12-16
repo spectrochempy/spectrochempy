@@ -328,11 +328,12 @@ class SpectroChemPy(Application):
     csv_delimiter = Unicode(';',
                             help='set csv delimiter').tag(config=True)
 
-    project = Unicode('', help='project to load at startup').tag(config=True)
+    startup_project = Unicode('', help='project to load at startup').tag(
+        config=True)
 
     aliases = Dict(
         dict(test='SpectroChemPy.test',
-             p='SpectroChemPy.project',
+             p='SpectroChemPy.startup_project',
              log_level='SpectroChemPy.log_level'))
 
     flags = Dict(dict(
