@@ -142,6 +142,19 @@ __all__ = core.__all__
 # ==============================================================================
 
 if __name__ == '__main__':
+<<<<<<< HEAD
+=======
+    print(__version__)
+    print(__copyright__)
+    print(__license__)
+    print(__url__)
+
+    # launch GUI
+    from spectrochempy.gui.gui import MainWindow as gui
+    gui.start()
+
+
+>>>>>>> WIP
 
     pass
 
