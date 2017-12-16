@@ -28,7 +28,7 @@ from spectrochempy.plotters.utils import make_label
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
 _methods = __all__[:]
 
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 log = app.log
 
 # =============================================================================
@@ -143,7 +143,7 @@ def plot_2D(source, **kwargs):
     # Other properties
     # ------------------
 
-    method = kwargs.get('method', plotoptions.method_2D)
+    method = kwargs.get('method', plot_options.method_2D)
 
     colorbar = kwargs.get('colorbar', True)
 
@@ -156,18 +156,18 @@ def plot_2D(source, **kwargs):
 
         if method in ['map','image']:
             cmap = colormap = kwargs.get('colormap',
-                            kwargs.get('cmap', plotoptions.colormap))
+                            kwargs.get('cmap', plot_options.colormap))
         elif data_transposed:
             cmap = colormap = kwargs.get('colormap',
-                            kwargs.get('cmap', plotoptions.colormap_transposed))
+                            kwargs.get('cmap', plot_options.colormap_transposed))
         else:
             cmap = colormap = kwargs.get('colormap',
-                            kwargs.get('cmap', plotoptions.colormap_stack))
+                            kwargs.get('cmap', plot_options.colormap_stack))
 
 
-    lw = kwargs.get('linewidth', kwargs.get('lw', plotoptions.linewidth))
+    lw = kwargs.get('linewidth', kwargs.get('lw', plot_options.linewidth))
 
-    alpha = kwargs.get('calpha', plotoptions.contour_alpha)
+    alpha = kwargs.get('calpha', plot_options.contour_alpha)
 
     # -------------------------------------------------------------------------
     # plot the source
@@ -264,7 +264,7 @@ def plot_2D(source, **kwargs):
         new._ax_lines = lines[:]
 
         # but display only a subset of them in order to accelerate the drawing
-        maxlines = kwargs.get('maxlines', plotoptions.max_lines_in_stack)
+        maxlines = kwargs.get('maxlines', plot_options.max_lines_in_stack)
         log.debug('max number of lines %d'% maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         new.ax.lines = new._ax_lines[::setpy]  # displayed ax lines
@@ -328,8 +328,8 @@ def plot_2D(source, **kwargs):
         # ----------------
         ax.set_ylim(ylim)
 
-    number_x_labels = plotoptions.number_of_x_labels
-    number_y_labels = plotoptions.number_of_y_labels
+    number_x_labels = plot_options.number_of_x_labels
+    number_y_labels = plot_options.number_of_y_labels
     new.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     new.ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
     # the next two line are to avoid multipliers in axis scale
@@ -406,8 +406,8 @@ def clevels(data, **kwargs):
     minimum = -maximum
 
     nlevels = kwargs.get('nlevels', kwargs.get('nc',
-                                               plotoptions.number_of_contours))
-    start = kwargs.get('start', plotoptions.contour_start) * maximum
+                                               plot_options.number_of_contours))
+    start = kwargs.get('start', plot_options.contour_start) * maximum
     negative = kwargs.get('negative', True)
     if negative < 0:
         negative = True

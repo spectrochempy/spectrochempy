@@ -23,14 +23,14 @@ __all__ = []
 # =============================================================================
 # Plot Options
 # =============================================================================
-class PlotOptions(Configurable):
+class plot_options(Configurable):
     """
     All options relative to plotting and views
 
     """
     import matplotlib.pyplot as plt
 
-    name = Unicode('PlotOptions')
+    name = Unicode('plot_options')
 
     description = Unicode('Options for plotting datasets')
 

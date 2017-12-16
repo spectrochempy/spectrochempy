@@ -46,7 +46,7 @@ from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity, Measurement
 from spectrochempy.application import app
 
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 
 # ----------------------------------------------------------------------------
 # constants
@@ -54,6 +54,7 @@ plotoptions = app.plotoptions
 
 log = app.log
 options = app
+general_options = app.general_options
 
 __all__ = ['NDIO',
 
@@ -105,7 +106,7 @@ class NDIO(HasTraits):
     # Generic save function
     # --------------------------------------------------------------------------
 
-    def save(self, filename='', directory=options.scpdata,
+    def save(self, filename='', directory=general_options.data,
              **kwargs
              ):
         """
@@ -118,7 +119,7 @@ class NDIO(HasTraits):
         filename : str
             The filename of the file where to save the current dataset
 
-        directory : str, optional, default = ``options.scpdata``
+        directory : str, optional, default = ``general_options.data``
             If specified, the given `directory` and the `filename` will be
             appended.
 
@@ -143,7 +144,7 @@ class NDIO(HasTraits):
 
         """
 
-        directory = kwargs.get("directory", options.scpdata)
+        directory = kwargs.get("directory", general_options.data)
 
         if not filename:
             # the current file name or default filename (id)
@@ -253,7 +254,7 @@ class NDIO(HasTraits):
     def load(cls,
              fid='',
              protocol='scp',
-             directory=options.scpdata,
+             directory=general_options.data,
              **kwargs
              ):
         """Load a dataset object saved as a pickle file ( ``.scp`` file).
@@ -313,7 +314,7 @@ class NDIO(HasTraits):
             # this is a filename
 
             filename = fid
-            directory = kwargs.get("directory", options.scpdata)
+            directory = kwargs.get("directory", general_options.data)
             if not filename:
                 raise IOError('no filename provided!')
             else:

@@ -14,17 +14,17 @@ from traitlets import (Dict, List, Bool, Instance, Unicode, HasTraits, This,
 from traitlets.config.configurable import Configurable
 
 
-__all__ = ['ProjectsOptions']
+__all__ = ['ProjectOptions']
 
 
 # ============================================================================
-class ProjectsOptions(Configurable) :
+class ProjectOptions(Configurable) :
 
-    projects_directory = Unicode(help='location where all projects are '
+    project_directory = Unicode(help='location where all projects are '
                                      'strored by defauult').tag(config=True)
 
-    @default('projects_directory')
-    def _get_default_projects_directory(self):
+    @default('project_directory')
+    def _get_default_project_directory(self):
 
         """
         Determines the SpectroChemPy project directory name and

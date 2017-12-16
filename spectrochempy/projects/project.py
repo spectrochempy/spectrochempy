@@ -42,7 +42,7 @@ __all__ = ['Project']
 
 log = app.log
 options = app
-projectsoptions = app.projectsoptions
+project_options = app.project_options
 
 
 # ============================================================================
@@ -629,7 +629,7 @@ class Project(AbstractProject):
 
         """
 
-        directory = kwargs.get("directory", projectsoptions.projects_directory)
+        directory = kwargs.get("directory", project_options.project_directory)
 
         if not filename:
             # the current file name or default filename (project name)
@@ -771,7 +771,7 @@ class Project(AbstractProject):
 
         if not os.path.exists(directory):
             directory = kwargs.get("directory",
-                                   projectsoptions.projects_directory)
+                                   project_options.project_directory)
         elif kwargs.get("directory", None) is not None:
             warnings.warn("got multiple directory information. Use that "
                           "obtained "

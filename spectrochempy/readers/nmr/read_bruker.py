@@ -27,7 +27,7 @@ import numpy as np
 
 from spectrochempy.application import app
 
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 log = app.log
 options = app
 

@@ -31,7 +31,7 @@ from spectrochempy.application import app
 
 # local import
 # ------------
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 log = app.log
 options = app
 from spectrochempy.utils import docstrings
@@ -294,19 +294,19 @@ class NDPlot(HasTraits):
         if ndim == 2:
             # TODO: also the case of 3D
 
-            method = kwargs.get('method', plotoptions.method_2D)
+            method = kwargs.get('method', plot_options.method_2D)
 
             # show projections (only useful for map or image)
             # ------------------------------------------------
 
             colorbar = kwargs.get('colorbar', True)
 
-            proj = kwargs.get('proj', plotoptions.show_projections)
+            proj = kwargs.get('proj', plot_options.show_projections)
             # TODO: tell the axis by title.
 
-            xproj = kwargs.get('xproj', plotoptions.show_projection_x)
+            xproj = kwargs.get('xproj', plot_options.show_projection_x)
 
-            yproj = kwargs.get('yproj', plotoptions.show_projection_y)
+            yproj = kwargs.get('yproj', plot_options.show_projection_y)
 
             SHOWXPROJ = (proj or xproj) and method in ['map', 'image']
             SHOWYPROJ = (proj or yproj) and method in ['map', 'image']
@@ -549,7 +549,7 @@ def show():
     Method to force the `matplotlib` figure display
 
     """
-    if not plotoptions.do_not_block or plt.isinteractive():
+    if not plot_options.do_not_block or plt.isinteractive():
         if _curfig(True):  # True to avoid opening a new one
             plt.show()
 
@@ -581,12 +581,12 @@ def _set_figure_style(**kwargs):
             style = [style]
         if isinstance(style, dict):
             style = [style]
-        style = ['classic', plotoptions.style] + list(style)
+        style = ['classic', plot_options.style] + list(style)
         plt.style.use(style)
     else:
-        style = ['classic', plotoptions.style]
+        style = ['classic', plot_options.style]
         plt.style.use(style)
-        plt.style.use(plotoptions.style)
+        plt.style.use(plot_options.style)
 
         fontsize = mpl.rcParams['font.size'] = \
             kwargs.get('fontsize', mpl.rcParams['font.size'])

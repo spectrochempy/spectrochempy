@@ -22,8 +22,8 @@ ip()    # we need to go into this before anything esle in the test to have the
         #  IPhyton session available.
 
 def _set_do_not_block_true():
-    from tests.utils import plotoptions
-    plotoptions.do_not_block = True
+    from tests.utils import plot_options
+    plot_options.do_not_block = True
 
 _set_do_not_block_true() # this must come after ip()
 

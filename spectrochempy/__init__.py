@@ -155,13 +155,25 @@ def _get_release_date():
 
 __release_date__ = _get_release_date()
 
+# ............................................................................
+# other info
+
+__url__ = "http://www-lcs.ensicaen.fr/spectrochempy"
+__author__ = "C. Fernandez & A. Travert @LCS"
+__license__ = "CeCILL-B licence"
+
+
 # ==============================================================================
 # For documentation
 # ==============================================================================
 
 if __name__ == '__main__':
-    pass
-    print (__release__, __version__)
+    print(__version__)
+    print(__copyright__)
+    print(__license__)
+    print(__url__)
+
+
 
 
 

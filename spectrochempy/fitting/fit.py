@@ -42,7 +42,7 @@ from spectrochempy.utils import htmldoc
 __all__ = ['Fit']
 
 from spectrochempy.application import app
-plotoptions = app.plotoptions
+plot_options = app.plot_options
 log = app.log
 options = app
 
