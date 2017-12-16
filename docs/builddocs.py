@@ -142,7 +142,7 @@ def make_docs(*args):
              includeprivate=False,
              destdir='./source/dev/generated',
              exclude_patterns=['api.py'],
-             exclude_dirs=['extern', '~misc'],
+             exclude_dirs=['extern', '~misc', 'gui'],
              developper=True)
 
         sp.build()
