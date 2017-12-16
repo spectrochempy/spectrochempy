@@ -472,5 +472,5 @@ if __name__ == "__main__":
     main('spectrochempy',
          destdir='./source/dev/generated',
          exclude_patterns=['api.py'],
-         exclude_dirs=['extern','~misc'],
+         exclude_dirs=['extern','~misc','gui'],
          developper=True)
