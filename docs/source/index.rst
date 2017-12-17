@@ -104,7 +104,8 @@ Gallery of examples
 Issue Tracker
 ==============
 
-You find a problem, want to suggest enhancement or want to look at the current issues and milestones, you can go there:
+You find a problem, want to suggest enhancement or want to look at the current
+issues and milestones, you can go there:
 
 * `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
@@ -119,8 +120,6 @@ Developper documentation
 
     dev/index
 
-
-.. _main_see_also:
 
 See also
 =========
