@@ -9,10 +9,13 @@
 
 
 
-import os
 
-# ----------------------------------------------------------------------------
-def geticon(name):
 
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                 "ressources", name)
+
+
+
+
+
+# =============================================================================
+if __name__ == '__main__':
+    pass

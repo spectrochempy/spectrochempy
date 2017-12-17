@@ -216,6 +216,7 @@ class Plots(object):
         params = [dicprojet]
 
         ## Create tree of Parameter objects
+
         p = Parameter.create(name='params', type='group', children=params)
         t.setParameters(p, showTop=False)
 

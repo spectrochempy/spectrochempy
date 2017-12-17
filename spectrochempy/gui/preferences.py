@@ -7,28 +7,35 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+# inspired by psyplot_gui.preferences
 
-
-"""Preferences widget for psyplot_gui
+"""Preferences widget for SpectroChemPy
 
 This module defines the :class:`Preferences` widget that creates an interface
-to the optionsParams of psyplot and psyplot_gui"""
-import yaml
+to the configuration file  of SpectroChemPy
+
+"""
+
 from warnings import warn
 
 from ..extern.pyqtgraph.Qt import QtGui, QtCore
 from .guiutils import geticon
+from .widgets.parametertree import ParameterTree, Parameter
 
-# noinspection PyUnresolvedReferences
-from spectrochempy.api import (options as general_options,
-                               projectsoptions as project_options,
-                               plotoptions as plot_options)
+from spectrochempy.application import app
 
+general_options = app.general_options
+project_options = app.project_options
+plot_options = app.plot_options
+
+
+# ============================================================================
 class Preference_Page(object):
-    """An abstract base class for the application preference pages"""
+    """The base class for the application preference pages"""
 
     validChanged = QtCore.pyqtSignal(bool)
     changeProposed = QtCore.pyqtSignal(object)
+
     title = None
     icon = None
     auto_updates = False
@@ -48,30 +55,10 @@ class Preference_Page(object):
         raise NotImplementedError
 
 
-class OptionsTree(QtGui.QTreeWidget):
-    """A QTreeWidget that can be used to display a optionsParams instance
+# ============================================================================
+class OptionsTree(ParameterTree):
 
-    This widget is populated by a :class:`psyplot.config.optionssetup.optionsParams`
-    instance and displays whether the values are valid or not"""
-
-    #: A signal that shall be emitted if the validation state changes
-    validChanged = QtCore.pyqtSignal(bool)
-
-    #: A signal that is emitted if changes are propsed. It is either emitted
-    #: with the parent of this instance (if this is not None) or with the
-    #: instance itself
-    propose_changes = QtCore.pyqtSignal(object)
-
-    #: The :class:`~psyplot.config.optionssetup.optionsParams` to display
-    options = None
-
-    #: list of :class:`bool`. A boolean for each optionsParams key that states
-    #: whether the proposed value is valid or not
-    valid = []
-
-    value_col = 2
-
-    def __init__(self, options, *args, **kwargs):
+    def __init__(self, options, title=None, *args, **kwargs):
         """
         Parameters
         ----------
@@ -81,53 +68,30 @@ class OptionsTree(QtGui.QTreeWidget):
         """
         super(OptionsTree, self).__init__(*args, **kwargs)
         self.options = options
-
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.open_menu)
-        self.setColumnCount(self.value_col + 1)
-        self.setHeaderLabels(['Options', '', 'Value'])
-
-    @property
-    def is_valid(self):
-        """True if all the proposed values in this tree are valid"""
-        return all(self.valid)
+        self.title = title
 
     @property
     def top_level_items(self):
         """An iterator over the topLevelItems in this tree"""
         return map(self.topLevelItem, range(self.topLevelItemCount()))
 
-    def initialize(self):
-        """Fill the items of the :attr:`options` into the tree"""
-        optionsParams = self.options
-        descriptions = self.descriptions
-        self.valid = [True] * len(optionsParams)
-        validators = self.validators
-        vcol = self.value_col
-        for i, (key, val) in enumerate(sorted(optionsParams.items())):
-            item = QtGui.QTreeWidgetItem(0)
-            item.setText(0, key)
-            item.setToolTip(0, key)
-            item.setIcon(1, QtGui.QIcon(geticon('valid.png')))
-            desc = descriptions.get(key)
-            if desc:
-                item.setText(vcol, desc)
-                item.setToolTip(vcol, desc)
-            child = QtGui.QTreeWidgetItem(0)
-            item.addChild(child)
-            self.addTopLevelItem(item)
-            editor = QtGui.QTextEdit(self)
-            # set maximal height of the editor to 3 rows
-            editor.setMaximumHeight(
-                4 * QtGui.QFontMetrics(editor.font()).height())
-            editor.setPlainText(yaml.dump(val))
-            self.setItemWidget(child, vcol, editor)
-            editor.textChanged.connect(
-                self.set_icon_func(i, item, validators[key]))
+    def initialize(self, title=None):
+        """Fill the items into the tree"""
+
+        options = self.options.traits(config=True)
+
+        p = Parameter.create(name=title,
+                             title=title,
+                             type='group', children=options)
+
+        self.setParameters(p, showTop=True)
+
+        p.sigTreeStateChanged.connect(self.set_icon_func)
+
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
 
-    def set_icon_func(self, i, item, validator):
+    def set_icon_func(self, i, item, key):
         """Create a function to change the icon of one topLevelItem
 
         This method creates a function that can be called when the value of an
@@ -190,21 +154,6 @@ class OptionsTree(QtGui.QTreeWidget):
         if new is not old:
             self.validChanged.emit(new)
 
-    def open_menu(self, position):
-        """Open a menu to expand and collapse all items in the tree
-
-        Parameters
-        ----------
-        position: QPosition
-            The position where to open the menu"""
-        menu = QtGui.QMenu()
-        expand_all_action = QtGui.QAction('Expand all', self)
-        expand_all_action.triggered.connect(self.expandAll)
-        menu.addAction(expand_all_action)
-        collapse_all_action = QtGui.QAction('Collapse all', self)
-        collapse_all_action.triggered.connect(self.collapseAll)
-        menu.addAction(collapse_all_action)
-        menu.exec_(self.viewport().mapToGlobal(position))
 
     def changed_options(self, use_items=False):
         """Iterate over the changed optionsParams
@@ -280,7 +229,7 @@ class OptionsTree(QtGui.QTreeWidget):
         options = self.options
         filter_func = filter_func or no_check
         for item in self.top_level_items:
-            key = asstring(item.text(0))
+            key = item.text(0)
             editor = self.itemWidget(item.child(0), self.value_col)
             val = yaml.load(asstring(editor.toPlainText()))
             try:
@@ -309,6 +258,7 @@ class OptionsTree(QtGui.QTreeWidget):
             item.setSelected(True)
 
 
+# ============================================================================
 class OptionsWidget(Preference_Page, QtGui.QWidget):
     """A preference page for the spectrochempy options"""
 
@@ -316,20 +266,8 @@ class OptionsWidget(Preference_Page, QtGui.QWidget):
     tree = None
 
     @property
-    def changeProposed(self):
-        return self.tree.changeProposed
-
-    @property
-    def validChanged(self):
-        return self.tree.validChanged
-
-    @property
     def changed(self):
-        return bool(next(self.tree.changed_options(), None))
-
-    @property
-    def is_valid(self):
-        return self.tree.is_valid
+        return True #bool(next(self.tree.changed_options(), None))
 
     @property
     def icon(self):
@@ -339,41 +277,13 @@ class OptionsWidget(Preference_Page, QtGui.QWidget):
         super(OptionsWidget, self).__init__(*args, **kwargs)
         self.vbox = vbox = QtGui.QVBoxLayout()
 
-        self.description = QtGui.QLabel(
-            '<p>Modify the optionsParams for your need. Changes will not be applied'
-            ' until you click the Apply or Ok button.</p>'
-            '<p>Values must be entered in yaml syntax</p>', parent=self)
-        vbox.addWidget(self.description)
-        self.tree = tree = OptionsTree(
-            self.options, getattr(self.options, 'validate', None),
-            getattr(self.options, 'descriptions', None), parent=self)
-        tree.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
+        self.tree = tree = OptionsTree(self.options, parent=self, \
+                           showHeader=False, **kwargs)
+
         vbox.addWidget(self.tree)
-
-        self.bt_select_all = QtGui.QPushButton('Select All', self)
-        self.bt_select_changed = QtGui.QPushButton('Select changes', self)
-        self.bt_select_none = QtGui.QPushButton('Clear Selection', self)
-        self.bt_export = QtGui.QToolButton(self)
-        self.bt_export.setText('Export Selection...')
-        self.bt_export.setToolTip('Export the selected optionsParams to a file')
-        self.bt_export.setPopupMode(QtGui.QToolButton.InstantPopup)
-        self.export_menu = export_menu = QtGui.QMenu(self)
-        export_menu.addAction(self.save_settings_action())
-        export_menu.addAction(self.save_settings_action(True))
-        self.bt_export.setMenu(export_menu)
         hbox = QtGui.QHBoxLayout()
-        hbox.addWidget(self.bt_select_all)
-        hbox.addWidget(self.bt_select_changed)
-        hbox.addWidget(self.bt_select_none)
-        hbox.addStretch(1)
-        hbox.addWidget(self.bt_export)
         vbox.addLayout(hbox)
-
         self.setLayout(vbox)
-
-        self.bt_select_all.clicked.connect(self.tree.selectAll)
-        self.bt_select_none.clicked.connect(self.tree.clearSelection)
-        self.bt_select_changed.clicked.connect(self.tree.select_changes)
 
     def save_settings_action(self, update=False, target=None):
         """Create an action to save the selected settings in the :attr:`tree`
@@ -420,57 +330,46 @@ class OptionsWidget(Preference_Page, QtGui.QWidget):
         action.triggered.connect(func)
         return action
 
-    def initialize(self, optionsParams=None, validators=None, descriptions=None):
+    def initialize(self, options=None):
         """Initialize the config page
 
         Parameters
         ----------
-        optionsParams: dict
-            The optionsParams to use. If None, the :attr:`options` attribute of this
-            instance is used
-        validators: dict
-            A mapping from the `optionsParams` key to the corresponding validation
-            function for the value. If None, the
-            :attr:`~psyplot.config.optionssetup.optionsParams.validate` attribute of the
-            :attr:`options` attribute is used
-        descriptions: dict
-            A mapping from the `optionsParams` key to it's description. If None, the
-            :attr:`~psyplot.config.optionssetup.optionsParams.descriptions` attribute of
-            the :attr:`options` attribute is used"""
-        if optionsParams is not None:
-            self.options = optionsParams
-            self.tree.options = optionsParams
-        if validators is not None:
-            self.tree.validators = validators
-        if descriptions is not None:
-            self.tree.descriptions = descriptions
-        self.tree.initialize()
+        options: object
+
+        """
+        if options is not None:
+            self.options = options
+            self.tree.options = options
+        self.tree.initialize(title=self.title)
 
     def apply_changes(self):
         """Apply the changes in the config page"""
         self.tree.apply_changes()
 
 
+# ============================================================================
 class GeneralOptionsWidget(OptionsWidget):
 
     options = general_options
+    title = 'General preferences'
 
-    title = 'Application preferences'
 
-
+# ============================================================================
 class ProjectOptionsWidget(OptionsWidget):
 
     options = project_options
-
     title = 'Project preferences'
 
 
+# ============================================================================
 class PlotOptionsWidget(OptionsWidget):
-    options = plot_options
 
+    options = plot_options
     title = 'Plotting preferences'
 
 
+# ============================================================================
 class Preferences(QtGui.QDialog):
     """Preferences dialog"""
 
@@ -544,9 +443,9 @@ class Preferences(QtGui.QDialog):
         self.contents_widget.setCurrentRow(index)
 
     def current_page_changed(self, index):
-        configpage = self.get_page(index)
-        self.bt_apply.setVisible(not configpage.auto_updates)
-        self.check_changes(configpage)
+        preference_page = self.get_page(index)
+        self.bt_apply.setVisible(not preference_page.auto_updates)
+        self.check_changes(preference_page)
 
     def get_page(self, index=None):
         """Return page widget"""
@@ -558,18 +457,18 @@ class Preferences(QtGui.QDialog):
 
     def accept(self):
         """Reimplement Qt method"""
-        for configpage in self.pages:
-            if not configpage.is_valid:
+        for preference_page in self.pages:
+            if not preference_page.is_valid:
                 continue
-            configpage.apply_changes()
+            preference_page.apply_changes()
         QtGui.QDialog.accept(self)
 
     def apply_clicked(self):
         # Apply button was clicked
-        configpage = self.get_page()
-        if configpage.is_valid:
-            configpage.apply_changes()
-        self.check_changes(configpage)
+        preference_page = self.get_page()
+        if preference_page.is_valid:
+            preference_page.apply_changes()
+        self.check_changes(preference_page)
 
     def add_page(self, widget):
         """Add a new page to the preferences dialog
@@ -593,15 +492,15 @@ class Preferences(QtGui.QDialog):
         item.setText(widget.title)
         item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
         item.setSizeHint(QtCore.QSize(0, 25))
-        widget.propose_changes.connect(self.check_changes)
+        widget.changeProposed.connect(self.check_changes)
 
-    def check_changes(self, configpage):
+    def check_changes(self, preference_page):
         """Enable the apply button if there are changes to the settings"""
-        if configpage != self.get_page():
+        if preference_page != self.get_page():
             return
         self.bt_apply.setEnabled(
-            not configpage.auto_updates and configpage.is_valid and
-            configpage.changed)
+            not preference_page.auto_updates and
+            preference_page.changed)
 
     def load_plugin_pages(self):
         """Load the optionsParams for the plugins in separate pages"""

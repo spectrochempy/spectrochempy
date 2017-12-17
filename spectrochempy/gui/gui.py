@@ -48,6 +48,7 @@ from ..application import app
 from ..projects.project import Project
 
 log = app.log
+options = app
 general_options = app.general_options
 project_options = app.project_options
 
@@ -100,11 +101,10 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         # Create Menubar and preferences
         # ------------------------------
-        self._append_menubar_and_preferences()
-
         self.preference_pages.extend([GeneralOptionsWidget,
                                       ProjectOptionsWidget,
                                       PlotOptionsWidget])
+        self._append_menubar_and_preferences()
 
         # show window
         # --------------------------------------------------------------------
@@ -125,6 +125,12 @@ class MainWindow(QtGui.QMainWindow, Plots):
         # Console
         # --------------------------------------------------------------------
         self.dplots = dplots = Dock("plots", size=(ww * .80, wh * .80))
+        text = QtWidgets.QLabel("""<html>
+            <p><center>Select one or several dataset in the project 
+            tree.</center></p>
+            </html>""")
+        dplots.addWidget(
+            text) #, stretch=1, alignment=QtCore.Qt.AlignCenter)
         dplots.hideTitleBar()
 
         self.dconsole = dconsole = Dock("Console", size=(ww * .80, wh * .20),
@@ -153,7 +159,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         dproject = Dock("Project", size=(ww * .20, wh * .50), closable=False)
         d = None
-        startup_project = general_options.startup_project
+        startup_project = options.startup_project
         if startup_project:
             d = self.load_project(startup_project)
         self.wproject = ProjectTreeWidget(project=d, showHeader=False)
@@ -250,22 +256,14 @@ class MainWindow(QtGui.QMainWindow, Plots):
         def export_sp(self, *args, **kwargs):
             export_project(main=False)
 
+        # ....................................................................
         def about():
             """About the tool"""
-            # versions = {
-            #     key: d['version'] for key, d in psyplot.get_versions(
-            # False).items()
-            #     }
-            # versions.update(psyplot_gui.get_versions()['requirements'])
-            # versions.update(psyplot._get_versions()['requirements'])
-            # versions['github'] = 'https://github.com/Chilipp/psyplot'
-            # versions['author'] = psyplot.__author__
-            about = QtGui.QMessageBox.about(self, "About SpectroChemPy",
-                                            """ <strong> 
-            the about info </strong>
-                """)
-            # % versions)
+            about = QtGui.QMessageBox.about(self,
+                "SpectroChemPy {}".format(options.release),
+                options.description )
 
+        # ....................................................................
         def edit_preferences(exec_=None):
 
             if hasattr(self, 'preferences'):
@@ -280,21 +278,23 @@ class MainWindow(QtGui.QMainWindow, Plots):
                 page.initialize()
                 dlg.add_page(page)
 
-            available_width = 0.667 * \
+            available_width = 0.5 * \
                              QtGui.QDesktopWidget().availableGeometry().width()
             width = dlg.sizeHint().width()
             height = dlg.sizeHint().height()
-            # The preferences window should cover at least one third of the screen
+            # The preferences window should cover at least half of the screen
             dlg.resize(max(available_width, width), height)
             if exec_:
                 dlg.exec_()
 
+        # --------------------------------------------------------------------
         # MENU FILE
-        # -------------------------------------------------------------------
+        # --------------------------------------------------------------------
+
         file_menu = QtGui.QMenu('File', parent=self)
 
         # Open project
-        # --------------------------------------------------------------------
+
         open_project_menu = QtGui.QMenu('Open project', self)
         file_menu.addMenu(open_project_menu)
 
@@ -316,7 +316,6 @@ class MainWindow(QtGui.QMainWindow, Plots):
         self.menuBar().addMenu(file_menu)
 
         # Save project
-        # --------------------------------------------------------------------
 
         save_project_menu = QtGui.QMenu('Save project', parent=self)
         file_menu.addMenu(save_project_menu)
@@ -334,7 +333,6 @@ class MainWindow(QtGui.QMainWindow, Plots):
         save_project_menu.addAction(save_sp_action)
 
         # Save project as
-        # --------------------------------------------------------------------
 
         save_project_as_menu = QtGui.QMenu('Save project as', parent=self)
         file_menu.addMenu(save_project_as_menu)
@@ -355,7 +353,6 @@ class MainWindow(QtGui.QMainWindow, Plots):
         save_project_as_menu.addAction(save_sp_as_action)
 
         # Export figures
-        # --------------------------------------------------------------------
 
         export_project_menu = QtGui.QMenu('Export figures', parent=self)
         file_menu.addMenu(export_project_menu)
@@ -377,7 +374,6 @@ class MainWindow(QtGui.QMainWindow, Plots):
         export_project_menu.addAction(export_sp_action)
 
         # Close project
-        # --------------------------------------------------------------------
 
         file_menu.addSeparator()
 
@@ -404,7 +400,6 @@ class MainWindow(QtGui.QMainWindow, Plots):
         close_project_menu.addAction(close_sp_action)
 
         #  Quit
-        # --------------------------------------------------------------------
 
         if sys.platform != 'darwin':  # mac os makes this anyway
             quit_action = QtGui.QAction('Quit', self)
@@ -415,13 +410,17 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         self.menuBar().addMenu(file_menu)
 
-        # ######################## Console menu ###############################
+        # --------------------------------------------------------------------
+        # Console menu
+        # --------------------------------------------------------------------
 
         console_menu = QtGui.QMenu('Console', self)
         console_menu.addActions(self.wconsole.actions())
         self.menuBar().addMenu(console_menu)
 
-        # ######################## Windows menu ###############################
+        # --------------------------------------------------------------------
+        # Windows menu
+        # --------------------------------------------------------------------
 
         windows_menu = QtGui.QMenu('View', self)
         self.menuBar().addMenu(windows_menu)
@@ -439,26 +438,32 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         windows_menu.addMenu(window_layouts_menu)
 
-        # ############################ Help menu ##############################
+        # --------------------------------------------------------------------
+        # Help menu
+        # --------------------------------------------------------------------
 
         help_menu = QtGui.QMenu('Help', parent=self)
         self.menuBar().addMenu(help_menu)
 
-        # -------------------------- Preferences ------------------------------
+        # --------------------------------------------------------------------
+        # Preferences
+        # --------------------------------------------------------------------
 
         help_action = QtGui.QAction('Preferences', self)
         help_action.triggered.connect(lambda: edit_preferences(True))
         help_action.setShortcut(QtGui.QKeySequence.Preferences)
         help_menu.addAction(help_action)
 
-        # ---------------------------- About ----------------------------------
+        # --------------------------------------------------------------------
+        # About
+        # --------------------------------------------------------------------
 
         about_action = QtGui.QAction('About', self)
         about_action.triggered.connect(about)
         help_menu.addAction(about_action)
 
-        # self.menuBar().setNativeMenuBar(False)  # this put the menu in the
-        #  window itself in OSX, as in windows.
+        # self.menuBar().setNativeMenuBar(False)
+        #  this put the menu in the window itself in OSX, as in windows.
 
 
     # ------------------------------------------------------------------------

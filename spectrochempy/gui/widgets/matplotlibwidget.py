@@ -7,14 +7,15 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+
 import matplotlib as mpl
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-
 from ...extern.pyqtgraph.Qt import QtGui, QtCore
 
+__all__ = []
 
 class MatplotlibWidget(QtGui.QWidget):
     """

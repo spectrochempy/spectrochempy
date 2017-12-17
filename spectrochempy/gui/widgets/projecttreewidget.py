@@ -12,15 +12,7 @@ from ...extern.pyqtgraph.Qt import QtGui, QtCore
 
 from ...projects.project import Project, NDDataset #, Script, Meta
 
-try :
-    import metaarray
-
-    HAVE_METAARRAY = True
-except :
-    HAVE_METAARRAY = False
-
-__all__ = ['DataTreeWidget']
-
+__all__ = []
 
 class ProjectTreeWidget(QtGui.QTreeWidget) :
     """
