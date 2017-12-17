@@ -7,13 +7,33 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+from spectrochempy.gui.preferences import (Preferences,
+                                           GeneralOptionsWidget,
+                                           ProjectOptionsWidget,
+                                           PlotOptionsWidget)
 
+from spectrochempy.extern.pyqtgraph import mkQApp
 
+app = mkQApp()
 
+class testPreferences():
 
+    def __init__(self):
 
+        self.preference_pages = [GeneralOptionsWidget,
+                                      ProjectOptionsWidget,
+                                      PlotOptionsWidget]
 
+        self.preferences = dlg = Preferences()
 
+        for Page in self.preference_pages:
+            page = Page(dlg)
+            page.initialize()
+            dlg.add_page(page)
+
+        dlg.exec_()
+
+tp = testPreferences()
 
 
 # =============================================================================

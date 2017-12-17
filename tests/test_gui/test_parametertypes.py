@@ -1,8 +1,7 @@
-import pyqtgraph.parametertree as pt
-import pyqtgraph as pg
-app = pg.mkQApp()
+import spectrochempy.gui.widgets.parametertree as pt
 
-def test_opts():
+def test_opts(app):
+
     paramSpec = [
         dict(name='bool', type='bool', readonly=True),
         dict(name='color', type='color', readonly=True),
@@ -16,3 +15,4 @@ def test_opts():
     assert list(param.param('color').items.keys())[0].widget.isEnabled() is False
 
 
+    app.exec_()

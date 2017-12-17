@@ -347,3 +347,12 @@ def NMR_dataset_2D():
 
 
 # TODO: rationalise all this fixtures
+
+# ----------------------------------------------------------------------------
+# GUI Fixtures
+# ----------------------------------------------------------------------------
+from spectrochempy.extern.pyqtgraph import mkQApp
+
+@pytest.fixture(scope="module")
+def app():
+    return mkQApp()
