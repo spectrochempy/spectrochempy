@@ -32,8 +32,10 @@ import warnings
 # ============================================================================
 
 from traitlets.config.configurable import Configurable
-from traitlets.config.application import Application, catch_config_error
-from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe,
+from traitlets.config.application import Application, \
+    catch_config_error
+from traitlets import (Instance, Bool, Unicode, List, Dict, default,
+                          observe,
                        import_item, HasTraits)
 import matplotlib as mpl
 
@@ -285,13 +287,12 @@ class GeneralOptions(Configurable) :
     # ------------------------------------------------------------------------
 
     show_info_on_loading = Bool(True,
-                                help='display info on loading'
+                                help='Display info on loading?'
                                 ).tag(config=True)
 
-    csv_delimiter = Unicode(';',
-                            help='set csv delimiter').tag(config=True)
+    csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
 
-    data = Unicode(help="Directory where to look for data").tag(config=True)
+    data = Unicode(help="Default data directory").tag(config=True)
 
     @property
     def data(self):
@@ -354,18 +355,20 @@ class SpectroChemPy(Application):
     def _get_description(self):
         from spectrochempy import __license__, __author__, __release__
 
-        desc = """This is the main <b>SpectroChemPy</b> Application<br>
+        desc = """Welcome to <strong>SpectroChemPy</strong> Application<br>
 <br>
-<b>SpectroChemPy</b> is a framework for processing, analysing and 
+<p>
+<strong>SpectroChemPy</strong> is a framework for processing, analysing and 
 modelling 
-<b>Spectro</>scopic data for <b>Chem</b>istry with <b>Py</b>thon. It is 
+<strong>Spectro</>scopic data for <strong>Chem</strong>istry with <strong>Py</strong>thon. It is 
 is a cross platform software, running on Linux, Windows or OS X.
 <br>
-<b>version:</b> {version}
 <br>
-<b>Authors:</b> {authors}
+<strong>version:</strong> {version}
 <br>
-<b>License:</b> {license}
+<strong>Authors:</strong> {authors}
+<br>
+<strong>License:</strong> {license}
 <br>
 <div class='warning'> SpectroChemPy is still experimental and under active 
 development.
@@ -376,7 +379,8 @@ development.
 </div>
 <br>
 <br>
-When using |scp| for your own work, you are kindly requested 
+When using <strong>SpectroChemPy</strong> for your own work, you are kindly 
+requested 
 to cite it this way:
 <pre>
  Arnaud Travert & Christian Fernandez,
@@ -386,8 +390,11 @@ to cite it this way:
  Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
  Caen/CNRS, 2017
 </pre>
+</p>
 
 """.format(version=__release__, authors=__author__, license=__license__)
+
+        return desc
 
 
     # configuration parameters
