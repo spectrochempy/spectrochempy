@@ -7,11 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-"""
-This package provides classes and functions to perform spectral analysis.
-
-"""
-
 import sys
 from traitlets import import_item
 
