@@ -78,18 +78,21 @@ class OptionsTree(ParameterTree):
     def initialize(self, title=None):
         """Fill the items into the tree"""
 
-        options = self.options.traits(config=True)
+        # we may have passed some config options or a dictionary
+        if hasattr(self.options, 'traits'):
+            options = self.options.traits(config=True)
+            # sorting using title
+            options = {o[1]:o[2] for o in sorted([(opt.help, k, opt) for k,opt in options.items()])}
+        else:
+            options = self.options
 
         p = Parameter.create(name=title,
                              title=title,
-                             type='group', children=options)
-
+                             type='group',
+                             children=options)
         self.setParameters(p, showTop=True)
 
         p.sigTreeStateChanged.connect(self.set_icon_func)
-
-        self.resizeColumnToContents(0)
-        self.resizeColumnToContents(1)
 
     def set_icon_func(self, i, item, key):
         """Create a function to change the icon of one topLevelItem
@@ -352,6 +355,20 @@ class OptionsWidget(Preference_Page, QtGui.QWidget):
 class GeneralOptionsWidget(OptionsWidget):
 
     options = general_options
+    # options = [
+    # {'name': 'Basic parameter data types', 'type': 'group', 'children': [
+    #     {'name': 'Integer', 'type': 'int', 'value': 10},
+    #     {'name': 'Float', 'type': 'float', 'value': 10.5, 'step': 0.1},
+    #     {'name': 'String', 'type': 'str', 'value': "hi"},
+    #     {'name': 'List', 'type': 'list', 'values': [1,2,3], 'value': 2},
+    #     {'name': 'Named List', 'type': 'list', 'values': {"one": 1, "two": "twosies", "three": [3,3,3]}, 'value': 2},
+    #     {'name': 'Boolean', 'type': 'bool', 'value': True, 'tip': "This is a checkbox"},
+    #     {'name': 'Color', 'type': 'color', 'value': "FF0", 'tip': "This is a color button"},
+    #     {'name': 'Gradient', 'type': 'colormap'},
+    #     {'name': 'Text Parameter', 'type': 'text', 'value': 'Some text...'},
+    #     {'name': 'Action Parameter', 'type': 'action'},
+    # ]}
+    # ]
     title = 'General preferences'
 
 

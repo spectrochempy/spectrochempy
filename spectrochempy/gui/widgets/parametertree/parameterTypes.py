@@ -149,7 +149,7 @@ class WidgetParameterItem(ParameterItem):
             w.setFlat(True)
             w.setEnabled(not opts.get('readonly', False))            
         elif t == 'colormap':
-            from ..widgets.GradientWidget import GradientWidget ## need this here to avoid import loop
+            from ....extern.pyqtgraph.widgets.GradientWidget import GradientWidget ## need this here to avoid import loop
             w = GradientWidget(orientation='bottom')
             w.sigChanged = w.sigGradientChangeFinished
             w.sigChanging = w.sigGradientChanged

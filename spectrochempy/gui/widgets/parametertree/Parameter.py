@@ -116,6 +116,7 @@ class Parameter(QtCore.QObject):
         if typ is None:
             cls = Parameter
         else:
+            print(opts['name'], typ)
             cls = PARAM_TYPES[opts['type']]
         return cls(**opts)
     
@@ -175,19 +176,7 @@ class Parameter(QtCore.QObject):
             'title': None
         }
 
-        # when a traits is provided, get info from the trait itself
-        # else we expect a dictionary
-
-        trait = opts.get('trait', None)
-        if trait:
-            self.opts['name'] = trait.name
-            self.opts['readonly'] = trait.read_only
-            self.opts['value'] = self.opts['default'] = trait.default_value
-            self.opts['type'] = type(self.opts['default'])
-            self.opts['title'] = trait.help
-        else:
-            self.opts.update(opts)
-
+        self.opts.update(opts)
 
         self.childs = []
         self.names = {}   ## map name:child
@@ -532,7 +521,20 @@ class Parameter(QtCore.QObject):
                 if isinstance(opts, dict) and 'name' not in opts:
                     opts = opts.copy()
                     opts['name'] = name
+
+                elif isinstance(opts, traitlets.TraitType):
+                    opt = {}
+                    opt['name'] = opts.name
+                    opt['readonly'] = opts.read_only
+                    opt['value'] = opt['default'] = opts.default_value
+
+                    opt['type'] = opts.metadata.get('type',type(
+                        opts.default_value).__name__)
+                    opt['title'] = opts.help
+                    opts = opt
+
                 ch2.append(opts)
+
             children = ch2
         
         for chOpts in children:
@@ -554,7 +556,7 @@ class Parameter(QtCore.QObject):
         """
         if isinstance(child, dict):
             child = Parameter.create(**child)
-        if isinstance(child, traitlets.TraitType):
+        elif isinstance(child, traitlets.TraitType):
             child = Parameter.create(trait=child)
 
         name = child.name()
