@@ -13,7 +13,7 @@
 from spectrochempy.api import *
 import os
 import pytest
-from tests.utils import assert_approx_equal, show_do_not_block
+from tests.utils import assert_approx_equal
 
 
 @pytest.fixture()
@@ -42,7 +42,7 @@ def script():
         $ width: 200, 0, 1000
     """
 
-@show_do_not_block
+
 def test_fit_single_source(IR_source_2D, script):
 
     source = IR_source_2D[54, 3700.:3400.]
@@ -51,18 +51,13 @@ def test_fit_single_source(IR_source_2D, script):
     f1.run(maxiter=10, every=1)
 #    assert_approx_equal(source.model_A, -116.40475, significant=4)
 #    assert_approx_equal(f1.fp['width_line_2'], 195.7273, significant=4)
-
-
     source.plot(plot_model=True)
-    #show()
 
     source2 = source.copy() * 2.34
     f2 = Fit(source2, script, silent=True)
     f2.run(maxiter=10, every=1)
 
-
     source2.plot(plot_model=True)
-    show()
 
     assert_approx_equal(source2.model_A, -116.40475 * 2.34, significant=4)
     assert_approx_equal(f2.fp['width_line_2'], 195.7273, significant=4)

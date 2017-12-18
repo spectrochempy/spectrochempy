@@ -18,7 +18,7 @@ import functools
 import pytest
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
-                         raises, show_do_not_block)
+                         raises)
 
 
 from spectrochempy.api import *
@@ -27,7 +27,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 
 # nmr_processing
 #-----------------------------
-@show_do_not_block
+
 def test_nmr_1D_show(NMR_source_1D):
     source = NMR_source_1D.copy()
     ax1 = source.plot()
@@ -35,7 +35,7 @@ def test_nmr_1D_show(NMR_source_1D):
     show()
     pass
 
-@show_do_not_block
+
 def test_nmr_1D_show_hold(NMR_source_1D):
     source = NMR_source_1D.copy()
     # test if we can plot on the same figure
@@ -44,7 +44,7 @@ def test_nmr_1D_show_hold(NMR_source_1D):
     source.plot(imag=True, data_only=True)
     show()
 
-@show_do_not_block
+
 def test_nmr_1D_show_dualdisplay(NMR_source_1D):
     source = NMR_source_1D.copy()
     # test if we can plot on the same figure
@@ -57,7 +57,7 @@ def test_nmr_1D_show_dualdisplay(NMR_source_1D):
     source.plot()
     show()
 
-@show_do_not_block
+
 def test_nmr_1D_show_dualdisplay_apodfun(NMR_source_1D):
     source = NMR_source_1D.copy()
     # test if we can plot on the same figure
@@ -71,7 +71,7 @@ def test_nmr_1D_show_dualdisplay_apodfun(NMR_source_1D):
     apodfun.plot(data_only=True)
     show()
 
-@show_do_not_block
+
 def test_nmr_1D_show_complex(NMR_source_1D):
     # display the real and complex at the same time
     source = NMR_source_1D.copy()
@@ -170,7 +170,7 @@ def test_nmr_em_calculated_inplace(NMR_source_1D):
     assert (source == arrcalc * source2)
 
 
-@show_do_not_block
+
 def test_nmr_1D_em_(NMR_source_1D):
 
     source = NMR_source_1D.copy()
@@ -188,7 +188,7 @@ def test_nmr_1D_em_(NMR_source_1D):
 
     show()
 
-@show_do_not_block
+
 def test_nmr_1D_em_with_no_kw_lb_parameters(NMR_source_1D):
 
     source = NMR_source_1D.copy()
@@ -198,7 +198,7 @@ def test_nmr_1D_em_with_no_kw_lb_parameters(NMR_source_1D):
     source.plot()
     show()
 
-@show_do_not_block
+
 def test_nmr_1D_em_inplace(NMR_source_1D):
     source = NMR_source_1D.copy()
 
@@ -211,7 +211,7 @@ def test_nmr_1D_em_inplace(NMR_source_1D):
         pass
     show()
 
-@show_do_not_block
+
 def test_nmr_1D_gm(NMR_source_1D):
 
     # first test gm

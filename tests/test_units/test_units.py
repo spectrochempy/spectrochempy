@@ -14,7 +14,7 @@
 
 """
 from spectrochempy.api import ur, set_nmr_context, Quantity, np, show
-from tests.utils import raises, show_do_not_block
+from tests.utils import raises
 
 def test_ppm():
 
@@ -70,7 +70,7 @@ def test_unit_measurement():
     with raises(AttributeError):
         ba = xa.plus_minus(.1)
 
-@show_do_not_block
+
 def test_matplotlib():
 
     import matplotlib.pyplot as plt

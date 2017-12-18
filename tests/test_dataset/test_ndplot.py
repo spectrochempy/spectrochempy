@@ -7,26 +7,23 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
-import matplotlib.pyplot as mpl
-
-from tests.utils import show_do_not_block, image_comparison
-
-from spectrochempy.api import *
+from spectrochempy.api import show, options, INFO
 
 options.log_level = INFO
 
-# To regenerate the reference figures, set FORCE to True
-FORCE = False
-# for this regeneration it is advised to set non parallel testing.
-# (remove option -nauto in pytest.ini)
+def test_plot_generic_1D(IR_source_1D):
 
-#@image_comparison(reference=['IR_source_2D_stack', 'IR_source_2D_map',
-#                             'IR_source_2D_image'], force_creation=FORCE)
+    for method in ['scatter', 'lines']:
+        source = IR_source_1D.copy()
+        source.plot(method=method)
 
-@show_do_not_block
+    show()
+
+
 def test_plot_generic_2D(IR_source_2D):
     for method in ['stack', 'map', 'image']:
         source = IR_source_2D.copy()
         source.plot(method=method)
+
+    show()
+

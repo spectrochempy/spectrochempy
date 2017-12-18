@@ -12,10 +12,10 @@
 
 from spectrochempy.api import *
 
-from tests.utils import assert_approx_equal, show_do_not_block
+from tests.utils import assert_approx_equal
 import pytest
 
-@show_do_not_block
+
 def test_read_csv():
 
     A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',

@@ -22,7 +22,7 @@ __all__ = ["assert_equal",
            "EPSILON",
            "is_sequence",
            "scpdata",
-           "plot_options"
+           "options"
           ]
 
 import os
@@ -41,13 +41,11 @@ from nbconvert.preprocessors.execute import CellExecutionError
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_approx_equal)
 
-#  we defer import in order to avoid importing them as well as the namespace
-#  in spectrochempy
-
-def plot_options():
+#  we defer import in order to avoid importing all the spectroscopy namespace
+def options():
     from spectrochempy.application import app
-    return app.plot_options
-plot_options = plot_options()
+    return app
+options = options()
 
 def scpdata():
     from spectrochempy.application import app
@@ -116,6 +114,7 @@ class RandomSeedContext(object):
 
 # .............................................................................
 def assert_equal_units(unit1, unit2):
+    from spectrochempy.extern.pint import DimensionalityError
     try:
         x = (1. * unit1) / (1. * unit2)
     except DimensionalityError:
@@ -263,33 +262,6 @@ def example_run(path):
 # -----------------------------------------------------------------------------
 
 # .............................................................................
-def show_do_not_block(func):
-    """
-    A decorator to allow non blocking testing of matplotlib figures-
-    set the plotoption.do_not_block
-
-    This doesn't work with pytest in parallel mode because the sys.argv
-    contain only the flag -c and that's all!
-
-    To make it work, the only way I found for now is to remove the option
-    -nauto in pythest.ini adopts= nauto etc...
-
-    """
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        if not '-c' in sys.argv[0] and func.__name__ in sys.argv[1]:
-            # The individual test has been called - then we show figures
-            # we do not show for full tests
-            plot_options.do_not_block = False
-        else:
-            plot_options.do_not_block = True
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-# .............................................................................
 def _compute_rms(x, y):
     return calculate_rms(x, y)
 
@@ -419,7 +391,7 @@ def image_comparison(reference=None,
 
     """
 
-    plot_options.do_not_block = True
+    options.do_not_block = True
 
     if not reference:
         raise ValueError('no reference image provided. Stopped')

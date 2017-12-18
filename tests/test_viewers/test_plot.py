@@ -11,7 +11,7 @@
 
 import matplotlib.pyplot as mpl
 
-from tests.utils import show_do_not_block, image_comparison
+from tests.utils import  image_comparison
 
 from spectrochempy.api import *
 
@@ -76,7 +76,7 @@ def test_plot_stack_generic(IR_source_2D):
     source.plot()  # generic plot default to map
 
 
-@show_do_not_block
+
 def test_plot_stack_masked(IR_source_2D):
     # just to see if masked area do not apppear on the figure
     source = IR_source_2D.copy() * 2.
@@ -84,7 +84,7 @@ def test_plot_stack_masked(IR_source_2D):
     source.plot_stack(colorbar=False)
     source.plot_map(colorbar=False)
 
-@show_do_not_block
+
 def test_plot_stack_multiple(IR_source_2D):
     source = IR_source_2D.copy()
     s1 = source[-10:]
@@ -98,7 +98,7 @@ def test_plot_stack_multiple(IR_source_2D):
 
 # BUG FIXES IN PLOTS
 
-@show_do_not_block
+
 def test_successive_plot_bug_1a3_28(IR_source_2D):
     source = IR_source_2D.copy() * 2.
     source[:, 1300.:900.] = masked
@@ -106,7 +106,7 @@ def test_successive_plot_bug_1a3_28(IR_source_2D):
     source.plot()  # in 0.1a3.28 bug because key colorbar is missing.
     show()
 
-@show_do_not_block
+
 def test_successive_plot_bug_with_colorbars(IR_source_2D):
     source = IR_source_2D.copy() * 2.
     source[:, 1300.:900.] = masked

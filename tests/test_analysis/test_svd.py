@@ -13,13 +13,13 @@
 """ Tests for the svd module
 
 """
-from spectrochempy.api import *
-from tests.utils import show_do_not_block
+from spectrochempy.analysis.svd import Svd
+
+from spectrochempy.api import show, Coord
 
 # test svd
 #-----------
 
-@show_do_not_block
 def test_svd(IR_source_2D):
 
     source = IR_source_2D.copy()

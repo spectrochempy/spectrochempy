@@ -13,11 +13,10 @@ import pytest
 from glob import glob
 import os, sys
 
-from tests.utils import notebook_run, example_run, show_do_not_block
+from tests.utils import notebook_run, example_run
 
 @pytest.mark.skip
 @pytest.mark.parametrize('notebook', glob("../docs/source/user/*/*.ipynb"))
-@show_do_not_block
 def test_notebooks(notebook):
     print(notebook)
     if '.ipynb_checkpoints' in notebook :
@@ -28,7 +27,6 @@ def test_notebooks(notebook):
         assert errors == []
 
 @pytest.mark.parametrize('example', glob("../docs/source/examples/*/*.py"))
-@show_do_not_block
 def test_example(example):
     if os.path.exists(example) and os.path.splitext(example)[-1] == '.py' :
         e, message, err = example_run(example)

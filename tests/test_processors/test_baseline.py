@@ -8,16 +8,18 @@
 # =============================================================================
 
 
-
-from spectrochempy.api import *
-from tests.utils import show_do_not_block
+# noinspection PyUnresolvedReferences
+from spectrochempy.api import (show,
+                               BaselineCorrection,
+                               NDDataset,
+                               scpdata)
 
 import pytest
 import os
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-@show_do_not_block
+
 def test_basecor_sequential(IR_source_2D):
 
     source = IR_source_2D[:5]
@@ -28,7 +30,7 @@ def test_basecor_sequential(IR_source_2D):
     s.plot()
     show()
 
-@show_do_not_block
+
 def test_basecor_sequential_pchip(IR_source_2D):
 
     source = IR_source_2D[:5]
@@ -39,7 +41,7 @@ def test_basecor_sequential_pchip(IR_source_2D):
     s.plot()
     show()
 
-@show_do_not_block
+
 def test_basecor_multivariate(IR_source_2D):
 
     source = IR_source_2D[:5]
@@ -51,7 +53,7 @@ def test_basecor_multivariate(IR_source_2D):
     s.plot()
     show()
 
-@show_do_not_block
+
 def test_basecor_multivariate_pchip(IR_source_2D):
 
     source = IR_source_2D[:5]
@@ -63,16 +65,13 @@ def test_basecor_multivariate_pchip(IR_source_2D):
     s.plot()
     show()
 
-@show_do_not_block
+
 def test_notebook_basecor_bug():
     # coding: utf-8
 
     source = NDDataset.read_omnic(
         os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
     source
-
-    # In[3]:
-
 
     s = source[:, 1260.0 :5999.0]
     s = s - s[-1]
@@ -91,20 +90,10 @@ def test_notebook_basecor_bug():
 
     # The regions used to set the baseline are accessible using the `ranges`
     #  attibute:
-
-    # In[ ]:
-
-
     ranges = basc.ranges
     print(ranges)
 
-    # In[ ]:
-
-
     basc.corrected.plot_stack()
-
-
-    # In[ ]:
 
 
 

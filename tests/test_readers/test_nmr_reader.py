@@ -12,11 +12,11 @@
 
 from spectrochempy.api import *
 
-from tests.utils import assert_approx_equal, show_do_not_block
+from tests.utils import assert_approx_equal
 import os
 import pytest
 
-@show_do_not_block
+
 def test_nmr():
     path = os.path.join(scpdata, 'nmrdata','bruker', 'tests', 'nmr','bruker_1d')
 

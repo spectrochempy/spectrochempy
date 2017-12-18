@@ -26,7 +26,7 @@ from spectrochempy.utils import Meta, SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
-from tests.utils import RandomSeedContext, show_do_not_block
+from tests.utils import RandomSeedContext
 
 
 def test_fix_crossvalidate_bug():
@@ -1461,8 +1461,6 @@ def test_ndarray_plusminus():
 
 #### Test masks ######
 
-
-@show_do_not_block
 def test_nddataset_use_of_mask(IR_source_1D):
 
     nd = IR_source_1D.copy()

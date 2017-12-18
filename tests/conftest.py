@@ -1,12 +1,13 @@
 # coding=utf-8
-import matplotlib as mpl
 
-matplotlib_backend = mpl.get_backend()
-
+import sys
+import os
 
 import pytest
 import numpy as np
-import os
+
+import matplotlib as mpl
+matplotlib_backend = mpl.get_backend()
 
 #initialize a ipython session before calling spectrochempy
 
@@ -15,17 +16,25 @@ def ip():
     from IPython.testing.globalipapp import get_ipython as getipy
     ip = getipy()
     ip.run_cell("from spectrochempy.api import *")
-    #from spectrochempy.application import SpectroChemPyMagics
-    #ip.register_magics(SpectroChemPyMagics)
     return ip
-ip()    # we need to go into this before anything esle in the test to have the
+
+ip()    # we need to go into this before anything else in the test to have the
         #  IPhyton session available.
 
-def _set_do_not_block_true():
-    from tests.utils import plot_options
-    plot_options.do_not_block = True
+def _set_do_not_block():
+    from matplotlib import pyplot as plt
+    from spectrochempy.application import app as options
 
-_set_do_not_block_true() # this must come after ip()
+    # let's set do_not_block flag to true only if we are running the whole
+    # suite of tests
+    if sys.argv[1].endswith("/spectrochempy/tests"):
+        plt.ioff()
+        options.do_not_block = True
+    else:
+        options.do_not_block = False
+
+
+_set_do_not_block() # this must come after ip()
 
 
 #########################
@@ -349,3 +358,11 @@ def NMR_source_2D():
 
 # TODO: rationalise all this fixtures
 
+# ----------------------------------------------------------------------------
+# GUI Fixtures
+# ----------------------------------------------------------------------------
+from spectrochempy.extern.pyqtgraph import mkQApp
+
+@pytest.fixture(scope="module")
+def app():
+    return mkQApp()

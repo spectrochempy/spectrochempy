@@ -20,7 +20,7 @@ from spectrochempy.api import *
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
-                         raises, show_do_not_block)
+                         raises)
 
 import pytest
 import numpy as np
@@ -29,7 +29,7 @@ import os
 
 # autosub
 #------
-@show_do_not_block
+
 def test_autosub(IR_source_2D):
 
     source = IR_source_2D

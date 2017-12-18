@@ -18,14 +18,14 @@ import functools
 import pytest
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
-                         raises, show_do_not_block)
+                         raises)
 
 from spectrochempy.api import *
 
 from spectrochempy.utils import SpectroChemPyWarning
 
 
-@show_do_not_block
+
 def test_nmr_2D(NMR_source_2D):
     source = NMR_source_2D
     source.plot(nlevels=20)  # , start=0.15)
@@ -33,7 +33,7 @@ def test_nmr_2D(NMR_source_2D):
     pass
 
 
-@show_do_not_block
+
 def test_nmr_2D_imag(NMR_source_2D):
     # plt.ion()
     source = NMR_source_2D.copy()
@@ -42,7 +42,7 @@ def test_nmr_2D_imag(NMR_source_2D):
     pass
 
 
-@show_do_not_block
+
 def test_nmr_2D_imag_compare(NMR_source_2D):
     # plt.ion()
     source = NMR_source_2D.copy()
@@ -53,7 +53,7 @@ def test_nmr_2D_imag_compare(NMR_source_2D):
     pass
 
 
-@show_do_not_block
+
 def test_nmr_2D_hold(NMR_source_2D):
     source = NMR_source_2D
     source.plot()
@@ -62,7 +62,7 @@ def test_nmr_2D_hold(NMR_source_2D):
     pass
 
 
-@show_do_not_block
+
 def test_nmr_2D_em_(NMR_source_2D):
     source = NMR_source_2D.copy()
     source.plot()
