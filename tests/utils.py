@@ -42,14 +42,14 @@ from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_approx_equal)
 
 #  we defer import in order to avoid importing all the spectroscopy namespace
-def options():
+def preferences():
     from spectrochempy.application import app
     return app
-options = options()
+preferences = preferences()
 
 def scpdata():
     from spectrochempy.application import app
-    return app.general_options.data
+    return app.general_preferences.data
 scpdata = scpdata()
 
 
@@ -391,7 +391,7 @@ def image_comparison(reference=None,
 
     """
 
-    options.do_not_block = True
+    #preferences.do_not_block = True
 
     if not reference:
         raise ValueError('no reference image provided. Stopped')

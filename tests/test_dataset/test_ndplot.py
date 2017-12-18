@@ -7,9 +7,9 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-from spectrochempy.api import show, options, INFO
+from spectrochempy.api import show, preferences, INFO
 
-options.log_level = INFO
+preferences.log_level = INFO
 
 def test_plot_generic_1D(IR_source_1D):
 

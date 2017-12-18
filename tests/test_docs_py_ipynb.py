@@ -30,6 +30,6 @@ def test_notebooks(notebook):
 def test_example(example):
     if os.path.exists(example) and os.path.splitext(example)[-1] == '.py' :
         e, message, err = example_run(example)
-        print(e, message.decode('ascii'), err )
-        assert not e, message.decode('ascii')
+        print(e, message.decode('utf8'), err )
+        assert not e, message.decode('utf8')
 

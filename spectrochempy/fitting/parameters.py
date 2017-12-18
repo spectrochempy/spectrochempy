@@ -23,9 +23,9 @@ from collections import \
 
 from spectrochempy.application import app
 
-plot_options = app.plot_options
+plotter_preferences = app.plotter_preferences
 log = app.log
-options = app
+preferences = app
 from spectrochempy.dataset.nddataset import NDDataset
 
 import numpy as np

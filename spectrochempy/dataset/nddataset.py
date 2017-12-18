@@ -58,7 +58,6 @@ from ..application import app
 from ..utils.meta import Meta
 
 log = app.log
-options = app
 
 # =============================================================================
 # Constants

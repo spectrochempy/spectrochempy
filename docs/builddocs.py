@@ -42,7 +42,7 @@ from spectrochempy.extern import sphinx_apidoc as apigen
 
 from traitlets import import_item
 
-options.log_level = ERROR
+preferences.log_level = ERROR
 
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
@@ -109,7 +109,7 @@ def make_docs(*args):
     DEBUG = 'DEBUG' in args
 
     if DEBUG:
-        options.log_level = ERROR
+        preferences.log_level = ERROR
 
     builders = []
     if  'html' in args:
@@ -234,7 +234,7 @@ def make_dirs():
 
 
 def class_config_rst_doc(cls):
-    """Generate rST documentation for the class `cls` config options.
+    """Generate rST documentation for the class `cls` config preferences.
     Excludes traits defined on parent classes. (adapted from traitlets)
     """
     lines = []

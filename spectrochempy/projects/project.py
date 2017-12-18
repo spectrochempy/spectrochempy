@@ -41,8 +41,8 @@ from spectrochempy.projects.baseproject import AbstractProject
 __all__ = ['Project']
 
 log = app.log
-options = app
-project_options = app.project_options
+preferences = app
+project_preferences = app.project_preferences
 
 
 # ============================================================================
@@ -629,7 +629,7 @@ class Project(AbstractProject):
 
         """
 
-        directory = kwargs.get("directory", project_options.project_directory)
+        directory = kwargs.get("directory", project_preferences.project_directory)
 
         if not filename:
             # the current file name or default filename (project name)
@@ -771,7 +771,7 @@ class Project(AbstractProject):
 
         if not os.path.exists(directory):
             directory = kwargs.get("directory",
-                                   project_options.project_directory)
+                                   project_preferences.project_directory)
         elif kwargs.get("directory", None) is not None:
             warnings.warn("got multiple directory information. Use that "
                           "obtained "
@@ -848,7 +848,7 @@ if __name__ == '__main__':
     import dill
     from spectrochempy.api import *
 
-    options.log_level = ERROR
+    preferences.log_level = ERROR
 
     scripts = []
 
@@ -891,7 +891,7 @@ if __name__ == '__main__':
         return None
 
 
-    # options.log_level = DEBUG
+    # preferences.log_level = DEBUG
     proj = Project.load('HIZECOKE')
     datasets, labels = preprocess_IR(proj)
     plot_IR(datasets, labels)

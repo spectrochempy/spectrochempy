@@ -20,9 +20,9 @@ from matplotlib.ticker import MaxNLocator
 
 from spectrochempy.application import app
 
-plot_options = app.plot_options
+plotter_preferences = app.plotter_preferences
 log = app.log
-options = app
+preferences = app
 from spectrochempy.plotters.utils import make_label
 from spectrochempy.utils import is_sequence
 
@@ -379,8 +379,8 @@ def plot_1D(source, **kwargs):
         new._plot_resume(source, **kwargs)
         return True
 
-    number_x_labels = plot_options.number_of_x_labels  # get from config
-    number_y_labels = plot_options.number_of_y_labels
+    number_x_labels = plotter_preferences.number_of_x_labels  # get from config
+    number_y_labels = plotter_preferences.number_of_y_labels
 
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
@@ -419,7 +419,7 @@ if __name__ == '__main__':
 
     from spectrochempy.api import *
     from tests.utils import figures_dir, same_images
-    options.log_level=DEBUG
+    preferences.log_level=DEBUG
 
 
     source = NDDataset.read_omnic(

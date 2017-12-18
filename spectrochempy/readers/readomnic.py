@@ -22,10 +22,10 @@ from spectrochempy.dataset.ndio import NDIO
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.application import app
 
-plot_options = app.plot_options
-general_options = app.general_options
+plotter_preferences = app.plotter_preferences
+general_preferences = app.general_preferences
 log = app.log
-options = app
+preferences = app
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
 __all__ = ['read_omnic', 'read_spg', 'read_spa']
@@ -93,7 +93,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
         source = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", general_options.data)
+    directory = kwargs.get("directory", general_preferences.data)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 

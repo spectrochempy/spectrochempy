@@ -27,9 +27,9 @@ import numpy as np
 
 from spectrochempy.application import app
 
-plot_options = app.plot_options
+plotter_preferences = app.plotter_preferences
 log = app.log
-options = app
+preferences = app
 
 from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, \
     read_lowmem

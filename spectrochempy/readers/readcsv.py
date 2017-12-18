@@ -26,10 +26,10 @@ locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
 from ..dataset.api import Coord, NDDataset
 from ..processors.api import stack
 from ..application import app
-plot_options = app.plot_options
-general_options = app.general_options
+plotter_preferences = app.plotter_preferences
+general_preferences = app.general_preferences
 log = app.log
-options = app
+preferences = app
 from ..utils import (readfilename, unzip, is_sequence,
                                 SpectroChemPyWarning)
 
@@ -134,7 +134,7 @@ def _read(source, filename='',
 
         source = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", general_options.data)
+    directory = kwargs.get("directory", general_preferences.data)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 
@@ -232,7 +232,7 @@ def _read_csv(source, filename='', **kwargs):
         raise IOError("{} file doesn't exists!".format(filename))
 
     new = source.copy() # important
-    delimiter = kwargs.get("csv_delimiter", general_options.csv_delimiter)
+    delimiter = kwargs.get("csv_delimiter", general_preferences.csv_delimiter)
     try:
         d = np.loadtxt(filename, delimiter=delimiter)
     except ValueError:
@@ -336,7 +336,7 @@ if __name__ == '__main__':
     from spectrochempy.api import (NDDataset, scpdata, options, ERROR, show)
 
 
-    options.log_level = ERROR
+    preferences.log_level = ERROR
 
     # A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
     #                        directory=data,

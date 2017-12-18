@@ -15,7 +15,7 @@ import ast
 from spectrochempy.projects.baseproject import AbstractProject
 __all__ = ['Script','run_script','run_all_scripts']
 
-#from spectrochempy.api import *
+from spectrochempy.api import *
 from spectrochempy.dataset.nddataset import NDDataset  # needed for script
 
 class Script(HasTraits):
@@ -133,6 +133,7 @@ class Script(HasTraits):
         try:
             exec(code, globals(), localvars)
         except NameError as e:
+            print('loooooog')
             log.error(e + '. pass the variable `locals()` : this may solve '
                           'this problem! ')
 

@@ -11,5 +11,5 @@
 
 __all__ = []
 
-class ProcessOptions:
+class ReaderPreferences:
     pass

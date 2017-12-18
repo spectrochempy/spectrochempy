@@ -46,15 +46,15 @@ from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity, Measurement
 from spectrochempy.application import app
 
-plot_options = app.plot_options
+plotter_preferences = app.plotter_preferences
 
 # ----------------------------------------------------------------------------
 # constants
 # ----------------------------------------------------------------------------
 
 log = app.log
-options = app
-general_options = app.general_options
+preferences = app
+general_preferences = app.general_preferences
 
 __all__ = ['NDIO',
 
@@ -106,7 +106,7 @@ class NDIO(HasTraits):
     # Generic save function
     # --------------------------------------------------------------------------
 
-    def save(self, filename='', directory=general_options.data,
+    def save(self, filename='', directory=general_preferences.data,
              **kwargs
              ):
         """
@@ -119,7 +119,7 @@ class NDIO(HasTraits):
         filename : str
             The filename of the file where to save the current dataset
 
-        directory : str, optional, default = ``general_options.data``
+        directory : str, optional, default = ``general_preferences.data``
             If specified, the given `directory` and the `filename` will be
             appended.
 
@@ -144,7 +144,7 @@ class NDIO(HasTraits):
 
         """
 
-        directory = kwargs.get("directory", general_options.data)
+        directory = kwargs.get("directory", general_preferences.data)
 
         if not filename:
             # the current file name or default filename (id)
@@ -254,7 +254,7 @@ class NDIO(HasTraits):
     def load(cls,
              fid='',
              protocol='scp',
-             directory=general_options.data,
+             directory=general_preferences.data,
              **kwargs
              ):
         """Load a dataset object saved as a pickle file ( ``.scp`` file).
@@ -314,7 +314,7 @@ class NDIO(HasTraits):
             # this is a filename
 
             filename = fid
-            directory = kwargs.get("directory", general_options.data)
+            directory = kwargs.get("directory", general_preferences.data)
             if not filename:
                 raise IOError('no filename provided!')
             else:

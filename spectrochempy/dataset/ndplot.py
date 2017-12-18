@@ -68,9 +68,9 @@ NBlue = cmyk2rgb(100, 30, 0, 0)
 NGreen = cmyk2rgb(85, 0, 60, 10)
 
 
-plot_options = app.plot_options
+plotter_preferences = app.plotter_preferences
 log = app.log
-options = app
+preferences = app
 
 # =============================================================================
 # Class NDPlot to handle plotting of datasets
@@ -309,19 +309,19 @@ class NDPlot(HasTraits):
         if ndim == 2:
             # TODO: also the case of 3D
 
-            method = kwargs.get('method', plot_options.method_2D)
+            method = kwargs.get('method', plotter_preferences.method_2D)
 
             # show projections (only useful for map or image)
             # ------------------------------------------------
 
             colorbar = kwargs.get('colorbar', True)
 
-            proj = kwargs.get('proj', plot_options.show_projections)
+            proj = kwargs.get('proj', plotter_preferences.show_projections)
             # TODO: tell the axis by title.
 
-            xproj = kwargs.get('xproj', plot_options.show_projection_x)
+            xproj = kwargs.get('xproj', plotter_preferences.show_projection_x)
 
-            yproj = kwargs.get('yproj', plot_options.show_projection_y)
+            yproj = kwargs.get('yproj', plotter_preferences.show_projection_y)
 
             SHOWXPROJ = (proj or xproj) and method in ['map', 'image']
             SHOWYPROJ = (proj or yproj) and method in ['map', 'image']
@@ -561,7 +561,7 @@ def show():
     Method to force the `matplotlib` figure display
 
     """
-    if not options.do_not_block:
+    if not preferences.do_not_block:
 
         if _curfig(True):  # True to avoid opening a new one
             plt.show(block=True)
@@ -594,12 +594,12 @@ def _set_figure_style(**kwargs):
             style = [style]
         if isinstance(style, dict):
             style = [style]
-        style = ['classic', plot_options.style] + list(style)
+        style = ['classic', plotter_preferences.style] + list(style)
         plt.style.use(style)
     else:
-        style = ['classic', plot_options.style]
+        style = ['classic', plotter_preferences.style]
         plt.style.use(style)
-        plt.style.use(plot_options.style)
+        plt.style.use(plotter_preferences.style)
 
         fontsize = mpl.rcParams['font.size'] = \
             kwargs.get('fontsize', mpl.rcParams['font.size'])

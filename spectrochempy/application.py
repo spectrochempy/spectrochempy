@@ -336,8 +336,8 @@ class SCPData(HasTraits):
 # ============================================================================
 # Main application and configurators
 # ============================================================================
-class GeneralOptions(Configurable) :
-    """Options that apply to the |scp| application in general"""
+class GeneralPreferences(Configurable) :
+    """Preferences that apply to the |scp| application in general"""
 
     _scpdata = Instance(SCPData,
                     help="Set a data directory where to look for data"
@@ -380,11 +380,11 @@ class SpectroChemPy(Application):
     from spectrochempy.utils import docstrings
 
 
-    from spectrochempy.projects.projectoptions import ProjectOptions
-    from spectrochempy.plotters.plottersoptions import plot_options
-    #from spectrochempy.readers.readersoptions import ReadOptions
-    #from spectrochempy.writers.writersoptions import WriteOptions
-    #from spectrochempy.processors.processorsoptions import ProcessOptions
+    from spectrochempy.projects.projectpreferences import ProjectPreferences
+    from spectrochempy.plotters.plotterpreferences import PlotterPreferences
+    from spectrochempy.readers.readerpreferences import ReaderPreferences
+    from spectrochempy.writers.writerpreferences import WriterPreferences
+    from spectrochempy.processors.processorpreferences import ProcessorPreferences
 
     # applications attributes
     # ------------------------------------------------------------------------
@@ -491,9 +491,9 @@ to cite it this way:
             "Set loglevel to DEBUG")
     ))
 
-    classes = List([GeneralOptions,
-                    ProjectOptions,
-                    plot_options,
+    classes = List([GeneralPreferences,
+                    ProjectPreferences,
+                    PlotterPreferences,
                     ])
 
     # ------------------------------------------------------------------------
@@ -541,19 +541,19 @@ to cite it this way:
         if _do_parse:
             self.parse_command_line(sys.argv)
 
-        # Get options from the config file
+        # Get preferences from the config file
         # ---------------------------------------------------------------------
 
         if self.config_file_name:
             config_file = os.path.join(self.config_dir, self.config_file_name)
             self.load_config_file(config_file)
 
-        # add other options
+        # add other preferecnes
         # ---------------------------------------------------------------------
 
-        self._init_general_options()
-        self._init_plot_options()
-        self._init_project_options()
+        self._init_general_preferences()
+        self._init_plotter_preferences()
+        self._init_project_preferences()
 
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
@@ -670,7 +670,7 @@ to cite it this way:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
 
-            if self.general_options.show_info_on_loading:
+            if self.general_preferences.show_info_on_loading:
                 print(info_string)
 
             self.log.debug(
@@ -692,25 +692,25 @@ to cite it this way:
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    def _init_general_options(self):
+    def _init_general_preferences(self):
 
-        self.general_options = GeneralOptions(config=self.config)
-
-    # ........................................................................
-    def _init_project_options(self):
-
-        from spectrochempy.projects.projectoptions import ProjectOptions
-
-        self.project_options = ProjectOptions(config=self.config)
+        self.general_preferences = GeneralPreferences(config=self.config)
 
     # ........................................................................
-    def _init_plot_options(self):
+    def _init_project_preferences(self):
 
-        from spectrochempy.plotters.plottersoptions import plot_options
+        from spectrochempy.projects.projectpreferences import ProjectPreferences
+
+        self.project_preferences = ProjectPreferences(config=self.config)
+
+    # ........................................................................
+    def _init_plotter_preferences(self):
+
+        from spectrochempy.plotters.plotterpreferences import PlotterPreferences
         from spectrochempy.utils import install_styles
 
         # Pass config to other classes for them to inherit the config.
-        self.plot_options = plot_options(config=self.config)
+        self.plotter_preferences = PlotterPreferences(config=self.config)
 
         # also install style to be sure everything is set
         install_styles()

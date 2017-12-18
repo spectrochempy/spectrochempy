@@ -15,7 +15,7 @@ from tests.utils import  image_comparison
 
 from spectrochempy.api import *
 
-options.log_level = INFO
+preferences.log_level = INFO
 
 # To regenerate the reference figures, set FORCE to True
 FORCE = True

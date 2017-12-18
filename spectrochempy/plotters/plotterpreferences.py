@@ -22,7 +22,7 @@ __all__ = []
 # =============================================================================
 # Plot Options
 # =============================================================================
-class plot_options(Configurable):
+class PlotterPreferences(Configurable):
     """
     Options relative to plotting and views
 
@@ -33,7 +33,7 @@ class plot_options(Configurable):
     # attributes
     # ------------------------------------------------------------------------
 
-    name = Unicode('plot_options')
+    name = Unicode('PlotterPreferences')
 
     description = Unicode('Options for plotting datasets')
 

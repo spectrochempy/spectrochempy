@@ -80,12 +80,12 @@ url = __url__
 log =  app.log
 log_level =  app.log_level
 
-# give a user friendly name to the objects containing configurables options
-options = app
-scpdata =  app.general_options.data
-list_scpdata =  app.general_options.list_scpdata
-plot_options =  app.plot_options
-project_options =  app.project_options
+# give a user friendly name to the objects containing configurables preferences
+preferences = app
+scpdata =  app.general_preferences.data
+list_scpdata =  app.general_preferences.list_scpdata
+plotter_preferences =  app.plotter_preferences
+project_preferences =  app.project_preferences
 
 
 # Log levels
@@ -103,7 +103,7 @@ __all__ += [
     'app',
     'log', 'log_level', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
     'scpdata', 'list_scpdata',
-    'plot_options', 'options',
+    'plotter_preferences', 'project_preferences', 'preferences',
     #'pcl',
 
     ### Info
@@ -241,7 +241,7 @@ _reset_config = False
 _started = application.app.start(debug=_debug, reset_config=_reset_config)
 
 # load the default style
-plt.style.use(application.app.plot_options.style)
+plt.style.use(application.app.plotter_preferences.style)
 
 log.info("API activated "
          if _started else "API was not started!")

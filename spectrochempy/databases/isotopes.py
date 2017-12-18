@@ -26,10 +26,7 @@ import pandas as pd
 from pkg_resources import resource_filename
 
 from spectrochempy.application import app
-
-plot_options = app.plot_options
 log = app.log
-options = app
 
 # =============================================================================
 # Third-party imports

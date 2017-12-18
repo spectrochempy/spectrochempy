@@ -14,11 +14,11 @@ from traitlets import (Dict, List, Bool, Instance, Unicode, HasTraits, This,
 from traitlets.config.configurable import Configurable
 
 
-__all__ = ['ProjectOptions']
+__all__ = ['ProjectPreferences']
 
 
 # ============================================================================
-class ProjectOptions(Configurable) :
+class ProjectPreferences(Configurable) :
 
     project_directory = Unicode(help='location where all projects are '
                                      'strored by defauult').tag(config=True)

@@ -24,9 +24,9 @@ from spectrochempy.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
 from spectrochempy.application import app
 
-plot_options = app.plot_options
+plotter_preferences = app.plotter_preferences
 log = app.log
-options = app
+preferences = app
 
 
 __all__ = ['multiplot', 'multiplot_map', 'multiplot_stack',

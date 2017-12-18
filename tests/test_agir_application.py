@@ -72,7 +72,7 @@ def test_slicing_agir(samples):
 
         samples[key]['IR'] = s
 
-    #options.log_level = DEBUG
+    #preferences.log_level = DEBUG
 
 
 

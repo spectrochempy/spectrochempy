@@ -11,5 +11,5 @@
 
 __all__ = []
 
-class ReadOptions:
+class ProcessorPreferences:
     pass
