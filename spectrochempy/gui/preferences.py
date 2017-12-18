@@ -26,7 +26,7 @@ from spectrochempy.application import app
 
 general_preferences = app.general_preferences
 project_preferences = app.project_preferences
-plot_preferences = app.plot_preferences
+plotter_preferences = app.plotter_preferences
 
 
 # ============================================================================
@@ -340,7 +340,7 @@ class ProjectPreferencePageWidget(PreferencePageWidget):
 # ============================================================================
 class PlotPreferencePageWidget(PreferencePageWidget):
 
-    preferences = plot_preferences
+    preferences = plotter_preferences
     title = 'Plotting preferences'
 
 
