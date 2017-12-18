@@ -28,7 +28,6 @@ from pkgutil import walk_packages
 import subprocess
 from warnings import warn
 import setuptools_scm
-import apigen
 from sphinx.util.docutils import docutils_namespace, patch_docutils
 from ipython_genutils.text import indent, dedent, wrap_paragraphs
 from sphinx.errors import SphinxError
@@ -40,6 +39,7 @@ mpl.use('agg')
 
 from spectrochempy.api import *
 from spectrochempy import __version__ as version
+from spectrochempy.extern import sphinx_apidoc as apigen
 
 from traitlets import import_item
 
