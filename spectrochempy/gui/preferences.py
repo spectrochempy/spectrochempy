@@ -24,9 +24,9 @@ from .widgets.parametertree import ParameterTree, Parameter
 
 from spectrochempy.application import app
 
-general_options = app.general_options
-project_options = app.project_options
-plot_options = app.plot_options
+general_preferences = app.general_preferences
+project_preferences = app.project_preferences
+plot_preferences = app.plot_preferences
 
 
 # ============================================================================
@@ -56,18 +56,18 @@ class Preference_Page(object):
 
 
 # ============================================================================
-class OptionsTree(ParameterTree):
+class PreferencesTree(ParameterTree):
 
-    def __init__(self, options, title=None, *args, **kwargs):
+    def __init__(self, preferences, title=None, *args, **kwargs):
         """
         Parameters
         ----------
-        options: object
-            The Configurable object that contains the options
+        preferences: object
+            The Configurable object that contains the preferences
 
         """
-        super(OptionsTree, self).__init__(*args, **kwargs)
-        self.options = options
+        super(PreferencesTree, self).__init__(*args, **kwargs)
+        self.preferences = preferences
         self.title = title
 
     @property
@@ -78,65 +78,37 @@ class OptionsTree(ParameterTree):
     def initialize(self, title=None):
         """Fill the items into the tree"""
 
-        # we may have passed some config options or a dictionary
-        if hasattr(self.options, 'traits'):
-            options = self.options.traits(config=True)
+        # we may have passed some config preferences or a dictionary
+        if hasattr(self.preferences, 'traits'):
+            preferences = self.preferences.traits(config=True)
             # sorting using title
-            options = {o[1]:o[2] for o in sorted([(opt.help, k, opt) for k,opt in options.items()])}
+            preferences = {o[1]:o[2] for o in sorted([(opt.help, k, opt) for k,opt in preferences.items()])}
         else:
-            options = self.options
+            preferences = self.preferences
 
         p = Parameter.create(name=title,
                              title=title,
                              type='group',
-                             children=options)
+                             children=preferences)
         self.setParameters(p, showTop=True)
 
-        p.sigTreeStateChanged.connect(self.set_icon_func)
+        p.sigTreeStateChanged.connect(self.parameter_changed)
 
-    def set_icon_func(self, i, item, key):
-        """Create a function to change the icon of one topLevelItem
+    def parameter_changed(self, par, changes):
 
-        This method creates a function that can be called when the value of an
-        item changes to display it's valid state. The returned function changes
-        the icon of the given topLevelItem depending on
-        whether the proposed changes are valid or not and it modifies the
-        :attr:`valid` attribute accordingly
-
-        Parameters
-        ----------
-        i: int
-            The index of the topLevelItem
-        item: QTreeWidgetItem
-            The topLevelItem
-        validator: func
-            The validation function
-
-        Returns
-        -------
-        function
-            The function that can be called to set the correct icon"""
-        def func():
-            editor = self.itemWidget(item.child(0), self.value_col)
-            s = asstring(editor.toPlainText())
-            try:
-                val = yaml.load(s)
-            except Exception as e:
-                item.setIcon(1, QtGui.QIcon(geticon('warning.png')))
-                item.setToolTip(1, "Could not parse yaml code: %s" % e)
-                self.set_valid(i, False)
-                return
-            try:
-                validator(val)
-            except Exception as e:
-                item.setIcon(1, QtGui.QIcon(geticon('invalid.png')))
-                item.setToolTip(1, "Wrong value: %s" % e)
-                self.set_valid(i, False)
+        for opt, change, data in changes:
+            path = p.childPath(param)
+            if path is not None:
+                childName = '.'.join(path)
             else:
-                item.setIcon(1, QtGui.QIcon(geticon('valid.png')))
-                self.set_valid(i, True)
-            self.propose_changes.emit(self.parent() or self)
-        return func
+                childName = param.name()
+
+            if childName == "Project.usempl":
+                log.debug('%s : %s\n' % (childName, data))
+                self.usempl = data
+                for key in self.open_plots.keys():
+                    self.show_or_create_plot_dock(key)
+                self.project_item_clicked()
 
     def set_valid(self, i, b):
         """Set the validation status
@@ -158,8 +130,8 @@ class OptionsTree(ParameterTree):
             self.validChanged.emit(new)
 
 
-    def changed_options(self, use_items=False):
-        """Iterate over the changed optionsParams
+    def changed_preferences(self, use_items=False):
+        """Iterate over the changed preferencesParams
 
         Parameters
         ----------
@@ -174,11 +146,11 @@ class OptionsTree(ParameterTree):
             The proposed value"""
         def equals(item, key, val, orig):
             return val != orig
-        for t in self._get_options(equals):
+        for t in self._get_preferences(equals):
             yield t[0 if use_items else 1], t[2]
 
-    def selected_options(self, use_items=False):
-        """Iterate over the selected optionsParams
+    def selected_preferences(self, use_items=False):
+        """Iterate over the selected preferencesParams
 
         Parameters
         ----------
@@ -193,11 +165,11 @@ class OptionsTree(ParameterTree):
             The proposed value"""
         def is_selected(item, key, val, orig):
             return item.isSelected()
-        for t in self._get_options(is_selected):
+        for t in self._get_preferences(is_selected):
             yield t[0 if use_items else 1], t[2]
 
-    def _get_options(self, filter_func=None):
-        """Iterate over the optionsParams
+    def _get_preferences(self, filter_func=None):
+        """Iterate over the preferencesParams
 
         This function applies the given `filter_func` to check whether the
         item should be included or not
@@ -210,7 +182,7 @@ class OptionsTree(ParameterTree):
             item
                 The QTreeWidgetItem
             key
-                The optionsParams key
+                The preferencesParams key
             val
                 The proposed value
             orig
@@ -221,7 +193,7 @@ class OptionsTree(ParameterTree):
         QTreeWidgetItem
             The corresponding topLevelItem
         str
-            The optionsParams key
+            The preferencesParams key
         object
             The proposed value
         object
@@ -229,58 +201,58 @@ class OptionsTree(ParameterTree):
         """
         def no_check(item, key, val, orig):
             return True
-        options = self.options
+        preferences = self.preferences
         filter_func = filter_func or no_check
         for item in self.top_level_items:
             key = item.text(0)
             editor = self.itemWidget(item.child(0), self.value_col)
             val = yaml.load(asstring(editor.toPlainText()))
             try:
-                val = options.validate[key](val)
+                val = preferences.validate[key](val)
             except:
                 pass
             try:
-                include = filter_func(item, key, val, options[key])
+                include = filter_func(item, key, val, preferences[key])
             except:
                 warn('Could not check state for %s key' % key,
                      RuntimeWarning)
             else:
                 if include:
-                    yield (item, key, val, options[key])
+                    yield (item, key, val, preferences[key])
 
     def apply_changes(self):
-        """Update the :attr:`options` with the proposed changes"""
-        new = dict(self.changed_options())
-        if new != self.options:
-            self.options.update(new)
+        """Update the :attr:`preferences` with the proposed changes"""
+        new = dict(self.changed_preferences())
+        if new != self.preferences:
+            self.preferences.update(new)
 
     def select_changes(self):
-        """Select all the items that changed comparing to the current optionsParams
+        """Select all the items that changed comparing to the current preferencesParams
         """
-        for item, val in self.changed_options(True):
+        for item, val in self.changed_preferences(True):
             item.setSelected(True)
 
 
 # ============================================================================
-class OptionsWidget(Preference_Page, QtGui.QWidget):
-    """A preference page for the spectrochempy options"""
+class PreferencePageWidget(Preference_Page, QtGui.QWidget):
+    """A Widget for a spectrochempy preference page"""
 
-    options = None  # implemented in subclass
+    preferences = None  # implemented in subclass
     tree = None
 
     @property
     def changed(self):
-        return True #bool(next(self.tree.changed_options(), None))
+        return True #bool(next(self.tree.changed_preferences(), None))
 
     @property
     def icon(self):
-        return QtGui.QIcon(geticon('options.png'))
+        return QtGui.QIcon(geticon('preferences.png'))
 
     def __init__(self, *args, **kwargs):
-        super(OptionsWidget, self).__init__(*args, **kwargs)
+        super(PreferencePageWidget, self).__init__(*args, **kwargs)
         self.vbox = vbox = QtGui.QVBoxLayout()
 
-        self.tree = tree = OptionsTree(self.options, parent=self, \
+        self.tree = tree = preferencesTree(self.preferences, parent=self, \
                            showHeader=False, **kwargs)
 
         vbox.addWidget(self.tree)
@@ -316,34 +288,34 @@ class OptionsWidget(Preference_Page, QtGui.QWidget):
             if not fname:
                 return
             if update:
-                options = self.options.__class__(defaultParams=self.options.defaultParams)
-                options.load_from_file(fname)
-                old_keys = list(options)
-                selected = dict(self.tree.selected_options())
+                preferences = self.preferences.__class__(defaultParams=self.preferences.defaultParams)
+                preferences.load_from_file(fname)
+                old_keys = list(preferences)
+                selected = dict(self.tree.selected_preferences())
                 new_keys = list(selected)
-                options.update(selected)
-                options.dump(fname, include_keys=old_keys + new_keys,
+                preferences.update(selected)
+                preferences.dump(fname, include_keys=old_keys + new_keys,
                         exclude_keys=[])
             else:
-                options = self.options.__class__(self.tree.selected_options(),
-                                       defaultParams=self.options.defaultParams)
-                options.dump(fname, exclude_keys=[])
+                preferences = self.preferences.__class__(self.tree.selected_preferences(),
+                                       defaultParams=self.preferences.defaultParams)
+                preferences.dump(fname, exclude_keys=[])
 
         action = QtGui.QAction('Update...' if update else 'Overwrite...', self)
         action.triggered.connect(func)
         return action
 
-    def initialize(self, options=None):
+    def initialize(self, preferences=None):
         """Initialize the config page
 
         Parameters
         ----------
-        options: object
+        preferences: object
 
         """
-        if options is not None:
-            self.options = options
-            self.tree.options = options
+        if preferences is not None:
+            self.preferences = preferences
+            self.tree.preferences = preferences
         self.tree.initialize(title=self.title)
 
     def apply_changes(self):
@@ -352,37 +324,23 @@ class OptionsWidget(Preference_Page, QtGui.QWidget):
 
 
 # ============================================================================
-class GeneralOptionsWidget(OptionsWidget):
+class GeneralPreferencePageWidget(PreferencePageWidget):
 
-    options = general_options
-    # options = [
-    # {'name': 'Basic parameter data types', 'type': 'group', 'children': [
-    #     {'name': 'Integer', 'type': 'int', 'value': 10},
-    #     {'name': 'Float', 'type': 'float', 'value': 10.5, 'step': 0.1},
-    #     {'name': 'String', 'type': 'str', 'value': "hi"},
-    #     {'name': 'List', 'type': 'list', 'values': [1,2,3], 'value': 2},
-    #     {'name': 'Named List', 'type': 'list', 'values': {"one": 1, "two": "twosies", "three": [3,3,3]}, 'value': 2},
-    #     {'name': 'Boolean', 'type': 'bool', 'value': True, 'tip': "This is a checkbox"},
-    #     {'name': 'Color', 'type': 'color', 'value': "FF0", 'tip': "This is a color button"},
-    #     {'name': 'Gradient', 'type': 'colormap'},
-    #     {'name': 'Text Parameter', 'type': 'text', 'value': 'Some text...'},
-    #     {'name': 'Action Parameter', 'type': 'action'},
-    # ]}
-    # ]
+    preferences = general_preferences
     title = 'General preferences'
 
 
 # ============================================================================
-class ProjectOptionsWidget(OptionsWidget):
+class ProjectPreferencePageWidget(PreferencePageWidget):
 
-    options = project_options
+    preferences = project_preferences
     title = 'Project preferences'
 
 
 # ============================================================================
-class PlotOptionsWidget(OptionsWidget):
+class PlotPreferencePageWidget(PreferencePageWidget):
 
-    options = plot_options
+    preferences = plot_preferences
     title = 'Plotting preferences'
 
 
@@ -408,7 +366,7 @@ class Preferences(QtGui.QDialog):
         self.bt_reset = QtGui.QPushButton('Reset to defaults')
         #self.bt_load_plugins = QtGui.QPushButton('Load plugin pages')
         #self.bt_load_plugins.setToolTip(
-        #    'Load the optionsParams for the plugins in separate pages')
+        #    'Load the preferencesParams for the plugins in separate pages')
 
         self.bbox = bbox = QtGui.QDialogButtonBox(
             QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Apply |
@@ -445,7 +403,7 @@ class Preferences(QtGui.QDialog):
 
         # Signals and slots
         if main is not None:
-            pass #self.bt_reset.clicked.connect(main.reset_optionsParams)
+            pass #self.bt_reset.clicked.connect(main.reset_preferencesParams)
         #self.bt_load_plugins.clicked.connect(self.load_plugin_pages)
         self.pages_widget.currentChanged.connect(self.current_page_changed)
         self.contents_widget.currentRowChanged.connect(
@@ -520,19 +478,19 @@ class Preferences(QtGui.QDialog):
             preference_page.changed)
 
     def load_plugin_pages(self):
-        """Load the optionsParams for the plugins in separate pages"""
-        validators = psy_optionsParams.validate
-        descriptions = psy_optionsParams.descriptions
-        for ep in psy_optionsParams._load_plugin_entrypoints():
+        """Load the preferencesParams for the plugins in separate pages"""
+        validators = psy_preferencesParams.validate
+        descriptions = psy_preferencesParams.descriptions
+        for ep in psy_preferencesParams._load_plugin_entrypoints():
             plugin = ep.load()
-            options = getattr(plugin, 'optionsParams', None)
-            if options is None:
-                options = optionsParams()
-            w = OptionsWidget(parent=self)
-            w.title = 'optionsParams of ' + ep.module_name
-            w.default_path = PsyoptionsParamsWidget.default_path
-            w.initialize(optionsParams=options, validators=validators,
+            preferences = getattr(plugin, 'preferencesParams', None)
+            if preferences is None:
+                preferences = preferencesParams()
+            w = PreferencePageWidget(parent=self)
+            w.title = 'preferencesParams of ' + ep.module_name
+            w.default_path = PsypreferencesParamsWidget.default_path
+            w.initialize(preferencesParams=preferences, validators=validators,
                          descriptions=descriptions)
-            # use the full optionsParams after initialization
-            w.options = psy_optionsParams
+            # use the full preferencesParams after initialization
+            w.preferences = psy_preferencesParams
             self.add_page(w)

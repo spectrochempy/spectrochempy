@@ -40,8 +40,8 @@ from .widgets.projecttreewidget import ProjectTreeWidget
 from .widgets.matplotlibwidget import MatplotlibWidget
 from .logtoconsole import QtHandler, redirectoutput
 from .plots import Plots
-from .preferences import (Preferences, ProjectOptionsWidget,
-                        GeneralOptionsWidget, PlotOptionsWidget)
+from .preferences import (Preferences, ProjectPreferencePageWidget,
+                          GeneralPreferencePageWidget, PlotPreferencePageWidget)
 from .guiutils import geticon
 
 from ..application import app
@@ -101,9 +101,9 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         # Create Menubar and preferences
         # ------------------------------
-        self.preference_pages.extend([GeneralOptionsWidget,
-                                      ProjectOptionsWidget,
-                                      PlotOptionsWidget])
+        self.preference_pages.extend([GeneralPreferencePageWidget,
+                                      ProjectPreferencePageWidget,
+                                      PlotPreferencePageWidget])
         self._append_menubar_and_preferences()
 
         # show window
@@ -278,12 +278,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
                 page.initialize()
                 dlg.add_page(page)
 
-            available_width = 0.5 * \
-                             QtGui.QDesktopWidget().availableGeometry().width()
-            width = dlg.sizeHint().width()
-            height = dlg.sizeHint().height()
-            # The preferences window should cover at least half of the screen
-            dlg.resize(max(available_width, width), height)
+            dlg.resize(1000,400)
             if exec_:
                 dlg.exec_()
 
