@@ -19,21 +19,21 @@ are defined.
 # Python and third parties imports
 # ----------------------------------
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+import sys
 from cycler import cycler
-from traitlets import Dict, HasTraits, Instance
 
-from spectrochempy.utils import is_sequence
-from spectrochempy.plotters.utils import cmyk2rgb
-from spectrochempy.application import app
+import matplotlib as mpl
+
+from matplotlib import pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+from traitlets import Dict, HasTraits, Instance
 
 # local import
 # ------------
-plot_options = app.plot_options
-log = app.log
-options = app
+from spectrochempy.utils import is_sequence
+from spectrochempy.plotters.utils import cmyk2rgb
+from spectrochempy.application import app
 from spectrochempy.utils import docstrings
 
 # Constants
@@ -53,8 +53,6 @@ __all__ = ['NDPlot',
            'NBlack', 'NRed', 'NBlue', 'NGreen',
 
            ]
-
-
 # For color blind people, it is safe to use only 4 colors in graphs:
 # see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
 #   Black CMYK=0,0,0,0
@@ -66,6 +64,10 @@ NRed = cmyk2rgb(0, 77, 100, 0)
 NBlue = cmyk2rgb(100, 30, 0, 0)
 NGreen = cmyk2rgb(85, 0, 60, 10)
 
+
+plot_options = app.plot_options
+log = app.log
+options = app
 
 # =============================================================================
 # Class NDPlot to handle plotting of datasets
@@ -411,9 +413,6 @@ class NDPlot(HasTraits):
                     kw[key] = value
             self._fig.savefig(savename, **kw)
 
-        #mpl.interactive(True)
-        plt.draw()
-
     # -------------------------------------------------------------------------
     # Special attributes
     # -------------------------------------------------------------------------
@@ -463,7 +462,7 @@ class NDPlot(HasTraits):
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)
-        elif isinstance(axes, Axes):
+        elif isinstance(axes, plt.Axes):
             # it's an axe! add it to our list
             self._ndaxes[axes.name] = axes
 
@@ -549,9 +548,10 @@ def show():
     Method to force the `matplotlib` figure display
 
     """
-    if not plot_options.do_not_block or plt.isinteractive():
+    if not options.do_not_block:
+
         if _curfig(True):  # True to avoid opening a new one
-            plt.show()
+            plt.show(block=True)
 
 
 # .............................................................................

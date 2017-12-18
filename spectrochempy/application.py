@@ -37,7 +37,9 @@ from traitlets.config.application import Application, \
 from traitlets import (Instance, Bool, Unicode, List, Dict, default,
                           observe,
                        import_item, HasTraits)
+
 import matplotlib as mpl
+from matplotlib import pyplot as plt
 
 from IPython import get_ipython
 from IPython.core.magic import (Magics, magics_class, line_magic, cell_magic,
@@ -432,6 +434,11 @@ to cite it this way:
     startup_project = Unicode('', help='project to load at startup').tag(
         config=True)
 
+
+    do_not_block = Bool(False,
+                        help="Make the plots but do not stop (for tests)"
+                        ).tag(config=True)
+
     aliases = Dict(
         dict(test='SpectroChemPy.test',
              p='SpectroChemPy.startup_project',
@@ -510,8 +517,6 @@ to cite it this way:
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
 
-        _do_not_block = self.plot_options.do_not_block
-
         for caller in ['builddocs.py', 'pytest', 'py.test', '-c']:
             # `-c` happen if the pytest is executed in parallel mode
             # using the plugin pytest-xdist
@@ -519,19 +524,13 @@ to cite it this way:
             if caller in sys.argv[0]:
                 # this is necessary to build doc
                 # with sphinx-gallery and doctests
-
-                _do_not_block = self.plot_options.do_not_block = True
+                self.do_not_block = True
                 break
 
         # case we have passed -test arguments to a script
         if len(sys.argv) > 1 and "-test" in sys.argv[1]:
-            _do_not_block = self.plot_options.do_not_block = True
+            self.do_not_block = True
             caller = sys.argv[0]
-
-        if _do_not_block:
-            self.log.warning(
-                'Running {} - set do_not_block: {}'.format(
-                    caller, _do_not_block))
 
         # we catch warnings and error for a ligther display to the end-user.
         # except if we are in debugging mode
@@ -630,8 +629,7 @@ to cite it this way:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(self.version, self.copyright)
 
-            if self.show_info_on_loading and \
-                    not self.plot_options.do_not_block:
+            if self.show_info_on_loading: # and not self.do_not_block:
                 print(info_string)
 
             self.log.debug(
@@ -672,16 +670,6 @@ to cite it this way:
 
         # Pass config to other classes for them to inherit the config.
         self.plot_options = plot_options(config=self.config)
-
-        if not self.plot_options.latex_preamble:
-            self.plot_options.latex_preamble = [
-                r'\usepackage{siunitx}',
-                r'\sisetup{detect-all}',
-                r'\usepackage{times}',  # set the normal font here
-                r'\usepackage{sansmath}',
-                # load up the sansmath so that math -> helvet
-                r'\sansmath'
-            ]
 
         # also install style to be sure everything is set
         install_styles()

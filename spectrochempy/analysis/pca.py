@@ -28,7 +28,7 @@ plot_options = app.plot_options
 log = app.log
 options = app
 
-_do_not_block = plot_options.do_not_block
+#_do_not_block =options.do_not_block
 
 
 # ==============================================================================
@@ -186,9 +186,9 @@ class Pca(HasTraits):
         plt.ylabel('cummulative / %')
         # plt.ylim((0.,100.))
 
-        if not _do_not_block:
-            plt.show()
-        return
+        #if not _do_not_block:
+        plt.show()
+        #return
 
     def scoreplot(self, pcs, nfig=None):
         """2D or 3D scoreplot of samples
@@ -225,7 +225,7 @@ class Pca(HasTraits):
                        self.T.data[:, pcs[2]], zdir='z', s=30, c=col,
                        depthshade=True)
 
-        if not _do_not_block:
-            plt.show()
+        #if not _do_not_block:
+        plt.show()
 
         return

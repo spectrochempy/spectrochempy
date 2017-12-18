@@ -59,13 +59,20 @@ class plot_options(Configurable):
         mpl.rc('text', usetex=change.new)
 
     # ........................................................................
-    latex_preamble = List(mpl.rcParams['text.latex.preamble'],
-                          help='latex preamble for matplotlib outputs'
-                          ).tag(config=True)
+    latex_preamble = Unicode(
+r"""\usepackage{siunitx}
+\sisetup{detect-all}
+\usepackage{times} # set the normal font here
+\usepackage{sansmath}
+# load up the sansmath so that math -> helvet
+\sansmath
+""",
+                          help='Latex preamble for matplotlib outputs'
+                          ).tag(config=True, type='text')
 
     @observe('latex_preamble')
     def _set_latex_preamble(self, change):
-        mpl.rcParams['text.latex.preamble'] = change.new
+        mpl.rcParams['text.latex.preamble'] = change.new.split('\n')
 
     # -------------------------------------------------------------------------
 
@@ -82,7 +89,7 @@ class plot_options(Configurable):
                              ).tag(config=True)
 
     colormap_transposed = Unicode('magma',
-                            help='Default colormap for tramsposed stack plots'
+                            help='Default colormap for transposed stack plots'
                                   ).tag(config=True)
 
     show_projections = Bool(False,
@@ -95,11 +102,11 @@ class plot_options(Configurable):
     show_projection_y = Bool(False, help='Show projection along y'
                              ).tag(config=True)
 
-    background_color = Tuple((0.5, 0.5, 0.5), help='Bakground color for plots'
-                             ).tag(config=True)
+    background_color = Unicode('#EFEFEF', help='Bakground color for plots'
+                              ).tag(config=True, type='color')
 
-    foreground_color = Tuple((1.0, 1.0, 1.0), help='Foreground color for plots'
-                             ).tag(config=True)
+    foreground_color = Unicode('#000', help='Foreground color for plots'
+                              ).tag(config=True, type='color')
 
     linewidth = Float(.7, help='Default width for lines').tag(config=True)
 
@@ -120,9 +127,6 @@ class plot_options(Configurable):
                           ).tag(config=True)
 
     max_lines_in_stack = Integer(1000, help='Maximum number of lines to'
-                                       ' plot in a stack plot'
+                                       ' plot in stack plots'
                                  ).tag(config=True)
 
-    do_not_block = Bool(False, help="whether or not we show the plots "
-                                    "and stop after each of them"
-                        ).tag(config=True)

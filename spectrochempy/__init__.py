@@ -85,10 +85,10 @@ def _setup_backend_and_ipython(backend=None):
     # the current backend
     backend = mpl.get_backend()
     if backend == 'module://ipykernel.pylab.backend_inline'  or backend == \
-            'MacOSX':
-        # Force QT5
-        backend = 'Qt5Agg'
-        mpl.rcParams['backend.qt5'] = 'PyQt5'
+             'MacOSX':
+         # Force QT5
+         backend = 'Qt5Agg'
+         mpl.rcParams['backend.qt5'] = 'PyQt5'
 
     # if we are building the docs, in principle it should be done using
     # the builddocs.py located in the scripts folder
@@ -160,7 +160,7 @@ __release_date__ = _get_release_date()
 
 __url__ = "http://www-lcs.ensicaen.fr/spectrochempy"
 __author__ = "C. Fernandez & A. Travert @LCS"
-__license__ = "CeCILL-B licence"
+__license__ = "CeCILL-B license"
 
 
 # ==============================================================================
