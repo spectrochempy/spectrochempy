@@ -49,8 +49,8 @@ def test_project(ds1, ds2, dsm):
     dsm.name = 'titi'
 
     ds = ds1[:10, INPLACE]
+    assert ds1.shape == ds.shape
     assert ds is ds1
-    print(ds1.shape, ds.shape)
 
     myp.add_datasets(ds1, ds2, dsm)
 
@@ -143,16 +143,3 @@ def test_project(ds1, ds2, dsm):
     # attemps to resolve locals
     newproj.print_info()
 
-
-######## HIZECOKE NOTEBOOK
-
-
-    print('*'*50)
-    newproj = Project.load('HIZECOKE')
-    print(newproj)
-
-    newproj.print_info()
-#    newproj.preprocess()
-
-    newproj['print_info'] = Script('print_info', script_source)
-    newproj.print_info()
