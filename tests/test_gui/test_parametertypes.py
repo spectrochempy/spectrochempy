@@ -14,5 +14,4 @@ def test_opts(app):
     assert list(param.param('bool').items.keys())[0].widget.isEnabled() is False
     assert list(param.param('color').items.keys())[0].widget.isEnabled() is False
 
-
-    app.exec_()
+    # app.exec_()

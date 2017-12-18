@@ -33,9 +33,9 @@ class testPreferences():
 
         dlg.exec_()
 
-tp = testPreferences()
-
-
 # =============================================================================
 if __name__ == '__main__':
-    pass
+
+    tp = testPreferences()
+
+
