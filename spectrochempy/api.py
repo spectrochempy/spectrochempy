@@ -41,9 +41,7 @@ __all__ = [
 
            # useful methods from external library
            # ------------------------------------
-
            'raises',
-
 
             ### methods and objects from other packages will be added
             ### later on this module (see below)
@@ -56,13 +54,28 @@ __all__ = [
 
 # here we also construct the __all__ list automatically
 
-from spectrochempy.application import app
+from spectrochempy.application import (app,
+                                       __version__,
+                                       __release__,
+                                       __copyright__,
+                                       __license__,
+                                       __release_date__,
+                                       __author__,
+                                       __contributor__,
+                                       __url__
+                                       )
 from spectrochempy import application
 
 running = app.running
-version, release = (app.version, app.release)
-copyright =  app.copyright
-license = app.license
+
+version = __version__
+release = __release__
+copyright =  __copyright__
+license = __license__
+release_date = __release_date__
+authors = __author__
+contributors = __contributor__
+url = __url__
 
 log =  app.log
 log_level =  app.log_level
@@ -94,7 +107,8 @@ __all__ += [
     #'pcl',
 
     ### Info
-    'copyright', 'version', 'release', 'license',
+    'copyright', 'version', 'release', 'license', 'url', 'release_date',
+    'authors', 'contributors'
 ]
 
 

@@ -38,7 +38,6 @@ import matplotlib as mpl
 mpl.use('agg')
 
 from spectrochempy.api import *
-from spectrochempy import __version__ as version
 from spectrochempy.extern import sphinx_apidoc as apigen
 
 from traitlets import import_item

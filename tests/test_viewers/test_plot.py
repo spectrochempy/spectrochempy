@@ -169,3 +169,14 @@ def tests_multipleplots_and_styles():
     # check that style reinit to default
     plot_multiple(method='scatter',
                   sources=sources, labels=labels, legend='best')
+
+##### debugging ####
+
+#### deprecation #
+
+def test_kind_deprecated(IR_source_2D):
+
+    source = IR_source_2D.copy()
+
+    # should raise a deprecation warning
+    source.plot(kind='stack', style='sans', colorbar=False)

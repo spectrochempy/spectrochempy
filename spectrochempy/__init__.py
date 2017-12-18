@@ -46,18 +46,14 @@ and some `IPython` configurations are made.
 
 """
 import sys
-import warnings
+
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
 import matplotlib as mpl
 
-from pkg_resources import get_distribution, DistributionNotFound
-from setuptools_scm import get_version
-import  subprocess
-import datetime
+__all__ = []
 
-__all__ = ['__version__', '__release__', '__release_date__', '__copyright__']
 
 # ----------------------------------------------------------------------------
 # Backend
@@ -122,61 +118,13 @@ def _setup_backend_and_ipython(backend=None):
 
 _setup_backend_and_ipython()
 
-# ----------------------------------------------------------------------------
-# Version
-# ----------------------------------------------------------------------------
-
-try:
-    __release__ = get_distribution('spectrochempy').version
-except DistributionNotFound:
-    # package is not installed
-    __release__ = '0.1.beta'
-
-try:
-    __version__ = get_version(root='..', relative_to=__file__)
-except:
-    __version__ = __release__
-
-
-# ............................................................................
-def _get_copyright():
-    current_year = datetime.date.today().year
-    copyright = '2014-{}'.format(current_year)
-    copyright += ' - A.Travert and C.Fernandez @ LCS'
-    return copyright
-
-__copyright__ = _get_copyright()
-
-# .............................................................................
-def _get_release_date():
-    try:
-        return subprocess.getoutput(
-            "git log -1 --tags --date='short' --format='%ad'")
-    except:
-        pass
-
-__release_date__ = _get_release_date()
-
-# ............................................................................
-# other info
-
-__url__ = "http://www-lcs.ensicaen.fr/spectrochempy"
-__author__ = "C. Fernandez & A. Travert @LCS"
-__license__ = "CeCILL-B license"
-
-
 # ==============================================================================
 # For documentation
 # ==============================================================================
 
 if __name__ == '__main__':
-    print(__version__)
-    print(__copyright__)
-    print(__license__)
-    print(__url__)
 
-
-
+    pass
 
 
 

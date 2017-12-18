@@ -33,8 +33,9 @@ import inspect
 # automodule options
 OPTIONS = [
         'members',
+        #'undoc-members',
         'show-inheritance',
-        'autosummary'
+        'autosummary',
     ]
 
 INITPY = '__init__.py'
@@ -149,8 +150,7 @@ def create_module_file(package, module, opts):
         elif members:
             text += "\n\n.. _mod_{}_dev:\n\n".format(
                     "_".join(item.split('.''')[1:]))
-            text += format_heading(3, "Additional information for "
-                                      "developper's")
+            text += "\n\n**Additional information for developper's**\n\n"
             for name, obj in members:
                 if inspect.isclass(obj):
                     directive = '.. autoclass:: %s.%s\n' % (item, name)
@@ -167,7 +167,8 @@ def create_module_file(package, module, opts):
                     directive = '.. autofunction:: %s.%s\n' % (item, name)
                     text += directive
             for name, obj in members:
-                if not (inspect.isclass(obj) and inspect.isclass(obj)) :
+                if not (inspect.isclass(obj) or inspect.isfunction(obj) or
+                            inspect.ismethod(obj)) :
                     directive = '.. autoattribute:: %s.%s\n' % (item, name)
                     text += directive
 
@@ -194,8 +195,9 @@ def create_package_file(root, master_package, subroot, py_files, opts, subs, is_
         text += '\n'
 
     submods = [os.path.splitext(sub)[0] for sub in py_files
-               if not shall_skip(os.path.join(root, sub), opts) and
-               sub != INITPY]
+               if not shall_skip(os.path.join(root, sub), opts)
+               #and sub != INITPY
+               ]
     if submods:
         text += format_heading(2, 'Submodules')
         if opts.separatemodules:
@@ -417,7 +419,7 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
     opts = Options({
             'exclude_patterns' : [],
             'force': True,
-            'tocdepth': 4,
+            'tocdepth': 1,
             'followlinks': False,
             'dryrun': False,
             'separatemodules': True,

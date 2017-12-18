@@ -12,8 +12,6 @@
 """
 This module define the `application` on which the API rely.
 
-This module has no public members and so is not intended to be
-accessed directly by the end user.
 
 """
 
@@ -26,11 +24,16 @@ import glob
 import sys
 import logging
 import warnings
+import subprocess
+import datetime
+import warnings
 
 # ============================================================================
 # third party imports
 # ============================================================================
 
+from pkg_resources import get_distribution, DistributionNotFound
+from setuptools_scm import get_version
 from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, \
     catch_config_error
@@ -52,9 +55,76 @@ from IPython.utils.text import get_text_list
 # constants
 # ============================================================================
 
-__all__ = ['app']  # no public methods
+__all__ = ['app', '__version__',
+           '__release__', '__release_date__',
+           '__copyright__', '__license__',
+           '__author__', '__contributor__',
+           '__url__']
 
-from spectrochempy import __version__
+
+# Log levels
+# -----------------------------------------------------------------------------
+DEBUG = logging.DEBUG
+INFO = logging.INFO
+WARNING = logging.WARNING
+ERROR = logging.ERROR
+CRITICAL = logging.CRITICAL
+
+# ----------------------------------------------------------------------------
+# Version
+# ----------------------------------------------------------------------------
+
+try:
+    #: the release string of this package
+    __release__ = get_distribution('spectrochempy').version
+except DistributionNotFound:
+    # package is not installed
+    __release__ = '0.1.alpha'
+
+try:
+    #: the version string of this package
+    __version__ = get_version(root='..', relative_to=__file__)
+except:
+    __version__ = __release__
+
+
+# ............................................................................
+def _get_copyright():
+    current_year = datetime.date.today().year
+    copyright = '2014-{}'.format(current_year)
+    copyright += ' - A.Travert and C.Fernandez @ LCS'
+    return copyright
+
+#: the copyright string of this package
+__copyright__ = _get_copyright()
+
+# .............................................................................
+def _get_release_date():
+    try:
+        return subprocess.getoutput(
+            "git log -1 --tags --date='short' --format='%ad'")
+    except:
+        pass
+
+#: the last release date of this package
+__release_date__ = _get_release_date()
+
+# ............................................................................
+# other info
+
+#: url for the documentation of this package
+__url__ = "http://www-lcs.ensicaen.fr/spectrochempy"
+
+#: first authors(s) of this package
+__author__ = "C. Fernandez & A. Travert @LCS"
+
+#: contributor(s) to this package
+__contributor__ = ""
+
+#: The license of this package
+__license__ = "CeCILL-B license"
+
+
 
 
 # ============================================================================
@@ -281,19 +351,19 @@ class GeneralOptions(Configurable) :
     def list_scpdata(self):
         return self._scpdata
 
-    # backend = Unicode('spectrochempy',
-    #                   help='backend to be used in the application'
-    #                   ).tag(config=True)
 
     # configuration parameters
     # ------------------------------------------------------------------------
 
+    #: Display info on loading
     show_info_on_loading = Bool(True,
                                 help='Display info on loading?'
                                 ).tag(config=True)
 
+    #: CSV data delimiter
     csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
 
+    #: Default DATA directory
     data = Unicode(help="Default data directory").tag(config=True)
 
     @property
@@ -324,39 +394,10 @@ class SpectroChemPy(Application):
 
     name = Unicode('SpectroChemPy')
 
-    version = Unicode
-
-    @default('version')
-    def _get_version(self):
-        return __version__
-
-    release = Unicode
-
-    @default('release')
-    def _get_release(self):
-        from spectrochempy import __release__
-        return __release__
-
-    copyright = Unicode
-
-    @default('copyright')
-    def _get_copyright(self):
-        from spectrochempy import __copyright__
-        return __copyright__
-
-    license = Unicode
-
-    @default('license')
-    def _get_licence(self):
-        from spectrochempy import __license__
-        return __license__
-
     description = Unicode
 
     @default('description')
     def _get_description(self):
-        from spectrochempy import __license__, __author__, __release__
-
         desc = """Welcome to <strong>SpectroChemPy</strong> Application<br>
 <br>
 <p>
@@ -627,9 +668,9 @@ to cite it this way:
                 self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
 
             info_string = "SpectroChemPy's API - v.{}\n" \
-                          "© Copyright {}".format(self.version, self.copyright)
+                          "© Copyright {}".format(__version__, __copyright__)
 
-            if self.show_info_on_loading: # and not self.do_not_block:
+            if self.general_options.show_info_on_loading:
                 print(info_string)
 
             self.log.debug(
@@ -753,14 +794,6 @@ to cite it this way:
 #: It is advisable to use the main `api` import to access all public methods of
 #: this object.
 app = SpectroChemPy()
-
-# Log levels
-# -----------------------------------------------------------------------------
-DEBUG = logging.DEBUG
-INFO = logging.INFO
-WARNING = logging.WARNING
-ERROR = logging.ERROR
-CRITICAL = logging.CRITICAL
 
 
 # TODO: look at the subcommands capabilities of traitlets
