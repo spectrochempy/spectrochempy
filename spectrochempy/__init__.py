@@ -8,8 +8,10 @@
 # christian.fernandez@ensicaen.fr
 # arnaud.travert@ensicaen.fr
 #
-# This software is a computer program whose purpose is to [describe
-# functionalities and technical features of your software].
+# This software is a computer program whose purpose is to provide a framework
+# for processing, analysing and modelling *Spectro*scopic
+# data for *Chem*istry with *Py*thon (SpectroChemPy). It is is a cross
+# platform software, running on Linux, Windows or OS X.
 #
 # This software is governed by the CeCILL-B license under French law and
 # abiding by the rules of distribution of free software.  You can  use,
