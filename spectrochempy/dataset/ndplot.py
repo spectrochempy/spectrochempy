@@ -20,6 +20,7 @@ are defined.
 # ----------------------------------
 
 import sys
+import warnings
 from cycler import cycler
 
 import matplotlib as mpl
@@ -31,7 +32,9 @@ from traitlets import Dict, HasTraits, Instance
 
 # local import
 # ------------
-from spectrochempy.utils import is_sequence
+from spectrochempy.utils import (is_sequence,
+                                 SpectroChemPyWarning,
+                                 SpectroChemPyDeprecationWarning)
 from spectrochempy.plotters.utils import cmyk2rgb
 from spectrochempy.application import app
 from spectrochempy.utils import docstrings
@@ -154,10 +157,20 @@ class NDPlot(HasTraits):
         # prop_cycle = options.prop_cycle
         # mpl.rcParams['axes.prop_cycle']= r" cycler('color', %s) " % prop_cycle
 
-        # -------------------------------------------------------------------------
+        # --------------------------------------------------------------------
         # select plotter depending on the dimension of the data
-        # -------------------------------------------------------------------------
-        method = kwargs.pop('method', 'generic')
+        # --------------------------------------------------------------------
+
+        method = 'generic'
+
+        # check the deprecated use of `kind`
+        kind = kwargs.pop('kind', None)
+        if kind is not None:
+            method=kind
+            warnings.warn('`kind`is deprecated, use `method` instead',
+                          SpectroChemPyDeprecationWarning)
+
+        method = kwargs.pop('method', method)
         log.debug('Call to plot_{}'.format(method))
 
         # Find or guess the adequate plotter
