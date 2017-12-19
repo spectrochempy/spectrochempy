@@ -778,7 +778,8 @@ class Project(AbstractProject):
                           "from filename!", SpectroChemPyWarning)
 
         filename = os.path.expanduser(os.path.join(directory, filename))
-        if not os.path.exists(filename) and not filename.endswith('.pscp'):
+        if (not os.path.exists(filename) or os.path.isdir(filename)) \
+                and not filename.endswith('.pscp'):
             filename = filename + '.pscp'
             if not os.path.exists(filename):
                 raise IOError('no valid project filename provided')
