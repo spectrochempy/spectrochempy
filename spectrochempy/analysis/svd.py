@@ -20,8 +20,8 @@ import numpy as np
 # local imports
 # ----------------------------------------------------------------------------
 
-from spectrochempy.dataset.ndcoords import Coord
-from spectrochempy.dataset.nddataset import NDDataset, CoordSet
+from spectrochempy.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.dataset.ndarray import masked, nomask
 
 # ----------------------------------------------------------------------------
