@@ -84,8 +84,9 @@ log_level =  app.log_level
 preferences = app
 scpdata =  app.general_preferences.data
 list_scpdata =  app.general_preferences.list_scpdata
-plotter_preferences =  app.plotter_preferences
-project_preferences =  app.project_preferences
+general_preferences = app.general_preferences
+plotter_preferences = app.plotter_preferences
+project_preferences = app.project_preferences
 
 
 # Log levels
@@ -103,7 +104,8 @@ __all__ += [
     'app',
     'log', 'log_level', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
     'scpdata', 'list_scpdata',
-    'plotter_preferences', 'project_preferences', 'preferences',
+    'plotter_preferences', 'project_preferences', 'general_preferences',
+    'preferences',
     #'pcl',
 
     ### Info

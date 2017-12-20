@@ -39,12 +39,12 @@ class Svd(HasTraits):
     ---------
     >>> source = NDDataset.load('mydataset.scp')
     >>> svd = Svd(source)
-    >>> print(svd.ev)
+    >>> print(svd.ev.data)
     [11848.225  633.980 ...,    0.001    0.001]
-    >>> print(svd.ev_cum)
+    >>> print(svd.ev_cum.data)
     [11848.225 12482.204 ..., 12532.584 12532.585]
-    >>> print(svd.ev_ratio)
-    [   0.945    0.051 ...,    0.000    0.000]
+    >>> print(svd.ev_ratio.data)
+    [  94.539    5.059 ...,    0.000    0.000]
 
     """
 
@@ -88,7 +88,9 @@ class Svd(HasTraits):
                                ' of type {} has been provided'.format(
                                type(X).__name__))
 
-        # retains valid columns
+        # Retains valid columns
+        # ---------------------
+
         # unfortunately the present SVD implementation in linalg librairy
         # doesn't support numpy masked array. So we will have to remove the
         # mask ourselves
@@ -105,10 +107,10 @@ class Svd(HasTraits):
         # -----------------------------
 
         if np.any(masked_columns):
-            Vt2 = np.zeros((s.shape[0], X.shape[1]))
-            Vt2[:, ~ masked_columns ] = Vt
-            Vt2[:, masked_columns] = masked
-            Vt = Vt2
+            temp = np.zeros((s.shape[0], X.shape[1]))
+            temp[:, ~ masked_columns ] = Vt
+            temp[:, masked_columns] = masked
+            Vt = temp
 
         # Returns U as a NDDataset object
         # --------------------------------

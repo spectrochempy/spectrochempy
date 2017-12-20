@@ -33,10 +33,23 @@ def test_svd(IR_source_2D):
     print((svd.ev_cum))
     print((svd.ev_ratio))
 
-    svd.Vt.plot()
-    show()
+    assert np.around(svd.ev_ratio[0].data, decimals=3) == 94.539
 
-#    svd.Vt[:10].plot()
-#    show()
+    #TODO: add round function to NDDataset
 
 
+    # with masks
+    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    ax = source.plot_stack()
+
+    svd = Svd(source)
+
+    print()
+    print((svd.U))
+    print((svd.Vt))
+    print((svd.s))
+    print((svd.ev))
+    print((svd.ev_cum))
+    print((svd.ev_ratio))
+
+    assert np.around(svd.ev_ratio[0].data, decimals=3) == 93.887

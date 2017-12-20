@@ -38,15 +38,8 @@ class Pca(HasTraits):
 
     This class performs a Principal Component Analysis of a NDDataset
 
-    Parameters
-    -----------
-    X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object of
-    shape (``N``, ``M``)
-
-    npc : int, optional
-
-        The number of components to compute. If not set all components
-        are computed.
+    If the dataset contains masked values, the corresponding ranges are
+    ignored in the calculation.
 
     """
 
@@ -57,22 +50,31 @@ class Pca(HasTraits):
     # private attributes
     _ev = Instance(np.ndarray)
 
-    def __init__(self, source, npc=None):
-        """Constructor"""
+    def __init__(self, X, npc=None):
+        """
+        Parameters
+        -----------
+        X : :class:`~spectrochempy.dataset.nddataset.NDDataset`object.
+            The dataset has shape (``N``, ``M``)
+        npc : int, optional
+            The number of components to compute. If not set all components
+            are computed.
+
+        """
 
         # check if we have the correct input
-        if isinstance(source, NDDataset):
-            data = source.data
+        if isinstance(X, NDDataset):
+            data = X.data
         else:
             raise TypeError('A dataset of type NDDataset is  '
                                'expected as a source of data, but an object'
                                ' of type {} has been provided'.format(
-                               type(source).__name__))
+                               type(X).__name__))
 
         # mean center the dataset
-        self.center = center = np.nanmean(source.data, axis=0)
-        X = source.copy()
-        X.data = source.data - center
+        self.center = center = np.mean(X.masked_data, axis=0)
+        X = X.copy()
+        X.data = X.data - center
 
         if npc is None:
             npc = min(X.shape)
@@ -83,7 +85,7 @@ class Pca(HasTraits):
         T = np.dot(Xsvd.U.data[:, 0:npc], np.diag(Xsvd.s)[0:npc, 0:npc])
         T = NDDataset(T)
         T.title = 'scores (T) of ' + X.name
-        T.coordset = CoordSet(source.coordset[0],
+        T.coordset = CoordSet(X.coordset[0],
                               Coord([ i+1 for i in range(len(Xsvd.s))],
                                 labels=['#%d' % (i+1) for i in range(len(Xsvd.s))],
                                 title='PC')

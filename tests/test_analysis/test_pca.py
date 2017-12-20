@@ -21,8 +21,11 @@ from spectrochempy.api import Pca
 def test_pca(IR_source_2D):
 
     source = IR_source_2D.copy()
-    pca = Pca(source)
 
+    # with masks
+    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+
+    pca = Pca(source)
     print(pca)
     pca.printev(npc=5)
 
