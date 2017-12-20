@@ -444,11 +444,11 @@ to cite it this way:
     # ------------------------------------------------------------------------
 
     reset_config = Bool(False,
-                        help='should we restaure a default configuration?'
+                        help='Should we restaure a default configuration?'
                         ).tag(config=True)
 
     config_file_name = Unicode(None,
-                               help="Load this config file"
+                               help="Configuration file name"
                                ).tag(config=True)
 
     @default('config_file_name')
@@ -457,7 +457,7 @@ to cite it this way:
 
 
     config_dir = Unicode(None,
-                         help="Set the configuration dir location"
+                         help="Set the configuration directory location"
                          ).tag(config=True)
 
     @default('config_dir')
@@ -465,19 +465,19 @@ to cite it this way:
         return self._get_config_dir()
 
     debug = Bool(False,
-                 help='set DEBUG mode, with full outputs'
+                 help='Set DEBUG mode, with full outputs'
                  ).tag(config=True)
 
     quiet = Bool(False,
-                 help='set Quiet mode, with minimal outputs'
+                 help='Set Quiet mode, with minimal outputs'
                  ).tag(config=True)
 
-    startup_project = Unicode('', help='project to load at startup').tag(
+    startup_project = Unicode('', help='Project to load at startup').tag(
         config=True)
 
 
     do_not_block = Bool(False,
-                        help="Make the plots but do not stop (for tests)"
+                        help="Make the plots BUT do not stop (for tests)"
                         ).tag(config=True)
 
     aliases = Dict(
@@ -643,7 +643,8 @@ to cite it this way:
         >>> app.start(
         ...    reset_config=True,   # for restoring default configuration
         ...    debug=True,          # debugging logs
-        ...    )
+        ...    ) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        SpectroChemPy's API - v.0.1...
         True
 
         """
@@ -670,6 +671,7 @@ to cite it this way:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
 
+            # print(self.general_preferences.show_info_on_loading)
             if self.general_preferences.show_info_on_loading:
                 print(info_string)
 
@@ -797,7 +799,9 @@ app = SpectroChemPy()
 
 
 # TODO: look at the subcommands capabilities of traitlets
+
 if __name__ == "__main__":
+
     print('start application')
     pass
 

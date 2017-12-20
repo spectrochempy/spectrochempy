@@ -34,7 +34,7 @@ import numpy as np
 from spectrochempy.extern.uncertainties import unumpy as unp
 from spectrochempy.units.units import Quantity
 from spectrochempy.dataset.ndarray import NDArray
-from spectrochempy.utils import (interleave, interleaved2complex)
+from spectrochempy.utils import (interleave, interleaved2complex, getdocfrom)
 from spectrochempy.application import app
 
 log = app.log
@@ -147,6 +147,30 @@ class NDMath(object):
 
     absolute = abs
 
+    @getdocfrom(np.sum)
+    def sum(self, *args, **kwargs):
+        """sum along axis"""
+
+        new = self.copy()
+        #TODO: check uncertainty and axes reduction too
+        ma = np.sum(new._masked_data, *args, **kwargs)
+        if kwargs.get('axis', None) is None:
+            return ma
+        new._data = ma.data
+        new._mask = False
+        return new
+
+    @getdocfrom(np.cumsum)
+    def cumsum(self, *args, **kwargs):
+        """cumsum along axis"""
+
+        new = self.copy()
+        #TODO: check uncertainty and axes reduction too
+        ma = np.cumsum(new._masked_data, *args, **kwargs)
+        new._data = ma.data
+        new._mask = False
+        return new
+
     # -------------------------------------------------------------------------
     # special methods
     # -------------------------------------------------------------------------
@@ -154,8 +178,8 @@ class NDMath(object):
     # the following methods are to give NDArray based class
     # a behavior similar to np.ndarray regarding the ufuncs
 
-    # def __array_prepare(self, *args, **kwargs):
-    #    pass
+    def __array_prepare(self, *args, **kwargs):
+        pass
 
     def __array_wrap__(self, *args):
         # called when element-wise ufuncs are applied to the array

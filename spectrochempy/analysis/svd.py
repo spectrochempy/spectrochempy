@@ -10,13 +10,20 @@
 
 __all__ = ['Svd']
 
+# ----------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------
 
 from traitlets import HasTraits, Instance
 import numpy as np
 
+# ----------------------------------------------------------------------------
+# local imports
+# ----------------------------------------------------------------------------
+
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.dataset.nddataset import NDDataset, CoordSet
-
+from spectrochempy.dataset.ndarray import masked, nomask
 
 # ----------------------------------------------------------------------------
 class Svd(HasTraits):
@@ -25,50 +32,51 @@ class Svd(HasTraits):
     The SVD is commonly written as :math:'X = ur \Sigma V^{T}'. This class \
     has the attributes: ur, s = diag(S) and Vt=V.T.
 
-    If the dataset contains NaN values (e.g. if parts of the spectra have\
-    been blanked, the corresponding ranges are ignored in the calculation.
+    If the dataset contains masked values, the corresponding ranges are
+    ignored in the calculation.
 
     Examples
     ---------
     >>> source = NDDataset.load('mydataset.scp')
-    >>appvd = Svd(source)
+    >>> svd = Svd(source)
     >>> print(svd.ev)
-    [1.18e+04      634 ...,  0.00109 0.000975]
+    [11848.225  633.980 ...,    0.001    0.001]
     >>> print(svd.ev_cum)
-    [1.18e+04 1.25e+04 ..., 1.25e+04 1.25e+04]
+    [11848.225 12482.204 ..., 12532.584 12532.585]
     >>> print(svd.ev_ratio)
-    [   0.945   0.0506 ..., 8.69e-08 7.78e-08]
+    [   0.945    0.051 ...,    0.000    0.000]
 
     """
 
     U = Instance(NDDataset)
-    s = Instance(np.ndarray)
+    s = Instance(NDDataset)
     Vt = Instance(NDDataset)
 
     def __init__(self, X, full_matrices=False, compute_uv=True):
         """
-    Parameters
-    -----------
-    X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object.
-        This nddataset must have a 2 shape (``N``, ``M``).
-    full_matrices : bool, optional, default=``False``.
-        If ``False`` , `ur` and `Vt` have the shapes (``N``,  ``k``) and
-        (``k``, ``M``), respectively, where ``k`` = min(``N``, ``M``).
-        Otherwise the shapes will be (``M``, ``M``) and (``N`, ``N``),
-        respectively.
-    compute_uv: bool, optional, default=``True``.
-        Whether or not to compute `ur` and `Vt` in addition to `s`.
+        Parameters
+        -----------
+        X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object.
+            This nddataset must have a 2 shape (``N``, ``M``).
+        full_matrices : bool, optional, default=``False``.
+            If ``False`` , `ur` and `Vt` have the shapes (``N``,  ``k``) and
+            (``k``, ``M``), respectively, where ``k`` = min(``N``, ``M``).
+            Otherwise the shapes will be (``M``, ``M``) and (``N`, ``N``),
+            respectively.
+        compute_uv: bool, optional, default=``True``.
+            Whether or not to compute `ur` and `Vt` in addition to `s`.
 
-    Attributes
-    ----------
-    ur : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
-        `ur` contains the left unitary matrix.
-        Its shape depends on `full_matrices`.
-    s : `numpy.ndarray`.
-        Vector of singular values
-    Vt : :class:`~spectrochempy.dataset.dataset.NDDataset`.
-        `Vt` contains a transpose matrix of the Loadings.
-        Its shape depends on `full_matrices`
+        Attributes
+        ----------
+        ur : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+            `ur` contains the left unitary matrix.
+            Its shape depends on `full_matrices`.
+        s : `numpy.ndarray`.
+            Vector of singular values
+        Vt : :class:`~spectrochempy.dataset.dataset.NDDataset`.
+            `Vt` contains a transpose matrix of the Loadings.
+            Its shape depends on `full_matrices`
+
         """
 
         # check if we have the correct input
@@ -80,27 +88,33 @@ class Svd(HasTraits):
                                ' of type {} has been provided'.format(
                                type(X).__name__))
 
-        # retains valid columns #TODO: mask can do this already
-        NaNColumns = np.any(np.isnan(data), axis=0)
-        data = data[:, ~ NaNColumns]
+        # retains valid columns
+        # unfortunately the present SVD implementation in linalg librairy
+        # doesn't support numpy masked array. So we will have to remove the
+        # mask ourselves
 
-        # makes SVD
+        masked_columns = np.any(X.mask, axis=0)
+        data = data[:, ~ masked_columns]
+
+        # Performs the SVD
+        # ----------------
+
         U, s, Vt = np.linalg.svd(data, full_matrices, compute_uv)
 
-        # Put back columns with NaN in Vt
-        if any(NaNColumns):
-            Vt2 = np.zeros((s.shape[0], data.shape[1]))
-            j = 0
-            for i in np.arange(len(NaNColumns)):
-                if ~ NaNColumns[i]:
-                    Vt2[:, i] = Vt[:, j]
-                    j = j + 1
-                else:
-                    Vt2[:, i] = float('nan') * np.ones((Vt2.shape[0],))
-            Vt_ = Vt2
+        # Put back masked columns in Vt
+        # -----------------------------
+
+        if np.any(masked_columns):
+            Vt2 = np.zeros((s.shape[0], X.shape[1]))
+            Vt2[:, ~ masked_columns ] = Vt
+            Vt2[:, masked_columns] = masked
+            Vt = Vt2
 
         # Returns U as a NDDataset object
+        # --------------------------------
+
         U = NDDataset(U)
+        U.name = 'U'
         U.title = 'left singular vectors of ' + X.name
         U.coordset = CoordSet(X.coordset[0],
                               Coord([i+1 for i in range(len(s))],
@@ -111,7 +125,10 @@ class Svd(HasTraits):
         U.history = 'created by Svd \n'
 
         # Returns the loadings (Vt) as a NDDataset object
+        # ------------------------------------------------
+
         Vt = NDDataset(Vt)
+        Vt.name = 'V.T'
         Vt.title = 'Loadings (V.t) of ' + X.name
         Vt.coordset = CoordSet(Coord([i+1 for i in range(len(s))],
                                  labels=['#%d' % (i+1) for i in range(len(s))],
@@ -120,6 +137,17 @@ class Svd(HasTraits):
         Vt.description = (
             'Loadings obtained by singular value decomposition of ' + X.name)
         Vt.history = (str(Vt.modified) + ': created by Svd \n')
+
+        # Returns the diagonal sigma matrix as a NDDataset object
+        # -------------------------------------------------------
+
+        s = NDDataset(s)
+        s.title='Singular values of ' + X.name
+        s.name = 'sigma'
+        s.history = 'created by Svd \n'
+        s.description = (
+            'Vector of singular values obtained  by SVD '
+            'decomposition of ' + X.name)
 
         self.U = U
         self.s = s
@@ -139,15 +167,54 @@ class Svd(HasTraits):
 
     @property
     def ev(self):
-        """`numpy.ndarray`,  eigenvalues of the covariance matrix """
-        return (self.s * self.s) / (np.size(self.s) - 1)
+        """`NDDataset`,  eigenvalues of the covariance matrix """
+        ev = (self.s ** 2) / (self.s.size - 1)
+        ev.name = 'ev'
+        ev.title = 'Eigenvalues'
+        return ev
 
     @property
     def ev_cum(self):
-        """`numpy.ndarray`,  Cummulative Explained Variance """
-        return np.cumsum(self.ev)
+        """`NDDataset`,  Cumulative Explained Variance """
+        ev_cum = np.cumsum(self.ev)
+        ev_cum.name = 'ev_cum'
+        ev_cum.title = 'Cumulative variance'
+        return ev_cum
 
     @property
     def ev_ratio(self):
         """`numpy.ndarray`,  Explained Variance per singular values """
-        return self.ev / np.sum(self.ev)
+        ratio = self.ev *100. / np.sum(self.ev)
+        ratio.name = 'ev_ratio'
+        ratio.title = 'Explained variance'
+        ratio.units = 'percent'
+        return ratio
+
+
+if __name__ == '__main__':
+
+    from tests.conftest import IR_source_2D
+    from spectrochempy.api import *
+
+    source = IR_source_2D()
+
+    print(source)
+
+    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    ax = source.plot_stack()
+
+    svd = Svd(source)
+
+    print()
+    print((svd.U))
+    print((svd.Vt))
+    print((svd.s))
+    print((svd.ev))
+    print((svd.ev_cum))
+    print((svd.ev_ratio))
+
+    svd.Vt[:6].plot_stack()
+
+    svd.ev_ratio.plot_scatter(color='red', lines=True, xlim=(-0.1,9.5))
+    show()
+

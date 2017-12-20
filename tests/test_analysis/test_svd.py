@@ -13,9 +13,7 @@
 """ Tests for the svd module
 
 """
-from spectrochempy.analysis.svd import Svd
-
-from spectrochempy.api import show, Coord
+from spectrochempy.api import *
 
 # test svd
 #-----------

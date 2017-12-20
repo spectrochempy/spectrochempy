@@ -27,7 +27,7 @@ def _set_do_not_block():
 
     # let's set do_not_block flag to true only if we are running the whole
     # suite of tests
-    if sys.argv[1].endswith("/spectrochempy/tests"):
+    if len(sys.argv)>1 and sys.argv[1].endswith("/spectrochempy/tests"):
         plt.ioff()
         options.do_not_block = True
     else:

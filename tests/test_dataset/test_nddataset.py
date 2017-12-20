@@ -979,6 +979,22 @@ def test_unary_ufuncs_data_w_uncertainties(nd, name):
     assert isinstance(r, NDDataset)
 
 
+
+@pytest.mark.parametrize(('operation', 'result'),
+                         [
+                                ('sum', 6 ),
+                                ('cumsum', [1, 3, 6] ),
+                          ])
+def test_non_ufunc_functions(operation, result):
+    op = getattr(np, operation)
+    print(op.__doc__)
+    x = NDDataset([1,2,3])
+    y = op(x, axis=-1)
+    assert np.all(y.data==result)
+
+
+
+
 def test_creationdate():
     ndd = NDDataset([1., 2., 3.])
     ndd2 = np.sqrt(ndd)

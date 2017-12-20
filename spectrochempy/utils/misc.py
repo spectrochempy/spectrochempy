@@ -16,7 +16,7 @@ Various methods and classes used in other part of the program
 """
 __all__ =  [
     "closer_power_of_two",
-    "create_traitsdoc",
+    "getdocfrom",
     "dict_compare",
     'htmldoc',
     "ignored",
@@ -270,31 +270,15 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
 # =============================================================================
 # doc utilities
 # =============================================================================
+def getdocfrom(origin):
 
-def create_traitsdoc(klass):
-    # this function is for the sphinx documentation.
-    # I could not make numpy trait docs working so the Property traits were
-    # not autodocumented
-    # this is a try to have this working
-    import inspect
-    import textwrap
-
-    module = inspect.getmodule(klass)
-
-    attrs = dict(inspect.getmembers(klass))['__base_traits__']
-    attr_doc = ""
-    for k, attr in sorted(attrs.items()):
-        if attr.type == "property":
-            kdoc = getattr(klass, "_get_{0}".format(k)).__doc__
-            if kdoc is not None:
-                attr_doc += "**{0}**\n\t{1}\n".format(k, kdoc)
-
-    if not klass.__doc__.startswith(' ' * 4):
-        klass.__doc__ = "    " + klass.__doc__
-    doc = textwrap.dedent(klass.__doc__).strip()
-    doc += "\n\nAttributes\n----------\n\n{attributes}\n"
-    klass.__doc__ = doc.format(attributes=attr_doc)
-
+    def decorated(func):
+        func.__doc__ = origin.__doc__
+        def wrapper(*args, **kwargs):
+            response = func(*args, **kwargs)
+            return response
+        return wrapper
+    return decorated
 
 
 def htmldoc(text):
