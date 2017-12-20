@@ -366,14 +366,14 @@ class GeneralPreferences(Configurable) :
     #: Default DATA directory
     data = Unicode(help="Default data directory").tag(config=True)
 
-    @property
-    def data(self):
+    @default('data')
+    def _get_data(self):
         return self._scpdata.data
 
 
 class SpectroChemPy(Application):
     """
-    _SpectroChemPy is the main class, containing most of the setup,
+    This class SpectroChemPy is the main class, containing most of the setup,
     configuration and more.
 
     """
@@ -453,7 +453,7 @@ to cite it this way:
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
-        return self.name + '_config.py'
+        return self.name.lower() + '.cfg.py'
 
 
     config_dir = Unicode(None,

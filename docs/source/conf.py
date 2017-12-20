@@ -58,6 +58,7 @@ extensions = [
     'sphinx_gallery.gen_gallery',
     'nbsphinx',
     'spectrochempy.sphinxext.autodocsumm',
+    'spectrochempy.sphinxext.traitlets_sphinxdoc',
 ]
 
 # Numpy autodoc attributes

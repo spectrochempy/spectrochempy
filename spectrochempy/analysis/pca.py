@@ -7,18 +7,28 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+__all__ = ['PCA']
 
+# ----------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------
 
-
-__all__ = ['Pca']
-
-import matplotlib.pyplot as plt
 from traitlets import HasTraits, Instance
-from spectrochempy.dataset.nddataset import NDDataset
 import numpy as np
 
+<<<<<<< HEAD
 from spectrochempy.dataset.ndcoords import Coord, CoordSet
 from .svd import SVD
+=======
+# ----------------------------------------------------------------------------
+# localimports
+# ----------------------------------------------------------------------------
+
+from spectrochempy.dataset.nddataset import NDDataset, CoordSet
+from spectrochempy.dataset.ndcoords import Coord
+from spectrochempy.dataset.ndarray import masked, nomask
+from spectrochempy.analysis.svd import SVD
+>>>>>>> WIP
 
 # ==============================================================================
 # Global preferences
@@ -31,9 +41,9 @@ preferences = app
 
 
 # ==============================================================================
-# class Pca
+# class PCA
 # ==============================================================================
-class Pca(HasTraits):
+class PCA(HasTraits):
     """
     Principal Component Analysis
 
@@ -56,31 +66,23 @@ class Pca(HasTraits):
         Parameters
         -----------
         X : :class:`~spectrochempy.dataset.nddataset.NDDataset`object.
-            The dataset has shape (``N``, ``M``)
+            The dataset has shape (``M``, ``N``)
         npc : int, optional
             The number of components to compute. If not set all components
             are computed.
 
         """
 
-        # check if we have the correct input
-        if isinstance(X, NDDataset):
-            data = X.data
-        else:
-            raise TypeError('A dataset of type NDDataset is  '
-                               'expected as a source of data, but an object'
-                               ' of type {} has been provided'.format(
-                               type(X).__name__))
-
         # mean center the dataset
-        self.center = center = np.mean(X.masked_data, axis=0)
-        X = X.copy()
-        X.data = X.data - center
+        # -----------------------
+        self.center = center = np.ma.mean(X, axis=0)
+
+        data_centered = data - center
 
         if npc is None:
-            npc = min(X.shape)
+            npc = min(data.shape)
 
-        Xsvd = Svd(X)
+        Xsvd = SVD(X)
 
         # select npc loadings & compute scores
         T = np.dot(Xsvd.U.data[:, 0:npc], np.diag(Xsvd.s)[0:npc, 0:npc])
@@ -92,11 +94,11 @@ class Pca(HasTraits):
                                 title='PC')
                               )
         T.description = 'scores (T) of ' + X.name
-        T.history = 'created by Pca'
+        T.history = 'created by PCA'
 
-        Pt = Xsvd.Vt[0:npc]
+        Pt = Xsvd.VT[0:npc]
         Pt.title = 'Loadings (P.t) of ' + X.name
-        Pt.history = 'created by Pca'
+        Pt.history = 'created by PCA'
 
         # scores (T) and loading (Pt) matrixes
         self.T = T
@@ -230,3 +232,25 @@ class Pca(HasTraits):
         plt.show()
 
         return
+
+if __name__ == '__main__':
+
+    from tests.conftest import IR_source_2D
+    from spectrochempy.api import *
+
+    source = IR_source_2D()
+
+    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    ax = source.plot_stack()
+
+    center = np.mean(source, axis=0)
+
+    center.plot()
+    show()
+
+    pca = PCA(source)
+    print(pca)
+    pca.printev(npc=5)
+
+    assert str(pca)[:3] == '\nPC'
+

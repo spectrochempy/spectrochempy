@@ -8,6 +8,7 @@ User Documentation
 
     userguide/index
     tutorial/index
+    Preferences <api/preferences>
     API reference <api/apireference>
     faq
 

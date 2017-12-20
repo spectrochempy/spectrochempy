@@ -9,7 +9,7 @@ To get started with |scp| it is advisable to look first at
 the :ref:`userguide`. For a more advanced use of |scp|, you can also have a
 look at the :ref:`develguide`.
 
-
+The
 The NDDataset object
 --------------------
 
@@ -18,10 +18,6 @@ The NDDataset object
 
     nddataset
     ndcoords
-
-
-
-
 
 
 

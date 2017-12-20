@@ -11,9 +11,10 @@ from spectrochempy.api import *
 
 ##########################################################
 #
-# Here we import two dataset, one is 1D and the other is 2D
+# Here we import two datasets, one is 1D and the other is 2D
 # 
-# Because , we will sometimes need to recall the original dataset, we create to getting functions
+# Because we will sometimes need to recall the original dataset,
+# we create two getting functions
 
 ##########################################################
 # 1D dataset getting function

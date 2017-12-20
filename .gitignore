@@ -94,3 +94,15 @@ recipes/spectrochempy/linux-32
 recipes/spectrochempy/linux-64
 recipes/spectrochempy/linux-aarch64
 *.tar.bz2
+spectrochempy/gui/gui_BACKUP_20431.py
+spectrochempy/gui/gui_BACKUP_20697.py
+spectrochempy/gui/gui_BASE_20431.py
+spectrochempy/gui/gui_BASE_20697.py
+spectrochempy/gui/gui_LOCAL_20431.py
+spectrochempy/gui/gui_LOCAL_20697.py
+spectrochempy/gui/gui_REMOTE_20431.py
+spectrochempy/gui/gui_REMOTE_20697.py
+spectrochempy/gui/preferences_BACKUP_20917.py
+spectrochempy/gui/preferences_BASE_20917.py
+spectrochempy/gui/preferences_LOCAL_20917.py
+spectrochempy/gui/preferences_REMOTE_20917.py
