@@ -27,6 +27,9 @@ it returns a new NDDataset, while in some cases noted below, one get a ndarray.
 >>> np.sin(ds)
 
 
+
+To be continued
+#################################################################
 Math operations
 ----------------
 add(x1, x2, /[, out, where, casting, order, ...])	Add arguments element-wise.
@@ -446,6 +449,7 @@ class NDMath(object):
         else:
             new._data = ma
         return new
+
 
     # -------------------------------------------------------------------------
     # special methods

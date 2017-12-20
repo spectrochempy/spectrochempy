@@ -18,7 +18,8 @@ from spectrochempy.dataset.nddataset import NDDataset
 import numpy as np
 
 from spectrochempy.dataset.ndcoords import Coord, CoordSet
-from .svd import Svd
+from .svd import SVD
+
 # ==============================================================================
 # Global preferences
 # ==============================================================================
