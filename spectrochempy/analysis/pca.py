@@ -16,10 +16,6 @@ __all__ = ['PCA']
 from traitlets import HasTraits, Instance
 import numpy as np
 
-<<<<<<< HEAD
-from spectrochempy.dataset.ndcoords import Coord, CoordSet
-from .svd import SVD
-=======
 # ----------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------
@@ -28,7 +24,6 @@ from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.dataset.ndarray import masked, nomask
 from spectrochempy.analysis.svd import SVD
->>>>>>> WIP
 
 # ==============================================================================
 # Global preferences

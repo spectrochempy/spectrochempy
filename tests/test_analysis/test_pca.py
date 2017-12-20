@@ -13,7 +13,7 @@
 """ Tests for the PCA module
 
 """
-from spectrochempy.api import Pca
+from spectrochempy.api import PCA
 
 # test pca
 #---------
@@ -25,7 +25,7 @@ def test_pca(IR_source_2D):
     # with masks
     source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
 
-    pca = Pca(source)
+    pca = PCA(source)
     print(pca)
     pca.printev(npc=5)
 

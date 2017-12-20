@@ -402,9 +402,9 @@ def test_non_ufunc_functions(operation, result):
 
 @pytest.mark.parametrize(('operation', 'result'),
                          [
-                                #('sum',    [3,7]        ),
-                                #('cumsum', [[1,3],[3,7]]),
-                                ('diff',   [[1],  [1]]  )
+                                ('sum',    [3,7]        ),
+                                ('cumsum', [[1,3],[3,7]]),
+
                           ])
 def test_non_ufunc_functions_with_2D(operation, result):
     op = getattr(np, operation)
