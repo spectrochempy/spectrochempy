@@ -1885,8 +1885,8 @@ class NDArray(HasTraits):
             if not isinstance(key, (int, np.int)):
                 start = self._loc2index(key, axis)
             else:
-                if key < 0:  # reverse indexing
-                    start = self.shape[axis] + key
+                if key < 0:  # reverse indexing (on the real shape!)
+                    start = self._data.shape[axis] + key
             stop = start + 1
             step = 1
         else:
@@ -1951,16 +1951,16 @@ class NDArray(HasTraits):
         if len(keys) > self.ndim:
             raise IndexError("invalid index")
 
-        #
         if self._data.ndim != self.ndim:
             # case or 1D spectra or of array with complex dimensions
             # this need some attention to have a correct slicing
-            # because, the user is not aware of the internal representation
+            # because, the user should not be aware of the internal
+            # representation
             newkeys = []
             i = 0
             for size in self._data.shape:
-                # loop on the real shape, and make the keys correspondind to
-                # dimension which are not of lenght one.
+                # loop on the real shape, and make the keys corresponding to
+                # dimensions which are not of length 1.
                 # The other have to be replaced by a slice(None) or 0
                 if size == 1:
                     newkeys.append(slice(None))
