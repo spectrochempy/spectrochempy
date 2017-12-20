@@ -260,6 +260,7 @@ import functools
 # third-party imports
 # =============================================================================
 import numpy as np
+from numpy.ma import MaskedArray
 
 # =============================================================================
 # Local imports
@@ -393,16 +394,14 @@ class NDMath(object):
         axis = kwargs.get('axis', None)
         if axis is None:
             return ma
-        if np.ma.is_masked(ma):
+        if isinstance(ma, MaskedArray):
             new._data = ma.data
             new._mask = ma.mask
         else:
             new._data = ma
         # the data being reduce to only a single elements along the summed axis
         # we must reduce the corresponding coordinates
-        from spectrochempy.dataset.ndcoords import Coord # forwarded import
-        # to avoid import loop
-        new.coordset[axis]= None # Coord(title='sum')
+        new.coordset[axis]= None
         return new
 
     @getdocfrom(np.prod)
@@ -414,7 +413,7 @@ class NDMath(object):
         axis = kwargs.get('axis', None)
         if axis is None:
             return ma
-        if np.ma.is_masked(ma):
+        if isinstance(ma, MaskedArray):
             new._data = ma.data
             new._mask = ma.mask
         else:
@@ -430,7 +429,7 @@ class NDMath(object):
 
         new = self.copy()
         ma = np.cumsum(new._masked_data, *args, **kwargs)
-        if np.ma.is_masked(ma):
+        if isinstance(ma, MaskedArray):
             new._data = ma.data
             new._mask = ma.mask
         else:
@@ -443,7 +442,7 @@ class NDMath(object):
 
         new = self.copy()
         ma = np.cumprod(new._masked_data, *args, **kwargs)
-        if np.ma.is_masked(ma):
+        if isinstance(ma, MaskedArray):
             new._data = ma.data
             new._mask = ma.mask
         else:

@@ -23,8 +23,7 @@ from functools import wraps
 # third party imports
 # ============================================================================
 
-from traitlets import (Dict, List, Bool, Instance, ForwardDeclaredInstance,
-                       Unicode, This, Any, default)
+from traitlets import (Dict, List, Bool, Instance, Unicode, This, Any, default)
 #import dill
 
 # ============================================================================
@@ -33,6 +32,7 @@ from traitlets import (Dict, List, Bool, Instance, ForwardDeclaredInstance,
 
 from spectrochempy.application import app
 from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.scripts.script import Script
 from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
                                  ScpFile, )
 
@@ -59,8 +59,7 @@ class Project(AbstractProject):
     _parent = This
     _projects = Dict(This)
     _datasets = Dict(Instance(NDDataset))
-    _scripts = Dict(ForwardDeclaredInstance(
-                               '.scripts.script.Script'))
+    _scripts = Dict(Instance(Script))
     _others = Dict()
     _meta = Instance(Meta)
     _filename = Unicode
