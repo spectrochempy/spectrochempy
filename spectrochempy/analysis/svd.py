@@ -185,8 +185,8 @@ class SVD(HasTraits):
     # ------------------------------------------------------------------------
 
     def __repr__(self):
-        return '<svd: ur%s, s(%s), VT%s>' % (
-            self.U.shape, len(self.s), self.VT.shape)
+        return '<svd: U%s, s(%s), VT%s>' % (
+            self.U.shape, self.s.size, self.VT.shape)
 
     # ------------------------------------------------------------------------
     #  Properties

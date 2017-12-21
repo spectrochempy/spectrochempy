@@ -74,13 +74,13 @@ class PCA(HasTraits):
         self.center = center = np.mean(X, axis=0)
         Xc = X - center
 
-        if npc is None:
-            npc = min(Xc.shape)
-
         svd = SVD(X)
 
         # select npc loadings & compute scores
         # ------------------------------------
+        if npc is None:
+            npc = svd.s.size
+
         sigma = diag(svd.s)
         s = sigma[:npc, :npc]
         u = svd.U[:, :npc]
