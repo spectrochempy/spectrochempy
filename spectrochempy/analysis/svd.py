@@ -210,7 +210,7 @@ class SVD(HasTraits):
 
     @property
     def ev_ratio(self):
-        """`numpy.ndarray`,  Explained Variance per singular values """
+        """`NDDataset`,  Explained Variance per singular values """
         ratio = self.ev *100. / np.sum(self.ev)
         ratio.name = 'ev_ratio'
         ratio.title = 'Explained variance'

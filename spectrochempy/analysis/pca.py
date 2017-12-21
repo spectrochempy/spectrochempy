@@ -12,32 +12,31 @@ __all__ = ['PCA']
 # ----------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------
-
-from traitlets import HasTraits, Instance
 import numpy as np
+from traitlets import HasTraits, Instance
+
+from spectrochempy.dataset.nddataset import NDDataset, CoordSet
+from spectrochempy.dataset.ndcoords import Coord
+from spectrochempy.analysis.svd import SVD
+from spectrochempy.processors.numpy import diag, dot
+
+# ============================================================================
+# Global preferences
+# ============================================================================
+from spectrochempy.application import app
 
 # ----------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------
-
-from spectrochempy.dataset.nddataset import NDDataset, CoordSet
-from spectrochempy.dataset.ndcoords import Coord
-from spectrochempy.dataset.ndarray import masked, nomask
-from spectrochempy.analysis.svd import SVD
-
-# ==============================================================================
-# Global preferences
-# ==============================================================================
-from spectrochempy.application import app
 
 plotter_preferences = app.plotter_preferences
 log = app.log
 preferences = app
 
 
-# ==============================================================================
+# ============================================================================
 # class PCA
-# ==============================================================================
+# ============================================================================
 class PCA(HasTraits):
     """
     Principal Component Analysis
@@ -51,10 +50,11 @@ class PCA(HasTraits):
 
     T = Instance(NDDataset)
     Pt = Instance(NDDataset)
-    center = Instance(np.ndarray)
+    center = Instance(NDDataset)
 
-    # private attributes
-    _ev = Instance(np.ndarray)
+    ev = Instance(NDDataset)
+    ev_ratio = Instance(NDDataset)
+    ev_cum = Instance(NDDataset)
 
     def __init__(self, X, npc=None):
         """
@@ -70,50 +70,55 @@ class PCA(HasTraits):
 
         # mean center the dataset
         # -----------------------
-        self.center = center = np.ma.mean(X, axis=0)
 
-        data_centered = data - center
+        self.center = center = np.mean(X, axis=0)
+        Xc = X - center
 
         if npc is None:
-            npc = min(data.shape)
+            npc = min(Xc.shape)
 
-        Xsvd = SVD(X)
+        svd = SVD(X)
 
         # select npc loadings & compute scores
-        T = np.dot(Xsvd.U.data[:, 0:npc], np.diag(Xsvd.s)[0:npc, 0:npc])
-        T = NDDataset(T)
+        # ------------------------------------
+        sigma = diag(svd.s)
+        s = sigma[:npc, :npc]
+        u = svd.U[:, :npc]
+        T = dot(u, s)
+
         T.title = 'scores (T) of ' + X.name
-        T.coordset = CoordSet(X.coordset[0],
-                              Coord([ i+1 for i in range(len(Xsvd.s))],
-                                labels=['#%d' % (i+1) for i in range(len(Xsvd.s))],
-                                title='PC')
+        T.coordset = CoordSet(X.y,
+                              Coord([ i+1 for i in range(npc)],
+                              labels=['#%d' % (i+1) for i in range(npc)],
+                              title='PC')
                               )
+
         T.description = 'scores (T) of ' + X.name
         T.history = 'created by PCA'
 
-        Pt = Xsvd.VT[0:npc]
+        Pt = svd.VT[0:npc]
         Pt.title = 'Loadings (P.t) of ' + X.name
         Pt.history = 'created by PCA'
 
-        # scores (T) and loading (Pt) matrixes
+        # scores (T) and loading (Pt) matrices
+        # ------------------------------------
+
         self.T = T
         self.Pt = Pt
-        # eigenvalues of the covariance matrix
-        self._ev = (Xsvd.s * Xsvd.s) / (np.size(Xsvd.s) - 1)
+
+        # other attributes
+        # ----------------
+
+        #: Eigenvalues of the covariance matrix
+        self.ev = svd.ev
+
+        #: Explained Variance per singular values
+        self.ev_ratio= svd.ev_ratio
+
+        #: Cumulative Explained Variance
+        self.ev_cum = svd.ev_cum
 
         return
-
-    # Properties
-    # ------------
-    @property
-    def ev_ratio(self):
-        """% Explained Variance per PC"""
-        return 100 * self._ev / sum(self._ev)
-
-    @property
-    def ev_cum(self):
-        """% Cummulative Explained Variance"""
-        return np.cumsum(self.ev_ratio)
 
     # special methods
     # -----------------
@@ -123,8 +128,9 @@ class PCA(HasTraits):
             '%cumulative\n'
         s += '   \t\tof cov(X)\t\t per PC\t' \
              '     variance\n'
-        for i in np.arange(npc):
-            tuple = (i, self._ev[i], self.ev_ratio[i], self.ev_cum[i])
+        for i in range(npc):
+            tuple = (i, self.ev.data[i], self.ev_ratio.data[i],
+                     self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tuple)
 
         return s
@@ -164,7 +170,7 @@ class PCA(HasTraits):
         print((self.__str__(npc)))
 
     def screeplot(self, npc=5, nfig=None):
-        """scree plot of explained variance + cummulative variance by pca or svd
+        """scree plot of explained variance + cumulative variance by pca or svd
         :param npc: number of components to plot
         :type npc: int
         :param nfig: figure number. If None (default), a new figure is made
@@ -235,17 +241,46 @@ if __name__ == '__main__':
 
     source = IR_source_2D()
 
-    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    # columns masking
+    #source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    # row masking
+    #source[10:12] = masked
+
     ax = source.plot_stack()
+
 
     center = np.mean(source, axis=0)
 
     center.plot()
-    show()
+
+
+    Xc1 = source - center
+    Xc1.plot_stack()
 
     pca = PCA(source)
-    print(pca)
+
+    pca.printev(npc=5)
+
+    # columns masking
+    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    # row masking
+    source[10:12] = masked
+
+    ax = source.plot_stack()
+
+
+    center = np.mean(source, axis=0)
+
+    center.plot()
+
+
+    Xc2 = source - center
+    Xc2.plot_stack()
+
+    pca = PCA(source)
+
     pca.printev(npc=5)
 
     assert str(pca)[:3] == '\nPC'
 
+    show()

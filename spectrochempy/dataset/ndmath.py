@@ -384,6 +384,10 @@ class NDMath(object):
 
     # numpy functions which are not ufuncs
     #TODO: implement uncertainties!
+
+    # sum, products...
+    # ------------------------------------------------------------------------
+
     # ........................................................................
     @getdocfrom(np.sum)
     def sum(self, *args, **kwargs):
@@ -449,6 +453,20 @@ class NDMath(object):
             new._data = ma
         return new
 
+    # statistics
+    # ------------------------------------------------------------------------
+    @getdocfrom(np.mean)
+    def mean(self, *args, **kwargs):
+        """mean values along axis"""
+
+        new = self.copy()
+        ma = np.mean(new._masked_data, *args, **kwargs)
+        if isinstance(ma, MaskedArray):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
+        return new
 
     # -------------------------------------------------------------------------
     # special methods
@@ -493,7 +511,6 @@ class NDMath(object):
     # private methods
     # -------------------------------------------------------------------------
 
-
     @staticmethod
     def _op(f, objs, ufunc=False):
         # achieve an operation f on the objs
@@ -512,6 +529,7 @@ class NDMath(object):
         # Some flags to be set depending of the object
         isdataset = True
         iscomplex = False
+        isuncertain = False
 
         objcomplex = []  # to keep track of the complex nature of the obj
         # in the other dimensions tahn the last
@@ -528,13 +546,18 @@ class NDMath(object):
             else:
                 q = 1.
 
+            if obj.is_uncertain:
+                isuncertain = True
+
             # Check if our NDArray is actually a NDDataset
             # (it must have an attribute _coordset)
             if hasattr(obj, '_coordset'):
 
                 # do we have uncertainties on our data ?
                 # if any create an UFloat type if any uncertainty
-                d = obj._uarray(d, obj._uncertainty)
+                # else we use the faster numpy standard array
+                if isuncertain:
+                    d = obj._uarray(d, obj._uncertainty)
 
                 # Our data may be complex
                 iscomplex = False
@@ -677,9 +700,12 @@ class NDMath(object):
             # restore interleaving of complex data
             data, iscomplex = interleave(data)
 
-        # unpack the data
-        uncertainty = unp.std_devs(data)
-        data = unp.nominal_values(data).astype(float)
+        # unpack the data (this process is long, so we bypass it if not needed)
+        if isuncertain:
+            uncertainty = unp.std_devs(data)
+            data = unp.nominal_values(data).astype(float)
+        else:
+            uncertainty = None
 
         # get possible mask
         if isinstance(data, np.ma.MaskedArray):

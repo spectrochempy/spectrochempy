@@ -418,9 +418,10 @@ class NDDataset(
     # -------------------------------------------------------------------------
 
     def implements(self, name=None):
-        ## For compatibility with pyqtgraph
-        ## Rather than isinstance(obj, MetaArray) use object.implements('MetaArray')
-        ## This is usefull to check type without importing the module
+        # For compatibility with pyqtgraph
+        # Rather than isinstance(obj, NDDataset) use object.implements(
+        # 'NDDataset')
+        # This is usefull to check type without importing the module
         if name is None:
             return ['NDDataset']
         else:
