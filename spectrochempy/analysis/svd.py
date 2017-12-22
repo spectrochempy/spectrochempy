@@ -200,7 +200,7 @@ class SVD(HasTraits):
         ev.name = 'ev'
         ev.title = 'Eigenvalues'
         ev.coordset = CoordSet(
-                                 Coord([i for i in range(size)],
+                                 Coord(None, #[i for i in range(size)],
                                  labels=['#%d' % (i) for i in range(size)],
                                  title='Unitary vectors'))
         return ev

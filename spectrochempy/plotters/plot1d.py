@@ -20,7 +20,7 @@ Module containing 1D plotting function(s)
 # ----------------------------------------------------------------------------
 
 import numpy as np
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 # ----------------------------------------------------------------------------
 # localimports
@@ -35,8 +35,8 @@ plotter_preferences = app.plotter_preferences
 log = app.log
 preferences = app
 
-__all__ = ['plot_1D','plot_lines', 'plot_pen', 'plot_scatter',
-           'plot_multiple', 'plot_bar', 'plot_twin']
+__all__ = ['plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar',
+           'plot_multiple']
 
 _methods = __all__[:]
 
@@ -93,18 +93,6 @@ def plot_bar(source, **kwargs):
     """
     kwargs['method'] = 'bar'
     ax = plot_1D(source, **kwargs)
-    return ax
-
-# plot twin -----------------------------------------------------------------
-
-def plot_twin(source1, source2,  method1='pen', method2='pen', **kwargs):
-    """
-    Plot two 1D datasets with twin axis.
-
-    """
-    kwargs['method'] = method1
-    ax = plot_1D(source1, **kwargs)
-
     return ax
 
 
@@ -189,15 +177,19 @@ def plot_1D(source, **kwargs):
 
     Parameters
     ----------
-    source: :class:`~spectrochempy.ddataset.nddataset.NDDataset`
-        Source of data to plot
-    method: str, optional
+    source : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+        Source of data to plot.
+    method : str, optional, default:pen
         The method can be one among ``pen``, ``bar``,  or ``scatter``
         Default values is ``pen``, i.e., solid lines are drawn.
-        To draw a Bar graph, use method: ``bar``
-        For a Scatter plot, use method: ``scatter`
+        To draw a Bar graph, use method: ``bar``.
+        For a Scatter plot, use method: ``scatter`.
+    twinx : :class:`~matplotlib.Axes` instance, optional, default:None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
     title: str
         Title of the plot (or subplot) axe.
+
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
@@ -300,6 +292,7 @@ def plot_1D(source, **kwargs):
     new = source.copy()
 
     new._figure_setup(**kwargs)
+
     ax = new.ndaxes['main']
 
     # -------------------------------------------------------------------------
@@ -307,6 +300,7 @@ def plot_1D(source, **kwargs):
     # -------------------------------------------------------------------------
 
     method = kwargs.pop('method','pen')
+    is_twinx = kwargs.pop('twinx', None) is not None
 
     # lines is deprecated
     pen = kwargs.pop('pen',kwargs.pop('lines',False)) # in case it is
@@ -351,7 +345,8 @@ def plot_1D(source, **kwargs):
         line, = ax.plot(x.data, z.masked_data)
 
     elif bar:
-        line = ax.bar(x.data, z.masked_data, align='center')
+        line = ax.bar(x.data, z.masked_data, color=color,
+                      edgecolor='k', align='center')
         barwidth = line[0].get_width()
 
     if show_complex and pen:
@@ -415,8 +410,25 @@ def plot_1D(source, **kwargs):
     zlim.sort()
 
     # set the limits
-    ax.set_xlim(xlim)
+    if not is_twinx:
+        # when twin axes, we keep the setting of the first ax plotted
+        ax.set_xlim(xlim)
+    else:
+        ax.tick_params('y', colors=color)
+
     ax.set_ylim(zlim)
+
+    number_x_labels = plotter_preferences.number_of_x_labels  # get from config
+    number_y_labels = plotter_preferences.number_of_y_labels
+    # the next two line are to avoid multipliers in axis scale
+    y_formatter = ScalarFormatter(useOffset=False)
+    ax.yaxis.set_major_formatter(y_formatter)
+    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    ax.xaxis.set_ticks_position('bottom')
+    if not is_twinx:
+        # do not move these label for twin axes!
+        ax.yaxis.set_ticks_position('left')
 
     # -------------------------------------------------------------------------
     # labels
@@ -427,14 +439,6 @@ def plot_1D(source, **kwargs):
         # it was probably done already in a previous plot
         new._plot_resume(source, **kwargs)
         return True
-
-    number_x_labels = plotter_preferences.number_of_x_labels  # get from config
-    number_y_labels = plotter_preferences.number_of_y_labels
-
-    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-    ax.xaxis.set_ticks_position('bottom')
-    ax.yaxis.set_ticks_position('left')
 
     # x label
 
@@ -448,11 +452,13 @@ def plot_1D(source, **kwargs):
     if not zlabel:
         zlabel = make_label(new, 'z')
 
-    ax.set_ylabel(zlabel)
+    #ax.set_ylabel(zlabel)
 
     # do we display the ordinate axis?
-    if kwargs.get('show_z', True):
+    if kwargs.get('show_z', True) and not is_twinx:
         ax.set_ylabel(zlabel)
+    elif kwargs.get('show_z', True) and is_twinx:
+        ax.set_ylabel(zlabel, color=color)
     else:
         ax.set_yticks([])
 

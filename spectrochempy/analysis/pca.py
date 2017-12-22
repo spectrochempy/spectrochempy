@@ -20,6 +20,7 @@ from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.analysis.svd import SVD
 from spectrochempy.processors.numpy import diag, dot
+from spectrochempy.dataset.ndplot import NRed, NBlue
 
 # ============================================================================
 # Global preferences
@@ -175,20 +176,37 @@ class PCA(HasTraits):
         """
         print((self.__str__(npc)))
 
-    def screeplot(self, npc=5, nfig=None):
-        """scree plot of explained variance + cumulative variance by pca or svd
-        :param npc: number of components to plot
-        :type npc: int
-        :param nfig: figure number. If None (default), a new figure is made
-        :type nfig: int"""
+    def screeplot(self,
+                  npc=5, **kwargs):
+        """
+        Scree plot of explained variance + cumulative variance by PCA
 
+        Parameters
+        ----------
+        npc: int
+            Number of components to plot
 
+        """
+        color1, color2 = kwargs.get('colors', [NBlue, NRed])
+        pen = kwargs.get('pen', True)
+        ylim1, ylim2 = kwargs.get('ylims', [(0,100), 'auto'])
 
-        ax = self.ev_ratio[:npc].plot_bar(title='Scree plot')
+        if ylim2 == 'auto':
+            y1 = np.around(self.ev_ratio.data[0]*.95,-1)
+            y2 = 101.
+            ylim2 = (y1, y2)
 
-        # plt.twinx()
-        # plt.plot(np.arange(npc), self.ev_cum.data[0:npc], '-ro')
-        ax.set_ylim((0.,100.))
+        ax1 = self.ev_ratio[:npc].plot_bar(ylim = ylim1,
+                                           color = color1,
+                                           title='Scree plot')
+        ax2 = self.ev_cum[:npc].plot_scatter(ylim = ylim2,
+                                             color=color2,
+                                             pen=True,
+                                             markersize = 7.,
+                                             twinx = ax1
+                                            )
+        return ax1, ax2
+
 
     def scoreplot(self, pcs, nfig=None):
         """2D or 3D scoreplot of samples
