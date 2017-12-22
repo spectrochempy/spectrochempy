@@ -14,35 +14,31 @@
 Module containing 1D plotting function(s)
 
 """
-import numpy as np
 
+# ----------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------
+
+import numpy as np
 from matplotlib.ticker import MaxNLocator
 
+# ----------------------------------------------------------------------------
+# localimports
+# ----------------------------------------------------------------------------
+
 from spectrochempy.application import app
+from spectrochempy.plotters.utils import make_label
+from spectrochempy.utils import is_sequence
+from spectrochempy.utils import deprecated
 
 plotter_preferences = app.plotter_preferences
 log = app.log
 preferences = app
-from spectrochempy.plotters.utils import make_label
-from spectrochempy.utils import is_sequence
 
-
-__all__ = ['plot_1D','plot_lines','plot_scatter', 'plot_multiple']
+__all__ = ['plot_1D','plot_lines', 'plot_pen', 'plot_scatter',
+           'plot_multiple', 'plot_bar', 'plot_twin']
 
 _methods = __all__[:]
-
-# plot lines (default) --------------------------------------------------------
-
-def plot_lines(source, **kwargs):
-    """
-    Plot a 1D dataset with solid lines by default.
-
-    Alias of plot_1D (with `method` argument set to ``lines``.
-
-    """
-    kwargs['method'] = 'lines'
-    ax = plot_1D(source, **kwargs)
-    return ax
 
 
 # plot scatter ----------------------------------------------------------------
@@ -51,7 +47,7 @@ def plot_scatter(source, **kwargs):
     """
     Plot a 1D dataset as a scatter plot (points can be added on lines).
 
-    Alias of plot_1D (with `method` argument set to ``scatter``.
+    Alias of plot (with `method` argument set to ``scatter``.
 
     """
     kwargs['method'] = 'scatter'
@@ -59,36 +55,75 @@ def plot_scatter(source, **kwargs):
     return ax
 
 
-# plot lines (default) --------------------------------------------------------
+# plot lines ----------------------------------------------------------------
 
+@deprecated('Use method=pen or plot_pen() instead.')
 def plot_lines(source, **kwargs):
     """
     Plot a 1D dataset with solid lines by default.
 
-    Alias of plot_1D (with `method` argument set to ``lines``.
+    Alias of plot (with `method` argument set to ``lines``.
 
     """
     kwargs['method'] = 'lines'
     ax = plot_1D(source, **kwargs)
     return ax
 
+# plot pen (default) --------------------------------------------------------
+
+def plot_pen(source, **kwargs):
+    """
+    Plot a 1D dataset with solid pen by default.
+
+    Alias of plot (with `method` argument set to ``pen``.
+
+    """
+    kwargs['method'] = 'pen'
+    ax = plot_1D(source, **kwargs)
+    return ax
+
+# plot bars -----------------------------------------------------------------
+
+def plot_bar(source, **kwargs):
+    """
+    Plot a 1D dataset with bars.
+
+    Alias of plot (with `method` argument set to ``bar``.
+
+    """
+    kwargs['method'] = 'bar'
+    ax = plot_1D(source, **kwargs)
+    return ax
+
+# plot twin -----------------------------------------------------------------
+
+def plot_twin(source1, source2,  method1='pen', method2='pen', **kwargs):
+    """
+    Plot two 1D datasets with twin axis.
+
+    """
+    kwargs['method'] = method1
+    ax = plot_1D(source1, **kwargs)
+
+    return ax
+
 
 # plot multiple ----------------------------------------------------------------
 
-def plot_multiple(sources, method='scatter', lines=True,
+def plot_multiple(sources, method='scatter', pen=True,
                   labels = None, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot
-    (points can be added on lines).
+    with optional lines between markers.
 
     Parameters
     ----------
 
     sources : a list of ndatasets
 
-    method : str among [scatter, lines]
+    method : str among [scatter, pen]
 
-    lines : `bool`, optional, default=``True``
+    pen : `bool`, optional, default=``True``
 
         if method is scatter, this flag tells to draw also the lines
         between the marks.
@@ -128,7 +163,7 @@ def plot_multiple(sources, method='scatter', lines=True,
     for s in sources : #, colors, markers):
 
         ax = s.plot(method= method,
-                    lines=True,
+                    pen=pen,
                     hold=hold, **kwargs)
         hold = True
         # hold is necessary for the next plot to say
@@ -154,14 +189,18 @@ def plot_1D(source, **kwargs):
 
     Parameters
     ----------
-    new: :class:`~spectrochempy.ddataset.nddataset.NDDataset` to plot
-
-    method: str [optional among ``lines`, ``scatter``]
-
+    source: :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+        Source of data to plot
+    method: str, optional
+        The method can be one among ``pen``, ``bar``,  or ``scatter``
+        Default values is ``pen``, i.e., solid lines are drawn.
+        To draw a Bar graph, use method: ``bar``
+        For a Scatter plot, use method: ``scatter`
+    title: str
+        Title of the plot (or subplot) axe.
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
-
     reverse: `bool` or None [optional, default= None/False
         In principle, coordinates run from left to right, except for wavenumbers
         (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
@@ -267,12 +306,15 @@ def plot_1D(source, **kwargs):
     # plot the source
     # -------------------------------------------------------------------------
 
-    method = kwargs.pop('method','lines')
-    lines = kwargs.pop('lines',False) # in case it is scatter,
-                                      # we can also show the lines
-    lines = method=='lines' or lines
-    scatter = method=='scatter' and not lines
-    scatlines = method=='scatter' and lines
+    method = kwargs.pop('method','pen')
+
+    # lines is deprecated
+    pen = kwargs.pop('pen',kwargs.pop('lines',False)) # in case it is
+                            # scatter we can also show the lines
+    pen = method=='pen' or method=='lines' or pen
+    scatter = method=='scatter' and not pen
+    scatterpen = method=='scatter' and pen
+    bar = method=='bar'
 
     show_complex = kwargs.pop('show_complex', False)
 
@@ -299,16 +341,20 @@ def plot_1D(source, **kwargs):
 
     # plot_lines
     # -----------------------------
-    if scatlines:
+    if scatterpen:
         line, = ax.plot(x.data, z.masked_data,  markersize = markersize,
                                         markevery = markevery)
     elif scatter:
         line, = ax.plot(x.data, z.masked_data, lw=0,  markersize = markersize,
                                         markevery = markevery)
-    elif lines:
+    elif pen:
         line, = ax.plot(x.data, z.masked_data)
 
-    if show_complex and lines:
+    elif bar:
+        line = ax.bar(x.data, z.masked_data, align='center')
+        barwidth = line[0].get_width()
+
+    if show_complex and pen:
         zimag = new.imag
         ax.plot(x.data, zimag.masked_data, ls='--')
 
@@ -317,13 +363,13 @@ def plot_1D(source, **kwargs):
         ax.plot(x.data, modeldata.T, ls=':', lw='2')   #TODO: improve this!!!
 
     # line attributes
-    if lines and color:
+    if pen and color:
         line.set_color(color)
 
-    if lines and lw:
+    if pen and lw:
         line.set_linewidth(lw)
 
-    if lines and ls:
+    if pen and ls:
         line.set_linestyle(ls)
 
     # -------------------------------------------------------------------------
@@ -333,6 +379,9 @@ def plot_1D(source, **kwargs):
     # abscissa limits?
     xl = [x.data[0], x.data[-1]]
     xl.sort()
+    if bar:
+        # we need to extend the axis to take into account the width of the bars
+        xl = xl[0]-barwidth*.6, xl[1]+barwidth*.6
 
     # ordinates limits?
     amp = np.ma.ptp(z.masked_data) / 50.

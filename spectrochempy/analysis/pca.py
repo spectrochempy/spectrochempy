@@ -14,6 +14,7 @@ __all__ = ['PCA']
 # ----------------------------------------------------------------------------
 import numpy as np
 from traitlets import HasTraits, Instance
+import matplotlib.pyplot as plt
 
 from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 from spectrochempy.dataset.ndcoords import Coord
@@ -37,6 +38,7 @@ preferences = app
 # ============================================================================
 # class PCA
 # ============================================================================
+
 class PCA(HasTraits):
     """
     Principal Component Analysis
@@ -78,6 +80,7 @@ class PCA(HasTraits):
 
         # select npc loadings & compute scores
         # ------------------------------------
+
         if npc is None:
             npc = svd.s.size
 
@@ -111,12 +114,15 @@ class PCA(HasTraits):
 
         #: Eigenvalues of the covariance matrix
         self.ev = svd.ev
+        self.ev.x.title = 'PC #'
 
         #: Explained Variance per singular values
         self.ev_ratio= svd.ev_ratio
+        self.ev_ratio.x.title = 'PC #'
 
         #: Cumulative Explained Variance
         self.ev_cum = svd.ev_cum
+        self.ev_cum.x.title = 'PC #'
 
         return
 
@@ -176,23 +182,13 @@ class PCA(HasTraits):
         :param nfig: figure number. If None (default), a new figure is made
         :type nfig: int"""
 
-        if nfig is None:
-            plt.figure()
-        else:
-            plt.figure(nfig)
 
-        plt.title('Scree plot')
-        plt.xlabel('PC #')
-        plt.ylabel('per PC / %')
-        plt.bar(np.arange(npc), self.ev_ratio[0:npc], align='center')
-        plt.twinx()
-        plt.plot(np.arange(npc), self.ev_cum[0:npc], '-ro')
-        plt.ylabel('cummulative / %')
-        # plt.ylim((0.,100.))
 
-        #if not _do_not_block:
-        plt.show()
-        #return
+        ax = self.ev_ratio[:npc].plot_bar(title='Scree plot')
+
+        # plt.twinx()
+        # plt.plot(np.arange(npc), self.ev_cum.data[0:npc], '-ro')
+        ax.set_ylim((0.,100.))
 
     def scoreplot(self, pcs, nfig=None):
         """2D or 3D scoreplot of samples
@@ -251,7 +247,8 @@ if __name__ == '__main__':
 
     pca = PCA(source)
 
-    pca.printev(npc=5)
+    pca.printev(npc=6)
 
+    pca.screeplot(npc=6)
 
     show()

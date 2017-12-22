@@ -195,17 +195,23 @@ class SVD(HasTraits):
     @property
     def ev(self):
         """`NDDataset`,  eigenvalues of the covariance matrix """
-        ev = (self.s ** 2) / (self.s.size - 1)
+        size = self.s.size
+        ev = (self.s ** 2) / (size - 1)
         ev.name = 'ev'
         ev.title = 'Eigenvalues'
+        ev.coordset = CoordSet(
+                                 Coord([i for i in range(size)],
+                                 labels=['#%d' % (i) for i in range(size)],
+                                 title='Unitary vectors'))
         return ev
 
     @property
     def ev_cum(self):
         """`NDDataset`,  Cumulative Explained Variance """
-        ev_cum = np.cumsum(self.ev)
+        ev_cum = np.cumsum(self.ev_ratio)
         ev_cum.name = 'ev_cum'
         ev_cum.title = 'Cumulative variance'
+        ev_cum.units = 'percent'
         return ev_cum
 
     @property
