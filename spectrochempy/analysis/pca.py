@@ -92,7 +92,7 @@ class PCA(HasTraits):
 
         T.title = 'scores (T) of ' + X.name
         T.coordset = CoordSet(X.y,
-                              Coord([ i+1 for i in range(npc)],
+                              Coord(None,
                               labels=['#%d' % (i+1) for i in range(npc)],
                               title='PC')
                               )
@@ -208,17 +208,16 @@ class PCA(HasTraits):
         return ax1, ax2
 
 
-    def scoreplot(self, pcs, nfig=None):
-        """2D or 3D scoreplot of samples
-        :param pcs: set of  or 3 pcs
-        :type npc: list or tuplet of int with 2 or 3 elements
-        :param nfig: figure number. If None (default), a new figure is made
-        :type nfig: int"""
+    def scoreplot(self, pcs):
+        """
+        2D or 3D scoreplot of samples
 
-        if nfig is None:
-            fig = plt.figure()
-        else:
-            fig = plt.figure(nfig)
+        Parameters
+        ----------
+        pcs: list or tuple of int
+            Must contain 2 or 3 elements
+
+        """
 
         col = self.T.coordset[0]
 

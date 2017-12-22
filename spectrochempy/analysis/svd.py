@@ -144,8 +144,8 @@ class SVD(HasTraits):
         U.name = 'U'
         U.title = 'left singular vectors of ' + X.name
         U.coordset = CoordSet(X.coordset[0],
-                              Coord([i for i in range(KU)],
-                                labels=['#%d' % (i) for i in range(KU)],
+                              Coord(None,
+                                labels=['#%d' % (i+1) for i in range(KU)],
                                 title='Unitary vectors')
                               )
         U.description = 'left singular vectors of ' + X.name
@@ -157,8 +157,8 @@ class SVD(HasTraits):
         VT = NDDataset(VT)
         VT.name = 'V.T'
         VT.title = 'Loadings (V.t) of ' + X.name
-        VT.coordset = CoordSet(Coord([i for i in range(KV)],
-                                 labels=['#%d' % (i) for i in range(KV)],
+        VT.coordset = CoordSet(Coord(None,
+                                 labels=['#%d' % (i+1) for i in range(KV)],
                                  title='Unitary vectors'),
                                X.coordset[1])
         VT.description = (
@@ -200,8 +200,8 @@ class SVD(HasTraits):
         ev.name = 'ev'
         ev.title = 'Eigenvalues'
         ev.coordset = CoordSet(
-                                 Coord(None, #[i for i in range(size)],
-                                 labels=['#%d' % (i) for i in range(size)],
+                                 Coord(None,
+                                 labels=['#%d' % (i+1) for i in range(size)],
                                  title='Unitary vectors'))
         return ev
 
