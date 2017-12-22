@@ -475,9 +475,6 @@ class NDMath(object):
     # the following methods are to give NDArray based class
     # a behavior similar to np.ndarray regarding the ufuncs
 
-    def __array_prepare(self, *args, **kwargs):
-        pass
-
     def __array_wrap__(self, *args):
         # called when element-wise ufuncs are applied to the array
 
@@ -529,6 +526,10 @@ class NDMath(object):
         # Some flags to be set depending of the object
         isdataset = True
         iscomplex = False
+
+        # this might be a limit of the program
+        # but we will consider using uncertainty only if
+        # the mai object has uncertainty only
         isuncertain = False
 
         objcomplex = []  # to keep track of the complex nature of the obj
@@ -637,7 +638,12 @@ class NDMath(object):
                     argunits.append(1.)
 
                 arg = other._data
-                arg = other._uarray(arg, other._uncertainty)
+                if isuncertain:
+                    # whatever the existence of
+                    # uncertainty here if the main object
+                    # was not uncertain, we will not take into
+                    # account those uncertainty
+                    arg = other._uarray(arg, other._uncertainty)
 
                 # mask?
                 arg = other._umasked(arg, other._mask)
@@ -665,7 +671,7 @@ class NDMath(object):
 
         # perform operations
         # ------------------
-        if ufunc:
+        if ufunc and isuncertain:
             # with use of the numpy functions of uncertainty package
             # some transformation to handle missing function in the unumpy module
             if fname == 'exp2':
@@ -687,6 +693,11 @@ class NDMath(object):
                 data = np.isfinite(unp.nominal_values(d))
             else:
                 data = getattr(unp, fname)(d, *args)
+
+        elif ufunc:
+            # if not uncertain use the numpy package, not the unp
+            data = getattr(np, fname)(d, *args)
+
 
                 # TODO: check the complex nature of the result to return it
 

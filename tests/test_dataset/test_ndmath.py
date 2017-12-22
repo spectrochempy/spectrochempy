@@ -10,12 +10,15 @@
 """Tests for the ndmath module
 
 """
-
 import pandas as pd
 import pytest
 
-from spectrochempy.api import *
-from spectrochempy.api import NDDataset, Coord, CoordSet, show
+#from spectrochempy.api import *
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.units.units import ur
+from spectrochempy.api import show, masked
+
 from spectrochempy.extern.pint.errors import (UndefinedUnitError,
                                               DimensionalityError)
 from spectrochempy.utils import Meta, SpectroChemPyWarning
@@ -23,6 +26,7 @@ from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
 from tests.utils import RandomSeedContext
+import numpy as np
 
 
 
@@ -62,6 +66,8 @@ def test_absolute_of_complex():
 def test_ufunc_method(nd):
     assert isinstance(nd, NDDataset)
     nd2 = np.sin(nd)
+    nds = np.sqrt(nd)
+
     assert nd2 is not nd
     assert nd2._data is not nd._data
     sinnd = np.sin(nd._data)
