@@ -251,13 +251,33 @@ class NDPlot(HasTraits):
         # ------------------------------
         log.debug('update plot')
 
-        # get the current figure
+        # should we use the previous figure?
+        #TODO: change this keword to newfig which willl be clearer!
         hold = kwargs.get('hold', False)
-        self._fig = _curfig(hold)
-        self._fig.rcParams = plt.rcParams.copy()
 
         # is ax in the keywords ?
         ax = kwargs.pop('ax', None)
+
+        # is it a twin figure? In such case if ax and hold are also provided,
+        # they will be ignored
+        tax = kwargs.get('twinx', None)
+        if tax is not None:
+            if isinstance(tax, plt.Axes):
+                hold = True
+                ax = tax.twinx()
+                ax.name = 'main'
+                tax.name = 'twin' # the previous main is renamed!
+                self.ndaxes['main'] = ax
+                self.ndaxes['twin'] = tax
+            else:
+                raise ValueError(
+                        '{} is not recognized as a valid Axe'.format(tax))
+
+
+        # get the current figure (or the last used)
+        self._fig = _curfig(hold)
+        self._fig.rcParams = plt.rcParams.copy()
+
         if not hold:
             self._ndaxes = {}  # reset ndaxes
             self._divider = None
@@ -269,7 +289,8 @@ class NDPlot(HasTraits):
                 ax.name = 'main'
                 self.ndaxes['main'] = ax
             else:
-                raise ValueError('{} is not recognized'.format(ax))
+                raise ValueError(
+                        '{} is not recognized as a valid Axe'.format(ax))
 
         elif self._fig.get_axes():
             # no ax parameters in keywords, so we need to get those existing

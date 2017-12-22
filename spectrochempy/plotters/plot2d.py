@@ -25,7 +25,7 @@ import numpy as np
 from spectrochempy.application import app  # must come before plt import
 from spectrochempy.plotters.utils import make_label
 
-__all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
+__all__ = ['plot_map', 'plot_stack', 'plot_image']
 _methods = __all__[:]
 
 plotter_preferences = app.plotter_preferences

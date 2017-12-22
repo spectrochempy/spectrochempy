@@ -100,9 +100,9 @@ class Coord(NDMath, NDArray):
             The actual data array contained in the |Coord| object.
             The given array (with a single dimension) can be a list,
             a tuple, a |ndarray|, or a |ndarray|-like object.
-            If an object is passed that contains
-            already mask, labels, or units, these elements will be
-            used to accordingly set those of the created object.
+            If an object is passed that contains labels, or units,
+            these elements will be used to accordingly set those of the
+            created object.
             If possible, the provided data will not be copied for `data` input,
             but will be passed by reference, so you should make a copy the
             `data` before passing it in the object constructor if that's the

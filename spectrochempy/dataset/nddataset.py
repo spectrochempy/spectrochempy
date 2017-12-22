@@ -328,10 +328,10 @@ class NDDataset(
         Return the x coord, i.e. coordset(-1)
 
         If the dataset has no axis (coordset is None), then the index of the
-        data is returned
+        data is returned except if there is labels taht can replace this index.
 
         """
-        if self.coordset is None or self.coordset[-1].data.size == 0: # no axis
+        if self.coordset is None or self.coordset[-1].size == 0: # no axis
             new = Coord( range(self.shape[-1]), title = 'index')
             return new
         return self.coordset[-1]
