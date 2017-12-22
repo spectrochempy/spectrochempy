@@ -15,6 +15,8 @@ __all__ = ['PCA']
 import numpy as np
 from traitlets import HasTraits, Instance
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 from spectrochempy.dataset.ndcoords import Coord
@@ -71,10 +73,13 @@ class PCA(HasTraits):
 
         """
 
+        self.X = X
+
         # mean center the dataset
         # -----------------------
 
         self.center = center = np.mean(X, axis=0)
+
         Xc = X - center
 
         svd = SVD(X)
@@ -208,44 +213,79 @@ class PCA(HasTraits):
         return ax1, ax2
 
 
-    def scoreplot(self, pcs):
+    def scoreplot(self, *pcs, cmap='jet', **kwargs):
         """
         2D or 3D scoreplot of samples
 
         Parameters
         ----------
-        pcs: list or tuple of int
+        *pcs: a series of int argument or a list/tuple
             Must contain 2 or 3 elements
+
+        Examples
+        --------
+        >>> pca.scoreplot(1,2)
 
         """
 
-        col = self.T.coordset[0]
+        if isinstance(pcs[0], (list,tuple, set)):
+            pcs = pcs[0]
 
-        plt.title('Score plot')
+        # transform to internal index of unitary vectors (1->0 etc...)
+        pcs = np.array(pcs) - 1
+
+        # colors
+        colors = self.T.coordset[0].data
+
         if len(pcs) == 2:
-            plt.xlabel('PC# {} ({:.3f}%)'.format(pcs[0], self.ev_ratio[pcs[0]]))
-            plt.ylabel('PC# {} ({:.3f}%)'.format(pcs[1], self.ev_ratio[pcs[1]]))
-            plt.scatter(self.T.data[:, pcs[0]], self.T.data[:, pcs[1]], s=30,
-                        c=col)
+
+            fig = plt.figure(**kwargs)
+            ax = fig.add_subplot(111)
+            ax.set_title('Score plot')
+
+            ax.set_xlabel('PC# {} ({:.3f}%)'.format(
+                                           pcs[0], self.ev_ratio.data[pcs[0]]))
+            ax.set_ylabel('PC# {} ({:.3f}%)'.format(
+                                           pcs[1], self.ev_ratio.data[pcs[1]]))
+            ax.scatter(self.T.data[:, pcs[0]],
+                        self.T.data[:, pcs[1]],
+                        s=30,
+                        c=colors,
+                        cmap=cmap)
+
+            number_x_labels = plotter_preferences.number_of_x_labels  # get
+            # from config
+            number_y_labels = plotter_preferences.number_of_y_labels
+            # the next two line are to avoid multipliers in axis scale
+            y_formatter = ScalarFormatter(useOffset=False)
+            ax.yaxis.set_major_formatter(y_formatter)
+            ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+            ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+            ax.xaxis.set_ticks_position('bottom')
+            ax.yaxis.set_ticks_position('left')
 
         if len(pcs) == 3:
-            ax = fig.add_subplot(111,
-                                 projection='3d')  # FIXME: projection does not work
+
+            fig = plt.figure(**kwargs)
+            ax = plt.axes(projection='3d')
             ax.set_title('Score plot')
             ax.set_xlabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[0], self.ev_ratio[pcs[0]]))
+                    'PC# {} ({:.3f}%)'.format(pcs[0], self.ev_ratio.data[pcs[
+                        0]]))
             ax.set_ylabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[1], self.ev_ratio[pcs[1]]))
+                    'PC# {} ({:.3f}%)'.format(pcs[1], self.ev_ratio.data[pcs[
+                        1]]))
             ax.set_zlabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio[pcs[2]]))
-            ax.scatter(self.T.data[:, pcs[0]], self.T.data[:, pcs[1]],
-                       self.T.data[:, pcs[2]], zdir='z', s=30, c=col,
+                    'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio.data[pcs[
+                        2]]))
+            ax.scatter(self.T.data[:, pcs[0]],
+                       self.T.data[:, pcs[1]],
+                       self.T.data[:, pcs[2]],
+                       zdir='z',
+                       s=30,
+                       c=colors,
+                       cmap=cmap,
                        depthshade=True)
-
-        #if not _do_not_block:
-        plt.show()
-
-        return
 
 if __name__ == '__main__':
 
@@ -263,9 +303,10 @@ if __name__ == '__main__':
     ax = source.plot_stack()
 
     pca = PCA(source)
-
     pca.printev(npc=6)
 
     pca.screeplot(npc=6)
+    pca.scoreplot(1,2)
+    pca.scoreplot(1,2,3)
 
     show()

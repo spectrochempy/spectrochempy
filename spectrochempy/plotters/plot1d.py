@@ -438,7 +438,6 @@ def plot_1D(source, **kwargs):
     # -------------------------------------------------------------------------
     # labels
     # -------------------------------------------------------------------------
-
     if kwargs.get('data_only', False):
         # if data only (we will not set labels
         # it was probably done already in a previous plot

@@ -588,6 +588,7 @@ def show():
             plt.show(block=True)
 
 
+
 # .............................................................................
 def _curfig(hold=False, **kwargs):
     # Get the figure where to plot.
