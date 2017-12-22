@@ -11,6 +11,7 @@
 
 """
 from spectrochempy.api import *
+from numpy.testing import assert_allclose
 
 # test svd
 #-----------
@@ -30,7 +31,7 @@ def test_svd(IR_source_2D):
     print((svd.ev_cum))
     print((svd.ev_ratio))
 
-    assert np.around(svd.ev_ratio[0].data, decimals=3) == 94.539
+    assert_allclose( svd.ev_ratio[0].data, 94.539, rtol=1e-5, atol=0.0001)
 
     #TODO: add round function to NDDataset
 
@@ -51,7 +52,7 @@ def test_svd(IR_source_2D):
     print((svd.ev_cum))
     print((svd.ev_ratio))
 
-    assert np.around(svd.ev_ratio[0].data, decimals=3) == 93.803
+    assert_allclose(svd.ev_ratio[0].data, 93.803, rtol=1e-5, atol=0.0001)
 
     # with masks
     source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
@@ -69,4 +70,4 @@ def test_svd(IR_source_2D):
     print((svd.ev_cum))
     print((svd.ev_ratio))
 
-    assert np.around(svd.ev_ratio[0].data, decimals=3) == 93.803
+    assert_allclose(svd.ev_ratio[0].data, 93.803, rtol=1e-5, atol=0.0001)

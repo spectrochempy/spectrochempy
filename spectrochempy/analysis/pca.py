@@ -242,45 +242,16 @@ if __name__ == '__main__':
     source = IR_source_2D()
 
     # columns masking
-    #source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
-    # row masking
-    #source[10:12] = masked
-
-    ax = source.plot_stack()
-
-
-    center = np.mean(source, axis=0)
-
-    center.plot()
-
-
-    Xc1 = source - center
-    Xc1.plot_stack()
-
-    pca = PCA(source)
-
-    pca.printev(npc=5)
-
-    # columns masking
     source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+
     # row masking
     source[10:12] = masked
 
     ax = source.plot_stack()
 
-
-    center = np.mean(source, axis=0)
-
-    center.plot()
-
-
-    Xc2 = source - center
-    Xc2.plot_stack()
-
     pca = PCA(source)
 
     pca.printev(npc=5)
 
-    assert str(pca)[:3] == '\nPC'
 
     show()

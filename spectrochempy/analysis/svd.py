@@ -86,8 +86,8 @@ class SVD(HasTraits):
             # As seen below, we cannot performs SVD on the masked array
             # so let's take the ndarray only
             data = X.data
-
             M, N  = X.shape
+
         else:
             raise TypeError('A dataset of type NDDataset is  '
                                'expected as a source of data, but an object'
