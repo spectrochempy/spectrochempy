@@ -32,7 +32,11 @@ __all__ = []
 for pkg in pkgs:
     if pkg.endswith('api'):
         continue
-    pkg = import_item(pkg)
+    try:
+        pkg = import_item(pkg)
+    except:
+        print('pkg', pkg)
+
     if not hasattr(pkg, '__all__'):
         continue
     a = getattr(pkg, '__all__')

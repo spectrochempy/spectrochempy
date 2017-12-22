@@ -7,15 +7,11 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
-
-""" Tests for the svd module
+""" Tests for the SVD class
 
 """
-from spectrochempy.analysis.svd import Svd
-
-from spectrochempy.api import show, Coord
+from spectrochempy.api import *
+from numpy.testing import assert_allclose
 
 # test svd
 #-----------
@@ -25,20 +21,53 @@ def test_svd(IR_source_2D):
     source = IR_source_2D.copy()
     print(source)
 
-    svd = Svd(source)
+    svd = SVD(source)
 
     print()
     print((svd.U))
-    print((svd.Vt))
+    print((svd.VT))
     print((svd.s))
     print((svd.ev))
     print((svd.ev_cum))
     print((svd.ev_ratio))
 
-    svd.Vt.plot()
-    show()
+    assert_allclose( svd.ev_ratio[0].data, 94.539, rtol=1e-5, atol=0.0001)
 
-#    svd.Vt[:10].plot()
-#    show()
+    #TODO: add round function to NDDataset
 
 
+    # with masks
+    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    source[10:12] = masked
+
+    ax = source.plot_stack()
+
+    svd = SVD(source)
+
+    print()
+    print((svd.U))
+    print((svd.VT))
+    print((svd.s))
+    print((svd.ev))
+    print((svd.ev_cum))
+    print((svd.ev_ratio))
+
+    assert_allclose(svd.ev_ratio[0].data, 93.803, rtol=1e-5, atol=0.0001)
+
+    # with masks
+    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    source[10:12] = masked
+
+    ax = source.plot_stack()
+
+    svd = SVD(source, full_matrices = True)
+
+    print()
+    print((svd.U))
+    print((svd.VT))
+    print((svd.s))
+    print((svd.ev))
+    print((svd.ev_cum))
+    print((svd.ev_ratio))
+
+    assert_allclose(svd.ev_ratio[0].data, 93.803, rtol=1e-5, atol=0.0001)

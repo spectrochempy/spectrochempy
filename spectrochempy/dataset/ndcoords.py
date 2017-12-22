@@ -376,7 +376,8 @@ class CoordSet(HasTraits):
         else:
             for item in coords:
 
-                if not isinstance(item, (NDArray, CoordSet)):
+                if item is not None and not isinstance(item, (NDArray, \
+                        CoordSet)):
                     item = NDArray(item, copy=_copy)
                     # full validation of the item
                     # will be done in NDArray.__init__
@@ -553,6 +554,9 @@ class CoordSet(HasTraits):
     # .........................................................................
     def _validation(self, item):
         # To be valid any added axis must have a different name
+
+        if item is None:
+            return True
 
         if not isinstance(item, (NDArray, CoordSet)):
             raise ValueError('The elements of must be NDArray or '

@@ -144,6 +144,13 @@ def make_docs(*args):
              exclude_dirs=['extern', '~misc', 'gui'],
              developper=True)
 
+        from spectrochempy.sphinxext.traitlets_sphinxdoc import write_doc
+        from spectrochempy.application import app
+
+        write_doc('source/user/api/preferences.rst',           # File to write
+                 'SpectroChemPy config preferences',           # Title
+                 app)
+
         sp.build()
         res = sp.statuscode
         log.debug(res)

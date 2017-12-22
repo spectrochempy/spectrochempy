@@ -7,113 +7,118 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+__all__ = ['PCA']
 
-
-
-__all__ = ['Pca']
-
-import matplotlib.pyplot as plt
-from traitlets import HasTraits, Instance
-from spectrochempy.dataset.nddataset import NDDataset
+# ----------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------
 import numpy as np
+from traitlets import HasTraits, Instance
 
-from spectrochempy.dataset.ndcoords import Coord, CoordSet
-from .svd import Svd
-# ==============================================================================
+from spectrochempy.dataset.nddataset import NDDataset, CoordSet
+from spectrochempy.dataset.ndcoords import Coord
+from spectrochempy.analysis.svd import SVD
+from spectrochempy.processors.numpy import diag, dot
+
+# ============================================================================
 # Global preferences
-# ==============================================================================
+# ============================================================================
 from spectrochempy.application import app
+
+# ----------------------------------------------------------------------------
+# localimports
+# ----------------------------------------------------------------------------
 
 plotter_preferences = app.plotter_preferences
 log = app.log
 preferences = app
 
 
-# ==============================================================================
-# class Pca
-# ==============================================================================
-class Pca(HasTraits):
+# ============================================================================
+# class PCA
+# ============================================================================
+class PCA(HasTraits):
     """
     Principal Component Analysis
 
     This class performs a Principal Component Analysis of a NDDataset
 
-    Parameters
-    -----------
-    X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object of
-    shape (``N``, ``M``)
-
-    npc : int, optional
-
-        The number of components to compute. If not set all components
-        are computed.
+    If the dataset contains masked values, the corresponding ranges are
+    ignored in the calculation.
 
     """
 
     T = Instance(NDDataset)
     Pt = Instance(NDDataset)
-    center = Instance(np.ndarray)
+    center = Instance(NDDataset)
 
-    # private attributes
-    _ev = Instance(np.ndarray)
+    ev = Instance(NDDataset)
+    ev_ratio = Instance(NDDataset)
+    ev_cum = Instance(NDDataset)
 
-    def __init__(self, source, npc=None):
-        """Constructor"""
+    def __init__(self, X, npc=None):
+        """
+        Parameters
+        -----------
+        X : :class:`~spectrochempy.dataset.nddataset.NDDataset`object.
+            The dataset has shape (``M``, ``N``)
+        npc : int, optional
+            The number of components to compute. If not set all components
+            are computed.
 
-        # check if we have the correct input
-        if isinstance(source, NDDataset):
-            data = source.data
-        else:
-            raise TypeError('A dataset of type NDDataset is  '
-                               'expected as a source of data, but an object'
-                               ' of type {} has been provided'.format(
-                               type(source).__name__))
+        """
 
         # mean center the dataset
-        self.center = center = np.nanmean(source.data, axis=0)
-        X = source.copy()
-        X.data = source.data - center
+        # -----------------------
 
-        if npc is None:
-            npc = min(X.shape)
+        self.center = center = np.mean(X, axis=0)
+        Xc = X - center
 
-        Xsvd = Svd(X)
+        svd = SVD(X)
 
         # select npc loadings & compute scores
-        T = np.dot(Xsvd.U.data[:, 0:npc], np.diag(Xsvd.s)[0:npc, 0:npc])
-        T = NDDataset(T)
+        # ------------------------------------
+        if npc is None:
+            npc = svd.s.size
+
+        sigma = diag(svd.s)
+        s = sigma[:npc, :npc]
+        u = svd.U[:, :npc]
+        T = dot(u, s)
+
         T.title = 'scores (T) of ' + X.name
-        T.coordset = CoordSet(source.coordset[0],
-                              Coord([ i+1 for i in range(len(Xsvd.s))],
-                                labels=['#%d' % (i+1) for i in range(len(Xsvd.s))],
-                                title='PC')
+        T.coordset = CoordSet(X.y,
+                              Coord([ i+1 for i in range(npc)],
+                              labels=['#%d' % (i+1) for i in range(npc)],
+                              title='PC')
                               )
+
         T.description = 'scores (T) of ' + X.name
-        T.history = 'created by Pca'
+        T.history = 'created by PCA'
 
-        Pt = Xsvd.Vt[0:npc]
+        Pt = svd.VT[0:npc]
         Pt.title = 'Loadings (P.t) of ' + X.name
-        Pt.history = 'created by Pca'
+        Pt.history = 'created by PCA'
 
-        # scores (T) and loading (Pt) matrixes
+        # scores (T) and loading (Pt) matrices
+        # ------------------------------------
+
         self.T = T
         self.Pt = Pt
-        # eigenvalues of the covariance matrix
-        self._ev = (Xsvd.s * Xsvd.s) / (np.size(Xsvd.s) - 1)
+
+        # other attributes
+        # ----------------
+
+        #: Eigenvalues of the covariance matrix
+        self.ev = svd.ev
+
+        #: Explained Variance per singular values
+        self.ev_ratio= svd.ev_ratio
+
+        #: Cumulative Explained Variance
+        self.ev_cum = svd.ev_cum
 
         return
-
-    # Properties
-    # ------------
-    @property
-    def ev_ratio(self):
-        """% Explained Variance per PC"""
-        return 100 * self._ev / sum(self._ev)
-
-    @property
-    def ev_cum(self):
-        """% Cummulative Explained Variance"""
-        return np.cumsum(self.ev_ratio)
 
     # special methods
     # -----------------
@@ -123,8 +128,9 @@ class Pca(HasTraits):
             '%cumulative\n'
         s += '   \t\tof cov(X)\t\t per PC\t' \
              '     variance\n'
-        for i in np.arange(npc):
-            tuple = (i, self._ev[i], self.ev_ratio[i], self.ev_cum[i])
+        for i in range(npc):
+            tuple = (i, self.ev.data[i], self.ev_ratio.data[i],
+                     self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tuple)
 
         return s
@@ -164,7 +170,7 @@ class Pca(HasTraits):
         print((self.__str__(npc)))
 
     def screeplot(self, npc=5, nfig=None):
-        """scree plot of explained variance + cummulative variance by pca or svd
+        """scree plot of explained variance + cumulative variance by pca or svd
         :param npc: number of components to plot
         :type npc: int
         :param nfig: figure number. If None (default), a new figure is made
@@ -227,3 +233,25 @@ class Pca(HasTraits):
         plt.show()
 
         return
+
+if __name__ == '__main__':
+
+    from tests.conftest import IR_source_2D
+    from spectrochempy.api import *
+
+    source = IR_source_2D()
+
+    # columns masking
+    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+
+    # row masking
+    source[10:12] = masked
+
+    ax = source.plot_stack()
+
+    pca = PCA(source)
+
+    pca.printev(npc=5)
+
+
+    show()

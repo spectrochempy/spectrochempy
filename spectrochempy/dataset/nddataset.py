@@ -327,10 +327,12 @@ class NDDataset(
 
         Return the x coord, i.e. coordset(-1)
 
+        If the dataset has no axis (coordset is None), then the index of the
+        data is returned
+
         """
-        if self.coordset[-1].data.size == 0:
-            new = self.coordset[-1].copy()
-            new._data = range(self.shape[-1])
+        if self.coordset is None or self.coordset[-1].data.size == 0: # no axis
+            new = Coord( range(self.shape[-1]), title = 'index')
             return new
         return self.coordset[-1]
 
@@ -416,9 +418,10 @@ class NDDataset(
     # -------------------------------------------------------------------------
 
     def implements(self, name=None):
-        ## For compatibility with pyqtgraph
-        ## Rather than isinstance(obj, MetaArray) use object.implements('MetaArray')
-        ## This is usefull to check type without importing the module
+        # For compatibility with pyqtgraph
+        # Rather than isinstance(obj, NDDataset) use object.implements(
+        # 'NDDataset')
+        # This is usefull to check type without importing the module
         if name is None:
             return ['NDDataset']
         else:

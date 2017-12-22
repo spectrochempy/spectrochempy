@@ -366,14 +366,14 @@ class GeneralPreferences(Configurable) :
     #: Default DATA directory
     data = Unicode(help="Default data directory").tag(config=True)
 
-    @property
-    def data(self):
+    @default('data')
+    def _get_data(self):
         return self._scpdata.data
 
 
 class SpectroChemPy(Application):
     """
-    _SpectroChemPy is the main class, containing most of the setup,
+    This class SpectroChemPy is the main class, containing most of the setup,
     configuration and more.
 
     """
@@ -444,20 +444,20 @@ to cite it this way:
     # ------------------------------------------------------------------------
 
     reset_config = Bool(False,
-                        help='should we restaure a default configuration?'
+                        help='Should we restaure a default configuration?'
                         ).tag(config=True)
 
     config_file_name = Unicode(None,
-                               help="Load this config file"
+                               help="Configuration file name"
                                ).tag(config=True)
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
-        return self.name + '_config.py'
+        return self.name.lower() + '.cfg.py'
 
 
     config_dir = Unicode(None,
-                         help="Set the configuration dir location"
+                         help="Set the configuration directory location"
                          ).tag(config=True)
 
     @default('config_dir')
@@ -465,19 +465,19 @@ to cite it this way:
         return self._get_config_dir()
 
     debug = Bool(False,
-                 help='set DEBUG mode, with full outputs'
+                 help='Set DEBUG mode, with full outputs'
                  ).tag(config=True)
 
     quiet = Bool(False,
-                 help='set Quiet mode, with minimal outputs'
+                 help='Set Quiet mode, with minimal outputs'
                  ).tag(config=True)
 
-    startup_project = Unicode('', help='project to load at startup').tag(
+    startup_project = Unicode('', help='Project to load at startup').tag(
         config=True)
 
 
     do_not_block = Bool(False,
-                        help="Make the plots but do not stop (for tests)"
+                        help="Make the plots BUT do not stop (for tests)"
                         ).tag(config=True)
 
     aliases = Dict(
@@ -558,20 +558,31 @@ to cite it this way:
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
 
-        for caller in ['builddocs.py', 'pytest', 'py.test', '-c']:
+        for caller in ['builddocs.py', '-c']:
             # `-c` happen if the pytest is executed in parallel mode
             # using the plugin pytest-xdist
 
             if caller in sys.argv[0]:
                 # this is necessary to build doc
                 # with sphinx-gallery and doctests
+                plt.ioff()
                 self.do_not_block = True
                 break
 
+        for caller in ['pytest', 'py.test']:
+
+            if caller in sys.argv[0]:
+                # let's set do_not_block flag to true only if we are running
+                #  the whole suite of tests
+                if len(sys.argv)>1 and sys.argv[1].endswith("tests"):
+                    plt.ioff()
+                    self.do_not_block = True
+
         # case we have passed -test arguments to a script
         if len(sys.argv) > 1 and "-test" in sys.argv[1]:
+            plt.ioff()
             self.do_not_block = True
-            caller = sys.argv[0]
+
 
         # we catch warnings and error for a ligther display to the end-user.
         # except if we are in debugging mode
@@ -643,7 +654,8 @@ to cite it this way:
         >>> app.start(
         ...    reset_config=True,   # for restoring default configuration
         ...    debug=True,          # debugging logs
-        ...    )
+        ...    ) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        SpectroChemPy's API - v.0.1...
         True
 
         """
@@ -670,6 +682,7 @@ to cite it this way:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
 
+            # print(self.general_preferences.show_info_on_loading)
             if self.general_preferences.show_info_on_loading:
                 print(info_string)
 
@@ -797,7 +810,9 @@ app = SpectroChemPy()
 
 
 # TODO: look at the subcommands capabilities of traitlets
+
 if __name__ == "__main__":
+
     print('start application')
     pass
 

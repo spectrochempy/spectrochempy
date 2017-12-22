@@ -19,6 +19,7 @@ jupyter
 # ipyparallel
 ipykernel
 nb_conda
+ipympl
 
 # for testing
 
