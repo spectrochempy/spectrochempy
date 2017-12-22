@@ -19,22 +19,8 @@ def ip():
     return ip
 
 ip()    # we need to go into this before anything else in the test to have the
-        #  IPhyton session available.
+        #  IPython session available.
 
-def _set_do_not_block():
-    from matplotlib import pyplot as plt
-    from spectrochempy.application import app as options
-
-    # let's set do_not_block flag to true only if we are running the whole
-    # suite of tests
-    if len(sys.argv)>1 and sys.argv[1].endswith("/spectrochempy/tests"):
-        plt.ioff()
-        options.do_not_block = True
-    else:
-        options.do_not_block = False
-
-
-_set_do_not_block() # this must come after ip()
 
 
 #########################
