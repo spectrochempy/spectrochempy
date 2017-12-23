@@ -46,7 +46,9 @@ class PCA(HasTraits):
     """
     Principal Component Analysis
 
-    This class performs a Principal Component Analysis of a NDDataset
+    This class performs a Principal Component Analysis of a NDDataset, *i.e.*,
+    a linear dimensionality reduction using Singular Value Decomposition (SVD)
+    of the data to project it to a lower dimensional space.
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
@@ -55,65 +57,78 @@ class PCA(HasTraits):
 
     T = Instance(NDDataset)
     Pt = Instance(NDDataset)
-    center = Instance(NDDataset)
 
     ev = Instance(NDDataset)
     ev_ratio = Instance(NDDataset)
     ev_cum = Instance(NDDataset)
 
-    def __init__(self, X, npc=None):
+    def __init__(self, X, npc=None,
+                 centered=True,
+                 standardized=False,
+                 scaled = False):
         """
         Parameters
-        -----------
-        X : :class:`~spectrochempy.dataset.nddataset.NDDataset`object.
+        ----------
+        X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object.
             The dataset has shape (``M``, ``N``)
-        npc : int, optional
-            The number of components to compute. If not set all components
-            are computed.
+        centered : Bool, optional, default=True
+            If True the data are centered around the mean values:
+            X' = X - mean(X)
+        standardized : Bool, optional, default=False
+            If True the data are scaled to unit standard deviation:
+            X' = X / sigma
+        scaled : Bool, optional, default=False
+            If True the data are scaled in the interval [0-1]
+            X' = (X - min(X)) / (max(X)-min(X))
+
+        Attributes
+        ----------
+        ev : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+            Eigenvalues of the covariance matrix
+        ev_ratio : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+            Explained Variance per singular values
+        ev_cum : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+            Cumulative Explained Variance
 
         """
 
-        self.X = X
+        self._X = X
+
+        Xsc = X.copy()
 
         # mean center the dataset
         # -----------------------
+        self._centered = centered
+        if centered:
+            self._center = center = np.mean(X, axis=0)
+            Xsc = X - center
+            Xsc.title = "centered %s"% X.title
 
-        self.center = center = np.mean(X, axis=0)
+        # Standardization
+        # ---------------
+        self._standardized = standardized
+        if standardized:
+            self._std = np.std(Xsc, axis=0)
+            Xsc /= self._std
+            Xsc.title = "standardized %s" % Xsc.title
 
-        Xc = X - center
+        # Scaling
+        # -------
+        self._scaled = scaled
+        if scaled:
+            self._min = np.min(Xsc, axis=0)
+            self._ampl = np.ptp(Xsc, axis=0)
+            Xsc -= self._min
+            Xsc /= self._ampl
+            Xsc.title = "scaled %s" % Xsc.title
 
-        svd = SVD(X)
+        self._Xscaled = Xsc
 
-        # select npc loadings & compute scores
-        # ------------------------------------
+        # perform SVD
+        # -----------
+        self._svd = svd = SVD(Xsc)
 
-        if npc is None:
-            npc = svd.s.size
-
-        sigma = diag(svd.s)
-        s = sigma[:npc, :npc]
-        u = svd.U[:, :npc]
-        T = dot(u, s)
-
-        T.title = 'scores (T) of ' + X.name
-        T.coordset = CoordSet(X.y,
-                              Coord(None,
-                              labels=['#%d' % (i+1) for i in range(npc)],
-                              title='PC')
-                              )
-
-        T.description = 'scores (T) of ' + X.name
-        T.history = 'created by PCA'
-
-        Pt = svd.VT[0:npc]
-        Pt.title = 'Loadings (P.t) of ' + X.name
-        Pt.history = 'created by PCA'
-
-        # scores (T) and loading (Pt) matrices
-        # ------------------------------------
-
-        self.T = T
-        self.Pt = Pt
+        self._sigma = diag(svd.s)
 
         # other attributes
         # ----------------
@@ -132,8 +147,10 @@ class PCA(HasTraits):
 
         return
 
-    # special methods
-    # -----------------
+    # ------------------------------------------------------------------------
+    # Special methods
+    # ------------------------------------------------------------------------
+
     def __str__(self, npc=10):
 
         s = '\nPC\t\tEigenvalue\t\t%variance\t' \
@@ -141,31 +158,109 @@ class PCA(HasTraits):
         s += '   \t\tof cov(X)\t\t per PC\t' \
              '     variance\n'
         for i in range(npc):
-            tuple = (i, self.ev.data[i], self.ev_ratio.data[i],
-                     self.ev_cum.data[i])
+            tuple = (
+            i, self.ev.data[i], self.ev_ratio.data[i], self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tuple)
 
         return s
 
+    # ------------------------------------------------------------------------
     # Public methods
-    # -----------------
+    # ------------------------------------------------------------------------
 
-    def construct(self, npc=5):
-        """reconstructs a dataset with npc PC's
+    def transform(self, npc=None):
+        """
+        Apply the dimensionality reduction
 
         Parameters
         ----------
         npc : int, optional, default=10
+            The number of components to compute. If not set all components
+            are computed.
 
-            The number of PC to use for the reconstruction
+        Returns
+        -------
+        Pt : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+            Loadings
+        T : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+            Scores
+
 
         """
-        #TODO: make a function to performs dot on two datasets
 
-        X = self.center + np.dot(self.T.data[:, 0:npc], self.Pt.data[0:npc, :])
-        X = NDDataset(X)
-        X.name = 'PCA constructed Dataset with {} PCs'.format(npc)
-        X.coordset = CoordSet(self.T.coords(0).copy(), self.Pt.coords(1).copy())
+        X = self._X
+
+        # select npc loadings & compute scores
+        # ------------------------------------
+
+        if npc is None:
+            npc = self._svd.s.size
+
+        s = self._sigma[:npc, :npc]
+        u = self._svd.U[:, :npc]
+        T = dot(u, s)
+
+        T.title = 'scores (T) of ' + X.name
+        T.coordset = CoordSet(X.y,
+                              Coord(None,
+                              labels=['#%d' % (i+1) for i in range(npc)],
+                              title='PC')
+                              )
+
+        T.description = 'scores (T) of ' + X.name
+        T.history = 'created by PCA'
+
+        Pt = self._svd.VT[0:npc]
+        Pt.title = 'Loadings (P.t) of ' + X.name
+        Pt.history = 'created by PCA'
+
+        # scores (T) and loading (Pt) matrices
+        # ------------------------------------
+
+        self.T = T
+        self.Pt = Pt
+
+        return Pt, T
+
+
+    def inverse_transform(self, npc=None):
+        """
+        Transform data back to the original space using the given number of
+        PC's.
+
+        Parameters
+        ----------
+        npc : int, optional, default=10
+            The number of PC to use for the reconstruction
+
+        Return
+        ------
+        X : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+
+        """
+
+        if npc is None:
+            npc = self.T.shape[-1]
+        else:
+            npc = min(npc, self.T.shape[-1])
+
+        T = self.T[:, :npc]
+        Pt = self.Pt[:npc]
+
+        X = dot(T, Pt)
+
+        # try ti reconstruct something close to the original scaled,
+        # standardized or centered data
+        if self._scaled:
+            X *= self._ampl
+            X += self._min
+        if self._standardized:
+            X *= self._std
+        if self._centered:
+            X += self._center
+
+        X.history = 'PCA reconstructed Dataset with {} PCs'.format(npc)
+        X.title = self._X.title
         return X
 
     def printev(self, npc=10):
@@ -182,7 +277,8 @@ class PCA(HasTraits):
         print((self.__str__(npc)))
 
     def screeplot(self,
-                  npc=5, **kwargs):
+                  npc=5,
+                  **kwargs):
         """
         Scree plot of explained variance + cumulative variance by PCA
 
@@ -192,6 +288,7 @@ class PCA(HasTraits):
             Number of components to plot
 
         """
+        npc = min(npc, self.ev.size)
         color1, color2 = kwargs.get('colors', [NBlue, NRed])
         pen = kwargs.get('pen', True)
         ylim1, ylim2 = kwargs.get('ylims', [(0,100), 'auto'])
@@ -235,7 +332,10 @@ class PCA(HasTraits):
         pcs = np.array(pcs) - 1
 
         # colors
-        colors = self.T.coordset[0].data
+        if np.any(self.T.y.data):
+            colors = self.T.y.data
+        else:
+            colors = np.array(range(self.T.shape[0]))
 
         if len(pcs) == 2:
 
@@ -247,7 +347,7 @@ class PCA(HasTraits):
                                            pcs[0], self.ev_ratio.data[pcs[0]]))
             ax.set_ylabel('PC# {} ({:.3f}%)'.format(
                                            pcs[1], self.ev_ratio.data[pcs[1]]))
-            ax.scatter(self.T.masked_data[:, pcs[0]],
+            ax.scatter( self.T.masked_data[:, pcs[0]],
                         self.T.masked_data[:, pcs[1]],
                         s=30,
                         c=colors,
@@ -295,18 +395,24 @@ if __name__ == '__main__':
     source = IR_source_2D()
 
     # columns masking
-    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    source[:, 1320.0:840.0] = masked  # do not forget to use float in slicing
 
     # row masking
     source[10:12] = masked
 
     ax = source.plot_stack()
 
-    pca = PCA(source)
+    pca = PCA(source) #, standardized=True, scaled=True)
+    Pt, T = pca.transform(npc=6)
+
     pca.printev(npc=6)
 
+    pca.Pt.plot_stack()
     pca.screeplot(npc=6)
     pca.scoreplot(1,2)
     pca.scoreplot(1,2,3)
+
+    Xp = pca.inverse_transform(npc=6)
+    Xp.plot_stack()
 
     show()

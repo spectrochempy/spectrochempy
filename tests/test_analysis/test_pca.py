@@ -7,9 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
-
 """ Tests for the PCA module
 
 """

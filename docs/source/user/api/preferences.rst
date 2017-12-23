@@ -27,13 +27,13 @@ SpectroChemPy config preferences
 
 .. configtrait:: SpectroChemPy.config_dir
 
-    Set the configuration dir location
+    Set the configuration directory location
 
     :trait type: Unicode
 
 .. configtrait:: SpectroChemPy.config_file_name
 
-    The config filename
+    Configuration file name
 
     :trait type: Unicode
 
@@ -46,7 +46,7 @@ SpectroChemPy config preferences
 
 .. configtrait:: SpectroChemPy.do_not_block
 
-    Make the plots but do not stop (for tests)
+    Make the plots BUT do not stop (for tests)
 
     :trait type: Bool
     :default: ``False``
@@ -126,6 +126,13 @@ SpectroChemPy config preferences
 
     :trait type: Unicode
     :default: ``'#EFEFEF'``
+
+.. configtrait:: PlotterPreferences.colorbar
+
+    Show color bar for 2D plots
+
+    :trait type: Bool
+    :default: ``True``
 
 .. configtrait:: PlotterPreferences.colormap
 

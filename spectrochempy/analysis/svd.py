@@ -29,8 +29,9 @@ class SVD(HasTraits):
     """
     Performs a Singular Value Decomposition of a dataset.
     
-    The SVD is commonly written as :math:'X = U \Sigma V^{T}'. This class \
-    has the attributes: U, s = diag(S) and VT=V.T.
+    The SVD is commonly written as :math:`X = U \Sigma V^{T}`.
+
+    This class has the attributes: U, s = diag(S) and VT=V.T.
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
@@ -61,7 +62,7 @@ class SVD(HasTraits):
         full_matrices : bool, optional, default=``False``.
             If ``False`` , `U` and `VT` have the shapes (``M``,  ``k``) and
             (``k``, ``N``), respectively, where ``k`` = min(``M``, ``N``).
-            Otherwise the shapes will be (``M``, ``M``) and (``N`, ``N``),
+            Otherwise the shapes will be (``M``, ``M``) and (``N``, ``N``),
             respectively.
         compute_uv: bool, optional, default=``True``.
             Whether or not to compute `U` and `VT` in addition to `s`.
@@ -122,9 +123,11 @@ class SVD(HasTraits):
 
         # Put back masked columns in  VT
         # ------------------------------
+        # Note that it is very important to use here the ma version of zeros
+        # array constructor
         KV = VT.shape[0]
         if np.any(masked_columns):
-            Vtemp = np.ma.zeros((KV, N))
+            Vtemp = np.ma.zeros((KV, N))  # note np.ma, ot np.
             Vtemp[ : , ~ masked_columns ] = VT
             Vtemp[ : , masked_columns] = masked
             VT = Vtemp

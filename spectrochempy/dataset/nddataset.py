@@ -346,12 +346,19 @@ class NDDataset(
         Return the y coord, i.e. coordset(-2) for 2D dataset.
 
         """
-        if self.ndim > 1:
-            if self.coordset[-2].data.size == 0:
-                new = self.coordset[-2].copy()
-                new._data = range(self.shape[-2])
-                return new
-            return self.coordset[-2]
+        if self.ndim < 2:
+            warnings.warn("The data are not 2D, there is no y dim",
+                          SpectroChemPyWarning)
+            return None
+            # if self.coordset[-2].data.size == 0:
+            #     new = self.coordset[-2].copy()
+            #     new._data = range(self.shape[-2])
+            #     return new
+            # return self.coordset[-2]
+        if self.coordset is None or self.coordset[-2].size == 0:  # no axis
+            new = Coord(range(self.shape[-1]), title='index')
+            return new
+        return self.coordset[-2]
 
     @y.setter
     def y(self, value):

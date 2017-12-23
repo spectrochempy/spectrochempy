@@ -80,6 +80,10 @@ r"""\usepackage{siunitx}
                         help='Default plot methods for 2D'
                         ).tag(config=True)
 
+    colorbar = Bool(True,
+                       help='Show color bar for 2D plots'
+                       ).tag(config=True)
+
     colormap = Unicode('jet',
                        help='Default colormap for contour plots'
                        ).tag(config=True)

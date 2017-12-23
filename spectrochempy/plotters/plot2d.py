@@ -8,7 +8,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
 """
 
 """
@@ -111,10 +110,7 @@ def plot_2D(source, **kwargs):
 
     """.format(source._general_parameters_doc_)
 
-    # where to plot?
-    # --------------
-
-    #mpl.interactive(False)
+    mpl.interactive(False)
 
     # method of plot
     # ------------
@@ -142,95 +138,207 @@ def plot_2D(source, **kwargs):
 
     method = kwargs.get('method', plotter_preferences.method_2D)
 
-    colorbar = kwargs.get('colorbar', True)
+    colorbar = kwargs.get('colorbar', plotter_preferences.colorbar)
 
-    cmap = colormap = mpl.rcParams['image.cmap']
+    cmap = mpl.rcParams['image.cmap']
 
-    # viridis is the default setting, so we assume that it must be overload here
+    # viridis is the default setting,
+    # so we assume that it must be overwritten here
     # except if style is grayscale which is a particular case.
-    styles = kwargs.get('style',[] )
-    if styles and not "grayscale" in styles and cmap == 'viridis':
+    styles = kwargs.get('style', plotter_preferences.style)
+
+    if styles and not "grayscale" in styles and cmap == "viridis":
 
         if method in ['map','image']:
             cmap = colormap = kwargs.get('colormap',
                             kwargs.get('cmap', plotter_preferences.colormap))
         elif data_transposed:
             cmap = colormap = kwargs.get('colormap',
-                            kwargs.get('cmap', plotter_preferences.colormap_transposed))
+                kwargs.get('cmap', plotter_preferences.colormap_transposed))
         else:
             cmap = colormap = kwargs.get('colormap',
-                            kwargs.get('cmap', plotter_preferences.colormap_stack))
+                kwargs.get('cmap', plotter_preferences.colormap_stack))
 
 
     lw = kwargs.get('linewidth', kwargs.get('lw', plotter_preferences.linewidth))
 
     alpha = kwargs.get('calpha', plotter_preferences.contour_alpha)
 
-    # -------------------------------------------------------------------------
-    # plot the source
-    # by default contours are plotted
-    # -------------------------------------------------------------------------
+    number_x_labels = plotter_preferences.number_of_x_labels
+    number_y_labels = plotter_preferences.number_of_y_labels
+    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
 
-    # abscissa axis
-    x = new.x.data
+    # the next lines are to avoid multipliers in axis scale
+    formatter = ScalarFormatter(useOffset=False)
+    ax.xaxis.set_major_formatter(formatter)
+    ax.yaxis.set_major_formatter(formatter)
 
-    # ordinates axis
-    y = new.y.data
+    # ------------------------------------------------------------------------
+    # Set axis
+    # ------------------------------------------------------------------------
+
+    # set the abscissa axis
+    # ---------------------
+
+    x = new.x
+    xdata = x.data
+    discrete_data = False
+    if not np.any(xdata):
+        discrete_data = True
+        # take into account the fact that sometimes axis have just labels
+        xdata = range(1,len(x.labels)+1)
+
+    xl = [xdata[0], xdata[-1]]
+    xl.sort()
+
+    if len(x.labels) < number_x_labels + 1:
+        # extend the axis so that the labels are not too close to the limits
+        inc = abs(xdata[1] - xdata[0]) * .5
+        xl = [xl[0] - inc, xl[1] + inc]
+
+    xlim = list(kwargs.get('xlim', xl))
+    xlim.sort()
+    xlim[-1] = min(xlim[-1], xl[-1])
+    xlim[0] = max(xlim[0], xl[0])
+
+    if kwargs.get('x_reverse', kwargs.get('reverse', x.is_reversed)):
+        xlim.reverse()
+
+    ax.set_xlim(xlim)
+
+    # set the ordinates axis
+    # ----------------------
+
+    y = new.y
+    ydata = y.data
+    if not np.any(ydata):
+        # take into account the fact that sometimes axis have just labels
+        ydata = range(1,len(y.labels)+1)
+
+    yl = [ydata[0], ydata[-1]]
+    yl.sort()
+
+    if len(y.labels) < number_y_labels + 1:
+        # extend the axis so that the labels are not too close to the limits
+        inc = abs(ydata[1] - ydata[0]) * .5
+        yl = [yl[0] - inc, yl[1] + inc]
+
+    ylim = list(kwargs.get("ylim", yl))
+    ylim.sort()
+    ylim[-1] = min(ylim[-1], yl[-1])
+    xlim[0] = max(ylim[0], yl[0])
 
     # z intensity (by default we plot real part of the data)
+    # ------------------------------------------------------
+
     if not kwargs.get('imag', False):
-        z = new.RR.masked_data
+        zdata = new.RR.masked_data
     else:
-        z = new.RI.masked_data
-    zlim = kwargs.get('zlim', (z.min(), z.max()))
+        zdata = new.RI.masked_data
+    zlim = kwargs.get('zlim', (zdata.min(), zdata.max()))
+
+    if method in ['stack']:
+
+        # the z axis info
+        # ---------------
+        # zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
+        amp = np.ma.ptp(zdata) / 50.
+        zl = (np.min(np.ma.min(zdata) - amp), np.max(np.ma.max(zdata)) + amp)
+        zlim = list(kwargs.get('zlim', zl))
+        zlim.sort()
+        z_reverse = kwargs.get('z_reverse', False)
+        if z_reverse:
+            zlim.reverse()
+
+        # set the limits
+        # ---------------
+        ax.set_ylim(zlim)
+
+    else:
+
+        # the y axis info
+        # ----------------
+        ylim = list(kwargs.get('ylim', ylim))
+        ylim.sort()
+        y_reverse = kwargs.get('y_reverse', y.is_reversed)
+        if y_reverse:
+            ylim.reverse()
+
+        # set the limits
+        # ----------------
+        ax.set_ylim(ylim)
+
+    # ------------------------------------------------------------------------
+    # plot the source
+    # by default contours are plotted
+    # ------------------------------------------------------------------------
+    normalize = kwargs.get('normalize', None)
 
     if method in ['map', 'image']:
 
         zmin, zmax = zlim
-        #if not kwargs.get('negative', True):
         zmin = min(zmin, -zmax)
         zmax = max(-zmin, zmax)
         norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
 
+    if method in ['image']:
+        if discrete_data:
+            method = 'map'
+        else:
+            # image plot
+            # ----------
+            kwargs['nlevels'] = 500
+            if new.clevels is None:
+                new.clevels = clevels(zdata, **kwargs)
+            c = ax.contourf(xdata, ydata, zdata,
+                                   new.clevels, linewidths=lw, alpha=alpha)
+            c.set_cmap(cmap)
+            c.set_norm(norm)
+
     if method in ['map']:
 
-        # contour plot
-        # -------------
-        if new.clevels is None:
-            new.clevels = clevels(z, **kwargs)
+        if discrete_data:
 
-        c = ax.contour(x, y, z,
-                              new.clevels, linewidths=lw, alpha=alpha)
-        c.set_cmap(cmap)
-        c.set_norm(norm)
+            _colormap = cm = plt.get_cmap(cmap)
+            scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
-    elif method in ['image']:
+            marker = kwargs.get('marker', kwargs.get('m', None))
+            markersize = kwargs.get('markersize', kwargs.get('ms', 5.))
+            markevery = kwargs.get('markevery', kwargs.get('me', 1))
 
-        # image plot
-        # ----------
-        kwargs['nlevels'] = 500
-        if new.clevels is None:
-            new.clevels = clevels(z, **kwargs)
-        c = ax.contourf(x, y, z,
-                               new.clevels, linewidths=lw, alpha=alpha)
-        c.set_cmap(cmap)
-        c.set_norm(norm)
+            for i in ydata:
+                for j in xdata:
+
+                    l, =  ax.plot(j, i, lw=lw, marker='o',
+                                  markersize = markersize)
+                    l.set_color(scalarMap.to_rgba(zdata[i-1,j-1]))
+
+
+        else:
+            # contour plot
+            # -------------
+            if new.clevels is None:
+                new.clevels = clevels(zdata, **kwargs)
+
+            c = ax.contour(xdata, ydata, zdata,
+                                  new.clevels, linewidths=lw, alpha=alpha)
+            c.set_cmap(cmap)
+            c.set_norm(norm)
+
 
     elif method in ['stack']:
 
         # stack plot
         # ----------
-        normalize = kwargs.get('normalize', None)
 
         # now plot the collection of lines
-        # ---------------------------------
+        # --------------------------------
         # map colors using the colormap
-        ylim = kwargs.get("ylim", None)
 
-        if ylim is not None:
-             vmin, vmax = ylim
-        else:
-             vmin, vmax = sorted([y[0], y[-1]])
+        vmin, vmax = ylim
         norm = mpl.colors.Normalize(vmin=vmin,
                                      vmax=vmax)  # we normalize to the max time
         if normalize is not None:
@@ -245,17 +353,18 @@ def plot_2D(source, **kwargs):
         hold = kwargs.get('hold', False)
         lines = []
         if hold and not data_transposed:
-            lines.extend(new.ax.lines)  # keep the old lines
+            lines.extend(ax.lines)  # keep the old lines
 
-        line0, = ax.plot(x, z[0], lw=lw, picker=True)
 
-        for i in range(z.shape[0]):
+        line0, = ax.plot(xdata, zdata[0], lw=lw, picker=True)
+
+        for i in range(zdata.shape[0]):
             l = copy(line0)
-            l.set_ydata(z[i])
+            l.set_ydata(zdata[i])
             lines.append(l)
-            l.set_color(scalarMap.to_rgba(y[i]))
-            l.set_label("{:.5f}".format(y[i]))
-            l.set_zorder(z.shape[0]+1-i)
+            l.set_color(scalarMap.to_rgba(ydata[i]))
+            l.set_label("{:.5f}".format(ydata[i]))
+            l.set_zorder(zdata.shape[0]+1-i)
 
         # store the full set of lines
         new._ax_lines = lines[:]
@@ -264,7 +373,7 @@ def plot_2D(source, **kwargs):
         maxlines = kwargs.get('maxlines', plotter_preferences.max_lines_in_stack)
         log.debug('max number of lines %d'% maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
-        new.ax.lines = new._ax_lines[::setpy]  # displayed ax lines
+        ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 
     if data_only:
         # if data only (we will  ot set axes and labels
@@ -275,65 +384,6 @@ def plot_2D(source, **kwargs):
     # -------------------------------------------------------------------------
     # axis limits and labels
     # -------------------------------------------------------------------------
-    # abscissa limits?
-    xl = [x.data[0], x.data[-1]]
-    xl.sort()
-    xlim = list(kwargs.get('xlim', xl))
-    xlim.sort()
-    xlim[-1] = min(xlim[-1], xl[-1])
-    xlim[0] = max(xlim[0], xl[0])
-
-    # reversed x axis?
-    # -----------------
-    if kwargs.get('x_reverse',
-                  kwargs.get('reverse', new.x.is_reversed)):
-        xlim.reverse()
-
-    # set the limits
-    # ---------------
-    ax.set_xlim(xlim)
-
-    # ordinates limits?
-    # ------------------
-    if method in ['stack']:
-        # the z axis info
-        # ----------------
-
-        #zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
-        amp = np.ma.ptp(z)/50.
-        zl = (np.min(np.ma.min(z)-amp), np.max(np.ma.max(z))+amp)
-        zlim = list(kwargs.get('zlim', zl))
-        zlim.sort()
-        z_reverse = kwargs.get('z_reverse', False)
-        if z_reverse:
-            zlim.reverse()
-
-        # set the limits
-        # ---------------
-        ax.set_ylim(zlim)
-
-    else:
-        # the y axis info
-        # ----------------
-        ylim = list(kwargs.get('ylim', new.ax.get_ylim()))
-        ylim.sort()
-        y_reverse = kwargs.get('y_reverse', new.y.is_reversed)
-        if y_reverse:
-            ylim.reverse()
-
-        # set the limits
-        # ----------------
-        ax.set_ylim(ylim)
-
-    number_x_labels = plotter_preferences.number_of_x_labels
-    number_y_labels = plotter_preferences.number_of_y_labels
-    new.ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-    new.ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-    # the next two line are to avoid multipliers in axis scale
-    y_formatter = ScalarFormatter(useOffset=False)
-    new.ax.yaxis.set_major_formatter(y_formatter)
-    new.ax.xaxis.set_ticks_position('bottom')
-    new.ax.yaxis.set_ticks_position('left')
 
 
     # -------------------------------------------------------------------------
@@ -344,8 +394,16 @@ def plot_2D(source, **kwargs):
     # -------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        xlabel = make_label(new.x, 'x')
+        xlabel = make_label(x, 'x')
     ax.set_xlabel(xlabel)
+
+    # x tick labels
+
+    uselabelx = kwargs.get('uselabel_x', False)
+    if (uselabelx or not np.any(x.data)) and len(x.labels)<number_x_labels+1:
+        #TODO refine this to use different orders of labels
+        ax.set_xticks(xdata)
+        ax.set_xticklabels(x.labels)
 
     # y label
     # --------
@@ -353,15 +411,23 @@ def plot_2D(source, **kwargs):
     if not ylabel:
         if method in ['stack']:
             ylabel = make_label(new, 'z')
+
         else:
-            ylabel = make_label(new.y, 'y')
+            ylabel = make_label(y, 'y')
+            # y tick labels
+            uselabely = kwargs.get('uselabel_y', False)
+            if (uselabely or not np.any(y.data)) and \
+                            len(y.labels)<number_y_labels:
+                # TODO refine this to use different orders of labels
+                ax.set_yticks(ydata)
+                ax.set_yticklabels(y.labels)
 
     # z label
     # --------
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         if method in ['stack']:
-            zlabel = make_label(new.y, 'y')
+            zlabel = make_label(y, 'y')
         else:
             zlabel = make_label(new, 'z')
 
@@ -378,7 +444,8 @@ def plot_2D(source, **kwargs):
             axec.name = axec.name+nameadd
             new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
             new._axcb.set_label(zlabel)
-            # new._axcb.ax.yaxis.set_major_formatter(y_formatter) #this doesn't work
+            # new._axcb.ax.yaxis.set_major_formatter(y_formatter)
+            # #this doesn't work
         pass
 
     # do we display the zero line

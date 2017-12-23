@@ -289,15 +289,18 @@ def plot_1D(source, **kwargs):
     """
     # where to plot?
     # ---------------
+
     new = source.copy()
+
+    # figure setup
+    # ------------
 
     new._figure_setup(**kwargs)
 
     ax = new.ndaxes['main']
 
-    # -------------------------------------------------------------------------
-    # plot the source
-    # -------------------------------------------------------------------------
+    # Other properties
+    # ------------------
 
     method = kwargs.pop('method','pen')
     is_twinx = kwargs.pop('twinx', None) is not None
@@ -320,8 +323,32 @@ def plot_1D(source, **kwargs):
     markersize = kwargs.get('markersize', kwargs.get('ms', 5.))
     markevery = kwargs.get('markevery', kwargs.get('me', 1))
 
+
+    number_x_labels = plotter_preferences.number_of_x_labels  # get from config
+    number_y_labels = plotter_preferences.number_of_y_labels
+    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
+    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    ax.xaxis.set_ticks_position('bottom')
+    if not is_twinx:
+        # do not move these label for twin axes!
+        ax.yaxis.set_ticks_position('left')
+
+    # the next lines are to avoid multipliers in axis scale
+    formatter = ScalarFormatter(useOffset=False)
+    ax.xaxis.set_major_formatter(formatter)
+    ax.yaxis.set_major_formatter(formatter)
+
+    # ------------------------------------------------------------------------
+    # plot the source
+    # ------------------------------------------------------------------------
+
     # abscissa axis
     x = new.x
+
+    # take into account the fact that sometimes axis have just labels
+    xdata = x.data
+    if not np.any(xdata):
+        xdata = range(1,len(x.labels)+1)
 
     # ordinates (by default we plot real part of the data)
     if not kwargs.pop('imag', False) or kwargs.get('show_complex', False):
@@ -335,9 +362,6 @@ def plot_1D(source, **kwargs):
 
     # plot_lines
     # -----------------------------
-    xdata = x.data
-    if not np.any(xdata):
-        xdata = range(1,len(x.labels)+1)
 
     if scatterpen:
         line, = ax.plot(xdata, z.masked_data,  markersize = markersize,
@@ -372,16 +396,17 @@ def plot_1D(source, **kwargs):
         line.set_linestyle(ls)
 
     # -------------------------------------------------------------------------
-    # axis limits
+    # axis
     # -------------------------------------------------------------------------
 
     # abscissa limits?
     xl = [xdata[0], xdata[-1]]
     xl.sort()
 
-    if bar:
-        # we need to extend the axis to take into account the width of the bars
-        xl = xl[0]-barwidth*.6, xl[1]+barwidth*.6
+    if bar or len(x.labels) < number_x_labels+1:
+        # extend the axis so that the labels are not too close to the limits
+        inc = (xdata[1]-xdata[0])*.5
+        xl = xl[0]-inc, xl[1]+inc
 
     # ordinates limits?
     amp = np.ma.ptp(z.masked_data) / 50.
@@ -423,17 +448,6 @@ def plot_1D(source, **kwargs):
 
     ax.set_ylim(zlim)
 
-    number_x_labels = plotter_preferences.number_of_x_labels  # get from config
-    number_y_labels = plotter_preferences.number_of_y_labels
-    # the next two line are to avoid multipliers in axis scale
-    y_formatter = ScalarFormatter(useOffset=False)
-    ax.yaxis.set_major_formatter(y_formatter)
-    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-    ax.xaxis.set_ticks_position('bottom')
-    if not is_twinx:
-        # do not move these label for twin axes!
-        ax.yaxis.set_ticks_position('left')
 
     # -------------------------------------------------------------------------
     # labels
@@ -452,6 +466,7 @@ def plot_1D(source, **kwargs):
     ax.set_xlabel(xlabel)
 
     # x tick labels
+
     uselabel = kwargs.get('uselabel', False)
     if uselabel or not np.any(x.data):
         #TODO refine this to use different orders of labels
@@ -459,6 +474,7 @@ def plot_1D(source, **kwargs):
         ax.set_xticklabels(x.labels)
 
     # z label
+
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         zlabel = make_label(new, 'z')

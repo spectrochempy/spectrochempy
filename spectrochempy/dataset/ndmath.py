@@ -468,6 +468,60 @@ class NDMath(object):
             new._data = ma
         return new
 
+    @getdocfrom(np.std)
+    def std(self, *args, **kwargs):
+        """Standard deviation values along axis"""
+
+        new = self.copy()
+        ma = np.std(new._masked_data, *args, **kwargs)
+        if isinstance(ma, MaskedArray):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
+        return new
+
+    # utilities
+
+    @getdocfrom(np.ptp)
+    def ptp(self, *args, **kwargs):
+        """amplitude of data along axis"""
+
+        new = self.copy()
+        ma = np.ptp(new._masked_data, *args, **kwargs)
+        if isinstance(ma, MaskedArray):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
+        return new
+
+    @getdocfrom(np.min)
+    def min(self, *args, **kwargs):
+        """minimum of data along axis"""
+
+        new = self.copy()
+        ma = np.min(new._masked_data, *args, **kwargs)
+        if isinstance(ma, MaskedArray):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
+        return new
+
+    @getdocfrom(np.max)
+    def max(self, *args, **kwargs):
+        """maximum of data along axis"""
+
+        new = self.copy()
+        ma = np.max(new._masked_data, *args, **kwargs)
+        if isinstance(ma, MaskedArray):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
+        return new
+
     # -------------------------------------------------------------------------
     # special methods
     # -------------------------------------------------------------------------
