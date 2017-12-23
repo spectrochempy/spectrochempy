@@ -247,8 +247,8 @@ class PCA(HasTraits):
                                            pcs[0], self.ev_ratio.data[pcs[0]]))
             ax.set_ylabel('PC# {} ({:.3f}%)'.format(
                                            pcs[1], self.ev_ratio.data[pcs[1]]))
-            ax.scatter(self.T.data[:, pcs[0]],
-                        self.T.data[:, pcs[1]],
+            ax.scatter(self.T.masked_data[:, pcs[0]],
+                        self.T.masked_data[:, pcs[1]],
                         s=30,
                         c=colors,
                         cmap=cmap)
@@ -278,9 +278,9 @@ class PCA(HasTraits):
             ax.set_zlabel(
                     'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio.data[pcs[
                         2]]))
-            ax.scatter(self.T.data[:, pcs[0]],
-                       self.T.data[:, pcs[1]],
-                       self.T.data[:, pcs[2]],
+            ax.scatter(self.T.masked_data[:, pcs[0]],
+                       self.T.masked_data[:, pcs[1]],
+                       self.T.masked_data[:, pcs[2]],
                        zdir='z',
                        s=30,
                        c=colors,

@@ -124,7 +124,7 @@ class SVD(HasTraits):
         # ------------------------------
         KV = VT.shape[0]
         if np.any(masked_columns):
-            Vtemp = np.zeros((KV, N))
+            Vtemp = np.ma.zeros((KV, N))
             Vtemp[ : , ~ masked_columns ] = VT
             Vtemp[ : , masked_columns] = masked
             VT = Vtemp
@@ -133,7 +133,7 @@ class SVD(HasTraits):
         # -------------------------
         KU = U.shape[1]
         if np.any(masked_rows):
-            Utemp = np.zeros((M, KU))
+            Utemp = np.ma.zeros((M, KU))
             Utemp[~ masked_rows ] = U
             Utemp[masked_rows] = masked
             U = Utemp
