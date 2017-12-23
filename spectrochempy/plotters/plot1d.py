@@ -336,7 +336,7 @@ def plot_1D(source, **kwargs):
     # plot_lines
     # -----------------------------
     xdata = x.data
-    if not xdata:
+    if not np.any(xdata):
         xdata = range(1,len(x.labels)+1)
 
     if scatterpen:
@@ -453,7 +453,7 @@ def plot_1D(source, **kwargs):
 
     # x tick labels
     uselabel = kwargs.get('uselabel', False)
-    if uselabel or not x.data:
+    if uselabel or not np.any(x.data):
         #TODO refine this to use different orders of labels
         ax.set_xticks(xdata)
         ax.set_xticklabels(x.labels)

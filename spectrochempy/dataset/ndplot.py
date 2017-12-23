@@ -38,6 +38,9 @@ from spectrochempy.utils import (is_sequence,
 from spectrochempy.plotters.utils import cmyk2rgb
 from spectrochempy.application import app
 from spectrochempy.utils import docstrings
+from spectrochempy.plotters.plot1d import plot_1D
+from spectrochempy.plotters.plot2d import plot_2D
+from spectrochempy.plotters.plot3d import plot_3D
 
 # Constants
 # ---------
@@ -216,15 +219,15 @@ class NDPlot(HasTraits):
 
         if self.ndim == 1:
 
-            ax = self.plot_1D(**kwargs)
+            ax = plot_1D(self, **kwargs)
 
         elif self.ndim == 2:
 
-            ax = self.plot_2D(**kwargs)
+            ax = plot_2D(self, **kwargs)
 
         elif self.ndim == 3:
 
-            ax = self.plot_3D(**kwargs)
+            ax = plot_3D(self, **kwargs)
 
         else:
             log.error('Cannot guess an adequate plotter, nothing done!')
