@@ -350,7 +350,7 @@ class PCA(HasTraits):
         if isinstance(pcs[0], (list,tuple, set)):
             pcs = pcs[0]
 
-        # transform to internal index of unitary vectors (1->0 etc...)
+        # transform to internal index of component's index (1->0 etc...)
         pcs = np.array(pcs) - 1
 
         # colors

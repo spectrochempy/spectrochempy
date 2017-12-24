@@ -121,7 +121,6 @@ class SVD(HasTraits):
                                         "want to check the masked data. ")
 
         U, s, VT = np.linalg.svd(data, full_matrices, compute_uv)
-        U, VT = svd_flip(U, VT)
 
         # Put back masked columns in  VT
         # ------------------------------
@@ -129,7 +128,7 @@ class SVD(HasTraits):
         # array constructor
         KV = VT.shape[0]
         if np.any(masked_columns):
-            Vtemp = np.ma.zeros((KV, N))  # note np.ma, ot np.
+            Vtemp = np.ma.zeros((KV, N))  # note np.ma, not np.
             Vtemp[ : , ~ masked_columns ] = VT
             Vtemp[ : , masked_columns] = masked
             VT = Vtemp
@@ -142,6 +141,11 @@ class SVD(HasTraits):
             Utemp[~ masked_rows ] = U
             Utemp[masked_rows] = masked
             U = Utemp
+
+        # Sign correction to ensure deterministic output from SVD.
+        # This doesn't work will full_matrices=True.
+        if not full_matrices:
+            U, VT = svd_flip(U, VT)
 
         # Returns U as a NDDataset object
         # --------------------------------

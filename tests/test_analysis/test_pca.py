@@ -24,7 +24,7 @@ def test_pca(IR_source_2D):
 
     pca = PCA(source)
     print(pca)
-    pca.printev(npc=5)
+    pca.printev(n_pc=5)
 
     assert str(pca)[:3] == '\nPC'
 

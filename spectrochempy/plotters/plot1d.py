@@ -406,7 +406,7 @@ def plot_1D(source, **kwargs):
     if bar or len(x.labels) < number_x_labels+1:
         # extend the axis so that the labels are not too close to the limits
         inc = (xdata[1]-xdata[0])*.5
-        xl = xl[0]-inc, xl[1]+inc
+        xl = [xl[0]-inc, xl[1]+inc]
 
     # ordinates limits?
     amp = np.ma.ptp(z.masked_data) / 50.
@@ -417,11 +417,11 @@ def plot_1D(source, **kwargs):
     multiplelines = 2 if kwargs.get('show_zero', False) else 1
     if len(ax.lines) > multiplelines:
         # get the previous xlim and zlim
-        xlim = ax.get_xlim()
+        xlim = list(ax.get_xlim())
         xl[-1] = max(xlim[-1], xl[-1])
         xl[0] = min(xlim[0], xl[0])
 
-        zlim = ax.get_ylim()
+        zlim = list(ax.get_ylim())
         zl[-1] = max(zlim[-1], zl[-1])
         zl[0] = min(zlim[0], zl[0])
 
