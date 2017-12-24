@@ -9,7 +9,6 @@
 
 __all__ = ['PCA']
 
-
 # ----------------------------------------------------------------------------
 # imports
 # ----------------------------------------------------------------------------
@@ -22,20 +21,20 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
+# ----------------------------------------------------------------------------
+# localimports
+# ----------------------------------------------------------------------------
+
 from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.analysis.svd import SVD
 from spectrochempy.processors.numpy import diag, dot
 from spectrochempy.dataset.ndplot import NRed, NBlue
+from spectrochempy.application import app
 
 # ============================================================================
 # Global preferences
 # ============================================================================
-from spectrochempy.application import app
-
-# ----------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------
 
 plotter_preferences = app.plotter_preferences
 log = app.log
@@ -50,11 +49,18 @@ class PCA(HasTraits):
     """
     Principal Component Analysis
 
-    This class performs a Principal Component Analysis of a NDDataset, *i.e.*,
-    a linear dimensionality reduction using Singular Value Decomposition (SVD)
-    of the data to project it to a lower dimensional space.
+    This class performs a Principal Component Analysis of a
+    :class:`~spectrochempy.dataset.nddataset.NDDataset`, *i.e.*,
+    a linear dimensionality reduction using Singular Value Decomposition
+    (:class:`~spectrochempy.analysis.svd.SVD`)
+    of the data to perform its projection to a lower dimensional space.
 
-    If the dataset contains masked values, the corresponding ranges are
+    The reduction of a dataset :math:`X` with shape (`M`,`N`) is achieved
+    using the decomposition: :math:`X = S.L^T`, where
+    :math:`S` is the score's matrix with shape (`M`, `n_pc`) and :math:`L^T` is
+    the transposed loading's matrix with shape (`n_pc`, `N`).
+
+    If the dataset `X` contains masked values, these values are silently
     ignored in the calculation.
 
     """
@@ -73,29 +79,43 @@ class PCA(HasTraits):
         """
         Parameters
         ----------
-        X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object.
-            The dataset has shape (``M``, ``N``). ``M`` is the number of
-            observations (for examples a series of IR spectra) while ``N``
+        X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object
+            The dataset has shape (`M`, `N`). `M` is the number of
+            observations (for examples a series of IR spectra) while `N`
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
-        centered : Bool, optional, default=True
-            If True the data are centered around the mean values:
-            X' = X - mean(X)
-        standardized : Bool, optional, default=False
-            If True the data are scaled to unit standard deviation:
-            X' = X / sigma
-        scaled : Bool, optional, default=False
-            If True the data are scaled in the interval [0-1]
-            X' = (X - min(X)) / (max(X)-min(X))
+        centered : bool, optional, default:True
+            If ``True`` the data are centered around the mean values:
+            :math:`X' = X - mean(X)`.
+        standardized : bool, optional, default:False
+            If ``True`` the data are scaled to unit standard deviation:
+            :math:`X' = X / \sigma`.
+        scaled : bool, optional, default:False
+            If ``True`` the data are scaled in the interval [0-1]:
+            :math:`X' = (X - min(X)) / (max(X)-min(X))`
+
+        Examples
+        --------
+
+        .. plot::
+            :include-source:
+
+            from spectrochempy.api import *
+            source = upload_IRIS()
+            pca = PCA(source, centered=True)
+            LT, S = pca.transform(n_pc='auto')
+            _ = pca.screeplot()
+            _ = pca.scoreplot(1,2, color_mapping='labels')
+            show()
 
         Attributes
         ----------
-        ev : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
-            Eigenvalues of the covariance matrix
-        ev_ratio : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
-            Explained Variance per singular values
-        ev_cum : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
-            Cumulative Explained Variance
+        ev : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+            Explained variances (The eigenvalues of the covariance matrix).
+        ev_ratio : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+            Explained variance per singular values.
+        ev_cum : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+            Cumulative Explained Variances.
 
         """
 
@@ -164,15 +184,12 @@ class PCA(HasTraits):
         # other attributes
         # ----------------
 
-        #: explained variance
         self.ev = svd.ev
         self.ev.x.title = 'PC #'
 
-        #: Explained variance per singular values
         self.ev_ratio= svd.ev_ratio
         self.ev_ratio.x.title = 'PC #'
 
-        #: Cumulative Explained Variance
         self.ev_cum = svd.ev_cum
         self.ev_cum.x.title = 'PC #'
 
@@ -231,7 +248,7 @@ class PCA(HasTraits):
     def _assess_dimension_(self, rank):
         """Compute the likelihood of a rank ``rank`` dataset
         The dataset is assumed to be embedded in gaussian noise having
-        spectrum ``spectrum`` (here the explained variances).
+        spectrum ``spectrum`` (here, the explained variances `ev` ).
 
         Parameters
         ----------
@@ -240,14 +257,13 @@ class PCA(HasTraits):
 
         Returns
         -------
-        ll : float,
-            The log-likelihood
+        float
+            The log-likelihood.
 
         Notes
         -----
-        This implements the method of `Thomas P. Minka:
-        Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604`
-
+        This implements the method of Thomas P. Minka:
+        Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604.
         Copied and modified from scikit-learn.decomposition.pca (BSD-3 license)
 
         """
@@ -291,8 +307,10 @@ class PCA(HasTraits):
     def _infer_pc_(self):
         """Infers the number of principal components.
 
-        Copied and modified from
-        _infer_dimensions in scikit-learn.decomposition.pca (BSD-3 license)
+        Notes
+        -----
+        Copied and modified from _infer_dimensions in
+        scikit-learn.decomposition.pca (BSD-3 license).
 
         """
         n_ev = self.ev.size
@@ -307,24 +325,22 @@ class PCA(HasTraits):
 
     def transform(self, n_pc=None):
         """
-        Apply the dimensionality reduction to the X dataset of shape
-        [n_observation, n_features].
+        Apply the dimensionality reduction to the X dataset of shape [M, N].
 
-        Loadings :math:`L` with shape [n_pc, n_features] and scores :math:`S`
-        with shape [n_observation, n_pc] are obtained using the following
-        decomposition: :math:`X = S.L^T`
+        Loadings `L` with shape [``n_pc``, `N`] and scores `S`
+        with shape [`M`, `n_pc`] are obtained using the following
+        decomposition: :math:`X = S.L^T`.
 
         Parameters
         ----------
-        n_pc : int, optional, default=10
+        n_pc : int, optional
             The number of principal components to compute. If not set all
             components are returned, except if n_pc is set to ``auto`` for
             an automatic determination of the number of components.
 
         Returns
         -------
-        :math:`L^T`, :math:`S` : :class:`~spectrochempy.dataset.nddataset.NDDataset
-        `objects.
+        LT, S : :class:`~spectrochempy.dataset.nddataset.NDDataset` objects.
             n_pc loadings and their corresponding scores for each observations.
 
 
@@ -350,16 +366,16 @@ class PCA(HasTraits):
         PC's.
 
         The following matrice operation is performed: :math:`X' = S'.L'^T`
-        where :math:`S'=S[:, n_pc]` and :math:`L'=L[:, n_pc].
+        where S'=S[:, n_pc] and L=L[:, n_pc].
 
         Parameters
         ----------
-        n_pc : int, optional, default=10
-            The number of PC to use for the reconstruction
+        n_pc : int, optional
+            The number of PC to use for the reconstruction.
 
         Return
         ------
-        X_reconstructed : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+        X_reconstructed : :class:`~spectrochempy.dataset.nddataset.NDDataset`
             The reconstructed dataset based on n_pc principal components.
 
         """
@@ -390,13 +406,12 @@ class PCA(HasTraits):
 
     def printev(self, n_pc=None):
         """prints figures of merit: eigenvalues and explained variance
-        for the first n_pc PS's
+        for the first n_pc PS's.
 
         Parameters
         ----------
-        n_pc : int, optional, default=10
-
-          The number of PC to print
+        n_pc : int, optional
+            The number of components to print.
 
         """
         # get n_pc (automatic or determined by the n_pc arguments)
@@ -406,12 +421,12 @@ class PCA(HasTraits):
 
     def screeplot(self, n_pc=None, **kwargs):
         """
-        Scree plot of explained variance + cumulative variance by PCA
+        Scree plot of explained variance + cumulative variance by PCA.
 
         Parameters
         ----------
         n_pc: int
-            Number of components to plot
+            Number of components to plot.
 
         """
         # get n_pc (automatic or determined by the n_pc arguments)
@@ -441,22 +456,18 @@ class PCA(HasTraits):
     def scoreplot(self, *pcs, colormap='viridis', color_mapping='index' ,
                   **kwargs):
         """
-        2D or 3D scoreplot of samples
+        2D or 3D scoreplot of samples.
 
         Parameters
         ----------
         *pcs: a series of int argument or a list/tuple
-            Must contain 2 or 3 elements
+            Must contain 2 or 3 elements.
         colormap : str
-            A matplotlib colormap
+            A matplotlib colormap.
         color_mapping : 'index' or 'labels'
             If 'index', then the colors of each n_scores is mapped sequentially
             on the colormap. If labels, the labels of the n_observation are
             used for color mapping.
-
-        Examples
-        --------
-        >>> pca.scoreplot(1,2)
 
         """
 
@@ -530,6 +541,9 @@ class PCA(HasTraits):
                        cmap=colormap,
                        depthshade=True)
 
+        return ax
+
+# ============================================================================
 if __name__ == '__main__':
 
     from tests.conftest import IR_source_2D

@@ -32,7 +32,7 @@ class SVD(HasTraits):
     
     The SVD is commonly written as :math:`X = U \Sigma V^{T}`.
 
-    This class has the attributes: U, s = diag(S) and VT=V.T.
+    This class has the attributes: U, s = diag(S) and VT=V:math:`^T`.
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
@@ -70,12 +70,12 @@ class SVD(HasTraits):
 
         Attributes
         ----------
-        U : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+        U : :class:`~spectrochempy.dataset.nddataset.NDDataset`
             `U` contains the left unitary matrix.
             Its shape depends on `full_matrices`.
-        s : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+        s : :class:`~spectrochempy.dataset.nddataset.NDDataset`
             Vector of singular values
-        VT : :class:`~spectrochempy.dataset.dataset.NDDataset`.
+        VT : :class:`~spectrochempy.dataset.dataset.NDDataset`
             `VT` contains a transpose matrix of the Loadings.
             Its shape depends on `full_matrices`
 
@@ -244,7 +244,9 @@ class SVD(HasTraits):
             If True, use the columns of u as the basis for sign flipping.
             Otherwise, use the rows of v.
 
-        ..notes:: Copied from scikit-learn.utils.extmath (BSD3-Licence)
+        Notes
+        -----
+        Copied and modified from scikit-learn.utils.extmath (BSD 3 Licence)
 
         """
 

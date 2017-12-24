@@ -53,18 +53,20 @@ extensions = [
     'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
-    #'spectrochempy.sphinxext.extended_napoleon',
-    'numpydoc',
+    #'sphinx.ext.napoleon',
+    'spectrochempy.sphinxext.extended_napoleon',
+    #'numpydoc',
     'sphinx_gallery.gen_gallery',
     'nbsphinx',
     'spectrochempy.sphinxext.autodocsumm',
     'spectrochempy.sphinxext.traitlets_sphinxdoc',
+    'sphinx_nbexamples',
 ]
 
 # Numpy autodoc attributes
-numpydoc_show_class_members = False
-numpydoc_use_plots =  True
-numpydoc_class_members_toctree = False
+#numpydoc_show_class_members = False
+#numpydoc_use_plots =  True
+#numpydoc_class_members_toctree = False
 
 # Napoleon settings
 napoleon_google_docstring = False
@@ -75,9 +77,9 @@ napoleon_include_special_with_doc = False
 napoleon_use_admonition_for_examples = True
 napoleon_use_admonition_for_notes = True
 napoleon_use_admonition_for_references = True
-napoleon_use_ivar = False
+napoleon_use_ivar = True
 napoleon_use_param = True
-napoleon_use_rtype = False
+napoleon_use_rtype = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

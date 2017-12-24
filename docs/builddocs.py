@@ -169,6 +169,9 @@ def make_docs(*args):
         "\n\nBuild finished. The {0} pages are in {1}/{2}.".format(
             builder.upper(), BUILDDIR, builder))
 
+        #do some cleaning
+        shutil.rmtree('auto_examples', ignore_errors=True)
+
     if 'release' in args:
         do_release()
 
@@ -195,7 +198,7 @@ def do_release():
                      PROJECT=PROJECT,
                      FROM=os.path.join(path,'%s_doc'%PROJECT,'*'),
                      SERVER=SERVER)
-        print(cmd)
+
         log.debug(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
         log.debug(cmd)
         res = subprocess.call([cmd], shell=True, executable='/bin/bash')

@@ -110,8 +110,6 @@ def plot_2D(source, **kwargs):
 
     """.format(source._general_parameters_doc_)
 
-    mpl.interactive(False)
-
     # method of plot
     # ------------
 

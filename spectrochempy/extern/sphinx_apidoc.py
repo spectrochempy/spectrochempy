@@ -453,7 +453,7 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
         while not os.path.exists(rootpath):
             rootpath = os.path.join(dirname, _rootpath)
             dirname = os.path.dirname(dirname)
-            print(rootpath)
+            #print(rootpath)
 
     if not os.path.isdir(rootpath):
         print('%s is not a directory.' % rootpath, file=sys.stderr)
