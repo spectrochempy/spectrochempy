@@ -25,6 +25,7 @@ from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.dataset.ndarray import masked, nomask
 
 # ----------------------------------------------------------------------------
+
 class SVD(HasTraits):
     """
     Performs a Singular Value Decomposition of a dataset.
@@ -72,7 +73,7 @@ class SVD(HasTraits):
         U : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
             `U` contains the left unitary matrix.
             Its shape depends on `full_matrices`.
-        s : `numpy.ndarray`.
+        s : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
             Vector of singular values
         VT : :class:`~spectrochempy.dataset.dataset.NDDataset`.
             `VT` contains a transpose matrix of the Loadings.
@@ -120,6 +121,7 @@ class SVD(HasTraits):
                                         "want to check the masked data. ")
 
         U, s, VT = np.linalg.svd(data, full_matrices, compute_uv)
+        U, VT = svd_flip(U, VT)
 
         # Put back masked columns in  VT
         # ------------------------------
@@ -149,7 +151,7 @@ class SVD(HasTraits):
         U.coordset = CoordSet(X.coordset[0],
                               Coord(None,
                                 labels=['#%d' % (i+1) for i in range(KU)],
-                                title='Unitary vectors')
+                                title='Components')
                               )
         U.description = 'left singular vectors of ' + X.name
         U.history = 'created by SVD \n'
@@ -162,7 +164,7 @@ class SVD(HasTraits):
         VT.title = 'Loadings (V.t) of ' + X.name
         VT.coordset = CoordSet(Coord(None,
                                  labels=['#%d' % (i+1) for i in range(KV)],
-                                 title='Unitary vectors'),
+                                 title='Components'),
                                X.coordset[1])
         VT.description = (
             'Loadings obtained by singular value decomposition of ' + X.name)
@@ -197,15 +199,15 @@ class SVD(HasTraits):
 
     @property
     def ev(self):
-        """`NDDataset`,  eigenvalues of the covariance matrix """
+        """`NDDataset`,  Explained variance """
         size = self.s.size
         ev = (self.s ** 2) / (size - 1)
         ev.name = 'ev'
-        ev.title = 'Eigenvalues'
+        ev.title = 'Explained variance'
         ev.coordset = CoordSet(
                                  Coord(None,
                                  labels=['#%d' % (i+1) for i in range(size)],
-                                 title='Unitary vectors'))
+                                 title='Components'))
         return ev
 
     @property
@@ -213,7 +215,7 @@ class SVD(HasTraits):
         """`NDDataset`,  Cumulative Explained Variance """
         ev_cum = np.cumsum(self.ev_ratio)
         ev_cum.name = 'ev_cum'
-        ev_cum.title = 'Cumulative variance'
+        ev_cum.title = 'Cumulative explained variance'
         ev_cum.units = 'percent'
         return ev_cum
 
@@ -226,7 +228,44 @@ class SVD(HasTraits):
         ratio.units = 'percent'
         return ratio
 
+def svd_flip(u, v, u_based_decision=True):
+    """
+    Sign correction to ensure deterministic output from SVD.
+    Adjusts the columns of u and the rows of v such that the loadings in the
+    columns in u that are largest in absolute value are always positive.
 
+    Parameters
+    ----------
+    u, v : ndarray
+        u and v are the output of `linalg.svd` with matching inner dimensions
+        so one can compute `np.dot(u * s, v)`.
+    u_based_decision : boolean, (default=True)
+        If True, use the columns of u as the basis for sign flipping.
+        Otherwise, use the rows of v.
+
+    Returns
+    -------
+    u_adjusted, v_adjusted : arrays with the same dimensions as the input.
+
+    ..notes:: Copied from scikit-learn.utils.extmath (BSD3-Licence)
+
+    """
+    if u_based_decision:
+        # columns of u, rows of v
+        max_abs_cols = np.argmax(np.abs(u), axis=0)
+        signs = np.sign(u[max_abs_cols, range(u.shape[1])])
+        u *= signs
+        v *= signs[:, np.newaxis]
+    else:
+        # rows of v, columns of u
+        max_abs_rows = np.argmax(np.abs(v), axis=1)
+        signs = np.sign(v[range(v.shape[0]), max_abs_rows])
+        u *= signs
+        v *= signs[:, np.newaxis]
+    return u, v
+
+
+# ============================================================================
 if __name__ == '__main__':
 
     from tests.conftest import IR_source_2D

@@ -73,7 +73,6 @@ def upload_IRIS():
 NDDataset.upload_IRIS = upload_IRIS
 
 
-
 # =============================================================================
 if __name__ == '__main__':
 
@@ -84,8 +83,8 @@ if __name__ == '__main__':
     ds.plot_stack()
 
     pca = PCA(ds, centered=True)
-    pca.transform()
-    pca.Pt.plot_stack()
+    L, S = pca.transform()
+    L.plot_stack()
     pca.screeplot()
-    pca.scoreplot(1,2)
+    pca.scoreplot(1,2, color_mapping='labels')
     show()

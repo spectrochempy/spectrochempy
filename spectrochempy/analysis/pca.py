@@ -62,7 +62,7 @@ class PCA(HasTraits):
     ev_ratio = Instance(NDDataset)
     ev_cum = Instance(NDDataset)
 
-    def __init__(self, X, npc=None,
+    def __init__(self, X,
                  centered=True,
                  standardized=False,
                  scaled = False):
@@ -126,9 +126,33 @@ class PCA(HasTraits):
 
         # perform SVD
         # -----------
-        self._svd = svd = SVD(Xsc)
+        svd = svd = SVD(Xsc)
+        sigma = diag(svd.s)
+        U = svd.U
+        VT = svd.VT
 
-        self._sigma = diag(svd.s)
+        # select n_pc loadings & compute scores
+        # --------------------------------------------------------------------
+
+        # loadings
+
+        LT = VT
+        LT.title = 'Loadings (L^T) of ' + X.name
+        LT.history = 'created by PCA'
+
+        # scores
+
+        S = dot(U, sigma)
+        S.title = 'scores (S) of ' + X.name
+        S.coordset = CoordSet(X.y, Coord(None,
+                          labels=['#%d' % (i + 1) for i in range(svd.s.size)],
+                              title='principal component'))
+
+        S.description = 'scores (S) of ' + X.name
+        S.history = 'created by PCA'
+
+        self._LT = LT
+        self._S = S
 
         # other attributes
         # ----------------
@@ -151,13 +175,13 @@ class PCA(HasTraits):
     # Special methods
     # ------------------------------------------------------------------------
 
-    def __str__(self, npc=10):
+    def __str__(self, n_pc=10):
 
         s = '\nPC\t\tEigenvalue\t\t%variance\t' \
             '%cumulative\n'
         s += '   \t\tof cov(X)\t\t per PC\t' \
              '     variance\n'
-        for i in range(npc):
+        for i in range(n_pc):
             tuple = (
             i, self.ev.data[i], self.ev_ratio.data[i], self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tuple)
@@ -168,88 +192,78 @@ class PCA(HasTraits):
     # Public methods
     # ------------------------------------------------------------------------
 
-    def transform(self, npc=None):
+    def transform(self, n_pc=None):
         """
-        Apply the dimensionality reduction
+        Apply the dimensionality reduction to the X dataset of shape
+        [n_observation, n_features].
+
+        Loadings :math:`L` with shape [n_pc, n_features] and scores :math:`S`
+        with shape [n_observation, n_pc] are obtained using the following
+        decomposition: :math:`X = S.L^T`
 
         Parameters
         ----------
-        npc : int, optional, default=10
-            The number of components to compute. If not set all components
-            are computed.
+        n_pc : int, optional, default=10
+            The number of principal components to compute. If not set all
+            components are returned, except if n_pc is set to ``auto`` for
+            an automatic determination of the number of components.
 
         Returns
         -------
-        Pt : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
-            Loadings
-        T : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
-            Scores
+        :math:`L^T`, :math:`S` : :class:`~spectrochempy.dataset.nddataset.NDDataset
+        `objects.
+            n_pc loadings and their corresponding scores for each observations.
 
 
         """
 
         X = self._X
 
-        # select npc loadings & compute scores
+        if n_pc is None:
+            n_pc = self._LT.shape[0]
+
+
+        # scores (S) and loading (L^T) matrices
         # ------------------------------------
 
-        if npc is None:
-            npc = self._svd.s.size
+        S = self._S[:, :n_pc]
+        LT = self._LT[:n_pc]
 
-        s = self._sigma[:npc, :npc]
-        u = self._svd.U[:, :npc]
-        T = dot(u, s)
+        return LT, S
 
-        T.title = 'scores (T) of ' + X.name
-        T.coordset = CoordSet(X.y,
-                              Coord(None,
-                              labels=['#%d' % (i+1) for i in range(npc)],
-                              title='PC')
-                              )
+    #_infer_dimension_(explained_variance_, n_samples, n_features)
 
-        T.description = 'scores (T) of ' + X.name
-        T.history = 'created by PCA'
-
-        Pt = self._svd.VT[0:npc]
-        Pt.title = 'Loadings (P.t) of ' + X.name
-        Pt.history = 'created by PCA'
-
-        # scores (T) and loading (Pt) matrices
-        # ------------------------------------
-
-        self.T = T
-        self.Pt = Pt
-
-        return Pt, T
-
-
-    def inverse_transform(self, npc=None):
+    def inverse_transform(self, n_pc=None):
         """
         Transform data back to the original space using the given number of
         PC's.
 
+        The following matrice operation is performed: :math:`X' = S'.L'^T`
+        where :math:`S'=S[:, n_pc]` and :math:`L'=L[:, n_pc].
+
         Parameters
         ----------
-        npc : int, optional, default=10
+        n_pc : int, optional, default=10
             The number of PC to use for the reconstruction
 
         Return
         ------
-        X : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+        X_reconstructed : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+            The reconstructed dataset based on n_pc principal components.
 
         """
 
-        if npc is None:
-            npc = self.T.shape[-1]
+        if n_pc is None:
+            n_pc = self._S.shape[-1]
         else:
-            npc = min(npc, self.T.shape[-1])
+            n_pc = min(n_pc, self._S.shape[-1])
 
-        T = self.T[:, :npc]
-        Pt = self.Pt[:npc]
+        S = self._S[:, :n_pc]
+        LT = self._LT[:n_pc]
 
-        X = dot(T, Pt)
+        X = dot(S, LT)
 
-        # try ti reconstruct something close to the original scaled,
+        # try to reconstruct something close to the original scaled,
         # standardized or centered data
         if self._scaled:
             X *= self._ampl
@@ -259,36 +273,37 @@ class PCA(HasTraits):
         if self._centered:
             X += self._center
 
-        X.history = 'PCA reconstructed Dataset with {} PCs'.format(npc)
+        X.history = 'PCA reconstructed Dataset with {} principal ' \
+                    'components'.format(n_pc)
         X.title = self._X.title
         return X
 
-    def printev(self, npc=10):
+    def printev(self, n_pc=10):
         """prints figures of merit: eigenvalues and explained variance
-        for the first npc PS's
+        for the first n_pc PS's
 
         Parameters
         ----------
-        npc : int, optional, default=10
+        n_pc : int, optional, default=10
 
           The number of PC to print
 
         """
-        print((self.__str__(npc)))
+        print((self.__str__(n_pc)))
 
     def screeplot(self,
-                  npc=5,
+                  n_pc=5,
                   **kwargs):
         """
         Scree plot of explained variance + cumulative variance by PCA
 
         Parameters
         ----------
-        npc: int
+        n_pc: int
             Number of components to plot
 
         """
-        npc = min(npc, self.ev.size)
+        n_pc = min(n_pc, self.ev.size)
         color1, color2 = kwargs.get('colors', [NBlue, NRed])
         pen = kwargs.get('pen', True)
         ylim1, ylim2 = kwargs.get('ylims', [(0,100), 'auto'])
@@ -298,10 +313,10 @@ class PCA(HasTraits):
             y2 = 101.
             ylim2 = (y1, y2)
 
-        ax1 = self.ev_ratio[:npc].plot_bar(ylim = ylim1,
+        ax1 = self.ev_ratio[:n_pc].plot_bar(ylim = ylim1,
                                            color = color1,
                                            title='Scree plot')
-        ax2 = self.ev_cum[:npc].plot_scatter(ylim = ylim2,
+        ax2 = self.ev_cum[:n_pc].plot_scatter(ylim = ylim2,
                                              color=color2,
                                              pen=True,
                                              markersize = 7.,
@@ -310,7 +325,8 @@ class PCA(HasTraits):
         return ax1, ax2
 
 
-    def scoreplot(self, *pcs, cmap='jet', **kwargs):
+    def scoreplot(self, *pcs, colormap='viridis', color_mapping='index' ,
+                  **kwargs):
         """
         2D or 3D scoreplot of samples
 
@@ -318,6 +334,12 @@ class PCA(HasTraits):
         ----------
         *pcs: a series of int argument or a list/tuple
             Must contain 2 or 3 elements
+        colormap : str
+            A matplotlib colormap
+        color_mapping : 'index' or 'labels'
+            If 'index', then the colors of each n_scores is mapped sequentially
+            on the colormap. If labels, the labels of the n_observation are
+            used for color mapping.
 
         Examples
         --------
@@ -332,12 +354,20 @@ class PCA(HasTraits):
         pcs = np.array(pcs) - 1
 
         # colors
-        if np.any(self.T.y.data):
-            colors = self.T.y.data
-        else:
-            colors = np.array(range(self.T.shape[0]))
+        if color_mapping == 'index':
+
+            if np.any(self._S.y.data):
+                colors = self._S.y.data
+            else:
+                colors = np.array(range(self._S.shape[0]))
+
+        elif color_mapping == 'labels':
+
+            labels = list(set(self._S.y.labels))
+            colors = [labels.index(l) for l in self._S.y.labels]
 
         if len(pcs) == 2:
+            # bidimentional score plot
 
             fig = plt.figure(**kwargs)
             ax = fig.add_subplot(111)
@@ -347,11 +377,11 @@ class PCA(HasTraits):
                                            pcs[0], self.ev_ratio.data[pcs[0]]))
             ax.set_ylabel('PC# {} ({:.3f}%)'.format(
                                            pcs[1], self.ev_ratio.data[pcs[1]]))
-            ax.scatter( self.T.masked_data[:, pcs[0]],
-                        self.T.masked_data[:, pcs[1]],
+            ax.scatter( self._S.masked_data[:, pcs[0]],
+                        self._S.masked_data[:, pcs[1]],
                         s=30,
                         c=colors,
-                        cmap=cmap)
+                        cmap=colormap)
 
             number_x_labels = plotter_preferences.number_of_x_labels  # get
             # from config
@@ -365,7 +395,7 @@ class PCA(HasTraits):
             ax.yaxis.set_ticks_position('left')
 
         if len(pcs) == 3:
-
+            # tridimensional score plot
             fig = plt.figure(**kwargs)
             ax = plt.axes(projection='3d')
             ax.set_title('Score plot')
@@ -378,13 +408,13 @@ class PCA(HasTraits):
             ax.set_zlabel(
                     'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio.data[pcs[
                         2]]))
-            ax.scatter(self.T.masked_data[:, pcs[0]],
-                       self.T.masked_data[:, pcs[1]],
-                       self.T.masked_data[:, pcs[2]],
+            ax.scatter(self._S.masked_data[:, pcs[0]],
+                       self._S.masked_data[:, pcs[1]],
+                       self._S.masked_data[:, pcs[2]],
                        zdir='z',
                        s=30,
                        c=colors,
-                       cmap=cmap,
+                       cmap=colormap,
                        depthshade=True)
 
 if __name__ == '__main__':
@@ -403,16 +433,16 @@ if __name__ == '__main__':
     ax = source.plot_stack()
 
     pca = PCA(source) #, standardized=True, scaled=True)
-    Pt, T = pca.transform(npc=6)
+    Pt, T = pca.transform(n_pc=6)
 
-    pca.printev(npc=6)
+    pca.printev(n_pc=6)
 
     pca.Pt.plot_stack()
-    pca.screeplot(npc=6)
+    pca.screeplot(n_pc=6)
     pca.scoreplot(1,2)
     pca.scoreplot(1,2,3)
 
-    Xp = pca.inverse_transform(npc=6)
+    Xp = pca.inverse_transform(n_pc=6)
     Xp.plot_stack()
 
     show()
