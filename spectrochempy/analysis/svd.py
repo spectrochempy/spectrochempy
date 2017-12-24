@@ -145,7 +145,7 @@ class SVD(HasTraits):
         # Sign correction to ensure deterministic output from SVD.
         # This doesn't work will full_matrices=True.
         if not full_matrices:
-            U, VT = svd_flip(U, VT)
+            U, VT = self.svd_flip(U,VT)
 
         # Returns U as a NDDataset object
         # --------------------------------
@@ -232,41 +232,36 @@ class SVD(HasTraits):
         ratio.units = 'percent'
         return ratio
 
-def svd_flip(u, v, u_based_decision=True):
-    """
-    Sign correction to ensure deterministic output from SVD.
-    Adjusts the columns of u and the rows of v such that the loadings in the
-    columns in u that are largest in absolute value are always positive.
+    def svd_flip(self, U, VT, u_based_decision=True):
+        """
+        Sign correction to ensure deterministic output from SVD.
+        Adjusts the columns of u and the rows of v such that the loadings in the
+        columns in u that are largest in absolute value are always positive.
 
-    Parameters
-    ----------
-    u, v : ndarray
-        u and v are the output of `linalg.svd` with matching inner dimensions
-        so one can compute `np.dot(u * s, v)`.
-    u_based_decision : boolean, (default=True)
-        If True, use the columns of u as the basis for sign flipping.
-        Otherwise, use the rows of v.
+        Parameters
+        ----------
+        u_based_decision : boolean, (default=True)
+            If True, use the columns of u as the basis for sign flipping.
+            Otherwise, use the rows of v.
 
-    Returns
-    -------
-    u_adjusted, v_adjusted : arrays with the same dimensions as the input.
+        ..notes:: Copied from scikit-learn.utils.extmath (BSD3-Licence)
 
-    ..notes:: Copied from scikit-learn.utils.extmath (BSD3-Licence)
+        """
 
-    """
-    if u_based_decision:
-        # columns of u, rows of v
-        max_abs_cols = np.argmax(np.abs(u), axis=0)
-        signs = np.sign(u[max_abs_cols, range(u.shape[1])])
-        u *= signs
-        v *= signs[:, np.newaxis]
-    else:
-        # rows of v, columns of u
-        max_abs_rows = np.argmax(np.abs(v), axis=1)
-        signs = np.sign(v[range(v.shape[0]), max_abs_rows])
-        u *= signs
-        v *= signs[:, np.newaxis]
-    return u, v
+        if u_based_decision:
+            # columns of U, rows of VT
+            max_abs_cols = np.argmax(np.abs(U), axis=0)
+            signs = np.sign(U[max_abs_cols, range(U.shape[1])])
+            U *= signs
+            VT *= signs[:, np.newaxis]
+        else:
+            # rows of V, columns of U
+            max_abs_rows = np.argmax(np.abs(VT), axis=1)
+            signs = np.sign(VT[range(VT.shape[0]), max_abs_rows])
+            U *= signs
+            VT *= signs[:, np.newaxis]
+
+        return U, VT
 
 
 # ============================================================================

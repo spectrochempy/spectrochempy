@@ -9,10 +9,14 @@
 
 __all__ = ['PCA']
 
+
 # ----------------------------------------------------------------------------
-# third party imports
+# imports
 # ----------------------------------------------------------------------------
+import warnings
 import numpy as np
+from scipy.special import gammaln
+
 from traitlets import HasTraits, Instance
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -70,7 +74,10 @@ class PCA(HasTraits):
         Parameters
         ----------
         X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object.
-            The dataset has shape (``M``, ``N``)
+            The dataset has shape (``M``, ``N``). ``M`` is the number of
+            observations (for examples a series of IR spectra) while ``N``
+            is the number of features (for example the wavenumbers measured
+            in each IR spectrum).
         centered : Bool, optional, default=True
             If True the data are centered around the mean values:
             X' = X - mean(X)
@@ -157,11 +164,11 @@ class PCA(HasTraits):
         # other attributes
         # ----------------
 
-        #: Eigenvalues of the covariance matrix
+        #: explained variance
         self.ev = svd.ev
         self.ev.x.title = 'PC #'
 
-        #: Explained Variance per singular values
+        #: Explained variance per singular values
         self.ev_ratio= svd.ev_ratio
         self.ev_ratio.x.title = 'PC #'
 
@@ -175,7 +182,7 @@ class PCA(HasTraits):
     # Special methods
     # ------------------------------------------------------------------------
 
-    def __str__(self, n_pc=10):
+    def __str__(self, n_pc=5):
 
         s = '\nPC\t\tEigenvalue\t\t%variance\t' \
             '%cumulative\n'
@@ -187,6 +194,112 @@ class PCA(HasTraits):
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tuple)
 
         return s
+
+    # ------------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------------
+
+    def _get_n_pc(self, n_pc=None):
+
+        max_n_pc = self.ev.size
+        if n_pc is None:
+            n_pc = max_n_pc
+            return n_pc
+        elif isinstance(n_pc, int):
+            n_pc = min(n_pc, max_n_pc)
+            return n_pc
+        elif n_pc == 'auto':
+            M, N = self._X.shape
+            if M >= N:
+                n_pc = self._infer_pc_()
+                return n_pc
+            else:
+                warnings.warn('Cannot use `auto` if n_observations < '
+                              'n_features. Try with threshold 0.9999')
+                n_pc= 0.9999
+
+        if 0 < n_pc < 1.0:
+            # number of PC for which the cumulated explained variance is
+            # less than a given ratio
+            n_pc = np.searchsorted(self.ev_cum.data / 100., n_pc) + 1
+            return n_pc
+        else:
+            raise ValueError('could not get a valid number of components')
+
+
+
+    def _assess_dimension_(self, rank):
+        """Compute the likelihood of a rank ``rank`` dataset
+        The dataset is assumed to be embedded in gaussian noise having
+        spectrum ``spectrum`` (here the explained variances).
+
+        Parameters
+        ----------
+        rank : int
+            Tested rank value.
+
+        Returns
+        -------
+        ll : float,
+            The log-likelihood
+
+        Notes
+        -----
+        This implements the method of `Thomas P. Minka:
+        Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604`
+
+        Copied and modified from scikit-learn.decomposition.pca (BSD-3 license)
+
+        """
+        spectrum = self.ev.data
+        M, N = self._X.shape
+
+        if rank > len(spectrum):
+            raise ValueError("The tested rank cannot exceed the rank of the"
+                             " dataset")
+
+        pu = -rank * np.log(2.)
+        for i in range(rank):
+            pu += (gammaln((N - i) / 2.) - np.log(np.pi) * (
+            N - i) / 2.)
+
+        pl = np.sum(np.log(spectrum[:rank]))
+        pl = -pl * M / 2.
+
+        if rank == N:
+            pv = 0
+            v = 1
+        else:
+            v = np.sum(spectrum[rank:]) / (N - rank)
+            pv = -np.log(v) * M * (N - rank) / 2.
+
+        m = N * rank - rank * (rank + 1.) / 2.
+        pp = np.log(2. * np.pi) * (m + rank + 1.) / 2.
+
+        pa = 0.
+        spectrum_ = spectrum.copy()
+        spectrum_[rank:N] = v
+        for i in range(rank):
+            for j in range(i + 1, len(spectrum)):
+                pa += np.log((spectrum[i] - spectrum[j]) * (
+                1. / spectrum_[j] - 1. / spectrum_[i])) + np.log(M)
+
+        ll = pu + pl + pv + pp - pa / 2. - rank * np.log(M) / 2.
+
+        return ll
+
+    def _infer_pc_(self):
+        """Infers the number of principal components.
+
+        Copied and modified from
+        _infer_dimensions in scikit-learn.decomposition.pca (BSD-3 license)
+
+        """
+        n_ev = self.ev.size
+        ll = np.empty(n_ev)
+        for rank in range(n_ev):
+            ll[rank] = self._assess_dimension_(rank)
+        return ll.argmax()
 
     # ------------------------------------------------------------------------
     # Public methods
@@ -219,9 +332,8 @@ class PCA(HasTraits):
 
         X = self._X
 
-        if n_pc is None:
-            n_pc = self._LT.shape[0]
-
+        # get n_pc (automatic or determined by the n_pc arguments)
+        n_pc = self._get_n_pc(n_pc)
 
         # scores (S) and loading (L^T) matrices
         # ------------------------------------
@@ -231,7 +343,6 @@ class PCA(HasTraits):
 
         return LT, S
 
-    #_infer_dimension_(explained_variance_, n_samples, n_features)
 
     def inverse_transform(self, n_pc=None):
         """
@@ -253,11 +364,10 @@ class PCA(HasTraits):
 
         """
 
-        if n_pc is None:
-            n_pc = self._S.shape[-1]
-        else:
-            n_pc = min(n_pc, self._S.shape[-1])
+        # get n_pc (automatic or determined by the n_pc arguments)
+        n_pc = self._get_n_pc(n_pc)
 
+        # reconstruct from scores and loadings using n_pc components
         S = self._S[:, :n_pc]
         LT = self._LT[:n_pc]
 
@@ -278,7 +388,7 @@ class PCA(HasTraits):
         X.title = self._X.title
         return X
 
-    def printev(self, n_pc=10):
+    def printev(self, n_pc=None):
         """prints figures of merit: eigenvalues and explained variance
         for the first n_pc PS's
 
@@ -289,11 +399,12 @@ class PCA(HasTraits):
           The number of PC to print
 
         """
+        # get n_pc (automatic or determined by the n_pc arguments)
+        n_pc = self._get_n_pc(n_pc)
+
         print((self.__str__(n_pc)))
 
-    def screeplot(self,
-                  n_pc=5,
-                  **kwargs):
+    def screeplot(self, n_pc=None, **kwargs):
         """
         Scree plot of explained variance + cumulative variance by PCA
 
@@ -303,7 +414,9 @@ class PCA(HasTraits):
             Number of components to plot
 
         """
-        n_pc = min(n_pc, self.ev.size)
+        # get n_pc (automatic or determined by the n_pc arguments)
+        n_pc = self._get_n_pc(n_pc)
+
         color1, color2 = kwargs.get('colors', [NBlue, NRed])
         pen = kwargs.get('pen', True)
         ylim1, ylim2 = kwargs.get('ylims', [(0,100), 'auto'])
@@ -433,16 +546,17 @@ if __name__ == '__main__':
     ax = source.plot_stack()
 
     pca = PCA(source) #, standardized=True, scaled=True)
-    Pt, T = pca.transform(n_pc=6)
+    L, S = pca.transform(n_pc=6)
 
-    pca.printev(n_pc=6)
+    pca.printev(n_pc='auto')
 
-    pca.Pt.plot_stack()
-    pca.screeplot(n_pc=6)
+    L.plot_stack()
+    pca.screeplot(n_pc='auto')
+
     pca.scoreplot(1,2)
     pca.scoreplot(1,2,3)
 
-    Xp = pca.inverse_transform(n_pc=6)
+    Xp = pca.inverse_transform(n_pc='auto')
     Xp.plot_stack()
 
     show()

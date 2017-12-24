@@ -28,8 +28,11 @@ def test_pca(IR_source_2D):
 
     assert str(pca)[:3] == '\nPC'
 
-    pca.screeplot(npc=5)
+    pca.screeplot(npc=0.95)
+
+    pca.screeplot(npc='auto')
 
     pca.scoreplot((1,2))
 
     pca.scoreplot(1,2, 3)
+
