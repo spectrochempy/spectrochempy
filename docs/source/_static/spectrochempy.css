@@ -17,14 +17,51 @@ blockquote {
  * 	Separation between classes and functions
  */
 
-dl.class, dl.function {
+dl.class {
     border-bottom: 4px solid #888;
-    padding-top: 20px;
+    padding-top: 0px;
     background-color: #fff6e0;;
 }
 
+
+dl.function {
+    border-bottom: 4px solid #888;
+    padding-top: 0px;
+    background-color: #fff5e0;;
+}
+
+
 dl.method{
     border-top: 1px solid #aaa;
+}
+
+
+/* dl.attribute, {
+    border-top: 1px solid #aaa;
+}*/
+
+
+dl.glossary dt {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+
+.rst-content dl:not(.docutils) dt {
+    display:inline-block;
+    width: 100%;
+    margin:6px 0;
+    font-size:90%;
+    line-height:normal;
+    background:#e7f2fa;
+    color:#2980B9;
+    border-top:solid 3px #6ab0de;
+    padding:6px;
+    position:relative;
+}
+
+.rst-content dl.function:not(.docutils) dt {
+    background: #dafae5;
 }
 
 dt{
@@ -33,15 +70,44 @@ dt{
     background-color: #fff9f4;
 }
 
-/* dl.attribute, {
-    border-top: 1px solid #aaa;
-}*/
-
-dl.glossary dt {
-    font-weight: bold;
-    font-size: 1.1em;
+.rst-content table.field-list .field-name {
+    padding-right: 20px;
+    padding-top: 3px;
+    font-size: 100%;
+    text-align: left;
+    white-space: nowrap;
+    background: #f2fffd;
+    margin-bottom: 2px;
 }
 
+.rst-content table.field-list .field-body {
+    text-align: left;
+    padding-left: 10px;
+}
+
+.field {
+    padding:10px;
+    border-top: 4px solid #eee;
+}
+.field-body{
+    padding: 10px;
+    padding-left:10px;
+    border-top: 4px solid #eee;
+}
+
+.rst-content blockquote {
+    margin-left: 5px;
+    line-height: 24px;
+    margin-bottom: 0px;
+}
+
+blockquote {
+    padding: 0px;
+    padding-left:5px;
+    margin: 0 0 0px;
+    font-size: 10pt;
+    border-left: 5px solid #eeeeee;
+}
 
 @media (min-width: 992px) {
     .col-md-12 {
