@@ -57,7 +57,7 @@ extensions = [
     'numpydoc',
     'sphinx_gallery.gen_gallery',
     'nbsphinx',
-    #'spectrochempy.sphinxext.autodocsumm',
+    'spectrochempy.sphinxext.autodocsumm',
     'spectrochempy.sphinxext.traitlets_sphinxdoc',
 ]
 
@@ -66,18 +66,18 @@ numpydoc_show_class_members = False
 numpydoc_use_plots =  True
 numpydoc_class_members_toctree = True
 
-# Napoleon settings
-napoleon_google_docstring = False
-napoleon_numpy_docstring = True
-napoleon_include_init_with_doc = False
-napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = False
-napoleon_use_admonition_for_examples = True
-napoleon_use_admonition_for_notes = True
-napoleon_use_admonition_for_references = True
-napoleon_use_ivar = True
-napoleon_use_param = True
-napoleon_use_rtype = False
+# # Napoleon settings
+# napoleon_google_docstring = False
+# napoleon_numpy_docstring = True
+# napoleon_include_init_with_doc = False
+# napoleon_include_private_with_doc = False
+# napoleon_include_special_with_doc = False
+# napoleon_use_admonition_for_examples = True
+# napoleon_use_admonition_for_notes = True
+# napoleon_use_admonition_for_references = True
+# napoleon_use_ivar = True
+# napoleon_use_param = True
+# napoleon_use_rtype = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -166,7 +166,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '_static/logo.png'
+html_logo = '_static/scp_small.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -373,18 +373,20 @@ autoclass_content = 'both'   #Both the class’ and the __init__ method’s
 
 autodoc_default_flags = ['autosummary']
 
-exclusions = ('with_traceback', 'with_traceback',
-              'observe', 'unobserve', 'observe', 'cross_validation_lock',
-              'unobserve_all', 'class_config_rst_doc', 'class_config_section',
-              'class_get_help', 'class_print_help',
-              'section_names', 'update_config',
-              'clear_instance', 'document_config_options', 'flatten_flags',
-              'generate_config_file', 'initialize_subcommand', 'initialized',
-              'instance', 'json_config_loader_class', 'launch_instance',
-              'load_config_file', 'parse_command_line', 'print_alias_help',
-              'print_description', 'print_examples', 'print_flag_help',
-              'print_help', 'print_subcommands', 'print_version',
-              'python_config_loader_class',
+exclusions = (
+    # 'with_traceback', 'with_traceback',
+    #           'observe', 'unobserve', 'observe', 'cross_validation_lock',
+    #           'unobserve_all', 'class_config_rst_doc', 'class_config_section',
+    #           'class_get_help', 'class_print_help',
+    #           'section_names', 'update_config',
+    #           'clear_instance', 'document_config_options', 'flatten_flags',
+    #           'generate_config_file', 'initialize_subcommand', 'initialized',
+    #           'instance', 'json_config_loader_class', 'launch_instance',
+    #           'load_config_file', 'parse_command_line', 'print_alias_help',
+    #           'print_description', 'print_examples', 'print_flag_help',
+    #           'print_help', 'print_subcommands', 'print_version',
+    #           'python_config_loader_class',
+    #           'raises',
               )
 
 
@@ -407,7 +409,7 @@ plot_gallery = True
 
 sphinx_gallery_conf = {
     'backreferences_dir': 'gen_modules/backreferences',
-    'doc_module': ('spectrochempy','spectrochempy.dataset.nddataset.NDDataset'),
+    'doc_module': ('spectrochempy.api'),
     'reference_url': {
         'spectrochempy': None,
         'matplotlib': 'https://matplotlib.org',

@@ -106,3 +106,4 @@ spectrochempy/gui/preferences_BACKUP_20917.py
 spectrochempy/gui/preferences_BASE_20917.py
 spectrochempy/gui/preferences_LOCAL_20917.py
 spectrochempy/gui/preferences_REMOTE_20917.py
+spectrochempy.api.*.rst

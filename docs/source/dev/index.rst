@@ -1,9 +1,49 @@
 .. _develdocs:
 
-Developper's Guide
-==================
+Developper's documentation
+===========================
+
+Developper guide
+-----------------
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     develguide
+
+
+Code reference
+---------------
+
+.. currentmodule:: spectrochempy
+
+Packages
+++++++++
+
+.. autosummary::
+   :toctree: generated/
+   :template: module.rst
+
+   spectrochempy.analysis
+   spectrochempy.databases
+   spectrochempy.dataset
+   spectrochempy.fitting
+   spectrochempy.plotters
+   spectrochempy.processors
+   spectrochempy.projects
+   spectrochempy.readers
+   spectrochempy.scripts
+   spectrochempy.sphinxext
+   spectrochempy.units
+   spectrochempy.utils
+   spectrochempy.writers
+
+Modules
++++++++
+
+.. autosummary::
+   :toctree: generated/
+   :template: module.rst
+
+   spectrochempy.application
+

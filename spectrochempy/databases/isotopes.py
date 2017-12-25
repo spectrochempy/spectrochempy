@@ -56,7 +56,7 @@ PKG = 'spectrochempy.databases.isotopes'
 # =============================================================================
 class Isotopes(HasTraits):
     """
-    This class defines useful properties of nuclei [#]_.
+    This class defines useful properties of nuclei [*]_.
 
 
     Examples
@@ -89,7 +89,7 @@ class Isotopes(HasTraits):
 
     References
     ----------
-    .. [#] Nuclear magnetic moments are taken from Stone, Table of Nuclear
+    .. [*] Nuclear magnetic moments are taken from Stone, Table of Nuclear
         Magnetic Dipole and Electric Quadrupole Moments, Atomic Data
         and Nuclear Data Tables 90, 75-176 (2005).
         Nuclear quadrupole moments are taken from P.Pyykko, Mol.Phys.

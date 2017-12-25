@@ -10,7 +10,8 @@ and then we plot one section (a 2D plane)
 
 ###############################################################################
 # As usual, we start by loading the api
-from spectrochempy.api import *
+import numpy as np
+from spectrochempy import api
 
 ###############################################################################
 # Creation
@@ -35,17 +36,17 @@ nd_data = np.array([np.array(
 # The `Coord` object allow making an array of coordinates
 # with additional metadata such as units, labels, title, etc
 
-coord0 = Coord(data=c0,
+coord0 = api.Coord(data=c0,
                labels=['cold', 'normal', 'hot'],
                units="K",
                title='temperature')
 
-coord1 = Coord(data=c1,
+coord1 = api.Coord(data=c1,
                labels=None,
                units="minutes",
                title='time-on-stream')
 
-coord2 = Coord(data=c2,
+coord2 = api.Coord(data=c2,
                labels=None,
                units="cm^-1",
                title='wavenumber')
@@ -61,7 +62,7 @@ print(a)
 # +++++++++++
 # The `NDDataset` object allow making the array of data with units, etc...
 
-mydataset = NDDataset(nd_data,
+mydataset = api.NDDataset(nd_data,
                       coordset=[coord0, coord1, coord2],
                       title='Absorbance',
                       units='absorbance'
@@ -93,7 +94,7 @@ new = mydataset['hot']
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 
 new.plot()
-show()
+api.show()
 
 ##################################################################
 # But it is possible to display image
@@ -101,10 +102,16 @@ show()
 
 # sphinx_gallery_thumbnail_number = 2
 new.plot(method='image')
-show()
+api.show()
 
 ##################################################################
 # or stacked plot
 
 new.plot(method='stack')
-show()
+api.show()
+
+##################################################################
+# Note that the API allows one to use this syntax too:
+
+api.plot_stack(new)
+api.show()

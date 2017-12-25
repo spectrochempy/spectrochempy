@@ -55,11 +55,12 @@ from IPython.utils.text import get_text_list
 # constants
 # ============================================================================
 
-__all__ = ['app', '__version__',
-           '__release__', '__release_date__',
-           '__copyright__', '__license__',
-           '__author__', '__contributor__',
-           '__url__']
+__all__ = ['app']
+    #, '__version__',
+    #       '__release__', '__release_date__',
+    #       '__copyright__', '__license__',
+    #       '__author__', '__contributor__',
+    #       '__url__']
 
 
 # Log levels

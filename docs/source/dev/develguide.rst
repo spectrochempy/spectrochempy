@@ -1,10 +1,10 @@
 .. _develguide:
 
-Developer Guide
-###############
+Developer's Guide
+==================
 
 Installing a developper version
-===============================
+--------------------------------
 
 The best to proceed with development is that we (the developers) all have a similar
 environment for each python version.
@@ -142,8 +142,8 @@ To build the doc, we need the following packages:
 
 * sphinx
 * nbsphinx, to convert notebook to sphinx pages
-* sphinx-gallery, to convert python *.py files to examples for the gallery.
-* sphinx-nbexamples, to convert *.ipynb notebooks into example for the gallery
+* sphinx-gallery, to convert python \*.py files to examples for the gallery.
+* sphinx-nbexamples, to convert \*.ipynb notebooks into example for the gallery
 
 These package are available on conda-forge or pypi.
 
@@ -166,7 +166,7 @@ The generated file are located in a directory (spectrochempy_doc) at the same
 level as the
 spectrochempy directory.
 
-To display the documentation (on mac. For widow the command `tart`should
+To display the documentation (on mac. For widow the command `start` should
 work or something equivalent on linux):
 
     $cd ../../spectrochempy_doc/html
@@ -179,4 +179,4 @@ be simpler!).
 Commit and push to the Bitbucket repository
 --------------------------------------------
 
-
+to do

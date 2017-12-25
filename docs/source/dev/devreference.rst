@@ -1,7 +1,7 @@
-.. _api_reference_spc:
+.. _dev_reference_spc:
 
-API reference
-#####################
+Developper's reference
+######################
 
 .. currentmodule:: spectrochempy
 

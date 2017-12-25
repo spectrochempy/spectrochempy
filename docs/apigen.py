@@ -400,6 +400,7 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
             'implicit_namespaces': True,
             'suffix': 'rst',
             'developper': False,
+            'genapi': False,
         })
 
     # get options form kwargs
@@ -416,6 +417,10 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
         sys.exit(1)
     opts['destdir'] = destdir
 
+    if opts.genapi:
+        create_api_files(rootpath, opts)
+        return
+
     if not os.path.exists(rootpath) :
         # try to guess!
         _rootpath = rootpath
@@ -425,7 +430,7 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
             dirname = os.path.dirname(dirname)
             #print(rootpath)
 
-    if not os.path.isdir(rootpath):
+    if not os.path.isdir(rootpath) and not opts.genapi:
         print('%s is not a directory.' % rootpath, file=sys.stderr)
         sys.exit(1)
 
@@ -437,6 +442,188 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
         create_modules_toc_file(modules, opts)
 
     return True
+
+def create_api_files(rootpath, opts):
+    """Build the text of the file and write the file."""
+    # generate separate file for the members of the api
+
+    # we assume that the file is api.py
+    app = os.path.split(rootpath)[-2]
+
+    api = app + ".api"
+
+    _imported_item = import_item(api)
+    clsmembers = inspect.getmembers(_imported_item)
+
+    members = [m for m in clsmembers if m[0] in _imported_item.__all__ and
+               not m[0].startswith('__')]
+
+
+    indextemplate = """.. _api_reference_spectrochempy:
+
+User API reference
+==================
+
+.. currentmodule:: spectrochempy
+
+The |scp| API exposes many objects and functions that are described below.
+
+To use the API, one must load it using one of the following syntax:
+
+>>> from spectrochempy import api
+
+>>> from spectrochempy.api import *
+
+In the second syntax, as usual in python, access to the objects/functions 
+may be simplified (*e.g.*, we can use `plot_stack` instead of 
+`api.plot_stack` but there is always a risk of overwriting some variables 
+already in the namespace. Therefore, the first syntax is in general 
+recommended,
+although that, in the examples in this documentation, we have often use the 
+second one for simplicity.
+
+
+Constants
+---------
+
+{consts}
+
+
+
+Objects
+-------
+
+.. autosummary::
+   :toctree:
+
+{classes}
+
+
+Functions
+---------
+
+.. currentmodule:: spectrochempy
+
+.. autosummary::
+   :toctree:
+
+{funcs}
+
+
+Preferences
+-----------
+
+.. toctree::
+    :maxdepth: 2
+
+    preferences
+    
+    
+"""
+
+    classtemplate = \
+"""{api}.{klass}
+===========================
+
+.. automodule:: {api}
+
+   .. autoclass:: {api}.{klass}
+      :members:
+      :no-inherited-members:
+
+   .. include:: ../../gen_modules/backreferences/{api}.{klass}.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+	       
+"""
+
+    functemplate = \
+"""{api}.{func}
+===========================
+
+.. automodule:: {api}
+
+   .. autofunction:: {api}.{func}
+      
+   .. include:: ../../gen_modules/backreferences/{api}.{func}.examples
+
+   .. raw:: html
+
+           <div style='clear:both'></div>
+
+"""
+
+    lconsts = [":%s: %s\n"%m for m in members if type(m[1]) in [int, float,
+                                                   str, bool, tuple]]
+    lclasses = []
+    classes = [m[0] for m in members if inspect.isclass(m[1]) and not type(
+        m[1]).__name__=='type' ]
+    for klass in classes:
+        name = "{api}.{klass}".format(api=api, klass=klass)
+        text = classtemplate.format(api=api, klass=klass)
+        write_file(name, text, opts)
+        lclasses.append(name+'\n')
+
+    lfuncs = []
+    funcs = [m[0] for m in members if inspect.isfunction(m[1]) or
+             inspect.ismethod(m[1])]
+    for func in funcs:
+        name = "{api}.{func}".format(api=api, func=func)
+        text = functemplate.format(api=api, func=func)
+        write_file(name, text, opts)
+        lfuncs.append(name+'\n')
+
+    _classes = "    ".join(lclasses)
+    _funcs = "    ".join(lfuncs)
+    _consts = "".join(lconsts)
+    _consts = _consts.replace('/Users/christian/Dropbox/D.PROGRAMMES/', '~/')
+    text = indextemplate.format(consts=""+_consts,
+                                 classes = "    "+_classes,
+                                 funcs = "    "+_funcs)
+    write_file('index', text, opts)
+
+    # if opts.developper:
+    #
+    #     _imported_item = import_item(item)
+    #
+    #     clsmembers = inspect.getmembers(_imported_item)
+    #
+    #     members = [m for m in clsmembers if (not inspect.ismodule(m[1])
+    #     and     (hasattr(m[1],'__module__')
+    #              and m[1].__module__ == _imported_item.__name__)
+    #     and not (m[0].endswith('__') and m[0].startswith('__'))
+    #     and m[0] not in _imported_item.__all__ )]
+    #
+    #     if not hasattr(_imported_item, '__all__'):
+    #         print('missing __all__ in %s  - apigen skip this' % item)
+    #     elif members:
+    #         text += "\n\n.. _mod_{}_dev:\n\n".format(
+    #                 "_".join(item.split('.''')[1:]))
+    #         text += "\n\n**Additional information for developper's**\n\n"
+    #         for name, obj in members:
+    #             if inspect.isclass(obj):
+    #                 directive = '.. autoclass:: %s.%s\n' % (item, name)
+    #                 for option in OPTIONS:
+    #                     directive += '    :%s:\n' % option
+    #                 directive += '    :undoc-members:\n'
+    #                 text += directive
+    #         for name, obj in members:
+    #             if inspect.ismethod(obj):
+    #                 directive = '.. automethod:: %s.%s\n' % (item, name)
+    #                 text += directive
+    #         for name, obj in members:
+    #             if inspect.isfunction(obj):
+    #                 directive = '.. autofunction:: %s.%s\n' % (item, name)
+    #                 text += directive
+    #         for name, obj in members:
+    #             if not (inspect.isclass(obj) or inspect.isfunction(obj) or
+    #                         inspect.ismethod(obj)) :
+    #                 directive = '.. autoattribute:: %s.%s\n' % (item, name)
+    #                 text += directive
+
+
 
 
 if __name__ == "__main__":

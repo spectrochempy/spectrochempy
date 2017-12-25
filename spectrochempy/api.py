@@ -113,6 +113,17 @@ __all__ += [
     'authors', 'contributors'
 ]
 
+# IPython methods
+# ---------------
+# we put them before so that we can eventually overwrite them
+
+from IPython.core.display import *
+from IPython.core import display
+__all__.extend(display.__all__)
+from IPython.lib.display import *
+from IPython.lib import display
+__all__.extend(display.__all__)
+
 
 # dataset
 # --------
@@ -197,27 +208,20 @@ __all__ += api.__all__
 
 try:
     import sympy as sym
-    HAS_SYMPY = True
+    __HAS_SYMPY__ = True
     __all__.append('sym')
 except ImportError:
-    HAS_SYMPY = True
-__all__.append('HAS_SYMPY')
+    __HAS_SYMPY__ = True
+__all__.append('__HAS_SYMPY__')
 
 try:
     import sklearn as skl
-    HAS_SCIKITLEARN = True
+    __HAS_SCIKITLEARN__ = True
     __all__.append('skl')
 except ImportError:
-    HAS_SCIKITLEARN = False
-__all__.append('HAS_SCIKITLEARN')
+    __HAS_SCIKITLEARN__ = False
+__all__.append('__HAS_SCIKITLEARN__')
 
-# IPython methods
-from IPython.core.display import *
-from IPython.core import display
-__all__.extend(display.__all__)
-from IPython.lib.display import *
-from IPython.lib import display
-__all__.extend(display.__all__)
 
 # Helpers
 # -------

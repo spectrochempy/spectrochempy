@@ -19,28 +19,18 @@ where optional parameters idincates which job to perfom.
 
 """
 
-import os, sys
-import re
 import shutil
-from collections import namedtuple
-from glob import glob
-from pkgutil import walk_packages
 import subprocess
-from warnings import warn
-import setuptools_scm
-from sphinx.util.docutils import docutils_namespace, patch_docutils
-from ipython_genutils.text import indent, dedent, wrap_paragraphs
-from sphinx.errors import SphinxError
-from sphinx.application import Sphinx
 
+from ipython_genutils.text import indent, dedent
+from sphinx.application import Sphinx
 # set the correct backend for sphinx-gallery
 import matplotlib as mpl
+
 mpl.use('agg')
 
 from spectrochempy.api import *
-from spectrochempy.extern import sphinx_apidoc as apigen
-
-from traitlets import import_item
+from docs import apigen
 
 preferences.log_level = ERROR
 
@@ -55,7 +45,8 @@ DOCDIR = os.path.join(
 
 PROJECT = "spectrochempy"
 SOURCE =   os.path.join(DOCDIR, 'source')
-API = os.path.join(DOCDIR, 'source', 'api', 'generated')
+API = os.path.join(DOCDIR, 'source', 'api')
+DEVAPI = os.path.join(DOCDIR, 'source', 'dev')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT, '~doctrees')
 
@@ -126,14 +117,22 @@ def make_docs(*args):
         log.info('\n\nOld documentation now erased.\n\n')
 
     if 'no_apigen' not in args:
-        # generate API reference
+        # generate DEVAPI reference
         apigen.main(PROJECT,
              tocdepth=1,
-             includeprivate=False,
-             destdir=API,
+             includeprivate=True,
+             destdir=os.path.join(DEVAPI,'generated'),
              exclude_patterns=['api.py'],
              exclude_dirs=['extern', '~misc', 'gui'],
              developper=True)
+
+        # generate API reference
+        apigen.main(PROJECT+'/api.py',
+             tocdepth=1,
+             includeprivate=True,
+             destdir=API,
+             genapi=True,
+                    )
 
     for builder in builders:
 
@@ -150,8 +149,8 @@ def make_docs(*args):
         from spectrochempy.sphinxext.traitlets_sphinxdoc import write_doc
         from spectrochempy.application import app
 
-        write_doc('source/api/preferences.rst',           # File to write
-                 'SpectroChemPy config preferences',           # Title
+        write_doc(os.path.join(API, 'preferences.rst'),     # File to write
+                 'API Preferences',           # Title
                  app)
 
         sp.build()
@@ -223,7 +222,7 @@ def clean():
     shutil.rmtree(SOURCE + '/auto_examples', ignore_errors=True)
     shutil.rmtree(SOURCE + '/gen_modules', ignore_errors=True)
     shutil.rmtree(SOURCE + '/modules/generated', ignore_errors=True)
-    shutil.rmtree(SOURCE + '/api/generated', ignore_errors=True)
+    shutil.rmtree(API + '/generated', ignore_errors=True)
 
 
 def make_dirs():

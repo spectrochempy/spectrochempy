@@ -1,5 +1,5 @@
-SpectroChemPy config preferences
-================================
+API Preferences
+===============
 
 
 
