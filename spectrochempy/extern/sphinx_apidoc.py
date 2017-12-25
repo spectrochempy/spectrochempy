@@ -32,48 +32,12 @@ import inspect
 
 # automodule options
 OPTIONS = [
-        'members',
-        #'undoc-members',
-        'show-inheritance',
-        'autosummary',
+        'no-members',
+        'no-inherited-members',
     ]
 
 INITPY = '__init__.py'
 PY_SUFFIXES = set(['.py', '.pyx'])
-
-# temporary import as to check the presence of doc functions
-#pkg = import_item(package)
-#
-# classes = ''
-# methods = ''
-#
-# if hasattr(pkg, '_classes'):
-#     classes += "\nClasses\n-------------\n"
-#     classes += "This module contains the following classes:\n\n"
-#     for item in pkg._classes:
-#         _item = "%s.%s" % (package, item)
-#         _imported_item = import_item(_item)
-#         if hasattr(_imported_item, 'class_config_rst_doc'):
-#             doc = "\n" + class_config_rst_doc(_imported_item)
-#             doc = doc.replace(item + ".", '')
-#             doc = doc.replace(item + "\n", '\n\t')
-#             _imported_item.__doc__ = _imported_item.__doc__.format(
-#                 attributes=doc)  # "\n\tAttributes\n\t========================\n%s\n"%doc
-#         classes += "\n.. autoclass:: %s\n\t:members:\n\t:inherited-members:\n\n" % _item
-#
-# if hasattr(pkg, '_methods'):
-#     methods += "\nMethods\n---------------\n"
-#     methods += "This module contains the following methods:\n\n"
-#
-#     for item in pkg._methods:
-#         # check if it is really a method:
-#         # if hasattr(getattr(spectrochempy.api,
-#         #                   '{}'.format(item)), '__call__'):
-#         _item = "%s.%s" % (package, item)
-#         methods += "\n.. automethod:: %s\n\n" % _item
-#         # else:
-#         #    print(item)
-#         #    # may be add this in the doc to
 
 def makename(package, module):
     """Join package and module with a dot."""
@@ -113,7 +77,12 @@ def format_heading(level, text, escape=True):
 def format_directive(module, package=None, auto='automodule'):
     """Create the automodule directive and add the options."""
     item = makename(package, module)
-    directive = '.. %s:: %s\n' % (auto,item)
+
+    if auto == 'automodule':
+        directive = '.. currentmodule:: %s\n\n' % item
+    else:
+        directive = ''
+    directive += '.. %s:: %s\n' % (auto,item)
     for option in OPTIONS:
         directive += '    :%s:\n' % option
     return directive
@@ -133,89 +102,90 @@ def create_module_file(package, module, opts):
     # __all__ control which members will be shown to the end user
     text += format_directive(module, package)
 
-    if opts.developper:
-
-        _imported_item = import_item(item)
-
-        clsmembers = inspect.getmembers(_imported_item)
-
-        members = [m for m in clsmembers if (not inspect.ismodule(m[1])
-        and     (hasattr(m[1],'__module__')
-                 and m[1].__module__ == _imported_item.__name__)
-        and not (m[0].endswith('__') and m[0].startswith('__'))
-        and m[0] not in _imported_item.__all__ )]
-
-        if not hasattr(_imported_item, '__all__'):
-            print('missing __all__ in %s  - apigen skip this' % item)
-        elif members:
-            text += "\n\n.. _mod_{}_dev:\n\n".format(
-                    "_".join(item.split('.''')[1:]))
-            text += "\n\n**Additional information for developper's**\n\n"
-            for name, obj in members:
-                if inspect.isclass(obj):
-                    directive = '.. autoclass:: %s.%s\n' % (item, name)
-                    for option in OPTIONS:
-                        directive += '    :%s:\n' % option
-                    directive += '    :undoc-members:\n'
-                    text += directive
-            for name, obj in members:
-                if inspect.ismethod(obj):
-                    directive = '.. automethod:: %s.%s\n' % (item, name)
-                    text += directive
-            for name, obj in members:
-                if inspect.isfunction(obj):
-                    directive = '.. autofunction:: %s.%s\n' % (item, name)
-                    text += directive
-            for name, obj in members:
-                if not (inspect.isclass(obj) or inspect.isfunction(obj) or
-                            inspect.ismethod(obj)) :
-                    directive = '.. autoattribute:: %s.%s\n' % (item, name)
-                    text += directive
+    # if opts.developper:
+    #
+    #     _imported_item = import_item(item)
+    #
+    #     clsmembers = inspect.getmembers(_imported_item)
+    #
+    #     members = [m for m in clsmembers if (not inspect.ismodule(m[1])
+    #     and     (hasattr(m[1],'__module__')
+    #              and m[1].__module__ == _imported_item.__name__)
+    #     and not (m[0].endswith('__') and m[0].startswith('__'))
+    #     and m[0] not in _imported_item.__all__ )]
+    #
+    #     if not hasattr(_imported_item, '__all__'):
+    #         print('missing __all__ in %s  - apigen skip this' % item)
+    #     elif members:
+    #         text += "\n\n.. _mod_{}_dev:\n\n".format(
+    #                 "_".join(item.split('.''')[1:]))
+    #         text += "\n\n**Additional information for developper's**\n\n"
+    #         for name, obj in members:
+    #             if inspect.isclass(obj):
+    #                 directive = '.. autoclass:: %s.%s\n' % (item, name)
+    #                 for option in OPTIONS:
+    #                     directive += '    :%s:\n' % option
+    #                 directive += '    :undoc-members:\n'
+    #                 text += directive
+    #         for name, obj in members:
+    #             if inspect.ismethod(obj):
+    #                 directive = '.. automethod:: %s.%s\n' % (item, name)
+    #                 text += directive
+    #         for name, obj in members:
+    #             if inspect.isfunction(obj):
+    #                 directive = '.. autofunction:: %s.%s\n' % (item, name)
+    #                 text += directive
+    #         for name, obj in members:
+    #             if not (inspect.isclass(obj) or inspect.isfunction(obj) or
+    #                         inspect.ismethod(obj)) :
+    #                 directive = '.. autoattribute:: %s.%s\n' % (item, name)
+    #                 text += directive
 
     write_file(makename(package, module), text, opts)
 
 
 def create_package_file(root, master_package, subroot, py_files, opts, subs, is_namespace):
     """Build the text of the file and write the file."""
-    text = format_heading(1, ('%s package' if not is_namespace else "%s namespace")
-                          % makename(master_package, subroot))
+
+    name = makename(master_package, subroot)
+    _name = name.replace('.','_')
+    text = ".. _api_%s:\n\n"%_name
+    text += format_heading(1,
+                 ('%s package' if not is_namespace else "%s namespace")% name)
 
     if opts.modulefirst and not is_namespace:
         text += format_directive(subroot, master_package)
         text += '\n'
 
-    # build a list of directories that are szvpackages (contain an INITPY file)
+    # build a list of directories that are subpackages (contain an INITPY file)
     subs = [sub for sub in subs if os.path.isfile(os.path.join(root, sub, INITPY))]
     # if there are some package directories, add a TOC for theses subpackages
     if subs:
         text += format_heading(2, 'Subpackages')
-        text += '.. toctree::\n\n'
+        text += '.. autosummary::\n'
+        text += '   :toctree: \n'
+        text += '   :template: module.rst\n\n'
         for sub in subs:
-            text += '    %s.%s\n' % (makename(master_package, subroot), sub)
+            text += '   %s.%s\n' % (makename(master_package, subroot), sub)
         text += '\n'
 
     submods = [os.path.splitext(sub)[0] for sub in py_files
                if not shall_skip(os.path.join(root, sub), opts)
-               #and sub != INITPY
+               and sub != INITPY
                ]
     if submods:
         text += format_heading(2, 'Submodules')
         if opts.separatemodules:
-            text += '.. toctree::\n\n'
+            #text += '.. toctree::\n\n'
+            text += '.. autosummary::\n'
+            text += '   :toctree: \n'
+            text += '   :template: module.rst\n\n'
+
             for submod in submods:
                 modfile = makename(master_package, makename(subroot, submod))
                 text += '   %s\n' % modfile
-
-                # generate separate file for this module
-                # if not opts.noheadings:
-                #     filetext = format_heading(1, '%s module' % modfile)
-                # else:
-                #     filetext = ''
-                # filetext += format_directive(makename(subroot, submod),
-                #                              master_package)
-                # write_file(modfile, filetext, opts)
-                create_module_file(master_package,
-                                   makename(subroot, submod), opts)
+               # create_module_file(master_package,
+               #                    makename(subroot, submod), opts)
         else:
             for submod in submods:
                 modfile = makename(master_package, makename(subroot, submod))
@@ -236,7 +206,7 @@ def create_package_file(root, master_package, subroot, py_files, opts, subs, is_
 def create_modules_toc_file(modules, opts, name='modules'):
     """Create the module's index."""
     text = format_heading(1, '%s' % opts.header, escape=False)
-    text += '.. toctree::\n'
+    text += '.. toctree:: \n'
     text += '   :maxdepth: %s\n\n' % opts.maxdepth
 
     modules.sort()
@@ -472,7 +442,7 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
 if __name__ == "__main__":
 
     main('spectrochempy',
-         destdir='./source/dev/generated',
+         destdir='../../docs/source/dev/generated',
          exclude_patterns=['api.py'],
          exclude_dirs=['extern','~misc','gui'],
          developper=True)

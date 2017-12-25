@@ -87,6 +87,16 @@ User Documentation
 
     user/index
 
+.. _main_api:
+
+API Reference
+=============
+
+.. toctree::
+    :maxdepth: 1
+
+    api/index
+
 
 .. _gallery_of_examples:
 

@@ -508,29 +508,23 @@ class NDDataset(
 
         Parameters
         ----------
-
         axes : list of int, optional
-
             By default, reverse the dimensions, otherwise permute the coordset
             according to the values given.
 
         inplace : `bool`, optional, default = `False`.
-
             By default a new dataset is returned.
             Change to `True` to change data inplace.
 
         Returns
         -------
-
         transposed_dataset : same type
-
             The nd-dataset or a new nd-dataset (inplace=False)
             is returned with coords
             transposed
 
         See Also
         --------
-
         :meth:`swapaxes`
 
         """
@@ -562,24 +556,16 @@ class NDDataset(
 
         Parameters
         ----------
-
         axis1 : int
-
             First axis.
-
         axis2 : int
-
             Second axis.
-
         inplace : bool, optional, default = False
-
             if False a new object is returned
 
         Returns
         -------
-
         swapped_dataset : same type
-
             The object or a new object (inplace=False) is returned with coordset
             swapped
 
@@ -674,7 +660,7 @@ class NDDataset(
 
         Parameters
         ----------
-        axis : int, optional, default = -1
+        axis : int, optional, default:-1
             The axis to make complex
 
         """

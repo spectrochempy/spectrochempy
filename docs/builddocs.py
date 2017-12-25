@@ -55,6 +55,7 @@ DOCDIR = os.path.join(
 
 PROJECT = "spectrochempy"
 SOURCE =   os.path.join(DOCDIR, 'source')
+API = os.path.join(DOCDIR, 'source', 'api', 'generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT, '~doctrees')
 
@@ -124,6 +125,16 @@ def make_docs(*args):
         args.remove('clean')
         log.info('\n\nOld documentation now erased.\n\n')
 
+    if 'no_apigen' not in args:
+        # generate API reference
+        apigen.main(PROJECT,
+             tocdepth=1,
+             includeprivate=False,
+             destdir=API,
+             exclude_patterns=['api.py'],
+             exclude_dirs=['extern', '~misc', 'gui'],
+             developper=True)
+
     for builder in builders:
 
         print('building %s documentation (version: %s)'%(builder,
@@ -134,20 +145,12 @@ def make_docs(*args):
 
         #with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
-        sp.verbosity = 0
-
-        # generate developper reference
-        apigen.main(PROJECT, tocdepth=1,
-             includeprivate=False,
-             destdir='./source/dev/generated',
-             exclude_patterns=['api.py'],
-             exclude_dirs=['extern', '~misc', 'gui'],
-             developper=True)
+        sp.verbosity = 1
 
         from spectrochempy.sphinxext.traitlets_sphinxdoc import write_doc
         from spectrochempy.application import app
 
-        write_doc('source/user/api/preferences.rst',           # File to write
+        write_doc('source/api/preferences.rst',           # File to write
                  'SpectroChemPy config preferences',           # Title
                  app)
 
@@ -217,10 +220,10 @@ def clean():
     shutil.rmtree(BUILDDIR + '/pdf', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/latex', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
-    shutil.rmtree(SOURCE + '/api/auto_examples', ignore_errors=True)
+    shutil.rmtree(SOURCE + '/auto_examples', ignore_errors=True)
     shutil.rmtree(SOURCE + '/gen_modules', ignore_errors=True)
     shutil.rmtree(SOURCE + '/modules/generated', ignore_errors=True)
-    shutil.rmtree(SOURCE + '/dev/generated', ignore_errors=True)
+    shutil.rmtree(SOURCE + '/api/generated', ignore_errors=True)
 
 
 def make_dirs():

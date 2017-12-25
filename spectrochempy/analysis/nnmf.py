@@ -7,9 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
-
 """
 based on:
 NMF by alternative non-negative least squares using projected gradients

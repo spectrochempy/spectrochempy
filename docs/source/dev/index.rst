@@ -1,10 +1,9 @@
 .. _develdocs:
 
-Developper's Documentation
-==========================
+Developper's Guide
+==================
 
 .. toctree::
     :maxdepth: 1
 
     develguide
-    devreference

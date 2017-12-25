@@ -54,19 +54,17 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
     #'sphinx.ext.napoleon',
-    'spectrochempy.sphinxext.extended_napoleon',
-    #'numpydoc',
+    'numpydoc',
     'sphinx_gallery.gen_gallery',
     'nbsphinx',
-    'spectrochempy.sphinxext.autodocsumm',
+    #'spectrochempy.sphinxext.autodocsumm',
     'spectrochempy.sphinxext.traitlets_sphinxdoc',
-    'sphinx_nbexamples',
 ]
 
 # Numpy autodoc attributes
-#numpydoc_show_class_members = False
-#numpydoc_use_plots =  True
-#numpydoc_class_members_toctree = False
+numpydoc_show_class_members = False
+numpydoc_use_plots =  True
+numpydoc_class_members_toctree = True
 
 # Napoleon settings
 napoleon_google_docstring = False
@@ -79,7 +77,7 @@ napoleon_use_admonition_for_notes = True
 napoleon_use_admonition_for_references = True
 napoleon_use_ivar = True
 napoleon_use_param = True
-napoleon_use_rtype = True
+napoleon_use_rtype = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -151,84 +149,6 @@ from spectrochempy.utils.rstutils import rst_epilog
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-
-# Activate the theme.
-# import sphinx_bootstrap_theme
-#
-# html_theme = 'bootstrap'  # https://github.com/ryan-roemer/sphinx-bootstrap-theme
-# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-#
-# # (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
-# # Path should be relative to the ``_static`` files directory.
-# # html_logo = "_static/logo.png"
-#
-# # Theme options are theme-specific and customize the look and feel of a
-# # theme further.
-# html_theme_options = {
-#     # Navigation bar title. (Default: ``project`` value)
-#     'navbar_title': "SpectroChemPy",
-#
-#     # Tab name for entire site. (Default: "Site")
-#     'navbar_site_name': "Documentation",
-#
-#     # A list of tuples containing pages or urls to link to.
-#     # Valid tuples should be in the following forms:
-#     #    (name, page)                 # a link to a page
-#     #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
-#     #    (name, "http://example.com", True) # arbitrary absolute url
-#     # Note the "1" or "True" value above as the third argument to indicate
-#     # an arbitrary url.
-#     'navbar_links': [
-#         # ("Examples", "examples"),
-#         # ("Link", "http://example.com", True),
-#     ],
-#
-#     # Render the next and previous page links in navbar. (Default: true)
-#     'navbar_sidebarrel': True,
-#
-#     # Render the current pages TOC in the navbar. (Default: true)
-#     'navbar_pagenav': True,
-#
-#     # Tab name for the current pages TOC. (Default: "Page")
-#     'navbar_pagenav_name': "Page",
-#
-#     # Global TOC depth for "site" navbar tab. (Default: 1)
-#     # Switching to -1 shows all levels.
-#     'globaltoc_depth': 2,
-#
-#     # Include hidden TOCs in Site navbar?
-#     #
-#     # Note: If this is "false", you cannot have mixed ``:hidden:`` and
-#     # non-hidden ``toctree`` directives in the same page, or else the build
-#     # will break.
-#     #
-#     # Values: "true" (default) or "false"
-#     'globaltoc_includehidden': "true",
-#
-#     # HTML navbar class (Default: "navbar") to attach to <div> element.
-#     # For black navbar, do "navbar navbar-inverse"
-#     'navbar_class': "navbar navbar-inverse",
-#
-#     # Fix navigation bar to top of page?
-#     # Values: "true" (default) or "false"
-#     'navbar_fixed_top': "true",
-#
-#     # Location of link to source.
-#     # Options are "nav" (default), "footer" or anything else to exclude.
-#     'source_link_position': "",  # "nav",
-#
-#     # Bootswatch (http://bootswatch.com/) theme.
-#     #
-#     # Options are nothing (default) or the name of a valid theme
-#     # such as "amelia" or "cosmo".
-#     'bootswatch_theme': "journal",
-#
-#     # Choose Bootstrap version.
-#     # Values: "3" (default) or "2" (in quotes)
-#     'bootstrap_version': "3",
-# }
-#
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -246,7 +166,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-# html_logo = '_static/logo.png'
+html_logo = '_static/logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -486,9 +406,8 @@ def setup(app):
 plot_gallery = True
 
 sphinx_gallery_conf = {
-    # 'backreferences_dir': False,
     'backreferences_dir': 'gen_modules/backreferences',
-    'doc_module': ('spectrochempy',),
+    'doc_module': ('spectrochempy','spectrochempy.dataset.nddataset.NDDataset'),
     'reference_url': {
         'spectrochempy': None,
         'matplotlib': 'https://matplotlib.org',
@@ -502,4 +421,5 @@ sphinx_gallery_conf = {
     # path where to save gallery generated examples
     'gallery_dirs': 'auto_examples',
     'expected_failing_examples': [],
+
 }

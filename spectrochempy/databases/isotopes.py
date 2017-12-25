@@ -56,12 +56,7 @@ PKG = 'spectrochempy.databases.isotopes'
 # =============================================================================
 class Isotopes(HasTraits):
     """
-    This class defines useful properties of nuclei
-
-    Parameters
-    ----------
-    nucleus : String, optional, default='1H'
-        In the AX form where A is the atomic mass and X the atom symbol
+    This class defines useful properties of nuclei [#]_.
 
 
     Examples
@@ -94,7 +89,7 @@ class Isotopes(HasTraits):
 
     References
     ----------
-    .. [1] Nuclear magnetic moments are taken from Stone, Table of Nuclear
+    .. [#] Nuclear magnetic moments are taken from Stone, Table of Nuclear
         Magnetic Dipole and Electric Quadrupole Moments, Atomic Data
         and Nuclear Data Tables 90, 75-176 (2005).
         Nuclear quadrupole moments are taken from P.Pyykko, Mol.Phys.
@@ -218,7 +213,11 @@ class Isotopes(HasTraits):
     # -------------------------------------------------------------------------
     def __init__(self, nucleus='1H'):
         """
-        Class constructor
+        Parameters
+        ----------
+        nucleus : String, optional, default='1H'
+            In the AX form where A is the atomic mass and X the atom symbol
+
         """
         filename = resource_filename(PKG, 'isotopes.csv')
         self.isotopes = pd.read_csv(filename, index_col=0)
@@ -259,6 +258,7 @@ class Isotopes(HasTraits):
         log.info('Current nucleus has been set to {}'.format(self.nucleus))
 
 
+# ============================================================================
 if __name__ == '__main__':
     isotope = Isotopes('129Xe')
     print((isotope.name))
@@ -270,6 +270,4 @@ if __name__ == '__main__':
     print((isotope.symbol))
     print((isotope.H_2.Q))
     print((isotope.H_2.gamma.to('MHz/T') / 2. / np.pi))
-# =============================================================================
-# EOF
-# =============================================================================
+

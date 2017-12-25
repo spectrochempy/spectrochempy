@@ -174,6 +174,8 @@ work or something equivalent on linux):
 
 you can also double-click on the index.html file in your file explorer (may
 be simpler!).
+
+
 Commit and push to the Bitbucket repository
 --------------------------------------------
 
