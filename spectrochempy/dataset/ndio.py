@@ -11,7 +11,7 @@
 
 """
 This module define the class :class:`NDIO` in which input/output standard
-methods for a :class:`~spectrochempy.dataset.nddataset.NDDataset`
+methods for a |NDDataset|
 are defined.
 
 """
@@ -71,10 +71,10 @@ __all__ = ['NDIO',
 class NDIO(HasTraits):
     """
     Import/export interface
-    from :class:`~spectrochempy.dataset.nddataset.NDDataset`
+    from |NDDataset|
 
     This class is used as basic import/export interface of the
-    :class:`~spectrochempy.dataset.nddataset.NDDataset` .
+    |NDDataset| .
 
     """
 
@@ -110,7 +110,7 @@ class NDIO(HasTraits):
              **kwargs
              ):
         """
-        Save the :class:`~spectrochempy.dataset.nddataset.NDDataset`
+        Save the |NDDataset|
         (default extension: ``.scp`` ).
 
         Parameters
@@ -451,7 +451,7 @@ class NDIO(HasTraits):
         protocol : str
 
             The protocol used to write the
-            :class:`~spectrochempy.dataset.nddataset.NDDataset` in a file,
+            |NDDataset| in a file,
             which will determine the exporter to use.
 
         kwargs : optional keyword parameters

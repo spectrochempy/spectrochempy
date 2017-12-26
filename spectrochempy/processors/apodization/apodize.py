@@ -76,12 +76,12 @@ def apodize(source, **kwargs):
 
         True to reverse the apodization before applying it to the data.
 
-    apply : `bool`, optional, default = `True`
+    apply : `bool`, optional, default = True
 
         Should we apply the calculated apodization to the dataset (default)
         or just return the apodization ndarray.
 
-    inplace : `bool`, optional, default = `True`
+    inplace : `bool`, optional, default = True
 
         Should we make the transform in place or return a new dataset
 

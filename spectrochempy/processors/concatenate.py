@@ -36,7 +36,7 @@ def concatenate(*sources, axis=None, **kwargs):
     Parameters
     ----------
 
-    *sources : a series of :class:`~spectrochempy.dataset.nddataset.NDDataset`
+    *sources : a series of |NDDataset|
         The dataset to be concatenated to the current dataset
 
 
@@ -46,7 +46,7 @@ def concatenate(*sources, axis=None, **kwargs):
     Returns
     --------
 
-    out : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+    out : |NDDataset|
         A dataset created from the contenations of the `sources` datasets
 
     Examples
@@ -215,13 +215,13 @@ def stack(*sources):
     Parameters
     ----------
 
-    *sources : a series of :class:`~spectrochempy.dataset.nddataset.NDDataset`
+    *sources : a series of |NDDataset|
         The dataset to be stacked to the current dataset
 
     Returns
     --------
 
-    out : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+    out : |NDDataset|
         A dataset created from the stack of the `sources` datasets
 
     Examples

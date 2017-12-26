@@ -8,3 +8,7 @@
 # =============================================================================
 
 
+"""
+Modules defining plotting methods for n-dimensional datasets.
+
+"""

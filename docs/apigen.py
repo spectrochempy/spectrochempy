@@ -12,8 +12,12 @@
     http://www.sat.qc.ca/
 
     :copyright: Copyright 2007-2017 by the Sphinx team, see AUTHORS.
-    :license: BSD, see LICENSE for details.
+    :license: BSD, see LICENSE_SPHINX for details.
+
 """
+#TODO: rewrite something smaller just fitting our present need to generate
+# the API
+
 from __future__ import print_function
 
 import os
@@ -360,7 +364,7 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
     followlinks : bool
         Follow symbolic links
     separatemodules : bool, optional
-        Put documentation for each module on its own page. Default= `True`
+        Put documentation for each module on its own page. Default= True
     includeprivate : bool, optional
         Include ``_private`` modules. Default= `False`
     noheadings : bool
@@ -523,7 +527,7 @@ Preferences
 
     classtemplate = \
 """{api}.{klass}
-===========================
+==============================================================================
 
 .. automodule:: {api}
 

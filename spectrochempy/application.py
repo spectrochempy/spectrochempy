@@ -7,8 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
 """
 This module define the `application` on which the API rely.
 
@@ -56,11 +54,6 @@ from IPython.utils.text import get_text_list
 # ============================================================================
 
 __all__ = ['app']
-    #, '__version__',
-    #       '__release__', '__release_date__',
-    #       '__copyright__', '__license__',
-    #       '__author__', '__contributor__',
-    #       '__url__']
 
 
 # Log levels
@@ -136,39 +129,52 @@ class SpectroChemPyMagics(Magics):
 
     @line_cell_magic
     def addscript(self, pars='', cell=None):
-        """This works both as %addscript and as %%addscript
+        """This works both as **%addscript** and as **%%addscript**
 
         This magic command can either take a local filename, element in the
         namespace or history range (see %history),
         or the current cell content
 
-        %addscript myscript.py
-        %addscript 7-27
-        %addscript -s MyClass,myfunction myscript.py
-        %addscript MyClass
-        %addscript mymodule.myfunction
 
-        Usage:\\
-          %addscript  -p project  n1-n2 n3-n4 ... n5 .. n6 ...
+        Usage
+            %addscript  -p project  n1-n2 n3-n4 ... n5 .. n6 ...
 
-        or
+             or
 
-        Usage:\\
-          %%addscript -p project
-          ...code lines ...
+            %%addscript -p project
+            ...code lines ...
 
-        Options:
 
-          -p <string>: Name of the project where the script will be stored.
-                       If not provided, a project with a standard name:
-                       `proj` is searched.
-          -o <string>: script name
+        Options
+            -p <string>         Name of the project where the script will be stored.
+                                If not provided, a project with a standard name:
+                                ``proj`` is searched.
+            -o <string>         script name
 
-          -s <symbols>: Specify function or classes to load from python source.
+            -s <symbols>        Specify function or classes to load from python
+                                source.
 
-          -a : append to the current script instead of overwriting it.
+            -a                  append to the current script instead of
+                                overwriting it.
 
-          -n : search symbol in the current namespace
+            -n                  search symbol in the current namespace
+
+
+        Examples
+        --------
+
+        .. sourcecode:: ipython::
+
+            In[1]: %addscript myscript.py
+
+            In[2]: %addscript 7-27
+
+            In[3]: %addscript -s MyClass,myfunction myscript.py
+
+            In[4]: %addscript MyClass
+
+            In[5]: %addscript mymodule.myfunction
+
 
         """
         opts, args = self.parse_options(pars, 'p:o:s:n:a')
@@ -243,9 +249,6 @@ class SpectroChemPyMagics(Magics):
 
         if not args:
             raise UsageError('Missing script name')
-
-
-
 
         return args
 

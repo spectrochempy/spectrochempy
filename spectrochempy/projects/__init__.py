@@ -7,3 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+"""
+Modules allowing project's management.
+
+"""

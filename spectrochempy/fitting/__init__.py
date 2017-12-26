@@ -7,4 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
+"""
+Modules related to fitting of n-dimensional datasets.
+"""

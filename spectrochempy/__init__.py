@@ -40,7 +40,10 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 # =============================================================================
 
-"""During the initialization of this package, a `matplotlib` backend is set
+"""
+Main package
+
+During the initialization of this package, a `matplotlib` backend is set
 and some `IPython` configurations are made.
 
 

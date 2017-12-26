@@ -93,7 +93,7 @@ Parameters
 ----------
 axis : int, optional, default: -1
     Dimension index along which the method should be applied.
-inplace : bool, optional, default= ``False``
+inplace : bool, optional, default= `False`
     Flag to say that the method return a new object (default)
     or not (inplace=True)
 

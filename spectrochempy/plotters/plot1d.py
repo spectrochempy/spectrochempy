@@ -111,7 +111,7 @@ def plot_multiple(sources, method='scatter', pen=True,
 
     method : str among [scatter, pen]
 
-    pen : `bool`, optional, default=``True``
+    pen : `bool`, optional, default=True
 
         if method is scatter, this flag tells to draw also the lines
         between the marks.

@@ -14,7 +14,7 @@ from traitlets import (Dict, List, Bool, Instance, Unicode, HasTraits, This,
 from traitlets.config.configurable import Configurable
 
 
-__all__ = ['ProjectPreferences']
+__all__ = []
 
 
 # ============================================================================

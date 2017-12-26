@@ -7,10 +7,8 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
 """
-This package provides utilities classes and functions.
+Modules containing various utilities classes and functions.
 
 """
 import numpy as np

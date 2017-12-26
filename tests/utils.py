@@ -365,7 +365,7 @@ def image_comparison(reference=None,
         Extension to be used to save figure, among
         (eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff)
 
-    force_creation : `bool`, optional, default=``False``.
+    force_creation : `bool`, optional, default=`False`.
 
         if this flag is True, the figures created in the decorated function are
         saved in the reference figures directory (``.spectrocchempy/figures``)

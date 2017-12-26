@@ -7,4 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+"""
+Modules defining exporters for the n-dimensional datasets and projects
 
+"""

@@ -46,7 +46,7 @@ DOCDIR = os.path.join(
 PROJECT = "spectrochempy"
 SOURCE =   os.path.join(DOCDIR, 'source')
 API = os.path.join(DOCDIR, 'source', 'api')
-DEVAPI = os.path.join(DOCDIR, 'source', 'dev')
+DEVAPI = os.path.join(DOCDIR, 'source', 'dev', 'generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT, '~doctrees')
 
@@ -121,9 +121,9 @@ def make_docs(*args):
         apigen.main(PROJECT,
              tocdepth=1,
              includeprivate=True,
-             destdir=os.path.join(DEVAPI,'generated'),
+             destdir=DEVAPI,
              exclude_patterns=['api.py'],
-             exclude_dirs=['extern', '~misc', 'gui'],
+             exclude_dirs=['extern', 'sphinxext', '~misc', 'gui'],
              developper=True)
 
         # generate API reference
@@ -221,8 +221,8 @@ def clean():
     shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
     shutil.rmtree(SOURCE + '/auto_examples', ignore_errors=True)
     shutil.rmtree(SOURCE + '/gen_modules', ignore_errors=True)
-    shutil.rmtree(SOURCE + '/modules/generated', ignore_errors=True)
-    shutil.rmtree(API + '/generated', ignore_errors=True)
+    shutil.rmtree(DEVAPI, ignore_errors=True)
+    shutil.rmtree(API, ignore_errors=True)
 
 
 def make_dirs():
@@ -236,7 +236,7 @@ def make_dirs():
                   os.path.join(BUILDDIR, 'pdf'),
                   os.path.join(SOURCE, '_static'),
                   os.path.join(SOURCE, 'dev', 'generated'),
-                  os.path.join(SOURCE, 'api', 'generated')
+                  os.path.join(SOURCE, 'api')
                   ]
     for d in build_dirs:
         try:
@@ -244,51 +244,51 @@ def make_dirs():
         except OSError:
             pass
 
-
-def class_config_rst_doc(cls):
-    """Generate rST documentation for the class `cls` config preferences.
-    Excludes traits defined on parent classes. (adapted from traitlets)
-    """
-    lines = []
-    for k, trait in sorted(cls.class_traits().items()):
-        if trait.name.startswith('_') or not trait.help or trait.name in [
-            'cli_config',
-        ]:
-            continue
-
-        ttype = '`'+trait.__class__.__name__+'`'
-
-        termline = '**'+trait.name+'**'
-
-        # Choices or type
-        if 'Enum' in ttype:
-            # include Enum choices
-            termline += ' : ' + '|'.join('`'+repr(x)+'`' for x in trait.values)
-        else:
-            termline += ' : ' + ttype + ', '
-        lines.append(termline)
-
-        # Default value
-        try:
-            dvr = trait.default_value_repr()
-        except Exception:
-            dvr = None  # ignore defaults we can't construct
-        if dvr is not None:
-            if len(dvr) > 64:
-                dvr = dvr[:61] + '...'
-            # Double up backslashes, so they get to the rendered docs
-            dvr = dvr.replace('\\n', '\\\\n')
-            lines.append(indent('Default: `%s`,' % dvr, 4))
-            lines.append('')
-
-        help = trait.help or 'No description'
-        lines.append(indent(dedent(help+'.'), 4))
-
-        # Blank line
-        lines.append('')
-
-    return '\n'.join(lines)
-
+#
+# def class_config_rst_doc(cls):
+#     """Generate rST documentation for the class `cls` config preferences.
+#     Excludes traits defined on parent classes. (adapted from traitlets)
+#     """
+#     lines = []
+#     for k, trait in sorted(cls.class_traits().items()):
+#         if trait.name.startswith('_') or not trait.help or trait.name in [
+#             'cli_config',
+#         ]:
+#             continue
+#
+#         ttype = '`'+trait.__class__.__name__+'`'
+#
+#         termline = '**'+trait.name+'**'
+#
+#         # Choices or type
+#         if 'Enum' in ttype:
+#             # include Enum choices
+#             termline += ' : ' + '|'.join('`'+repr(x)+'`' for x in trait.values)
+#         else:
+#             termline += ' : ' + ttype + ', '
+#         lines.append(termline)
+#
+#         # Default value
+#         try:
+#             dvr = trait.default_value_repr()
+#         except Exception:
+#             dvr = None  # ignore defaults we can't construct
+#         if dvr is not None:
+#             if len(dvr) > 64:
+#                 dvr = dvr[:61] + '...'
+#             # Double up backslashes, so they get to the rendered docs
+#             dvr = dvr.replace('\\n', '\\\\n')
+#             lines.append(indent('Default: `%s`,' % dvr, 4))
+#             lines.append('')
+#
+#         help = trait.help or 'No description'
+#         lines.append(indent(dedent(help+'.'), 4))
+#
+#         # Blank line
+#         lines.append('')
+#
+#     return '\n'.join(lines)
+#
         #
         # # classes
         # # -------

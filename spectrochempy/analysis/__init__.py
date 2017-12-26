@@ -8,3 +8,7 @@
 # =============================================================================
 
 
+"""
+Modules related to the analysis of n-dimensional datasets or projects.
+
+"""

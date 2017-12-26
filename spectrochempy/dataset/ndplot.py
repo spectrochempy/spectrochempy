@@ -11,7 +11,7 @@
 
 """
 This module define the class :class:`NDPlot` in which generic plot
-methods for a :class:`~spectrochempy.dataset.nddataset.NDDataset`
+methods for a |NDDataset|
 are defined.
 
 """
@@ -82,10 +82,10 @@ preferences = app
 class NDPlot(HasTraits):
     """
     Plotting interface
-    for :class:`~spectrochempy.dataset.nddataset.NDDataset`
+    for |NDDataset|
 
     This class is used as basic plotting interface of the
-    :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+    |NDDataset|.
 
     """
 
@@ -107,7 +107,7 @@ class NDPlot(HasTraits):
 
         """
         Generic plot function for
-        a :class:`~spectrochempy.dataset.nddataset.NDDataset` which
+        a |NDDataset| which
         actually delegate the work to a plotter defined by the parameter ``method``.
 
         Parameters
@@ -139,7 +139,7 @@ class NDPlot(HasTraits):
 
         style : str
 
-        autolayout : `bool`, optional, default=``True``
+        autolayout : `bool`, optional, default=True
 
             if True, layout will be set automatically
 

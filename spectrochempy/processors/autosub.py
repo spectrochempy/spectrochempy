@@ -26,10 +26,10 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
 
     Parameters
     -----------
-    source : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+    source : |NDDataset|.
         Dataset to which we want to subtract the reference data
 
-    ref : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+    ref : |NDDataset|.
          1D reference data, with a size maching the axis to subtract
          (axis parameter) #TODO : optionally use title of axis
 
@@ -49,7 +49,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     Returns
     --------
 
-    out : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+    out : |NDDataset|.
         The subtracted dataset
 
     Examples

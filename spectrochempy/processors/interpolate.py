@@ -32,10 +32,10 @@ def align(source, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan,
 
     Parameters
     -----------
-    source : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+    source : |NDDataset|.
         Dataset to align
 
-    ref : :class:`~spectrochempy.dataset.nddataset.NDDataset`.
+    ref : |NDDataset|.
         Reference dataset on which to align
 
     axis : int, [optional, default = 0].
@@ -46,7 +46,7 @@ def align(source, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan,
 
     Returns
     --------
-    aligned_dataset : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+    aligned_dataset : |NDDataset|
        A dataset aligned with ref along the axis
 
 

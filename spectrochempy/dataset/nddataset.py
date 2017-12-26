@@ -514,7 +514,7 @@ class NDDataset(
 
         inplace : `bool`, optional, default = `False`.
             By default a new dataset is returned.
-            Change to `True` to change data inplace.
+            Change to True to change data inplace.
 
         Returns
         -------
@@ -604,9 +604,9 @@ class NDDataset(
         by : str among ['value', 'label'], optional, default = ``value``.
             Indicate if the sorting is following the order of labels or
             numeric coord values.
-        descend : `bool`, optional, default = ``False``.
+        descend : `bool`, optional, default = `False`.
             If true the dataset is sorted in a descending direction.
-        inplace : bool, optional, default = ``False``.
+        inplace : bool, optional, default = `False`.
             if False a new object is returned,
             else the data are modified inline.
 

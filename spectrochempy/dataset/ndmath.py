@@ -8,7 +8,7 @@
 # =============================================================================
 
 """
-This module implements the base `NDDataset` class.
+This module implements the base |NDDataset| class.
 
 List of mathematical functions (numpy) implemented (or planned for
 implementation)
@@ -334,7 +334,7 @@ class NDMath(object):
         -----
 
         Use ``.pipe`` when chaining together functions that expect
-        on `NDDataset`.
+        on |NDDataset|.
 
         """
         if isinstance(func, tuple):

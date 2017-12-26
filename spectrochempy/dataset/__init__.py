@@ -7,9 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
 """
-This sub-package contains modules related to dataset's creation and handling
+Modules related to n-dimensional dataset's creation and handling
 
 """

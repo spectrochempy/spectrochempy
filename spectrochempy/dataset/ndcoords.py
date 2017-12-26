@@ -7,46 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
-"""
-The coordinates of a |NDDataset| can be created using the |Coord| object.
-This is a single dimension array with either numerical (float) values or
-labels (str, `Datetime` objects, or any other kind of objects) to
-represent the coordinates. Only a one numerical axis can be defined, but labels
-can be multiple.
-
-Let's give an example. We first import the object from the main API:
-
->>> from spectrochempy.api import Coord # doctest: +ELLIPSIS
-SpectroChemPy's API - v.0.1...
-
-We then create a numpy |ndarray| and use it as the numerical `data` axis of our
-new |Coord| object.
-
->>> arr = np.arange(1,12,2)
->>> c0 = Coord(data=arr, title='frequency', units='Hz')
->>> c0                               # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-Coord: [       1,        3,        5,        7,        9,       11] Hz
-
-We can take a series of str to create a non numerical but labelled axis:
-
->>> tarr = list('abcdef')
->>> tarr
-['a', 'b', 'c', 'd', 'e', 'f']
->>> c1 = Coord(labels=tarr, title='mylabels')
->>> c1                               # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-Coord: [a, b, c, d, e, f]
->>> print(c1)                                   # doctest: +NORMALIZE_WHITESPACE
-title: Mylabels
-labels: [a b c d e f]
-
-Some other examples will found in the :ref:`userguide`.
-
-Classes and Methods
-===================
-"""
-
 import copy
 import uuid
 import warnings
@@ -79,7 +39,40 @@ numpyprintoptions()
 # =============================================================================
 
 class Coord(NDMath, NDArray):
-    """A class describing the coords of the data along a given axis.
+    """Coordinates for a dataset along a given axis.
+
+    The coordinates of a |NDDataset| can be created using the |Coord| object.
+    This is a single dimension array with either numerical (float) values or
+    labels (str, `Datetime` objects, or any other kind of objects) to
+    represent the coordinates. Only a one numerical axis can be defined, but labels
+    can be multiple.
+
+    Let's give an example. We first import the object from the main API:
+
+    >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS
+    SpectroChemPy's API - v.0.1...
+
+    We then create a numpy |ndarray| and use it as the numerical `data` axis of our
+    new |Coord| object.
+
+    >>> arr = np.arange(1,12,2)
+    >>> c0 = Coord(data=arr, title='frequency', units='Hz')
+    >>> c0                               # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    Coord: [       1,        3,        5,        7,        9,       11] Hz
+
+    We can take a series of str to create a non numerical but labelled axis:
+
+    >>> tarr = list('abcdef')
+    >>> tarr
+    ['a', 'b', 'c', 'd', 'e', 'f']
+    >>> c1 = Coord(labels=tarr, title='mylabels')
+    >>> c1                               # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    Coord: [a, b, c, d, e, f]
+    >>> print(c1)                                   # doctest: +NORMALIZE_WHITESPACE
+    title: Mylabels
+    labels: [a b c d e f]
+
+    Some other examples will found in the :ref:`userguide`.
 
     """
 
@@ -88,7 +81,7 @@ class Coord(NDMath, NDArray):
     # -------------------------------------------------------------------------
     # initialization
     # -------------------------------------------------------------------------
-    docstrings.delete_params('NDArray.parameters', 'data', 'masks',
+    docstrings.delete_params('NDArray.parameters', 'data', 'mask',
                              'uncertainty')
 
     @docstrings.dedent
@@ -107,18 +100,20 @@ class Coord(NDMath, NDArray):
             but will be passed by reference, so you should make a copy the
             `data` before passing it in the object constructor if that's the
             desired behavior or set the `copy` argument to True.
-        %(NDArray.parameters.no_data|masks|uncertainty)s
+        %(NDArray.parameters.no_data|mask|uncertainty)s
 
 
-        .. note:: If only labels are provided during initialisation of a Coord
-            object, a numerical axis is automatically created with the
-            labels indices.
+        Notes
+        -----
+        If only labels are provided during initialisation of a Coord
+        object, a numerical axis is automatically created with the
+        labels indices.
+
 
         Examples
-        ---------
-        >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS,+NORMALIZE_WHITESPACE
-
-        SpectroChemPy's API  ...
+        --------
+        >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS
+        SpectroChemPy's API...
 
         >>> x = Coord([1,2,3], title='time on stream', units='hours')
         >>> print(x) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -480,7 +475,7 @@ class CoordSet(HasTraits):
     # .........................................................................
     @property
     def isempty(self):
-        """`bool`, read-only property - `True` if there is no coords defined.
+        """`bool`, read-only property - True if there is no coords defined.
 
         """
         return len(self._coords) == 0
@@ -489,7 +484,7 @@ class CoordSet(HasTraits):
     @property
     def is_same_dim(self):
         """`bool`, read-only property -
-        `True` if the coords define a single dimension.
+        True if the coords define a single dimension.
 
         """
         return self._is_same_dim
@@ -804,6 +799,7 @@ class CoordRange(HasTraits):
 set_operators(Coord, priority=50)
 
 if __name__ == '__main__':
+
     from spectrochempy.api import Coord
 
     print(Coord.__init__.__doc__)

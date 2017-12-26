@@ -7,19 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
-
-"""The basic |NDArray| class is an array
-(numpy |ndarray|-like) container, usually not intended to be used directly,
-as its basic functionalities may be quite limited, but to be subclassed.
-
-Indeed, both the class |Coord| which handles the coordinates in a given
-dimension and the class |NDDataset| which implements a full dataset (with
-coordinates) are derived from |NDArray| in |scp|.
-
-
-"""
 # =============================================================================
 # standard imports
 # =============================================================================
@@ -86,9 +73,18 @@ class NDArray(HasTraits):
     """
     An |NDArray| object.
 
-    The key distinction from raw numpy arrays is the presence of
-    optional properties such as ``labels``, ``masks``, ``uncertainties``,
-    ``units`` and/or extensible ``metadata`` dictionary.
+    The basic |NDArray| class is an array
+    (numpy |ndarray|-like) container, usually not intended to be used directly,
+    as its basic functionalities may be quite limited, but to be subclassed.
+
+    Indeed, both the class |Coord| which handles the coordinates in a given
+    dimension and the class |NDDataset| which implements a full dataset (with
+    coordinates) are derived from |NDArray| in |scp|.
+
+
+    The key distinction from raw numpy \|ndarrays| is the presence of
+    optional properties such as labels, masks, uncertainties,
+    units and/or extensible metadata dictionary.
 
     This is a base class in |scp| on which for instance, the |Coord|  and
     |NDDataset| are builded. This class is normaly intended to be subclassed,
@@ -152,7 +148,7 @@ class NDArray(HasTraits):
             Mask for the data. The mask array must have the same shape as
             the data. The given array can be a list, a tuple,
             a |ndarray|. Each values in the array must be `False`
-            where the data is *valid* and `True` when it is not (like in numpy
+            where the data is *valid* and True when it is not (like in numpy
             masked arrays). If `data` is already a
             :class:`~numpy.ma.MaskedArray`, or any array object
             (such as a |NDArray| or subclass of it), providing a `mask` here
@@ -183,6 +179,7 @@ class NDArray(HasTraits):
             further restriction is placed on meta.
         copy : bool, optional
             Perform a copy of the passed object.
+
 
         Examples
         --------
@@ -505,7 +502,10 @@ class NDArray(HasTraits):
         If a dimension is complex, real and imaginary part are interleaved
         in the `data` array.
 
-        .. note:: See the :ref:`userguide` and :ref:`develguide` for more information
+        .. note::
+
+            See the :ref:`userguide` and :ref:`develguide`
+            for more information
 
 
         """
@@ -617,12 +617,14 @@ class NDArray(HasTraits):
     @property
     def labels(self):
         """
-        |ndarray| of type `object` - Labels for `data`.
+        |ndarray|, Labels for `data`.
 
         An array of objects of any type (but most
         generally string), with the last dimension size equal
         to that of the dimension of data.
-        Note that's labelling is possible only for 1D data
+        Note that's labelling is possible only for 1D data. One classical
+        application is the labelling of coordinates to display informative
+        strings instead of numerical values.
 
         """
         if not self.is_labeled:
@@ -713,7 +715,9 @@ class NDArray(HasTraits):
     @property
     def mask(self):
         """
-        |ndarray| of bool - Mask for the data.
+        |ndarray| of bool
+
+        Mask for the data.
 
         """
 
@@ -995,7 +999,7 @@ class NDArray(HasTraits):
     @property
     def dimensionless(self):
         """
-        bool - ``True`` if the `data` array is dimensionless
+        bool - True if the `data` array is dimensionless
         (Readonly property).
 
         .. note:: ``Dimensionless`` is different of ``unitless``,
@@ -1029,7 +1033,7 @@ class NDArray(HasTraits):
     @property
     def has_complex_dims(self):
         """
-        bool - ``True`` if at least one of the `data` array (Readonly property).
+        bool - True if at least one of the `data` array (Readonly property).
         dimension is complex.
 
         """
@@ -1039,7 +1043,7 @@ class NDArray(HasTraits):
     @property
     def has_units(self):
         """
-        bool - ``True`` if the `data` array have units (Readonly property).
+        bool - True if the `data` array have units (Readonly property).
 
         See Also
         --------
@@ -1056,7 +1060,7 @@ class NDArray(HasTraits):
     @property
     def is_empty(self):
         """
-        bool -  ``True`` if the `data` array is empty (size=0) (Readonly property).
+        bool -  True if the `data` array is empty (size=0) (Readonly property).
 
 
         """
@@ -1071,7 +1075,7 @@ class NDArray(HasTraits):
     @property
     def is_complex(self):
         """
-        tuple of bool - ``True`` i one of the `data` dimensions is complex
+        tuple of bool - True i one of the `data` dimensions is complex
         (Readonly property).
 
         .. note:: If a dimension is complex, real and imaginary part
@@ -1092,7 +1096,7 @@ class NDArray(HasTraits):
     @property
     def is_labeled(self):
         """
-        bool - ``True`` if the `data` array have labels (Readonly property).
+        bool - True if the `data` array have labels (Readonly property).
 
         """
         # label cannot exists (for now for nD dataset - only 1D dataset, such
@@ -1109,7 +1113,7 @@ class NDArray(HasTraits):
     @property
     def is_masked(self):
         """
-        bool - ``True`` if the `data` array has masked values
+        bool - True if the `data` array has masked values
         (Readonly property).
 
         """
@@ -1128,7 +1132,7 @@ class NDArray(HasTraits):
     @property
     def is_uncertain(self):
         """
-        bool - ``True`` if the `data` array has uncertainty
+        bool - True if the `data` array has uncertainty
         (Readonly property).
 
 
@@ -1234,7 +1238,7 @@ class NDArray(HasTraits):
     @property
     def unitless(self):
         """
-        bool- ``True`` if the `data` have `units` (Readonly property).
+        bool- True if the `data` have `units` (Readonly property).
 
         """
 
@@ -1393,7 +1397,7 @@ class NDArray(HasTraits):
         Parameters
         ----------
         deep : bool, optional
-            If `True` a deepcopy is performed which is the default behavior
+            If True a deepcopy is performed which is the default behavior
         memo : Not used
             This parameter ensure compatibility with deepcopy() from the copy
             package.
@@ -1449,7 +1453,7 @@ class NDArray(HasTraits):
         Returns
         -------
         result
-            ``True`` if units are compatible
+            True if units are compatible
 
         Examples
         --------
@@ -1481,13 +1485,13 @@ class NDArray(HasTraits):
         """
         Inplace scaling of the current object data to different units.
 
-        (same as `to` with inplace= ``True``).
+        (same as `to` with inplace= True).
 
         Parameters
         ----------
         other : |Unit|, |Quantity| or str
             Destination units.
-        force : bool, optional, default= ``False``
+        force : bool, optional, default= `False`
             If True the change of units is forced, even for incompatible units
 
         Returns

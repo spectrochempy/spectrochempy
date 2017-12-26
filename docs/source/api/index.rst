@@ -44,7 +44,7 @@ Constants
 :release_date: 2017-12-18
 :scpdata: ~/spectrochempy/scp_data/testdata
 :url: http://www-lcs.ensicaen.fr/spectrochempy
-:version: 0.1a7.dev38+gc40b4fd6.d20171225
+:version: 0.1a7.dev39+g60a1eba6.d20171226
 
 
 
@@ -69,7 +69,6 @@ Objects
     spectrochempy.api.PCA
     spectrochempy.api.ParameterScript
     spectrochempy.api.Project
-    spectrochempy.api.ProjectPreferences
     spectrochempy.api.SVD
     spectrochempy.api.Script
 

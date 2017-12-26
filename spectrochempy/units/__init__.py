@@ -7,10 +7,8 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
-
 """
+Modules to handle units (interface with `pint`.
 """
 
 from .units import *

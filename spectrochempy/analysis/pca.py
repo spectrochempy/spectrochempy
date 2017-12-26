@@ -49,10 +49,9 @@ class PCA(HasTraits):
     """
     Principal Component Analysis
 
-    This class performs a Principal Component Analysis of a
-    :class:`~spectrochempy.dataset.nddataset.NDDataset`, *i.e.*,
-    a linear dimensionality reduction using Singular Value Decomposition
-    (:class:`~spectrochempy.analysis.svd.SVD`)
+    This class performs a Principal Component Analysis of a |NDDataset|,
+    *i.e.*, a linear dimensionality reduction using Singular Value
+    Decomposition (`SVD`)
     of the data to perform its projection to a lower dimensional space.
 
     The reduction of a dataset :math:`X` with shape (`M`,`N`) is achieved
@@ -79,19 +78,19 @@ class PCA(HasTraits):
         """
         Parameters
         ----------
-        X : :class:`~spectrochempy.dataset.nddataset.NDDataset` object
+        X : |NDDataset| object
             The dataset has shape (`M`, `N`). `M` is the number of
             observations (for examples a series of IR spectra) while `N`
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
         centered : bool, optional, default:True
-            If ``True`` the data are centered around the mean values:
+            If True the data are centered around the mean values:
             :math:`X' = X - mean(X)`.
         standardized : bool, optional, default:False
-            If ``True`` the data are scaled to unit standard deviation:
+            If True the data are scaled to unit standard deviation:
             :math:`X' = X / \sigma`.
         scaled : bool, optional, default:False
-            If ``True`` the data are scaled in the interval [0-1]:
+            If True the data are scaled in the interval [0-1]:
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
 
         Examples
@@ -110,11 +109,11 @@ class PCA(HasTraits):
 
         Attributes
         ----------
-        ev : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+        ev : |NDDataset|
             Explained variances (The eigenvalues of the covariance matrix).
-        ev_ratio : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+        ev_ratio : |NDDataset|
             Explained variance per singular values.
-        ev_cum : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+        ev_cum : |NDDataset|
             Cumulative Explained Variances.
 
         """
@@ -340,7 +339,7 @@ class PCA(HasTraits):
 
         Returns
         -------
-        LT, S : :class:`~spectrochempy.dataset.nddataset.NDDataset` objects.
+        LT, S : |NDDataset| objects.
             n_pc loadings and their corresponding scores for each observations.
 
 
@@ -375,7 +374,7 @@ class PCA(HasTraits):
 
         Return
         ------
-        X_reconstructed : :class:`~spectrochempy.dataset.nddataset.NDDataset`
+        X_reconstructed : |NDDataset|
             The reconstructed dataset based on n_pc principal components.
 
         """

@@ -180,7 +180,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
     frameon : bool
 
-        If ``False`` , suppress drawing the figure frame
+        If `False` , suppress drawing the figure frame
 
     left : float in the [0-1] interval
 
