@@ -103,48 +103,6 @@ def create_module_file(package, module, opts):
     else:
         text += ''
 
-    # __all__ control which members will be shown to the end user
-    text += format_directive(module, package)
-
-    # if opts.developper:
-    #
-    #     _imported_item = import_item(item)
-    #
-    #     clsmembers = inspect.getmembers(_imported_item)
-    #
-    #     members = [m for m in clsmembers if (not inspect.ismodule(m[1])
-    #     and     (hasattr(m[1],'__module__')
-    #              and m[1].__module__ == _imported_item.__name__)
-    #     and not (m[0].endswith('__') and m[0].startswith('__'))
-    #     and m[0] not in _imported_item.__all__ )]
-    #
-    #     if not hasattr(_imported_item, '__all__'):
-    #         print('missing __all__ in %s  - apigen skip this' % item)
-    #     elif members:
-    #         text += "\n\n.. _mod_{}_dev:\n\n".format(
-    #                 "_".join(item.split('.''')[1:]))
-    #         text += "\n\n**Additional information for developper's**\n\n"
-    #         for name, obj in members:
-    #             if inspect.isclass(obj):
-    #                 directive = '.. autoclass:: %s.%s\n' % (item, name)
-    #                 for option in OPTIONS:
-    #                     directive += '    :%s:\n' % option
-    #                 directive += '    :undoc-members:\n'
-    #                 text += directive
-    #         for name, obj in members:
-    #             if inspect.ismethod(obj):
-    #                 directive = '.. automethod:: %s.%s\n' % (item, name)
-    #                 text += directive
-    #         for name, obj in members:
-    #             if inspect.isfunction(obj):
-    #                 directive = '.. autofunction:: %s.%s\n' % (item, name)
-    #                 text += directive
-    #         for name, obj in members:
-    #             if not (inspect.isclass(obj) or inspect.isfunction(obj) or
-    #                         inspect.ismethod(obj)) :
-    #                 directive = '.. autoattribute:: %s.%s\n' % (item, name)
-    #                 text += directive
-
     write_file(makename(package, module), text, opts)
 
 
@@ -545,7 +503,7 @@ Preferences
 
     functemplate = \
 """{api}.{func}
-===========================
+==============================================================================
 
 .. automodule:: {api}
 
@@ -588,52 +546,7 @@ Preferences
                                  funcs = "    "+_funcs)
     write_file('index', text, opts)
 
-    # if opts.developper:
-    #
-    #     _imported_item = import_item(item)
-    #
-    #     clsmembers = inspect.getmembers(_imported_item)
-    #
-    #     members = [m for m in clsmembers if (not inspect.ismodule(m[1])
-    #     and     (hasattr(m[1],'__module__')
-    #              and m[1].__module__ == _imported_item.__name__)
-    #     and not (m[0].endswith('__') and m[0].startswith('__'))
-    #     and m[0] not in _imported_item.__all__ )]
-    #
-    #     if not hasattr(_imported_item, '__all__'):
-    #         print('missing __all__ in %s  - apigen skip this' % item)
-    #     elif members:
-    #         text += "\n\n.. _mod_{}_dev:\n\n".format(
-    #                 "_".join(item.split('.''')[1:]))
-    #         text += "\n\n**Additional information for developper's**\n\n"
-    #         for name, obj in members:
-    #             if inspect.isclass(obj):
-    #                 directive = '.. autoclass:: %s.%s\n' % (item, name)
-    #                 for option in OPTIONS:
-    #                     directive += '    :%s:\n' % option
-    #                 directive += '    :undoc-members:\n'
-    #                 text += directive
-    #         for name, obj in members:
-    #             if inspect.ismethod(obj):
-    #                 directive = '.. automethod:: %s.%s\n' % (item, name)
-    #                 text += directive
-    #         for name, obj in members:
-    #             if inspect.isfunction(obj):
-    #                 directive = '.. autofunction:: %s.%s\n' % (item, name)
-    #                 text += directive
-    #         for name, obj in members:
-    #             if not (inspect.isclass(obj) or inspect.isfunction(obj) or
-    #                         inspect.ismethod(obj)) :
-    #                 directive = '.. autoattribute:: %s.%s\n' % (item, name)
-    #                 text += directive
-
-
-
 
 if __name__ == "__main__":
 
-    main('spectrochempy',
-         destdir='../../docs/source/dev/generated',
-         exclude_patterns=['api.py'],
-         exclude_dirs=['extern','~misc','gui'],
-         developper=True)
+    pass

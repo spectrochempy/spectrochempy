@@ -8,6 +8,6 @@
 # =============================================================================
 
 """
-Modules defiing import methods for external data files
+Package defiing import methods for external data files
 
 """

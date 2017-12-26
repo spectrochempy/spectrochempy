@@ -8,6 +8,6 @@
 # =============================================================================
 
 """
-Modules related to n-dimensional dataset's creation and handling
+Package related to n-dimensional dataset's creation and handling
 
 """

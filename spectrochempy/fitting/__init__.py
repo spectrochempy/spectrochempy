@@ -8,5 +8,5 @@
 # =============================================================================
 
 """
-Modules related to fitting of n-dimensional datasets.
+Package related to fitting of n-dimensional datasets.
 """

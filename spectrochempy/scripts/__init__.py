@@ -8,6 +8,6 @@
 # =============================================================================
 
 """
-Modules defining script's management inside a given project.
+Package defining script's management inside a given project.
 
 """

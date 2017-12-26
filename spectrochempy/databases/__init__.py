@@ -8,6 +8,6 @@
 # =============================================================================
 
 """
-Modules defining various databases.
+Package defining various databases.
 
 """

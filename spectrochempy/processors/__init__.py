@@ -8,6 +8,6 @@
 # =============================================================================
 
 """
-Modules defining functions to process n-dimensional datasets.
+Package defining functions to process n-dimensional datasets.
 
 """

@@ -9,6 +9,6 @@
 
 
 """
-Modules related to the analysis of n-dimensional datasets or projects.
+Package related to the analysis of n-dimensional datasets or projects.
 
 """

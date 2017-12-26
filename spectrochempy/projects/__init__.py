@@ -8,6 +8,6 @@
 # =============================================================================
 
 """
-Modules allowing project's management.
+Package allowing project's management.
 
 """

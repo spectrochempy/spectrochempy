@@ -8,7 +8,7 @@
 # =============================================================================
 
 """
-Modules containing various utilities classes and functions.
+Package containing various utilities classes and functions.
 
 """
 import numpy as np

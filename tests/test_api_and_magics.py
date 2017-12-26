@@ -11,14 +11,13 @@
 def test_api():
     import spectrochempy
     # test version
-    from spectrochempy.api import APIref, log, version, running
+    from spectrochempy.api import APIref, log, version
     assert version.split('.')[0] == '0'
     assert version.split('.')[1][:1] == '1'
     # TODO: modify this for each release
 
     # test application
 
-    print(('\n\nRunning : ', running))
     assert version.startswith('0.1')
 
     log.warning('Ok, this is nicely executing!')

@@ -45,7 +45,7 @@ DOCDIR = os.path.join(
 
 PROJECT = "spectrochempy"
 SOURCE =   os.path.join(DOCDIR, 'source')
-API = os.path.join(DOCDIR, 'source', 'api')
+API = os.path.join(DOCDIR, 'source', 'api', 'generated')
 DEVAPI = os.path.join(DOCDIR, 'source', 'dev', 'generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT, '~doctrees')
@@ -100,8 +100,9 @@ def make_docs(*args):
 
     DEBUG = 'DEBUG' in args
 
+    preferences.log_level = WARNING
     if DEBUG:
-        preferences.log_level = ERROR
+        preferences.log_level = DEBUG
 
     builders = []
     if  'html' in args:
@@ -124,7 +125,7 @@ def make_docs(*args):
              destdir=DEVAPI,
              exclude_patterns=['api.py'],
              exclude_dirs=['extern', 'sphinxext', '~misc', 'gui'],
-             developper=True)
+             )
 
         # generate API reference
         apigen.main(PROJECT+'/api.py',
@@ -236,76 +237,13 @@ def make_dirs():
                   os.path.join(BUILDDIR, 'pdf'),
                   os.path.join(SOURCE, '_static'),
                   os.path.join(SOURCE, 'dev', 'generated'),
-                  os.path.join(SOURCE, 'api')
+                  os.path.join(SOURCE, 'api', 'generated')
                   ]
     for d in build_dirs:
         try:
             os.makedirs(d)
         except OSError:
             pass
-
-#
-# def class_config_rst_doc(cls):
-#     """Generate rST documentation for the class `cls` config preferences.
-#     Excludes traits defined on parent classes. (adapted from traitlets)
-#     """
-#     lines = []
-#     for k, trait in sorted(cls.class_traits().items()):
-#         if trait.name.startswith('_') or not trait.help or trait.name in [
-#             'cli_config',
-#         ]:
-#             continue
-#
-#         ttype = '`'+trait.__class__.__name__+'`'
-#
-#         termline = '**'+trait.name+'**'
-#
-#         # Choices or type
-#         if 'Enum' in ttype:
-#             # include Enum choices
-#             termline += ' : ' + '|'.join('`'+repr(x)+'`' for x in trait.values)
-#         else:
-#             termline += ' : ' + ttype + ', '
-#         lines.append(termline)
-#
-#         # Default value
-#         try:
-#             dvr = trait.default_value_repr()
-#         except Exception:
-#             dvr = None  # ignore defaults we can't construct
-#         if dvr is not None:
-#             if len(dvr) > 64:
-#                 dvr = dvr[:61] + '...'
-#             # Double up backslashes, so they get to the rendered docs
-#             dvr = dvr.replace('\\n', '\\\\n')
-#             lines.append(indent('Default: `%s`,' % dvr, 4))
-#             lines.append('')
-#
-#         help = trait.help or 'No description'
-#         lines.append(indent(dedent(help+'.'), 4))
-#
-#         # Blank line
-#         lines.append('')
-#
-#     return '\n'.join(lines)
-#
-        #
-        # # classes
-        # # -------
-        # if hasattr(pkg, '_classes') and pkg._classes:
-        #     classes += "\nClasses\n-------------\n"
-        #     classes += "This module contains the following classes:\n\n"
-        #     for item in pkg._classes:
-        #         _item = "%s.%s"%(package,item)
-        #         _imported_item = import_item(_item)
-        #         if hasattr(_imported_item,'class_config_rst_doc'):
-        #             doc = "\n"+class_config_rst_doc(_imported_item)
-        #             doc = doc.replace(item+".",'')
-        #             doc = doc.replace(item + "\n", '\n\t')
-        #             _imported_item.__doc__ = _imported_item.__doc__.format(
-        #                     attributes=doc)
-        #         classes += "\n.. autoclass:: %s\n\t:members:\n" \
-        #                    "\t:inherited-members:\n\n" % _item
 
 if __name__ == '__main__':
 

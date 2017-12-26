@@ -95,7 +95,7 @@ API Reference
 .. toctree::
     :maxdepth: 1
 
-    api/index
+    api/generated/index
 
 
 .. _gallery_of_examples:

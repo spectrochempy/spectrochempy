@@ -6,8 +6,12 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # =============================================================================
+from spectrochempy import api
 
-"""
-Package defining exporters for the n-dimensional datasets and projects
+def main():
+    pass
 
-"""
+
+# =============================================================================
+if __name__ == '__main__':
+    pass

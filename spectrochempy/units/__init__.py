@@ -8,7 +8,7 @@
 # =============================================================================
 
 """
-Modules to handle units (interface with `pint`.
+Package to handle units (interface with `pint`.
 """
 
 from .units import *

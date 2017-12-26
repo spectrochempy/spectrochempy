@@ -394,8 +394,6 @@ class SpectroChemPy(Application):
     # ------------------------------------------------------------------------
     running = Bool(False)
 
-    test = Bool(False)
-
     name = Unicode('SpectroChemPy')
 
     description = Unicode
@@ -479,14 +477,20 @@ to cite it this way:
     startup_project = Unicode('', help='Project to load at startup').tag(
         config=True)
 
+    startup_filename = Unicode('', help='Name of the file to load at '
+                                        'startup').tag(
+        config=True)
 
     do_not_block = Bool(False,
                         help="Make the plots BUT do not stop (for tests)"
                         ).tag(config=True)
 
+    test = Bool(False, help='test flag').tag(config=True)
+
     aliases = Dict(
         dict(test='SpectroChemPy.test',
              p='SpectroChemPy.startup_project',
+             f='SpectroChemPy.startup_filename',
              log_level='SpectroChemPy.log_level'))
 
     flags = Dict(dict(
@@ -636,8 +640,7 @@ to cite it this way:
     @docstrings.dedent
     def start(self, **kwargs):
         """
-        Start the |scp| API or only make a plot if an `output` filename is
-        given.
+        Start the |scp| API
 
         Parameters
         ----------
@@ -650,17 +653,6 @@ to cite it this way:
             (which is contradictory) debug has the priority.
         reset_config : `bool`
             Reset the configuration file to default values.
-
-        Examples
-        --------
-        >>> app = SpectroChemPy()
-        >>> app.initialize()
-        >>> app.start(
-        ...    reset_config=True,   # for restoring default configuration
-        ...    debug=True,          # debugging logs
-        ...    ) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        SpectroChemPy's API - v.0.1...
-        True
 
         """
 
@@ -817,6 +809,5 @@ app = SpectroChemPy()
 
 if __name__ == "__main__":
 
-    print('start application')
     pass
 
