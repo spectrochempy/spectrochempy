@@ -69,15 +69,15 @@ CRITICAL = logging.CRITICAL
 # ----------------------------------------------------------------------------
 
 try:
-    #: the release string of this package
     __release__ = get_distribution('spectrochempy').version
+    "Release version string of this package"
 except DistributionNotFound:
     # package is not installed
     __release__ = '0.1.alpha'
 
 try:
-    #: the version string of this package
     __version__ = get_version(root='..', relative_to=__file__)
+    "Version string of this package"
 except:
     __version__ = __release__
 
@@ -89,8 +89,8 @@ def _get_copyright():
     copyright += ' - A.Travert and C.Fernandez @ LCS'
     return copyright
 
-#: the copyright string of this package
 __copyright__ = _get_copyright()
+"Copyright string of this package"
 
 # .............................................................................
 def _get_release_date():
@@ -100,24 +100,23 @@ def _get_release_date():
     except:
         pass
 
-#: the last release date of this package
 __release_date__ = _get_release_date()
+"Last release date of this package"
 
-# ............................................................................
 # other info
+# ............................................................................
 
-#: url for the documentation of this package
 __url__ = "http://www-lcs.ensicaen.fr/spectrochempy"
+"URL for the documentation of this package"
 
-#: first authors(s) of this package
 __author__ = "C. Fernandez & A. Travert @LCS"
+"First authors(s) of this package"
 
-#: contributor(s) to this package
 __contributor__ = ""
+"contributor(s) to this package"
 
-#: The license of this package
 __license__ = "CeCILL-B license"
-
+"Licence of this package"
 
 
 
@@ -240,31 +239,30 @@ class SpectroChemPyMagics(Magics):
 
         return "Script {} created.".format(name)
 
-    @line_magic
-    def runscript(self, pars=''):
-        """
+    # @line_magic
+    # def runscript(self, pars=''):
+    #     """
+    #
+    #     """
+    #     opts, args = self.parse_options(pars, '')
+    #
+    #     if not args:
+    #         raise UsageError('Missing script name')
+    #
+    #     return args
 
-        """
-        opts, args = self.parse_options(pars, '')
+# ============================================================================
+# _Data class
+# ============================================================================
 
-        if not args:
-            raise UsageError('Missing script name')
-
-        return args
-
-# ==============================================================================
-# SCPData class
-# ==============================================================================
-
-class SCPData(HasTraits):
+class _Data(HasTraits):
     """
-    This class is used to determine the path to the scp_data directory.
+    A private class used to determine the path to the testdata directory.
 
     """
 
-    data = Unicode(help="Directory where to look for data")
-
-    _data = Unicode()
+    data = Unicode()
+    "Directory where to look for data"
 
     # ------------------------------------------------------------------------
     # public methods
@@ -272,7 +270,7 @@ class SCPData(HasTraits):
 
     def listing(self):
         """
-        Create a str representing a listing of the data repertory.
+        Create a str representing a listing of the testdata folder.
 
         Returns
         -------
@@ -307,11 +305,6 @@ class SCPData(HasTraits):
 
     @default('data')
     def _get_data_default(self):
-        # return the spectra dir by default
-        return self._data
-
-    @default('_data')
-    def _get__data_default(self):
         # the spectra path in package data
         return self._get_pkg_data_dir('testdata', 'scp_data')
 
@@ -340,39 +333,69 @@ class SCPData(HasTraits):
 # ============================================================================
 # Main application and configurators
 # ============================================================================
-class GeneralPreferences(Configurable) :
-    """Preferences that apply to the |scp| application in general"""
+class Preferences(Configurable) :
+    """
+    Preferences that apply to the |scp| application in general
 
-    _scpdata = Instance(SCPData,
-                    help="Set a data directory where to look for data"
-                    )
+    They should be accessibles from the main API
 
-    @default('_scpdata')
-    def _get__scpdata_default(self):
-        return SCPData()
+    Examples
+    ========
 
-    @property
-    def list_scpdata(self):
-        return self._scpdata
+    >>> from spectrochempy import api # doctest: +ELLIPSIS
+    SpectroChemPy's API...
+    >>> delimiter = api.preferences.csv_delimiter
 
 
-    # configuration parameters
-    # ------------------------------------------------------------------------
+    """
 
-    #: Display info on loading
+    # various settings
+    # ----------------
+
     show_info_on_loading = Bool(True,
-                                help='Display info on loading?'
-                                ).tag(config=True)
+                              help='Display info on loading?').tag(config=True)
 
-    #: CSV data delimiter
     csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
 
-    #: Default DATA directory
-    data = Unicode(help="Default data directory").tag(config=True)
 
-    @default('data')
-    def _get_data(self):
-        return self._scpdata.data
+    startup_project = Unicode('',
+                            help='Project to load at startup').tag(config=True)
+
+    startup_filename = Unicode('',
+                   help='Name of the file to load at startup').tag(config=True)
+
+    @property
+    def log_level(self):
+        return self.parent.log_level
+
+    @log_level.setter
+    def log_level(self, value):
+        if isinstance(value, str):
+            value = getattr(logging, value, None)
+            if value is None:
+                warnings.warn('Log level not changed: invalid value given\n'
+                              'string values must be DEBUG, INFO, WARNING, '
+                              'or ERROR')
+        self.parent.log_level = value
+
+
+    # default data directory
+    # ----------------------
+    _datadir = Instance(_Data)
+
+    @default('_datadir')
+    def _get_datadir_default(self):
+        return _Data()
+
+    @property
+    def list_datadir(self):
+        return self._datadir
+
+    datadir = Unicode(help="Default data directory").tag(config=True)
+
+    @default('datadir')
+    def _get_datadir(self):
+        return self._datadir.data
 
 
 class SpectroChemPy(Application):
@@ -383,123 +406,123 @@ class SpectroChemPy(Application):
     """
     from spectrochempy.utils import docstrings
 
-
     from spectrochempy.projects.projectpreferences import ProjectPreferences
     from spectrochempy.plotters.plotterpreferences import PlotterPreferences
     from spectrochempy.readers.readerpreferences import ReaderPreferences
     from spectrochempy.writers.writerpreferences import WriterPreferences
-    from spectrochempy.processors.processorpreferences import ProcessorPreferences
+    from spectrochempy.processors.processorpreferences import \
+        ProcessorPreferences
 
     # applications attributes
     # ------------------------------------------------------------------------
     running = Bool(False)
+    "Running status of the |scp| application"
 
     name = Unicode('SpectroChemPy')
+    "Running name of the application"
 
-    description = Unicode
+    description = Unicode('SpectroChemPy is a '
+                          'framework for processing, '
+                          'analysing and modelling Spectroscopic data for '
+                          'Chemistry with Python.')
+    "Short description of the |scp| application"
+    long_description = Unicode
 
-    @default('description')
-    def _get_description(self):
-        desc = """Welcome to <strong>SpectroChemPy</strong> Application<br>
-<br>
-<p>
-<strong>SpectroChemPy</strong> is a framework for processing, analysing and 
-modelling 
-<strong>Spectro</>scopic data for <strong>Chem</strong>istry with <strong>Py</strong>thon. It is 
-is a cross platform software, running on Linux, Windows or OS X.
-<br>
-<br>
-<strong>version:</strong> {version}
-<br>
-<strong>Authors:</strong> {authors}
-<br>
-<strong>License:</strong> {license}
-<br>
-<div class='warning'> SpectroChemPy is still experimental and under active 
-development.
-    Its current design is subject to major changes, reorganizations, bugs
-    and crashes!!!. Please report any issues to the 
-    <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker
-    <a>
-</div>
-<br>
-<br>
-When using <strong>SpectroChemPy</strong> for your own work, you are kindly 
-requested 
-to cite it this way:
-<pre>
- Arnaud Travert & Christian Fernandez,
- SpectroChemPy, a framework for processing, analysing and modelling of 
- Spectroscopic data for Chemistry with Python
- https://bitbucket.org/spectrocat/spectrochempy, (version {version})
- Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
- Caen/CNRS, 2017
-</pre>
-</p>
+    @default('long_description')
+    def _get_long_description(self):
+        desc = """\
+    Welcome to <strong>SpectroChemPy</strong> Application<br><br>
+    <p><strong>SpectroChemPy</strong> is a framework for processing, 
+    analysing and 
+    modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry 
+    with 
+    <strong>Py</strong>thon. It is a cross platform software, running on 
+    Linux, 
+    Windows or OS X.</p><br><br>
+    <strong>version:</strong> {version}<br>
+    <strong>Authors:</strong> {authors}<br>
+    <strong>License:</strong> {license}<br>
+    <div class='warning'> SpectroChemPy is still experimental and under active 
+    development. Its current design and functionalities are subject to major 
+    changes, reorganizations, bugs and crashes!!!. Please report any issues 
+    to the 
+    <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
+    </div><br><br>
+    When using <strong>SpectroChemPy</strong> for your own work, you are 
+    kindly 
+    requested to cite it this way:
+    <pre>
+     Arnaud Travert & Christian Fernandez,
+     SpectroChemPy, a framework for processing, analysing and modelling of 
+     Spectroscopic data for Chemistry with Python
+     https://bitbucket.org/spectrocat/spectrochempy, (version {version})
+     Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
+     Caen/CNRS, 2017
+    </pre>
+    </p>
 
-""".format(version=__release__, authors=__author__, license=__license__)
+    """.format(version=__release__, authors=__author__, license=__license__)
 
         return desc
 
-
-    # configuration parameters
+    # ------------------------------------------------------------------------
+    # Configuration parameters
     # ------------------------------------------------------------------------
 
+    # Config file setting
+    # -------------------
     reset_config = Bool(False,
-                        help='Should we restaure a default configuration?'
-                        ).tag(config=True)
+                        help='Should we restaure a default '
+                             'configuration?').tag(config=True)
 
     config_file_name = Unicode(None,
-                               help="Configuration file name"
-                               ).tag(config=True)
+                               help="Configuration file name").tag(config=True)
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
         return self.name.lower() + '.cfg.py'
 
-
     config_dir = Unicode(None,
-                         help="Set the configuration directory location"
-                         ).tag(config=True)
+              help="Set the configuration directory location").tag(config=True)
 
     @default('config_dir')
     def _get_config_dir_default(self):
         return self._get_config_dir()
 
+    # Logger at startup
+    # -----------------
+
     debug = Bool(False,
-                 help='Set DEBUG mode, with full outputs'
-                 ).tag(config=True)
+                 help='Set DEBUG mode, with full outputs').tag(config=True)
 
     quiet = Bool(False,
-                 help='Set Quiet mode, with minimal outputs'
-                 ).tag(config=True)
+                 help='Set Quiet mode, with minimal outputs').tag(config=True)
 
-    startup_project = Unicode('', help='Project to load at startup').tag(
-        config=True)
 
-    startup_filename = Unicode('', help='Name of the file to load at '
-                                        'startup').tag(
-        config=True)
-
-    do_not_block = Bool(False,
-                        help="Make the plots BUT do not stop (for tests)"
-                        ).tag(config=True)
-
+    # TESTING
+    # ------------------------------------------------------------------------
     test = Bool(False, help='test flag').tag(config=True)
+
+    do_not_block = Bool(False)
+    "Make the plots BUT do not stop for TESTS or DOCS building"
+
+    # Command line interface
+    # ------------------------------------------------------------------------
 
     aliases = Dict(
         dict(test='SpectroChemPy.test',
-             p='SpectroChemPy.startup_project',
-             f='SpectroChemPy.startup_filename',
-             log_level='SpectroChemPy.log_level'))
+             p='SpectroChemPy.preferences.startup_project',
+             f='SpectroChemPy.preferences.startup_filename')
+    )
 
     flags = Dict(dict(
-        debug=(
-            {'SpectroChemPy': {'log_level': 10}},
-            "Set loglevel to DEBUG")
+        debug=( {'SpectroChemPy': {'log_level': DEBUG}},
+                "Set log_level to DEBUG"),
+        quiet=({'SpectroChemPy': {'log_level': ERROR}},
+               "Set log_level to ERROR")
     ))
 
-    classes = List([GeneralPreferences,
+    classes = List([Preferences,
                     ProjectPreferences,
                     PlotterPreferences,
                     ])
@@ -510,8 +533,9 @@ to cite it this way:
 
     def __init__(self, *args, **kwargs):
         super(SpectroChemPy, self).__init__(*args, **kwargs)
+
         if kwargs.get('debug', False):
-            self.log_level = logging.DEBUG
+            self.log_level = DEBUG
 
         self.initialize()
 
@@ -559,7 +583,7 @@ to cite it this way:
         # add other preferecnes
         # ---------------------------------------------------------------------
 
-        self._init_general_preferences()
+        self._init_preferences()
         self._init_plotter_preferences()
         self._init_project_preferences()
 
@@ -669,17 +693,17 @@ to cite it this way:
             self.log_format = '%(highlevel)s %(message)s'
 
             if self.quiet:
-                self.log_level = logging.ERROR
+                self.log_level = ERROR
 
             if self.debug:
-                self.log_level = logging.DEBUG
+                self.log_level = DEBUG
                 self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
 
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
 
-            # print(self.general_preferences.show_info_on_loading)
-            if self.general_preferences.show_info_on_loading:
+            # print(self.preferences.show_info_on_loading)
+            if self.preferences.show_info_on_loading:
                 print(info_string)
 
             self.log.debug(
@@ -701,9 +725,10 @@ to cite it this way:
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    def _init_general_preferences(self):
+    def _init_preferences(self):
 
-        self.general_preferences = GeneralPreferences(config=self.config)
+        self.preferences = Preferences(config=self.config, parent=self)
+
 
     # ........................................................................
     def _init_project_preferences(self):
@@ -786,12 +811,15 @@ to cite it this way:
     # ------------------------------------------------------------------------
     # Events from Application
     # ------------------------------------------------------------------------
+    @observe('log')
+    def _log_changed(self, change):
+        print()
 
     @observe('log_level')
     def _log_level_changed(self, change):
 
         self.log_format = '%(highlevel)s %(message)s'
-        if change.new == logging.DEBUG:
+        if change.new == DEBUG:
             self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
         self.log.level = self.log_level
         for handler in self.log.handlers:

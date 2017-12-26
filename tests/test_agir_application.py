@@ -7,13 +7,12 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
 from spectrochempy.api import *
 
 import os
 import pytest
 
+#TODO: to revise with project!
 @pytest.fixture(scope="module")
 def samples():
     _samples = {'P350':{'label':'$\mathrm{M_P}\,(623\,K)$'},
@@ -21,12 +20,13 @@ def samples():
                'B350':{'label':'$\mathrm{M_B}\,(623\,K)$'}}
 
     for key, sample in _samples.items():
-        # our data are in our test `scpdata` directory.
-        basename = os.path.join(scpdata,'agirdata/{}/FTIR/FTIR'.format(key))
+        # our data are in our test `preferences.datadir` directory.
+        basename = os.path.join(preferences.datadir,
+                                'agirdata/{}/FTIR/FTIR'.format(key))
         if os.path.exists(basename+'.scp'):
             #check if the scp file have already been saved
             filename = basename + '.scp'
-            sample['IR'] = NDDataset.read( filename)
+            sample['IR'] = NDDataset.read(filename)
         else:
             # else read the original zip file
             filename = basename + '.zip'
@@ -35,7 +35,8 @@ def samples():
             sample['IR'].save(basename + '.scp')
 
     for key, sample in _samples.items():
-        basename = os.path.join(scpdata, 'agirdata/{}/TGA/tg'.format(key))
+        basename = os.path.join(preferences.datadir,
+                                              'agirdata/{}/TGA/tg'.format(key))
         if os.path.exists(basename + '.scp'):
             # check if the scp file have already been saved
             filename = basename + '.scp'

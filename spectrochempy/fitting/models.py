@@ -17,7 +17,8 @@ import numpy as np
 from spectrochempy.application import app
 plotter_preferences = app.plotter_preferences
 log = app.log
-preferences = app
+preferences = app.preferences
+
 from spectrochempy.utils import SpectroChemPyWarning
 
 __all__ = []

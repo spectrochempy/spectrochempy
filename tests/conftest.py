@@ -281,38 +281,39 @@ def dataset3d():
 ############################
 # Fixture:  IR spectra (SPG)
 ############################
+
 @pytest.fixture(scope="function")
 def IR_source_1D():
-    from spectrochempy.dataset.nddataset import NDDataset
-    from spectrochempy.api import scpdata
+    from spectrochempy.api import NDDataset, preferences
+    datadir = preferences.datadir
     source = NDDataset.read_omnic(
-            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
     return source[0]
 
 @pytest.fixture(scope="function")
 def IR_source_2D():
-    from spectrochempy.dataset.nddataset import NDDataset
-    from spectrochempy.api import scpdata
+    from spectrochempy.api import NDDataset, preferences
+    datadir = preferences.datadir
     source = NDDataset.read_omnic(
-            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
     return source
 
 # Fixture:  IR spectra
 @pytest.fixture(scope="function")
 def IR_scp_1():
-    from spectrochempy.dataset.nddataset import NDDataset
-    from spectrochempy.api import scpdata
+    from spectrochempy.api import NDDataset, preferences
+    datadir = preferences.datadir
     source = NDDataset.load(
-            os.path.join(scpdata, 'irdata', 'nh4.scp'))
+            os.path.join(datadir, 'irdata', 'nh4.scp'))
     return source
 
 
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D():
-    from spectrochempy.dataset.nddataset import NDDataset
-    from spectrochempy.api import scpdata
-    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
+    from spectrochempy.api import NDDataset, preferences
+    datadir = preferences.datadir
+    path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
     source = NDDataset.read_bruker_nmr(
             path, expno=1, remove_digital_filter=True)
@@ -322,9 +323,9 @@ def NMR_source_1D():
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D_1H():
-    from spectrochempy.dataset.nddataset import NDDataset
-    from spectrochempy.api import scpdata
-    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
+    from spectrochempy.api import NDDataset, preferences
+    datadir = preferences.datadir
+    path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'tpa')
     source = NDDataset.read_bruker_nmr(
             path, expno=10, remove_digital_filter=True)
@@ -333,9 +334,9 @@ def NMR_source_1D_1H():
 
 @pytest.fixture(scope="function")
 def NMR_source_2D():
-    from spectrochempy.dataset.nddataset import NDDataset
-    from spectrochempy.api import scpdata
-    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
+    from spectrochempy.api import NDDataset, preferences
+    datadir = preferences.datadir
+    path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')
     source = NDDataset.read_bruker_nmr(
             path, expno=1, remove_digital_filter=True)

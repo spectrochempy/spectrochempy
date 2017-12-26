@@ -53,8 +53,7 @@ plotter_preferences = app.plotter_preferences
 # ----------------------------------------------------------------------------
 
 log = app.log
-preferences = app
-general_preferences = app.general_preferences
+preferences = app.preferences
 
 __all__ = ['NDIO',
 
@@ -106,7 +105,7 @@ class NDIO(HasTraits):
     # Generic save function
     # --------------------------------------------------------------------------
 
-    def save(self, filename='', directory=general_preferences.data,
+    def save(self, filename='', directory=preferences.datadir,
              **kwargs
              ):
         """
@@ -119,7 +118,7 @@ class NDIO(HasTraits):
         filename : str
             The filename of the file where to save the current dataset
 
-        directory : str, optional, default = ``general_preferences.data``
+        directory : str, optional, default:`preferences.datadir`
             If specified, the given `directory` and the `filename` will be
             appended.
 
@@ -128,10 +127,10 @@ class NDIO(HasTraits):
 
         Read some experimental data and then save in our proprietary format **scp**
 
-        >>> from spectrochempy.api import NDDataset, scpdata #doctest: +ELLIPSIS
+        >>> from spectrochempy.api import NDDataset #doctest: +ELLIPSIS
         SpectroChemPy's API...
-        >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
-        >>> mydataset.save('mydataset.scp', directory=scpdata)
+        >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
+        >>> mydataset.save('mydataset.scp')
 
         Notes
         -----
@@ -144,7 +143,7 @@ class NDIO(HasTraits):
 
         """
 
-        directory = kwargs.get("directory", general_preferences.data)
+        directory = kwargs.get("directory", preferences.datadir)
 
         if not filename:
             # the current file name or default filename (id)
@@ -254,10 +253,10 @@ class NDIO(HasTraits):
     def load(cls,
              fid='',
              protocol='scp',
-             directory=general_preferences.data,
+             directory=preferences.datadir,
              **kwargs
              ):
-        """Load a dataset object saved as a pickle file ( ``.scp`` file).
+        """Load a dataset object saved as a pickle file ( '.scp' file).
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
@@ -265,9 +264,9 @@ class NDIO(HasTraits):
         ----------
         fid : str or file object
             The name of the file to read (or a file object).
-        protocol : str, optional, default= ``scp``
+        protocol : str, optional, default:'scp'
             The default type for saving.
-        directory : str, optional, default= ``scpdata``
+        directory : str, optional, default:`preferences.datadir`
             The directory from where to load the file.
         kwargs : optional keyword parameters.
             Any additional keyword(s) to pass to the actual reader.
@@ -275,8 +274,8 @@ class NDIO(HasTraits):
         Examples
         --------
 
-        >>> from spectrochempy.api import NDDataset,scpdata
-        >>> mydataset = NDDataset.load('mydataset.scp', directory=scpdata)
+        >>> from spectrochempy.api import NDDataset
+        >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
         ...
@@ -284,7 +283,7 @@ class NDIO(HasTraits):
         by default, directory for saving is the `data`.
         So the same thing can be done simply by:
 
-        >>> from spectrochempy.api import NDDataset,scpdata
+        >>> from spectrochempy.api import NDDataset
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -314,14 +313,14 @@ class NDIO(HasTraits):
             # this is a filename
 
             filename = fid
-            directory = kwargs.get("directory", general_preferences.data)
+            directory = kwargs.get("directory", preferences.datadir)
             if not filename:
                 raise IOError('no filename provided!')
             else:
                 filename = os.path.expanduser(
-                                           os.path.join(directory, filename))
+                                             os.path.join(directory, filename))
                 try:
-                    # cast to  file in the testdata directory
+                    # cast to file in the testdata directory
                     # TODO: add possibility to search in several directory
                     fid = open(filename,'rb')
                 except:

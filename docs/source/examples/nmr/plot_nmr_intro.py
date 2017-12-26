@@ -6,8 +6,8 @@ Introduction to NMR processing
 Here we explain how to display and perform basic processing of NMR file
 
 """
-
-from spectrochempy.api import *
+import os
+from spectrochempy import api
 
 ##########################################################
 #
@@ -19,10 +19,11 @@ from spectrochempy.api import *
 ##########################################################
 # 1D dataset getting function
 # ---------------------------
+datadir = api.preferences.datadir
 
 def get_source1D():
-    source1D = NDDataset()
-    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    source1D = api.NDDataset()
+    path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
     source1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return source1D
 
@@ -32,8 +33,8 @@ def get_source1D():
 # ---------------------------
 
 def get_source2D():
-    source2D = NDDataset()
-    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
+    source2D = api.NDDataset()
+    path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
     source2D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return source2D
 
@@ -59,7 +60,7 @@ source1D.plot(xlim=(0, 25000), style='paper')
 source1D.plot(imag=True, data_only=True, hold=True)
 # `data_only=True` to plot only the additional data, without updating the figure setting
 # such as xlim and so on.
-show()
+api.show()
 
 ##########################################################
 # To display the imaginary part, one can also simply use the show_complex commands.
@@ -67,20 +68,20 @@ show()
 ax = source1D.plot(show_complex=True, color='green',
                    xlim=(0., 20000.), zlim=(-2., 2.))
 
-show()
+api.show()
 
-###############################@@
+###############################
 # Plot the 2D dataset raw data
 
 source2D = get_source2D()
-ax = source2D.plot(xlim=(0., 25000.))
+ax = api.plot(source2D, xlim=(0., 25000.))
 
 ##############################
 # probably less util, but multiple display is also possible for 2D
 
 source2D.plot()
 ax = source2D.plot(imag=True, cmap='jet', data_only=True, hold=True)
-show()
+api.show()
 
 #################
 # Apodization
@@ -89,6 +90,7 @@ source1D = get_source1D()  # restore original
 p = source1D.plot()
 
 # create the apodized dataset
+ur = api.ur # the unit registry
 lb_source = source1D.em(lb=100. * ur.Hz)
 
 p = lb_source.plot(xlim=(0, 25000), zlim=(-2, 2))
@@ -96,7 +98,7 @@ p = lb_source.plot(xlim=(0, 25000), zlim=(-2, 2))
 lb_source.ax.text(12500, 1.70, 'Dual display (original & apodized fids)', ha='center',
            fontsize=16)
 
-show()
+api.show()
 
 ############################
 # Note that the apodized dataset actually replace the original data
@@ -121,7 +123,7 @@ lb2_source is not source1D
 source1D = get_source1D()  # restore original
 p = source1D.plot()
 
-show()
+api.show()
 
 ################################################
 # create the apodized dataset (if apply is False, the apodization function is not applied to the dataset,
@@ -136,7 +138,7 @@ source1D.plot(data_only=True, hold=True)
 source1D.ax.text(12500, 1.70,
            'Multiple display (original & em apodized fids + apod.function)',
            ha='center', fontsize=14)
-show()
+api.show()
 
 ######################################
 # Apodization function can be em, gm, sp ...
@@ -157,7 +159,7 @@ source1D.ax.text(12500, 1.70,
            'Multiple display (original & gm apodized fids + apod.function)',
            ha='center', fontsize=14)
 
-show()
+api.show()
 
 # **TODO**: sp function
 
@@ -172,7 +174,7 @@ source2D.em(lb=LB)
 source2D.em(lb=LB / 2, axis=0)
 source2D.plot(data_only=True, xlim=(0, 5000), cmap='copper', hold=True)
 
-show()
+api.show()
 
 
 

@@ -19,7 +19,6 @@ import pytest
 def test_read_csv():
 
     A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
-                           directory=scpdata,
                            origin='omnic_export',
                            only=10)
     print(A)
@@ -28,7 +27,7 @@ def test_read_csv():
     A.plot_stack()
 
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
-                           directory=scpdata,
+                           directory=preferences.datadir,
                            origin='tga')
     assert B.shape == (3446,)
     print(B)

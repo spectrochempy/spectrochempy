@@ -33,8 +33,7 @@ from spectrochempy.utils import deprecated
 
 plotter_preferences = app.plotter_preferences
 log = app.log
-preferences = app
-
+preferences = app.preferences
 __all__ = ['plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar',
            'plot_multiple']
 
@@ -505,7 +504,7 @@ if __name__ == '__main__':
 
 
     source = NDDataset.read_omnic(
-            os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(preferences.datadir, 'irdata', 'NH4Y-activation.SPG'))
 
 
     # plot generic

@@ -410,11 +410,11 @@ def create_api_files(rootpath, opts):
     # generate separate file for the members of the api
 
     # we assume that the file is api.py
-    app = os.path.split(rootpath)[-2]
-
-    api = app + ".api"
+    root = os.path.split(rootpath)[-2]
+    api = root + ".api"
 
     _imported_item = import_item(api)
+
     clsmembers = inspect.getmembers(_imported_item)
 
     members = [m for m in clsmembers if m[0] in _imported_item.__all__ and
@@ -445,13 +445,6 @@ although that, in the examples in this documentation, we have often use the
 second one for simplicity.
 
 
-Constants
----------
-
-{consts}
-
-
-
 Objects
 -------
 
@@ -475,12 +468,16 @@ Functions
 Preferences
 -----------
 
-.. toctree::
-    :maxdepth: 2
+{preferences}
+    
 
-    preferences
-    
-    
+Constants
+---------
+
+{consts}
+
+
+
 """
 
     classtemplate = \
@@ -541,12 +538,47 @@ Preferences
     _funcs = "    ".join(lfuncs)
     _consts = "".join(lconsts)
     _consts = _consts.replace('/Users/christian/Dropbox/D.PROGRAMMES/', '~/')
-    text = indextemplate.format(consts=""+_consts,
-                                 classes = "    "+_classes,
-                                 funcs = "    "+_funcs)
+
+    text = indextemplate.format(consts= _consts,
+                                preferences = write_prefs(root),
+                                classes = "    "+_classes,
+                                funcs = "    "+_funcs)
     write_file('index', text, opts)
 
+from spectrochempy.sphinxext.traitlets_sphinxdoc import reverse_aliases, \
+    class_config_rst_doc
+
+def write_prefs(root):
+    from spectrochempy.application import app
+    trait_aliases = reverse_aliases(app)
+    text = ""
+    for c in app._classes_inc_parents():
+        text += class_config_rst_doc(c, trait_aliases)
+        text += '\n'
+    return text
 
 if __name__ == "__main__":
 
-    pass
+    DOCDIR = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
+    PROJECT = "spectrochempy"
+    SOURCE = os.path.join(DOCDIR, 'source')
+    API = os.path.join(SOURCE, 'api', 'generated')
+    DEVAPI = os.path.join(SOURCE, 'dev', 'generated')
+
+    # generate DEVAPI reference
+    main(PROJECT,
+         tocdepth=1,
+         includeprivate=True,
+         destdir=DEVAPI,
+         exclude_patterns=['api.py'],
+         exclude_dirs=['extern', 'sphinxext', '~misc', 'gui'],
+         )
+
+    # generate API reference
+    main(PROJECT+'/api.py',
+         tocdepth=1,
+         includeprivate=True,
+         destdir=API,
+         genapi=True,
+                )

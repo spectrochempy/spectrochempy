@@ -24,9 +24,9 @@ from spectrochempy.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
 from spectrochempy.application import app
 
-plotter_preferences = app.plotter_preferences
 log = app.log
-preferences = app
+preferences = app.preferences
+plotter_preferences = app.plotter_preferences
 
 
 __all__ = ['multiplot', 'multiplot_map', 'multiplot_stack',
@@ -457,7 +457,7 @@ if __name__ == '__main__':
     from spectrochempy.api import *
 
     source = NDDataset.read_omnic(
-         os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))[0:20]
+         os.path.join(preferences.datadir, 'irdata', 'NH4Y-activation.SPG'))[0:20]
 
     sources=[source, source*1.1, source*1.2, source*1.3]
     labels = ['sample {}'.format(label) for label in

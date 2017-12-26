@@ -10,7 +10,7 @@
 
 
 
-from spectrochempy.api import NDDataset, scpdata, log, DEBUG, ERROR
+from spectrochempy.api import NDDataset, preferences
 
 from tests.utils import assert_approx_equal
 import os
@@ -26,7 +26,7 @@ def test_load(IR_source_2D):
     assert_approx_equal(B.data[0, 0], 2.05 * 1.98, significant=2)
     assert "binary operation mul with `1.98` has been performed" in B.history
 
-    filename = os.path.join(scpdata, 'irdata', 'nh4.scp')
+    filename = os.path.join('irdata', 'nh4.scp')
     source.save(filename)
     source2 = NDDataset.read(filename)
 
@@ -34,8 +34,8 @@ def test_load(IR_source_2D):
 
 def test_methods_read_access():
 
-    path = os.path.join(scpdata, 'nmrdata', 'bruker', 'tests', 'nmr',
-                        'bruker_1d')
+    path = os.path.join(preferences.datadir, 'nmrdata', 'bruker', 'tests',
+                        'nmr','bruker_1d')
 
     # load the data in a new dataset
     ndd = NDDataset()

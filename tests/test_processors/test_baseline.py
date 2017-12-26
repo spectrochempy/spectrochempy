@@ -11,8 +11,7 @@
 # noinspection PyUnresolvedReferences
 from spectrochempy.api import (show,
                                BaselineCorrection,
-                               NDDataset,
-                               scpdata)
+                               NDDataset)
 
 import pytest
 import os
@@ -70,7 +69,7 @@ def test_notebook_basecor_bug():
     # coding: utf-8
 
     source = NDDataset.read_omnic(
-        os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+        os.path.join('irdata', 'NH4Y-activation.SPG'))
     source
 
     s = source[:, 1260.0 :5999.0]

@@ -23,12 +23,12 @@ def test_save_and_load_file_with_nofilename(IR_source_2D):
     A.save()
 
     # no directory for saving passed ... it must be in data
-    path = os.path.join(scpdata, A.id + '.scp')
+    path = os.path.join(preferences.datadir, A.id + '.scp')
     assert os.path.exists(path)
 
     # the filename should be stored in the object just saved
     assert A.filename == A.id + '.scp'
-    assert A.directory == scpdata
+    assert A.directory == preferences.datadir
 
     B = NDDataset.load(path)
     assert B.description == A.description
@@ -36,7 +36,7 @@ def test_save_and_load_file_with_nofilename(IR_source_2D):
 
     # the filename should be stored in the object just loaded
     assert B.filename == A.filename
-    assert B.directory == scpdata
+    assert B.directory == preferences.datadir
 
     os.remove(path)
 

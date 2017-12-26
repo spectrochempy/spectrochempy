@@ -25,6 +25,7 @@ __all__ = ['plot_map', 'plot_stack', 'plot_image']
 _methods = __all__[:]
 
 plotter_preferences = app.plotter_preferences
+preferences = app.preferences
 log = app.log
 
 # =============================================================================
@@ -485,9 +486,9 @@ def clevels(data, **kwargs):
 
 if __name__ == '__main__':
 
-    from spectrochempy.api import NDDataset, scpdata, show
+    from spectrochempy.api import NDDataset, show
 
-    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
+    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=preferences.datadir)
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'

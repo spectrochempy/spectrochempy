@@ -27,9 +27,8 @@ from ..dataset.api import Coord, NDDataset
 from ..processors.api import stack
 from ..application import app
 plotter_preferences = app.plotter_preferences
-general_preferences = app.general_preferences
 log = app.log
-preferences = app
+preferences = app.preferences
 from ..utils import (readfilename, unzip, is_sequence,
                                 SpectroChemPyWarning)
 
@@ -59,10 +58,10 @@ def read_zip(source, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.api import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
         SpectroChemPy's API ...
-    >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip', directory=data)
+    >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
     --------------------------------------------------------------------------------
@@ -102,7 +101,7 @@ def read_csv(source, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.api import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
         SpectroChemPy's API ...
     >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=data)
@@ -134,7 +133,7 @@ def _read(source, filename='',
 
         source = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", general_preferences.data)
+    directory = kwargs.get("directory", preferences.datadir)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 
@@ -232,7 +231,7 @@ def _read_csv(source, filename='', **kwargs):
         raise IOError("{} file doesn't exists!".format(filename))
 
     new = source.copy() # important
-    delimiter = kwargs.get("csv_delimiter", general_preferences.csv_delimiter)
+    delimiter = kwargs.get("csv_delimiter", preferences.csv_delimiter)
     try:
         d = np.loadtxt(filename, delimiter=delimiter)
     except ValueError:
@@ -333,7 +332,7 @@ def _add_omnic_info(source, **kwargs):
 #===============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.api import (NDDataset, scpdata, options, ERROR, show)
+    from spectrochempy.api import (NDDataset, preferences, ERROR, show)
 
 
     preferences.log_level = ERROR
@@ -345,7 +344,7 @@ if __name__ == '__main__':
     # A.plot_stack()
 
 
-    B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=scpdata)
+    B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
     print(B)
 
     B = B[-0.5:60.0]

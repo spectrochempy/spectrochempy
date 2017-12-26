@@ -49,7 +49,7 @@ and some `IPython` configurations are made.
 
 """
 import sys
-
+import logging
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
@@ -57,6 +57,15 @@ import matplotlib as mpl
 
 __all__ = []
 
+# this is to simplify import of log levels
+# for example:
+# >>> from spectrochempy import api, DEBUG
+
+DEBUG = logging.DEBUG
+INFO = logging.INFO
+WARNING = logging.WARNING
+ERROR = logging.ERROR
+CRITICAL = logging.CRITICAL
 
 # ----------------------------------------------------------------------------
 # Backend

@@ -18,7 +18,8 @@ import pytest
 
 
 def test_nmr():
-    path = os.path.join(scpdata, 'nmrdata','bruker', 'tests', 'nmr','bruker_1d')
+    path = os.path.join(preferences.datadir, 'nmrdata','bruker', 'tests',
+                        'nmr','bruker_1d')
 
     # load the data in a new dataset
     ndd = NDDataset()

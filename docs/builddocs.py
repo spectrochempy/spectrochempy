@@ -35,7 +35,8 @@ from docs import apigen
 preferences.log_level = ERROR
 
 #from sphinx.util.console import bold, darkgreen
-#TODO: make our message colored too!   look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
+#TODO: make our message colored too!
+# look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
 #from sphinx.cmdline import main as sphinx_build
 
 SERVER = os.environ.get('SERVER_FOR_LCS', None)
@@ -45,8 +46,8 @@ DOCDIR = os.path.join(
 
 PROJECT = "spectrochempy"
 SOURCE =   os.path.join(DOCDIR, 'source')
-API = os.path.join(DOCDIR, 'source', 'api', 'generated')
-DEVAPI = os.path.join(DOCDIR, 'source', 'dev', 'generated')
+API = os.path.join(SOURCE, 'api', 'generated')
+DEVAPI = os.path.join(SOURCE, 'dev', 'generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT, '~doctrees')
 
@@ -146,13 +147,6 @@ def make_docs(*args):
         #with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
         sp.verbosity = 1
-
-        from spectrochempy.sphinxext.traitlets_sphinxdoc import write_doc
-        from spectrochempy.application import app
-
-        write_doc(os.path.join(API, 'preferences.rst'),     # File to write
-                 'API Preferences',           # Title
-                 app)
 
         sp.build()
         res = sp.statuscode

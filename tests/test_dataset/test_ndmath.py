@@ -432,8 +432,7 @@ def test_non_ufunc_functions_with_2D(operation, result):
 def test_simple_arithmetic_on_full_dataset():
     # due to a bug in notebook with the following
     import os
-    from spectrochempy.api import scpdata
-    source = NDDataset.read_omnic(os.path.join(scpdata, 'irdata', 'NH4Y-activation.SPG'))
+    source = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
     d = source - source[0]
     # suppress the first spectrum to all other spectra in the series
 

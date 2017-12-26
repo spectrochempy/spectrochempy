@@ -21,8 +21,8 @@ __all__ = ["assert_equal",
            "RandomSeedContext",
            "EPSILON",
            "is_sequence",
-           "scpdata",
-           "options"
+           "preferences",
+           "datadir"
           ]
 
 import os
@@ -47,10 +47,10 @@ def preferences():
     return app
 preferences = preferences()
 
-def scpdata():
+def datadir():
     from spectrochempy.application import app
-    return app.general_preferences.data
-scpdata = scpdata()
+    return app.preferences.datadir
+datadir = datadir()
 
 
 figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
@@ -353,7 +353,8 @@ def image_comparison(reference=None,
     reference : list of image filename for the references
 
         List the image filenames of the reference figures
-        (located in ``scpdata/figures``) which correspond in the same order to
+        (located in ``<preferences.datadir>/figures``) which correspond in
+        the same order to
         the various figures created in the decorated fonction. if
         these files doesn't exist an error is generated, except if the
         force_creation argument is True. This should allow the creation

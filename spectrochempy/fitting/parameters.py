@@ -22,10 +22,10 @@ from collections import \
     UserDict  # This is to be able to create a special dictionary
 
 from spectrochempy.application import app
-
-plotter_preferences = app.plotter_preferences
 log = app.log
-preferences = app
+plotter_preferences = app.plotter_preferences
+preferences = app.preferences
+
 from spectrochempy.dataset.nddataset import NDDataset
 
 import numpy as np

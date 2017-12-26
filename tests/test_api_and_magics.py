@@ -9,6 +9,7 @@
 
 
 def test_api():
+
     import spectrochempy
     # test version
     from spectrochempy.api import APIref, log, version

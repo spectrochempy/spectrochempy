@@ -23,9 +23,8 @@ from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.application import app
 
 plotter_preferences = app.plotter_preferences
-general_preferences = app.general_preferences
 log = app.log
-preferences = app
+preferences = app.preferences
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
 __all__ = ['read_omnic', 'read_spg', 'read_spa']
@@ -70,10 +69,9 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.api import NDDataset, scpdata # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    <BLANKLINE>
-        SpectroChemPy's API ...
-    >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
+    >>> from spectrochempy.api import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    SpectroChemPy's API ...
+    >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
     --------------------------------------------------------------------------------
@@ -93,7 +91,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
         source = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", general_preferences.data)
+    directory = kwargs.get("directory", preferences.datadir)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 
@@ -543,11 +541,11 @@ def _read_spa(source, filename):
 
 if __name__ == '__main__':
 
-    from spectrochempy.api import NDDataset, scpdata
+    from spectrochempy.api import NDDataset
 
-    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=scpdata)
+    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
     print(A)
 
-    B = NDDataset.read('irdata/NH4Y-activation.spg', directory=scpdata)
+    B = NDDataset.read('irdata/NH4Y-activation.spg')
     print(B)
 

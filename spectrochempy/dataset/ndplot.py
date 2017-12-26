@@ -73,8 +73,7 @@ NGreen = cmyk2rgb(85, 0, 60, 10)
 
 plotter_preferences = app.plotter_preferences
 log = app.log
-preferences = app
-
+preferences = app.preferences
 # =============================================================================
 # Class NDPlot to handle plotting of datasets
 # =============================================================================
@@ -585,7 +584,7 @@ def show():
     Method to force the `matplotlib` figure display
 
     """
-    if not preferences.do_not_block:
+    if not app.do_not_block:
 
         if _curfig(True):  # True to avoid opening a new one
             plt.show(block=True)

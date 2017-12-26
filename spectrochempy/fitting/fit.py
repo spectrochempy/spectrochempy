@@ -44,8 +44,7 @@ __all__ = ['Fit']
 from spectrochempy.application import app
 plotter_preferences = app.plotter_preferences
 log = app.log
-preferences = app
-
+preferences = app.preferences
 
 # *******************************************************************************
 # Fit : main object to handle a fit

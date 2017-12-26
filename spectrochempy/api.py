@@ -78,13 +78,9 @@ contributors = __contributor__
 url = __url__
 
 log =  app.log
-log_level =  app.log_level
 
 # give a user friendly name to the objects containing configurables preferences
-preferences = app
-scpdata =  app.general_preferences.data
-list_scpdata =  app.general_preferences.list_scpdata
-general_preferences = app.general_preferences
+preferences = app.preferences
 plotter_preferences = app.plotter_preferences
 project_preferences = app.project_preferences
 
@@ -99,18 +95,23 @@ CRITICAL = logging.CRITICAL
 
 __all__ += application.__all__
 __all__ += [
-
     ### Helpers
-    'app',
-    'log', 'log_level', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
-    'scpdata', 'list_scpdata',
-    'plotter_preferences', 'project_preferences', 'general_preferences',
+    'log',
+    'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
+    'plotter_preferences',
+    'project_preferences',
     'preferences',
     #'pcl',
 
     ### Info
-    'copyright', 'version', 'release', 'license', 'url', 'release_date',
-    'authors', 'contributors'
+    'copyright',
+    'version',
+    'release',
+    'license',
+    'url',
+    'release_date',
+    'authors',
+    'contributors'
 ]
 
 # IPython methods

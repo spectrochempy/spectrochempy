@@ -15,8 +15,7 @@
 
 """
 
-from spectrochempy.api import NDDataset
-from spectrochempy.api import scpdata
+from spectrochempy.api import NDDataset, preferences
 from spectrochempy.utils import SpectroChemPyWarning
 
 import pytest
@@ -32,7 +31,7 @@ def test_save_and_load(IR_source_2D):
     A = IR_source_2D.copy()
     A.save('tartempion.scp')
     # no directory for saving passed ... it must be in data
-    path = os.path.join(scpdata, 'tartempion.scp')
+    path = os.path.join(preferences.datadir, 'tartempion.scp')
     assert os.path.exists(path)
 
     B = NDDataset.load('tartempion.scp')
@@ -52,4 +51,4 @@ def test_save(IR_source_2D):
     source.plot_stack()
     source.save('essai')  # there was a bug due to the saving of mpl axes
 
-    os.remove(os.path.join(scpdata, 'essai.scp'))
+    os.remove(os.path.join(preferences.datadir, 'essai.scp'))
