@@ -439,7 +439,9 @@ class SpectroChemPy(Application):
                           'analysing and modelling Spectroscopic data for '
                           'Chemistry with Python.')
     "Short description of the |scpy| application"
+
     long_description = Unicode
+    "Long description of the |scpy| appplication"
 
     @default('long_description')
     def _get_long_description(self):
@@ -484,12 +486,16 @@ class SpectroChemPy(Application):
 
     # Config file setting
     # -------------------
+
     reset_config = Bool(False,
-                        help='Should we restaure a default '
+                        help='Should we restore a default '
                              'configuration?').tag(config=True)
+    """Flag: True if one wants to reset settings to the original config 
+    defaults"""
 
     config_file_name = Unicode(None,
                                help="Configuration file name").tag(config=True)
+    """Configuration file name"""
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
@@ -497,6 +503,7 @@ class SpectroChemPy(Application):
 
     config_dir = Unicode(None,
               help="Set the configuration directory location").tag(config=True)
+    """Configuration directory"""
 
     @default('config_dir')
     def _get_config_dir_default(self):
@@ -507,20 +514,22 @@ class SpectroChemPy(Application):
 
     debug = Bool(False,
                  help='Set DEBUG mode, with full outputs').tag(config=True)
-
+    """Flag to set debugging mode"""
     quiet = Bool(False,
                  help='Set Quiet mode, with minimal outputs').tag(config=True)
-
+    """Flag to set in fully quite mode (even no warnings)"""
 
     # TESTING
-    # ------------------------------------------------------------------------
+    # --------
+
     test = Bool(False, help='test flag').tag(config=True)
+    """Flag to set the application in testing mode"""
 
     do_not_block = Bool(False)
-    "Make the plots BUT do not stop for TESTS or DOCS building"
+    "Flag to make the plots BUT do not stop for TESTS or DOCS building"
 
     # Command line interface
-    # ------------------------------------------------------------------------
+    # ----------------------
 
     aliases = Dict(
         dict(test='SpectroChemPy.test',
@@ -587,6 +596,10 @@ class SpectroChemPy(Application):
         self._init_preferences()
         self._init_plotter_preferences()
         self._init_project_preferences()
+        self._init_processor_preferences()
+        self._init_reader_preferences()
+        self._init_writer_preferences()
+
 
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
@@ -730,18 +743,19 @@ class SpectroChemPy(Application):
 
         self.preferences = Preferences(config=self.config, parent=self)
 
-
     # ........................................................................
     def _init_project_preferences(self):
 
-        from spectrochempy.projects.projectpreferences import ProjectPreferences
+        from spectrochempy.projects.projectpreferences \
+            import ProjectPreferences
 
         self.project_preferences = ProjectPreferences(config=self.config)
 
     # ........................................................................
     def _init_plotter_preferences(self):
 
-        from spectrochempy.plotters.plotterpreferences import PlotterPreferences
+        from spectrochempy.plotters.plotterpreferences \
+            import PlotterPreferences
         from spectrochempy.utils import install_styles
 
         # Pass config to other classes for them to inherit the config.
@@ -750,6 +764,21 @@ class SpectroChemPy(Application):
         # also install style to be sure everything is set
         install_styles()
 
+    def _init_reader_preferences(self):
+
+        from spectrochempy.readers.readerpreferences import ReaderPreferences
+        self.reader_preferences = ReaderPreferences(config=self.config)
+
+    def _init_writer_preferences(self):
+
+        from spectrochempy.writers.writerpreferences import WriterPreferences
+        self.writer_preferences = WriterPreferences(config=self.config)
+
+    def _init_processor_preferences(self):
+
+        from spectrochempy.processors.processorpreferences import \
+            ProcessorPreferences
+        self.processor_preferences = ProcessorPreferences(config=self.config)
 
     # ........................................................................
     def _make_default_config_file(self):
@@ -834,6 +863,13 @@ class SpectroChemPy(Application):
 app = SpectroChemPy()
 
 log = app.log
+preferences = app.preferences
+plotter_preferences = app.plotter_preferences
+project_preferences = app.project_preferences
+processor_preferences = app.processor_preferences
+reader_preferences = app.reader_preferences
+writer_preferences = app.writer_preferences
+
 """The main logger of the |scpy| application"""
 
 # TODO: look at the subcommands capabilities of traitlets

@@ -30,16 +30,8 @@ from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.analysis.svd import SVD
 from spectrochempy.processors.numpy import diag, dot
 from spectrochempy.dataset.ndplot import NRed, NBlue
-from spectrochempy.application import app
-
-# ============================================================================
-# Global preferences
-# ============================================================================
-
-plotter_preferences = app.plotter_preferences
-log = app.log
-preferences = app.preferences
-
+from spectrochempy.application import log, plotter_preferences, preferences
+from spectrochempy.utils import docstrings
 
 
 # ============================================================================
@@ -72,6 +64,9 @@ class PCA(HasTraits):
     ev_ratio = Instance(NDDataset)
     ev_cum = Instance(NDDataset)
 
+    # ........................................................................
+    @docstrings.get_sectionsf('PCA')
+    @docstrings.dedent
     def __init__(self, X,
                  centered=True,
                  standardized=False,

@@ -7,7 +7,10 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+"""
+Preferences for plotter methods and classes
 
+"""
 from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple, \
     Unicode
 from traitlets.config.configurable import Configurable
@@ -22,7 +25,7 @@ __all__ = []
 # =============================================================================
 class PlotterPreferences(Configurable):
     """
-    Options relative to plotting and views
+    Preferences relative to plotting and views
 
     """
     def __init__(self, **kwargs):

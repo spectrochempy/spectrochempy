@@ -54,8 +54,7 @@ __all__ = [
 
 # here we also construct the __all__ list automatically
 
-from spectrochempy.application import (app,
-                                       log,
+from spectrochempy.application import (log,
                                        __version__,
                                        __release__,
                                        __copyright__,
@@ -63,11 +62,16 @@ from spectrochempy.application import (app,
                                        __release_date__,
                                        __author__,
                                        __contributor__,
-                                       __url__
+                                       __url__,
+                                       preferences,
+                                       plotter_preferences,
+                                       processor_preferences,
+                                       project_preferences,
+                                       reader_preferences,
+                                       writer_preferences,
+
                                        )
 from spectrochempy import application
-
-running = app.running
 
 version = __version__
 """Version number """
@@ -78,12 +82,6 @@ release_date = __release_date__
 authors = __author__
 contributors = __contributor__
 url = __url__
-
-
-# give a user friendly name to the objects containing configurables preferences
-preferences = app.preferences
-plotter_preferences = app.plotter_preferences
-project_preferences = app.project_preferences
 
 
 # Log levels
@@ -101,6 +99,9 @@ __all__ += [
     'DEBUG', 'WARNING', 'ERROR', 'CRITICAL', 'INFO',
     'plotter_preferences',
     'project_preferences',
+    'reader_preferences',
+    'writer_preferences',
+    'processor_preferences',
     'preferences',
     #'pcl',
 
