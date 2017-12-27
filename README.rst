@@ -10,19 +10,19 @@ What is |scpy|?
 data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
 running on Linux, Windows or OS X.
 
-#.  A `NDDataset` object embedding array of data with labeled axes and
+#.  A ``NDDataset`` object embedding array of data with labeled axes and
     metadata.
-#.  A `Project` manager to work on multiple `NDDataset`s simultaneoulsly.
-#.  `Units` and `Uncertainty` for `NDDataset`.
-#.  Mathematical operations over `NDDataset`s such addition,
+#.  A ``Project`` manager to work on multiple ``NDDataset``s simultaneoulsly.
+#.  ``Units`` and ``Uncertainty`` for ``NDDataset``.
+#.  Mathematical operations over ``NDDataset``s such addition,
     multiplication and many more ...
 #.  Import functions to read data from experiments or modelling programs ...
-#.  Display functions such as `plot` for 1D or nD datasets ...
-#.  Export functions to ``csv``, ``xls`` ... (NOT YET)
+#.  Display functions such as ``plot`` for 1D or nD datasets ...
+#.  Export functions to **csv**, **xls** formats ... (NOT YET)
 #.  Preprocessing functions such as baseline correction, automatic
     subtraction and many more ...
 #.  Fitting capabilities for single or multiple datasets ...
-#.  Exploratory analysis such as `SVD`, `PCA`, `MCR_ALS`, `EFA` ...
+#.  Exploratory analysis such as ``SVD``, ``PCA``, ``MCR_ALS``, ``EFA`` ...
 
 
 .. warning::
