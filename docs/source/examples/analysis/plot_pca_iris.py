@@ -17,17 +17,17 @@ In this example, we perform the PCA dimensionality reduction of the classical
 from spectrochempy import api
 
 ############################################################
-# upload a dataset form a distant server
+# Upload a dataset form a distant server
 
 dataset = api.upload_IRIS()
 print(dataset)
 
 ##############################################################
-# create a PCA object
+# Create a PCA object
 pca = api.PCA(dataset, centered=True)
 
 ##############################################################
-# reduce the dataset to a lower dimensionality (number of
+# Reduce the dataset to a lower dimensionality (number of
 # components is automatically determined)
 
 LT, S = pca.transform(n_pc='auto')
@@ -35,7 +35,7 @@ LT, S = pca.transform(n_pc='auto')
 print(LT)
 
 ###############################################################@
-# display the results graphically
+# Finally, display the results graphically
 
 _ = pca.screeplot()
 _ = pca.scoreplot(1, 2, color_mapping='labels')

@@ -502,7 +502,7 @@ class PCA(HasTraits):
                                            pcs[0], self.ev_ratio.data[pcs[0]]))
             ax.set_ylabel('PC# {} ({:.3f}%)'.format(
                                            pcs[1], self.ev_ratio.data[pcs[1]]))
-            ax.scatter( self._S.masked_data[:, pcs[0]],
+            axsc = ax.scatter( self._S.masked_data[:, pcs[0]],
                         self._S.masked_data[:, pcs[1]],
                         s=30,
                         c=colors,
@@ -533,7 +533,7 @@ class PCA(HasTraits):
             ax.set_zlabel(
                     'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio.data[pcs[
                         2]]))
-            ax.scatter(self._S.masked_data[:, pcs[0]],
+            axsc = ax.scatter(self._S.masked_data[:, pcs[0]],
                        self._S.masked_data[:, pcs[1]],
                        self._S.masked_data[:, pcs[2]],
                        zdir='z',
@@ -542,36 +542,31 @@ class PCA(HasTraits):
                        cmap=colormap,
                        depthshade=True)
 
+        if color_mapping == 'labels':
+            import matplotlib.patches as mpatches
+
+            leg= []
+            for l in labels:
+                i = labels.index(l)
+                c = axsc.get_cmap().colors[int(255/(len(labels)-1)*i)]
+                leg.append(mpatches.Patch(color=c,
+                                          label=l))
+
+            ax.legend(handles=leg, loc='best')
+
+
+
+
         return ax
 
 # ============================================================================
 if __name__ == '__main__':
 
-    from tests.conftest import IR_source_2D
     from spectrochempy.api import *
 
-    source = IR_source_2D()
-
-    # columns masking
-    source[:, 1320.0:840.0] = masked  # do not forget to use float in slicing
-
-    # row masking
-    source[10:12] = masked
-
-    ax = source.plot_stack()
-
-    pca = PCA(source) #, standardized=True, scaled=True)
-    L, S = pca.transform(n_pc=6)
-
-    pca.printev(n_pc='auto')
-
-    L.plot_stack()
-    pca.screeplot(n_pc='auto')
-
-    pca.scoreplot(1,2)
-    pca.scoreplot(1,2,3)
-
-    Xp = pca.inverse_transform(n_pc='auto')
-    Xp.plot_stack()
-
+    dataset = upload_IRIS()
+    pca = PCA(dataset, centered=True)
+    LT, S = pca.transform(n_pc='auto')
+    _ = pca.screeplot()
+    _ = pca.scoreplot(1, 2, color_mapping='labels')
     show()
