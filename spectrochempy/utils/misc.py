@@ -7,9 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
-
 """
 Various methods and classes used in other part of the program
 
@@ -44,6 +41,8 @@ import sys
 from contextlib import contextmanager
 from spectrochempy.extern.uncertainties.core import Variable
 import inspect
+import functools
+
 
 # =============================================================================
 # Ignored context
@@ -274,6 +273,7 @@ def getdocfrom(origin):
 
     def decorated(func):
         func.__doc__ = origin.__doc__
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             response = func(*args, **kwargs)
             return response
@@ -475,27 +475,5 @@ def make_func_from(func, first=None):
                                   func.__closure__)
     modified.__doc__ = func.__doc__
     return modified
-
-
-if __name__ == '__main__':
-    from spectrochempy.api import NDDataset, swapaxes
-
-    func = NDDataset.swapaxes
-    newfunc = make_func_from(func, first='dataset')
-    print(inspect.getfullargspec(newfunc).args)
-    print(newfunc.__doc__)
-    assert func is not newfunc
-
-
-    def nd2d():
-        # a simple 2D ndarray with negative elements
-        _nd = NDDataset()
-        _nd._data = np.array([[1., 2., 3., -0.4], [-1., -.1, 1., 2.]])
-        return _nd
-
-    nd = nd2d()
-    print(NDDataset.swapaxes(nd,0,1))
-
-    print(newfunc(nd, 0, 1))
 
 

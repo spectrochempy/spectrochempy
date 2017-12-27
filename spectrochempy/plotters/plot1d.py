@@ -338,7 +338,7 @@ def plot_1D(source, **kwargs):
     ax.yaxis.set_major_formatter(formatter)
 
     # ------------------------------------------------------------------------
-    # plot the source
+    # plot the dataset
     # ------------------------------------------------------------------------
 
     # abscissa axis

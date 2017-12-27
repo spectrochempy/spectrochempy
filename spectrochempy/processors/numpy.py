@@ -55,8 +55,6 @@ def dot(a, b, strict=True, out=None):
         conditions are not met, an exception is raised, instead of attempting
         to be flexible.
 
-        .. versionadded:: 1.10.2
-
     See Also
     --------
     numpy.dot : Equivalent function for ndarrays.
@@ -162,7 +160,7 @@ def diag(source, k=0):
         coordset = None
         if source.coordset is not None:
             coordset = [source.coordset[0]]*2
-        history = 'diagonal array build from the 1D source'
+        history = 'diagonal array build from the 1D dataset'
 
     elif len(s) == 2:
         # extract a diagonal
@@ -178,7 +176,7 @@ def diag(source, k=0):
         if source.coordset is not None:
             coordset = [source.coordset[0]]  # TODO: this is likely not
                                              #       correct for k != 0
-        history = 'diagonal of rank %d extracted from original source'%k
+        history = 'diagonal of rank %d extracted from original dataset'%k
 
     else:
         raise ValueError("Input must be 1- or 2-d.")

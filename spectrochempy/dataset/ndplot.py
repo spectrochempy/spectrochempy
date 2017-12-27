@@ -7,12 +7,9 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
-
 """
-This module define the class :class:`NDPlot` in which generic plot
-methods for a |NDDataset|
-are defined.
+This module defines the class |NDPlot| in which generic plot
+methods for a |NDDataset| are defined.
 
 """
 
@@ -80,11 +77,9 @@ preferences = app.preferences
 
 class NDPlot(HasTraits):
     """
-    Plotting interface
-    for |NDDataset|
+    Plotting interface for |NDDataset|
 
-    This class is used as basic plotting interface of the
-    |NDDataset|.
+    This class is used as basic plotting interface of the |NDDataset|.
 
     """
 
@@ -103,7 +98,6 @@ class NDPlot(HasTraits):
     @docstrings.get_sectionsf('plot')
     @docstrings.dedent
     def plot(self, **kwargs):
-
         """
         Generic plot function for
         a |NDDataset| which
@@ -111,45 +105,26 @@ class NDPlot(HasTraits):
 
         Parameters
         ----------
-
         method : str, optional
-
-            The method of plot of the dataset,
-            which will determine the plotter to use.
-            For instance, for 2D data, it can be `map`, `stack` or `image`
-            among other method.
-
-        ax : :class:`matplotlib.Axes` instance. Optional, default = current or new one
-
+            The method of plot of the dataset, which will determine the
+            plotter to use. For instance, for 2D data, it can be `map`,
+            `stack` or `image` among other method.
+        ax : |Axes| instance. Optional, default:current or new one
             The axe where to plot
-
         figsize : tuple, optional, default is mpl.rcParams['figure.figsize']
-
             The figure size
-
         fontsize : int, optional
-
             The font size in pixels, default is 10 (or read from preferences)
-
         hold : `bool`, optional, default = `False`.
-
-            Should we plot on the ax previously used
-            or create a new figure?
-
+            Should we plot on the ax previously used or create a new figure?
         style : str
-
         autolayout : `bool`, optional, default=True
-
             if True, layout will be set automatically
-
         output: str
-
             A string containing a path to a filename. The output format is deduced
             from the extension of the filename. If the filename has no extension,
             the value of the rc parameter savefig.format is used.
-
         dpi : [ None | scalar > 0]
-
             The resolution in dots per inch. If None it will default to the
             value savefig.dpi in the matplotlibrc file.
 
@@ -398,7 +373,7 @@ class NDPlot(HasTraits):
 
         log.debug('resume plot')
 
-        # put back the axes in the original source
+        # put back the axes in the original dataset
         # (we have worked on a copy in plot)
         if not kwargs.get('data_transposed', False):
             origin.ndaxes = self.ndaxes

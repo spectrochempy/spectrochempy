@@ -20,12 +20,15 @@ __all__ = []
 # ============================================================================
 class ProjectPreferences(Configurable) :
 
+    def __init__(self, **kwargs):
+        super(ProjectPreferences, self).__init__(**kwargs)
+
+
     project_directory = Unicode(help='Location where projects are '
                                      'stored by default').tag(config=True)
 
     @default('project_directory')
     def _get_default_project_directory(self):
-
         """
         Determines the SpectroChemPy project directory name and
         creates the directory if it doesn't exist.

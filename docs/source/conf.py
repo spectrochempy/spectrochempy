@@ -374,19 +374,19 @@ autoclass_content = 'both'   #Both the class’ and the __init__ method’s
 autodoc_default_flags = ['autosummary']
 
 exclusions = (
-    # 'with_traceback', 'with_traceback',
-    #           'observe', 'unobserve', 'observe', 'cross_validation_lock',
-    #           'unobserve_all', 'class_config_rst_doc', 'class_config_section',
-    #           'class_get_help', 'class_print_help',
-    #           'section_names', 'update_config',
-    #           'clear_instance', 'document_config_options', 'flatten_flags',
-    #           'generate_config_file', 'initialize_subcommand', 'initialized',
-    #           'instance', 'json_config_loader_class', 'launch_instance',
-    #           'load_config_file', 'parse_command_line', 'print_alias_help',
-    #           'print_description', 'print_examples', 'print_flag_help',
-    #           'print_help', 'print_subcommands', 'print_version',
-    #           'python_config_loader_class',
-    #           'raises',
+     'with_traceback', 'with_traceback',
+               'observe', 'unobserve', 'observe', 'cross_validation_lock',
+               'unobserve_all', 'class_config_rst_doc', 'class_config_section',
+               'class_get_help', 'class_print_help',
+               'section_names', 'update_config',
+               'clear_instance', 'document_config_options', 'flatten_flags',
+               'generate_config_file', 'initialize_subcommand', 'initialized',
+               'instance', 'json_config_loader_class', 'launch_instance',
+               'load_config_file', 'parse_command_line', 'print_alias_help',
+               'print_description', 'print_examples', 'print_flag_help',
+               'print_help', 'print_subcommands', 'print_version',
+               'python_config_loader_class',
+               'raises',
               )
 
 

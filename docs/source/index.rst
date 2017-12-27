@@ -1,6 +1,6 @@
 .. _main:
 
-Welcome to the |scp| documentation!
+Welcome to the |scpy| documentation!
 ###################################
 
 :release: |release|
@@ -13,10 +13,10 @@ Welcome to the |scp| documentation!
 Introduction
 ============
 
-What is |scp|?
+What is |scpy|?
 --------------
 
-|scp| is a framework for processing, analysing and modelling **Spectro**\ scopic
+|scpy| is a framework for processing, analysing and modelling **Spectro**\ scopic
 data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
 running on Linux, Windows or OS X.
 
@@ -35,7 +35,7 @@ running on Linux, Windows or OS X.
 
 .. warning::
 
-    |scp| is still experimental and under active development.
+    |scpy| is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!!. Please report any issues to the
     `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
@@ -152,10 +152,10 @@ Changes in the last release
 
 .. _main_citing:
 
-Citing |scp|
+Citing |scpy|
 ============
 
-When using |scp| for your own work, you are kindly requested to cite it this
+When using |scpy| for your own work, you are kindly requested to cite it this
 way::
 
      Arnaud Travert & Christian Fernandez,

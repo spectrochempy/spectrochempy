@@ -8,11 +8,9 @@
 # =============================================================================
 
 
-
 """
 This module define the class :class:`NDIO` in which input/output standard
-methods for a |NDDataset|
-are defined.
+methods for a |NDDataset| are defined.
 
 """
 
@@ -69,11 +67,9 @@ __all__ = ['NDIO',
 
 class NDIO(HasTraits):
     """
-    Import/export interface
-    from |NDDataset|
+    Import/export interface from |NDDataset|
 
-    This class is used as basic import/export interface of the
-    |NDDataset| .
+    This class is used as basic import/export interface of the |NDDataset|.
 
     """
 
@@ -109,22 +105,18 @@ class NDIO(HasTraits):
              **kwargs
              ):
         """
-        Save the |NDDataset|
-        (default extension: ``.scp`` ).
+        Save the current |NDDataset| (default extension: ``.scp`` ).
 
         Parameters
         ----------
-
         filename : str
             The filename of the file where to save the current dataset
-
         directory : str, optional, default:`preferences.datadir`
             If specified, the given `directory` and the `filename` will be
             appended.
 
         Examples
         ---------
-
         Read some experimental data and then save in our proprietary format **scp**
 
         >>> from spectrochempy.api import NDDataset #doctest: +ELLIPSIS
@@ -138,7 +130,6 @@ class NDIO(HasTraits):
 
         See Also
         ---------
-
         write
 
         """
@@ -257,6 +248,7 @@ class NDIO(HasTraits):
              **kwargs
              ):
         """Load a dataset object saved as a pickle file ( '.scp' file).
+
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
@@ -273,7 +265,6 @@ class NDIO(HasTraits):
 
         Examples
         --------
-
         >>> from spectrochempy.api import NDDataset
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
@@ -292,13 +283,11 @@ class NDIO(HasTraits):
 
         Notes
         -----
-
         adapted from `numpy.load`
 
         See Also
         --------
-
-        :meth:`read`, :meth:`save`
+        read, save
 
 
         """
@@ -384,27 +373,21 @@ class NDIO(HasTraits):
     def read(cls,
              filename=None, **kwargs):
         """
-        Generic read function. It's like load a class method.
+        Generic read function. It's like `load` a class method.
 
         Parameters
         ----------
         filename : str
-
             The path to the file to be read
-
         protocol : str
-
             Protocol used for reading. If not provided, the correct protocol
             is evaluated from the file name extension.
-
         kwargs : optional keyword parameters
-
             Any additional keyword to pass to the actual reader
 
         See Also
         --------
-
-        :meth:`load`
+        load
 
         """
 
@@ -442,25 +425,18 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-
         filename : str
-
             The path to the file to be read
-
         protocol : str
-
             The protocol used to write the
             |NDDataset| in a file,
             which will determine the exporter to use.
-
         kwargs : optional keyword parameters
-
             Any additional keyword to pass to the actual exporter
 
         See Also
         --------
-
-        :meth:`save`
+        save
 
         """
         protocol = kwargs.pop('protocol', None)
@@ -487,30 +463,6 @@ class NDIO(HasTraits):
             raise AttributeError('The specified writter '
                                  'for protocol `{}` was not found!'.format(
                     protocol))
-
-    # -------------------------------------------------------------------------
-    # Special attributes
-    # -------------------------------------------------------------------------
-
-    # def __getstate__(self):   #TODO: not sure still have needs for that. CHECK!
-    #     # needed to remove some entry to avoid pickling them
-    #     state = super(NDIO, self).__getstate__()
-    #
-    #     for key in self._all_func_names:
-    #         if key in state:
-    #             del state[key]
-    #
-    #     statekeys = list(state.keys())
-    #     for key in statekeys:
-    #         if not key.startswith('_'):
-    #             del state[key]
-    #
-    #     statekeys = list(state.keys())
-    #     for key in statekeys:
-    #         if key.startswith('__'):
-    #             del state[key]
-    #
-    #     return state
 
 
 load = NDIO.load

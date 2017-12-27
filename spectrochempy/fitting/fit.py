@@ -95,7 +95,7 @@ class Fit(HasTraits):
                 self.sources = [args[0], ]
             else:
                 self.sources = args[0]
-                # we create a list of source in all case
+                # we create a list of dataset in all case
             script = args[1]
 
         else:
@@ -193,17 +193,17 @@ class Fit(HasTraits):
             for exp_idx, source in enumerate(sources):
                 modeldata = self._get_modeldata(source, exp_idx)[0]
                 # baseline is already summed with modeldata[-1]
-                # important to work with the real part of source
+                # important to work with the real part of dataset
                 # not the complex number
                 data = source.data
 
-                # if not source.is_2d:
+                # if not dataset.is_2d:
                 mdata = modeldata[-1]  # modelsum
                 # else:
                 #    mdata = modeldata.values
 
                 merror = 1.
-                # if source.is_2d:
+                # if dataset.is_2d:
                 #     if constraints:
                 #
                 #         # Case of SQ-DQ experiments

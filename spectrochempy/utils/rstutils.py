@@ -17,7 +17,7 @@ rst_epilog = """
 
 .. |ma_ndarray| replace:: :class:`~numpy.ma.array`
 
-.. |scp| replace:: **SpectroChemPy**
+.. |scpy| replace:: **SpectroChemPy**
 
 .. |Project| replace:: :class:`~spectrochempy.dataset.ndarray.Project`
 
@@ -35,18 +35,19 @@ rst_epilog = """
 
 .. |NDIO| replace:: :class:`~spectrochempy.dataset.ndio.NDIO`
 
-.. |NDMath| replace:: :class:`~spectrochempy.dataset.ndmath.NDNath`
+.. |NDMath| replace:: :class:`~spectrochempy.dataset.ndmath.NDMath`
 
 .. |Meta| replace:: :class:`~spectrochempy.dataset.ndmeta.Meta`
 
 .. |NDPlot| replace:: :class:`~spectrochempy.dataset.ndplot.NDPlot`
 
-.. |Unit| replace:: :class:`~spectrochempy.units.units.Unit``
+.. |Unit| replace:: :class:`~spectrochempy.units.units.Unit`
 
 .. |Quantity| replace:: :class:`~spectrochempy.units.units.Quantity`
 
 .. |Measurement| replace:: :class:`~spectrochempy.units.units.Measurement`
 
+.. |Axes| replace:: :class:`~matplotlib.Axes`
 
 
 """

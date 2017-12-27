@@ -14,24 +14,6 @@
 
 """
 
-# # register to dataset
-# from ..dataset.nddataset import NDDataset
-#
-# from .autosub import autosub
-# from .baseline import basecor
-# from .concatenate import concatenate
-# from .interpolate import align, interpolate
-#
-# setattr(NDDataset, 'autosub', autosub)
-# setattr(NDDataset, 'align', align)
-# setattr(NDDataset, 'concatenate', concatenate)
-# setattr(NDDataset, 'basecor', basecor)
-#
-# # all (make this function also available as full API functions
-#
-# __all__ = ['autosub', 'align', 'concatenate', 'basecor', 'interpolate']
-#
-
 import sys
 
 from traitlets import import_item

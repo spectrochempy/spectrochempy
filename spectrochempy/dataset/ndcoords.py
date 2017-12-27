@@ -6,37 +6,56 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # =============================================================================
+"""
+This module implements three classes |Coord|, |CoordSet| and |CoordRange|.
+
+
+"""
+
+# ----------------------------------------------------------------------------
+# standard imports
+# ----------------------------------------------------------------------------
 
 import copy
 import uuid
 import warnings
 from datetime import datetime
 
+# ----------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------
+
 import numpy as np
 from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
-from spectrochempy.dataset.ndarray import NDArray
 
-from spectrochempy.application import app
+# ----------------------------------------------------------------------------
+# localimports
+# ----------------------------------------------------------------------------
+
+from spectrochempy.dataset.ndarray import NDArray
+from spectrochempy.application import log
 from spectrochempy.dataset.ndmath import NDMath
 from spectrochempy.utils import (set_operators, is_number, is_sequence,
                                  numpyprintoptions, docstrings,
                                  SpectroChemPyWarning)
 from spectrochempy.utils.traittypes import Range
 
+# ----------------------------------------------------------------------------
+# constants
+# ----------------------------------------------------------------------------
+
 __all__ = ['Coord', 'CoordSet', 'CoordRange']
 
-log = app.log
-
-# =============================================================================
+# ============================================================================
 # set numpy print options
-# =============================================================================
+# ============================================================================
 
 numpyprintoptions()
 
 
-# =============================================================================
+# ============================================================================
 # Coord
-# =============================================================================
+# ============================================================================
 
 class Coord(NDMath, NDArray):
     """Coordinates for a dataset along a given axis.
@@ -44,43 +63,16 @@ class Coord(NDMath, NDArray):
     The coordinates of a |NDDataset| can be created using the |Coord| object.
     This is a single dimension array with either numerical (float) values or
     labels (str, `Datetime` objects, or any other kind of objects) to
-    represent the coordinates. Only a one numerical axis can be defined, but labels
-    can be multiple.
-
-    Let's give an example. We first import the object from the main API:
-
-    >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS
-    SpectroChemPy's API - v.0.1...
-
-    We then create a numpy |ndarray| and use it as the numerical `data` axis of our
-    new |Coord| object.
-
-    >>> arr = np.arange(1,12,2)
-    >>> c0 = Coord(data=arr, title='frequency', units='Hz')
-    >>> c0                               # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    Coord: [       1,        3,        5,        7,        9,       11] Hz
-
-    We can take a series of str to create a non numerical but labelled axis:
-
-    >>> tarr = list('abcdef')
-    >>> tarr
-    ['a', 'b', 'c', 'd', 'e', 'f']
-    >>> c1 = Coord(labels=tarr, title='mylabels')
-    >>> c1                               # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    Coord: [a, b, c, d, e, f]
-    >>> print(c1)                                   # doctest: +NORMALIZE_WHITESPACE
-    title: Mylabels
-    labels: [a b c d e f]
-
-    Some other examples will found in the :ref:`userguide`.
+    represent the coordinates. Only a one numerical axis can be defined,
+    but labels can be multiple.
 
     """
 
     _copy = Bool
 
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # initialization
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     docstrings.delete_params('NDArray.parameters', 'data', 'mask',
                              'uncertainty')
 
@@ -103,26 +95,34 @@ class Coord(NDMath, NDArray):
         %(NDArray.parameters.no_data|mask|uncertainty)s
 
 
-        Notes
-        -----
-        If only labels are provided during initialisation of a Coord
-        object, a numerical axis is automatically created with the
-        labels indices.
-
-
         Examples
         --------
+        We first import the object from the main API:
+
         >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS
-        SpectroChemPy's API...
+        SpectroChemPy's API - v.0.1...
 
-        >>> x = Coord([1,2,3], title='time on stream', units='hours')
-        >>> print(x) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-                  title: Time on stream
-               data: [       1        2        3] hr
+        We then create a numpy |ndarray| and use it as the numerical `data`
+        axis of our new |Coord| object.
 
-        >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
-        [       1        2        3]
+        >>> arr = np.arange(1,12,2)
+        >>> c0 = Coord(data=arr, title='frequency', units='Hz')
+        >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        Coord: [       1,        3,        5,        7,        9,       11] Hz
 
+        We can take a series of str to create a non numerical but labelled axis:
+
+        >>> tarr = list('abcdef')
+        >>> tarr
+        ['a', 'b', 'c', 'd', 'e', 'f']
+        >>> c1 = Coord(labels=tarr, title='mylabels')
+        >>> c1   # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        Coord: [a, b, c, d, e, f]
+        >>> print(c1) # doctest: +NORMALIZE_WHITESPACE
+        title: Mylabels
+        labels: [a b c d e f]
+
+        Some other examples will found in the :ref:`userguide`.
 
         """
         super(Coord, self).__init__(data, **kwargs)
@@ -132,13 +132,26 @@ class Coord(NDMath, NDArray):
             raise ValueError("Number of dimension for coordinate's array "
                              "should be 1!")
 
-    # -------------------------------------------------------------------------
+    def implements(self, name=None):
+        # For compatibility with pyqtgraph
+        # Rather than isinstance(obj, NDDataset) use object.implements(
+        # 'NDDataset')
+        # This is useful to check type without importing the module
+        if name is None:
+            return ['Coord']
+        else:
+            return name == 'Coord'
+
+    # ------------------------------------------------------------------------
+    # readonly property
+    # ------------------------------------------------------------------------
+
     @property
     def is_reversed(self):
-        """`bool`, read-only property - Whether the axis is ascending or
-        reversed.
+        """bool - Whether the axis is ascending or reversed (readonly
+        property).
 
-        return a correct result only if the data are sorted
+        Return a correct result only if the data are sorted
 
         """
         if "wavenumber" in self.title.lower() or "ppm" in self.title.lower():
@@ -147,10 +160,11 @@ class Coord(NDMath, NDArray):
 
         return bool(self.data[0] > self.data[-1])
 
-    ########
+    # ------------------------------------------------------------------------
     # hidden properties (for the documentation, only - we remove the docs)
     # some of the property of NDArray has to be hidden because they are not
-    # usefull for this Coord class
+    # useful for this Coord class
+    # ------------------------------------------------------------------------
 
     @property
     def is_complex(self):
@@ -176,25 +190,24 @@ class Coord(NDMath, NDArray):
     def shape(self):
         return self._data.shape
 
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # public methods
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
-    # .........................................................................
+    # ........................................................................
     def get_labels(self, level=0):
-        """
-        Get the labels at a given level
+        """Get the labels at a given level
 
         Used to replace `data` when only labels are provided, and/or for
         labeling axis in plots
 
         Parameters
         ----------
-        level : int, optional, default=0
+        level : int, optional, default:0
 
         Returns
         -------
-        labels : |ndarray|
+        |ndarray|
             The labels at the desired level or None
 
         """
@@ -211,9 +224,9 @@ class Coord(NDMath, NDArray):
         else:
             return self._labels
 
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # private methods
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     def _loc2index(self, loc, axis=None):
         # Return the index of a location (label or coordinates) along the axis
@@ -269,9 +282,9 @@ class Coord(NDMath, NDArray):
 
     # TODO: _repr_latex
 
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
     # special methods
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     def __dir__(self):
         # with remove some methods with respect to the full NDArray
@@ -293,26 +306,14 @@ class Coord(NDMath, NDArray):
         return out
 
 
-# =============================================================================
+# ============================================================================
 # CoordSet
-# =============================================================================
+# ============================================================================
 
 class CoordSet(HasTraits):
     """
-    A collection of Coord objects for a NDArray object
-    with a validation method.
-
-    Parameters
-    ----------
-    coords : NDarray or NDArray subclass objects.
-       Any instance of a NDArray can be accepted as coordinates for a
-       given dimension.
-       If an instance of CoordSet is found, instead, this means that all
-       coordinates in this set describe the same axis
-    is_same_dim : bool, optional, default=False
-        if true, all elements of coords describes a single dimension.
-        By default, this is false, which means that each item describes
-        a different dimension.
+    A collection of Coord objects for a NDArray object with a validation
+    method.
 
     """
 
@@ -336,6 +337,19 @@ class CoordSet(HasTraits):
 
     # .........................................................................
     def __init__(self, *coords, **kwargs):
+        """
+        Parameters
+        ----------
+        coords : array-like, |NDarray|, |NDArray| subclass or |CoordSet| objects
+           If an instance of CoordSet is found, instead of an array, this means
+           that all coordinates in this coordset describe the same axis.
+        is_same_dim : bool, optional, default:False
+            if true, all elements of coords describes a single dimension.
+            By default, this is false, which means that each item describes
+            a different dimension.
+
+
+        """
         _copy = kwargs.pop('copy', False)
 
         super(CoordSet, self).__init__(**kwargs)
@@ -393,20 +407,27 @@ class CoordSet(HasTraits):
                                      'for a dimension with multiple '
                                      'coordinates')
 
-    # -------------------------------------------------------------------------
-    # Properties
-    # -------------------------------------------------------------------------
+    def implements(self, name=None):
+        # For compatibility with pyqtgraph
+        # Rather than isinstance(obj, NDDataset) use
+        # object.implements(
+        # 'NDDataset')
+        # This is useful to check type without importing the module
+        if name is None:
+            return ['CoordSet']
+        else:
+            return name == 'CoordSet'
 
-    # .........................................................................
-    @property
-    def name(self):
-        return self._name
+    # ------------------------------------------------------------------------
+    # Readonly Properties
+    # ------------------------------------------------------------------------
 
     # .........................................................................
     @property
     def names(self):
-        """
-        list, read-only property - Get the list of axis names.
+        """list - Names of the coords in the current coordset (readonly
+        property).
+
         """
         if len(self._coords) < 1:
             return []
@@ -417,8 +438,67 @@ class CoordSet(HasTraits):
 
     # .........................................................................
     @property
+    def isempty(self):
+        """bool - True if there is no coords defined (readonly
+        property).
+
+        """
+        return len(self._coords) == 0
+
+    # .........................................................................
+    @property
+    def is_same_dim(self):
+        """bool - True if the coords define a single dimension (readonly
+        property).
+
+        """
+        return self._is_same_dim
+
+    # .........................................................................
+    @property
+    def sizes(self):
+        """int - Size of the coord object for each dimention (readonly
+        property).
+
+        """
+        _sizes = []
+        for i, item in enumerate(self._coords):
+            if isinstance(item, NDArray):
+                _sizes.append(item.size)
+            elif isinstance(item, CoordSet):
+                _sizes.append(item.sizes[i][0])
+        return _sizes
+
+    # .........................................................................
+    @property
+    def coords(self):
+        """list - list of the Coord objects in the current coordset (readonly
+        property).
+
+        """
+        return self._coords
+
+    # ------------------------------------------------------------------------
+    # Readonly Properties
+    # ------------------------------------------------------------------------
+
+    # .........................................................................
+    @property
+    def name(self):
+        """str - Name of the coordset
+
+        """
+        return self._name
+
+    # .........................................................................
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    # .........................................................................
+    @property
     def titles(self):
-        """list - Get/Set a list of axis titles.
+        """list - Titles of the coords in the current coordset
 
         """
         _titles = []
@@ -444,7 +524,7 @@ class CoordSet(HasTraits):
     # .........................................................................
     @property
     def labels(self):
-        """list - Get/Set a list of axis labels.
+        """list - Labels of the coords in the current coordset
 
         """
         return [item.label for item in self._coords]
@@ -460,7 +540,7 @@ class CoordSet(HasTraits):
     # .........................................................................
     @property
     def units(self):
-        """list - Get/Set a list of axis units.
+        """list - Units of the coords in the current coordset
 
         """
         return [item.units for item in self._coords]
@@ -472,56 +552,17 @@ class CoordSet(HasTraits):
             for i, item in enumerate(value):
                 self._coords[i].units = item
 
-    # .........................................................................
-    @property
-    def isempty(self):
-        """`bool`, read-only property - True if there is no coords defined.
-
-        """
-        return len(self._coords) == 0
-
-    # .........................................................................
-    @property
-    def is_same_dim(self):
-        """`bool`, read-only property -
-        True if the coords define a single dimension.
-
-        """
-        return self._is_same_dim
-
-    # .........................................................................
-    @property
-    def sizes(self):
-        """int, read-only property -
-        gives the size of the axis or coords for each dimention"""
-        _sizes = []
-        for i, item in enumerate(self._coords):
-            if isinstance(item, NDArray):
-                _sizes.append(item.size)
-            elif isinstance(item, CoordSet):
-                _sizes.append(item.sizes[i][0])
-        return _sizes
-
-    # .........................................................................
-    @property
-    def coords(self):
-        """:class:`~numpy.ndarray`-like object - A list of the Coord object
-        present in this coordset
-
-        """
-        return self._coords
-
     # -------------------------------------------------------------------------
     # public methods
     # -------------------------------------------------------------------------
 
     # .........................................................................
     def copy(self):
-        """Make a disconnected copy of the current coords.
+        """Make a disconnected copy of the current coordset.
 
         Returns
         -------
-        coords : same type
+        object
             an exact copy of the current object
 
         """
@@ -672,27 +713,9 @@ class CoordSet(HasTraits):
 # =============================================================================
 
 class CoordRange(HasTraits):
-    """An axisrange is a set of ordered, non intersecting intervals,\
+    """Set of ordered, non intersecting intervals
+
     e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
-
-    Parameters
-    -----------
-
-    ranges :  iterable,  an interval or a set of intervals.
-
-        An interval or a set of intervals.
-        set of  intervals. If none is given, the axisrange
-        will be a set of an empty interval [[]]. The interval limits do not
-        need to be ordered, and the intervals do not need to be distincts.
-
-    reversed : `bool`, optional.
-
-        The intervals are ranked by decreasing order if True
-        or increasing order if False.
-
-    nranges :  int
-
-        Number of distinct ranges
 
     """
     # TODO: May use also units ???
@@ -701,7 +724,20 @@ class CoordRange(HasTraits):
     reversed = Bool
 
     def __init__(self, *ranges, **kwargs):
-        """ Constructs CoordRange with default values
+        """
+        Parameters
+        -----------
+        ranges :  iterable
+            An interval or a set of intervals.
+            set of  intervals. If none is given, the range
+            will be a set of an empty interval [[]]. The interval limits do not
+            need to be ordered, and the intervals do not need to be distincts.
+        reversed : bool, optional.
+            The intervals are ranked by decreasing order if True
+            or increasing order if False.
+        nranges :  int
+            Number of distinct ranges
+
 
         """
         super(CoordRange, self).__init__(**kwargs)
@@ -732,37 +768,47 @@ class CoordRange(HasTraits):
         if self.ranges:
             self.ranges = self._cleanranges(self.ranges)
 
-    def __iter__(self):
-        """
-        return an iterator
+    # ------------------------------------------------------------------------
+    # Special methods
+    # ------------------------------------------------------------------------
 
-        """
+    def __iter__(self):
         for x in self.ranges:
             yield x
 
+    # ------------------------------------------------------------------------
     # Properties
+    # ------------------------------------------------------------------------
 
     @property
     def nranges(self):
+        """int - Number of interval in the current |CoordRange| (readonly
+        property).
+
+        """
         return len(self.ranges)
 
+    # ------------------------------------------------------------------------
     # public methods
+    # ------------------------------------------------------------------------
 
     def reverse(self):
-        """ Reverse the order of the axis range
+        """Reverse the order of the range
 
         """
         for range in self.ranges:
             range.reverse()
         self.ranges.reverse()
 
+    # ------------------------------------------------------------------------
     # private methods
+    # ------------------------------------------------------------------------
 
     @staticmethod
     def _cleanranges(ranges):
-        """ sort and merge overlaping ranges
+        """Sort and merge overlaping ranges
 
-        works as follows::
+        It works as follows::
 
         1. orders each interval
         2. sorts intervals
@@ -792,14 +838,13 @@ class CoordRange(HasTraits):
         return cleaned_ranges
 
 
-# =============================================================================
+# ============================================================================
 # Set the operators
-# =============================================================================
+# ============================================================================
 
 set_operators(Coord, priority=50)
 
+# ============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.api import Coord
-
-    print(Coord.__init__.__doc__)
+    pass

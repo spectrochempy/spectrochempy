@@ -7,6 +7,10 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+"""
+This module implements the base |NDArray| class.
+
+"""
 # =============================================================================
 # standard imports
 # =============================================================================
@@ -25,7 +29,7 @@ from pandas.core.generic import NDFrame, Index
 
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, ur, Quantity
-from spectrochempy.application import app
+from spectrochempy.application import log
 from spectrochempy.utils import (EPSILON, StdDev, is_sequence,
                                  numpyprintoptions, interleaved2complex,
                                  interleave, SpectroChemPyWarning, docstrings,
@@ -48,21 +52,24 @@ from spectrochempy.extern.uncertainties import unumpy as unp
 
 __all__ = ['NDArray', 'masked', 'nomask', 'EPSILON', 'INPLACE']
 
-#: Logger
-log = app.log
-
 INPLACE = "INPLACE"
+"Flag used to specify inplace slicing"
 
 # =============================================================================
 # Some initializations
 # =============================================================================
 
-#: Options for printing data (numpy arrays) contained in a NDArray.
+# set options for printing data (numpy arrays) contained in a NDArray.
 numpyprintoptions()  # set up the numpy print format
 
-#: A lambda function to check that an array has at least some values
-#: greater than epsilon
+
+# ============================================================================
+# Functions
+# ============================================================================
+
 gt_eps = lambda arr: np.any(arr > EPSILON)
+"""lambda function to check that an array has at least some values
+ greater than epsilon """
 
 
 # =============================================================================
@@ -71,22 +78,22 @@ gt_eps = lambda arr: np.any(arr > EPSILON)
 
 class NDArray(HasTraits):
     """
-    An |NDArray| object.
+    The basic |NDArray| object.
 
-    The basic |NDArray| class is an array
+    The |NDArray| class is an array
     (numpy |ndarray|-like) container, usually not intended to be used directly,
     as its basic functionalities may be quite limited, but to be subclassed.
 
     Indeed, both the class |Coord| which handles the coordinates in a given
     dimension and the class |NDDataset| which implements a full dataset (with
-    coordinates) are derived from |NDArray| in |scp|.
+    coordinates) are derived from |NDArray| in |scpy|.
 
 
     The key distinction from raw numpy \|ndarrays| is the presence of
     optional properties such as labels, masks, uncertainties,
     units and/or extensible metadata dictionary.
 
-    This is a base class in |scp| on which for instance, the |Coord|  and
+    This is a base class in |scpy| on which for instance, the |Coord|  and
     |NDDataset| are builded. This class is normaly intended to be subclassed,
     but it can also be used at such.
 
@@ -158,7 +165,7 @@ class NDArray(HasTraits):
             then `units` is set to the unit of the `data`; if a unit is also
             explicitly provided an error is raised. Handling of units use
             a fork of the `pint <https://pint.readthedocs.org/en/0.6>`_
-            package (BSD Licence) which is embedded in |scp|)
+            package (BSD Licence) which is embedded in |scpy|)
         uncertainty : array of floats, optional
             Standard deviation on the `data`. An array giving the uncertainty
             on each values of the data array.
@@ -166,7 +173,7 @@ class NDArray(HasTraits):
             can be a list, a tuple, a |ndarray|.
             Handling of uncertainty use a fork of the `uncertainties
             <http://pythonhosted.org/uncertainties/>`_ package (BSD Licence)
-            which is embedded in |scp|.
+            which is embedded in |scpy|.
         title : str, optional
             The title of the axis. It will later be used for instance
             for labelling plots of the data. It is optional but recommended to
@@ -249,6 +256,18 @@ class NDArray(HasTraits):
 
         # process eventual kwargs, adressing HasTrait class
         super(NDArray, self).__init__(**kwargs)
+
+
+    def implements(self, name=None):
+        # For compatibility with pyqtgraph
+        # Rather than isinstance(obj, NDDataset) use object.implements(
+        # 'NDDataset')
+        # This is useful to check type without importing the module
+        if name is None:
+            return ['NDArray']
+        else:
+            return name == 'NDArray'
+
 
     # -------------------------------------------------------------------------
     # special methods
@@ -496,16 +515,14 @@ class NDArray(HasTraits):
     @property
     def data(self):
         """
-        |ndarray| of type float or `complex` or hypercomplex - The `data` array.
+        |ndarray|, dtype:float - The `data` array.
 
-        A special storage is used for hypercomplex data.
+        A special storage is used for complex or hypercomplex data.
         If a dimension is complex, real and imaginary part are interleaved
         in the `data` array.
 
         .. note::
-
-            See the :ref:`userguide` and :ref:`develguide`
-            for more information
+            See the :ref:`userguide` for more information
 
 
         """
@@ -617,7 +634,7 @@ class NDArray(HasTraits):
     @property
     def labels(self):
         """
-        |ndarray|, Labels for `data`.
+        |ndarray|, dtype:object - Labels for `data`.
 
         An array of objects of any type (but most
         generally string), with the last dimension size equal
@@ -715,9 +732,7 @@ class NDArray(HasTraits):
     @property
     def mask(self):
         """
-        |ndarray| of bool
-
-        Mask for the data.
+        |ndarray|, dtype:bool - Mask for the data
 
         """
 
@@ -887,7 +902,7 @@ class NDArray(HasTraits):
     @property
     def uncertainty(self):
         """
-        |ndarray| of type float - Uncertainty (std deviation) on the data.
+        |ndarray|, dtype:float - Uncertainty (std deviation) on the data.
 
         """
         if not self.is_uncertain:
@@ -946,7 +961,7 @@ class NDArray(HasTraits):
     @property
     def units(self):
         """
-        |Unit| instance or str - The units of the data.
+        |Unit| instance object - The units of the data.
 
         """
         return self._units
@@ -990,7 +1005,7 @@ class NDArray(HasTraits):
     @property
     def id(self):
         """
-        str -  Readonly object identifier.
+        str - Object identifier (Readonly property).
 
         """
         return self._id
@@ -999,11 +1014,11 @@ class NDArray(HasTraits):
     @property
     def dimensionless(self):
         """
-        bool - True if the `data` array is dimensionless
-        (Readonly property).
+        bool - True if the `data` array is dimensionless (Readonly property).
 
-        .. note:: ``Dimensionless`` is different of ``unitless``,
-           which means no unit.
+        Notes
+        -----
+        `Dimensionless` is different of `unitless` which means no unit.
 
         See Also
         --------
@@ -1019,7 +1034,7 @@ class NDArray(HasTraits):
     @property
     def dtype(self):
         """
-        `dtype` - Type of the underlying `data` array (Readonly property).
+        dtype - Type of the underlying `data` array (Readonly property).
 
         """
         if self._data is None:
@@ -1033,8 +1048,8 @@ class NDArray(HasTraits):
     @property
     def has_complex_dims(self):
         """
-        bool - True if at least one of the `data` array (Readonly property).
-        dimension is complex.
+        bool - True if at least one of the `data` array dimension is complex
+        (Readonly property).
 
         """
         return np.any(self._is_complex)
@@ -1060,7 +1075,7 @@ class NDArray(HasTraits):
     @property
     def is_empty(self):
         """
-        bool -  True if the `data` array is empty (size=0) (Readonly property).
+        bool - True if the `data` array is empty (size=0) (Readonly property).
 
 
         """
@@ -1075,10 +1090,12 @@ class NDArray(HasTraits):
     @property
     def is_complex(self):
         """
-        tuple of bool - True i one of the `data` dimensions is complex
+        tuple of bool - True if one of the `data` dimensions is complex
         (Readonly property).
 
-        .. note:: If a dimension is complex, real and imaginary part
+        Notes
+        -----
+        If a dimension is complex, real and imaginary part
         are interleaved in the `data` array.
 
         """
@@ -1113,8 +1130,7 @@ class NDArray(HasTraits):
     @property
     def is_masked(self):
         """
-        bool - True if the `data` array has masked values
-        (Readonly property).
+        bool - True if the `data` array has masked values (Readonly property).
 
         """
         if self._mask is nomask or self._mask is None:
@@ -1132,8 +1148,7 @@ class NDArray(HasTraits):
     @property
     def is_uncertain(self):
         """
-        bool - True if the `data` array has uncertainty
-        (Readonly property).
+        bool - True if the `data` array has uncertainty (Readonly property).
 
 
 
@@ -1166,8 +1181,7 @@ class NDArray(HasTraits):
     @property
     def ndim(self):
         """
-        int - The number of dimensions of the `data` array (Readonly
-        property).
+        int - The number of dimensions of the `data` array (Readonly property).
 
         """
 
@@ -1177,10 +1191,9 @@ class NDArray(HasTraits):
     @property
     def shape(self):
         """
-        tuple - A tuple with the size of each axis (Readonly property).
+        tuple on int - A tuple with the size of each axis (Readonly property).
 
-        The number of `data` element
-        on each dimensions (possibly complex).
+        The number of `data` element on each dimensions (possibly complex).
 
         """
         if self._data is None:
@@ -1199,9 +1212,8 @@ class NDArray(HasTraits):
         """
         int - Size of the underlying `data` array (Readonly property).
 
-        The total number
-        of data element
-        (possibly complex or hypercomplex in the array).
+        The total number of data element (possibly complex or hypercomplex
+        in the array).
 
         """
         if self._data is None or self._data.size == 0:
@@ -1220,7 +1232,7 @@ class NDArray(HasTraits):
     @property
     def uncert_data(self):
         """
-        |ndarray| - The actual array with
+        |ndarray|, dtype:object - The actual array with
         `uncertainty` of the `data` contained in this object (Readonly property).
 
         """
@@ -1238,7 +1250,7 @@ class NDArray(HasTraits):
     @property
     def unitless(self):
         """
-        bool- True if the `data` have `units` (Readonly property).
+        bool - True if the `data` have `units` (Readonly property).
 
         """
 
@@ -1248,7 +1260,8 @@ class NDArray(HasTraits):
     @property
     def real(self):
         """
-        |ndarray| - The array with real part of the `data` (Readonly property).
+        |ndarray|, dtype:float - The array with real part of the `data` (
+        Readonly property).
 
         """
         if not self._is_complex[-1]:
@@ -1269,7 +1282,7 @@ class NDArray(HasTraits):
     @property
     def imag(self):
         """
-        |ndarray| - The array with imaginary part of the `data`
+        |ndarray|, dtype:float - The array with imaginary part of the `data`
         (Readonly property).
 
         """
@@ -1293,7 +1306,7 @@ class NDArray(HasTraits):
     @property
     def RR(self):
         """
-        |ndarray| - The array with real part in both dimension of
+        |ndarray|, dtype:float - The array with real part in both dimension of
         hypercomplex 2D `data` (Readonly property).
 
         """
@@ -1306,7 +1319,7 @@ class NDArray(HasTraits):
     @property
     def RI(self):
         """
-        |ndarray| - The array with real-imaginary part of
+        |ndarray|, dtype:float - The array with real-imaginary part of
         hypercomplex 2D `data` (Readonly property).
 
         """
@@ -1319,7 +1332,7 @@ class NDArray(HasTraits):
     @property
     def IR(self):
         """
-        |ndarray| - The array with imaginary-real part of
+        |ndarray|, dtype:float - The array with imaginary-real part of
         hypercomplex 2D `data` (Readonly property).
 
         """
@@ -1332,7 +1345,7 @@ class NDArray(HasTraits):
     @property
     def II(self):
         """
-        |ndarray| - The array with imaginary-imaginary part of
+        |ndarray|, dtype:float - The array with imaginary-imaginary part of
         hypercomplex 2D data (Readonly property).
 
         """
@@ -1345,8 +1358,8 @@ class NDArray(HasTraits):
     @property
     def values(self):
         """
-        |ndarray| - The actual values (data, units, uncertainties)
-        contained in this object (Readonly property).
+        |ndarray|, dtype:object - The actual values (data, units,
+        uncertainties) contained in this object (Readonly property).
 
         """
         return self._uarray(self._data, self._uncertainty, self._units)
@@ -2053,7 +2066,7 @@ class NDArray(HasTraits):
             return uar
 
 
+# ============================================================================
 if __name__ == '__main__':
 
-    print(NDArray.__init__.__doc__)
-    docstrings
+    pass

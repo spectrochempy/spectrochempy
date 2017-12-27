@@ -128,7 +128,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
                                       sortbydate=True, **kwargs)
 
     if len(sources)==1:
-        return sources[0] # a single source is returned
+        return sources[0] # a single dataset is returned
 
     return sources  # several sources returned
 

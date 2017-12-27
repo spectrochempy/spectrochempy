@@ -62,7 +62,7 @@ def align(source, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan,
     if axis == -1:
         axis = source.ndim - 1
 
-    # reorders source and reference in ascending order
+    # reorders dataset and reference in ascending order
     sourceordered = source.sort(axis)
     refordered = ref.sort(refaxis)
 

@@ -82,7 +82,7 @@ def plot_2D(source, **kwargs):
 
     Parameters
     ----------
-    source: :class:`~spectrochempy.ddataset.nddataset.NDDataset` to plot
+    dataset: :class:`~spectrochempy.ddataset.nddataset.NDDataset` to plot
 
     data_only: `bool` [optional, default=`False`]
 
@@ -119,7 +119,7 @@ def plot_2D(source, **kwargs):
     data_transposed = kwargs.get('data_transposed', False)
 
     if data_transposed:
-        new = source.T  # transpose source
+        new = source.T  # transpose dataset
         nameadd='T'
     else:
         new = source.copy()
@@ -271,7 +271,7 @@ def plot_2D(source, **kwargs):
         ax.set_ylim(ylim)
 
     # ------------------------------------------------------------------------
-    # plot the source
+    # plot the dataset
     # by default contours are plotted
     # ------------------------------------------------------------------------
     normalize = kwargs.get('normalize', None)

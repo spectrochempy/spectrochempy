@@ -19,7 +19,7 @@ def test_concatenate(IR_source_2D):
 
     source = IR_source_2D
 
-    #print(source)
+    #print(dataset)
     s1 = source[:10]
     s2 = source[20:]
 

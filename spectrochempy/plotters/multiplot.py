@@ -251,7 +251,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
     ndims = set([source.ndim for source in sources])
     if len(ndims) > 1:
-        raise NotImplementedError('mixed source shape.')
+        raise NotImplementedError('mixed dataset shape.')
     ndim = list(ndims)[0]
 
     # create the subplots and plot the ndarrays

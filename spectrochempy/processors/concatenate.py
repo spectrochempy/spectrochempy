@@ -155,10 +155,10 @@ def concatenate(*sources, axis=None, **kwargs):
     # data = np.concatenate(sources, axis=axis)
     # # for the concatenation to work we need to take the real _mask
     # #twod = lambda x: x #if x.ndim>1 else np.array([x])
-    # mask = np.concatenate(tuple((source._mask
-    #                              for source in sources)), axis=axis)
-    # uncertainty = np.concatenate(tuple((source._uncertainty)
-    #                                     for source in sources), axis=axis)
+    # mask = np.concatenate(tuple((dataset._mask
+    #                              for dataset in sources)), axis=axis)
+    # uncertainty = np.concatenate(tuple((dataset._uncertainty)
+    #                                     for dataset in sources), axis=axis)
 
     # concatenate coordset
     stack = kwargs.get('force_stack', False)

@@ -8,245 +8,8 @@
 # =============================================================================
 
 """
-This module implements the base |NDDataset| class.
+This module implements the |NDMath| class.
 
-List of mathematical functions (numpy) implemented (or planned for
-implementation)
-
-Ufuncs
-======
-
-This functions should work like for numpy-ndarray
-
-Examples
---------
-
-ds being a NDDataset, just call the np function like this. Most of the time
-it returns a new NDDataset, while in some cases noted below, one get a ndarray.
-
->>> np.sin(ds)
-
-
-
-To be continued
-#################################################################
-Math operations
-----------------
-add(x1, x2, /[, out, where, casting, order, ...])	Add arguments element-wise.
-subtract(x1, x2, /[, out, where, casting, ...])	Subtract arguments, element-wise.
-multiply(x1, x2, /[, out, where, casting, ...])	Multiply arguments element-wise.
-divide(x1, x2, /[, out, where, casting, ...])	Divide arguments element-wise.
-logaddexp(x1, x2, /[, out, where, casting, ...])	Logarithm of the sum of exponentiations of the inputs.
-logaddexp2(x1, x2, /[, out, where, casting, ...])	Logarithm of the sum of exponentiations of the inputs in base-2.
-true_divide(x1, x2, /[, out, where, ...])	Returns a true division of the inputs, element-wise.
-floor_divide(x1, x2, /[, out, where, ...])	Return the largest integer smaller or equal to the division of the inputs.
-negative(x, /[, out, where, casting, order, ...])	Numerical negative, element-wise.
-positive(x, /[, out, where, casting, order, ...])	Numerical positive, element-wise.
-power(x1, x2, /[, out, where, casting, ...])	First array elements raised to powers from second array, element-wise.
-remainder(x1, x2, /[, out, where, casting, ...])	Return element-wise remainder of division.
-mod(x1, x2, /[, out, where, casting, order, ...])	Return element-wise remainder of division.
-fmod(x1, x2, /[, out, where, casting, ...])	Return the element-wise remainder of division.
-divmod(x1, x2[, out1, out2], / [[, out, ...])	Return element-wise quotient and remainder simultaneously.
-absolute(x, /[, out, where, casting, order, ...])	Calculate the absolute value element-wise.
-fabs(x, /[, out, where, casting, order, ...])	Compute the absolute values element-wise.
-rint(x, /[, out, where, casting, order, ...])	Round elements of the array to the nearest integer.
-sign(x, /[, out, where, casting, order, ...])	Returns an element-wise indication of the sign of a number.
-heaviside(x1, x2, /[, out, where, casting, ...])	Compute the Heaviside step function.
-conj(x, /[, out, where, casting, order, ...])	Return the complex conjugate, element-wise.
-exp(x, /[, out, where, casting, order, ...])	Calculate the exponential of all elements in the input array.
-exp2(x, /[, out, where, casting, order, ...])	Calculate 2**p for all p in the input array.
-log(x, /[, out, where, casting, order, ...])	Natural logarithm, element-wise.
-log2(x, /[, out, where, casting, order, ...])	Base-2 logarithm of x.
-log10(x, /[, out, where, casting, order, ...])	Return the base 10 logarithm of the input array, element-wise.
-expm1(x, /[, out, where, casting, order, ...])	Calculate exp(x) - 1 for all elements in the array.
-log1p(x, /[, out, where, casting, order, ...])	Return the natural logarithm of one plus the input array, element-wise.
-sqrt(x, /[, out, where, casting, order, ...])	Return the positive square-root of an array, element-wise.
-square(x, /[, out, where, casting, order, ...])	Return the element-wise square of the input.
-cbrt(x, /[, out, where, casting, order, ...])	Return the cube-root of an array, element-wise.
-reciprocal(x, /[, out, where, casting, ...])	Return the reciprocal of the argument, element-wise.
-Tip
-The optional output arguments can be used to help you save memory for large calculations. If your arrays are large, complicated expressions can take longer than absolutely necessary due to the creation and (later) destruction of temporary calculation spaces. For example, the expression G = a * b + c is equivalent to t1 = A * B; G = T1 + C; del t1. It will be more quickly executed as G = A * B; add(G, C, G) which is the same as G = A * B; G += C.
-
-Trigonometric functions
-All trigonometric functions use radians when an angle is called for. The ratio of degrees to radians is 180^{\circ}/\pi.
-
-sin(x, /[, out, where, casting, order, ...])	Trigonometric sine, element-wise.
-cos(x, /[, out, where, casting, order, ...])	Cosine element-wise.
-tan(x, /[, out, where, casting, order, ...])	Compute tangent element-wise.
-arcsin(x, /[, out, where, casting, order, ...])	Inverse sine, element-wise.
-arccos(x, /[, out, where, casting, order, ...])	Trigonometric inverse cosine, element-wise.
-arctan(x, /[, out, where, casting, order, ...])	Trigonometric inverse tangent, element-wise.
-arctan2(x1, x2, /[, out, where, casting, ...])	Element-wise arc tangent of x1/x2 choosing the quadrant correctly.
-hypot(x1, x2, /[, out, where, casting, ...])	Given the “legs” of a right triangle, return its hypotenuse.
-sinh(x, /[, out, where, casting, order, ...])	Hyperbolic sine, element-wise.
-cosh(x, /[, out, where, casting, order, ...])	Hyperbolic cosine, element-wise.
-tanh(x, /[, out, where, casting, order, ...])	Compute hyperbolic tangent element-wise.
-arcsinh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic sine element-wise.
-arccosh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic cosine, element-wise.
-arctanh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic tangent element-wise.
-deg2rad(x, /[, out, where, casting, order, ...])	Convert angles from degrees to radians.
-rad2deg(x, /[, out, where, casting, order, ...])	Convert angles from radians to degrees.
-Bit-twiddling functions
-These function all require integer arguments and they manipulate the bit-pattern of those arguments.
-
-bitwise_and(x1, x2, /[, out, where, ...])	Compute the bit-wise AND of two arrays element-wise.
-bitwise_or(x1, x2, /[, out, where, casting, ...])	Compute the bit-wise OR of two arrays element-wise.
-bitwise_xor(x1, x2, /[, out, where, ...])	Compute the bit-wise XOR of two arrays element-wise.
-invert(x, /[, out, where, casting, order, ...])	Compute bit-wise inversion, or bit-wise NOT, element-wise.
-left_shift(x1, x2, /[, out, where, casting, ...])	Shift the bits of an integer to the left.
-right_shift(x1, x2, /[, out, where, ...])	Shift the bits of an integer to the right.
-Comparison functions
-greater(x1, x2, /[, out, where, casting, ...])	Return the truth value of (x1 > x2) element-wise.
-greater_equal(x1, x2, /[, out, where, ...])	Return the truth value of (x1 >= x2) element-wise.
-less(x1, x2, /[, out, where, casting, ...])	Return the truth value of (x1 < x2) element-wise.
-less_equal(x1, x2, /[, out, where, casting, ...])	Return the truth value of (x1 =< x2) element-wise.
-not_equal(x1, x2, /[, out, where, casting, ...])	Return (x1 != x2) element-wise.
-equal(x1, x2, /[, out, where, casting, ...])	Return (x1 == x2) element-wise.
-Warning
-Do not use the Python keywords and and or to combine logical array expressions. These keywords will test the truth value of the entire array (not element-by-element as you might expect). Use the bitwise operators & and | instead.
-
-logical_and(x1, x2, /[, out, where, ...])	Compute the truth value of x1 AND x2 element-wise.
-logical_or(x1, x2, /[, out, where, casting, ...])	Compute the truth value of x1 OR x2 element-wise.
-logical_xor(x1, x2, /[, out, where, ...])	Compute the truth value of x1 XOR x2, element-wise.
-logical_not(x, /[, out, where, casting, ...])	Compute the truth value of NOT x element-wise.
-Warning
-The bit-wise operators & and | are the proper way to perform element-by-element array comparisons. Be sure you understand the operator precedence: (a > 2) & (a < 5) is the proper syntax because a > 2 & a < 5 will result in an error due to the fact that 2 & a is evaluated first.
-
-maximum(x1, x2, /[, out, where, casting, ...])	Element-wise maximum of array elements.
-Tip
-The Python function max() will find the maximum over a one-dimensional array, but it will do so using a slower sequence interface. The reduce method of the maximum ufunc is much faster. Also, the max() method will not give answers you might expect for arrays with greater than one dimension. The reduce method of minimum also allows you to compute a total minimum over an array.
-
-minimum(x1, x2, /[, out, where, casting, ...])	Element-wise minimum of array elements.
-Warning
-the behavior of maximum(a, b) is different than that of max(a, b). As a ufunc, maximum(a, b) performs an element-by-element comparison of a and b and chooses each element of the result according to which element in the two arrays is larger. In contrast, max(a, b) treats the objects a and b as a whole, looks at the (total) truth value of a > b and uses it to return either a or b (as a whole). A similar difference exists between minimum(a, b) and min(a, b).
-
-fmax(x1, x2, /[, out, where, casting, ...])	Element-wise maximum of array elements.
-fmin(x1, x2, /[, out, where, casting, ...])	Element-wise minimum of array elements.
-Floating functions
-Recall that all of these functions work element-by-element over an array, returning an array output. The description details only a single operation.
-
-isfinite(x, /[, out, where, casting, order, ...])	Test element-wise for finiteness (not infinity or not Not a Number).
-isinf(x, /[, out, where, casting, order, ...])	Test element-wise for positive or negative infinity.
-isnan(x, /[, out, where, casting, order, ...])	Test element-wise for NaN and return result as a boolean array.
-fabs(x, /[, out, where, casting, order, ...])	Compute the absolute values element-wise.
-signbit(x, /[, out, where, casting, order, ...])	Returns element-wise True where signbit is set (less than zero).
-copysign(x1, x2, /[, out, where, casting, ...])	Change the sign of x1 to that of x2, element-wise.
-nextafter(x1, x2, /[, out, where, casting, ...])	Return the next floating-point value after x1 towards x2, element-wise.
-spacing(x, /[, out, where, casting, order, ...])	Return the distance between x and the nearest adjacent number.
-modf(x[, out1, out2], / [[, out, where, ...])	Return the fractional and integral parts of an array, element-wise.
-ldexp(x1, x2, /[, out, where, casting, ...])	Returns x1 * 2**x2, element-wise.
-frexp(x[, out1, out2], / [[, out, where, ...])	Decompose the elements of x into mantissa and twos exponent.
-fmod(x1, x2, /[, out, where, casting, ...])	Return the element-wise remainder of division.
-floor(x, /[, out, where, casting, order, ...])	Return the floor of the input, element-wise.
-ceil(x, /[, out, where, casting, order, ...])	Return the ceiling of the input, element-wise.
-trunc(x, /[, out, where, casting, order, ...])	Return the truncated value of the input, element-wise.
-
-
-Trigonometric functions
-------------------------
-
-sin(x)	Trigonometric sine, element-wise. (Ufuncs - ONLY for
-dimensionless or x in radians)
-cos(x)	Cosine element-wise. (Ufuncs - ONLY for dimensionless or x in
-radians)
-tan(x)	Compute tangent element-wise.
-arcsin(x, /[, out, where, casting, order, ...])	Inverse sine, element-wise.
-arccos(x, /[, out, where, casting, order, ...])	Trigonometric inverse cosine, element-wise.
-arctan(x, /[, out, where, casting, order, ...])	Trigonometric inverse tangent, element-wise.
-hypot(x1, x2, /[, out, where, casting, ...])	Given the “legs” of a right triangle, return its hypotenuse.
-arctan2(x1, x2, /[, out, where, casting, ...])	Element-wise arc tangent of x1/x2 choosing the quadrant correctly.
-degrees(x, /[, out, where, casting, order, ...])	Convert angles from radians to degrees.
-radians(x, /[, out, where, casting, order, ...])	Convert angles from degrees to radians.
-unwrap(p[, discont, axis])	Unwrap by changing deltas between values to 2*pi complement.
-deg2rad(x, /[, out, where, casting, order, ...])	Convert angles from degrees to radians.
-rad2deg(x, /[, out, where, casting, order, ...])	Convert angles from radians to degrees.
-Hyperbolic functions
-sinh(x, /[, out, where, casting, order, ...])	Hyperbolic sine, element-wise.
-cosh(x, /[, out, where, casting, order, ...])	Hyperbolic cosine, element-wise.
-tanh(x, /[, out, where, casting, order, ...])	Compute hyperbolic tangent element-wise.
-arcsinh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic sine element-wise.
-arccosh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic cosine, element-wise.
-arctanh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic tangent element-wise.
-Rounding
-around(a[, decimals, out])	Evenly round to the given number of decimals.
-round_(a[, decimals, out])	Round an array to the given number of decimals.
-rint(x, /[, out, where, casting, order, ...])	Round elements of the array to the nearest integer.
-fix(x[, out])	Round to nearest integer towards zero.
-floor(x, /[, out, where, casting, order, ...])	Return the floor of the input, element-wise.
-ceil(x, /[, out, where, casting, order, ...])	Return the ceiling of the input, element-wise.
-trunc(x, /[, out, where, casting, order, ...])	Return the truncated value of the input, element-wise.
-Sums, products, differences
-prod(a[, axis, dtype, out, keepdims])	Return the product of array elements over a given axis.
-sum(a[, axis, dtype, out, keepdims])	Sum of array elements over a given axis.
-nanprod(a[, axis, dtype, out, keepdims])	Return the product of array elements over a given axis treating Not a Numbers (NaNs) as ones.
-nansum(a[, axis, dtype, out, keepdims])	Return the sum of array elements over a given axis treating Not a Numbers (NaNs) as zero.
-cumprod(a[, axis, dtype, out])	Return the cumulative product of elements along a given axis.
-cumsum(a[, axis, dtype, out])	Return the cumulative sum of the elements along a given axis.
-nancumprod(a[, axis, dtype, out])	Return the cumulative product of array elements over a given axis treating Not a Numbers (NaNs) as one.
-nancumsum(a[, axis, dtype, out])	Return the cumulative sum of array elements over a given axis treating Not a Numbers (NaNs) as zero.
-diff(a[, n, axis])	Calculate the n-th discrete difference along given axis.
-ediff1d(ary[, to_end, to_begin])	The differences between consecutive elements of an array.
-gradient(f, *varargs, **kwargs)	Return the gradient of an N-dimensional array.
-cross(a, b[, axisa, axisb, axisc, axis])	Return the cross product of two (arrays of) vectors.
-trapz(y[, x, dx, axis])	Integrate along the given axis using the composite trapezoidal rule.
-Exponents and logarithms
-exp(x, /[, out, where, casting, order, ...])	Calculate the exponential of all elements in the input array.
-expm1(x, /[, out, where, casting, order, ...])	Calculate exp(x) - 1 for all elements in the array.
-exp2(x, /[, out, where, casting, order, ...])	Calculate 2**p for all p in the input array.
-log(x, /[, out, where, casting, order, ...])	Natural logarithm, element-wise.
-log10(x, /[, out, where, casting, order, ...])	Return the base 10 logarithm of the input array, element-wise.
-log2(x, /[, out, where, casting, order, ...])	Base-2 logarithm of x.
-log1p(x, /[, out, where, casting, order, ...])	Return the natural logarithm of one plus the input array, element-wise.
-logaddexp(x1, x2, /[, out, where, casting, ...])	Logarithm of the sum of exponentiations of the inputs.
-logaddexp2(x1, x2, /[, out, where, casting, ...])	Logarithm of the sum of exponentiations of the inputs in base-2.
-Other special functions
-i0(x)	Modified Bessel function of the first kind, order 0.
-sinc(x)	Return the sinc function.
-Floating point routines
-signbit(x, /[, out, where, casting, order, ...])	Returns element-wise True where signbit is set (less than zero).
-copysign(x1, x2, /[, out, where, casting, ...])	Change the sign of x1 to that of x2, element-wise.
-frexp(x[, out1, out2], / [[, out, where, ...])	Decompose the elements of x into mantissa and twos exponent.
-ldexp(x1, x2, /[, out, where, casting, ...])	Returns x1 * 2**x2, element-wise.
-nextafter(x1, x2, /[, out, where, casting, ...])	Return the next floating-point value after x1 towards x2, element-wise.
-spacing(x, /[, out, where, casting, order, ...])	Return the distance between x and the nearest adjacent number.
-Arithmetic operations
-add(x1, x2, /[, out, where, casting, order, ...])	Add arguments element-wise.
-reciprocal(x, /[, out, where, casting, ...])	Return the reciprocal of the argument, element-wise.
-negative(x, /[, out, where, casting, order, ...])	Numerical negative, element-wise.
-multiply(x1, x2, /[, out, where, casting, ...])	Multiply arguments element-wise.
-divide(x1, x2, /[, out, where, casting, ...])	Divide arguments element-wise.
-power(x1, x2, /[, out, where, casting, ...])	First array elements raised to powers from second array, element-wise.
-subtract(x1, x2, /[, out, where, casting, ...])	Subtract arguments, element-wise.
-true_divide(x1, x2, /[, out, where, ...])	Returns a true division of the inputs, element-wise.
-floor_divide(x1, x2, /[, out, where, ...])	Return the largest integer smaller or equal to the division of the inputs.
-float_power(x1, x2, /[, out, where, ...])	First array elements raised to powers from second array, element-wise.
-fmod(x1, x2, /[, out, where, casting, ...])	Return the element-wise remainder of division.
-mod(x1, x2, /[, out, where, casting, order, ...])	Return element-wise remainder of division.
-modf(x[, out1, out2], / [[, out, where, ...])	Return the fractional and integral parts of an array, element-wise.
-remainder(x1, x2, /[, out, where, casting, ...])	Return element-wise remainder of division.
-divmod(x1, x2[, out1, out2], / [[, out, ...])	Return element-wise quotient and remainder simultaneously.
-Handling complex numbers
-angle(z[, deg])	Return the angle of the complex argument.
-real(val)	Return the real part of the complex argument.
-imag(val)	Return the imaginary part of the complex argument.
-conj(x, /[, out, where, casting, order, ...])	Return the complex conjugate, element-wise.
-Miscellaneous
-convolve(a, v[, mode])	Returns the discrete, linear convolution of two one-dimensional sequences.
-clip(a, a_min, a_max[, out])	Clip (limit) the values in an array.
-sqrt(x, /[, out, where, casting, order, ...])	Return the positive square-root of an array, element-wise.
-cbrt(x, /[, out, where, casting, order, ...])	Return the cube-root of an array, element-wise.
-square(x, /[, out, where, casting, order, ...])	Return the element-wise square of the input.
-absolute(x, /[, out, where, casting, order, ...])	Calculate the absolute value element-wise.
-fabs(x, /[, out, where, casting, order, ...])	Compute the absolute values element-wise.
-sign(x, /[, out, where, casting, order, ...])	Returns an element-wise indication of the sign of a number.
-heaviside(x1, x2, /[, out, where, casting, ...])	Compute the Heaviside step function.
-maximum(x1, x2, /[, out, where, casting, ...])	Element-wise maximum of array elements.
-minimum(x1, x2, /[, out, where, casting, ...])	Element-wise minimum of array elements.
-fmax(x1, x2, /[, out, where, casting, ...])	Element-wise maximum of array elements.
-fmin(x1, x2, /[, out, where, casting, ...])	Element-wise minimum of array elements.
-nan_to_num(x[, copy])	Replace nan with zero and inf with finite numbers.
-real_if_close(a[, tol])	If complex input returns a real array if complex parts are close to zero.
-interp(x, xp, fp[, left, right, period])	One-dimensional linear interpolation.
 
 """
 
@@ -268,7 +31,8 @@ from numpy.ma import MaskedArray
 from spectrochempy.extern.uncertainties import unumpy as unp
 from spectrochempy.units.units import Quantity
 from spectrochempy.dataset.ndarray import NDArray
-from spectrochempy.utils import (interleave, interleaved2complex, getdocfrom)
+from spectrochempy.utils import (interleave, interleaved2complex, getdocfrom,
+                                 docstrings)
 from spectrochempy.application import app
 
 log = app.log
@@ -287,15 +51,36 @@ get_name = lambda x: str(x.name if hasattr(x, 'name') else x)
 
 class NDMath(object):
     """
+    This class provides the math functionality to |NDDArray| or |Coord|.
+
+    Below is a list of mathematical functions (numpy) implemented (or
+    planned for implementation)
+
+    Ufuncs
+    ------
+
+    These functions should work like for numpy-ndarray, except that they
+    may be units-aware.
+
+    For instance, `ds`  being a |NDDataset|, just call the np functions like
+    this. Most of the time it returns a new NDDataset, while in some cases
+    noted below, one get a |ndarray|.
+
+    >>> np.sin(ds)
+
+    In this particular case (*i.e.*, `np.sin` ufuncs) , the `ds` units must be
+    `unitless`, `dimensionless` or angle-units : `radians` or `degrees`,
+    or an exception will be raised.
+
 
     Examples
     --------
 
     >>> from spectrochempy.api import *
-    >>> source = NDDataset.load('mydataset.scp')
-    >>> source             #doctest: +ELLIPSIS
+    >>> dataset = NDDataset.load('mydataset.scp')
+    >>> dataset             #doctest: +ELLIPSIS
     NDDataset([[    2.06,...,     1.24]])
-    >>> np.negative(source) #doctest: +ELLIPSIS
+    >>> np.negative(dataset) #doctest: +ELLIPSIS
     NDDataset([[   -2.06,...,    -1.24]])
 
 
@@ -315,26 +100,22 @@ class NDMath(object):
         Parameters
         ----------
         func : function
-
-            function to apply to the NDDataset.
-            ``args``, and ``kwargs`` are passed into ``func``.
-            Alternatively a ``(callable, data_keyword)`` tuple where
-            ``data_keyword`` is a string indicating the keyword of
-            ``callable`` that expects the NADArray object.
-
-        args : positional arguments passed into ``func``.
-
-        kwargs : a dictionary of keyword arguments passed into ``func``.
+            function to apply to the |NDDataset|.
+            `\*args`, and `\*\*kwargs` are passed into `func`.
+            Alternatively a `(callable, data_keyword)` tuple where
+            `data_keyword` is a string indicating the keyword of
+            `callable` that expects the array object.
+        *args : positional arguments passed into `func`.
+        **kwargs : keyword arguments passed into `func`.
 
         Returns
         -------
-        object : the return type of ``func``.
+        object : the return type of `func`.
 
         Notes
         -----
-
         Use ``.pipe`` when chaining together functions that expect
-        on |NDDataset|.
+        a |NDDataset|.
 
         """
         if isinstance(func, tuple):
@@ -348,24 +129,19 @@ class NDMath(object):
         return func(self, *args, **kwargs)
 
     # .........................................................................
-    def abs(self, axis=-1):
+    @docstrings.dedent
+    def abs(self, axis=-1, inplace=False):
         """
         Returns the absolute value of a complex array.
 
         Parameters
         ----------
-        axis : int
-
-            Optional, default: 1.
-
-            The axis along which the absolute value should be calculated.
+        %(generic_method.parameters.axis)s
+        %(generic_method.parameters.inplace)s
 
         Returns
         -------
-        array : same type,
-
-            Output array.
-
+        %(generic_method.returns)s
 
         """
         new = self.copy()
@@ -376,6 +152,9 @@ class NDMath(object):
         new = np.sqrt(new.real ** 2 + new.imag ** 2)
         new.swapaxes(axis, -1, inplace=True)
         new._is_complex[axis] = False
+
+        if inplace:
+            self = new
 
         return new
 
@@ -888,3 +667,232 @@ class NDMath(object):
 
         return new
 
+
+if __name__ == '__main__':
+
+    print(NDMath.__doc__)
+
+
+_s = """
+
+To be continued
+#################################################################
+Math operations
+----------------
+add(x1, x2, /[, out, where, casting, order, ...])	Add arguments element-wise.
+subtract(x1, x2, /[, out, where, casting, ...])	Subtract arguments, element-wise.
+multiply(x1, x2, /[, out, where, casting, ...])	Multiply arguments element-wise.
+divide(x1, x2, /[, out, where, casting, ...])	Divide arguments element-wise.
+logaddexp(x1, x2, /[, out, where, casting, ...])	Logarithm of the sum of exponentiations of the inputs.
+logaddexp2(x1, x2, /[, out, where, casting, ...])	Logarithm of the sum of exponentiations of the inputs in base-2.
+true_divide(x1, x2, /[, out, where, ...])	Returns a true division of the inputs, element-wise.
+floor_divide(x1, x2, /[, out, where, ...])	Return the largest integer smaller or equal to the division of the inputs.
+negative(x, /[, out, where, casting, order, ...])	Numerical negative, element-wise.
+positive(x, /[, out, where, casting, order, ...])	Numerical positive, element-wise.
+power(x1, x2, /[, out, where, casting, ...])	First array elements raised to powers from second array, element-wise.
+remainder(x1, x2, /[, out, where, casting, ...])	Return element-wise remainder of division.
+mod(x1, x2, /[, out, where, casting, order, ...])	Return element-wise remainder of division.
+fmod(x1, x2, /[, out, where, casting, ...])	Return the element-wise remainder of division.
+divmod(x1, x2[, out1, out2], / [[, out, ...])	Return element-wise quotient and remainder simultaneously.
+absolute(x, /[, out, where, casting, order, ...])	Calculate the absolute value element-wise.
+fabs(x, /[, out, where, casting, order, ...])	Compute the absolute values element-wise.
+rint(x, /[, out, where, casting, order, ...])	Round elements of the array to the nearest integer.
+sign(x, /[, out, where, casting, order, ...])	Returns an element-wise indication of the sign of a number.
+heaviside(x1, x2, /[, out, where, casting, ...])	Compute the Heaviside step function.
+conj(x, /[, out, where, casting, order, ...])	Return the complex conjugate, element-wise.
+exp(x, /[, out, where, casting, order, ...])	Calculate the exponential of all elements in the input array.
+exp2(x, /[, out, where, casting, order, ...])	Calculate 2**p for all p in the input array.
+log(x, /[, out, where, casting, order, ...])	Natural logarithm, element-wise.
+log2(x, /[, out, where, casting, order, ...])	Base-2 logarithm of x.
+log10(x, /[, out, where, casting, order, ...])	Return the base 10 logarithm of the input array, element-wise.
+expm1(x, /[, out, where, casting, order, ...])	Calculate exp(x) - 1 for all elements in the array.
+log1p(x, /[, out, where, casting, order, ...])	Return the natural logarithm of one plus the input array, element-wise.
+sqrt(x, /[, out, where, casting, order, ...])	Return the positive square-root of an array, element-wise.
+square(x, /[, out, where, casting, order, ...])	Return the element-wise square of the input.
+cbrt(x, /[, out, where, casting, order, ...])	Return the cube-root of an array, element-wise.
+reciprocal(x, /[, out, where, casting, ...])	Return the reciprocal of the argument, element-wise.
+Tip
+The optional output arguments can be used to help you save memory for large calculations. If your arrays are large, complicated expressions can take longer than absolutely necessary due to the creation and (later) destruction of temporary calculation spaces. For example, the expression G = a * b + c is equivalent to t1 = A * B; G = T1 + C; del t1. It will be more quickly executed as G = A * B; add(G, C, G) which is the same as G = A * B; G += C.
+
+Trigonometric functions
+All trigonometric functions use radians when an angle is called for. The ratio of degrees to radians is 180^{\circ}/\pi.
+
+sin(x, /[, out, where, casting, order, ...])	Trigonometric sine, element-wise.
+cos(x, /[, out, where, casting, order, ...])	Cosine element-wise.
+tan(x, /[, out, where, casting, order, ...])	Compute tangent element-wise.
+arcsin(x, /[, out, where, casting, order, ...])	Inverse sine, element-wise.
+arccos(x, /[, out, where, casting, order, ...])	Trigonometric inverse cosine, element-wise.
+arctan(x, /[, out, where, casting, order, ...])	Trigonometric inverse tangent, element-wise.
+arctan2(x1, x2, /[, out, where, casting, ...])	Element-wise arc tangent of x1/x2 choosing the quadrant correctly.
+hypot(x1, x2, /[, out, where, casting, ...])	Given the “legs” of a right triangle, return its hypotenuse.
+sinh(x, /[, out, where, casting, order, ...])	Hyperbolic sine, element-wise.
+cosh(x, /[, out, where, casting, order, ...])	Hyperbolic cosine, element-wise.
+tanh(x, /[, out, where, casting, order, ...])	Compute hyperbolic tangent element-wise.
+arcsinh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic sine element-wise.
+arccosh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic cosine, element-wise.
+arctanh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic tangent element-wise.
+deg2rad(x, /[, out, where, casting, order, ...])	Convert angles from degrees to radians.
+rad2deg(x, /[, out, where, casting, order, ...])	Convert angles from radians to degrees.
+Bit-twiddling functions
+These function all require integer arguments and they manipulate the bit-pattern of those arguments.
+
+bitwise_and(x1, x2, /[, out, where, ...])	Compute the bit-wise AND of two arrays element-wise.
+bitwise_or(x1, x2, /[, out, where, casting, ...])	Compute the bit-wise OR of two arrays element-wise.
+bitwise_xor(x1, x2, /[, out, where, ...])	Compute the bit-wise XOR of two arrays element-wise.
+invert(x, /[, out, where, casting, order, ...])	Compute bit-wise inversion, or bit-wise NOT, element-wise.
+left_shift(x1, x2, /[, out, where, casting, ...])	Shift the bits of an integer to the left.
+right_shift(x1, x2, /[, out, where, ...])	Shift the bits of an integer to the right.
+Comparison functions
+greater(x1, x2, /[, out, where, casting, ...])	Return the truth value of (x1 > x2) element-wise.
+greater_equal(x1, x2, /[, out, where, ...])	Return the truth value of (x1 >= x2) element-wise.
+less(x1, x2, /[, out, where, casting, ...])	Return the truth value of (x1 < x2) element-wise.
+less_equal(x1, x2, /[, out, where, casting, ...])	Return the truth value of (x1 =< x2) element-wise.
+not_equal(x1, x2, /[, out, where, casting, ...])	Return (x1 != x2) element-wise.
+equal(x1, x2, /[, out, where, casting, ...])	Return (x1 == x2) element-wise.
+Warning
+Do not use the Python keywords and and or to combine logical array expressions. These keywords will test the truth value of the entire array (not element-by-element as you might expect). Use the bitwise operators & and | instead.
+
+logical_and(x1, x2, /[, out, where, ...])	Compute the truth value of x1 AND x2 element-wise.
+logical_or(x1, x2, /[, out, where, casting, ...])	Compute the truth value of x1 OR x2 element-wise.
+logical_xor(x1, x2, /[, out, where, ...])	Compute the truth value of x1 XOR x2, element-wise.
+logical_not(x, /[, out, where, casting, ...])	Compute the truth value of NOT x element-wise.
+Warning
+The bit-wise operators & and | are the proper way to perform element-by-element array comparisons. Be sure you understand the operator precedence: (a > 2) & (a < 5) is the proper syntax because a > 2 & a < 5 will result in an error due to the fact that 2 & a is evaluated first.
+
+maximum(x1, x2, /[, out, where, casting, ...])	Element-wise maximum of array elements.
+Tip
+The Python function max() will find the maximum over a one-dimensional array, but it will do so using a slower sequence interface. The reduce method of the maximum ufunc is much faster. Also, the max() method will not give answers you might expect for arrays with greater than one dimension. The reduce method of minimum also allows you to compute a total minimum over an array.
+
+minimum(x1, x2, /[, out, where, casting, ...])	Element-wise minimum of array elements.
+Warning
+the behavior of maximum(a, b) is different than that of max(a, b). As a ufunc, maximum(a, b) performs an element-by-element comparison of a and b and chooses each element of the result according to which element in the two arrays is larger. In contrast, max(a, b) treats the objects a and b as a whole, looks at the (total) truth value of a > b and uses it to return either a or b (as a whole). A similar difference exists between minimum(a, b) and min(a, b).
+
+fmax(x1, x2, /[, out, where, casting, ...])	Element-wise maximum of array elements.
+fmin(x1, x2, /[, out, where, casting, ...])	Element-wise minimum of array elements.
+Floating functions
+Recall that all of these functions work element-by-element over an array, returning an array output. The description details only a single operation.
+
+isfinite(x, /[, out, where, casting, order, ...])	Test element-wise for finiteness (not infinity or not Not a Number).
+isinf(x, /[, out, where, casting, order, ...])	Test element-wise for positive or negative infinity.
+isnan(x, /[, out, where, casting, order, ...])	Test element-wise for NaN and return result as a boolean array.
+fabs(x, /[, out, where, casting, order, ...])	Compute the absolute values element-wise.
+signbit(x, /[, out, where, casting, order, ...])	Returns element-wise True where signbit is set (less than zero).
+copysign(x1, x2, /[, out, where, casting, ...])	Change the sign of x1 to that of x2, element-wise.
+nextafter(x1, x2, /[, out, where, casting, ...])	Return the next floating-point value after x1 towards x2, element-wise.
+spacing(x, /[, out, where, casting, order, ...])	Return the distance between x and the nearest adjacent number.
+modf(x[, out1, out2], / [[, out, where, ...])	Return the fractional and integral parts of an array, element-wise.
+ldexp(x1, x2, /[, out, where, casting, ...])	Returns x1 * 2**x2, element-wise.
+frexp(x[, out1, out2], / [[, out, where, ...])	Decompose the elements of x into mantissa and twos exponent.
+fmod(x1, x2, /[, out, where, casting, ...])	Return the element-wise remainder of division.
+floor(x, /[, out, where, casting, order, ...])	Return the floor of the input, element-wise.
+ceil(x, /[, out, where, casting, order, ...])	Return the ceiling of the input, element-wise.
+trunc(x, /[, out, where, casting, order, ...])	Return the truncated value of the input, element-wise.
+
+
+Trigonometric functions
+------------------------
+
+sin(x)	Trigonometric sine, element-wise. (Ufuncs - ONLY for
+dimensionless or x in radians)
+cos(x)	Cosine element-wise. (Ufuncs - ONLY for dimensionless or x in
+radians)
+tan(x)	Compute tangent element-wise.
+arcsin(x, /[, out, where, casting, order, ...])	Inverse sine, element-wise.
+arccos(x, /[, out, where, casting, order, ...])	Trigonometric inverse cosine, element-wise.
+arctan(x, /[, out, where, casting, order, ...])	Trigonometric inverse tangent, element-wise.
+hypot(x1, x2, /[, out, where, casting, ...])	Given the “legs” of a right triangle, return its hypotenuse.
+arctan2(x1, x2, /[, out, where, casting, ...])	Element-wise arc tangent of x1/x2 choosing the quadrant correctly.
+degrees(x, /[, out, where, casting, order, ...])	Convert angles from radians to degrees.
+radians(x, /[, out, where, casting, order, ...])	Convert angles from degrees to radians.
+unwrap(p[, discont, axis])	Unwrap by changing deltas between values to 2*pi complement.
+deg2rad(x, /[, out, where, casting, order, ...])	Convert angles from degrees to radians.
+rad2deg(x, /[, out, where, casting, order, ...])	Convert angles from radians to degrees.
+Hyperbolic functions
+sinh(x, /[, out, where, casting, order, ...])	Hyperbolic sine, element-wise.
+cosh(x, /[, out, where, casting, order, ...])	Hyperbolic cosine, element-wise.
+tanh(x, /[, out, where, casting, order, ...])	Compute hyperbolic tangent element-wise.
+arcsinh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic sine element-wise.
+arccosh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic cosine, element-wise.
+arctanh(x, /[, out, where, casting, order, ...])	Inverse hyperbolic tangent element-wise.
+Rounding
+around(a[, decimals, out])	Evenly round to the given number of decimals.
+round_(a[, decimals, out])	Round an array to the given number of decimals.
+rint(x, /[, out, where, casting, order, ...])	Round elements of the array to the nearest integer.
+fix(x[, out])	Round to nearest integer towards zero.
+floor(x, /[, out, where, casting, order, ...])	Return the floor of the input, element-wise.
+ceil(x, /[, out, where, casting, order, ...])	Return the ceiling of the input, element-wise.
+trunc(x, /[, out, where, casting, order, ...])	Return the truncated value of the input, element-wise.
+Sums, products, differences
+prod(a[, axis, dtype, out, keepdims])	Return the product of array elements over a given axis.
+sum(a[, axis, dtype, out, keepdims])	Sum of array elements over a given axis.
+nanprod(a[, axis, dtype, out, keepdims])	Return the product of array elements over a given axis treating Not a Numbers (NaNs) as ones.
+nansum(a[, axis, dtype, out, keepdims])	Return the sum of array elements over a given axis treating Not a Numbers (NaNs) as zero.
+cumprod(a[, axis, dtype, out])	Return the cumulative product of elements along a given axis.
+cumsum(a[, axis, dtype, out])	Return the cumulative sum of the elements along a given axis.
+nancumprod(a[, axis, dtype, out])	Return the cumulative product of array elements over a given axis treating Not a Numbers (NaNs) as one.
+nancumsum(a[, axis, dtype, out])	Return the cumulative sum of array elements over a given axis treating Not a Numbers (NaNs) as zero.
+diff(a[, n, axis])	Calculate the n-th discrete difference along given axis.
+ediff1d(ary[, to_end, to_begin])	The differences between consecutive elements of an array.
+gradient(f, *varargs, **kwargs)	Return the gradient of an N-dimensional array.
+cross(a, b[, axisa, axisb, axisc, axis])	Return the cross product of two (arrays of) vectors.
+trapz(y[, x, dx, axis])	Integrate along the given axis using the composite trapezoidal rule.
+Exponents and logarithms
+exp(x, /[, out, where, casting, order, ...])	Calculate the exponential of all elements in the input array.
+expm1(x, /[, out, where, casting, order, ...])	Calculate exp(x) - 1 for all elements in the array.
+exp2(x, /[, out, where, casting, order, ...])	Calculate 2**p for all p in the input array.
+log(x, /[, out, where, casting, order, ...])	Natural logarithm, element-wise.
+log10(x, /[, out, where, casting, order, ...])	Return the base 10 logarithm of the input array, element-wise.
+log2(x, /[, out, where, casting, order, ...])	Base-2 logarithm of x.
+log1p(x, /[, out, where, casting, order, ...])	Return the natural logarithm of one plus the input array, element-wise.
+logaddexp(x1, x2, /[, out, where, casting, ...])	Logarithm of the sum of exponentiations of the inputs.
+logaddexp2(x1, x2, /[, out, where, casting, ...])	Logarithm of the sum of exponentiations of the inputs in base-2.
+Other special functions
+i0(x)	Modified Bessel function of the first kind, order 0.
+sinc(x)	Return the sinc function.
+Floating point routines
+signbit(x, /[, out, where, casting, order, ...])	Returns element-wise True where signbit is set (less than zero).
+copysign(x1, x2, /[, out, where, casting, ...])	Change the sign of x1 to that of x2, element-wise.
+frexp(x[, out1, out2], / [[, out, where, ...])	Decompose the elements of x into mantissa and twos exponent.
+ldexp(x1, x2, /[, out, where, casting, ...])	Returns x1 * 2**x2, element-wise.
+nextafter(x1, x2, /[, out, where, casting, ...])	Return the next floating-point value after x1 towards x2, element-wise.
+spacing(x, /[, out, where, casting, order, ...])	Return the distance between x and the nearest adjacent number.
+Arithmetic operations
+add(x1, x2, /[, out, where, casting, order, ...])	Add arguments element-wise.
+reciprocal(x, /[, out, where, casting, ...])	Return the reciprocal of the argument, element-wise.
+negative(x, /[, out, where, casting, order, ...])	Numerical negative, element-wise.
+multiply(x1, x2, /[, out, where, casting, ...])	Multiply arguments element-wise.
+divide(x1, x2, /[, out, where, casting, ...])	Divide arguments element-wise.
+power(x1, x2, /[, out, where, casting, ...])	First array elements raised to powers from second array, element-wise.
+subtract(x1, x2, /[, out, where, casting, ...])	Subtract arguments, element-wise.
+true_divide(x1, x2, /[, out, where, ...])	Returns a true division of the inputs, element-wise.
+floor_divide(x1, x2, /[, out, where, ...])	Return the largest integer smaller or equal to the division of the inputs.
+float_power(x1, x2, /[, out, where, ...])	First array elements raised to powers from second array, element-wise.
+fmod(x1, x2, /[, out, where, casting, ...])	Return the element-wise remainder of division.
+mod(x1, x2, /[, out, where, casting, order, ...])	Return element-wise remainder of division.
+modf(x[, out1, out2], / [[, out, where, ...])	Return the fractional and integral parts of an array, element-wise.
+remainder(x1, x2, /[, out, where, casting, ...])	Return element-wise remainder of division.
+divmod(x1, x2[, out1, out2], / [[, out, ...])	Return element-wise quotient and remainder simultaneously.
+Handling complex numbers
+angle(z[, deg])	Return the angle of the complex argument.
+real(val)	Return the real part of the complex argument.
+imag(val)	Return the imaginary part of the complex argument.
+conj(x, /[, out, where, casting, order, ...])	Return the complex conjugate, element-wise.
+Miscellaneous
+convolve(a, v[, mode])	Returns the discrete, linear convolution of two one-dimensional sequences.
+clip(a, a_min, a_max[, out])	Clip (limit) the values in an array.
+sqrt(x, /[, out, where, casting, order, ...])	Return the positive square-root of an array, element-wise.
+cbrt(x, /[, out, where, casting, order, ...])	Return the cube-root of an array, element-wise.
+square(x, /[, out, where, casting, order, ...])	Return the element-wise square of the input.
+absolute(x, /[, out, where, casting, order, ...])	Calculate the absolute value element-wise.
+fabs(x, /[, out, where, casting, order, ...])	Compute the absolute values element-wise.
+sign(x, /[, out, where, casting, order, ...])	Returns an element-wise indication of the sign of a number.
+heaviside(x1, x2, /[, out, where, casting, ...])	Compute the Heaviside step function.
+maximum(x1, x2, /[, out, where, casting, ...])	Element-wise maximum of array elements.
+minimum(x1, x2, /[, out, where, casting, ...])	Element-wise minimum of array elements.
+fmax(x1, x2, /[, out, where, casting, ...])	Element-wise maximum of array elements.
+fmin(x1, x2, /[, out, where, casting, ...])	Element-wise minimum of array elements.
+nan_to_num(x[, copy])	Replace nan with zero and inf with finite numbers.
+real_if_close(a[, tol])	If complex input returns a real array if complex parts are close to zero.
+interp(x, xp, fp[, left, right, period])	One-dimensional linear interpolation.
+
+"""

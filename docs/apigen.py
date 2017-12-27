@@ -245,7 +245,7 @@ def recurse_tree(rootpath, excludes, opts):
         # remove hidden ('.') and private ('_') directories, as well as
         # excluded dirs
         if includeprivate:
-            exclude_prefixes = ('.',)
+            exclude_prefixes = ('.','__')
         else:
             exclude_prefixes = ('.', '_')
         subs[:] = sorted(sub for sub in subs if not sub.startswith(exclude_prefixes) and
@@ -276,8 +276,8 @@ def recurse_tree(rootpath, excludes, opts):
 
 def normalize_excludes(rootpath, excludes):
     """Normalize the excluded directory list."""
-    return [os.path.abspath(os.path.join(rootpath, exclude))
-                            for exclude in excludes]
+    return [os.path.abspath(os.path.join(rootpath, exclude)) for exclude in
+            excludes]
 
 
 def is_excluded(root, excludes):
@@ -428,7 +428,7 @@ User API reference
 
 .. currentmodule:: spectrochempy
 
-The |scp| API exposes many objects and functions that are described below.
+The |scpy| API exposes many objects and functions that are described below.
 
 To use the API, one must load it using one of the following syntax:
 
@@ -443,6 +443,8 @@ already in the namespace. Therefore, the first syntax is in general
 recommended,
 although that, in the examples in this documentation, we have often use the 
 second one for simplicity.
+
+To go deeper in the core of |scpy|, look at the full `develreference`_.
 
 
 Objects
@@ -488,7 +490,8 @@ Constants
 
    .. autoclass:: {api}.{klass}
       :members:
-      :no-inherited-members:
+      :inherited-members:
+      :show-inheritance:
 
    .. include:: ../../gen_modules/backreferences/{api}.{klass}.examples
 

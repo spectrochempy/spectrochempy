@@ -80,7 +80,7 @@ where <workspace> is you programming workspace (any folder you like)
 	$ cd <wokspace>/spectrochempy
 
 
-7. Get the packages necessary for running |scp| of all required package:
+7. Get the packages necessary for running |scpy| of all required package:
 
 .. sourcecode:: bash
 

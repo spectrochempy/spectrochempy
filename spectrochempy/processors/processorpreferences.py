@@ -12,4 +12,6 @@
 __all__ = []
 
 class ProcessorPreferences:
-    pass
+    def __init__(self, **kwargs):
+        super(ProcessorPreferences, self).__init__(**kwargs)
+

@@ -7,7 +7,7 @@ User Guide
 API (Application Programming Interface)
 =======================================
 
-The |scp| **API** is accessible from python shell or IPython.
+The |scpy| **API** is accessible from python shell or IPython.
 
 Introduction
 ------------

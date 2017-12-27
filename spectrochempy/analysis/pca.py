@@ -101,8 +101,8 @@ class PCA(HasTraits):
             :include-source:
 
             from spectrochempy.api import *
-            source = upload_IRIS()
-            pca = PCA(source, centered=True)
+            dataset = upload_IRIS()
+            pca = PCA(dataset, centered=True)
             LT, S = pca.transform(n_pc='auto')
             _ = pca.screeplot()
             _ = pca.scoreplot(1,2, color_mapping='labels')
@@ -450,6 +450,7 @@ class PCA(HasTraits):
                                              markersize = 7.,
                                              twinx = ax1
                                             )
+        ax1.set_title('Scree plot')
         return ax1, ax2
 
 

@@ -11,9 +11,7 @@
 from traitlets import Unicode, List, Bool, observe, Integer, Float, Tuple, \
     Unicode
 from traitlets.config.configurable import Configurable
-
 import matplotlib.pyplot as plt
-
 import matplotlib as mpl
 
 __all__ = []
@@ -27,7 +25,8 @@ class PlotterPreferences(Configurable):
     Options relative to plotting and views
 
     """
-    import matplotlib.pyplot as plt
+    def __init__(self, **kwargs):
+        super(PlotterPreferences, self).__init__(**kwargs)
 
     # ------------------------------------------------------------------------
     # attributes

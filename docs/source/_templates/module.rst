@@ -27,7 +27,7 @@
    {% for item in classes %}
    .. autoclass:: {{ item }}
       :members:
-      :no-inherited-members:
+      :inherited-members:
       :show-inheritance:
 
 

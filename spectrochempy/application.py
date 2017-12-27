@@ -53,7 +53,7 @@ from IPython.utils.text import get_text_list
 # constants
 # ============================================================================
 
-__all__ = ['app']
+__all__ = []
 
 
 # Log levels
@@ -147,7 +147,7 @@ class SpectroChemPyMagics(Magics):
         Options
             -p <string>         Name of the project where the script will be stored.
                                 If not provided, a project with a standard name:
-                                ``proj`` is searched.
+                                `proj` is searched.
             -o <string>         script name
 
             -s <symbols>        Specify function or classes to load from python
@@ -162,7 +162,7 @@ class SpectroChemPyMagics(Magics):
         Examples
         --------
 
-        .. sourcecode:: ipython::
+        .. sourcecode:: ipython
 
             In[1]: %addscript myscript.py
 
@@ -256,10 +256,7 @@ class SpectroChemPyMagics(Magics):
 # ============================================================================
 
 class _Data(HasTraits):
-    """
-    A private class used to determine the path to the testdata directory.
-
-    """
+    #private class used to determine the path to the testdata directory.
 
     data = Unicode()
     "Directory where to look for data"
@@ -335,12 +332,12 @@ class _Data(HasTraits):
 # ============================================================================
 class Preferences(Configurable) :
     """
-    Preferences that apply to the |scp| application in general
+    Preferences that apply to the |scpy| application in general
 
-    They should be accessibles from the main API
+    They should be accessible from the main API
 
     Examples
-    ========
+    --------
 
     >>> from spectrochempy import api # doctest: +ELLIPSIS
     SpectroChemPy's API...
@@ -348,6 +345,9 @@ class Preferences(Configurable) :
 
 
     """
+
+    def __init__(self, **kwargs):
+        super(Preferences, self).__init__(**kwargs)
 
     # various settings
     # ----------------
@@ -413,10 +413,23 @@ class SpectroChemPy(Application):
     from spectrochempy.processors.processorpreferences import \
         ProcessorPreferences
 
+    # ------------------------------------------------------------------------
+    # initialization
+    # ------------------------------------------------------------------------
+
+    def __init__(self, *args, **kwargs):
+        super(SpectroChemPy, self).__init__(*args, **kwargs)
+
+        if kwargs.get('debug', False):
+            self.log_level = DEBUG
+
+        self.initialize()
+
+    # ------------------------------------------------------------------------
     # applications attributes
     # ------------------------------------------------------------------------
     running = Bool(False)
-    "Running status of the |scp| application"
+    "Running status of the |scpy| application"
 
     name = Unicode('SpectroChemPy')
     "Running name of the application"
@@ -425,7 +438,7 @@ class SpectroChemPy(Application):
                           'framework for processing, '
                           'analysing and modelling Spectroscopic data for '
                           'Chemistry with Python.')
-    "Short description of the |scp| application"
+    "Short description of the |scpy| application"
     long_description = Unicode
 
     @default('long_description')
@@ -526,18 +539,6 @@ class SpectroChemPy(Application):
                     ProjectPreferences,
                     PlotterPreferences,
                     ])
-
-    # ------------------------------------------------------------------------
-    # initialization
-    # ------------------------------------------------------------------------
-
-    def __init__(self, *args, **kwargs):
-        super(SpectroChemPy, self).__init__(*args, **kwargs)
-
-        if kwargs.get('debug', False):
-            self.log_level = DEBUG
-
-        self.initialize()
 
     # ------------------------------------------------------------------------
     # Initialisation of the application
@@ -664,7 +665,7 @@ class SpectroChemPy(Application):
     @docstrings.dedent
     def start(self, **kwargs):
         """
-        Start the |scp| API
+        Start the |scpy| API
 
         Parameters
         ----------
@@ -827,11 +828,13 @@ class SpectroChemPy(Application):
         self.log.debug("changed default log_level to {}".format(
                                              logging.getLevelName(change.new)))
 
-#: Main application object that should not be called directly by a end user.
-#: It is advisable to use the main `api` import to access all public methods of
-#: this object.
+#Main application object that should not be called directly by a end user.
+#It is advisable to use the main `api` import to access all public methods of
+#this object.
 app = SpectroChemPy()
 
+log = app.log
+"""The main logger of the |scpy| application"""
 
 # TODO: look at the subcommands capabilities of traitlets
 

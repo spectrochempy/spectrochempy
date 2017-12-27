@@ -7,9 +7,10 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+"""
+This module implements the `BaselineCorrection` class for baseline corrections.
 
-# author : A.Travert & C.Fernandez
-# =============================================================================
+"""
 
 import numpy as np
 import scipy.interpolate
@@ -17,12 +18,12 @@ from traitlets import (Int, Instance, HasTraits, Float, Unicode, Tuple)
 from matplotlib.widgets import SpanSelector
 import matplotlib.pyplot as plt
 
-from spectrochempy.dataset.nddataset import NDDataset
-
 # local imports
 # -----------------------------------------------------------------------------
 from spectrochempy.dataset.ndcoords import CoordRange
 from spectrochempy.plotters.multiplot import multiplot
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.utils import docstrings
 
 __all__ = ['BaselineCorrection']
 
@@ -33,16 +34,16 @@ class BaselineCorrection(HasTraits):
 
     2 methods are proposed:
 
-        * ``sequential`` (default) = classical polynom fit or spline \
-            interpolation with one fit per spectrum
-        * ``multivariate`` = SVD modeling of baseline, polynomial fit of PC's \
-        and calculation of the modelled baseline spectra.
+    * ``sequential`` (default) = classical polynom fit or spline
+      interpolation with separate fitting of each row (spectrum)
+    * ``multivariate`` = SVD modeling of baseline, polynomial fit of PC's
+      and calculation of the modelled baseline spectra.
 
-    Interactive mode is proposed using the `interactive function.`
+    Interactive mode is proposed using the interactive function : :meth:`run`.
 
     """
-    source = Instance(NDDataset)
-    corrected_source = Instance(NDDataset)
+    dataset = Instance(NDDataset)
+    corrected = Instance(NDDataset)
     method = Unicode('multivariate')
     interpolation = Unicode('pchip')
     axis = Int(1)
@@ -51,20 +52,63 @@ class BaselineCorrection(HasTraits):
     zoompreview = Float(1.)
     figsize=Tuple((8,6))
 
+    @docstrings.get_sectionsf('BaselineCorrection')
+    @docstrings.dedent
     def __init__(self,
-                 source,
+                 dataset,
+                 *ranges,
                  **kwargs):
+        """
+        Parameters
+        ----------
+        dataset : |NDDataset|
+            The dataset to be transformed
+        *ranges : a variable number of pair-tuples
+            The regions taken into account for the baseline correction.
+        **kwargs : keywords arguments
+            Known keywords are given below
 
-        self.source = source
-        self.corrected = self.source.copy()
+            * axis : the axis where to apply the baseline correction
+              usually -1, *i.e.*, the last dimension.
+            * method : ``multivariate`` or ``sequential``
+            * interpolation : ``polynomial`` or ``pchip``
+            * order : polynomial order, default=6
+            * npc : number of components for the ``multivariate`` method
+
+        Examples
+        --------
+
+        .. plot::
+            :include-source:
+
+            from spectrochempy.api import *
+            nd = NDDataset.read_omnic(os.path.join('irdata',
+                                        'NH4Y-activation.SPG'))
+            ndp = nd[:, 1290.0:5999.0]
+            bc = BaselineCorrection(ndp, axis=-1,
+                                        method='multivariate',
+                                        interpolation='pchip',
+                                        npc=8)
+            ranges=[[5996., 5998.], [1290., 1300.],
+                    [2205., 2301.], [5380., 5979.],
+                    [3736., 5125.]]
+            span = bc.compute(*ranges)
+            _ = bc.corrected.plot_stack()
+            show()
+
+        """
+        self.dataset = dataset
+        self.corrected = self.dataset.copy()
 
         self._setup(**kwargs)
 
-        x = source.x.data
+        x = dataset.x.data
         self.ranges = [
                 [x[0], x[2]],
                 [x[-3], x[-1]]
             ]
+        if ranges:
+            self.ranges.extend(ranges)
 
     def _setup(self, **kwargs):
 
@@ -82,14 +126,25 @@ class BaselineCorrection(HasTraits):
 
         return self.compute(*ranges, **kwargs)
 
+
+    docstrings.delete_params('BaselineCorrection.parameters', 'dataset')
+    @docstrings.dedent
     def compute(self, *ranges, **kwargs):
-        """Base function for dataset baseline correction.
+        """
+        Base function for dataset baseline correction.
+
+        Parameters
+        ----------
+        %(BaselineCorrection.parameters.no_dataset)s
+        zoompreview : the zoom factor for the preview in interactive mode
+        figsize : Size of the figure to display
+
         """
 
         self._setup(**kwargs)
 
         # output dataset
-        new = self.source.copy()
+        new = self.dataset.copy()
 
         # we assume that the last dimension if always the dimension to which
         # we want to subtract the baseline.
@@ -189,7 +244,7 @@ class BaselineCorrection(HasTraits):
 
             baseline = np.dot(T, baseline_loadings)
 
-        new.name = '*' + self.source.name
+        new.name = '*' + self.dataset.name
         new.data = new.data - baseline
 
         # eventually sort back to the original order
@@ -216,17 +271,23 @@ class BaselineCorrection(HasTraits):
         self.corrected = new
         return new
 
+    @docstrings.dedent
     def run(self, *ranges, **kwargs):
         """
-        Interactive version of the basecor function.
+        Interactive version of the baseline correction.
+
+        Parameters
+        ----------
+        %(BaselineCorrection.parameters.no_dataset)s
 
         """
         self._setup(**kwargs)
-        sources = [self.source, self.source]
+
+        datasets = [self.dataset, self.dataset]
         labels = ['\nClick & span with left mouse button to set a baseline region.'
                       '\nClick on right button on a region to remove it.',
                   'Baseline corrected dataset preview']
-        axes = multiplot(sources, labels,
+        axes = multiplot(datasets, labels,
                   method='stack',
                   sharex=True,
                   nrow = 2,
@@ -254,6 +315,7 @@ class BaselineCorrection(HasTraits):
             sps.append(sp)
 
         def show_basecor(ax2):
+            
             corrected = self.compute()
 
             ax2.clear()
@@ -304,23 +366,4 @@ class BaselineCorrection(HasTraits):
 
 if __name__ == '__main__':
 
-    from spectrochempy.api import *
-    import os
-    nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
-
-    ndp = (nd - nd[-1])[:,
-          1290.0:5999.0]  # Important note that we use foating point number
-    # integer would mean points, not wavenumbers!
-
-
-    ibc = BaselineCorrection(ndp, axis=-1,
-                             method='multivariate',
-                             interpolation='pchip',
-                             order=3,
-                             npc=5,
-                             zoompreview=3)
-    ranges=[]
-    span = ibc.run(*ranges)
-    plt.show()
-
-    print (ibc.corrected)
+    pass

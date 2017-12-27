@@ -39,8 +39,8 @@ class SVD(HasTraits):
 
     Examples
     ---------
-    >>> source = NDDataset.load('mydataset.scp')
-    >>> svd = SVD(source)
+    >>> dataset = NDDataset.load('mydataset.scp')
+    >>> svd = SVD(dataset)
     >>> print(svd.ev.data)
     [11848.225  633.980 ...,    0.001    0.001]
     >>> print(svd.ev_cum.data)
@@ -92,7 +92,7 @@ class SVD(HasTraits):
 
         else:
             raise TypeError('A dataset of type NDDataset is  '
-                               'expected as a source of data, but an object'
+                               'expected as a dataset of data, but an object'
                                ' of type {} has been provided'.format(
                                type(X).__name__))
 

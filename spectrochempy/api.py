@@ -55,6 +55,7 @@ __all__ = [
 # here we also construct the __all__ list automatically
 
 from spectrochempy.application import (app,
+                                       log,
                                        __version__,
                                        __release__,
                                        __copyright__,
@@ -69,6 +70,7 @@ from spectrochempy import application
 running = app.running
 
 version = __version__
+"""Version number """
 release = __release__
 copyright =  __copyright__
 license = __license__
@@ -77,7 +79,6 @@ authors = __author__
 contributors = __contributor__
 url = __url__
 
-log =  app.log
 
 # give a user friendly name to the objects containing configurables preferences
 preferences = app.preferences

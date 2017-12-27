@@ -6,10 +6,10 @@ Installation Guide
 .. contents::
 	:local:
 
-Where to Get |scp|
+Where to Get |scpy|
 ==================
 
-To get a working installation of |scp| , on any platform (windows, mac OS X, Linux ... ),
+To get a working installation of |scpy| , on any platform (windows, mac OS X, Linux ... ),
 several solutions are (*or will be soon*) available.
 
 * :ref:`pypi`
@@ -24,7 +24,7 @@ several solutions are (*or will be soon*) available.
 Requirements
 ============
 
-|scp| requires a working python installation.
+|scpy| requires a working python installation.
 
 * `Python <http://www.python.org/>`_
 
@@ -56,7 +56,7 @@ use commands for this distribution.
 
   if you register as academic member of the university you get interesting add-ons.
 
-  Finally, see :ref:`conda` for installing the |scp| conda package.
+  Finally, see :ref:`conda` for installing the |scpy| conda package.
 
 If you prefer **Canopy** here it is:
 
@@ -64,7 +64,7 @@ If you prefer **Canopy** here it is:
 
   If you register with your academic email, you can get the full academic version).
 
-  Finally, see :ref:`pypi` for installing |scp| .
+  Finally, see :ref:`pypi` for installing |scpy| .
 
 
 Installation
@@ -191,7 +191,7 @@ Then execute two commands as following:
 
 	In [2]: NDDataset()
 
-If this goes well, the |scp| application is likely functional.
+If this goes well, the |scpy| application is likely functional.
 
 Getting started
 ===============

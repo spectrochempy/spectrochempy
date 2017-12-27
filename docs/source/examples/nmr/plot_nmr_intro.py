@@ -40,13 +40,13 @@ def get_source2D():
 
 
 ##########################################################
-# get the 1D source
+# get the 1D dataset
 # -----------------
 source1D = get_source1D()
 source1D
 
 ##########################################################
-# get the 2D source
+# get the 2D dataset
 source2D = get_source2D()
 source2D
 

@@ -49,7 +49,7 @@ def test_fit_single_source(IR_source_2D, script):
 
     f1 = Fit(source, script, silent=True)
     f1.run(maxiter=10, every=1)
-#    assert_approx_equal(source.model_A, -116.40475, significant=4)
+#    assert_approx_equal(dataset.model_A, -116.40475, significant=4)
 #    assert_approx_equal(f1.fp['width_line_2'], 195.7273, significant=4)
     source.plot(plot_model=True)
 

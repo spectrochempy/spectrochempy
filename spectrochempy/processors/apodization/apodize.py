@@ -110,7 +110,7 @@ def apodize(source, **kwargs):
     axis = kwargs.pop('axis', -1)
 
     # if axis < 0:
-    #    axis = source.ndim + axis
+    #    axis = dataset.ndim + axis
     if axis == new.ndim - 1:
         axis = -1
 
@@ -231,7 +231,7 @@ def apodize(source, **kwargs):
     # shifted = args.shifted  # float(kargs.get('top', 0.0))
     # k_shifted = args.k_shifted
     #
-    # if k_shifted and (axis == -1 or axis == 1) and source.is_2d:
+    # if k_shifted and (axis == -1 or axis == 1) and dataset.is_2d:
     #     # in k shifted method for 2D spectra, the top of
     #     # the broadening function follow the top of the echoes
     #     # parameters p and q should be defined in parameters
@@ -243,14 +243,14 @@ def apodize(source, **kwargs):
     #     if p == 1 and q == 0:
     #         ratio = 1.0
     #     else:
-    #         ratio = k_ratio(source, p, q)
+    #         ratio = k_ratio(dataset, p, q)
     #     shifted = np.abs(ratio)
     #     if args.verbose:
     #         print('k_ratio: %.3f' % ratio)
     #
     # par.LB = lb
     #
-    # kargs['lb'] = lb / source.get_multiplicator(axis)
+    # kargs['lb'] = lb / dataset.get_multiplicator(axis)
     # kargs['shifted'] = shifted
     # kargs['states'] = True if 'STATES' in par.encoding else False
     #
@@ -260,5 +260,5 @@ def apodize(source, **kwargs):
     #     # transpose temporarily the data for indirect dimension ft
     #     datv = datv.T
     #
-    # source.data = datv
-    # source.history.append('Exponential apodization lb:%.2f' % par.LB)
+    # dataset.data = datv
+    # dataset.history.append('Exponential apodization lb:%.2f' % par.LB)

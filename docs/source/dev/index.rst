@@ -11,6 +11,7 @@ Developper guide
 
     develguide
 
+.. _develreference:
 
 Code reference
 ---------------
