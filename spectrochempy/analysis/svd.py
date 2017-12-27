@@ -23,6 +23,7 @@ import numpy as np
 from spectrochempy.dataset.ndcoords import Coord, CoordSet
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.dataset.ndarray import masked, nomask
+from spectrochempy.utils import docstrings
 
 # ----------------------------------------------------------------------------
 
@@ -50,22 +51,27 @@ class SVD(HasTraits):
 
     """
 
-    U = Instance(NDDataset)
+    U = Instance(NDDataset, allow_none=True)
     s = Instance(NDDataset)
-    VT = Instance(NDDataset)
+    VT = Instance(NDDataset, allow_none=True)
 
+    @docstrings.get_sectionsf('SVD')
+    @docstrings.dedent
     def __init__(self, X, full_matrices=False, compute_uv=True):
         """
         Parameters
         -----------
-        X : |NDDataset| object.
-            This nddataset must have a 2D shape (``M``, ``N``).
-        full_matrices : bool, optional, default=`False`.
+        X : |NDDataset| object
+            The dataset has shape (`M`, `N`). `M` is the number of
+            observations (for examples a series of IR spectra) while `N`
+            is the number of features (for example the wavenumbers measured
+            in each IR spectrum).
+        full_matrices : bool, optional, default:`False`.
             If `False` , `U` and `VT` have the shapes (``M``,  ``k``) and
             (``k``, ``N``), respectively, where ``k`` = min(``M``, ``N``).
             Otherwise the shapes will be (``M``, ``M``) and (``N``, ``N``),
             respectively.
-        compute_uv: bool, optional, default=True.
+        compute_uv : bool, optional, default:True.
             Whether or not to compute `U` and `VT` in addition to `s`.
 
         Attributes
@@ -120,59 +126,11 @@ class SVD(HasTraits):
             raise np.linalg.LinAlgError("Arrays cannot be empty. You may "
                                         "want to check the masked data. ")
 
-        U, s, VT = np.linalg.svd(data, full_matrices, compute_uv)
-
-        # Put back masked columns in  VT
-        # ------------------------------
-        # Note that it is very important to use here the ma version of zeros
-        # array constructor
-        KV = VT.shape[0]
-        if np.any(masked_columns):
-            Vtemp = np.ma.zeros((KV, N))  # note np.ma, not np.
-            Vtemp[ : , ~ masked_columns ] = VT
-            Vtemp[ : , masked_columns] = masked
-            VT = Vtemp
-
-        # Put back masked rows in U
-        # -------------------------
-        KU = U.shape[1]
-        if np.any(masked_rows):
-            Utemp = np.ma.zeros((M, KU))
-            Utemp[~ masked_rows ] = U
-            Utemp[masked_rows] = masked
-            U = Utemp
-
-        # Sign correction to ensure deterministic output from SVD.
-        # This doesn't work will full_matrices=True.
-        if not full_matrices:
-            U, VT = self.svd_flip(U,VT)
-
-        # Returns U as a NDDataset object
-        # --------------------------------
-        U = NDDataset(U)
-        U.name = 'U'
-        U.title = 'left singular vectors of ' + X.name
-        U.coordset = CoordSet(X.coordset[0],
-                              Coord(None,
-                                labels=['#%d' % (i+1) for i in range(KU)],
-                                title='Components')
-                              )
-        U.description = 'left singular vectors of ' + X.name
-        U.history = 'created by SVD \n'
-
-        # Returns the loadings (VT) as a NDDataset object
-        # ------------------------------------------------
-
-        VT = NDDataset(VT)
-        VT.name = 'V.T'
-        VT.title = 'Loadings (V.t) of ' + X.name
-        VT.coordset = CoordSet(Coord(None,
-                                 labels=['#%d' % (i+1) for i in range(KV)],
-                                 title='Components'),
-                               X.coordset[1])
-        VT.description = (
-            'Loadings obtained by singular value decomposition of ' + X.name)
-        VT.history = (str(VT.modified) + ': created by SVD \n')
+        res = np.linalg.svd(data, full_matrices, compute_uv)
+        if compute_uv:
+            U, s, VT = res
+        else:
+            s = res
 
         # Returns the diagonal sigma matrix as a NDDataset object
         # -------------------------------------------------------
@@ -184,10 +142,66 @@ class SVD(HasTraits):
         s.description = (
             'Vector of singular values obtained  by SVD '
             'decomposition of ' + X.name)
-
-        self.U = U
         self.s = s
-        self.VT = VT
+
+        if compute_uv:
+            # Put back masked columns in  VT
+            # ------------------------------
+            # Note that it is very important to use here the ma version of zeros
+            # array constructor
+            KV = VT.shape[0]
+            if np.any(masked_columns):
+                Vtemp = np.ma.zeros((KV, N))  # note np.ma, not np.
+                Vtemp[ : , ~ masked_columns ] = VT
+                Vtemp[ : , masked_columns] = masked
+                VT = Vtemp
+
+            # Put back masked rows in U
+            # -------------------------
+            KU = U.shape[1]
+            if np.any(masked_rows):
+                Utemp = np.ma.zeros((M, KU))
+                Utemp[~ masked_rows ] = U
+                Utemp[masked_rows] = masked
+                U = Utemp
+
+            # Sign correction to ensure deterministic output from SVD.
+            # This doesn't work will full_matrices=True.
+            if not full_matrices:
+                U, VT = self.svd_flip(U,VT)
+
+            # Returns U as a NDDataset object
+            # --------------------------------
+            U = NDDataset(U)
+            U.name = 'U'
+            U.title = 'left singular vectors of ' + X.name
+            U.coordset = CoordSet(X.coordset[0],
+                                  Coord(None,
+                                    labels=['#%d' % (i+1) for i in range(KU)],
+                                    title='Components')
+                                  )
+            U.description = 'left singular vectors of ' + X.name
+            U.history = 'created by SVD \n'
+
+            # Returns the loadings (VT) as a NDDataset object
+            # ------------------------------------------------
+
+            VT = NDDataset(VT)
+            VT.name = 'V.T'
+            VT.title = 'Loadings (V.t) of ' + X.name
+            VT.coordset = CoordSet(Coord(None,
+                                     labels=['#%d' % (i+1) for i in range(KV)],
+                                     title='Components'),
+                                   X.coordset[1])
+            VT.description = (
+                'Loadings obtained by singular value decomposition of ' + X.name)
+            VT.history = (str(VT.modified) + ': created by SVD \n')
+
+            self.U = U
+            self.VT = VT
+        else:
+            self.U = None
+            self.VT = None
 
     # ------------------------------------------------------------------------
     # special methods
@@ -296,7 +310,11 @@ if __name__ == '__main__':
 
     svd.VT[:6].plot_stack()
 
-    svd.ev_ratio.plot_scatter(color='red', lines=True, xlim=(-0.1,9.5))
+    svd.ev_ratio[:10].plot_scatter(color='red', pen=True)
     show()
 
+    svd2 = SVD(source, compute_uv=False)
+
+    svd2.ev_ratio[:10].plot_scatter(color='blue', pen=True)
+    show()
 

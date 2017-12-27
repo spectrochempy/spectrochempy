@@ -65,7 +65,7 @@ class PCA(HasTraits):
     ev_cum = Instance(NDDataset)
 
     # ........................................................................
-    @docstrings.get_sectionsf('PCA')
+
     @docstrings.dedent
     def __init__(self, X,
                  centered=True,
@@ -74,11 +74,7 @@ class PCA(HasTraits):
         """
         Parameters
         ----------
-        X : |NDDataset| object
-            The dataset has shape (`M`, `N`). `M` is the number of
-            observations (for examples a series of IR spectra) while `N`
-            is the number of features (for example the wavenumbers measured
-            in each IR spectrum).
+        %(SVD.parameters.X)s
         centered : bool, optional, default:True
             If True the data are centered around the mean values:
             :math:`X' = X - mean(X)`.
