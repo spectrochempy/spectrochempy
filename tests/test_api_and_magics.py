@@ -8,11 +8,11 @@
 # =============================================================================
 
 
-def test_api():
+def test_scp():
 
     import spectrochempy
     # test version
-    from spectrochempy.api import APIref, log, version
+    from spectrochempy.scp import APIref, log, version
     assert version.split('.')[0] == '0'
     assert version.split('.')[1][:1] == '1'
     # TODO: modify this for each release

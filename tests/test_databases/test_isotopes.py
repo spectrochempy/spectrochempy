@@ -10,7 +10,7 @@
 
 
 
-from spectrochempy.api import Isotopes
+from spectrochempy.scp import Isotopes
 
 
 def test_isotopes():

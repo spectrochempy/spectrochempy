@@ -10,7 +10,7 @@
 """ Tests for the PCA module
 
 """
-from spectrochempy.api import PCA, masked
+from spectrochempy.scp import PCA, masked
 
 # test pca
 #---------

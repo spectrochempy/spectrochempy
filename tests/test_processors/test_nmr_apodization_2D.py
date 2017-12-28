@@ -20,7 +20,7 @@ from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
 
-from spectrochempy.api import *
+from spectrochempy.scp import *
 
 from spectrochempy.utils import SpectroChemPyWarning
 

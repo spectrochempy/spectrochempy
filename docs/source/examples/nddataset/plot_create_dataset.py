@@ -9,9 +9,9 @@ and then we plot one section (a 2D plane)
 """
 
 ###############################################################################
-# As usual, we start by loading the api
+# As usual, we start by loading the scp
 import numpy as np
-from spectrochempy import api
+from spectrochempy import scp
 
 ###############################################################################
 # Creation
@@ -36,17 +36,17 @@ nd_data = np.array([np.array(
 # The `Coord` object allow making an array of coordinates
 # with additional metadata such as units, labels, title, etc
 
-coord0 = api.Coord(data=c0,
+coord0 = scp.Coord(data=c0,
                labels=['cold', 'normal', 'hot'],
                units="K",
                title='temperature')
 
-coord1 = api.Coord(data=c1,
+coord1 = scp.Coord(data=c1,
                labels=None,
                units="minutes",
                title='time-on-stream')
 
-coord2 = api.Coord(data=c2,
+coord2 = scp.Coord(data=c2,
                labels=None,
                units="cm^-1",
                title='wavenumber')
@@ -62,7 +62,7 @@ print(a)
 # +++++++++++
 # The |NDDataset| object allow making the array of data with units, etc...
 
-mydataset = api.NDDataset(nd_data,
+mydataset = scp.NDDataset(nd_data,
                       coordset=[coord0, coord1, coord2],
                       title='Absorbance',
                       units='absorbance'
@@ -94,7 +94,7 @@ new = mydataset['hot']
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 
 new.plot()
-api.show()
+scp.show()
 
 ##################################################################
 # But it is possible to display image
@@ -102,16 +102,16 @@ api.show()
 
 # sphinx_gallery_thumbnail_number = 2
 new.plot(method='image')
-api.show()
+scp.show()
 
 ##################################################################
 # or stacked plot
 
 new.plot(method='stack')
-api.show()
+scp.show()
 
 ##################################################################
-# Note that the API allows one to use this syntax too:
+# Note that the scp allows one to use this syntax too:
 
-api.plot_stack(new)
-api.show()
+scp.plot_stack(new)
+scp.show()

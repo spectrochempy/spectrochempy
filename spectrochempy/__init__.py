@@ -59,7 +59,7 @@ __all__ = []
 
 # this is to simplify import of log levels
 # for example:
-# >>> from spectrochempy import api, DEBUG
+# >>> from spectrochempy import scp, DEBUG
 
 DEBUG = logging.DEBUG
 INFO = logging.INFO

@@ -14,6 +14,7 @@
 necessary features of NMR nuclei, such as their spin, larmor frequency and so on.
 
 """
+__all__ = ['Isotopes']
 
 import re
 from fractions import Fraction
@@ -39,13 +40,6 @@ from traitlets import (HasTraits,
 # =============================================================================
 from spectrochempy.units import ur
 
-# =============================================================================
-# Constants
-# =============================================================================
-
-# for the command : from .isotopes import *
-__all__ = ['Isotopes']
-
 
 # This module's package.
 PKG = 'spectrochempy.databases.isotopes'
@@ -64,9 +58,9 @@ class Isotopes(HasTraits):
 
     How to use it?
 
-    after the api has been loaded:
+    after the scp has been loaded:
 
-    >>> from spectrochempy.api import *
+    >>> from spectrochempy.scp import *
 
 
     one can use:

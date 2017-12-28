@@ -9,7 +9,7 @@
 
 
 # noinspection PyUnresolvedReferences
-from spectrochempy.api import (show,
+from spectrochempy.scp import (show,
                                BaselineCorrection,
                                NDDataset)
 

@@ -10,7 +10,7 @@
 
 
 
-from spectrochempy.api import ur, concatenate, stack,\
+from spectrochempy.scp import ur, concatenate, stack,\
     CoordRange
 
 import pytest

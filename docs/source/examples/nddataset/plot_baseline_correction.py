@@ -18,15 +18,15 @@ interactively, using the `multivariate` method and a `pchip` interpolation.
 
 ###############################################################################
 # As usual we start by importing the useful library, and at least  the
-# spectrochempy API.
+# spectrochempy scp.
 
-from spectrochempy import api
+from spectrochempy import scp
 import os
 
 ###############################################################################
 # Load data
 
-nd = api.NDDataset.read_omnic(os.path.join(api.preferences.datadir,
+nd = scp.NDDataset.read_omnic(os.path.join(scp.preferences.datadir,
                                            'irdata', 'NH4Y-activation.SPG'))
 
 ###############################################################################
@@ -39,7 +39,7 @@ ndp = (nd - nd[-1])[:, 1290.0:5999.0]
 ###############################################################################
 # Define the BaselineCorrection object.
 
-ibc = api.BaselineCorrection(ndp, axis=-1,
+ibc = scp.BaselineCorrection(ndp, axis=-1,
                          method='multivariate',
                          interpolation='pchip',
                          npc=5, zoompreview=3)
@@ -50,7 +50,7 @@ ibc = api.BaselineCorrection(ndp, axis=-1,
 ranges = []  # not predefined range
 span = ibc.run(*ranges)
 
-api.show()
+scp.show()
 
 ###############################################################################
 # print the corrected dataset

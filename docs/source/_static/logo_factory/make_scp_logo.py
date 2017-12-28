@@ -16,7 +16,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
-from spectrochempy.api import NRed, NBlue
+from spectrochempy.utils import NRed, NBlue
 
 def draw_circle(ax) :
     circle = plt.Circle((-0.5 + decal, 0.5), .48, edgecolor=contour, fill=True,

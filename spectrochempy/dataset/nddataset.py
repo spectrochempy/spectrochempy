@@ -12,6 +12,10 @@ This module implements the |NDDataset| class.
 
 """
 
+__all__ = ['NDDataset']
+
+__dataset_methods__ = []
+
 # =============================================================================
 # Standard python imports
 # =============================================================================
@@ -19,47 +23,32 @@ This module implements the |NDDataset| class.
 import itertools
 import textwrap
 from datetime import datetime
-from warnings import warn
 
 # =============================================================================
 # third-party imports
 # =============================================================================
-
 import numpy as np
 from traitlets import (List, Unicode, Instance, Bool, All, Float, validate,
-                       observe, default)
+                       observe, default, )
 import matplotlib.pyplot as plt
+
 
 # =============================================================================
 # Local imports
 # =============================================================================
-
-from spectrochempy.utils import (SpectroChemPyWarning,
-                                 is_sequence,
-                                 is_number,
-                                 numpyprintoptions,
-                                 get_user_and_node,
-                                 set_operators,
-                                 docstrings,
-                                 make_func_from)
-
-from spectrochempy.extern.traittypes import Array
-
-from ..projects.baseproject import AbstractProject
+from ..utils import (SpectroChemPyWarning, numpyprintoptions,
+                     get_user_and_node, set_operators, docstrings,
+                     make_func_from, )
+from ..extern.traittypes import Array
+from ..scp.projects.baseproject import AbstractProject
 from .ndarray import NDArray
 from .ndcoords import Coord, CoordSet
 from .ndmath import NDMath
 from .ndio import NDIO
 from .ndplot import NDPlot
 from ..application import log
-from ..utils.meta import Meta
 
 
-# =============================================================================
-# Constants
-# =============================================================================
-
-__all__ = ['NDDataset']
 
 # =============================================================================
 # numpy print options
@@ -144,8 +133,8 @@ class NDDataset(
         --------
         Usage by an end-user:
 
-        >>> from spectrochempy.api import NDDataset # doctest: +ELLIPSIS
-        SpectroChemPy's API...
+        >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS
+        SpectroChemPy's scp...
         >>> x = NDDataset([1,2,3])
         >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
         [       1        2        3]
@@ -880,7 +869,7 @@ class NDDataset(
 # module function
 # =============================================================================
 
-# make some functions also accessible from the API
+# make some functions also accessible from the scp API
 # We want a slightly different docstring so we cannot just make:
 #     func = NDDataset.func
 

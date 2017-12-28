@@ -14,8 +14,8 @@
 import pandas as pd
 import pytest
 
-from spectrochempy.api import *
-from spectrochempy.api import NDDataset, Coord, CoordSet, show
+from spectrochempy.scp import *
+from spectrochempy.scp import NDDataset, Coord, CoordSet, show
 from spectrochempy.extern.pint.errors import (UndefinedUnitError,
                                               DimensionalityError)
 from spectrochempy.utils import Meta, SpectroChemPyWarning
@@ -349,7 +349,7 @@ def test_ndarray_swapaxes(nd1d, nd2d):
     assert nd2s.shape == (2, 4)
     assert nd2s is not nd2
 
-    # TODO: add check for swaping of all elements of a dataset such as meta
+    # TODO: add check for swscpng of all elements of a dataset such as meta
 
 
 def test_set_coords_parameters_at_init():
@@ -850,7 +850,7 @@ def test_complex_full():
     assert nd.coordset[1] == nds.coordset[0]
 
 
-def test_nddataset_from_api():
+def test_nddataset_from_scp():
     pass
 
 

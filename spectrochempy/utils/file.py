@@ -8,15 +8,17 @@
 # ============================================================================
 
 import os
+import sys
 import io
 import json
 from pkgutil import walk_packages
 from numpy.lib.format import read_array
 from numpy.compat import asstr
+from traitlets import import_item
 
 __all__ = [
 
-           'list_packages',
+           'list_packages', 'generate_api',
 
            'make_zipfile', 'ScpFile',
 
@@ -25,7 +27,7 @@ __all__ = [
            ]
 
 # ============================================================================
-# PACKAGE UTILITIES
+# PACKAGE and API UTILITIES
 # ============================================================================
 
 # ............................................................................
@@ -46,6 +48,42 @@ def list_packages(package):
 
     return names
 
+
+# ............................................................................
+def generate_api(api_path):
+
+    # name of the package
+    dirname, name = os.path.split(os.path.split(api_path)[0])
+    if not dirname.endswith('spectrochempy'):
+        dirname, _name = os.path.split(dirname)
+        name = _name+'.'+name
+    pkgs = sys.modules['spectrochempy.%s' % name]
+    api = sys.modules['spectrochempy.%s.api' % name]
+
+    pkgs = list_packages(pkgs)
+
+    __all__ = []
+
+    for pkg in pkgs:
+        if pkg.endswith('api'):
+            continue
+        pkg = import_item(pkg)
+        if not hasattr(pkg, '__all__'):
+            continue
+        a = getattr(pkg, '__all__',[])
+        dmethods = getattr(pkg, '__dataset_methods__', [])
+        __all__ += a
+        for item in a:
+
+            # set general method for the current package API
+            setattr(api, item, getattr(pkg, item))
+
+            # some  methods are class method of NDDatasets
+            if item in dmethods:
+                from spectrochempy.dataset.nddataset import NDDataset
+                setattr(NDDataset, item, getattr(pkg, item))
+
+    return __all__
 
 # ============================================================================
 # ZIP UTILITIES

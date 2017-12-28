@@ -10,8 +10,11 @@
 """
 This module implements the |NDMath| class.
 
-
 """
+
+__all__ = ['NDMath', ]
+
+__dataset_methods__ = []
 
 # =============================================================================
 # Standard python imports
@@ -33,15 +36,8 @@ from spectrochempy.units.units import Quantity
 from spectrochempy.dataset.ndarray import NDArray
 from spectrochempy.utils import (interleave, interleaved2complex, getdocfrom,
                                  docstrings)
-from spectrochempy.application import app
+from spectrochempy.application import log
 
-log = app.log
-
-# =============================================================================
-# Constants
-# =============================================================================
-
-__all__ = ['NDMath', ]
 
 # =============================================================================
 # utility
@@ -76,7 +72,7 @@ class NDMath(object):
     Examples
     --------
 
-    >>> from spectrochempy.api import *
+    >>> from spectrochempy.scp import *
     >>> dataset = NDDataset.load('mydataset.scp')
     >>> dataset             #doctest: +ELLIPSIS
     NDDataset([[    2.06,...,     1.24]])

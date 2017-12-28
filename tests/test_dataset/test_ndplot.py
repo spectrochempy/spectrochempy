@@ -7,7 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-from spectrochempy.api import show, preferences, INFO
+from spectrochempy.scp import show, preferences, INFO
 
 preferences.log_level = INFO
 

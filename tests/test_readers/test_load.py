@@ -10,7 +10,7 @@
 
 
 
-from spectrochempy.api import NDDataset, preferences
+from spectrochempy.scp import NDDataset, preferences
 
 from tests.utils import assert_approx_equal
 import os

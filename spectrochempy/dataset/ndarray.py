@@ -11,6 +11,9 @@
 This module implements the base |NDArray| class.
 
 """
+
+__all__ = ['NDArray']
+
 # =============================================================================
 # standard imports
 # =============================================================================
@@ -30,7 +33,7 @@ from pandas.core.generic import NDFrame, Index
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, ur, Quantity
 from spectrochempy.application import log
-from spectrochempy.utils import (EPSILON, StdDev, is_sequence,
+from spectrochempy.utils import (EPSILON, INPLACE, StdDev, is_sequence,
                                  numpyprintoptions, interleaved2complex,
                                  interleave, SpectroChemPyWarning, docstrings,
                                  make_func_from)
@@ -45,15 +48,6 @@ from spectrochempy.extern.uncertainties import unumpy as unp
 # local imports
 # =============================================================================
 # from spectrochempy.application import app
-
-# =============================================================================
-# Constants
-# =============================================================================
-
-__all__ = ['NDArray', 'masked', 'nomask', 'EPSILON', 'INPLACE']
-
-INPLACE = "INPLACE"
-"Flag used to specify inplace slicing"
 
 # =============================================================================
 # Some initializations
@@ -192,9 +186,9 @@ class NDArray(HasTraits):
         --------
         Empty initialization
 
-        >>> from spectrochempy.api import NDArray # doctest: +ELLIPSIS
+        >>> from spectrochempy import scp # doctest: +ELLIPSIS
         SpectroChemPy's API ...
-        >>> ndd = NDArray()
+        >>> ndd = scp.NDArray()
 
         Initialization with a ndarray
 
@@ -1945,7 +1939,7 @@ class NDArray(HasTraits):
         if isinstance(key, np.ndarray) and key.dtype == np.bool:
             # this is a boolean selection
             # we can proceed directly
-            return key
+            return key, key  # TODO: jsut check with complex!!!
 
         # we need to have a list of slice for each argument
         # or a single slice acting on the axis=0

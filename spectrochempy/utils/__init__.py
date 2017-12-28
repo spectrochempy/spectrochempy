@@ -11,9 +11,18 @@
 Package containing various utilities classes and functions.
 
 """
+# some useful constants
+# ----------------------------------------------------------------------------
 import numpy as np
-
 EPSILON = epsilon = np.finfo(float).eps
+"Minimum value before considering it as zero value"
+
+INPLACE = "INPLACE"
+"Flag used to specify inplace slicing"
+
+# masked arrays
+# ----------------------------------------------------------------------------
+from numpy.ma.core import masked, nomask
 
 
 from .exceptions import *

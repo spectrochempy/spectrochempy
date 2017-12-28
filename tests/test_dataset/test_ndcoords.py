@@ -18,7 +18,7 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy.api import *
+from spectrochempy.scp import *
 
 from spectrochempy.utils.traittypes import Range
 

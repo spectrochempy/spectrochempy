@@ -12,6 +12,9 @@ This module implements three classes |Coord|, |CoordSet| and |CoordRange|.
 
 """
 
+__all__ = ['Coord', 'CoordSet', 'CoordRange']
+
+
 # ----------------------------------------------------------------------------
 # standard imports
 # ----------------------------------------------------------------------------
@@ -32,19 +35,12 @@ from traitlets import (HasTraits, List, Bool, Unicode, default, Instance)
 # localimports
 # ----------------------------------------------------------------------------
 
-from spectrochempy.dataset.ndarray import NDArray
-from spectrochempy.application import log
-from spectrochempy.dataset.ndmath import NDMath
-from spectrochempy.utils import (set_operators, is_number, is_sequence,
-                                 numpyprintoptions, docstrings,
-                                 SpectroChemPyWarning)
-from spectrochempy.utils.traittypes import Range
-
-# ----------------------------------------------------------------------------
-# constants
-# ----------------------------------------------------------------------------
-
-__all__ = ['Coord', 'CoordSet', 'CoordRange']
+from .ndarray import NDArray
+from ..application import log
+from .ndmath import NDMath
+from ..utils import (set_operators, is_number, is_sequence,
+                    numpyprintoptions, docstrings, SpectroChemPyWarning)
+from ..utils.traittypes import Range
 
 # ============================================================================
 # set numpy print options
@@ -97,10 +93,10 @@ class Coord(NDMath, NDArray):
 
         Examples
         --------
-        We first import the object from the main API:
+        We first import the object from the main scp:
 
-        >>> from spectrochempy.api import Coord # doctest: +ELLIPSIS
-        SpectroChemPy's API - v.0.1...
+        >>> from spectrochempy.scp import Coord # doctest: +ELLIPSIS
+        SpectroChemPy's scp - v.0.1...
 
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
@@ -269,7 +265,7 @@ class Coord(NDMath, NDArray):
              "<td style='text-align:left'>{}</td><tr>\n"
 
         out = "<table style='width:100%'>\n"
-        out += tr.format("Title", self.title.capitalize())
+        out += tr.format("Title", self.title.cscptalize())
         if self.data is not None:
             data_str = super(Coord, self)._repr_html_()
             out += tr.format("Data", data_str)
@@ -806,7 +802,7 @@ class CoordRange(HasTraits):
 
     @staticmethod
     def _cleanranges(ranges):
-        """Sort and merge overlaping ranges
+        """Sort and merge overlscpng ranges
 
         It works as follows::
 

@@ -13,47 +13,38 @@ This module define the `application` on which the API rely.
 
 """
 
-# ============================================================================
-# standard library import
-# ============================================================================
+__all__ = []
+
+
+# ----------------------------------------------------------------------------
+# standard imports
+# ----------------------------------------------------------------------------
 
 import os
 import glob
 import sys
 import logging
-import warnings
 import subprocess
 import datetime
 import warnings
 
-# ============================================================================
+# ----------------------------------------------------------------------------
 # third party imports
-# ============================================================================
+# ----------------------------------------------------------------------------
 
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
 from traitlets.config.configurable import Configurable
-from traitlets.config.application import Application, \
-    catch_config_error
-from traitlets import (Instance, Bool, Unicode, List, Dict, default,
-                          observe,
-                       import_item, HasTraits)
-
+from traitlets.config.application import Application, catch_config_error
+from traitlets import (Instance, Bool, Unicode, List, Dict, default, observe,
+                       import_item, HasTraits, )
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-
 from IPython import get_ipython
-from IPython.core.magic import (Magics, magics_class, line_magic, cell_magic,
-                                line_cell_magic)
+from IPython.core.magic import (Magics, magics_class, line_cell_magic)
 from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
-
-# ============================================================================
-# constants
-# ============================================================================
-
-__all__ = []
 
 
 # Log levels
@@ -233,7 +224,7 @@ class SpectroChemPyMagics(Magics):
         if cell:
             contents += "\n" + cell
 
-        from spectrochempy.scripts.script import Script
+        from spectrochempy.scp.scripts.script import Script
         script = Script(name, content=contents)
         projobj[name]=script
 
@@ -339,9 +330,9 @@ class Preferences(Configurable) :
     Examples
     --------
 
-    >>> from spectrochempy import api # doctest: +ELLIPSIS
+    >>> from spectrochempy import scp # doctest: +ELLIPSIS
     SpectroChemPy's API...
-    >>> delimiter = api.preferences.csv_delimiter
+    >>> delimiter = scp.preferences.csv_delimiter
 
 
     """
@@ -406,12 +397,10 @@ class SpectroChemPy(Application):
     """
     from spectrochempy.utils import docstrings
 
-    from spectrochempy.projects.projectpreferences import ProjectPreferences
-    from spectrochempy.plotters.plotterpreferences import PlotterPreferences
-    from spectrochempy.readers.readerpreferences import ReaderPreferences
-    from spectrochempy.writers.writerpreferences import WriterPreferences
-    from spectrochempy.processors.processorpreferences import \
-        ProcessorPreferences
+    from spectrochempy.scp.projects.projectpreferences import \
+        ProjectPreferences
+    from spectrochempy.scp.plotters.plotterpreferences import \
+        PlotterPreferences
 
     # ------------------------------------------------------------------------
     # initialization
@@ -746,16 +735,16 @@ class SpectroChemPy(Application):
     # ........................................................................
     def _init_project_preferences(self):
 
-        from spectrochempy.projects.projectpreferences \
-            import ProjectPreferences
+        from spectrochempy.scp.projects.projectpreferences import \
+            ProjectPreferences
 
         self.project_preferences = ProjectPreferences(config=self.config)
 
     # ........................................................................
     def _init_plotter_preferences(self):
 
-        from spectrochempy.plotters.plotterpreferences \
-            import PlotterPreferences
+        from spectrochempy.scp.plotters.plotterpreferences import \
+            PlotterPreferences
         from spectrochempy.utils import install_styles
 
         # Pass config to other classes for them to inherit the config.
@@ -766,17 +755,19 @@ class SpectroChemPy(Application):
 
     def _init_reader_preferences(self):
 
-        from spectrochempy.readers.readerpreferences import ReaderPreferences
+        from spectrochempy.scp.readers.readerpreferences import \
+            ReaderPreferences
         self.reader_preferences = ReaderPreferences(config=self.config)
 
     def _init_writer_preferences(self):
 
-        from spectrochempy.writers.writerpreferences import WriterPreferences
+        from spectrochempy.scp.writers.writerpreferences import \
+            WriterPreferences
         self.writer_preferences = WriterPreferences(config=self.config)
 
     def _init_processor_preferences(self):
 
-        from spectrochempy.processors.processorpreferences import \
+        from spectrochempy.scp.processors.processorpreferences import \
             ProcessorPreferences
         self.processor_preferences = ProcessorPreferences(config=self.config)
 
@@ -858,7 +849,7 @@ class SpectroChemPy(Application):
                                              logging.getLevelName(change.new)))
 
 #Main application object that should not be called directly by a end user.
-#It is advisable to use the main `api` import to access all public methods of
+#It is advisable to use the main `scp` import to access all public methods of
 #this object.
 app = SpectroChemPy()
 
@@ -869,6 +860,7 @@ project_preferences = app.project_preferences
 processor_preferences = app.processor_preferences
 reader_preferences = app.reader_preferences
 writer_preferences = app.writer_preferences
+do_not_block = app.do_not_block
 
 """The main logger of the |scpy| application"""
 

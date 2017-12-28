@@ -7,12 +7,15 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
 """
-This module define the class :class:`NDIO` in which input/output standard
+This module define the class |NDIO| in which input/output standard
 methods for a |NDDataset| are defined.
 
 """
+
+__all__ = ['NDIO']
+
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------
 # Python imports
@@ -53,13 +56,7 @@ plotter_preferences = app.plotter_preferences
 log = app.log
 preferences = app.preferences
 
-__all__ = ['NDIO',
 
-           'load',
-           'read',
-           'write',
-
-           ]
 
 # ==============================================================================
 # Class NDIO to handle I/O of datasets
@@ -119,8 +116,8 @@ class NDIO(HasTraits):
         ---------
         Read some experimental data and then save in our proprietary format **scp**
 
-        >>> from spectrochempy.api import NDDataset #doctest: +ELLIPSIS
-        SpectroChemPy's API...
+        >>> from spectrochempy.scp import NDDataset #doctest: +ELLIPSIS
+        SpectroChemPy's scp...
         >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
         >>> mydataset.save('mydataset.scp')
 
@@ -265,7 +262,7 @@ class NDIO(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy.api import NDDataset
+        >>> from spectrochempy.scp import NDDataset
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -274,7 +271,7 @@ class NDIO(HasTraits):
         by default, directory for saving is the `data`.
         So the same thing can be done simply by:
 
-        >>> from spectrochempy.api import NDDataset
+        >>> from spectrochempy.scp import NDDataset
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -464,11 +461,16 @@ class NDIO(HasTraits):
                                  'for protocol `{}` was not found!'.format(
                     protocol))
 
+# make some methods accessible from the main scp API
+# ----------------------------------------------------------------------------
 
 load = NDIO.load
 read = NDIO.read
 write = NDIO.write
 
+__all__ += ['load', 'read', 'write']
+
+# ============================================================================
 if __name__ == '__main__':
 
     pass

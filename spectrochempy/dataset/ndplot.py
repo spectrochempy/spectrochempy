@@ -13,64 +13,40 @@ methods for a |NDDataset| are defined.
 
 """
 
-# Python and third parties imports
-# ----------------------------------
-
-import sys
-import warnings
-from cycler import cycler
-
-import matplotlib as mpl
-
-from matplotlib import pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-from traitlets import Dict, HasTraits, Instance
-
-# local import
-# ------------
-from spectrochempy.utils import (is_sequence,
-                                 SpectroChemPyWarning,
-                                 SpectroChemPyDeprecationWarning)
-from spectrochempy.plotters.utils import cmyk2rgb
-from spectrochempy.application import app
-from spectrochempy.utils import docstrings
-from spectrochempy.plotters.plot1d import plot_1D
-from spectrochempy.plotters.plot2d import plot_2D
-from spectrochempy.plotters.plot3d import plot_3D
-
-# Constants
-# ---------
-
 __all__ = ['NDPlot',
-
            'figure',
            'show',
            'plot',
 
-           # 'interactive_masks',
-           '_set_figure_style',
-
            # styles and colors
+           '_set_figure_style',
            'available_styles',
-           'NBlack', 'NRed', 'NBlue', 'NGreen',
-
            ]
-# For color blind people, it is safe to use only 4 colors in graphs:
-# see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
-#   Black CMYK=0,0,0,0
-#   Red CMYK= 0, 77, 100, 0 %
-#   Blue CMYK= 100, 30, 0, 0 %
-#   Green CMYK= 85, 0, 60, 10 %
-NBlack = (0, 0, 0)
-NRed = cmyk2rgb(0, 77, 100, 0)
-NBlue = cmyk2rgb(100, 30, 0, 0)
-NGreen = cmyk2rgb(85, 0, 60, 10)
 
 
-plotter_preferences = app.plotter_preferences
-log = app.log
-preferences = app.preferences
+# Python and third parties imports
+# ----------------------------------
+
+import warnings
+
+from cycler import cycler
+import matplotlib as mpl
+from matplotlib import pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from traitlets import Dict, HasTraits, Instance
+
+# local import
+# ------------
+from spectrochempy.utils import (is_sequence, SpectroChemPyDeprecationWarning,
+                                 docstrings, NBlack, NBlue, NGreen, NRed)
+from spectrochempy.application import (plotter_preferences, preferences, log,
+                                       do_not_block)
+
+from spectrochempy.scp.plotters.plot1d import plot_1D
+from spectrochempy.scp.plotters.plot3d import plot_3D
+from spectrochempy.scp.plotters.plot2d import plot_2D
+
+
 # =============================================================================
 # Class NDPlot to handle plotting of datasets
 # =============================================================================
@@ -559,7 +535,7 @@ def show():
     Method to force the `matplotlib` figure display
 
     """
-    if not app.do_not_block:
+    if not do_not_block:
 
         if _curfig(True):  # True to avoid opening a new one
             plt.show(block=True)
@@ -628,7 +604,7 @@ def available_styles():
 
 
 # .............................................................................
-plot = NDPlot.plot  # make plot accessible directly from the API
+plot = NDPlot.plot  # make plot accessible directly from the scp API
 
 # =============================================================================
 if __name__ == '__main__':

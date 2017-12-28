@@ -7,10 +7,6 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-from spectrochempy.api import *
-from spectrochempy.utils import SpectroChemPyWarning
-
-import pytest
 import os
 
 from tests.utils import assert_array_equal
@@ -122,7 +118,7 @@ def test_project(ds1, ds2, dsm):
     script_source = 'print("samples contained in the project are: ' \
                     '%s"%proj.projects_names)'
 
-    from spectrochempy.scripts.script import Script
+    from spectrochempy.scp.scripts import Script
 
     proj['print_info'] = Script('print_info', script_source)
 

@@ -7,7 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-from spectrochempy.api import *
+from spectrochempy.scp import *
 
 import os
 import pytest
