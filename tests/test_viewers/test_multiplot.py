@@ -12,7 +12,7 @@ from spectrochempy import *
 def test_multiplot():
 
     source = NDDataset.read_omnic(
-         os.path.join(preferences.datadir, 'irdata', 'NH4Y-activation.SPG'))[0:20]
+         os.path.join(datadir.path, 'irdata', 'NH4Y-activation.SPG'))[0:20]
 
     sources=[source, source*1.1, source*1.2, source*1.3]
     labels = ['sample {}'.format(label) for label in

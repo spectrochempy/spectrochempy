@@ -45,7 +45,7 @@ from .ndcoords import Coord, CoordSet
 from ..utils import SpectroChemPyWarning
 from ..utils.meta import Meta
 from ..units import Unit, Quantity, Measurement
-from ..application import plotter_preferences, log, preferences
+from ..application import plotter_preferences, log, preferences, datadir
 
 
 # ==============================================================================
@@ -92,7 +92,7 @@ class NDIO(HasTraits):
     # Generic save function
     # --------------------------------------------------------------------------
 
-    def save(self, filename='', directory=preferences.datadir,
+    def save(self, filename='', directory=datadir,
              **kwargs
              ):
         """
@@ -102,7 +102,7 @@ class NDIO(HasTraits):
         ----------
         filename : str
             The filename of the file where to save the current dataset
-        directory : str, optional, default:`preferences.datadir`
+        directory : str, optional, default:`datadir.path`
             If specified, the given `directory` and the `filename` will be
             appended.
 
@@ -126,7 +126,7 @@ class NDIO(HasTraits):
 
         """
 
-        directory = kwargs.get("directory", preferences.datadir)
+        directory = kwargs.get("directory", datadir.path)
 
         if not filename:
             # the current file name or default filename (id)
@@ -236,7 +236,7 @@ class NDIO(HasTraits):
     def load(cls,
              fid='',
              protocol='scp',
-             directory=preferences.datadir,
+             directory=datadir,
              **kwargs
              ):
         """Load a dataset object saved as a pickle file ( '.scp' file).
@@ -250,7 +250,7 @@ class NDIO(HasTraits):
             The name of the file to read (or a file object).
         protocol : str, optional, default:'scp'
             The default type for saving.
-        directory : str, optional, default:`preferences.datadir`
+        directory : str, optional, default:`datadir.path`
             The directory from where to load the file.
         kwargs : optional keyword parameters.
             Any additional keyword(s) to pass to the actual reader.
@@ -294,7 +294,7 @@ class NDIO(HasTraits):
             # this is a filename
 
             filename = fid
-            directory = kwargs.get("directory", preferences.datadir)
+            directory = kwargs.get("directory", datadir.path)
             if not filename:
                 raise IOError('no filename provided!')
             else:

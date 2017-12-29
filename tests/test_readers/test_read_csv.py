@@ -27,7 +27,7 @@ def test_read_csv():
     A.plot_stack()
 
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
-                           directory=preferences.datadir,
+                           directory=datadir.path,
                            origin='tga')
     assert B.shape == (3446,)
     print(B)

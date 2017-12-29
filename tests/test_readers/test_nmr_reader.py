@@ -18,7 +18,7 @@ import pytest
 
 
 def test_nmr():
-    path = os.path.join(preferences.datadir, 'nmrdata','bruker', 'tests',
+    path = os.path.join(datadir.path, 'nmrdata','bruker', 'tests',
                         'nmr','bruker_1d')
 
     # load the data in a new dataset

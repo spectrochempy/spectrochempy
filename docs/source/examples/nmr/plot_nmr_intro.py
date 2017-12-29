@@ -19,7 +19,7 @@ import spectrochempy as scp
 ##########################################################
 # 1D dataset getting function
 # ---------------------------
-datadir = scp.preferences.datadir
+datadir = scp.datadir.path
 
 def get_source1D():
     source1D = scp.NDDataset()

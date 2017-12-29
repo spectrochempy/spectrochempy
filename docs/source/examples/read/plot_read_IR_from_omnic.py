@@ -13,7 +13,7 @@ import spectrochempy as scp
 ###################################################################
 # Loading and stacked plot of the original
 
-datadir = scp.preferences.datadir
+datadir = scp.datadir.path
 
 dataset = scp.NDDataset.read_omnic(os.path.join(datadir,
                                            'irdata', 'NH4Y-activation.SPG'))

@@ -137,7 +137,6 @@ class Script(HasTraits):
         try:
             exec(code, globals(), localvars)
         except NameError as e:
-            print('loooooog')
             log.error(e + '. pass the variable `locals()` : this may solve '
                           'this problem! ')
 

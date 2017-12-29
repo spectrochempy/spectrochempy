@@ -358,7 +358,7 @@ class NDMath(object):
 
         # this might be a limit of the program
         # but we will consider using uncertainty only if
-        # the mai object has uncertainty only
+        # the main object has uncertainty only
         isuncertain = False
 
         objcomplex = []  # to keep track of the complex nature of the obj

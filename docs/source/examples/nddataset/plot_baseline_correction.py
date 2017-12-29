@@ -26,7 +26,7 @@ import os
 ###############################################################################
 # Load data
 
-nd = scp.NDDataset.read_omnic(os.path.join(scp.preferences.datadir,
+nd = scp.NDDataset.read_omnic(os.path.join(scp.datadir.path,
                                            'irdata', 'NH4Y-activation.SPG'))
 
 ###############################################################################

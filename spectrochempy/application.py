@@ -243,13 +243,14 @@ class SpectroChemPyMagics(Magics):
     #     return args
 
 # ============================================================================
-# _Data class
+# DataDir class
 # ============================================================================
 
-class _Data(HasTraits):
-    #private class used to determine the path to the testdata directory.
+class DataDir(Configurable):
+    """ A configurable class used to determine the path to the testdata
+    directory. """
 
-    data = Unicode()
+    path = Unicode().tag(config=True)
     "Directory where to look for data"
 
     # ------------------------------------------------------------------------
@@ -265,7 +266,7 @@ class _Data(HasTraits):
         listing : str
 
         """
-        s = os.path.basename(self.data) + "\n"
+        s = os.path.basename(self.path) + "\n"
 
         def _listdir(s, initial, ns):
             ns += 1
@@ -278,7 +279,7 @@ class _Data(HasTraits):
                     s = _listdir(s, f, ns)
             return s
 
-        return _listdir(s, self.data, -1)
+        return _listdir(s, self.path, -1)
 
     # ------------------------------------------------------------------------
     # special methods
@@ -291,10 +292,10 @@ class _Data(HasTraits):
     # initialization
     # ------------------------------------------------------------------------
 
-    @default('data')
-    def _get_data_default(self):
+    @default('path')
+    def _get_path_default(self):
         # the spectra path in package data
-        return self._get_pkg_data_dir('testdata', 'scp_data')
+        return self._get_pkg_datadir_path('testdata', 'scp_data')
 
 
     # ------------------------------------------------------------------------
@@ -305,17 +306,17 @@ class _Data(HasTraits):
         # _repr_html is needed to output in notebooks
         return self.listing().replace('\n', '<br/>').replace(" ", "&nbsp;")
 
-    def _get_pkg_data_dir(self, data_name, package=None) :
+    def _get_pkg_datadir_path(self, data_name, package=None) :
 
         data_name = os.path.normpath(data_name)
 
-        datadir = os.path.dirname(import_item(package).__file__)
-        datadir = os.path.join(datadir, data_name)
+        path = os.path.dirname(import_item(package).__file__)
+        path = os.path.join(path, data_name)
 
-        if not os.path.isdir(datadir) :
-            return os.path.dirname(datadir)
+        if not os.path.isdir(path) :
+            return os.path.dirname(path)
 
-        return datadir
+        return path
 
 
 # ============================================================================
@@ -339,6 +340,7 @@ class Preferences(Configurable) :
 
     def __init__(self, **kwargs):
         super(Preferences, self).__init__(**kwargs)
+
 
     # various settings
     # ----------------
@@ -370,25 +372,6 @@ class Preferences(Configurable) :
         self.parent.log_level = value
 
 
-    # default data directory
-    # ----------------------
-    _datadir = Instance(_Data)
-
-    @default('_datadir')
-    def _get_datadir_default(self):
-        return _Data()
-
-    @property
-    def list_datadir(self):
-        return self._datadir
-
-    datadir = Unicode(help="Default data directory").tag(config=True)
-
-    @default('datadir')
-    def _get_datadir(self):
-        return self._datadir.data
-
-
 class SpectroChemPy(Application):
     """
     This class SpectroChemPy is the main class, containing most of the setup,
@@ -417,6 +400,7 @@ class SpectroChemPy(Application):
     # ------------------------------------------------------------------------
     # applications attributes
     # ------------------------------------------------------------------------
+
     running = Bool(False)
     "Running status of the |scpy| application"
 
@@ -522,8 +506,8 @@ class SpectroChemPy(Application):
 
     aliases = Dict(
         dict(test='SpectroChemPy.test',
-             p='SpectroChemPy.preferences.startup_project',
-             f='SpectroChemPy.preferences.startup_filename')
+             p='Preferences.startup_project',
+             f='Preferences.startup_filename')
     )
 
     flags = Dict(dict(
@@ -536,6 +520,7 @@ class SpectroChemPy(Application):
     classes = List([Preferences,
                     ProjectPreferences,
                     PlotterPreferences,
+                    DataDir,
                     ])
 
     # ------------------------------------------------------------------------
@@ -579,10 +564,11 @@ class SpectroChemPy(Application):
             config_file = os.path.join(self.config_dir, self.config_file_name)
             self.load_config_file(config_file)
 
-        # add other preferecnes
+        # add other preferences
         # ---------------------------------------------------------------------
 
         self._init_preferences()
+        self._init_datadir()
         self._init_plotter_preferences()
         self._init_project_preferences()
         self._init_processor_preferences()
@@ -733,6 +719,11 @@ class SpectroChemPy(Application):
         self.preferences = Preferences(config=self.config, parent=self)
 
     # ........................................................................
+    def _init_datadir(self):
+
+        self.datadir = DataDir(config=self.config)
+
+    # ........................................................................
     def _init_project_preferences(self):
 
         from spectrochempy.core.projects.projectpreferences import \
@@ -861,6 +852,7 @@ processor_preferences = app.processor_preferences
 reader_preferences = app.reader_preferences
 writer_preferences = app.writer_preferences
 do_not_block = app.do_not_block
+datadir = app.datadir
 
 """The main logger of the |scpy| application"""
 

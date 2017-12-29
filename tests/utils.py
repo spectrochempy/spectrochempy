@@ -49,7 +49,7 @@ preferences = preferences()
 
 def datadir():
     from spectrochempy.application import app
-    return app.preferences.datadir
+    return app.datadir.path
 datadir = datadir()
 
 
@@ -353,7 +353,7 @@ def image_comparison(reference=None,
     reference : list of image filename for the references
 
         List the image filenames of the reference figures
-        (located in ``<preferences.datadir>/figures``) which correspond in
+        (located in ``<datadir.path>/figures``) which correspond in
         the same order to
         the various figures created in the decorated fonction. if
         these files doesn't exist an error is generated, except if the

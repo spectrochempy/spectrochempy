@@ -18,7 +18,7 @@ def test_1D():
 
 
     source = NDDataset.read_omnic(
-            os.path.join(preferences.datadir, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(datadir.path, 'irdata', 'NH4Y-activation.SPG'))
 
 
     # plot generic

@@ -35,7 +35,7 @@ import numpy as np
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.concatenate import stack
-from spectrochempy.application import log, preferences
+from spectrochempy.application import log, datadir, preferences
 from spectrochempy.utils import (readfilename, unzip, is_sequence,
                                  SpectroChemPyWarning)
 
@@ -139,7 +139,7 @@ def _read(dataset, filename='',
 
         dataset = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", preferences.datadir)
+    directory = kwargs.get("directory", datadir.path)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 

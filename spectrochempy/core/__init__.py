@@ -84,6 +84,7 @@ from spectrochempy.application import (log,
                                        INFO,
                                        ####
                                        app as APPLICATION,
+                                       datadir,
                                        )
 
 __all__ += [
@@ -100,6 +101,7 @@ __all__ += [
     'writer_preferences',
     'processor_preferences',
     'preferences',
+    'datadir',
 
     ### Info
     'copyright',
@@ -111,6 +113,21 @@ __all__ += [
     'authors',
     'contributors'
 ]
+
+# START THE APPLICATION ======================================================
+
+_debug = False
+_reset_config = False
+
+
+_started = APPLICATION.start(debug=_debug, reset_config=_reset_config)
+
+# load the default style
+plt.style.use(APPLICATION.plotter_preferences.style)
+
+log.info("API activated "
+         if _started else "API was not started!")
+
 
 # IPython methods
 # ----------------------------------------------------------------------------
@@ -249,20 +266,6 @@ def APIref():
 APIref = APIref()
 
 __all__.append('APIref')
-
-# START THE APPLICATION ======================================================
-
-_debug = False
-_reset_config = False
-
-
-_started = APPLICATION.start(debug=_debug, reset_config=_reset_config)
-
-# load the default style
-plt.style.use(APPLICATION.plotter_preferences.style)
-
-log.info("API activated "
-         if _started else "API was not started!")
 
 
 # ============================================================================

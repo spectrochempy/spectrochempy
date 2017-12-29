@@ -18,7 +18,7 @@ import spectrochempy as scp
 ############################################################
 # Upload and preprocess a dataset
 
-datadir = scp.preferences.datadir
+datadir = scp.datadir.path
 dataset = scp.read_omnic(os.path.join(datadir, 'irdata',
                                       'NH4Y-activation.SPG'))
 # columns masking

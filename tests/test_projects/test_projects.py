@@ -19,9 +19,9 @@ def test_save_and_load_file_with_nofilename(IR_source_2D):
     A.save()
 
     # no directory for saving passed ... it must be in data
-    path = os.path.join(preferences.datadir, A.filename )
+    path = os.path.join(datadir.path, A.filename )
     assert os.path.exists(path)
-    assert A.directory == preferences.datadir
+    assert A.directory == datadir.path
 
     B = NDDataset.load(path)
     assert B.description == A.description
@@ -29,7 +29,7 @@ def test_save_and_load_file_with_nofilename(IR_source_2D):
 
     # the filename should be stored in the object just loaded
     assert B.filename == A.filename
-    assert B.directory == preferences.datadir
+    assert B.directory == datadir.path
 
     os.remove(path)
 

@@ -13,23 +13,26 @@ terminal command line
 """
 import sys
 import os
-import spectrochempy as scp
+import spectrochempy.core as sc
+from spectrochempy.application import app, WARNING
 
-log = scp.log
-preferences = scp.preferences
+log = sc.log
+preferences = sc.preferences
 
 def main():
-    preferences.log_level = scp.DEBUG
-    fname = scp.preferences.startup_filename
+    preferences.log_level = WARNING
+    fname = sc.preferences.startup_filename
     log.info("Loading filename: '%s'"%fname)
     if os.path.exists(fname):
-        ds = scp.nddataset.read(fname)
-        print(ds)
+        ds = sc.nddataset.read(fname)
+        #ds.print()
     else:
-        log.error("'%s' file doesn't exists"%fname)
-        print(scp.app.print_help())
+        log.info("'%s' file doesn't exists"%fname)
+        app.print_help()
+
 
 # =============================================================================
 if __name__ == '__main__':
 
     main()
+    print(app.datadir)

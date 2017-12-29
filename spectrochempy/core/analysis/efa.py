@@ -49,17 +49,20 @@ class EFA(HasTraits):
     befa = Instance(NDDataset)
     """|NDDataset| - Eigenvalues for the backward analysis"""
 
-    docstrings.keep_params('SVD.parameters', 'X')
+    docstrings.keep_params('SVD.parameters', 'dataset')
+
     @docstrings.dedent
-    def __init__(self, X):
+    def __init__(self, dataset):
         """
         Parameters
         ----------
-        %(SVD.parameters.X)s
+        %(SVD.parameters.dataset)s
 
         """
         # check if we have the correct input
         # ----------------------------------
+
+        X = dataset
 
         if isinstance(X, NDDataset):
             # As seen below, we cannot performs SVD on the masked array

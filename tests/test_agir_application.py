@@ -20,8 +20,8 @@ def samples():
                'B350':{'label':'$\mathrm{M_B}\,(623\,K)$'}}
 
     for key, sample in _samples.items():
-        # our data are in our test `preferences.datadir` directory.
-        basename = os.path.join(preferences.datadir,
+        # our data are in our test `datadir.path` directory.
+        basename = os.path.join(datadir.path,
                                 'agirdata/{}/FTIR/FTIR'.format(key))
         if os.path.exists(basename+'.scp'):
             #check if the scp file have already been saved
@@ -35,7 +35,7 @@ def samples():
             sample['IR'].save(basename + '.scp')
 
     for key, sample in _samples.items():
-        basename = os.path.join(preferences.datadir,
+        basename = os.path.join(datadir.path,
                                               'agirdata/{}/TGA/tg'.format(key))
         if os.path.exists(basename + '.scp'):
             # check if the scp file have already been saved

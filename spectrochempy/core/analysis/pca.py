@@ -75,6 +75,7 @@ class PCA(HasTraits):
     """|NDDataset| - Cumulative Explained Variances."""
 
     # ........................................................................
+    docstrings.keep_params('SVD.parameters', 'dataset')
 
     @docstrings.dedent
     def __init__(self, dataset,
