@@ -18,33 +18,30 @@ Code reference
 
 .. currentmodule:: spectrochempy
 
+.. automodule:: spectrochempy
+    :no-members:
+    :no-inherited-members:
+
 Packages
-++++++++
+~~~~~~~~
 
 .. autosummary::
-   :toctree: generated/
+   :toctree:
    :template: module.rst
 
-   spectrochempy.analysis
+   spectrochempy.core
    spectrochempy.databases
    spectrochempy.dataset
-   spectrochempy.fitting
-   spectrochempy.plotters
-   spectrochempy.processors
-   spectrochempy.projects
-   spectrochempy.readers
-   spectrochempy.scripts
-   spectrochempy.sphinxext
    spectrochempy.units
    spectrochempy.utils
-   spectrochempy.writers
 
 Modules
-+++++++
+~~~~~~~~~~
 
 .. autosummary::
-   :toctree: generated/
+   :toctree:
    :template: module.rst
 
    spectrochempy.application
+   spectrochempy.commands
 

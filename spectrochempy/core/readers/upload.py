@@ -81,15 +81,4 @@ NDDataset.upload_IRIS = upload_IRIS
 # =============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy import PCA
-
-    ds = upload_IRIS()
-    print (ds)
-    ds.plot_stack()
-
-    pca = PCA(ds, centered=True)
-    L, S = pca.transform()
-    L.plot_stack()
-    pca.screeplot()
-    pca.scoreplot(1,2, color_mapping='labels')
-    show()
+    pass

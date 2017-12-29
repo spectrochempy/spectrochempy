@@ -40,14 +40,17 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 # =============================================================================
 
-"""
-Main package
+# We intentionnaly DO NOT SET DOCSTRING, HERE... due to the way doc is
+# builded.
 
-During the initialization of this package, a `matplotlib` backend is set
-and some `IPython` configurations are made.
-
-
-"""
+# """
+# Main package
+#
+# During the initialization of this package, a `matplotlib` backend is set
+# and some `IPython` configurations are made.
+#
+#
+# """
 
 import sys
 import logging

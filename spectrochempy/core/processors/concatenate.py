@@ -23,18 +23,20 @@ from spectrochempy.extern.uncertainties import unumpy as unp
 
 
 def concatenate(*datasets, axis=None, **kwargs):
-    """Concatenation of |NDDataSet| objects along a given axis (by default the
-    fisrt)
+    """Concatenation of |NDDataset| objects along a given axis (by default the
+    first)
 
-    Any number of |NDDataSet| objects can be concatenated. For this operation
+    Any number of |NDDataset| objects can be concatenated. For this operation
     to be defined the following must be true:
 
-    #. all inputs must be valid dataset objects,
+    #. all inputs must be valid dataset objects;
     #. units of data and axis must be compatible (rescaling is applied
-       automatically if necessary)
-    #. concatenation is along the axis specified or the first one.
-
-    The remaining dimension sizes must match.
+       automatically if necessary);
+    #. concatenation is along the axis specified or the first one;
+    #. along the non-concatenated dimensions, any dataset (or array-like
+       objects) without axis coordinates will be concatenated silently
+       assuming compatible dimensions and units coordinates in those
+       dimensions, as far as the dimension sizes match.
 
     Parameters
     ----------
@@ -50,7 +52,7 @@ def concatenate(*datasets, axis=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.scp import * # doctest: +ELLIPSIS
+    >>> from spectrochempy import * # doctest: +ELLIPSIS
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
@@ -74,20 +76,20 @@ def concatenate(*datasets, axis=None, **kwargs):
     - ``out.title``        : title of the fist dataset
 
     - ``out.author``     : concatenation of dataset authors
-                            (each distinct author appear once)
+      (each distinct author appear once)
 
     - ``out.date``       : date of concatenation
 
     - ``out.moddate``    : date of concatenation
 
     - ``out.data``       : numpy.concatenate(a.data,b.data,c.data,...,
-    concatdim)
+      concatdim)
 
-    - ``out.label``      : dim 'concatdim' label sets are concatenated, and \
-                          label sets are created for all other dims
+    - ``out.label``      : dim 'concatdim' label sets are concatenated, and
+      label sets are created for all other dims
 
-    - ``out.axis``  : dim 'concatdim' axis sets are concatenated, and \
-                          axis sets are created for all other dims
+    - ``out.axis``  : dim 'concatdim' axis sets are concatenated, and
+      axis sets are created for all other dims
 
     - ``out.description``: concatenates all descriptions
 
@@ -102,7 +104,9 @@ def concatenate(*datasets, axis=None, **kwargs):
         if is_sequence(dataset):  # numpy style of passing args
             datasets = dataset
 
+        #
     units = datasets[0].units
+
 
     for dataset in datasets:
 
@@ -111,21 +115,32 @@ def concatenate(*datasets, axis=None, **kwargs):
                     "Only instance of NDDataset can be concatenated, not: " + type(
                             dataset).__name__)
 
+        # check if dimension are compatibles
         if dataset.ndim != datasets[0].ndim:
             raise ValueError(
                     "All datasets must have the same number of dims")
 
+        # check if units are compatibles
         if not dataset.is_units_compatible(datasets[0]):
             raise ValueError(
                     'units of the datasets to concatenate are not compatible')
         dataset.to(units)
 
+        # check if coordinates are compatible
         sax = datasets[0].coordset
-        for i, ax in enumerate(dataset.coordset):
-            if not ax.is_units_compatible(sax[i]):
-                raise ValueError(
-                        "units of the dataset's axis are not compatible")
-            ax.to(sax[i].units)
+        if sax is not None:
+            # we expect that coordinates are the same!
+            for i, ax in enumerate(dataset.coordset):
+                if not ax.is_units_compatible(sax[i]):
+                    raise ValueError(
+                            "units of the dataset's axis are not compatible")
+                ax.to(sax[i].units)
+        else:
+            # there is no coordinates on the first dataset.
+            # so we don't care.
+            # OK, but what about the case there is some dataset with
+            # coordinates and other withuot. #TODO: try to handle this case
+            pass
 
         shapes.append(dataset.shape)
 
@@ -148,15 +163,8 @@ def concatenate(*datasets, axis=None, **kwargs):
     sconcat = np.ma.concatenate(sss, axis=axis)
     data = unp.nominal_values(np.asarray(sconcat))
     mask = sconcat.mask  # np.array(self._mask[keys])
-    uncertainty = unp.std_devs(np.asarray(sconcat))
-
-    # data = np.concatenate(datasets, axis=axis)
-    # # for the concatenation to work we need to take the real _mask
-    # #twod = lambda x: x #if x.ndim>1 else np.array([x])
-    # mask = np.concatenate(tuple((dataset._mask
-    #                              for dataset in datasets)), axis=axis)
-    # uncertainty = np.concatenate(tuple((dataset._uncertainty)
-    #                                     for dataset in datasets), axis=axis)
+    uncertainty = unp.std_devs(np.asarray(sconcat))      #TODO: check first
+    # the exstence of uncertianty to accelerate this process
 
     # concatenate coordset
     stack = kwargs.get('force_stack', False)
@@ -200,9 +208,9 @@ def concatenate(*datasets, axis=None, **kwargs):
 
 def stack(*datasets):
     """
-    Stack of |NDDataSet| objects along the fisrt dimension
+    Stack of |NDDataset| objects along the fisrt dimension
 
-    Any number of |NDDataSet| objects can be stacked. For this operation
+    Any number of |NDDataset| objects can be stacked. For this operation
     to be defined the following must be true:
 
     #. all inputs must be valid dataset objects,
@@ -223,8 +231,7 @@ def stack(*datasets):
 
     Examples
     --------
-    >>> from spectrochempy.scp import * # doctest: +ELLIPSIS,
-    +NORMALIZE_WHITESPACE
+    >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
@@ -245,13 +252,4 @@ def stack(*datasets):
 
 if __name__ == '__main__':
 
-    from spectrochempy import *
-    A = NDDataset.load('spec.spg', protocol='omnic')
-    B = NDDataset.load('mydataset.scp')
-    C = concatenate( A, B, axis=0)
-    print(C)
-
-
-    A = NDDataset.load('spec.spg', protocol='omnic')
-    B = NDDataset.load('mydataset.scp')
-    C = A.concatenate(B, axis=0)
+    pass

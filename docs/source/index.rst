@@ -1,7 +1,7 @@
 .. _main:
 
 Welcome to the |scpy| documentation!
-###################################
+#####################################
 
 :release: |release|
 :version: |version| (|today|)
@@ -14,7 +14,7 @@ Introduction
 ============
 
 What is |scpy|?
---------------
+----------------
 
 |scpy| is a framework for processing, analysing and modelling **Spectro**\ scopic
 data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
@@ -72,9 +72,7 @@ Last updated Html documentation is always available there:
 
 * `http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
 
-Pdf documentation can also be downloaded there:
-
-* `spectrochempy.pdf <http://www-lcs.ensicaen.fr/cfnews/spectrochempy/pdf/spectrochempy.pdf>`_
+.. Pdf documentation can also be downloaded there:
 
 
 .. _main_user_documentation:
@@ -153,7 +151,7 @@ Changes in the last release
 .. _main_citing:
 
 Citing |scpy|
-============
+===============
 
 When using |scpy| for your own work, you are kindly requested to cite it this
 way::

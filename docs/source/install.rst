@@ -7,7 +7,7 @@ Installation Guide
 	:local:
 
 Where to Get |scpy|
-==================
+====================
 
 To get a working installation of |scpy| , on any platform (windows, mac OS X, Linux ... ),
 several solutions are (*or will be soon*) available.

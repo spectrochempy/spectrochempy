@@ -6,6 +6,16 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ============================================================================
+
+"""
+Package defining the *core* methods of the |scpy| API such as plotting,
+processing,
+analysis, etc...
+
+"""
+
+
+
 # ============================================================================
 # standard library import
 # ============================================================================
@@ -114,6 +124,11 @@ from IPython.lib.display import *
 from IPython.lib import display
 __all__.extend(display.__all__)
 
+"""
+This packages contains most of the core methods expose in the spectrochempy 
+API.
+
+"""
 # constants
 # ----------------------------------------------------------------------------
 from spectrochempy.utils import  show, masked, nomask, EPSILON, INPLACE

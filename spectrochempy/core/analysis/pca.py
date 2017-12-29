@@ -77,14 +77,14 @@ class PCA(HasTraits):
     # ........................................................................
 
     @docstrings.dedent
-    def __init__(self, X,
+    def __init__(self, dataset,
                  centered=True,
                  standardized=False,
                  scaled = False):
         """
         Parameters
         ----------
-        %(SVD.parameters.X)s
+        %(SVD.parameters.dataset)s
         centered : bool, optional, default:True
             If True the data are centered around the mean values:
             :math:`X' = X - mean(X)`.
@@ -111,7 +111,7 @@ class PCA(HasTraits):
 
         """
 
-        self._X = X
+        self._X = X = dataset
 
         Xsc = X.copy()
 
@@ -413,7 +413,7 @@ class PCA(HasTraits):
 
     def screeplot(self, n_pc=None, **kwargs):
         """
-        Scree plot of explained variance + cumulative variance by PCA.
+        Scree plot of explained variance \+ cumulative variance by PCA.
 
         Parameters
         ----------
@@ -553,12 +553,4 @@ class PCA(HasTraits):
 
 # ============================================================================
 if __name__ == '__main__':
-
-    from spectrochempy import *
-
-    dataset = upload_IRIS()
-    pca = PCA(dataset, centered=True)
-    LT, S = pca.transform(n_pc='auto')
-    _ = pca.screeplot()
-    _ = pca.scoreplot(1, 2, color_mapping='labels')
-    show()
+    pass

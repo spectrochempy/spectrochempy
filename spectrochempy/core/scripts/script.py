@@ -171,10 +171,4 @@ def run_all_scripts(project):
     """
 if __name__ == '__main__':
 
-    x = Script('name')
-    print(x.name)
-
-    try:
-        x = Script('0name')
-    except:
-        print('name not valid')
+    pass

@@ -72,7 +72,7 @@ class NDMath(object):
     Examples
     --------
 
-    >>> from spectrochempy.scp import *
+    >>> from spectrochempy import *
     >>> dataset = NDDataset.load('mydataset.scp')
     >>> dataset             #doctest: +ELLIPSIS
     NDDataset([[    2.06,...,     1.24]])
@@ -204,7 +204,7 @@ class NDMath(object):
 
     @getdocfrom(np.cumsum)
     def cumsum(self, *args, **kwargs):
-        """cumsum along axis"""
+        """umsum along axis"""
 
         new = self.copy()
         ma = np.cumsum(new._masked_data, *args, **kwargs)

@@ -107,3 +107,10 @@ spectrochempy/gui/preferences_BASE_20917.py
 spectrochempy/gui/preferences_LOCAL_20917.py
 spectrochempy/gui/preferences_REMOTE_20917.py
 spectrochempy.api.*.rst
+docs/source/dev/spectrochempy.application.rst
+docs/source/dev/spectrochempy.commands.rst
+docs/source/dev/spectrochempy.core.rst
+docs/source/dev/spectrochempy.databases.rst
+docs/source/dev/spectrochempy.dataset.rst
+docs/source/dev/spectrochempy.units.rst
+docs/source/dev/spectrochempy.utils.rst

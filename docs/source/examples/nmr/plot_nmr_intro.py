@@ -41,18 +41,19 @@ def get_source2D():
 
 ##########################################################
 # get the 1D dataset
-# -----------------
+# -------------------
 source1D = get_source1D()
 source1D
 
 ##########################################################
 # get the 2D dataset
+# -------------------
 source2D = get_source2D()
 source2D
 
 ##########################################################
 # Plot the 1D dataset raw data
-
+# ----------------------------
 # plot the real data
 source1D.plot(xlim=(0, 25000), style='paper')
 

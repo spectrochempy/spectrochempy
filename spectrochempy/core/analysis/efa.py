@@ -191,25 +191,7 @@ class EFA(HasTraits):
 # ============================================================================
 if __name__ == '__main__':
 
-    from tests.conftest import IR_source_2D
-
-    source = IR_source_2D()
-
-    print(source)
-
-    # columns masking
-    source[:, 1230.0:920.0] = masked  # do not forget to use float in slicing
-
-    # difference spectra
-    source -= source[-1]
-
-    # row masking
-    source[10:12] = masked
-
-    efa = EFA(source )
-
-    npc=4
-    c = efa.get_conc(npc, plot=True)
+    pass
 
 
 

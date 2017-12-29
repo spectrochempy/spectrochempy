@@ -437,7 +437,12 @@ class NDArray(HasTraits):
 
     # .........................................................................
     def __len__(self):
-
+        if self.ndim == 1:
+            warnings.warn('The length of a 1D array in spectrochempy is '
+                          'ambiguous. It stands for the number of rows: so '
+                          'len(array1D)=1. If what you want is the length of '
+                          'the row, then you have to use the `size` attibute '
+                          'intead of  `len`.', SpectroChemPyWarning)
         return self._data.shape[0]
 
     # .........................................................................

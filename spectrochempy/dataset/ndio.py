@@ -111,7 +111,7 @@ class NDIO(HasTraits):
         Read some experimental data and then save in our proprietary format
         **scp**
 
-        >>> from spectrochempy.scp import NDDataset #doctest: +ELLIPSIS
+        >>> from spectrochempy import NDDataset #doctest: +ELLIPSIS
         SpectroChemPy's scp...
         >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
         >>> mydataset.save('mydataset.scp')
@@ -257,7 +257,7 @@ class NDIO(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy.scp import NDDataset
+        >>> from spectrochempy import NDDataset
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -266,7 +266,7 @@ class NDIO(HasTraits):
         by default, directory for saving is the `data`.
         So the same thing can be done simply by:
 
-        >>> from spectrochempy.scp import NDDataset
+        >>> from spectrochempy import NDDataset
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>

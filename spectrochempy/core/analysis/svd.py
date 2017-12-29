@@ -59,12 +59,12 @@ class SVD(HasTraits):
 
     @docstrings.get_sectionsf('SVD')
     @docstrings.dedent
-    def __init__(self, X, full_matrices=False, compute_uv=True):
+    def __init__(self, dataset, full_matrices=False, compute_uv=True):
         """
         Parameters
         -----------
-        X : |NDDataset| object
-            The dataset has shape (`M`, `N`). `M` is the number of
+        dataset : |NDDataset| object
+            The `dataset` ``X`` has shape (`M`, `N`). `M` is the number of
             observations (for examples a series of IR spectra) while `N`
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
@@ -91,6 +91,8 @@ class SVD(HasTraits):
 
         # check if we have the correct input
         # ----------------------------------
+
+        X = dataset
 
         if isinstance(X, NDDataset):
             # As seen below, we cannot performs SVD on the masked array
@@ -287,39 +289,4 @@ class SVD(HasTraits):
 
 # ============================================================================
 if __name__ == '__main__':
-
-    from tests.conftest import IR_source_2D
-    from spectrochempy import *
-
-    source = IR_source_2D()
-
-    print(source)
-
-    # columns masking
-    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
-
-    # row masking
-    source[10:12] = masked
-
-    ax = source.plot_stack()
-
-    svd = SVD(source, full_matrices=True)
-
-    print()
-    print((svd.U))
-    print((svd.VT))
-    print((svd.s))
-    print((svd.ev))
-    print((svd.ev_cum))
-    print((svd.ev_ratio))
-
-    svd.VT[:6].plot_stack()
-
-    svd.ev_ratio[:10].plot_scatter(color='red', pen=True)
-    show()
-
-    svd2 = SVD(source, compute_uv=False)
-
-    svd2.ev_ratio[:10].plot_scatter(color='blue', pen=True)
-    show()
-
+    pass

@@ -7,24 +7,29 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+"""
+This module is the main entry-point for the application launched on the
+terminal command line
+"""
 import sys
 import os
-import spectrochempy as scp, DEBUG
+import spectrochempy as scp
 
-log = spc.log
-preferences = spc.preferences
+log = scp.log
+preferences = scp.preferences
 
 def main():
-    preferences.log_level = DEBUG
-    fname = spc.preferences.startup_filename
+    preferences.log_level = scp.DEBUG
+    fname = scp.preferences.startup_filename
     log.info("Loading filename: '%s'"%fname)
     if os.path.exists(fname):
-        ds = spc.nddataset.read(fname)
+        ds = scp.nddataset.read(fname)
         print(ds)
     else:
         log.error("'%s' file doesn't exists"%fname)
-        print(spc.app.print_help())
+        print(scp.app.print_help())
 
 # =============================================================================
 if __name__ == '__main__':
+
     main()

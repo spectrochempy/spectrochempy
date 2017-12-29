@@ -8,7 +8,7 @@
 # =============================================================================
 
 
-def test_scp():
+def test_api():
 
     import spectrochempy
     # test version

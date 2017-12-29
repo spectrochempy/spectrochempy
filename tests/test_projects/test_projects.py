@@ -115,7 +115,6 @@ def test_project(ds1, ds2, dsm):
     script_source = 'print("samples contained in the project are: ' \
                     '%s"%proj.projects_names)'
 
-    #from spectrochempy.scp.scripts.script import Script
 
     proj['print_info'] = Script('print_info', script_source)
 

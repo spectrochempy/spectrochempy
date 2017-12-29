@@ -73,7 +73,7 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS,
+    >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS,
     +NORMALIZE_WHITESPACE
     SpectroChemPy's API ...
     >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
@@ -547,11 +547,5 @@ def _read_spa(source, filename):
 
 if __name__ == '__main__':
 
-    from spectrochempy import NDDataset
-
-    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
-    print(A)
-
-    B = NDDataset.read('irdata/NH4Y-activation.spg')
-    print(B)
+    pass
 

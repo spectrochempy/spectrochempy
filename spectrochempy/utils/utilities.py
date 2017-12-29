@@ -88,6 +88,4 @@ def readfilename(filename, directory='', filter=''):
 
 if __name__ == '__main__':
 
-    res = readfilename(None, filter='OMNIC file (*.spg);;'
-                                         'OMNIC file (*.spa)')
-    print(res)
+    pass

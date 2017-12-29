@@ -26,28 +26,20 @@ def McrAls(X, guess, **options):
 
     Parameters
     -----------
-
     tol : float, optional, default=1e-3
-
         convergence tolerance
-
     maxit : maximum number of ALS minimizations
-
     maxdiv : maximum number of non-converging iteratiobs
-
     nonnegConc : array or tuple indicating species non-negative concentration
                    profiles. For instance [1, 0, 1] indicates that species #0
                    and #2 have non-negative conc profiles while species #1
                    can have negative concentrations
                    Default [1, ..., 1]  (only non-negative cocentrations)
-
     unimodConc : array or tuple indicating species having unimodal concentrations
                    profiles.
                    Default [1, ..., 1]  (only unimodal cocentration profiles)
-
     nonnegSpec : array or tuple indicating species having non-negative spectra
                    Default [1, ..., 1]  (only non-negative spectra)
-
     unimodSpec : array or tuple indicating species having unimodal spectra
                    Default [0, ..., 0]  (no unimodal cocentration profiles)
 
