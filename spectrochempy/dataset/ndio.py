@@ -41,21 +41,11 @@ from traitlets import HasTraits, Unicode
 # local import
 # ----------------------------------------------------------------------------
 
-from spectrochempy.dataset.ndcoords import Coord, CoordSet
-from spectrochempy.utils import SpectroChemPyWarning
-from spectrochempy.utils.meta import Meta
-from spectrochempy.units import Unit, Quantity, Measurement
-from spectrochempy.application import app
-
-plotter_preferences = app.plotter_preferences
-
-# ----------------------------------------------------------------------------
-# constants
-# ----------------------------------------------------------------------------
-
-log = app.log
-preferences = app.preferences
-
+from .ndcoords import Coord, CoordSet
+from ..utils import SpectroChemPyWarning
+from ..utils.meta import Meta
+from ..units import Unit, Quantity, Measurement
+from ..application import plotter_preferences, log, preferences
 
 
 # ==============================================================================
@@ -81,7 +71,11 @@ class NDIO(HasTraits):
         if self._filename:
             return os.path.basename(self._filename)
         else:
-            return self.id
+            return self.name
+
+    @filename.setter
+    def filename(self, fname):
+        self._filename = fname
 
     @property
     def directory(self) :
@@ -117,7 +111,7 @@ class NDIO(HasTraits):
         Read some experimental data and then save in our proprietary format
         **scp**
 
-        >>> from spectrochempy.core import NDDataset #doctest: +ELLIPSIS
+        >>> from spectrochempy.scp import NDDataset #doctest: +ELLIPSIS
         SpectroChemPy's scp...
         >>> mydataset = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
         >>> mydataset.save('mydataset.scp')
@@ -263,7 +257,7 @@ class NDIO(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy.core import NDDataset
+        >>> from spectrochempy.scp import NDDataset
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -272,7 +266,7 @@ class NDIO(HasTraits):
         by default, directory for saving is the `data`.
         So the same thing can be done simply by:
 
-        >>> from spectrochempy.core import NDDataset
+        >>> from spectrochempy.scp import NDDataset
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>

@@ -8,7 +8,7 @@
 # =============================================================================
 
 
-from spectrochempy.core import log, WARNING, INFO, preferences
+from spectrochempy import log, WARNING, INFO, preferences
 
 def test_logger():
 

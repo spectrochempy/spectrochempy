@@ -501,7 +501,7 @@ def plot_1D(source, **kwargs):
 
 if __name__ == '__main__':
 
-    from spectrochempy.core import *
+    from spectrochempy import *
     from tests.utils import figures_dir, same_images
     preferences.log_level=DEBUG
 

@@ -10,7 +10,7 @@
 import os
 
 from tests.utils import assert_array_equal
-from spectrochempy.core import *
+from spectrochempy import *
 
 # Basic
 # -------
@@ -19,11 +19,8 @@ def test_save_and_load_file_with_nofilename(IR_source_2D):
     A.save()
 
     # no directory for saving passed ... it must be in data
-    path = os.path.join(preferences.datadir, A.id + '.scp')
+    path = os.path.join(preferences.datadir, A.filename )
     assert os.path.exists(path)
-
-    # the filename should be stored in the object just saved
-    assert A.filename == A.id + '.scp'
     assert A.directory == preferences.datadir
 
     B = NDDataset.load(path)

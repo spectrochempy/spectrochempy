@@ -95,7 +95,7 @@ class Coord(NDMath, NDArray):
         --------
         We first import the object from the main scp:
 
-        >>> from spectrochempy.core import Coord # doctest: +ELLIPSIS
+        >>> from spectrochempy.scp import Coord # doctest: +ELLIPSIS
         SpectroChemPy's scp - v.0.1...
 
         We then create a numpy |ndarray| and use it as the numerical `data`

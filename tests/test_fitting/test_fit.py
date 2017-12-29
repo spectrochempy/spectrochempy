@@ -10,7 +10,7 @@
 
 
 
-from spectrochempy.core import *
+from spectrochempy import *
 import os
 import pytest
 from tests.utils import assert_approx_equal

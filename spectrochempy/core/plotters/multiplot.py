@@ -454,7 +454,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
 
 if __name__ == '__main__':
 
-    from spectrochempy.core import *
+    from spectrochempy import *
 
     source = NDDataset.read_omnic(
          os.path.join(preferences.datadir, 'irdata', 'NH4Y-activation.SPG'))[0:20]

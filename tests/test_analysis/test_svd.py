@@ -10,7 +10,7 @@
 """ Tests for the SVD class
 
 """
-from spectrochempy.core import *
+from spectrochempy import *
 from numpy.testing import assert_allclose
 
 # test svd

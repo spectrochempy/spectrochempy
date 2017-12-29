@@ -409,7 +409,7 @@ plot_gallery = True
 
 sphinx_gallery_conf = {
     'backreferences_dir': 'gen_modules/backreferences',
-    'doc_module': ('spectrochempy.scp'),
+    'doc_module': ('spectrochempy'),
     'reference_url': {
         'spectrochempy': None,
         'matplotlib': 'https://matplotlib.org',

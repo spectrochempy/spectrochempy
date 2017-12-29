@@ -63,22 +63,17 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
     Parameters
     ----------
-
     source : NDDataset
-
         The dataset to store the data and the metadata read from the spg file
-
     filename: str
-
         filename of the file to load
-
     directory: str [optional, default=""].
         From where to read the specified filename. If not sperfied, read i 
         the current directory.
 
     Examples
     --------
-    >>> from spectrochempy.core import NDDataset # doctest: +ELLIPSIS, 
+    >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS,
     +NORMALIZE_WHITESPACE
     SpectroChemPy's API ...
     >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
@@ -358,6 +353,7 @@ def _read_spg(source, filename, sortbydate=True, **kwargs):
     source.units = 'absorbance'
     source.title = 'Absorbance'
     source.name = spg_title
+    source.filename = os.path.basename(filename).split('.')[0]
     source.coordset = (np.array(alltimestamps), xaxis)
     source.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
     source.coordset[1].units = 'cm^-1'
@@ -551,7 +547,7 @@ def _read_spa(source, filename):
 
 if __name__ == '__main__':
 
-    from spectrochempy.core import NDDataset
+    from spectrochempy import NDDataset
 
     A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
     print(A)

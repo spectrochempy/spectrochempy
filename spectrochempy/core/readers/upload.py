@@ -81,7 +81,7 @@ NDDataset.upload_IRIS = upload_IRIS
 # =============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.core import PCA
+    from spectrochempy import PCA
 
     ds = upload_IRIS()
     print (ds)

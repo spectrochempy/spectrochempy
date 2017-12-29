@@ -21,7 +21,7 @@ from tests.utils import (assert_equal, assert_array_equal,
                          raises)
 
 
-from spectrochempy.core import *
+from spectrochempy import *
 from spectrochempy.utils import SpectroChemPyWarning
 
 

@@ -55,13 +55,13 @@ def empty(shape, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import core # doctest: +ELLIPSIS
+    >>> import spectrochempy as scp # doctest: +ELLIPSIS
     SpectroChemPy's API...
 
-    >>> core.empty([2, 2]) # doctest: +ELLIPSIS
+    >>> scp.empty([2, 2]) # doctest: +ELLIPSIS
     NDDataset: [[...]] unitless
 
-    >>> core.empty([2, 2], dtype=int, units='s') # doctest: +ELLIPSIS
+    >>> scp.empty([2, 2], dtype=int, units='s') # doctest: +ELLIPSIS
     NDDataset: [[...]] s
 
     """
@@ -127,15 +127,15 @@ def zeros(shape, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import core
-    >>> core.zeros(5)
+    >>> import spectrochempy as scp
+    >>> scp.zeros(5)
     NDDataset: [   0.000,    0.000,    0.000,    0.000,    0.000] unitless
 
-    >>> core.zeros((5,), dtype=np.int)
+    >>> scp.zeros((5,), dtype=np.int)
     NDDataset: [       0,        0,        0,        0,        0] unitless
 
     >>> s = (2,2)
-    >>> core.zeros(s, units='m')
+    >>> scp.zeros(s, units='m')
     NDDataset: [[   0.000,    0.000],
                 [   0.000,    0.000]] m
 
@@ -167,14 +167,14 @@ def ones(shape, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import core
-    >>> core.ones(5, units='km')
+    >>> import spectrochempy as scp
+    >>> scp.ones(5, units='km')
     NDDataset: [   1.000,    1.000,    1.000,    1.000,    1.000] km
 
-    >>> core.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
+    >>> scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
     NDDataset: [  --,        1,        1,        1,   --] unitless
 
-    >>> core.ones((2, 2))
+    >>> scp.ones((2, 2))
     NDDataset: [[   1.000,    1.000],
                 [   1.000,    1.000]] unitless
 
@@ -208,14 +208,14 @@ def zeros_like(a, dtype=None,):
 
     Examples
     --------
-    >>> from spectrochempy import core
+    >>> import spectrochempy as scp
     >>> x = np.arange(6)
     >>> x = x.reshape((2, 3))
     >>> x = NDDataset(x, units='s')
     >>> x
     NDDataset: [[       0,        1,        2],
                 [       3,        4,        5]] s
-    >>> core.zeros_like(x)
+    >>> scp.zeros_like(x)
     NDDataset: [[       0,        0,        0],
                 [       0,        0,        0]] s
 
@@ -253,14 +253,14 @@ def ones_like(a, dtype=None):
 
     Examples
     --------
-    >>> from spectrochempy import core
+    >>> import spectrochempy as scp
     >>> x = np.arange(6)
     >>> x = x.reshape((2, 3))
     >>> x = NDDataset(x, units='s')
     >>> x
     NDDataset: [[       0,        1,        2],
                 [       3,        4,        5]] s
-    >>> core.ones_like(x)
+    >>> scp.ones_like(x)
     NDDataset: [[       1,        1,        1],
                 [       1,        1,        1]] s
 
@@ -302,11 +302,11 @@ def full(shape, fill_value, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import core
-    >>> core.full((2, 2), np.inf)
+    >>> import spectrochempy as scp
+    >>> scp.full((2, 2), np.inf)
     NDDataset: [[     inf,      inf],
                 [     inf,      inf]] unitless
-    >>> core.full((2, 2), 10, dtype=np.int)
+    >>> scp.full((2, 2), 10, dtype=np.int)
     NDDataset: [[      10,       10],
                 [      10,       10]] unitless
 
@@ -343,18 +343,18 @@ def full_like(a, fill_value, dtype=None):
 
     Examples
     --------
-    >>> from spectrochempy import core
+    >>> import spectrochempy as scp
 
     >>> x = np.arange(6, dtype=int)
-    >>> core.full_like(x, 1)
+    >>> scp.full_like(x, 1)
     array([       1,        1,        1,        1,        1,        1])
 
     >>> x = NDDataset(x, units='m')
-    >>> core.full_like(x, 0.1)
+    >>> scp.full_like(x, 0.1)
     NDDataset: [       0,        0,        0,        0,        0,        0] m
-    >>> core.full_like(x, 0.1, dtype=np.double)
+    >>> scp.full_like(x, 0.1, dtype=np.double)
     NDDataset: [   0.100,    0.100,    0.100,    0.100,    0.100,    0.100] m
-    >>> core.full_like(x, np.nan, dtype=np.double)
+    >>> scp.full_like(x, np.nan, dtype=np.double)
     NDDataset: [     nan,      nan,      nan,      nan,      nan,      nan] m
 
     """

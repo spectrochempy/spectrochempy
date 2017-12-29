@@ -11,7 +11,7 @@ and then we plot one section (a 2D plane)
 ###############################################################################
 # As usual, we start by loading the scp
 import numpy as np
-from spectrochempy import core
+import spectrochempy as scp
 
 ###############################################################################
 # Creation
@@ -36,20 +36,20 @@ nd_data = np.array([np.array(
 # The `Coord` object allow making an array of coordinates
 # with additional metadata such as units, labels, title, etc
 
-coord0 = core.Coord(data=c0,
-                    labels=['cold', 'normal', 'hot'],
-                    units="K",
-                    title='temperature')
+coord0 = scp.Coord(data=c0,
+                   labels=['cold', 'normal', 'hot'],
+                   units="K",
+                   title='temperature')
 
-coord1 = core.Coord(data=c1,
-                    labels=None,
-                    units="minutes",
-                    title='time-on-stream')
+coord1 = scp.Coord(data=c1,
+                   labels=None,
+                   units="minutes",
+                   title='time-on-stream')
 
-coord2 = core.Coord(data=c2,
-                    labels=None,
-                    units="cm^-1",
-                    title='wavenumber')
+coord2 = scp.Coord(data=c2,
+                   labels=None,
+                   units="cm^-1",
+                   title='wavenumber')
 
 ###############################################################################
 # Labels can be useful for instance for indexing
@@ -62,11 +62,11 @@ print(a)
 # +++++++++++
 # The |NDDataset| object allow making the array of data with units, etc...
 
-mydataset = core.NDDataset(nd_data,
-                           coordset=[coord0, coord1, coord2],
-                           title='Absorbance',
-                           units='absorbance'
-                           )
+mydataset = scp.NDDataset(nd_data,
+                          coordset=[coord0, coord1, coord2],
+                          title='Absorbance',
+                          units='absorbance'
+                          )
 
 mydataset.description = """Dataset example created for this tutorial. 
 It's a 3-D dataset (with dimensionless intensity : absorbance )"""
@@ -94,7 +94,7 @@ new = mydataset['hot']
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 
 new.plot()
-core.show()
+scp.show()
 
 ##################################################################
 # But it is possible to display image
@@ -102,16 +102,16 @@ core.show()
 
 # sphinx_gallery_thumbnail_number = 2
 new.plot(method='image')
-core.show()
+scp.show()
 
 ##################################################################
 # or stacked plot
 
 new.plot(method='stack')
-core.show()
+scp.show()
 
 ##################################################################
 # Note that the scp allows one to use this syntax too:
 
-core.plot_stack(new)
-core.show()
+scp.plot_stack(new)
+scp.show()

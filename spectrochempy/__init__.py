@@ -121,7 +121,7 @@ _setup_backend_and_ipython()
 
 # import the core api
 from .core import *
-import spectrochempy.core
+from spectrochempy import core
 
 __all__ = core.__all__
 

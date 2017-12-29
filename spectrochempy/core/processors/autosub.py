@@ -67,7 +67,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     ---------
 
     >>> import os
-    >>> from spectrochempy.core import NDDataset #doctest: +ELLIPSIS
+    >>> from spectrochempy.scp import NDDataset #doctest: +ELLIPSIS
     <BLANKLINE>
     ...
     <BLANKLINE>

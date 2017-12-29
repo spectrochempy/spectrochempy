@@ -13,7 +13,7 @@ import matplotlib.pyplot as mpl
 
 from tests.utils import  image_comparison
 
-from spectrochempy.core import *
+from spectrochempy import *
 
 preferences.log_level = INFO
 

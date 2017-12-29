@@ -330,9 +330,9 @@ class Preferences(Configurable) :
     Examples
     --------
 
-    >>> from spectrochempy import core # doctest: +ELLIPSIS
+    >>> import spectrochempy as scp # doctest: +ELLIPSIS
     SpectroChemPy's API...
-    >>> delimiter = core.preferences.csv_delimiter
+    >>> delimiter = scp.preferences.csv_delimiter
 
 
     """

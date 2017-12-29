@@ -9,21 +9,21 @@
 
 import sys
 import os
-from spectrochempy import core, DEBUG
+import spectrochempy as scp, DEBUG
 
-log = core.log
-preferences = core.preferences
+log = spc.log
+preferences = spc.preferences
 
 def main():
     preferences.log_level = DEBUG
-    fname = core.preferences.startup_filename
+    fname = spc.preferences.startup_filename
     log.info("Loading filename: '%s'"%fname)
     if os.path.exists(fname):
-        ds = core.nddataset.read(fname)
+        ds = spc.nddataset.read(fname)
         print(ds)
     else:
         log.error("'%s' file doesn't exists"%fname)
-        print(core.app.print_help())
+        print(spc.app.print_help())
 
 # =============================================================================
 if __name__ == '__main__':

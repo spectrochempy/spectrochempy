@@ -554,7 +554,7 @@ class PCA(HasTraits):
 # ============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.core import *
+    from spectrochempy import *
 
     dataset = upload_IRIS()
     pca = PCA(dataset, centered=True)

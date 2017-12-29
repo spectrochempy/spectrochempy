@@ -31,10 +31,10 @@ from numpy.ma import MaskedArray
 # =============================================================================
 # Local imports
 # =============================================================================
-from spectrochempy.extern.uncertainties import unumpy as unp
-from spectrochempy.units.units import Quantity
-from spectrochempy.dataset.ndarray import NDArray
-from spectrochempy.utils import (interleave, interleaved2complex, getdocfrom,
+from ..extern.uncertainties import unumpy as unp
+from ..units.units import Quantity
+from .ndarray import NDArray
+from ..utils import (interleave, interleaved2complex, getdocfrom,
                                  docstrings)
 from spectrochempy.application import log
 
@@ -72,7 +72,7 @@ class NDMath(object):
     Examples
     --------
 
-    >>> from spectrochempy.core import *
+    >>> from spectrochempy.scp import *
     >>> dataset = NDDataset.load('mydataset.scp')
     >>> dataset             #doctest: +ELLIPSIS
     NDDataset([[    2.06,...,     1.24]])
@@ -666,7 +666,7 @@ class NDMath(object):
 
 if __name__ == '__main__':
 
-    print(NDMath.__doc__)
+    pass
 
 
 _s = """

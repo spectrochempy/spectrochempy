@@ -60,7 +60,7 @@ class Isotopes(HasTraits):
 
     after the scp has been loaded:
 
-    >>> from spectrochempy.core import *
+    >>> from spectrochempy.scp import *
 
 
     one can use:

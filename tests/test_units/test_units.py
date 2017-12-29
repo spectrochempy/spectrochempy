@@ -13,7 +13,7 @@
 """
 
 """
-from spectrochempy.core import ur, set_nmr_context, Quantity, np, show
+from spectrochempy import ur, set_nmr_context, Quantity, np, show
 from tests.utils import raises
 
 def test_ppm():

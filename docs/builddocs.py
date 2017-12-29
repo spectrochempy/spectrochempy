@@ -129,7 +129,7 @@ def make_docs(*args):
              )
 
         # generate API reference
-        apigen.main(PROJECT+'/api.py',
+        apigen.main(PROJECT,
              tocdepth=1,
              includeprivate=True,
              destdir=API,

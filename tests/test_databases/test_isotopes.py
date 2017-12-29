@@ -10,7 +10,7 @@
 
 
 
-from spectrochempy.core import Isotopes
+from spectrochempy import Isotopes
 
 
 def test_isotopes():

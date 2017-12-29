@@ -10,7 +10,7 @@
 
 
 
-from spectrochempy.core import ur, concatenate, stack,\
+from spectrochempy import ur, concatenate, stack,\
     CoordRange
 
 import pytest

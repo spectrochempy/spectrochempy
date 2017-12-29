@@ -8,7 +8,7 @@
 # =============================================================================
 
 
-from spectrochempy.core import upload_IRIS
+from spectrochempy import upload_IRIS
 
 def test_upload():
 

@@ -845,7 +845,7 @@ if __name__ == '__main__':
     pass
 
     import dill
-    from spectrochempy.core import *
+    from spectrochempy import *
 
     preferences.log_level = ERROR
 

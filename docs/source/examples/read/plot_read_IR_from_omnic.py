@@ -8,18 +8,18 @@ Here we load an experimental SPG file (OMNIC) and plot it.
 """
 
 import os
-from spectrochempy import core
+import spectrochempy as scp
 
 ###################################################################
 # Loading and stacked plot of the original
 
-datadir = core.preferences.datadir
+datadir = scp.preferences.datadir
 
-dataset = core.NDDataset.read_omnic(os.path.join(datadir,
+dataset = scp.NDDataset.read_omnic(os.path.join(datadir,
                                            'irdata', 'NH4Y-activation.SPG'))
 
 dataset.plot_stack(style='paper')
-core.show()
+scp.show()
 
 ##################################################################
 # change the unit of y axis, the y origin as well as the title of the axis
@@ -29,4 +29,4 @@ dataset.y -= dataset.y[0]
 dataset.y.title = 'acquisition time'
 
 dataset.plot_stack()
-core.show()
+scp.show()

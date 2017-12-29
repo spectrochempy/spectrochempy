@@ -35,15 +35,15 @@ from traitlets import Dict, HasTraits, Instance
 
 # local import
 # ------------
-from spectrochempy.utils import (is_sequence, SpectroChemPyDeprecationWarning,
+from ..utils import (is_sequence, SpectroChemPyDeprecationWarning,
                                  docstrings, NBlack, NBlue, NGreen, NRed,
                                  get_figure)
-from spectrochempy.application import (plotter_preferences, preferences, log,
+from ..application import (plotter_preferences, preferences, log,
                                        do_not_block)
 
-from spectrochempy.core.plotters.plot1d import plot_1D
-from spectrochempy.core.plotters.plot3d import plot_3D
-from spectrochempy.core.plotters.plot2d import plot_2D
+from ..core.plotters.plot1d import plot_1D
+from ..core.plotters.plot3d import plot_3D
+from ..core.plotters.plot2d import plot_2D
 
 
 # =============================================================================

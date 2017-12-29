@@ -24,30 +24,31 @@ import warnings
 import re
 from datetime import datetime
 
+# =============================================================================
+# Third party imports
+# =============================================================================
+
 import numpy as np
 from numpy.ma.core import MaskedConstant, masked, nomask
 from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float,
                        HasTraits, default, validate)
 from pandas.core.generic import NDFrame, Index
 
-from spectrochempy.utils.meta import Meta
-from spectrochempy.units import Unit, ur, Quantity
-from spectrochempy.application import log
-from spectrochempy.utils import (EPSILON, INPLACE, StdDev, is_sequence,
-                                 numpyprintoptions, interleaved2complex,
-                                 interleave, SpectroChemPyWarning, docstrings,
-                                 make_func_from)
-from spectrochempy.extern.traittypes import Array
-from spectrochempy.extern.pint.errors import (DimensionalityError)
-from spectrochempy.extern.uncertainties import unumpy as unp
-
-# =============================================================================
-# Third party imports
-# =============================================================================
 # =============================================================================
 # local imports
 # =============================================================================
-# from spectrochempy.application import app
+
+from ..utils.meta import Meta
+from ..units import Unit, ur, Quantity
+from ..application import log
+from ..utils import (EPSILON, INPLACE, StdDev, is_sequence,
+                                 numpyprintoptions, interleaved2complex,
+                                 interleave, SpectroChemPyWarning, docstrings,
+                                 make_func_from)
+from ..extern.traittypes import Array
+from ..extern.pint.errors import (DimensionalityError)
+from ..extern.uncertainties import unumpy as unp
+
 
 # =============================================================================
 # Some initializations
@@ -187,9 +188,9 @@ class NDArray(HasTraits):
         --------
         Empty initialization
 
-        >>> from spectrochempy import core # doctest: +ELLIPSIS
+        >>> import spectrochempy as scp # doctest: +ELLIPSIS
         SpectroChemPy's API ...
-        >>> ndd = core.NDArray()
+        >>> ndd = scp.NDArray()
 
         Initialization with a ndarray
 

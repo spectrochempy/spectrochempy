@@ -50,7 +50,7 @@ def concatenate(*datasets, axis=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.core import * # doctest: +ELLIPSIS
+    >>> from spectrochempy.scp import * # doctest: +ELLIPSIS
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
@@ -223,7 +223,7 @@ def stack(*datasets):
 
     Examples
     --------
-    >>> from spectrochempy.core import * # doctest: +ELLIPSIS,
+    >>> from spectrochempy.scp import * # doctest: +ELLIPSIS,
     +NORMALIZE_WHITESPACE
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
@@ -245,7 +245,7 @@ def stack(*datasets):
 
 if __name__ == '__main__':
 
-    from spectrochempy.core import *
+    from spectrochempy import *
     A = NDDataset.load('spec.spg', protocol='omnic')
     B = NDDataset.load('mydataset.scp')
     C = concatenate( A, B, axis=0)

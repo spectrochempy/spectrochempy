@@ -409,10 +409,7 @@ def create_api_files(rootpath, opts):
     """Build the text of the file and write the file."""
     # generate separate file for the members of the api
 
-    # we assume that the file is api.py
-    root = os.path.split(rootpath)[-2]
-    api = root + ".api"
-
+    api = rootpath
     _imported_item = import_item(api)
 
     clsmembers = inspect.getmembers(_imported_item)
@@ -438,7 +435,7 @@ To use the API, one must load it using one of the following syntax:
 
 In the second syntax, as usual in python, access to the objects/functions 
 may be simplified (*e.g.*, we can use `plot_stack` instead of 
-`api.plot_stack` but there is always a risk of overwriting some variables 
+`scp.plot_stack` but there is always a risk of overwriting some variables 
 already in the namespace. Therefore, the first syntax is in general 
 recommended,
 although that, in the examples in this documentation, we have often use the 
@@ -543,7 +540,7 @@ Constants
     _consts = _consts.replace('/Users/christian/Dropbox/D.PROGRAMMES/', '~/')
 
     text = indextemplate.format(consts= _consts,
-                                preferences = write_prefs(root),
+                                preferences = write_prefs(),
                                 classes = "    "+_classes,
                                 funcs = "    "+_funcs)
     write_file('index', text, opts)
@@ -551,7 +548,7 @@ Constants
 from spectrochempy.sphinxext.traitlets_sphinxdoc import reverse_aliases, \
     class_config_rst_doc
 
-def write_prefs(root):
+def write_prefs():
     from spectrochempy.application import app
     trait_aliases = reverse_aliases(app)
     text = ""
@@ -579,7 +576,7 @@ if __name__ == "__main__":
          )
 
     # generate API reference
-    main(PROJECT+'/api.py',
+    main(PROJECT,
          tocdepth=1,
          includeprivate=True,
          destdir=API,

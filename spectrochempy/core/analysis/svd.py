@@ -289,7 +289,7 @@ class SVD(HasTraits):
 if __name__ == '__main__':
 
     from tests.conftest import IR_source_2D
-    from spectrochempy.core import *
+    from spectrochempy import *
 
     source = IR_source_2D()
 

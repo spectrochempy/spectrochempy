@@ -63,7 +63,7 @@ def read_zip(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.core import NDDataset # doctest: +ELLIPSIS, 
+    >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS,
     +NORMALIZE_WHITESPACE
     SpectroChemPy's API ...
     >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
@@ -101,7 +101,7 @@ def read_csv(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.core import NDDataset # doctest: +ELLIPSIS, 
+    >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS,
     +NORMALIZE_WHITESPACE
     <BLANKLINE>
         SpectroChemPy's API ...
@@ -339,7 +339,7 @@ def _add_omnic_info(dataset, **kwargs):
 #===============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.core import (NDDataset, preferences, ERROR, show)
+    from spectrochempy import (NDDataset, preferences, ERROR, show)
 
 
     preferences.log_level = ERROR

@@ -494,7 +494,7 @@ def clevels(data, **kwargs):
 
 if __name__ == '__main__':
 
-    from spectrochempy.core import NDDataset, show
+    from spectrochempy import NDDataset, show
 
     A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=preferences.datadir)
     A.y -= A.y[0]

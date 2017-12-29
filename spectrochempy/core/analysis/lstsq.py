@@ -68,7 +68,7 @@ def Lstsq(A, B, rcond=-1):
     Let's take a similar example to the one given in the `numpy.linalg`
     documentation
 
-    >>> from spectrochempy.core import * # doctest: +ELLIPSIS
+    >>> from spectrochempy.scp import * # doctest: +ELLIPSIS
     ...
 
     Fit a line, :math:`d = v.t  + d_0`, through some noisy data-points:
@@ -113,7 +113,7 @@ def Lstsq(A, B, rcond=-1):
 
 if __name__ == '__main__':
 
-    import spectrochempy.core as sc
+    import spectrochempy as sc
 
     t = sc.NDDataset([0, 1, 2, 3], units='hour')
     d = sc.NDDataset([-1, 0.2, 0.9, 2.1], units='kilometer')

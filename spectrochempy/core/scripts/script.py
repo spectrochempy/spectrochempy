@@ -18,7 +18,7 @@ from spectrochempy.core.projects.baseproject import AbstractProject
 __all__ = ['Script','run_script','run_all_scripts']
 
 try:
-    from spectrochempy.core import *
+    from spectrochempy import *
 except:
     pass
 

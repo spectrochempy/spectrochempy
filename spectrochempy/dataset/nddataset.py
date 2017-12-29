@@ -134,7 +134,7 @@ class NDDataset(
         --------
         Usage by an end-user:
 
-        >>> from spectrochempy.core import NDDataset # doctest: +ELLIPSIS
+        >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS
         SpectroChemPy's scp...
         >>> x = NDDataset([1,2,3])
         >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
