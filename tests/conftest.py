@@ -15,7 +15,7 @@ matplotlib_backend = mpl.get_backend()
 def ip():
     from IPython.testing.globalipapp import get_ipython as getipy
     ip = getipy()
-    ip.run_cell("from spectrochempy.scp import *")
+    ip.run_cell("from spectrochempy import *")
     return ip
 
 try:
@@ -287,7 +287,7 @@ def dataset3d():
 
 @pytest.fixture(scope="function")
 def IR_source_1D():
-    from spectrochempy.scp import NDDataset, preferences
+    from spectrochempy.core import NDDataset, preferences
     datadir = preferences.datadir
     source = NDDataset.read_omnic(
             os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
@@ -295,7 +295,7 @@ def IR_source_1D():
 
 @pytest.fixture(scope="function")
 def IR_source_2D():
-    from spectrochempy.scp import NDDataset, preferences
+    from spectrochempy.core import NDDataset, preferences
     datadir = preferences.datadir
     source = NDDataset.read_omnic(
             os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
@@ -304,7 +304,7 @@ def IR_source_2D():
 # Fixture:  IR spectra
 @pytest.fixture(scope="function")
 def IR_scp_1():
-    from spectrochempy.scp import NDDataset, preferences
+    from spectrochempy.core import NDDataset, preferences
     datadir = preferences.datadir
     source = NDDataset.load(
             os.path.join(datadir, 'irdata', 'nh4.scp'))
@@ -314,7 +314,7 @@ def IR_scp_1():
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D():
-    from spectrochempy.scp import NDDataset, preferences
+    from spectrochempy.core import NDDataset, preferences
     datadir = preferences.datadir
     path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
@@ -326,7 +326,7 @@ def NMR_source_1D():
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
 def NMR_source_1D_1H():
-    from spectrochempy.scp import NDDataset, preferences
+    from spectrochempy.core import NDDataset, preferences
     datadir = preferences.datadir
     path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'tpa')
@@ -337,7 +337,7 @@ def NMR_source_1D_1H():
 
 @pytest.fixture(scope="function")
 def NMR_source_2D():
-    from spectrochempy.scp import NDDataset, preferences
+    from spectrochempy.core import NDDataset, preferences
     datadir = preferences.datadir
     path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')

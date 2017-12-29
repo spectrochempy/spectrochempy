@@ -29,9 +29,9 @@ from traitlets import HasTraits, Instance
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.utils import docstrings, masked
-from spectrochempy.scp.analysis.svd import SVD
-from spectrochempy.scp.plotters.api import plot_multiple
-from spectrochempy.scp import show
+from spectrochempy.core.analysis.svd import SVD
+from spectrochempy.core.plotters.plot1d import plot_multiple
+from spectrochempy.utils import show
 
 
 class EFA(HasTraits):

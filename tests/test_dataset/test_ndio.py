@@ -15,7 +15,7 @@
 
 """
 
-from spectrochempy.scp import NDDataset, preferences
+from spectrochempy.core import NDDataset, preferences
 from spectrochempy.utils import SpectroChemPyWarning
 
 import pytest

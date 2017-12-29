@@ -14,8 +14,8 @@
 import pandas as pd
 import pytest
 
-from spectrochempy.scp import *
-from spectrochempy.scp import NDDataset, Coord, CoordSet, show
+from spectrochempy import *
+
 from spectrochempy.extern.pint.errors import (UndefinedUnitError,
                                               DimensionalityError)
 from spectrochempy.utils import Meta, SpectroChemPyWarning

@@ -32,8 +32,9 @@ import numpy as np
 # -----------------------------------------------------------------------------
 # Local imports
 # -----------------------------------------------------------------------------
-from spectrochempy.dataset.api import Coord, NDDataset
-from spectrochempy.scp.processors.api import stack
+from spectrochempy.dataset.ndcoords import Coord
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.core.processors.concatenate import stack
 from spectrochempy.application import log, preferences
 from spectrochempy.utils import (readfilename, unzip, is_sequence,
                                  SpectroChemPyWarning)
@@ -62,7 +63,8 @@ def read_zip(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.core import NDDataset # doctest: +ELLIPSIS, 
+    +NORMALIZE_WHITESPACE
     SpectroChemPy's API ...
     >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -90,7 +92,8 @@ def read_csv(dataset, filename='', **kwargs):
     filename: str
         filename of the file to load
     directory: str [optional, default=""].
-        From where to read the specified filename. If not sperfied, read i the current directory.
+        From where to read the specified filename. If not sperfied, read i 
+        the current directory.
 
     Returns
     -------
@@ -98,7 +101,8 @@ def read_csv(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.core import NDDataset # doctest: +ELLIPSIS, 
+    +NORMALIZE_WHITESPACE
     <BLANKLINE>
         SpectroChemPy's API ...
     >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=data)
@@ -335,7 +339,7 @@ def _add_omnic_info(dataset, **kwargs):
 #===============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.scp import (NDDataset, preferences, ERROR, show)
+    from spectrochempy.core import (NDDataset, preferences, ERROR, show)
 
 
     preferences.log_level = ERROR

@@ -14,8 +14,6 @@ methods for a |NDDataset| are defined.
 """
 
 __all__ = ['NDPlot',
-           'figure',
-           'show',
            'plot',
 
            # styles and colors
@@ -38,13 +36,14 @@ from traitlets import Dict, HasTraits, Instance
 # local import
 # ------------
 from spectrochempy.utils import (is_sequence, SpectroChemPyDeprecationWarning,
-                                 docstrings, NBlack, NBlue, NGreen, NRed)
+                                 docstrings, NBlack, NBlue, NGreen, NRed,
+                                 get_figure)
 from spectrochempy.application import (plotter_preferences, preferences, log,
                                        do_not_block)
 
-from spectrochempy.scp.plotters.plot1d import plot_1D
-from spectrochempy.scp.plotters.plot3d import plot_3D
-from spectrochempy.scp.plotters.plot2d import plot_2D
+from spectrochempy.core.plotters.plot1d import plot_1D
+from spectrochempy.core.plotters.plot3d import plot_3D
+from spectrochempy.core.plotters.plot2d import plot_2D
 
 
 # =============================================================================
@@ -228,7 +227,7 @@ class NDPlot(HasTraits):
 
 
         # get the current figure (or the last used)
-        self._fig = _curfig(hold)
+        self._fig = get_figure(hold)
         self._fig.rcParams = plt.rcParams.copy()
 
         if not hold:
@@ -515,46 +514,6 @@ class NDPlot(HasTraits):
 
         """
         return self._divider
-
-    # -------------------------------------------------------------------------
-    # events and interactive functions
-    # -------------------------------------------------------------------------
-
-
-# .............................................................................
-def figure(**kwargs):
-    """
-    Method to open a new figure
-    """
-    return _curfig(hold=False, **kwargs)
-
-
-# .............................................................................
-def show():
-    """
-    Method to force the `matplotlib` figure display
-
-    """
-    if not do_not_block:
-
-        if _curfig(True):  # True to avoid opening a new one
-            plt.show(block=True)
-
-
-
-# .............................................................................
-def _curfig(hold=False, **kwargs):
-    # Get the figure where to plot.
-
-    n = plt.get_fignums()
-
-    if not n or not hold:
-        # create a figure
-        return plt.figure(**kwargs)
-
-    # a figure already exists - if several we take the last
-    return plt.figure(n[-1])
-
 
 # .............................................................................
 def _set_figure_style(**kwargs):

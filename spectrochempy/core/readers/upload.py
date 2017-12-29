@@ -33,7 +33,7 @@ import requests
 
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.dataset.ndcoords import Coord
-from spectrochempy.dataset.ndplot import show
+from spectrochempy.utils import show
 
 
 # ............................................................................
@@ -81,7 +81,7 @@ NDDataset.upload_IRIS = upload_IRIS
 # =============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.scp import PCA
+    from spectrochempy.core import PCA
 
     ds = upload_IRIS()
     print (ds)

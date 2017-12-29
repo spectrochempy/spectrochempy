@@ -50,7 +50,7 @@ def concatenate(*datasets, axis=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy.scp import * # doctest: +ELLIPSIS
+    >>> from spectrochempy.core import * # doctest: +ELLIPSIS
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
@@ -80,7 +80,8 @@ def concatenate(*datasets, axis=None, **kwargs):
 
     - ``out.moddate``    : date of concatenation
 
-    - ``out.data``       : numpy.concatenate(a.data,b.data,c.data,...,concatdim)
+    - ``out.data``       : numpy.concatenate(a.data,b.data,c.data,...,
+    concatdim)
 
     - ``out.label``      : dim 'concatdim' label sets are concatenated, and \
                           label sets are created for all other dims
@@ -222,7 +223,8 @@ def stack(*datasets):
 
     Examples
     --------
-    >>> from spectrochempy.scp import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.core import * # doctest: +ELLIPSIS,
+    +NORMALIZE_WHITESPACE
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
@@ -243,7 +245,7 @@ def stack(*datasets):
 
 if __name__ == '__main__':
 
-    from spectrochempy.scp import *
+    from spectrochempy.core import *
     A = NDDataset.load('spec.spg', protocol='omnic')
     B = NDDataset.load('mydataset.scp')
     C = concatenate( A, B, axis=0)

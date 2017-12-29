@@ -30,7 +30,7 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from spectrochempy.application import log, plotter_preferences, preferences
-from spectrochempy.scp.plotters.utils import make_label
+from spectrochempy.core.plotters.utils import make_label
 from spectrochempy.utils import is_sequence, deprecated
 
 # ----------------------------------------------------------------------------
@@ -501,7 +501,7 @@ def plot_1D(source, **kwargs):
 
 if __name__ == '__main__':
 
-    from spectrochempy.scp import *
+    from spectrochempy.core import *
     from tests.utils import figures_dir, same_images
     preferences.log_level=DEBUG
 

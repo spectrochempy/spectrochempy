@@ -23,10 +23,10 @@ from traitlets import (Dict, Instance, Unicode, This, default)
 
 from spectrochempy.application import app
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.scp.scripts.script import Script
+from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
                                  ScpFile, )
-from spectrochempy.scp.projects.baseproject import AbstractProject
+from spectrochempy.core.projects.baseproject import AbstractProject
 
 # ============================================================================
 # third party imports
@@ -845,7 +845,7 @@ if __name__ == '__main__':
     pass
 
     import dill
-    from spectrochempy.scp import *
+    from spectrochempy.core import *
 
     preferences.log_level = ERROR
 

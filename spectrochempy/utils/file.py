@@ -67,7 +67,10 @@ def generate_api(api_path):
     for pkg in pkgs:
         if pkg.endswith('api'):
             continue
-        pkg = import_item(pkg)
+        try:
+            pkg = import_item(pkg)
+        except:
+            raise ImportError(pkg)
         if not hasattr(pkg, '__all__'):
             continue
         a = getattr(pkg, '__all__',[])

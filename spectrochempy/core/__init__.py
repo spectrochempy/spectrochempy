@@ -116,9 +116,9 @@ __all__.extend(display.__all__)
 
 # constants
 # ----------------------------------------------------------------------------
-from spectrochempy.utils import  masked, nomask, EPSILON, INPLACE
+from spectrochempy.utils import  show, masked, nomask, EPSILON, INPLACE
 
-__all__ +=  'masked', 'nomask', 'EPSILON', 'INPLACE'
+__all__ +=  'show', 'masked', 'nomask', 'EPSILON', 'INPLACE'
 
 # dataset
 # --------
@@ -129,29 +129,29 @@ __all__ += api.__all__
 
 # plotters
 # --------
-from spectrochempy.scp.plotters.api import *
-from spectrochempy.scp.plotters import api
+from spectrochempy.core.plotters.api import *
+from spectrochempy.core.plotters import api
 
 __all__ += api.__all__
 
 # processors
 # ----------
-from spectrochempy.scp.processors.api import *
-from spectrochempy.scp.processors import api
+from spectrochempy.core.processors.api import *
+from spectrochempy.core.processors import api
 
 __all__ += api.__all__
 
 # readers
 # -------
-from spectrochempy.scp.readers.api import *
-from spectrochempy.scp.readers import api
+from spectrochempy.core.readers.api import *
+from spectrochempy.core.readers import api
 
 __all__ += api.__all__
 
 # writers
 # -------
-from spectrochempy.scp.writers.api import *
-from spectrochempy.scp.writers import api
+from spectrochempy.core.writers.api import *
+from spectrochempy.core.writers import api
 
 __all__ += api.__all__
 
@@ -172,37 +172,31 @@ __all__ += api.__all__
 
 # analysis
 # --------
-from spectrochempy.scp.analysis.api import *
-from spectrochempy.scp.analysis import api
+from .analysis.api import *
+from .analysis import api
 
 __all__ += api.__all__
 
 # fitting
 # -------
-from spectrochempy.scp.fitting.api import *
-from spectrochempy.scp.fitting import api
+from spectrochempy.core.fitting.api import *
+from spectrochempy.core.fitting import api
 
 __all__ += api.__all__
 
 # project
 # -------
-from spectrochempy.scp.projects.api import *
-from spectrochempy.scp.projects import api
+from spectrochempy.core.projects.api import *
+from spectrochempy.core.projects import api
 
 __all__ += api.__all__
 
 # script
 # -------
-from spectrochempy.scp.scripts.api import *
-from spectrochempy.scp.scripts import api
+from spectrochempy.core.scripts.api import *
+from spectrochempy.core.scripts import api
 
 __all__ += api.__all__
-
-# Core
-# ----
-from spectrochempy.scp.core import *
-from spectrochempy.scp import core
-__all__ += core.__all__
 
 
 # optional libraries

@@ -13,7 +13,7 @@
 """ Tests for the interpolate module
 
 """
-from spectrochempy.scp import align
+from spectrochempy.core import align
 
 # align
 #-------

@@ -95,7 +95,7 @@ class Coord(NDMath, NDArray):
         --------
         We first import the object from the main scp:
 
-        >>> from spectrochempy.scp import Coord # doctest: +ELLIPSIS
+        >>> from spectrochempy.core import Coord # doctest: +ELLIPSIS
         SpectroChemPy's scp - v.0.1...
 
         We then create a numpy |ndarray| and use it as the numerical `data`
@@ -106,7 +106,8 @@ class Coord(NDMath, NDArray):
         >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [       1,        3,        5,        7,        9,       11] Hz
 
-        We can take a series of str to create a non numerical but labelled axis:
+        We can take a series of str to create a non numerical but labelled
+        axis:
 
         >>> tarr = list('abcdef')
         >>> tarr
@@ -265,7 +266,7 @@ class Coord(NDMath, NDArray):
              "<td style='text-align:left'>{}</td><tr>\n"
 
         out = "<table style='width:100%'>\n"
-        out += tr.format("Title", self.title.cscptalize())
+        out += tr.format("Title", self.title.capitalize())
         if self.data is not None:
             data_str = super(Coord, self)._repr_html_()
             out += tr.format("Data", data_str)

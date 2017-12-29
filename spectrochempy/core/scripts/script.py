@@ -13,12 +13,12 @@ import ast
 from traitlets import (HasTraits, Unicode, validate, TraitError, Instance,
                        Float, )
 
-from spectrochempy.scp.projects.baseproject import AbstractProject
+from spectrochempy.core.projects.baseproject import AbstractProject
 
 __all__ = ['Script','run_script','run_all_scripts']
 
 try:
-    from spectrochempy.scp import *
+    from spectrochempy.core import *
 except:
     pass
 

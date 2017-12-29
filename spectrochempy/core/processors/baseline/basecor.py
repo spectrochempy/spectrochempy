@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 # ----------------------------------------------------------------------------
 
 from spectrochempy.dataset.ndcoords import CoordRange
-from spectrochempy.scp.plotters.multiplot import multiplot
+from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings
 

@@ -12,7 +12,7 @@ def test_scp():
 
     import spectrochempy
     # test version
-    from spectrochempy.scp import APIref, log, version
+    from spectrochempy.core import APIref, log, version
     assert version.split('.')[0] == '0'
     assert version.split('.')[1][:1] == '1'
     # TODO: modify this for each release
@@ -28,6 +28,8 @@ def test_scp():
     assert 'abs' in APIref
 
 def test_magic_addscript(ip):
+
+    from spectrochempy import __all__
 
     assert "available_styles" in ip.user_ns.keys()
     ip.run_cell("print(available_styles())", store_history=True)

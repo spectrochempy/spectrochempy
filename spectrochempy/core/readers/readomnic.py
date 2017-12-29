@@ -58,7 +58,8 @@ def readbtext(f, pos):
 # function for loading spa or spg file
 # --------------------------------------
 def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
-    """Open a Thermo Nicolet .spg or list of .spa files and set data/metadata in the current dataset
+    """Open a Thermo Nicolet .spg or list of .spa files and set 
+    data/metadata in the current dataset
 
     Parameters
     ----------
@@ -72,11 +73,13 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
         filename of the file to load
 
     directory: str [optional, default=""].
-        From where to read the specified filename. If not sperfied, read i the current directory.
+        From where to read the specified filename. If not sperfied, read i 
+        the current directory.
 
     Examples
     --------
-    >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy.core import NDDataset # doctest: +ELLIPSIS, 
+    +NORMALIZE_WHITESPACE
     SpectroChemPy's API ...
     >>> A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -548,7 +551,7 @@ def _read_spa(source, filename):
 
 if __name__ == '__main__':
 
-    from spectrochempy.scp import NDDataset
+    from spectrochempy.core import NDDataset
 
     A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG')
     print(A)

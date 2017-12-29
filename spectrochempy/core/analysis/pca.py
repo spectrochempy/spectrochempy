@@ -27,8 +27,8 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 from spectrochempy.dataset.ndcoords import Coord
-from spectrochempy.scp.analysis.svd import SVD
-from spectrochempy.scp.processors.numpy import diag, dot
+from spectrochempy.core.analysis.svd import SVD
+from spectrochempy.core.processors.npy import diag, dot
 from spectrochempy.application import plotter_preferences
 from spectrochempy.utils import docstrings, NRed, NBlue
 
@@ -554,7 +554,7 @@ class PCA(HasTraits):
 # ============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy.scp import *
+    from spectrochempy.core import *
 
     dataset = upload_IRIS()
     pca = PCA(dataset, centered=True)

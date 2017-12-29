@@ -25,7 +25,7 @@ plotter_preferences = app.plotter_preferences
 log = app.log
 preferences = app.preferences
 
-from spectrochempy.scp.fitting.parameters import FitParameters
+from spectrochempy.core.fitting.parameters import FitParameters
 
 
 # ===========================================================================

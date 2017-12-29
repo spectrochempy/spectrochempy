@@ -10,7 +10,7 @@
 import os
 
 from tests.utils import assert_array_equal
-
+from spectrochempy.core import *
 
 # Basic
 # -------
@@ -118,7 +118,7 @@ def test_project(ds1, ds2, dsm):
     script_source = 'print("samples contained in the project are: ' \
                     '%s"%proj.projects_names)'
 
-    from spectrochempy.scp.scripts import Script
+    #from spectrochempy.scp.scripts.script import Script
 
     proj['print_info'] = Script('print_info', script_source)
 

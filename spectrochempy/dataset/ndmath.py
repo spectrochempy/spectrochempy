@@ -72,7 +72,7 @@ class NDMath(object):
     Examples
     --------
 
-    >>> from spectrochempy.scp import *
+    >>> from spectrochempy.core import *
     >>> dataset = NDDataset.load('mydataset.scp')
     >>> dataset             #doctest: +ELLIPSIS
     NDDataset([[    2.06,...,     1.24]])

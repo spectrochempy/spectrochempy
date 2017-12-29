@@ -9,9 +9,9 @@
 
 
 # noinspection PyUnresolvedReferences
-from spectrochempy.scp import (show,
-                               BaselineCorrection,
-                               NDDataset)
+from spectrochempy import (     show,
+                                BaselineCorrection,
+                                NDDataset)
 
 import pytest
 import os

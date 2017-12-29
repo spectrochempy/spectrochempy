@@ -40,7 +40,7 @@ from ..utils import (SpectroChemPyWarning, numpyprintoptions,
                      get_user_and_node, set_operators, docstrings,
                      make_func_from, )
 from ..extern.traittypes import Array
-from ..scp.projects.baseproject import AbstractProject
+from ..core.projects.baseproject import AbstractProject
 from .ndarray import NDArray
 from .ndcoords import Coord, CoordSet
 from .ndmath import NDMath
@@ -118,7 +118,8 @@ class NDDataset(
         %(NDArray.parameters.no_labels)s
         coordset : An instance of |CoordSet|, optional
             `coords` contains the coordinates for the different
-            dimensions of the `data`. if `coords` is provided, it must specified
+            dimensions of the `data`. if `coords` is provided, it must
+            specified
             the `coord` and `labels` for all dimensions of the `data`.
             Multiple `coord`'s can be specified in an |CoordSet| instance
             for each dimension.
@@ -133,7 +134,7 @@ class NDDataset(
         --------
         Usage by an end-user:
 
-        >>> from spectrochempy.scp import NDDataset # doctest: +ELLIPSIS
+        >>> from spectrochempy.core import NDDataset # doctest: +ELLIPSIS
         SpectroChemPy's scp...
         >>> x = NDDataset([1,2,3])
         >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE

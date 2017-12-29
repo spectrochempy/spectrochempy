@@ -7,13 +7,18 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+__all__ = ['install_styles', 'cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen',
+           'figure', 'show', 'get_figure']
+
 
 import os
 import shutil as sh
 from pkg_resources import resource_filename
 
-__all__ = ['install_styles', 'cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen']
+from matplotlib import pyplot as plt
 
+
+# ............................................................................
 # color conversion function
 def cmyk2rgb(C, M, Y, K):
     """CMYK to RGB conversion
@@ -68,3 +73,59 @@ def install_styles():
         src = os.path.join(styles_path, style)
         dest = os.path.join(stylelib, style)
         sh.copy(src, dest)
+
+
+# .............................................................................
+def figure(**kwargs):
+    """
+    Method to open a new figure
+
+    Parameters
+    ----------
+    kwargs : any
+        keywords arguments to be passed to the matplotlib figure constructor.
+
+    """
+    return get_figure(hold=False, **kwargs)
+
+
+# .............................................................................
+def show():
+    """
+    Method to force the `matplotlib` figure display
+
+    """
+    from spectrochempy.application import do_not_block
+    if not do_not_block:
+
+        if get_figure(True):  # True to avoid opening a new one
+            plt.show(block=True)
+
+
+# .............................................................................
+def get_figure(hold=False, **kwargs):
+    """
+    Get the figure where to plot.
+
+    Parameters
+    ----------
+    hold : bool
+        if True the last used figure is used.
+    kwargs : any
+        keywords arguments to be passed to the matplotlib figure constructor.
+
+    Returns
+    -------
+    matplotlib figure instance
+
+    """
+
+    n = plt.get_fignums()
+
+    if not n or not hold:
+        # create a figure
+        return plt.figure(**kwargs)
+
+    # a figure already exists - if several we take the last
+    return plt.figure(n[-1])
+

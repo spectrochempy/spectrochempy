@@ -34,7 +34,7 @@ import numpy as np
 # ----------------------------------------------------------------------------
 
 from spectrochempy.application import plotter_preferences, preferences, log
-from spectrochempy.scp.plotters.utils import make_label
+from spectrochempy.core.plotters.utils import make_label
 
 # =============================================================================
 # nddataset plot2D functions
@@ -494,7 +494,7 @@ def clevels(data, **kwargs):
 
 if __name__ == '__main__':
 
-    from spectrochempy.scp import NDDataset, show
+    from spectrochempy.core import NDDataset, show
 
     A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG', directory=preferences.datadir)
     A.y -= A.y[0]

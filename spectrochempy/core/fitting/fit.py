@@ -37,10 +37,10 @@ from IPython import display
 # localimports
 # ----------------------------------------------------------------------------
 
-from spectrochempy.scp.fitting.parameters import ParameterScript
-from spectrochempy.scp.fitting.models import getmodel
+from spectrochempy.core.fitting.parameters import ParameterScript
+from spectrochempy.core.fitting.models import getmodel
 
-from spectrochempy.scp.fitting.optimization import optimize
+from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 
 from spectrochempy.application import plotter_preferences, preferences, log

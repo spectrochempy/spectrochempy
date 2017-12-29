@@ -133,7 +133,8 @@ class NDArray(HasTraits):
             numpy-ndarray. If a subclass of |NDArray| is passed that contains
             already mask, labels,units or uncertainties, these elements will be
             used to accordingly set those of the created object.
-            If possible, the provided data  will not be copied for `data` input,
+            If possible, the provided data  will not be copied for `data`
+            input,
             but will be passed by reference, so you should make a copy of the
             `data` before passing them if that's the desired behavior or
             set the `copy` argument to True.
@@ -186,9 +187,9 @@ class NDArray(HasTraits):
         --------
         Empty initialization
 
-        >>> from spectrochempy import scp # doctest: +ELLIPSIS
+        >>> from spectrochempy import core # doctest: +ELLIPSIS
         SpectroChemPy's API ...
-        >>> ndd = scp.NDArray()
+        >>> ndd = core.NDArray()
 
         Initialization with a ndarray
 

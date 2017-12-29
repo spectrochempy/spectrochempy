@@ -224,7 +224,7 @@ class SpectroChemPyMagics(Magics):
         if cell:
             contents += "\n" + cell
 
-        from spectrochempy.scp.scripts.script import Script
+        from spectrochempy.core.scripts.script import Script
         script = Script(name, content=contents)
         projobj[name]=script
 
@@ -330,9 +330,9 @@ class Preferences(Configurable) :
     Examples
     --------
 
-    >>> from spectrochempy import scp # doctest: +ELLIPSIS
+    >>> from spectrochempy import core # doctest: +ELLIPSIS
     SpectroChemPy's API...
-    >>> delimiter = scp.preferences.csv_delimiter
+    >>> delimiter = core.preferences.csv_delimiter
 
 
     """
@@ -397,9 +397,9 @@ class SpectroChemPy(Application):
     """
     from spectrochempy.utils import docstrings
 
-    from spectrochempy.scp.projects.projectpreferences import \
+    from spectrochempy.core.projects.projectpreferences import \
         ProjectPreferences
-    from spectrochempy.scp.plotters.plotterpreferences import \
+    from spectrochempy.core.plotters.plotterpreferences import \
         PlotterPreferences
 
     # ------------------------------------------------------------------------
@@ -735,7 +735,7 @@ class SpectroChemPy(Application):
     # ........................................................................
     def _init_project_preferences(self):
 
-        from spectrochempy.scp.projects.projectpreferences import \
+        from spectrochempy.core.projects.projectpreferences import \
             ProjectPreferences
 
         self.project_preferences = ProjectPreferences(config=self.config)
@@ -743,7 +743,7 @@ class SpectroChemPy(Application):
     # ........................................................................
     def _init_plotter_preferences(self):
 
-        from spectrochempy.scp.plotters.plotterpreferences import \
+        from spectrochempy.core.plotters.plotterpreferences import \
             PlotterPreferences
         from spectrochempy.utils import install_styles
 
@@ -755,19 +755,19 @@ class SpectroChemPy(Application):
 
     def _init_reader_preferences(self):
 
-        from spectrochempy.scp.readers.readerpreferences import \
+        from spectrochempy.core.readers.readerpreferences import \
             ReaderPreferences
         self.reader_preferences = ReaderPreferences(config=self.config)
 
     def _init_writer_preferences(self):
 
-        from spectrochempy.scp.writers.writerpreferences import \
+        from spectrochempy.core.writers.writerpreferences import \
             WriterPreferences
         self.writer_preferences = WriterPreferences(config=self.config)
 
     def _init_processor_preferences(self):
 
-        from spectrochempy.scp.processors.processorpreferences import \
+        from spectrochempy.core.processors.processorpreferences import \
             ProcessorPreferences
         self.processor_preferences = ProcessorPreferences(config=self.config)
 

@@ -16,7 +16,7 @@
 import numpy as np
 import pandas as pd
 
-from spectrochempy.scp import *
+from spectrochempy.core import *
 from spectrochempy.utils import SpectroChemPyWarning
 from tests.utils import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,

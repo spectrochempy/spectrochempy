@@ -6,15 +6,23 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # =============================================================================
-"""
-This module adds numpy-like methods to the main |scp| API.
 
 """
-__all__ = ['empty', 'empty_like', 'zeros', 'zeros_like', 'ones',
+In this module, we define basic functions adapted from numpy but able to handle
+our NDDataset objects
+
+"""
+__all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'zeros_like', 'ones',
            'ones_like', 'full', 'full_like']
+
+
+# ----------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------
 
 import numpy as np
 from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.utils import nomask
 
 def empty(shape, dtype=None, **kwargs):
     """
@@ -47,13 +55,13 @@ def empty(shape, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import scp # doctest: +ELLIPSIS
+    >>> from spectrochempy import core # doctest: +ELLIPSIS
     SpectroChemPy's API...
 
-    >>> scp.empty([2, 2]) # doctest: +ELLIPSIS
+    >>> core.empty([2, 2]) # doctest: +ELLIPSIS
     NDDataset: [[...]] unitless
 
-    >>> scp.empty([2, 2], dtype=int, units='s') # doctest: +ELLIPSIS
+    >>> core.empty([2, 2], dtype=int, units='s') # doctest: +ELLIPSIS
     NDDataset: [[...]] s
 
     """
@@ -119,15 +127,15 @@ def zeros(shape, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import scp
-    >>> scp.zeros(5)
+    >>> from spectrochempy import core
+    >>> core.zeros(5)
     NDDataset: [   0.000,    0.000,    0.000,    0.000,    0.000] unitless
 
-    >>> scp.zeros((5,), dtype=np.int)
+    >>> core.zeros((5,), dtype=np.int)
     NDDataset: [       0,        0,        0,        0,        0] unitless
 
     >>> s = (2,2)
-    >>> scp.zeros(s, units='m')
+    >>> core.zeros(s, units='m')
     NDDataset: [[   0.000,    0.000],
                 [   0.000,    0.000]] m
 
@@ -159,14 +167,14 @@ def ones(shape, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import scp
-    >>> scp.ones(5, units='km')
+    >>> from spectrochempy import core
+    >>> core.ones(5, units='km')
     NDDataset: [   1.000,    1.000,    1.000,    1.000,    1.000] km
 
-    >>> scp.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
+    >>> core.ones((5,), dtype=np.int, mask=[True, False, False, False, True])
     NDDataset: [  --,        1,        1,        1,   --] unitless
 
-    >>> scp.ones((2, 2))
+    >>> core.ones((2, 2))
     NDDataset: [[   1.000,    1.000],
                 [   1.000,    1.000]] unitless
 
@@ -176,7 +184,8 @@ def ones(shape, dtype=None, **kwargs):
 
 def zeros_like(a, dtype=None,):
     """
-    Return a |NDDataset| of zeros with the same shape and type as a given array.
+    Return a |NDDataset| of zeros with the same shape and type as a given
+    array.
 
     Parameters
     ----------
@@ -199,14 +208,14 @@ def zeros_like(a, dtype=None,):
 
     Examples
     --------
-    >>> from spectrochempy import scp
+    >>> from spectrochempy import core
     >>> x = np.arange(6)
     >>> x = x.reshape((2, 3))
     >>> x = NDDataset(x, units='s')
     >>> x
     NDDataset: [[       0,        1,        2],
                 [       3,        4,        5]] s
-    >>> scp.zeros_like(x)
+    >>> core.zeros_like(x)
     NDDataset: [[       0,        0,        0],
                 [       0,        0,        0]] s
 
@@ -244,14 +253,14 @@ def ones_like(a, dtype=None):
 
     Examples
     --------
-    >>> from spectrochempy import scp
+    >>> from spectrochempy import core
     >>> x = np.arange(6)
     >>> x = x.reshape((2, 3))
     >>> x = NDDataset(x, units='s')
     >>> x
     NDDataset: [[       0,        1,        2],
                 [       3,        4,        5]] s
-    >>> scp.ones_like(x)
+    >>> core.ones_like(x)
     NDDataset: [[       1,        1,        1],
                 [       1,        1,        1]] s
 
@@ -293,11 +302,11 @@ def full(shape, fill_value, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import scp
-    >>> scp.full((2, 2), np.inf)
+    >>> from spectrochempy import core
+    >>> core.full((2, 2), np.inf)
     NDDataset: [[     inf,      inf],
                 [     inf,      inf]] unitless
-    >>> scp.full((2, 2), 10, dtype=np.int)
+    >>> core.full((2, 2), 10, dtype=np.int)
     NDDataset: [[      10,       10],
                 [      10,       10]] unitless
 
@@ -334,18 +343,18 @@ def full_like(a, fill_value, dtype=None):
 
     Examples
     --------
-    >>> from spectrochempy import scp
+    >>> from spectrochempy import core
 
     >>> x = np.arange(6, dtype=int)
-    >>> scp.full_like(x, 1)
+    >>> core.full_like(x, 1)
     array([       1,        1,        1,        1,        1,        1])
 
     >>> x = NDDataset(x, units='m')
-    >>> scp.full_like(x, 0.1)
+    >>> core.full_like(x, 0.1)
     NDDataset: [       0,        0,        0,        0,        0,        0] m
-    >>> scp.full_like(x, 0.1, dtype=np.double)
+    >>> core.full_like(x, 0.1, dtype=np.double)
     NDDataset: [   0.100,    0.100,    0.100,    0.100,    0.100,    0.100] m
-    >>> scp.full_like(x, np.nan, dtype=np.double)
+    >>> core.full_like(x, np.nan, dtype=np.double)
     NDDataset: [     nan,      nan,      nan,      nan,      nan,      nan] m
 
     """
@@ -354,11 +363,176 @@ def full_like(a, fill_value, dtype=None):
     return new
 
 
+# ............................................................................
+def dot(a, b, strict=True, out=None):
+    """
+    Return the dot product of two NDDatasets.
 
+    This function is the equivalent of `numpy.dot` that takes NDDataset for
+    input.
+
+    .. note::
+      Works only with 2-D arrays at the moment.
+
+
+    Parameters
+    ----------
+    a, b : masked_array_like
+        Inputs arrays.
+    strict : bool, optional
+        Whether masked data are propagated (True) or set to 0 (False) for
+        the computation. Default is False.  Propagating the mask means that
+        if a masked value appears in a row or column, the whole row or
+        column is considered masked.
+    out : masked_array, optional
+        Output argument. This must have the exact kind that would be returned
+        if it was not used. In particular, it must have the right type, must be
+        C-contiguous, and its dtype must be the dtype that would be returned
+        for `dot(a,b)`. This is a performance feature. Therefore, if these
+        conditions are not met, an exception is raised, instead of attempting
+        to be flexible.
+
+    See Also
+    --------
+    numpy.dot : Equivalent function for ndarrays.
+    numpy.ma.dot : Equivalent function for masked ndarrays
+
+    """
+    if not a.implements('NDDataset'):
+        raise TypeError('A dataset of type NDDataset is  '
+                        'expected as a source of data, but an object'
+                        ' of type {} has been provided'.format(
+            type(a).__name__))
+
+    if not b.implements('NDDataset'):
+        raise TypeError('A dataset of type NDDataset is  '
+                        'expected as a source of data, but an object'
+                        ' of type {} has been provided'.format(
+            type(b).__name__))
+
+    #TODO: may be we can be less strict, and allow dot products with
+    # different kind of objects, as far they are numpy-like arrays
+
+    data = np.ma.dot(a.masked_data, b.masked_data)
+    mask = data.mask
+    data = data.data
+    uncertainty = None
+    if a.is_uncertain or b.is_uncertain:
+            raise NotImplementedError('uncertainty not yet implemented')
+
+    coordset = None
+    if a.coordset is not None:
+        coordset = [a.coordset[0]]
+    if b.coordset is not None:
+        if coordset is None:
+            coordset = [None]
+        coordset.append(b.coordset[1])
+    elif coordset is not None:
+        coordset.append(None)
+
+    history = 'dot product between %s and %s'%(a.name, b.name)
+
+    # make the output
+    # ---------------
+    new = a.copy()
+    new._data = data
+    new._mask = mask
+    new._uncertainty = uncertainty
+    new._coordset =  type(new.coordset)(coordset)
+    new.history = history
+
+    return new
+
+
+# ............................................................................
+def diag(source, k=0):
+    """
+    Extract a diagonal or construct a diagonal array.
+
+    See the more detailed documentation for ``numpy.diagonal`` if you use this
+    function to extract a diagonal and wish to write to the resulting array;
+    whether it returns a copy or a view depends on what version of numpy you
+    are using.
+
+    Parameters
+    ----------
+    v : array_like
+        If `v` is a 2-D array, return a copy of its `k`-th diagonal.
+        If `v` is a 1-D array, return a 2-D array with `v` on the `k`-th
+        diagonal.
+    k : int, optional
+        Diagonal in question. The default is 0. Use `k>0` for diagonals
+        above the main diagonal, and `k<0` for diagonals below the main
+        diagonal.
+
+    Returns
+    -------
+    out : ndarray
+        The extracted diagonal or constructed diagonal array.
+
+    copied from numpy (licence
+    """
+
+    # check if we have the correct input
+    # ----------------------------------
+
+    if not source.implements('NDDataset'):
+        raise TypeError('A dataset of type NDDataset is  '
+                        'expected as a source of data, but an object'
+                        ' of type {} has been provided'.format(
+            type(source).__name__))
+
+    s = source.data.shape
+
+    if len(s) == 1:
+        # construct a diagonal array
+        # --------------------------
+        data = np.diag(source.data)
+        mask = nomask
+        if source.is_masked:
+            size = source.size
+            m = np.repeat(source.mask, size).reshape(size, size)
+            mask = m | m.T
+        uncertainty = None
+        if source.is_uncertain:
+            uncertainty = np.diag(source.uncertainty)
+        coordset = None
+        if source.coordset is not None:
+            coordset = [source.coordset[0]]*2
+        history = 'diagonal array build from the 1D dataset'
+
+    elif len(s) == 2:
+        # extract a diagonal
+        # ------------------
+        data = np.diagonal(source.data, k).copy()
+        mask = None
+        if source.is_masked:
+            mask = np.diagonal(source.mask, k).copy()
+        uncertainty = None
+        if source.is_uncertain:
+            uncertainty = np.diagonal(source.uncertainty, k).copy()
+        coordset = None
+        if source.coordset is not None:
+            coordset = [source.coordset[0]]  # TODO: this is likely not
+                                             #       correct for k != 0
+        history = 'diagonal of rank %d extracted from original dataset'%k
+
+    else:
+        raise ValueError("Input must be 1- or 2-d.")
+
+    # make the output
+    # ---------------
+    new = source.copy()
+    new._data = data
+    new._mask = mask
+    new._uncertainty = uncertainty
+    new.coordset = coordset
+    new.history = history
+
+    return new
 
 
 
 # =============================================================================
 if __name__ == '__main__':
-
     pass

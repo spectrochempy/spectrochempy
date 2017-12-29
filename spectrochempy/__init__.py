@@ -48,14 +48,13 @@ and some `IPython` configurations are made.
 
 
 """
+
 import sys
 import logging
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
 import matplotlib as mpl
-
-__all__ = []
 
 # this is to simplify import of log levels
 # for example:
@@ -129,6 +128,12 @@ def _setup_backend_and_ipython(backend=None):
     return (ip, backend)
 
 _setup_backend_and_ipython()
+
+# import the core api
+from .core import *
+import spectrochempy.core
+
+__all__ = core.__all__
 
 # ==============================================================================
 # For documentation
