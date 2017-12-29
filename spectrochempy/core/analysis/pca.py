@@ -101,7 +101,7 @@ class PCA(HasTraits):
         .. plot::
             :include-source:
 
-            from spectrochempy.scp import *
+            from spectrochempy import *
             dataset = upload_IRIS()
             pca = PCA(dataset, centered=True)
             LT, S = pca.transform(n_pc='auto')

@@ -432,9 +432,9 @@ The |scpy| API exposes many objects and functions that are described below.
 
 To use the API, one must load it using one of the following syntax:
 
->>> from spectrochempy import api
+>>> import spectrochempy as scp
 
->>> from spectrochempy.api import *
+>>> from spectrochempy import *
 
 In the second syntax, as usual in python, access to the objects/functions 
 may be simplified (*e.g.*, we can use `plot_stack` instead of 

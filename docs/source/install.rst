@@ -187,7 +187,7 @@ Then execute two commands as following:
 
 .. sourcecode:: ipython
 
-	In [1]: from spectrochempy.api import *
+	In [1]: from spectrochempy import *
 
 	In [2]: NDDataset()
 

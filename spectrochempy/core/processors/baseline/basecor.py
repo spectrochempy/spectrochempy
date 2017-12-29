@@ -88,7 +88,7 @@ class BaselineCorrection(HasTraits):
         .. plot::
             :include-source:
 
-            from spectrochempy.scp import *
+            from spectrochempy import *
             nd = NDDataset.read_omnic(os.path.join('irdata',
                                         'NH4Y-activation.SPG'))
             ndp = nd[:, 1290.0:5999.0]

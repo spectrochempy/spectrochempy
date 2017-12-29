@@ -29,7 +29,7 @@ import matplotlib as mpl
 
 mpl.use('agg')
 
-from spectrochempy.api import *
+from spectrochempy import *
 from docs import apigen
 
 preferences.log_level = ERROR

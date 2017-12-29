@@ -13,7 +13,7 @@
 import pandas as pd
 import pytest
 
-#from spectrochempy.scp import *
+#from spectrochempy import *
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.dataset.ndcoords import Coord, CoordSet
 from spectrochempy.units.units import ur
