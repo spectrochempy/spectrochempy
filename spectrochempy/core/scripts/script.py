@@ -17,10 +17,7 @@ from spectrochempy.core.projects.baseproject import AbstractProject
 
 __all__ = ['Script','run_script','run_all_scripts']
 
-try:
-    from spectrochempy import *
-except:
-    pass
+from spectrochempy.application import log
 
 class Script(HasTraits):
     """
@@ -113,7 +110,9 @@ class Script(HasTraits):
     # private methods
     # ------------------------------------------------------------------------
     def execute(self, localvars=None):
-        code = compile(self._content, '<string>', 'exec')
+        co = 'from spectrochempy import *\n' \
+             'import spectrochempy as scp\n'+self._content
+        code = compile(co, '<string>', 'exec')
         if localvars is None:
             # locals was not passed, try to avoid missing values for name
             # such as 'project', 'proj', 'newproj'...
@@ -140,7 +139,7 @@ class Script(HasTraits):
             log.error(e + '. pass the variable `locals()` : this may solve '
                           'this problem! ')
 
-def run_script(script, localvars):
+def run_script(script, localvars=None):
     """
     Execute a given project script in the current context.
 
@@ -148,6 +147,9 @@ def run_script(script, localvars):
     ----------
     script : script instance
         The script to execute
+    localvars: dict, optional
+        If provided it will be used for evaluating the script. In general,
+        it can be `localvrs`=``locals()``.
 
     Returns
     -------

@@ -82,8 +82,11 @@ def test_project(ds1, ds2, dsm):
 
     print(myp2)
 
+def test_project_with_script():
+
     # Example from tutorial agir notebook
-    proj = Project(Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+    proj = Project(
+        Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
         Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
         Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
         name='HIZECOKE_TEST')
@@ -112,8 +115,10 @@ def test_project(ds1, ds2, dsm):
     # proj = Project.load('HIZECOKE')
     # assert proj.projects_names == ['A350', 'B350', 'P350']
 
-    script_source = 'print("samples contained in the project are: ' \
-                    '%s"%proj.projects_names)'
+
+    script_source = 'preferences.log_level = INFO\n' \
+                    'log.info("samples contained in the project are: ' \
+                              '%s"%proj.projects_names)'
 
 
     proj['print_info'] = Script('print_info', script_source)

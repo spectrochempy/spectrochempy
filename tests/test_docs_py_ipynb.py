@@ -15,7 +15,7 @@ import os, sys
 
 from tests.utils import notebook_run, example_run
 
-@pytest.mark.skip
+#@pytest.mark.skip
 @pytest.mark.parametrize('notebook', glob("../docs/source/user/*/*.ipynb"))
 def test_notebooks(notebook):
     print(notebook)

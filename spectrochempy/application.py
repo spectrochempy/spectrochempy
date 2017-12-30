@@ -46,6 +46,14 @@ from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
 
+from spectrochempy.utils import docstrings
+from spectrochempy.core.projects.projectpreferences import ProjectPreferences
+from spectrochempy.core.plotters.plotterpreferences import PlotterPreferences
+from spectrochempy.core.processors.processorpreferences import \
+    ProcessorPreferences
+from spectrochempy.core.writers.writerpreferences import WriterPreferences
+from spectrochempy.core.readers.readerpreferences import ReaderPreferences
+from spectrochempy.utils import install_styles
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -224,7 +232,8 @@ class SpectroChemPyMagics(Magics):
         if cell:
             contents += "\n" + cell
 
-        from spectrochempy.core.scripts.script import Script
+        from spectrochempy.core.scripts.script import Script # import
+        # delayed to avoid circular import error
         script = Script(name, content=contents)
         projobj[name]=script
 
@@ -378,12 +387,7 @@ class SpectroChemPy(Application):
     configuration and more.
 
     """
-    from spectrochempy.utils import docstrings
 
-    from spectrochempy.core.projects.projectpreferences import \
-        ProjectPreferences
-    from spectrochempy.core.plotters.plotterpreferences import \
-        PlotterPreferences
 
     # ------------------------------------------------------------------------
     # initialization
@@ -726,17 +730,10 @@ class SpectroChemPy(Application):
     # ........................................................................
     def _init_project_preferences(self):
 
-        from spectrochempy.core.projects.projectpreferences import \
-            ProjectPreferences
-
         self.project_preferences = ProjectPreferences(config=self.config)
 
     # ........................................................................
     def _init_plotter_preferences(self):
-
-        from spectrochempy.core.plotters.plotterpreferences import \
-            PlotterPreferences
-        from spectrochempy.utils import install_styles
 
         # Pass config to other classes for them to inherit the config.
         self.plotter_preferences = PlotterPreferences(config=self.config)
@@ -746,20 +743,14 @@ class SpectroChemPy(Application):
 
     def _init_reader_preferences(self):
 
-        from spectrochempy.core.readers.readerpreferences import \
-            ReaderPreferences
         self.reader_preferences = ReaderPreferences(config=self.config)
 
     def _init_writer_preferences(self):
 
-        from spectrochempy.core.writers.writerpreferences import \
-            WriterPreferences
         self.writer_preferences = WriterPreferences(config=self.config)
 
     def _init_processor_preferences(self):
 
-        from spectrochempy.core.processors.processorpreferences import \
-            ProcessorPreferences
         self.processor_preferences = ProcessorPreferences(config=self.config)
 
     # ........................................................................
