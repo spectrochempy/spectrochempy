@@ -7,7 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 """
-This module implement the SVD (Singular Value Decomposition) class.
+This module implements the Singular Value Decomposition (SVD) class.
 
 """
 

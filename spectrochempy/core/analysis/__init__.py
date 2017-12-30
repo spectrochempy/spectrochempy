@@ -7,8 +7,8 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
 """
-Package related to the analysis of n-dimensional datasets or projects.
+Package with modules related to the analysis of |NDDataset|'s or
+|Project|'s.
 
 """
