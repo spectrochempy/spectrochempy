@@ -10,59 +10,56 @@ The best to proceed with development is that we (the developers) all have a simi
 environment for each python version.
 
 The master is build on the 3.6 python version. It may work with earlier
-version of python, e.g., 3.x but this has not yet been tested.
+version of python, *e.g.*, 3.x but this has not yet been tested.
 
-For sure it will not work for python 2.7.x and no attempt to get such
+For sure, it will not work for python 2.7.x and no attempt to get such
 compatibility will be made.
 
-1. Install anaconda3.
+1.  **Install** ***anaconda***
+    Go to `Anaconda donwload website <https://www.anaconda.com/download/>`_ the
+    and choose your platform. Download one of the available graphical
+    installer, *e.g.*, the 3.6 or + version.
 
-Go to and choose your platform. Download one of the available graphical installer, *e.g.*, the 3.6 or + version.
+2.  Install the version of Anaconda which you downloaded, following the
+    instructions on the download page.
 
-`anaconda <https://www.anaconda.com/download/>`_
+3.  Open a terminal and create an environment called, for example, **scp36**
+    by entering the following command:
 
+    .. sourcecode:: bash
 
-2.  Install the version of Anaconda which you downloaded, following the instructions on the download page.
-
-
-3. open a terminal and create an environment called, for example, **scp36**
-by entering the following command:
-
-.. sourcecode:: bash
-
-	$ conda create -n scp36 python=3.6
+	    $ conda create -n scp36 python=3.6
 
 
-4. switch to this environment
+4.  Switch to this environment:
 
-On WINDOWS, you should use ``activate scp36``.
+    On WINDOWS, you should use ``activate scp36``.
 
-On LINUX or macOS,  ``source activate scp36``.
+    On LINUX or macOS,  ``source activate scp36``.
 
-.. sourcecode:: bash
+    .. sourcecode:: bash
 
-	$ source activate scp36
-
-
-You can make it permanent by putting this command in you ``bash_profile``
-(MAC).
-
-..todo::
-
-    what's the equivalent for windows???
+	    $ source activate scp36
 
 
-4. If during set up or runtime, some package appear to miss, just install them
-using:
+    You can make it permanent by putting this command in you ``bash_profile``
+    (MAC).
 
-.. sourcecode:: bash
+    .. todo::
 
-	$ conda install -n scp36 <pkgname>
+        what's the equivalent for windows???
+
+4.  If during set up or runtime, some packages with name <pkgname> appear to
+    be missing, just install them using:
+
+    .. sourcecode:: bash
+
+	    $ conda install -n scp36 <pkgname>
 
 
-5. Clone the **spectrochempy** bitbucket repository
+5.  Clone the **spectrochempy** bitbucket repository
 
-.. sourcecode:: bash
+    .. sourcecode:: bash
 
 	$ cd <workspace>
 
