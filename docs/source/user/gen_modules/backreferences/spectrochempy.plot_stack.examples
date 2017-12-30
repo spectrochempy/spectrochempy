@@ -1,0 +1,22 @@
+
+
+Examples using ``spectrochempy.plot_stack``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we create a 3D NDDataset from scratch, and then we plot one section (a 2D plan...">
+
+.. only:: html
+
+    .. figure:: /user/auto_examples/nddataset/images/thumb/sphx_glr_plot_create_dataset_thumb.png
+
+        :ref:`sphx_glr_user_auto_examples_nddataset_plot_create_dataset.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_user_auto_examples_nddataset_plot_create_dataset.py`

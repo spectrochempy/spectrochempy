@@ -1,11 +1,7 @@
 .. _userguide:
 
 User Guide
-##########
-
-
-API (Application Programming Interface)
-=======================================
+==========
 
 The |scpy| **API** is accessible from python shell or IPython.
 

@@ -102,20 +102,13 @@ def plot_multiple(sources, method='scatter', pen=True,
 
     Parameters
     ----------
-
     sources : a list of ndatasets
-
     method : str among [scatter, pen]
-
-    pen : `bool`, optional, default=True
-
+    pen : bool, optional, default:True
         if method is scatter, this flag tells to draw also the lines
         between the marks.
-
     labels : a list of str, optional
-
         labels used for the legend.
-
     **kwargs : other parameters that will be passed to the plot1D function
 
     """
@@ -179,107 +172,68 @@ def plot_1D(source, **kwargs):
         The method can be one among ``pen``, ``bar``,  or ``scatter``
         Default values is ``pen``, i.e., solid lines are drawn.
         To draw a Bar graph, use method: ``bar``.
-        For a Scatter plot, use method: ``scatter`.
+        For a Scatter plot, use method: ``scatter``.
     twinx : :class:`~matplotlib.Axes` instance, optional, default:None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     title: str
         Title of the plot (or subplot) axe.
-
     style : str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
-    reverse: `bool` or None [optional, default= None/False
+    reverse: bool or None [optional, default= None/False
         In principle, coordinates run from left to right, except for wavenumbers
-        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
         will try to guess. But if reverse is set, then this is the
         setting which will be taken into account.
-
-    hold: `bool` [optional, default=`False`]
-
+    hold: bool, optional, default:False
         If true hold the current figure and ax until a new plot is performed.
-
-    data_only: `bool` [optional, default=`False`]
-
+    data_only: bool, optional, default:False
         Only the plot is done. No addition of axes or label specifications
         (current if any or automatic settings are kept.
-
-    imag: `bool` [optional, default=`False`]
-
+    imag: bool, optional, default:False
         Show imaginary part. By default only the real part is displayed.
-
-    show_complex: `bool` [optional, default=`False`]
-
+    show_complex: bool, optional, default:False
         Show both real and imaginary part.
         By default only the real part is displayed.
-
     dpi: int, optional
         the number of pixel per inches
-
     figsize: tuple, optional, default is (3.4, 1.7)
         figure size
-
     fontsize: int, optional
         font size in pixels, default is 10
-
     imag: bool, optional, default False
         By default real part is shown. Set to True to display the imaginary part
-
     xlim: tuple, optional
         limit on the horizontal axis
-
     zlim or ylim: tuple, optional
         limit on the vertical axis
-
     color or c: matplotlib valid color, optional
-
         color of the line #TODO: a list if several line
-
     linewidth or lw: float, optional
-
         line width
-
     linestyle or ls: str, optional
-
         line style definition
-
     xlabel: str, optional
         label on the horizontal axis
-
     zlabel or ylabel: str, optional
         label on the vertical axis
-
     showz: bool, optional, default=True
         should we show the vertical axis
-
     plot_model:Bool,
-
         plot model data if available
-
     modellinestyle or modls: str,
-
         line style of the model
-
     offset: float,
-
         offset of the model individual lines
-
     commands: str,
-
         matplotlib commands to be executed
-
     show_zero: boolean, optional
-
         show the zero basis
-
     output: str,
-
         name of the file to save the figure
-
     vshift: float, optional
         vertically shift the line from its baseline
-
-
     kwargs : additional keywords
 
     """

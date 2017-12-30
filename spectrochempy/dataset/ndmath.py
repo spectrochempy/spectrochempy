@@ -47,7 +47,7 @@ get_name = lambda x: str(x.name if hasattr(x, 'name') else x)
 
 class NDMath(object):
     """
-    This class provides the math functionality to |NDDArray| or |Coord|.
+    This class provides the math functionality to |NDArray| or |Coord|.
 
     Below is a list of mathematical functions (numpy) implemented (or
     planned for implementation)

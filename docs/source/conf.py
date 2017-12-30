@@ -408,7 +408,7 @@ def setup(app):
 plot_gallery = True
 
 sphinx_gallery_conf = {
-    'backreferences_dir': 'gen_modules/backreferences',
+    'backreferences_dir': 'user/gen_modules/backreferences',
     'doc_module': ('spectrochempy'),
     'reference_url': {
         'spectrochempy': None,
@@ -418,10 +418,10 @@ sphinx_gallery_conf = {
     },
 
     # path to the examples scripts
-    'examples_dirs': 'examples',
+    'examples_dirs': 'user/examples',
 
     # path where to save gallery generated examples
-    'gallery_dirs': 'auto_examples',
+    'gallery_dirs': 'user/auto_examples',
     'expected_failing_examples': [],
 
 }

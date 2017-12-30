@@ -6,10 +6,6 @@ Welcome to the |scpy| documentation!
 :release: |release|
 :version: |version| (|today|)
 
-.. contents::
-
-.. _main_introduction:
-
 Introduction
 ============
 
@@ -41,8 +37,6 @@ running on Linux, Windows or OS X.
     `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
 
-.. _main_intallation:
-
 Installation
 ============
 
@@ -51,8 +45,6 @@ Installation
 
     install
 
-
-.. _main_license:
 
 License
 =======
@@ -63,10 +55,8 @@ License
     CeCILL-B FREE SOFTWARE LICENSE AGREEMENT <license>
 
 
-.. _main_documentation:
-
 Documentation
-===============
+=============
 
 Last updated Html documentation is always available there:
 
@@ -75,58 +65,35 @@ Last updated Html documentation is always available there:
 .. Pdf documentation can also be downloaded there:
 
 
-.. _main_user_documentation:
-
 User Documentation
-==================
+------------------
 
 .. toctree::
     :maxdepth: 2
 
-    user/index
-
-.. _main_api:
-
-API Reference
-=============
-
-.. toctree::
-    :maxdepth: 1
-
-    api/generated/index
-
-
-.. _gallery_of_examples:
-
-Gallery of examples
-=====================
-
-.. toctree::
-    :maxdepth: 2
-
-    auto_examples/index
-
-
-.. _main_issue_tracker:
-
-Issue Tracker
-==============
-
-You find a problem, want to suggest enhancement or want to look at the current
-issues and milestones, you can go there:
-
-* `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
+    user/userguide/index
+    user/tutorial/index
+    user/api/generated/index
+    user/auto_examples/index
+    user/faq
 
 
 Developper documentation
-========================
-.. _main_developper:
-
+------------------------
 
 .. toctree::
     :maxdepth: 2
 
     dev/index
+
+
+Issue Tracker
+=============
+
+You find a problem, want to suggest enhancement or want to look at the current
+issues and milestones, you can go there:
+
+* `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
 
 See also
@@ -138,20 +105,16 @@ See also
     seealso
 
 
-.. _main_changelog:
-
 Changes in the last release
-=============================
+===========================
 .. toctree::
     :maxdepth: 2
 
     changelog
 
 
-.. _main_citing:
-
 Citing |scpy|
-===============
+=============
 
 When using |scpy| for your own work, you are kindly requested to cite it this
 way::

@@ -1,0 +1,94 @@
+
+
+Examples using ``spectrochempy.datadir.path``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /user/auto_examples/analysis/images/thumb/sphx_glr_plot_efa_thumb.png
+
+        :ref:`sphx_glr_user_auto_examples_analysis_plot_efa.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_user_auto_examples_analysis_plot_efa.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform a baseline correction of a 2D NDDataset interactively, using the `m...">
+
+.. only:: html
+
+    .. figure:: /user/auto_examples/nddataset/images/thumb/sphx_glr_plot_baseline_correction_thumb.png
+
+        :ref:`sphx_glr_user_auto_examples_nddataset_plot_baseline_correction.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_user_auto_examples_nddataset_plot_baseline_correction.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Here we explain how to display and perform basic processing of NMR file">
+
+.. only:: html
+
+    .. figure:: /user/auto_examples/nmr/images/thumb/sphx_glr_plot_nmr_intro_thumb.png
+
+        :ref:`sphx_glr_user_auto_examples_nmr_plot_nmr_intro.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_user_auto_examples_nmr_plot_nmr_intro.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Here we load an experimental SPG file (OMNIC) and plot it.">
+
+.. only:: html
+
+    .. figure:: /user/auto_examples/read/images/thumb/sphx_glr_plot_read_IR_from_omnic_thumb.png
+
+        :ref:`sphx_glr_user_auto_examples_read_plot_read_IR_from_omnic.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_user_auto_examples_read_plot_read_IR_from_omnic.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we load a NMR dataset (in the Bruker format) and plot it.">
+
+.. only:: html
+
+    .. figure:: /user/auto_examples/read/images/thumb/sphx_glr_plot_read_nmr_from_bruker_thumb.png
+
+        :ref:`sphx_glr_user_auto_examples_read_plot_read_nmr_from_bruker.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_user_auto_examples_read_plot_read_nmr_from_bruker.py`

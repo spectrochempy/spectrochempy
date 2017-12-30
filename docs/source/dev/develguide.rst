@@ -15,15 +15,16 @@ version of python, *e.g.*, 3.x but this has not yet been tested.
 For sure, it will not work for python 2.7.x and no attempt to get such
 compatibility will be made.
 
-1.  **Install** ***anaconda***
+#.  Install Anaconda
+
     Go to `Anaconda donwload website <https://www.anaconda.com/download/>`_ the
     and choose your platform. Download one of the available graphical
     installer, *e.g.*, the 3.6 or + version.
 
-2.  Install the version of Anaconda which you downloaded, following the
-    instructions on the download page.
+#.  Install the version of Anaconda which you just downloaded, following
+    the instructions on the download page.
 
-3.  Open a terminal and create an environment called, for example, **scp36**
+#.  Open a terminal and create an environment called, for example, **scp36**
     by entering the following command:
 
     .. sourcecode:: bash
@@ -31,7 +32,7 @@ compatibility will be made.
 	    $ conda create -n scp36 python=3.6
 
 
-4.  Switch to this environment:
+#.  Switch to this environment:
 
     On WINDOWS, you should use ``activate scp36``.
 
@@ -49,7 +50,7 @@ compatibility will be made.
 
         what's the equivalent for windows???
 
-4.  If during set up or runtime, some packages with name <pkgname> appear to
+#.  If during set up or runtime, some packages with name <pkgname> appear to
     be missing, just install them using:
 
     .. sourcecode:: bash
@@ -57,60 +58,73 @@ compatibility will be made.
 	    $ conda install -n scp36 <pkgname>
 
 
-5.  Clone the **spectrochempy** bitbucket repository
+#.  Git clone the **spectrochempy** bitbucket repository
 
     .. sourcecode:: bash
 
-	$ cd <workspace>
+	    $ cd <workspace>
 
-where <workspace> is you programming workspace (any folder you like)
+    where <workspace> is you programming workspace (any folder you like)
 
-.. sourcecode:: bash
+    .. sourcecode:: bash
 
-	$ git clone git@bitbucket.org:spectrocat/spectrochempy.git
-
-
-6. Switch to the ``spectrchempy`` directory
-
-.. sourcecode:: bash
-
-	$ cd <wokspace>/spectrochempy
+	    $ git clone git@bitbucket.org:spectrocat/spectrochempy.git
 
 
-7. Get the packages necessary for running |scpy| of all required package:
+#.  Switch to the ``spectrchempy`` directory
 
-.. sourcecode:: bash
+    .. sourcecode:: bash
 
-    $ conda install -y -\-file requirements.txt
-
-6. Install the spectrochempy package
-
-Execute the setup.py in developper mode
-
-.. sourcecode:: bash
-
-	$ python setup.py develop
+	    $ cd <wokspace>/spectrochempy
 
 
-or use the pip command in developper mode (flag `-e`)
+#.  Get the packages necessary for running |scpy| of all required package:
 
-.. sourcecode:: bash
+    .. sourcecode:: bash
 
-	$ pip install -e .
+        $ conda install -y -\-file requirements.txt
 
+#. 	Install the spectrochempy package
 
+	Execute the setup.py in developper mode
+
+    .. sourcecode:: bash
+
+	    $ python setup.py develop
+
+    or use the pip command in developper mode (flag `-e`)
+
+    .. sourcecode:: bash
+
+	    $ pip install -e .
+
+The only problem, with the above procedure, is that you can commit change
+made of the application locally you won't be able to push any changes to the
+``origin`` repository if the maintainer do not give read access to it.
+
+To be able to contribute, you will need first to create you own fork of the
+|scpy| repository based on bitbucket. And then from your fork, you can
+create pull request to the main repository.
+
+Create a fork repository
+------------------------
+
+The simplest way is to perform this operation on the bitbucket web site.
+
+TO BE CONTINUED
 
 Testing SpectroChemPy
 ---------------------
 
-Tests for SpectroChemPy are executed using pytest.
+Tests for SpectroChemPy are executed using
+`pytest <https://docs.pytest.org/en/latest/>`_.
 It should then be present on the system.
 
 .. sourcecode:: bash
 
 	$ conda install pytest
 
-In order to accelerate the tests, it is useful to install the plugin
+In order to accelerate the tests, it may be useful to install the plugin
 ``pytest-xdist`` for parallelization of the tests.
 
 .. sourcecode:: bash

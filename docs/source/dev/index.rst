@@ -26,20 +26,21 @@ Packages
 ~~~~~~~~
 
 .. autosummary::
-   :toctree:
-   :template: module.rst
+    :toctree: generated/
+    :template: module.rst
 
-   spectrochempy.core
-   spectrochempy.databases
-   spectrochempy.dataset
-   spectrochempy.units
-   spectrochempy.utils
+    spectrochempy.dataset
+    spectrochempy.core
+    spectrochempy.units
+    spectrochempy.databases
+    spectrochempy.utils
+
 
 Modules
 ~~~~~~~~~~
 
 .. autosummary::
-   :toctree:
+   :toctree: generated/
    :template: module.rst
 
    spectrochempy.application

@@ -1,0 +1,22 @@
+
+
+Examples using ``spectrochempy.ur``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Here we explain how to display and perform basic processing of NMR file">
+
+.. only:: html
+
+    .. figure:: /user/auto_examples/nmr/images/thumb/sphx_glr_plot_nmr_intro_thumb.png
+
+        :ref:`sphx_glr_user_auto_examples_nmr_plot_nmr_intro.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_user_auto_examples_nmr_plot_nmr_intro.py`

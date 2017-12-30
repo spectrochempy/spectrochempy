@@ -1,0 +1,22 @@
+
+
+Examples using ``spectrochempy.upload_IRIS``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /user/auto_examples/analysis/images/thumb/sphx_glr_plot_pca_iris_thumb.png
+
+        :ref:`sphx_glr_user_auto_examples_analysis_plot_pca_iris.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_user_auto_examples_analysis_plot_pca_iris.py`

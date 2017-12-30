@@ -58,6 +58,8 @@ def makename(package, module):
 
 def write_file(name, text, opts):
     """Write the output file for module/package <name>."""
+    if name == 'spectrochempy':
+        return
     fname = os.path.join(opts.destdir, '%s.%s' % (name, opts.suffix))
     if opts.dryrun:
         print('Would create file %s.' % fname)

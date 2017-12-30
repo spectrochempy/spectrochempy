@@ -46,7 +46,7 @@ DOCDIR = os.path.join(
 
 PROJECT = "spectrochempy"
 SOURCE =   os.path.join(DOCDIR, 'source')
-API = os.path.join(SOURCE, 'api', 'generated')
+API = os.path.join(SOURCE, 'user', 'api', 'generated')
 DEVAPI = os.path.join(SOURCE, 'dev', 'generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT, '~doctrees')
