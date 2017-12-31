@@ -495,7 +495,7 @@ def _read_spa(source, filename):
                     allhistories.append(history)
                     gotinfos[2] = True
 
-                elif key == False:
+                elif not key:
                     break
 
                 pos = pos + 16

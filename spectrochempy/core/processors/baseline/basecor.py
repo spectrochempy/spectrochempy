@@ -168,10 +168,10 @@ class BaselineCorrection(HasTraits):
         # most of the time we need sorted axis, so let's do it now
         coords = new.coordset(-1)
 
-        sorted = False
+        is_sorted = False
         if new.coordset(-1).is_reversed:
             new.sort(axis=-1, inplace=True)
-            sorted = True
+            is_sorted = True
 
         coords = new.coordset(-1)
         baseline = np.zeros_like(new)
@@ -255,7 +255,7 @@ class BaselineCorrection(HasTraits):
         new.data = new.data - baseline
 
         # eventually sort back to the original order
-        if sorted:
+        if is_sorted:
             new.sort(axis=-1, inplace=True, descend=True)
 
         new.history = str(new.modified) + \

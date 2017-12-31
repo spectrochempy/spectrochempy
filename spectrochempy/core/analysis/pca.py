@@ -199,9 +199,9 @@ class PCA(HasTraits):
         s += '   \t\tof cov(X)\t\t per PC\t' \
              '     variance\n'
         for i in range(n_pc):
-            tuple = (
+            tup = (
             i, self.ev.data[i], self.ev_ratio.data[i], self.ev_cum.data[i])
-            s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tuple)
+            s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tup)
 
         return s
 
