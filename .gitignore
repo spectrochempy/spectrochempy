@@ -10,6 +10,8 @@ target/
 
 # Spyder project
 .spyderproject
+.spyproject
+
 
 # Example ipython notebook checkpoints
 *.ipynb_checkpoints/
@@ -40,11 +42,12 @@ cov/
 
 # data
 essai.scp
-docs/source/auto_examples/
-docs/source/gen_modules/
-docs/source/modules/
-docs/source/savefig/
-docs/source/_templates_old
+docs/user/auto_examples
+docs/user/gen_modules
+docs/modules/
+docs/savefig/
+docs/_templates_old
+scpy.svg
 *.pyc
 
 *.sample
@@ -94,7 +97,5 @@ recipes/spectrochempy/linux-32
 recipes/spectrochempy/linux-64
 recipes/spectrochempy/linux-aarch64
 *.tar.bz2
-docs/source/user/auto_examples
-.spyproject
-docs/source/user/gen_modules
-scpy.svg
+
+

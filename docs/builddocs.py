@@ -41,15 +41,14 @@ preferences.log_level = ERROR
 
 SERVER = os.environ.get('SERVER_FOR_LCS', None)
 
+PROJECT =  "spectrochempy"
+
 DOCDIR = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
-
-PROJECT =  "spectrochempy"
-SOURCE =   os.path.join(DOCDIR)
-API =      os.path.join(SOURCE, 'user', 'api', 'generated')
-DEVAPI =   os.path.join(SOURCE, 'dev', 'generated')
-BUILDDIR = os.path.join(DOCDIR, '..','%s_doc'%PROJECT)
-DOCTREES = os.path.join(DOCDIR, '..','%s_doc'%PROJECT, '~doctrees')
+API =      os.path.join(DOCDIR, 'user', 'api', 'generated')
+DEVAPI =   os.path.join(DOCDIR, 'dev', 'generated')
+BUILDDIR = os.path.join(DOCDIR, '..', '..', '%s_doc'%PROJECT)
+DOCTREES = os.path.join(DOCDIR, '..', '..', '%s_doc'%PROJECT, '~doctrees')
 
 
 def gitcommands():
@@ -140,7 +139,7 @@ def make_docs(*args):
 
         print('building %s documentation (version: %s)'%(builder,
                                                          version) )
-        srcdir = confdir = SOURCE
+        srcdir = confdir = DOCDIR
         outdir = "{0}/{1}".format(BUILDDIR, builder)
         doctreedir = "{0}/~doctrees".format(BUILDDIR)
 
@@ -214,8 +213,8 @@ def clean():
     shutil.rmtree(BUILDDIR + '/pdf', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/latex', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
-    shutil.rmtree(SOURCE + '/auto_examples', ignore_errors=True)
-    shutil.rmtree(SOURCE + '/gen_modules', ignore_errors=True)
+    shutil.rmtree(DOCDIR + '/auto_examples', ignore_errors=True)
+    shutil.rmtree(DOCDIR + '/gen_modules', ignore_errors=True)
     shutil.rmtree(DEVAPI, ignore_errors=True)
     shutil.rmtree(API, ignore_errors=True)
 
@@ -229,9 +228,9 @@ def make_dirs():
                   os.path.join(BUILDDIR, 'html'),
                   os.path.join(BUILDDIR, 'latex'),
                   os.path.join(BUILDDIR, 'pdf'),
-                  os.path.join(SOURCE, '_static'),
-                  os.path.join(SOURCE, 'dev', 'generated'),
-                  os.path.join(SOURCE, 'api', 'generated')
+                  os.path.join(DOCDIR, '_static'),
+                  os.path.join(DOCDIR, 'dev', 'generated'),
+                  os.path.join(DOCDIR, 'user', 'api', 'generated')
                   ]
     for d in build_dirs:
         try:
