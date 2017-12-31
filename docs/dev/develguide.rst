@@ -17,86 +17,86 @@ compatibility will be made.
 
 #.  Install Anaconda
 
-    Go to `Anaconda donwload website <https://www.anaconda.com/download/>`_ the
-    and choose your platform. Download one of the available graphical
-    installer, *e.g.*, the 3.6 or + version.
+	Go to `Anaconda download website <https://www.anaconda.com/download/>`_ the
+	and choose your platform. Download one of the available graphical
+	installer, *e.g.*, the 3.6 or + version.
 
 #.  Install the version of Anaconda which you just downloaded, following
-    the instructions on the download page.
+	the instructions on the download page.
 
 #.  Open a terminal and create an environment called, for example, **scp36**
-    by entering the following command:
+	by entering the following command:
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-	    $ conda create -n scp36 python=3.6
+		$ conda create -n scp36 python=3.6
 
 
 #.  Switch to this environment:
 
-    On WINDOWS, you should use ``activate scp36``.
+	On WINDOWS, you should use ``activate scp36``.
 
-    On LINUX or macOS,  ``source activate scp36``.
+	On LINUX or macOS,  ``source activate scp36``.
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-	    $ source activate scp36
+		$ source activate scp36
 
 
-    You can make it permanent by putting this command in you ``bash_profile``
-    (MAC).
+	You can make it permanent by putting this command in you ``bash_profile``
+	(MAC).
 
-    .. todo::
+	.. todo::
 
-        what's the equivalent for windows???
+		what's the equivalent for windows???
 
 #.  If during set up or runtime, some packages with name <pkgname> appear to
-    be missing, just install them using:
+	be missing, just install them using:
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-	    $ conda install -n scp36 <pkgname>
+		$ conda install -n scp36 <pkgname>
 
 
 #.  Git clone the **spectrochempy** bitbucket repository
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-	    $ cd <workspace>
+		$ cd <workspace>
 
-    where <workspace> is you programming workspace (any folder you like)
+	where <workspace> is you programming workspace (any folder you like)
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-	    $ git clone git@bitbucket.org:spectrocat/spectrochempy.git
+		$ git clone git@bitbucket.org:spectrocat/spectrochempy.git
 
 
-#.  Switch to the ``spectrchempy`` directory
+#.  Switch to the ``spectrochempy`` directory
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-	    $ cd <wokspace>/spectrochempy
+		$ cd <workspace>/spectrochempy
 
 
 #.  Get the packages necessary for running |scpy| of all required package:
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-        $ conda install -y -\-file requirements.txt
+		$ conda install -y -\-file requirements.txt
 
 #. 	Install the spectrochempy package
 
 	Execute the setup.py in developper mode
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-	    $ python setup.py develop
+		$ python setup.py develop
 
-    or use the pip command in developper mode (flag `-e`)
+	or use the pip command in developper mode (flag `-e`)
 
-    .. sourcecode:: bash
+	.. sourcecode:: bash
 
-	    $ pip install -e .
+		$ pip install -e .
 
 The only problem, with the above procedure, is that you can commit change
 made of the application locally you won't be able to push any changes to the
@@ -143,7 +143,7 @@ from inside the main spectrochempy directory (where the folder ``tests`` resides
 
 Currently it is not possible to use arguments in this command line, as they
 will be interpreted by spectrochempy and then produce errors.
-To add arguments/options to pytest, use the ``pystest.ini`` file in the ``tests`` folder.
+To add arguments/options to pytest, use the ``pytest.ini`` file in the ``tests`` folder.
 
 
 Compiling the docs
@@ -163,15 +163,15 @@ to rebuild the doc, just do:
 
 .. sourcecode:: bash
 
-    $cd docs
-    $python builddocs.py clean html
+	$cd docs
+	$python builddocs.py clean html
 
 or to update it after some changes:
 
 .. sourcecode:: bash
 
-    $cd docs
-    $python builddocs.py html
+	$cd docs
+	$python builddocs.py html
 
 The generated file are located in a directory (spectrochempy_doc) at the same
 level as the
@@ -180,8 +180,8 @@ spectrochempy directory.
 To display the documentation (on mac. For widow the command `start` should
 work or something equivalent on linux):
 
-    $cd ../../spectrochempy_doc/html
-    $open index.html
+	$cd ../../spectrochempy_doc/html
+	$open index.html
 
 you can also double-click on the index.html file in your file explorer (may
 be simpler!).

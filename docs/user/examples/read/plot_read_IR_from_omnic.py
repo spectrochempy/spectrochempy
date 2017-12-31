@@ -1,7 +1,7 @@
 # coding: utf-8
 """
-Loading an IR (omnic SPG) exerimental file
-===========================================
+Loading an IR (omnic SPG) experimental file
+============================================
 
 Here we load an experimental SPG file (OMNIC) and plot it.
 
@@ -16,7 +16,7 @@ import spectrochempy as scp
 datadir = scp.datadir.path
 
 dataset = scp.NDDataset.read_omnic(os.path.join(datadir,
-                                           'irdata', 'NH4Y-activation.SPG'))
+                                              'irdata', 'NH4Y-activation.SPG'))
 
 dataset.plot_stack(style='paper')
 scp.show()

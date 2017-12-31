@@ -7,63 +7,46 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+"""
+SpectroChemPy documentation build configuration file
 
+"""
 
-#
-# SpectroChemPy documentation build configuration file, created by
-# sphinx-quickstart on Sat Sep 29 21:37:47 2012.
-#
-
-global doc_building
-doc_building = True
-
-import sys, os
+import sys
 import sphinx_rtd_theme
-import sphinx_gallery
-
 import spectrochempy
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
-# documentation general, use os.path.abspath to make it absolute, like shown here.
-# sys.path.insert(0, os.path.abspath('.'))
+# documentation general, use os.path.abspath to make it absolute, like shown
+# here : sys.path.insert(0, os.path.abspath('.'))
 
-# -- General configuration -----------------------------------------------------
+# -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
 
-# Add any Sphinx extension module names here, as strings. They can be extensions
-# coming w
-# ith Sphinx (named 'sphinx.ext.*') or your custom ones.
+# Add any Sphinx extension module names here, as strings.
+# They can be extensions coming with Sphinx (named 'sphinx.ext.*') or your
+# custom ones.
 
 # sys.path.append(os.path.abspath('../sphinxext'))
 
 # hack to make import
 sys._called_from_sphinx = True
 
-extensions = [
-    'sphinx.ext.mathjax',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.todo',
-    'matplotlib.sphinxext.plot_directive',
+extensions = ['sphinx.ext.mathjax', 'sphinx.ext.autosummary',
+    'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode',
+    'sphinx.ext.todo', 'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_console_highlighting',
-    'IPython.sphinxext.ipython_directive',
-    #'sphinx.ext.napoleon',
-    'numpydoc',
-    'sphinx_gallery.gen_gallery',
-    'nbsphinx',
+    'IPython.sphinxext.ipython_directive',  # 'sphinx.ext.napoleon',
+    'numpydoc', 'sphinx_gallery.gen_gallery', 'nbsphinx',
     'spectrochempy.sphinxext.autodocsumm',
-    'spectrochempy.sphinxext.traitlets_sphinxdoc',
-]
+    'spectrochempy.sphinxext.traitlets_sphinxdoc', ]
 
 # Numpy autodoc attributes
 numpydoc_show_class_members = False
-numpydoc_use_plots =  True
+numpydoc_use_plots = True
 numpydoc_class_members_toctree = True
 
 # # Napoleon settings
@@ -116,7 +99,8 @@ today_fmt = '%B %d, %Y'
 # directories to ignore when looking for source files.
 exclude_patterns = ['**.ipynb_checkpoints']
 
-# The reST default role (used for this markup: `text`) to use for all documents.
+# The reST default role (used for this markup: `text`) to use for all
+# documents.
 default_role = 'obj'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
@@ -141,7 +125,7 @@ pygments_style = 'sphinx'
 
 from spectrochempy.utils.rstutils import rst_epilog
 
-# -- Options for HTML output ---------------------------------------------------
+# -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -177,7 +161,6 @@ html_logo = '_static/scpy.png'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -225,7 +208,7 @@ htmlhelp_basename = 'spectrochempydoc'
 
 trim_doctests_flags = True
 
-# -- Options for LaTeX output --------------------------------------------------
+# -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
@@ -241,11 +224,11 @@ latex_elements = {
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
-    ('index', 'spectrochempy.tex', 'SpectroChemPy Documentation',
-     'LCS', 'manual'),
-]
+# (source start file, target name, title, author, documentclass  [
+# howto/manual]).
+latex_documents = [(
+'index', 'spectrochempy.tex', 'SpectroChemPy Documentation', 'LCS',
+'manual'), ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -268,29 +251,25 @@ latex_logo = "_static/logo.png"
 # latex_domain_indices = True
 
 
-# -- Options for manual page output --------------------------------------------
+# -- Options for manual page output -------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'spectrochempy', 'SpectroChemPy Documentation',
-     ['LCS'], 1)
-]
+    ('index', 'spectrochempy', 'SpectroChemPy Documentation', ['LCS'], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
 
 
-# -- Options for Texinfo output ------------------------------------------------
+# -- Options for Texinfo output -----------------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
-    ('index', 'spectrochempy', 'SpectroChemPy Documentation',
-     'LCS', 'SpectroChemPy', 'Online description of project.',
-     'Miscellaneous'),
-]
+texinfo_documents = [(
+'index', 'spectrochempy', 'SpectroChemPy Documentation', 'LCS',
+'SpectroChemPy', 'Online description of project.', 'Miscellaneous'), ]
 
 # Documents to append as an appendix to all manuals.
 # texinfo_appendices = []
@@ -302,7 +281,7 @@ texinfo_documents = [
 # texinfo_show_urls = 'footnote'
 
 
-# -- Options for Epub output ---------------------------------------------------
+# -- Options for Epub output --------------------------------------------------
 
 # Bibliographic Dublin Core info.
 epub_title = 'SpectroChemPy'
@@ -346,11 +325,12 @@ epub_copyright = copyright
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None),
-                       'pytest': ('http://pytest.org/latest/', None),
-                       'ipython': (
-                           'http://ipython.readthedocs.org/en/stable/', None),
-                       'numpy': ('http://docs.scipy.org/doc/numpy/', None)}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3.6', None),
+    'pytest': ('http://pytest.org/latest/', None),
+    'ipython': ('http://ipython.readthedocs.org/en/stable/', None),
+    'numpy': ('http://docs.scipy.org/doc/numpy/', None)
+}
 
 
 def linkcode_resolve(domain, info):
@@ -359,7 +339,9 @@ def linkcode_resolve(domain, info):
     if not info['module']:
         return None
     filename = info['module'].replace('.', '/')
-    return "https://bitbucket.org/spectrocat/spectrochempy/src/spectrochempy/%s.py" % filename
+    return \
+    "https://bitbucket.org/spectrocat/spectrochempy/src/spectrochempy/%s.py" \
+    % filename
 
 
 # ----------------
@@ -368,26 +350,22 @@ def linkcode_resolve(domain, info):
 
 autosummary_generate = True
 
-autoclass_content = 'both'   #Both the class’ and the __init__ method’s
-                        # docstring are concatenated and inserted.
+autoclass_content = 'both'  # Both the class’ and the __init__ method’s
+# docstring are concatenated and inserted.
 
 autodoc_default_flags = ['autosummary']
 
 exclusions = (
-     'with_traceback', 'with_traceback',
-               'observe', 'unobserve', 'observe', 'cross_validation_lock',
-               'unobserve_all', 'class_config_rst_doc', 'class_config_section',
-               'class_get_help', 'class_print_help',
-               'section_names', 'update_config',
-               'clear_instance', 'document_config_options', 'flatten_flags',
-               'generate_config_file', 'initialize_subcommand', 'initialized',
-               'instance', 'json_config_loader_class', 'launch_instance',
-               'load_config_file', 'parse_command_line', 'print_alias_help',
-               'print_description', 'print_examples', 'print_flag_help',
-               'print_help', 'print_subcommands', 'print_version',
-               'python_config_loader_class',
-               'raises',
-              )
+    'with_traceback', 'with_traceback', 'observe', 'unobserve', 'observe',
+    'cross_validation_lock', 'unobserve_all', 'class_config_rst_doc',
+    'class_config_section', 'class_get_help', 'class_print_help',
+    'section_names', 'update_config', 'clear_instance',
+    'document_config_options', 'flatten_flags', 'generate_config_file',
+    'initialize_subcommand', 'initialized', 'instance',
+    'json_config_loader_class', 'launch_instance', 'load_config_file',
+    'parse_command_line', 'print_alias_help', 'print_description',
+    'print_examples', 'print_flag_help', 'print_help', 'print_subcommands',
+    'print_version', 'python_config_loader_class', 'raises',)
 
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
@@ -397,7 +375,7 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
-    app.add_stylesheet("spectrochempy.css") # also can be a full URL
+    app.add_stylesheet("spectrochempy.css")  # also can be a full URL
     # app.add_stylesheet("ANOTHER.css")
     # app.add_stylesheet("AND_ANOTHER.css")
 
@@ -409,10 +387,8 @@ plot_gallery = True
 
 sphinx_gallery_conf = {
     'backreferences_dir': 'user/gen_modules/backreferences',
-    'doc_module': ('spectrochempy'),
-    'reference_url': {
-        'spectrochempy': None,
-        'matplotlib': 'https://matplotlib.org',
+    'doc_module': ('spectrochempy', ), 'reference_url': {
+        'spectrochempy': None, 'matplotlib': 'https://matplotlib.org',
         'numpy': 'https://docs.scipy.org/doc/numpy',
         'sklearn': 'http://scikit-learn.org/stable',
     },
@@ -422,6 +398,7 @@ sphinx_gallery_conf = {
 
     # path where to save gallery generated examples
     'gallery_dirs': 'user/auto_examples',
-    'expected_failing_examples': [],
+                        'user/expected_failing_examples':
+        [],
 
 }

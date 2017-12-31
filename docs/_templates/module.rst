@@ -13,6 +13,11 @@
 
    .. autofunction:: {{ item }}
 
+   .. include:: ../../gen_modules/backreferences/{{fullname}}.{{item}}.examples
+
+   .. raw:: html
+
+       <div style='clear:both'></div>
 
    {%- endfor %}
    {% endif %}

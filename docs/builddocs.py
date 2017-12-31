@@ -44,12 +44,12 @@ SERVER = os.environ.get('SERVER_FOR_LCS', None)
 DOCDIR = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
 
-PROJECT = "spectrochempy"
-SOURCE =   os.path.join(DOCDIR, 'source')
-API = os.path.join(SOURCE, 'user', 'api', 'generated')
-DEVAPI = os.path.join(SOURCE, 'dev', 'generated')
-BUILDDIR = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT)
-DOCTREES = os.path.join(DOCDIR, '..', '..','%s_doc'%PROJECT, '~doctrees')
+PROJECT =  "spectrochempy"
+SOURCE =   os.path.join(DOCDIR)
+API =      os.path.join(SOURCE, 'user', 'api', 'generated')
+DEVAPI =   os.path.join(SOURCE, 'dev', 'generated')
+BUILDDIR = os.path.join(DOCDIR, '..','%s_doc'%PROJECT)
+DOCTREES = os.path.join(DOCDIR, '..','%s_doc'%PROJECT, '~doctrees')
 
 
 def gitcommands():

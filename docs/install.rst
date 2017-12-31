@@ -54,7 +54,8 @@ use commands for this distribution.
 
 * install the **Anaconda Scientific Python Distribution** : Go to `http://continuum.io/downloads <http://continuum.io/downloads>`_ and follow the instructions for your platform
 
-  if you register as academic member of the university you get interesting add-ons.
+  If you register as academic member of the university you get interesting
+  add-ons.
 
   Finally, see :ref:`conda` for installing the |scpy| conda package.
 
@@ -79,15 +80,16 @@ Very simple, use the following command in a terminal:
 
 .. sourcecode:: bash
 
-	$ conda config –add channels conda-forge
-	$ conda config –add channels fernandezc  #TODO: create a channel spectrocat
-	$ conda install spectrochempy
+   $ conda config –add channels conda-forge
+   $ conda config –add channels fernandezc  #TODO: create a channel spectrocat
+   $ conda install spectrochempy
 
 .. note::
 
-	the conda installer doesn't exist right now. It will be present for version 1.b1.
+   the conda installer doesn't exist right now. It will be present for version
+   1.b1.
 
-	For now, use the method described for developper, here: :ref:`develguide`
+   For now, use the method described for developper, here: :ref:`develguide`
 
 
 .. _pypi:
@@ -99,17 +101,18 @@ Again very simple, use the following command in a terminal:
 
 .. sourcecode:: bash
 
-	$ pip install spectrochempy
+   $ pip install spectrochempy
 
 or to update a previous installation with the latest stable release:
 
 .. sourcecode:: bash
 
-	$ pip install -U spectrochempy
+   $ pip install -U spectrochempy
 
 .. note::
 
-	the Pypi installer doesn't exist right now. It will be present for version 1.b1.
+   the Pypi installer doesn't exist right now. It will be present for version
+   1.b1.
 
 .. _dev:
 

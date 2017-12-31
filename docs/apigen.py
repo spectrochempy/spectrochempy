@@ -15,33 +15,27 @@
     :license: BSD, see LICENSE_SPHINX for details.
 
 """
-#TODO: rewrite something smaller just fitting our present need to generate
+# TODO: rewrite something smaller just fitting our present need to generate
 # the API
 
 from __future__ import print_function
 
 import os
 import sys
-import optparse
 import shutil
-from six import binary_type
 from fnmatch import fnmatch
 
-from sphinx import __display_version__
-from sphinx.quickstart import EXTENSIONS
 from sphinx.util import rst
 from sphinx.util.osutil import FileAvoidWrite, walk
 from traitlets import import_item
 import inspect
 
 # automodule options
-OPTIONS = [
-        'no-members',
-        'no-inherited-members',
-    ]
+OPTIONS = ['no-members', 'no-inherited-members', ]
 
 INITPY = '__init__.py'
-PY_SUFFIXES = set(['.py', '.pyx'])
+PY_SUFFIXES = {'.py', '.pyx'}
+
 
 def makename(package, module):
     """Join package and module with a dot."""
@@ -88,7 +82,7 @@ def format_directive(module, package=None, auto='automodule'):
         directive = '.. currentmodule:: %s\n\n' % item
     else:
         directive = ''
-    directive += '.. %s:: %s\n' % (auto,item)
+    directive += '.. %s:: %s\n' % (auto, item)
     for option in OPTIONS:
         directive += '    :%s:\n' % option
     return directive
@@ -108,21 +102,23 @@ def create_module_file(package, module, opts):
     write_file(makename(package, module), text, opts)
 
 
-def create_package_file(root, master_package, subroot, py_files, opts, subs, is_namespace):
+def create_package_file(root, master_package, subroot, py_files, opts, subs,
+                        is_namespace):
     """Build the text of the file and write the file."""
 
     name = makename(master_package, subroot)
-    _name = name.replace('.','_')
-    text = ".. _api_%s:\n\n"%_name
-    text += format_heading(1,
-                 ('%s package' if not is_namespace else "%s namespace")% name)
+    _name = name.replace('.', '_')
+    text = ".. _api_%s:\n\n" % _name
+    text += format_heading(1, (
+        '%s package' if not is_namespace else "%s namespace") % name)
 
     if opts.modulefirst and not is_namespace:
         text += format_directive(subroot, master_package)
         text += '\n'
 
     # build a list of directories that are subpackages (contain an INITPY file)
-    subs = [sub for sub in subs if os.path.isfile(os.path.join(root, sub, INITPY))]
+    subs = [sub for sub in subs if
+            os.path.isfile(os.path.join(root, sub, INITPY))]
     # if there are some package directories, add a TOC for theses subpackages
     if subs:
         text += format_heading(2, 'Subpackages')
@@ -133,14 +129,12 @@ def create_package_file(root, master_package, subroot, py_files, opts, subs, is_
             text += '   %s.%s\n' % (makename(master_package, subroot), sub)
         text += '\n'
 
-    submods = [os.path.splitext(sub)[0] for sub in py_files
-               if not shall_skip(os.path.join(root, sub), opts)
-               and sub != INITPY
-               ]
+    submods = [os.path.splitext(sub)[0] for sub in py_files if
+               not shall_skip(os.path.join(root, sub), opts) and sub != INITPY]
     if submods:
         text += format_heading(2, 'Submodules')
         if opts.separatemodules:
-            #text += '.. toctree::\n\n'
+            # text += '.. toctree::\n\n'
             text += '.. autosummary::\n'
             text += '   :toctree: \n'
             text += '   :template: module.rst\n\n'
@@ -148,8 +142,8 @@ def create_package_file(root, master_package, subroot, py_files, opts, subs, is_
             for submod in submods:
                 modfile = makename(master_package, makename(subroot, submod))
                 text += '   %s\n' % modfile
-               # create_module_file(master_package,
-               #                    makename(subroot, submod), opts)
+                # create_module_file(master_package,
+                #                    makename(subroot, submod), opts)
         else:
             for submod in submods:
                 modfile = makename(master_package, makename(subroot, submod))
@@ -197,14 +191,14 @@ def shall_skip(module, opts):
 
     # skip if it has a "private" name and this is selected
     filename = os.path.basename(module)
-    if filename != '__init__.py' and filename.startswith('_') and \
-       not opts.includeprivate:
+    if filename != '__init__.py' and filename.startswith(
+            '_') and not opts.includeprivate:
         return True
 
     # skip if it follows some of the exclude pattern
     for pattern in opts.exclude_patterns:
         if fnmatch(module, "*/{}".format(pattern)):
-            if not('*' in pattern or '?' in pattern or '[' in pattern):
+            if not ('*' in pattern or '?' in pattern or '[' in pattern):
                 # check that the file is exactly the pattern
                 if os.path.basename(module) != pattern:
                     continue
@@ -231,33 +225,36 @@ def recurse_tree(rootpath, excludes, opts):
     implicit_namespaces = getattr(opts, 'implicit_namespaces', False)
     for root, subs, files in walk(rootpath, followlinks=followlinks):
         # document only Python module files (that aren't excluded)
-        py_files = sorted(f for f in files
-                          if os.path.splitext(f)[1] in PY_SUFFIXES and
-                          not is_excluded(os.path.join(root, f), excludes))
+        py_files = sorted(f for f in files if os.path.splitext(f)[
+            1] in PY_SUFFIXES and not is_excluded(os.path.join(root, f),
+                                                  excludes))
         is_pkg = INITPY in py_files
         is_namespace = INITPY not in py_files and implicit_namespaces
         if is_pkg:
             py_files.remove(INITPY)
             py_files.insert(0, INITPY)
         elif root != rootpath:
-            # only accept non-package at toplevel unless using implicit namespaces
+            # only accept non-package at toplevel unless using implicit
+            # namespaces
             if not implicit_namespaces:
                 del subs[:]
                 continue
         # remove hidden ('.') and private ('_') directories, as well as
         # excluded dirs
         if includeprivate:
-            exclude_prefixes = ('.','__')
+            exclude_prefixes = ('.', '__')
         else:
             exclude_prefixes = ('.', '_')
-        subs[:] = sorted(sub for sub in subs if not sub.startswith(exclude_prefixes) and
-                         not is_excluded(os.path.join(root, sub), excludes))
+        subs[:] = sorted(sub for sub in subs if not sub.startswith(
+            exclude_prefixes) and not is_excluded(os.path.join(root, sub),
+                                                  excludes))
 
         if is_pkg or is_namespace:
             # we are in a package with something to document
-            if subs or len(py_files) > 1 or not shall_skip(os.path.join(root, INITPY), opts):
-                subpackage = root[len(rootpath):].lstrip(os.path.sep).\
-                    replace(os.path.sep, '.')
+            if subs or len(py_files) > 1 or not shall_skip(
+                    os.path.join(root, INITPY), opts):
+                subpackage = root[len(rootpath):].lstrip(os.path.sep).replace(
+                    os.path.sep, '.')
                 # if this is not a namespace or
                 # a namespace and there is something there to document
                 if not is_namespace or len(py_files) > 0:
@@ -294,7 +291,7 @@ def is_excluded(root, excludes):
     return False
 
 
-def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
+def main(rootpath, destdir='./api/generated', exclude_dirs=[],
          **kwargs):
     """
     Modified version of apidoc
@@ -351,21 +348,12 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
 
     # default options
     opts = Options({
-            'exclude_patterns' : [],
-            'force': True,
-            'tocdepth': 1,
-            'followlinks': False,
-            'dryrun': False,
-            'separatemodules': True,
-            'includeprivate': False,
-            'notoc': True,
-            'noheadings': False,
-            'modulefirst': True,
-            'implicit_namespaces': True,
-            'suffix': 'rst',
-            'developper': False,
-            'genapi': False,
-        })
+        'exclude_patterns': [], 'force': True, 'tocdepth': 1,
+        'followlinks': False, 'dryrun': False, 'separatemodules': True,
+        'includeprivate': False, 'notoc': True, 'noheadings': False,
+        'modulefirst': True, 'implicit_namespaces': True, 'suffix': 'rst',
+        'developper': False, 'genapi': False,
+    })
 
     # get options form kwargs
     opts.update(kwargs)
@@ -385,14 +373,14 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
         create_api_files(rootpath, opts)
         return
 
-    if not os.path.exists(rootpath) :
+    if not os.path.exists(rootpath):
         # try to guess!
         _rootpath = rootpath
         dirname = os.path.dirname(__file__)
         while not os.path.exists(rootpath):
             rootpath = os.path.join(dirname, _rootpath)
             dirname = os.path.dirname(dirname)
-            #print(rootpath)
+            # print(rootpath)
 
     if not os.path.isdir(rootpath) and not opts.genapi:
         print('%s is not a directory.' % rootpath, file=sys.stderr)
@@ -407,6 +395,7 @@ def main(rootpath, destdir='./source/api/generated', exclude_dirs=[],
 
     return True
 
+
 def create_api_files(rootpath, opts):
     """Build the text of the file and write the file."""
     # generate separate file for the members of the api
@@ -416,9 +405,8 @@ def create_api_files(rootpath, opts):
 
     clsmembers = inspect.getmembers(_imported_item)
 
-    members = [m for m in clsmembers if m[0] in _imported_item.__all__ and
-               not m[0].startswith('__')]
-
+    members = [m for m in clsmembers if
+               m[0] in _imported_item.__all__ and not m[0].startswith('__')]
 
     indextemplate = """.. _api_reference_spectrochempy:
 
@@ -483,8 +471,7 @@ Constants
 
 """
 
-    classtemplate = \
-"""{api}.{klass}
+    classtemplate = """{api}.{klass}
 ==============================================================================
 
 .. automodule:: {api}
@@ -498,12 +485,11 @@ Constants
 
    .. raw:: html
 
-	       <div style='clear:both'></div>
+      <div style='clear:both'></div>
 	       
 """
 
-    functemplate = \
-"""{api}.{func}
+    functemplate = """{api}.{func}
 ==============================================================================
 
 .. automodule:: {api}
@@ -514,46 +500,48 @@ Constants
 
    .. raw:: html
 
-           <div style='clear:both'></div>
+       <div style='clear:both'></div>
 
 """
 
-    lconsts = [":%s: %s\n"%m for m in members if type(m[1]) in [int, float,
-                                                   str, bool, tuple]]
+    lconsts = [":%s: %s\n" % m for m in members if
+               type(m[1]) in [int, float, str, bool, tuple]]
     lclasses = []
-    classes = [m[0] for m in members if inspect.isclass(m[1]) and not type(
-        m[1]).__name__=='type' ]
+    classes = [m[0] for m in members if
+               inspect.isclass(m[1]) and not type(m[1]).__name__ == 'type']
     for klass in classes:
         name = "{api}.{klass}".format(api=api, klass=klass)
         text = classtemplate.format(api=api, klass=klass)
         write_file(name, text, opts)
-        lclasses.append(name+'\n')
+        lclasses.append(name + '\n')
 
     lfuncs = []
-    funcs = [m[0] for m in members if inspect.isfunction(m[1]) or
-             inspect.ismethod(m[1])]
+    funcs = [m[0] for m in members if
+             inspect.isfunction(m[1]) or inspect.ismethod(m[1])]
     for func in funcs:
         name = "{api}.{func}".format(api=api, func=func)
         text = functemplate.format(api=api, func=func)
         write_file(name, text, opts)
-        lfuncs.append(name+'\n')
+        lfuncs.append(name + '\n')
 
     _classes = "    ".join(lclasses)
     _funcs = "    ".join(lfuncs)
     _consts = "".join(lconsts)
     _consts = _consts.replace('/Users/christian/Dropbox/D.PROGRAMMES/', '~/')
 
-    text = indextemplate.format(consts= _consts,
-                                preferences = write_prefs(),
-                                classes = "    "+_classes,
-                                funcs = "    "+_funcs)
+    text = indextemplate.format(consts=_consts, preferences=write_prefs(),
+                                classes="    " + _classes,
+                                funcs="    " + _funcs)
     write_file('index', text, opts)
 
-from spectrochempy.sphinxext.traitlets_sphinxdoc import reverse_aliases, \
-    class_config_rst_doc
+
+from spectrochempy.sphinxext.traitlets_sphinxdoc import (reverse_aliases,
+                                                         class_config_rst_doc, )
+
 
 def write_prefs():
     from spectrochempy.application import app
+
     trait_aliases = reverse_aliases(app)
     text = ""
     for c in app._classes_inc_parents():
@@ -561,28 +549,7 @@ def write_prefs():
         text += '\n'
     return text
 
+
 if __name__ == "__main__":
 
-    DOCDIR = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
-    PROJECT = "spectrochempy"
-    SOURCE = os.path.join(DOCDIR, 'source')
-    API = os.path.join(SOURCE, 'api', 'generated')
-    DEVAPI = os.path.join(SOURCE, 'dev', 'generated')
-
-    # generate DEVAPI reference
-    main(PROJECT,
-         tocdepth=1,
-         includeprivate=True,
-         destdir=DEVAPI,
-         exclude_patterns=['api.py'],
-         exclude_dirs=['extern', 'sphinxext', '~misc', 'gui'],
-         )
-
-    # generate API reference
-    main(PROJECT,
-         tocdepth=1,
-         includeprivate=True,
-         destdir=API,
-         genapi=True,
-                )
+    pass

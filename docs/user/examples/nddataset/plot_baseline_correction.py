@@ -12,7 +12,7 @@ NDDataset baseline correction
 ==============================
 
 In this example, we perform a baseline correction of a 2D NDDataset
-interactively, using the `multivariate` method and a `pchip` interpolation.
+interactively, using the ``multivariate`` method and a ``pchip`` interpolation.
 
 """
 
@@ -26,8 +26,8 @@ import os
 ###############################################################################
 # Load data
 
-nd = scp.NDDataset.read_omnic(os.path.join(scp.datadir.path,
-                                           'irdata', 'NH4Y-activation.SPG'))
+nd = scp.NDDataset.read_omnic(
+    os.path.join(scp.datadir.path, 'irdata', 'NH4Y-activation.SPG'))
 
 ###############################################################################
 # Do some slicing to keep only the interesting region
@@ -39,10 +39,8 @@ ndp = (nd - nd[-1])[:, 1290.0:5999.0]
 ###############################################################################
 # Define the BaselineCorrection object.
 
-ibc = scp.BaselineCorrection(ndp, axis=-1,
-                             method='multivariate',
-                             interpolation='pchip',
-                             npc=5, zoompreview=3)
+ibc = scp.BaselineCorrection(ndp, axis=-1, method='multivariate',
+                             interpolation='pchip', npc=5, zoompreview=3)
 
 ###############################################################################
 # Launch the interactive view, using the `BaselineCorrection.run` method:
@@ -56,13 +54,6 @@ scp.show()
 # print the corrected dataset
 
 print(ibc.corrected)
-
-
-
-
-
-
-
 
 # =============================================================================
 if __name__ == '__main__':

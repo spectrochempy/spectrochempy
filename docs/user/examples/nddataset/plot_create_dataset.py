@@ -27,8 +27,8 @@ c0 = np.linspace(200., 300., 3)
 c1 = np.linspace(0., 60., 100)
 c2 = np.linspace(4000., 1000., 100)
 nd_data = np.array([np.array(
-        [np.sin(2. * np.pi * c2 / 4000.) * np.exp(-y / 60) for y in
-         c1]) * t for t in c0])
+    [np.sin(2. * np.pi * c2 / 4000.) * np.exp(-y / 60) for y in c1]) * t for t
+                    in c0])
 
 ###############################################################################
 # Coordinates
@@ -36,20 +36,13 @@ nd_data = np.array([np.array(
 # The `Coord` object allow making an array of coordinates
 # with additional metadata such as units, labels, title, etc
 
-coord0 = scp.Coord(data=c0,
-                   labels=['cold', 'normal', 'hot'],
-                   units="K",
+coord0 = scp.Coord(data=c0, labels=['cold', 'normal', 'hot'], units="K",
                    title='temperature')
 
-coord1 = scp.Coord(data=c1,
-                   labels=None,
-                   units="minutes",
+coord1 = scp.Coord(data=c1, labels=None, units="minutes",
                    title='time-on-stream')
 
-coord2 = scp.Coord(data=c2,
-                   labels=None,
-                   units="cm^-1",
-                   title='wavenumber')
+coord2 = scp.Coord(data=c2, labels=None, units="cm^-1", title='wavenumber')
 
 ###############################################################################
 # Labels can be useful for instance for indexing
@@ -62,11 +55,8 @@ print(a)
 # +++++++++++
 # The |NDDataset| object allow making the array of data with units, etc...
 
-mydataset = scp.NDDataset(nd_data,
-                          coordset=[coord0, coord1, coord2],
-                          title='Absorbance',
-                          units='absorbance'
-                          )
+mydataset = scp.NDDataset(nd_data, coordset=[coord0, coord1, coord2],
+                          title='Absorbance', units='absorbance')
 
 mydataset.description = """Dataset example created for this tutorial. 
 It's a 3-D dataset (with dimensionless intensity : absorbance )"""
