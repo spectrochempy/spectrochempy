@@ -8,7 +8,7 @@
 # =============================================================================
 
 """
-Logo SCP (based on the LCS logo)
+Logo SCPy (based on the LCS logo)
 """
 
 import numpy as np
@@ -19,8 +19,12 @@ from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from spectrochempy.utils import NRed, NBlue
 
 def draw_circle(ax) :
-    circle = plt.Circle((-0.5 + decal, 0.5), .48, edgecolor=contour, fill=True,
-                        clip_on=False, facecolor=background, linewidth=3)
+    circle = plt.Circle((-0.5 + decal, 0.5), .48,
+                        edgecolor=contour,
+                        fill=True,
+                        clip_on=False,
+                        facecolor=background,
+                        linewidth=3)
     ax.add_artist(circle)
 
 
@@ -28,12 +32,14 @@ def plot_fid(ax, start, lim) :
     x = np.linspace(start, lim, 550)
     y = -np.exp(-x / .2) * np.sin(8. * x * np.pi) / 3. + 0.6
     s = 0
-    ax.plot(x[s :] - 1. + decal, y[s :], transform=ax.transAxes, clip_on=False,
+    ax.plot(x[s :] - 1. + decal, y[s :],
+            transform=ax.transAxes,
+            clip_on=False,
             c=contour, lw=3)
     return x, y
 
 
-def write_lcs(ax, decal) :
+def write_scpy(ax, decal) :
     ax.text(0.47, 0.25, 'SCP', color=NBlue, fontsize=62, ha='center',
             va='baseline', alpha=1.0, family=['Calibri', 'sans-serif'],
             weight=999, transform=ax.transAxes)
@@ -54,10 +60,10 @@ ax.set_ylim(0, 1)
 ax.set_axis_off()
 
 contour = '#505080'
-background = '#fff0bb'
+background = (0.98,0.82,0.42)
 draw_circle(ax)
 plot_fid(ax, 0.05, 0.96)
-write_lcs(ax, decal)
+write_scpy(ax, decal)
 
-plt.savefig('../scp.png', dpi=60, transparent=True)
-plt.savefig('scp.svg', transparent=True)
+plt.savefig('../scpy.png', dpi=60, transparent=True)
+plt.savefig('scpy.svg', transparent=True)

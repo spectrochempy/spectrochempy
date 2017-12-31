@@ -12,9 +12,9 @@ running on Linux, Windows or OS X.
 
 #.  A ``NDDataset`` object embedding array of data with labeled axes and
     metadata.
-#.  A ``Project`` manager to work on multiple ``NDDataset``s simultaneoulsly.
+#.  A ``Project`` manager to work on multiple ``NDDataset`` simultaneoulsly.
 #.  ``Units`` and ``Uncertainty`` for ``NDDataset``.
-#.  Mathematical operations over ``NDDataset``s such addition,
+#.  Mathematical operations over ``NDDataset`` such addition,
     multiplication and many more ...
 #.  Import functions to read data from experiments or modelling programs ...
 #.  Display functions such as ``plot`` for 1D or nD datasets ...
@@ -29,10 +29,9 @@ running on Linux, Windows or OS X.
 
 	|scpy| is still experimental and under active development.
 	Its current design is subject to major changes, reorganizations, bugs
-	and crashes!!!. Please report any issues to the `Issue Tracker <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
+	and crashes!!!. Please report any issues to the 
+	`Issue Tracker <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
-
-.. _main_installation:
 
 Installation
 ============
@@ -104,7 +103,6 @@ issues and milestones, you can go there:
 * `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
 
-.. _roadmap:
 Road Map
 ========
 
@@ -112,8 +110,6 @@ The possible roadmap for this project is here:
 
 * `Roadmap <https://bitbucket.org/spectrocat/spectrochempy/wiki/>`_
 
-
-.. _main_citing:
 
 Citing |scpy|
 ============

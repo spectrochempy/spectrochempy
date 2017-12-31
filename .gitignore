@@ -95,3 +95,6 @@ recipes/spectrochempy/linux-64
 recipes/spectrochempy/linux-aarch64
 *.tar.bz2
 docs/source/user/auto_examples
+.spyproject
+docs/source/user/gen_modules
+scpy.svg
