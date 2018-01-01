@@ -159,9 +159,11 @@ class Coord(NDMath, NDArray):
 
     # ------------------------------------------------------------------------
     # hidden properties (for the documentation, only - we remove the docs)
-    # some of the property of NDArray has to be hidden because they are not
-    # useful for this Coord class
+    # some of the property of NDArray has to be hidden because they
+    # are not useful for this Coord class
     # ------------------------------------------------------------------------
+
+    # NDarray methods
 
     @property
     def is_complex(self):
@@ -173,7 +175,8 @@ class Coord(NDMath, NDArray):
 
     @property
     def uncertainty(self):
-        return np.zeros_like(self._data, dtype=float)
+        return super().uncertainty #return np.zeros_like(self._data,
+        # dtype=float)
 
     @uncertainty.setter
     def uncertainty(self, uncertainty):
@@ -181,11 +184,121 @@ class Coord(NDMath, NDArray):
 
     @property
     def T(self):  # no transpose
-        return self
+        raise NotImplementedError
 
     @property
     def shape(self):
         return self._data.shape
+
+    @property
+    def II(self):
+        raise NotImplementedError
+
+    @property
+    def IR(self):
+        raise NotImplementedError
+
+    @property
+    def RI(self):
+        raise NotImplementedError
+
+    @property
+    def RR(self):
+        return self
+
+    @property
+    def date(self):
+        raise NotImplementedError
+
+    @property
+    def has_complex_dims(self):
+        return False
+
+    @property
+    def imag(self):
+        raise NotImplementedError
+
+    @property
+    def real(self):
+        return self
+
+    @property
+    def values(self):
+        return super().values
+
+    @property
+    def uncert_data(self):
+        return super().uncert_data
+
+    @property
+    def masked_data(self):
+        return super().masked_data
+
+    @property
+    def is_uncertain(self):
+        return False
+
+    @property
+    def is_masked(self):
+        return False
+
+    @property
+    def mask(self):
+        return super().mask
+
+    @mask.setter
+    def mask(self, val):
+        pass
+
+            # NDmath methods
+
+    def abs(self, **kwargs):
+        raise NotImplementedError
+
+    def absolute(self, **kwargs):
+        raise NotImplementedError
+
+    def conj(self, **kwargs):
+        raise NotImplementedError
+
+    def conjugate(self, **kwargs):
+        raise NotImplementedError
+
+    def cumprod(self, **kwargs):
+        raise NotImplementedError
+
+    def cumsum(self, **kwargs):
+        raise NotImplementedError
+
+    def mean(self, **kwargs):
+        raise NotImplementedError
+
+    def part(self, **kwargs):
+        raise NotImplementedError
+
+    def pipe(self, **kwargs):
+        raise NotImplementedError
+
+    def prod(self, **kwargs):
+        raise NotImplementedError
+
+    def remove_masks(self, **kwargs):
+        raise NotImplementedError
+
+    def set_complex(self, **kwargs):
+        raise NotImplementedError
+
+    def set_real(self, **kwargs):
+        raise NotImplementedError
+
+    def std(self, **kwargs):
+        raise NotImplementedError
+
+    def sum(self, **kwargs):
+        raise NotImplementedError
+
+    def swapaxes(self, **kwargs):
+        raise NotImplementedError
 
     # ------------------------------------------------------------------------
     # public methods
@@ -301,7 +414,6 @@ class Coord(NDMath, NDArray):
         if out[-1] == '\n':
             out = out[:-1]
         return out
-
 
 # ============================================================================
 # CoordSet
@@ -638,6 +750,11 @@ class CoordSet(HasTraits):
             return CoordSet(coords)
 
     # .........................................................................
+    def __hash__(self):
+        # all instance of this class has same hash, so they can be compared
+        return hash(tuple(self._coords))
+
+        # .........................................................................
     def __len__(self):
         return len(self._coords)
 
@@ -698,7 +815,6 @@ class CoordSet(HasTraits):
     # .........................................................................
     def __eq__(self, other):
         return self._coords == other._coords
-        # TODO: check the case of compatible units
 
     # .........................................................................
     def __ne__(self, other):
