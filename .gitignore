@@ -28,6 +28,12 @@ docs/index.doctree
 *generated
 dist/
 build/
+docs/gen_modules
+docs/user/auto_examples
+docs/user/gen_modules
+docs/modules/
+docs/savefig/
+docs/_templates_old
 
 .DS_Store
 *.log
@@ -42,11 +48,6 @@ cov/
 
 # data
 essai.scp
-docs/user/auto_examples
-docs/user/gen_modules
-docs/modules/
-docs/savefig/
-docs/_templates_old
 scpy.svg
 *.pyc
 
@@ -97,5 +98,6 @@ recipes/spectrochempy/linux-32
 recipes/spectrochempy/linux-64
 recipes/spectrochempy/linux-aarch64
 *.tar.bz2
+
 
 
