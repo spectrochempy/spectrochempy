@@ -481,7 +481,7 @@ Constants
       :inherited-members:
       :show-inheritance:
 
-   .. include:: ../../gen_modules/backreferences/{api}.{klass}.examples
+   .. include:: ../../../gen_modules/backreferences/{api}.{klass}.examples
 
    .. raw:: html
 
@@ -496,7 +496,7 @@ Constants
 
    .. autofunction:: {api}.{func}
       
-   .. include:: ../../gen_modules/backreferences/{api}.{func}.examples
+   .. include:: ../../../gen_modules/backreferences/{api}.{func}.examples
 
    .. raw:: html
 
