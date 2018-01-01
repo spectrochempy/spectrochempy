@@ -761,6 +761,11 @@ class NDDataset(
         # some attrib are not important for equality
         return super(NDDataset, self).__eq__(other, attrs)
 
+    # .........................................................................
+    def __hash__(self):
+        # all instance of this class has same hash, so they can be compared
+        return super().__hash__ + hash(self._coordset)
+
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
