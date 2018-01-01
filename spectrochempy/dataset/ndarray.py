@@ -286,6 +286,11 @@ class NDArray(HasTraits):
                 'meta', 'name', 'title', 'is_complex']
 
     # .........................................................................
+    def __hash__(self):
+        # all instance of this class has same hash, so they can be compared
+        return hash((type(self), self.shape, self._units) )
+
+    # .........................................................................
     def __eq__(self, other, attrs=None):
 
         if not isinstance(other, NDArray):
@@ -420,12 +425,6 @@ class NDArray(HasTraits):
                                           "hypercomplex array "
                                           "is not yet possible")
             self.data[keys] = value
-
-    # .........................................................................
-    def __hash__(self):
-        # all instance of this class has same hash, so they can be compared
-
-        return type(self).__name__ + "1234567890"
 
     # .........................................................................
     def __iter__(self):
