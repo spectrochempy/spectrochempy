@@ -516,8 +516,8 @@ class NDDataset(
             new._mask = np.transpose(new._mask, axes)
         if new.is_uncertain:
             new._uncertainty = np.transpose(new._uncertainty, axes)
-
-        new._coordset._transpose(axes)
+        if new._coordset is not None:
+            new._coordset._transpose(axes)
         new._is_complex = [new._is_complex[axis] for axis in axes]
 
         return new
