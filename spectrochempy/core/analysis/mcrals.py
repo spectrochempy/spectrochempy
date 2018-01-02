@@ -8,9 +8,9 @@
 # =============================================================================
 
 
-__all__ = ['McrAls']
+__all__ = ['MCRALS']
 
-__dataset_methods__ = ['McrAls']
+__dataset_methods__ = ['MCRALS']
 
 import numpy as np
 from traitlets import HasTraits, Instance
@@ -19,7 +19,7 @@ from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.application import log
 
 
-class MCRAlS(HasTraits):
+class MCRALS(HasTraits):
     """Performs MCR-ALS of a dataset knowing the initial C or St matrix
 
     """

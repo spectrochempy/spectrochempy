@@ -9,7 +9,7 @@
 
 # TODO: create tests
 
-__all__ = ['LSTSQ'] #, 'LSTSQNN']
+__all__ = ['LSTSQ'] #, 'NNLS']
 
 import numpy as np
 
@@ -130,7 +130,7 @@ class LSTSQ(HasTraits):
     itrans = inverse_transform
 
 
-def lsqnonneg(C, d, x0=None, tol=None, itmax_factor=3):
+def NNLS(C, d, x0=None, tol=None, itmax_factor=3):
     """Linear least squares with nonnegativity constraints
     (x, resnorm, residual) = lsqnonneg(C,d)
     returns the vector x that minimizes norm(d-C*x)
