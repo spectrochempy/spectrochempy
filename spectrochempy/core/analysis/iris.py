@@ -7,7 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-__all__ = ['Iris']
+__all__ = ['IRIS']
 
 
 import numpy as np
@@ -15,8 +15,11 @@ import numpy as np
 from scipy import optimize
 
 
-class Iris:
-    """Infrared inversion spectroscopy"""
+class IRIS:
+    """
+    Infrared inversion spectroscopy
+
+    """
 
     def __init__(self, X, invertParam):
 
@@ -31,7 +34,8 @@ class Iris:
                           invertParam['epsRange'][2])
 
         w = np.zeros((invertParam['epsRange'][2], 1))
-        w[0] = 0.5 * (g[-1] - g[0]) / (invertParam['epsRange'][2] - 1)
+        w[0] = 0.5 * (g[-1] - g[0]) / (invertParam['epsRange'][2] - 1)    #
+        # TODO this cannot work!!! what is this g!
         w[-1] = w[0]
 
         for j in range(1, invertParam['epsRange'][2] - 1):
