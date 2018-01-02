@@ -8,20 +8,17 @@
 # =============================================================================
 
 
-
-
-from spectrochempy import ur, concatenate, stack,\
-    CoordRange
+from spectrochempy import *
 
 import pytest
 
-def test_concatenate(IR_source_2D):
+def test_concatenate(IR_dataset_2D):
 
-    source = IR_source_2D
+    dataset = IR_dataset_2D
 
     #print(dataset)
-    s1 = source[:10]
-    s2 = source[20:]
+    s1 = dataset[:10]
+    s2 = dataset[20:]
 
     # check with derived units
     s1.to(ur.m, force=True)
@@ -45,27 +42,27 @@ def test_concatenate(IR_source_2D):
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
     assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
 
-def test_concatenate_1D_along_axis0(IR_source_2D):
+def test_concatenate_1D_along_axis0(IR_dataset_2D):
     # TODO: very long process - try to optimize this
-    source = IR_source_2D[3:]
+    dataset = IR_dataset_2D[3:]
 
     # split all rows
     rows = []
-    for i in range(len(source)):
-        rows.append(source[i])
+    for i in range(len(dataset)):
+        rows.append(dataset[i])
 
-    assert len(rows)==source.shape[0]
+    assert len(rows)==dataset.shape[0]
 
     # reconstruct
     new = stack(rows)
-    assert new.shape == source.shape
+    assert new.shape == dataset.shape
 
     # #TODO: fix bug when ndim=1 (squeezed data)
     # using stack we should have a concatenation along a new axis 0 in this case.
     # for now it doesnt work.
 
     rows = []
-    for s in source:
+    for s in dataset:
         rows.append(s)
         assert s.shape == (5549,)
         print(s._mask)
@@ -73,13 +70,13 @@ def test_concatenate_1D_along_axis0(IR_source_2D):
 
     # reconstruct from rows
     new = stack(rows)
-    assert new.shape == source.shape
+    assert new.shape == dataset.shape
 
-def test_concatenate_along_axis1(IR_source_2D):
+def test_concatenate_along_axis1(IR_dataset_2D):
 
-    source = IR_source_2D
+    dataset = IR_dataset_2D
 
-    coord = source.coordset(-1)
+    coord = dataset.coordset(-1)
 
     # test along axis 1
     ranges = ([6000., 3500.], [1800., 1500.])
@@ -90,7 +87,7 @@ def test_concatenate_along_axis1(IR_source_2D):
     for pair in ranges:
         # determine the slices
         sl = slice(*pair)
-        s.append(source[..., sl])
+        s.append(dataset[..., sl])
 
     sbase = concatenate( *s, axis=-1)
     xbase = sbase.coordset(-1)
@@ -98,3 +95,5 @@ def test_concatenate_along_axis1(IR_source_2D):
     assert sbase.shape[-1] == (s[0].shape[-1] + s[1].shape[-1])
     assert xbase.size == (s[0].coordset(-1).size + s[1].coordset(-1).size)
 
+    sbase.plot_stack()
+    show()

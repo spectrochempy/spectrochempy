@@ -27,7 +27,7 @@ from spectrochempy.utils import epsilon
 # em function
 # =============================================================================
 
-def em(source, *args, **kwargs):
+def em(dataset, *args, **kwargs):
     """Calculate an exponential apodization function
 
     The exponential apodization is calculated in the last dimension on NDDatasets.
@@ -42,7 +42,7 @@ def em(source, *args, **kwargs):
 
     Parameters
     ----------
-    source : |NDDataset|.
+    dataset : |NDDataset|.
         Dataset we want to apodize using exponential multiplication
 
     lb : float or `quantity`
@@ -110,6 +110,6 @@ def em(source, *args, **kwargs):
     kwargs['apod'] = lb
     kwargs['shifted'] = shifted
 
-    out = apodize(source, **kwargs)
+    out = apodize(dataset, **kwargs)
 
     return out

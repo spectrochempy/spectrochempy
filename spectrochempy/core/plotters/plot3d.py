@@ -20,7 +20,7 @@ __all__ = ['plot_3D']
 __dataset_imports__ = ['plot_3D']
 
 
-def plot_3D(source,
+def plot_3D(dataset,
             **kwargs):
 
     raise NotImplementedError

@@ -16,7 +16,7 @@ import os, sys
 from tests.utils import notebook_run, example_run
 
 #@pytest.mark.skip
-@pytest.mark.parametrize('notebook', glob("../docs/source/user/*/*.ipynb"))
+@pytest.mark.parametrize('notebook', glob("../docs/user/*/*.ipynb"))
 def test_notebooks(notebook):
     print(notebook)
     if '.ipynb_checkpoints' in notebook :
@@ -26,7 +26,7 @@ def test_notebooks(notebook):
         nb, errors = notebook_run(notebook)
         assert errors == []
 
-@pytest.mark.parametrize('example', glob("../docs/source/examples/*/*.py"))
+@pytest.mark.parametrize('example', glob("../docs/examples/*/*.py"))
 def test_example(example):
     if os.path.exists(example) and os.path.splitext(example)[-1] == '.py' :
         e, message, err = example_run(example)

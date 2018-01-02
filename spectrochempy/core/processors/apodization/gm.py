@@ -28,7 +28,7 @@ from spectrochempy.utils import epsilon
 # gm function
 # =============================================================================
 
-def gm(source, *args, **kwargs):
+def gm(dataset, *args, **kwargs):
     """Calculate a Lorentz-Gauss apodization
 
     Functional form of apodization window:
@@ -124,6 +124,6 @@ def gm(source, *args, **kwargs):
     kwargs['apod2'] = gb
     kwargs['shifted'] = shifted
 
-    out = apodize(source, **kwargs)
+    out = apodize(dataset, **kwargs)
 
     return out

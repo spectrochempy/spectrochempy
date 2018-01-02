@@ -19,33 +19,33 @@ import os
 path = os.path.dirname(os.path.abspath(__file__))
 
 
-def test_basecor_sequential(IR_source_2D):
+def test_basecor_sequential(IR_dataset_2D):
 
-    source = IR_source_2D[:5]
+    dataset = IR_dataset_2D[:5]
 
-    basc = BaselineCorrection(source)
+    basc = BaselineCorrection(dataset)
     s = basc([6000.,3500.],[1800.,1500.])
 
     s.plot()
     show()
 
 
-def test_basecor_sequential_pchip(IR_source_2D):
+def test_basecor_sequential_pchip(IR_dataset_2D):
 
-    source = IR_source_2D[:5]
+    dataset = IR_dataset_2D[:5]
 
-    basc = BaselineCorrection(source)
+    basc = BaselineCorrection(dataset)
     s = basc([6000., 3500.], [1800., 1500.],
                               interpolation='pchip')
     s.plot()
     show()
 
 
-def test_basecor_multivariate(IR_source_2D):
+def test_basecor_multivariate(IR_dataset_2D):
 
-    source = IR_source_2D[:5]
+    dataset = IR_dataset_2D[:5]
 
-    basc = BaselineCorrection(source)
+    basc = BaselineCorrection(dataset)
     s = basc([6000., 3500.], [1800., 1500.],
                               method='multivariate',
                               interpolation='polynomial')
@@ -53,11 +53,11 @@ def test_basecor_multivariate(IR_source_2D):
     show()
 
 
-def test_basecor_multivariate_pchip(IR_source_2D):
+def test_basecor_multivariate_pchip(IR_dataset_2D):
 
-    source = IR_source_2D[:5]
+    dataset = IR_dataset_2D[:5]
 
-    basc = BaselineCorrection(source)
+    basc = BaselineCorrection(dataset)
     s = basc([6000., 3500.], [1800., 1500.],
                               method='multivariate',
                               interpolation='pchip')
@@ -68,11 +68,11 @@ def test_basecor_multivariate_pchip(IR_source_2D):
 def test_notebook_basecor_bug():
     # coding: utf-8
 
-    source = NDDataset.read_omnic(
+    dataset = NDDataset.read_omnic(
         os.path.join('irdata', 'NH4Y-activation.SPG'))
-    source
+    dataset
 
-    s = source[:, 1260.0 :5999.0]
+    s = dataset[:, 1260.0 :5999.0]
     s = s - s[-1]
 
     # Important note that we use floating point number

@@ -57,7 +57,7 @@ class Fit(HasTraits):
 
     Parameters
     ----------
-    source : Dataset or list of Dataset instance
+    dataset : Dataset or list of Dataset instance
         The data to fit
 
     mode : Unicode, optional
@@ -79,7 +79,7 @@ class Fit(HasTraits):
 
     _ = Any
 
-    sources = List(Instance('spectrochempy.dataset.nddataset.NDDataset'))
+    datasets = List(Instance('spectrochempy.dataset.nddataset.NDDataset'))
 
     parameterscript = Instance(ParameterScript)
 
@@ -92,9 +92,9 @@ class Fit(HasTraits):
         if args:
             # look in args
             if not isinstance(args[0], list):
-                self.sources = [args[0], ]
+                self.datasets = [args[0], ]
             else:
-                self.sources = args[0]
+                self.datasets = args[0]
                 # we create a list of dataset in all case
             script = args[1]
 
@@ -102,7 +102,7 @@ class Fit(HasTraits):
             return
 
         # get parameters form script
-        self.parameterscript = ParameterScript(sources=self.sources,
+        self.parameterscript = ParameterScript(datasets=self.datasets,
                                                script=script)
         if self.fp is None:
             # for unknown reason for now, this sometimes happens during tests
@@ -114,9 +114,9 @@ class Fit(HasTraits):
         self.mode = kargs.get('mode', None)
         self.method = kargs.get('method', None)
 
-        for exp_idx, source in enumerate(self.sources):
-            source.modeldata, source.modelnames, source.model_A, source.model_a, source.model_b = \
-                self._get_modeldata(source, exp_idx)
+        for exp_idx, dataset in enumerate(self.datasets):
+            dataset.modeldata, dataset.modelnames, dataset.model_A, dataset.model_a, dataset.model_b = \
+                self._get_modeldata(dataset, exp_idx)
 
     # *******************************************************************************
     # public methodss
@@ -179,7 +179,7 @@ class Fit(HasTraits):
         niter = 0
 
         # internally defined function chi2
-        def funchi2(params, sources, *constraints):
+        def funchi2(params, datasets, *constraints):
             """
             Return sum((y - x)**2)
             """
@@ -190,12 +190,12 @@ class Fit(HasTraits):
             som = 0
             ncalls += 1
 
-            for exp_idx, source in enumerate(sources):
-                modeldata = self._get_modeldata(source, exp_idx)[0]
+            for exp_idx, dataset in enumerate(datasets):
+                modeldata = self._get_modeldata(dataset, exp_idx)[0]
                 # baseline is already summed with modeldata[-1]
                 # important to work with the real part of dataset
                 # not the complex number
-                data = source.data
+                data = dataset.data
 
                 # if not dataset.is_2d:
                 mdata = modeldata[-1]  # modelsum
@@ -259,7 +259,7 @@ class Fit(HasTraits):
         fp = self.fp  # starting parameters
 
         fp, fopt = optimize(funchi2, fp,
-                            args=(self.sources,),
+                            args=(self.datasets,),
                             maxfun=maxfun,
                             maxiter=maxiter,
                             method=method,
@@ -278,9 +278,9 @@ class Fit(HasTraits):
             log.info(self.parameterscript.script)
 
         # store the models
-        for exp_idx, source in enumerate(self.sources):
-            source.modeldata, source.modelnames, source.model_A, source.model_a, source.model_b = \
-                self._get_modeldata(source, exp_idx)
+        for exp_idx, dataset in enumerate(self.datasets):
+            dataset.modeldata, dataset.modelnames, dataset.model_A, dataset.model_a, dataset.model_b = \
+                self._get_modeldata(dataset, exp_idx)
 
         return
 
@@ -301,12 +301,12 @@ class Fit(HasTraits):
     # *******************************************************************************
 
     def _repr_html_(self):
-        if not self.sources:
+        if not self.datasets:
             return htmldoc(self.__init__.__doc__)
         else:
             return self.message
 
-    def _get_modeldata(self, source, exp_idx):
+    def _get_modeldata(self, dataset, exp_idx):
 
         # Prepare parameters
         parameters = self._prepare(self.fp, exp_idx)
@@ -315,15 +315,15 @@ class Fit(HasTraits):
         models = self.fp.models
         nbmodels = len(models)
 
-        # Make an array 'modeldata' with the size of the source of data
+        # Make an array 'modeldata' with the size of the dataset of data
         # which will contains the data produced by the models
         # This name must always be 'modeldata'
         # which will be returned to the main program.
 
-        expedata = source.real.data
-        x = source.coordset[-1].data
+        expedata = dataset.real.data
+        x = dataset.coordset[-1].data
 
-        if source.ndim > 1:
+        if dataset.ndim > 1:
             # nD data
             raise NotImplementedError("Fit not implemented for nD data yet!")
 
@@ -340,7 +340,7 @@ class Fit(HasTraits):
         names = ['baseline', ]
 
         for model in models:
-            calc = getmodel(x, modelname=model, par=parameters, source=source)
+            calc = getmodel(x, modelname=model, par=parameters, dataset=dataset)
             if not model.startswith('baseline'):
                 row += 1
                 modeldata[row] = calc

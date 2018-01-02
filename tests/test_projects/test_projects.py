@@ -14,8 +14,8 @@ from spectrochempy import *
 
 # Basic
 # -------
-def test_save_and_load_file_with_nofilename(IR_source_2D):
-    A = IR_source_2D.copy()
+def test_save_and_load_file_with_nofilename(IR_dataset_2D):
+    A = IR_dataset_2D.copy()
     A.save()
 
     # no directory for saving passed ... it must be in data

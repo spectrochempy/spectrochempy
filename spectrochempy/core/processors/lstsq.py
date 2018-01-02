@@ -9,32 +9,28 @@
 
 # TODO: create tests
 
-__all__ = ['Lstsq', 'Lsqnonneg']
+__all__ = ['lstsq', 'lsqnonneg']
 
 import numpy as np
 
-from spectrochempy.dataset.nddataset import NDDataset
+from ...dataset.nddataset import NDDataset
+from .npy import ones
+from .concatenate import stack
 
-
-def Lstsq(A, B, rcond=-1):
+def lstsq(*datasets, rcond=-1):
     """
     Return the least-squares solution to a linear matrix equation.
 
-    This is an extension of :meth:`numpy.linalg.lstsq` to |NDDataset|.
+    This is modify :meth:`numpy.linalg.lstsq` for application to |NDDataset|.
 
-    Solves the equation `A X = B` by computing a vector `X` that
-    minimizes the Euclidean 2-norm `|| B - A X ||^2`.  The equation may
-    be under-, well-, or over- determined (*i.e.*, the number of
-    linearly independent rows of `A` can be less than, equal to, or
-    greater than its number of linearly independent columns).  If `A`
-    is square and of full rank, then `X` (but for round-off error) is
-    the "exact" solution of the equation.
+    Solves the equation `A.X + B = Y` by computing  ``A``,  ``B`` that
+    minimizes the Euclidean 2-norm `|| Y - (A.X + B) ||^2`.
 
     Parameters
     ----------
-    A : (M, N) |NDDataset| or array-like
+    X : (M, N) |NDDataset|
         "Coefficient" matrix.
-    B : {(M,), (M, K)} |NDDataset| or array_like
+    Y : {(M,), (M, K)} |NDDataset|
         Ordinate or "dependent variable" values. If `B` is two-dimensional,
         the least-squares solution is calculated for each of the `K` columns
         of `B`.
@@ -73,7 +69,7 @@ def Lstsq(A, B, rcond=-1):
     Fit a line, :math:`d = v.t  + d_0`, through some noisy data-points:
 
     >>> t = NDDataset([0, 1, 2, 3], units='hour')
-    >>> v = NDDataset([-1, 0.2, 0.9, 2.1], units='kilometer')
+    >>> d = NDDataset([-1, 0.2, 0.9, 2.1], units='kilometer')
 
     By examining the coefficients, we see that the line should have a
     gradient of roughly 1 km/h and cut the y-axis at, more or less, -1 km.
@@ -81,14 +77,16 @@ def Lstsq(A, B, rcond=-1):
     :math:`A = [[t 1]]` and :math:`P = [[v], [d_0]]`.  Now use `lstsq` to
     solve for `t`:
 
-    >>> A = stack([t, np.ones(len(t))]).T
+    >>> un = ones(t.shape, units=t.units)
+    >>> A = stack([t, un]).T
     >>> A
-    array([[ 0.,  1.],
-           [ 1.,  1.],
-           [ 2.,  1.],
-           [ 3.,  1.]])
+    NDDataset: [[   0.000,    1.000],
+                [   1.000,    1.000],
+                [   2.000,    1.000],
+                [   3.000,    1.000]] hr
 
-    >>> v, d0 = np.linalg.lstsq(A, d)[0]
+    >>> P, res, rank, s = lstsq(A, d)
+    >>> P
     >>> print(v, d0)
     1.0 -0.95
 
@@ -101,17 +99,42 @@ def Lstsq(A, B, rcond=-1):
 
     """
 
-    X, res, rank, s = np.linalg.lstsq(A.data, B.data, rcond)
+    if len(datasets)>2 or len(datasets)<1:
+        raise ValueError('one or two dataset at max are expected')
 
-    X = NDDataset(X)
-    X.name = A.name + ' \ ' + B.name
-    X.axes[0] = A.axes[1]
-    X.axes[1] = B.axes[1]
-    X.history = 'computed by spectrochempy.lstsq \n'
-    return X, res, rank, s
+    if len(datasets)==2:
+        X, Y = datasets
+        if Y.coordset is not None:
+            if X.data == Y.x.data or X.units == Y.x.units:
+                raise ValueError('X and Y dataset are not compatible')
+
+    else: # nb dataset ==1
+        # abscissa coordinates are the X
+        X = datasets[0].x
+        Y = datasets[0]
+
+    Xdata = np.vstack([X.data, np.ones(len(X.data))]).T
+    Ydata = Y.data
+
+    P, res, rank, s = np.linalg.lstsq(Xdata, Ydata, rcond)
+
+    A = NDDataset(data=P[0],
+                  units=Y.units/X.units,
+                  title="%s/%s"%(Y.title,X.title),
+                  )         # TODO: check if it works with more than a single
+                            # dimension (probably not!). We need also to
+                            # take care of masks
+    B = NDDataset(data=P[1]* np.ones(X.size),
+                  units=Y.units,
+                  title="%s at origin"%Y.title)
 
 
-def Lsqnonneg(C, d, x0=None, tol=None, itmax_factor=3):
+    A.history = 'computed by spectrochempy.lstsq \n'
+    B.history = 'computed by spectrochempy.lstsq \n'
+    return A, B
+
+
+def lsqnonneg(C, d, x0=None, tol=None, itmax_factor=3):
     """Linear least squares with nonnegativity constraints
     (x, resnorm, residual) = lsqnonneg(C,d)
     returns the vector x that minimizes norm(d-C*x)

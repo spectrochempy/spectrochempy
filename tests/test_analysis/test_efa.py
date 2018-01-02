@@ -10,9 +10,9 @@
 from spectrochempy import masked, EFA
 
 
-def test_EFA(IR_source_2D):
+def test_EFA(IR_dataset_2D):
 
-    ds = IR_source_2D.copy()
+    ds = IR_dataset_2D.copy()
 
     print(ds)
 

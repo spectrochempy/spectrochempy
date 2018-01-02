@@ -42,7 +42,7 @@ from spectrochempy.core.plotters.utils import make_label
 
 # contour map (default) -------------------------------------------------------
 
-def plot_map(source, **kwargs):
+def plot_map(dataset, **kwargs):
     """
     Plot a 2D dataset as a contoured map.
 
@@ -50,13 +50,13 @@ def plot_map(source, **kwargs):
 
     """
     kwargs['method'] = 'map'
-    ax = plot_2D(source, **kwargs)
+    ax = plot_2D(dataset, **kwargs)
     return ax
 
 
 # stack plot  -----------------------------------------------------------------
 
-def plot_stack(source, **kwargs):
+def plot_stack(dataset, **kwargs):
     """
     Plot a 2D dataset as a stacked plot.
 
@@ -64,13 +64,13 @@ def plot_stack(source, **kwargs):
 
     """
     kwargs['method'] = 'stack'
-    ax = plot_2D(source, **kwargs)
+    ax = plot_2D(dataset, **kwargs)
     return ax
 
 
 # image plot --------------------------------------------------------
 
-def plot_image(source, **kwargs):
+def plot_image(dataset, **kwargs):
     """
     Plot a 2D dataset as an image plot.
 
@@ -78,13 +78,13 @@ def plot_image(source, **kwargs):
 
     """
     kwargs['method'] = 'image'
-    ax = plot_2D(source, **kwargs)
+    ax = plot_2D(dataset, **kwargs)
     return  ax
 
 
 # generic plot (default stack plot) -------------------------------------------
 
-def plot_2D(source, **kwargs):
+def plot_2D(dataset, **kwargs):
     """
     PLot of 2D array.
 
@@ -117,7 +117,7 @@ def plot_2D(source, **kwargs):
 
     {}
 
-    """.format(source._general_parameters_doc_)
+    """.format(dataset._general_parameters_doc_)
 
     # method of plot
     # ------------
@@ -127,10 +127,10 @@ def plot_2D(source, **kwargs):
     data_transposed = kwargs.get('data_transposed', False)
 
     if data_transposed:
-        new = source.T  # transpose dataset
+        new = dataset.T  # transpose dataset
         nameadd='T'
     else:
-        new = source.copy()
+        new = dataset.copy()
         nameadd =''
 
     # figure setup
@@ -385,7 +385,7 @@ def plot_2D(source, **kwargs):
     if data_only:
         # if data only (we will  ot set axes and labels
         # it was probably done already in a previous plot
-        new._plot_resume(source, **kwargs)
+        new._plot_resume(dataset, **kwargs)
         return ax
 
     # -------------------------------------------------------------------------
@@ -459,7 +459,7 @@ def plot_2D(source, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
-    new._plot_resume(source, **kwargs)
+    new._plot_resume(dataset, **kwargs)
 
     return ax
 

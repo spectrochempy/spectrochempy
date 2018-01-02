@@ -26,9 +26,9 @@ from tests.utils import assert_array_equal
 
 # Basic
 # -------
-def test_save_and_load(IR_source_2D):
+def test_save_and_load(IR_dataset_2D):
 
-    A = IR_source_2D.copy()
+    A = IR_dataset_2D.copy()
     A.save('tartempion.scp')
     # no directory for saving passed ... it must be in data
     path = os.path.join(datadir.path, 'tartempion.scp')
@@ -43,12 +43,12 @@ def test_save_and_load(IR_source_2D):
 
     #C=NDDataset.load()
 
-def test_save(IR_source_2D):
+def test_save(IR_dataset_2D):
 
-    source = IR_source_2D.copy()
-    source.save('essai')
+    dataset = IR_dataset_2D.copy()
+    dataset.save('essai')
 
-    source.plot_stack()
-    source.save('essai')  # there was a bug due to the saving of mpl axes
+    dataset.plot_stack()
+    dataset.save('essai')  # there was a bug due to the saving of mpl axes
 
     os.remove(os.path.join(datadir.path, 'essai.scp'))

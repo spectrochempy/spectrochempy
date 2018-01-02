@@ -28,7 +28,7 @@ from spectrochempy.application import plotter_preferences, log, preferences
 # =============================================================================
 # generic apodization function
 # =============================================================================
-def apodize(source, **kwargs):
+def apodize(dataset, **kwargs):
     """Calculate an apodization function
 
     The apodization is calculated in the last dimension of the dataset.
@@ -91,9 +91,9 @@ def apodize(source, **kwargs):
     inplace = inplace and apply  # force inplace false if we do not apply
 
     if not inplace:
-        new = source.copy()  # copy to be sure not to modify this dataset
+        new = dataset.copy()  # copy to be sure not to modify this dataset
     else:
-        new = source
+        new = dataset
 
     # On which axis do we want to apodize?
     axis = kwargs.pop('axis', -1)
@@ -118,7 +118,7 @@ def apodize(source, **kwargs):
                 lastcoord.units.dimensionality != '[time]'):
         log.error('apodization functions apply only to dimensions '
                   'with [time] dimensionality')
-        return source
+        return dataset
 
     # first parameters (apodization in Hz) ?
     apod = kwargs.get('apod', kwargs.get('apod1', 0))

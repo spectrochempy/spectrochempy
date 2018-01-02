@@ -286,64 +286,64 @@ def dataset3d():
 ############################
 
 @pytest.fixture(scope="function")
-def IR_source_1D():
+def IR_dataset_1D():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
-    source = NDDataset.read_omnic(
+    dataset = NDDataset.read_omnic(
             os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
-    return source[0]
+    return dataset[0]
 
 @pytest.fixture(scope="function")
-def IR_source_2D():
+def IR_dataset_2D():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
-    source = NDDataset.read_omnic(
+    dataset = NDDataset.read_omnic(
             os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
-    return source
+    return dataset
 
 # Fixture:  IR spectra
 @pytest.fixture(scope="function")
 def IR_scp_1():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
-    source = NDDataset.load(
+    dataset = NDDataset.load(
             os.path.join(datadir, 'irdata', 'nh4.scp'))
-    return source
+    return dataset
 
 
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
-def NMR_source_1D():
+def NMR_dataset_1D():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
     path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
-    source = NDDataset.read_bruker_nmr(
+    dataset = NDDataset.read_bruker_nmr(
             path, expno=1, remove_digital_filter=True)
-    return source
+    return dataset
 
 
 # Fixture : NMR spectra
 @pytest.fixture(scope="function")
-def NMR_source_1D_1H():
+def NMR_dataset_1D_1H():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
     path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'tpa')
-    source = NDDataset.read_bruker_nmr(
+    dataset = NDDataset.read_bruker_nmr(
             path, expno=10, remove_digital_filter=True)
-    return source
+    return dataset
 
 
 @pytest.fixture(scope="function")
-def NMR_source_2D():
+def NMR_dataset_2D():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
     path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')
-    source = NDDataset.read_bruker_nmr(
+    dataset = NDDataset.read_bruker_nmr(
             path, expno=1, remove_digital_filter=True)
-    return source
+    return dataset
 
 
 # TODO: rationalise all this fixtures

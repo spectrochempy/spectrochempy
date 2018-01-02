@@ -43,42 +43,58 @@ Plot the data along with the fitted line:
 
 """
 
-def test_lstsq():
+def test_lstsq_from_scratch():
 
-    t = sc.NDDataset([0, 1, 2, 3], units='hour')
-    d = sc.NDDataset([-1, 0.2, 0.9, 2.1], units='kilometer')
+    t = sc.NDDataset(data = [0, 1, 2, 3],
+                     title='time',
+                     units='hour')
 
-    with pytest.warns(SpectroChemPyWarning):
-        assert len(t) == t.ndim # nb of rows = 1
+    d = sc.NDDataset(data = [-1, 0.2, 0.9, 2.1],
+                     title='distance',
+                     units='kilometer')
 
-    assert t.size == 4
-    assert d.size == 4
-    assert t.ndim == 1
-    assert d.ndim == 1
+    # We would like v and d0 such as
+    #    d = v.t + d0
 
-    aones = sc.ones(t.shape, units=t.units)
-    assert aones.size == 4
-    assert aones.ndim == 1
-    assert aones.shape == (4,)
-
-    A = sc.stack([t, aones]).T
-
-
-
-
-
-    v, d0 = sc.lstsq(A, d)[0]
+    v, d0 = sc.lstsq(t, d)    #
 
     print(v, d0)
 
     import matplotlib.pyplot as plt
 
-    plt.plot(t, d, 'o', label='Original data', markersize=10)
-    plt.plot(t, v * t + d0, 'r', label='Fitted line')
+    plt.plot(t.data, d.data, 'o', label='Original data', markersize=5)
+    plt.plot(t.data, (v * t + d0).data, ':r',
+             label='Fitted line')
     plt.legend()
-    plt.show()
+    sc.show()
 
+def test_implicit_lstsq():
 
+    t = sc.Coord(data = [0, 1, 2, 3],
+                 units='hour',
+                 title='time')
+
+    d = sc.NDDataset(data = [-1, 0.2, 0.9, 2.1],
+                     coordset=[t],
+                     units='kilometer',
+                     title='distance')
+
+    assert d.ndim == 1
+
+    # We would like v and d0 such as
+    #    d = v.t + d0
+
+    v, d0 = sc.lstsq(d)  #
+
+    print(v, d0)
+
+    d.plot_scatter(pen=False, markersize=10, mfc='r', mec='k')
+    dfit = (v*d.x + d0)
+    dfit.title = 'distance'
+    dfit.coordset = [d.x]
+    dfit.plot_pen(hold=True, color='g')
+
+    sc.show()
 
 
 

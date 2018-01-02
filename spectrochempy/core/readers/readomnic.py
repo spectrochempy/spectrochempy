@@ -57,13 +57,13 @@ def readbtext(f, pos):
 
 # function for loading spa or spg file
 # --------------------------------------
-def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
+def read_omnic(dataset=None, filename='', sortbydate=True, **kwargs):
     """Open a Thermo Nicolet .spg or list of .spa files and set 
     data/metadata in the current dataset
 
     Parameters
     ----------
-    source : NDDataset
+    dataset : NDDataset
         The dataset to store the data and the metadata read from the spg file
     filename: str
         filename of the file to load
@@ -88,13 +88,13 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
 
     # check if the first parameter is a dataset
     # because we allow not to pass it
-    if not isinstance(source, NDDataset):
+    if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameters must be the filename
-        if isinstance(source, str) and source!='':
-            filename = source
+        if isinstance(dataset, str) and dataset!='':
+            filename = dataset
 
-        source = NDDataset()  # create a NDDataset
+        dataset = NDDataset()  # create a NDDataset
 
     directory = kwargs.get("directory", datadir.path)
     if not os.path.exists(directory):
@@ -116,26 +116,26 @@ def read_omnic(source=None, filename='', sortbydate=True, **kwargs):
     if not files:
         return None
 
-    sources = []
+    datasets = []
 
     for extension in files.keys():
 
         for filename in files[extension]:
             if extension == '.spg':
-                sources.append(_read_spg(source, filename))
+                datasets.append(_read_spg(dataset, filename))
 
             elif extension == '.spa':
-                sources.append(_read_spa(source, filename,
+                datasets.append(_read_spa(dataset, filename,
                                          sortbydate=True, **kwargs))
             else:
                 # try another format!
-                sources = source.read(filename, protocol=extension[1:],
+                datasets = dataset.read(filename, protocol=extension[1:],
                                       sortbydate=True, **kwargs)
 
-    if len(sources)==1:
-        return sources[0] # a single dataset is returned
+    if len(datasets)==1:
+        return datasets[0] # a single dataset is returned
 
-    return sources  # several sources returned
+    return datasets  # several datasets returned
 
 #alias
 read_spg = read_omnic
@@ -145,7 +145,7 @@ read_spa = read_omnic
 NDIO.read_spg = read_omnic
 NDIO.read_spa = read_omnic
 
-def _read_spg(source, filename, sortbydate=True, **kwargs):
+def _read_spg(dataset, filename, sortbydate=True, **kwargs):
 
     # read spg file
     with open(filename, 'rb') as f:
@@ -349,38 +349,38 @@ def _read_spg(source, filename, sortbydate=True, **kwargs):
                     allhistories.append(history)
 
     # Create Dataset Object of spectral content
-    source.data = data
-    source.units = 'absorbance'
-    source.title = 'Absorbance'
-    source.name = spg_title
-    source.filename = os.path.basename(filename).split('.')[0]
-    source.coordset = (np.array(alltimestamps), xaxis)
-    source.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
-    source.coordset[1].units = 'cm^-1'
-    source.coordset[0].labels = (allacquisitiondates, alltitles)
-    source.coordset[0].units = 's'
+    dataset.data = data
+    dataset.units = 'absorbance'
+    dataset.title = 'Absorbance'
+    dataset.name = spg_title
+    dataset.filename = os.path.basename(filename).split('.')[0]
+    dataset.coordset = (np.array(alltimestamps), xaxis)
+    dataset.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
+    dataset.coordset[1].units = 'cm^-1'
+    dataset.coordset[0].labels = (allacquisitiondates, alltitles)
+    dataset.coordset[0].units = 's'
 
     # Set description and history
-    source.description = (
+    dataset.description = (
         'Dataset from spg file : ' + spg_title + ' \n'
         + 'History of the 1st spectrum: ' + allhistories[0])
 
-    source.history = str(datetime.now()) + ':read from spg file \n'
+    dataset.history = str(datetime.now()) + ':read from spg file \n'
 
     if kwargs.get('sortbydate', 'True'):
-        source.sort(axis=0, inplace=True)
-        source.history = 'sorted'
+        dataset.sort(axis=0, inplace=True)
+        dataset.history = 'sorted'
 
     # Set the NDDataset date
-    source._date = datetime.now()
-    source._modified = source.date
+    dataset._date = datetime.now()
+    dataset._modified = dataset.date
 
     log.debug("end of reading")
 
-    return source
+    return dataset
 
 
-def _read_spa(source, filename):
+def _read_spa(dataset, filename):
 
     # TODO: make the reader for spa files
 
@@ -515,13 +515,13 @@ def _read_spa(source, filename):
         return
 
     # load into the  Dataset Object of spectral content
-    source.data = np.array(allintensities)
+    dataset.data = np.array(allintensities)
     # nd.title = alltitles[0] + ' ... ' + alltitles[-1]
-    source.units = 'absorbance'
-    source.title = 'Absorbance'
-    source.name = alltitles[0] + ' ... ' + alltitles[-1]
-    source._date = datetime.datetime.now()
-    source._modified = source._date
+    dataset.units = 'absorbance'
+    dataset.title = 'Absorbance'
+    dataset.name = alltitles[0] + ' ... ' + alltitles[-1]
+    dataset._date = datetime.datetime.now()
+    dataset._modified = dataset._date
 
     # TODO: Finish the conversion
     raise NotImplementedError('implementation not finished')
@@ -543,7 +543,7 @@ def _read_spa(source, filename):
     str(datetime.datetime.now()) + ':created by sa.loadspa() \n')
 
     # return the dataset
-    return source
+    return dataset
 
 if __name__ == '__main__':
 

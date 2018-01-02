@@ -36,7 +36,7 @@ plotter_preferences = app.plotter_preferences
 
 
 # .............................................................................
-def multiplot_scatter(sources, **kwargs):
+def multiplot_scatter(datasets, **kwargs):
     """
     Plot a multiplot with 1D scatter type plots.
 
@@ -44,10 +44,10 @@ def multiplot_scatter(sources, **kwargs):
 
     """
     kwargs['method'] = 'scatter'
-    return multiplot(sources, **kwargs)
+    return multiplot(datasets, **kwargs)
 
 # .............................................................................
-def multiplot_lines(sources, **kwargs):
+def multiplot_lines(datasets, **kwargs):
     """
     Plot a multiplot with 1D linetype plots.
 
@@ -55,10 +55,10 @@ def multiplot_lines(sources, **kwargs):
 
     """
     kwargs['method'] = 'lines'
-    return multiplot(sources, **kwargs)
+    return multiplot(datasets, **kwargs)
 
 # .............................................................................
-def multiplot_stack(sources, **kwargs):
+def multiplot_stack(datasets, **kwargs):
     """
     Plot a multiplot with 2D stack type plots.
 
@@ -66,10 +66,10 @@ def multiplot_stack(sources, **kwargs):
 
     """
     kwargs['method'] = 'stack'
-    return multiplot(sources, **kwargs)
+    return multiplot(datasets, **kwargs)
 
 # .............................................................................
-def multiplot_map(sources, **kwargs):
+def multiplot_map(datasets, **kwargs):
     """
     Plot a multiplot with 2D map type plots.
 
@@ -77,11 +77,11 @@ def multiplot_map(sources, **kwargs):
 
     """
     kwargs['method'] = 'map'
-    return multiplot(sources, **kwargs)
+    return multiplot(datasets, **kwargs)
 
 
 # .............................................................................
-def multiplot_image(sources, **kwargs):
+def multiplot_image(datasets, **kwargs):
     """
     Plot a multiplot with 2D image type plots.
 
@@ -89,12 +89,12 @@ def multiplot_image(sources, **kwargs):
 
     """
     kwargs['method'] = 'image'
-    return multiplot(sources, **kwargs)
+    return multiplot(datasets, **kwargs)
 
 
 # with transpose plot  -----------------------------------------------------------------
 
-def plot_with_transposed(source, **kwargs):
+def plot_with_transposed(dataset, **kwargs):
     """
     Plot a 2D dataset as a stacked plot with its transposition in a second
     axe.
@@ -103,13 +103,13 @@ def plot_with_transposed(source, **kwargs):
 
     """
     kwargs['method'] = 'with_transposed'
-    axes = multiplot(source, **kwargs)
+    axes = multiplot(dataset, **kwargs)
     return axes
 
 multiplot_with_transposed = plot_with_transposed
 
 # .............................................................................
-def multiplot( sources=[], labels=[], nrow=1, ncol=1,
+def multiplot( datasets=[], labels=[], nrow=1, ncol=1,
                method='stack',
                sharex=False, sharey=False, sharez=False,
                colorbar=False,
@@ -122,7 +122,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
     Parameters
     ----------
 
-    sources : nddataset or list of nddataset
+    datasets : nddataset or list of nddataset
 
     labels : list of str.
 
@@ -136,7 +136,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
     nrows, ncols : int, default: 1
 
         Number of rows/cols of the subplot grid. ncol*nrow must be equal
-        to the number of sources to plot
+        to the number of datasets to plot
 
     sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default: False
 
@@ -225,31 +225,31 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
         method = 'stack'
         nrow = 2
         ncol = 1
-        sources = [sources, sources]   # we need to sources
+        datasets = [datasets, datasets]   # we need to datasets
         sharez = True
 
     single=False
-    if not is_sequence(sources):
+    if not is_sequence(datasets):
         single=True
-        sources = list([sources])  # make a list
+        datasets = list([datasets])  # make a list
 
-    if len(sources) < nrow * ncol and not show_transposed:
-        # not enough sources given in this list.
-        raise ValueError('Not enough sources given in this list')
+    if len(datasets) < nrow * ncol and not show_transposed:
+        # not enough datasets given in this list.
+        raise ValueError('Not enough datasets given in this list')
 
-    # if labels and len(labels) != len(sources):
+    # if labels and len(labels) != len(datasets):
     #     # not enough labels given in this list.
     #     raise ValueError('Not enough labels given in this list')
 
     if nrow == ncol and nrow == 1 and not show_transposed and single:
         # obviously a single plot, return it
-        return sources[0].plot(**kwargs)
-    elif nrow*ncol <len(sources):
-        nrow = ncol = len(sources)//2
-        if nrow*ncol<len(sources):
+        return datasets[0].plot(**kwargs)
+    elif nrow*ncol <len(datasets):
+        nrow = ncol = len(datasets)//2
+        if nrow*ncol<len(datasets):
             ncol+=1
 
-    ndims = set([source.ndim for source in sources])
+    ndims = set([dataset.ndim for dataset in datasets])
     if len(ndims) > 1:
         raise NotImplementedError('mixed dataset shape.')
     ndim = list(ndims)[0]
@@ -317,7 +317,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
         for icol in range(ncol):
 
             idx = irow*ncol + icol
-            source = sources[idx]
+            dataset = datasets[idx]
             try:
                 label = labels[idx]
             except:
@@ -381,7 +381,7 @@ def multiplot( sources=[], labels=[], nrow=1, ncol=1,
             else:
                 transposed = False
 
-            source.plot(method=method,
+            dataset.plot(method=method,
                         ax=ax, hold=True, autolayout=False,
                         colorbar=colorbar,
                         data_transposed = transposed,

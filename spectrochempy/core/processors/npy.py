@@ -445,7 +445,7 @@ def dot(a, b, strict=True, out=None):
 
 
 # ............................................................................
-def diag(source, k=0):
+def diag(dataset, k=0):
     """
     Extract a diagonal or construct a diagonal array.
 
@@ -476,44 +476,44 @@ def diag(source, k=0):
     # check if we have the correct input
     # ----------------------------------
 
-    if not source.implements('NDDataset'):
+    if not dataset.implements('NDDataset'):
         raise TypeError('A dataset of type NDDataset is  '
                         'expected as a source of data, but an object'
                         ' of type {} has been provided'.format(
-            type(source).__name__))
+            type(dataset).__name__))
 
-    s = source.data.shape
+    s = dataset.data.shape
 
     if len(s) == 1:
         # construct a diagonal array
         # --------------------------
-        data = np.diag(source.data)
+        data = np.diag(dataset.data)
         mask = nomask
-        if source.is_masked:
-            size = source.size
-            m = np.repeat(source.mask, size).reshape(size, size)
+        if dataset.is_masked:
+            size = dataset.size
+            m = np.repeat(dataset.mask, size).reshape(size, size)
             mask = m | m.T
         uncertainty = None
-        if source.is_uncertain:
-            uncertainty = np.diag(source.uncertainty)
+        if dataset.is_uncertain:
+            uncertainty = np.diag(dataset.uncertainty)
         coordset = None
-        if source.coordset is not None:
-            coordset = [source.coordset[0]]*2
+        if dataset.coordset is not None:
+            coordset = [dataset.coordset[0]]*2
         history = 'diagonal array build from the 1D dataset'
 
     elif len(s) == 2:
         # extract a diagonal
         # ------------------
-        data = np.diagonal(source.data, k).copy()
+        data = np.diagonal(dataset.data, k).copy()
         mask = None
-        if source.is_masked:
-            mask = np.diagonal(source.mask, k).copy()
+        if dataset.is_masked:
+            mask = np.diagonal(dataset.mask, k).copy()
         uncertainty = None
-        if source.is_uncertain:
-            uncertainty = np.diagonal(source.uncertainty, k).copy()
+        if dataset.is_uncertain:
+            uncertainty = np.diagonal(dataset.uncertainty, k).copy()
         coordset = None
-        if source.coordset is not None:
-            coordset = [source.coordset[0]]  # TODO: this is likely not
+        if dataset.coordset is not None:
+            coordset = [dataset.coordset[0]]  # TODO: this is likely not
                                              #       correct for k != 0
         history = 'diagonal of rank %d extracted from original dataset'%k
 
@@ -522,7 +522,7 @@ def diag(source, k=0):
 
     # make the output
     # ---------------
-    new = source.copy()
+    new = dataset.copy()
     new._data = data
     new._mask = mask
     new._uncertainty = uncertainty

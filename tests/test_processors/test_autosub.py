@@ -30,22 +30,22 @@ import os
 # autosub
 #------
 
-def test_autosub(IR_source_2D):
+def test_autosub(IR_dataset_2D):
 
-    source = IR_source_2D
+    dataset = IR_dataset_2D
 
     ranges = [5000., 6000.], [1940., 1820.]
 
 
-    s1 = source.copy()
+    s1 = dataset.copy()
     ref = s1[0]
 
-    source.plot_stack()
+    dataset.plot_stack()
 
     ref.plot()
     #show()
 
-    s2 = source.copy()
+    s2 = dataset.copy()
 
     s3 = s2.autosub(ref, *ranges)
     # inplace = False
@@ -55,14 +55,14 @@ def test_autosub(IR_source_2D):
 
     s3.plot_stack()
 
-    s4 = source.copy()
+    s4 = dataset.copy()
     s4.autosub(ref, *ranges, method='chi2', inplace=True)
     s4.name = "chi2, inplace"
     assert np.round(s4.data[0,0],4) == 0.0000
 
     s4.plot_stack()  #true avoid blocking due to graphs
 
-    s4 = source.copy()
+    s4 = dataset.copy()
     s = autosub(s4, ref, *ranges, method='chi2')
     assert np.round(s4.data[0, 0], 4) != 0.0000
     assert np.round(s.data[0, 0], 4) == 0.0000

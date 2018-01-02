@@ -17,62 +17,62 @@ def test_1D():
     preferences.log_level=DEBUG
 
 
-    source = NDDataset.read_omnic(
+    dataset = NDDataset.read_omnic(
             os.path.join(datadir.path, 'irdata', 'NH4Y-activation.SPG'))
 
 
     # plot generic
-    ax = source[0].plot(output=os.path.join(figures_dir, 'IR_source_1D'),
+    ax = dataset[0].plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
                          savedpi=150)
 
     # plot generic style
-    ax = source[0].plot(style='sans',
-                        output=os.path.join(figures_dir, 'IR_source_1D_sans'),
+    ax = dataset[0].plot(style='sans',
+                        output=os.path.join(figures_dir, 'IR_dataset_1D_sans'),
                         savedpi=150)
 
     # check that style reinit to default
-    ax = source[0].plot(output='IR_source_1D', savedpi=150)
+    ax = dataset[0].plot(output='IR_dataset_1D', savedpi=150)
     try:
-        assert same_images('IR_source_1D.png',
-                             os.path.join(figures_dir, 'IR_source_1D.png'))
+        assert same_images('IR_dataset_1D.png',
+                             os.path.join(figures_dir, 'IR_dataset_1D.png'))
     except:
-        os.remove('IR_source_1D.png')
+        os.remove('IR_dataset_1D.png')
         raise AssertionError('comparison fails')
-    os.remove('IR_source_1D.png')
+    os.remove('IR_dataset_1D.png')
 
-    source = source[:,::100]
+    dataset = dataset[:,::100]
 
-    sources = [source[0], source[10], source[20], source[50], source[53]]
+    datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
     labels = ['sample {}'.format(label) for label in
               ["S1", "S10", "S20", "S50", "S53"]]
 
     # plot multiple
     plot_multiple(method = 'scatter',
-                  sources=sources, labels=labels, legend='best',
+                  datasets=datasets, labels=labels, legend='best',
                   output=os.path.join(figures_dir,
-                                       'multiple_IR_source_1D_scatter'),
+                                       'multiple_IR_dataset_1D_scatter'),
                   savedpi=150)
 
     # plot mupltiple with  style
     plot_multiple(method='scatter', style='sans',
-                  sources=sources, labels=labels, legend='best',
+                  datasets=datasets, labels=labels, legend='best',
                   output=os.path.join(figures_dir,
-                                       'multiple_IR_source_1D_scatter_sans'),
+                                       'multiple_IR_dataset_1D_scatter_sans'),
                   savedpi=150)
 
     # check that style reinit to default
     plot_multiple(method='scatter',
-                  sources=sources, labels=labels, legend='best',
-                  output='multiple_IR_source_1D_scatter',
+                  datasets=datasets, labels=labels, legend='best',
+                  output='multiple_IR_dataset_1D_scatter',
                   savedpi=150)
     try:
-        assert same_images('multiple_IR_source_1D_scatter',
+        assert same_images('multiple_IR_dataset_1D_scatter',
                              os.path.join(figures_dir,
-                                          'multiple_IR_source_1D_scatter'))
+                                          'multiple_IR_dataset_1D_scatter'))
     except:
-        os.remove('multiple_IR_source_1D_scatter.png')
+        os.remove('multiple_IR_dataset_1D_scatter.png')
         raise AssertionError('comparison fails')
-    os.remove('multiple_IR_source_1D_scatter.png')
+    os.remove('multiple_IR_dataset_1D_scatter.png')
 
     plt.show()
 

@@ -15,14 +15,14 @@ from spectrochempy import PCA, masked
 # test pca
 #---------
 
-def test_pca(IR_source_2D):
+def test_pca(IR_dataset_2D):
 
-    source = IR_source_2D.copy()
+    dataset = IR_dataset_2D.copy()
 
     # with masks
-    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    dataset[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
 
-    pca = PCA(source)
+    pca = PCA(dataset)
     print(pca)
     pca.printev(n_pc=5)
 

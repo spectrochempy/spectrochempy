@@ -16,12 +16,12 @@ from numpy.testing import assert_allclose
 # test svd
 #-----------
 
-def test_svd(IR_source_2D):
+def test_svd(IR_dataset_2D):
 
-    source = IR_source_2D.copy()
-    print(source)
+    dataset = IR_dataset_2D.copy()
+    print(dataset)
 
-    svd = SVD(source)
+    svd = SVD(dataset)
 
     print()
     print((svd.U))
@@ -37,12 +37,12 @@ def test_svd(IR_source_2D):
 
 
     # with masks
-    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
-    source[10:12] = masked
+    dataset[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    dataset[10:12] = masked
 
-    ax = source.plot_stack()
+    ax = dataset.plot_stack()
 
-    svd = SVD(source)
+    svd = SVD(dataset)
 
     print()
     print((svd.U))
@@ -55,12 +55,12 @@ def test_svd(IR_source_2D):
     assert_allclose(svd.ev_ratio[0].data, 93.803, rtol=1e-5, atol=0.0001)
 
     # with masks
-    source[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
-    source[10:12] = masked
+    dataset[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
+    dataset[10:12] = masked
 
-    ax = source.plot_stack()
+    ax = dataset.plot_stack()
 
-    svd = SVD(source, full_matrices = True)
+    svd = SVD(dataset, full_matrices = True)
 
     print()
     print((svd.U))

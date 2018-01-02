@@ -16,21 +16,21 @@ from tests.utils import assert_approx_equal
 import os
 import pytest
 
-#sources are defined in conftest as fixture
+#datasets are defined in conftest as fixture
 
-def test_load(IR_source_2D):
+def test_load(IR_dataset_2D):
 
-    source = IR_source_2D
-    assert_approx_equal(source.data[0,0], 2.05, significant=2)
-    B = source * 1.98
+    dataset = IR_dataset_2D
+    assert_approx_equal(dataset.data[0,0], 2.05, significant=2)
+    B = dataset * 1.98
     assert_approx_equal(B.data[0, 0], 2.05 * 1.98, significant=2)
     assert "binary operation mul with `1.98` has been performed" in B.history
 
     filename = os.path.join('irdata', 'nh4.scp')
-    source.save(filename)
-    source2 = NDDataset.read(filename)
+    dataset.save(filename)
+    dataset2 = NDDataset.read(filename)
 
-    assert source == source2
+    assert dataset == dataset2
 
 def test_methods_read_access():
 

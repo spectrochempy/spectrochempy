@@ -12,19 +12,19 @@ from spectrochempy.application import preferences, INFO
 
 preferences.log_level = INFO
 
-def test_plot_generic_1D(IR_source_1D):
+def test_plot_generic_1D(IR_dataset_1D):
 
     for method in ['scatter', 'lines']:
-        source = IR_source_1D.copy()
-        source.plot(method=method)
+        dataset = IR_dataset_1D.copy()
+        dataset.plot(method=method)
 
     show()
 
 
-def test_plot_generic_2D(IR_source_2D):
+def test_plot_generic_2D(IR_dataset_2D):
     for method in ['stack', 'map', 'image']:
-        source = IR_source_2D.copy()
-        source.plot(method=method)
+        dataset = IR_dataset_2D.copy()
+        dataset.plot(method=method)
 
     show()
 

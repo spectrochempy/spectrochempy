@@ -973,40 +973,40 @@ def test_nddataset_with_meta(ds1):
 #### sorting #################################################################
 def test_nddataset_sorting(ds1):  # ds1 is defined in conftest
 
-    source = ds1[:3, :3, 0].copy()
-    source.sort(inplace=True)
+    dataset = ds1[:3, :3, 0].copy()
+    dataset.sort(inplace=True)
     labels = np.array('c b a'.split())
-    assert_array_equal(source.coordset[0].labels, labels)
-    print(source)
+    assert_array_equal(dataset.coordset[0].labels, labels)
+    print(dataset)
 
-    source.sort(inplace=True)
-    print(source)
-    new = source.copy()
+    dataset.sort(inplace=True)
+    print(dataset)
+    new = dataset.copy()
     new = new.sort(descend=True, inplace=False)
     print(new)
-    assert_array_equal(new.data, source.data[::-1])
-    assert (new[0, 0] == source[-1, 0])
+    assert_array_equal(new.data, dataset.data[::-1])
+    assert (new[0, 0] == dataset[-1, 0])
     assert_array_equal(new.coordset[0].labels, labels[::-1])
-    assert_array_equal(new.coordset[0].data, source.coordset[0].data[::-1])
+    assert_array_equal(new.coordset[0].data, dataset.coordset[0].data[::-1])
 
-    new = source.copy()
+    new = dataset.copy()
     new.sort(inplace=True, descend=False)
-    assert_array_equal(new.data, source.data)
-    assert (new[0, 0] == source[0, 0])
+    assert_array_equal(new.data, dataset.data)
+    assert (new[0, 0] == dataset[0, 0])
     assert_array_equal(new.coordset[0].labels, labels)
 
     # check for another dimension
 
-    source = ds1.copy()
+    dataset = ds1.copy()
     new = ds1.copy()
     new.sort(axis=1, inplace=True, descend=False)
-    assert_array_equal(new.data, source.data)
-    assert (new[0, 0, 0] == source[0, 0, 0])
+    assert_array_equal(new.data, dataset.data)
+    assert (new[0, 0, 0] == dataset[0, 0, 0])
 
-    new = source.copy()
+    new = dataset.copy()
     new.sort(axis=1, inplace=True, descend=True)
-    assert_array_equal(new.data, source.data[:, ::-1, :])
-    assert (new[0, -1, 0] == source[0, 0, 0])
+    assert_array_equal(new.data, dataset.data[:, ::-1, :])
+    assert (new[0, -1, 0] == dataset[0, 0, 0])
 
 
 #### multiple axis #############################################################
@@ -1055,9 +1055,9 @@ def test_multiple_axis(dsm):  # dsm is defined in conftest
                        np.logspace(1., 4., 50) + 273.15,
                        "get a Coord from Coordset by title failed")
 
-def test_coords_manipulation(IR_source_2D):
-    source = IR_source_2D.copy()
-    coord0 = source.coordset[0]
+def test_coords_manipulation(IR_dataset_2D):
+    dataset = IR_dataset_2D.copy()
+    coord0 = dataset.coordset[0]
 
     coord0 -= coord0[0]
 
@@ -1077,9 +1077,9 @@ def test_ndarray_plusminus():
 
 #### Test masks ######
 
-def test_nddataset_use_of_mask(IR_source_1D):
+def test_nddataset_use_of_mask(IR_dataset_1D):
 
-    nd = IR_source_1D.copy()
+    nd = IR_dataset_1D.copy()
     nd[950.:1260.] = masked
     print(nd)
     nd.plot()

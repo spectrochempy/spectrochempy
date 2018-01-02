@@ -32,12 +32,12 @@ from spectrochempy.dataset.ndcoords import CoordRange
 
 
 
-def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
+def autosub(dataset, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     """Automatic subtraction of ref to the dataset to minimise peaks due to ref
 
     Parameters
     -----------
-    source : |NDDataset|.
+    dataset : |NDDataset|.
         Dataset to which we want to subtract the reference data
 
     ref : |NDDataset|.
@@ -83,9 +83,9 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     # output dataset
 
     if not inplace:
-        new = source.copy()
+        new = dataset.copy()
     else:
-        new = source
+        new = dataset
 
     # we assume that the last dimension if always the dimension
     # to which we want to subtract.
@@ -95,7 +95,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
         axis = -1
 
     try:
-        ref.to(source.units)
+        ref.to(dataset.units)
     except:
         raise ValueError('Units of the dataset and reference are not compatible')
 
@@ -114,7 +114,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     # must be float to be considered as frequency for instance
 
     coords = new.coordset[-1]
-    xrange = CoordRange(*ranges, reversed=coords.is_reversed).ranges
+    xrange = CoordRange(*ranges, reversed=coords.is_reversed)
 
     s = []
     r = []
@@ -122,7 +122,7 @@ def autosub(source, ref, *ranges, axis=-1, method='vardiff', inplace=False):
         # determine the slices
 
         sl = slice(*xpair)
-        s.append(source[..., sl])
+        s.append(dataset[..., sl])
         r.append(ref[..., sl])
 
     # faster with np.array

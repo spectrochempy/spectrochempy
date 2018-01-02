@@ -11,42 +11,42 @@ from spectrochempy import *
 
 def test_multiplot():
 
-    source = NDDataset.read_omnic(
+    dataset = NDDataset.read_omnic(
          os.path.join(datadir.path, 'irdata', 'NH4Y-activation.SPG'))[0:20]
 
-    sources=[source, source*1.1, source*1.2, source*1.3]
+    datasets=[dataset, dataset*1.1, dataset*1.2, dataset*1.3]
     labels = ['sample {}'.format(label) for label in
               ["1", "2", "3", "4"]]
-    multiplot(sources=sources, method='stack', labels=labels, nrow=2, ncol=2,
+    multiplot(datasets=datasets, method='stack', labels=labels, nrow=2, ncol=2,
               figsize=(9, 5), style='sans',
               sharex=True, sharey=True, sharez=True)
 
-    multiplot(sources=sources, method='image', labels=labels, nrow=2, ncol=2,
+    multiplot(datasets=datasets, method='image', labels=labels, nrow=2, ncol=2,
                     figsize=(9, 5), sharex=True, sharey=True, sharez=True)
 
-    sources = [source * 1.2, source * 1.3,
-               source, source * 1.1, source * 1.2, source * 1.3]
+    datasets = [dataset * 1.2, dataset * 1.3,
+               dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
     labels = ['sample {}'.format(label) for label in
                                  ["1", "2", "3", "4", "5", "6"]]
-    multiplot_map(sources=sources, labels=labels, nrow=2, ncol=3,
+    multiplot_map(datasets=datasets, labels=labels, nrow=2, ncol=3,
               figsize=(9, 5), sharex=False, sharey=False, sharez=True)
 
-    multiplot_map(sources=sources, labels=labels, nrow=2, ncol=3,
+    multiplot_map(datasets=datasets, labels=labels, nrow=2, ncol=3,
               figsize=(9, 5), sharex=True, sharey=True, sharez=True)
 
-    sources = [source * 1.2, source * 1.3, source, ]
+    datasets = [dataset * 1.2, dataset * 1.3, dataset, ]
     labels = ['sample {}'.format(label) for label in
               ["1", "2", "3"]]
-    multiplot_stack(sources=sources, labels=labels, nrow=1, ncol=3,
+    multiplot_stack(datasets=datasets, labels=labels, nrow=1, ncol=3,
                     figsize=(9, 5), sharex=True,
                     sharey=True, sharez=True)
 
-    multiplot_stack(sources=sources, labels=labels, nrow=3, ncol=1,
+    multiplot_stack(datasets=datasets, labels=labels, nrow=3, ncol=1,
                     figsize=(9, 5), sharex=True,
                     sharey=True, sharez=True)
 
-    multiplot(method='lines', sources=[source[0], source[10]*1.1,
-                                     source[19]*1.2, source[15]*1.3],
+    multiplot(method='lines', datasets=[dataset[0], dataset[10]*1.1,
+                                     dataset[19]*1.2, dataset[15]*1.3],
               nrow=2, ncol=2, figsize=(9, 5),
               labels=labels, sharex=True)
 

@@ -349,7 +349,7 @@ class ParameterScript(HasTraits):
 
     script = Unicode('')
 
-    sources = List(Instance(NDDataset))
+    datasets = List(Instance(NDDataset))
 
     # ===========================================================================
     # properties
@@ -377,7 +377,7 @@ class ParameterScript(HasTraits):
         fp = FitParameters()
 
         # set the number of experiments
-        fp.expnumber = len(self.sources)
+        fp.expnumber = len(self.datasets)
         log.info("The number of experiment(s) is set to %d" % fp.expnumber)
 
         # start interpreting ------------------------------------------------------
@@ -477,7 +477,7 @@ class ParameterScript(HasTraits):
                     ks = "%s" % key
                     fp.common[key] = True
                 # if key in fp.expvars:
-                #    for i in xrange(len(self.sources)):
+                #    for i in xrange(len(self.datasets)):
                 #        ks = "%s_exp%d"%(ks, i)
                 fp.reference[ks] = reference
                 if not reference:

@@ -22,8 +22,8 @@ import spectrochempy as scp
 datadir = scp.datadir.path
 
 
-def get_source1D():
-    """Read the 1D source"""
+def get_dataset1D():
+    """Read the 1D dataset"""
     s1D = scp.NDDataset()
     path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
@@ -35,8 +35,8 @@ def get_source1D():
 # 2D dataset getting function
 # ---------------------------
 
-def get_source2D():
-    """Read the 2D source"""
+def get_dataset2D():
+    """Read the 2D dataset"""
     s2D = scp.NDDataset()
     path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')
@@ -47,23 +47,23 @@ def get_source2D():
 ##########################################################
 # get the 1D dataset
 # -------------------
-source1D = get_source1D()
-print(source1D)
+dataset1D = get_dataset1D()
+print(dataset1D)
 
 ##########################################################
 # get the 2D dataset
 # -------------------
-source2D = get_source2D()
-print(source2D)
+dataset2D = get_dataset2D()
+print(dataset2D)
 
 ##########################################################
 # Plot the 1D dataset raw data
 # ----------------------------
 # plot the real data
-source1D.plot(xlim=(0, 25000), style='paper')
+dataset1D.plot(xlim=(0, 25000), style='paper')
 
 # plot the imaginary data on the same plot
-source1D.plot(imag=True, data_only=True, hold=True)
+dataset1D.plot(imag=True, data_only=True, hold=True)
 # `data_only=True` to plot only the additional data, without updating the
 # figure setting
 # such as xlim and so on.
@@ -73,7 +73,7 @@ scp.show()
 # To display the imaginary part, one can also simply use the show_complex
 # commands.
 
-ax = source1D.plot(show_complex=True, color='green', xlim=(0., 20000.),
+ax = dataset1D.plot(show_complex=True, color='green', xlim=(0., 20000.),
                    zlim=(-2., 2.))
 
 scp.show()
@@ -81,29 +81,29 @@ scp.show()
 ###############################
 # Plot the 2D dataset raw data
 
-source2D = get_source2D()
-ax = scp.plot(source2D, xlim=(0., 25000.))
+dataset2D = get_dataset2D()
+ax = scp.plot(dataset2D, xlim=(0., 25000.))
 
 ##############################
 # probably less util, but multiple display is also possible for 2D
 
-source2D.plot()
-ax = source2D.plot(imag=True, cmap='jet', data_only=True, hold=True)
+dataset2D.plot()
+ax = dataset2D.plot(imag=True, cmap='jet', data_only=True, hold=True)
 scp.show()
 
 #################
 # Apodization
 
-source1D = get_source1D()  # restore original
-p = source1D.plot()
+dataset1D = get_dataset1D()  # restore original
+p = dataset1D.plot()
 
 # create the apodized dataset
 ur = scp.ur  # the unit registry
-lb_source = source1D.em(lb=100. * ur.Hz)
+lb_dataset = dataset1D.em(lb=100. * ur.Hz)
 
-p = lb_source.plot(xlim=(0, 25000), zlim=(-2, 2))
+p = lb_dataset.plot(xlim=(0, 25000), zlim=(-2, 2))
 
-lb_source.ax.text(12500, 1.70, 'Dual display (original & apodized fids)',
+lb_dataset.ax.text(12500, 1.70, 'Dual display (original & apodized fids)',
                   ha='center', fontsize=16)
 
 scp.show()
@@ -111,7 +111,7 @@ scp.show()
 ############################
 # Note that the apodized dataset actually replace the original data
 # check that both dataset are the same
-print(lb_source is source1D)  # note here, that the original data are modified
+print(lb_dataset is dataset1D)  # note here, that the original data are modified
 #  by
 # default
 # when applying apodization function.
@@ -121,18 +121,18 @@ print(lb_source is source1D)  # note here, that the original data are modified
 # If we want to avoid this behavior and create a new dataset instead,
 # we use the `inplace` flag.
 
-source1D = get_source1D()
+dataset1D = get_dataset1D()
 
-lb2_source = source1D.em(lb=100. * ur.Hz, inplace=False)
+lb2_dataset = dataset1D.em(lb=100. * ur.Hz, inplace=False)
 
 # check that both dataset are different
-print(lb2_source is not source1D)
+print(lb2_dataset is not dataset1D)
 
 ###############################################
 # We can also get only the apodization function
 
-source1D = get_source1D()  # restore original
-p = source1D.plot()
+dataset1D = get_dataset1D()  # restore original
+p = dataset1D.plot()
 
 scp.show()
 
@@ -141,13 +141,13 @@ scp.show()
 # is not applied to the dataset,
 # but returned)
 
-apodfunc = source1D.em(lb=100. * ur.Hz, apply=False)
+apodfunc = dataset1D.em(lb=100. * ur.Hz, apply=False)
 
 apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2))
 
-source1D.em(lb=100. * ur.Hz, apply=True)
-source1D.plot(data_only=True, hold=True)
-source1D.ax.text(12500, 1.70,
+dataset1D.em(lb=100. * ur.Hz, apply=True)
+dataset1D.plot(data_only=True, hold=True)
+dataset1D.ax.text(12500, 1.70,
                  'Multiple display (original & em apodized fids + '
                  'apod.function)',
                  ha='center', fontsize=14)
@@ -156,19 +156,19 @@ scp.show()
 ######################################
 # Apodization function can be em, gm, sp ...
 
-source1D = get_source1D()  # restore original
-p = source1D.plot()
+dataset1D = get_dataset1D()  # restore original
+p = dataset1D.plot()
 
 LB = 50. * ur.Hz
 GB = 100. * ur.Hz
-apodfunc = source1D.gm(gb=GB, lb=LB, apply=False)
+apodfunc = dataset1D.gm(gb=GB, lb=LB, apply=False)
 
 apodfunc.plot(xlim=(0, 25000), hold=True, zlim=(-2, 2))
 
-source1D.gm(gb=GB, lb=LB)  # apply=True by default
-source1D.plot(data_only=True, hold=True)
+dataset1D.gm(gb=GB, lb=LB)  # apply=True by default
+dataset1D.plot(data_only=True, hold=True)
 
-source1D.ax.text(12500, 1.70,
+dataset1D.ax.text(12500, 1.70,
                  'Multiple display (original & gm apodized fids + '
                  'apod.function)',
                  ha='center', fontsize=14)
@@ -180,12 +180,12 @@ scp.show()
 ################################################
 # Apodization of 2D data
 
-source2D = get_source2D()
-source2D.plot(xlim=(0., 5000.))
+dataset2D = get_dataset2D()
+dataset2D.plot(xlim=(0., 5000.))
 
 LB = 20. * ur.Hz
-source2D.em(lb=LB)
-source2D.em(lb=LB / 2, axis=0)
-source2D.plot(data_only=True, xlim=(0, 5000), cmap='copper', hold=True)
+dataset2D.em(lb=LB)
+dataset2D.em(lb=LB / 2, axis=0)
+dataset2D.plot(data_only=True, xlim=(0, 5000), cmap='copper', hold=True)
 
 scp.show()

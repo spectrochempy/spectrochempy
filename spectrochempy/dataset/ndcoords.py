@@ -836,7 +836,7 @@ class CoordRange(HasTraits):
     ranges = List(Range)
     reversed = Bool
 
-    def __init__(self, *ranges, **kwargs):
+    def __call__(self, *ranges, **kwargs):
         """
         Parameters
         -----------
@@ -848,12 +848,9 @@ class CoordRange(HasTraits):
         reversed : bool, optional.
             The intervals are ranked by decreasing order if True
             or increasing order if False.
-        nranges :  int
-            Number of distinct ranges
-
 
         """
-        super(CoordRange, self).__init__(**kwargs)
+        #super(CoordRange, self).__init__(**kwargs)
 
         self.reversed = kwargs.get('reversed', False)
 
@@ -872,54 +869,20 @@ class CoordRange(HasTraits):
 
         else:
             # third case: a set of pairs of scalars has been passed
-
-            self.ranges = self._cleanranges(ranges)
-
-        if self.reversed:
-            self.reverse()
+            self._cleanranges(ranges)
 
         if self.ranges:
-            self.ranges = self._cleanranges(self.ranges)
+            self._cleanranges(self.ranges)
 
-    # ------------------------------------------------------------------------
-    # Special methods
-    # ------------------------------------------------------------------------
+        return self.ranges
 
-    def __iter__(self):
-        for x in self.ranges:
-            yield x
-
-    # ------------------------------------------------------------------------
-    # Properties
-    # ------------------------------------------------------------------------
-
-    @property
-    def nranges(self):
-        """int - Number of interval in the current |CoordRange| (readonly
-        property).
-
-        """
-        return len(self.ranges)
-
-    # ------------------------------------------------------------------------
-    # public methods
-    # ------------------------------------------------------------------------
-
-    def reverse(self):
-        """Reverse the order of the range
-
-        """
-        for range in self.ranges:
-            range.reverse()
-        self.ranges.reverse()
 
     # ------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------
 
-    @staticmethod
-    def _cleanranges(ranges):
-        """Sort and merge overlscpng ranges
+    def _cleanranges(self, ranges):
+        """Sort and merge overlapping ranges
 
         It works as follows::
 
@@ -948,8 +911,14 @@ class CoordRange(HasTraits):
             else:
                 cleaned_ranges.append(range)
 
-        return cleaned_ranges
+        self.ranges = cleaned_ranges
+        if self.reversed:
+            for range in self.ranges:
+                range.reverse()
+            self.ranges.reverse()
 
+
+CoordRange = CoordRange()
 
 # ============================================================================
 # Set the operators
