@@ -19,6 +19,7 @@ __dataset_methods__ = ['PCA']
 # imports
 # ----------------------------------------------------------------------------
 import numpy as np
+import warnings
 from scipy.special import gammaln
 from traitlets import HasTraits, Instance
 from matplotlib import pyplot as plt

@@ -324,16 +324,22 @@ def plot_1D(dataset, **kwargs):
     # -----------------------------
 
     if scatterpen:
-        line, = ax.plot(xdata, zdata,  markersize = markersize,
-                                       markevery = markevery,
-                                       markerfacecolor = markerfacecolor,
-                                       markeredgecolor=markeredgecolor)
+        line, = ax.plot(xdata, zdata,
+                        marker = marker,
+                        markersize = markersize,
+                        markevery = markevery,
+                        markeredgewidth = 1.,
+                        markerfacecolor = markerfacecolor,
+                        markeredgecolor = markeredgecolor)
     elif scatter:
-        line, = ax.plot(xdata, zdata, lw=0,
-                                       markersize = markersize,
-                                       markevery = markevery,
-                                       markerfacecolor = markerfacecolor,
-                                       markeredgecolor=markeredgecolor)
+        line, = ax.plot(xdata, zdata,
+                        ls = "",
+                        marker = marker,
+                        markersize = markersize,
+                        markeredgewidth = 1.,
+                        markevery = markevery,
+                        markerfacecolor = markerfacecolor,
+                        markeredgecolor = markeredgecolor)
     elif pen:
         line, = ax.plot(xdata, zdata, marker="")
 

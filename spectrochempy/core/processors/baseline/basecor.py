@@ -192,9 +192,9 @@ class BaselineCorrection(HasTraits):
             sl = slice(*pair)
             s.append(new[..., sl])
 
-        sbase = s[0].concatenate(*s[1:],
-                                 axis=-1)  # TODO: probably we could use masked
-        # data instead of concatenating
+        sbase = s[0].concatenate(*s[1:], axis=-1)
+
+        # TODO: probably we could use masked data instead of concatenating
         xbase = sbase.coordset(-1)
 
         if self.method == 'sequential':
