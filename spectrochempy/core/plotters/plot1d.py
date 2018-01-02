@@ -39,7 +39,7 @@ from spectrochempy.utils import is_sequence, deprecated
 
 # plot scatter ----------------------------------------------------------------
 
-def plot_scatter(source, **kwargs):
+def plot_scatter(dataset, **kwargs):
     """
     Plot a 1D dataset as a scatter plot (points can be added on lines).
 
@@ -47,14 +47,14 @@ def plot_scatter(source, **kwargs):
 
     """
     kwargs['method'] = 'scatter'
-    ax = plot_1D(source, **kwargs)
+    ax = plot_1D(dataset, **kwargs)
     return ax
 
 
 # plot lines ----------------------------------------------------------------
 
 @deprecated('Use method=pen or plot_pen() instead.')
-def plot_lines(source, **kwargs):
+def plot_lines(dataset, **kwargs):
     """
     Plot a 1D dataset with solid lines by default.
 
@@ -62,12 +62,12 @@ def plot_lines(source, **kwargs):
 
     """
     kwargs['method'] = 'lines'
-    ax = plot_1D(source, **kwargs)
+    ax = plot_1D(dataset, **kwargs)
     return ax
 
 # plot pen (default) --------------------------------------------------------
 
-def plot_pen(source, **kwargs):
+def plot_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
 
@@ -75,12 +75,12 @@ def plot_pen(source, **kwargs):
 
     """
     kwargs['method'] = 'pen'
-    ax = plot_1D(source, **kwargs)
+    ax = plot_1D(dataset, **kwargs)
     return ax
 
 # plot bars -----------------------------------------------------------------
 
-def plot_bar(source, **kwargs):
+def plot_bar(dataset, **kwargs):
     """
     Plot a 1D dataset with bars.
 
@@ -88,13 +88,13 @@ def plot_bar(source, **kwargs):
 
     """
     kwargs['method'] = 'bar'
-    ax = plot_1D(source, **kwargs)
+    ax = plot_1D(dataset, **kwargs)
     return ax
 
 
 # plot multiple ----------------------------------------------------------------
 
-def plot_multiple(sources, method='scatter', pen=True,
+def plot_multiple(datasets, method='scatter', pen=True,
                   labels = None, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot
@@ -102,7 +102,7 @@ def plot_multiple(sources, method='scatter', pen=True,
 
     Parameters
     ----------
-    sources : a list of ndatasets
+    datasets : a list of ndatasets
     method : str among [scatter, pen]
     pen : bool, optional, default:True
         if method is scatter, this flag tells to draw also the lines
@@ -112,17 +112,17 @@ def plot_multiple(sources, method='scatter', pen=True,
     **kwargs : other parameters that will be passed to the plot1D function
 
     """
-    if not is_sequence(sources):
+    if not is_sequence(datasets):
         # we need a sequence. Else it is a single plot.
-        return sources.plot(**kwargs)
+        return datasets.plot(**kwargs)
 
-    if not is_sequence(labels) or len(labels)!=len(sources):
-        # we need a sequence of labels of same lentgh as sources
+    if not is_sequence(labels) or len(labels)!=len(datasets):
+        # we need a sequence of labels of same lentgh as datasets
         raise ValueError('the list of labels must be of same length '
-                         'as the sources list')
+                         'as the datasets list')
 
-    for source in sources:
-        if source.ndim > 1:
+    for dataset in datasets:
+        if dataset.ndim > 1:
             raise NotImplementedError('plot multiple is designed to work on '
                                       '1D dataset only. you may achieved '
                                       'several plots with '
@@ -137,7 +137,7 @@ def plot_multiple(sources, method='scatter', pen=True,
     commands = kwargs.get('commands', [])
     kwargs['commands'] = []
 
-    for s in sources : #, colors, markers):
+    for s in datasets : #, colors, markers):
 
         ax = s.plot(method= method,
                     pen=pen,
@@ -152,7 +152,7 @@ def plot_multiple(sources, method='scatter', pen=True,
         leg = ax.legend(ax.lines, labels, shadow=True, loc=legend,
                         frameon=True, facecolor='lightyellow')
     kw = {'output': output, 'commands': commands}
-    sources[0]._plot_resume(sources[-1], **kw)
+    datasets[0]._plot_resume(datasets[-1], **kw)
 
     return ax
 
@@ -160,13 +160,13 @@ def plot_multiple(sources, method='scatter', pen=True,
 # ------------------------------------------------------------------------------
 # plot_1D
 # ------------------------------------------------------------------------------
-def plot_1D(source, **kwargs):
+def plot_1D(dataset, **kwargs):
     """
     Plot of one-dimensional data
 
     Parameters
     ----------
-    source : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
         Source of data to plot.
     method : str, optional, default:pen
         The method can be one among ``pen``, ``bar``,  or ``scatter``
@@ -240,7 +240,7 @@ def plot_1D(source, **kwargs):
     # where to plot?
     # ---------------
 
-    new = source.copy()
+    new = dataset.copy()
 
     # figure setup
     # ------------
@@ -272,6 +272,8 @@ def plot_1D(source, **kwargs):
     marker = kwargs.get('marker', kwargs.get('m', None))  # default to rc
     markersize = kwargs.get('markersize', kwargs.get('ms', 5.))
     markevery = kwargs.get('markevery', kwargs.get('me', 1))
+    markerfacecolor = kwargs.get('markerfacecolor', kwargs.get('mfc', None))
+    markeredgecolor = kwargs.get('markeredgecolor', kwargs.get('mec', None))
 
     xscale = kwargs.get('xscale', 'linear')
     yscale = kwargs.get('yscale', 'linear')
@@ -309,37 +311,44 @@ def plot_1D(source, **kwargs):
     # ordinates (by default we plot real part of the data)
     if not kwargs.pop('imag', False) or kwargs.get('show_complex', False):
         z = new.real
+        zdata = z.masked_data
     else:
         z = new.imag
+        zdata = z.masked_data
 
     # offset
     offset = kwargs.pop('offset', 0.0)
-    z = z - offset
+    zdata = zdata - offset
 
     # plot_lines
     # -----------------------------
 
     if scatterpen:
-        line, = ax.plot(xdata, z.masked_data,  markersize = markersize,
-                                        markevery = markevery)
+        line, = ax.plot(xdata, zdata,  markersize = markersize,
+                                       markevery = markevery,
+                                       markerfacecolor = markerfacecolor,
+                                       markeredgecolor=markeredgecolor)
     elif scatter:
-        line, = ax.plot(xdata, z.masked_data, lw=0,  markersize = markersize,
-                                        markevery = markevery)
+        line, = ax.plot(xdata, zdata, lw=0,
+                                       markersize = markersize,
+                                       markevery = markevery,
+                                       markerfacecolor = markerfacecolor,
+                                       markeredgecolor=markeredgecolor)
     elif pen:
-        line, = ax.plot(xdata, z.masked_data)
+        line, = ax.plot(xdata, zdata, marker="")
 
     elif bar:
-        line = ax.bar(xdata, z.masked_data, color=color,
+        line = ax.bar(xdata, zdata, color=color,
                       edgecolor='k', align='center')
         barwidth = line[0].get_width()
 
     if show_complex and pen:
-        zimag = new.imag
-        ax.plot(x.data, zimag.masked_data, ls='--')
+        zimagdata = new.imag.masked_data
+        ax.plot(xdata, zimagdata, ls='--')
 
     if kwargs.get('plot_model', False):
-        modeldata = new.modeldata                   #TODO: what's about mask?
-        ax.plot(x.data, modeldata.T, ls=':', lw='2')   #TODO: improve this!!!
+        modeldata = new.modeldata                 #TODO: what's about mask?
+        ax.plot(xdata, modeldata.T, ls=':', lw='2')   #TODO: improve this!!!
 
     # line attributes
     if pen and color:
@@ -411,7 +420,7 @@ def plot_1D(source, **kwargs):
     if kwargs.get('data_only', False):
         # if data only (we will not set labels
         # it was probably done already in a previous plot
-        new._plot_resume(source, **kwargs)
+        new._plot_resume(dataset, **kwargs)
         return True
 
     # x label
@@ -449,7 +458,7 @@ def plot_1D(source, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines(label='zero_line')
 
-    new._plot_resume(source, **kwargs)
+    new._plot_resume(dataset, **kwargs)
 
     return ax
 
