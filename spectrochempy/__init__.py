@@ -94,7 +94,7 @@ def _setup_backend_and_ipython(backend=None):
 
     # if we are building the docs, in principle it should be done using
     # the builddocs.py located in the scripts folder
-    if not 'builddocs.py' in sys.argv[0]:
+    if not 'builddocs.py' in sys.argv[0] and not 'pytest' in sys.argv[0]:
         mpl.use(backend, warn = False, force = True)
     else:
         # 'agg' backend is necessary to build docs with sphinx-gallery
