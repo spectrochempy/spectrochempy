@@ -34,4 +34,4 @@ scikit-image
 sphinx
 sphinx_rtd_theme
 
-pyqt
+# pyqt
