@@ -19,13 +19,13 @@ ipython
 jupyter
 # ipyparallel
 ipykernel
-nb_conda
+# nb_conda
 ipympl
 
 # for testing
 
 pytest
-pytest-xdist
+# pytest-xdist
 pytest-runner
 scikit-image
 
