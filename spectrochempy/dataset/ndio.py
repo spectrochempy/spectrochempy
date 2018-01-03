@@ -88,6 +88,13 @@ class NDIO(HasTraits):
         else:
             return ''
 
+    # -------------------------------------------------------------------------
+    # special methods
+    # -------------------------------------------------------------------------
+
+    def __dir__(self):
+        return ['filename', ]
+
     # --------------------------------------------------------------------------
     # Generic save function
     # --------------------------------------------------------------------------
@@ -285,6 +292,14 @@ class NDIO(HasTraits):
         """
         filename = None
 
+        # case where load was call directly from the API
+        # e.g.,  A= scp.load("dataset.scp")
+        # In this cas ewe need to define cls as a NDDataset class
+        if isinstance(cls(), NDIO):
+            # not run as a class method of NDDataset
+            from spectrochempy import NDDataset
+            cls = NDDataset
+
         if protocol not in ['scp']:
             # TODO : case where fp is a file object
             filename = fid
@@ -305,7 +320,13 @@ class NDIO(HasTraits):
                     # TODO: add possibility to search in several directory
                     fid = open(filename,'rb')
                 except:
-                    raise IOError('no valid filename provided')
+                    if not filename.endswith('.scp'):
+                        filename = filename + '.scp'
+                    try:
+                        # try again
+                        fid = open(filename, 'rb')
+                    except IOError:
+                        raise IOError('no valid filename provided')
 
         # get zip file
         obj = NpzFile(fid, allow_pickle=True)

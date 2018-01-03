@@ -399,7 +399,7 @@ class Coord(NDMath, NDArray):
     def __dir__(self):
         # with remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
-        return ['data', 'mask', 'labels', 'units', 'meta', 'name', 'title']
+        return ['data', 'labels', 'units', 'meta', 'name', 'title']
 
     def __str__(self):
         out = '      title: %s\n' % (self.title.capitalize())

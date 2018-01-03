@@ -16,9 +16,6 @@
 """
 
 from spectrochempy import NDDataset, datadir
-from spectrochempy.utils import SpectroChemPyWarning
-
-import pytest
 import os
 
 from tests.utils import assert_array_equal
@@ -26,23 +23,6 @@ from tests.utils import assert_array_equal
 
 # Basic
 # -------
-def test_save_and_load(IR_dataset_2D):
-
-    A = IR_dataset_2D.copy()
-    A.save('tartempion.scp')
-    # no directory for saving passed ... it must be in data
-    path = os.path.join(datadir.path, 'tartempion.scp')
-    assert os.path.exists(path)
-
-    B = NDDataset.load('tartempion.scp')
-    assert B.description == A.description
-    assert_array_equal(A.data,B.data)
-    os.remove(path)
-
-    #B.save()
-
-    #C=NDDataset.load()
-
 def test_save(IR_dataset_2D):
 
     dataset = IR_dataset_2D.copy()
@@ -52,3 +32,11 @@ def test_save(IR_dataset_2D):
     dataset.save('essai')  # there was a bug due to the saving of mpl axes
 
     os.remove(os.path.join(datadir.path, 'essai.scp'))
+
+def test_save_and_load_mydataset(IR_dataset_2D):
+    ds = IR_dataset_2D.copy()
+    ds.save('mydataset')
+    dl = NDDataset.load('mydataset')
+    assert_array_equal(dl.data, ds.data)
+    assert_array_equal(dl.x.data, ds.x.data)
+    assert (dl==ds)
