@@ -112,7 +112,7 @@ class gaussianmodel(object):
         gb = width / 2.3548
         tsq = (x - pos) * 2 ** -0.5 / gb
         w = np.exp(-tsq * tsq) * (2 * np.pi) ** -0.5 / gb
-        w = w * (x[1] - x[0])
+        w = w * abs(x[1] - x[0])
         return ampl * w
 
 
@@ -139,7 +139,7 @@ class lorentzianmodel(object):
     def f(self, x, ampl, width, pos, **kargs):
         lb = width / 2.
         w = lb / np.pi / (x * x - 2 * x * pos + pos * pos + lb * lb)
-        w = w * (x[1] - x[0])
+        w = w * abs(x[1] - x[0])
         return ampl * w
 
 
@@ -169,7 +169,7 @@ class voigtmodel(object):
         else:
             w = wofz(((x - pos) + 1.0j * lb) * 2 ** -0.5 / gb)
             w = w.real * (2. * np.pi) ** -0.5 / gb
-            w = w * (x[1] - x[0])
+            w = w * abs(x[1] - x[0])
             return ampl * w
 
 
@@ -213,7 +213,7 @@ class assymvoigtmodel(object):
         # sigmoid variation of width
         w = ratio * self.lorentz(x, g, pos) \
             + (1. - ratio) * self.gaussian(x, g, pos)
-        w = w * (x[1] - x[0])
+        w = w * abs(x[1] - x[0])
         return ampl * w
 
 
