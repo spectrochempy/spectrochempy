@@ -73,7 +73,10 @@ def test_implicit_lstsq():
 
     sc.show()
 
+def test_lstq_2D():
+    pass
 
+#    St_i = np.linalg.lstsq(C_i, X.data)[0]
 
 
 
