@@ -69,7 +69,7 @@ def test_notebook_basecor_bug():
     # coding: utf-8
 
     dataset = NDDataset.read_omnic(
-        os.path.join('irdata', 'NH4Y-activation.SPG'))
+        os.path.join('irdata', 'nh4y-activation.spg'))
     dataset
 
     s = dataset[:, 1260.0 :5999.0]

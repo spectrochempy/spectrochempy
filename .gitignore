@@ -58,7 +58,6 @@ todo.txt
 *.pkl
 FTIR.scp
 tg.scp
-nh4.scp
 
 tests/figures
 .coverage*

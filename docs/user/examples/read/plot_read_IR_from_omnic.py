@@ -16,7 +16,7 @@ import spectrochempy as scp
 datadir = scp.datadir.path
 
 dataset = scp.NDDataset.read_omnic(os.path.join(datadir,
-                                              'irdata', 'NH4Y-activation.SPG'))
+                                              'irdata', 'nh4y-activation.spg'))
 
 dataset.plot_stack(style='paper')
 scp.show()

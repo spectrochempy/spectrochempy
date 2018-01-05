@@ -290,7 +290,7 @@ def IR_dataset_1D():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
     dataset = NDDataset.read_omnic(
-            os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
     return dataset[0]
 
 @pytest.fixture(scope="function")
@@ -298,7 +298,7 @@ def IR_dataset_2D():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
     dataset = NDDataset.read_omnic(
-            os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
+            os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
     return dataset
 
 # Fixture:  IR spectra

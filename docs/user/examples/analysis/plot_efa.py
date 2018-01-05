@@ -22,7 +22,7 @@ import spectrochempy as scp
 
 datadir = scp.datadir.path
 dataset = scp.read_omnic(os.path.join(datadir, 'irdata',
-                                      'NH4Y-activation.SPG'))
+                                      'nh4y-activation.spg'))
 
 
 # columns masking

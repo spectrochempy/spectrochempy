@@ -13,7 +13,7 @@ from spectrochempy import NDDataset, show, datadir
 
 def test_plot2D():
 
-    A = NDDataset.read_omnic('irdata/NH4Y-activation.SPG',
+    A = NDDataset.read_omnic('irdata/nh4y-activation.spg',
                              directory=datadir.path)
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)

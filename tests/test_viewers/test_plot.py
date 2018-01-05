@@ -140,7 +140,7 @@ def test_multiplot(IR_dataset_2D):
                              ], force_creation=FORCE)
 def tests_multipleplots_and_styles():
     dataset = NDDataset.read_omnic(
-            os.path.join('irdata', 'NH4Y-activation.SPG'))
+            os.path.join('irdata', 'nh4y-activation.spg'))
 
 
     # plot generic

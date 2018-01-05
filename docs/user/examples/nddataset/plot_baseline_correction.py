@@ -27,7 +27,7 @@ import os
 # Load data
 
 nd = scp.NDDataset.read_omnic(
-    os.path.join(scp.datadir.path, 'irdata', 'NH4Y-activation.SPG'))
+    os.path.join(scp.datadir.path, 'irdata', 'nh4y-activation.spg'))
 
 ###############################################################################
 # Do some slicing to keep only the interesting region

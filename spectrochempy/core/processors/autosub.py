@@ -71,7 +71,7 @@ def autosub(dataset, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     <BLANKLINE>
     ...
     <BLANKLINE>
-    >>> path_A = 'NH4Y-activation.SPG'
+    >>> path_A = 'nh4y-activation.spg'
     >>> A = NDDataset.load(path_A, protocol='omnic')
     >>> ref = A[0]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
