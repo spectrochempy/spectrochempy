@@ -6,17 +6,17 @@ Spectrochempy
 What is |scpy|?
 --------------
 
-|scpy| is a framework for processing, analysing and modelling **Spectro**\ scopic
-data for **Chem**\ istry with **Py**\ thon. It is is a cross platform software,
+|scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic
+data for **Chem**\ istry with **Py**\ thon. It is a cross platform software,
 running on Linux, Windows or OS X.
 
 #.  A ``NDDataset`` object embedding array of data with labeled axes and
     metadata.
-#.  A ``Project`` manager to work on multiple ``NDDataset`` simultaneoulsly.
+#.  A ``Project`` manager to work on multiple ``NDDataset`` simultaneously.
 #.  ``Units`` and ``Uncertainty`` for ``NDDataset``.
 #.  Mathematical operations over ``NDDataset`` such addition,
     multiplication and many more ...
-#.  Import functions to read data from experiments or modelling programs ...
+#.  Import functions to read data from experiments or modeling programs ...
 #.  Display functions such as ``plot`` for 1D or nD datasets ...
 #.  Export functions to **csv**, **xls** formats ... (NOT YET)
 #.  Preprocessing functions such as baseline correction, automatic
@@ -97,7 +97,7 @@ the online Html documentation is available here:
 Issue Tracker
 ==============
 
-You find a problem, want to suggest enhancement or want to look at the current
+You find a problem, want to suggest enhancements or want to look at the current
 issues and milestones, you can go there:
 
 * `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
@@ -118,7 +118,7 @@ When using |scpy| for your own work, you are kindly requested to cite it this
 way::
 
      Arnaud Travert & Christian Fernandez,
-     SpectroChemPy, a framework for processing, analysing and modelling
+     SpectroChemPy, a framework for processing, analyzing and modeling
      of Spectroscopic data for Chemistry with Python
      https://bitbucket.org/spectrocat/spectrochempy, (version 0.1)
      Laboratoire Catalyse and Spectrochemistry,
