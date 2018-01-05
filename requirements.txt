@@ -30,8 +30,11 @@ pytest-runner
 scikit-image
 
 # for docs
-# sphinx
-# sphinx_rtd_theme
+sphinx
+sphinx_rtd_theme
+sphinx-gallery
+nbsphinx
+numpydoc
 
 # for matplotlib backend and future gui
 pyqt
