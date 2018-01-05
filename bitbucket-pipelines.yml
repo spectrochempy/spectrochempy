@@ -11,5 +11,6 @@ pipelines:
         caches:
           - pip
         script: # Modify the commands below to build your repository.
-          - pip install -r requirements.txt
+          - pip install -e .
+          - scpy
           - pytest tests

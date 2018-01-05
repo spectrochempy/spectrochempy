@@ -52,7 +52,6 @@ from spectrochempy.core.processors.processorpreferences import \
     ProcessorPreferences
 from spectrochempy.core.writers.writerpreferences import WriterPreferences
 from spectrochempy.core.readers.readerpreferences import ReaderPreferences
-from spectrochempy.utils import install_styles
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -746,9 +745,6 @@ class SpectroChemPy(Application):
 
         # Pass config to other classes for them to inherit the config.
         self.plotter_preferences = PlotterPreferences(config=self.config)
-
-        # also install style to be sure everything is set
-        install_styles()
 
     def _init_reader_preferences(self):
 

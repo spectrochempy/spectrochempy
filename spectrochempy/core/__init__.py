@@ -123,7 +123,11 @@ _reset_config = False
 _started = APPLICATION.start(debug=_debug, reset_config=_reset_config)
 
 # load the default style
-plt.style.use(APPLICATION.plotter_preferences.style)
+# print("mpl_config_dir", mpl.get_configdir(), plt.style.available)
+try:
+    plt.style.use(APPLICATION.plotter_preferences.style)
+except:
+    pass # if the scp styles are not yet installed, ignore it
 
 log.info("API activated "
          if _started else "API was not started!")

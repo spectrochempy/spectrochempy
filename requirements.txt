@@ -20,7 +20,7 @@ jupyter
 # ipyparallel
 ipykernel
 # nb_conda
-ipympl
+# ipympl
 
 # for testing
 
@@ -30,9 +30,10 @@ pytest-runner
 scikit-image
 
 # for docs
-
-sphinx
-sphinx_rtd_theme
+# sphinx
+# sphinx_rtd_theme
 
 # for matplotlib backend and future gui
-pyqt5
+pyqt
+# with pip use
+# pyqt5

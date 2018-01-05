@@ -14,26 +14,21 @@ In this example, we perform the Evolving Factor Analysis
 """
 import os
 import numpy as np
+
 import spectrochempy as scp
-# sphinx_gallery_thumbnail_number = 4
 
 ############################################################
 # Upload and preprocess a dataset
 
-datadir = scp.datadir.path
-dataset = scp.read_omnic(os.path.join(datadir, 'irdata',
-                                      'NH4Y-activation.SPG'))
+dataset = scp.load("test_full2D")
 
 
 # columns masking
-dataset[:, 1230.0:920.0] = scp.masked  # do not forget to use float in slicing
-dataset[:, 5997.0:5993.0] = scp.masked
+#dataset[:, 1230.0:920.0] = scp.masked  # do not forget to use float in slicing
+#dataset[:, 5997.0:5993.0] = scp.masked
 
 # row masking (just for an example
-# dataset[10:16] = scp.masked
-
-# difference spectra
-# dataset -= dataset[-1]
+#dataset[10:16] = scp.masked
 
 dataset.plot_stack()
 
@@ -42,13 +37,25 @@ dataset.plot_stack()
 
 efa = scp.EFA(dataset)
 
-f = efa.get_forward(npc=6, plot=True)
-b = efa.get_backward(npc=6, plot=True)
 
+f = efa.get_forward(npc=7, plot=True)
+b = efa.get_backward(npc=7, plot=True)
+
+#scp.show()
+
+##############################################################################
+# Clearly we can retain 4 components, in agreement with what was used to
+# generate the data - we set the cutof of the 5th components
+#
 
 npc = 4
 cut = np.max(f[:, npc].data)
 
-c = efa.get_conc(npc, plot=True)
+f = efa.get_forward(npc=4, cutoff=cut, plot=True)
+b = efa.get_backward(npc=4, cutoff=cut, plot=True)
+
+#scp.show()
+
+c = efa.get_conc(npc, cutoff=cut, plot=True)
 
 scp.show()

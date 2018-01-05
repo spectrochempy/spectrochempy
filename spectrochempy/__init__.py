@@ -53,6 +53,7 @@
 # """
 
 import sys
+import os
 import logging
 
 from IPython.core.magic import UsageError
@@ -81,31 +82,34 @@ def _setup_backend_and_ipython(backend=None):
     """
 
     # change backend here before the project module is imported
-    if backend == 'spectrochempy_gui':
-        # this happen when the GUI is used
-        backend = 'module://spectrochempy_gui.backend'
+    #if backend == 'spectrochempy_gui':
+    #    # this happen when the GUI is used
+    #    backend = 'module://spectrochempy_gui.backend'
+
     # the current backend
     backend = mpl.get_backend()
     if backend == 'module://ipykernel.pylab.backend_inline'  or backend == \
-             'MacOSX':
-         # Force QT5
-         backend = 'Qt5Agg'
-         mpl.rcParams['backend.qt5'] = 'PyQt5'
+          'MacOSX':
+        # Force QT5
+        backend = 'Qt5Agg'
+        mpl.rcParams['backend.qt5'] = 'PyQt5'
 
     # if we are building the docs, in principle it should be done using
     # the builddocs.py located in the scripts folder
-    if not 'builddocs.py' in sys.argv[0] and not 'pytest' in sys.argv[0]:
+    #print('sys.argv', sys.argv, backend)
+    if not 'builddocs.py' in sys.argv[0] :
         mpl.use(backend, warn = False, force = True)
     else:
         # 'agg' backend is necessary to build docs with sphinx-gallery
         mpl.use('agg', warn = False, force = True)
 
+    # use of IPython (console or notebook)
     ip = get_ipython()
     if ip is not None:
         if getattr(get_ipython(), 'kernel', None) is not None:
             # set the ipython matplotlib environments
             try:
-                import ipympl
+                #import ipympl
                 ip.magic('matplotlib notebook')
             except UsageError as e:
                 try:
@@ -118,9 +122,14 @@ def _setup_backend_and_ipython(backend=None):
             except:
                  pass
 
+    #print('backend', backend)
     return (ip, backend)
 
-_setup_backend_and_ipython()
+if not 'pytest' in sys.argv[0] and \
+                                 os.environ.get('PWD', None)!='/spectrochempy':
+    _setup_backend_and_ipython()
+else:
+    mpl.use('agg', warn=False, force=True)
 
 # import the core api
 from .core import *

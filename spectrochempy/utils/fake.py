@@ -81,6 +81,9 @@ conc = _make_concentrations_matrix(C1, C2, C3, C4)
 conc.plot_stack(colorbar=False)
 
 d = generate_2D_spectra(conc, spec)
+# add some noise
+d.data = np.random.normal(d.data,.007*d.data.max())
+
 d.plot_stack()
 
 show()

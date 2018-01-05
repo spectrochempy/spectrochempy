@@ -23,6 +23,29 @@ import warnings
 def path():
 	return os.path.dirname(__file__)
 
+def install_styles():
+    """
+    Install matplotlib styles
+
+    """
+    import matplotlib as mpl
+    from pkg_resources import resource_filename
+
+    cfgdir = mpl.get_configdir()
+    stylelib = os.path.join(cfgdir, 'stylelib')
+    if not os.path.exists(stylelib):
+        os.mkdir(stylelib)
+
+    styles_path = resource_filename('scp_data', 'stylesheets')
+
+    styles = os.listdir(styles_path)
+
+    for style in styles:
+        src = os.path.join(styles_path, style)
+        dest = os.path.join(stylelib, style)
+        sh.copy(src, dest)
+
+
 class PostDevelopCommand(develop):
 	"""Post-installation for development mode."""
 	def run(self):
@@ -34,12 +57,14 @@ class PostDevelopCommand(develop):
 			nhook = os.path.join(path(), 'git_hooks', item)
 			sh.copy(nhook, hook)
 			print(('installation of `.git/hooks/{}` made.'.format(item)))
+		install_styles()
+
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
-        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
         install.run(self)
+        install_styles()
 
 def read(fname):
 	with open(os.path.join(path(), fname), 'r') as f:
@@ -76,7 +101,7 @@ def run_setup():
 			author_email='spectrochempy@ensicaen.fr',
 			description='Spectra Analysis & Processing with Python',
 			long_description=read('README.rst'),
-			setup_requires=['setuptools_scm'],
+			setup_requires=['setuptools_scm', 'matplotlib'],
 			install_requires=get_dependencies(),
 			dependency_links=[
 			],

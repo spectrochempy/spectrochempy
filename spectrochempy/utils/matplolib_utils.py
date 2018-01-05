@@ -7,7 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-__all__ = ['install_styles', 'cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen',
+__all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen',
            'figure', 'show', 'get_figure']
 
 
@@ -16,7 +16,7 @@ import shutil as sh
 from pkg_resources import resource_filename
 
 from matplotlib import pyplot as plt
-
+import matplotlib as mpl
 
 # ............................................................................
 # color conversion function
@@ -53,27 +53,6 @@ NBlack = (0, 0, 0)
 NRed = cmyk2rgb(0, 77, 100, 0)
 NBlue = cmyk2rgb(100, 30, 0, 0)
 NGreen = cmyk2rgb(85, 0, 60, 10)
-
-
-def install_styles():
-    """
-    Install matplotlib styles
-
-    """
-    stylelib = os.path.expanduser(
-            os.path.join('~', '.matplotlib', 'stylelib'))
-    if not os.path.exists(stylelib):
-        os.mkdir(stylelib)
-
-    styles_path = resource_filename('scp_data', 'stylesheets')
-
-    styles = os.listdir(styles_path)
-
-    for style in styles:
-        src = os.path.join(styles_path, style)
-        dest = os.path.join(stylelib, style)
-        sh.copy(src, dest)
-
 
 # .............................................................................
 def figure(**kwargs):

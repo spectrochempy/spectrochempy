@@ -129,13 +129,13 @@ def plot_multiple(datasets, method='scatter', pen=True,
                                       'the `hold` parameter as a work around '
                                       'solution')
 
-    hold = False
 
     # do not save during this plots, nor apply any commands
     output = kwargs.get('output', None)
     kwargs['output']=None
     commands = kwargs.get('commands', [])
     kwargs['commands'] = []
+    hold = kwargs.pop('hold', False)
 
     for s in datasets : #, colors, markers):
 

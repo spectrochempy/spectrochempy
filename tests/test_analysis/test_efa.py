@@ -18,6 +18,7 @@ def test_EFA(IR_dataset_2D):
 
     # columns masking
     ds[:, 1230.0:920.0] = masked  # do not forget to use float in slicing
+    ds[:, 5900.0:5890.0] = masked
 
     # difference spectra
     ds -= ds[-1]

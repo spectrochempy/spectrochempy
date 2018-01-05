@@ -57,6 +57,7 @@ class SVD(HasTraits):
     """ |NDDataset| - Contains a transpose matrix of the Loadings. Its shape 
     depends on `full_matrices` """
 
+
     @docstrings.get_sectionsf('SVD')
     @docstrings.dedent
     def __init__(self, dataset, full_matrices=False, compute_uv=True):
@@ -89,6 +90,8 @@ class SVD(HasTraits):
 
         """
 
+        self._compute_uv = compute_uv
+
         # check if we have the correct input
         # ----------------------------------
 
@@ -119,13 +122,15 @@ class SVD(HasTraits):
         # the following however assumes that entire rows or columns are masked,
         # not only some individual data (if this is what you wanted, this
         # will fail)
-
-        masked_columns = np.all(X._mask, axis=-2)
-        masked_rows = np.all(X._mask, axis=-1)
+        if np.any(X._mask):
+            masked_columns = np.all(X._mask, axis=-2)
+            masked_rows = np.all(X._mask, axis=-1)
+        else:
+            masked_columns = np.zeros(X._data.shape[-1], dtype=bool)
+            masked_rows = np.zeros(X._data.shape[-2], dtype=bool)
 
         data = data[:, ~ masked_columns]
         data = data[~ masked_rows]
-
         # Performs the SVD
         # ----------------
 
@@ -215,8 +220,11 @@ class SVD(HasTraits):
     # ------------------------------------------------------------------------
 
     def __repr__(self):
-        return '<svd: U%s, s(%s), VT%s>' % (
-            self.U.shape, self.s.size, self.VT.shape)
+        if self._compute_uv:
+            return '<svd: U%s, s(%s), VT%s>' % (
+                self.U.shape, self.s.size, self.VT.shape)
+        else:
+            return '<svd: s(%s), U,VT:not computed>' % (self.s.size,)
 
     # ------------------------------------------------------------------------
     #  Properties

@@ -21,7 +21,10 @@ import warnings
 from io import StringIO
 from datetime import datetime
 import locale
-locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
+try:
+    locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
+except:
+    warnings.warn('Could not set locale: en_US')
 
 # ----------------------------------------------------------------------------
 # third party imports

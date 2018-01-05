@@ -75,21 +75,25 @@ class EFA(HasTraits):
                                ' of type {} has been provided'.format(
                                type(X).__name__))
 
+        # max number of components
+        K = min(M, N)
+
+        # in case some row are masked, we need to take this into account
+        masked_rows = np.all(X.mask, axis=-1)
+
+        K = min(K, len(np.where(~ masked_rows)[0]))
 
         # --------------------------------------------------------------------
         # forward analysis
         # --------------------------------------------------------------------
 
-        # max number of components
-        K = min(M, N)
-
         self.fefa = f = NDDataset(np.zeros((M, K)),
-                      coordset = [X.y.copy(), Coord(range(K))],
-                      name = 'Forward EFA of ' + X.name)
+                      coordset=[X.y.copy(), Coord(range(K))],
+                      title= 'EigenValues',
+                      name='Forward EFA of ' + X.name)
 
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
-        masked_rows = np.all(X.mask, axis=-1)
         f[masked_rows] = masked
 
         # performs the analysis
@@ -97,16 +101,10 @@ class EFA(HasTraits):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
                 fsvd = SVD(X[:i+1], compute_uv=False)
-                # but if some rows are masked there is another complication
-                # as the size of svd.s will be less than the size of the
-                # destination! try to correct this.
-                # create a temporary masked array to contains calculated
-                # svd.s values
-                stemp = np.ma.zeros((K,))
-                stemp.mask = masked_rows
-                stemp[~masked_rows[:i+1]] = fsvd.s ** 2
-                f[i] = stemp
-                f[i, i + 1:] = masked
+                k = fsvd.s.size
+                print(i, k)
+                f[i, :k] = fsvd.s.data ** 2
+                f[i, k:] = masked
             else:
                 f[i] = masked
 
@@ -115,8 +113,9 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         self.befa = b = NDDataset(np.zeros((M, K)),
-                      coordset = [X.y.copy(), Coord(range(K))],
-                      name = 'Backward EFA of ' + X.name)
+                      coordset=[X.y.copy(), Coord(range(K))],
+                      title='EigenValues',
+                      name='Backward EFA of ' + X.name)
 
         b[masked_rows] = masked
 
@@ -124,19 +123,67 @@ class EFA(HasTraits):
             # if some rows are masked, we must skip them
             if not masked_rows[i]:
                 bsvd = SVD(X[i:M], compute_uv=False)
-                # but if some rows are masked there is another complication
-                # as the size of svd.s will be less than the size of the
-                # destination! try to correct this
-                stemp = np.ma.zeros((K,))
-                stemp.mask = masked_rows
-                stemp[~masked_rows[ :M-i]] = bsvd.s ** 2
-                b[i] = stemp
-                b[i, :M - i] = masked
+                k = bsvd.s.size
+                b[i, :k] = bsvd.s.data ** 2
+                b[i, k:] = masked
             else:
                 b[i] = masked
 
+    def get_forward(self, npc=None, cutoff=None, plot=False, hold=False,
+                    legend='best'):
+        """
 
-    def get_conc(self, npc=3, order='fifo', plot=True):
+        Parameters
+        ----------
+        npc
+        plot
+
+        Returns
+        -------
+
+        """
+        M, K = self.fefa.shape
+        if npc is None:
+            npc = K
+        npc = min(K, npc)
+
+        f = self.fefa
+        if cutoff is not None:
+            f.data = np.max((f.data, np.ones_like(f.data)*cutoff), axis=0)
+
+        if plot:
+            self._plot(f, npc, hold=hold, legend=legend)
+
+        return f
+
+    def get_backward(self, npc=None, cutoff=None, plot=False, hold=False,
+                     legend='best'):
+        """
+
+        Parameters
+        ----------
+        npc
+        plot
+
+        Returns
+        -------
+
+        """
+        M, K = self.befa.shape
+        if npc is None:
+            npc = K
+        npc = min(K, npc)
+
+        b = self.befa
+        if cutoff is not None:
+            b.data = np.max((b.data, np.ones_like(b.data)*cutoff), axis=0)
+
+        if plot:
+            self._plot(b, npc, hold=hold, legend=legend)
+
+        return b
+
+    def get_conc(self, npc=None, cutoff = None, order='fifo', plot=True):
         """
         Computes abstract concentration profile (first in - first out)
 
@@ -155,12 +202,14 @@ class EFA(HasTraits):
             Concentration profile
 
         """
-
         M, K = self.fefa.shape
+        if npc is None:
+            npc = K
         npc = min(K, npc)
 
-        f = self.fefa
-        b = self.befa
+        f = self.get_forward(npc, cutoff)
+        b = self.get_backward(npc, cutoff)
+
         c = NDDataset(np.zeros((M, npc)),
                       coordset=[self._X.y.copy(), Coord(range(npc),
                                                         title='PC#')],
@@ -169,26 +218,37 @@ class EFA(HasTraits):
                       )
         masked_rows = np.all(self._X.mask, axis=-1)
 
-        for i in range(K):
+        for i in range(M):
             if masked_rows[i]:
                 c[i] = masked
                 continue
-            for j in range(npc):
-                c[i, j] = min([f[i, j], b[i, npc - j - 1]])
-                if c[i, j] == 0:
-                    c[i, j] = masked
+            # c[i] = np.min((f[i,:npc].data, b.data[i,-npc-1::-1]), axis=0)
+            c[i] = np.min((f[i,:npc].data, b.data[i,:npc][::-1]), axis=0)
 
         if plot:
-
-            profiles = [c.T[j] for j in range(npc)]
-
-            labels = ["PC#%d" % i for i in range(npc)]
-
-            plot_multiple(profiles, labels=labels, yscale='log', legend=True)
-
-            show()
+            self._plot(c, npc)
 
         return c
+
+    def _plot(self, c, npc, hold=False, legend='best'):
+        """
+
+        Parameters
+        ----------
+        c
+        npc
+
+        Returns
+        -------
+
+        """
+
+        profiles = [c.T[j] for j in range(npc)]
+
+        labels = ["PC#%d" % i for i in range(npc)]
+
+        plot_multiple(profiles, labels=labels, yscale='log',
+                      hold=hold, legend=legend)
 
 
 # ============================================================================
