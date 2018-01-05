@@ -101,3 +101,6 @@ recipes/spectrochempy/linux-aarch64
 
 
 
+.dockerignore
+.pipeline*.sh
+Dockerfile
