@@ -13,26 +13,30 @@ terminal command line
 """
 import sys
 import os
-import spectrochempy.core as sc
-from spectrochempy.application import app, WARNING
-
-log = sc.log
-preferences = sc.preferences
 
 def main():
+    import spectrochempy.core as sc
+    from spectrochempy.application import app, WARNING, DEBUG
+
+    log = sc.log
+    preferences = sc.preferences
+
     preferences.log_level = WARNING
     fname = sc.preferences.startup_filename
-    log.info("Loading filename: '%s'"%fname)
     if os.path.exists(fname):
+        log.info("Loading filename: '%s'" % fname)
         ds = sc.nddataset.read(fname)
         #ds.print()
     else:
         log.info("'%s' file doesn't exists"%fname)
         app.print_help()
 
+def maingui():
+    from spectrochempy.gui.gui import MainWindow as gui
+    gui.start()
+
 
 # =============================================================================
 if __name__ == '__main__':
 
-    main()
-    print(app.datadir)
+    maingui()
