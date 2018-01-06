@@ -26,7 +26,7 @@ class ProjectPreferences(Configurable) :
 
 
     project_directory = Unicode(help='Location where projects are '
-                                     'stored by default').tag(config=True)
+                        'stored by default').tag(config=True, type='folder')
 
     @default('project_directory')
     def _get_default_project_directory(self):

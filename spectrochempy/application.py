@@ -367,11 +367,11 @@ class Preferences(Configurable):
     csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
 
     startup_project = Unicode('', help='Project to load at startup').tag(
-        config=True)
+        config=True, type='project')   # `type` will be used by the gui
 
     startup_filename = Unicode('',
                                help='Name of the file to load at startup').tag(
-        config=True)
+        config=True, type='file')
 
     @property
     def log_level(self):
@@ -834,6 +834,8 @@ reader_preferences = app.reader_preferences
 writer_preferences = app.writer_preferences
 do_not_block = app.do_not_block
 datadir = app.datadir
+description = app.description
+long_description = app.long_description
 
 """The main logger of the |scpy| application"""
 
