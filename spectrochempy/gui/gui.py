@@ -44,13 +44,10 @@ from .preferences import (Preferences, ProjectPreferencePageWidget,
                           GeneralPreferencePageWidget, PlotPreferencePageWidget)
 from .guiutils import geticon
 
-from ..application import app
-from ..projects.project import Project
+from ..application import (log, preferences, project_preferences,
+                           __release__, long_description)
+from ..core.projects.project import Project
 
-log = app.log
-options = app
-general_options = app.general_options
-project_options = app.project_options
 
 # set flags to change for the final usage
 __DEV__ = True
@@ -79,7 +76,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
         self.area = area = DockArea()
         self.setCentralWidget(area)
 
-        self.setWindowIcon(QtGui.QIcon(geticon('scp.png')))
+        self.setWindowIcon(QtGui.QIcon(geticon('scpy.png')))
 
         self.setWindowTitle('SpectroChemPy')
 
@@ -148,10 +145,10 @@ class MainWindow(QtGui.QMainWindow, Plots):
             if True:  # TODO: obviously change this to some options
                 redirectoutput(console=self.wconsole)
 
-            general_options.log_level = logging.WARNING
+            preferences.log_level = logging.WARNING
         else:
             # developpement
-            general_options.log_level = logging.DEBUG
+            preferences.log_level = logging.DEBUG
 
         # --------------------------------------------------------------------
         # project window
@@ -159,7 +156,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         dproject = Dock("Project", size=(ww * .20, wh * .50), closable=False)
         d = None
-        startup_project = options.startup_project
+        startup_project = preferences.startup_project
         if startup_project:
             d = self.load_project(startup_project)
         self.wproject = ProjectTreeWidget(project=d, showHeader=False)
@@ -210,7 +207,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
     @property
     def project_dir(self):
-        return project_options.projects_directory
+        return project_preferences.projects_directory
 
     def load_project(self, fname, **kwargs):
         proj = Project.load(fname, **kwargs)
@@ -256,15 +253,21 @@ class MainWindow(QtGui.QMainWindow, Plots):
         def export_sp(self, *args, **kwargs):
             export_project(main=False)
 
-        # ....................................................................
+        # --------------------------------------------------------------------
+        # Help and informations
+        # --------------------------------------------------------------------
+
         def about():
             """About the tool"""
             about = QtGui.QMessageBox.about(self,
-                "SpectroChemPy {}".format(options.release),
-                options.description )
+                "SpectroChemPy {}".format(__release__),
+                long_description )
 
-        # ....................................................................
-        def edit_preferences(exec_=None):
+        # --------------------------------------------------------------------
+        # Preferences
+        # --------------------------------------------------------------------
+
+        def edit_preferences(exec=None):
 
             if hasattr(self, 'preferences'):
                 try:
@@ -279,8 +282,10 @@ class MainWindow(QtGui.QMainWindow, Plots):
                 dlg.add_page(page)
 
             dlg.resize(1000,400)
-            if exec_:
-                dlg.exec_()
+
+            if exec:
+                dlg.exec()
+
 
         # --------------------------------------------------------------------
         # MENU FILE
@@ -564,7 +569,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
         gui = QtGui.QApplication(sys.argv)
         cls.run(*args, **kwargs)
 
-        sys.exit(gui.exec_())
+        gui.exec_()
 
 
 # =============================================================================

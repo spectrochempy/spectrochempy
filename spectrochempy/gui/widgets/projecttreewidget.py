@@ -10,7 +10,7 @@
 
 from ...extern.pyqtgraph.Qt import QtGui, QtCore
 
-from ...projects.project import Project, NDDataset #, Script, Meta
+from ...core.projects.project import Project, NDDataset #, Script, Meta
 
 __all__ = []
 

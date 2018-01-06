@@ -116,7 +116,7 @@ class Parameter(QtCore.QObject):
         if typ is None:
             cls = Parameter
         else:
-            print(opts['name'], typ)
+            # print(opts['name'], typ)
             cls = PARAM_TYPES[opts['type']]
         return cls(**opts)
     
@@ -193,7 +193,7 @@ class Parameter(QtCore.QObject):
             raise Exception("Parameter must have a string name specified in opts.")
         self.setName(self.opts['name'])
         
-        self.addChildren(self.opts.get('children', []))
+        self.addChildren(self.opts.get('children', {}))
             
         if 'value' in self.opts and 'default' not in self.opts:
             self.opts['default'] = self.opts['value']
@@ -511,35 +511,27 @@ class Parameter(QtCore.QObject):
 
     def addChildren(self, children):
         """
-        Add a list or dict of children to this parameter. This method calls
+        Add dict of children to this parameter. This method calls
         addChild once for each value in *children*.
         """
-        ## If children was specified as dict, then assume keys are the names.
-        if isinstance(children, dict):
-            ch2 = []
-            for name, opts in children.items():
-                if isinstance(opts, dict) and 'name' not in opts:
-                    opts = opts.copy()
-                    opts['name'] = name
+        ch2 = []
+        for name, (opts, value) in children.items():
+            opt = {}
+            opt['name'] = opts.name
+            opt['readonly'] = opts.read_only
+            opt['value'] = value
+            opt['default'] = opts.default_value
+            opt['type'] = opts.metadata.get('type',type(
+                opts.default_value).__name__)
+            opt['title'] = opts.help
+            opts = opt
 
-                elif isinstance(opts, traitlets.TraitType):
-                    opt = {}
-                    opt['name'] = opts.name
-                    opt['readonly'] = opts.read_only
-                    opt['value'] = opt['default'] = opts.default_value
+            ch2.append(opts)
 
-                    opt['type'] = opts.metadata.get('type',type(
-                        opts.default_value).__name__)
-                    opt['title'] = opts.help
-                    opts = opt
-
-                ch2.append(opts)
-
-            children = ch2
+        children = ch2
         
-        for chOpts in children:
-            #print self, "Add child:", type(chOpts), id(chOpts)
-            self.addChild(chOpts)
+        for chopts in children:
+            self.addChild(chopts)
         
         
     def insertChild(self, pos, child, autoIncrementName=None):

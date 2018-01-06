@@ -18,7 +18,7 @@ from ....extern.pyqtgraph.widgets.ColorButton import ColorButton
 # from ..widgets.GradientWidget import GradientWidget ## creates import loop
 from ....extern.pyqtgraph import pixmaps as pixmaps, functions as fn
 from ....extern.pyqtgraph.pgcollections import OrderedDict
-
+from ..filepickerwidget import FilePickerWidget
 from .Parameter import Parameter, registerParameterType
 from .ParameterItem import ParameterItem
 
@@ -139,6 +139,13 @@ class WidgetParameterItem(ParameterItem):
             w.value = lambda: asUnicode(w.text())
             w.setValue = lambda v: w.setText(asUnicode(v))
             w.sigChanging = w.textChanged
+        elif t in ('file', 'folder', 'project'):
+            w = FilePickerWidget()
+            w.sigChanged = w.editingFinished
+            w.value = lambda: asUnicode(w.text())
+            w.setValue = lambda v: w.setText(asUnicode(v))
+            w.sigChanging = w.textChanged
+            self.hideWidget = False
         elif t == 'color':
             w = ColorButton()
             w.sigChanged = w.sigColorChanged
@@ -335,8 +342,10 @@ registerParameterType('str', SimpleParameter, override=True)
 registerParameterType('color', SimpleParameter, override=True)
 registerParameterType('colormap', SimpleParameter, override=True)
 
-
-
+#TODO: replace this by some file editor
+registerParameterType('file', SimpleParameter, override=True)
+registerParameterType('folder', SimpleParameter, override=True)
+registerParameterType('project', SimpleParameter, override=True)
 
 class GroupParameterItem(ParameterItem):
     """
