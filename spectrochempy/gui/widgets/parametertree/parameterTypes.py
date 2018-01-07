@@ -140,7 +140,7 @@ class WidgetParameterItem(ParameterItem):
             w.setValue = lambda v: w.setText(asUnicode(v))
             w.sigChanging = w.textChanged
         elif t in ('file', 'folder', 'project'):
-            w = FilePickerWidget()
+            w = FilePickerWidget(t)
             w.sigChanged = w.editingFinished
             w.value = lambda: asUnicode(w.text())
             w.setValue = lambda v: w.setText(asUnicode(v))

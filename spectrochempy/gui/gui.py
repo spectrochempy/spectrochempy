@@ -40,12 +40,19 @@ from .widgets.projecttreewidget import ProjectTreeWidget
 from .widgets.matplotlibwidget import MatplotlibWidget
 from .logtoconsole import QtHandler, redirectoutput
 from .plots import Plots
-from .preferences import (Preferences, ProjectPreferencePageWidget,
+from .preferences import (DialogPreferences, ProjectPreferencePageWidget,
                           GeneralPreferencePageWidget, PlotPreferencePageWidget)
 from .guiutils import geticon
 
-from ..application import (log, preferences, project_preferences,
-                           __release__, long_description)
+from ..application import (app, log,
+                           preferences,
+                           project_preferences,
+                           plotter_preferences,
+                           processor_preferences,
+                           reader_preferences,
+                           writer_preferences,
+                           __release__,
+                           long_description)
 from ..core.projects.project import Project
 
 
@@ -61,7 +68,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
     #: current dataset instance
     dataset = None
 
-    preference_pages = []
+    dlg_preference_pages = []
 
     # ........................................................................
     def __init__(self, show=True):
@@ -98,9 +105,9 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         # Create Menubar and preferences
         # ------------------------------
-        self.preference_pages.extend([GeneralPreferencePageWidget,
-                                      ProjectPreferencePageWidget,
-                                      PlotPreferencePageWidget])
+        self.dlg_preference_pages.extend([GeneralPreferencePageWidget,
+                                          ProjectPreferencePageWidget,
+                                          PlotPreferencePageWidget])
         self._append_menubar_and_preferences()
 
         # show window
@@ -222,6 +229,52 @@ class MainWindow(QtGui.QMainWindow, Plots):
         global layout
         self.area.restoreState(layout)
 
+    # --------------------------------------------------------------------
+    # Preferences
+    # --------------------------------------------------------------------
+
+    def edit_preferences(self, reset=False):
+
+        if hasattr(self, 'dlg_preferences'):
+            try:
+                self.dlg_preferences.close()
+            except RuntimeError:
+                pass
+        self.dlg_preferences = dlg = DialogPreferences(self)
+
+        for Page in self.dlg_preference_pages:
+            page = Page(dlg)
+            page.initialize(reset=reset)
+            dlg.add_page(page)
+
+        dlg.resize(1000,400)
+
+        dlg.exec()
+
+    def reset_preferences(self):
+        """
+        Reset preferences to default values
+
+        """
+        #TODO: make an alert for confirmation
+        print("RESET")
+        if hasattr(self, 'dlg_preferences'):
+            try:
+                self.dlg_preferences.close()
+            except RuntimeError:
+                pass
+
+        app.init_all_preferences()
+
+        preferences = app.preferences
+        project_preferences = app.project_preferences
+        plotter_preferences = app.plotter_preferences
+        processor_preferences = app.processor_preferences
+        reader_preferences = app.reader_preferences
+        writer_preferences = app.writer_preferences
+
+        self.edit_preferences(reset=True)
+
     # ........................................................................
     def _append_menubar_and_preferences(self):
 
@@ -262,30 +315,6 @@ class MainWindow(QtGui.QMainWindow, Plots):
             about = QtGui.QMessageBox.about(self,
                 "SpectroChemPy {}".format(__release__),
                 long_description )
-
-        # --------------------------------------------------------------------
-        # Preferences
-        # --------------------------------------------------------------------
-
-        def edit_preferences(exec=None):
-
-            if hasattr(self, 'preferences'):
-                try:
-                    self.preferences.close()
-                except RuntimeError:
-                    pass
-            self.preferences = dlg = Preferences(self)
-
-            for Page in self.preference_pages:
-                page = Page(dlg)
-                page.initialize()
-                dlg.add_page(page)
-
-            dlg.resize(1000,400)
-
-            if exec:
-                dlg.exec()
-
 
         # --------------------------------------------------------------------
         # MENU FILE
@@ -450,7 +479,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
         # --------------------------------------------------------------------
 
         help_action = QtGui.QAction('Preferences', self)
-        help_action.triggered.connect(lambda: edit_preferences(True))
+        help_action.triggered.connect(lambda: self.edit_preferences())
         help_action.setShortcut(QtGui.QKeySequence.Preferences)
         help_menu.addAction(help_action)
 

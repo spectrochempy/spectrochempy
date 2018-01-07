@@ -472,7 +472,7 @@ class SpectroChemPy(Application):
      Spectroscopic data for Chemistry with Python
      https://bitbucket.org/spectrocat/spectrochempy, (version {version})
      Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
-     Caen/CNRS, 2017
+     Caen/CNRS, 2018
     </pre>
     </p>
 
@@ -532,13 +532,16 @@ class SpectroChemPy(Application):
     # ----------------------
 
     aliases = Dict(
-        dict(test='SpectroChemPy.test', p='Preferences.startup_project',
+        dict(test='SpectroChemPy.test',
+             p='Preferences.startup_project',
              f='Preferences.startup_filename'))
 
-    flags = Dict(dict(debug=(
-        {'SpectroChemPy': {'log_level': DEBUG}}, "Set log_level to DEBUG"),
-          quiet=({'SpectroChemPy': {'log_level': ERROR}},
-               "Set log_level to ERROR")))
+    flags = Dict(
+        dict(
+            debug=({'SpectroChemPy': {'log_level': DEBUG}},
+                   "Set log_level to DEBUG - most verbose mode"),
+            quiet=({'SpectroChemPy': {'log_level': ERROR}},
+                   "Set log_level to ERROR - no verbosity at all")))
 
     classes = List(
         [Preferences, ProjectPreferences, PlotterPreferences, DataDir, ])
@@ -577,23 +580,10 @@ class SpectroChemPy(Application):
         if _do_parse:
             self.parse_command_line(sys.argv)
 
-        # Get preferences from the config file
+        # Get preferences from the config file and init everything
         # ---------------------------------------------------------------------
 
-        if self.config_file_name:
-            config_file = os.path.join(self.config_dir, self.config_file_name)
-            self.load_config_file(config_file)
-
-        # add other preferences
-        # ---------------------------------------------------------------------
-
-        self._init_preferences()
-        self._init_datadir()
-        self._init_plotter_preferences()
-        self._init_project_preferences()
-        self._init_processor_preferences()
-        self._init_reader_preferences()
-        self._init_writer_preferences()
+        self.init_all_preferences()
 
         # Test, Sphinx,  ...  detection
         # ---------------------------------------------------------------------
@@ -652,6 +642,27 @@ class SpectroChemPy(Application):
         # --------------------------------------------------------------------
         if ip is not None:
             ip.register_magics(SpectroChemPyMagics)
+
+    def init_all_preferences(self):
+
+        # Get preferences from the config file
+        # ---------------------------------------------------------------------
+
+        if self.config_file_name:
+            config_file = os.path.join(self.config_dir,
+                                       self.config_file_name)
+            self.load_config_file(config_file)
+
+        # add other preferences
+        # ---------------------------------------------------------------------
+
+        self._init_preferences()
+        self._init_datadir()
+        self._init_plotter_preferences()
+        self._init_project_preferences()
+        self._init_processor_preferences()
+        self._init_reader_preferences()
+        self._init_writer_preferences()
 
         # Possibly write the default config file
         # --------------------------------------------------------------------

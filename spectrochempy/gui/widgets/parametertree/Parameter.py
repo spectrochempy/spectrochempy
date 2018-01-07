@@ -519,8 +519,11 @@ class Parameter(QtCore.QObject):
             opt = {}
             opt['name'] = opts.name
             opt['readonly'] = opts.read_only
-            opt['value'] = value
             opt['default'] = opts.default_value
+            if value != "RESET_TO_DEFAULT":
+                opt['value'] = value
+            else:
+                opt['value'] = opt['default']
             opt['type'] = opts.metadata.get('type',type(
                 opts.default_value).__name__)
             opt['title'] = opts.help

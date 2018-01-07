@@ -15,10 +15,10 @@ class FilePickerWidget(QtGui.QWidget):
     A file picker widget
     """
 
-    def __init__(self):
+    def __init__(self, typ='file'):
 
         QtGui.QWidget.__init__(self)
-
+        self.typ = typ
         # vertical layout for widgets
         self.hbox = QtGui.QHBoxLayout()
         self.setLayout(self.hbox)
@@ -28,7 +28,7 @@ class FilePickerWidget(QtGui.QWidget):
         self.hbox.addWidget(self.qed)
 
         # Create a push button labelled 'choose' and add it to our layout
-        btn = QtGui.QPushButton('Choose file', self)
+        btn = QtGui.QPushButton('Choose %s'%self.typ, self)
         self.hbox.addWidget(btn)
         self.setSizePolicy(QtGui.QSizePolicy.Expanding,
                            QtGui.QSizePolicy.Expanding)
@@ -44,11 +44,28 @@ class FilePickerWidget(QtGui.QWidget):
         """
         Handler called when 'choose file' is clicked
         """
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Select file')
+        t = self.typ
+        dlg = QtGui.QFileDialog()
+        if t == 'folder':
+            dlg.setFileMode(QtGui.QFileDialog.Directory)
+            dlg.setOption(QtGui.QFileDialog.ShowDirsOnly, True)
+            fname = dlg.getExistingDirectory(self, "Select project's folder")
+            if fname:
+                self.setText(fname)
+            else:
+                self.setText(self.text)
+            return
+
+        elif t == 'project':
+            dlg.setFilter("Project files (*.pscp)")
+            fname = dlg.getOpenFileName(self, "Select project")
+        else:
+            fname = dlg.getOpenFileName(self, "Select file")
+
         if fname:
             self.setText(fname[0])
         else:
-            self.setText('')
+            self.setText(self.text)
 
 
 # =============================================================================

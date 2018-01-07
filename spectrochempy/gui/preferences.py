@@ -9,20 +9,22 @@
 
 # inspired by psyplot_gui.preferences
 
-"""Preferences widget for SpectroChemPy
+"""Dialog Preferences widget for SpectroChemPy
 
-This module defines the :class:`Preferences` widget that creates an interface
-to the configuration file  of SpectroChemPy
+This module defines the :class:`DialogPreferences` widget that creates an
+interface to the configuration file of SpectroChemPy
 
 """
 
 from warnings import warn
+import os
 
 from ..extern.pyqtgraph.Qt import QtGui, QtCore
 from .guiutils import geticon
 from .widgets.parametertree import ParameterTree, Parameter
 
-from spectrochempy.application import (log, preferences as general_preferences,
+from spectrochempy.application import (app, log,
+                                       preferences as general_preferences,
                                        plotter_preferences,
                                        project_preferences)
 
@@ -53,7 +55,7 @@ class PreferencesTree(ParameterTree):
         self.preferences = preferences
         self.title = title
 
-    def initialize(self, title=None):
+    def initialize(self, title=None, reset=False):
         """Fill the items into the tree"""
 
         if hasattr(self.preferences, 'traits'):
@@ -61,7 +63,9 @@ class PreferencesTree(ParameterTree):
             pref_traits = self.preferences.traits(config=True)
             # we sorts traits using help text
             # we make a dictionary containing the traits and the current values
-            preferences = {o[1]: (o[2] , getattr(self.preferences, o[1]))
+            preferences = {o[1]: (o[2] ,
+                    getattr(self.preferences, o[1]) if not reset else
+                    "RESET_TO_DEFAULT")
                     for o in sorted(
                        [(opt.help, k, opt)  for k,opt in pref_traits.items()]
                                    )}
@@ -163,7 +167,7 @@ class PreferencePageWidget(Preference_Page, QtGui.QWidget):
         action.triggered.connect(func)
         return action
 
-    def initialize(self, preferences=None):
+    def initialize(self, preferences=None, reset=False):
         """Initialize the config page
 
         Parameters
@@ -174,7 +178,7 @@ class PreferencePageWidget(Preference_Page, QtGui.QWidget):
         if preferences is not None:
             self.preferences = preferences
             self.tree.preferences = preferences
-        self.tree.initialize(title=self.title)
+        self.tree.initialize(title=self.title, reset=reset)
 
 # ============================================================================
 class GeneralPreferencePageWidget(PreferencePageWidget):
@@ -198,7 +202,7 @@ class PlotPreferencePageWidget(PreferencePageWidget):
 
 
 # ============================================================================
-class Preferences(QtGui.QDialog):
+class DialogPreferences(QtGui.QDialog):
     """Preferences dialog"""
 
     @property
@@ -206,9 +210,13 @@ class Preferences(QtGui.QDialog):
         return map(self.get_page, range(self.pages_widget.count()))
 
     def __init__(self, main=None):
-        super(Preferences, self).__init__(parent=main)
+        super(DialogPreferences, self).__init__(parent=main)
         self.setWindowTitle('Preferences')
-
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+        self.setWindowFlags(
+            QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint |
+            QtCore.Qt.WindowTitleHint |
+            QtCore.Qt.WindowStaysOnTopHint)
         # Widgets
         self.pages_widget = QtGui.QStackedWidget()
         self.contents_widget = QtGui.QListWidget()
@@ -246,7 +254,8 @@ class Preferences(QtGui.QDialog):
         self.setLayout(vlayout)
 
         # Signals and slots
-        self.bt_reset.clicked.connect(self.reset_preferences)
+        if main is not None:
+            self.bt_reset.clicked.connect(main.reset_preferences)
         self.pages_widget.currentChanged.connect(self.current_page_changed)
         self.contents_widget.currentRowChanged.connect(
             self.pages_widget.setCurrentIndex)
@@ -289,13 +298,3 @@ class Preferences(QtGui.QDialog):
         item.setText(widget.title)
         item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
         item.setSizeHint(QtCore.QSize(0, 25))
-        #widget.changeProposed.connect(self.check_changes)
-
-    def reset_preferences(self):
-        """
-        Reset preferences to default values
-
-        """
-        #TODO: make an alert for confirmation
-        print("RESET")
-        pass
