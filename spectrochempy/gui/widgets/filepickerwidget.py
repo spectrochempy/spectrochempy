@@ -8,7 +8,10 @@
 # =============================================================================
 
 import sys
-from spectrochempy.extern.pyqtgraph.Qt import QtGui, QtCore
+import os
+from ...extern.pyqtgraph.Qt import QtGui, QtCore
+from .commonwidgets import OpenFileName, OpenExistingDirectory
+from ...application import project_preferences, datadir
 
 class FilePickerWidget(QtGui.QWidget):
     """
@@ -45,27 +48,40 @@ class FilePickerWidget(QtGui.QWidget):
         Handler called when 'choose file' is clicked
         """
         t = self.typ
-        dlg = QtGui.QFileDialog()
-        if t == 'folder':
-            dlg.setFileMode(QtGui.QFileDialog.Directory)
-            dlg.setOption(QtGui.QFileDialog.ShowDirsOnly, True)
-            fname = dlg.getExistingDirectory(self, "Select project's folder")
-            if fname:
-                self.setText(fname)
-            else:
-                self.setText(self.text)
-            return
-
-        elif t == 'project':
-            dlg.setFilter("Project files (*.pscp)")
-            fname = dlg.getOpenFileName(self, "Select project")
+        text = self.text()
+        if os.path.exists(text) and os.path.isdir(text):
+            directory = text
+        elif os.path.exists(text):
+            directory = os.path.dirname(text)
+        elif t=='project':
+            directory = project_preferences.project_directory
         else:
-            fname = dlg.getOpenFileName(self, "Select file")
+            directory = datadir.path
+
+        # when only folders are requested
+        if t == 'folder':
+            fname = OpenExistingDirectory(self,
+                                          directory=directory,
+                                          caption ="Select project's folder")
+
+        # else we want a file
+        elif t == 'project':
+            fname = OpenFileName(self,
+                                 directory=directory,
+                                 caption="Select a project",
+                                 filters = ["Project files (*.pscp)"])
+        else:
+            fname = OpenFileName(self,
+                                 caption ="Select a file",
+                                 directory=self.text(),
+                                 filters=["SpectroChemPy files (*.scp;*.scpy)",
+                                         "Project files (*.pscp)",
+                                         "All Files (*)"])
 
         if fname:
-            self.setText(fname[0])
+            self.setText(fname)
         else:
-            self.setText(self.text)
+            self.setText(self.text())
 
 
 # =============================================================================
@@ -73,4 +89,4 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     gui = FilePickerWidget()
     gui.show()
-    app.exec_()
+    app.exec()

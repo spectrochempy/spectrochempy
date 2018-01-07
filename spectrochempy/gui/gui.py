@@ -40,6 +40,7 @@ from .widgets.projecttreewidget import ProjectTreeWidget
 from .widgets.matplotlibwidget import MatplotlibWidget
 from .logtoconsole import QtHandler, redirectoutput
 from .plots import Plots
+from .widgets.commonwidgets import warningMessage
 from .preferences import (DialogPreferences, ProjectPreferencePageWidget,
                           GeneralPreferencePageWidget, PlotPreferencePageWidget)
 from .guiutils import geticon
@@ -110,10 +111,12 @@ class MainWindow(QtGui.QMainWindow, Plots):
                                           PlotPreferencePageWidget])
         self._append_menubar_and_preferences()
 
+
         # show window
         # --------------------------------------------------------------------
         if show:
-            self.show()  # Maximized()
+            self.show() # Maximized()
+
 
     # ........................................................................
     def _create_docks(self):
@@ -247,7 +250,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
             page.initialize(reset=reset)
             dlg.add_page(page)
 
-        dlg.resize(1000,400)
+        dlg.resize(1200,500)
 
         dlg.exec()
 
@@ -256,13 +259,19 @@ class MainWindow(QtGui.QMainWindow, Plots):
         Reset preferences to default values
 
         """
-        #TODO: make an alert for confirmation
-        print("RESET")
+
+        if not warningMessage(self, message= 'Are you sure to reset to the '
+                                       'default? All previous changes will '
+                                       'be lost.'):
+            return
+
         if hasattr(self, 'dlg_preferences'):
             try:
                 self.dlg_preferences.close()
             except RuntimeError:
                 pass
+
+        log.debug("RESET")
 
         app.init_all_preferences()
 
@@ -437,6 +446,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
             quit_action.setShortcut(QtGui.QKeySequence.Quit)
             file_menu.addAction(quit_action)
 
+
         self.menuBar().addMenu(file_menu)
 
         # --------------------------------------------------------------------
@@ -491,9 +501,11 @@ class MainWindow(QtGui.QMainWindow, Plots):
         about_action.triggered.connect(about)
         help_menu.addAction(about_action)
 
-        # self.menuBar().setNativeMenuBar(False)
+        self.menuBar().setNativeMenuBar(False)
         #  this put the menu in the window itself in OSX, as in windows.
-
+        # when running application from pycharm, it helps to have immediate
+        # access to menu
+        # Indeed, on mac they are not accessible until unfocused the window
 
     # ------------------------------------------------------------------------
     # Actions on matplotlib plot canvas
@@ -598,7 +610,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
         gui = QtGui.QApplication(sys.argv)
         cls.run(*args, **kwargs)
 
-        gui.exec_()
+        sys.exit(gui.exec())
 
 
 # =============================================================================
