@@ -83,6 +83,7 @@ class FilePickerWidget(QtGui.QWidget):
         else:
             self.setText(self.text())
 
+        self.editingFinished.emit()
 
 # =============================================================================
 if __name__ == "__main__":
