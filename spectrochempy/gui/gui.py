@@ -106,9 +106,12 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         # Create Menubar and preferences
         # ------------------------------
-        self.dlg_preference_pages.extend([GeneralPreferencePageWidget,
-                                          ProjectPreferencePageWidget,
-                                          PlotPreferencePageWidget])
+        # tuple (page, preferences section)
+        self.dlg_preference_pages =[
+            (GeneralPreferencePageWidget, preferences),
+            (ProjectPreferencePageWidget, project_preferences),
+            (PlotPreferencePageWidget, plotter_preferences),
+        ]
         self._append_menubar_and_preferences()
 
 
@@ -166,7 +169,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         dproject = Dock("Project", size=(ww * .20, wh * .50), closable=False)
         d = None
-        startup_project = preferences.startup_project
+        startup_project = project_preferences.startup_project
         if startup_project:
             d = self.load_project(startup_project)
         self.wproject = ProjectTreeWidget(project=d, showHeader=False)
@@ -236,7 +239,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
     # Preferences
     # --------------------------------------------------------------------
 
-    def edit_preferences(self, reset=False):
+    def edit_preferences(self):
 
         if hasattr(self, 'dlg_preferences'):
             try:
@@ -245,9 +248,9 @@ class MainWindow(QtGui.QMainWindow, Plots):
                 pass
         self.dlg_preferences = dlg = DialogPreferences(self)
 
-        for Page in self.dlg_preference_pages:
+        for Page, prefs in self.dlg_preference_pages:
             page = Page(dlg)
-            page.initialize(reset=reset)
+            page.initialize(preferences=prefs)
             dlg.add_page(page)
 
         dlg.resize(1200,500)
@@ -267,11 +270,13 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         if hasattr(self, 'dlg_preferences'):
             try:
+                self.dlg_preferences.reset = True
                 self.dlg_preferences.close()
             except RuntimeError:
                 pass
 
         log.debug("RESET")
+
 
         app.init_all_preferences()
 
@@ -282,7 +287,10 @@ class MainWindow(QtGui.QMainWindow, Plots):
         reader_preferences = app.reader_preferences
         writer_preferences = app.writer_preferences
 
-        self.edit_preferences(reset=True)
+        self.dlg_preference_pages = [
+                (GeneralPreferencePageWidget, preferences),
+                (ProjectPreferencePageWidget, project_preferences),
+                (PlotPreferencePageWidget, plotter_preferences), ]
 
     # ........................................................................
     def _append_menubar_and_preferences(self):

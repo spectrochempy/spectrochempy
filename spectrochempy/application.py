@@ -26,6 +26,8 @@ import logging
 import subprocess
 import datetime
 import warnings
+import pprint
+import json
 
 # ----------------------------------------------------------------------------
 # third party imports
@@ -366,12 +368,8 @@ class Preferences(Configurable):
 
     csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
 
-    startup_project = Unicode('', help='Project to load at startup').tag(
-        config=True, type='project')   # `type` will be used by the gui
-
     startup_filename = Unicode('',
-                               help='Name of the file to load at startup').tag(
-        config=True, type='file')
+      help='Name of the file to load at startup').tag(config=True, type='file')
 
     @property
     def log_level(self):
@@ -486,6 +484,7 @@ class SpectroChemPy(Application):
 
     # Config file setting
     # -------------------
+    _loaded_config_files = List()
 
     reset_config = Bool(False, help='Should we restore a default '
                                     'configuration?').tag(config=True)
@@ -498,7 +497,7 @@ class SpectroChemPy(Application):
 
     @default('config_file_name')
     def _get_config_file_name_default(self):
-        return str(self.name).lower() + '.cfg.py'
+        return str(self.name).lower() + '_cfg'
 
     config_dir = Unicode(None,
                          help="Set the configuration directory location").tag(
@@ -519,8 +518,27 @@ class SpectroChemPy(Application):
         config=True)
     """Flag to set in fully quite mode (even no warnings)"""
 
+
     # TESTING
     # --------
+
+    show_config = Bool(
+        help="Instead of starting the Application, dump configuration to stdout"
+    ).tag(config=True)
+
+    show_config_json = Bool(
+        help="Instead of starting the Application, dump configuration to stdout (as JSON)"
+    ).tag(config=True)
+
+    @observe('show_config_json')
+    def _show_config_json_changed(self, change):
+        self.show_config = change.new
+
+    @observe('show_config')
+    def _show_config_changed(self, change):
+        if change.new:
+            self._save_start = self.start
+            self.start = self.start_show_config
 
     test = Bool(False, help='test flag').tag(config=True)
     """Flag to set the application in testing mode"""
@@ -533,7 +551,7 @@ class SpectroChemPy(Application):
 
     aliases = Dict(
         dict(test='SpectroChemPy.test',
-             p='Preferences.startup_project',
+             p='ProjectPreferences.startup_project',
              f='Preferences.startup_filename'))
 
     flags = Dict(
@@ -541,7 +559,11 @@ class SpectroChemPy(Application):
             debug=({'SpectroChemPy': {'log_level': DEBUG}},
                    "Set log_level to DEBUG - most verbose mode"),
             quiet=({'SpectroChemPy': {'log_level': ERROR}},
-                   "Set log_level to ERROR - no verbosity at all")))
+                   "Set log_level to ERROR - no verbosity at all"),
+            show_config=({'SpectroChemPy': {'show_config': True,}},
+    "Show the application's configuration (human-readable format)"),
+            show_config_json=({'SpectroChemPy': {'show_config_json': True,}},
+    "Show the application's configuration (json format)"), ))
 
     classes = List(
         [Preferences, ProjectPreferences, PlotterPreferences, DataDir, ])
@@ -652,6 +674,8 @@ class SpectroChemPy(Application):
             config_file = os.path.join(self.config_dir,
                                        self.config_file_name)
             self.load_config_file(config_file)
+            if config_file not in self._loaded_config_files:
+                self._loaded_config_files.append(config_file)
 
         # add other preferences
         # ---------------------------------------------------------------------
@@ -668,6 +692,44 @@ class SpectroChemPy(Application):
         # --------------------------------------------------------------------
         self._make_default_config_file()
 
+    def start_show_config(self, **kwargs):
+        """start function used when show_config is True"""
+        config = self.config.copy()
+        # exclude show_config flags from displayed config
+        for cls in self.__class__.mro():
+            if cls.__name__ in config:
+                cls_config = config[cls.__name__]
+                cls_config.pop('show_config', None)
+                cls_config.pop('show_config_json', None)
+
+        if self.show_config_json:
+            json.dump(config, sys.stdout,
+                      indent=1, sort_keys=True, default=repr)
+            # add trailing newline
+            sys.stdout.write('\n')
+            return
+
+        if self._loaded_config_files:
+            print("Loaded config files:")
+            for f in self._loaded_config_files:
+                print('  ' + f)
+            print()
+
+        for classname in sorted(config):
+            class_config = config[classname]
+            if not class_config:
+                continue
+            print(classname)
+            pformat_kwargs = dict(indent=4)
+            if sys.version_info >= (3,4):
+                # use compact pretty-print on Pythons that support it
+                pformat_kwargs['compact'] = True
+            for traitname in sorted(class_config):
+                value = class_config[traitname]
+                print('  .{} = {}'.format(
+                    traitname,
+                    pprint.pformat(value, **pformat_kwargs),
+                ))
     # ------------------------------------------------------------------------
     # start the application
     # ------------------------------------------------------------------------
@@ -754,7 +816,6 @@ class SpectroChemPy(Application):
     # ........................................................................
     def _init_plotter_preferences(self):
 
-        # Pass config to other classes for them to inherit the config.
         self.plotter_preferences = PlotterPreferences(config=self.config)
 
     def _init_reader_preferences(self):
@@ -774,13 +835,16 @@ class SpectroChemPy(Application):
         """auto generate default config file."""
 
         fname = os.path.join(self.config_dir,
-                                           self.config_file_name)
+                                           self.config_file_name+'.py')
 
         if not os.path.exists(fname) or self.reset_config:
             s = self.generate_config_file()
             self.log.warning("Generating default config file: %r" % fname)
             with open(fname, 'w') as f:
                 f.write(s)
+
+
+
 
     # ........................................................................
 
@@ -813,6 +877,7 @@ class SpectroChemPy(Application):
             return os.path.abspath(scp)
 
         return os.path.abspath(_find_or_create_spectrochempy_dir('config'))
+
 
     # ------------------------------------------------------------------------
     # Events from Application

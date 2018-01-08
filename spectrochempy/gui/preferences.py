@@ -22,11 +22,14 @@ import os
 from ..extern.pyqtgraph.Qt import QtGui, QtCore
 from .guiutils import geticon
 from .widgets.parametertree import ParameterTree, Parameter
+from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.application import (app, log,
                                        preferences as general_preferences,
                                        plotter_preferences,
-                                       project_preferences)
+                                       project_preferences, )
+
+from .widgets.commonwidgets import warningMessage
 
 
 # ============================================================================
@@ -39,11 +42,11 @@ class Preference_Page(object):
     def initialize(self):
         raise NotImplementedError
 
+
 # ============================================================================
 class PreferencesTree(ParameterTree):
 
-
-    def __init__(self, preferences, title=None, *args, **kwargs):
+    def __init__(self, preferences, *args, **kwargs):
         """
         Parameters
         ----------
@@ -53,47 +56,64 @@ class PreferencesTree(ParameterTree):
         """
         super(PreferencesTree, self).__init__(*args, **kwargs)
         self.preferences = preferences
-        self.title = title
 
-    def initialize(self, title=None, reset=False):
+    def initialize(self, title=None):
         """Fill the items into the tree"""
+
+        self.cfg = BaseJSONConfigManager(
+            config_dir=project_preferences.project_directory)
+
+        self.pname = project_preferences.startup_project
 
         if hasattr(self.preferences, 'traits'):
 
             pref_traits = self.preferences.traits(config=True)
             # we sorts traits using help text
             # we make a dictionary containing the traits and the current values
-            preferences = {o[1]: (o[2] ,
-                    getattr(self.preferences, o[1]) if not reset else
-                    "RESET_TO_DEFAULT")
-                    for o in sorted(
-                       [(opt.help, k, opt)  for k,opt in pref_traits.items()]
-                                   )}
+            preferences = {o[1]: (o[2], getattr(self.preferences, o[
+                1])) for o in sorted(
+                [(opt.help, k, opt) for k, opt in pref_traits.items()])}
         else:
             raise ValueError("preferences must be a Configurable object")
 
-        p = Parameter.create(name=title,
-                             title=title,
-                             type='group',
+        self.p = p = Parameter.create(name=title, title=title, type='group',
                              children=preferences)
 
         self.setParameters(p, showTop=True)
 
+
         p.sigTreeStateChanged.connect(self.parameter_changed)
+
+        # savestate
+        self.savedstate = p.saveState(filter = 'user')
 
     def parameter_changed(self, par, changes):
 
         for opt, change, data in changes:
             path = par.childPath(opt)
             if path is not None:
-                childName = '.'.join(path)
+                childname = '.'.join(path)
             else:
-                childName = opt.name()
+                childname = opt.name()
 
             if change == 'value':
-                setattr(self.preferences, childName, data)
-                pass
+                # Change the values of the preference
+                data = self._sanitize(childname, data)
+                setattr(self.preferences, childname,data)
+                self.cfg.update(self.pname, {
+                    self.preferences.__class__.__name__: {childname: data, }
+                })
 
+    def _sanitize(self, name, data):
+        # make a string from special type compatible with traits definition
+
+        # color:
+        if name in self.preferences.traits(type='color'):
+            if isinstance(data, tuple):
+                return '#%02x%02x%02x' % data[:3]
+            return data.name()
+
+        return data
 
 # ============================================================================
 class PreferencePageWidget(Preference_Page, QtGui.QWidget):
@@ -104,7 +124,7 @@ class PreferencePageWidget(Preference_Page, QtGui.QWidget):
 
     @property
     def changed(self):
-        return True #bool(next(self.tree.changed_preferences(), None))
+        return self.tree.p.saveState(filter='user')!=self.tree.savedstate
 
     @property
     def icon(self):
@@ -115,59 +135,14 @@ class PreferencePageWidget(Preference_Page, QtGui.QWidget):
         self.vbox = vbox = QtGui.QVBoxLayout()
 
         self.tree = tree = PreferencesTree(self.preferences, parent=self, \
-                           showHeader=False, **kwargs)
+                                           showHeader=False, **kwargs)
 
         vbox.addWidget(self.tree)
         hbox = QtGui.QHBoxLayout()
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def save_settings_action(self, update=False, target=None):
-        """Create an action to save the selected settings in the :attr:`tree`
-
-        Parameters
-        ----------
-        update: bool
-            If True, it is expected that the file already exists and it will be
-            updated. Otherwise, existing files will be overwritten
-        """
-        def func():
-            if update:
-                meth = QtGui.QFileDialog.getOpenFileName
-            else:
-                meth = QtGui.QFileDialog.getSaveFileName
-            if target is None:
-                fname = meth(
-                    self, 'Select a file to %s' % (
-                        'update' if update else 'create'),
-                    self.default_path,
-                    'YAML files (*.yml);;'
-                    'All files (*)'
-                    )
-                fname = fname[0]
-            else:
-                fname = target
-            if not fname:
-                return
-            if update:
-                preferences = self.preferences.__class__(defaultParams=self.preferences.defaultParams)
-                preferences.load_from_file(fname)
-                old_keys = list(preferences)
-                selected = dict(self.tree.selected_preferences())
-                new_keys = list(selected)
-                preferences.update(selected)
-                preferences.dump(fname, include_keys=old_keys + new_keys,
-                        exclude_keys=[])
-            else:
-                preferences = self.preferences.__class__(self.tree.selected_preferences(),
-                                       defaultParams=self.preferences.defaultParams)
-                preferences.dump(fname, exclude_keys=[])
-
-        action = QtGui.QAction('Update...' if update else 'Overwrite...', self)
-        action.triggered.connect(func)
-        return action
-
-    def initialize(self, preferences=None, reset=False):
+    def initialize(self, preferences=None):
         """Initialize the config page
 
         Parameters
@@ -178,25 +153,23 @@ class PreferencePageWidget(Preference_Page, QtGui.QWidget):
         if preferences is not None:
             self.preferences = preferences
             self.tree.preferences = preferences
-        self.tree.initialize(title=self.title, reset=reset)
+        self.tree.initialize(title=self.title)
+
 
 # ============================================================================
 class GeneralPreferencePageWidget(PreferencePageWidget):
-
     preferences = general_preferences
     title = 'General preferences'
 
 
 # ============================================================================
 class ProjectPreferencePageWidget(PreferencePageWidget):
-
     preferences = project_preferences
     title = 'Project preferences'
 
 
 # ============================================================================
 class PlotPreferencePageWidget(PreferencePageWidget):
-
     preferences = plotter_preferences
     title = 'Plotter preferences'
 
@@ -205,9 +178,7 @@ class PlotPreferencePageWidget(PreferencePageWidget):
 class DialogPreferences(QtGui.QDialog):
     """Preferences dialog"""
 
-    @property
-    def pages(self):
-        return map(self.get_page, range(self.pages_widget.count()))
+    reset = False
 
     def __init__(self, main=None):
         super(DialogPreferences, self).__init__(parent=main)
@@ -215,15 +186,14 @@ class DialogPreferences(QtGui.QDialog):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.setWindowFlags(
             QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint |
-            QtCore.Qt.WindowTitleHint |
-            QtCore.Qt.WindowStaysOnTopHint)
+            QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
         # Widgets
         self.pages_widget = QtGui.QStackedWidget()
         self.contents_widget = QtGui.QListWidget()
         self.bt_reset = QtGui.QPushButton('Reset to defaults')
 
         self.bbox = bbox = QtGui.QDialogButtonBox(
-            QtGui.QDialogButtonBox.Ok)
+            QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
 
         # Widgets setup
         # Destroying the C++ object right after closing the dialog box,
@@ -231,7 +201,7 @@ class DialogPreferences(QtGui.QDialog):
         # (e.g. the editor's analysis thread in Spyder), thus leading to
         # a segmentation fault on UNIX or an application crash on Windows
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle('Preferences')
+        self.setWindowTitle('SpectroChemPy Configuration')
         self.contents_widget.setMovement(QtGui.QListView.Static)
         self.contents_widget.setSpacing(1)
         self.contents_widget.setCurrentRow(0)
@@ -254,20 +224,12 @@ class DialogPreferences(QtGui.QDialog):
         self.setLayout(vlayout)
 
         # Signals and slots
-        if main is not None:
-            self.bt_reset.clicked.connect(main.reset_preferences)
+        self.bt_reset.clicked.connect(main.reset_preferences)
         self.pages_widget.currentChanged.connect(self.current_page_changed)
         self.contents_widget.currentRowChanged.connect(
             self.pages_widget.setCurrentIndex)
         bbox.accepted.connect(self.accept)
         bbox.rejected.connect(self.reject)
-
-    def set_current_index(self, index):
-        """Set current page index"""
-        self.contents_widget.setCurrentRow(index)
-
-    def current_page_changed(self, index):
-        preference_page = self.get_page(index)
 
     def get_page(self, index=None):
         """Return page widget"""
@@ -277,6 +239,9 @@ class DialogPreferences(QtGui.QDialog):
             widget = self.pages_widget.widget(index)
         return widget.widget()
 
+    @property
+    def pages(self):
+        return map(self.get_page, range(self.pages_widget.count()))
 
     def add_page(self, widget):
         """Add a new page to the preferences dialog
@@ -298,3 +263,24 @@ class DialogPreferences(QtGui.QDialog):
         item.setText(widget.title)
         item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
         item.setSizeHint(QtCore.QSize(0, 25))
+
+    def set_current_index(self, index):
+        """Set current page index"""
+        self.contents_widget.setCurrentRow(index)
+
+    def current_page_changed(self, index):
+        self.current_page = self.get_page(index)
+
+    def reject(self):
+        """
+        Reject current changes
+        """
+
+        if not self.reset and not warningMessage(self,
+            message= 'Are you sure to cancel all current preference changes'):
+            return
+
+        for page in self.pages:
+            page.tree.p.restoreState(page.tree.savedstate)
+
+        super().reject()

@@ -15,9 +15,6 @@ from traitlets import (Dict, List, Bool, Instance, Unicode, HasTraits, This,
 from traitlets.config.configurable import Configurable
 
 
-
-
-
 # ============================================================================
 class ProjectPreferences(Configurable) :
 
@@ -65,6 +62,18 @@ class ProjectPreferences(Configurable) :
             raise IOError('Intended Projects directory is actually a file.')
 
         return os.path.abspath(scp)
+
+    startup_project = Unicode('', help='Project to load at startup').tag(
+        config=True, type='project')   # `type` will be used by the gui
+
+    @default('startup_project')
+    def _get_default_startup_project(self):
+        from .project import Project
+        name = 'DEFAULT'
+        defproj = Project(name=name)
+        defproj.save(name)
+        return name
+
 
 # ============================================================================
 if __name__ == '__main__' :
