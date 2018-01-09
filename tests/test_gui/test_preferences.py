@@ -9,8 +9,7 @@
 
 from spectrochempy.gui.preferences import (DialogPreferences,
                                            GeneralPreferencePageWidget,
-                                           ProjectPreferencePageWidget,
-                                           PlotPreferencePageWidget)
+                                           ProjectPreferencePageWidget,)
 
 from spectrochempy.extern.pyqtgraph import mkQApp
 
@@ -21,8 +20,7 @@ class testPreferences():
     def __init__(self):
 
         self.dlg_preference_pages = [GeneralPreferencePageWidget,
-                                     ProjectPreferencePageWidget,
-                                     PlotPreferencePageWidget]
+                                     ProjectPreferencePageWidget,]
 
         self.dlg_preferences = dlg = DialogPreferences(self)
 
@@ -34,7 +32,7 @@ class testPreferences():
         dlg.resize(1000, 400)
         dlg.exec_()
 
-tp = testPreferences()
+#tp = testPreferences()
 
 if __name__ == '__main__':
     pass

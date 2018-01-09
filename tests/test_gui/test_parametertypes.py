@@ -1,5 +1,7 @@
 import spectrochempy.gui.widgets.parametertree as pt
+import pytest
 
+@pytest.mark.skip
 def test_opts(app):
 
     paramSpec = [

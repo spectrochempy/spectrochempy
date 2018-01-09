@@ -72,11 +72,7 @@ from spectrochempy.application import (log,
                                        __contributor__ as contributors,
                                        __url__ as url,
                                        preferences,
-                                       plotter_preferences,
-                                       processor_preferences,
                                        project_preferences,
-                                       reader_preferences,
-                                       writer_preferences,
                                        DEBUG,
                                        WARNING,
                                        ERROR,
@@ -95,11 +91,7 @@ __all__ += [
     'ERROR',
     'CRITICAL',
     'INFO',
-    'plotter_preferences',
     'project_preferences',
-    'reader_preferences',
-    'writer_preferences',
-    'processor_preferences',
     'preferences',
     'datadir',
 
@@ -116,16 +108,12 @@ __all__ += [
 
 # START THE APPLICATION ======================================================
 
-_debug = False
-_reset_config = False
-
-
-_started = APPLICATION.start(debug=_debug, reset_config=_reset_config)
+_started = APPLICATION.start()
 
 # load the default style
 # print("mpl_config_dir", mpl.get_configdir(), plt.style.available)
 try:
-    plt.style.use(APPLICATION.plotter_preferences.style)
+    plt.style.use(APPLICATION.project_preferences.style)
 except:
     pass # if the scp styles are not yet installed, ignore it
 

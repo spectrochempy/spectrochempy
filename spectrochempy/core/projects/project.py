@@ -9,14 +9,11 @@
 
 __all__ = ['Project']
 
-
-# ============================================================================
-# standard library import
-# ============================================================================
-
 import os
 import uuid
 import json
+import warnings
+
 from functools import wraps
 
 from traitlets import (Dict, Instance, Unicode, This, default)
@@ -28,20 +25,9 @@ from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
                                  ScpFile, )
 from spectrochempy.core.projects.baseproject import AbstractProject
 
-# ============================================================================
-# third party imports
-# ============================================================================
-# import dill
-# ============================================================================
-# local imports
-# ============================================================================
-
-
-
 log = app.log
 preferences = app.preferences
 project_preferences = app.project_preferences
-
 
 # ============================================================================
 # Project class
@@ -627,7 +613,7 @@ class Project(AbstractProject):
 
         """
 
-        directory = kwargs.get("directory", project_preferences.project_directory)
+        directory = kwargs.get("directory", preferences.project_directory)
 
         if not filename:
             # the current file name or default filename (project name)
@@ -769,7 +755,7 @@ class Project(AbstractProject):
 
         if not os.path.exists(directory):
             directory = kwargs.get("directory",
-                                   project_preferences.project_directory)
+                                   preferences.project_directory)
         elif kwargs.get("directory", None) is not None:
             warnings.warn("got multiple directory information. Use that "
                           "obtained "

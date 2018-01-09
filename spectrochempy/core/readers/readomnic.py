@@ -34,7 +34,7 @@ import numpy as np
 
 from spectrochempy.dataset.ndio import NDIO
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import plotter_preferences, datadir, log
+from spectrochempy.application import  datadir, log
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
 

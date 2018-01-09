@@ -8,7 +8,7 @@ pandas
 traitlets
 xlrd
 # dill (not used for now)
-
+requests
 # mainly for install and a bit more...
 
 setuptools_scm

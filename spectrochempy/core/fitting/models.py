@@ -18,7 +18,7 @@ __all__ = []
 import os
 import numpy as np
 from spectrochempy.application import app
-plotter_preferences = app.plotter_preferences
+project_preferences = app.project_preferences
 log = app.log
 preferences = app.preferences
 

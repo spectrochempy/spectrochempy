@@ -29,7 +29,7 @@ __dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter',
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from spectrochempy.application import log, plotter_preferences, preferences
+from spectrochempy.application import log,  preferences, project_preferences
 from spectrochempy.core.plotters.utils import make_label
 from spectrochempy.utils import is_sequence, deprecated
 
@@ -279,8 +279,8 @@ def plot_1D(dataset, **kwargs):
     yscale = kwargs.get('yscale', 'linear')
 
 
-    number_x_labels = plotter_preferences.number_of_x_labels  # get from config
-    number_y_labels = plotter_preferences.number_of_y_labels
+    number_x_labels = project_preferences.number_of_x_labels  # get from config
+    number_y_labels = project_preferences.number_of_y_labels
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
     ax.xaxis.set_ticks_position('bottom')

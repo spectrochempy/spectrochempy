@@ -8,14 +8,16 @@
 # =============================================================================
 
 """
-This module is the main entry-point for the application launched on the
+This module is the main entry-point for the application launched from the
 terminal command line
+
 """
 import sys
 import os
 
 def main():
-    import spectrochempy.core as sc
+
+    import spectrochempy as sc
     from spectrochempy.application import app, WARNING, DEBUG
 
     log = sc.log
@@ -23,6 +25,10 @@ def main():
 
     preferences.log_level = WARNING
     fname = sc.preferences.startup_filename
+
+    if not fname:
+        return
+
     if os.path.exists(fname):
         log.info("Loading filename: '%s'" % fname)
         ds = sc.nddataset.read(fname)
@@ -31,12 +37,7 @@ def main():
         log.info("'%s' file doesn't exists"%fname)
         app.print_help()
 
-def maingui():
-    from spectrochempy.gui.gui import MainWindow as gui
-    gui.start()
-
-
 # =============================================================================
 if __name__ == '__main__':
 
-    maingui()
+    main()

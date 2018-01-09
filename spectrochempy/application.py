@@ -38,7 +38,9 @@ from setuptools_scm import get_version
 from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, catch_config_error
 from traitlets import (Bool, Unicode, List, Dict, default, observe,
-                       import_item)
+                       import_item, All, HasTraits, Instance)
+from traitlets.config.manager import BaseJSONConfigManager
+
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from IPython import get_ipython
@@ -48,12 +50,8 @@ from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
 
 from spectrochempy.utils import docstrings
+
 from spectrochempy.core.projects.projectpreferences import ProjectPreferences
-from spectrochempy.core.plotters.plotterpreferences import PlotterPreferences
-from spectrochempy.core.processors.processorpreferences import \
-    ProcessorPreferences
-from spectrochempy.core.writers.writerpreferences import WriterPreferences
-from spectrochempy.core.readers.readerpreferences import ReaderPreferences
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -85,7 +83,7 @@ except:
 def _get_copyright():
     current_year = datetime.date.today().year
     copyright = '2014-{}'.format(current_year)
-    copyright += ' - A.Travert and C.Fernandez @ LCS'
+    copyright += ' - A.Travert & C.Fernandez @ LCS'
     return copyright
 
 
@@ -278,16 +276,15 @@ def _get_pkg_datadir_path(data_name, package=None):
     return path
 
 
-class DataDir(Configurable):
-    """ A configurable class used to determine the path to the testdata
+class DataDir(HasTraits):
+    """ A class used to determine the path to the testdata
     directory. """
-
-    path = Unicode().tag(config=True)
-    "Directory where to look for data"
 
     # ------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------
+
+    path = Unicode()
 
     def listing(self):
         """
@@ -360,16 +357,71 @@ class Preferences(Configurable):
     def __init__(self, **kwargs):
         super(Preferences, self).__init__(**kwargs)
 
+        self.cfg = self.parent.config_manager
+        self.cfg_file_name = self.parent.config_file_name
+
     # various settings
     # ----------------
 
     show_info_on_loading = Bool(True, help='Display info on loading?').tag(
         config=True)
 
+    show_close_dialog = Bool(True, help='Display the close dialog on '
+                                        'exit?').tag(config=True)
+
     csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
 
-    startup_filename = Unicode('',
-      help='Name of the file to load at startup').tag(config=True, type='file')
+    project_directory = Unicode(help='Directory where projects are '
+                        'stored by default').tag(config=True, type='folder')
+
+    @default('project_directory')
+    def _get_default_project_directory(self):
+        """
+        Determines the SpectroChemPy project directory name and
+        creates the directory if it doesn't exist.
+
+        This directory is typically ``$HOME/spectrochempy/projects``,
+        but if the
+        SCP_PROJECTS_HOME environment variable is set and the
+        ``$SCP_PROJECTS_HOME`` directory exists, it will be that
+        directory.
+
+        If neither exists, the former will be created.
+
+        Returns
+        -------
+        dir : str
+            The absolute path to the projects directory.
+
+        """
+
+        # first look for SCP_PROJECTS_HOME
+        scp = os.environ.get('SCP_PROJECTS_HOME')
+
+        if scp is not None and os.path.exists(scp) :
+            return os.path.abspath(scp)
+
+        scp = os.path.join(os.path.expanduser('~'), 'spectrochempy',
+                                 'projects')
+
+        if not os.path.exists(scp) :
+            os.makedirs(scp, exist_ok=True)
+
+        elif not os.path.isdir(scp) :
+            raise IOError('Intended Projects directory is actually a file.')
+
+        return os.path.abspath(scp)
+
+    datapath = Unicode(help='Directory where to look for data by '
+                            'default').tag(config=True, type="folder")
+
+    @default('datapath')
+    def _get_default_datapath(self):
+        return self.parent.datadir.path
+
+    @observe('datapath')
+    def _datapath_changed(self, change):
+        self.parent.datadir.path = change['new']
 
     @property
     def log_level(self):
@@ -388,6 +440,17 @@ class Preferences(Configurable):
                               'or ERROR')
         self.parent.log_level = value
 
+    @observe(All)
+    def _anytrait_changed(self, change):
+        # update configuration
+        if not hasattr(self, 'cfg'):
+            # not yet initialized
+            return
+
+        if change.name in self.traits(config=True):
+            self.cfg.update(self.cfg_file_name, {
+                self.__class__.__name__: {change.name: change.new, }
+            })
 
 def _find_or_create_spectrochempy_dir(directory):
     directory = os.path.join(os.path.expanduser('~'), '.spectrochempy',
@@ -508,6 +571,13 @@ class SpectroChemPy(Application):
     def _get_config_dir_default(self):
         return self._get_config_dir()
 
+    config_manager = Instance(BaseJSONConfigManager)
+
+    @default('config_manager')
+    def _get_default_config_manager(self):
+        return BaseJSONConfigManager(config_dir=self.config_dir)
+
+
     # Logger at startup
     # -----------------
 
@@ -518,6 +588,18 @@ class SpectroChemPy(Application):
         config=True)
     """Flag to set in fully quite mode (even no warnings)"""
 
+    # project at startup
+    last_project = Unicode('', help='Project to load at startup').tag(
+        config=True, type='project')
+
+    @observe('last_project')
+    def _last_project_changed(self, change):
+        # update configuration
+
+        if change.name in self.traits(config=True):
+            self.config_manager.update(self.config_file_name, {
+                self.__class__.__name__: {change.name: change.new, }
+            })
 
     # TESTING
     # --------
@@ -560,13 +642,15 @@ class SpectroChemPy(Application):
                    "Set log_level to DEBUG - most verbose mode"),
             quiet=({'SpectroChemPy': {'log_level': ERROR}},
                    "Set log_level to ERROR - no verbosity at all"),
+            reset_config=({'SpectroChemPy': {'reset_config': True}},
+                   "Reset config to default"),
             show_config=({'SpectroChemPy': {'show_config': True,}},
     "Show the application's configuration (human-readable format)"),
             show_config_json=({'SpectroChemPy': {'show_config_json': True,}},
     "Show the application's configuration (json format)"), ))
 
     classes = List(
-        [Preferences, ProjectPreferences, PlotterPreferences, DataDir, ])
+        [Preferences, ProjectPreferences, DataDir, ])
 
     # ------------------------------------------------------------------------
     # Initialisation of the application
@@ -670,9 +754,18 @@ class SpectroChemPy(Application):
         # Get preferences from the config file
         # ---------------------------------------------------------------------
 
+
         if self.config_file_name:
             config_file = os.path.join(self.config_dir,
                                        self.config_file_name)
+
+            if self.reset_config:
+                # remove the user json file to reset to defaults
+                jsonname = os.path.join(self.config_dir,
+                                        self.config_file_name + '.json')
+                if os.path.exists(jsonname):
+                    os.remove(jsonname)
+
             self.load_config_file(config_file)
             if config_file not in self._loaded_config_files:
                 self._loaded_config_files.append(config_file)
@@ -680,13 +773,9 @@ class SpectroChemPy(Application):
         # add other preferences
         # ---------------------------------------------------------------------
 
-        self._init_preferences()
         self._init_datadir()
-        self._init_plotter_preferences()
+        self._init_preferences()
         self._init_project_preferences()
-        self._init_processor_preferences()
-        self._init_reader_preferences()
-        self._init_writer_preferences()
 
         # Possibly write the default config file
         # --------------------------------------------------------------------
@@ -705,9 +794,11 @@ class SpectroChemPy(Application):
         if self.show_config_json:
             json.dump(config, sys.stdout,
                       indent=1, sort_keys=True, default=repr)
-            # add trailing newline
+            # add trailing newlines
             sys.stdout.write('\n')
-            return
+            print()
+            return self._start()
+
 
         if self._loaded_config_files:
             print("Loaded config files:")
@@ -730,63 +821,48 @@ class SpectroChemPy(Application):
                     traitname,
                     pprint.pformat(value, **pformat_kwargs),
                 ))
+        print()
+
+        # now run the actual start function
+        return self._start()
+
     # ------------------------------------------------------------------------
     # start the application
     # ------------------------------------------------------------------------
 
     @docstrings.get_sectionsf('SpectroChemPy.start')
     @docstrings.dedent
-    def start(self, **kwargs):
+    def start(self):
         """
         Start the |scpy| API
 
-        Parameters
-        ----------
-        debug : bool
-            Set application in debugging mode (log debug message
-            are displayed in the standard output console).
-        quiet : bool
-            Set the application in minimal messaging mode. Only errors are
-            displayed (bu no warnings). If both debug and quiet are set
-            (which is contradictory) debug has the priority.
-        reset_config : bool
-            Reset the configuration file to default values.
-
+        All configuration must have been done before calling this function
         """
+        return self._start()
+
+    def _start(self):
+
+        debug = self.log.debug
 
         try:
 
             if self.running:
-                self.log.debug('API already started. Nothing done!')
+                debug('API already started. Nothing done!')
                 return
-
-            for key in list(kwargs.keys()):
-                if hasattr(self, key):
-                    setattr(self, key, kwargs[key])
-
-            self.log_format = '%(highlevel)s %(message)s'
-
-            if self.quiet:
-                self.log_level = ERROR
-
-            if self.debug:
-                self.log_level = DEBUG
-                self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(' \
-                                  'message)s'
-
-            info_string = "SpectroChemPy's API - v.{}\n" \
-                          "© Copyright {}".format(__version__, __copyright__)
 
             # print(self.preferences.show_info_on_loading)
             if self.preferences.show_info_on_loading:
+                info_string = "SpectroChemPy's API - v.{}\n" \
+                              "© Copyright {}".format(__version__,
+                                                      __copyright__)
                 print(info_string)
 
-            self.log.debug(
+            debug(
                 "The application was launched with ARGV : %s" % str(sys.argv))
 
             self.running = True
 
-            self.log.debug('MPL backend: {}'.format(mpl.get_backend()))
+            debug('MPL backend: {}'.format(mpl.get_backend()))
 
             return True
 
@@ -798,10 +874,6 @@ class SpectroChemPy(Application):
     # Private methods
     # ------------------------------------------------------------------------
 
-    # ........................................................................
-    def _init_preferences(self):
-
-        self.preferences = Preferences(config=self.config, parent=self)
 
     # ........................................................................
     def _init_datadir(self):
@@ -809,26 +881,13 @@ class SpectroChemPy(Application):
         self.datadir = DataDir(config=self.config)
 
     # ........................................................................
+    def _init_preferences(self):
+        self.preferences = Preferences(config=self.config, parent=self)
+
+    # ........................................................................
     def _init_project_preferences(self):
 
         self.project_preferences = ProjectPreferences(config=self.config)
-
-    # ........................................................................
-    def _init_plotter_preferences(self):
-
-        self.plotter_preferences = PlotterPreferences(config=self.config)
-
-    def _init_reader_preferences(self):
-
-        self.reader_preferences = ReaderPreferences(config=self.config)
-
-    def _init_writer_preferences(self):
-
-        self.writer_preferences = WriterPreferences(config=self.config)
-
-    def _init_processor_preferences(self):
-
-        self.processor_preferences = ProcessorPreferences(config=self.config)
 
     # ........................................................................
     def _make_default_config_file(self):
@@ -837,16 +896,12 @@ class SpectroChemPy(Application):
         fname = os.path.join(self.config_dir,
                                            self.config_file_name+'.py')
 
-        if not os.path.exists(fname) or self.reset_config:
+        if not os.path.exists(fname):
             s = self.generate_config_file()
-            self.log.warning("Generating default config file: %r" % fname)
+            self.log.info("Generating default config file: %r" % fname)
             with open(fname, 'w') as f:
                 f.write(s)
 
-
-
-
-    # ........................................................................
 
     # ........................................................................
     @staticmethod
@@ -886,15 +941,18 @@ class SpectroChemPy(Application):
     @observe('log_level')
     def _log_level_changed(self, change):
 
-        self.log_format = '%(highlevel)s %(message)s'
+        self.log_format = '%(message)s'
         if change.new == DEBUG:
-            self.log_format = '[%(name)s %(asctime)s]%(highlevel)s %(message)s'
+            self.log_format = '[%(filename)s-%(funcName)s %(levelname)s] %(' \
+                              'message)s'
         self.log.level = self.log_level
         for handler in self.log.handlers:
             handler.level = self.log_level
         self.log.debug("changed default log_level to {}".format(
             logging.getLevelName(change.new)))
 
+
+# ============================================================================
 
 # Main application object that should not be called directly by a end user.
 # It is advisable to use the main `scp` import to access all public methods of
@@ -903,11 +961,7 @@ app = SpectroChemPy()
 
 log = app.log
 preferences = app.preferences
-plotter_preferences = app.plotter_preferences
 project_preferences = app.project_preferences
-processor_preferences = app.processor_preferences
-reader_preferences = app.reader_preferences
-writer_preferences = app.writer_preferences
 do_not_block = app.do_not_block
 datadir = app.datadir
 description = app.description

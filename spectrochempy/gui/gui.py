@@ -23,6 +23,7 @@ from functools import partial
 # ----------------------------------------------------------------------------
 
 from traitlets import HasTraits
+from traitlets.config import Application
 
 # ----------------------------------------------------------------------------
 # local imports
@@ -42,23 +43,16 @@ from .logtoconsole import QtHandler, redirectoutput
 from .plots import Plots
 from .widgets.commonwidgets import warningMessage
 from .preferences import (DialogPreferences, ProjectPreferencePageWidget,
-                          GeneralPreferencePageWidget, PlotPreferencePageWidget)
+                          GeneralPreferencePageWidget)
 from .guiutils import geticon
 
-from ..application import (app, log,
+from ..application import (app, log, DEBUG,
                            preferences,
                            project_preferences,
-                           plotter_preferences,
-                           processor_preferences,
-                           reader_preferences,
-                           writer_preferences,
                            __release__,
                            long_description)
+
 from ..core.projects.project import Project
-
-
-# set flags to change for the final usage
-__DEV__ = True
 
 # =============================================================================
 class MainWindow(QtGui.QMainWindow, Plots):
@@ -110,7 +104,6 @@ class MainWindow(QtGui.QMainWindow, Plots):
         self.dlg_preference_pages =[
             (GeneralPreferencePageWidget, preferences),
             (ProjectPreferencePageWidget, project_preferences),
-            (PlotPreferencePageWidget, plotter_preferences),
         ]
         self._append_menubar_and_preferences()
 
@@ -149,8 +142,9 @@ class MainWindow(QtGui.QMainWindow, Plots):
         dconsole.addWidget(self.wconsole)
         dconsole.hideTitleBar()
 
-        if not __DEV__:
+        if preferences.log_level != DEBUG:
             # production
+
             # log to this console
             handler = QtHandler()
             log.handlers = [handler]  # addHandler(handler) #
@@ -158,10 +152,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
             if True:  # TODO: obviously change this to some options
                 redirectoutput(console=self.wconsole)
 
-            preferences.log_level = logging.WARNING
-        else:
-            # developpement
-            preferences.log_level = logging.DEBUG
+
 
         # --------------------------------------------------------------------
         # project window
@@ -169,9 +160,16 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         dproject = Dock("Project", size=(ww * .20, wh * .50), closable=False)
         d = None
-        startup_project = project_preferences.startup_project
-        if startup_project:
-            d = self.load_project(startup_project)
+        current_project = app.last_project
+        if current_project:
+            self.current_project = app.last_project = current_project
+            d = self.load_project(current_project)
+        else:
+            current_project = 'DEFAULT'
+            self.current_project = app.last_project = current_project
+            d = Project(name=current_project)
+            d.save(current_project)
+
         self.wproject = ProjectTreeWidget(project=d, showHeader=False)
         dproject.addWidget(self.wproject)
 
@@ -257,6 +255,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         dlg.exec()
 
+    # ........................................................................
     def reset_preferences(self):
         """
         Reset preferences to default values
@@ -277,20 +276,16 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         log.debug("RESET")
 
-
+        # we init all preference to their default
         app.init_all_preferences()
 
         preferences = app.preferences
         project_preferences = app.project_preferences
-        plotter_preferences = app.plotter_preferences
-        processor_preferences = app.processor_preferences
-        reader_preferences = app.reader_preferences
-        writer_preferences = app.writer_preferences
 
+        # we need to actualize the preferences pages
         self.dlg_preference_pages = [
                 (GeneralPreferencePageWidget, preferences),
-                (ProjectPreferencePageWidget, project_preferences),
-                (PlotPreferencePageWidget, plotter_preferences), ]
+                (ProjectPreferencePageWidget, project_preferences), ]
 
     # ........................................................................
     def _append_menubar_and_preferences(self):
@@ -565,7 +560,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
                     log.error(e)
 
     # ------------------------------------------------------------------------
-    # Starts and run methods
+    # Starts, run and close methods
     # ------------------------------------------------------------------------
 
     @classmethod
@@ -620,8 +615,38 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         sys.exit(gui.exec())
 
+    def closeEvent(self, evt):
+        if preferences.show_close_dialog:
+            b = _CloseDialog(self)
+            ret = b.exec_()
+            if ret == QtWidgets.QMessageBox.Cancel:
+                return evt.ignore()
+            if ret == QtWidgets.QMessageBox.Discard:
+                return evt.accept()
+        self.project.save()
+        return evt.accept()
 
-# =============================================================================
+
+# ============================================================================
+class _CloseDialog(QtWidgets.QMessageBox):
+
+    def __init__(self, mainWindow):
+        QtWidgets.QMessageBox.__init__(self, mainWindow)
+        self.setIcon(QtWidgets.QMessageBox.Warning)
+        self.setText("Close Spectrochempy...")
+        self.setInformativeText("Save current project?")
+        self.setStandardButtons(
+            QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard |
+            QtWidgets.QMessageBox.Cancel)
+
+        c = QtWidgets.QCheckBox("don't ask me again")
+        c.clicked.connect(lambda val: preferences.set_trait(
+            'show_close_dialog', not val))
+        self.layout().addWidget(c, 4, 0, 7, 0)
+
+
+
+# ============================================================================
 if __name__ == '__main__':
 
-    MainWindow.start()
+    pass

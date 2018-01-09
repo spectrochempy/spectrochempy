@@ -45,7 +45,7 @@ from .ndcoords import Coord, CoordSet
 from ..utils import SpectroChemPyWarning
 from ..utils.meta import Meta
 from ..units import Unit, Quantity, Measurement
-from ..application import plotter_preferences, log, preferences, datadir
+from ..application import  log, preferences, datadir
 
 
 # ==============================================================================

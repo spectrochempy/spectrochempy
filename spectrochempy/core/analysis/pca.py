@@ -30,7 +30,7 @@ from spectrochempy.dataset.nddataset import NDDataset, CoordSet
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.processors.npy import diag, dot
-from spectrochempy.application import plotter_preferences
+from spectrochempy.application import project_preferences
 from spectrochempy.utils import docstrings, NRed, NBlue
 
 
@@ -502,9 +502,9 @@ class PCA(HasTraits):
                         c=colors,
                         cmap=colormap)
 
-            number_x_labels = plotter_preferences.number_of_x_labels  # get
+            number_x_labels = project_preferences.number_of_x_labels  # get
             # from config
-            number_y_labels = plotter_preferences.number_of_y_labels
+            number_y_labels = project_preferences.number_of_y_labels
             # the next two line are to avoid multipliers in axis scale
             y_formatter = ScalarFormatter(useOffset=False)
             ax.yaxis.set_major_formatter(y_formatter)

@@ -32,7 +32,7 @@ import numpy as np
 
 from spectrochempy.application import app
 
-plotter_preferences = app.plotter_preferences
+project_preferences = app.project_preferences
 log = app.log
 preferences = app.preferences
 from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, \

@@ -71,7 +71,6 @@ class ParameterItem(QtGui.QTreeWidgetItem):
         ## flag used internally during name editing
         self.ignoreNameColumnChange = False
     
-    
     def valueChanged(self, param, val):
         ## called when the parameter's value has changed
         pass

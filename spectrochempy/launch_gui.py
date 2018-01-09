@@ -8,19 +8,18 @@
 # =============================================================================
 
 """
-Preferences for reader methods and classes
+This module is the main entry-point for the GUI application launched from the
+terminal command line
 
 """
-from traitlets.config.configurable import Configurable
+def main_gui():
 
-__all__ = []
+    from spectrochempy.gui.gui import MainWindow as gui
+    gui.start()
 
-class ReaderPreferences(Configurable):
-    """
-    Preferences relative to readers and importers
 
-    """
+# =============================================================================
+if __name__ == '__main__':
 
-    def __init__(self, **kwargs):
+    main_gui()
 
-        super(ReaderPreferences, self).__init__(**kwargs)

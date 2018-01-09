@@ -21,7 +21,7 @@ import scipy.optimize
 
 from spectrochempy.application import app
 
-plotter_preferences = app.plotter_preferences
+project_preferences = app.project_preferences
 log = app.log
 preferences = app.preferences
 

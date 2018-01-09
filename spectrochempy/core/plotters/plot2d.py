@@ -33,7 +33,7 @@ import numpy as np
 # localimports
 # ----------------------------------------------------------------------------
 
-from spectrochempy.application import plotter_preferences, preferences, log
+from spectrochempy.application import  project_preferences, preferences, log
 from spectrochempy.core.plotters.utils import make_label
 
 # =============================================================================
@@ -143,36 +143,36 @@ def plot_2D(dataset, **kwargs):
     # Other properties
     # ------------------
 
-    method = kwargs.get('method', plotter_preferences.method_2D)
+    method = kwargs.get('method', project_preferences.method_2D)
 
-    colorbar = kwargs.get('colorbar', plotter_preferences.colorbar)
+    colorbar = kwargs.get('colorbar', project_preferences.colorbar)
 
     cmap = mpl.rcParams['image.cmap']
 
     # viridis is the default setting,
     # so we assume that it must be overwritten here
     # except if style is grayscale which is a particular case.
-    styles = kwargs.get('style', plotter_preferences.style)
+    styles = kwargs.get('style', project_preferences.style)
 
     if styles and not "grayscale" in styles and cmap == "viridis":
 
         if method in ['map','image']:
             cmap = colormap = kwargs.get('colormap',
-                            kwargs.get('cmap', plotter_preferences.colormap))
+                            kwargs.get('cmap', project_preferences.colormap))
         elif data_transposed:
             cmap = colormap = kwargs.get('colormap',
-                kwargs.get('cmap', plotter_preferences.colormap_transposed))
+                kwargs.get('cmap', project_preferences.colormap_transposed))
         else:
             cmap = colormap = kwargs.get('colormap',
-                kwargs.get('cmap', plotter_preferences.colormap_stack))
+                kwargs.get('cmap', project_preferences.colormap_stack))
 
 
-    lw = kwargs.get('linewidth', kwargs.get('lw', plotter_preferences.linewidth))
+    lw = kwargs.get('linewidth', kwargs.get('lw', project_preferences.linewidth))
 
-    alpha = kwargs.get('calpha', plotter_preferences.contour_alpha)
+    alpha = kwargs.get('calpha', project_preferences.contour_alpha)
 
-    number_x_labels = plotter_preferences.number_of_x_labels
-    number_y_labels = plotter_preferences.number_of_y_labels
+    number_x_labels = project_preferences.number_of_x_labels
+    number_y_labels = project_preferences.number_of_y_labels
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
     ax.xaxis.set_ticks_position('bottom')
@@ -377,7 +377,7 @@ def plot_2D(dataset, **kwargs):
         new._ax_lines = lines[:]
 
         # but display only a subset of them in order to accelerate the drawing
-        maxlines = kwargs.get('maxlines', plotter_preferences.max_lines_in_stack)
+        maxlines = kwargs.get('maxlines', project_preferences.max_lines_in_stack)
         log.debug('max number of lines %d'% maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         ax.lines = new._ax_lines[::setpy]  # displayed ax lines
@@ -477,8 +477,8 @@ def clevels(data, **kwargs):
     minimum = -maximum
 
     nlevels = kwargs.get('nlevels', kwargs.get('nc',
-                                               plotter_preferences.number_of_contours))
-    start = kwargs.get('start', plotter_preferences.contour_start) * maximum
+                                               project_preferences.number_of_contours))
+    start = kwargs.get('start', project_preferences.contour_start) * maximum
     negative = kwargs.get('negative', True)
     if negative < 0:
         negative = True

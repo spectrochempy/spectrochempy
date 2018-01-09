@@ -95,7 +95,7 @@ def run_setup():
             exclude=['docs', "*.tests", "*.tests.*", "tests.*", "tests"]),
         include_package_data=True,
         url='http:/www-lcs.ensicaen.fr/spectrochempy', license='CeCILL-B',
-        author='Arnaud Travert & christian Fernandez',
+        author='Arnaud Travert & Christian Fernandez',
         author_email='spectrochempy@ensicaen.fr',
         description='Spectra Analysis & Processing with Python',
         long_description=read('README.rst'),
@@ -110,8 +110,8 @@ def run_setup():
             'develop': PostDevelopCommand, 'install': PostInstallCommand,
         }, entry_points={
             'console_scripts': [
-                'scpy=spectrochempy.commands:main',
-                'scpygui=spectrochempy.commands:maingui', ]
+                'scpy=spectrochempy.__main__:main',
+                'scpygui=spectrochempy.launch_gui:main_gui', ]
         }, )
 
 

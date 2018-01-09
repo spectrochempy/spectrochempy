@@ -26,7 +26,7 @@ from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.application import (app, log,
                                        preferences as general_preferences,
-                                       plotter_preferences,
+
                                        project_preferences, )
 
 from .widgets.commonwidgets import warningMessage
@@ -37,6 +37,8 @@ class Preference_Page(object):
     """The base class for the application preference pages"""
 
     title = None
+    running_title = None
+    tree_title = None
     icon = None
 
     def initialize(self):
@@ -61,9 +63,9 @@ class PreferencesTree(ParameterTree):
         """Fill the items into the tree"""
 
         self.cfg = BaseJSONConfigManager(
-            config_dir=project_preferences.project_directory)
+            config_dir = general_preferences.project_directory)
 
-        self.pname = project_preferences.startup_project
+        self.pname = app.last_project
 
         if hasattr(self.preferences, 'traits'):
 
@@ -80,7 +82,6 @@ class PreferencesTree(ParameterTree):
                              children=preferences)
 
         self.setParameters(p, showTop=True)
-
 
         p.sigTreeStateChanged.connect(self.parameter_changed)
 
@@ -153,25 +154,24 @@ class PreferencePageWidget(Preference_Page, QtGui.QWidget):
         if preferences is not None:
             self.preferences = preferences
             self.tree.preferences = preferences
-        self.tree.initialize(title=self.title)
+
+        current_project = app.last_project
+        self.running_title = self.title.format(current_project=current_project)
+        tree_title = self.tree_title.format(current_project=current_project)
+        self.tree.initialize(title=tree_title)
 
 
 # ============================================================================
 class GeneralPreferencePageWidget(PreferencePageWidget):
     preferences = general_preferences
-    title = 'General preferences'
+    tree_title = title = 'General preferences'
 
 
 # ============================================================================
 class ProjectPreferencePageWidget(PreferencePageWidget):
     preferences = project_preferences
-    title = 'Project preferences'
-
-
-# ============================================================================
-class PlotPreferencePageWidget(PreferencePageWidget):
-    preferences = plotter_preferences
-    title = 'Plotter preferences'
+    title = 'Project:{current_project}'
+    tree_title = 'Project `{current_project}` preferences'
 
 
 # ============================================================================
@@ -260,7 +260,7 @@ class DialogPreferences(QtGui.QDialog):
             item.setIcon(widget.icon)
         except TypeError:
             pass
-        item.setText(widget.title)
+        item.setText(widget.running_title)
         item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
         item.setSizeHint(QtCore.QSize(0, 25))
 
@@ -274,6 +274,7 @@ class DialogPreferences(QtGui.QDialog):
     def reject(self):
         """
         Reject current changes
+
         """
 
         if not self.reset and not warningMessage(self,

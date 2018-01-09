@@ -305,7 +305,7 @@ class SimpleParameter(Parameter):
         if self.opts['type'] == 'color':
             self.value = self.colorValue
             self.saveState = self.saveColorState
-    
+
     def colorValue(self):
         return fn.mkColor(Parameter.value(self))
     

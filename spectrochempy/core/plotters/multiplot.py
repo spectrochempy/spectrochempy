@@ -31,7 +31,7 @@ from spectrochempy.application import app
 
 log = app.log
 preferences = app.preferences
-plotter_preferences = app.plotter_preferences
+project_preferences = app.project_preferences
 
 
 
