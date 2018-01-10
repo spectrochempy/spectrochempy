@@ -10,6 +10,8 @@
 """
 This module define the `application` on which the API rely.
 
+It also define the default application preferences and IPython magic functions.
+
 
 """
 
@@ -337,11 +339,11 @@ class DataDir(HasTraits):
 
 
 # ============================================================================
-# Main application and configurators
+# General Preferences
 # ============================================================================
 
 # ============================================================================
-class Preferences(Configurable):
+class GeneralPreferences(Configurable):
     """
     Preferences that apply to the |scpy| application in general
 
@@ -358,7 +360,7 @@ class Preferences(Configurable):
     """
 
     def __init__(self, **kwargs):
-        super(Preferences, self).__init__(**kwargs)
+        super(GeneralPreferences, self).__init__(**kwargs)
 
         self.cfg = self.parent.config_manager
         self.cfg_file_name = self.parent.config_file_name
@@ -416,10 +418,10 @@ class Preferences(Configurable):
         return os.path.abspath(scp)
 
     autosave_projects = Bool(False, help='Automatic saving of the current '
-                                        'project').tag(config='True')
+                                        'project').tag(config=True)
 
     autoload_project = Bool(False, help='Automatic loading of the last '
-                                       'project at startup').tag(config='True')
+                                       'project at startup').tag(config=True)
 
     datapath = Unicode(help='Directory where to look for data by '
                             'default').tag(config=True, type="folder")
@@ -581,18 +583,8 @@ r"""\usepackage{siunitx}
 
 
 # ============================================================================
-def _find_or_create_spectrochempy_dir(directory):
-    directory = os.path.join(os.path.expanduser('~'), '.spectrochempy',
-                             directory)
-
-    if not os.path.exists(directory):
-        os.makedirs(directory, exist_ok=True)
-    elif not os.path.isdir(directory):
-        msg = 'Intended SpectroChemPy directory `{0}` is ' \
-              'actually a file.'
-        raise IOError(msg.format(directory))
-
-    return os.path.abspath(directory)
+# Application
+# ============================================================================
 
 
 # ============================================================================
@@ -782,7 +774,7 @@ class SpectroChemPy(Application):
     "Show the application's configuration (json format)"), ))
 
     classes = List(
-        [Preferences, ProjectPreferences, DataDir, ])
+        [GeneralPreferences, ProjectPreferences, DataDir, ])
 
     # ------------------------------------------------------------------------
     # Initialisation of the application
@@ -881,6 +873,7 @@ class SpectroChemPy(Application):
         if ip is not None:
             ip.register_magics(SpectroChemPyMagics)
 
+
     def init_all_preferences(self):
 
         # Get preferences from the config file
@@ -906,7 +899,7 @@ class SpectroChemPy(Application):
         # ---------------------------------------------------------------------
 
         self._init_datadir()
-        self._init_preferences()
+        self._init_general_preferences()
         self._init_project_preferences()
 
         # Possibly write the default config file
@@ -983,7 +976,7 @@ class SpectroChemPy(Application):
                 return
 
             # print(self.preferences.show_info_on_loading)
-            if self.preferences.show_info_on_loading:
+            if self.general_preferences.show_info_on_loading:
                 info_string = "SpectroChemPy's API - v.{}\n" \
                               "© Copyright {}".format(__version__,
                                                       __copyright__)
@@ -1013,8 +1006,8 @@ class SpectroChemPy(Application):
         self.datadir = DataDir(config=self.config)
 
     # ........................................................................
-    def _init_preferences(self):
-        self.preferences = Preferences(config=self.config, parent=self)
+    def _init_general_preferences(self):
+        self.general_preferences = GeneralPreferences(config=self.config, parent=self)
 
     # ........................................................................
     def _init_project_preferences(self):
@@ -1034,10 +1027,23 @@ class SpectroChemPy(Application):
             with open(fname, 'w') as f:
                 f.write(s)
 
-
     # ........................................................................
     @staticmethod
-    def _get_config_dir(create=True):
+    def _find_or_create_spectrochempy_dir(directory):
+        directory = os.path.join(os.path.expanduser('~'), '.spectrochempy',
+                                 directory)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+        elif not os.path.isdir(directory):
+            msg = 'Intended SpectroChemPy directory `{0}` is ' \
+                  'actually a file.'
+            raise IOError(msg.format(directory))
+
+        return os.path.abspath(directory)
+
+    # ........................................................................
+    def _get_config_dir(self):
         """
         Determines the SpectroChemPy configuration directory name and
         creates the directory if it doesn't exist.
@@ -1063,7 +1069,8 @@ class SpectroChemPy(Application):
         if scp is not None and os.path.exists(scp):
             return os.path.abspath(scp)
 
-        return os.path.abspath(_find_or_create_spectrochempy_dir('config'))
+        return os.path.abspath(self._find_or_create_spectrochempy_dir(
+            'config'))
 
 
     # ------------------------------------------------------------------------
@@ -1092,7 +1099,7 @@ class SpectroChemPy(Application):
 app = SpectroChemPy()
 
 log = app.log
-preferences = app.preferences
+preferences = app.general_preferences
 project_preferences = app.project_preferences
 do_not_block = app.do_not_block
 datadir = app.datadir

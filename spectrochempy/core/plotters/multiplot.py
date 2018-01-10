@@ -30,7 +30,7 @@ from spectrochempy.utils import is_sequence
 from spectrochempy.application import app
 
 log = app.log
-preferences = app.preferences
+preferences = app.general_preferences
 project_preferences = app.project_preferences
 
 

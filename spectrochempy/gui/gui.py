@@ -15,6 +15,8 @@ __all__ = []
 
 import os
 import sys
+import time
+
 import logging
 from functools import partial
 
@@ -66,7 +68,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
     dlg_preference_pages = []
 
     # ........................................................................
-    def __init__(self, show=True):
+    def __init__(self):
 
         pg.setConfigOption('background', 'w')
         pg.setConfigOption('foreground', 'k')
@@ -108,12 +110,6 @@ class MainWindow(QtGui.QMainWindow, Plots):
         self._append_menubar_and_preferences()
 
 
-        # show window
-        # --------------------------------------------------------------------
-        if show:
-            self.show() # Maximized()
-
-
     # ........................................................................
     def _create_docks(self):
 
@@ -129,8 +125,8 @@ class MainWindow(QtGui.QMainWindow, Plots):
         # --------------------------------------------------------------------
         self.dplots = dplots = Dock("plots", size=(ww * .80, wh * .80))
         text = QtWidgets.QLabel("""<html>
-            <p><center>Select one or several dataset in the project 
-            tree.</center></p>
+            <p><center>Select a dataset in the project tree, if any, 
+            <br/> or add one in the menu to display it.</center></p>
             </html>""")
         dplots.addWidget(
             text) #, stretch=1, alignment=QtCore.Qt.AlignCenter)
@@ -160,11 +156,14 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         dproject = Dock("Project", size=(ww * .20, wh * .50), closable=False)
         d = None
+        autoload = preferences.autoload_project
         current_project = app.last_project
-        if current_project:
+        if current_project and autoload:
+            # load last
             self.current_project = app.last_project = current_project
             d = self.load_project(current_project)
         else:
+            # create a default project
             current_project = 'DEFAULT'
             self.current_project = app.last_project = current_project
             d = Project(name=current_project)
@@ -279,7 +278,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
         # we init all preference to their default
         app.init_all_preferences()
 
-        preferences = app.preferences
+        preferences = app.general_preferences
         project_preferences = app.project_preferences
 
         # we need to actualize the preferences pages
@@ -560,60 +559,8 @@ class MainWindow(QtGui.QMainWindow, Plots):
                     log.error(e)
 
     # ------------------------------------------------------------------------
-    # Starts, run and close methods
+    # close methods
     # ------------------------------------------------------------------------
-
-    @classmethod
-    def run(cls, *args, **kwargs):
-        """
-        Create a mainwindow and open the given files or project
-
-        This class method creates a new mainwindow instance and sets the
-        global :attr:`mainwindow` variable.
-
-        Parameters
-        ----------
-        %(MainWindow.open_external_files.parameters)s
-        %(MainWindow.parameters)s
-
-        Notes
-        -----
-        - There can be only one mainwindow at the time
-        - This method does not create a QApplication instance! See
-          :meth:`run_app`
-
-        See Also
-        --------
-        run_app
-        """
-
-        show = kwargs.get('show', True)
-        mainwindow = cls(show=show)
-
-        # here we can process the command line parameters
-        # TODO
-
-        return mainwindow
-
-    @classmethod
-    def start(cls, *args, **kwargs):
-        """
-        Create a QApplication, open the given files or project and enter the
-        mainloop
-
-        Parameters
-        ----------
-        %(MainWindow.run.parameters)s
-
-        See Also
-        --------
-        run
-        """
-
-        gui = QtGui.QApplication(sys.argv)
-        cls.run(*args, **kwargs)
-
-        sys.exit(gui.exec())
 
     def closeEvent(self, evt):
         if preferences.show_close_dialog:
@@ -643,6 +590,8 @@ class _CloseDialog(QtWidgets.QMessageBox):
         c.clicked.connect(lambda val: preferences.set_trait(
             'show_close_dialog', not val))
         self.layout().addWidget(c, 4, 0, 7, 0)
+
+# ============================================================================
 
 
 

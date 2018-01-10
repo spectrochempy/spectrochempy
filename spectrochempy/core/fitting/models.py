@@ -20,7 +20,7 @@ import numpy as np
 from spectrochempy.application import app
 project_preferences = app.project_preferences
 log = app.log
-preferences = app.preferences
+preferences = app.general_preferences
 
 from spectrochempy.utils import SpectroChemPyWarning
 

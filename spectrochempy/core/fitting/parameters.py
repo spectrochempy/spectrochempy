@@ -27,7 +27,7 @@ from collections import \
 from spectrochempy.application import app
 log = app.log
 project_preferences = app.project_preferences
-preferences = app.preferences
+preferences = app.general_preferences
 
 from spectrochempy.dataset.nddataset import NDDataset
 

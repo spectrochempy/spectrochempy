@@ -66,4 +66,5 @@ plot_fid(ax, 0.05, 0.96)
 write_scpy(ax, decal)
 
 plt.savefig('../scpy.png', dpi=60, transparent=True)
-plt.savefig('scpy.svg', transparent=True)
+
+plt.savefig('../scpy_splash.png', dpi=150, transparent=True)

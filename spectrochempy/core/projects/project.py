@@ -26,7 +26,7 @@ from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
 from spectrochempy.core.projects.baseproject import AbstractProject
 
 log = app.log
-preferences = app.preferences
+preferences = app.general_preferences
 project_preferences = app.project_preferences
 
 # ============================================================================
