@@ -131,14 +131,15 @@ def main_gui():
     progressBar.setMaximum(10)
     progressBar.setGeometry(0, splash_pix.height() - 50, splash_pix.width(),
                             20)
-    splash.show()
+    progressBar.setVisible(False)
 
+    splash.show()
     splash.showMessage("<br/><h1><font color='blue'>"
                        "Welcome to<br/>SpectroChemPy</font></h1>",
                        QtCore.Qt.AlignTop | QtCore.Qt.AlignCenter,
                        QtCore.Qt.black)
     gui.processEvents()
-    time.sleep(2)
+    time.sleep(1)
 
     splash.clearMessage()
 
@@ -148,6 +149,8 @@ def main_gui():
                        QtCore.Qt.black)
     gui.processEvents()
 
+    progressBar.setVisible(True)
+    
     for i in range(1, 11):
         progressBar.setValue(i)
         t = time.time()
