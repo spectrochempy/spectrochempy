@@ -35,14 +35,17 @@ import json
 
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
+
 from traitlets.config.configurable import Configurable
 from traitlets.config.application import Application, catch_config_error
-from traitlets import (Bool, Unicode, List, Dict, default, observe,
-                       import_item, All, HasTraits, Instance)
+from traitlets import (Bool, Unicode, List, Dict, Integer, Float,
+                       All, HasTraits, Instance,
+                       default, observe, import_item, )
 from traitlets.config.manager import BaseJSONConfigManager
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+
 from IPython import get_ipython
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
 from IPython.core.magics.code import extract_symbols
@@ -50,8 +53,6 @@ from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
 
 from spectrochempy.utils import docstrings
-
-from spectrochempy.core.projects.projectpreferences import ProjectPreferences
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -338,6 +339,8 @@ class DataDir(HasTraits):
 # ============================================================================
 # Main application and configurators
 # ============================================================================
+
+# ============================================================================
 class Preferences(Configurable):
     """
     Preferences that apply to the |scpy| application in general
@@ -412,6 +415,12 @@ class Preferences(Configurable):
 
         return os.path.abspath(scp)
 
+    autosave_projects = Bool(False, help='Automatic saving of the current '
+                                        'project').tag(config='True')
+
+    autoload_project = Bool(False, help='Automatic loading of the last '
+                                       'project at startup').tag(config='True')
+
     datapath = Unicode(help='Directory where to look for data by '
                             'default').tag(config=True, type="folder")
 
@@ -452,6 +461,126 @@ class Preferences(Configurable):
                 self.__class__.__name__: {change.name: change.new, }
             })
 
+
+# ============================================================================
+class ProjectPreferences(Configurable) :
+    """
+    Per project preferences
+
+    include plotting and views preference for the incuded datasets
+
+    """
+
+    def __init__(self, **kwargs):
+        super(ProjectPreferences, self).__init__(**kwargs)
+
+    # ------------------------------------------------------------------------
+    # attributes
+    # ------------------------------------------------------------------------
+
+    name = Unicode('PlotterPreferences')
+
+    description = Unicode('Options for plotting datasets')
+
+    # ------------------------------------------------------------------------
+    # configuration
+    # ------------------------------------------------------------------------
+
+    # ........................................................................
+    style = Unicode('lcs',
+                    help='Basic matplotlib style to use').tag(config=True)
+
+    @observe('style')
+    def _style_changed(self, change):
+        plt.style.use(change.new)
+
+    # ........................................................................
+    use_latex = Bool(True,
+                     help='Should we use latex for plotting labels and texts?'
+                     ).tag(config=True)
+
+    @observe('use_latex')
+    def _use_latex_changed(self, change):
+        mpl.rc('text', usetex=change.new)
+
+    # ........................................................................
+    latex_preamble = Unicode(
+r"""\usepackage{siunitx}
+\sisetup{detect-all}
+\usepackage{times} # set the normal font here
+\usepackage{sansmath}
+# load up the sansmath so that math -> helvet
+\sansmath
+""",
+                          help='Latex preamble for matplotlib outputs'
+                          ).tag(config=True, type='text')
+
+    @observe('latex_preamble')
+    def _set_latex_preamble(self, change):
+        mpl.rcParams['text.latex.preamble'] = change.new.split('\n')
+
+    # -------------------------------------------------------------------------
+
+    method_2D = Unicode('map',
+                        help='Default plot methods for 2D'
+                        ).tag(config=True)
+
+    colorbar = Bool(True,
+                       help='Show color bar for 2D plots'
+                       ).tag(config=True)
+
+    colormap = Unicode('jet',
+                       help='Default colormap for contour plots'
+                       ).tag(config=True)
+
+    colormap_stack = Unicode('viridis',
+                             help='Default colormap for stack plots'
+                             ).tag(config=True)
+
+    colormap_transposed = Unicode('magma',
+                            help='Default colormap for transposed stack plots'
+                                  ).tag(config=True)
+
+    show_projections = Bool(False,
+                            help='Show all projections'
+                            ).tag(config=True)
+
+    show_projection_x = Bool(False, help='Show projection along x'
+                             ).tag(config=True)
+
+    show_projection_y = Bool(False, help='Show projection along y'
+                             ).tag(config=True)
+
+    background_color = Unicode('#EFEFEF', help='Bakground color for plots'
+                              ).tag(config=True, type='color')
+
+    foreground_color = Unicode('#000', help='Foreground color for plots'
+                              ).tag(config=True, type='color')
+
+    linewidth = Float(.7, help='Default width for lines').tag(config=True)
+
+    number_of_x_labels = Integer(5, help='Number of X labels').tag(config=True)
+
+    number_of_y_labels = Integer(5, help='Number of Y labels').tag(config=True)
+
+    number_of_z_labels = Integer(5, help='Number of Z labels').tag(config=True)
+
+    number_of_contours = Integer(50, help='Number of contours').tag(
+        config=True)
+
+    contour_alpha = Float(1, help='Transparency of the contours'
+                          ).tag(config=True)
+
+    contour_start = Float(0.05, help='Fraction of the maximum '
+                              'for starting contour levels'
+                          ).tag(config=True)
+
+    max_lines_in_stack = Integer(1000, help='Maximum number of lines to'
+                                       ' plot in stack plots'
+                                 ).tag(config=True)
+
+
+# ============================================================================
 def _find_or_create_spectrochempy_dir(directory):
     directory = os.path.join(os.path.expanduser('~'), '.spectrochempy',
                              directory)
@@ -466,6 +595,7 @@ def _find_or_create_spectrochempy_dir(directory):
     return os.path.abspath(directory)
 
 
+# ============================================================================
 class SpectroChemPy(Application):
     """
     This class SpectroChemPy is the main class, containing most of the setup,
@@ -588,8 +718,10 @@ class SpectroChemPy(Application):
         config=True)
     """Flag to set in fully quite mode (even no warnings)"""
 
-    # project at startup
-    last_project = Unicode('', help='Project to load at startup').tag(
+    # last project
+    # ------------
+
+    last_project = Unicode('', help='Last used project').tag(
         config=True, type='project')
 
     @observe('last_project')
@@ -605,11 +737,11 @@ class SpectroChemPy(Application):
     # --------
 
     show_config = Bool(
-        help="Instead of starting the Application, dump configuration to stdout"
+        help="Dump configuration to stdout at startup"
     ).tag(config=True)
 
     show_config_json = Bool(
-        help="Instead of starting the Application, dump configuration to stdout (as JSON)"
+        help="Dump configuration to stdout (as JSON)"
     ).tag(config=True)
 
     @observe('show_config_json')
