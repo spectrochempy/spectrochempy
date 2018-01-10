@@ -24,17 +24,19 @@ def main():
     preferences = sc.preferences
 
     preferences.log_level = WARNING
-    fname = sc.preferences.startup_filename
+    fname = app.startup_filename
 
     if not fname:
         return
 
-    if os.path.exists(fname):
+    try:
         log.info("Loading filename: '%s'" % fname)
-        ds = sc.nddataset.read(fname)
-        #ds.print()
-    else:
+        ds = sc.NDDataset.read(fname)
+        ds.plot()
+        sc.show()
+    except:
         log.info("'%s' file doesn't exists"%fname)
+        print()
         app.print_help()
 
 # =============================================================================

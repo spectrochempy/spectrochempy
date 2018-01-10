@@ -110,7 +110,7 @@ def run_setup():
             'develop': PostDevelopCommand, 'install': PostInstallCommand,
         }, entry_points={
             'console_scripts': [
-                'scpy=spectrochempy.__main__:main',
+                'scpy=spectrochempy.main:main',
                 'scpygui=spectrochempy.launch_gui:main_gui', ]
         }, )
 

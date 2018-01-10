@@ -725,6 +725,13 @@ class SpectroChemPy(Application):
                 self.__class__.__name__: {change.name: change.new, }
             })
 
+    # filename to load at startup
+    # ---------------------------
+    startup_filename = Unicode('test_full2D.scp', help='File name to laod at '
+                                            'startup').tag(
+        config=True,
+        type='file')
+
     # TESTING
     # --------
 
@@ -757,8 +764,8 @@ class SpectroChemPy(Application):
 
     aliases = Dict(
         dict(test='SpectroChemPy.test',
-             p='ProjectPreferences.startup_project',
-             f='Preferences.startup_filename'))
+             p='SpectroChemPy.last_project',
+             f='SpectroChemPy.startup_filename'))
 
     flags = Dict(
         dict(
