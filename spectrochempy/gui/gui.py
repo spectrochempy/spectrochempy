@@ -24,8 +24,8 @@ from functools import partial
 # third party imports
 # ----------------------------------------------------------------------------
 
-from traitlets import HasTraits
-from traitlets.config import Application
+from traitlets import HasTraits, Instance
+from traitlets.config import Application, Configurable
 
 # ----------------------------------------------------------------------------
 # local imports
@@ -43,91 +43,158 @@ from .widgets.projecttreewidget import ProjectTreeWidget
 from .widgets.matplotlibwidget import MatplotlibWidget
 from .logtoconsole import QtHandler, redirectoutput
 from .plots import Plots
-from .widgets.commonwidgets import warningMessage
+from .widgets.commonwidgets import warningMessage, OpenFileName, SaveFileName
 from .preferences import (DialogPreferences, ProjectPreferencePageWidget,
                           GeneralPreferencePageWidget)
 from .guiutils import geticon
 
-from ..application import (app, log, DEBUG,
-                           preferences,
-                           project_preferences,
-                           __release__,
-                           long_description)
+from ..application import (app, log, DEBUG, __release__, long_description)
 
-from ..core.projects.project import Project
 
-# =============================================================================
-class MainWindow(QtGui.QMainWindow, Plots):
+from ..core import Project, Script, NDDataset
 
-    #: current project instance
-    project = None
 
-    #: current dataset instance
-    dataset = None
+# ============================================================================
+class _metaclass_mixin(
+    QtWidgets.QWidget.__class__, HasTraits.__class__):
+    # This is necessary to be able to mix HasTraits with QtWidget class.
+    pass
+
+
+# ============================================================================
+class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
+                 metaclass=_metaclass_mixin):
+
+    project = Instance(Project)
+    "Current project instance"
+
+    subproject = Instance(Project)
+    "Current sub-project instance"
+
+    dataset = Instance(NDDataset)
+    "Current NDDataset instance"
+
+    script = Instance(Script)
+    "Current Script instance"
 
     dlg_preference_pages = []
 
-    # ........................................................................
-    def __init__(self):
+    # ------------------------------------------------------------------------
+    # Initialisation
+    # ------------------------------------------------------------------------
 
-        pg.setConfigOption('background', 'w')
-        pg.setConfigOption('foreground', 'k')
+    def __init__(self, **kwargs):
 
-        super(MainWindow, self).__init__()
+        super().__init__()
+
+        # first thing to do : get a project (or the last project)
+        autoload = app.general_preferences.autoload_project
+        self.last = app.last_project
+
+        if self.last and autoload:
+            # load last
+            self.last = app.last_project
+        else:
+            # create or load the default project
+            self.last= 'DEFAULT'
+
+        try:
+            self.project = self.load_project(self.last)
+        except:
+            self.project = Project(name=self.last)
+            self.project.save()
+
+        app.last_project = self.last
+
+        # TODO: Try to integrate better configuration for pyQtGraph
+        pg.setConfigOption('background',
+                           app.project_preferences.background_color)
+        pg.setConfigOption('foreground',
+                           app.project_preferences.foreground_color)
+
+        # window and other Qt settings
+        # ----------------------------
+        self.settings = QtCore.QSettings()
+        PX_FACTOR = QtWidgets.QApplication.instance().PX_FACTOR = \
+            QtGui.QPaintDevice.logicalDpiY(
+            self) / 96
+        self.ww, self.wh = ww, wh =int(1440 * PX_FACTOR), int(900 * PX_FACTOR)
+        self.resize(ww, wh)
 
         # Main area
         # ---------
         self.area = area = DockArea()
         self.setCentralWidget(area)
 
-        self.setWindowIcon(QtGui.QIcon(geticon('scpy.png')))
+        self.setWindowIcon(QtGui.QIcon(geticon(app.icon)))
+        #TODO: create an app to get the icon working:
+        # see http://doc.qt.io/qt-5/appicon.html
 
-        self.setWindowTitle('SpectroChemPy')
-
-        # Create progress bar
-        # -------------------
-        self.progressbar = QtGui.QProgressBar()
-        self.progressbar.setMaximumWidth(250)
-        self.progressbar.setVisible(False)
+        self.setWindowTitle(app.name)
 
         # Create status bar
         # -----------------
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage('Welcome to SpectroChemPy')
+        self.statusbar.showMessage('Welcome to %s'% app.name)
+
+        # Create progress bar
+        # -------------------
+        # Will be activated (and will appear in the status bar) for long
+        # process
+        self.progressbar = QtGui.QProgressBar()
+        self.progressbar.setMaximumWidth(250)
+        self.progressbar.setVisible(False)
         self.statusbar.addPermanentWidget(self.progressbar)
 
         # Create docked windows
         # ---------------------
         self._create_docks()
 
-        # Create Menubar and preferences
-        # ------------------------------
+        # Create preferences pages
+        # ------------------------
         # tuple (page, preferences section)
         self.dlg_preference_pages =[
-            (GeneralPreferencePageWidget, preferences),
-            (ProjectPreferencePageWidget, project_preferences),
+            (GeneralPreferencePageWidget, 'general_preferences'),
+            (ProjectPreferencePageWidget, 'project_preferences'),
         ]
-        self._append_menubar_and_preferences()
 
+        # Create menubar
+        # --------------
+        self._append_menubar()
 
-    # ........................................................................
+        # eventually load a previous layout
+        # ---------------------------------
+        self.load_layout()
+
+    # ------------------------------------------------------------------------
+    # Docks creation
+    # ------------------------------------------------------------------------
+
     def _create_docks(self):
 
-        # rescale relative
-        PX_FACTOR = QtWidgets.QApplication.instance().PX_FACTOR = \
-            QtGui.QPaintDevice.logicalDpiY(
-            self) / 96
+        ww, wh = self.ww, self.wh
 
-        ww, wh = 1440 * PX_FACTOR, 900 * PX_FACTOR
-
-        # --------------------------------------------------------------------
         # Console
-        # --------------------------------------------------------------------
+        # --------
         self.dplots = dplots = Dock("plots", size=(ww * .80, wh * .80))
-        text = QtWidgets.QLabel("""<html>
-            <p><center>Select a dataset in the project tree, if any, 
-            <br/> or add one in the menu to display it.</center></p>
-            </html>""")
+        text = QtWidgets.QLabel("""
+            <html>
+            <center>
+            <p>
+            Select a dataset in the project tree, if any,<br/> 
+            or add one to display it.</p>
+            <p>
+            Create a new project ... <font color='#00C'>%s</font> <br/>
+            Open an existing project <font color='#00C'>%s</font> <br/>
+            </p>
+            </center>
+            </html>
+            """%(QtGui.QKeySequence(QtGui.QKeySequence.New).toString(
+                                                QtGui.QKeySequence.NativeText),
+                 QtGui.QKeySequence(QtGui.QKeySequence.Open).toString(
+                                                QtGui.QKeySequence.NativeText)
+                )
+            )
         dplots.addWidget(
             text) #, stretch=1, alignment=QtCore.Qt.AlignCenter)
         dplots.hideTitleBar()
@@ -138,7 +205,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
         dconsole.addWidget(self.wconsole)
         dconsole.hideTitleBar()
 
-        if preferences.log_level != DEBUG:
+        if app.general_preferences.log_level != DEBUG:
             # production
 
             # log to this console
@@ -148,93 +215,74 @@ class MainWindow(QtGui.QMainWindow, Plots):
             if True:  # TODO: obviously change this to some options
                 redirectoutput(console=self.wconsole)
 
-
-
-        # --------------------------------------------------------------------
         # project window
-        # --------------------------------------------------------------------
+        # ---------------
 
-        dproject = Dock("Project", size=(ww * .20, wh * .50), closable=False)
-        d = None
-        autoload = preferences.autoload_project
-        current_project = app.last_project
-        if current_project and autoload:
-            # load last
-            self.current_project = app.last_project = current_project
-            d = self.load_project(current_project)
-        else:
-            # create a default project
-            current_project = 'DEFAULT'
-            self.current_project = app.last_project = current_project
-            d = Project(name=current_project)
-            d.save(current_project)
-
-        self.wproject = ProjectTreeWidget(project=d, showHeader=False)
+        dproject = Dock("Project", size=(ww * .20, wh * 1.0), closable=False)
+        self.wproject = ProjectTreeWidget(project=self.project,
+                                          showHeader=False)
         dproject.addWidget(self.wproject)
 
         self.wproject.itemClicked.connect(self.project_item_clicked)
-        #self.wproject.itemEntered.connect(self.project_item_activated)
-        # self.wproject.itemSelectionChanged.connect(
-        # self.project_item_activated)
 
-        # currentItemChanged(::QTreeWidgetItem *,::QTreeWidgetItem *)
-        # itemActivated(::QTreeWidgetItem *, int)
-        # itemChanged(::QTreeWidgetItem *, int)
-        # itemClicked(::QTreeWidgetItem *, int)
-        # itemCollapsed(::QTreeWidgetItem *)
-        # itemDoubleClicked(::QTreeWidgetItem *, int)
-        # itemEntered(::QTreeWidgetItem *, int)
-        # itemExpanded(::QTreeWidgetItem *)
-        # itemPressed(::QTreeWidgetItem *, int)
-        # itemSelectionChanged()
-
-        # --------------------------------------------------------------------
         # FlowChart window
-        # --------------------------------------------------------------------
+        # ----------------
 
-        self.dflowchart = dflowchart = Dock("FlowChart", size=(ww * .20,
-                                                            wh * .50),
-                          closable=False)
-        ## Create an empty flowchart with a single input and output
-        self.fc = fc = Flowchart(terminals={
-            'dataIn': {'io': 'in'}, 'dataOut': {'io': 'out'}
-        })
-        w5 = fc.widget()
-        dflowchart.addWidget(w5)
+        # self.dflowchart = dflowchart = Dock("FlowChart", size=(ww * .20,
+        #                                                     wh * .50),
+        #                   closable=False)
+        # ## Create an empty flowchart with a single input and output
+        # self.fc = fc = Flowchart(terminals={
+        #     'dataIn': {'io': 'in'}, 'dataOut': {'io': 'out'}
+        # })
+        # w5 = fc.widget()
+        # dflowchart.addWidget(w5)
 
 
-        # --------------------------------------------------------------------
-        # set layout
-        # --------------------------------------------------------------------
+        # set dock layout
+        # ----------------
 
         self.area.addDock(dproject, 'left')
         self.area.addDock(dplots, 'right')
-        self.area.addDock(dflowchart, 'bottom', dproject)
+        #self.area.addDock(dflowchart, 'bottom', dproject)
         self.area.addDock(dconsole, 'bottom', dplots)
 
-        self.save_layout()
-        self.resize(ww, wh)
-
-    @property
-    def project_dir(self):
-        return project_preferences.projects_directory
-
-    def load_project(self, fname, **kwargs):
-        proj = Project.load(fname, **kwargs)
-        proj.meta['project_file'] = fname
-        return proj
+    # ------------------------------------------------------------------------
+    # General setting for the window layout and geometry
+    # ------------------------------------------------------------------------
+    # We use the QT settings, for these very specific preferences, which are
+    #  not used in the normal API
 
     def save_layout(self):
-        global layout
-        layout = self.area.saveState()
+        self.settings.setValue("geometry", self.saveGeometry())
+        self.settings.setValue("windowState", self.saveState())
+        self.settings.setValue("areaState", self.area.saveState())
 
     def load_layout(self):
-        global layout
-        self.area.restoreState(layout)
+        try:
+            self.restoreGeometry(self.settings.value("geometry", ""))
+            self.ww, self.wh = self.frameGeometry()[2:]
+        except:
+            pass
+
+        try:
+            self.restoreState(self.settings.value("windowState", ""))
+        except:
+            pass
+        try:
+            self.area.restoreState(self.settings.value("areaState", ""))
+        except:
+            pass
 
     # --------------------------------------------------------------------
-    # Preferences
+    # Help and preferences actions
     # --------------------------------------------------------------------
+
+    def about(self):
+        """About the tool"""
+        QtGui.QMessageBox.about(self,
+                                "SpectroChemPy {}".format(__release__),
+                                long_description)
 
     def edit_preferences(self):
 
@@ -247,14 +295,17 @@ class MainWindow(QtGui.QMainWindow, Plots):
 
         for Page, prefs in self.dlg_preference_pages:
             page = Page(dlg)
-            page.initialize(preferences=prefs)
+            preferences = getattr(app, prefs)
+            page.initialize(preferences=preferences)
             dlg.add_page(page)
 
-        dlg.resize(1200,500)
+        dlg.set_current_index(1)
+        ww = self.frameGeometry().width()
+        wh = self.frameGeometry().height()
+        dlg.resize(ww*.95,wh*.8)
 
         dlg.exec()
 
-    # ........................................................................
     def reset_preferences(self):
         """
         Reset preferences to default values
@@ -278,129 +329,303 @@ class MainWindow(QtGui.QMainWindow, Plots):
         # we init all preference to their default
         app.init_all_preferences()
 
-        preferences = app.general_preferences
-        project_preferences = app.project_preferences
-
         # we need to actualize the preferences pages
         self.dlg_preference_pages = [
-                (GeneralPreferencePageWidget, preferences),
-                (ProjectPreferencePageWidget, project_preferences), ]
+                (GeneralPreferencePageWidget, app.general_preferences),
+                (ProjectPreferencePageWidget, app.project_preferences),]
+
+    # ------------------------------------------------------------------------
+    # Project actions
+    # ------------------------------------------------------------------------
+
+    def load_project(self, fname, **kwargs):
+        proj = Project.load(fname, **kwargs)
+        proj.meta['project_file'] = fname
+        return proj
+
+    def open_project(self, *args, **kwargs):
+
+        #if self.project.name != 'DEFAULT':
+        self.close_project()
+
+        if not kwargs.get('new', False):
+            # get an existing project (limited to those present in the
+            # project directory
+
+            def getproject():
+                directory = app.general_preferences.project_directory
+                items = (f.split('.')[0].upper()
+                    for f in os.listdir(directory) if f.endswith(
+                    '.pscp'))
+
+                item, ok = QtGui.QInputDialog.getItem(self,
+                                                "select a project",
+                                                "list of available "
+                                                "projects", items,
+                                                0, False)
+
+                if ok and item:
+                    return str(item)
+
+            projectname = getproject()
+            if projectname:
+                proj = self.load_project(projectname, **kwargs)
+            else:
+                return
+
+        else:
+            # create a new project
+            dlg = QtGui.QInputDialog(self)
+            dlg.setWindowTitle('Create a new project')
+            dlg.setInputMode(QtGui.QInputDialog.TextInput)
+            dlg.setLabelText('Enter the project name:')
+            dlg.resize(300, 120)
+            ok = dlg.exec()
+            projectname = dlg.textValue()
+
+            if ok and projectname:
+                proj = Project(name=str(projectname).upper())
+            else:
+                return
+
+        if not kwargs.get('main', True):
+            # get current project if we need to add a subproject
+            self.subproject = proj
+            self.project.add_project(proj)
+
+        else:
+            # if it is a main project, replace the previous displayed
+            # project by this one
+            self.project = proj
+
+        app.last_project = self.project.name
+
+        self.update_project_widget(self.project)
+
+
+    def save_project(self, *args, **kwargs):
+        main = kwargs.get('main', True)
+        new = kwargs.get('new', False)
+        if main:
+            # save main project
+
+            if not new: # normal save
+                self.project.save()
+
+            else: #save as
+                dlg = QtGui.QInputDialog(self)
+                dlg.setWindowTitle('Save as a new project')
+                dlg.setInputMode(QtGui.QInputDialog.TextInput)
+                dlg.setLabelText('Enter the new project name:')
+                dlg.resize(300, 120)
+                ok = dlg.exec()
+                projectname = dlg.textValue()
+
+                if ok and projectname:
+                    proj = self.project.copy()
+                    proj.name =str(projectname).upper()
+                    proj.meta['project_file'] = proj.name
+                    self.project = proj
+                    self.project.save()
+                    self.update_project_widget(proj)
+                else:
+                    return
+        else:
+            print()
+            pass
+
+    def close_project(self, *args, **kwargs):
+
+        if app.general_preferences.show_close_dialog:
+            b = _CloseProjectDialog(self, "Close current project ...")
+            ret = b.exec_()
+            if ret == QtWidgets.QMessageBox.Cancel:
+                return
+            if ret == QtWidgets.QMessageBox.Discard:
+                return
+
+        self.project.save()
+
+    def remove_subproject(self):
+        pass
+
+    # ------------------------------------------------------------------------
+    # Actions on project items
+    # ------------------------------------------------------------------------
 
     # ........................................................................
-    def _append_menubar_and_preferences(self):
+    def update_project_widget(self, project):
+        self.wproject.setproject(project)
 
-        def open_mp(*args, **kwargs):
-            open_project(main=True)
+    # ........................................................................
+    def get_branches(self, item, branches=[]):
+        # Check if top level item is selected or child selected
+        if self.wproject.indexOfTopLevelItem(item) == -1:
+            name = item.text(0)
+            branches.insert(0, name)
+            return self.get_branches(item.parent(), branches)
+        else:
+            return branches
 
-        def open_sp(self, *args, **kwargs):
-            self._open_project(main=False)
+    # ........................................................................
+    def project_item_clicked(self):
+        """
+        When an item is clicked in the project window, some actions can be
+        performed, e.g., plot the corresponding data.
 
-        def open_project(self, *args, **kwargs):
-            fname = QtGui.QFileDialog.getOpenFileName(self, 'Project file',
-                self.project_dir, 'SpectroChemPy project files (*.pscp);;'
-                                  'All files (*)')
-            fname = fname[0]
-            if not fname:
-                return
-            proj = self.load_project(fname, **kwargs)
-            self.update_project_widget(proj)
+        """
+        sel = self.wproject.currentItem()
+        if sel:
+            branches = []
+            branches = self.get_branches(sel, branches)
+            if branches:
+                try:
+                    if sel.text(
+                            1) == "NDDataset":  # sinstance(data, NDDataset):
+                        # make a plot of the data
+                        key = '.'.join(branches)
+                        log.debug('add %s' % key)
+                        self.show_or_create_plot_dock(key)
+                except Exception as e:
+                    log.error(e)
 
-        def save_mp(*args, **kwargs):
-            self._save_project(main=True)
+    # ------------------------------------------------------------------------
+    # Actions on matplotlib plot canvas
+    # ------------------------------------------------------------------------
 
-        def save_sp(*args, **kwargs):
-            self.save_project(main=False)
+    def updatestatusbar(self, event):
+        if event.inaxes:
+            x, y = event.xdata, event.ydata
+            self.statusbar.showMessage(("x=%.4f y=%.4f" % (x, y)), 0)
 
-        def export_mp(*args, **kwargs):
-            export_project(main=True)
+    # ------------------------------------------------------------------------
+    # close event
+    # ------------------------------------------------------------------------
 
-        def export_sp(self, *args, **kwargs):
-            export_project(main=False)
+    def closeEvent(self, evt):
+
+        self.save_layout()
+
+        if app.general_preferences.show_close_dialog:
+            b = _CloseProjectDialog(self, "Close Spectrochempy...")
+            ret = b.exec_()
+            if ret == QtWidgets.QMessageBox.Cancel:
+                return evt.ignore()
+            if ret == QtWidgets.QMessageBox.Discard:
+                return evt.accept()
+
+        self.project.save()
+
+        return evt.accept()
+
+
+    # ------------------------------------------------------------------------
+    # Menubar
+    # ------------------------------------------------------------------------
+
+    def _append_menubar(self):
 
         # --------------------------------------------------------------------
-        # Help and informations
+        # MENU Project
         # --------------------------------------------------------------------
 
-        def about():
-            """About the tool"""
-            about = QtGui.QMessageBox.about(self,
-                "SpectroChemPy {}".format(__release__),
-                long_description )
+        project_menu = QtGui.QMenu('Project', parent=self)
 
-        # --------------------------------------------------------------------
-        # MENU FILE
-        # --------------------------------------------------------------------
+        new_mp_action = QtGui.QAction('New project', self)
+        new_mp_action.setShortcut(QtGui.QKeySequence.New)
+        new_mp_action.setStatusTip('Create a new project')
+        new_mp_action.triggered.connect(partial(self.open_project,
+                                                main=True, new=True))
+        project_menu.addAction(new_mp_action)
 
-        file_menu = QtGui.QMenu('File', parent=self)
-
-        # Open project
-
-        open_project_menu = QtGui.QMenu('Open project', self)
-        file_menu.addMenu(open_project_menu)
-
-        open_mp_action = QtGui.QAction('New main project', self)
+        open_mp_action = QtGui.QAction('Open project', self)
         open_mp_action.setShortcut(QtGui.QKeySequence.Open)
-        open_mp_action.setStatusTip('Open a new main project')
-        open_mp_action.triggered.connect(open_mp)
-        open_project_menu.addAction(open_mp_action)
+        open_mp_action.setStatusTip('Load an existing project')
+        open_mp_action.triggered.connect(partial(self.open_project,
+                                                 main=True, new=False))
+        project_menu.addAction(open_mp_action)
 
-        open_sp_action = QtGui.QAction('Add to current', self)
+        save_mp_action = QtGui.QAction('Save project', self)
+        save_mp_action.setStatusTip('Save the entire project')
+        save_mp_action.setShortcut(QtGui.QKeySequence.Save)
+        save_mp_action.triggered.connect(partial(self.save_project,
+                                                 main=True, new=False))
+        project_menu.addAction(save_mp_action)
+
+        save_mp_as_action = QtGui.QAction('Save project as ...', self)
+        save_mp_as_action.setStatusTip('Save the entire project with a new '
+                                       'name')
+        save_mp_as_action.triggered.connect(partial(self.save_project,
+                                                    main=True, new=True))
+        project_menu.addAction(save_mp_as_action)
+
+        close_mp_action = QtGui.QAction('Close project', self)
+        close_mp_action.setStatusTip(
+            'Close the current project, subprojects and all opened datasets')
+        close_mp_action.setShortcut(QtGui.QKeySequence.Close)
+        close_mp_action.triggered.connect(partial(self.close_project,
+                                                  main=True))
+        project_menu.addAction(close_mp_action)
+
+        # ....................................................................
+        project_menu.addSeparator()
+
+        subproject_menu = QtGui.QMenu('Subprojects ...', parent=self)
+        project_menu.addMenu(subproject_menu)
+
+        new_sp_action = QtGui.QAction('Add new subproject', self)
+        new_sp_action.setShortcut(
+            QtGui.QKeySequence('Ctrl+Shift+N', QtGui.QKeySequence.NativeText))
+        new_sp_action.setStatusTip('Create a new subproject and add it to the '
+                                   'current project')
+        new_sp_action.triggered.connect(partial(self.open_project,
+                                                main=False, new=True))
+        subproject_menu.addAction(new_sp_action)
+
+        open_sp_action = QtGui.QAction('Add existing project...', self)
         open_sp_action.setShortcut(
             QtGui.QKeySequence('Ctrl+Shift+O', QtGui.QKeySequence.NativeText))
-        open_sp_action.setStatusTip('Load a project as a sub project '
-                                         'and add it to the current main '
-                                         'project')
-        open_sp_action.triggered.connect(open_sp)
-        open_project_menu.addAction(open_sp_action)
+        open_sp_action.setStatusTip('Load a project and add it to the current'
+                                    ' main project')
+        open_sp_action.triggered.connect( partial(self.open_project,
+                                                  main=False, new=False))
+        subproject_menu.addAction(open_sp_action)
 
-        self.menuBar().addMenu(file_menu)
-
-        # Save project
-
-        save_project_menu = QtGui.QMenu('Save project', parent=self)
-        file_menu.addMenu(save_project_menu)
-
-        save_mp_action = QtGui.QAction('All', self)
-        save_mp_action.setStatusTip('Save the entire project into a file')
-        save_mp_action.setShortcut(QtGui.QKeySequence.Save)
-        save_mp_action.triggered.connect(save_mp)
-        save_project_menu.addAction(save_mp_action)
-
-        save_sp_action = QtGui.QAction('Selected', self)
+        save_sp_action = QtGui.QAction('Save selected subproject', self)
         save_sp_action.setStatusTip(
-            'Save the selected sub project into file')
-        save_sp_action.triggered.connect(save_sp)
-        save_project_menu.addAction(save_sp_action)
-
-        # Save project as
-
-        save_project_as_menu = QtGui.QMenu('Save project as', parent=self)
-        file_menu.addMenu(save_project_as_menu)
-
-        save_mp_as_action = QtGui.QAction('All', self)
-        save_mp_as_action.setStatusTip(
-            'Save the entire project into a file')
-        save_mp_as_action.setShortcut(QtGui.QKeySequence.SaveAs)
-        save_mp_as_action.triggered.connect(
-            partial(save_mp, new_fname=True))
-        save_project_as_menu.addAction(save_mp_as_action)
-
-        save_sp_as_action = QtGui.QAction('Selected', self)
-        save_sp_as_action.setStatusTip(
             'Save the selected sub project into a file')
-        save_sp_as_action.triggered.connect(
-            partial(save_sp, new_fname=True))
-        save_project_as_menu.addAction(save_sp_as_action)
+        save_sp_action.setShortcut(
+            QtGui.QKeySequence('Ctrl+Shift+N', QtGui.QKeySequence.NativeText))
+        save_sp_action.triggered.connect(partial(self.save_project,
+                                                 main=False, new=False))
+        subproject_menu.addAction(save_sp_action)
+
+        save_sp_as_action = QtGui.QAction('Save selected subproject as ...',
+                                        self)
+        save_sp_as_action.setStatusTip('Save only selected subproject to a '
+                                      'file with a new name')
+        save_sp_as_action.triggered.connect(partial(self.save_project,
+                                                    main=False, new=True))
+        subproject_menu.addAction(save_sp_as_action)
+
+        remove_sp_action = QtGui.QAction('Remove selected subproject', self)
+        remove_sp_action.setStatusTip('Remove the selected subproject')
+        #remove_sp_action.setShortcut(QtGui.QKeySequence.Close)
+        remove_sp_action.triggered.connect(self.remove_subproject)
+        subproject_menu.addAction(remove_sp_action)
+
+        # ....................................................................
+        project_menu.addSeparator()
 
         # Export figures
 
         export_project_menu = QtGui.QMenu('Export figures', parent=self)
-        file_menu.addMenu(export_project_menu)
+        project_menu.addMenu(export_project_menu)
 
         export_mp_action = QtGui.QAction('All', self)
         export_mp_action.setStatusTip(
             'Pack all the data of the main project into one folder')
-        export_mp_action.triggered.connect(export_mp)
+        #export_mp_action.triggered.connect(export_mp)
         export_mp_action.setShortcut(
             QtGui.QKeySequence('Ctrl+E', QtGui.QKeySequence.NativeText))
         export_project_menu.addAction(export_mp_action)
@@ -410,34 +635,10 @@ class MainWindow(QtGui.QMainWindow, Plots):
             'Pack all the data of the current sub project into one folder')
         export_sp_action.setShortcut(
             QtGui.QKeySequence('Ctrl+Shift+E', QtGui.QKeySequence.NativeText))
-        export_sp_action.triggered.connect(export_sp)
+        #export_sp_action.triggered.connect(export_sp)
         export_project_menu.addAction(export_sp_action)
 
-        # Close project
-
-        file_menu.addSeparator()
-
-        close_project_menu = QtGui.QMenu('Close project', parent=self)
-        file_menu.addMenu(close_project_menu)
-
-        close_mp_action = QtGui.QAction('Main project', self)
-        close_mp_action.setShortcut(
-            QtGui.QKeySequence('Ctrl+Shift+W', QtGui.QKeySequence.NativeText))
-        close_mp_action.setStatusTip(
-            'Close the main project and delete all data and plots out of '
-            'memory')
-        # TODO : self.close_mp_action.triggered.connect(
-        #        lambda : psy.close(psy.gcp(True).num))
-        close_project_menu.addAction(close_mp_action)
-
-        close_sp_action = QtGui.QAction('Only selected', self)
-        close_sp_action.setStatusTip(
-            'Close the selected arrays project and delete all data and plots '
-            'out of memory')
-        close_sp_action.setShortcut(QtGui.QKeySequence.Close)
-        # TODO: close_sp_action.triggered.connect(
-        #        lambda : psy.gcp().close(True, True))
-        close_project_menu.addAction(close_sp_action)
+        project_menu.addSeparator()
 
         #  Quit
 
@@ -446,10 +647,10 @@ class MainWindow(QtGui.QMainWindow, Plots):
             quit_action.triggered.connect(
                 QtCore.QCoreApplication.instance().quit)
             quit_action.setShortcut(QtGui.QKeySequence.Quit)
-            file_menu.addAction(quit_action)
+            project_menu.addAction(quit_action)
 
 
-        self.menuBar().addMenu(file_menu)
+        self.menuBar().addMenu(project_menu)
 
         # --------------------------------------------------------------------
         # Console menu
@@ -500,7 +701,7 @@ class MainWindow(QtGui.QMainWindow, Plots):
         # --------------------------------------------------------------------
 
         about_action = QtGui.QAction('About', self)
-        about_action.triggered.connect(about)
+        about_action.triggered.connect(self.about)
         help_menu.addAction(about_action)
 
         self.menuBar().setNativeMenuBar(False)
@@ -509,91 +710,26 @@ class MainWindow(QtGui.QMainWindow, Plots):
         # access to menu
         # Indeed, on mac they are not accessible until unfocused the window
 
-    # ------------------------------------------------------------------------
-    # Actions on matplotlib plot canvas
-    # ------------------------------------------------------------------------
-
-    def updatestatusbar(self, event):
-        if event.inaxes:
-            x, y = event.xdata, event.ydata
-            self.statusbar.showMessage(("x=%.4f y=%.4f" % (x, y)), 0)
-
-    # ------------------------------------------------------------------------
-    # Actions on project items
-    # ------------------------------------------------------------------------
-
-    # ........................................................................
-    def update_project_widget(self, project):
-        self.wproject.setproject(project)
-
-    # ........................................................................
-    def get_branches(self, item, branches=[]):
-        # Check if top level item is selected or child selected
-        if self.wproject.indexOfTopLevelItem(item) == -1:
-            name = item.text(0)
-            branches.insert(0, name)
-            return self.get_branches(item.parent(), branches)
-        else:
-            return branches
-
-    # ........................................................................
-    def project_item_clicked(self):
-        """
-        When an item is clicked in the project window, some actions can be
-        performed, e.g., plot the corresponding data.
-
-        """
-        sel = self.wproject.currentItem()
-        if sel:
-            branches = []
-            branches = self.get_branches(sel, branches)
-            if branches:
-                try:
-                    if sel.text(
-                            1) == "NDDataset":  # sinstance(data, NDDataset):
-                        # make a plot of the data
-                        key = '.'.join(branches)
-                        log.debug('add %s' % key)
-                        self.show_or_create_plot_dock(key)
-                except Exception as e:
-                    log.error(e)
-
-    # ------------------------------------------------------------------------
-    # close methods
-    # ------------------------------------------------------------------------
-
-    def closeEvent(self, evt):
-        if preferences.show_close_dialog:
-            b = _CloseDialog(self)
-            ret = b.exec_()
-            if ret == QtWidgets.QMessageBox.Cancel:
-                return evt.ignore()
-            if ret == QtWidgets.QMessageBox.Discard:
-                return evt.accept()
-        self.project.save()
-        return evt.accept()
-
 
 # ============================================================================
-class _CloseDialog(QtWidgets.QMessageBox):
+class _CloseProjectDialog(QtWidgets.QMessageBox):
 
-    def __init__(self, mainWindow):
+    def __init__(self, mainWindow, message):
         QtWidgets.QMessageBox.__init__(self, mainWindow)
         self.setIcon(QtWidgets.QMessageBox.Warning)
-        self.setText("Close Spectrochempy...")
+        self.setText(message)
         self.setInformativeText("Save current project?")
         self.setStandardButtons(
             QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard |
             QtWidgets.QMessageBox.Cancel)
 
         c = QtWidgets.QCheckBox("don't ask me again")
-        c.clicked.connect(lambda val: preferences.set_trait(
-            'show_close_dialog', not val))
+        c.clicked.connect(self.change_ask_again)
+
         self.layout().addWidget(c, 4, 0, 7, 0)
 
-# ============================================================================
-
-
+    def change_ask_again(self, val):
+        app.general_preferences.show_close_dialog = not val
 
 # ============================================================================
 if __name__ == '__main__':

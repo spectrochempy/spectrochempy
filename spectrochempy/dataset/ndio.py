@@ -164,8 +164,8 @@ class NDIO(HasTraits):
         zipf = zipfile_factory(filename, mode="w",
                                compression=zipfile.ZIP_DEFLATED)
 
-        # Stage arrays in a temporary file on disk, before writing to zip.
-        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.tmp')
+        # Stage data in a temporary file on disk, before writing to zip.
+        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.scp')
         os.close(fd)
 
         pars = {}

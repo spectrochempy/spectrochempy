@@ -11,6 +11,7 @@
 
 import os, weakref, re
 import traitlets
+import textwrap
 
 from ....extern.pyqtgraph.Qt import QtGui, QtCore
 from ....extern.pyqtgraph.pgcollections import OrderedDict
@@ -523,7 +524,7 @@ class Parameter(QtCore.QObject):
             opt['value'] = value
             opt['type'] = opts.metadata.get('type',type(
                 opts.default_value).__name__)
-            opt['title'] = opts.help
+            opt['title'] = '  \n'.join(textwrap.wrap(opts.help, 32))
             opts = opt
 
             ch2.append(opts)

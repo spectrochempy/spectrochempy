@@ -23,18 +23,16 @@ class FilePickerWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         self.typ = typ
         # vertical layout for widgets
-        self.hbox = QtGui.QHBoxLayout()
-        self.setLayout(self.hbox)
+        self.vbox = QtGui.QVBoxLayout()
+        self.setLayout(self.vbox)
 
         # Create a label which displays the path to our chosen file
         self.qed = QtGui.QLineEdit()
-        self.hbox.addWidget(self.qed)
+        self.vbox.addWidget(self.qed)
 
         # Create a push button labelled 'choose' and add it to our layout
         btn = QtGui.QPushButton('Choose %s'%self.typ, self)
-        self.hbox.addWidget(btn)
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
-                           QtGui.QSizePolicy.Expanding)
+        self.vbox.addWidget(btn, 0, QtCore.Qt.AlignRight)
 
         # Connect the clicked signal to the get_fname handler
         btn.clicked.connect(self.get_fname)

@@ -14,10 +14,10 @@ import os
 from ....extern.pyqtgraph.Qt import QtCore, QtGui
 from ....extern.pyqtgraph.python2_3 import asUnicode
 from ....extern.pyqtgraph.widgets.SpinBox import SpinBox
-from ....extern.pyqtgraph.widgets.ColorButton import ColorButton
 # from ..widgets.GradientWidget import GradientWidget ## creates import loop
 from ....extern.pyqtgraph import pixmaps as pixmaps, functions as fn
 from ....extern.pyqtgraph.pgcollections import OrderedDict
+from ..ColorButton import ColorButton
 from ..filepickerwidget import FilePickerWidget
 from .Parameter import Parameter, registerParameterType
 from .ParameterItem import ParameterItem

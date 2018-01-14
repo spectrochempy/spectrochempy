@@ -18,16 +18,14 @@ interface to the configuration file of SpectroChemPy
 
 from warnings import warn
 import os
+from textwrap import fill
 
 from ..extern.pyqtgraph.Qt import QtGui, QtCore
 from .guiutils import geticon
 from .widgets.parametertree import ParameterTree, Parameter
 from traitlets.config.manager import BaseJSONConfigManager
 
-from spectrochempy.application import (app, log,
-                                       preferences as general_preferences,
-
-                                       project_preferences, )
+from spectrochempy.application import (app, log)
 
 from .widgets.commonwidgets import warningMessage
 
@@ -62,9 +60,6 @@ class PreferencesTree(ParameterTree):
     def initialize(self, title=None):
         """Fill the items into the tree"""
 
-        self.cfg = BaseJSONConfigManager(
-            config_dir = general_preferences.project_directory)
-
         self.pname = app.last_project
 
         if hasattr(self.preferences, 'traits'):
@@ -74,7 +69,9 @@ class PreferencesTree(ParameterTree):
             # we make a dictionary containing the traits and the current values
             preferences = {o[1]: (o[2], getattr(self.preferences, o[
                 1])) for o in sorted(
-                [(opt.help, k, opt) for k, opt in pref_traits.items()])}
+                [(opt.help, k, opt) for k, opt in pref_traits.items(
+
+                )])}
         else:
             raise ValueError("preferences must be a Configurable object")
 
@@ -101,9 +98,8 @@ class PreferencesTree(ParameterTree):
                 # Change the values of the preference
                 data = self._sanitize(childname, data)
                 setattr(self.preferences, childname,data)
-                self.cfg.update(self.pname, {
-                    self.preferences.__class__.__name__: {childname: data, }
-                })
+                # the main  json configuration file is uddated automatically
+                # when parameters changes
 
     def _sanitize(self, name, data):
         # make a string from special type compatible with traits definition
@@ -155,7 +151,7 @@ class PreferencePageWidget(Preference_Page, QtGui.QWidget):
             self.preferences = preferences
             self.tree.preferences = preferences
 
-        current_project = app.last_project
+        current_project = self.preferences.parent.last_project
         self.running_title = self.title.format(current_project=current_project)
         tree_title = self.tree_title.format(current_project=current_project)
         self.tree.initialize(title=tree_title)
@@ -163,13 +159,13 @@ class PreferencePageWidget(Preference_Page, QtGui.QWidget):
 
 # ============================================================================
 class GeneralPreferencePageWidget(PreferencePageWidget):
-    preferences = general_preferences
+    preferences = app.general_preferences
     tree_title = title = 'General preferences'
 
 
 # ============================================================================
 class ProjectPreferencePageWidget(PreferencePageWidget):
-    preferences = project_preferences
+    preferences = app.project_preferences
     title = 'Project:{current_project}'
     tree_title = 'Project `{current_project}` preferences'
 
@@ -203,14 +199,15 @@ class DialogPreferences(QtGui.QDialog):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle('SpectroChemPy Configuration')
         self.contents_widget.setMovement(QtGui.QListView.Static)
-        self.contents_widget.setSpacing(1)
+        self.contents_widget.setSpacing(2)
         self.contents_widget.setCurrentRow(0)
 
         # Layout
         hsplitter = QtGui.QSplitter()
         hsplitter.addWidget(self.contents_widget)
         hsplitter.addWidget(self.pages_widget)
-        hsplitter.setStretchFactor(1, 1)
+        hsplitter.setSizes([170, -1])
+        hsplitter.setStretchFactor(1,4)
 
         btnlayout = QtGui.QHBoxLayout()
         btnlayout.addWidget(self.bt_reset)

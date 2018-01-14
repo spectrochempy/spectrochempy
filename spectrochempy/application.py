@@ -371,8 +371,10 @@ class GeneralPreferences(Configurable):
     show_info_on_loading = Bool(True, help='Display info on loading?').tag(
         config=True)
 
-    show_close_dialog = Bool(True, help='Display the close dialog on '
-                                        'exit?').tag(config=True)
+    show_close_dialog = Bool(True, help='Display the close project dialog'
+                                        ' project changing or on '
+                                        'apllication exit?').tag(
+                                    config=True)
 
     csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
 
@@ -475,6 +477,9 @@ class ProjectPreferences(Configurable) :
 
     def __init__(self, **kwargs):
         super(ProjectPreferences, self).__init__(**kwargs)
+
+        self.cfg = self.parent.config_manager
+        self.cfg_file_name = self.parent.config_file_name
 
     # ------------------------------------------------------------------------
     # attributes
@@ -581,6 +586,17 @@ r"""\usepackage{siunitx}
                                        ' plot in stack plots'
                                  ).tag(config=True)
 
+    @observe(All)
+    def _anytrait_changed(self, change):
+        # update configuration
+        if not hasattr(self, 'cfg'):
+            # not yet initialized
+            return
+
+        if change.name in self.traits(config=True):
+            self.cfg.update('ProjectPreferences', {
+                self.__class__.__name__: {change.name: change.new, }
+            })
 
 # ============================================================================
 # Application
@@ -610,6 +626,9 @@ class SpectroChemPy(Application):
     # ------------------------------------------------------------------------
     # applications attributes
     # ------------------------------------------------------------------------
+
+    icon = Unicode('scpy.png')
+    "Icon for the application"
 
     running = Bool(False)
     "Running status of the |scpy| application"
@@ -898,19 +917,22 @@ class SpectroChemPy(Application):
                 if os.path.exists(jsonname):
                     os.remove(jsonname)
 
-            self.load_config_file(config_file)
-            if config_file not in self._loaded_config_files:
-                self._loaded_config_files.append(config_file)
+            for cfgname in [config_file, ]:
+                self.load_config_file(cfgname)
+                if cfgname not in self._loaded_config_files:
+                    self._loaded_config_files.append(cfgname)
 
         # add other preferences
         # ---------------------------------------------------------------------
 
-        self._init_datadir()
-        self._init_general_preferences()
-        self._init_project_preferences()
+        self.datadir = DataDir(config=self.config)
+        self.general_preferences = GeneralPreferences(config=self.config,
+                                                      parent=self)
+        self.project_preferences = ProjectPreferences(config=self.config,
+                                                      parent=self)
 
-        # Possibly write the default config file
-        # --------------------------------------------------------------------
+        # Eventually write the default config file
+        # --------------------------------------
         self._make_default_config_file()
 
     def start_show_config(self, **kwargs):
@@ -1006,27 +1028,11 @@ class SpectroChemPy(Application):
     # Private methods
     # ------------------------------------------------------------------------
 
-
-    # ........................................................................
-    def _init_datadir(self):
-
-        self.datadir = DataDir(config=self.config)
-
-    # ........................................................................
-    def _init_general_preferences(self):
-        self.general_preferences = GeneralPreferences(config=self.config, parent=self)
-
-    # ........................................................................
-    def _init_project_preferences(self):
-
-        self.project_preferences = ProjectPreferences(config=self.config)
-
     # ........................................................................
     def _make_default_config_file(self):
         """auto generate default config file."""
 
-        fname = os.path.join(self.config_dir,
-                                           self.config_file_name+'.py')
+        fname = os.path.join(self.config_dir, self.config_file_name+'.py')
 
         if not os.path.exists(fname):
             s = self.generate_config_file()

@@ -21,6 +21,13 @@ def warningMessage(parent, message='Warning'):
     return (msgBox.exec() == QMessageBox.AcceptRole)
 
 
+def questionMessage(parent, message):
+    reply = QMessageBox.question(parent, "QMessageBox.question()",
+                                 message,
+                                 QMessageBox.Yes | QMessageBox.No |
+                                 QMessageBox.Cancel)
+    return reply
+
 def OpenExistingDirectory(parent,
                           caption='Select a folder',
                           directory=''):

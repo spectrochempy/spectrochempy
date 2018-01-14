@@ -13,12 +13,13 @@ import os
 import uuid
 import json
 import warnings
+from copy import copy as _copy
 
 from functools import wraps
 
 from traitlets import (Dict, Instance, Unicode, This, default)
 
-from spectrochempy.application import app
+from spectrochempy.application import app, ProjectPreferences
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
@@ -28,6 +29,7 @@ from spectrochempy.core.projects.baseproject import AbstractProject
 log = app.log
 preferences = app.general_preferences
 project_preferences = app.project_preferences
+cfg = app.config_manager
 
 # ============================================================================
 # Project class
@@ -210,6 +212,18 @@ class Project(AbstractProject):
 
     def __dir__(self):
         return ['name', 'meta', 'parent', 'datasets', 'projects', 'scripts', ]
+
+    def __copy__(self):
+        new = Project()
+        new.name = self.name+'_copy'
+        for item in dir(self):
+            if item == 'name':
+                continue
+            item = "_"+item
+            setattr(new, item, _copy(getattr(self, item)))
+            if item == '_projects':
+                print()
+        return new
 
     # ------------------------------------------------------------------------
     # properties
@@ -402,6 +416,13 @@ class Project(AbstractProject):
     # ------------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------------
+
+    def copy(self):
+        """
+        Make an exact copy of the current project
+
+        """
+        return _copy(self)
 
     # ........................................................................
     # dataset items
@@ -613,6 +634,8 @@ class Project(AbstractProject):
 
         """
 
+        # get the filename associated to this project
+
         directory = kwargs.get("directory", preferences.project_directory)
 
         if not filename:
@@ -633,8 +656,11 @@ class Project(AbstractProject):
             warnings.warn('Provided directory is a file, '
                           'so we use its parent directory',
                           SpectroChemPyWarning)
-            filename = os.path.join(os.path.dirname(directory), filename)
+            directory = os.path.dirname(directory)
+            filename = os.path.join(directory, filename)
 
+        # Handle the case when we want to preserve the data (partial saving
+        # of scripts)
 
         global savedproj, keepdata
         keepdata = False
@@ -646,14 +672,15 @@ class Project(AbstractProject):
             savedproj = Project.load(filename)
 
         # Imports deferred for startup time improvement
+
         import zipfile
         import tempfile
 
         compression = zipfile.ZIP_DEFLATED
         zipf = make_zipfile(filename, mode="w", compression=compression)
 
-        # Stage arrays in a temporary file on disk, before writing to zip.
-        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.ds.scp')
+        # Stage data in a temporary file on disk, before writing to zip.
+        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.pscp.scp')
         os.close(fd)
 
         pars = {}
@@ -717,8 +744,14 @@ class Project(AbstractProject):
 
         with open(tmpfile, 'w') as f:
             f.write(json.dumps(pars, sort_keys=True, indent=2))
-
         zipf.write(tmpfile, arcname='pars.json')
+
+        # add also the preference json in the zipfile
+        prefjsonfile = os.path.join(app.config_dir,'ProjectPreferences.json')
+        if os.path.exists(prefjsonfile):
+            zipf.write(prefjsonfile, arcname='ProjectPreferences.json')
+
+        # resume the saving process
         os.remove(tmpfile)
         zipf.close()
 
@@ -775,10 +808,21 @@ class Project(AbstractProject):
         # open the zip file as a dict-like object
         obj = ScpFile(fid)
 
-        # read json file
-        pars = obj['pars.json']
+        # read json files in the pscp file (obj[f])
+        # then write it in the main config directory
+        f = 'ProjectPreferences.json'
+        if f in obj.files:
+            prefjsonfile = os.path.join(app.config_dir, f)
+            with open(prefjsonfile, 'w') as fd:
+                json.dump(obj[f], fd,  indent=4)
+            # we must also reinit preferences
+            app.load_config_file(prefjsonfile)
+            project_preferences = app.project_preferences = \
+                    ProjectPreferences(config=app.config, parent=app)
 
         # make a project (or a subclass of it, so we use cls)
+        pars = obj['pars.json']
+
         def _make_project(_cls, pars, obj, pname):
 
             args = []

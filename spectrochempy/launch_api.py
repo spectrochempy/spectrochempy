@@ -34,7 +34,9 @@ def main():
         ds = sc.NDDataset.read(fname)
         ds.plot()
         sc.show()
+
     except:
+
         log.info("'%s' file doesn't exists"%fname)
         print()
         app.print_help()

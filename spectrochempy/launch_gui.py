@@ -110,13 +110,17 @@ QtCore.Signal = QtCore.pyqtSignal
 
 import sys, time
 
-def main_gui():
+
+def main():
 
     # if 'darwin' in sys.platform:
     #   if QtGui.QApplication.setGraphicsSystem:
     #      QtGui.QApplication.setGraphicsSystem('raster')  # to avoid the warning  (but on sierra it doesnt
     gui = QtGui.QApplication(sys.argv)
 
+    gui.setOrganizationName("LCS.spectrocat");
+    gui.setOrganizationDomain("www-lcs.ensicaen.fr");
+    gui.setApplicationName("SpectroChemPy");
 
     # Create and display the splash screen
     splash_pix = QtGui.QPixmap('gui/ressources/scpy_splash.png')
@@ -128,7 +132,7 @@ def main_gui():
 
     # adding progress bar
     progressBar = QtGui.QProgressBar(splash)
-    progressBar.setMaximum(10)
+    progressBar.setMaximum(15)
     progressBar.setGeometry(0, splash_pix.height() - 50, splash_pix.width(),
                             20)
     progressBar.setVisible(False)
@@ -143,20 +147,26 @@ def main_gui():
 
     splash.clearMessage()
 
-    splash.showMessage("<br/><h3><font color='blue'>"
-                       "Loading API...</font></h3>",
-                       QtCore.Qt.AlignTop | QtCore.Qt.AlignCenter,
-                       QtCore.Qt.black)
+    progressBar.setVisible(True)
+
+    def gui_splash(i, text):
+        progressBar.setValue(i)
+        gui.processEvents()
+        splash.showMessage("<br/><h3><font color='blue'>"
+                           "%s</font></h3>"%text,
+                           QtCore.Qt.AlignTop | QtCore.Qt.AlignCenter,
+                           QtCore.Qt.black)
+
+    gui_splash(0, 'Start loading API...' )
     gui.processEvents()
 
-    progressBar.setVisible(True)
-    
-    for i in range(1, 11):
-        progressBar.setValue(i)
-        t = time.time()
-        while time.time() < t + 0.1:
-            gui.processEvents()
+    # global flag to inform spectrochempy that we use GUI during API import
 
+    sys.gui_splash = gui_splash
+    # Todo: more pythonic way to do that? might be possible to rewrite the
+    # API so that it is a QObject which could be used either in the GUI or
+    # in a non-GUI version of spectrochempy. It will allows the use py
+    # signal and slots
 
     from spectrochempy.gui.gui import MainWindow
 
@@ -168,4 +178,7 @@ def main_gui():
     sys.exit(gui.exec())
 
 
-main_gui()
+# =============================================================================
+if __name__ == '__main__':
+
+    main()
