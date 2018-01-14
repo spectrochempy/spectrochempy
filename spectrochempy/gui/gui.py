@@ -45,18 +45,16 @@ from .logtoconsole import QtHandler, redirectoutput
 from .plots import Plots
 from .widgets.commonwidgets import warningMessage, OpenFileName, SaveFileName
 from .preferences import (DialogPreferences, ProjectPreferencePageWidget,
-                          GeneralPreferencePageWidget)
+                          GeneralPreferencePageWidget, )
 from .guiutils import geticon
 
 from ..application import (app, log, DEBUG, __release__, long_description)
-
 
 from ..core import Project, Script, NDDataset
 
 
 # ============================================================================
-class _metaclass_mixin(
-    QtWidgets.QWidget.__class__, HasTraits.__class__):
+class _metaclass_mixin(QtWidgets.QWidget.__class__, HasTraits.__class__):
     # This is necessary to be able to mix HasTraits with QtWidget class.
     pass
 
@@ -64,7 +62,6 @@ class _metaclass_mixin(
 # ============================================================================
 class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
                  metaclass=_metaclass_mixin):
-
     project = Instance(Project)
     "Current project instance"
 
@@ -96,7 +93,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             self.last = app.last_project
         else:
             # create or load the default project
-            self.last= 'DEFAULT'
+            self.last = 'DEFAULT'
 
         try:
             self.project = self.load_project(self.last)
@@ -106,7 +103,6 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
         app.last_project = self.last
 
-        # TODO: Try to integrate better configuration for pyQtGraph
         pg.setConfigOption('background',
                            app.project_preferences.background_color)
         pg.setConfigOption('foreground',
@@ -114,11 +110,10 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
         # window and other Qt settings
         # ----------------------------
-        self.settings = QtCore.QSettings()
         PX_FACTOR = QtWidgets.QApplication.instance().PX_FACTOR = \
             QtGui.QPaintDevice.logicalDpiY(
             self) / 96
-        self.ww, self.wh = ww, wh =int(1440 * PX_FACTOR), int(900 * PX_FACTOR)
+        self.ww, self.wh = ww, wh = int(1440 * PX_FACTOR), int(900 * PX_FACTOR)
         self.resize(ww, wh)
 
         # Main area
@@ -127,7 +122,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         self.setCentralWidget(area)
 
         self.setWindowIcon(QtGui.QIcon(geticon(app.icon)))
-        #TODO: create an app to get the icon working:
+        # TODO: create an app to get the icon working:
         # see http://doc.qt.io/qt-5/appicon.html
 
         self.setWindowTitle(app.name)
@@ -135,7 +130,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         # Create status bar
         # -----------------
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage('Welcome to %s'% app.name)
+        self.statusbar.showMessage('Welcome to %s' % app.name)
 
         # Create progress bar
         # -------------------
@@ -153,10 +148,9 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         # Create preferences pages
         # ------------------------
         # tuple (page, preferences section)
-        self.dlg_preference_pages =[
+        self.dlg_preference_pages = [
             (GeneralPreferencePageWidget, 'general_preferences'),
-            (ProjectPreferencePageWidget, 'project_preferences'),
-        ]
+            (ProjectPreferencePageWidget, 'project_preferences'), ]
 
         # Create menubar
         # --------------
@@ -164,19 +158,19 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
         # eventually load a previous layout
         # ---------------------------------
+        self.save_layout(default=True)
+
         self.load_layout()
 
     # ------------------------------------------------------------------------
     # Docks creation
     # ------------------------------------------------------------------------
 
-    def _create_docks(self):
+    def _create_plot_area(self):
 
-        ww, wh = self.ww, self.wh
-
-        # plots
-        # ------
-        self.dplots = dplots = Dock("plots", size=(ww * .80, wh * .80))
+        dplots = Dock("plots", size=(self.ww * self._ratio,
+                                                   self.wh * .80),
+                                    closable=False, hideTitle=True)
         text = QtWidgets.QLabel("""
             <html>
             <center>
@@ -189,18 +183,27 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             </p>
             </center>
             </html>
-            """%(QtGui.QKeySequence(QtGui.QKeySequence.New).toString(
-                                                QtGui.QKeySequence.NativeText),
-                 QtGui.QKeySequence(QtGui.QKeySequence.Open).toString(
-                                                QtGui.QKeySequence.NativeText)
-                )
-            )
+            """ % (QtGui.QKeySequence(QtGui.QKeySequence.New).toString(
+            QtGui.QKeySequence.NativeText),
+                   QtGui.QKeySequence(QtGui.QKeySequence.Open).toString(
+                       QtGui.QKeySequence.NativeText)))
         dplots.addWidget(text)
-        dplots.hideTitleBar()
+
+        return dplots
+
+
+    def _create_docks(self):
+
+        ww, wh = self.ww, self.wh
+        self._ratio = ratio = .72
+
+        # plots
+        # ------
+        self.dplots = dplots = self._create_plot_area()
 
         # console
         # --------
-        self.dconsole = dconsole = Dock("Console", size=(ww * .80, wh * .20),
+        self.dconsole = dconsole = Dock("Console", size=(ww * ratio, wh * .20),
                                         closable=False)
         self.wconsole = pg.console.ConsoleWidget()
         dconsole.addWidget(self.wconsole)
@@ -219,7 +222,8 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         # project window
         # ---------------
 
-        dproject = Dock("Project", size=(ww * .20, wh * 1.0), closable=False)
+        dproject = Dock("Project", size=(ww * (1. - ratio), wh * 1.0),
+                        closable=False)
         self.wproject = ProjectTreeWidget(project=self.project,
                                           showHeader=False)
         dproject.addWidget(self.wproject)
@@ -239,14 +243,14 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         # w5 = fc.widget()
         # dflowchart.addWidget(w5)
 
-
         # set dock layout
         # ----------------
 
         self.area.addDock(dproject, 'left')
-        self.area.addDock(dplots, 'right')
-        #self.area.addDock(dflowchart, 'bottom', dproject)
+        self.area.addDock(dplots, 'right', dproject)
         self.area.addDock(dconsole, 'bottom', dplots)
+
+        # self.area.addDock(dflowchart, 'bottom', dproject)
 
     # ------------------------------------------------------------------------
     # General setting for the window layout and geometry
@@ -254,26 +258,51 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
     # We use the QT settings, for these very specific preferences, which are
     #  not used in the normal API
 
-    def save_layout(self):
-        self.settings.setValue("geometry", self.saveGeometry())
-        self.settings.setValue("windowState", self.saveState())
-        self.settings.setValue("areaState", self.area.saveState())
+    def save_layout(self, default=False):
+        settings = QtCore.QSettings()
+        defstr = ''
+        if default:
+            defstr = 'def_'
+        settings.setValue(defstr + "geometry", self.saveGeometry())
+        settings.setValue(defstr + "areastate", self.area.saveState())
+        del settings
 
-    def load_layout(self):
-        try:
-            self.restoreGeometry(self.settings.value("geometry", ""))
-            self.ww, self.wh = self.frameGeometry()[2:]
-        except:
-            pass
+    def load_layout(self, default=False):
+        settings = QtCore.QSettings()
+        defstr = ''
+        if default:
+            defstr = 'def_'
+
+        self.restoreGeometry(settings.value(defstr + "geometry",
+                                            settings.value("def_geometry")))
+        self.ww, self.wh = self.frameGeometry().width(), self.frameGeometry(
+
+        ).height()
+
+        def checktab(item):
+            # print(item)
+            if hasattr(item, '__iter__') and not isinstance(item, str):
+                for i in item:
+                    if checktab(i):
+                        return True
+            else:
+                if 'tab' in item:
+                    return True
+            return False
 
         try:
-            self.restoreState(self.settings.value("windowState", ""))
+            s = settings.value(defstr + "areastate")
+            if not checktab(s['main']):
+                # if tab in the state This main
+                # that the application was not closed properly. In thsi
+                # case we use the default.
+                s = settings.value("def_areastate")
+                self.area.restoreState(s)
         except:
-            pass
-        try:
-            self.area.restoreState(self.settings.value("areaState", ""))
-        except:
-            pass
+            try:
+                self.area.restoreState(settings.value("def_areastate"))
+            except:
+                log.error("can't restore docking state")
 
     # --------------------------------------------------------------------
     # Help and preferences actions
@@ -281,8 +310,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
     def about(self):
         """About the tool"""
-        QtGui.QMessageBox.about(self,
-                                "SpectroChemPy {}".format(__release__),
+        QtGui.QMessageBox.about(self, "SpectroChemPy {}".format(__release__),
                                 long_description)
 
     def edit_preferences(self):
@@ -303,7 +331,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         dlg.set_current_index(1)
         ww = self.frameGeometry().width()
         wh = self.frameGeometry().height()
-        dlg.resize(ww*.95,wh*.8)
+        dlg.resize(ww * .95, wh * .8)
 
         dlg.exec()
 
@@ -313,9 +341,10 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
         """
 
-        if not warningMessage(self, message= 'Are you sure to reset to the '
-                                       'default? All previous changes will '
-                                       'be lost.'):
+        if not warningMessage(self, message='Are you sure to reset to the '
+                                            'default? All previous changes '
+                                            'will '
+                                            'be lost.'):
             return
 
         if hasattr(self, 'dlg_preferences'):
@@ -343,7 +372,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
     def open_project(self, *args, **kwargs):
 
-        #if self.project.name != 'DEFAULT':
+        # if self.project.name != 'DEFAULT':
         self.close_project()
 
         if not kwargs.get('new', False):
@@ -352,15 +381,13 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
             def getproject():
                 directory = app.general_preferences.project_directory
-                items = (f.split('.')[0].upper()
-                    for f in os.listdir(directory) if f.endswith(
-                    '.pscp'))
+                items = (f.split('.')[0].upper() for f in os.listdir(directory)
+                         if f.endswith('.pscp'))
 
-                item, ok = QtGui.QInputDialog.getItem(self,
-                                                "select a project",
-                                                "list of available "
-                                                "projects", items,
-                                                0, False)
+                item, ok = QtGui.QInputDialog.getItem(self, "select a project",
+                                                      "list of available "
+                                                      "projects", items, 0,
+                                                      False)
 
                 if ok and item:
                     return str(item)
@@ -400,17 +427,16 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
         self.update_project_widget(self.project)
 
-
     def save_project(self, *args, **kwargs):
         main = kwargs.get('main', True)
         new = kwargs.get('new', False)
         if main:
             # save main project
 
-            if not new: # normal save
+            if not new:  # normal save
                 self.project.save()
 
-            else: #save as
+            else:  # save as
                 dlg = QtGui.QInputDialog(self)
                 dlg.setWindowTitle('Save as a new project')
                 dlg.setInputMode(QtGui.QInputDialog.TextInput)
@@ -421,7 +447,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
                 if ok and projectname:
                     proj = self.project.copy()
-                    proj.name =str(projectname).upper()
+                    proj.name = str(projectname).upper()
                     proj.meta['project_file'] = proj.name
                     self.project = proj
                     self.project.save()
@@ -478,8 +504,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             branches = self.get_branches(sel, branches)
             if branches:
                 try:
-                    if sel.text(
-                            1) == "NDDataset":  # sinstance(data, NDDataset):
+                    if sel.text(1) == "NDDataset":
                         # make a plot of the data
                         key = '.'.join(branches)
                         log.debug('plot %s' % key)
@@ -512,10 +537,16 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             if ret == QtWidgets.QMessageBox.Discard:
                 return evt.accept()
 
+        # close open plots
+        for key in list(self.open_plots.keys()):
+            # get the existing ones
+            dp, wplot, _ = self.open_plots[key]
+            dp.close()
+            del wplot
+
         self.project.save()
 
         return evt.accept()
-
 
     # ------------------------------------------------------------------------
     # Menubar
@@ -532,37 +563,37 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         new_mp_action = QtGui.QAction('New project', self)
         new_mp_action.setShortcut(QtGui.QKeySequence.New)
         new_mp_action.setStatusTip('Create a new project')
-        new_mp_action.triggered.connect(partial(self.open_project,
-                                                main=True, new=True))
+        new_mp_action.triggered.connect(
+            partial(self.open_project, main=True, new=True))
         project_menu.addAction(new_mp_action)
 
         open_mp_action = QtGui.QAction('Open project', self)
         open_mp_action.setShortcut(QtGui.QKeySequence.Open)
         open_mp_action.setStatusTip('Load an existing project')
-        open_mp_action.triggered.connect(partial(self.open_project,
-                                                 main=True, new=False))
+        open_mp_action.triggered.connect(
+            partial(self.open_project, main=True, new=False))
         project_menu.addAction(open_mp_action)
 
         save_mp_action = QtGui.QAction('Save project', self)
         save_mp_action.setStatusTip('Save the entire project')
         save_mp_action.setShortcut(QtGui.QKeySequence.Save)
-        save_mp_action.triggered.connect(partial(self.save_project,
-                                                 main=True, new=False))
+        save_mp_action.triggered.connect(
+            partial(self.save_project, main=True, new=False))
         project_menu.addAction(save_mp_action)
 
         save_mp_as_action = QtGui.QAction('Save project as ...', self)
         save_mp_as_action.setStatusTip('Save the entire project with a new '
                                        'name')
-        save_mp_as_action.triggered.connect(partial(self.save_project,
-                                                    main=True, new=True))
+        save_mp_as_action.triggered.connect(
+            partial(self.save_project, main=True, new=True))
         project_menu.addAction(save_mp_as_action)
 
         close_mp_action = QtGui.QAction('Close project', self)
         close_mp_action.setStatusTip(
             'Close the current project, subprojects and all opened datasets')
         close_mp_action.setShortcut(QtGui.QKeySequence.Close)
-        close_mp_action.triggered.connect(partial(self.close_project,
-                                                  main=True))
+        close_mp_action.triggered.connect(
+            partial(self.close_project, main=True))
         project_menu.addAction(close_mp_action)
 
         # ....................................................................
@@ -576,8 +607,8 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             QtGui.QKeySequence('Ctrl+Shift+N', QtGui.QKeySequence.NativeText))
         new_sp_action.setStatusTip('Create a new subproject and add it to the '
                                    'current project')
-        new_sp_action.triggered.connect(partial(self.open_project,
-                                                main=False, new=True))
+        new_sp_action.triggered.connect(
+            partial(self.open_project, main=False, new=True))
         subproject_menu.addAction(new_sp_action)
 
         open_sp_action = QtGui.QAction('Add existing project...', self)
@@ -585,8 +616,8 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             QtGui.QKeySequence('Ctrl+Shift+O', QtGui.QKeySequence.NativeText))
         open_sp_action.setStatusTip('Load a project and add it to the current'
                                     ' main project')
-        open_sp_action.triggered.connect( partial(self.open_project,
-                                                  main=False, new=False))
+        open_sp_action.triggered.connect(
+            partial(self.open_project, main=False, new=False))
         subproject_menu.addAction(open_sp_action)
 
         save_sp_action = QtGui.QAction('Save selected subproject', self)
@@ -594,21 +625,21 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             'Save the selected sub project into a file')
         save_sp_action.setShortcut(
             QtGui.QKeySequence('Ctrl+Shift+N', QtGui.QKeySequence.NativeText))
-        save_sp_action.triggered.connect(partial(self.save_project,
-                                                 main=False, new=False))
+        save_sp_action.triggered.connect(
+            partial(self.save_project, main=False, new=False))
         subproject_menu.addAction(save_sp_action)
 
         save_sp_as_action = QtGui.QAction('Save selected subproject as ...',
-                                        self)
+                                          self)
         save_sp_as_action.setStatusTip('Save only selected subproject to a '
-                                      'file with a new name')
-        save_sp_as_action.triggered.connect(partial(self.save_project,
-                                                    main=False, new=True))
+                                       'file with a new name')
+        save_sp_as_action.triggered.connect(
+            partial(self.save_project, main=False, new=True))
         subproject_menu.addAction(save_sp_as_action)
 
         remove_sp_action = QtGui.QAction('Remove selected subproject', self)
         remove_sp_action.setStatusTip('Remove the selected subproject')
-        #remove_sp_action.setShortcut(QtGui.QKeySequence.Close)
+        # remove_sp_action.setShortcut(QtGui.QKeySequence.Close)
         remove_sp_action.triggered.connect(self.remove_subproject)
         subproject_menu.addAction(remove_sp_action)
 
@@ -623,7 +654,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         export_mp_action = QtGui.QAction('All', self)
         export_mp_action.setStatusTip(
             'Pack all the data of the main project into one folder')
-        #export_mp_action.triggered.connect(export_mp)
+        # export_mp_action.triggered.connect(export_mp)
         export_mp_action.setShortcut(
             QtGui.QKeySequence('Ctrl+E', QtGui.QKeySequence.NativeText))
         export_project_menu.addAction(export_mp_action)
@@ -633,7 +664,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             'Pack all the data of the current sub project into one folder')
         export_sp_action.setShortcut(
             QtGui.QKeySequence('Ctrl+Shift+E', QtGui.QKeySequence.NativeText))
-        #export_sp_action.triggered.connect(export_sp)
+        # export_sp_action.triggered.connect(export_sp)
         export_project_menu.addAction(export_sp_action)
 
         project_menu.addSeparator()
@@ -646,7 +677,6 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
                 QtCore.QCoreApplication.instance().quit)
             quit_action.setShortcut(QtGui.QKeySequence.Quit)
             project_menu.addAction(quit_action)
-
 
         self.menuBar().addMenu(project_menu)
 
@@ -667,10 +697,14 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         windows_menu.addSeparator()
         window_layouts_menu = QtGui.QMenu('Window layouts', self)
 
-        restore_layout_action = QtGui.QAction('Restore previous layout',
-                                                   self)
+        restore_layout_action = QtGui.QAction('Restore previous layout', self)
         restore_layout_action.triggered.connect(self.load_layout)
         window_layouts_menu.addAction(restore_layout_action)
+
+        reset_layout_action = QtGui.QAction('Reset to default layout', self)
+        reset_layout_action.triggered.connect(
+            partial(self.load_layout, default=True))
+        window_layouts_menu.addAction(reset_layout_action)
 
         save_layout_action = QtGui.QAction('Save layout', self)
         save_layout_action.triggered.connect(self.save_layout)
@@ -702,11 +736,11 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         about_action.triggered.connect(self.about)
         help_menu.addAction(about_action)
 
-        self.menuBar().setNativeMenuBar(False)
-        #  this put the menu in the window itself in OSX, as in windows.
-        # when running application from pycharm, it helps to have immediate
-        # access to menu
-        # Indeed, on mac they are not accessible until unfocused the window
+        self.menuBar().setNativeMenuBar(
+            False)  #  this put the menu in the window itself in OSX,
+        # as in windows.  # when running application from pycharm, it helps
+        # to have immediate  # access to menu  # Indeed, on mac they are not
+        #  accessible until unfocused the window
 
 
 # ============================================================================
@@ -728,6 +762,7 @@ class _CloseProjectDialog(QtWidgets.QMessageBox):
 
     def change_ask_again(self, val):
         app.general_preferences.show_close_dialog = not val
+
 
 # ============================================================================
 if __name__ == '__main__':

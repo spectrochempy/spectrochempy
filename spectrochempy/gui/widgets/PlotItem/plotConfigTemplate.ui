@@ -35,7 +35,16 @@
     <bool>false</bool>
    </property>
    <layout class="QGridLayout" name="gridLayout_5">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <property name="spacing">
@@ -56,7 +65,16 @@
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_4">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <property name="spacing">
@@ -194,7 +212,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>154</width>
+     <width>181</width>
      <height>79</height>
     </rect>
    </property>

@@ -15,7 +15,10 @@ from matplotlib.figure import Figure
 
 from ...extern.pyqtgraph.Qt import QtGui, QtCore
 
-__all__ = []
+from spectrochempy.application import app
+
+__all__ = ['MatplotlibWidget']
+
 
 class MatplotlibWidget(QtGui.QWidget):
     """
@@ -30,10 +33,18 @@ class MatplotlibWidget(QtGui.QWidget):
         mw.draw()
     """
     
-    def __init__(self, dpi=100):
+    def __init__(self, parent=None,
+                 background='default',
+                 dpi=100,
+                 **kargs):
+
+        if background=='default':
+            background = app.project_preferences.background_color
+
         QtGui.QWidget.__init__(self)
-        a=236./255.
-        self.fig = Figure(dpi=dpi, facecolor=(a,a,a))
+        #a=236./255.
+
+        self.fig = Figure(dpi=dpi, facecolor=background) #(a,a,a))
         self.setSizePolicy(QtGui.QSizePolicy.Expanding,
                            QtGui.QSizePolicy.Expanding)
         self.canvas = FigureCanvas(self.fig)
@@ -51,3 +62,23 @@ class MatplotlibWidget(QtGui.QWidget):
         
     def draw(self):
         self.canvas.draw()
+
+    def clear(self):
+        self.fig.clf()
+
+    def plot(self, *args, **kargs):
+        fig = self.fig
+        clear = kargs.get('clear', False)
+        params = kargs.get('params', None)
+
+        if clear:
+            self.clear()
+
+        if len(args) == 1:
+            data = args[0]
+            data.plot(ax=fig.gca())
+        else:
+            raise NotImplementedError
+            # TODO: make this class as close as possible to that thovided by pyqtgraph
+
+        self.draw()

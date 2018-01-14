@@ -536,19 +536,6 @@ r"""\usepackage{siunitx}
                        help='Show color bar for 2D plots'
                        ).tag(config=True)
 
-    colormap = Unicode('jet',
-                       help='Default colormap for contour plots'
-                       ).tag(config=True)
-
-    colormap_stack = Unicode('viridis',
-                             help='Default colormap for stack plots'
-                             ).tag(config=True)
-
-    colormap_transposed = Unicode('magma',
-                            help='Default colormap for transposed stack '
-                                 'plots'
-                                  ).tag(config=True)
-
     show_projections = Bool(False,
                             help='Show all projections'
                             ).tag(config=True)
@@ -559,11 +546,6 @@ r"""\usepackage{siunitx}
     show_projection_y = Bool(False, help='Show projection along y'
                              ).tag(config=True)
 
-    background_color = Unicode('#EFEFEF', help='Bakground color for plots'
-                              ).tag(config=True, type='color')
-
-    foreground_color = Unicode('#000', help='Foreground color for plots'
-                              ).tag(config=True, type='color')
 
     linewidth = Float(.7, help='Default width for lines').tag(config=True)
 
@@ -583,13 +565,48 @@ r"""\usepackage{siunitx}
                               'for starting contour levels'
                           ).tag(config=True)
 
+    # colors
+    # ------
+
+    background_color = Unicode('#EFEFEF', help='Bakground color for plots'
+                              ).tag(config=True, type='color')
+
+    foreground_color = Unicode('#000', help='Foreground color for plots'
+                              ).tag(config=True, type='color')
+
+    colormap = Unicode('jet',
+                       help='Default colormap for contour plots'
+                       ).tag(config=True)
+
+    colormap_stack = Unicode('viridis',
+                             help='Default colormap for stack plots'
+                             ).tag(config=True)
+
+    colormap_transposed = Unicode('magma',
+                            help='Default colormap for transposed stack '
+                                 'plots'
+                                  ).tag(config=True)
+
+    # matplotlib specific  group
+    # ---------------------------
+
     max_lines_in_stack = Integer(1000, help='Maximum number of lines to'
                                        ' plot in stack plots'
                                  ).tag(config=True)
 
     usempl = Bool(help='Use MatPlotLib for plotting (slow but mode suitable '
-                       'for printing)').tag(config=True)
+                       'for printing)').tag(config=True, group='mpl')
 
+    simplify = Bool(help='Matplotlib path simplification for improving '
+                         'performance').tag(config=True, group='mpl')
+
+    @observe('simplify')
+    def _simplify_changed(self, change):
+        plt.rcParams['path.simplify'] = change.new
+        plt.rcParams['path.simplify_threshold'] = 1.
+
+    # update parameters in json file
+    # -------------------------------
     @observe(All)
     def _anytrait_changed(self, change):
         # update configuration

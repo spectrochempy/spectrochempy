@@ -1,12 +1,11 @@
 import numpy as np
-from .. import metaarray as metaarray
-from ..Qt import QtCore
-from .GraphicsObject import GraphicsObject
-from .PlotCurveItem import PlotCurveItem
-from .ScatterPlotItem import ScatterPlotItem
-from .. import functions as fn
-from .. import debug as debug
-from .. import getConfigOption
+from ....extern.pyqtgraph.Qt import QtCore
+from ....extern.pyqtgraph.graphicsItems.GraphicsObject import GraphicsObject
+from ....extern.pyqtgraph.graphicsItems.PlotCurveItem import PlotCurveItem
+from ....extern.pyqtgraph.graphicsItems.ScatterPlotItem import ScatterPlotItem
+from ....extern.pyqtgraph import functions as fn
+from ....extern.pyqtgraph import debug as debug
+from ....extern.pyqtgraph import getConfigOption
 
 
 class PlotDataItem(GraphicsObject):
@@ -52,8 +51,7 @@ class PlotDataItem(GraphicsObject):
             PlotDataItem(recarray)        numpy array with dtype=[('x', float), ('y', float), ...]
             PlotDataItem(list-of-dicts)   [{'x': x, 'y': y, ...},   ...] 
             PlotDataItem(dict-of-lists)   {'x': [...], 'y': [...],  ...}           
-            PlotDataItem(MetaArray)       1D array of Y values with X sepecified as axis values 
-                                          OR 2D array with a column 'y' and extra columns as needed.
+            PlotDataItem(NDDataset)       NDDataset objects
             ===========================   =========================================
         
         **Line style keyword arguments:**
@@ -374,20 +372,20 @@ class PlotDataItem(GraphicsObject):
                 for k in ['data', 'symbolSize', 'symbolPen', 'symbolBrush', 'symbolShape']:
                     if k in data:
                         kargs[k] = [d.get(k, None) for d in data]
-            elif dt == 'MetaArray':
-                y = data.view(np.ndarray)
-                x = data.xvals(0).view(np.ndarray)
+            elif dt == 'NDDataset':
+                y = data.masked_data
+                x = data.x.data
             else:
                 raise Exception('Invalid data type %s' % type(data))
             
         elif len(args) == 2:
-            seq = ('listOfValues', 'MetaArray', 'empty')
+            seq = ('listOfValues', 'NDDataset', 'empty')
             dtyp = dataType(args[0]), dataType(args[1])
             if dtyp[0] not in seq or dtyp[1] not in seq:
                 raise Exception('When passing two unnamed arguments, both must be a list or array of values. (got %s, %s)' % (str(type(args[0])), str(type(args[1]))))
             if not isinstance(args[0], np.ndarray):
                 #x = np.array(args[0])
-                if dtyp[0] == 'MetaArray':
+                if dtyp[0] == 'NDDataset':
                     x = args[0].asarray()
                 else:
                     x = np.array(args[0])
@@ -395,7 +393,7 @@ class PlotDataItem(GraphicsObject):
                 x = args[0].view(np.ndarray)
             if not isinstance(args[1], np.ndarray):
                 #y = np.array(args[1])
-                if dtyp[1] == 'MetaArray':
+                if dtyp[1] == 'NDDataset':
                     y = args[1].asarray()
                 else:
                     y = np.array(args[1])
@@ -451,7 +449,7 @@ class PlotDataItem(GraphicsObject):
         if isinstance(y, list):
             y = np.array(y)
         
-        self.xData = x.view(np.ndarray)  ## one last check to make sure there are no MetaArrays getting by
+        self.xData = x.view(np.ndarray)  ## one last check to make sure there are no NDDatasets getting by
         self.yData = y.view(np.ndarray)
         self.xClean = self.yClean = None
         self.xDisp = None
@@ -693,8 +691,9 @@ def dataType(obj):
     elif isSequence(obj):
         first = obj[0]
         
-        if (hasattr(obj, 'implements') and obj.implements('MetaArray')):
-            return 'MetaArray'
+        if (hasattr(obj, 'implements') and obj.implements('NDDataset')):
+            return 'NDDataset'
+        
         elif isinstance(obj, np.ndarray):
             if obj.ndim == 1:
                 if obj.dtype.names is None:
@@ -712,7 +711,9 @@ def dataType(obj):
         
         
 def isSequence(obj):
-    return hasattr(obj, '__iter__') or isinstance(obj, np.ndarray) or (hasattr(obj, 'implements') and obj.implements('MetaArray'))
+    return hasattr(obj, '__iter__') \
+           or isinstance(obj, np.ndarray) \
+           or (hasattr(obj, 'implements') and obj.implements('NDDataset'))
     
             
             

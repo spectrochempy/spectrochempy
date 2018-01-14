@@ -20,38 +20,25 @@ import sys
 import weakref
 import numpy as np
 import os
-from ...Qt import QtGui, QtCore, QT_LIB
-from ... import pixmaps
-from ... import functions as fn
-from ...widgets.FileDialog import FileDialog
-from .. PlotDataItem import PlotDataItem
-from .. ViewBox import ViewBox
-from .. AxisItem import AxisItem
-from .. LabelItem import LabelItem
-from .. LegendItem import LegendItem
-from .. GraphicsWidget import GraphicsWidget
-from .. ButtonItem import ButtonItem
-from .. InfiniteLine import InfiniteLine
-from ...WidgetGroup import WidgetGroup
-from ...python2_3 import basestring
+from ....extern.pyqtgraph.Qt import QtGui, QtCore
+from ....extern.pyqtgraph import pixmaps
+from ....extern.pyqtgraph import functions as fn
+from ....extern.pyqtgraph.widgets.FileDialog import FileDialog
+from ....extern.pyqtgraph.graphicsItems.ViewBox import ViewBox
+from ....extern.pyqtgraph.graphicsItems.AxisItem import AxisItem
+from ....extern.pyqtgraph.graphicsItems.LabelItem import LabelItem
+from ....extern.pyqtgraph.graphicsItems.LegendItem import LegendItem
+from ....extern.pyqtgraph.graphicsItems.GraphicsWidget import GraphicsWidget
+from ....extern.pyqtgraph.graphicsItems.ButtonItem import ButtonItem
+from ....extern.pyqtgraph.graphicsItems.InfiniteLine import InfiniteLine
+from ....extern.pyqtgraph.WidgetGroup import WidgetGroup
+from ....extern.pyqtgraph.python2_3 import basestring
 
-if QT_LIB == 'PyQt4':
-    from .plotConfigTemplate_pyqt import *
-elif QT_LIB == 'PySide':
-    from .plotConfigTemplate_pyside import *
-elif QT_LIB == 'PyQt5':
-    from .plotConfigTemplate_pyqt5 import *
+from .PlotDataItem import PlotDataItem
+
+from .plotConfigTemplate_pyqt5 import *
 
 __all__ = ['PlotItem']
-
-try:
-    from metaarray import *
-    HAVE_METAARRAY = True
-except:
-    HAVE_METAARRAY = False
-
-
-
 
 class PlotItem(GraphicsWidget):
     

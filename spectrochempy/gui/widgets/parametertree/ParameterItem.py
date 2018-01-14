@@ -76,6 +76,8 @@ class ParameterItem(QtGui.QTreeWidgetItem):
         font.setWeight(QtGui.QFont.Bold)
         self.setFont(0, font)
 
+        self.setTextAlignment(0, QtCore.Qt.AlignRight)
+
     def valueChanged(self, param, val):
         ## called when the parameter's value has changed
         pass

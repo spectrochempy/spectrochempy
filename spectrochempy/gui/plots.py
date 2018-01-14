@@ -6,6 +6,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # =============================================================================
+import numpy as np
+import copy
 
 import matplotlib.pyplot as plt
 
@@ -13,9 +15,10 @@ from ..extern.pyqtgraph.parametertree import (Parameter,
                                                        ParameterTree, )
 from ..extern.pyqtgraph.dockarea import Dock
 from ..extern.pyqtgraph.functions import mkPen
-from ..extern.pyqtgraph import PlotWidget
+from .widgets.PlotWidget import PlotWidget
 from .widgets.matplotlibwidget import MatplotlibWidget
 
+from spectrochempy.application import app
 
 # --------------------------------------------------------------------
 # Plot window
@@ -43,6 +46,8 @@ class Plots(object):
 
         opens = self.open_plots
 
+        self.usempl = app.project_preferences.usempl
+
         if key in opens.keys():
             # get the existing ones
             dp, wplot, usempl = opens[key]
@@ -55,199 +60,59 @@ class Plots(object):
                 return
 
         if key not in opens.keys():
+            # We do not use else, here because if one plot has been deleted it
+            #  is not anymore in the keys - so we need to check this
             # we need to create a dock object.
-            dp = Dock(key, size=(1000, 600), closable=True)
+            dp = Dock(key, size=(self.ww * self._ratio, self.wh),
+                      closable=True)
             dp.sigClosed.connect(self.plot_closed)
 
-        # get the real object
+        # --------------------------------------------------------------------
+        # Select the required plotwidget
+        # --------------------------------------------------------------------
+
+        if self.usempl:
+            # use matplotlib (The slower option)
+            wplot = MatplotlibWidget()
+        else:
+            # or use the Qt's GraphicsView framework offered by Pyqtgraph
+            wplot = PlotWidget(name=key)
+
+        # --------------------------------------------------------------------
+        # Get the dataset to plot and plot it
+        # --------------------------------------------------------------------
         data = self.wproject.project
         for item in key.split('.'):
             data = data[item]
 
-        if self.usempl:
-            # or use matplotlib (The slower option)
-            wplot = MatplotlibWidget()
-            fig = wplot.getFigure()
-            fig.clf()
-            ax = fig.gca()
-            # simplify plot for better interactivity (#TODO:options)
-            plt.rcParams['path.simplify']=True
-            plt.rcParams['path.simplify_threshold'] = 1.
-            data.plot(ax=ax)
-            wplot.draw()
+        wplot.plot(data)
 
-        else:
-            # use the Qt's GraphicsView framework offered by Pyqtgraph
-            wplot = PlotWidget(title="")
-            wplot.plot(data,
-                       clear=True,
-                       pen=mkPen('#FFCC33', width=3),
-                       symbol='o',
-                       symbolSize=7 )
+            #wplot.plot(data,
+            #           clear=True)
+                       #pen=mkPen('#FFCC33', width=3),
+                       #symbol='o',
+                       #symbolSize=7 )
 
         # --------------------------------------------------------------------
         # update dockarea
         # --------------------------------------------------------------------
 
         dp.addWidget(wplot)
-        self.area.addDock(dp, 'above', self.dplots)
+        try:
+            self.area.addDock(dp, 'above', self.dplots)
+        except:
+            self.area.addDock(dp, 'above', opens[list(opens.keys())[-1]][0])
         opens[key]= (dp, wplot, self.usempl)
-
+        if hasattr(self, 'dplots'):
+            self.dplots.close()
+            del self.dplots
 
     def plot_closed(self, dock):
 
         del self.open_plots[dock.name()]
+        if not self.open_plots:
+            # recreate the void area for plots
+            self.dplots = self._create_plot_area()
+            self.area.addDock(self.dplots, 'top', self.dconsole)
 
 
-    def show_options(self):
-        # ------------------------------------------------------------------------
-        # Option window
-        # ------------------------------------------------------------------------
-
-        doptions = Dock("Options", size=(ww * .20, wh * .50), closable=False)
-        self.options = t = ParameterTree(showHeader=False)
-        doptions.addWidget(t)
-
-        # """
-        # 'type': None,
-        #     'readonly': False,
-        #     'visible': True,
-        #     'enabled': True,
-        #     'renamable': False,
-        #     'removable': False,
-        #     'strictNaming': False,  # forces name to be usable as a python
-        #  variable
-        #     'expanded': True,
-        #     'title': None,
-        #     """
-
-        self.usempl = True
-
-        self.scatter = True
-        self.line = True
-        self.stacked = True
-        self.map = False
-        self.image = False
-
-        usempl = {
-                'name': 'usempl',
-                'title': 'Use Matplotlib?',
-                'type': 'bool',
-                'value': self.usempl,
-                'tip': "Matplotlib is slower than the QtGraphicView,"
-                       " but render nicer figures for publishing.",
-                }
-
-        dicprojet = {
-            # PROJECT
-            'name': 'Project',
-            'type': 'group',
-            'strictNaming': True,
-            'children': [usempl]
-            }
-
-        scatter = {
-                    'name': 'scatter',
-                    'title': 'scatter plot',
-                    'type': 'bool',
-                    'value': self.scatter,
-                    'tip': "type of 1D plot (scatter)",
-                  }
-
-        line = {
-                    'name': 'line',
-                    'title': 'line plot',
-                    'type': 'bool',
-                    'value': self.line,
-                    'tip': "type of 1D plot (line)",
-                }
-
-        stacked = {
-                    'name': 'stacked',
-                    'title': 'stacked plot',
-                    'type': 'bool',
-                    'value': self.stacked,
-                    'tip': "type of 2D plot (stacked)",
-                  }
-
-        mapped = {
-                    'name': 'map',
-                    'title': 'mapped plot',
-                    'type': 'bool',
-                    'value': self.map,
-                    'tip': "type of 2D plot (map)",
-                }
-
-        imaged = {
-                    'name': 'image',
-                    'title': 'image',
-                    'type': 'bool',
-                    'value': self.image,
-                    'tip': "type of 2D plot (image)"
-                }
-
-        dic1d = {   # 1D
-                    'name': '1D',
-                    'visible': (self.dataset_showed and
-                    self.current_dataset.ndim==1),
-                    'type': 'group',
-                    'children': [scatter, line]
-                }
-
-        dic2d = {   # 2D
-                    'name': '2D',
-                    'visible': (self.dataset_showed
-            and self.current_dataset.ndim==2),
-                    'type': 'group',
-                    'children': [stacked, mapped, imaged ]
-                }
-
-        dicdataset = {
-            # DATASET
-            'name': 'Dataset',
-            'visible': self.dataset_showed,
-            'type': 'group',
-            'strictNaming': True,
-            'children': [dic1d, dic2d]
-            }
-
-        # Todo: add nd
-
-        params = [dicprojet]
-
-        ## Create tree of Parameter objects
-
-        p = Parameter.create(name='params', type='group', children=params)
-        t.setParameters(p, showTop=False)
-
-        ## If anything changes in the tree, print a message
-
-        def change(param, changes):
-
-            for param, change, data in changes:
-                path = p.childPath(param)
-                if path is not None:
-                    childName = '.'.join(path)
-                else:
-                    childName = param.name()
-
-                if childName == "Project.usempl":
-                    log.debug('%s : %s\n' % (childName, data))
-                    self.usempl = data
-                    for key in self.open_plots.keys():
-                        self.show_or_create_plot_dock(key)
-                    self.project_item_clicked()
-
-        p.sigTreeStateChanged.connect(change)
-
-        def valueChanging(param, value):
-            self.wconsole.write(
-                "Value changing (not finalized): %s %s" % (param, value))
-
-        # Too lazy for recursion:
-        for child in p.children():
-            child.sigValueChanging.connect(valueChanging)
-            for ch2 in child.children():
-                ch2.sigValueChanging.connect(valueChanging)
-
-        self.area.addDock(doptions, 'above', self.dflowchart)

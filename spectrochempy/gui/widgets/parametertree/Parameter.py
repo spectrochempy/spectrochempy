@@ -524,7 +524,7 @@ class Parameter(QtCore.QObject):
             opt['value'] = value
             opt['type'] = opts.metadata.get('type',type(
                 opts.default_value).__name__)
-            opt['title'] = '  \n'.join(textwrap.wrap(opts.help, 32))
+            opt['title'] = '  \n'.join(textwrap.wrap(opts.help+':', 32))
             opts = opt
 
             ch2.append(opts)

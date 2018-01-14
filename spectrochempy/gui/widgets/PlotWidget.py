@@ -6,9 +6,13 @@ Distributed under MIT/X11 license. See license.txt for more infomation.
 """
 from ...extern.pyqtgraph.Qt import QtGui, QtCore
 from ...extern.pyqtgraph.widgets.GraphicsView import *
-from ...extern.pyqtgraph.graphicsItems.PlotItem import *
+from .PlotItem import *
+
+from spectrochempy.application import app
 
 __all__ = ['PlotWidget']
+
+
 class PlotWidget(GraphicsView):
     
     # signals wrapped from PlotItem / ViewBox
@@ -42,11 +46,17 @@ class PlotWidget(GraphicsView):
     For all 
     other methods, use :func:`getPlotItem <pyqtgraph.PlotWidget.getPlotItem>`.
     """
-    def __init__(self, parent=None, background='default', **kargs):
+    def __init__(self, parent=None,
+                 background='default',
+                 **kargs):
         """When initializing PlotWidget, *parent* and *background* are passed to 
         :func:`GraphicsWidget.__init__() <pyqtgraph.GraphicsWidget.__init__>`
         and all others are passed
         to :func:`PlotItem.__init__() <pyqtgraph.PlotItem.__init__>`."""
+
+        if background=='default':
+            background = app.project_preferences.background_color
+
         GraphicsView.__init__(self, parent, background=background)
         self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.enableMouse(False)
