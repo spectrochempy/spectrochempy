@@ -816,6 +816,7 @@ class Project(AbstractProject):
             with open(prefjsonfile, 'w') as fd:
                 json.dump(obj[f], fd,  indent=4)
             # we must also reinit preferences
+            app.init_all_preferences()
             app.load_config_file(prefjsonfile)
             project_preferences = app.project_preferences = \
                     ProjectPreferences(config=app.config, parent=app)
