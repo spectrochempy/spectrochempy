@@ -38,7 +38,7 @@ import json
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
 
-from traitlets.config.configurable import Configurable
+from traitlets.config.configurable import Configurable, Config
 from traitlets.config.application import Application, catch_config_error
 from traitlets import (Bool, Unicode, List, Dict, Integer, Float,
                        All, HasTraits, Instance,
@@ -912,10 +912,13 @@ class SpectroChemPy(Application):
 
             if self.reset_config:
                 # remove the user json file to reset to defaults
-                jsonname = os.path.join(self.config_dir,
-                                        self.config_file_name + '.json')
-                if os.path.exists(jsonname):
-                    os.remove(jsonname)
+                l = os.listdir(self.config_dir)
+                for f in l:
+                    if f.endswith('.json'):
+                        jsonname = os.path.join(self.config_dir, f)
+                        os.remove(jsonname)
+
+            self.config = Config()
 
             for cfgname in [config_file, ]:
                 self.load_config_file(cfgname)

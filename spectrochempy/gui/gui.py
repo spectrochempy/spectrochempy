@@ -327,12 +327,9 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         log.debug("RESET")
 
         # we init all preference to their default
+        app.reset_config = True
         app.init_all_preferences()
-
-        # we need to actualize the preferences pages
-        self.dlg_preference_pages = [
-                (GeneralPreferencePageWidget, app.general_preferences),
-                (ProjectPreferencePageWidget, app.project_preferences),]
+        pass
 
     # ------------------------------------------------------------------------
     # Project actions
