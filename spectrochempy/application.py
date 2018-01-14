@@ -368,12 +368,12 @@ class GeneralPreferences(Configurable):
     # various settings
     # ----------------
 
-    show_info_on_loading = Bool(True, help='Display info on loading?').tag(
+    show_info_on_loading = Bool(True, help='Display info on loading').tag(
         config=True)
 
     show_close_dialog = Bool(True, help='Display the close project dialog'
                                         ' project changing or on '
-                                        'apllication exit?').tag(
+                                        'apllication exit').tag(
                                     config=True)
 
     csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
@@ -503,7 +503,7 @@ class ProjectPreferences(Configurable) :
 
     # ........................................................................
     use_latex = Bool(True,
-                     help='Should we use latex for plotting labels and texts?'
+                     help='Use latex for plotting labels and texts'
                      ).tag(config=True)
 
     @observe('use_latex')
@@ -545,7 +545,8 @@ r"""\usepackage{siunitx}
                              ).tag(config=True)
 
     colormap_transposed = Unicode('magma',
-                            help='Default colormap for transposed stack plots'
+                            help='Default colormap for transposed stack '
+                                 'plots'
                                   ).tag(config=True)
 
     show_projections = Bool(False,
@@ -585,6 +586,9 @@ r"""\usepackage{siunitx}
     max_lines_in_stack = Integer(1000, help='Maximum number of lines to'
                                        ' plot in stack plots'
                                  ).tag(config=True)
+
+    usempl = Bool(help='Use MatPlotLib for plotting (slow but mode suitable '
+                       'for printing)').tag(config=True)
 
     @observe(All)
     def _anytrait_changed(self, change):
@@ -691,7 +695,7 @@ class SpectroChemPy(Application):
     _loaded_config_files = List()
 
     reset_config = Bool(False, help='Should we restore a default '
-                                    'configuration?').tag(config=True)
+                                    'configuration ?').tag(config=True)
     """Flag: True if one wants to reset settings to the original config 
     defaults"""
 

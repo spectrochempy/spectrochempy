@@ -174,8 +174,8 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
 
         ww, wh = self.ww, self.wh
 
-        # Console
-        # --------
+        # plots
+        # ------
         self.dplots = dplots = Dock("plots", size=(ww * .80, wh * .80))
         text = QtWidgets.QLabel("""
             <html>
@@ -195,10 +195,11 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
                                                 QtGui.QKeySequence.NativeText)
                 )
             )
-        dplots.addWidget(
-            text) #, stretch=1, alignment=QtCore.Qt.AlignCenter)
+        dplots.addWidget(text)
         dplots.hideTitleBar()
 
+        # console
+        # --------
         self.dconsole = dconsole = Dock("Console", size=(ww * .80, wh * .20),
                                         closable=False)
         self.wconsole = pg.console.ConsoleWidget()
@@ -481,7 +482,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
                             1) == "NDDataset":  # sinstance(data, NDDataset):
                         # make a plot of the data
                         key = '.'.join(branches)
-                        log.debug('add %s' % key)
+                        log.debug('plot %s' % key)
                         self.show_or_create_plot_dock(key)
                 except Exception as e:
                     log.error(e)
