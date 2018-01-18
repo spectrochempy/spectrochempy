@@ -23,7 +23,7 @@ import numpy as np
 # =============================================================================
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import epsilon, interleave, interleaved2complex
-from spectrochempy.application import  log, preferences
+from spectrochempy.application import  log, general_preferences
 
 # =============================================================================
 # generic apodization function

@@ -138,8 +138,8 @@ def main():
     progressBar.setVisible(False)
 
     splash.show()
-    splash.showMessage("<br/><h1><font color='blue'>"
-                       "Welcome to<br/>SpectroChemPy</font></h1>",
+    splash.showMessage("<br/><h2><font color='blue'>"
+                       "Welcome to<br/>SpectroChemPy</font></h2>",
                        QtCore.Qt.AlignTop | QtCore.Qt.AlignCenter,
                        QtCore.Qt.black)
     gui.processEvents()

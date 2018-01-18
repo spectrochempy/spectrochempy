@@ -52,7 +52,7 @@ CONFIG_OPTIONS = {
     # foreground/background take any arguments to the 'mkColor' in /pyqtgraph/functions.py
     'foreground': 'd',  ## default foreground color for axes, labels, etc.
     'background': 'k',        ## default background for GraphicsWidget
-    'antialias': False,
+    'antialias': True,
     'editorCommand': None,  ## command used to invoke code editor from ConsoleWidgets
     'useWeave': False,       ## Use weave to speed up some operations, if it is available
     'weaveDebug': False,    ## Print full error message if weave compile fails

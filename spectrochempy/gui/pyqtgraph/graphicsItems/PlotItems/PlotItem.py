@@ -16,27 +16,26 @@ This class is very heavily featured:
   - Control panel with a huge feature set including averaging, decimation,
     display, power spectrum, svg/png export, plot linking, and more.
 """
-import sys
 import weakref
 import numpy as np
 import os
-from ....extern.pyqtgraph.Qt import QtGui, QtCore
-from ....extern.pyqtgraph import pixmaps
-from ....extern.pyqtgraph import functions as fn
-from ....extern.pyqtgraph.widgets.FileDialog import FileDialog
-from ....extern.pyqtgraph.graphicsItems.ViewBox import ViewBox
-from ....extern.pyqtgraph.graphicsItems.AxisItem import AxisItem
-from ....extern.pyqtgraph.graphicsItems.LabelItem import LabelItem
-from ....extern.pyqtgraph.graphicsItems.LegendItem import LegendItem
-from ....extern.pyqtgraph.graphicsItems.GraphicsWidget import GraphicsWidget
-from ....extern.pyqtgraph.graphicsItems.ButtonItem import ButtonItem
-from ....extern.pyqtgraph.graphicsItems.InfiniteLine import InfiniteLine
-from ....extern.pyqtgraph.WidgetGroup import WidgetGroup
-from ....extern.pyqtgraph.python2_3 import basestring
+from .....extern.pyqtgraph.Qt import QtGui, QtCore
+from .....extern.pyqtgraph import pixmaps
+from .....extern.pyqtgraph import functions as fn
+from .....extern.pyqtgraph.widgets.FileDialog import FileDialog
+from .....extern.pyqtgraph.graphicsItems.ViewBox import ViewBox
+from .....extern.pyqtgraph.graphicsItems.AxisItem import AxisItem
+from .....extern.pyqtgraph.graphicsItems.LabelItem import LabelItem
+from .....extern.pyqtgraph.graphicsItems.LegendItem import LegendItem
+from .....extern.pyqtgraph.graphicsItems.GraphicsWidget import GraphicsWidget
+from .....extern.pyqtgraph.graphicsItems.ButtonItem import ButtonItem
+from .....extern.pyqtgraph.graphicsItems.InfiniteLine import InfiniteLine
+from .....extern.pyqtgraph.WidgetGroup import WidgetGroup
+from .....extern.pyqtgraph.python2_3 import basestring
 
-from .PlotDataItem import PlotDataItem
+from ...graphicsItems.PlotDataItem import PlotDataItem
 
-from .plotConfigTemplate_pyqt5 import *
+from .plotConfigTemplate_pyqt5 import Ui_Form
 
 __all__ = ['PlotItem']
 

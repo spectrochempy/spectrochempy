@@ -17,8 +17,8 @@ from ....extern.pyqtgraph.widgets.SpinBox import SpinBox
 # from ..widgets.GradientWidget import GradientWidget ## creates import loop
 from ....extern.pyqtgraph import pixmaps as pixmaps, functions as fn
 from ....extern.pyqtgraph.pgcollections import OrderedDict
-from ..ColorButton import ColorButton
-from ..filepickerwidget import FilePickerWidget
+from ....extern.pyqtgraph.widgets.ColorButton import ColorButton
+from ...widgets.filepickerwidget import FilePickerWidget
 from .Parameter import Parameter, registerParameterType
 from .ParameterItem import ParameterItem
 
@@ -342,7 +342,6 @@ registerParameterType('str', SimpleParameter, override=True)
 registerParameterType('color', SimpleParameter, override=True)
 registerParameterType('colormap', SimpleParameter, override=True)
 
-#TODO: replace this by some file editor
 registerParameterType('file', SimpleParameter, override=True)
 registerParameterType('folder', SimpleParameter, override=True)
 registerParameterType('project', SimpleParameter, override=True)
@@ -490,7 +489,8 @@ class ListParameterItem(WidgetParameterItem):
         opts = self.param.opts
         t = opts['type']
         w = QtGui.QComboBox()
-        w.setMaximumHeight(20)  ## set to match height of spin box and line edit
+        w.setMaximumHeight(30)  ## set to match height of spin box and line
+        # edit
         w.sigChanged = w.currentIndexChanged
         w.value = self.value
         w.setValue = self.setValue

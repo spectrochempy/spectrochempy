@@ -40,9 +40,8 @@ from setuptools_scm import get_version
 
 from traitlets.config.configurable import Configurable, Config
 from traitlets.config.application import Application, catch_config_error
-from traitlets import (Bool, Unicode, List, Dict, Integer, Float,
-                       All, HasTraits, Instance,
-                       default, observe, import_item, )
+from traitlets import (Bool, Unicode, List, Dict, Integer, Float, Enum,
+                       All, HasTraits, Instance, default, observe, import_item)
 from traitlets.config.manager import BaseJSONConfigManager
 
 import matplotlib as mpl
@@ -63,6 +62,7 @@ INFO = logging.INFO
 WARNING = logging.WARNING
 ERROR = logging.ERROR
 CRITICAL = logging.CRITICAL
+
 
 # ----------------------------------------------------------------------------
 # Version
@@ -121,6 +121,42 @@ __contributor__ = ""
 __license__ = "CeCILL-B license"
 "Licence of this package"
 
+
+# colorsmaps and plot styles
+# ----------------------------------------------------------------------------
+
+cmaps = [
+            'viridis', 'plasma', 'inferno', 'magma',
+            'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
+            'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
+            'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn',
+            'binary', 'gist_yarg', 'gist_gray', 'gray', 'bone', 'pink',
+            'spring', 'summer', 'autumn', 'winter', 'cool', 'Wistia',
+            'hot', 'afmhot', 'gist_heat', 'copper',
+            'PiYG', 'PRGn', 'BrBG', 'PuOr', 'RdGy', 'RdBu',
+            'RdYlBu', 'RdYlGn', 'Spectral', 'coolwarm', 'bwr', 'seismic',
+            'Pastel1', 'Pastel2', 'Paired', 'Accent',
+            'Dark2', 'Set1', 'Set2', 'Set3',
+            'tab10', 'tab20', 'tab20b', 'tab20c',
+            'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern',
+            'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'hsv',
+            'gist_rainbow', 'rainbow', 'jet', 'nipy_spectral', 'gist_ncar'
+]
+
+def available_styles():
+    """
+    Styles availables in SpectroChemPy
+
+    Todo
+    -----
+    Make this list extensible programmatically
+
+    Returns
+    -------
+    A list of style
+
+    """
+    return ['notebook', 'paper', 'poster', 'talk', 'sans']
 
 # ============================================================================
 # Magic ipython function
@@ -359,6 +395,8 @@ class GeneralPreferences(Configurable):
 
     """
 
+    updated = Bool(False)
+
     def __init__(self, **kwargs):
         super(GeneralPreferences, self).__init__(**kwargs)
 
@@ -375,6 +413,7 @@ class GeneralPreferences(Configurable):
                                         ' project changing or on '
                                         'apllication exit').tag(
                                     config=True)
+
 
     csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
 
@@ -453,6 +492,45 @@ class GeneralPreferences(Configurable):
                               'or ERROR')
         self.parent.log_level = value
 
+    # ------------------------------------------------------------------------
+    # General configuration for plotting
+    # ------------------------------------------------------------------------
+
+
+    leftbuttonpan = Bool(True, help="LeftButtonPan: If false, left button "
+                                    "drags a rubber band for "
+                                    "zooming in viewbox").tag(config=True,
+                                                              )
+
+    background_color = Unicode('#EFEFEF', help='Background color for plots'
+                              ).tag(config=True, type='color')
+
+    foreground_color = Unicode('#000', help='Foreground color for plots '
+                                            'elements'
+                              ).tag(config=True, type='color')
+
+    antialias = Bool(True, help = 'Antialiasing')
+
+
+    # matplotlib specific  group
+    # ---------------------------
+
+    max_lines_in_stack = Integer(1000, min=1,
+                                 help='Maximum number of lines to'
+                                       ' plot in stack plots').tag(config=True)
+
+    usempl = Bool(help='Use MatPlotLib for plotting (slow but mode suitable '
+                       'for printing)').tag(config=True, group='mpl')
+
+    simplify = Bool(help='Matplotlib path simplification for improving '
+                         'performance').tag(config=True, group='mpl')
+
+
+    @observe('simplify')
+    def _simplify_changed(self, change):
+        plt.rcParams['path.simplify'] = change.new
+        plt.rcParams['path.simplify_threshold'] = 1.
+
     @observe(All)
     def _anytrait_changed(self, change):
         # update configuration
@@ -465,6 +543,9 @@ class GeneralPreferences(Configurable):
                 self.__class__.__name__: {change.name: change.new, }
             })
 
+            self.updated = True
+
+
 
 # ============================================================================
 class ProjectPreferences(Configurable) :
@@ -474,6 +555,8 @@ class ProjectPreferences(Configurable) :
     include plotting and views preference for the incuded datasets
 
     """
+
+    updated = Bool(False)
 
     def __init__(self, **kwargs):
         super(ProjectPreferences, self).__init__(**kwargs)
@@ -528,9 +611,26 @@ r"""\usepackage{siunitx}
 
     # -------------------------------------------------------------------------
 
-    method_2D = Unicode('map',
-                        help='Default plot methods for 2D'
-                        ).tag(config=True)
+    # 1D or 2D options
+    # ----------------
+
+    linewidth = Float(.70, min=0, help='Default width for lines').tag(
+        config=True)
+
+    # 1D options
+    # ----------
+    method_1D = Enum(['pen', 'scatter', 'scatter+pen', 'bar'],
+                      default_value='pen',
+                      help='Default plot methods for 1D datasets'
+                    ).tag(config=True, type='list')
+
+    # 2D options
+    # ----------
+
+    method_2D = Enum(['map', 'image', 'stack', '3D'],
+                     default_value='stack',
+                     help='Default plot methods for 2D datasets'
+                    ).tag(config=True, type='list')
 
     colorbar = Bool(True,
                        help='Show color bar for 2D plots'
@@ -547,63 +647,46 @@ r"""\usepackage{siunitx}
                              ).tag(config=True)
 
 
-    linewidth = Float(.7, help='Default width for lines').tag(config=True)
-
-    number_of_x_labels = Integer(5, help='Number of X labels').tag(config=True)
-
-    number_of_y_labels = Integer(5, help='Number of Y labels').tag(config=True)
-
-    number_of_z_labels = Integer(5, help='Number of Z labels').tag(config=True)
-
-    number_of_contours = Integer(50, help='Number of contours').tag(
+    number_of_x_labels = Integer(5, min=3, help='Number of X labels').tag(
         config=True)
 
-    contour_alpha = Float(1, help='Transparency of the contours'
+    number_of_y_labels = Integer(5, min=3, help='Number of Y labels').tag(
+        config=True)
+
+    number_of_z_labels = Integer(5, min=3, help='Number of Z labels').tag(
+        config=True)
+
+    number_of_contours = Integer(50, min=10, help='Number of contours').tag(
+        config=True)
+
+    contour_alpha = Float(1.00, min=0., max=1.0, help='Transparency of the ' \
+                                                  'contours'
                           ).tag(config=True)
 
-    contour_start = Float(0.05, help='Fraction of the maximum '
+    contour_start = Float(0.05, min=0.001, help='Fraction of the maximum '
                               'for starting contour levels'
                           ).tag(config=True)
 
     # colors
     # ------
 
-    background_color = Unicode('#EFEFEF', help='Bakground color for plots'
-                              ).tag(config=True, type='color')
+    pen_color = Unicode('#000', help='Default pen color for 1D plots').tag(
+        config=True, type='color')
 
-    foreground_color = Unicode('#000', help='Foreground color for plots'
-                              ).tag(config=True, type='color')
-
-    colormap = Unicode('jet',
+    colormap = Enum(cmaps, default_value='jet',
                        help='Default colormap for contour plots'
-                       ).tag(config=True)
+                       ).tag(config=True, type='list')
 
-    colormap_stack = Unicode('viridis',
+    colormap_stack = Enum(cmaps, default_value='viridis',
                              help='Default colormap for stack plots'
-                             ).tag(config=True)
+                             ).tag(config=True, type='list')
 
-    colormap_transposed = Unicode('magma',
+    colormap_transposed = Enum(cmaps, default_value='magma',
                             help='Default colormap for transposed stack '
                                  'plots'
-                                  ).tag(config=True)
+                                  ).tag(config=True, type='list')
 
-    # matplotlib specific  group
-    # ---------------------------
 
-    max_lines_in_stack = Integer(1000, help='Maximum number of lines to'
-                                       ' plot in stack plots'
-                                 ).tag(config=True)
-
-    usempl = Bool(help='Use MatPlotLib for plotting (slow but mode suitable '
-                       'for printing)').tag(config=True, group='mpl')
-
-    simplify = Bool(help='Matplotlib path simplification for improving '
-                         'performance').tag(config=True, group='mpl')
-
-    @observe('simplify')
-    def _simplify_changed(self, change):
-        plt.rcParams['path.simplify'] = change.new
-        plt.rcParams['path.simplify_threshold'] = 1.
 
     # update parameters in json file
     # -------------------------------
@@ -618,6 +701,9 @@ r"""\usepackage{siunitx}
             self.cfg.update('ProjectPreferences', {
                 self.__class__.__name__: {change.name: change.new, }
             })
+
+            self.updated = True
+
 
 # ============================================================================
 # Application
@@ -1136,7 +1222,7 @@ class SpectroChemPy(Application):
 app = SpectroChemPy()
 
 log = app.log
-preferences = app.general_preferences
+general_preferences = app.general_preferences
 project_preferences = app.project_preferences
 do_not_block = app.do_not_block
 datadir = app.datadir

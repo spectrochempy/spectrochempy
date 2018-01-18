@@ -2,7 +2,7 @@ import numpy as np
 from ....extern.pyqtgraph.Qt import QtCore
 from ....extern.pyqtgraph.graphicsItems.GraphicsObject import GraphicsObject
 from ....extern.pyqtgraph.graphicsItems.PlotCurveItem import PlotCurveItem
-from ....extern.pyqtgraph.graphicsItems.ScatterPlotItem import ScatterPlotItem
+from spectrochempy.extern.pyqtgraph.graphicsItems.ScatterPlotItem import ScatterPlotItem
 from ....extern.pyqtgraph import functions as fn
 from ....extern.pyqtgraph import debug as debug
 from ....extern.pyqtgraph import getConfigOption
@@ -373,9 +373,20 @@ class PlotDataItem(GraphicsObject):
                     if k in data:
                         kargs[k] = [d.get(k, None) for d in data]
             elif dt == 'NDDataset':
+
                 y = data.masked_data
                 x = data.x.data
+
+                if x.size <= 200:
+                    # only few points, lets put scatter plot by default
+                    # except if method is pen.
+                    if kargs.get('method',None) is None:
+                        kargs['symbol'] = kargs.get('symbol','o')
+                        kargs['symbolSize'] = kargs.get('symbolSize',5)
+                        # TODO: put from default preferences
+
             else:
+
                 raise Exception('Invalid data type %s' % type(data))
             
         elif len(args) == 2:

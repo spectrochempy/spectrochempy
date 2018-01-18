@@ -38,7 +38,7 @@ import numpy as np
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.concatenate import stack
-from spectrochempy.application import log, datadir, preferences
+from spectrochempy.application import log, datadir, general_preferences
 from spectrochempy.utils import (readfilename, unzip, is_sequence,
                                  SpectroChemPyWarning)
 

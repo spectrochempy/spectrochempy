@@ -16,16 +16,11 @@ interface to the configuration file of SpectroChemPy
 
 """
 
-from warnings import warn
-import os
-from textwrap import fill
-
 from ..extern.pyqtgraph.Qt import QtGui, QtCore
 from .guiutils import geticon
-from .widgets.parametertree import ParameterTree, Parameter
-from traitlets.config.manager import BaseJSONConfigManager
+from spectrochempy.gui.pyqtgraph.parametertree import ParameterTree, Parameter
 
-from spectrochempy.application import (app, log)
+from spectrochempy.application import (app)
 
 from .widgets.commonwidgets import warningMessage
 
@@ -108,7 +103,8 @@ class PreferencesTree(ParameterTree):
         if name in self.preferences.traits(type='color'):
             if isinstance(data, tuple):
                 return '#%02x%02x%02x' % data[:3]
-            return data.name()
+            if isinstance(data, QtGui.QColor):
+                return data.name()
 
         return data
 

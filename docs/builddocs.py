@@ -32,6 +32,7 @@ mpl.use('agg')
 from spectrochempy import *
 from docs import apigen
 
+preferences = general_preferences
 preferences.log_level = ERROR
 
 #from sphinx.util.console import bold, darkgreen

@@ -15,9 +15,7 @@ __all__ = []
 
 import os
 import sys
-import time
 
-import logging
 from functools import partial
 
 # ----------------------------------------------------------------------------
@@ -25,25 +23,20 @@ from functools import partial
 # ----------------------------------------------------------------------------
 
 from traitlets import HasTraits, Instance
-from traitlets.config import Application, Configurable
 
 # ----------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------
 
 from ..extern import pyqtgraph as pg
+from ..extern.pyqtgraph.console import ConsoleWidget
 from ..extern.pyqtgraph.Qt import QtGui, QtCore, QtWidgets
 from ..extern.pyqtgraph.dockarea import DockArea, Dock
-from ..extern.pyqtgraph.flowchart import Flowchart, Node
-from ..extern.pyqtgraph.flowchart import library as fclib
-from ..extern.pyqtgraph.flowchart.library.common import CtrlNode
-from ..extern.pyqtgraph import console
 
 from .widgets.projecttreewidget import ProjectTreeWidget
-from .widgets.matplotlibwidget import MatplotlibWidget
 from .logtoconsole import QtHandler, redirectoutput
 from .plots import Plots
-from .widgets.commonwidgets import warningMessage, OpenFileName, SaveFileName
+from .widgets.commonwidgets import warningMessage
 from .preferences import (DialogPreferences, ProjectPreferencePageWidget,
                           GeneralPreferencePageWidget, )
 from .guiutils import geticon
@@ -102,11 +95,6 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
             self.project.save()
 
         app.last_project = self.last
-
-        pg.setConfigOption('background',
-                           app.project_preferences.background_color)
-        pg.setConfigOption('foreground',
-                           app.project_preferences.foreground_color)
 
         # window and other Qt settings
         # ----------------------------
@@ -205,7 +193,7 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         # --------
         self.dconsole = dconsole = Dock("Console", size=(ww * ratio, wh * .20),
                                         closable=False)
-        self.wconsole = pg.console.ConsoleWidget()
+        self.wconsole = ConsoleWidget()
         dconsole.addWidget(self.wconsole)
         dconsole.hideTitleBar()
 
@@ -334,6 +322,15 @@ class MainWindow(HasTraits, Plots, QtGui.QMainWindow,
         dlg.resize(ww * .95, wh * .8)
 
         dlg.exec()
+
+        if app.project_preferences.updated or \
+            app.general_preferences.updated:
+            app.project_preferences.updated = False
+            app.general_preferences.updated = False
+            opens = list(self.open_plots.keys())
+            for key in opens:
+                self.show_or_create_plot_dock(key, update=True)
+
 
     def reset_preferences(self):
         """

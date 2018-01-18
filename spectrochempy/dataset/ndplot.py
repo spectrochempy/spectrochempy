@@ -17,8 +17,7 @@ __all__ = ['NDPlot',
            'plot',
 
            # styles and colors
-           '_set_figure_style',
-           'available_styles',
+           '_set_figure_style'
            ]
 
 
@@ -38,13 +37,18 @@ from traitlets import Dict, HasTraits, Instance
 from ..utils import (is_sequence, SpectroChemPyDeprecationWarning,
                                  docstrings, NBlack, NBlue, NGreen, NRed,
                                  get_figure)
-from ..application import ( project_preferences, log,
-                                       do_not_block)
+from ..application import app
+
+project_preferences = app.project_preferences
+log = app.log
+do_not_block = app.do_not_block
+
 
 from ..core.plotters.plot1d import plot_1D
 from ..core.plotters.plot3d import plot_3D
 from ..core.plotters.plot2d import plot_2D
 
+from ..utils import deprecated
 
 # =============================================================================
 # Class NDPlot to handle plotting of datasets
@@ -545,6 +549,7 @@ def _set_figure_style(**kwargs):
 
         return mpl.rcParams
 
+@deprecated('use `available styles` from application instead')
 # .............................................................................
 def available_styles():
     """
@@ -559,7 +564,7 @@ def available_styles():
     l : a list of style
 
     """
-    return ['notebook', 'paper', 'poster', 'talk', 'sans']
+    return app.available_styles()
 
 
 # .............................................................................

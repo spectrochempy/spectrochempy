@@ -117,7 +117,6 @@ class Parameter(QtCore.QObject):
         if typ is None:
             cls = Parameter
         else:
-            # print(opts['name'], typ)
             cls = PARAM_TYPES[opts['type']]
         return cls(**opts)
     
@@ -522,11 +521,36 @@ class Parameter(QtCore.QObject):
             opt['readonly'] = opts.read_only
             opt['default'] = opts.default_value
             opt['value'] = value
-            opt['type'] = opts.metadata.get('type',type(
-                opts.default_value).__name__)
-            opt['title'] = '  \n'.join(textwrap.wrap(opts.help+':', 32))
-            opts = opt
+            opt['type'] = \
+                opts.metadata.get('type',type(opts.default_value).__name__)
+            opt['title'] = '  \n'.join(textwrap.wrap(opts.help+':', 36))
+            if hasattr(opts,'values'):
+                opt['values']=opts.values
+            if hasattr(opts,'min') or hasattr(opts,'max'):
+                if hasattr(opts,'min') and opts.min!=float('inf'):
+                    _min = opts.min
+                else:
+                    _min=None
+                if hasattr(opts,'max') and opts.max!=float('inf'):
+                    _max = opts.max
+                else:
+                    _max=None
+                opt['limits'] = (_min, _max)
+                if _min is not None and _max is not None:
+                    opt['step'] = abs(_max-_min)/50.
+                elif _min is not None:
+                    opt['step'] = abs(_min) / 50.
+                elif _max is not None:
+                    opt['step'] = abs(_max) / 50.
+                else:
+                    opt['step']=1.
 
+            if opt.get('step',0.1)<=0:
+                opt['step']=0.1
+            if opt['type']=='int':
+                opt['step']=max(int(opt['step']), 1)
+
+            opts = opt
             ch2.append(opts)
 
         children = ch2

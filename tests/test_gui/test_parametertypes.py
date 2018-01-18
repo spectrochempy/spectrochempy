@@ -1,4 +1,4 @@
-import spectrochempy.gui.widgets.parametertree as pt
+import spectrochempy.gui.pyqtgraph.parametertree as pt
 import pytest
 
 @pytest.mark.skip

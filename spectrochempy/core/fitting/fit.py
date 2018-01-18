@@ -43,7 +43,7 @@ from spectrochempy.core.fitting.models import getmodel
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 
-from spectrochempy.application import  preferences, log
+from spectrochempy.application import general_preferences, log
 
 
 # ============================================================================

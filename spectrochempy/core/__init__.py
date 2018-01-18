@@ -77,7 +77,7 @@ from spectrochempy.application import (log,
                                        __author__ as authors ,
                                        __contributor__ as contributors,
                                        __url__ as url,
-                                       preferences,
+                                       general_preferences,
                                        project_preferences,
                                        DEBUG,
                                        WARNING,
@@ -98,7 +98,7 @@ __all__ += [
     'CRITICAL',
     'INFO',
     'project_preferences',
-    'preferences',
+    'general_preferences',
     'datadir',
 
     ### Info

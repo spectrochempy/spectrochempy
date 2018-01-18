@@ -6,17 +6,10 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # =============================================================================
-import numpy as np
-import copy
 
-import matplotlib.pyplot as plt
-
-from ..extern.pyqtgraph.parametertree import (Parameter,
-                                                       ParameterTree, )
 from ..extern.pyqtgraph.dockarea import Dock
-from ..extern.pyqtgraph.functions import mkPen
-from .widgets.PlotWidget import PlotWidget
-from .widgets.matplotlibwidget import MatplotlibWidget
+from spectrochempy.gui.widgets.plotwidget import (MatplotlibWidget,
+                                                  PyQtGraphWidget)
 
 from spectrochempy.application import app
 
@@ -30,7 +23,7 @@ class Plots(object):
     open_plots = {}
     usempl = False
 
-    def show_or_create_plot_dock(self, key):
+    def show_or_create_plot_dock(self, key, update=False):
         """
         Utility function to create docked plots
     
@@ -38,45 +31,40 @@ class Plots(object):
         ----------
         self : class
             reference to the mainwindow
-        branches : list(str)
-            the branch elements in the project tree
-    
+        key : str
+            the dataset key in the project tree
+        update : bool
+            If true, redraw is enforced
     
         """
 
         opens = self.open_plots
 
-        self.usempl = app.project_preferences.usempl
+        self.usempl = app.general_preferences.usempl
 
         if key in opens.keys():
             # get the existing ones
             dp, wplot, usempl = opens[key]
-            if usempl != self.usempl:
+            if usempl != self.usempl or update:
+                # delte old for redrawing
                 dp.close()
                 del wplot
             else:
-                # nothing to do, except to raise the corresponding tab
-                dp.raiseDock()
-                return
+                # nothing to do, except to raise the corresponding tab,
+                # if necessary
+                try:
+                    dp.raiseDock()
+                finally:
+                    return
 
         if key not in opens.keys():
             # We do not use else, here because if one plot has been deleted it
             #  is not anymore in the keys - so we need to check this
             # we need to create a dock object.
+
             dp = Dock(key, size=(self.ww * self._ratio, self.wh),
                       closable=True)
             dp.sigClosed.connect(self.plot_closed)
-
-        # --------------------------------------------------------------------
-        # Select the required plotwidget
-        # --------------------------------------------------------------------
-
-        if self.usempl:
-            # use matplotlib (The slower option)
-            wplot = MatplotlibWidget()
-        else:
-            # or use the Qt's GraphicsView framework offered by Pyqtgraph
-            wplot = PlotWidget(name=key)
 
         # --------------------------------------------------------------------
         # Get the dataset to plot and plot it
@@ -85,24 +73,32 @@ class Plots(object):
         for item in key.split('.'):
             data = data[item]
 
-        wplot.plot(data)
+        # --------------------------------------------------------------------
+        # Select the required plotwidget
+        # --------------------------------------------------------------------
 
-            #wplot.plot(data,
-            #           clear=True)
-                       #pen=mkPen('#FFCC33', width=3),
-                       #symbol='o',
-                       #symbolSize=7 )
+        if self.usempl:
+            # use matplotlib (The slower option)
+            wplot = MatplotlibWidget(data=data, name=key)
+        else:
+            # or use the Qt's GraphicsView framework offered by Pyqtgraph
+            wplot = PyQtGraphWidget(data=data, name=key)
 
         # --------------------------------------------------------------------
         # update dockarea
         # --------------------------------------------------------------------
 
         dp.addWidget(wplot)
-        try:
+
+        if hasattr(self, 'dplots'):
             self.area.addDock(dp, 'above', self.dplots)
-        except:
-            self.area.addDock(dp, 'above', opens[list(opens.keys())[-1]][0])
+        else:
+            # get the last dockked tab
+            dtb = opens[list(opens.keys())[-1]][0]
+            self.area.addDock(dp, 'above', dtb)
+
         opens[key]= (dp, wplot, self.usempl)
+
         if hasattr(self, 'dplots'):
             self.dplots.close()
             del self.dplots
@@ -110,6 +106,7 @@ class Plots(object):
     def plot_closed(self, dock):
 
         del self.open_plots[dock.name()]
+
         if not self.open_plots:
             # recreate the void area for plots
             self.dplots = self._create_plot_area()
