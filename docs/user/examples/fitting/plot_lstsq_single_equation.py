@@ -69,7 +69,7 @@ d.plot_scatter(markersize=10,
                                                  'example')
 dfit = lst.inverse_transform()
 
-dfit.plot_pen(hold=True, color='g', label='Fitted line', legend=True)
+dfit.plot_pen(clear=False, color='g', label='Fitted line', legend=True)
 
 show()
 

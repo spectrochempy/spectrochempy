@@ -228,7 +228,7 @@ def test_nmr_1D_gm(NMR_dataset_1D):
 #     td = dataset1.meta.td[-1]
 #     dataset1 = dataset1.zf(size=2*td)
 #     #si = dataset_em.meta.si[-1]
-#     dataset1.plot(hold=True)
+#     dataset1.plot(clear=False)
 #
 #     # dataset1 = dataset1.fft()
 #     dataset1.plot()

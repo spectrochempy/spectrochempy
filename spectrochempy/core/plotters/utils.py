@@ -15,7 +15,7 @@ import numpy as np
 from spectrochempy.utils import NGreen, NRed, NBlue, NBlack
 
 # ............................................................................
-def make_label(ss, lab='<no_axe_label>'):
+def make_label(ss, lab='<no_axe_label>', usempl=True):
     """ make a label from title and units
 
     """
@@ -24,16 +24,20 @@ def make_label(ss, lab='<no_axe_label>'):
     else:
         label = lab
 
-    if ss.units is not None and str(ss.units) != 'dimensionless':
-        #if str(ss.units) == 'absorbance':
-        #    units = r'/\ a.u.'
-        #else:
-        units = r"/\ {:~L}".format(ss.units)
-        units = units.replace('%',r'\%')
+    if usempl:
+        if ss.units is not None and str(ss.units) != 'dimensionless':
+            units = r"/\ {:~L}".format(ss.units)
+            units = units.replace('%',r'\%')
+        else:
+            units = ''
+        label = r"%s $\mathrm{%s}$" % (label, units)
     else:
-        units = ''
+        if ss.units is not None and str(ss.units) != 'dimensionless':
+            units = r"{:~H}".format(ss.units)
+        else:
+            units = ''
+        label = r"%s / %s" % (label, units)
 
-    label = r"%s $\mathrm{%s}$" % (label, units)
     return label
 
 

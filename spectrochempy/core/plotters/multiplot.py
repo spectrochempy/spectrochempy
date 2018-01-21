@@ -382,7 +382,7 @@ def multiplot( datasets=[], labels=[], nrow=1, ncol=1,
                 transposed = False
 
             dataset.plot(method=method,
-                        ax=ax, hold=True, autolayout=False,
+                        ax=ax, clear=False, autolayout=False,
                         colorbar=colorbar,
                         data_transposed = transposed,
                         **kwargs)

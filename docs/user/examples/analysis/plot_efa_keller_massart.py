@@ -76,8 +76,8 @@ npc = 2
 cut = np.max(f[:, npc].data)
 
 efa.get_forward(plot=True, npc=2, cutoff=cut, legend='upper right')
-efa.get_backward(plot=True, npc=2, cutoff=cut, hold=True, legend='lower right')
-# with hold=True, we will plot the two graphs on the same figure
+efa.get_backward(plot=True, npc=2, cutoff=cut, clear=False, legend='lower right')
+# with clear=False, we will plot the two graphs on the same figure
 # TODO: solve the problem with legends when two plots on the same figures
 
 

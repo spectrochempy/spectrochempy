@@ -69,7 +69,7 @@ def test_implicit_lstsq():
 
     d.plot_scatter(pen=False, markersize=10, mfc='r', mec='k')
     dfit = lstsq.inverse_transform()
-    dfit.plot_pen(hold=True, color='g')
+    dfit.plot_pen(clear=False, color='g')
 
     sc.show()
 

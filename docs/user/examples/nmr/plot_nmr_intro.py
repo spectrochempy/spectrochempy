@@ -63,7 +63,7 @@ print(dataset2D)
 dataset1D.plot(xlim=(0, 25000), style='paper')
 
 # plot the imaginary data on the same plot
-dataset1D.plot(imag=True, data_only=True, hold=True)
+dataset1D.plot(imag=True, data_only=True, clear=False)
 # `data_only=True` to plot only the additional data, without updating the
 # figure setting
 # such as xlim and so on.
@@ -88,7 +88,7 @@ ax = scp.plot(dataset2D, xlim=(0., 25000.))
 # probably less util, but multiple display is also possible for 2D
 
 dataset2D.plot()
-ax = dataset2D.plot(imag=True, cmap='jet', data_only=True, hold=True)
+ax = dataset2D.plot(imag=True, cmap='jet', data_only=True, clear=False)
 scp.show()
 
 #################
@@ -146,7 +146,7 @@ apodfunc = dataset1D.em(lb=100. * ur.Hz, apply=False)
 apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2))
 
 dataset1D.em(lb=100. * ur.Hz, apply=True)
-dataset1D.plot(data_only=True, hold=True)
+dataset1D.plot(data_only=True, clear=False)
 dataset1D.ax.text(12500, 1.70,
                  'Multiple display (original & em apodized fids + '
                  'apod.function)',
@@ -163,10 +163,10 @@ LB = 50. * ur.Hz
 GB = 100. * ur.Hz
 apodfunc = dataset1D.gm(gb=GB, lb=LB, apply=False)
 
-apodfunc.plot(xlim=(0, 25000), hold=True, zlim=(-2, 2))
+apodfunc.plot(xlim=(0, 25000), clear=False, zlim=(-2, 2))
 
 dataset1D.gm(gb=GB, lb=LB)  # apply=True by default
-dataset1D.plot(data_only=True, hold=True)
+dataset1D.plot(data_only=True, clear=False)
 
 dataset1D.ax.text(12500, 1.70,
                  'Multiple display (original & gm apodized fids + '
@@ -186,6 +186,6 @@ dataset2D.plot(xlim=(0., 5000.))
 LB = 20. * ur.Hz
 dataset2D.em(lb=LB)
 dataset2D.em(lb=LB / 2, axis=0)
-dataset2D.plot(data_only=True, xlim=(0, 5000), cmap='copper', hold=True)
+dataset2D.plot(data_only=True, xlim=(0, 5000), cmap='copper', clear=False)
 
 scp.show()

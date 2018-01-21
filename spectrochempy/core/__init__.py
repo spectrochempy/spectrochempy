@@ -87,6 +87,8 @@ from spectrochempy.application import (log,
                                        ####
                                        app as APPLICATION,
                                        datadir,
+                                       available_styles,
+                                       set_loglevel,
                                        )
 
 __all__ += [
@@ -100,6 +102,8 @@ __all__ += [
     'project_preferences',
     'general_preferences',
     'datadir',
+    'available_styles',
+    'set_loglevel',
 
     ### Info
     'copyright',

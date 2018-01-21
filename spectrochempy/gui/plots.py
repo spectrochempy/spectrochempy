@@ -67,7 +67,7 @@ class Plots(object):
             dp.sigClosed.connect(self.plot_closed)
 
         # --------------------------------------------------------------------
-        # Get the dataset to plot and plot it
+        # Get the dataset to plot
         # --------------------------------------------------------------------
         data = self.wproject.project
         for item in key.split('.'):

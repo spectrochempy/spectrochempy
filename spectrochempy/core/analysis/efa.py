@@ -102,7 +102,7 @@ class EFA(HasTraits):
             if not masked_rows[i]:
                 fsvd = SVD(X[:i+1], compute_uv=False)
                 k = fsvd.s.size
-                print(i, k)
+                #print(i, k)
                 f[i, :k] = fsvd.s.data ** 2
                 f[i, k:] = masked
             else:
@@ -129,7 +129,7 @@ class EFA(HasTraits):
             else:
                 b[i] = masked
 
-    def get_forward(self, npc=None, cutoff=None, plot=False, hold=False,
+    def get_forward(self, npc=None, cutoff=None, plot=False, clear=True,
                     legend='best'):
         """
 
@@ -152,11 +152,11 @@ class EFA(HasTraits):
             f.data = np.max((f.data, np.ones_like(f.data)*cutoff), axis=0)
 
         if plot:
-            self._plot(f, npc, hold=hold, legend=legend)
+            self._plot(f, npc, clear=clear, legend=legend)
 
         return f
 
-    def get_backward(self, npc=None, cutoff=None, plot=False, hold=False,
+    def get_backward(self, npc=None, cutoff=None, plot=False, clear=True,
                      legend='best'):
         """
 
@@ -179,7 +179,7 @@ class EFA(HasTraits):
             b.data = np.max((b.data, np.ones_like(b.data)*cutoff), axis=0)
 
         if plot:
-            self._plot(b, npc, hold=hold, legend=legend)
+            self._plot(b, npc, clear=clear, legend=legend)
 
         return b
 
@@ -230,7 +230,7 @@ class EFA(HasTraits):
 
         return c
 
-    def _plot(self, c, npc, hold=False, legend='best'):
+    def _plot(self, c, npc, clear=True, legend='best'):
         """
 
         Parameters
@@ -248,7 +248,7 @@ class EFA(HasTraits):
         labels = ["PC#%d" % i for i in range(npc)]
 
         plot_multiple(profiles, labels=labels, yscale='log',
-                      hold=hold, legend=legend)
+                      clear=clear, legend=legend)
 
 
 # ============================================================================

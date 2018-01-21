@@ -14,8 +14,7 @@ from tests.utils import figures_dir, same_images
 @pytest.mark.skip
 def test_1D():
 
-    preferences.log_level=DEBUG
-
+    set_loglevel(DEBUG)
 
     dataset = NDDataset.read_omnic(
             os.path.join(datadir.path, 'irdata', 'nh4y-activation.spg'))
@@ -75,10 +74,6 @@ def test_1D():
     os.remove('multiple_IR_dataset_1D_scatter.png')
 
     plt.show()
-
-
-
-
 
 
 

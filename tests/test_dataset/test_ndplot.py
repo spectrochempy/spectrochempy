@@ -8,9 +8,9 @@
 # =============================================================================
 
 from spectrochempy.utils import show
-from spectrochempy.application import preferences, INFO
+from spectrochempy.application import set_loglevel, INFO
 
-preferences.log_level = INFO
+set_loglevel(INFO)
 
 def test_plot_generic_1D(IR_dataset_1D):
 

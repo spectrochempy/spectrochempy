@@ -15,7 +15,7 @@ from tests.utils import  image_comparison
 
 from spectrochempy import *
 
-preferences.log_level = INFO
+general_preferences.log_level = INFO
 
 # To regenerate the reference figures, set FORCE to True
 FORCE = True
@@ -39,7 +39,6 @@ def test_plot_generic_1D(IR_dataset_1D):
     assert mpl.rcParams['figure.figsize'] == [6.8, 4.4]
     dataset.plot(style='sans')
     assert mpl.rcParams['font.family'] == ['sans-serif']
-
 
 @image_comparison(reference=['IR_dataset_2D_stack'])
 def test_plot_stack(IR_dataset_2D):
@@ -93,7 +92,7 @@ def test_plot_stack_multiple(IR_dataset_2D):
     row.plot()
     # two on the same plot
     s1.plot_stack()
-    s2.plot_stack(data_only=True, hold=True)
+    s2.plot_stack(data_only=True, clear=False)
     show()
 
 # BUG FIXES IN PLOTS

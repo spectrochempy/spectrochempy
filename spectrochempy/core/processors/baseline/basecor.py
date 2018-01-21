@@ -332,9 +332,9 @@ class BaselineCorrection(HasTraits):
                 zb = 1. # self.zoompreview
                 zlim = [corrected.data.min()/zb,corrected.data.max()/zb]
                 ax2 = corrected.plot_stack(ax=ax2, colorbar=False,
-                                           zlim=zlim, hold=True)
+                                           zlim=zlim, clear=False)
             else:
-                ax2 = corrected.plot_stack(ax=ax2, colorbar=False, hold=True)
+                ax2 = corrected.plot_stack(ax=ax2, colorbar=False, clear=False)
 
         show_basecor(ax2)
 

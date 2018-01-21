@@ -65,7 +65,7 @@ def figure(**kwargs):
         keywords arguments to be passed to the matplotlib figure constructor.
 
     """
-    return get_figure(hold=False, **kwargs)
+    return get_figure(clear=True, **kwargs)
 
 
 # .............................................................................
@@ -77,19 +77,19 @@ def show():
     from spectrochempy.application import do_not_block
     if not do_not_block:
 
-        if get_figure(True):  # True to avoid opening a new one
+        if get_figure(clear=False):  # True to avoid opening a new one
             plt.show(block=True)
 
 
 # .............................................................................
-def get_figure(hold=False, **kwargs):
+def get_figure(clear=True, **kwargs):
     """
     Get the figure where to plot.
 
     Parameters
     ----------
-    hold : bool
-        if True the last used figure is used.
+    clear : bool
+        if False the last used figure is used.
     kwargs : any
         keywords arguments to be passed to the matplotlib figure constructor.
 
@@ -101,7 +101,7 @@ def get_figure(hold=False, **kwargs):
 
     n = plt.get_fignums()
 
-    if not n or not hold:
+    if not n or clear:
         # create a figure
         return plt.figure(**kwargs)
 

@@ -35,8 +35,7 @@ from traitlets import Dict, HasTraits, Instance
 # local import
 # ------------
 from ..utils import (is_sequence, SpectroChemPyDeprecationWarning,
-                                 docstrings, NBlack, NBlue, NGreen, NRed,
-                                 get_figure)
+                      docstrings, NBlack, NBlue, NGreen, NRed, get_figure)
 from ..application import app
 
 project_preferences = app.project_preferences
@@ -94,7 +93,7 @@ class NDPlot(HasTraits):
             The figure size
         fontsize : int, optional
             The font size in pixels, default is 10 (or read from preferences)
-        hold : `bool`, optional, default = `False`.
+        clear : `bool`, optional, default = `True`.
             Should we plot on the ax previously used or create a new figure?
         style : str
         autolayout : `bool`, optional, default=True
@@ -195,21 +194,31 @@ class NDPlot(HasTraits):
     # .........................................................................
     def _figure_setup(self, ndim=1, **kwargs):
 
-        _set_figure_style(**kwargs)
+        log.debug('figure setup')
 
-        self._figsize = mpl.rcParams['figure.figsize'] = \
-            kwargs.get('figsize', mpl.rcParams['figure.figsize'])
+        # by default we use the matplotlib librairy especially for plotting
+        # in the jupyter notebook
+        # but there is also possibility that the plots are made using
+        # pyqtgraph in the GUI - usempl is the flag for that option
 
-        mpl.rcParams[
-            'figure.autolayout'] = kwargs.pop('autolayout', True)
+        usempl = kwargs.get('usempl', True)
+
+        # make matplolig specific setup
+
+        if usempl:
+            _set_figure_style(**kwargs)
+
+            self._figsize = mpl.rcParams['figure.figsize'] = \
+                kwargs.get('figsize', mpl.rcParams['figure.figsize'])
+
+            mpl.rcParams[
+                'figure.autolayout'] = kwargs.pop('autolayout', True)
 
         # Get current figure information
         # ------------------------------
-        log.debug('update plot')
 
         # should we use the previous figure?
-        #TODO: change this keword to newfig which willl be clearer!
-        hold = kwargs.get('hold', False)
+        clear = kwargs.get('clear', True)
 
         # is ax in the keywords ?
         ax = kwargs.pop('ax', None)
@@ -219,7 +228,7 @@ class NDPlot(HasTraits):
         tax = kwargs.get('twinx', None)
         if tax is not None:
             if isinstance(tax, plt.Axes):
-                hold = True
+                clear = False
                 ax = tax.twinx()
                 ax.name = 'main'
                 tax.name = 'twin' # the previous main is renamed!
@@ -229,19 +238,20 @@ class NDPlot(HasTraits):
                 raise ValueError(
                         '{} is not recognized as a valid Axe'.format(tax))
 
+        if usempl:
+            # get the current figure (or the last used)
+            self._fig = get_figure(clear)
+            self._fig.rcParams = plt.rcParams.copy()
 
-        # get the current figure (or the last used)
-        self._fig = get_figure(hold)
-        self._fig.rcParams = plt.rcParams.copy()
-
-        if not hold:
+        if clear:
             self._ndaxes = {}  # reset ndaxes
             self._divider = None
 
         if ax is not None:
             # ax given in the plot parameters,
             # in this case we will plot on this ax
-            if isinstance(ax, plt.Axes):
+            if isinstance(ax, (plt.Axes)) or (hasattr(ax, 'implements') and
+                                             ax.implements('PyQtGraphWidget')):
                 ax.name = 'main'
                 self.ndaxes['main'] = ax
             else:
@@ -258,7 +268,7 @@ class NDPlot(HasTraits):
             ax.name = 'main'
             self.ndaxes['main'] = ax
 
-        if ax is not None and kwargs.get('method') in ['scatter']:
+        if ax is not None and kwargs.pop('scatter',False):
             ax.set_prop_cycle(
                     cycler('color',
                            [NBlack, NBlue, NRed, NGreen] * 3) +
@@ -266,15 +276,16 @@ class NDPlot(HasTraits):
                            ['-', '--', ':', '-.'] * 3) +
                     cycler('marker',
                            ['o', 's', '^'] * 4))
-        elif ax is not None and kwargs.get('method') in ['lines']:
+        elif ax is not None and kwargs.pop('pen', False):
             ax.set_prop_cycle(
                     cycler('color',
                            [NBlack, NBlue, NRed, NGreen]) +
                     cycler('linestyle',
                            ['-', '--', ':', '-.']))
 
-        # Get the number of the present figure
-        self._fignum = self._fig.number
+        if usempl:
+            # Get the number of the present figure
+            self._fignum = self._fig.number
 
         # for generic plot, we assume only a single axe
         # with possible projections
@@ -286,19 +297,19 @@ class NDPlot(HasTraits):
         if ndim == 2:
             # TODO: also the case of 3D
 
-            method = kwargs.get('method', project_preferences.method_2D)
+            method = kwargs.get('method', self.meta.method_2D)
 
             # show projections (only useful for map or image)
             # ------------------------------------------------
 
-            colorbar = kwargs.get('colorbar', True)
+            colorbar = kwargs.get('colorbar', self.meta.colorbar)
 
-            proj = kwargs.get('proj', project_preferences.show_projections)
+            proj = kwargs.get('proj', self.meta.show_projections)
             # TODO: tell the axis by title.
 
-            xproj = kwargs.get('xproj', project_preferences.show_projection_x)
+            xproj = kwargs.get('xproj', self.meta.show_projection_x)
 
-            yproj = kwargs.get('yproj', project_preferences.show_projection_y)
+            yproj = kwargs.get('yproj', self.meta.show_projection_y)
 
             SHOWXPROJ = (proj or xproj) and method in ['map', 'image']
             SHOWYPROJ = (proj or yproj) and method in ['map', 'image']

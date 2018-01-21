@@ -38,7 +38,7 @@ import json
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
 
-from traitlets.config.configurable import Configurable, Config
+from traitlets.config.configurable import Config
 from traitlets.config.application import Application, catch_config_error
 from traitlets import (Bool, Unicode, List, Dict, Integer, Float, Enum,
                        All, HasTraits, Instance, default, observe, import_item)
@@ -46,6 +46,7 @@ from traitlets.config.manager import BaseJSONConfigManager
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
 
 from IPython import get_ipython
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
@@ -53,7 +54,7 @@ from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
 
-from spectrochempy.utils import docstrings
+from spectrochempy.utils import docstrings, MetaConfigurable
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -143,6 +144,13 @@ cmaps = [
             'gist_rainbow', 'rainbow', 'jet', 'nipy_spectral', 'gist_ncar'
 ]
 
+markers = list((Line2D.markers.keys()))
+markers.remove('')
+markers.remove(' ')
+linestyles = list((Line2D.lineStyles.keys()))
+linestyles.remove('')
+linestyles.remove(' ')
+
 def available_styles():
     """
     Styles availables in SpectroChemPy
@@ -156,7 +164,14 @@ def available_styles():
     A list of style
 
     """
-    return ['notebook', 'paper', 'poster', 'talk', 'sans']
+    cfgdir = mpl.get_configdir()
+    stylelib = os.path.join(cfgdir, 'stylelib')
+    listdir = os.listdir(stylelib)
+    styles = []
+    for style in listdir:
+        if style.endswith('.mplstyle'):
+            styles.append(style.split('.mplstyle')[0])
+    return styles
 
 # ============================================================================
 # Magic ipython function
@@ -378,8 +393,9 @@ class DataDir(HasTraits):
 # General Preferences
 # ============================================================================
 
+
 # ============================================================================
-class GeneralPreferences(Configurable):
+class GeneralPreferences(MetaConfigurable):
     """
     Preferences that apply to the |scpy| application in general
 
@@ -400,8 +416,6 @@ class GeneralPreferences(Configurable):
     def __init__(self, **kwargs):
         super(GeneralPreferences, self).__init__(**kwargs)
 
-        self.cfg = self.parent.config_manager
-        self.cfg_file_name = self.parent.config_file_name
 
     # various settings
     # ----------------
@@ -502,11 +516,12 @@ class GeneralPreferences(Configurable):
                                     "zooming in viewbox").tag(config=True,
                                                               )
 
-    background_color = Unicode('#EFEFEF', help='Background color for plots'
+    background_color = Unicode('#EFEFEF',
+                               help='Background color for plots'
                               ).tag(config=True, type='color')
 
-    foreground_color = Unicode('#000', help='Foreground color for plots '
-                                            'elements'
+    foreground_color = Unicode('#000000',
+                               help='Foreground color for plots elements'
                               ).tag(config=True, type='color')
 
     antialias = Bool(True, help = 'Antialiasing')
@@ -531,24 +546,9 @@ class GeneralPreferences(Configurable):
         plt.rcParams['path.simplify'] = change.new
         plt.rcParams['path.simplify_threshold'] = 1.
 
-    @observe(All)
-    def _anytrait_changed(self, change):
-        # update configuration
-        if not hasattr(self, 'cfg'):
-            # not yet initialized
-            return
-
-        if change.name in self.traits(config=True):
-            self.cfg.update(self.cfg_file_name, {
-                self.__class__.__name__: {change.name: change.new, }
-            })
-
-            self.updated = True
-
-
 
 # ============================================================================
-class ProjectPreferences(Configurable) :
+class ProjectPreferences(MetaConfigurable) :
     """
     Per project preferences
 
@@ -559,26 +559,26 @@ class ProjectPreferences(Configurable) :
     updated = Bool(False)
 
     def __init__(self, **kwargs):
-        super(ProjectPreferences, self).__init__(**kwargs)
-
-        self.cfg = self.parent.config_manager
-        self.cfg_file_name = self.parent.config_file_name
+        super(ProjectPreferences, self).__init__(jsonfile =
+                                                 'ProjectPreferences',
+                                                 **kwargs)
 
     # ------------------------------------------------------------------------
     # attributes
     # ------------------------------------------------------------------------
 
-    name = Unicode('PlotterPreferences')
+    name = Unicode('ProjectPreferences')
 
-    description = Unicode('Options for plotting datasets')
+    description = Unicode('Options for datasets, e.g., for plotting')
 
     # ------------------------------------------------------------------------
     # configuration
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    style = Unicode('lcs',
-                    help='Basic matplotlib style to use').tag(config=True)
+    style = Enum(available_styles(), default_value='lcs',
+                    help='Basic matplotlib style to use').tag(config=True,
+                                                              type='list')
 
     @observe('style')
     def _style_changed(self, change):
@@ -611,14 +611,9 @@ r"""\usepackage{siunitx}
 
     # -------------------------------------------------------------------------
 
-    # 1D or 2D options
-    # ----------------
-
-    linewidth = Float(.70, min=0, help='Default width for lines').tag(
-        config=True)
-
     # 1D options
     # ----------
+
     method_1D = Enum(['pen', 'scatter', 'scatter+pen', 'bar'],
                       default_value='pen',
                       help='Default plot methods for 1D datasets'
@@ -667,11 +662,27 @@ r"""\usepackage{siunitx}
                               'for starting contour levels'
                           ).tag(config=True)
 
-    # colors
-    # ------
+    # colors / style
+    # --------------
 
-    pen_color = Unicode('#000', help='Default pen color for 1D plots').tag(
-        config=True, type='color')
+    pen_linewidth = Float(.70, min=0, help='Default pen width').tag(
+        config=True)
+
+    pen_color = Unicode('#000000',
+                        help='Default pen color for 1D plots'
+                        ).tag(config=True, type='color')
+
+    pen_linestyle = Enum(linestyles, default_value=linestyles[0],
+                        help='Default pen style for 1D plots'
+                        ).tag(config=True, type='list')
+
+    marker = Enum(markers, default_value=markers[2],
+                        help='Default symbols for 1D scatter plots'
+                        ).tag(config=True, type='list')
+
+    markersize = Float(5.0, min=.5, help='Default symbol size for scatter '
+                                         'plots').tag(config=True)
+
 
     colormap = Enum(cmaps, default_value='jet',
                        help='Default colormap for contour plots'
@@ -686,23 +697,6 @@ r"""\usepackage{siunitx}
                                  'plots'
                                   ).tag(config=True, type='list')
 
-
-
-    # update parameters in json file
-    # -------------------------------
-    @observe(All)
-    def _anytrait_changed(self, change):
-        # update configuration
-        if not hasattr(self, 'cfg'):
-            # not yet initialized
-            return
-
-        if change.name in self.traits(config=True):
-            self.cfg.update('ProjectPreferences', {
-                self.__class__.__name__: {change.name: change.new, }
-            })
-
-            self.updated = True
 
 
 # ============================================================================
@@ -1229,9 +1223,8 @@ datadir = app.datadir
 description = app.description
 long_description = app.long_description
 
-"""The main logger of the |scpy| application"""
-
-# TODO: look at the subcommands capabilities of traitlets
+def set_loglevel(level=WARNING):
+    general_preferences.log_level = level
 
 if __name__ == "__main__":
 

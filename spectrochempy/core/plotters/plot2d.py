@@ -33,9 +33,8 @@ import numpy as np
 # localimports
 # ----------------------------------------------------------------------------
 
-from spectrochempy.application import  project_preferences, \
-    general_preferences, log
-from spectrochempy.core.plotters.utils import make_label
+from ...core.plotters.utils import make_label
+from ...application import app, project_preferences, general_preferences, log
 
 # =============================================================================
 # nddataset plot2D functions
@@ -120,8 +119,36 @@ def plot_2D(dataset, **kwargs):
 
     """.format(dataset._general_parameters_doc_)
 
+    # get all plot preferences
+    # ------------------------
+
+    prefs = dataset.meta
+    if not prefs.style:
+        # not yet set, initialize with default project preferences
+        prefs.update(app.project_preferences.to_dict())
+
+    # If we are in the GUI, we will plot on a widget: but which one?
+    # ---------------------------------------------------------------
+
+    widget = kwargs.get('widget', None)
+
+    if widget is not None:
+        if hasattr(widget, 'implements') and widget.implements('PyQtGraphWidget'):
+            # let's go to a particular treament for the pyqtgraph plots
+            kwargs['usempl'] = usempl = False
+            # we try to have a commmon interface for both plot library
+            kwargs['ax'] = ax = widget # return qt_plot_1D(dataset, **kwargs)
+        else:
+            # this must be a matplotlibwidget
+            kwargs['usempl'] = usempl = True
+            fig = widget.fig
+            kwargs['ax'] = ax = fig.gca()
+
     # method of plot
     # ------------
+
+
+    method = kwargs.get('method', prefs.method_2D)
 
     data_only = kwargs.get('data_only', False)
 
@@ -144,7 +171,6 @@ def plot_2D(dataset, **kwargs):
     # Other properties
     # ------------------
 
-    method = kwargs.get('method', project_preferences.method_2D)
 
     colorbar = kwargs.get('colorbar', project_preferences.colorbar)
 
@@ -168,7 +194,8 @@ def plot_2D(dataset, **kwargs):
                 kwargs.get('cmap', project_preferences.colormap_stack))
 
 
-    lw = kwargs.get('linewidth', kwargs.get('lw', project_preferences.linewidth))
+    lw = kwargs.get('linewidth', kwargs.get('lw',
+                                            project_preferences.pen_linewidth))
 
     alpha = kwargs.get('calpha', project_preferences.contour_alpha)
 
@@ -358,9 +385,9 @@ def plot_2D(dataset, **kwargs):
         # we display the line in the reverse order, so that the last
         # are behind the first.
 
-        hold = kwargs.get('hold', False)
+        clear = kwargs.get('clear', True)
         lines = []
-        if hold and not data_transposed:
+        if not clear and not data_transposed:
             lines.extend(ax.lines)  # keep the old lines
 
 

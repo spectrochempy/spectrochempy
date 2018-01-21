@@ -35,7 +35,7 @@ from .arrayutils import *
 from .docstring import *
 from .traittypes import *
 from .meta import *
-
+from .configurable import MetaConfigurable
 
 # internal utilities
 
