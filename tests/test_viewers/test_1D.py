@@ -11,7 +11,7 @@ import pytest
 from spectrochempy import *
 from tests.utils import figures_dir, same_images
 
-@pytest.mark.skip
+#@pytest.mark.skip
 def test_1D():
 
     set_loglevel(DEBUG)

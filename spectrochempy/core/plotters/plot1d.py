@@ -133,6 +133,8 @@ def plot_multiple(datasets, method='scatter', pen=True,
 
 
     # do not save during this plots, nor apply any commands
+    # we will make this when all plots will be done
+
     output = kwargs.get('output', None)
     kwargs['output']=None
     commands = kwargs.get('commands', [])
@@ -142,6 +144,7 @@ def plot_multiple(datasets, method='scatter', pen=True,
 
         ax = s.plot(method= method,
                     pen=pen,
+                    marker='AUTO',
                     color='AUTO',
                     ls='AUTO',
                     clear=clear,
@@ -155,6 +158,8 @@ def plot_multiple(datasets, method='scatter', pen=True,
     if legend is not None:
         leg = ax.legend(ax.lines, labels, shadow=True, loc=legend,
                         frameon=True, facecolor='lightyellow')
+
+    # now we can output the final figure
     kw = {'output': output, 'commands': commands}
     datasets[0]._plot_resume(datasets[-1], **kw)
 
@@ -370,17 +375,17 @@ def plot_1D(dataset, **kwargs):
     if scatterpen:
         # pen + scatter
         line, = ax.plot(xdata, zdata,
-                        marker = marker,
+                        #marker = marker,
                         markersize = markersize,
                         markevery = markevery,
                         markeredgewidth = 1.,
-                        markerfacecolor = markerfacecolor,
+                        #markerfacecolor = markerfacecolor,
                         markeredgecolor = markeredgecolor)
     elif scatter:
         # scatter only
         line, = ax.plot(xdata, zdata,
                         ls = "",
-                        marker = marker,
+                        #marker = marker,
                         markersize = markersize,
                         markeredgewidth = 1.,
                         markevery = markevery,
@@ -411,7 +416,7 @@ def plot_1D(dataset, **kwargs):
         # set the color if defined in the preferences or options
         line.set_color(color)
 
-    if (pen or scatterpen) and lw:
+    if (pen or scatterpen) and lw!='AUTO':
         # set the line width if defined in the preferences or options
         line.set_linewidth(lw)
 
@@ -419,6 +424,9 @@ def plot_1D(dataset, **kwargs):
         # set the line style if defined in the preferences or options
         line.set_linestyle(ls)
 
+    if (scatter or scatterpen) and marker!='AUTO':
+        # set the line style if defined in the preferences or options
+        line.set_marker(marker)
     # ------------------------------------------------------------------------
     # axis
     # ------------------------------------------------------------------------
