@@ -518,7 +518,7 @@ def plot_1D(dataset, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines(label='zero_line')
 
-    new._plot_resume(new, **kwargs)
+    new._plot_resume(dataset, **kwargs)
 
     return ax
 
