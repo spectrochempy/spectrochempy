@@ -253,6 +253,8 @@ def plot_1D(dataset, **kwargs):
         # not yet set, initialize with default project preferences
         prefs.update(app.project_preferences.to_dict())
 
+    usempl = True  # by default we use matplotlib for plotting
+
     # make a copy
     # -----------
     new = dataset.copy()

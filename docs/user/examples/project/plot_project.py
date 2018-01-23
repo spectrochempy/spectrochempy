@@ -70,7 +70,7 @@ assert newproj.A350.label == proj.A350.label
 # Now we add a script to the original proj
 
 script_source = """
-preferences.log_level = INFO
+set_loglevel(INFO)
 log.info('samples contained in the project are:%s'%proj.projects_names)
 """
 

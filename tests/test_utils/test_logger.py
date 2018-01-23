@@ -8,7 +8,7 @@
 # =============================================================================
 
 
-from spectrochempy import log, WARNING, INFO, general_preferences as preferences
+from spectrochempy import log, WARNING, INFO, set_loglevel
 
 def test_logger():
 
@@ -19,7 +19,7 @@ def test_logger():
     log.error('very bad')
 
     log.error('----------')
-    preferences.log_level = INFO
+    set_loglevel(INFO)
     log.info('Changed to INFO')
     log.debug('test log output for debugging, after changing level')
     log.info('ssssss, after changing level')
@@ -27,7 +27,7 @@ def test_logger():
     log.error('very badafter changing level')
 
     log.error('----------')
-    preferences.log_level = 'DEBUG'
+    set_loglevel('DEBUG')
     log.debug('test log output for debugging, after changing level')
     log.info('ssssss, after changing level')
     log.warning('aie aie aieafter changing level')

@@ -241,7 +241,7 @@ def _read_csv(dataset, filename='', **kwargs):
         raise IOError("{} file doesn't exists!".format(filename))
 
     new = dataset.copy() # important
-    delimiter = kwargs.get("csv_delimiter", preferences.csv_delimiter)
+    delimiter = kwargs.get("csv_delimiter", general_preferences.csv_delimiter)
     try:
         d = np.loadtxt(filename, delimiter=delimiter)
     except ValueError:
@@ -342,10 +342,10 @@ def _add_omnic_info(dataset, **kwargs):
 #===============================================================================
 if __name__ == '__main__':
 
-    from spectrochempy import (NDDataset, preferences, ERROR, show)
+    from spectrochempy import (NDDataset, set_loglevel, ERROR, show)
 
 
-    preferences.log_level = ERROR
+    set_loglevel(ERROR)
 
     # A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
     #                        directory=data,

@@ -15,7 +15,7 @@ from tests.utils import  image_comparison
 
 from spectrochempy import *
 
-general_preferences.log_level = INFO
+set_loglevel(INFO)
 
 # To regenerate the reference figures, set FORCE to True
 FORCE = True
@@ -69,10 +69,10 @@ def test_plot_image_offset(IR_dataset_2D):
     dataset.plot_image(style=['sans','paper'])
 
 
-@image_comparison(reference=['IR_dataset_2D_map'])
+@image_comparison(reference=['IR_dataset_2D_stack'])
 def test_plot_stack_generic(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
-    dataset.plot()  # generic plot default to map
+    dataset.plot()  # generic plot default to stack
 
 
 

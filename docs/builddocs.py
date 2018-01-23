@@ -33,7 +33,7 @@ from spectrochempy import *
 from docs import apigen
 
 preferences = general_preferences
-preferences.log_level = ERROR
+set_loglevel(ERROR)
 
 #from sphinx.util.console import bold, darkgreen
 #TODO: make our message colored too!
@@ -99,11 +99,9 @@ def make_docs(*args):
     if not nocommit:
         gitcommands()
 
-    DEBUG = 'DEBUG' in args
-
-    preferences.log_level = WARNING
-    if DEBUG:
-        preferences.log_level = DEBUG
+    set_loglevel(WARNING)
+    if 'DEBUG' in args:
+        set_loglevel(DEBUG)
 
     builders = []
     if  'html' in args:
