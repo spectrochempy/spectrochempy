@@ -116,7 +116,7 @@ def test_project_with_script():
     # assert proj.projects_names == ['A350', 'B350', 'P350']
 
 
-    script_source = 'preferences.log_level = INFO\n' \
+    script_source = 'set_loglevel(INFO)\n' \
                     'log.info("samples contained in the project are: ' \
                               '%s"%proj.projects_names)'
 

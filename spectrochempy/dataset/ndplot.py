@@ -271,7 +271,8 @@ class NDPlot(HasTraits):
         if ax is not None and kwargs.pop('scatter',False):
             ax.set_prop_cycle(
                     cycler('color',
-                           [NBlack, NBlue, NRed, NGreen] * 3) +
+                           [NBlack, NBlue, NRed, NGreen, 'magenta', 'cyan'] *
+                           2) +
                     cycler('linestyle',
                            ['-', '--', ':', '-.'] * 3) +
                     cycler('marker',

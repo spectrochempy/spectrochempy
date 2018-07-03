@@ -26,7 +26,7 @@ def test_notebooks(notebook):
         nb, errors = notebook_run(notebook)
         assert errors == []
 
-@pytest.mark.parametrize('example', glob("../docs/examples/*/*.py"))
+@pytest.mark.parametrize('example', glob("../docs/user/examples/*/*.py"))
 def test_example(example):
     if os.path.exists(example) and os.path.splitext(example)[-1] == '.py' :
         e, message, err = example_run(example)

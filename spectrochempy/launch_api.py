@@ -21,9 +21,8 @@ def main():
     from spectrochempy.application import app, WARNING, DEBUG
 
     log = sc.log
-    preferences = sc.general_preferences
 
-    preferences.log_level = WARNING
+    sc.set_loglevel(WARNING)
     fname = app.startup_filename
 
     if not fname:
