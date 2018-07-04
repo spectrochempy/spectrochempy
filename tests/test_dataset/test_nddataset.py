@@ -56,9 +56,10 @@ def test_nddataset_str():
     assert not d0unc.has_complex_dims
     assert d0unc.is_masked
     assert d0unc.is_uncertain
-    assert str(d0unc).splitlines()[9].strip().startswith('[  --    3.000+/-0.200 ')
+    assert str(d0unc).splitlines()[9].strip().startswith(
+                                              '[   --    3.000+/-0.200')
     assert repr(d0unc).startswith(
-            'NDDataset: [  --,    3.000+/-0.200,    4.000+/-0.150,')
+            'NDDataset: [   --,    3.000+/-0.200,    4.000+/-0.150,')
 
 
 def test_nddataset_repr():
@@ -1067,8 +1068,8 @@ def test_coords_manipulation(IR_dataset_2D):
 def test_ndarray_plusminus():
     ds = NDDataset([1.,2.,3.])
     dsu = ds.plus_minus(.1)
-    assert repr(ds[0]) == "NDDataset: 1.0 unitless" # not  inplace
-    assert repr(dsu[0])== "NDDataset: 1.0+/-0.1 unitless"
+    assert repr(ds[0]) == "NDDataset:    1.000 unitless" # not  inplace
+    assert repr(dsu[0])== "NDDataset:    1.000+/-0.100 unitless"
     np.random.seed(12345)
     ndd = NDDataset(data=np.random.random((3, 3)), units='m')
     ndd.plus_minus(.2, inplace=True)

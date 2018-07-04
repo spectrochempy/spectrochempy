@@ -451,27 +451,8 @@ class NDArray(HasTraits):
 
     # .........................................................................
     def __repr__(self):
+        return self._repr()
 
-        prefix = type(self).__name__ + ': '
-        print_unit=True
-        if not (self.is_empty and self.is_labeled):
-            data = self.uncert_data
-        else:
-            data = self.get_labels()
-            print_unit=False
-
-        if isinstance(data, Quantity):
-            data = data.magnitude
-
-        body = np.array2string( data.squeeze(), separator=', ', prefix=prefix)
-        # this allow indentation of len of the prefix
-
-        units = ''
-        if print_unit:
-            units = ' {:~K}'.format(self.units) \
-                                              if self.has_units else ' unitless'
-
-        return ''.join([prefix, body, units])
 
     # .........................................................................
     def __str__(self):
@@ -1811,9 +1792,18 @@ class NDArray(HasTraits):
         units = ufmt.format(self.units) if self.has_units else ''
 
         def mkbody(d, pref, units):
+            # first we have to handle the case of masked array which are not
+            # handled by array2string function - tentative workaround
+            ds = d.squeeze().copy()
+            if hasattr(ds, 'mask'):  # handle the case of ndarray with no mask
+                ds[np.nonzero(ds.mask)]=-9999
             body = np.array2string(
-                d.squeeze(), separator=' ',
+                ds, separator=' ',
                 prefix=pref)
+            if hasattr(ds, 'mask'):  # handle the case of ndarray with no mask
+                body = body.replace('-9999.000', '      --')  #float:  show masked
+                # values
+                body = body.replace('-9999','   --') # int : show masked values
             body = body.replace('\n', sep)
             text = ''.join([pref, body, units])
             text += sep
@@ -1835,6 +1825,44 @@ class NDArray(HasTraits):
 
         text = text[:-1]  # remove the trailing '\n'
         return text
+
+    # .........................................................................
+    def _repr(self):
+
+        prefix = type(self).__name__ + ': '
+        print_unit=True
+        if not (self.is_empty and self.is_labeled):
+            data = self.uncert_data
+        else:
+            data = self.get_labels()
+            print_unit=False
+
+        if isinstance(data, Quantity):
+            data = data.magnitude
+
+        # as for the _str function, first we have to handle the case of masked
+        # array which are not
+        # handled by array2string function - tentative workaround
+        ds = data.squeeze().copy()
+
+        if hasattr(ds, 'mask'): # handle the case of ndarray with no mask
+            ds[np.nonzero(ds.mask)] = -9999
+
+        body = np.array2string( ds, separator=', ', prefix=prefix)
+        # this allow indentation of len of the prefix
+
+        if hasattr(ds, 'mask'):
+            body = body.replace('-9999.000', '      --')  # float:  show masked
+            # values
+            body = body.replace('-9999', '   --')  # show masked values
+
+        units = ''
+        if print_unit:
+            units = ' {:~K}'.format(self.units) \
+                                              if self.has_units else ' unitless'
+
+        return ''.join([prefix, body, units])
+
 
     # .........................................................................
     def _repr_html_(self):
