@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
-#
-# =============================================================================
-# Copyright (©) 2015-2018 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
-# =============================================================================
+# coding: utf-8
+"""
+Introduction to the plotting librairie
+===========================================
+
+
+"""
+
 
 import spectrochempy as sp
 import os
