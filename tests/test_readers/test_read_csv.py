@@ -16,7 +16,7 @@ from tests.utils import assert_approx_equal
 import pytest
 
 
-def test_read_csv():
+def test_read_zip():
 
     A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
                            origin='omnic_export',
@@ -25,11 +25,23 @@ def test_read_csv():
     assert A.shape == (10,3736)
 
     A.plot_stack()
+    show()
+
+def test_read_csv_tg():
 
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
                            directory=datadir.path,
                            origin='tga')
     assert B.shape == (3446,)
+    print(B)
+    B.plot()
+    show()
+
+
+def test_read_csv_IR():
+    B = NDDataset.read_csv('irdata/ir.csv', directory=datadir.path,
+                           origin='ir', csv_delimiter=',')
+    assert B.shape == (3736,)
     print(B)
     B.plot()
     show()

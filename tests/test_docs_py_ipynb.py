@@ -18,7 +18,6 @@ from tests.utils import notebook_run, example_run
 #@pytest.mark.skip
 @pytest.mark.parametrize('notebook', glob("../docs/user/*/*.ipynb"))
 def test_notebooks(notebook):
-    print(notebook)
     if '.ipynb_checkpoints' in notebook :
         return True
     if os.path.exists(notebook) and os.path.splitext(notebook)[
