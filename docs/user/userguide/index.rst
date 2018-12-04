@@ -21,7 +21,7 @@ Your default explorer is now launched.
 You can now navigate to the userguide notebooks in docs/user/userguide.
 click on the the fist notebook : **introduction.ipynb**
 
-.. image:: jupyter_home.png
+.. image:: jupyter_intro.png
 
 This notebook and others are used to produce this user guide.
 So this way you can follow the explanations given below.
