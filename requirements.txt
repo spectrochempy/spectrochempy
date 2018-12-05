@@ -28,6 +28,7 @@ pytest
 # pytest-xdist
 pytest-runner
 scikit-image
+pytest-console-scripts
 
 # for docs
 sphinx

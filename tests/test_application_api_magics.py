@@ -7,25 +7,31 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+import pytest
 
-def test_api():
+def test_api(caplog):
 
-    import spectrochempy
-    # test version
-    from spectrochempy import APIref, log, version
-    assert version.split('.')[0] == '0'
-    assert version.split('.')[1][:1] == '1'
-    # TODO: modify this for each release
 
-    # test application
+    from spectrochempy import APIref, log, version, INFO
+    from spectrochempy.utils import SpectroChemPyWarning
 
-    assert version.startswith('0.1')
-
-    log.warning('Ok, this is nicely executing!')
-
+    assert 'EFA' in APIref
+    assert 'CRITICAL' in APIref
     assert 'np' in APIref
     assert 'NDDataset' in APIref
     assert 'abs' in APIref
+
+    # test version
+    assert version.split('.')[0] == '0'
+    assert version.split('.')[1][:1] == '1'
+    assert version.startswith('0.1')
+
+    # test log
+    assert log.level == 30  # WARNING Level by default
+    log.warning('Ok, this is nicely executing!')
+    log.level=10
+    assert log.level == 10  # DEBUG Level by default
+
 
 def test_magic_addscript(ip):
 
@@ -48,3 +54,6 @@ def test_magic_addscript(ip):
     print('result\n',x.result)
     assert x.result.strip() == 'Script essai created.'
 
+def test_console(script_runner):
+    ret = script_runner.run('scpy')
+    assert ret.success
