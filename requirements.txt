@@ -7,8 +7,8 @@ matplotlib
 pandas
 traitlets
 xlrd
-# dill (not used for now)
 requests
+
 # mainly for install and a bit more...
 
 setuptools_scm
@@ -17,27 +17,29 @@ setuptools_scm
 
 ipython
 jupyter
-# ipyparallel
 ipykernel
-# nb_conda
-# ipympl
+
+## ipyparallel
+## nb_conda
+## ipympl
 
 # for testing
 
 pytest
-# pytest-xdist
 pytest-runner
+
 scikit-image
 pytest-console-scripts
 
 # for docs
+
 sphinx
 sphinx_rtd_theme
 sphinx-gallery
+sphinx-nbexamples
 nbsphinx
 numpydoc
 
 # for matplotlib backend and future gui
+
 pyqt
-# with pip use
-# pyqt5

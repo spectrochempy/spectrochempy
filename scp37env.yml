@@ -1,4 +1,4 @@
-name: scpy
+name: scp37
 channels:
 - conda
 - conda-forge
@@ -19,8 +19,8 @@ dependencies:
 - nb_conda
 - pytest-runner
 - sphinx
-- pip:
-   - sphinx_rtd_theme
-   - sphinx-gallery
-   - nbsphinx
-   - numpydoc
+- sphinx-gallery
+- sphinx_rtd_theme
+- nbsphinx
+- numpydoc
+- docutils

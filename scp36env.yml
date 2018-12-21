@@ -1,0 +1,31 @@
+name: scp36
+channels:
+- conda
+- conda-forge
+dependencies:
+- python=3.6
+- setuptools
+- ipython
+- matplotlib
+- pyqt
+- scipy
+- setuptools_scm
+- xlrd
+- pandas
+- requests
+- pytest
+- jupyter
+- scikit-image
+- nb_conda
+- pytest-runner
+- sphinx
+- sphinx-gallery
+- sphinx_rtd_theme
+- nbsphinx
+- numpydoc
+- docutils
+
+   
+   
+   
+   

@@ -82,6 +82,17 @@ Very simple, use the following command in a terminal:
 
    $ conda config –add channels conda-forge
    $ conda config –add channels fernandezc  #TODO: create a channel spectrocat
+
+This will add the necessary channels where to find the various libraries used by |scpy| .
+
+Next we it is recommended to use a dedicated environment for |scpy|, called for example `scp36` (using python 3.6)
+
+.. sourcecode:: bash
+   $ conda create -n scp36 python=3.6
+   $ source activate scp36
+
+Next one can install |scpy|:
+.. sourcecode:: bash   
    $ conda install spectrochempy
 
 .. note::

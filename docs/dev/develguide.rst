@@ -50,15 +50,7 @@ compatibility will be made.
 
     .. note::
 
-        What's the equivalent for windows???
-
-
-#.  If during set up or runtime, some packages with name <pkgname> appear to
-    be missing, just install them using
-
-    .. sourcecode:: bash
-
-        $ conda install -n scp36 <pkgname>
+        What's the equivalent for windows???  ##TODO
 
 
 #.  Git clone the **spectrochempy** bitbucket repository
@@ -102,6 +94,12 @@ compatibility will be made.
 
         $ pip install -e .
 
+#.  If during set up or runtime, some packages with name <pkgname> appear to
+    be missing, just install them using
+
+    .. sourcecode:: bash
+
+        $ conda install -n scp36 <pkgname>
 
 The only problem, with the above procedure, is that you can commit change
 made of the application locally you won't be able to push any changes to the
@@ -178,18 +176,14 @@ or to update it after some changes:
     $cd docs
     $python builddocs.py html
 
-The generated file are located in a directory (spectrochempy_doc) at the same
-level as the
-spectrochempy directory.
+The generated file are located in a directory (spectrochempy_doc) at the same level as the spectrochempy directory.
 
-To display the documentation (on mac. For widow the command `start` should
-work or something equivalent on linux):
+To display the documentation (on mac. For widow the command `start` should work or something equivalent on linux):
 
     $cd ../../spectrochempy_doc/html
     $open index.html
 
-you can also double-click on the index.html file in your file explorer (may
-be simpler!).
+you can also double-click on the index.html file in your file explorer (may be simpler!).
 
 
 Commit and push to the Bitbucket repository

@@ -183,6 +183,26 @@ class NDMath(object):
         new.coordset[axis]= None
         return new
 
+    # ........................................................................
+    @getdocfrom(np.all)
+    def all(self, *args, **kwargs):
+        """Test whether all array elements along a given axis evaluate to True."""
+
+        new = self.copy()
+        ma = np.all(new._masked_data, *args, **kwargs)
+        axis = kwargs.get('axis', None)
+        if axis is None:
+            return ma
+        if isinstance(ma, MaskedArray):
+            new._data = ma.data
+            new._mask = ma.mask
+        else:
+            new._data = ma
+        # the data being reduce to only a single elements along the summed axis
+        # we must reduce the corresponding coordinates
+        new.coordset[axis]= None
+        return new
+
     @getdocfrom(np.prod)
     def prod(self, *args, **kwargs):
         """product along axis"""

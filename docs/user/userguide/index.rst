@@ -12,16 +12,17 @@ Assuming Jupyter is installed (if not install it!), go to the
 |scpy| folder. From this location, open a
 terminal and type:
 
-.. image:: launch_jupyter.png
+.. image:: images/launch_jupyter.png
 
 Your default explorer is now launched.
 
-.. image:: jupyter_home.png
+.. image:: images/jupyter_home.png
 
-You can now navigate to the userguide notebooks in docs/user/userguide.
-click on the the fist notebook : **introduction.ipynb**
+You can now navigate to the userguide notebooks in  `docs/user/userguide`.
 
-.. image:: jupyter_intro.png
+Click on the the fist notebook : **introduction.ipynb**
+
+.. image:: images/jupyter_intro.png
 
 This notebook and others are used to produce this user guide.
 So this way you can follow the explanations given below.
@@ -39,34 +40,41 @@ The NDDataset object
 ---------------------
 
 .. toctree::
-	:maxdepth: 1
+    :maxdepth: 1
 
-	nddataset
-	plotting
-	baseline_correction
+    nddataset
+    plotting
+    baseline_correction
+
+Import & export of NDDatasets
+-----------------------------
+.. toctree::
+    :maxdepth: 1
+
+    importing
 
 Units and uncertainty
 ----------------------
 
 .. toctree::
-	:maxdepth: 1
+    :maxdepth: 1
 
-	units_and_uncertainties
+    units_and_uncertainties
 
 
 Databases
 ----------
 
 .. toctree::
-	:maxdepth: 1
+    :maxdepth: 1
 
-	isotope_database
+    isotope_database
 
 
 NMR
 ----
 
 .. toctree::
-	:maxdepth: 1
+    :maxdepth: 1
 
-	nmr_intro
+    nmr_intro
