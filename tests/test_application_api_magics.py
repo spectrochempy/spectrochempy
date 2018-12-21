@@ -9,10 +9,10 @@
 
 import pytest
 
-def test_api(caplog):
+def test_api():
 
 
-    from spectrochempy import APIref, log, version, INFO
+    from spectrochempy import APIref, log, version
     from spectrochempy.utils import SpectroChemPyWarning
 
     assert 'EFA' in APIref
@@ -27,6 +27,7 @@ def test_api(caplog):
     assert version.startswith('0.1')
 
     # test log
+
     assert log.level == 30  # WARNING Level by default
     log.warning('Ok, this is nicely executing!')
     log.level=10
@@ -48,12 +49,16 @@ def test_magic_addscript(ip):
     assert x.strip() == 'Script style created.'
 
     # with cell contents
-    x = ip.run_cell('%%%%addscript -p project -o essai -n available_styles\n'
+    x = ip.run_cell('%%addscript -p project -o essai -n available_styles\n'
                     'print(available_styles())')
 
     print('result\n',x.result)
     assert x.result.strip() == 'Script essai created.'
 
 def test_console(script_runner):
+    # to test this, the scripts must be installed so the spectrochempy
+    # package must be installed : use pip install -e .
+
     ret = script_runner.run('scpy')
     assert ret.success
+

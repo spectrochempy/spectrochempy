@@ -179,3 +179,5 @@ def test_kind_deprecated(IR_dataset_2D):
 
     # should raise a deprecation warning
     dataset.plot(kind='stack', style='sans', colorbar=False)
+
+set_loglevel(WARNING)
