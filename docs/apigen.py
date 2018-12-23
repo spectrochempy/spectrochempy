@@ -472,8 +472,6 @@ Constants
 
 .. autoclass:: {api}.{klass}
    :members:
-   :inherited-members:
-   :show-inheritance:
 
 .. include:: ../../../gen_modules/backreferences/{api}.{klass}.examples
 

@@ -52,6 +52,20 @@ class Isotopes(HasTraits):
     """
     This class defines useful properties of nuclei. [#]_
 
+    Parameters
+    ----------
+    nucleus : String, optional, default='1H'
+        In the AX form where A is the atomic mass and X the atom symbol
+
+
+    References
+    ----------
+    .. [#] Nuclear magnetic moments are taken from Stone, Table of Nuclear
+           Magnetic Dipole and Electric Quadrupole Moments, Atomic Data
+           and Nuclear Data Tables 90, 75-176 (2005).
+           Nuclear quadrupole moments are taken from P.Pyykko, Mol.Phys.
+           99, 1617-1629 (2001) and the 2002 edition of the CRC Handbook
+           of Physics and Chemistry (which took it from Pyykko and others).
 
     Examples
     --------
@@ -80,14 +94,6 @@ class Isotopes(HasTraits):
     >>> isotope.symbol
     'Al'
 
-    References
-    ----------
-    .. [#] Nuclear magnetic moments are taken from Stone, Table of Nuclear
-           Magnetic Dipole and Electric Quadrupole Moments, Atomic Data
-           and Nuclear Data Tables 90, 75-176 (2005).
-           Nuclear quadrupole moments are taken from P.Pyykko, Mol.Phys.
-           99, 1617-1629 (2001) and the 2002 edition of the CRC Handbook
-           of Physics and Chemistry (which took it from Pyykko and others).
 
     """
 
@@ -205,13 +211,6 @@ class Isotopes(HasTraits):
     # initializer
     # -------------------------------------------------------------------------
     def __init__(self, nucleus='1H'):
-        """
-        Parameters
-        ----------
-        nucleus : String, optional, default='1H'
-            In the AX form where A is the atomic mass and X the atom symbol
-
-        """
         filename = resource_filename(PKG, 'isotopes.csv')
         self.isotopes = pd.read_csv(filename, index_col=0)
         self._nucleus = nucleus

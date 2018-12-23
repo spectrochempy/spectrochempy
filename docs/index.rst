@@ -23,7 +23,7 @@ running on Linux, Windows or OS X.
 
 #.  A |NDDataset| object embedding array of data with coordinates and metadata.
 #.  A |Project| manager to work on multiple |NDDataset| simultaneoulsly.
-#.  `Units` and `Uncertainties` for |NDDataset| and NDDataset coordinates
+#.  `Units`` and ``Uncertainties`` for |NDDataset| and NDDataset coordinates
     |Coord|.
 #.  Mathematical operations over |NDDataset| such addition, multiplication
     and many more ...
@@ -65,7 +65,7 @@ Documentation
 
 Last updated Html documentation is always available there:
 
-* `http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/ <http://www-lcs.ensicaen.fr/cfnews/spectrochempy/html/>`_
+* `http://www.spectrochempy.fr <http://www.spectrochempy.fr>`_
 
 .. Pdf documentation can also be downloaded there:
 

@@ -371,7 +371,8 @@ exclusions = (
     'section_names', 'update_config', 'clear_instance',
     'document_config_options', 'flatten_flags', 'generate_config_file',
     'initialize_subcommand', 'initialized', 'instance',
-    'json_config_loader_class', 'launch_instance', 'load_config_file',
+    'json_config_loader_class', 'launch_instance', 'setup_instance',
+    'load_config_file',
     'parse_command_line', 'print_alias_help', 'print_description',
     'print_examples', 'print_flag_help', 'print_help', 'print_subcommands',
     'print_version', 'python_config_loader_class', 'raises',)
