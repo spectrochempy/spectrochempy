@@ -116,6 +116,7 @@ class NDDataset(
         Parameters
         ----------
         %(NDArray.parameters.no_labels)s
+
         coordset : An instance of |CoordSet|, optional
             `coords` contains the coordinates for the different
             dimensions of the `data`. if `coords` is provided, it must
@@ -211,7 +212,7 @@ class NDDataset(
     def coordset(self):
         """
         |CoordSet| instance - Contains the coordinates of the various
-        dimensions of the dataset
+        dimensions of the dataset.
 
         """
         return self._coordset

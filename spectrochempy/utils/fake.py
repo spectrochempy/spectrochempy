@@ -9,7 +9,7 @@
 
 """
 This module implements routines to generate fake data that can be used for
-testing our various |scp| analysis methods
+testing our various |scpy| analysis methods
 
 """
 

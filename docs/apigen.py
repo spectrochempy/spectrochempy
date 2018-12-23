@@ -84,7 +84,7 @@ def format_directive(module, package=None, auto='automodule'):
         directive = ''
     directive += '.. %s:: %s\n' % (auto, item)
     for option in OPTIONS:
-        directive += '    :%s:\n' % option
+        directive += '   :%s:\n' % option
     return directive
 
 
@@ -435,7 +435,6 @@ To go deeper in the core of |scpy|, look at
 the :ref:`Developper's documentation<develdocs>` and 
 :ref:`Code Reference<develreference>`.
 
-
 Objects
 -------
 
@@ -443,7 +442,6 @@ Objects
    :toctree:
 
 {classes}
-
 
 Functions
 ---------
@@ -455,19 +453,15 @@ Functions
 
 {funcs}
 
-
 Preferences
 -----------
 
 {preferences}
 
-
 Constants
 ---------
 
 {consts}
-
-
 
 """
 
@@ -476,18 +470,17 @@ Constants
 
 .. automodule:: {api}
 
-   .. autoclass:: {api}.{klass}
-      :members:
-      :inherited-members:
-      :show-inheritance:
+.. autoclass:: {api}.{klass}
+   :members:
+   :inherited-members:
+   :show-inheritance:
 
-   .. include:: ../../../gen_modules/backreferences/{api}.{klass}.examples
+.. include:: ../../../gen_modules/backreferences/{api}.{klass}.examples
 
-   .. raw:: html
+.. raw:: html
 
-      <div style='clear:both'></div>
+   <div style='clear:both'></div>
 
-  
 """
 
     functemplate = """{api}.{func}
@@ -495,14 +488,13 @@ Constants
 
 .. automodule:: {api}
 
-   .. autofunction:: {api}.{func}
+.. autofunction:: {api}.{func}
  
-   .. include:: ../../../gen_modules/backreferences/{api}.{func}.examples
+.. include:: ../../../gen_modules/backreferences/{api}.{func}.examples
 
-   .. raw:: html
+.. raw:: html
 
-      <div style='clear:both'></div>
-
+   <div style='clear:both'></div>
 
 """
 

@@ -50,7 +50,7 @@ PKG = 'spectrochempy.databases.isotopes'
 # =============================================================================
 class Isotopes(HasTraits):
     """
-    This class defines useful properties of nuclei [*]_.
+    This class defines useful properties of nuclei. [#]_
 
 
     Examples
@@ -58,7 +58,7 @@ class Isotopes(HasTraits):
 
     How to use it?
 
-    after the scp has been loaded:
+    after the |scpy| has been loaded:
 
     >>> from spectrochempy import *
 
@@ -80,15 +80,14 @@ class Isotopes(HasTraits):
     >>> isotope.symbol
     'Al'
 
-
     References
     ----------
-    .. [*] Nuclear magnetic moments are taken from Stone, Table of Nuclear
-        Magnetic Dipole and Electric Quadrupole Moments, Atomic Data
-        and Nuclear Data Tables 90, 75-176 (2005).
-        Nuclear quadrupole moments are taken from P.Pyykko, Mol.Phys.
-        99, 1617-1629 (2001) and the 2002 edition of the CRC Handbook
-        of Physics and Chemistry (which took it from Pyykko and others).
+    .. [#] Nuclear magnetic moments are taken from Stone, Table of Nuclear
+           Magnetic Dipole and Electric Quadrupole Moments, Atomic Data
+           and Nuclear Data Tables 90, 75-176 (2005).
+           Nuclear quadrupole moments are taken from P.Pyykko, Mol.Phys.
+           99, 1617-1629 (2001) and the 2002 edition of the CRC Handbook
+           of Physics and Chemistry (which took it from Pyykko and others).
 
     """
 

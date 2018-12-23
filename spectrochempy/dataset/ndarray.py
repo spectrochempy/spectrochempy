@@ -1381,7 +1381,7 @@ class NDArray(HasTraits):
         return new
 
     conj = make_func_from(conjugate)
-    conj.__doc__ = "Short alias of `conjugate`"
+    conj.__doc__ = "Short alias of `conjugate` "
 
     # .........................................................................
     def copy(self, deep=True, memo=None):

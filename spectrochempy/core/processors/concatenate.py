@@ -29,12 +29,12 @@ def concatenate(*datasets, axis=0, **kwargs):
     Any number of |NDDataset| objects can be concatenated. For this operation
     to be defined the following must be true:
 
-    #. all inputs must be valid |NDDataset| objects;
-    #. units of data and axis must be compatible (rescaling is applied
-       automatically if necessary);
-    #. concatenation is along the axis specified or the first one;
-    #. along the non-concatenated dimensions, shape and units coordinates
-      must match.
+        #. all inputs must be valid |NDDataset| objects;
+        #. units of data and axis must be compatible (rescaling is applied
+           automatically if necessary);
+        #. concatenation is along the axis specified or the first one;
+        #. along the non-concatenated dimensions, shape and units coordinates
+           must match.
 
     Parameters
     ----------
@@ -68,7 +68,7 @@ def concatenate(*datasets, axis=0, **kwargs):
     ((55, 5549), (55, 5549), (165, 5549))
 
     By default concatenation is done along dimension 0 .To make it along
-    another dimension, one should set the `axis parameters
+    another dimension, one should set the `axis` parameters
 
     >>> E = A.concatenate(B, axis=1)
     >>> A.shape, B.shape, E.shape
@@ -80,26 +80,26 @@ def concatenate(*datasets, axis=0, **kwargs):
     This function is similar to :class:`numpy.ndarray` concatenation,
     but each attribute is treated specifically as follows:
 
-    :out.name: concatenation of dataset names
+        :out.name: concatenation of dataset names
 
-    :out.title: title of the fist dataset which have a title
+        :out.title: title of the fist dataset which have a title
 
-    :out.author: concatenation of dataset authors  (each distinct
-                 author appear once)
+        :out.author: concatenation of dataset authors  (each distinct
+                     author appear once)
 
-    :out.date: date of concatenation
+        :out.date: date of concatenation
 
-    :out.moddate: date of concatenation
+        :out.moddate: date of concatenation
 
-    :out.data: numpy.concatenate(a.data,b.data,c.data,...,)
+        :out.data: numpy.concatenate(a.data,b.data,c.data,...,)
 
-    :out.label: label sets are concatenated for the concatenated axis
-                and label sets are created for all other dims
+        :out.label: label sets are concatenated for the concatenated axis
+                    and label sets are created for all other dims
 
-    :out.axis: dim 'concatdim' axis sets are concatenated, and
-               axis sets are created for all other dims
+        :out.axis: dim 'concatdim' axis sets are concatenated, and
+                   axis sets are created for all other dims
 
-    :out.description: concatenates all descriptions
+        :out.description: concatenates all descriptions
 
     """
 
