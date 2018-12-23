@@ -18,9 +18,11 @@ dependencies:
 - scikit-image
 - nb_conda
 - pytest-runner
+- pytest-console-scripts
 - sphinx
 - sphinx-gallery
 - sphinx_rtd_theme
+- sphinx-nbexamples
 - nbsphinx
 - numpydoc
 - docutils

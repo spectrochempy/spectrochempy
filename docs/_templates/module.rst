@@ -3,52 +3,50 @@
 
 .. automodule:: {{ fullname }}
 
-   {% block functions %}
-   {% if functions %}
+{% block functions %}
+{% if functions %}
+Functions
+---------
 
-   Functions
-   ---------
+{% for item in functions %}
 
-   {% for item in functions %}
+.. autofunction:: {{ item }}
 
-   .. autofunction:: {{ item }}
+.. include:: ../../gen_modules/backreferences/{{fullname}}.{{item}}.examples
 
-   .. include:: ../../gen_modules/backreferences/{{fullname}}.{{item}}.examples
+.. raw:: html
 
-   .. raw:: html
+   <div style='clear:both'></div>
 
-       <div style='clear:both'></div>
+{%- endfor %}
+{% endif %}
+{% endblock %}
 
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
+{% block classes %}
+{% if classes %}
+Classes
+-------
 
-   {% block classes %}
-   {% if classes %}
-
-   Classes
-   -------
-
-   {% for item in classes %}
-   .. autoclass:: {{ item }}
-      :members:
-      :inherited-members:
-      :show-inheritance:
+{% for item in classes %}
+.. autoclass:: {{ item }}
+   :members:
+   :inherited-members:
+   :show-inheritance:
 
 
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
+{%- endfor %}
+{% endif %}
+{% endblock %}
 
-   {% block exceptions %}
-   {% if exceptions %}
+{% block exceptions %}
+{% if exceptions %}
 
-   Exceptions
-   ----------
+Exceptions
+----------
 
-   .. autosummary::
-   {% for item in exceptions %}
-      {{ item }}
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
+.. autosummary::
+{% for item in exceptions %}
+{{ item }}
+{%- endfor %}
+{% endif %}
+{% endblock %}

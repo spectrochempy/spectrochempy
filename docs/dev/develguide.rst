@@ -109,12 +109,14 @@ To be able to contribute, you will need first to create you own fork of the
 |scpy| repository based on bitbucket. And then from your fork, you can
 create pull request to the main repository.
 
+
 Create a fork repository
 ------------------------
 
 The simplest way is to perform this operation on the bitbucket web site.
 
 TO BE CONTINUED
+
 
 Testing SpectroChemPy
 ---------------------
@@ -125,14 +127,16 @@ It should then be present on the system.
 
 .. sourcecode:: bash
 
-    $ conda install pytest
+   $ conda install pytest
+
 
 In order to accelerate the tests, it may be useful to install the plugin
 ``pytest-xdist`` for parallelization of the tests.
 
 .. sourcecode:: bash
 
-    $ conda install pytest-xdist
+   $ conda install pytest-xdist
+
 
 To run the full suite of tests or only some of them, the best way is to do this using py charm.
 
@@ -141,8 +145,8 @@ from inside the main spectrochempy directory (where the folder ``tests`` resides
 
 .. sourcecode:: bash
 
-    $ cd <workspace>/spectrochempy
-    $ pytest tests
+   $ cd <workspace>/spectrochempy
+   $ pytest tests
 
 Currently it is not possible to use arguments in this command line, as they
 will be interpreted by spectrochempy and then produce errors.
@@ -166,22 +170,24 @@ to rebuild the doc, just do:
 
 .. sourcecode:: bash
 
-    $cd docs
-    $python builddocs.py clean html
+   $cd docs
+   $python builddocs.py clean html
 
 or to update it after some changes:
 
 .. sourcecode:: bash
 
-    $cd docs
-    $python builddocs.py html
+   $cd docs
+   $python builddocs.py html
 
 The generated file are located in a directory (spectrochempy_doc) at the same level as the spectrochempy directory.
 
 To display the documentation (on mac. For widow the command `start` should work or something equivalent on linux):
 
-    $cd ../../spectrochempy_doc/html
-    $open index.html
+.. sourcecode:: bash
+
+   $cd ../../spectrochempy_doc/html
+   $open index.html
 
 you can also double-click on the index.html file in your file explorer (may be simpler!).
 

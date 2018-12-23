@@ -15,7 +15,7 @@ target/
 
 # Example ipython notebook checkpoints
 *.ipynb_checkpoints/
-Untitled.ipynb
+../../Library/Preferences/PyCharm2018.3/scratches/Untitled.ipynb
 
 # caches
 __pycache__/

@@ -59,7 +59,9 @@ def _setup_backend_and_ipython(backend=None):
           'MacOSX':
         # Force QT5
         backend = 'Qt5Agg'
-        mpl.rcParams['backend.qt5'] = 'PyQt5'
+        # mpl.rcParams['backend.qt5'] = 'PyQt5'  # <-- This is deprecated in
+        # version 2.2 of matplotlib, but it seems, this doesn't make
+        # difference for our notebooks
 
     # if we are building the docs, in principle it should be done using
     # the builddocs.py located in the scripts folder

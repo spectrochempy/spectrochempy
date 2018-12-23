@@ -460,7 +460,7 @@ Preferences
 -----------
 
 {preferences}
-    
+
 
 Constants
 ---------
@@ -486,7 +486,8 @@ Constants
    .. raw:: html
 
       <div style='clear:both'></div>
-	       
+
+  
 """
 
     functemplate = """{api}.{func}
@@ -495,12 +496,13 @@ Constants
 .. automodule:: {api}
 
    .. autofunction:: {api}.{func}
-      
+ 
    .. include:: ../../../gen_modules/backreferences/{api}.{func}.examples
 
    .. raw:: html
 
-       <div style='clear:both'></div>
+      <div style='clear:both'></div>
+
 
 """
 
@@ -527,6 +529,7 @@ Constants
     _classes = "    ".join(lclasses)
     _funcs = "    ".join(lfuncs)
     _consts = "".join(lconsts)
+    #TODO: replace the hard reference to the user workspace
     _consts = _consts.replace('/Users/christian/Dropbox/D.PROGRAMMES/', '~/')
 
     text = indextemplate.format(consts=_consts, preferences=write_prefs(),
@@ -552,4 +555,13 @@ def write_prefs():
 
 if __name__ == "__main__":
 
-    pass
+    PROJECT = "spectrochempy"
+
+    DOCDIR = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
+    API = os.path.join(DOCDIR, 'user', 'api', 'generated')
+    DEVAPI = os.path.join(DOCDIR, 'dev', 'generated')
+
+    main(PROJECT, tocdepth=1, includeprivate=True, destdir=DEVAPI,
+                exclude_patterns=['api.py'],
+                exclude_dirs=['extern', 'sphinxext', '~misc', 'gui'], )

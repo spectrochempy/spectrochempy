@@ -30,7 +30,7 @@ Requirements
 
 .. warning::
 
-	Currently, only the python version 3.6 has been tested.
+	Only the python version 3.6 and 3.7 have been tested so far.
 
 
 The following libraries are also required such as :
@@ -85,14 +85,18 @@ Very simple, use the following command in a terminal:
 
 This will add the necessary channels where to find the various libraries used by |scpy| .
 
-Next we it is recommended to use a dedicated environment for |scpy|, called for example `scp36` (using python 3.6)
+Next we it is recommended to use a dedicated environment for |scpy|, called
+for example `scp37` (using python 3.7)
 
 .. sourcecode:: bash
-   $ conda create -n scp36 python=3.6
-   $ source activate scp36
+
+   $ conda create -n scp37 python=3.7
+   $ source activate scp37
 
 Next one can install |scpy|:
-.. sourcecode:: bash   
+
+.. sourcecode:: bash
+
    $ conda install spectrochempy
 
 .. note::

@@ -15,12 +15,22 @@ import re
 import six
 import sphinx
 from sphinx.ext.autodoc import (
-    ClassDocumenter, ModuleDocumenter, ALL, AutoDirective, PycodeError,
+    ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
     ModuleAnalyzer, bool_option, AttributeDocumenter, DataDocumenter, Options,
-    formatargspec, getargspec, force_decode, prepare_docstring)
+    force_decode, prepare_docstring)
 import sphinx.ext.autodoc as ad
 from sphinx.ext.autosummary import Autosummary, ViewList, mangle_signature
 from docutils import nodes
+
+if sphinx.__version__ >= '1.7':
+    from sphinx.ext.autodoc import Signature, AutodocRegistry, get_documenters
+    from sphinx.ext.autodoc.directive import (
+        AutodocDirective, AUTODOC_DEFAULT_OPTIONS, DocumenterBridge,
+        process_documenter_options)
+else:
+    from sphinx.ext.autodoc import (
+        getargspec, formatargspec, AutoDirective as AutodocDirective,
+        AutoDirective as AutodocRegistry)
 
 try:
     from cyordereddict import OrderedDict
@@ -33,13 +43,13 @@ except ImportError:
 if six.PY2:
     from itertools import imap as map
 
-__version__ = '0.1.5'
+__version__ = '0.1.7'
 
 __author__ = "Philipp Sommer"
 
 
 sphinx_version = list(map(float, re.findall('\d+', sphinx.__version__)[:3]))
-__all__ = []
+
 
 class AutosummaryDocumenter(object):
     """Abstract class for for extending Documenter methods
@@ -122,8 +132,12 @@ class AutosummaryDocumenter(object):
 
         # document non-skipped members
         memberdocumenters = []
+        if sphinx_version < [1, 7]:
+            registry = AutodocRegistry._registry
+        else:
+            registry = get_documenters(self.env.app)
         for (mname, member, isattr) in self.filter_members(members, want_all):
-            classes = [cls for cls in six.itervalues(AutoDirective._registry)
+            classes = [cls for cls in six.itervalues(registry)
                        if cls.can_document_member(member, mname, isattr, self)]
             if not classes:
                 # don't know how to document this member
@@ -134,6 +148,7 @@ class AutosummaryDocumenter(object):
             # of inner classes can be documented
             full_mname = self.modname + '::' + \
                 '.'.join(self.objpath + [mname])
+
             documenter = classes[-1](self.directive, full_mname, self.indent)
             memberdocumenters.append((documenter,
                                       members_check_module and not isattr))
@@ -222,18 +237,27 @@ class CallableDataDocumenter(DataDocumenter):
         callmeth = self.get_attr(self.object, '__call__', None)
         if callmeth is None:
             return None
-        try:
-            argspec = getargspec(callmeth)
-        except TypeError:
-            # still not possible: happens e.g. for old-style classes
-            # with __call__ in C
-            return None
-        if argspec[0] and argspec[0][0] in ('cls', 'self'):
-            del argspec[0][0]
-        if sphinx_version < [1, 4]:
-            return formatargspec(*argspec)
+        if sphinx_version < [1, 7]:
+            try:
+                argspec = getargspec(callmeth)
+            except TypeError:
+                # still not possible: happens e.g. for old-style classes
+                # with __call__ in C
+                return None
+            if argspec[0] and argspec[0][0] in ('cls', 'self'):
+                del argspec[0][0]
+            if sphinx_version < [1, 4]:
+                return formatargspec(*argspec)
+            else:
+                return formatargspec(callmeth, *argspec)
         else:
-            return formatargspec(callmeth, *argspec)
+            try:
+                args = Signature(callmeth).format_args()
+            except TypeError:
+                return None
+            else:
+                args = args.replace('\\', '\\\\')
+                return args
 
     def get_doc(self, encoding=None, ignore=1):
         """Reimplemented  to include data from the call method"""
@@ -277,18 +301,27 @@ class CallableAttributeDocumenter(AttributeDocumenter):
         callmeth = self.get_attr(self.object, '__call__', None)
         if callmeth is None:
             return None
-        try:
-            argspec = getargspec(callmeth)
-        except TypeError:
-            # still not possible: happens e.g. for old-style classes
-            # with __call__ in C
-            return None
-        if argspec[0] and argspec[0][0] in ('cls', 'self'):
-            del argspec[0][0]
-        if sphinx_version < [1, 4]:
-            return formatargspec(*argspec)
+        if sphinx_version < [1, 7]:
+            try:
+                argspec = getargspec(callmeth)
+            except TypeError:
+                # still not possible: happens e.g. for old-style classes
+                # with __call__ in C
+                return None
+            if argspec[0] and argspec[0][0] in ('cls', 'self'):
+                del argspec[0][0]
+            if sphinx_version < [1, 4]:
+                return formatargspec(*argspec)
+            else:
+                return formatargspec(callmeth, *argspec)
         else:
-            return formatargspec(callmeth, *argspec)
+            try:
+                args = Signature(callmeth).format_args()
+            except TypeError:
+                return None
+            else:
+                args = args.replace('\\', '\\\\')
+                return args
 
     def get_doc(self, encoding=None, ignore=1):
         """Reimplemented  to include data from the call method"""
@@ -320,14 +353,18 @@ class CallableAttributeDocumenter(AttributeDocumenter):
         return doc
 
 
-class AutoSummDirective(AutoDirective, Autosummary):
+class AutoSummDirective(AutodocDirective, Autosummary):
     """automodule directive that makes a summary at the beginning of the module
 
-    This directive combines the :class:`sphinx.ext.autodoc.AutoDirective` and
+    This directive combines the
+    :class:`sphinx.ext.autodoc.directives.AutodocDirective` and
     :class:`sphinx.ext.autosummary.Autosummary` directives to put a summary of
     the specified module at the beginning of the module documentation."""
 
-    _default_flags = AutoDirective._default_flags.union({'autosummary'})
+    if sphinx_version < [1, 7]:
+        _default_flags = AutodocDirective._default_flags.union({'autosummary'})
+    else:
+        AUTODOC_DEFAULT_OPTIONS.append('autosummary')
 
     @property
     def autosummary_documenter(self):
@@ -337,16 +374,31 @@ class AutoSummDirective(AutoDirective, Autosummary):
         except AttributeError:
             pass
         objtype = self.name[4:]
-        doc_class = self._registry[objtype]
-        documenter = doc_class(self, self.arguments[0])
+        env = self.state.document.settings.env
+        if sphinx_version < [1, 7]:
+            doc_class = self._registry[objtype]
+            params = self
+        else:
+            reporter = self.state.document.reporter
+            try:
+                lineno = reporter.get_source_and_line(self.lineno)[1]
+            except AttributeError:
+                lineno = None
+            doc_class = get_documenters(self.env.app)[objtype]
+            params = DocumenterBridge(
+                env, reporter,
+                process_documenter_options(doc_class, env.config,
+                                           self.options),
+                lineno)
+        documenter = doc_class(params, self.arguments[0])
         if hasattr(documenter, 'get_grouped_documenters'):
             self._autosummary_documenter = documenter
             return documenter
         # in case the has been changed in the registry, we decide manually
         if objtype == 'module':
-            documenter = AutoSummModuleDocumenter(self, self.arguments[0])
+            documenter = AutoSummModuleDocumenter(params, self.arguments[0])
         elif objtype == 'class':
-            documenter = AutoSummClassDocumenter(self, self.arguments[0])
+            documenter = AutoSummClassDocumenter(params, self.arguments[0])
         else:
             raise ValueError(
                 "Could not find a valid documenter for the object type %s" % (
@@ -356,11 +408,14 @@ class AutoSummDirective(AutoDirective, Autosummary):
 
     def run(self):
         """Run method for the directive"""
-        doc_nodes = AutoDirective.run(self)
+        doc_nodes = AutodocDirective.run(self)
         if 'autosummary' not in self.options:
             return doc_nodes
         self.warnings = []
-        self.env = self.state.document.settings.env
+        try:
+            self.env = self.state.document.settings.env
+        except AttributeError:
+            pass  # is set automatically with sphinx >= 1.8.0
         self.result = ViewList()
         documenter = self.autosummary_documenter
         grouped_documenters = documenter.get_grouped_documenters()
@@ -428,7 +483,7 @@ class AutoSummDirective(AutoDirective, Autosummary):
         ----------
         doc_nodes: list
             The list of nodes as they are generated by the
-            :meth:`sphinx.ext.autodoc.AutoDirective.run` method
+            :meth:`sphinx.ext.autodoc.AutodocDirective.run` method
         summ_nodes: dict
             The generated autosummary nodes as they are generated by the
             :meth:`autosumm_nodes` method. Note that `summ_nodes` must only
@@ -529,14 +584,9 @@ class AutoSummDirective(AutoDirective, Autosummary):
         base_documenter = self.autosummary_documenter
         base_documenter.analyzer = ModuleAnalyzer.for_module(
                 base_documenter.real_modname)
-        try:
-            attr_docs = base_documenter.analyzer.find_attr_docs()
-        except:
-            print("----", base_documenter.real_modname)
-            raise
+        attr_docs = base_documenter.analyzer.find_attr_docs()
 
         for documenter, check_module in documenters:
-            print(documenter.fullname)
             documenter.parse_name()
             documenter.import_object()
             documenter.real_modname = documenter.get_real_modname()
@@ -553,7 +603,7 @@ class AutoSummDirective(AutoDirective, Autosummary):
             else:
                 max_chars = max(10, max_item_chars - len(display_name))
                 sig = mangle_signature(sig, max_chars=max_chars)
-               # sig = sig.replace('*', r'\*')
+                sig = sig.replace('*', r'\*')
 
             # -- Grab the documentation
 
@@ -663,14 +713,18 @@ def setup(app):
     app.setup_extension('sphinx.ext.autodoc')
 
     # make sure to allow inheritance when registering new documenters
+    if sphinx_version < [1, 7]:
+        registry = AutodocRegistry._registry
+    else:
+        registry = get_documenters(app)
     for cls in [AutoSummClassDocumenter, AutoSummModuleDocumenter,
                 CallableAttributeDocumenter, NoDataDataDocumenter,
                 NoDataAttributeDocumenter]:
-        if not issubclass(AutoDirective._registry.get(cls.objtype), cls):
+        if not issubclass(registry.get(cls.objtype), cls):
             try:
                 # we use add_documenter because this does not add a new
                 # directive
-                ad.add_documenter(cls)
+                app.add_documenter(cls)
             except AttributeError:
                 app.add_autodocumenter(cls)
 

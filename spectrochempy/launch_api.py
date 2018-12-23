@@ -7,8 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-"""
-This module is the main entry-point for the application launched from the
+"""This module is the main entry-point for the application launched from the
 terminal command line
 
 """
@@ -16,6 +15,8 @@ import sys
 import os
 
 def main():
+    """Main call
+    """
 
     import spectrochempy as sc
     from spectrochempy.application import app, WARNING, DEBUG
@@ -35,7 +36,6 @@ def main():
         sc.show()
 
     except:
-
         log.info("'%s' file doesn't exists"%fname)
         print()
         app.print_help()

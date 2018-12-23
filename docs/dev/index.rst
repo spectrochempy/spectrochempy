@@ -7,11 +7,12 @@ Developper guide
 -----------------
 
 .. toctree::
-    :maxdepth: 2
+   :maxdepth: 2
 
-    develguide
+   develguide
 
 .. _develreference:
+
 
 Code reference
 ---------------
@@ -19,21 +20,22 @@ Code reference
 .. currentmodule:: spectrochempy
 
 .. automodule:: spectrochempy
-    :no-members:
-    :no-inherited-members:
+   :no-members:
+   :no-inherited-members:
+
 
 Packages
 ~~~~~~~~
 
 .. autosummary::
-    :toctree: generated/
-    :template: module.rst
+   :toctree: generated/
+   :template: module.rst
 
-    spectrochempy.dataset
-    spectrochempy.core
-    spectrochempy.units
-    spectrochempy.databases
-    spectrochempy.utils
+   spectrochempy.dataset
+   spectrochempy.core
+   spectrochempy.units
+   spectrochempy.databases
+   spectrochempy.utils
 
 
 Modules
@@ -44,5 +46,6 @@ Modules
    :template: module.rst
 
    spectrochempy.application
-   spectrochempy.commands
+   spectrochempy.launch_api
+   spectrochempy.launch_gui
 

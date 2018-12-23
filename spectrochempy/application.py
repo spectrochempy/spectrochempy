@@ -8,12 +8,8 @@
 # =============================================================================
 
 """
-This module define the `application` on which the API rely.
-
-It also define the default application preferences and IPython magic functions.
-
-
-"""
+This module define the `application` on which the API rely. It also define
+the default application preferences and IPython magic functions."""
 
 __all__ = []
 
@@ -179,36 +175,34 @@ class SpectroChemPyMagics(Magics):
 
     @line_cell_magic
     def addscript(self, pars='', cell=None):
-        """This works both as **%addscript** and as **%%addscript**
+        """
+        This works both as **%addscript** and as **%%addscript**
 
         This magic command can either take a local filename, element in the
         namespace or history range (see %history),
         or the current cell content
 
 
-        Usage
+        Usage:
+
             %addscript  -p project  n1-n2 n3-n4 ... n5 .. n6 ...
 
-             or
+            or
 
             %%addscript -p project
             ...code lines ...
 
 
-        Options
-            -p <string>         Name of the project where the script will be
-            stored.
-                                If not provided, a project with a standard
-                                name:
-                                `proj` is searched.
-            -o <string>         script name
+        Options:
 
+            -p <string>         Name of the project where the script will be stored.
+                                If not provided, a project with a standard
+                                name: `proj` is searched.
+            -o <string>         script name
             -s <symbols>        Specify function or classes to load from python
                                 source.
-
             -a                  append to the current script instead of
                                 overwriting it.
-
             -n                  search symbol in the current namespace
 
 
@@ -217,15 +211,15 @@ class SpectroChemPyMagics(Magics):
 
         .. sourcecode:: ipython
 
-            In[1]: %addscript myscript.py
+           In[1]: %addscript myscript.py
 
-            In[2]: %addscript 7-27
+           In[2]: %addscript 7-27
 
-            In[3]: %addscript -s MyClass,myfunction myscript.py
+           In[3]: %addscript -s MyClass,myfunction myscript.py
 
-            In[4]: %addscript MyClass
+           In[4]: %addscript MyClass
 
-            In[5]: %addscript mymodule.myfunction
+           In[5]: %addscript mymodule.myfunction
 
 
         """

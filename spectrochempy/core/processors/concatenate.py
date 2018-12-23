@@ -22,7 +22,8 @@ from spectrochempy.extern.uncertainties import unumpy as unp
 
 
 def concatenate(*datasets, axis=0, **kwargs):
-    """Concatenation of |NDDataset| objects along a given axis (by default
+    """
+    Concatenation of |NDDataset| objects along a given axis (by default
     the first)
 
     Any number of |NDDataset| objects can be concatenated. For this operation
@@ -32,8 +33,8 @@ def concatenate(*datasets, axis=0, **kwargs):
     #. units of data and axis must be compatible (rescaling is applied
        automatically if necessary);
     #. concatenation is along the axis specified or the first one;
-    #. along the non-concatenated dimensions, shape and units coordinates must
-    match.
+    #. along the non-concatenated dimensions, shape and units coordinates
+      must match.
 
     Parameters
     ----------

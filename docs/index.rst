@@ -3,8 +3,13 @@
 Welcome to the |scpy| documentation!
 #####################################
 
-:release: |release|
 :version: |version| (|today|)
+
+.. warning::
+
+    This software is not yet publicly released.
+
+    It is expected to be released in june or july 2019.
 
 Introduction
 ============

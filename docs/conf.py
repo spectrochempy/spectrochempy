@@ -35,14 +35,23 @@ import spectrochempy
 # hack to make import
 sys._called_from_sphinx = True
 
-extensions = ['sphinx.ext.mathjax', 'sphinx.ext.autosummary',
-    'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode',
-    'sphinx.ext.todo', 'matplotlib.sphinxext.plot_directive',
+extensions = \
+    [
+    'spectrochempy.sphinxext.autodocsumm',
+    'sphinx.ext.mathjax',
+    'spectrochempy.sphinxext.traitlets_sphinxdoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.todo',
+    'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',  # 'sphinx.ext.napoleon',
-    'numpydoc', 'sphinx_gallery.gen_gallery', 'nbsphinx',
-    'spectrochempy.sphinxext.autodocsumm',
-    'spectrochempy.sphinxext.traitlets_sphinxdoc', ]
+    'numpydoc',
+    'sphinx_gallery.gen_gallery',
+    'nbsphinx',
+    ]
 
 # Numpy autodoc attributes
 numpydoc_show_class_members = False
@@ -383,9 +392,9 @@ def setup(app):
 # Sphinx-gallery ------------------
 
 # Generate the plots for the gallery
-plot_gallery = True
 
 sphinx_gallery_conf = {
+    'plot_gallery': 'False',
     'backreferences_dir': 'gen_modules/backreferences',
     'doc_module': ('spectrochempy', ), 'reference_url': {
         'spectrochempy': None, 'matplotlib': 'https://matplotlib.org',

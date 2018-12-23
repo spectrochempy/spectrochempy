@@ -18,9 +18,10 @@ setuptools_scm
 ipython
 jupyter
 ipykernel
+jupyter_nbextensions_configurator
 
-## ipyparallel
-## nb_conda
+ipyparallel
+nb_conda
 ## ipympl
 
 # for testing
