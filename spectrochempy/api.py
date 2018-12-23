@@ -78,8 +78,8 @@ def _setup_backend_and_ipython(backend=None):
         if getattr(get_ipython(), 'kernel', None) is not None:
             # set the ipython matplotlib environments
             try:
-                #import ipympl
-                ip.magic('matplotlib notebook')
+                import ipympl
+                ip.magic('matplotlib widget')
             except UsageError as e:
                 try:
                     ip.magic('matplotlib qt5')

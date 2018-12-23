@@ -22,7 +22,8 @@ jupyter_nbextensions_configurator
 
 ipyparallel
 nb_conda
-## ipympl
+ipympl
+widgetsnbextension
 
 # for testing
 
