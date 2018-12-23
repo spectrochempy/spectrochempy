@@ -142,7 +142,8 @@ linestyles.remove(' ')
 
 def available_styles():
     """
-    Styles availables in SpectroChemPy
+    All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
+    which are available in |scpy|
 
     Todo
     -----
@@ -150,7 +151,7 @@ def available_styles():
 
     Returns
     -------
-    A list of style
+    A list of matplotlib styles
 
     """
     cfgdir = mpl.get_configdir()
@@ -224,9 +225,6 @@ class SpectroChemPyMagics(Magics):
 
         """
         opts, args = self.parse_options(pars, 'p:o:s:n:a')
-        # print(opts)
-        # print(args)
-        # print(cell)
 
         append = 'a' in opts
         mode = 'a' if append else 'w'
@@ -736,9 +734,9 @@ class SpectroChemPy(Application):
      Arnaud Travert & Christian Fernandez,
      SpectroChemPy, a framework for processing, analysing and modelling of 
      Spectroscopic data for Chemistry with Python
-     https://bitbucket.org/spectrocat/spectrochempy, (version {version})
+     https://www.spectrochempy.fr, (version {version})
      Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
-     Caen/CNRS, 2018
+     Caen/CNRS, 2019
     </pre>
     </p>
 
@@ -1150,6 +1148,7 @@ class SpectroChemPy(Application):
         if change.new == DEBUG:
             self.log_format = '[%(filename)s-%(funcName)s %(levelname)s] %(' \
                               'message)s'
+        self.log._cache = {}
         self.log.level = self.log_level
         for handler in self.log.handlers:
             handler.level = self.log_level

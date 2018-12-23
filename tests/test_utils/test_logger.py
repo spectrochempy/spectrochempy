@@ -7,28 +7,39 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-
+import logging
 from spectrochempy import log, WARNING, INFO, set_loglevel
 
 def test_logger():
 
-    log.error('----------')
-    log.debug('test log output for debugging')
-    log.info('ssssss')
-    log.warning('aie aie aie')
-    log.error('very bad')
+    # We can set the level using strings
+    set_loglevel('WARNING')
 
-    log.error('----------')
+    assert log.level == logging.WARNING
+
+    log.error('\n'+'*' * 80+'\n')
+
+    log.debug('debug in WARNING level - should not appear')
+    log.info('info in WARNING level - should not appear')
+    log.warning('OK this is a Warning')
+    log.error('OK This is an Error')
+
+    log.error('\n' + '*' * 80 + '\n')
+
     set_loglevel(INFO)
-    log.info('Changed to INFO')
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssss, after changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+    #assert log.level == logging.INFO
 
-    log.error('----------')
+    log.debug('debug in INFO level - should not appear')
+    log.info('OK - info in INFO level')
+    log.warning('OK this is a Warning')
+    log.error('OK This is an Error')
+
+    log.error('\n' + '*' * 80 + '\n')
+
     set_loglevel('DEBUG')
-    log.debug('test log output for debugging, after changing level')
-    log.info('ssssss, after changing level')
-    log.warning('aie aie aieafter changing level')
-    log.error('very badafter changing level')
+    assert log.level == logging.DEBUG
+
+    log.debug('OK - debug in DEBUG level')
+    log.info(' OK - info in DEBUG level')
+    log.warning('OK this is a Warning')
+    log.error('OK This is an Error')
