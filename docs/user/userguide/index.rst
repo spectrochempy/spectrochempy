@@ -28,53 +28,53 @@ This notebook and others are used to produce this user guide.
 So this way you can follow the explanations given below.
 
 
-Introduction
-------------
+1.Introduction
+---------------
 
 .. toctree::
-    :maxdepth: 1
+   :maxdepth: 1
 
-    introduction
+   1.1_introduction
 
-The NDDataset object
----------------------
-
-.. toctree::
-    :maxdepth: 1
-
-    nddataset
-    plotting
-    baseline_correction
-
-Import & export of NDDatasets
------------------------------
-.. toctree::
-    :maxdepth: 1
-
-    importing
-
-Units and uncertainty
-----------------------
+2.The NDDataset object
+-----------------------
 
 .. toctree::
-    :maxdepth: 1
+   :maxdepth: 1
 
-    units_and_uncertainties
+   2.1_nddataset
+   2.2_plotting
+   2.3_baseline_correction
 
+3.Import & export of NDDatasets
+--------------------------------
+.. toctree::
+   :maxdepth: 1
 
-Databases
-----------
+   3.1_importing
+
+4.Units and uncertainty
+------------------------
 
 .. toctree::
-    :maxdepth: 1
+   :maxdepth: 1
 
-    isotope_database
+   4.1_units_and_uncertainties
 
 
-NMR
-----
+5.Databases
+-------------
 
 .. toctree::
-    :maxdepth: 1
+   :maxdepth: 1
 
-    nmr_intro
+   5.1_isotope_database
+
+
+6.NMR
+-------
+
+.. toctree::
+   :maxdepth: 1
+
+   6.1_nmr_intro
