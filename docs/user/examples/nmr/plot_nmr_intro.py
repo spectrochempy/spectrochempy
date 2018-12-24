@@ -9,14 +9,14 @@ Here we explain how to display and perform basic processing of NMR file
 import os
 import spectrochempy as scp
 
-##########################################################
+###############################################################################
 #
 # Here we import two datasets, one is 1D and the other is 2D
 # 
 # Because we will sometimes need to recall the original dataset,
 # we create two getting functions
 
-##########################################################
+###############################################################################
 # 1D dataset getting function
 # ---------------------------
 datadir = scp.datadir.path
@@ -31,7 +31,7 @@ def get_dataset1D():
     return s1D
 
 
-##########################################################
+###############################################################################
 # 2D dataset getting function
 # ---------------------------
 
@@ -44,19 +44,19 @@ def get_dataset2D():
     return s2D
 
 
-##########################################################
+###############################################################################
 # get the 1D dataset
 # -------------------
 dataset1D = get_dataset1D()
 print(dataset1D)
 
-##########################################################
+###############################################################################
 # get the 2D dataset
 # -------------------
 dataset2D = get_dataset2D()
 print(dataset2D)
 
-##########################################################
+###############################################################################
 # Plot the 1D dataset raw data
 # ----------------------------
 # plot the real data
@@ -69,7 +69,7 @@ dataset1D.plot(imag=True, data_only=True, clear=False)
 # such as xlim and so on.
 scp.show()
 
-##########################################################
+###############################################################################
 # To display the imaginary part, one can also simply use the show_complex
 # commands.
 
@@ -78,20 +78,20 @@ ax = dataset1D.plot(show_complex=True, color='green', xlim=(0., 20000.),
 
 scp.show()
 
-###############################
+###############################################################################
 # Plot the 2D dataset raw data
 
 dataset2D = get_dataset2D()
 ax = scp.plot(dataset2D, xlim=(0., 25000.))
 
-##############################
+###############################################################################
 # probably less util, but multiple display is also possible for 2D
 
 dataset2D.plot()
 ax = dataset2D.plot(imag=True, cmap='jet', data_only=True, clear=False)
 scp.show()
 
-#################
+###############################################################################
 # Apodization
 
 dataset1D = get_dataset1D()  # restore original
@@ -108,7 +108,7 @@ lb_dataset.ax.text(12500, 1.70, 'Dual display (original & apodized fids)',
 
 scp.show()
 
-############################
+###############################################################################
 # Note that the apodized dataset actually replace the original data
 # check that both dataset are the same
 print(lb_dataset is dataset1D)  # note here, that the original data are modified
@@ -117,7 +117,7 @@ print(lb_dataset is dataset1D)  # note here, that the original data are modified
 # when applying apodization function.
 # Use the `inplace` keyword to modify this behavior
 
-#################################
+###############################################################################
 # If we want to avoid this behavior and create a new dataset instead,
 # we use the `inplace` flag.
 
@@ -128,7 +128,7 @@ lb2_dataset = dataset1D.em(lb=100. * ur.Hz, inplace=False)
 # check that both dataset are different
 print(lb2_dataset is not dataset1D)
 
-###############################################
+###############################################################################
 # We can also get only the apodization function
 
 dataset1D = get_dataset1D()  # restore original
@@ -136,7 +136,7 @@ p = dataset1D.plot()
 
 scp.show()
 
-################################################
+###############################################################################
 # create the apodized dataset (if apply is False, the apodization function
 # is not applied to the dataset,
 # but returned)
@@ -153,7 +153,7 @@ dataset1D.ax.text(12500, 1.70,
                  ha='center', fontsize=14)
 scp.show()
 
-######################################
+###############################################################################
 # Apodization function can be em, gm, sp ...
 
 dataset1D = get_dataset1D()  # restore original
@@ -177,7 +177,7 @@ scp.show()
 
 # **TODO**: sp function
 
-################################################
+###############################################################################
 # Apodization of 2D data
 
 dataset2D = get_dataset2D()
