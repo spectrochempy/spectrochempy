@@ -7,7 +7,11 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+"""
+API for the core.plotters package
+Automatically generated from file present in the plotters directory.
 
+"""
 from spectrochempy.utils import generate_api
 
 # generate api

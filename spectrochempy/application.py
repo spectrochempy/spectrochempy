@@ -105,7 +105,7 @@ __release_date__ = _get_release_date()
 # other info
 # ............................................................................
 
-__url__ = "http://www-lcs.ensicaen.fr/spectrochempy"
+__url__ = "http://www.spectrochempy.fr"
 "URL for the documentation of this package"
 
 __author__ = "C. Fernandez & A. Travert @LCS"
@@ -525,7 +525,7 @@ class ProjectPreferences(MetaConfigurable):
     """
     Per project preferences
 
-    include plotting and views preference for the incuded datasets
+    include plotting and views preference for the included datasets
 
     """
 
@@ -548,7 +548,7 @@ class ProjectPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    style = Enum(available_styles(), default_value='lcs',
+    style = Enum(available_styles(), default_value='sans',
                  help='Basic matplotlib style to use').tag(config=True,
                                                            type='list')
 

@@ -535,7 +535,11 @@ class NDPlot(HasTraits):
 def _set_figure_style(**kwargs):
     # set temporarily a new style if any
 
+
     log.debug('set style')
+
+    #reset first to default
+    plt.style.use('lcs')
 
     style = kwargs.get('style', None)
 
@@ -544,10 +548,10 @@ def _set_figure_style(**kwargs):
             style = [style]
         if isinstance(style, dict):
             style = [style]
-        style = ['classic', project_preferences.style] + list(style)
+        style = ['lcs', project_preferences.style] + list(style)
         plt.style.use(style)
     else:
-        style = ['classic', project_preferences.style]
+        style = ['lcs', project_preferences.style]
         plt.style.use(style)
         plt.style.use(project_preferences.style)
 
@@ -560,23 +564,23 @@ def _set_figure_style(**kwargs):
             cycler('color', [NBlack, NBlue, NRed, NGreen]))
 
         return mpl.rcParams
-
-@deprecated('use `available styles` from application instead')
-# .............................................................................
-def available_styles():
-    """
-    Styles availables in SpectroChemPy
-
-    Todo
-    -----
-    Make this list extensible programmatically
-
-    Returns
-    -------
-    l : a list of style
-
-    """
-    return app.available_styles()
+#
+# @deprecated('use `available styles` from application instead')
+# # .............................................................................
+# def available_styles():
+#     """
+#     Styles availables in SpectroChemPy
+#
+#     Todo
+#     -----
+#     Make this list extensible programmatically
+#
+#     Returns
+#     -------
+#     l : a list of style
+#
+#     """
+#     return app.available_styles()
 
 
 # .............................................................................

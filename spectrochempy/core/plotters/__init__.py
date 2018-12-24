@@ -9,6 +9,6 @@
 
 
 """
-Package defining plotting methods for n-dimensional datasets.
+Package defining plotting methods for n-dimensional |NDDataset|'s.
 
 """

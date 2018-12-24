@@ -11,6 +11,11 @@
 This module is the main entry-point for the GUI application launched from the
 terminal command line
 
+.. Warning::
+
+    In development : Not yet ready to use
+
+
 """
 
 #For compatibility with the pyQtgtaph library we copy the Qt.py part
