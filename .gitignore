@@ -5,9 +5,6 @@
 # pycharm project
 .idea/
 
-# PyBuilder
-target/
-
 # Spyder project
 .spyderproject
 .spyproject
@@ -15,7 +12,7 @@ target/
 
 # Example ipython notebook checkpoints
 *.ipynb_checkpoints/
-../../Library/Preferences/PyCharm2018.3/scratches/Untitled.ipynb
+Untitled.ipynb
 
 # caches
 __pycache__/
@@ -65,11 +62,6 @@ scp_data/testdata/figures
 .gitignore_*
 *.orig
 
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-
 # C extensions
 *.so
 
@@ -82,8 +74,6 @@ htmlcov/
 .tox/
 .coverage
 .coverage.*
-.cache
-nosetests.xml
 coverage.xml
 *,cover
 

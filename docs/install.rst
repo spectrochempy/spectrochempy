@@ -171,8 +171,8 @@ Alternatively, you can make a clone/fork of the github sources at:
 
 * `https://bitbucket.org/spectrocat/spectrochempy  <https://bitbucket.org/spectrocat/spectrochempy>`_
 
-This is the recommended solution for developpers
-and those who would like to contribute
+This is the recommended solution for developpers 
+and those who would like to contribute (see :ref:`develguide`)
 
 Install ipyparallel in Jupyter notebook
 =========================================
