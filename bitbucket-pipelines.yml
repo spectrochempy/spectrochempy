@@ -10,6 +10,9 @@ pipelines:
     - step:
         script:
         - echo "This script runs only on commit to the master branch."
+        - conda update -n base -c defaults conda
+        - conda config --prepend channels conda-forge 
+        - conda install --yes --file requirements.txt
         - pip install -e .
         - cd tests
         - pytest .
