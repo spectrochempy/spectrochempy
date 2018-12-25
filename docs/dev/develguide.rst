@@ -244,7 +244,7 @@ or to update it after some changes:
 
 The generated file are located in a directory (spectrochempy_doc) at the same level as the spectrochempy directory.
 
-To display the documentation (on mac. For widow the command `start` should work or something equivalent on linux):
+To display the documentation (on mac. For window the command `start` should work or something equivalent on linux):
 
 .. sourcecode:: bash
 
