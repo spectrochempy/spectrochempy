@@ -10,9 +10,6 @@ pipelines:
     - step:
         script:
         - echo "This script runs only on commit to the master branch."
-    - step:
-        trigger: manual
-        script:
         - pip install -e .
         - cd tests
         - pytest .
