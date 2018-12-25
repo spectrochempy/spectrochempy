@@ -41,6 +41,7 @@ from traitlets import HasTraits, Unicode
 # local import
 # ----------------------------------------------------------------------------
 
+from .ndarray import NDArray
 from .ndcoords import Coord, CoordSet
 from ..utils import SpectroChemPyWarning
 from ..utils.meta import Meta
@@ -205,8 +206,17 @@ class NDIO(HasTraits):
                     pars[level + key] = str(val)
 
                 elif isinstance(val, Meta):
-
-                    pars[level + key] = val.to_dict()
+                    d = val.to_dict()
+                    # we must handle Quantities
+                    for k,v in d.items():
+                        if isinstance(v, list):
+                            for i, item in enumerate(v):
+                                if isinstance(item, Quantity):
+                                    item = list(item.to_tuple())
+                                    if isinstance(item[0], np.ndarray):
+                                        item[0]=item[0].tolist()
+                                    d[k][i]=tuple(item)
+                    pars[level + key] = d
 
                 elif val is None:
                     continue
@@ -346,8 +356,6 @@ class NDIO(HasTraits):
                 pars = json.loads(asstr(val))
             else:
                 setattr(new, "_%s" % key, val)
-        if coordset:
-            new.coordset = coordset
 
         def setattributes(clss, key, val):
             # utility function to set the attributes
@@ -355,6 +363,17 @@ class NDIO(HasTraits):
                 val = datetime.datetime.fromtimestamp(val)
                 setattr(clss, "_%s" % key, val)
             elif key == 'meta':
+                # handle the case were quantity were saved
+                for k,v in val.items():
+                    if isinstance(v, list):
+                        for i,item in enumerate(v):
+                            if isinstance(item, (list, tuple)):
+                                try:
+                                    v[i] = Quantity.from_tuple(item)
+                                except TypeError:
+                                    # not a quantity
+                                    pass
+                        val[k]=v
                 clss.meta.update(val)
             elif key in ['units']:
                 setattr(clss, key, val)
@@ -374,6 +393,10 @@ class NDIO(HasTraits):
 
         if filename:
             new._filename = filename
+
+        if coordset: # this must comme after the set attribute (important
+            # for complex data)
+            new.coordset = coordset
 
         return new
 

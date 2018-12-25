@@ -1,7 +1,7 @@
 .. _userguide:
 
 User Guide
-==========
+===========
 
 The |scpy| **API** is accessible in a terminal using a python or
 an IPython shell.
@@ -28,16 +28,17 @@ This notebook and others are used to produce this user guide.
 So this way you can follow the explanations given below.
 
 
-1.Introduction
----------------
+1. Introduction
+----------------
 
 .. toctree::
    :maxdepth: 1
 
    1.1_introduction
 
-2.The NDDataset object
------------------------
+
+2. The NDDataset object
+------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -46,15 +47,17 @@ So this way you can follow the explanations given below.
    2.2_plotting
    2.3_baseline_correction
 
-3.Import & export of NDDatasets
---------------------------------
+
+3. Import & export of NDDatasets
+---------------------------------
 .. toctree::
    :maxdepth: 1
 
    3.1_importing
 
-4.Units and uncertainty
-------------------------
+
+4. Units and uncertainty
+-------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -62,7 +65,7 @@ So this way you can follow the explanations given below.
    4.1_units_and_uncertainties
 
 
-5.Databases
+5. Databases
 -------------
 
 .. toctree::
@@ -71,10 +74,21 @@ So this way you can follow the explanations given below.
    5.1_isotope_database
 
 
-6.NMR
+6. NMR
 -------
 
 .. toctree::
    :maxdepth: 1
 
    6.1_nmr_intro
+
+
+7. Managing projects
+---------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   7.1_project
+
+

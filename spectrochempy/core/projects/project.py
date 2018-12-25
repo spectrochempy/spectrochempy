@@ -25,6 +25,7 @@ from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
                                  ScpFile, )
 from spectrochempy.core.projects.baseproject import AbstractProject
+from spectrochempy.units.units import Quantity
 
 log = app.log
 preferences = app.general_preferences
@@ -192,6 +193,8 @@ class Project(AbstractProject):
 
         s = "Project {}:\n".format(self.name)
 
+        lens = len(s)
+
         def _listproj(s, project, ns):
             ns += 1
             sep = "   " * ns
@@ -200,11 +203,16 @@ class Project(AbstractProject):
                 s += "{} ⤷ {} (sub-project)\n".format(sep, k)
                 s = _listproj(s, v, ns)  # recursive call
 
+
             for k, v in project._datasets.items():
                 s += "{} ⤷ {} (dataset)\n".format(sep, k)
 
             for k, v in project._scripts.items():
                 s += "{} ⤷ {} (script)\n".format(sep, k)
+
+            if len(s) == lens:
+                # nothing has been found in the project
+                s += "{} (empty project)\n".format(sep)
 
             return s
 

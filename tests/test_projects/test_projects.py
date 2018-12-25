@@ -82,6 +82,14 @@ def test_project(ds1, ds2, dsm):
 
     print(myp2)
 
+
+
+def test_empty_project():
+
+    proj = Project(name="XXX")
+    assert proj.name == "XXX"
+    assert str(proj).strip() == "Project XXX:\n    (empty project)"
+
 def test_project_with_script():
 
     # Example from tutorial agir notebook
@@ -140,3 +148,34 @@ def test_project_with_script():
     # attemps to resolve locals
     newproj.print_info()
 
+    proj.save('HIZECOKE_TEST')
+    newproj = Project.load('HIZECOKE_TEST')
+
+
+def test_save_and_load_project(ds1, ds2):
+
+    myp = Project(name='process')
+
+    ds1.name = 'toto'
+    ds2.name = 'tata'
+
+    myp.add_datasets(ds1, ds2)
+
+    myp.save('PROCESS')
+
+def test_save_and_load_nmr_project():
+
+    myp = Project(name='process')
+
+    path = os.path.join(datadir.path, 'nmrdata', 'bruker', 'tests', 'nmr',
+                        'bruker_1d')
+
+    # load the data in a new dataset
+    ndd = NDDataset(name='NMR_1D')
+    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+
+    myp.add_dataset(ndd)
+    myp.save('NMR_1')
+
+    # now load it
+    myp2 = Project.load('NMR_1')
