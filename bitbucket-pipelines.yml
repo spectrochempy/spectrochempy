@@ -1,4 +1,4 @@
-image: python:3.6.3
+image: python:3.7.1
 
 pipelines:
   default:
@@ -10,5 +10,9 @@ pipelines:
     - step:
         script:
         - echo "This script runs only on commit to the master branch."
+    - step:
+        trigger: manual
+        script:
         - pip install -e .
-        - pytest tests
+        - cd tests
+        - pytest .
