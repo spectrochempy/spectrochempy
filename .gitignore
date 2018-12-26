@@ -43,18 +43,14 @@ cov/
 
 
 # data
-essai.scp
+.scp
 scpy.svg
 *.pyc
 
 *.sample
-
-tartempion.scp
 todo.txt
 *.bak
 *.pkl
-FTIR.scp
-tg.scp
 
 tests/figures
 .coverage*
