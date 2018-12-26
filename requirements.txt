@@ -20,7 +20,6 @@ jupyterlab
 ipykernel
 jupyter_nbextensions_configurator
 ipyparallel
-nb_conda
 ipympl
 widgetsnbextension
 nodejs

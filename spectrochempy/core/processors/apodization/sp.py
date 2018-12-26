@@ -27,7 +27,7 @@ from spectrochempy.units.units import Quantity
 # sp function
 # =============================================================================
 
-def sp(self, *args, **kwargs):
+def sp(dataset, *args, **kwargs):
     """Calculate a Shifted sine-bell apodization
 
     Functional form of apodization window:
@@ -107,4 +107,4 @@ def sp(self, *args, **kwargs):
     kwargs['apod2'] = end
     kwargs['apod3'] = pow
 
-    return apodize(self, **kwargs)
+    return apodize(dataset, **kwargs)
