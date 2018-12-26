@@ -48,8 +48,6 @@ ibc = scp.BaselineCorrection(ndp, axis=-1, method='multivariate',
 ranges = []  # not predefined range
 span = ibc.run(*ranges)
 
-scp.show()
-
 ###############################################################################
 # print the corrected dataset
 

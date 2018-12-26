@@ -107,4 +107,6 @@ def sp(dataset, *args, **kwargs):
     kwargs['apod2'] = end
     kwargs['apod3'] = pow
 
-    return apodize(dataset, **kwargs)
+    out = apodize(dataset, **kwargs)
+
+    return out

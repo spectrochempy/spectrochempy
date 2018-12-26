@@ -40,7 +40,6 @@ d = scp.NDDataset(data=[-1, 0.2, 0.9, 2.1],
 # Here is a plot of these data-points:
 
 d.plot_scatter(markersize=7, mfc='red')
-#show()
 
 ##############################################################################
 # We want to fit a line through these data-points of equation
@@ -71,7 +70,6 @@ dfit = lst.inverse_transform()
 
 dfit.plot_pen(clear=False, color='g', label='Fitted line', legend=True)
 
-show()
 
 ##############################################################################
 # Note: The same result can be obtained directly using `d` as a single

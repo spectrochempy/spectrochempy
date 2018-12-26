@@ -84,7 +84,6 @@ new = mydataset['hot']
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 
 new.plot()
-scp.show()
 
 ##################################################################
 # But it is possible to display image
@@ -92,16 +91,13 @@ scp.show()
 
 # sphinx_gallery_thumbnail_number = 2
 new.plot(method='image')
-scp.show()
 
 ##################################################################
 # or stacked plot
 
 new.plot(method='stack')
-scp.show()
 
 ##################################################################
 # Note that the scp allows one to use this syntax too:
 
 scp.plot_stack(new)
-scp.show()

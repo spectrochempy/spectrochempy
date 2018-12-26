@@ -49,7 +49,6 @@ dataset.data = np.random.normal(dataset.data,.2)
 dataset.title = 'intensity'
 
 dataset.plot_stack()
-#scp.show()
 
 ############################################################
 #  Evolving Factor Analysis
@@ -62,8 +61,6 @@ efa = scp.EFA(dataset)
 
 f = efa.get_forward(plot=True)
 b = efa.get_backward(plot=True)
-
-#scp.show()
 
 #############################################################
 # Looking at these EFA curves, it is quite obvious that only two components
@@ -86,5 +83,3 @@ efa.get_backward(plot=True, npc=2, cutoff=cut, clear=False, legend='lower right'
 #
 
 c = efa.get_conc(npc, cutoff=cut, plot=True)
-
-scp.show()

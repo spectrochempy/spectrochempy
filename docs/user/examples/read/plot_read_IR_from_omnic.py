@@ -19,7 +19,6 @@ dataset = scp.NDDataset.read_omnic(os.path.join(datadir,
                                               'irdata', 'nh4y-activation.spg'))
 
 dataset.plot_stack(style='paper')
-scp.show()
 
 ##################################################################
 # change the unit of y axis, the y origin as well as the title of the axis
@@ -29,4 +28,4 @@ dataset.y -= dataset.y[0]
 dataset.y.title = 'acquisition time'
 
 dataset.plot_stack()
-scp.show()
+

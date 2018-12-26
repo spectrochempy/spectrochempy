@@ -27,4 +27,3 @@ ndd = scp.NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 # view it...
 
 scp.plot(ndd, style='paper')
-scp.show()

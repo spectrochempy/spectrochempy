@@ -109,6 +109,3 @@ proj['tgscatter'] = scp.Script('tgscatter', script_source_2)
 
 proj.tgscatter()
 
-# =============================================================================
-if __name__ == '__main__':
-    pass

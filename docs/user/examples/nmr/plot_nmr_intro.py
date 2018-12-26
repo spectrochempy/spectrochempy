@@ -17,11 +17,10 @@ import spectrochempy as scp
 # we create two getting functions
 
 ###############################################################################
-# 1D dataset getting function
-# ---------------------------
+# Loading the NMR data
+# --------------------
+# Let's define the 1D dataset getting function
 datadir = scp.datadir.path
-
-
 def get_dataset1D():
     """Read the 1D dataset"""
     s1D = scp.NDDataset()
@@ -30,11 +29,8 @@ def get_dataset1D():
     s1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return s1D
 
-
 ###############################################################################
-# 2D dataset getting function
-# ---------------------------
-
+# and the 2D dataset getting function
 def get_dataset2D():
     """Read the 2D dataset"""
     s2D = scp.NDDataset()
@@ -43,31 +39,27 @@ def get_dataset2D():
     s2D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return s2D
 
-
 ###############################################################################
-# get the 1D dataset
-# -------------------
+# Now get the 1D dataset
 dataset1D = get_dataset1D()
 print(dataset1D)
 
 ###############################################################################
-# get the 2D dataset
-# -------------------
+# and the 2D dataset
 dataset2D = get_dataset2D()
 print(dataset2D)
 
 ###############################################################################
 # Plot the 1D dataset raw data
 # ----------------------------
-# plot the real data
+# We plot the real data and the imaginary data on the same plot
 dataset1D.plot(xlim=(0, 25000), style='paper')
+dataset1D.plot(imag=True, data_only=True, color='red', clear=False)
 
-# plot the imaginary data on the same plot
-dataset1D.plot(imag=True, data_only=True, clear=False)
+###############################################################################
 # `data_only=True` to plot only the additional data, without updating the
-# figure setting
-# such as xlim and so on.
-scp.show()
+# figure setting such as xlim and so on.
+
 
 ###############################################################################
 # To display the imaginary part, one can also simply use the show_complex
@@ -76,7 +68,6 @@ scp.show()
 ax = dataset1D.plot(show_complex=True, color='green', xlim=(0., 20000.),
                    zlim=(-2., 2.))
 
-scp.show()
 
 ###############################################################################
 # Plot the 2D dataset raw data
@@ -89,7 +80,6 @@ ax = scp.plot(dataset2D, xlim=(0., 25000.))
 
 dataset2D.plot()
 ax = dataset2D.plot(imag=True, cmap='jet', data_only=True, clear=False)
-scp.show()
 
 ###############################################################################
 # Apodization
@@ -104,9 +94,8 @@ lb_dataset = dataset1D.em(lb=100. * ur.Hz)
 p = lb_dataset.plot(xlim=(0, 25000), zlim=(-2, 2))
 
 lb_dataset.ax.text(12500, 1.70, 'Dual display (original & apodized fids)',
-                  ha='center', fontsize=16)
+                  ha='center', fontsize=10)
 
-scp.show()
 
 ###############################################################################
 # Note that the apodized dataset actually replace the original data
@@ -134,7 +123,6 @@ print(lb2_dataset is not dataset1D)
 dataset1D = get_dataset1D()  # restore original
 p = dataset1D.plot()
 
-scp.show()
 
 ###############################################################################
 # create the apodized dataset (if apply is False, the apodization function
@@ -150,15 +138,15 @@ dataset1D.plot(data_only=True, clear=False)
 dataset1D.ax.text(12500, 1.70,
                  'Multiple display (original & em apodized fids + '
                  'apod.function)',
-                 ha='center', fontsize=14)
-scp.show()
+                 ha='center', fontsize=10)
 
 ###############################################################################
-# Apodization function can be em, gm, sp ...
-
+# Apodization functions can be em, gm, sp ...
 dataset1D = get_dataset1D()  # restore original
 p = dataset1D.plot()
 
+###############################################################################
+# gm apodization:
 LB = 50. * ur.Hz
 GB = 100. * ur.Hz
 apodfunc = dataset1D.gm(gb=GB, lb=LB, apply=False)
@@ -168,14 +156,18 @@ apodfunc.plot(xlim=(0, 25000), clear=False, zlim=(-2, 2))
 dataset1D.gm(gb=GB, lb=LB)  # apply=True by default
 dataset1D.plot(data_only=True, clear=False)
 
-dataset1D.ax.text(12500, 1.70,
+dataset1D.ax.text(25000, 500,
                  'Multiple display (original & gm apodized fids + '
                  'apod.function)',
-                 ha='center', fontsize=14)
+                 ha='center', fontsize=10)
 
-scp.show()
+###############################################################################
+# sp apodization:
 
+###############################################################################
 # **TODO**: sp function
+
+
 
 ###############################################################################
 # Apodization of 2D data
@@ -188,4 +180,3 @@ dataset2D.em(lb=LB)
 dataset2D.em(lb=LB / 2, axis=0)
 dataset2D.plot(data_only=True, xlim=(0, 5000), cmap='copper', clear=False)
 
-scp.show()

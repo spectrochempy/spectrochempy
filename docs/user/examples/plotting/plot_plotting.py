@@ -45,6 +45,5 @@ sp.plot_multiple(method='scatter', style='sans',
 sp.plot_multiple(method='scatter',
               datasets=datasets, labels=labels, legend='best')
 
-sp.show()
 
 

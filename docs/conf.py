@@ -395,7 +395,7 @@ def setup(app):
 # Generate the plots for the gallery
 
 sphinx_gallery_conf = {
-    'plot_gallery': 'False',
+    'plot_gallery': 'True',
     'backreferences_dir': 'gen_modules/backreferences',
     'doc_module': ('spectrochempy', ), 'reference_url': {
         'spectrochempy': None, 'matplotlib': 'https://matplotlib.org',

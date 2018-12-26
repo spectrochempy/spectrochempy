@@ -41,7 +41,6 @@ efa = scp.EFA(dataset)
 f = efa.get_forward(npc=7, plot=True)
 b = efa.get_backward(npc=7, plot=True)
 
-#scp.show()
 
 ##############################################################################
 # Clearly we can retain 4 components, in agreement with what was used to
@@ -54,8 +53,5 @@ cut = np.max(f[:, npc].data)
 f = efa.get_forward(npc=4, cutoff=cut, plot=True)
 b = efa.get_backward(npc=4, cutoff=cut, plot=True)
 
-#scp.show()
 
 c = efa.get_conc(npc, cutoff=cut, plot=True)
-
-scp.show()

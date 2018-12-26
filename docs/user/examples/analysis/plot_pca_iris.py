@@ -41,4 +41,3 @@ _ = pca.screeplot()
 _ = pca.scoreplot(1, 2, color_mapping='labels')
 _ = pca.scoreplot(1, 2, 3, color_mapping='labels')
 
-scp.show()
