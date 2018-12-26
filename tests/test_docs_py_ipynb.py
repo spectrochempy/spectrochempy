@@ -16,7 +16,7 @@ import os, sys
 
 from tests.utils import notebook_run, example_run
 
-#@pytest.mark.skip
+@pytest.mark.skip # problem with timeout
 @pytest.mark.parametrize('notebook', glob("../docs/user/*/*.ipynb"))
 def test_notebooks(notebook):
     if '.ipynb_checkpoints' in notebook :

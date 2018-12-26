@@ -252,7 +252,7 @@ class NDIO(HasTraits):
     @classmethod
     def load(cls,
              fid='',
-             protocol='scp',
+             protocol=None,
              directory=datadir,
              **kwargs
              ):
@@ -310,10 +310,17 @@ class NDIO(HasTraits):
             from spectrochempy import NDDataset
             cls = NDDataset
 
-        if protocol not in ['scp']:
+        if protocol is not None and protocol not in ['scp']:
             # TODO : case where fp is a file object
             filename = fid
             return cls.read(filename, protocol=protocol)
+
+        if isinstance(fid, str) and protocol is None:
+            filename, ext = os.path.splitext(fid)
+            try:
+                return cls.read(fid, protocol=ext[1:])
+            except:
+                pass
 
         if isinstance(fid, str):
             # this is a filename

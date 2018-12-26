@@ -289,7 +289,7 @@ def dataset3d():
 def IR_dataset_1D():
     from spectrochempy import NDDataset, datadir
     datadir = datadir.path
-    dataset = NDDataset.read_omnic(
+    dataset = NDDataset.load(
             os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
     return dataset[0]
 
