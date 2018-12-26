@@ -19,7 +19,7 @@ import spectrochempy as scp
 ############################################################
 # Load a dataset
 
-dataset = scp.load("test_full2D")
+dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 print(dataset)
 dataset.plot_stack()
 

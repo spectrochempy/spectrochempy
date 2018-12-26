@@ -20,7 +20,7 @@ import spectrochempy as scp
 ############################################################
 # Upload and preprocess a dataset
 
-dataset = scp.load("test_full2D")
+dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 
 
 # columns masking
