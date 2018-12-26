@@ -33,7 +33,6 @@ def em(dataset, *args, **kwargs):
     The data in the last dimension MUST be time-domain,
     or an error is raised.
 
-
     Functional form of apodization window:
 
     .. math::
@@ -43,37 +42,23 @@ def em(dataset, *args, **kwargs):
     ----------
     dataset : |NDDataset|.
         Dataset we want to apodize using exponential multiplication
-
     lb : float or `quantity`
-
         Exponential line broadening,
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
-
     shifted : float or `quantity`
-
         Shift the data time origin by this amount. If it is not a quantity
         it is assumed to be expressed in the data units of the last
         dimension.
-
     inv : bool, optional
-
         True for inverse apodization.  False (default) for standard.
-
     rev : bool, optional.
-
         True to reverse the apodization before applying it to the data.
-
-
     apply : `bool`, optional, default = True
-
         Should we apply the calculated apodization to the dataset (default)
         or just return the apodization ndarray.
-
     inplace : `bool`, optional, default = True
-
         Should we make the transform in place or return a new dataset
-
     axis : optional, default is -1
 
     Returns
@@ -96,12 +81,12 @@ def em(dataset, *args, **kwargs):
     # is it a shifted broadening?
     shifted = kwargs.pop('shifted', 0)
 
-    def func(x, tc1, tc2, shifted):
+    def func(x, lb, tc2, shifted):
         # tc2 not used here
-        if tc1.magnitude <= epsilon:
+        if lb.magnitude <= epsilon:
             e = np.ones_like(x)
         else:
-            e = np.pi * np.abs(x - shifted) / tc1
+            e = np.pi * np.abs(x - shifted) / lb
         return np.exp(-e.data)
 
     kwargs['method'] = func

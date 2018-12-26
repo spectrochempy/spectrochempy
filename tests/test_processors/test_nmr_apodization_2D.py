@@ -26,42 +26,6 @@ from spectrochempy.utils import SpectroChemPyWarning
 
 
 
-def test_nmr_2D(NMR_dataset_2D):
-    dataset = NMR_dataset_2D
-    dataset.plot(nlevels=20)  # , start=0.15)
-    show()
-    pass
-
-
-
-def test_nmr_2D_imag(NMR_dataset_2D):
-    # plt.ion()
-    dataset = NMR_dataset_2D.copy()
-    dataset.plot(imag=True)
-    show()
-    pass
-
-
-
-def test_nmr_2D_imag_compare(NMR_dataset_2D):
-    # plt.ion()
-    dataset = NMR_dataset_2D.copy()
-    dataset.plot()
-    dataset.plot(imag=True, cmap='jet', data_only=True, alpha=.3)
-    # better not to replot a second colorbar
-    show()
-    pass
-
-
-
-def test_nmr_2D_hold(NMR_dataset_2D):
-    dataset = NMR_dataset_2D
-    dataset.plot()
-    dataset.imag.plot(cmap='jet', data_only=True)
-    show()
-    pass
-
-
 
 def test_nmr_2D_em_(NMR_dataset_2D):
     dataset = NMR_dataset_2D.copy()

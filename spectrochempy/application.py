@@ -807,7 +807,7 @@ class SpectroChemPy(Application):
 
     # filename to load at startup
     # ---------------------------
-    startup_filename = Unicode('test_full2D.scp', help='File name to load at '
+    startup_filename = Unicode('nh4-activation.spg', help='File name to load at '
                                                        'startup').tag(
         config=True, type='file')
 

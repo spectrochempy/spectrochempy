@@ -169,6 +169,8 @@ def tests_multipleplots_and_styles():
     plot_multiple(method='scatter',
                   datasets=datasets, labels=labels, legend='best')
 
+
+
 ##### debugging ####
 
 #### deprecation #
@@ -181,3 +183,5 @@ def test_kind_deprecated(IR_dataset_2D):
     dataset.plot(kind='stack', style='sans', colorbar=False)
 
 set_loglevel(WARNING)
+
+

@@ -39,40 +39,25 @@ def apodize(dataset, **kwargs):
     ----------
     method : Callable,
         Apodization function
-
     apod : float or a `Quantity`, default 0, or list
-
         Apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
-
     apod2 : float or a `Quantity`, optional, default 0, or list
-
         Second apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
-
     apod3 : float or a `Quantity`, optional, default 0, or list
-
         third apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
         alias: shifted
-
     inv : bool, optional
-
         True for inverse apodization.  False (default) for standard.
-
     rev : bool, optional.
-
         True to reverse the apodization before applying it to the data.
-
     apply : `bool`, optional, default = True
-
         Should we apply the calculated apodization to the dataset (default)
         or just return the apodization ndarray.
-
     inplace : `bool`, optional, default = True
-
         Should we make the transform in place or return a new dataset
-
     axis : optional, default is -1
 
     Returns
