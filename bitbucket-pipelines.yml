@@ -1,4 +1,4 @@
-image: continuumio/anaconda3
+image: continuumio/miniconda3
 
 pipelines:
   default:
