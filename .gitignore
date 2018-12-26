@@ -87,6 +87,7 @@ recipes/spectrochempy/linux-aarch64
 
 .dockerignore
 .pipeline*.sh
-Dockerfile
+
 /docs/user/userguide/essai.ipynb
 .vscode
+

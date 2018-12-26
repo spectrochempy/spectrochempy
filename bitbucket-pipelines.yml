@@ -10,8 +10,11 @@ pipelines:
     - step:
         script:
         - echo "This script runs only on commit to the master branch."
-        - conda config --prepend channels conda-forge 
-        - conda install --yes --file requirements.txt
+        - apt-get update && apt-get install libgl1-mesa-glx libglib2.0-0 -y
+        #- conda config --prepend channels conda-forge
+        #- conda install --yes --file requirements.txt
+        - conda env create -f scp37env.yml
+        - source activate scp37
         - pip install -e .
         - cd tests
         - pytest .
