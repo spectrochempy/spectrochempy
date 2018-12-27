@@ -11,4 +11,5 @@ pipelines:
         script:
         - echo "This script runs only on commit to the master branch."
         - pip install -e .
-        - pytest tests/
+        - ls
+        - pytest .
