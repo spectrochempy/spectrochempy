@@ -6,9 +6,6 @@ import os
 import pytest
 import numpy as np
 
-import matplotlib as mpl
-matplotlib_backend = mpl.get_backend()
-
 #initialize a ipython session before calling spectrochempy
 
 @pytest.fixture(scope="module")

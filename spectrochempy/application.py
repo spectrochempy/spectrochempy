@@ -840,20 +840,25 @@ class SpectroChemPy(Application):
     # ----------------------
 
     aliases = Dict(
-        dict(test='SpectroChemPy.test', p='SpectroChemPy.last_project',
+        dict(test='SpectroChemPy.test',
+             p='SpectroChemPy.last_project',
              f='SpectroChemPy.startup_filename'))
 
-    flags = Dict(dict(debug=({'SpectroChemPy': {'log_level': DEBUG}},
+    flags = Dict(
+        dict(
+        debug=({'SpectroChemPy': {'log_level': DEBUG}},
                              "Set log_level to DEBUG - most verbose mode"),
         quiet=({'SpectroChemPy': {'log_level': ERROR}},
-               "Set log_level to ERROR - no verbosity at all"), reset_config=(
+               "Set log_level to ERROR - no verbosity at all"),
+        reset_config=(
         {'SpectroChemPy': {'reset_config': True}}, "Reset config to default"),
         show_config=({'SpectroChemPy': {'show_config': True, }},
                      "Show the application's configuration (human-readable "
                      "format)"),
         show_config_json=({'SpectroChemPy': {'show_config_json': True, }},
                           "Show the application's configuration (json "
-                          "format)"), ))
+                          "format)"),
+    ))
 
     classes = List([GeneralPreferences, ProjectPreferences, DataDir, ])
 
@@ -923,6 +928,7 @@ class SpectroChemPy(Application):
         if len(sys.argv) > 1 and "-test" in sys.argv[1]:
             plt.ioff()
             self.do_not_block = True
+
 
         # we catch warnings and error for a ligther display to the end-user.
         # except if we are in debugging mode

@@ -11,10 +11,10 @@ import spectrochempy as scp
 
 ###############################################################################
 #
-# Here we import two datasets, one is 1D and the other is 2D
+# Here we import a 1D NMR dataset
 # 
 # Because we will sometimes need to recall the original dataset,
-# we create two getting functions
+# we create a getting functions
 
 ###############################################################################
 # Loading the NMR data
@@ -29,25 +29,12 @@ def get_dataset1D():
     s1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return s1D
 
-###############################################################################
-# and the 2D dataset getting function
-def get_dataset2D():
-    """Read the 2D dataset"""
-    s2D = scp.NDDataset()
-    path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
-                        'bruker_2d')
-    s2D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-    return s2D
 
 ###############################################################################
 # Now get the 1D dataset
 dataset1D = get_dataset1D()
 print(dataset1D)
 
-###############################################################################
-# and the 2D dataset
-dataset2D = get_dataset2D()
-print(dataset2D)
 
 ###############################################################################
 # Plot the 1D dataset raw data
@@ -70,18 +57,6 @@ ax = dataset1D.plot(show_complex=True, color='green', xlim=(0., 20000.),
 
 
 ###############################################################################
-# Plot the 2D dataset raw data
-
-dataset2D = get_dataset2D()
-ax = scp.plot(dataset2D, xlim=(0., 25000.))
-
-###############################################################################
-# probably less util, but multiple display is also possible for 2D
-
-dataset2D.plot()
-ax = dataset2D.plot(imag=True, cmap='jet', data_only=True, clear=False)
-
-###############################################################################
 # Apodization
 
 dataset1D = get_dataset1D()  # restore original
@@ -100,18 +75,14 @@ lb_dataset.ax.text(12500, 1.70, 'Dual display (original & apodized fids)',
 ###############################################################################
 # Note that the apodized dataset actually replace the original data
 # check that both dataset are the same
-print(lb_dataset is dataset1D)  # note here, that the original data are modified
-#  by
-# default
-# when applying apodization function.
-# Use the `inplace` keyword to modify this behavior
+print(lb_dataset is dataset1D)
 
 ###############################################################################
+# note here, that the original data are modified by default when applying apodization function.
+#
 # If we want to avoid this behavior and create a new dataset instead,
 # we use the `inplace` flag.
-
 dataset1D = get_dataset1D()
-
 lb2_dataset = dataset1D.em(lb=100. * ur.Hz, inplace=False)
 
 # check that both dataset are different
@@ -168,15 +139,5 @@ dataset1D.ax.text(25000, 500,
 # **TODO**: sp function
 
 
-
-###############################################################################
-# Apodization of 2D data
-
-dataset2D = get_dataset2D()
-dataset2D.plot(xlim=(0., 5000.))
-
-LB = 20. * ur.Hz
-dataset2D.em(lb=LB)
-dataset2D.em(lb=LB / 2, axis=0)
-dataset2D.plot(data_only=True, xlim=(0, 5000), cmap='copper', clear=False)
+scp.show()
 
