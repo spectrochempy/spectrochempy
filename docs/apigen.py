@@ -15,10 +15,8 @@
     :license: BSD, see LICENSE_SPHINX for details.
 
 """
-# TODO: rewrite something smaller just fitting our present need to generate
-# the API
 
-from __future__ import print_function
+# the API
 
 import os
 import sys
@@ -27,6 +25,8 @@ from fnmatch import fnmatch
 
 from sphinx.util import rst
 from sphinx.util.osutil import FileAvoidWrite, walk
+from spectrochempy.sphinxext.traitlets_sphinxdoc import reverse_aliases, class_config_rst_doc
+
 from traitlets import import_item
 import inspect
 
@@ -519,17 +519,13 @@ Constants
     _classes = "    ".join(lclasses)
     _funcs = "    ".join(lfuncs)
     _consts = "".join(lconsts)
-    #TODO: replace the hard reference to the user workspace
-    _consts = _consts.replace('/Users/christian/Dropbox/D.PROGRAMMES/', '~/')
+    
+    # _consts = _consts.replace('/Users/christian/Dropbox/D.PROGRAMMES/', '~/')
 
     text = indextemplate.format(consts=_consts, preferences=write_prefs(),
                                 classes="    " + _classes,
                                 funcs="    " + _funcs)
     write_file('index', text, opts)
-
-
-from spectrochempy.sphinxext.traitlets_sphinxdoc import (reverse_aliases,
-                                                         class_config_rst_doc, )
 
 
 def write_prefs():
