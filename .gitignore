@@ -91,3 +91,4 @@ recipes/spectrochempy/linux-aarch64
 /docs/user/userguide/essai.ipynb
 .vscode
 
+/tests_extern_packages/
