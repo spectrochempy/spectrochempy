@@ -82,11 +82,11 @@ class SVD(HasTraits):
         >>> dataset = NDDataset.load('mydataset.scp')
         >>> svd = SVD(dataset)
         >>> print(svd.ev.data)
-        [11848.225  633.980 ...,    0.001    0.001]
+        [11848.225  633.980 ...    0.001    0.001]
         >>> print(svd.ev_cum.data)
-        [11848.225 12482.204 ..., 12532.584 12532.585]
+        [  94.539   99.598 ...  100.000  100.000]
         >>> print(svd.ev_ratio.data)
-        [  94.539    5.059 ...,    0.000    0.000]
+        [  94.539    5.059 ...    0.000    0.000]
 
         """
 

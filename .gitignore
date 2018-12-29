@@ -83,8 +83,6 @@ recipes/spectrochempy/linux-64
 recipes/spectrochempy/linux-aarch64
 *.tar.bz2
 
-
-
 .dockerignore
 .pipeline*.sh
 

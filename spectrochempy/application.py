@@ -384,8 +384,8 @@ class GeneralPreferences(MetaConfigurable):
     --------
 
     >>> import spectrochempy as scp # doctest: +ELLIPSIS
-    SpectroChemPy's API...
-    >>> delimiter = scp.preferences.csv_delimiter
+
+    >>> delimiter = scp.general_preferences.csv_delimiter
 
 
     """
