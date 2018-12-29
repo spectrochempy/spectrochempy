@@ -73,7 +73,7 @@ def test_1D():
         raise AssertionError('comparison fails')
     os.remove('multiple_IR_dataset_1D_scatter.png')
 
-    plt.show()
+    show()
 
 
 

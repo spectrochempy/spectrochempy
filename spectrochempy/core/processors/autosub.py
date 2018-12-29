@@ -114,7 +114,7 @@ def autosub(dataset, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     # must be float to be considered as frequency for instance
 
     coords = new.coordset[-1]
-    xrange = CoordRange(*ranges, reversed=coords.is_reversed)
+    xrange = CoordRange(*ranges, reversed=coords.reversed)
 
     s = []
     r = []

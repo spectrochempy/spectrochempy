@@ -30,7 +30,7 @@ from datetime import datetime
 
 import numpy as np
 from numpy.ma.core import MaskedConstant, masked, nomask
-from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float,
+from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float, Complex,
                        HasTraits, default, validate)
 from pandas.core.generic import NDFrame, Index
 
@@ -95,6 +95,7 @@ class NDArray(HasTraits):
     """
 
     _data = Array(Float(), allow_none=True)
+    _cdata = Array(Complex(), allow_none=True)
     _coordset = Instance(List, allow_none=True)
     _mask = Union((Array(Bool()), Instance(MaskedConstant)))
     _uncertainty = Array(Float(), allow_none=True)
@@ -502,6 +503,9 @@ class NDArray(HasTraits):
         If a dimension is complex, real and imaginary part are interleaved
         in the `data` array.
 
+        This property return an interleaved data array (except if this is a single element array.
+        For 1D array, to get a complex data array, one must use the ``cdata`` property instead.
+
         .. note::
             See the :ref:`userguide` for more information
 
@@ -533,10 +537,14 @@ class NDArray(HasTraits):
             # successfully initialized for the passed NDArray.data
 
             for attr in self.__dir__():
-                val = getattr(data, "_%s" % attr)
-                if self._copy:
-                    val = copy.deepcopy(val)
-                setattr(self, "_%s" % attr, val)
+                try:
+                    val = getattr(data, "_%s" % attr)
+                    if self._copy:
+                        val = copy.deepcopy(val)
+                    setattr(self, "_%s" % attr, val)
+                except AttributeError:
+                    # some attribute of NDDataset are missing in NDArray
+                    pass
 
             if self._copy:
                 self._name = "copy of {}".format(data._name)
@@ -578,6 +586,29 @@ class NDArray(HasTraits):
         else:
             #log.debug("init data with a numpy array")
             self._data = np.array(data, subok=True, copy=self._copy)
+
+    # .........................................................................
+    @property
+    def cdata(self):
+        """
+        |ndarray|, dtype:complex - The `data` array.
+
+        A special storage is used for complex or hypercomplex data.
+        If a dimension is complex, real and imaginary part are interleaved
+        in the `data` array.
+
+        The cdata array (only for 1D array) return a non interleaved numpy array
+
+        .. note::
+            See the :ref:`userguide` for more information
+
+
+        """
+        if self.has_complex_dims and self.ndim==1:
+            return interleaved2complex(self._data).squeeze()[()]
+        else:
+            return self._data.squeeze()[()]
+
 
     # .........................................................................
     @default('_date')
@@ -1942,7 +1973,7 @@ class NDArray(HasTraits):
 
             if stop is not None and not isinstance(stop, (int, np.int_)):
                 stop = self._loc2index(stop, axis)
-                if stop < start:  # and self.coordset[axis].is_reversed:
+                if stop < start:  # and self.coordset[axis].reversed:
                     start, stop = stop, start
                 stop = stop + 1
 

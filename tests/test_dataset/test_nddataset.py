@@ -16,7 +16,11 @@ import pytest
 import numpy as np
 
 
-from spectrochempy import *
+# from spectrochempy import *
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.units import ur
+from spectrochempy.api import masked, show
 
 from spectrochempy.extern.pint.errors import (UndefinedUnitError,
                                               DimensionalityError)
@@ -35,6 +39,14 @@ def test_nddataset_init_with_nonarray():
     inp = [1, 2, 3]
     nd = NDDataset(inp)
     assert (np.array(inp) == nd.data).all()
+
+
+def test_nddataset_init_with_ndarray(ndarray):
+
+    nd = NDDataset(ndarray)
+    nd.mask[0] = True    # with a mask
+    assert nd.is_masked
+    print(nd)
 
 
 def test_nddataset_simple(nd):
@@ -1112,3 +1124,32 @@ def test_bug_fixe_figopeninnotebookwithoutplot():
     da2 = np.sqrt(da ** 3)
     assert da2._fig is None  # no figure should open
 
+# issue #7 - max()
+def test_max_with_ndarray(ndarray):
+
+    # test on a NDDataset without CoordSet
+    nd = NDDataset(ndarray)
+    nd.mask[0] = True    # with a mask
+    assert nd.is_masked
+    mx = nd.max()
+    assert mx == 4.940145858999619
+
+def test_max_with_1D(NMR_dataset_1D):
+    # test on a 1D NDDataset
+    nd1 = NMR_dataset_1D
+    nd1.mask[50] = True
+    assert nd1.is_masked
+    print(nd1)
+    mx = nd1.cdata.max()
+    assert mx == 821.4872828784091+80.80955334991164j
+    mx = nd1.data.max()
+    assert mx == 821.4872828784091
+    am = nd1.max()
+    print(am)
+
+def test_max_with_2D(NMR_dataset_2D):
+    # test on a 2D NDDataset
+    nd1 = NMR_dataset_1D
+    print(nd2.max())
+    print(nd2.max(axis=0))
+    print(nd1.ndmax())

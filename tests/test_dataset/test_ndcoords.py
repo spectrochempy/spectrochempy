@@ -8,7 +8,6 @@
 # =============================================================================
 
 
-
 """
 
 """
@@ -18,13 +17,14 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy import *
+# from spectrochempy import *
 
+from spectrochempy.dataset.ndcoords import Coord, CoordRange, CoordSet
+from spectrochempy.units import ur, Quantity
 from spectrochempy.utils.traittypes import Range
 
 from traitlets import HasTraits
 from traitlets import TraitError
-
 
 from tests.utils import (assert_array_equal,
                          assert_equal_units)
@@ -72,6 +72,7 @@ def test_coordarray_withlabels():
     a._labels[3] = x
     assert a._labels[3][2] == 2
 
+
 def test_coordarray_withonlylabels():
     y = [i for i in 'abcdefghij']
     a = MinimalCoordSetSubclass(labels=y, title='processors')
@@ -83,6 +84,7 @@ def test_coordarray_withonlylabels():
     # even an array
     a._labels[3] = range(10)
     assert a._labels[3][2] == 2
+
 
 def test_coordarray_with_datetime():
     from datetime import datetime
@@ -108,6 +110,13 @@ def test_coord_init_unitless():
     assert coord0.data[0] == 4000.
     assert repr(
         coord0) == "Coord: [4000.000, 3666.667, ..., 1333.333, 1000.000] unitless"
+
+def test_coord_init_error():
+
+    with pytest.raises(ValueError) as e_info:
+        # should raise an error as coords must be 1D
+        coord0 = Coord(data=np.ones((2,10)))
+    assert e_info.value.args[0] == "Number of dimension for coordinate's array should be 1!"
 
 
 def test_coord_init_dimensionless():
@@ -209,7 +218,7 @@ def test_coords_equal():
                    mask=None,
                    title='wavelength')
 
-    coordsa = CoordSet([coord0,  coord3, coord2])
+    coordsa = CoordSet([coord0, coord3, coord2])
     coordsb = CoordSet([coord0, coord3, coord2])
     assert coordsa == coordsb
 
@@ -307,7 +316,6 @@ def test_coords_slicing():
                    units='cm^-1',
                    mask=None,
                    title='wavelength')
-    c0 = coord0[0]
     assert coord0[0].data == 4000.0
     assert coord0[0] == 4000.0 * (1. / ur.cm)
 
@@ -457,6 +465,38 @@ def test_coordrange():
     r = CoordRange((3, 2), (4.4, 10), (4, 5),
                    reversed=True)
     assert r == [[10, 4], [3, 2]]
+
+def test_coord_is_reversed_not_complex():
+    coord0 = Coord(data=np.linspace(4000, 1000, 10),
+                   units='cm^-1',
+                   mask=None,
+                   title='wavenumbers')
+    assert coord0.reversed
+    assert not coord0.is_complex.all()
+
+def test_coord_real():
+    coord0 = Coord(data=np.linspace(4000, 1000, 10),
+                   units='cm^-1',
+                   mask=None,
+                   title='wavelength')
+
+    assert coord0.real == coord0
+    assert coord0.RR == coord0
+
+
+NOTIMPL = ['abs','absolute','conj','conjugate', 'cumprod', 'cumsum', 'mean','part',
+           'pipe', 'prod', 'remove_masks', 'set_complex', 'set_real',
+           'std', 'sum', 'swapaxes',
+           'T', 'II', 'IR', 'RI', 'date',
+           'imag', ]
+@pytest.mark.parametrize('name', NOTIMPL)
+def test_not_implemented(name):
+    coord0 = Coord(data=np.linspace(4000, 1000, 10),
+                   units='cm^-1',
+                   mask=None,
+                   title='wavelength')
+    with pytest.raises(NotImplementedError):
+        f = getattr(coord0, name)()
 
 
 

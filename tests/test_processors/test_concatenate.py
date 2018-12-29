@@ -81,7 +81,7 @@ def test_concatenate_along_axis1(IR_dataset_2D):
     # test along axis 1
     ranges = ([6000., 3500.], [1800., 1500.])
 
-    ranges = CoordRange(*ranges, reversed=coord.is_reversed)
+    ranges = CoordRange(*ranges, reversed=coord.reversed)
 
     s = []
     for pair in ranges:

@@ -27,6 +27,7 @@ import functools
 # =============================================================================
 import numpy as np
 from numpy.ma import MaskedArray
+from numpy.ma.core import nomask
 
 # =============================================================================
 # Local imports
@@ -310,11 +311,24 @@ class NDMath(object):
 
         new = self.copy()
         ma = np.max(new._masked_data, *args, **kwargs)
-        if isinstance(ma, MaskedArray):
+        if isinstance(ma, (MaskedArray, NDArray)):
             new._data = ma.data
-            new._mask = ma.mask
-        else:
+        elif isinstance(ma, np.ndarray):
             new._data = ma
+        else:
+            new._data = np.asarray([ma])
+
+        if new.size == 1:
+            # a single element, just return it
+            return float(new._data)
+
+        # the data being reduced to only a single elements along the summed axis
+        # we must reduce the corresponding coordinates
+        axis = kwargs.get('axis', None)
+        if axis is None and isinstance(ma, (MaskedArray, NDArray)):
+            new._mask = nomask
+            new._mask = ma.mask  # TODO: correct this
+            new.coordset[axis] = None
         return new
 
     # -------------------------------------------------------------------------
