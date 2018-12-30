@@ -18,7 +18,7 @@ from spectrochempy.dataset.ndarray import NDArray
 from spectrochempy.extern.pint.errors import DimensionalityError
 from spectrochempy.dataset.ndcoords import CoordSet
 from spectrochempy.units import ur
-from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.utils import SpectroChemPyWarning, quaternion
 
 from spectrochempy.utils.testing import assert_equal, assert_array_equal, raises, \
     catch_warnings
@@ -72,7 +72,7 @@ def test_init_ndarray_sequence():
     assert d0.size == 3
     assert not d0.has_complex_dims
     assert not d0.is_masked
-    assert str(d0) == '[       2        3        4]'
+    assert str(d0) == '[   2.000    3.000    4.000]'
 
 
 def test_init_ndarray_array():
@@ -118,9 +118,9 @@ def test_init_ndarray_with_a_mask():
     assert not d0mask.has_complex_dims
     assert d0mask.is_masked
     assert d0mask.mask.shape == d0mask.shape
-    assert str(d0mask).startswith('[      --        3        4        5]')
+    assert str(d0mask).startswith('[      --    3.000    4.000    5.000]')
     assert repr(d0mask).startswith(
-        'NDArray: [      --,        3,        4,        5]')
+        'NDArray: [      --,    3.000,    4.000,    5.000]')
 
 def test_init_ndarray_with_float_and_a_mask():
     # initialisation with a sequence and a mask
@@ -133,6 +133,17 @@ def test_init_ndarray_with_float_and_a_mask():
     assert str(d0mask).startswith('[      --    3.000    4.000    5.100]')
     assert repr(d0mask).startswith(
         'NDArray: [      --,    3.000,    4.000,    5.100]')
+
+def test_ndarraycplx_fixture(ndarray):
+
+    nd = ndarray.copy()
+    # some checking
+    assert nd.size == 100
+    assert nd.data.size == 100
+    assert nd.shape == (10, 10)
+    assert not nd.has_complex_dims
+    assert nd.data.dtype == np.float
+    assert nd.ndim == 2
 
 def test_set_simple_ndarray(ndarray):
     nd = ndarray.copy()
@@ -234,19 +245,7 @@ def test_ndarray_with_uncertaincy_and_units(ndarray):
     print(nd)
 
 
-def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraycplx):
-    nd = ndarraycplx.copy()
-    nd.units = 'm'
-    assert nd.units == ur.meter
-    assert not nd.is_uncertain
-    assert repr(nd).startswith('NDArray: ')
-    nd._uncertainty = nd._data * .01
-    assert nd.is_uncertain
-    assert repr(nd).startswith('NDArray: ')
-    assert nd._uncertainty.size == nd.data.size
-
-
-def test_ndarray_len_and_sizes(ndarray, ndarraycplx):
+def test_ndarray_len_and_sizes(ndarray):
     nd = ndarray.copy()
     assert not nd.has_complex_dims
     assert len(nd) == 10
@@ -254,18 +253,9 @@ def test_ndarray_len_and_sizes(ndarray, ndarraycplx):
     assert nd.size == 100
     assert nd.ndim == 2
 
-    ndc = ndarraycplx.copy()
-    assert ndc.has_complex_dims
-    assert ndc.is_complex[1]
-    assert len(ndc) == 10
-    assert ndc.shape == (10, 5)
-    assert ndc.size == 50
-    assert ndc.ndim == 2
-
-
 ### TEST SLICING
 
-def test_slicing_byindex(ndarray, ndarraycplx):
+def test_slicing_byindex(ndarray):
     nd = ndarray.copy()
     assert not np.any(
         nd.is_complex) and not nd.is_masked and not nd.is_uncertain
@@ -281,13 +271,6 @@ def test_slicing_byindex(ndarray, ndarraycplx):
 
     nd.mask[1] = True
     assert nd.is_masked
-
-    ndc = ndarraycplx.copy()
-    ndc1 = ndc[1, 1]
-    ndc.RR[1, 1]
-    assert_equal(ndc1.data, ndc.RR[1, 1].data + ndc.RI[1, 1].data * 1.j)
-
-    ndc.set_complex
 
 
 ### TEST __REPR__
@@ -378,7 +361,7 @@ def test_iteration(ndarrayunit):
 #     assert d1 is d
 
 
-def test_with_units_and_forc_to_change():
+def test_with_units_and_force_to_change():
     np.random.seed(12345)
     ndd = NDArray(data=np.random.random((3, 3)),
                   mask=[[True, False, False], [False, True, False],
@@ -394,35 +377,19 @@ def test_swapaxes():
     d = np.random.random((4, 3)) * np.exp(.1j)
     d3 = NDArray(d, units=ur.Hz,
                  mask=[[False, True, False], [False, True, False],
-                       [False, True, False], [True, False, False]],
-                 is_complex=[False, True]
-
+                       [False, True, False], [True, False, False]]
                  )  # with units & mask
     assert d3.shape == (4, 3)
-    assert d3._data.shape == (4, 6)
-    assert d3.is_complex == [False, True]
+    assert d3._data.shape == (4, 3)
+    assert d3.has_complex_dims
+    assert not d3.hypercomplex
 
     d4 = d3.swapaxes(0, 1)
 
     assert d4.shape == (3, 4)
-    assert d4._data.shape == (6, 4)
-    assert d4.is_complex == [True, False]
-
-
-def test_ndarray_complex(ndarraycplx):
-    nd = ndarraycplx.copy()
-
-    ndr = nd.real
-    assert_array_equal(ndr.data, nd.data[..., ::2])
-    assert ndr.size == nd.size
-    assert ndr.is_complex == [False, False]
-
-    nd = ndarraycplx.copy()
-
-    ndc = nd.conj()
-    assert_array_equal(ndc.data.imag, -ndc.data.imag)
-    assert ndc.is_complex == [False, True]
-    assert ndc.size == nd.size
+    assert d4._data.shape == (3, 4)
+    assert d4.has_complex_dims
+    assert not d4.hypercomplex
 
 
 def test_labels_and_sort():
@@ -531,14 +498,20 @@ def test_vector():
     assert_array_equal(v._data.T, np.array([[1.], [2.], [3.]]))
 
 
-def test_ndarray_str_representation_for_complex():
-    nd1 = NDArray([1. + 2.j, 2. + 3.j])
-    assert nd1.__repr__() == "NDArray: [   1.000,    2.000,    2.000,    " \
-                             "3.000] unitless"
-    assert nd1.__str__() == "R[   1.000    2.000]\nI[   2.000    3.000]"
 
+# =========== Complex ndarray=================================================
 
-# =========== Complex ndarray
+def test_ndarraycplx_fixture(ndarraycplx):
+
+    nd = ndarraycplx.copy()
+    # some checking
+    assert nd.size == 50
+    assert nd.data.size == 50
+    assert nd.shape == (10, 5)
+    assert nd.has_complex_dims
+    assert nd.data.dtype == np.complex128
+    assert nd.ndim == 2
+
 
 def test_init_ndarray_with_a_mask_and_uncertainty():
     # initialisation with a sequence + mask + uncertainty
@@ -563,22 +536,46 @@ def test_init_complex_with_a_ndarray():
     d0 = NDArray(d)
     assert d0.dtype == np.complex
     assert d0.has_complex_dims
-    assert d0.is_complex[-1]
     assert d0.shape == (2, 2)
     assert d0.size == 4
-    assert repr(d0).startswith('NDArray: [[   0.995,    0.100, ')
+    print('\n-------------')
+    print(d0.__repr__())
+    assert repr(d0).startswith('NDArray: [[   0.995+0.100j,    1.990+0.200j],')
+    print('\n-------------')
+    print(d0)
+    assert str(d0).startswith('RR[[   0.995    1.990]')
 
+def test_ndarrayquaternion_fixture(ndarrayquaternion):
+
+    nd = ndarrayquaternion.copy()
+    # some checking
+    assert nd.size == 25
+    assert nd.data.size == 25
+    assert nd.shape == (5, 5)
+    assert nd.has_complex_dims
+    assert nd.hypercomplex
+    assert nd.data.dtype == quaternion
+    assert nd.dtype == quaternion
+    assert nd.ndim == 2
+    print(nd)
 
 def test_init_hypercomplex_ndarray():
     # test with complex data in all dimension
 
     np.random.seed(12345)
     d = np.random.random((4, 3)) * np.exp(.1j)
+    print('\n-------------')
+    print(d)
     d0 = NDArray(d, units=ur.Hz,
                  mask=[[False, True, False], [True, False, False]],
-                 is_complex=[True, True])  # with units & mask
+                 hypercomplex=True)  # with units & mask
     assert d0.shape == (2, 3)
-    assert d0._data.shape == (4, 6)
+    print('\n-------------')
+    print(d0.__repr__())
+    assert repr(d0).startswith('NDArray: [[(   0.925+0.093j,    0.204+0.020j),')
+    print('\n-------------')
+    print(d0)
+    assert str(d0).startswith('RR[[   0.925       --    0.183]')
 
 
 def test_init_complex_with_copy_of_ndarray():
@@ -589,7 +586,8 @@ def test_init_complex_with_copy_of_ndarray():
     d2 = NDArray(d1)
     assert d1.data is d2.data
     assert np.all(d1.data == d2.data)
-    assert np.all(d2.is_complex == [False, True])
+    assert d2.has_complex_dims
+    assert not d2.hypercomplex
     assert d2.shape == (2, 2)
     assert str(d2).startswith('RR[[   0.995    0.995]')
     assert 'RI[[   0.100    0.100]' in str(d2)
@@ -605,19 +603,16 @@ def test_init_complex_with_mask():
 
     # internal representation (interleaved)
     assert d3.shape == (2, 2)
-    assert d3._data.shape == (2, 4)
-    assert d3.data.shape == (2, 4)
-    assert d3.cdata.shape == (2, 2)
+    assert d3._data.shape == (2, 2)
+    assert d3.data.shape == (2, 2)
     assert d3.size == 4
 
     assert (d3.real.data == d.real).all()
-    # but
-    assert d3.data.real != d.real   # (2,4) compare to (2,2) array
-    assert (d3.cdata.real == d.real).all()   # now this is ok
+    assert np.all(d3.data.real == d.real)
 
-    assert d3.dtype == np.float
+    assert d3.dtype == np.complex128
     assert d3.has_complex_dims
-    assert d3.mask.shape[-1] == d3.shape[-1] * 2
+    assert d3.mask.shape[-1] == d3.shape[-1]
     d3RR = d3.part('RR')
     assert not d3RR.has_complex_dims
     assert d3RR._data.shape == (2, 2)
@@ -658,6 +653,61 @@ def test_deepcopy_of_ndarray(ndarraycplx):
     nd1 = ndarraycplx.copy()
     nd2 = deepcopy(nd1)
     assert nd2 is not nd1
-    assert nd2.data.size == 100
+    assert nd2.data.size == 50
 
+
+def test_ndarray_with_uncertaincy_and_units_being_complex(ndarraycplx):
+    nd = ndarraycplx.copy()
+    nd.units = 'm'
+    assert nd.units == ur.meter
+    assert not nd.is_uncertain
+    assert repr(nd).startswith('NDArray: ')
+    #nd._uncertainty = nd._data * .01
+    assert not nd.is_uncertain   # we have not implemented uncertainty for complex data
+    assert repr(nd).startswith('NDArray: ')
+    # assert nd._uncertainty.size == nd.data.size
+
+
+def test_ndarray_len_and_sizes_cplx(ndarraycplx):
+
+    ndc = ndarraycplx.copy()
+    assert ndc.has_complex_dims
+    assert ndc.is_complex
+    assert len(ndc) == 10
+    assert ndc.shape == (10, 5)
+    assert ndc.size == 50
+    assert ndc.ndim == 2
+
+def test_slicing_byindex_cplx(ndarraycplx):
+
+    ndc = ndarraycplx.copy()
+    ndc1 = ndc[1, 1]
+    ndc.RR[1, 1]
+    assert_equal(ndc1.data, ndc.RR[1, 1].data + ndc.RI[1, 1].data * 1.j)
+
+    ndc.set_complex
+
+
+def test_ndarray_complex(ndarraycplx):
+
+    nd = ndarraycplx.copy()
+
+    ndr = nd.real
+    assert_array_equal(ndr.data, nd.data.real)
+    assert ndr.size == nd.size
+    assert not ndr.is_complex
+
+    nd = ndarraycplx.copy()
+
+    ndc = nd.conj()
+    assert_array_equal(ndc.data.imag, -nd.data.imag)
+    assert ndc.is_complex
+    assert ndc.size == nd.size
+
+def test_ndarray_str_representation_for_complex():
+    nd1 = NDArray([1. + 2.j, 2. + 3.j])
+    assert nd1.__repr__() == "NDArray: [   1.000+2.000j,    2.000+3.000j] unitless"
+    print("\n--------\n"+nd1.__str__())
+    assert nd1.__str__() == "R[   1.000    2.000]\n"+\
+                            "I[   2.000    3.000]"
 

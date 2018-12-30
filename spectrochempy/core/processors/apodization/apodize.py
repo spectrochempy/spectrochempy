@@ -22,7 +22,7 @@ import numpy as np
 # Local imports
 # =============================================================================
 from spectrochempy.units.units import ur, Quantity
-from spectrochempy.utils import epsilon, interleave, interleaved2complex
+from spectrochempy.utils import epsilon
 from spectrochempy.application import  log, general_preferences
 
 # =============================================================================

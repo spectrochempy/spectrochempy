@@ -6,7 +6,12 @@ import os
 import pytest
 import numpy as np
 
-#initialize a ipython session before calling spectrochempy
+from spectrochempy.utils.testing import RandomSeedContext
+from spectrochempy.dataset.ndarray import NDArray
+
+#############################################################
+# initialize a ipython session before calling spectrochempy
+#############################################################
 
 @pytest.fixture(scope="module")
 def ip():
@@ -23,57 +28,42 @@ except:
     pass
 
 
-#########################
-# FIXTURES: some arrays
-#########################
+###########################
+# FIXTURES: some NDArray's
+###########################
 
 @pytest.fixture(scope="module")
-def ndarray(): #ndarraysubclass():
+def ndarray():
     # return a simple ndarray with some data
-    from spectrochempy.utils.testing import RandomSeedContext
     with RandomSeedContext(12345):
         dx = 10.*np.random.random((10, 10))-5.
-    from spectrochempy.dataset.ndarray import NDArray
     _nd = NDArray()
     _nd.data = dx
     return _nd.copy()
 
 @pytest.fixture(scope="module")
-def ndarrayunit(): #ndarraysubclassunit():
+def ndarrayunit(ndarray):
     # return a simple ndarray with some data
-    from spectrochempy.utils.testing import RandomSeedContext
-    with RandomSeedContext(12345):
-        dx = 10.*np.random.random((10, 10))-5.
-    from spectrochempy.dataset.ndarray import NDArray
-    _nd = NDArray()
-    _nd.data = dx
+    _nd = ndarray.copy()
     _nd.units = 'm/s'
     return _nd.copy()
 
 @pytest.fixture(scope="module")
-def ndarraycplx():
-
+def ndarraycplx(ndarray):
     # return a complex ndarray
     # with some complex data
-    from spectrochempy.utils.testing import RandomSeedContext
-    with RandomSeedContext(12345):
-        dx = np.random.random((10, 10))
-    from spectrochempy.dataset.ndarray import NDArray
-    nd = NDArray()
-    nd.data = dx
-    nd.set_complex(axis=-1)  # this means that the data are complex in
-                              # the last dimension
+    _nd = ndarray.copy()
+    _nd.set_complex(inplace=True)  # this means that the data are complex
+    return _nd.copy()
 
-    # some checking
-    assert nd.data.size == 100
-    assert nd.size == 50
-    assert nd.data.shape == (10, 10)
-    assert nd.shape == (10, 5)  # the real shape
-    assert nd.is_complex == [False, True]
-    assert nd.ndim == 2
-
-    # return
-    return nd.copy()
+@pytest.fixture(scope="module")
+def ndarrayquaternion(ndarray):
+    # return a complex ndarray
+    # with hypercomplex data
+    _nd = ndarray.copy()
+    _nd.set_complex(inplace=True)
+    _nd.set_quaternion(inplace=True)  # this means that the data are hypercomplex
+    return _nd.copy()
 
 #########################
 # FIXTURES: some datasets

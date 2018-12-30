@@ -35,8 +35,7 @@ from numpy.ma.core import nomask
 from ..extern.uncertainties import unumpy as unp
 from ..units.units import Quantity
 from .ndarray import NDArray
-from ..utils import (interleave, interleaved2complex, getdocfrom,
-                                 docstrings)
+from ..utils import getdocfrom, docstrings
 from spectrochempy.application import log
 
 

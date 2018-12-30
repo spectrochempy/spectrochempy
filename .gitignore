@@ -90,3 +90,4 @@ recipes/spectrochempy/linux-aarch64
 .vscode
 
 /tests_extern_packages/
+/.editorconfig
