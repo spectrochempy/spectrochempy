@@ -120,7 +120,7 @@ class NDIO(HasTraits):
         **scp**
 
         >>> from spectrochempy import NDDataset #doctest: +ELLIPSIS
-        SpectroChemPy's scp...
+
         >>> mydataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
         >>> mydataset.save('mydataset.scp')
 

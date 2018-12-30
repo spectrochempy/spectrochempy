@@ -41,17 +41,7 @@ def read_dso(filename='', **kwargs):
     Examples
     =========
     >>> import spectrochempy as sa
-    >>> A = sa.loaddso('C:\Spectra\Ex_spectra.mat')
-    >>> A.print()
-       name: Ex_spectra.mat
-     author: Username
-       date: Wed., 26-Nov-14, 08:30:35
-       data: 10x1350  [float64]
-       (...)
-
-    See Also
-    =========
-
+    >>> A = sa.loaddso('C:\Spectra\Ex_spectra.mat') # doctest: +SKIP
 
 
     """

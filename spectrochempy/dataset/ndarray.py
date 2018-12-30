@@ -189,24 +189,19 @@ class NDArray(HasTraits):
         --------
         Empty initialization
 
-        >>> import spectrochempy as scp # doctest: +ELLIPSIS
-        SpectroChemPy's API ...
+        >>> import spectrochempy as scp
+
         >>> ndd = scp.NDArray()
 
         Initialization with a ndarray
 
         >>> np.random.seed(12345)
         >>> ndd.data = np.random.random((10, 10))
-        ...
 
         Let's see the string representation of this newly created `ndd` object.
 
-        >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        [[   0.930    0.316 ...,    0.749    0.654]
-        [   0.748    0.961 ...,    0.965    0.724]
-        ...,
-        [   0.945    0.533 ...,    0.651    0.313]
-        [   0.769    0.782 ...,    0.898    0.043]]
+        >>> print(ndd)
+        [[   0.930 ...
 
         NDArray can be also created using keywords arguments.
         Here is a masked array, with units:
@@ -217,9 +212,7 @@ class NDArray(HasTraits):
         ...                        [False, False, True]],
         ...                units = 'absorbance')
         >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        [[  --    0.295   --]
-        [   0.086   --    0.516]
-        [   0.689    0.857   --]] a.u.
+        [[  --   ...
 
 
         """
@@ -586,29 +579,6 @@ class NDArray(HasTraits):
         else:
             #log.debug("init data with a numpy array")
             self._data = np.array(data, subok=True, copy=self._copy)
-
-    # .........................................................................
-    @property
-    def cdata(self):
-        """
-        |ndarray|, dtype:complex - The `data` array.
-
-        A special storage is used for complex or hypercomplex data.
-        If a dimension is complex, real and imaginary part are interleaved
-        in the `data` array.
-
-        The cdata array (only for 1D array) return a non interleaved numpy array
-
-        .. note::
-            See the :ref:`userguide` for more information
-
-
-        """
-        if self.has_complex_dims and self.ndim==1:
-            return interleaved2complex(self._data).squeeze()[()]
-        else:
-            return self._data.squeeze()[()]
-
 
     # .........................................................................
     @default('_date')
@@ -1123,6 +1093,28 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @property
+    def cdata(self):
+        """
+        |ndarray|, dtype:complex - The `complex data` array.
+
+        A special storage is used for complex or hypercomplex data.
+        If a dimension is complex, real and imaginary part are interleaved
+        in the `data` array.
+
+        The cdata array (only for 1D array) return a non interleaved numpy array
+
+        .. note::
+            See the :ref:`userguide` for more information
+
+
+        """
+        if self.has_complex_dims:
+            return interleaved2complex(self._data).squeeze()[()]
+        else:
+            return self._data.squeeze()[()]
+
+    # .........................................................................
+    @property
     def is_labeled(self):
         """
         bool - True if the `data` array have labels (Readonly property).
@@ -1188,6 +1180,15 @@ class NDArray(HasTraits):
     @property
     def _masked_data(self):
          return self._umasked(self._data, self._mask)
+
+    # .........................................................................
+    @property
+    def masked_cdata(self):
+        """
+        |ma_ndarray| - The actual masked `cdata` array (complex) (Readonly property).
+
+        """
+        return interleaved2complex(self.masked_data)
 
     # .........................................................................
     @property

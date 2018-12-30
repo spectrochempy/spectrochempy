@@ -44,15 +44,7 @@ def read_jdx(filename='', sortbydate=True):
     --------
 
     >>> import spectrochempy as sa
-    >>> A = sa.loadjdx('C:\Spectra\Ex_spectra.jdx')
-    >>> A.print()
-       name: Ex_spectra.jdx
-     author: Username
-       date: Wed., 26-Nov-14, 08:30:35
-       data: 10x1350  [float64]
-       (...)
-
-    .. seealso:: loadspg(), spectrochempy.Dataset()
+    >>> A = sa.loadjdx('C:\Spectra\Ex_spectra.jdx') # doctest: +SKIP
 
     """
 

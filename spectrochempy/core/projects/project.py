@@ -453,7 +453,7 @@ class Project(AbstractProject):
         Assuming that ds1, ds2 and ds3 are already defined datasets:
 
         >>> proj = Project()
-        >>> proj.add_datasets(ds1, ds2, ds3)
+        >>> proj.add_datasets(ds1, ds2, ds3) # doctest: +SKIP
 
         """
         for ds in datasets:
@@ -479,7 +479,7 @@ class Project(AbstractProject):
         Assuming that ds1 is an already defined dataset:
 
         >>> proj = Project()
-        >>> proj.add_dataset(ds1, name='Toto')
+        >>> proj.add_dataset(ds1, name='Toto') # doctest: +SKIP
 
         """
 

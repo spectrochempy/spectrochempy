@@ -47,24 +47,25 @@ def write_scpy(ax, decal) :
             va='baseline', alpha=1.0, family=['Calibri', 'sans-serif'],
             weight=999, transform=ax.transAxes)
 
+if __name__ == '__main__':
 
-decal = 1
+    decal = 1
 
-figcolor = 'white'
-dpi = 300
-fig = plt.figure(figsize=(2.5, 2.5), dpi=dpi)
+    figcolor = 'white'
+    dpi = 300
+    fig = plt.figure(figsize=(2.5, 2.5), dpi=dpi)
 
-ax = fig.add_axes([0, 0, 1, 1], frameon=True, clip_on=False, aspect=1)
-ax.set_xlim(0, 1)
-ax.set_ylim(0, 1)
-ax.set_axis_off()
+    ax = fig.add_axes([0, 0, 1, 1], frameon=True, clip_on=False, aspect=1)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_axis_off()
 
-contour = '#505080'
-background = (0.98,0.82,0.42)
-draw_circle(ax)
-plot_fid(ax, 0.05, 0.96)
-write_scpy(ax, decal)
+    contour = '#505080'
+    background = (0.98,0.82,0.42)
+    draw_circle(ax)
+    plot_fid(ax, 0.05, 0.96)
+    write_scpy(ax, decal)
 
-plt.savefig('../scpy.png', dpi=60, transparent=True)
+    plt.savefig('../scpy.png', dpi=60, transparent=True)
 
-plt.savefig('../scpy_splash.png', dpi=150, transparent=True)
+    plt.savefig('../scpy_splash.png', dpi=150, transparent=True)

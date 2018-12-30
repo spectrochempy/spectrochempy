@@ -63,7 +63,10 @@ class NDMath(object):
     this. Most of the time it returns a new NDDataset, while in some cases
     noted below, one get a |ndarray|.
 
+    >>> from spectrochempy import NDDataset
+    >>> ds = NDDataset([1.,2.,3.])
     >>> np.sin(ds)
+        NDDataset: [   0.841,    0.909,    0.141] unitless
 
     In this particular case (*i.e.*, `np.sin` ufuncs) , the `ds` units must be
     `unitless`, `dimensionless` or angle-units : `radians` or `degrees`,
@@ -75,10 +78,14 @@ class NDMath(object):
 
     >>> from spectrochempy import *
     >>> dataset = NDDataset.load('mydataset.scp')
-    >>> dataset             #doctest: +ELLIPSIS
-    NDDataset([[    2.06,...,     1.24]])
-    >>> np.negative(dataset) #doctest: +ELLIPSIS
-    NDDataset([[   -2.06,...,    -1.24]])
+    >>> dataset             # doctest: +ELLIPSIS
+    NDDataset: [[   2.057,    2.061, ...,    2.013,    2.012],
+                [   2.033,    2.037, ...,    1.913,    1.911],
+                ...,
+                [   1.794,    1.791, ...,    1.198,    1.198],
+                [   1.816,    1.815, ...,    1.240,    1.238]] a.u.
+    >>> np.negative(dataset) # doctest: +ELLIPSIS
+    NDDataset: [[  -2.057, ... -1.238]] a.u.
 
 
     """

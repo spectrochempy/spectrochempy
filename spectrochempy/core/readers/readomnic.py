@@ -73,15 +73,13 @@ def read_omnic(dataset=None, filename='', sortbydate=True, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS,
-    +NORMALIZE_WHITESPACE
-    SpectroChemPy's API ...
+    >>> from spectrochempy import NDDataset
+
     >>> A = NDDataset.read_omnic('irdata/nh4y-activation.spg')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
-    --------------------------------------------------------------------------------
-      name/id: nh4y-activation.spg ...
-    >>> B = NDDataset.read_omnic()
+      name/id: NH4Y-activation.SPG ...
+
 
     """
     log.debug("reading omnic file")
