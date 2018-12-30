@@ -181,8 +181,7 @@ def dict_compare(d1, d2, check_equal_only=True):
 
         >>> x = dict(a=1, b=2)
         >>> y = dict(a=2, b=2)
-        >>> added, removed, modified, same = \
-        ... dict_compare(x, y, check_equal_only=False)
+        >>> added, removed, modified, same = dict_compare(x, y, check_equal_only=False)
         >>> print(added, removed, modified, same)
         set() set() {'a'} {'b'}
         >>> dict_compare(x, y)

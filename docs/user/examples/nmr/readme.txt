@@ -3,4 +3,4 @@
 NMR processing examples
 -----------------------
 
-Example of how to process...
+Example of how to process NMR data

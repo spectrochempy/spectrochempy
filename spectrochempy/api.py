@@ -94,8 +94,8 @@ def _setup_backend_and_ipython(backend=None):
     #print('backend', backend)
     return (ip, backend)
 
-if not 'pytest' in sys.argv[0] and \
-                                 os.environ.get('PWD', None)!='/spectrochempy':
+if not 'pytest' in sys.argv[0] or (len(sys.argv) > 1 and not sys.argv[1].endswith("spectrochempy")): # individual test):
+    # and os.environ.get('PWD', None)!='/spectrochempy':
     _setup_backend_and_ipython()
 else:
     mpl.use('agg', warn=False, force=True)

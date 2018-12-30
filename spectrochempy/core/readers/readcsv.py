@@ -67,13 +67,11 @@ def read_zip(dataset, filename='', **kwargs):
     Examples
     --------
     >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS,
-    +NORMALIZE_WHITESPACE
-    SpectroChemPy's API ...
+
     >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
-    --------------------------------------------------------------------------------
-      name/id: FTIR ...
+      name/id:  ...
 
     """
 
@@ -104,15 +102,12 @@ def read_csv(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS,
-    +NORMALIZE_WHITESPACE
-    <BLANKLINE>
-        SpectroChemPy's API ...
-    >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv', directory=data)
+    >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+
+    >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
-    --------------------------------------------------------------------------------
-      name/id: tg ...
+      name/id: ...
 
     Notes
     -----

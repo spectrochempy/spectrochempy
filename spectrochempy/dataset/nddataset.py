@@ -135,8 +135,8 @@ class NDDataset(
         --------
         Usage by an end-user:
 
-        >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS
-        SpectroChemPy's scp...
+        >>> from spectrochempy import NDDataset
+
         >>> x = NDDataset([1,2,3])
         >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
         [       1        2        3]
@@ -452,20 +452,18 @@ class NDDataset(
         Examples
         --------
         >>> np.random.seed(12345)
-        >>> ndd = NDArray( data = np.random.random((3)))
+        >>> ndd = NDDataset( data = np.random.random((3)))
         >>> ndd.plus_minus(.2)
-        NDArray: [   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200] unitless
+        NDDataset: [   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200] unitless
         >>> ndd # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        NDArray: [   0.930,  ...  0.184] unitless
+        NDDataset: [   0.930,  ...  0.184] unitless
 
         >>> np.random.seed(12345)
-        >>> ndd = NDArray( data = np.random.random((3,3)), units='m')
+        >>> ndd = NDDataset( data = np.random.random((3,3)), units='m')
         >>> ndd.plus_minus(.2, inplace=True) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        NDArray: [[   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200],
+        NDDataset: [[   0.930+/-0.200,    0.316+/-0.200,    0.184+/-0.200],
               [   0.205+/-0.200,    0.568+/-0.200,    0.596+/-0.200],
               [   0.965+/-0.200,    0.653+/-0.200,    0.749+/-0.200]] m
-        >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        [[   0.930+/-0.200    ...  0.749+/-0.200]] m
 
         """
         if inplace:

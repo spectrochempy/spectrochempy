@@ -28,6 +28,8 @@ nodejs
 
 pytest
 pytest-runner
+pytest-cov
+pytest-xdist
 
 scikit-image
 pytest-console-scripts

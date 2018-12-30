@@ -239,7 +239,7 @@ def plot_2D(dataset, **kwargs):
     xlim[-1] = min(xlim[-1], xl[-1])
     xlim[0] = max(xlim[0], xl[0])
 
-    if kwargs.get('x_reverse', kwargs.get('reverse', x.is_reversed)):
+    if kwargs.get('x_reverse', kwargs.get('reverse', x.reversed)):
         xlim.reverse()
 
     ax.set_xlim(xlim)
@@ -298,7 +298,7 @@ def plot_2D(dataset, **kwargs):
         # ----------------
         ylim = list(kwargs.get('ylim', ylim))
         ylim.sort()
-        y_reverse = kwargs.get('y_reverse', y.is_reversed)
+        y_reverse = kwargs.get('y_reverse', y.reversed)
         if y_reverse:
             ylim.reverse()
 

@@ -71,12 +71,12 @@ def autosub(dataset, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     <BLANKLINE>
     ...
     <BLANKLINE>
-    >>> path_A = 'nh4y-activation.spg'
+    >>> path_A = 'irdata/nh4y-activation.spg'
     >>> A = NDDataset.load(path_A, protocol='omnic')
     >>> ref = A[0]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
     >>> B #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    NDDataset: [[...]] dimensionless
+    NDDataset: [[...]] a.u.
 
     """
 
@@ -114,7 +114,7 @@ def autosub(dataset, ref, *ranges, axis=-1, method='vardiff', inplace=False):
     # must be float to be considered as frequency for instance
 
     coords = new.coordset[-1]
-    xrange = CoordRange(*ranges, reversed=coords.is_reversed)
+    xrange = CoordRange(*ranges, reversed=coords.reversed)
 
     s = []
     r = []
