@@ -23,7 +23,6 @@ from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils.testing import assert_equal, assert_array_equal, raises, \
     catch_warnings
 
-
 #########################
 #  TEST INITIALIZATION  #
 #########################
@@ -135,91 +134,6 @@ def test_init_ndarray_with_float_and_a_mask():
     assert repr(d0mask).startswith(
         'NDArray: [      --,    3.000,    4.000,    5.100]')
 
-def test_init_ndarray_with_a_mask_and_uncertainty():
-    # initialisation with a sequence + mask + uncertainty
-
-    d0unc = NDArray([2, 3, 4, 5], uncertainty=[.1, .2, .15, .21],
-                    mask=[1, 0, 0, 0])
-    assert d0unc.shape == (4,)
-    assert not d0unc.has_complex_dims
-    assert d0unc.is_masked
-    assert d0unc.is_uncertain
-    assert str(d0unc).startswith('[   --    3.000+/-0.200 ')
-    assert repr(d0unc).startswith(
-                        'NDArray: [   --,    3.000+/-0.200,    4.000+/-0.150,')
-
-
-def test_init_complex_ndarray():
-    # test with complex data in the last dimension
-
-    d = np.ones((2, 2)) * np.exp(.1j)
-    d0 = NDArray(d)
-    assert d0.has_complex_dims
-    assert d0.is_complex[-1]
-    assert d0.shape == (2, 2)
-    assert d0.size == 4
-    assert repr(d0).startswith('NDArray: [[   0.995,    0.100, ')
-
-
-def test_init_complex_ndarray():
-    # test with complex data in all dimension
-
-    np.random.seed(12345)
-    d = np.random.random((4, 3)) * np.exp(.1j)
-    d0 = NDArray(d, units=ur.Hz,
-                 mask=[[False, True, False], [True, False, False]],
-                 is_complex=[True, True])  # with units & mask
-    assert d0.shape == (2, 3)
-    assert d0._data.shape == (4, 6)
-
-
-def test_init_complex_with_copy_of_ndarray():
-    # test with complex from copy of another ndArray
-
-    d = np.ones((2, 2)) * np.exp(.1j)
-    d1 = NDArray(d)
-    d2 = NDArray(d1)
-    assert d1.data is d2.data
-    assert np.all(d1.data == d2.data)
-    assert np.all(d2.is_complex == [False, True])
-    assert d2.shape == (2, 2)
-    assert str(d2).startswith('RR[[   0.995    0.995]')
-    assert 'RI[[   0.100    0.100]' in str(d2)
-
-
-def test_init_complex_with_mask():
-    # test with complex with mask and units
-
-    np.random.seed(12345)
-    d = np.random.random((2, 2)) * np.exp(.1j)
-    d3 = NDArray(d, units=ur.Hz,
-                 mask=[[False, True], [False, False]])  # with units & mask
-    assert d3.shape == (2, 2)
-    assert d3._data.shape == (2, 4)
-    assert d3.size == 4
-    assert d3.dtype == np.complex
-    assert d3.has_complex_dims
-    assert d3.mask.shape[-1] == d3.shape[-1] * 2
-    d3RR = d3.part('RR')
-    assert not d3RR.has_complex_dims
-    assert d3RR._data.shape == (2, 2)
-    assert d3RR._mask.shape == (2, 2)
-    assert str(d3).startswith("RR[[   0.925       --]")
-    assert str(d3).endswith(     "[   0.018    0.020]] Hz")
-    assert d3[1, 1].data == d[1, 1]
-
-
-def test_real_imag():
-    np.random.seed(12345)
-    d = np.random.random((2, 2)) * np.exp(.1j)
-    d3 = NDArray(d)
-    d3r = d3.real
-    d3i = d3.imag
-    new = d3.copy()
-    new.data = d3.real.data + 1j * d3.imag.data
-    assert_equal(d3.data, new.data)
-
-
 def test_set_simple_ndarray(ndarray):
     nd = ndarray.copy()
     assert nd.data.size == 100
@@ -270,29 +184,6 @@ def test_set_ndarray_with_units(ndarray):
     assert nd.units.dimensionless
     assert nd.units.scaling == 0.001
     nd.to(1 * ur.m, force=True)
-
-
-def test_set_ndarray_with_complex(ndarraycplx):
-    nd = ndarraycplx.copy()
-    nd.units = 'meter'
-    assert nd.units == ur.meter
-
-
-def test_copy_of_ndarray(ndarraycplx):
-    nd1 = ndarraycplx
-    nd2 = copy(ndarraycplx)
-    assert nd2 is not nd1
-    assert nd2.shape == nd1.shape
-    assert nd2.is_complex == nd1.is_complex
-    assert nd2.ndim == nd1.ndim
-
-
-def test_deepcopy_of_ndarray(ndarraycplx):
-    # for this example there is no diif with copy (write another test for this)
-    nd1 = ndarraycplx.copy()
-    nd2 = deepcopy(nd1)
-    assert nd2 is not nd1
-    assert nd2.data.size == 100
 
 
 def test_ndarray_with_uncertainty(ndarray):
@@ -645,3 +536,128 @@ def test_ndarray_str_representation_for_complex():
     assert nd1.__repr__() == "NDArray: [   1.000,    2.000,    2.000,    " \
                              "3.000] unitless"
     assert nd1.__str__() == "R[   1.000    2.000]\nI[   2.000    3.000]"
+
+
+# =========== Complex ndarray
+
+def test_init_ndarray_with_a_mask_and_uncertainty():
+    # initialisation with a sequence + mask + uncertainty
+
+    d0unc = NDArray([2, 3, 4, 5],
+                    uncertainty=[.1, .2, .15, .21],
+                    mask=[1, 0, 0, 0])
+
+    assert d0unc.shape == (4,)
+    assert not d0unc.has_complex_dims
+    assert d0unc.is_masked
+    assert d0unc.is_uncertain
+    assert str(d0unc).startswith('[   --    3.000+/-0.200 ')
+    assert repr(d0unc).startswith(
+                        'NDArray: [   --,    3.000+/-0.200,    4.000+/-0.150,')
+
+
+def test_init_complex_with_a_ndarray():
+    # test with complex data in the last dimension
+
+    d = np.array([[1, 2],[3, 4]]) * np.exp(.1j)
+    d0 = NDArray(d)
+    assert d0.dtype == np.complex
+    assert d0.has_complex_dims
+    assert d0.is_complex[-1]
+    assert d0.shape == (2, 2)
+    assert d0.size == 4
+    assert repr(d0).startswith('NDArray: [[   0.995,    0.100, ')
+
+
+def test_init_hypercomplex_ndarray():
+    # test with complex data in all dimension
+
+    np.random.seed(12345)
+    d = np.random.random((4, 3)) * np.exp(.1j)
+    d0 = NDArray(d, units=ur.Hz,
+                 mask=[[False, True, False], [True, False, False]],
+                 is_complex=[True, True])  # with units & mask
+    assert d0.shape == (2, 3)
+    assert d0._data.shape == (4, 6)
+
+
+def test_init_complex_with_copy_of_ndarray():
+    # test with complex from copy of another ndArray
+
+    d = np.ones((2, 2)) * np.exp(.1j)
+    d1 = NDArray(d)
+    d2 = NDArray(d1)
+    assert d1.data is d2.data
+    assert np.all(d1.data == d2.data)
+    assert np.all(d2.is_complex == [False, True])
+    assert d2.shape == (2, 2)
+    assert str(d2).startswith('RR[[   0.995    0.995]')
+    assert 'RI[[   0.100    0.100]' in str(d2)
+
+
+def test_init_complex_with_mask():
+    # test with complex with mask and units
+
+    np.random.seed(12345)
+    d = np.random.random((2, 2)) * np.exp(.1j)
+    d3 = NDArray(d, units=ur.Hz,
+                 mask=[[False, True], [False, False]])  # with units & mask
+
+    # internal representation (interleaved)
+    assert d3.shape == (2, 2)
+    assert d3._data.shape == (2, 4)
+    assert d3.data.shape == (2, 4)
+    assert d3.cdata.shape == (2, 2)
+    assert d3.size == 4
+
+    assert (d3.real.data == d.real).all()
+    # but
+    assert d3.data.real != d.real   # (2,4) compare to (2,2) array
+    assert (d3.cdata.real == d.real).all()   # now this is ok
+
+    assert d3.dtype == np.float
+    assert d3.has_complex_dims
+    assert d3.mask.shape[-1] == d3.shape[-1] * 2
+    d3RR = d3.part('RR')
+    assert not d3RR.has_complex_dims
+    assert d3RR._data.shape == (2, 2)
+    assert d3RR._mask.shape == (2, 2)
+    assert str(d3).startswith("RR[[   0.925       --]")
+    assert str(d3).endswith(     "[   0.018    0.020]] Hz")
+    assert d3[1, 1].data == d[1, 1]
+
+
+def test_real_imag():
+    np.random.seed(12345)
+    d = np.random.random((2, 2)) * np.exp(.1j)
+    d3 = NDArray(d)
+    d3r = d3.real
+    d3i = d3.imag
+    new = d3.copy()
+    new.data = d3.real.data + 1j * d3.imag.data
+    assert_equal(d3.data, new.data)
+
+
+def test_set_ndarray_with_complex(ndarraycplx):
+    nd = ndarraycplx.copy()
+    nd.units = 'meter'
+    assert nd.units == ur.meter
+
+
+def test_copy_of_ndarray(ndarraycplx):
+    nd1 = ndarraycplx
+    nd2 = copy(ndarraycplx)
+    assert nd2 is not nd1
+    assert nd2.shape == nd1.shape
+    assert nd2.is_complex == nd1.is_complex
+    assert nd2.ndim == nd1.ndim
+
+
+def test_deepcopy_of_ndarray(ndarraycplx):
+    # for this example there is no diif with copy (write another test for this)
+    nd1 = ndarraycplx.copy()
+    nd2 = deepcopy(nd1)
+    assert nd2 is not nd1
+    assert nd2.data.size == 100
+
+

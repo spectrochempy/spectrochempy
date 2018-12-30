@@ -15,6 +15,27 @@ import operator
 import numpy as np
 from traitlets import HasTraits, Float
 
+def ctype(t='COMPLEX'):
+    """
+    Return complex or hypercomplex dtype for numpy array data
+
+    Parameters
+    ==========
+    t: str, default: 'COMPLEX'
+        Other possible values : QUATERNION for 2D hypercomplex data or OCTONION for 3D.
+
+    """
+    if t=='COMPLEX':
+        return np.dtype([('R', '<f8'), ('I', '<f8')])
+    elif t=='QUATERNION':
+        return np.dtype([('RR', '<f8'), ('IR', '<f8'), ('RI', '<f8'), ('II', '<f8')])
+    elif t=='OCTONION':
+        return np.dtype([('RRR', '<f8'), ('IRR', '<f8'), ('RIR', '<f8'), ('IIR', '<f8'),
+                         ('RRI', '<f8'), ('IRI', '<f8'), ('RII', '<f8'), ('III', '<f8')])
+    else:
+        raise NotImplementedError
+
+
 def interleave(data):
     """
     This function make an array where real and imaginary part are interleaved

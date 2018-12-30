@@ -216,6 +216,7 @@ class NDArray(HasTraits):
 
 
         """
+
         self._copy = kwargs.pop('copy', False)  # by default
         # we try to keep a reference to the data, not copy them
 
@@ -471,16 +472,25 @@ class NDArray(HasTraits):
     @validate('_data')
     def _data_validate(self, proposal):
         pv = proposal['value']
-        data, complex = interleave(pv)
+
         # if we have a 1D vector, make a 1 row matrix internally
-        if data.ndim == 1:
-            data = data.reshape((1, -1))
-        # handle the complexity
-        if not self.has_complex_dims or len(self._is_complex) != data.ndim:
-            # init the _is_complex list
-            self._is_complex = [False] * data.ndim
-        if data.ndim > 0:
-            self._is_complex[-1] |= complex
+        if pv.ndim == 1:
+            data = pv.reshape((1, -1))
+        else:
+            data = pv
+
+        # check if the passed data are complex in the last dimension
+        if np.any(np.iscomplex(data)) or data.dtype == np.complex:
+
+            # handle the complexity
+            if not self.has_complex_dims or len(self._is_complex) != data.ndim:
+                # init the _is_complex list
+                self._is_complex = [False] * data.ndim
+                self._is_complex[-1] = True
+                
+            #if data.ndim > 0:
+            #    self._is_complex[-1] |= complex
+
         if self._copy:
             return data.copy()
         else:
@@ -543,16 +553,6 @@ class NDArray(HasTraits):
                 self._name = "copy of {}".format(data._name)
                 self._date = data._date
 
-        elif isinstance(data, NDFrame):  # pandas object
-            #log.debug("init data with data from pandas NDFrame object")
-            self._data = data.values
-            self.coordset = data.axes
-
-        elif isinstance(data, Index):  # pandas index object
-            #log.debug("init data with data from a pandas Index")
-            self._data = data.values
-            self._title = data.name
-
         elif isinstance(data, Quantity):
             #log.debug("init data with data from a Quantity object")
             self._data_passed_is_quantity = True
@@ -560,8 +560,9 @@ class NDArray(HasTraits):
                                   copy=self._copy)
             self._units = data.units
 
-        elif hasattr(data, 'mask'):  # an object with data and mask attributes
-            #log.debug("init mask from the passed data")
+        elif hasattr(data, 'mask'):
+            # an object with data and mask attributes
+            log.debug("mask detected - initialize a mask from the passed data")
             self._data = np.array(data.data, subok=True,
                                   copy=self._copy)
             if isinstance(data.mask, np.ndarray) and \
@@ -571,13 +572,14 @@ class NDArray(HasTraits):
         elif (not hasattr(data, 'shape') or
                   not hasattr(data, '__getitem__') or
                   not hasattr(data, '__array_struct__')):
-            #log.debug("init data with a non numpy-like array object")
+
+            log.debug("Attempt to initialize data with a numpy-like array object")
             # Data doesn't look like a numpy array, try converting it to
             # one. Non-numerical input are converted to an array of objects.
             self._data = np.array(data, subok=True, copy=False)
 
         else:
-            #log.debug("init data with a numpy array")
+            log.debug("numpy array detected - initialize data with a numpy array")
             self._data = np.array(data, subok=True, copy=self._copy)
 
     # .........................................................................

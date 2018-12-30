@@ -1125,6 +1125,28 @@ def test_bug_fixe_figopeninnotebookwithoutplot():
     assert da2._fig is None  # no figure should open
 
 # issue #7 - max()
+
+def test_init_complex_1D_with_mask():
+    # test with complex with mask and units
+
+    np.random.seed(12345)
+    d = np.random.random((5)) * np.exp(.1j)
+    d1 = NDDataset(d, units=ur.Hz)  # with units
+    d1.mask[1] = True
+    assert d1.shape == (5,)
+    assert d1._data.shape == (1,10)
+    assert d1.size == 5
+    assert d1.dtype == np.complex
+    assert d1.has_complex_dims
+    assert d1.mask.shape[-1] == d1.shape[-1] * 2
+    d3RR = d1.part('RR')
+    assert not d3RR.has_complex_dims
+    assert d3RR._data.shape == (2, 2)
+    assert d3RR._mask.shape == (2, 2)
+    assert str(d1).startswith("RR[[   0.925       --]")
+    assert str(d1).endswith(     "[   0.018    0.020]] Hz")
+    assert d1[1, 1].data == d[1, 1]
+
 def test_max_with_ndarray(ndarray):
 
     # test on a NDDataset without CoordSet
