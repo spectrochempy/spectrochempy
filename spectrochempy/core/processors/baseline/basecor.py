@@ -169,7 +169,7 @@ class BaselineCorrection(HasTraits):
         coords = new.coordset(-1)
 
         is_sorted = False
-        if new.coordset(-1).is_reversed:
+        if new.coordset(-1).reversed:
             new.sort(axis=-1, inplace=True)
             is_sorted = True
 

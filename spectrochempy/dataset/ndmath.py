@@ -27,6 +27,7 @@ import functools
 # =============================================================================
 import numpy as np
 from numpy.ma import MaskedArray
+from numpy.ma.core import nomask
 
 # =============================================================================
 # Local imports
@@ -62,7 +63,10 @@ class NDMath(object):
     this. Most of the time it returns a new NDDataset, while in some cases
     noted below, one get a |ndarray|.
 
+    >>> from spectrochempy import NDDataset
+    >>> ds = NDDataset([1.,2.,3.])
     >>> np.sin(ds)
+        NDDataset: [   0.841,    0.909,    0.141] unitless
 
     In this particular case (*i.e.*, `np.sin` ufuncs) , the `ds` units must be
     `unitless`, `dimensionless` or angle-units : `radians` or `degrees`,
@@ -74,10 +78,14 @@ class NDMath(object):
 
     >>> from spectrochempy import *
     >>> dataset = NDDataset.load('mydataset.scp')
-    >>> dataset             #doctest: +ELLIPSIS
-    NDDataset([[    2.06,...,     1.24]])
-    >>> np.negative(dataset) #doctest: +ELLIPSIS
-    NDDataset([[   -2.06,...,    -1.24]])
+    >>> dataset             # doctest: +ELLIPSIS
+    NDDataset: [[   2.057,    2.061, ...,    2.013,    2.012],
+                [   2.033,    2.037, ...,    1.913,    1.911],
+                ...,
+                [   1.794,    1.791, ...,    1.198,    1.198],
+                [   1.816,    1.815, ...,    1.240,    1.238]] a.u.
+    >>> np.negative(dataset) # doctest: +ELLIPSIS
+    NDDataset: [[  -2.057, ... -1.238]] a.u.
 
 
     """
@@ -310,11 +318,24 @@ class NDMath(object):
 
         new = self.copy()
         ma = np.max(new._masked_data, *args, **kwargs)
-        if isinstance(ma, MaskedArray):
+        if isinstance(ma, (MaskedArray, NDArray)):
             new._data = ma.data
-            new._mask = ma.mask
-        else:
+        elif isinstance(ma, np.ndarray):
             new._data = ma
+        else:
+            new._data = np.asarray([ma])
+
+        if new.size == 1:
+            # a single element, just return it
+            return float(new._data)
+
+        # the data being reduced to only a single elements along the summed axis
+        # we must reduce the corresponding coordinates
+        axis = kwargs.get('axis', None)
+        if axis is None and isinstance(ma, (MaskedArray, NDArray)):
+            new._mask = nomask
+            new._mask = ma.mask  # TODO: correct this
+            new.coordset[axis] = None
         return new
 
     # -------------------------------------------------------------------------

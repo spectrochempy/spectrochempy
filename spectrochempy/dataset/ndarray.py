@@ -30,7 +30,7 @@ from datetime import datetime
 
 import numpy as np
 from numpy.ma.core import MaskedConstant, masked, nomask
-from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float,
+from traitlets import (List, Unicode, Instance, Bool, Union, Any, Float, Complex,
                        HasTraits, default, validate)
 from pandas.core.generic import NDFrame, Index
 
@@ -95,6 +95,7 @@ class NDArray(HasTraits):
     """
 
     _data = Array(Float(), allow_none=True)
+    _cdata = Array(Complex(), allow_none=True)
     _coordset = Instance(List, allow_none=True)
     _mask = Union((Array(Bool()), Instance(MaskedConstant)))
     _uncertainty = Array(Float(), allow_none=True)
@@ -188,24 +189,19 @@ class NDArray(HasTraits):
         --------
         Empty initialization
 
-        >>> import spectrochempy as scp # doctest: +ELLIPSIS
-        SpectroChemPy's API ...
+        >>> import spectrochempy as scp
+
         >>> ndd = scp.NDArray()
 
         Initialization with a ndarray
 
         >>> np.random.seed(12345)
         >>> ndd.data = np.random.random((10, 10))
-        ...
 
         Let's see the string representation of this newly created `ndd` object.
 
-        >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        [[   0.930    0.316 ...,    0.749    0.654]
-        [   0.748    0.961 ...,    0.965    0.724]
-        ...,
-        [   0.945    0.533 ...,    0.651    0.313]
-        [   0.769    0.782 ...,    0.898    0.043]]
+        >>> print(ndd)
+        [[   0.930 ...
 
         NDArray can be also created using keywords arguments.
         Here is a masked array, with units:
@@ -216,9 +212,7 @@ class NDArray(HasTraits):
         ...                        [False, False, True]],
         ...                units = 'absorbance')
         >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        [[  --    0.295   --]
-        [   0.086   --    0.516]
-        [   0.689    0.857   --]] a.u.
+        [[  --   ...
 
 
         """
@@ -502,6 +496,9 @@ class NDArray(HasTraits):
         If a dimension is complex, real and imaginary part are interleaved
         in the `data` array.
 
+        This property return an interleaved data array (except if this is a single element array.
+        For 1D array, to get a complex data array, one must use the ``cdata`` property instead.
+
         .. note::
             See the :ref:`userguide` for more information
 
@@ -533,10 +530,14 @@ class NDArray(HasTraits):
             # successfully initialized for the passed NDArray.data
 
             for attr in self.__dir__():
-                val = getattr(data, "_%s" % attr)
-                if self._copy:
-                    val = copy.deepcopy(val)
-                setattr(self, "_%s" % attr, val)
+                try:
+                    val = getattr(data, "_%s" % attr)
+                    if self._copy:
+                        val = copy.deepcopy(val)
+                    setattr(self, "_%s" % attr, val)
+                except AttributeError:
+                    # some attribute of NDDataset are missing in NDArray
+                    pass
 
             if self._copy:
                 self._name = "copy of {}".format(data._name)
@@ -1092,6 +1093,28 @@ class NDArray(HasTraits):
 
     # .........................................................................
     @property
+    def cdata(self):
+        """
+        |ndarray|, dtype:complex - The `complex data` array.
+
+        A special storage is used for complex or hypercomplex data.
+        If a dimension is complex, real and imaginary part are interleaved
+        in the `data` array.
+
+        The cdata array (only for 1D array) return a non interleaved numpy array
+
+        .. note::
+            See the :ref:`userguide` for more information
+
+
+        """
+        if self.has_complex_dims:
+            return interleaved2complex(self._data).squeeze()[()]
+        else:
+            return self._data.squeeze()[()]
+
+    # .........................................................................
+    @property
     def is_labeled(self):
         """
         bool - True if the `data` array have labels (Readonly property).
@@ -1157,6 +1180,15 @@ class NDArray(HasTraits):
     @property
     def _masked_data(self):
          return self._umasked(self._data, self._mask)
+
+    # .........................................................................
+    @property
+    def masked_cdata(self):
+        """
+        |ma_ndarray| - The actual masked `cdata` array (complex) (Readonly property).
+
+        """
+        return interleaved2complex(self.masked_data)
 
     # .........................................................................
     @property
@@ -1942,7 +1974,7 @@ class NDArray(HasTraits):
 
             if stop is not None and not isinstance(stop, (int, np.int_)):
                 stop = self._loc2index(stop, axis)
-                if stop < start:  # and self.coordset[axis].is_reversed:
+                if stop < start:  # and self.coordset[axis].reversed:
                     start, stop = stop, start
                 stop = stop + 1
 

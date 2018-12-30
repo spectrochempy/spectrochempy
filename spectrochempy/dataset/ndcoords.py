@@ -77,7 +77,7 @@ class Coord(NDMath, NDArray):
         """
         Parameters
         -----------
-        data : array of floats
+        data : ndarray, tuple or list
             The actual data array contained in the |Coord| object.
             The given array (with a single dimension) can be a list,
             a tuple, a |ndarray|, or a |ndarray|-like object.
@@ -95,8 +95,7 @@ class Coord(NDMath, NDArray):
         --------
         We first import the object from the main scp:
 
-        >>> from spectrochempy import Coord # doctest: +ELLIPSIS
-        SpectroChemPy's scp - v.0.1...
+        >>> from spectrochempy import Coord
 
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
@@ -125,9 +124,7 @@ class Coord(NDMath, NDArray):
         super(Coord, self).__init__(data, **kwargs)
 
         # some checking
-        if self.ndim > 1:
-            raise ValueError("Number of dimension for coordinate's array "
-                             "should be 1!")
+        _ = self.ndim  # should be 1
 
     def implements(self, name=None):
         # For compatibility with pyqtgraph
@@ -144,8 +141,8 @@ class Coord(NDMath, NDArray):
     # ------------------------------------------------------------------------
 
     @property
-    def is_reversed(self):
-        """bool - Whether the axis is ascending or reversed (readonly
+    def reversed(self):
+        """bool - Whether the axis is reversed (readonly
         property).
 
         Return a correct result only if the data are sorted
@@ -155,14 +152,13 @@ class Coord(NDMath, NDArray):
             return True
         return False
 
-        return bool(self.data[0] > self.data[-1])
+        #return bool(self.data[0] > self.data[-1])
 
     # ------------------------------------------------------------------------
     # hidden properties (for the documentation, only - we remove the docs)
     # some of the property of NDArray has to be hidden because they
     # are not useful for this Coord class
     # ------------------------------------------------------------------------
-
     # NDarray methods
 
     @property
@@ -171,6 +167,9 @@ class Coord(NDMath, NDArray):
 
     @property
     def ndim(self):
+        if self.data is not None and self.data.ndim > 1:
+            raise ValueError("Number of dimension for coordinate's array "
+                             "should be 1!")
         return 1
 
     @property

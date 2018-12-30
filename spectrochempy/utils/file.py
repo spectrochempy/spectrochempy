@@ -65,7 +65,7 @@ def generate_api(api_path):
     __all__ = []
 
     for pkg in pkgs:
-        if pkg.endswith('api'):
+        if pkg.endswith('api') or "test" in pkg:
             continue
         try:
             pkg = import_item(pkg)

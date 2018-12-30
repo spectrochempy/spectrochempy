@@ -42,23 +42,23 @@ from traitlets import (HasTraits, Unicode, Instance, List, observe)
 # =============
 # id_generator
 # =============
-def _id_generator():
-    """Returns a sequence of numbers for the title of the objects.
-
-    Examples
-    --------
-
-    >>> id_generator.next()
-    1
-
-    """
-    n = 1
-    while True:
-        yield n
-        n += 1
-
-
-id_generator = _id_generator()
+# def _id_generator():
+#     """Returns a sequence of numbers for the title of the objects.
+#
+#     Examples
+#     --------
+#
+#     >>> id_generator
+#     1
+#
+#     """
+#     n = 1
+#     while True:
+#         yield n
+#         n += 1
+#
+#
+# id_generator = _id_generator()
 
 
 # ==============

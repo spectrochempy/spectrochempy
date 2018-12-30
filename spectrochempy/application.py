@@ -69,7 +69,7 @@ try:
     "Release version string of this package"
 except DistributionNotFound:
     # package is not installed
-    __release__ = '0.1.alpha'
+    __release__ = '0.1a'
 
 try:
     __version__ = get_version(root='..', relative_to=__file__)
@@ -384,8 +384,8 @@ class GeneralPreferences(MetaConfigurable):
     --------
 
     >>> import spectrochempy as scp # doctest: +ELLIPSIS
-    SpectroChemPy's API...
-    >>> delimiter = scp.preferences.csv_delimiter
+
+    >>> delimiter = scp.general_preferences.csv_delimiter
 
 
     """
@@ -920,7 +920,7 @@ class SpectroChemPy(Application):
             if caller in sys.argv[0]:
                 # let's set do_not_block flag to true only if we are running
                 #  the whole suite of tests
-                if len(sys.argv) > 1 and sys.argv[1].endswith("tests"):
+                if len(sys.argv) > 1 and sys.argv[1].endswith("spectrochempy"):
                     plt.ioff()
                     self.do_not_block = True
 

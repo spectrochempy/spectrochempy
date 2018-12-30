@@ -462,7 +462,7 @@ def plot_1D(dataset, **kwargs):
     xlim.sort()
 
     # reversed axis?
-    reverse = new.x.is_reversed
+    reverse = new.x.reversed
     if kwargs.get('reverse', reverse):
         xlim.reverse()
 

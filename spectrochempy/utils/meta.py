@@ -64,7 +64,7 @@ class Meta(object):  # HasTraits):
     >>> m.chaine = "a modified string"
     Traceback (most recent call last):
      ...
-    KeyError: 'the metadata `chaine` is read only'
+    ValueError: 'the metadata `chaine` is read only'
     >>> print(m.chaine)
     a string
 
