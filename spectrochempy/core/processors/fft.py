@@ -88,7 +88,7 @@ def ft(self, **kwargs):
         si = closer_power_of_two(self.meta.td[axis] * 2)
 
     # should we work on complex data
-    iscomplex = self.is_complex[axis]
+    iscomplex = self.iscomplex[axis]
 
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])

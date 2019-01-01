@@ -34,31 +34,27 @@ def test_absolute_of_complex():
     ndd = NDDataset([1., 2. + 1j, 3.])
 
     val = np.abs(ndd)
-    # print(val)
+    print(val)
 
     val = ndd[1] * 1.2 - 10.
+
     val = np.abs(val)
-    # print(val)
+    print(val)
 
     na0 = np.array([[1., 2., 2., 0., 0., 0.],
                     [1.3, 2., 2., 0.5, 1., 1.],
                     [1, 4.2, 2., 3., 2., 2.],
                     [5., 4.2, 2., 3., 3., 3.]])
-    nd = NDDataset(na0)
-    coordset = CoordSet([np.linspace(-1, 1, 4), np.linspace(-10., 10., 6)])
-    assert nd.shape == (4, 6)
+    nd = NDDataset(na0, quaternion=True)
+    print(nd)
+    coordset = CoordSet([np.linspace(-1, 1, 2), np.linspace(-10., 10., 6)])
+    assert nd.shape == (2, 6)
     nd.coordset = coordset
-    nd.set_complex(axis=0)
     # print(nd)
 
     val = np.abs(nd)  # this dimension (the last is ot complex)
     # print(val)
 
-    val = np.fabs(nd)  # this dimension (the last is ot complex)
-    # print(val)   # should work the same  (works only on the last dimension
-
-    val = nd.abs(axis=0)  # the np.abs works only on the last dimension
-    # print(val)
 
     # TODO: add more testings
 

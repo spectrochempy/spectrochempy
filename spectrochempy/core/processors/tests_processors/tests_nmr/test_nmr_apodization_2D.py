@@ -29,12 +29,12 @@ from spectrochempy.utils import SpectroChemPyWarning
 
 def test_nmr_2D_em_(NMR_dataset_2D):
     dataset = NMR_dataset_2D.copy()
-    dataset.plot()
+    dataset.plot_map()
     assert dataset.shape == (96, 948)
     dataset.em(lb=100. * ur.Hz)
     assert dataset.shape == (96, 948)
     dataset.em(lb=50. * ur.Hz, axis=0)
     assert dataset.shape == (96, 948)
-    dataset.plot(cmap='copper', data_only=True)
+    dataset.plot_map(cmap='copper', data_only=True, clear=False)
     show()
     pass

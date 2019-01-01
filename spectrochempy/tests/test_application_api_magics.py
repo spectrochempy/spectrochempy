@@ -9,11 +9,15 @@
 
 import pytest
 
+from spectrochempy import application, APIref, log, version
+
+application.set_loglevel('WARNING')
+from spectrochempy import *
+
+
 def test_api():
 
 
-    from spectrochempy import application, APIref, log, version
-    application.set_loglevel('WARNING')
 
     assert 'EFA' in APIref
     assert 'CRITICAL' in APIref
@@ -35,8 +39,6 @@ def test_api():
 
 
 def test_magic_addscript(ip):
-
-    from spectrochempy import __all__
 
     assert "available_styles" in ip.user_ns.keys()
     ip.run_cell("print(available_styles())", store_history=True)

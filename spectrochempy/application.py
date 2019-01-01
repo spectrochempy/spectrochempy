@@ -842,7 +842,9 @@ class SpectroChemPy(Application):
     aliases = Dict(
         dict(test='SpectroChemPy.test',
              p='SpectroChemPy.last_project',
-             f='SpectroChemPy.startup_filename'))
+             f='SpectroChemPy.startup_filename',
+             ))
+
 
     flags = Dict(
         dict(

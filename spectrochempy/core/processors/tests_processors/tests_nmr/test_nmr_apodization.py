@@ -16,14 +16,16 @@
 import sys
 import functools
 import pytest
+import numpy as np
 from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
 
 
-from spectrochempy import *
-from spectrochempy.utils import SpectroChemPyWarning
-
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.application import datadir
+from spectrochempy.utils import SpectroChemPyWarning, show
+from spectrochempy.units import ur
 
 # nmr_processing
 #-----------------------------
@@ -31,7 +33,6 @@ from spectrochempy.utils import SpectroChemPyWarning
 def test_nmr_1D_show(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
     ax1 = dataset.plot()
-    assert dataset.is_complex[-1]
     show()
     pass
 

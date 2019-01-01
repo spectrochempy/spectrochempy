@@ -224,52 +224,7 @@ def test_masked_array_input():
     assert_array_equal(nd.data, marr.data)
 
 
-# initi with panda structure
-# Some panda structure for dataset initialization
-@pytest.fixture()
-def series():
-    with RandomSeedContext(2345):
-        arr = pd.Series(np.random.randn(4), index=np.arange(4) * 10.)
-    arr.index.name = 'un nom'
-    return arr
-
-
-@pytest.fixture()
-def dataframe():
-    with RandomSeedContext(23451):
-        arr = pd.DataFrame(np.random.randn(6, 4), index=np.arange(6) * 10.,
-                           columns=np.arange(4) * 10.)
-    for ax, name in zip(arr.axes, ['y', 'x']):
-        ax.name = name
-    return arr
-
-
-@pytest.fixture()
-def panel():
-    shape = (7, 6, 5)
-    with RandomSeedContext(23452):
-        # TODO: WARNING: pd.Panel is deprecated in pandas
-        arr = pd.Panel(np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
-                       major_axis=np.arange(shape[1]) * 10.,
-                       minor_axis=np.arange(shape[2]) * 10.)
-
-    for ax, name in zip(arr.axes, ['z', 'y', 'x']):
-        ax.name = name
-    return arr
-
-
-@pytest.fixture()
-def panelnocoordname():
-    shape = (7, 6, 5)
-    with RandomSeedContext(2452):
-        arr = pd.Panel(np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
-                       major_axis=np.arange(shape[1]) * 10.,
-                       minor_axis=np.arange(shape[2]) * 10.)
-    return arr
-
-
 def test_init_series(series):
-    # init with a panel directly (get the coords)
     dx = series
     da = NDDataset(dx)
     assert isinstance(da, NDDataset)
@@ -279,7 +234,6 @@ def test_init_series(series):
 
 
 def test_init_dataframe(dataframe):
-    # init with a panel directly (get the coords)
     dx = dataframe
     da = NDDataset(dx)
     assert isinstance(da, NDDataset)
@@ -631,9 +585,8 @@ def test_nddataset_unmasked_in_operation_with_masked_numpy_array():
     # assert np.all(result1[~result1.mask].data == -ndd.data[~np_mask])
 
     result2 = np_arr_masked * ndd
-    # assert_array_equal(result1.data, result2.data)  # warning: masked array!
-    # they cannot be compared based on the data only
-    assert result2.is_masked
+    # Numpy masked  array return a masked array in this case
+    # assert result2.is_masked
     assert np.all(result2.mask == np_mask)
     # assert np.all(result2[~result2.mask].data == -ndd.data[~np_mask])
 
@@ -695,9 +648,9 @@ def test_title():
 def test_create_from_complex_data():
     # 1D (complex)
     nd = NDDataset([1. + 2.j, 2. + 0j])
-    assert nd.data.size == 4
+    assert nd.data.size == 2
     assert nd.size == 2
-    assert nd.data.shape == (4,)
+    assert nd.data.shape == (2,)
     assert nd.shape == (2,)
 
     # 2D (complex in the last dimension - automatic detection)
@@ -706,42 +659,28 @@ def test_create_from_complex_data():
                     [1. + 4.2j, 2. + 3j]
                     ])
 
-    assert nd.data.size == 12
+    assert nd.data.size == 6
     assert nd.size == 6
-    assert nd.data.shape == (3, 4)
+    assert nd.data.shape == (3, 2)
     assert nd.shape == (3, 2)
 
-    # 2D (complex but not in the last dimension )
+    # 2D quaternion
     nd = NDDataset([[1., 2.],
                     [1.3, 2.],
                     [1., 2.],
                     [1., 2.],
-                    ], is_complex=[True, False])
+                    ], quaternion=True)
 
-    assert nd.data.size == 8
+    assert nd.data.size == 4
     assert nd.size == 4
-    assert nd.data.shape == (4, 2)
+    assert nd.data.shape == (2, 2)
     assert nd.shape == (2, 2)
 
-    # 2D (complex in all dimension )
-    nd = NDDataset([[1.j, 2.],
-                    [1.3, 2.j],
-                    [1.j, 2.],
-                    [1., 2.],
-                    ], is_complex=[True, True])
-
-    assert nd.data.size == 16
-    assert nd.size == 4
-    assert nd.data.shape == (4, 4)
-    assert nd.shape == (2, 2)
 
     # take real part
     ndr = nd.real
     assert ndr.shape == (2,2)
-    assert ndr.is_complex == [True, False]
-
-
-    pass
+    assert not ndr.isquaternion
 
 
 def test_set_complex_1D_during_math_op():
@@ -749,19 +688,19 @@ def test_set_complex_1D_during_math_op():
     assert nd.data.size == 2
     assert nd.size == 2
     assert nd.shape == (2,)
-    assert nd.is_complex == [False, ]
+    assert not nd.iscomplex
 
     ndj = nd * 1j
-    assert ndj.data.size == 4
-    assert ndj.is_complex[-1]
+    assert ndj.data.size == 2
+    assert ndj.iscomplex
 
 
 def test_create_from_complex_data_with_units_and_uncertainties():
     # 1D
     nd = NDDataset([1. + 2.j, 2. + 0j])
-    assert nd.data.size == 4
+    assert nd.data.size == 2
     assert nd.size == 2
-    assert nd.data.shape == (4,)
+    assert nd.data.shape == (2,)
     assert nd.shape == (2,)
 
     # add units
@@ -777,9 +716,9 @@ def test_create_from_complex_data_with_units_and_uncertainties():
     nd2 = NDDataset(
             [[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j]])
 
-    assert nd2.data.size == 12
+    assert nd2.data.size == 6
     assert nd2.size == 6
-    assert nd2.data.shape == (3, 4)
+    assert nd2.data.shape == (3, 2)
     assert nd2.shape == (3, 2)
 
     # add units
@@ -805,7 +744,7 @@ def test_real_imag():
 
     # in another dimension
     with raises(ValueError):
-        nd.set_complex(axis=0)  # cannot be complex as the number of row
+        nd.set_quaternion()  # cannot be ttansformed to quaternion as the number of row
         # doesn't match an even number
 
     na = np.array(
@@ -813,27 +752,15 @@ def test_real_imag():
              [1. + 4.2j, 2. + 3j], [5. + 4.2j, 2. + 3j]])
 
     nd = NDDataset(na)
-    nd.set_complex(axis=0)
-    assert nd.is_complex == [True, True]
-    assert_array_equal(nd.real, na.real)
-    assert_array_equal(nd.imag, na.imag)
+    nd.set_quaternion(inplace=True)
+    assert nd.isquaternion
 
-    na0 = np.array([[1., 2., 2., 0.],
-                    [1.3, 2., 2., 0.5],
-                    [1, 4.2, 2., 3.],
-                    [5., 4.2, 2., 3.]])
-
-    assert_array_equal(nd.data, na0)
-
-    nareal0 = np.array([[1., 2., 2., 0.],
-                        [1, 4.2, 2., 3.]])
-
-    assert_array_equal(nd.part("R*"), nareal0)
-
-    naimag0 = np.array([[1.3, 2., 2., 0.5],
-                        [5., 4.2, 2., 3.]])
-
-    assert_array_equal(nd.part("I*"), naimag0)
+    assert_array_equal(nd.real.data, np.array([[1., 2.],[1., 2.]]))
+    assert_array_equal(nd.imag.data,
+                       np.array([[(0.+2.j,    1.3+2.j), (   0j,    2.+0.5j)],
+                                 [(  4.2j,    5.+4.2j), (   3j,    2.+3.0j)]],
+                                         dtype=[('R', '<c16'), ('I', '<c16')]))
+    nd
 
 
 def test_complex_full():
@@ -847,7 +774,7 @@ def test_complex_full():
     assert nd.shape == (4, 6)
     nd.coordset = coordset
     # print(nd)
-    nd.set_complex(axis=0)
+    nd.set_quaternion()
     # print(nd)
 
     # test swapaxes
@@ -877,12 +804,12 @@ def test_complex_dataset_slicing_by_index():
     nd.coordset = coordset
 
     assert nd.shape == (24,)
-    assert nd.data.shape == (48,)
+    assert nd.data.shape == (24,)
     # print(nd)
 
     # slicing
     nd1 = nd[0]
-    assert nd1.shape == (1,)  ###TODO: To check
+    assert nd1.shape == ()
     assert nd1.data.shape == ()
     # print(nd1)
 
@@ -890,7 +817,7 @@ def test_complex_dataset_slicing_by_index():
     # slicing range
     nd2 = nd[1:6]
     assert nd2.shape == (5,)
-    assert nd2.data.shape == (10,)
+    assert nd2.data.shape == (5,)
     # print(nd2)
 
     na0 = na0.reshape(6, 4)
@@ -898,30 +825,30 @@ def test_complex_dataset_slicing_by_index():
     coordset = CoordSet([np.linspace(-10., 10., 6), np.linspace(-1., 1., 4)])
     nd.coordset = coordset
     assert nd.shape == (6, 4)
-    assert nd.data.shape == (6, 8)
+    assert nd.data.shape == (6, 4)
     # print(nd)
 
     # slicing 2D
     nd1 = nd[0]
     assert nd1.shape == (4,)
-    assert nd1.data.shape == (8,)
+    assert nd1.data.shape == (4,)
     # print(nd1)
 
     # slicing range
     nd1 = nd[1:3]
     assert nd1.shape == (2, 4)
-    assert nd1.data.shape == (2, 8)
+    assert nd1.data.shape == (2, 4)
     # print(nd1)
 
     # slicing range
     nd1 = nd[1:3, 0:2]
     assert nd1.shape == (2, 2)
-    assert nd1.data.shape == (2, 4)
+    assert nd1.data.shape == (2, 2)
     # print(nd1)
 
-    nd.set_complex(0)
-    assert nd.shape == (3, 4)
-    assert nd.data.shape == (6, 8)
+    nd.set_complex()
+    assert nd.shape == (6, 4)
+    assert nd.data.shape == (6, 4)
     # print(nd)
 
 
@@ -1134,18 +1061,18 @@ def test_init_complex_1D_with_mask():
     d1 = NDDataset(d, units=ur.Hz)  # with units
     d1.mask[1] = True
     assert d1.shape == (5,)
-    assert d1._data.shape == (1,10)
+    assert d1._data.shape == (1,5)
     assert d1.size == 5
     assert d1.dtype == np.complex
     assert d1.has_complex_dims
-    assert d1.mask.shape[-1] == d1.shape[-1] * 2
+    assert d1.mask.shape[-1] == 5
     d3RR = d1.part('RR')
     assert not d3RR.has_complex_dims
-    assert d3RR._data.shape == (2, 2)
-    assert d3RR._mask.shape == (2, 2)
-    assert str(d1).startswith("RR[[   0.925       --]")
-    assert str(d1).endswith(     "[   0.018    0.020]] Hz")
-    assert d1[1, 1].data == d[1, 1]
+    assert d3RR._data.shape == (1,5)
+    assert d3RR._mask.shape == (1,5)
+    assert str(d1).startswith("      name/id: NDDataset")
+    assert str(d1).endswith(" I[   0.093       --    0.018    0.020    0.057] Hz\n\n")
+    assert d1[1].data == d[1,]
 
 def test_max_with_ndarray(ndarray):
 
@@ -1156,22 +1083,23 @@ def test_max_with_ndarray(ndarray):
     mx = nd.max()
     assert mx == 4.940145858999619
 
-def test_max_with_1D(NMR_dataset_1D):
+def test_max_min_with_1D(NMR_dataset_1D):
     # test on a 1D NDDataset
     nd1 = NMR_dataset_1D
     nd1.mask[1] = True
     assert nd1.is_masked
     print(nd1)
-    mx = nd1.cdata.max()
+    mx = nd1.max()
     assert mx == 821.4872828784091+80.80955334991164j
-    mx = nd1.data.max()
-    assert mx == 821.4872828784091
     am = nd1.max()
     print(am)
 
+    #mi = nd1.min()
+    #assert mi == 821.4872828784091 + 80.80955334991164j
+
 def test_max_with_2D(NMR_dataset_2D):
     # test on a 2D NDDataset
-    nd1 = NMR_dataset_1D
+    nd2 = NMR_dataset_2D
     print(nd2.max())
     print(nd2.max(axis=0))
-    print(nd1.ndmax())
+    print(nd2.max())

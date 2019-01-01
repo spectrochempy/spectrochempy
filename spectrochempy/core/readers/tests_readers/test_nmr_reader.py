@@ -10,18 +10,32 @@
 
 
 
-from spectrochempy import *
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.application import datadir
 
 from spectrochempy.utils.testing import assert_approx_equal
 import os
 import pytest
 
 
-def test_nmr():
+def test_nmr_reader_1D():
     path = os.path.join(datadir.path, 'nmrdata','bruker', 'tests',
                         'nmr','bruker_1d')
 
     # load the data in a new dataset
     ndd = NDDataset()
     ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-    ndd._repr_html_()
+    print(ndd.__str__())
+    print()
+    print(ndd._repr_html_())
+
+def test_nmr_reader_2D():
+    path = os.path.join(datadir.path, 'nmrdata','bruker', 'tests',
+                        'nmr','bruker_2d')
+
+    # load the data in a new dataset
+    ndd = NDDataset()
+    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    print(ndd.__str__())
+    print()
+    print(ndd._repr_html_())

@@ -23,6 +23,7 @@ __dataset_methods__ = []
 import itertools
 import textwrap
 from datetime import datetime
+import warnings
 
 # =============================================================================
 # third-party imports
@@ -88,7 +89,7 @@ class NDDataset(
     _labels_allowed = Bool(False)  # no labels for NDDataset
 
     # dataset can be members of a project. (we use the abstractclass to
-    # avoir circular import)
+    # avoid circular import)
     _parent = Instance(AbstractProject, allow_none=True)
 
     # _ax is a hidden variable containing the matplotlib axis defined
@@ -135,7 +136,7 @@ class NDDataset(
         --------
         Usage by an end-user:
 
-        >>> from spectrochempy import NDDataset
+        >>> from spectrochempy import *
 
         >>> x = NDDataset([1,2,3])
         >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
@@ -240,8 +241,8 @@ class NDDataset(
                     size = coord.sizes[i]
                 else:
                     size = coord.size
-                if self.has_complex_dims and self._is_complex[i]:
-                    size = size * 2
+                #if self.has_complex_dims and self._iscomplex[i]:
+                #    size = size * 2
                 if size != self._data.shape[i]:
                     raise ValueError(
                             'the size of each coordinates array must '
@@ -511,13 +512,19 @@ class NDDataset(
             axes = list(range(self.ndim - 1, -1, -1))
 
         new._data = np.transpose(new._data, axes)
+        if new.isquaternion:
+            # here if it is hypercomplex quaternion
+            # we should interchange the imaginary part
+            ri = new.data['R'].imag
+            ir = new.data['I'].real
+            new._data['R'].imag = ir
+            new._data['I'].real = ri
         if new.is_masked:
             new._mask = np.transpose(new._mask, axes)
         if new.is_uncertain:
             new._uncertainty = np.transpose(new._uncertainty, axes)
         if new._coordset is not None:
             new._coordset._transpose(axes)
-        new._is_complex = [new._is_complex[axis] for axis in axes]
 
         return new
 
@@ -619,30 +626,14 @@ class NDDataset(
 
         return new
 
-    def set_complex(self, axis=-1):
-        """
-        Make a dimension complex
+    #def set_complex(self):
+    #    raise NotImplementedError
 
-        Parameters
-        ----------
-        axis : int, optional, default:-1
-            The axis to make complex
+    #def set_quaternion(self):
+    #    raise NotImplementedError
 
-        """
-        # override the ndarray function because we must care about the axis too.
-
-        if self._data.shape[axis] % 2 == 0:
-            # we have a pair number of element along this axis.
-            # It can be complex
-            # data are then supposed to be interlaced (real, imag, real, imag ..
-            self._is_complex[axis] = True
-        else:
-            raise ValueError('The odd size along axis {} is not compatible with'
-                             ' complex interlaced data'.format(axis))
-
-        if self.coordset:
-            new_axis = self.coordset[axis][::2]
-            self.coordset[axis] = new_axis
+    def set_real(self):
+        raise NotImplementedError
 
     # Create the returned values of functions should be same class as input.
     # The units should have been handled by __array_wrap__ already
@@ -653,7 +644,7 @@ class NDDataset(
 
     def __dir__(self):
         return NDIO().__dir__() + ['data', 'mask', 'units', 'uncertainty',
-                                   'meta', 'name', 'title', 'is_complex',
+                                   'meta', 'name', 'title', 'iscomplex',
                                    'coordset', 'description', 'history', 'date',
                                    'modified', 'modeldata'
                                    ]
@@ -702,11 +693,16 @@ class NDDataset(
         #         self.units) if self.units is not None else 'unitless'
 
         sh = ' size' if self.ndim < 2 else 'shape'
+
+        cplx =  [False] * self.ndim
+        if self.isquaternion:
+            cplx = [True, True]
+        elif self.iscomplex:
+            cplx[-1]=True
+
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
-                             list(zip(self.shape,
-                                      [False] * self.ndim
-                                      if not self.is_complex else self.is_complex))))
+                             list(zip(self.shape,cplx))))
         shape = (' x '.join(['{}{}'] * self.ndim)).format(
                 *shapecplx).replace(
                 'False', '').replace('True', '(complex)')
@@ -733,7 +729,8 @@ class NDDataset(
                 if isinstance(coord, list) or (hasattr(coord, 'data')
                                                and coord.data is not None):
                     coord_str = str(coord).replace('\n\n', '\n')
-                    out += 'coordinates {}:\n'.format(idx)
+                    out += ' {}-coordinate:\n'.format("wzyx"[-self.ndim-1:][idx])
+                    # here we add 1 to ndim to handle special case of stack for instances
                     out += textwrap.indent(coord_str, ' ' * 9)
                     out += '\n'
                     idx += 1
@@ -746,7 +743,6 @@ class NDDataset(
 
     def __getattr__(self, item):
         # when the attribute was not found
-
         if item in ["__numpy_ufunc__"] or '_validate' in item or \
                         '_changed' in item:
             # raise an error so that masked array will be handled correctly
@@ -796,11 +792,15 @@ class NDDataset(
         data += tr.format("Title", self.title)
 
         sh = 'Size' if self.ndim < 2 else 'Shape'
+
+        cplx =  [False] * self.ndim
+        if self.isquaternion:
+            cplx = [True, True]
+        elif self.iscomplex:
+            cplx[-1]=True
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
-                             list(zip(self.shape,
-                                      [False] * self.ndim
-                                      if not self.is_complex else self.is_complex))))
+                             list(zip(self.shape,cplx))))
 
         shape = (' x '.join(['{}{}'] * self.ndim)).format(
                 *shapecplx).replace(
@@ -821,11 +821,17 @@ class NDDataset(
         out += tr.format('data', data)
 
         if self.coordset is not None:
-            for i, coord in enumerate(self.coordset):
-                coord_str = coord._repr_html_()
-                out += tr.format("Coordinate %i" % i, coord_str)
-                if out.endswith("\n\n"):
-                    out = out[:-1]
+            idx = 0
+            for coord in self.coordset:
+                if isinstance(coord, list) or (hasattr(coord, 'data')
+                                               and coord.data is not None):
+                    coord_str = coord._repr_html_()
+                    # here we add 1 to ndim to handle special case of stack for instances
+                    out += tr.format("%s-coordinate" % "wzyx"[-self.ndim-1:][idx], coord_str)
+                    idx += 1
+                    if out.endswith("\n\n"):
+                        out = out[:-1]
+
         out += '</table><br/>\n'
 
         return out
@@ -862,7 +868,7 @@ class NDDataset(
         # change to complex
         # change type of data to complex
         # require modification of the coordset, if any
-        if change['name'] == '_is_complex':
+        if change['name'] == '_iscomplex':
             pass
 
         # all the time -> update modified date
