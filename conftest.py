@@ -7,12 +7,6 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from spectrochempy.dataset.ndarray import NDArray
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.dataset.ndcoords import CoordSet, Coord
-from spectrochempy.utils.testing import RandomSeedContext
-from spectrochempy.application import datadir
-
 #############################################################
 # initialize a ipython session before calling spectrochempy
 #############################################################
@@ -27,10 +21,15 @@ def ip():
 try:
     ip()
     # we need to go into this before anything else in the test
-    #  to have the IPython session available.
+    # to have the IPython session available.
 except:
     pass
 
+from spectrochempy.dataset.ndarray import NDArray
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.dataset.ndcoords import CoordSet, Coord
+from spectrochempy.utils.testing import RandomSeedContext
+from spectrochempy.application import datadir
 
 ###########################
 # FIXTURES: some NDArray's

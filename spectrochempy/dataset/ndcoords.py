@@ -100,7 +100,7 @@ class Coord(NDMath, NDArray):
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
 
-        >>> arr = np.arange(1,12,2)
+        >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
         >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [   1.000,    3.000,    5.000,    7.000,    9.000,   11.000] Hz

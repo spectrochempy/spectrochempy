@@ -17,8 +17,6 @@ from spectrochempy import *
 
 def test_api():
 
-
-
     assert 'EFA' in APIref
     assert 'CRITICAL' in APIref
     assert 'np' in APIref
@@ -31,8 +29,8 @@ def test_api():
     assert version.startswith('0.1')
 
     # test log
-
-    assert log.level == 30  # WARNING Level by default
+    set_loglevel("WARNING")
+    assert log.level == 30
     log.warning('Ok, this is nicely executing!')
     log.level=10
     assert log.level == 10  # DEBUG Level by default
