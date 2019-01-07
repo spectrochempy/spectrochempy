@@ -1089,6 +1089,7 @@ def test_max_min_with_1D(NMR_dataset_1D):
     nd1.mask[1] = True
     assert nd1.is_masked
     print(nd1)
+    assert "x-coordinate:" in str(nd1)
     mx = nd1.max()
     assert mx == 821.4872828784091+80.80955334991164j
     am = nd1.max()
@@ -1101,5 +1102,5 @@ def test_max_with_2D(NMR_dataset_2D):
     # test on a 2D NDDataset
     nd2 = NMR_dataset_2D
     print(nd2.max())
-    print(nd2.max(axis=0))
-    print(nd2.max())
+    nd2m = nd2.max(axis=0)
+    print(nd2m)

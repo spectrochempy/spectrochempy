@@ -399,13 +399,14 @@ class NDMath(object):
             # a single element, just return it
             return new._data
 
-        # the data being reduced to only a single elements along the summed axis
+        # if the data are reduced to only a single elements along the summed axis
         # we must reduce the corresponding coordinates
         axis = kwargs.get('axis', None)
-        if axis is None and isinstance(ma, (MaskedArray, NDArray)):
+        if axis is not None:
+            del new.coordset[axis]
+        if axis is None:
             new._mask = nomask
-            new._mask = ma.mask  # TODO: correct this
-            new.coordset[axis] = None
+            new.coordset = None
         return new
 
     # -------------------------------------------------------------------------
