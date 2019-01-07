@@ -22,7 +22,7 @@ import numpy as np
 # Local imports
 # =============================================================================
 from spectrochempy.units.units import ur, Quantity
-from spectrochempy.utils import epsilon, interleave, interleaved2complex
+from spectrochempy.utils import epsilon
 from spectrochempy.application import  log, general_preferences
 
 # =============================================================================
@@ -167,28 +167,23 @@ def apodize(dataset, **kwargs):
     if kwargs.pop('inv', False):
         apod_arr = 1. / apod_arr  # invert apodization
 
-    # apply?
-    # if not apply:
-    #    return apod_arr
-
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
     # TODO: CHECK IF THIS WORK WITH 2D DATA - IMPORTANT - CHECK IN PARTICULAR IF SWAPING ALSO SWAP METADATA (NOT SURE FOR NOW)
-    iscomplex = new.is_complex[-1]
+    iscomplex = new.iscomplex
+    isquaternion = new.isquaternion
     encoding = new.meta.encoding[-1]
     # TODO: handle this eventual complexity
 
-    if iscomplex:
-        data = interleaved2complex(new.data)
-        if not apply:
-            data = np.ones_like(data) + 0j
-        data, _ = interleave(data * apod_arr)
-        new._data = data
-    else:
-        data = new.data
-        if not apply:
-            data = np.ones_like(data).astype(new.data.dtype)
+    data = new.data
+    if not apply:
+        data = np.ones_like(data).astype(new.data.dtype)
+    if not isquaternion:
         new._data = data * apod_arr
+    else:
+        data['R'] = data['R'] * apod_arr
+        data['I'] = data['I'] * apod_arr
+        new._data = data
 
     # restore original data order if it was swaped
     if swaped:

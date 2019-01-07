@@ -32,7 +32,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 def test_nmr_1D_show(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
     ax1 = dataset.plot()
-    assert dataset.is_complex[-1]
+    assert dataset.iscomplex
     show()
     pass
 

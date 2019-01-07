@@ -100,10 +100,10 @@ class Coord(NDMath, NDArray):
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
 
-        >>> arr = np.arange(1,12,2)
+        >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
         >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        Coord: [       1,        3,        5,        7,        9,       11] Hz
+        Coord: [   1.000,    3.000,    5.000,    7.000,    9.000,   11.000] Hz
 
         We can take a series of str to create a non numerical but labelled
         axis:
@@ -162,7 +162,7 @@ class Coord(NDMath, NDArray):
     # NDarray methods
 
     @property
-    def is_complex(self):
+    def iscomplex(self):
         return [False, False]  # always real (the first dimension is of size 1)
 
     @property

@@ -674,13 +674,11 @@ def read_bruker_nmr(dataset, *args, **kwargs):
     if len(list_data) == 1:
         log.debug('One experiment read. Make it the current dataset')
 
-        dataset.data = list_data[0]  # complex data will be transformed
-        # automatically into an interleaved
-        # data array
-        # we can set also the complexity for the other dimensions
+        dataset.data = list_data[0]
+
         for axis, cplex in enumerate(meta.iscomplex[::-1]):
-            if cplex:
-                dataset.set_complex(dataset._data.ndim-1-axis)
+            if cplex and axis>0:
+                dataset.set_quaternion(inplace=True)
 
         dataset.meta.update(list_meta[0])
         dataset.meta.readonly = True

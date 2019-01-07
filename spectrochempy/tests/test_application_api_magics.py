@@ -9,11 +9,13 @@
 
 import pytest
 
+from spectrochempy import application, APIref, log, version
+
+application.set_loglevel('WARNING')
+from spectrochempy import *
+
+
 def test_api():
-
-
-    from spectrochempy import application, APIref, log, version
-    application.set_loglevel('WARNING')
 
     assert 'EFA' in APIref
     assert 'CRITICAL' in APIref
@@ -27,16 +29,14 @@ def test_api():
     assert version.startswith('0.1')
 
     # test log
-
-    assert log.level == 30  # WARNING Level by default
+    set_loglevel("WARNING")
+    assert log.level == 30
     log.warning('Ok, this is nicely executing!')
     log.level=10
     assert log.level == 10  # DEBUG Level by default
 
 
 def test_magic_addscript(ip):
-
-    from spectrochempy import __all__
 
     assert "available_styles" in ip.user_ns.keys()
     ip.run_cell("print(available_styles())", store_history=True)

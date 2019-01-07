@@ -13,8 +13,10 @@ from spectrochempy import log, WARNING, INFO, set_loglevel
 def test_logger():
 
     # We can set the level using strings
-    set_loglevel(WARNING)
+    set_loglevel("DEBUG")
+    assert log.level == logging.DEBUG
 
+    set_loglevel(WARNING)
     assert log.level == logging.WARNING
 
     log.error('\n'+'*' * 80+'\n')
@@ -27,7 +29,7 @@ def test_logger():
     log.error('\n' + '*' * 80 + '\n')
 
     set_loglevel(INFO)
-    #assert log.level == logging.INFO
+    assert log.level == logging.INFO
 
     log.debug('debug in INFO level - should not appear')
     log.info('OK - info in INFO level')

@@ -226,7 +226,7 @@ def dict_compare(d1, d2, check_equal_only=True):
 # =============================================================================
 
 def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
-                      formatter=None, spc=4, linewidth=130, **kargs):
+                      formatter=None, spc=4, linewidth=150, **kargs):
 
     def _format_object(x):
 
@@ -238,7 +238,7 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
                                 prec=precision - 1,
                                 l=precision + spc)
         elif isinstance(x, np.complex) :
-            fmt =  '({:^{l}.0{prec}f}{:^+{lc}.0{prec}f}j)'.format(
+            fmt =  '{:{l}.0{prec}f}{:+{lc}.0{prec}f}j'.format(
                     x.real, x.imag,
                     prec=precision - 1, l=precision + spc, lc=precision)
         elif isinstance(x, np.ma.core.MaskedConstant):

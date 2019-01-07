@@ -10,8 +10,9 @@
 
 
 
-from spectrochempy import *
-
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.application import datadir
+from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_approx_equal
 import pytest
 

@@ -161,7 +161,7 @@ def concatenate(*datasets, axis=0, **kwargs):
     # are data complex
     iscomplex = [dataset.has_complex_dims for dataset in datasets]
     if iscomplex:
-        datacomplex = [dataset._is_complex for dataset in datasets]
+        datacomplex = [dataset._iscomplex for dataset in datasets]
 
     # Check coordinates compatibility
     # -------------------------------
