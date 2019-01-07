@@ -122,9 +122,9 @@ def make_docs(*args):
              tocdepth=1,
              includeprivate=True,
              destdir=DEVAPI,
-             exclude_patterns=['api.py'],
+             exclude_patterns=['api.py','test_*','tests'],
              exclude_dirs=['extern', 'sphinxext', '~misc', 'gui',
-                           'tests*'],
+                           'tests','*/tests','*/*/tests'],
              )
 
         # generate API reference

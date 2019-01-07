@@ -336,9 +336,10 @@ epub_copyright = copyright
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.6', None),
-    'pytest': ('http://pytest.org/latest/', None),
-    'ipython': ('http://ipython.readthedocs.org/en/stable/', None),
-    'numpy': ('http://docs.scipy.org/doc/numpy/', None)
+    'pytest': ('https://pytest.org/latest/', None),
+    'ipython': ('https://ipython.readthedocs.org/en/stable/', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'matplotlib': ('https://matplotlib.org', None)
 }
 
 
@@ -398,9 +399,11 @@ sphinx_gallery_conf = {
     'plot_gallery': 'True',
     'backreferences_dir': 'gen_modules/backreferences',
     'doc_module': ('spectrochempy', ), 'reference_url': {
-        'spectrochempy': None, 'matplotlib': 'https://matplotlib.org',
+        'spectrochempy': None,
+        'matplotlib': 'https://matplotlib.org',
         'numpy': 'https://docs.scipy.org/doc/numpy',
-        'sklearn': 'http://scikit-learn.org/stable',
+        'sklearn': 'https://scikit-learn.org/stable',
+        'ipython': 'https://ipython.readthedocs.org/en/stable/',
     },
 
     # path to the examples scripts

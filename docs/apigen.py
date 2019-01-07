@@ -549,5 +549,5 @@ if __name__ == "__main__":
     DEVAPI = os.path.join(DOCDIR, 'dev', 'generated')
 
     main(PROJECT, tocdepth=1, includeprivate=True, destdir=DEVAPI,
-                exclude_patterns=['api.py'],
-                exclude_dirs=['extern', 'sphinxext', '~misc', 'gui'], )
+                exclude_patterns=['api.py', "test_*.py", "tests"],
+                exclude_dirs=['extern', 'sphinxext', '~misc', 'gui', 'tests','*/tests','*/*/tests'], )
