@@ -23,10 +23,6 @@ import sys
 import os
 import logging
 
-if 'IPython' not in sys.modules:
-    # IPython hasn't been imported, definitely not
-   print('not imported')
-
 from IPython.core.magic import UsageError
 from IPython import get_ipython
 import matplotlib as mpl
