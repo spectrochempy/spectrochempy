@@ -68,7 +68,7 @@ def read_zip(dataset, filename='', **kwargs):
     --------
     >>> from spectrochempy import * # doctest: +ELLIPSIS,
 
-    >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
+    >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip', origin='omnic')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
       name/id:  ...
@@ -196,6 +196,13 @@ def _read_zip(dataset, filename, **kwargs):
         print('Sorry but this filename (%s) does not exists!'%filename)
         return None
 
+    origin = kwargs.get('origin',None)
+    if origin is None:
+        origin ='unknown'
+        raise NotImplementedError ("Sorry, but reading a zip file with origin of "
+                                   "type '%s' is not implemented. Please"
+                                   "set the keyword 'origin'." %origin)
+
     temp = os.path.join(os.path.dirname(filename), '~temp')
     basename = os.path.splitext(os.path.basename(filename))[0]
     unzip(filename, temp)
@@ -284,9 +291,6 @@ def _read_csv(dataset, filename='', **kwargs):
     if 'omnic' in origin:
         # this will be treated as csv export from omnic (IR data)
         new = _add_omnic_info(new, **kwargs)
-    else:
-        raise NotImplementedError ("Sorry, but reading a file with origin of "
-                                   "type '%s' is not implemented." %origin)
 
     return new
 

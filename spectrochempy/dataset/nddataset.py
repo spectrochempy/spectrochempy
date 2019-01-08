@@ -261,8 +261,7 @@ class NDDataset(
                     size = coord.sizes[i]
                 else:
                     size = coord.size
-                # if self.has_complex_dims and self._iscomplex[i]:
-                #    size = size * 2
+
                 if size != self._data.shape[i]:
                     raise ValueError(
                         'the size of each coordinates array must '
