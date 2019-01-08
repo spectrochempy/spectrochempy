@@ -1022,6 +1022,7 @@ def test_ndarray_plusminus():
 def test_nddataset_use_of_mask(IR_dataset_1D):
 
     nd = IR_dataset_1D.copy()
+    print(nd)
     nd[950.:1260.] = masked
     print(nd)
     nd.plot()

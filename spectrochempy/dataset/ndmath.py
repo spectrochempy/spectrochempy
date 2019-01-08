@@ -38,12 +38,12 @@ from .ndarray import NDArray
 from ..utils import getdocfrom, docstrings
 from spectrochempy.application import log
 
-
 # =============================================================================
 # utility
 # =============================================================================
 
 get_name = lambda x: str(x.name if hasattr(x, 'name') else x)
+
 
 class NDMath(object):
     """
@@ -96,18 +96,17 @@ class NDMath(object):
     def __array_struct__(self):
         return self._data.__array_struct__
 
-
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
 
         # case of complex or hypercomplex data
         if self.has_complex_dims:
 
             if ufunc.__name__ in ['real',
-                              'imag',
-                              'conjugate',
-                              'absolute',
-                              'conj',
-                              'abs']:
+                                  'imag',
+                                  'conjugate',
+                                  'absolute',
+                                  'conj',
+                                  'abs']:
                 return getattr(inputs[0], ufunc.__name__)()
 
             if ufunc.__name__ in ["fabs", ]:
@@ -123,7 +122,6 @@ class NDMath(object):
 
         return self._op_result(data, uncertainty, units, mask, history,
                                isquaternion)
-
 
     def __array_wrap__(self, *args):
         # called when element-wise ufuncs are applied to the array
@@ -189,7 +187,7 @@ class NDMath(object):
             func, target = func
             if target in kwargs:
                 raise TypeError('%s is both the pipe target and a keyword '
-                                 'argument' % target)
+                                'argument' % target)
             kwargs[target] = self
             return func(*args, **kwargs)
 
@@ -226,9 +224,8 @@ class NDMath(object):
 
     absolute = abs
 
-
     # numpy functions which are not ufuncs
-    #TODO: implement uncertainties!
+    # TODO: implement uncertainties!
 
     # sum, products...
     # ------------------------------------------------------------------------
@@ -250,7 +247,7 @@ class NDMath(object):
             new._data = ma
         # the data being reduce to only a single elements along the summed axis
         # we must reduce the corresponding coordinates
-        new.coordset[axis]= None
+        new.coordset[axis] = None
         return new
 
     # ........................................................................
@@ -270,7 +267,7 @@ class NDMath(object):
             new._data = ma
         # the data being reduce to only a single elements along the summed axis
         # we must reduce the corresponding coordinates
-        new.coordset[axis]= None
+        new.coordset[axis] = None
         return new
 
     @getdocfrom(np.prod)
@@ -289,7 +286,7 @@ class NDMath(object):
             new._data = ma
         # the data being reduce to only a single elements along the summed axis
         # we must reduce the corresponding coordinates
-        new.coordset[axis]= None
+        new.coordset[axis] = None
         return new
 
     @getdocfrom(np.cumsum)
@@ -380,7 +377,7 @@ class NDMath(object):
 
         new = self.copy()
         if new.is_masked:
-            kwargs['fill_value']=fill_value=-1.e+300
+            kwargs['fill_value'] = fill_value = -1.e+300
         if not new.isquaternion:
             ma = new._masked_data.max(*args, **kwargs)
         else:
@@ -412,11 +409,6 @@ class NDMath(object):
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
-
-    def __rmul__(self, other):
-
-        pass
-
 
     @staticmethod
     def _op(f, inputs, isufunc=False):
@@ -513,18 +505,17 @@ class NDMath(object):
                     # here it can be several situations
                     # One acceptable is that e.g., we suppress or add
                     # a row to the whole dataset
-                    for i, (s1,s2) in enumerate(
-                            zip(obj._data.shape, other._data.shape)):
+                    for i, (s1, s2) in enumerate(
+                        zip(obj._data.shape, other._data.shape)):
                         # we obviously have to work on the real shapes
-                        if s1!=1 and s2!=1:
-                            if s1!=s2:
+                        if s1 != 1 and s2 != 1:
+                            if s1 != s2:
                                 raise ValueError(
-                                        "coordinate's sizes do not match")
-                            elif not np.all(obj._coordset[i]._data==
-                                      other._coordset[i]._data):
+                                    "coordinate's sizes do not match")
+                            elif not np.all(obj._coordset[i]._data ==
+                                            other._coordset[i]._data):
                                 raise ValueError(
-                                        "coordinate's values do not match")
-
+                                    "coordinate's values do not match")
 
                 # rescale according to units
                 if not other.unitless:
@@ -551,7 +542,7 @@ class NDMath(object):
 
                 # complex?
                 if hasattr(other, '_iscomplex') and \
-                                other._iscomplex is not None:
+                    other._iscomplex is not None:
                     if other._iscomplex[-1]:
                         # pack arg to complex
                         arg = interleaved2complex(arg)
@@ -599,8 +590,7 @@ class NDMath(object):
             # if not uncertain use the numpy package, not the unp
             data = getattr(np, fname)(d, *args)
 
-
-                # TODO: check the complex nature of the result to return it
+            # TODO: check the complex nature of the result to return it
 
         else:
             # make a simple operation
@@ -614,7 +604,7 @@ class NDMath(object):
                 raise ArithmeticError(e.args[0])
 
             # restore interleaving of complex data
-            #TODO: handle hypercomplex
+            # TODO: handle hypercomplex
             #       data, iscomplex = interleave(data)
 
         # unpack the data (this process is long, so we bypass it if not needed)
@@ -639,34 +629,33 @@ class NDMath(object):
             units = None
 
         # determine the iscomplex parameter:
-        #data_iscomplex = [False] * data.ndim
+        # data_iscomplex = [False] * data.ndim
 
-        #if iscomplex:
-            # the resulting data are complex on the last dimension
+        # if iscomplex:
+        # the resulting data are complex on the last dimension
         #    data_iscomplex[-1] = True
 
         # For the other dimension, this will depends on the history of the
         # objs:
         # TODO: The following will have to be carefully checked in many kind
         # of situation
-        #for i in range(data.ndim)[:-1]:
+        # for i in range(data.ndim)[:-1]:
 
         #    for item in objcomplex:
-                # dim is complex for this object
-                # (should be also the case of the results)
-                # of course this will work only if the array
-                # doesn't change in ndim ...
-                # TODO: is that possible? - To check
-                # this also assume that compatible object have been
-                # passed. If it is not the case,
-                # some adaptation will be necessary
-                # TODO: adapt array if necessary
-                # for complex dimension
+        # dim is complex for this object
+        # (should be also the case of the results)
+        # of course this will work only if the array
+        # doesn't change in ndim ...
+        # TODO: is that possible? - To check
+        # this also assume that compatible object have been
+        # passed. If it is not the case,
+        # some adaptation will be necessary
+        # TODO: adapt array if necessary
+        # for complex dimension
         #        if item:
         #            data_iscomplex[i] |= item[i]  # `or` operation
 
         return data, uncertainty, units, mask, isquaternion
-
 
     @staticmethod
     def _unary_op(f):
@@ -712,7 +701,7 @@ class NDMath(object):
             self._iscomplex = iscomplex
 
             self.history = 'inplace binary op : ' + f.__name__ + \
-            ' with %s ' % get_name(other)
+                           ' with %s ' % get_name(other)
             return self
 
         return func
@@ -742,9 +731,7 @@ class NDMath(object):
 
 
 if __name__ == '__main__':
-
     pass
-
 
 _s = """
 

@@ -8,8 +8,6 @@
 # =============================================================================
 
 
-
-
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.application import datadir
 from spectrochempy.utils import show
@@ -19,17 +17,19 @@ import pytest
 
 def test_read_zip():
 
+    with pytest.raises(NotImplementedError):
+        A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
+
     A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
                            origin='omnic_export',
                            only=10)
     print(A)
-    assert A.shape == (10,3736)
+    assert A.shape == (10, 3736)
 
     A.plot_stack()
     show()
 
 def test_read_csv_tg():
-
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
                            directory=datadir.path,
                            origin='tga')

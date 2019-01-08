@@ -159,9 +159,9 @@ def concatenate(*datasets, axis=0, **kwargs):
     isuncertain = any([dataset.is_uncertain for dataset in datasets])
 
     # are data complex
-    iscomplex = [dataset.has_complex_dims for dataset in datasets]
-    if iscomplex:
-        datacomplex = [dataset._iscomplex for dataset in datasets]
+    #iscomplex = [dataset.has_complex_dims for dataset in datasets]
+    #if np.any(iscomplex):
+    #    datacomplex = [dataset._iscomplex for dataset in datasets]
 
     # Check coordinates compatibility
     # -------------------------------

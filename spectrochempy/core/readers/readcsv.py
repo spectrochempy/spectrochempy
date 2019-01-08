@@ -66,7 +66,7 @@ def read_zip(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS,
+    >>> from spectrochempy import * # doctest: +ELLIPSIS,
 
     >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -75,9 +75,10 @@ def read_zip(dataset, filename='', **kwargs):
 
     """
 
-    return _read(dataset, filename,
+    nd = _read(dataset, filename,
                  filter='zip file (*.zip);', **kwargs)
 
+    return nd
 
 # =============================================================================
 # read_csv
@@ -102,7 +103,7 @@ def read_csv(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -116,9 +117,10 @@ def read_csv(dataset, filename='', **kwargs):
 
     """
 
-    return _read(dataset, filename,
+    nd =  _read(dataset, filename,
                  filter='csv file (*.csv);', **kwargs)
 
+    return nd
 
 # =============================================================================
 # private functions
@@ -207,6 +209,8 @@ def _read_zip(dataset, filename, **kwargs):
     only = kwargs.pop('only',None)
     if only is not None:
         filelist = filelist[:only+1]
+    else:
+        filelist = filelist[:]
     datasets = []
 
     for i, f in enumerate(filelist):
@@ -259,7 +263,7 @@ def _read_csv(dataset, filename='', **kwargs):
     d = d.T
 
     # First row should now be the coordinates, and data the rest of the array
-    coord1 = d[0]
+    coord0 = d[0]
     data = d[1]
 
     # create the dataset
@@ -270,17 +274,19 @@ def _read_csv(dataset, filename='', **kwargs):
     new.units = kwargs.get('units', None)
     new.description = kwargs.get('description',
                                     '"name" '+ 'read from .csv file')
-    coord0 = Coord(labels=[new.name])
-    new.coordset = [coord0, coord1] #[coord0, coord1]
+    new.coordset = [coord0]
     new.history = str(datetime.now()) + ':read from .csv file \n'
     new._date = datetime.now()
     new._modified = new.date
 
     # here we can check some particular format
-    origin = kwargs.get('origin', '')
+    origin = kwargs.get('origin','')
     if 'omnic' in origin:
         # this will be treated as csv export from omnic (IR data)
         new = _add_omnic_info(new, **kwargs)
+    else:
+        raise NotImplementedError ("Sorry, but reading a file with origin of "
+                                   "type '%s' is not implemented." %origin)
 
     return new
 
