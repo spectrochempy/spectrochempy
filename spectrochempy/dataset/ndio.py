@@ -119,7 +119,7 @@ class NDIO(HasTraits):
         Read some experimental data and then save in our proprietary format
         **scp**
 
-        >>> from spectrochempy import NDDataset #doctest: +ELLIPSIS
+        >>> from spectrochempy import * #doctest: +ELLIPSIS
 
         >>> mydataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
         >>> mydataset.save('mydataset.scp')
@@ -274,7 +274,7 @@ class NDIO(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import NDDataset
+        >>> from spectrochempy import *
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -283,7 +283,7 @@ class NDIO(HasTraits):
         by default, directory for saving is the `data`.
         So the same thing can be done simply by:
 
-        >>> from spectrochempy import NDDataset
+        >>> from spectrochempy import *
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)                  # doctest: +ELLIPSIS
         <BLANKLINE>
@@ -348,21 +348,30 @@ class NDIO(HasTraits):
         # get zip file
         obj = NpzFile(fid, allow_pickle=True)
 
+        log.debug(str(obj.files) + '\n')
+
         # interpret
         ndim = obj["data"].ndim
         coordset = None
         new = cls()
 
+        torem = []
         for key, val in list(obj.items()):
             if key.startswith('coord_'):
                 if not coordset:
                     coordset = [Coord() for _ in range(ndim)]
                 els = key.split('_')
-                setattr(coordset[int(els[1])], "_%s" % els[2], val)
+                idx = int(els[1])
+                if obj["data"].shape[idx]==1:
+                    torem.append(idx)
+                    idx+=1
+                setattr(coordset[idx], "_%s" % els[2], val)
+
             elif key == "pars.json":
                 pars = json.loads(asstr(val))
             else:
                 setattr(new, "_%s" % key, val)
+
 
         def setattributes(clss, key, val):
             # utility function to set the attributes
@@ -392,7 +401,10 @@ class NDIO(HasTraits):
             if key.startswith('coord_'):
 
                 els = key.split('_')
-                setattributes(coordset[int(els[1])], els[2], val)
+                idx = int(els[1])
+                if obj["data"].shape[idx] == 1:
+                    idx += 1
+                setattributes(coordset[idx], els[2], val)
 
             else:
 
@@ -401,9 +413,12 @@ class NDIO(HasTraits):
         if filename:
             new._filename = filename
 
-        if coordset: # this must comme after the set attribute (important
-            # for complex data)
-            new.coordset = coordset
+        if coordset:
+            ncoordset = []
+            for idx,v in enumerate(coordset):
+                if idx not in torem:
+                   ncoordset.append(coordset[idx])
+            new.coordset = ncoordset
 
         return new
 

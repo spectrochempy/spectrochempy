@@ -76,7 +76,7 @@ log.info('samples contained in the project are:%s'%proj.projects_names)
 
 proj['print_info'] = scp.Script('print_info', script_source)
 print(proj)
-
+print('*******************************************')
 ##############################################################################
 # save but do not change the original data
 

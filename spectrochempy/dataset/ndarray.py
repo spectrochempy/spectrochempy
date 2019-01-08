@@ -250,7 +250,7 @@ class NDArray(HasTraits):
         # process eventual kwargs, adressing HasTrait class
         super(NDArray, self).__init__(**kwargs)
 
-
+    # .........................................................................
     def implements(self, name=None):
         # For compatibility with pyqtgraph
         # Rather than isinstance(obj, NDArray) use object.implements('NDArray').
@@ -2162,8 +2162,3 @@ class NDArray(HasTraits):
         else:
             return uar
 
-
-# ============================================================================
-if __name__ == '__main__':
-
-    pass

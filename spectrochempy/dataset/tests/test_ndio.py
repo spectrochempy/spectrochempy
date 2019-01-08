@@ -15,7 +15,8 @@
 
 """
 
-from spectrochempy import NDDataset, datadir
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.application import datadir
 import os
 
 from spectrochempy.utils.testing import assert_array_equal
@@ -23,6 +24,22 @@ from spectrochempy.utils.testing import assert_array_equal
 
 # Basic
 # -------
+def test_basic():
+    ir = NDDataset([1.1, 2.2, 3.3], coordset=[[1, 2, 3]])
+    ir.save('essai')
+    dl = NDDataset.load('essai')
+    assert_array_equal(dl.data, ir.data)
+
+    ir = NDDataset([[1.1, 2.2, 3.3]], coordset=[[1, 2, 3]])
+    ir.save('essai')
+    dl = NDDataset.load('essai')
+    assert_array_equal(dl.data, ir.data)
+
+    ir = NDDataset([[1.1, 2.2, 3.3],[1.1, 2.2, 3.3]], coordset=[[1,2],[1, 2, 3]])
+    ir.save('essai')
+    dl = NDDataset.load('essai')
+    assert_array_equal(dl.data, ir.data)
+
 def test_save(IR_dataset_2D):
 
     dataset = IR_dataset_2D.copy()

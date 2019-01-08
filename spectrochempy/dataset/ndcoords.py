@@ -779,6 +779,9 @@ class CoordSet(HasTraits):
     def __setitem__(self, index, coords):
         self._coords[index] = coords
 
+    def __delitem__(self, index):
+        del self._coords[index]
+
     # .........................................................................
     def __iter__(self):
         for item in self._coords:

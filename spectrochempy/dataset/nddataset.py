@@ -33,7 +33,6 @@ from traitlets import (List, Unicode, Instance, Bool, All, Float, validate,
                        observe, default, )
 import matplotlib.pyplot as plt
 
-
 # =============================================================================
 # Local imports
 # =============================================================================
@@ -49,8 +48,6 @@ from .ndio import NDIO
 from .ndplot import NDPlot
 from ..application import log
 
-
-
 # =============================================================================
 # numpy print options
 # =============================================================================
@@ -63,10 +60,10 @@ numpyprintoptions()
 # =============================================================================
 
 class NDDataset(
-        NDIO,
-        NDPlot,
-        NDMath,
-        NDArray,
+    NDIO,
+    NDPlot,
+    NDMath,
+    NDArray,
 ):
     """
     The main N-dimensional dataset class used by |scpy|.
@@ -106,6 +103,7 @@ class NDDataset(
 
     docstrings.delete_params('NDArray.parameters', 'labels')
 
+    # .........................................................................
     @docstrings.dedent
     def __init__(self,
                  data=None,
@@ -159,14 +157,17 @@ class NDDataset(
     #
     # Default values
     #
+    # .........................................................................
     @default('_coordset')
     def _coordset_default(self):
         return None  # CoordSet([None for dim in self.shape])
 
+    # .........................................................................
     @default('_copy')
     def _copy_default(self):
         return False
 
+    # .........................................................................
     @default('_modeldata')
     def _modeldata_default(self):
         return None
@@ -174,6 +175,7 @@ class NDDataset(
     # --------------------------------------------------------------------------
     # additional properties (not in the NDArray base class)
     # --------------------------------------------------------------------------
+    # .........................................................................
     @property
     def description(self):
         """
@@ -182,10 +184,12 @@ class NDDataset(
         """
         return self._description
 
+    # .........................................................................
     @description.setter
     def description(self, value):
         self._description = value
 
+    # .........................................................................
     @property
     def history(self):
         """
@@ -194,10 +198,12 @@ class NDDataset(
         """
         return self._history
 
+    # .........................................................................
     @history.setter
     def history(self, value):
         self._history.append(value)
 
+    # .........................................................................
     @validate('_coordset')
     def _coordset_validate(self, proposal):
         coordset = proposal['value']
@@ -205,10 +211,11 @@ class NDDataset(
             return
         for i, item in enumerate(coordset):
             if isinstance(item, NDArray) and \
-                    not isinstance(item, Coord):
+                not isinstance(item, Coord):
                 coordset[i] = Coord(item)
         return coordset
 
+    # .........................................................................
     @property
     def coordset(self):
         """
@@ -216,8 +223,21 @@ class NDDataset(
         dimensions of the dataset.
 
         """
-        return self._coordset
 
+        if self._coordset is None:
+            return None
+
+        cs = self._coordset
+        if self.ndim < len(cs):
+            # check that the addition coord connain a data,
+            # else remove it from the returned list
+            for i, coord in enumerate(cs[:]):
+                if coord.data is None:
+                    cs.coords.remove(coord)
+        return cs
+
+
+    # .........................................................................
     @coordset.setter
     def coordset(self, value):
 
@@ -230,7 +250,7 @@ class NDDataset(
                 value = CoordSet(value)
 
             coordset = CoordSet(
-                    [[None] for s in self._data.shape])  # basic coordset
+                [[None] for s in self._data.shape])  # basic coordset
 
             for i, item in enumerate(value[::-1]):
                 coordset[self._data.ndim - 1 - i] = item
@@ -241,15 +261,15 @@ class NDDataset(
                     size = coord.sizes[i]
                 else:
                     size = coord.size
-                #if self.has_complex_dims and self._iscomplex[i]:
-                #    size = size * 2
+
                 if size != self._data.shape[i]:
                     raise ValueError(
-                            'the size of each coordinates array must '
-                            'be equal to that of the respective data dimension')
+                        'the size of each coordinates array must '
+                        'be equal to that of the respective data dimension')
 
             self._coordset = coordset
 
+    # .........................................................................
     @property
     def coordtitles(self):
         """
@@ -259,11 +279,13 @@ class NDDataset(
         if self.coordset is not None:
             return self.coordset.titles
 
+    # .........................................................................
     @coordtitles.setter
     def coordtitles(self, value):
         if self.coordset is not None:
             self.coordset.titles = value
 
+    # .........................................................................
     @property
     def coordunits(self):
         """
@@ -273,12 +295,14 @@ class NDDataset(
         if self.coordset is not None:
             return self.coordset.units
 
+    # .........................................................................
     @coordunits.setter
     def coordunits(self, value):
 
         if self.coordset is not None:
             self.coordset.units = value
 
+    # .........................................................................
     @property
     def modeldata(self):
         """
@@ -287,10 +311,12 @@ class NDDataset(
         """
         return self._modeldata
 
+    # .........................................................................
     @modeldata.setter
     def modeldata(self, data):
         self._modeldata = data
 
+    # .........................................................................
     @property
     def T(self):
         """
@@ -301,6 +327,7 @@ class NDDataset(
         """
         return self.transpose()
 
+    # .........................................................................
     @property
     def x(self):
         """
@@ -310,15 +337,17 @@ class NDDataset(
         data is returned except if there is labels taht can replace this index.
 
         """
-        if self.coordset is None or self.coordset[-1].size == 0: # no axis
-            new = Coord( range(self.shape[-1]), title = 'index')
+        if self.coordset is None or self.coordset[-1].size == 0:  # no axis
+            new = Coord(range(self.shape[-1]), title='index')
             return new
         return self.coordset[-1]
 
+    # .........................................................................
     @x.setter
     def x(self, value):
         self.coordset[-1] = value
 
+    # .........................................................................
     @property
     def y(self):
         """
@@ -339,10 +368,12 @@ class NDDataset(
             return new
         return self.coordset[-2]
 
+    # .........................................................................
     @y.setter
     def y(self, value):
         self.coordset[-2] = value
 
+    # .........................................................................
     @property
     def z(self):
         """
@@ -356,10 +387,12 @@ class NDDataset(
                 return new
             return self.coordset[-3]
 
+    # .........................................................................
     @z.setter
     def z(self, value):
         self.coordset[-3] = value
 
+    # .........................................................................
     @property
     def modified(self):
         """
@@ -394,6 +427,7 @@ class NDDataset(
     # usefull for this Coord class
     # -------------------------------------------------------------------------
 
+    # .........................................................................
     @property
     def labels(self):
         # not valid for NDDataset
@@ -403,6 +437,7 @@ class NDDataset(
     # public methods
     # -------------------------------------------------------------------------
 
+    # .........................................................................
     def implements(self, name=None):
         # For compatibility with pyqtgraph
         # Rather than isinstance(obj, NDDataset) use object.implements(
@@ -413,6 +448,7 @@ class NDDataset(
         else:
             return name == 'NDDataset'
 
+    # .........................................................................
     def coord(self, axis=-1):
         """
         Returns the coordinates along the given axis
@@ -479,6 +515,7 @@ class NDDataset(
 
         return new
 
+    # .........................................................................
     @docstrings.dedent
     def transpose(self, axes=None, inplace=False):
         """
@@ -528,6 +565,7 @@ class NDDataset(
 
         return new
 
+    # .........................................................................
     @docstrings.dedent
     def swapaxes(self, axis1, axis2, inplace=False):
         """
@@ -562,6 +600,7 @@ class NDDataset(
 
         return new
 
+    # .........................................................................
     @docstrings.dedent
     def sort(self,
              axis=0, pos=None, by='value', descend=False, inplace=False):
@@ -626,12 +665,13 @@ class NDDataset(
 
         return new
 
-    #def set_complex(self):
+    # def set_complex(self):
     #    raise NotImplementedError
 
-    #def set_quaternion(self):
+    # def set_quaternion(self):
     #    raise NotImplementedError
 
+    # .........................................................................
     def set_real(self):
         raise NotImplementedError
 
@@ -642,6 +682,7 @@ class NDDataset(
     # special methods
     # -------------------------------------------------------------------------
 
+    # .........................................................................
     def __dir__(self):
         return NDIO().__dir__() + ['data', 'mask', 'units', 'uncertainty',
                                    'meta', 'name', 'title', 'iscomplex',
@@ -649,6 +690,29 @@ class NDDataset(
                                    'modified', 'modeldata'
                                    ]
 
+    # .........................................................................
+    def __getattr__(self, item):
+        # when the attribute was not found
+        if item in ["__numpy_ufunc__"] or '_validate' in item or \
+            '_changed' in item:
+            # raise an error so that masked array will be handled correctly
+            # with arithmetic operators and more
+            raise AttributeError
+
+    # .........................................................................
+    def __eq__(self, other, attrs=None):
+        attrs = self.__dir__()
+        for attr in ('name', 'description', 'history', 'date', 'modified'):
+            attrs.remove(attr)
+        # some attrib are not important for equality
+        return super(NDDataset, self).__eq__(other, attrs)
+
+    # .........................................................................
+    def __hash__(self):
+        # all instance of this class has same hash, so they can be compared
+        return super().__hash__ + hash(self._coordset)
+
+    # .........................................................................
     def __str__(self):
         # Display the metadata of the object and partially the data
 
@@ -694,18 +758,18 @@ class NDDataset(
 
         sh = ' size' if self.ndim < 2 else 'shape'
 
-        cplx =  [False] * self.ndim
+        cplx = [False] * self.ndim
         if self.isquaternion:
             cplx = [True, True]
         elif self.iscomplex:
-            cplx[-1]=True
+            cplx[-1] = True
 
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
-                             list(zip(self.shape,cplx))))
+                         list(zip(self.shape, cplx))))
         shape = (' x '.join(['{}{}'] * self.ndim)).format(
-                *shapecplx).replace(
-                'False', '').replace('True', '(complex)')
+            *shapecplx).replace(
+            'False', '').replace('True', '(complex)')
         size = self.size
         sizecplx = '' if not self.has_complex_dims else " (complex)"
 
@@ -729,8 +793,12 @@ class NDDataset(
                 if isinstance(coord, list) or (hasattr(coord, 'data')
                                                and coord.data is not None):
                     coord_str = str(coord).replace('\n\n', '\n')
-                    out += ' {}-coordinate:\n'.format("wzyx"[-self.ndim-1:][idx])
-                    # here we add 1 to ndim to handle special case of stack for instances
+                    # special case when a coordinate has a single element.
+                    if len(self.coordset)>self.ndim:
+                        ndim = self.ndim+1
+                    else:
+                        ndim = self.ndim
+                    out += ' {}-coordinate:\n'.format("wzyx"[-ndim:][idx])
                     out += textwrap.indent(coord_str, ' ' * 9)
                     out += '\n'
                     idx += 1
@@ -741,30 +809,11 @@ class NDDataset(
 
         return out
 
-    def __getattr__(self, item):
-        # when the attribute was not found
-        if item in ["__numpy_ufunc__"] or '_validate' in item or \
-                        '_changed' in item:
-            # raise an error so that masked array will be handled correctly
-            # with arithmetic operators and more
-            raise AttributeError
-
-    def __eq__(self, other, attrs=None):
-        attrs = self.__dir__()
-        for attr in ('name', 'description', 'history', 'date', 'modified'):
-            attrs.remove(attr)
-        # some attrib are not important for equality
-        return super(NDDataset, self).__eq__(other, attrs)
-
-    # .........................................................................
-    def __hash__(self):
-        # all instance of this class has same hash, so they can be compared
-        return super().__hash__ + hash(self._coordset)
-
     # -------------------------------------------------------------------------
     # private methods
     # -------------------------------------------------------------------------
 
+    # .........................................................................
     def _repr_html_(self):
         tr = "<tr style='border: 1px solid lightgray;'>" \
              "<td style='padding-right:5px; width:100px'><strong>{}</strong></td>" \
@@ -793,18 +842,18 @@ class NDDataset(
 
         sh = 'Size' if self.ndim < 2 else 'Shape'
 
-        cplx =  [False] * self.ndim
+        cplx = [False] * self.ndim
         if self.isquaternion:
             cplx = [True, True]
         elif self.iscomplex:
-            cplx[-1]=True
+            cplx[-1] = True
         shapecplx = (x for x in
                      itertools.chain.from_iterable(
-                             list(zip(self.shape,cplx))))
+                         list(zip(self.shape, cplx))))
 
         shape = (' x '.join(['{}{}'] * self.ndim)).format(
-                *shapecplx).replace(
-                'False', '').replace('True', '(complex)')
+            *shapecplx).replace(
+            'False', '').replace('True', '(complex)')
 
         size = self.size
         sizecplx = '' if not self.has_complex_dims else " (complex)"
@@ -826,8 +875,11 @@ class NDDataset(
                 if isinstance(coord, list) or (hasattr(coord, 'data')
                                                and coord.data is not None):
                     coord_str = coord._repr_html_()
-                    # here we add 1 to ndim to handle special case of stack for instances
-                    out += tr.format("%s-coordinate" % "wzyx"[-self.ndim-1:][idx], coord_str)
+                    if len(self.coordset)>self.ndim:
+                        ndim = self.ndim+1
+                    else:
+                        ndim = self.ndim
+                    out += tr.format("%s-coordinate" % "wzyx"[-ndim:][idx], coord_str)
                     idx += 1
                     if out.endswith("\n\n"):
                         out = out[:-1]
@@ -836,6 +888,7 @@ class NDDataset(
 
         return out
 
+    # .........................................................................
     def _loc2index(self, loc, axis):
         # Return the index of a location (label or coordinates) along the axis
 
@@ -845,6 +898,8 @@ class NDDataset(
     # -------------------------------------------------------------------------
     # events
     # -------------------------------------------------------------------------
+
+    # .........................................................................
     @observe(All)
     def _anytrait_changed(self, change):
 
@@ -876,6 +931,7 @@ class NDDataset(
 
         return
 
+
 # =============================================================================
 # module function
 # =============================================================================
@@ -904,10 +960,4 @@ __all__ += ['sort',
 # Set the operators
 # =============================================================================
 
-set_operators(NDDataset, priority=50)
-
-if __name__ == '__main__':
-    pass
-
-
-
+set_operators(NDDataset, priority=100000)
