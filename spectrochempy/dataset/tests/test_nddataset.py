@@ -1105,3 +1105,23 @@ def test_max_with_2D(NMR_dataset_2D):
     print(nd2.max())
     nd2m = nd2.max(axis=0)
     print(nd2m)
+
+def test_comparison_of_dataset(NMR_dataset_1D):
+
+    # bug in notebook
+
+    nd1 = NMR_dataset_1D.copy()
+    nd2 = NMR_dataset_1D.copy()
+
+    lb1 = nd1.em(lb=100. * ur.Hz)
+    lb2 = nd2.em(lb=100. * ur.Hz)
+
+    assert nd1 is not nd2
+    assert nd1 == nd2
+
+    assert lb1 is not lb2
+    assert lb1 == lb2
+
+    print(lb1)
+    print(lb2)
+
