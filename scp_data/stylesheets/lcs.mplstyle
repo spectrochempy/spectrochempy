@@ -6,12 +6,13 @@ figure.dpi              : 100
 figure.facecolor        : white
 figure.edgecolor        : white
 figure.autolayout       : True
-figure.subplot.wspace   :0.0
-figure.subplot.hspace   :0.0
-figure.subplot.top      :0.98
-figure.subplot.bottom   :0.12
-figure.subplot.left     :0.15
-figure.subplot.right    :.95
+figure.max_open_warning : 50
+figure.subplot.wspace   : 0.0
+figure.subplot.hspace   : 0.0
+figure.subplot.top      : 0.98
+figure.subplot.bottom   : 0.12
+figure.subplot.left     : 0.15
+figure.subplot.right    : .95
 
 savefig.dpi       : 600
 savefig.facecolor : white

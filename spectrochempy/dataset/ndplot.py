@@ -568,6 +568,7 @@ def _set_figure_style(**kwargs):
 
     style = kwargs.get('style', None)
 
+    mpl.rcParams['figure.max_open_warning'] = 50
     if style:
         if not is_sequence(style):
             style = [style]

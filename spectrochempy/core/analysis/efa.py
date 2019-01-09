@@ -210,9 +210,9 @@ class EFA(HasTraits):
         f = self.get_forward(npc, cutoff)
         b = self.get_backward(npc, cutoff)
 
+        xcoord = Coord(range(npc), title='PC#')
         c = NDDataset(np.zeros((M, npc)),
-                      coordset=[self._X.y.copy(), Coord(range(npc),
-                                                        title='PC#')],
+                      coordset=[self._X.y.copy(), xcoord],
                       name = 'C_EFA[{}]'.format(self._X.name),
                       title = 'relative concentration',
                       )

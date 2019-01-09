@@ -250,7 +250,7 @@ class NDDataset(
                 value = CoordSet(value)
 
             coordset = CoordSet(
-                [[None] for s in self._data.shape])  # basic coordset
+                [ [None] for s in self._data.shape])  # basic coordset
 
             for i, item in enumerate(value[::-1]):
                 coordset[self._data.ndim - 1 - i] = item
@@ -431,7 +431,8 @@ class NDDataset(
     @property
     def labels(self):
         # not valid for NDDataset
-        raise ValueError("There is no label for nd-dataset")
+        "There is no label for nd-dataset"
+        return None
 
     # -------------------------------------------------------------------------
     # public methods

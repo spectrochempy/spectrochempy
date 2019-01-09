@@ -397,6 +397,7 @@ def test_non_ufunc_functions(operation, result):
     coord0 = Coord(np.arange(10)*.1)
     ds.coordset = [coord0]
     ds[-2] = masked
+    print(ds)
     ds.units = ur.m
     dsy = op(ds, axis=-1)
     print(dsy)

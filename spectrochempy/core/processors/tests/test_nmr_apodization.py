@@ -235,3 +235,46 @@ def test_nmr_1D_gm(NMR_dataset_1D):
 #     dataset1.plot()
 #     pass
 
+
+# ----------------------------------
+def test_nmr_prepare_ipynb():
+
+    # 1D dataset getting function
+    import os
+    def get_dataset1D():
+        dataset1D = NDDataset()
+        path = os.path.join(datadir.path, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+        dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+        return dataset1D
+
+    # restore original
+    dataset1D = get_dataset1D()
+    dataset1D = dataset1D[0.:14000.0]
+
+    # normalize amplitude
+    dataset1D /= dataset1D.max()
+
+    # apodize
+    LB = 100. * ur.Hz
+    apodfunc = dataset1D.em(lb=LB, apply=False)
+    lb_dataset = dataset1D.em(lb=LB, inplace=False)  # apply=True by default
+
+    # Plot
+    dataset1D.plot(lw=1, color='gray')
+    apodfunc.plot(color='r', clear=False)
+    lb_dataset.plot(color='r', ls='--', clear=False)
+
+    # shifted
+    apodfuncshifted = dataset1D.em(lb=LB, shifted=3000, apply=False)
+    apodfuncshifted.plot(color='b', clear=False)
+    lbshifted_dataset = dataset1D.em(lb=LB, shifted=3000, inplace=False)  # apply=True by default
+    lbshifted_dataset.plot(color='b', ls='--', clear=False)
+
+    # rev
+    apodfuncrev = dataset1D.em(lb=LB, rev=True, apply=False)
+    apodfuncrev.plot(color='g', clear=False)
+    lbrev_dataset = dataset1D.em(lb=LB, rev=True, inplace=False)  # apply=True by default
+    lbrev_dataset.plot(xlim=(0, 14000), ylim=(-1, 1), color='g', ls='--', clear=False)
+
+
+    show()

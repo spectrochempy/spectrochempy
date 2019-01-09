@@ -352,10 +352,10 @@ class NDArray(HasTraits):
 
 
         # The actual index depends on the complexity of the dimension
-        keys, internkeys = self._make_index(items)
+        keys = self._make_index(items)
 
         # slicing by index of all internal array
-        udata = new._uncert_data[internkeys]
+        udata = new._uncert_data[keys]
         if new.is_uncertain:
             new._data = unp.nominal_values(np.asarray(udata))
         else:
@@ -405,7 +405,7 @@ class NDArray(HasTraits):
 
         # TODO: this may not work for complex data in other dimensions than the
         # last
-        keys, internkeys = self._make_index(items)
+        keys = self._make_index(items)
         if self.ndim == 1:
             keys = keys[-1]
         if isinstance(value, (bool, np.bool_, MaskedConstant)):
@@ -414,10 +414,11 @@ class NDArray(HasTraits):
                 value = True
             if not np.any(self._mask):
                 self._mask = np.zeros_like(self._data).astype(np.bool_)
-            self._mask[internkeys] = value
+            self._mask[keys] = value
+            print()
         elif isinstance(value, StdDev):
             # the uncertainties are modified
-            self._uncertainty[internkeys] = value.data
+            self._uncertainty[keys] = value.data
         else:
             if self.ndim > 1 and self.isquaternion:
                 raise NotImplementedError("Sorry but setting values for"
@@ -2006,7 +2007,7 @@ class NDArray(HasTraits):
 
             if stop is not None and not isinstance(stop, (int, np.int_)):
                 stop = self._loc2index(stop, axis)
-                if stop < start:  # and self.coordset[axis].reversed:
+                if start is not None and stop < start:  # and self.coordset[axis].reversed:
                     start, stop = stop, start
                 stop = stop + 1
 
@@ -2021,15 +2022,7 @@ class NDArray(HasTraits):
 
         keys = slice(start, stop, step)
 
-        #if iscomplex:
-        #    if start is not None:
-        #        start = start * 2
-        #    if stop is not None:
-        #        stop = stop * 2
-
-        internkeys = slice(start, stop, step)
-
-        return keys, internkeys
+        return keys
 
     # .........................................................................
     def _make_quaternion(self, data):
@@ -2045,7 +2038,7 @@ class NDArray(HasTraits):
         if isinstance(key, np.ndarray) and key.dtype == np.bool:
             # this is a boolean selection
             # we can proceed directly
-            return key, key  # TODO: jsut check with complex!!!
+            return key  # TODO: jsut check with complex!!!
 
         # we need to have a list of slice for each argument
         # or a single slice acting on the axis=0
@@ -2069,7 +2062,7 @@ class NDArray(HasTraits):
             raise IndexError("invalid index")
 
         if self._data.ndim != self.ndim:
-            # case or 1D spectra or of array with complex dimensions
+            # case or 1D spectra
             # this need some attention to have a correct slicing
             # because, the user should not be aware of the internal
             # representation
@@ -2087,24 +2080,18 @@ class NDArray(HasTraits):
                         newkeys.append(slice(None))
                     else:
                         newkeys.append(keys.pop(0))
-            # TODO: check for complex data !!!!
+
             keys = newkeys[:]
         else:
             # pad the list with additional dimensions
             for i in range(len(keys), self.ndim):
                 keys.append(slice(None))
 
-        # replace all keys by index slices (and get internal slice index for
-        # complex array)
-
-        internkeys = keys[:]
-
         for axis, key in enumerate(keys):
-#            complex = self._iscomplex[axis]
 
-            keys[axis], internkeys[axis] = self._get_slice(key, axis)
+            keys[axis] = self._get_slice(key, axis)
 
-        return tuple(keys), tuple(internkeys)
+        return tuple(keys)
 
     # .........................................................................
     def _sort(self, by='value', pos=None, descend=False, inplace=False):
