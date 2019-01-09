@@ -30,7 +30,7 @@ from cycler import cycler
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from traitlets import Dict, HasTraits, Instance
+from traitlets import Dict, HasTraits, Instance, default
 
 # local import
 # ------------
@@ -46,7 +46,7 @@ do_not_block = app.do_not_block
 from ..core.plotters.plot1d import plot_1D
 from ..core.plotters.plot3d import plot_3D
 from ..core.plotters.plot2d import plot_2D
-
+from ..utils.meta import Meta
 from ..utils import deprecated
 
 # =============================================================================
@@ -67,6 +67,9 @@ class NDPlot(HasTraits):
     # The axes on which this dataset and other elements such as projections 
     # and colorbar can be plotted
     _ndaxes = Dict(Instance(plt.Axes))
+
+    # add metadata to store plot parameters
+    _plotmeta = Instance(Meta, allow_none=True)
 
     # -------------------------------------------------------------------------
     # generic plotter and plot related methods or properties
@@ -298,19 +301,19 @@ class NDPlot(HasTraits):
         if ndim == 2:
             # TODO: also the case of 3D
 
-            method = kwargs.get('method', self.meta.method_2D)
+            method = kwargs.get('method', self.plotmeta.method_2D)
 
             # show projections (only useful for map or image)
             # ------------------------------------------------
 
-            colorbar = kwargs.get('colorbar', self.meta.colorbar)
+            colorbar = kwargs.get('colorbar', self.plotmeta.colorbar)
 
-            proj = kwargs.get('proj', self.meta.show_projections)
+            proj = kwargs.get('proj', self.plotmeta.show_projections)
             # TODO: tell the axis by title.
 
-            xproj = kwargs.get('xproj', self.meta.show_projection_x)
+            xproj = kwargs.get('xproj', self.plotmeta.show_projection_x)
 
-            yproj = kwargs.get('yproj', self.meta.show_projection_y)
+            yproj = kwargs.get('yproj', self.plotmeta.show_projection_y)
 
             SHOWXPROJ = (proj or xproj) and method in ['map', 'image']
             SHOWYPROJ = (proj or yproj) and method in ['map', 'image']
@@ -426,6 +429,28 @@ class NDPlot(HasTraits):
     # -------------------------------------------------------------------------
     # Properties
     # -------------------------------------------------------------------------
+
+    # .........................................................................
+    @default('_plotmeta')
+    def _plotmeta_default(self):
+        return Meta()
+
+    # .........................................................................
+    @property
+    def plotmeta(self):
+        """
+        |Meta| instance object - Additional metadata.
+
+        """
+        return self._plotmeta
+
+
+    # .........................................................................
+    @plotmeta.setter
+    def plotmeta(self, plotmeta):
+        # property.setter for plotmeta
+        if plotmeta is not None:
+            self._plotmeta.update(plotmeta)
 
     # .........................................................................
     @property

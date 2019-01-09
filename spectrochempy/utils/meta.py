@@ -23,6 +23,7 @@ elements can be accessed by key, but also by attributes, *e.g.*
 
 from traitlets import HasTraits, Dict, Bool, default
 import numpy as np
+import sys
 
 from . import (is_sequence, SpectroChemPyWarning)
 
@@ -138,7 +139,16 @@ class Meta(object):  # HasTraits):
         return self.__copy__()
 
     def __eq__(self, other):
-        return self._data == other._data
+        m1 = self._data
+        m2 = other._data
+        eq = True
+        for k, v in m1.items():
+            if isinstance(v, list):
+                for i, ve in enumerate(v):
+                    eq &= np.all(ve == m2[k][i])
+            else:
+                eq &= np.all(v == m2[k])
+        return eq
 
     def __ne__(self, other):
         return not self.__eq__(other)

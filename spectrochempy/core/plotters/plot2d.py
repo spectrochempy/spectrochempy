@@ -122,7 +122,7 @@ def plot_2D(dataset, **kwargs):
     # get all plot preferences
     # ------------------------
 
-    prefs = dataset.meta
+    prefs = dataset.plotmeta
     if not prefs.style:
         # not yet set, initialize with default project preferences
         prefs.update(app.project_preferences.to_dict())
@@ -234,6 +234,9 @@ def plot_2D(dataset, **kwargs):
         inc = abs(xdata[1] - xdata[0]) * .5
         xl = [xl[0] - inc, xl[1] + inc]
 
+    if data_only:
+        xl = ax.get_xlim()
+
     xlim = list(kwargs.get('xlim', xl))
     xlim.sort()
     xlim[-1] = min(xlim[-1], xl[-1])
@@ -260,6 +263,9 @@ def plot_2D(dataset, **kwargs):
         # extend the axis so that the labels are not too close to the limits
         inc = abs(ydata[1] - ydata[0]) * .5
         yl = [yl[0] - inc, yl[1] + inc]
+
+    if data_only:
+        yl = ax.get_ylim()
 
     ylim = list(kwargs.get("ylim", yl))
     ylim.sort()
@@ -296,6 +302,9 @@ def plot_2D(dataset, **kwargs):
 
         # the y axis info
         # ----------------
+        if data_only:
+            ylim = ax.get_ylim()
+
         ylim = list(kwargs.get('ylim', ylim))
         ylim.sort()
         y_reverse = kwargs.get('y_reverse', y.reversed)
@@ -416,11 +425,6 @@ def plot_2D(dataset, **kwargs):
         # it was probably done already in a previous plot
         new._plot_resume(dataset, **kwargs)
         return ax
-
-    # -------------------------------------------------------------------------
-    # axis limits and labels
-    # -------------------------------------------------------------------------
-
 
     # -------------------------------------------------------------------------
     # labels

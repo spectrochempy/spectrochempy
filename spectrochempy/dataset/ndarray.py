@@ -291,7 +291,7 @@ class NDArray(HasTraits):
 
         if not isinstance(other, NDArray):
 
-            # try to make some assumption to make usefull comparison.
+            # try to make some assumption to make useful comparison.
             if isinstance(other, Quantity):
                 otherdata = other.magnitude
                 otherunits = other.units
@@ -319,19 +319,22 @@ class NDArray(HasTraits):
             attrs.remove('title')  # name and title will
             # not be used for comparison
         for attr in attrs:
-            if hasattr(other, "_%s" % attr):
-                eq &= np.all(
-                    getattr(self, "_%s" % attr) == getattr(other,
-                                                           "_%s" % attr))
-                if not eq:
-                    # log.debug("attributes '{}' are not equals "
-                    #           "or one is missing: "
-                    #           "{}, {}".format(attr,
-                    #                           getattr(self,
-                    #                                   "_%s" % attr),
-                    #                           getattr(other,
-                    #                                   "_%s" % attr)))
+                if hasattr(other, "_%s" % attr):
+                    eq &= np.all(
+                        getattr(self, "_%s" % attr) == getattr(other,
+                                                               "_%s" % attr))
+                    if not eq:
+                        log.debug("attributes '{}' are not equals "
+                                   "or one is missing: \n************\n"
+                                   "{}, \n************\n{}".format(attr,
+                                                   getattr(self,
+                                                           "_%s" % attr),
+                                                   getattr(other,
+                                                           "_%s" % attr)))
+                        return False
+                else:
                     return False
+
         return eq
 
     # .........................................................................

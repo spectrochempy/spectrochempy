@@ -203,7 +203,6 @@ def plot_1D(dataset, **kwargs):
         If false, hold the current figure and ax until a new plot is performed.
     data_only: bool, optional, default:False
         Only the plot is done. No addition of axes or label specifications
-        (current if any or automatic settings are kept.
     imag: bool, optional, default:False
         Show imaginary part. By default only the real part is displayed.
     show_complex: bool, optional, default:False
@@ -253,7 +252,7 @@ def plot_1D(dataset, **kwargs):
     # get all plot preferences
     # ------------------------
 
-    prefs = dataset.meta
+    prefs = dataset.plotmeta
     if not prefs.style:
         # not yet set, initialize with default project preferences
         prefs.update(app.project_preferences.to_dict())
@@ -427,9 +426,12 @@ def plot_1D(dataset, **kwargs):
     if (scatter or scatterpen) and marker!='AUTO':
         # set the line style if defined in the preferences or options
         line.set_marker(marker)
+
     # ------------------------------------------------------------------------
     # axis
     # ------------------------------------------------------------------------
+
+    data_only = kwargs.get('data_only', False)
 
     # abscissa limits?
     xl = [xdata[0], xdata[-1]]
@@ -457,6 +459,9 @@ def plot_1D(dataset, **kwargs):
         zl[-1] = max(zlim[-1], zl[-1])
         zl[0] = min(zlim[0], zl[0])
 
+    if data_only:
+        xl = ax.get_xlim()
+
     xlim = list(kwargs.get('xlim', xl))  # we read the argument xlim
                                          # that should have the priority
     xlim.sort()
@@ -465,6 +470,9 @@ def plot_1D(dataset, **kwargs):
     reverse = new.x.reversed
     if kwargs.get('reverse', reverse):
         xlim.reverse()
+
+    if data_only:
+        zl = ax.get_ylim()
 
     zlim = list(kwargs.get('zlim', kwargs.get('ylim', zl)))
                                 # we read the argument zlim or ylim
@@ -481,15 +489,15 @@ def plot_1D(dataset, **kwargs):
     ax.set_ylim(zlim)
 
 
+    if data_only:
+        # if data only (we will  ot set axes and labels
+        # it was probably done already in a previous plot
+        new._plot_resume(dataset, **kwargs)
+        return ax
+
     # ------------------------------------------------------------------------
     # labels
     # ------------------------------------------------------------------------
-
-    if kwargs.get('data_only', False):
-        # if data only (we will not set labels
-        # it was probably done already in a previous plot
-        new._plot_resume(new, **kwargs)
-        return True
 
     # x label
 

@@ -684,8 +684,8 @@ class NDDataset(
 
     # .........................................................................
     def __dir__(self):
-        return NDIO().__dir__() + ['data', 'mask', 'units', 'uncertainty',
-                                   'meta', 'name', 'title', 'iscomplex',
+        return NDIO().__dir__() + ['data', 'mask', 'labels', 'units', 'uncertainty',
+                                   'meta', 'plotmeta', 'name', 'title', 'isquaternion',
                                    'coordset', 'description', 'history', 'date',
                                    'modified', 'modeldata'
                                    ]
@@ -702,7 +702,8 @@ class NDDataset(
     # .........................................................................
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
-        for attr in ('name', 'description', 'history', 'date', 'modified'):
+        for attr in ('filename', 'plotmeta', 'name', 'description',
+                     'history', 'date', 'modified'):
             attrs.remove(attr)
         # some attrib are not important for equality
         return super(NDDataset, self).__eq__(other, attrs)
