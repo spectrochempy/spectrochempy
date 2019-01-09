@@ -391,6 +391,19 @@ class NDIO(HasTraits):
                                     pass
                         val[k]=v
                 clss.meta.update(val)
+            elif key == 'plotmeta':
+                # handle the case were quantity were saved
+                for k,v in val.items():
+                    if isinstance(v, list):
+                        for i,item in enumerate(v):
+                            if isinstance(item, (list, tuple)):
+                                try:
+                                    v[i] = Quantity.from_tuple(item)
+                                except TypeError:
+                                    # not a quantity
+                                    pass
+                        val[k]=v
+                clss.plotmeta.update(val)
             elif key in ['units']:
                 setattr(clss, key, val)
             else:

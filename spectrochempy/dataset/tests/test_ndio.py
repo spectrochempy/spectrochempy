@@ -8,9 +8,6 @@
 # =============================================================================
 
 
-
-
-
 """ Tests for the ndplugin module
 
 """
@@ -35,13 +32,13 @@ def test_basic():
     dl = NDDataset.load('essai')
     assert_array_equal(dl.data, ir.data)
 
-    ir = NDDataset([[1.1, 2.2, 3.3],[1.1, 2.2, 3.3]], coordset=[[1,2],[1, 2, 3]])
+    ir = NDDataset([[1.1, 2.2, 3.3], [1.1, 2.2, 3.3]], coordset=[[1, 2], [1, 2, 3]])
     ir.save('essai')
     dl = NDDataset.load('essai')
     assert_array_equal(dl.data, ir.data)
 
-def test_save(IR_dataset_2D):
 
+def test_save(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
     dataset.save('essai')
 
@@ -50,10 +47,13 @@ def test_save(IR_dataset_2D):
 
     os.remove(os.path.join(datadir.path, 'essai.scp'))
 
+
 def test_save_and_load_mydataset(IR_dataset_2D):
     ds = IR_dataset_2D.copy()
     ds.save('mydataset')
     dl = NDDataset.load('mydataset')
     assert_array_equal(dl.data, ds.data)
     assert_array_equal(dl.x.data, ds.x.data)
-    assert (dl==ds)
+    assert (dl == ds)
+    assert (dl.meta == ds.meta)
+    assert (dl.plotmeta == ds.plotmeta)
