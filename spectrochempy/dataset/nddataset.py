@@ -47,6 +47,7 @@ from .ndmath import NDMath
 from .ndio import NDIO
 from .ndplot import NDPlot
 from ..application import log
+from ..utils import INPLACE
 
 # =============================================================================
 # numpy print options
@@ -229,7 +230,7 @@ class NDDataset(
 
         cs = self._coordset
         if self.ndim < len(cs):
-            # check that the addition coord connain a data,
+            # check that the additional coord connain a data,
             # else remove it from the returned list
             for i, coord in enumerate(cs[:]):
                 if coord.data is None:
@@ -250,7 +251,7 @@ class NDDataset(
                 value = CoordSet(value)
 
             coordset = CoordSet(
-                [ [None] for s in self._data.shape])  # basic coordset
+                [ Coord() for s in self._data.shape])  # basic coordset
 
             for i, item in enumerate(value[::-1]):
                 coordset[self._data.ndim - 1 - i] = item
@@ -268,6 +269,11 @@ class NDDataset(
                         'be equal to that of the respective data dimension')
 
             self._coordset = coordset
+        else:
+            # no change
+            pass
+
+
 
     # .........................................................................
     @property
@@ -690,6 +696,36 @@ class NDDataset(
                                    'coordset', 'description', 'history', 'date',
                                    'modified', 'modeldata'
                                    ]
+
+    # .........
+    def __getitem__(self, items):
+
+        # choose, if we keep the same or create new dataset
+        inplace = False
+        if isinstance(items,tuple) and items[-1]==INPLACE:
+            items=list(items)[:-1]
+            inplace = True
+        if inplace:
+            new = self
+        else:
+            new = self.copy()
+
+        # get a better representation of the indexes
+        items = self._make_index(items)
+
+        if inplace:
+            new = super(NDDataset, self).__getitem__(items+(INPLACE,))
+        else:
+            new = super(NDDataset, self).__getitem__(items)
+
+        if self._coordset is not None:
+            new_coordset = []
+            for i, item in enumerate(items):
+                if isinstance(item, slice):
+                    new_coordset.append(self._coordset[i][items[i]])
+            new._coordset = CoordSet(new_coordset)
+
+        return new
 
     # .........................................................................
     def __getattr__(self, item):

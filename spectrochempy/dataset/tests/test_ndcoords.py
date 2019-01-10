@@ -472,7 +472,7 @@ def test_coord_is_reversed_not_complex():
                    mask=None,
                    title='wavenumbers')
     assert coord0.reversed
-    assert coord0.iscomplex == [False, False]
+    assert not coord0.iscomplex
 
 def test_coord_real():
     coord0 = Coord(data=np.linspace(4000, 1000, 10),

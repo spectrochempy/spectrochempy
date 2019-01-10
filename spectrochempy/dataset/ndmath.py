@@ -226,175 +226,41 @@ class NDMath(object):
 
     # numpy functions which are not ufuncs
     # TODO: implement uncertainties!
+    # -----------------------------------------------------------------------
 
     # sum, products...
     # ------------------------------------------------------------------------
 
-    # ........................................................................
-    @getdocfrom(np.sum)
-    def sum(self, *args, **kwargs):
-        """sum along axis"""
+
+
+    def _func(self, op, *args, **kwargs):
+
+        # basis for all op function
+        MIN = np.finfo(np.float64).min
+        MAX = np.finfo(np.float64).max
 
         new = self.copy()
-        ma = np.sum(new._masked_data, *args, **kwargs)
-        axis = kwargs.get('axis', None)
-        if axis is None:
-            return ma
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        # the data being reduce to only a single elements along the summed axis
-        # we must reduce the corresponding coordinates
-        new.coordset[axis] = None
-        return new
+        if op in ('max','min') and self.is_masked:
+            # because an incorrect behavior of max on masked numpy array
+            # we do the opposite for min.
+            kwargs['fill_value'] = MIN if op=='max' else MAX
 
-    # ........................................................................
-    @getdocfrom(np.all)
-    def all(self, *args, **kwargs):
-        """Test whether all array elements along a given axis evaluate to True."""
-
-        new = self.copy()
-        ma = np.all(new._masked_data, *args, **kwargs)
-        axis = kwargs.get('axis', None)
-        if axis is None:
-            return ma
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        # the data being reduce to only a single elements along the summed axis
-        # we must reduce the corresponding coordinates
-        new.coordset[axis] = None
-        return new
-
-    @getdocfrom(np.prod)
-    def prod(self, *args, **kwargs):
-        """product along axis"""
-
-        new = self.copy()
-        ma = np.prod(new._masked_data, *args, **kwargs)
-        axis = kwargs.get('axis', None)
-        if axis is None:
-            return ma
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        # the data being reduce to only a single elements along the summed axis
-        # we must reduce the corresponding coordinates
-        new.coordset[axis] = None
-        return new
-
-    @getdocfrom(np.cumsum)
-    def cumsum(self, *args, **kwargs):
-        """umsum along axis"""
-
-        new = self.copy()
-        ma = np.cumsum(new._masked_data, *args, **kwargs)
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        return new
-
-    @getdocfrom(np.cumprod)
-    def cumprod(self, *args, **kwargs):
-        """cumprod along axis"""
-
-        new = self.copy()
-        ma = np.cumprod(new._masked_data, *args, **kwargs)
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        return new
-
-    # statistics
-    # ------------------------------------------------------------------------
-    @getdocfrom(np.mean)
-    def mean(self, *args, **kwargs):
-        """mean values along axis"""
-
-        new = self.copy()
-        ma = np.mean(new._masked_data, *args, **kwargs)
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        return new
-
-    @getdocfrom(np.std)
-    def std(self, *args, **kwargs):
-        """Standard deviation values along axis"""
-
-        new = self.copy()
-        ma = np.std(new._masked_data, *args, **kwargs)
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        return new
-
-    # utilities
-
-    @getdocfrom(np.ptp)
-    def ptp(self, *args, **kwargs):
-        """amplitude of data along axis"""
-
-        new = self.copy()
-        ma = np.ptp(new._masked_data, *args, **kwargs)
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        return new
-
-    @getdocfrom(np.min)
-    def min(self, *args, **kwargs):
-        """minimum of data along axis"""
-
-        new = self.copy()
-        ma = np.min(new._masked_data, *args, **kwargs)
-        if isinstance(ma, MaskedArray):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-        return new
-
-    @getdocfrom(np.max)
-    def max(self, *args, **kwargs):
-        """maximum of data along axis"""
-
-        new = self.copy()
-        if new.is_masked:
-            kwargs['fill_value'] = fill_value = -1.e+300
         if not new.isquaternion:
-            ma = new._masked_data.max(*args, **kwargs)
+            ma = getattr(self._masked_data, op)(*args, **kwargs)
         else:
             # for quaternion we return only the real part
             # TODO: return a quaternion ?
-            ma = new._masked_data['R'].max(*args, **kwargs)
+            ma = getattr(self._masked_data['R'], op)(*args, **kwargs)
 
         if isinstance(ma, (MaskedArray, NDArray)):
             new._data = ma.data
+            new._mask = ma.mask
         elif isinstance(ma, np.ndarray):
             new._data = ma
+            new._mask = nomask
         else:
-            new._data = np.asarray([ma])
-
-        if new.size == 1:
-            # a single element, just return it
-            return new._data
+            new._data = np.asarray([ma,])
+            new._mask = nomask
 
         # if the data are reduced to only a single elements along the summed axis
         # we must reduce the corresponding coordinates
@@ -402,9 +268,80 @@ class NDMath(object):
         if axis is not None:
             del new.coordset[axis]
         if axis is None:
-            new._mask = nomask
             new.coordset = None
+            new.mask = nomask
+
+        #if new.size == 1:
+        #    return new._data
+
         return new
+
+    # ........................................................................
+    @getdocfrom(np.sum)
+    def sum(self, *args, **kwargs):
+        """sum along axis"""
+
+        return self._func('sum', *args, **kwargs)
+
+    # ........................................................................
+    @getdocfrom(np.all)
+    def all(self, *args, **kwargs):
+        """Test whether all array elements along a given axis evaluate to True."""
+
+        return self._func('all', *args, **kwargs)
+
+    @getdocfrom(np.prod)
+    def prod(self, *args, **kwargs):
+        """product along axis"""
+
+        return self._func('prod', *args, **kwargs)
+
+    @getdocfrom(np.cumsum)
+    def cumsum(self, *args, **kwargs):
+        """cumsum along axis"""
+
+        return self._func('cumsum', *args, **kwargs)
+
+    @getdocfrom(np.cumprod)
+    def cumprod(self, *args, **kwargs):
+        """cumprod along axis"""
+
+        return self._func('cumprod', *args, **kwargs)
+
+    # statistics
+    # ------------------------------------------------------------------------
+    @getdocfrom(np.mean)
+    def mean(self, *args, **kwargs):
+        """mean values along axis"""
+
+        return self._func('std', *args, **kwargs)
+
+    @getdocfrom(np.std)
+    def std(self, *args, **kwargs):
+        """Standard deviation values along axis"""
+
+        return self._func('std', *args, **kwargs)
+
+    # utilities
+
+    @getdocfrom(np.ptp)
+    def ptp(self, *args, **kwargs):
+        """amplitude of data along axis"""
+
+        return self._func('ptp', *args, **kwargs)
+
+    @getdocfrom(np.min)
+    def min(self, *args, **kwargs):
+        """minimum of data along axis"""
+
+        return self._func('min', *args, **kwargs)
+
+    @getdocfrom(np.max)
+    def max(self, *args, **kwargs):
+        """maximum of data along axis"""
+
+        return self._func('max', *args, **kwargs)
+
 
     # -------------------------------------------------------------------------
     # private methods
@@ -460,7 +397,7 @@ class NDMath(object):
                 if isuncertain:
                     d = obj._uarray(d, obj._uncertainty)
 
-                # Our data may be complex
+                # Our data may be complex or hypercomplex
                 iscomplex = obj.has_complex_dims and not obj.isquaternion
                 isquaternion = obj.isquaternion
 
@@ -502,20 +439,18 @@ class NDMath(object):
 
                 # if the first arg (obj) is a nddataset
                 if isdataset and other._coordset != obj._coordset:
-                    # here it can be several situations
-                    # One acceptable is that e.g., we suppress or add
-                    # a row to the whole dataset
-                    for i, (s1, s2) in enumerate(
-                        zip(obj._data.shape, other._data.shape)):
-                        # we obviously have to work on the real shapes
-                        if s1 != 1 and s2 != 1:
-                            if s1 != s2:
-                                raise ValueError(
+                    # here it can be several situations:
+                    # One acceptable situation could be that
+                    # e.g., we suppress or add a row to the whole dataset
+                    if other._data.ndim ==1 and \
+                        (obj._data.shape[-1], ) != other._data.shape:
+                        raise ValueError(
                                     "coordinate's sizes do not match")
-                            elif not np.all(obj._coordset[i]._data ==
-                                            other._coordset[i]._data):
-                                raise ValueError(
-                                    "coordinate's values do not match")
+
+                    if not np.all(obj._coordset[-1]._data ==
+                                    other._coordset[-1]._data):
+                        raise ValueError(
+                            "coordinate's values do not match")
 
                 # rescale according to units
                 if not other.unitless:

@@ -31,13 +31,14 @@ except:
 # ----------------------------------------------------------------------------
 
 import numpy as np
+from numpy.lib.npyio import zipfile_factory, NpzFile
 
 # -----------------------------------------------------------------------------
 # Local imports
 # -----------------------------------------------------------------------------
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.core.processors.concatenate import stack
+from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.application import log, datadir, general_preferences
 from spectrochempy.utils import (readfilename, unzip, is_sequence,
                                  SpectroChemPyWarning)
@@ -183,8 +184,11 @@ def _read(dataset, filename='',
                 elif is_sequence(dat):
                     datasets.extend(dat)
 
-    # and stack them into a single file - this assume they are compatibles
-    new = stack(datasets)
+    # and concatenate them into a single file - this assume they are compatibles
+    if len(datasets)>1:
+        new = concatenate(datasets, axis=0)
+    else:
+        new = datasets[0]
 
     # now we return the results
     return new
@@ -205,31 +209,31 @@ def _read_zip(dataset, filename, **kwargs):
 
     temp = os.path.join(os.path.dirname(filename), '~temp')
     basename = os.path.splitext(os.path.basename(filename))[0]
-    unzip(filename, temp)
-    unzipfilename = os.path.join(temp, basename, basename)
 
-    # get all .csv in directory
-    filelist = os.listdir(unzipfilename)
-    filelist.sort()
+    obj = NpzFile(filename)
+    # unzip(filename, temp)
+    # unzipfilename = os.path.join(temp, basename, basename)
+
+    # get all .csv in the zip
+    # filelist = os.listdir(unzipfilename)
+    filelist = sorted(obj.files)
 
     # read all .csv files?
-    only = kwargs.pop('only',None)
-    if only is not None:
-        filelist = filelist[:only+1]
-    else:
-        filelist = filelist[:]
+    only = kwargs.pop('only',len(filelist))
+
     datasets = []
 
-    for i, f in enumerate(filelist):
-        f = os.path.basename(f)
 
-        if os.path.splitext(f)[-1] != '.csv':
+    for f in filelist:
+
+        if not f.endswith('.csv') or f.startswith('__MACOSX'):
             continue # bypass non-csv files
 
-        pth = os.path.join(unzipfilename,f)
-        log.debug('reading %s: %s' % (f,pth) )
+        log.debug('reading %s ...' % (f) )
 
-        datasets.append(_read_csv(dataset, pth, **kwargs))
+        datasets.append(_read_csv(dataset, filename=f, fid=obj[f], **kwargs))
+        if len(datasets)+1>only:
+            break
 
     try:
         shutil.rmtree(temp)
@@ -238,26 +242,30 @@ def _read_zip(dataset, filename, **kwargs):
 
     return datasets
 
-def _read_csv(dataset, filename='', **kwargs):
+def _read_csv(dataset, filename='', fid=None, **kwargs):
 
     # this is limited to 1D array (two columns reading!)
     # TODO: improve this for 2D with header
 
-    if not os.path.exists(filename):
+    if not isinstance(fid,bytes) and not os.path.exists(filename):
         raise IOError("{} file doesn't exists!".format(filename))
 
     new = dataset.copy() # important
     delimiter = kwargs.get("csv_delimiter", general_preferences.csv_delimiter)
     try:
-        d = np.loadtxt(filename, delimiter=delimiter)
+        if isinstance(fid,bytes):
+            f = StringIO(fid.decode("utf-8"))
+        else:
+            f = filename
+        d = np.loadtxt(f, delimiter=delimiter)
     except ValueError:
         # it might be that the delimiter is not correct (default is ','), but
         # french excel export for instance, use ";".
         delimiter =';'
         # in this case, in french, very often the decimal '.' is replaced by a
         # comma:  Let's try to correct this
-        with open(filename, "r") as f:
-            txt = f.read()
+        with open(f, "r") as f_:
+            txt = f_.read()
             txt = txt.replace(',','.')
             fil = StringIO(txt)
             try:
@@ -290,6 +298,7 @@ def _read_csv(dataset, filename='', **kwargs):
     origin = kwargs.get('origin','')
     if 'omnic' in origin:
         # this will be treated as csv export from omnic (IR data)
+        new._data = new.data[np.newaxis] # add a dimension
         new = _add_omnic_info(new, **kwargs)
 
     return new

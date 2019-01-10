@@ -163,19 +163,18 @@ class Coord(NDMath, NDArray):
 
     @property
     def iscomplex(self):
-        return [False, False]  # always real (the first dimension is of size 1)
+        return False  # always real
 
     @property
     def ndim(self):
-        if self.data is not None and self.data.ndim > 1:
+        if self._data is not None and self._data.ndim > 1:
             raise ValueError("Number of dimension for coordinate's array "
                              "should be 1!")
         return 1
 
     @property
     def uncertainty(self):
-        return super().uncertainty #return np.zeros_like(self._data,
-        # dtype=float)
+        return super().uncertainty
 
     @uncertainty.setter
     def uncertainty(self, uncertainty):
@@ -249,8 +248,8 @@ class Coord(NDMath, NDArray):
     def mask(self, val):
         pass
 
-            # NDmath methods
-
+    # NDmath methods
+    # -----------------
     def abs(self, **kwargs):
         raise NotImplementedError
 
@@ -503,7 +502,6 @@ class CoordSet(HasTraits):
                     self._coords.append(item)
 
         # check if we have single dimension axis
-
         for item in self._coords:
             if isinstance(item, CoordSet):
                 # it must be a single dimension axis
@@ -816,6 +814,8 @@ class CoordSet(HasTraits):
 
     # .........................................................................
     def __eq__(self, other):
+        if other is None:
+            return False
         return self._coords == other._coords
 
     # .........................................................................

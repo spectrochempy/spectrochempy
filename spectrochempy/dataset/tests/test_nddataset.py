@@ -410,18 +410,18 @@ def test_dataset_slicing_by_index(dataset3d):
     assert da.shape == (10, 100, 3)
 
     plane0 = da[0]
-    assert type(plane0) == type(da)  # should return a dataset
+    assert type(plane0) == type(da)
+    # should return a dataset of lower dimension
     assert plane0.ndim == 2
-    assert plane0.shape == (100,3)
+    assert plane0.shape == (100, 3)
     assert plane0.size == 300
-    # print("Plane0: ", plane0)
 
     # a plane but without reduction
-    plane1 = da[1:2]
+    plane1 = da[0:1]
     assert type(plane1) == type(da)
-    assert plane1.ndim == 2
+    assert plane1.ndim == 3
+    assert plane1.shape == (1, 100, 3)
     assert plane1.size == 300
-    # print("Plane1: ", plane1)
 
     # another selection
     row0 = plane0[:, 0]
@@ -1034,7 +1034,7 @@ def test_nddataset_use_of_mask(IR_dataset_1D):
 
 def test_bug1():
     ds = NDDataset([[1, 2, 3, 6, 8, 0]],
-                   coordset=[Coord(data=[1, 2, 3, 4, 5, 6])], units='m')
+                   coordset=[Coord(labels=['undefined']), Coord(data=[1, 2, 3, 4, 5, 6])], units='m')
     print(ds)
 
 
@@ -1062,18 +1062,18 @@ def test_init_complex_1D_with_mask():
     d1 = NDDataset(d, units=ur.Hz)  # with units
     d1.mask[1] = True
     assert d1.shape == (5,)
-    assert d1._data.shape == (1,5)
+    assert d1._data.shape == (5,)
     assert d1.size == 5
     assert d1.dtype == np.complex
     assert d1.has_complex_dims
     assert d1.mask.shape[-1] == 5
     d3RR = d1.part('RR')
     assert not d3RR.has_complex_dims
-    assert d3RR._data.shape == (1,5)
-    assert d3RR._mask.shape == (1,5)
+    assert d3RR._data.shape == (5,)
+    assert d3RR._mask.shape == (5,)
     assert str(d1).startswith("      name/id: NDDataset")
     assert str(d1).endswith(" I[   0.093       --    0.018    0.020    0.057] Hz\n\n")
-    assert d1[1].data == d[1,]
+    assert d1[2].data == d[2]
 
 def test_max_with_ndarray(ndarray):
 
@@ -1092,9 +1092,8 @@ def test_max_min_with_1D(NMR_dataset_1D):
     print(nd1)
     assert "x-coordinate:" in str(nd1)
     mx = nd1.max()
-    assert mx == 821.4872828784091+80.80955334991164j
-    am = nd1.max()
-    print(am)
+    assert mx.data == 821.4872828784091+80.80955334991164j
+    print(mx)
 
     #mi = nd1.min()
     #assert mi == 821.4872828784091 + 80.80955334991164j
@@ -1125,3 +1124,23 @@ def test_comparison_of_dataset(NMR_dataset_1D):
     print(lb1)
     print(lb2)
 
+def test_bug_par_arnaud():
+
+    import spectrochempy as scp
+    import numpy as np
+
+    x = scp.Coord(data=np.linspace(1000., 4000., num=6000), title='x')
+    y = scp.Coord(data=np.linspace(0., 10, num=5), title='y')
+
+    data = np.random.rand(x.size, y.size)
+
+    ds = scp.NDDataset(data, coordset=[x, y])
+
+    ds2 = ds[2000.0:3200.0, :]
+
+    assert ds2.coordset._coords[0].data.shape[0] == 2400, 'taille axe 0 doit être 2400'
+    assert ds2.data.shape[0] == 2400, "taille dimension 0 doit être 2400"
+
+    print()
+    print('taille axe 0: ' + str(ds2.coordset._coords[0].data.shape[0]))
+    print('taille dimension 0:' + str(ds2.data.shape[0]))

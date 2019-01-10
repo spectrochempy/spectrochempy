@@ -23,7 +23,7 @@ def test_concatenate(IR_dataset_2D):
     # check with derived units
     s1.to(ur.m, force=True)
     s2.to(ur.dm, force=True)
-    s = concatenate(s1, s2)
+    s = concatenate(s1, s2, axis=0)
     assert s.units==s1.units
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
     assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
@@ -31,13 +31,13 @@ def test_concatenate(IR_dataset_2D):
     s.plot()
 
     # second syntax
-    s = s1.concatenate(s2)
+    s = s1.concatenate(s2, axis=0)
     assert s.units==s1.units
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
     assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
 
     # third syntax
-    s = concatenate((s1, s2))
+    s = concatenate((s1, s2), axis=0)
     assert s.units==s1.units
     assert s.shape[0]==(s1.shape[0]+s2.shape[0])
     assert s.coordset(0).size==(s1.coordset(0).size+s2.coordset(0).size)
@@ -45,6 +45,9 @@ def test_concatenate(IR_dataset_2D):
 def test_concatenate_1D_along_axis0(IR_dataset_2D):
     # TODO: very long process - try to optimize this
     dataset = IR_dataset_2D[3:]
+
+    # make these data with a mask
+    dataset[:, 1] = masked
 
     # split all rows
     rows = []
@@ -54,21 +57,21 @@ def test_concatenate_1D_along_axis0(IR_dataset_2D):
     assert len(rows)==dataset.shape[0]
 
     # reconstruct
+
     new = stack(rows)
     assert new.shape == dataset.shape
 
-    # #TODO: fix bug when ndim=1 (squeezed data)
-    # using stack we should have a concatenation along a new axis 0 in this case.
-    # for now it doesnt work.
+    # now with uncertainty
 
     rows = []
-    for s in dataset:
-        rows.append(s)
-        assert s.shape == (5549,)
-        print(s._mask)
-        assert not s.is_masked
+    for i in range(len(dataset)):
+        row = dataset[i]
+        row._uncertainty = np.abs(row.data *.001)
+        rows.append(row)
 
-    # reconstruct from rows
+    assert len(rows)==dataset.shape[0]
+
+    # reconstruct
     new = stack(rows)
     assert new.shape == dataset.shape
 

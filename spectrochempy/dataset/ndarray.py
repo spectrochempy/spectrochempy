@@ -340,23 +340,22 @@ class NDArray(HasTraits):
     # .........................................................................
     def __getitem__(self, items):
 
+        # choose, if we keep the same or create new dataset
         inplace = False
-        if isinstance(items,tuple) and items[-1]==INPLACE:
-            items=list(items)[:-1]
+        if isinstance(items, tuple) and items[-1] == INPLACE:
+            items = list(items)[:-1]
             inplace = True
-
         if inplace:
             new = self
         else:
             new = self.copy()
 
-
-        # The actual index depends on the complexity of the dimension
+        # get a better representation of the indexes
         keys = self._make_index(items)
 
         # slicing by index of all internal array
-        udata = new._uncert_data[keys]
-        if new.is_uncertain:
+        udata = self._uncert_data[keys]
+        if self.is_uncertain:
             new._data = unp.nominal_values(np.asarray(udata))
         else:
             new._data = np.asarray(udata)
@@ -389,12 +388,6 @@ class NDArray(HasTraits):
         else:
             new._uncertainty = None
 
-        if self._coordset is not None:
-            new_coordset = self.coordset.copy()
-            for i, coord in enumerate(new_coordset):
-                new_coordset[i] = coord[keys[i]]
-            new._coordset = new_coordset
-
         # this is a modified dataset
         new._name = '*' + self._name.lstrip('*')
 
@@ -415,7 +408,6 @@ class NDArray(HasTraits):
             if not np.any(self._mask):
                 self._mask = np.zeros_like(self._data).astype(np.bool_)
             self._mask[keys] = value
-            print()
         elif isinstance(value, StdDev):
             # the uncertainties are modified
             self._uncertainty[keys] = value.data
@@ -476,15 +468,9 @@ class NDArray(HasTraits):
     # .........................................................................
     @validate('_data')
     def _data_validate(self, proposal):
-        pv = proposal['value']
 
-        ndim = pv.ndim
-
-        # if we have a 1D vector, make a 1 row matrix internally
-        if pv.ndim == 1:
-            data = pv.reshape((1, -1))
-        else:
-            data = pv
+        data = proposal['value']
+        ndim = data.ndim
 
         # transform the passed data depending on the complexity
 
@@ -495,14 +481,12 @@ class NDArray(HasTraits):
             # must set it as quaternion
             self._isquaternion = True
             data = self._make_quaternion(data)
+            data = data.squeeze()
 
         elif (np.any(np.iscomplex(data)) or data.dtype == np.complex):
             # check if the passed data are complex in the last dimension
             self._isquaternion = False
             data = data.astype(np.complex128, copy=False)
-
-        #else :
-        #    data = data.astype(np.float64, copy=False)
 
         # return the validated data
         if self._copy:
@@ -524,7 +508,7 @@ class NDArray(HasTraits):
         if self.size == 1:
             return self._data.squeeze()[()]
 
-        return self._data.squeeze()
+        return self._data
 
     # .........................................................................
     @data.setter
@@ -532,12 +516,12 @@ class NDArray(HasTraits):
         # property.setter for data
 
         if data is None:
-            self._data = np.array([[]]).astype(float)  # reinit data
+            self._data = np.array([]).astype(float)  # reinit data
 
         elif isinstance(data, NDArray):
-            #log.debug(
-            #    "init data with data from another NDArray or NDArray
-            # subclass")
+            # init data with data from another NDArray
+            # or NDArray subclass
+
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
@@ -713,8 +697,6 @@ class NDArray(HasTraits):
         pv = proposal['value']
         mask = pv
         # if we have a 1D vector, make a 1 row matrix internally
-        if mask.ndim == 1:
-            mask = mask.reshape((1, -1))
         if self._copy:
             return mask.copy()
         else:
@@ -739,7 +721,7 @@ class NDArray(HasTraits):
         if self._mask.size == 1:
             return self._mask.squeeze()[()]
 
-        return self._mask.squeeze()
+        return self._mask
 
     # .........................................................................
     @mask.setter
@@ -790,10 +772,6 @@ class NDArray(HasTraits):
                 self._mask = mask.copy()
             else:
                 self._mask = mask
-
-        # if we have a 1D vector, make a 1 row matrix internally
-        if self._data.ndim == 1:
-            self._mask = self._mask.reshape((1, -1))
 
     # .........................................................................
     @default('_meta')
@@ -874,9 +852,6 @@ class NDArray(HasTraits):
     def _uncertainty_validate(self, proposal):
         pv = proposal['value']
         uncertainty = pv
-        # if we have a 1D vector, make a 1 row matrix internally
-        if uncertainty.ndim == 1:
-            uncertainty = uncertainty.reshape((1, -1))
         if self._copy:
             return uncertainty.copy()
         else:
@@ -902,10 +877,7 @@ class NDArray(HasTraits):
         if not self.is_uncertain:
             self._uncertainty = np.zeros_like(self._data).astype(float)
 
-        if self._uncertainty.size == 1:
-            return self._uncertainty.squeeze()[()]
-
-        return self._uncertainty.squeeze()
+        return self._uncertainty
 
     # .........................................................................
     @uncertainty.setter
@@ -927,9 +899,6 @@ class NDArray(HasTraits):
             # no uncertainty
             return
 
-        if self.ndim == 1:
-            uncertainty = uncertainty.squeeze()
-
         if uncertainty.shape != self.shape:
             raise ValueError(
                 "uncertainty {} and data {} shape mismatch!".format(
@@ -943,10 +912,6 @@ class NDArray(HasTraits):
             self._uncertainty = uncertainty.copy()
         else:
             self._uncertainty = uncertainty
-
-        # if we have a 1D vector, make a 1 row matrix internally
-        if self._data.ndim == 1:
-            self._uncertainty = self._uncertainty.reshape((1, -1))
 
     # .........................................................................
     @property
@@ -1083,7 +1048,6 @@ class NDArray(HasTraits):
         """
         bool - True if the `data` array is empty (size=0) (Readonly property).
 
-
         """
         return self._data.size == 0
 
@@ -1128,8 +1092,6 @@ class NDArray(HasTraits):
         """
         bool - True if the `data` array has uncertainty (Readonly property).
 
-
-
         """
         if self.has_complex_dims:
             return False
@@ -1166,7 +1128,7 @@ class NDArray(HasTraits):
 
         """
 
-        return self._data.squeeze().ndim
+        return self._data.ndim
 
     # .........................................................................
     @property
@@ -1179,7 +1141,7 @@ class NDArray(HasTraits):
         """
         if self._data is None:
             return ()
-        shape = list(self._data.squeeze().shape)
+        shape = list(self._data.shape)
         return tuple(shape)
 
     # .........................................................................
@@ -1857,7 +1819,7 @@ class NDArray(HasTraits):
         def mkbody(d, pref, units):
             # first we have to handle the case of masked array which are not
             # handled by array2string function - tentative workaround
-            ds = d.squeeze().copy()
+            ds = d.copy()
             if hasattr(ds, 'mask'):  # handle the case of ndarray with no mask
                 ds[np.nonzero(ds.mask)]=-9999
             body = np.array2string(
@@ -1907,7 +1869,7 @@ class NDArray(HasTraits):
         # as for the _str function, first we have to handle the case of masked
         # array which are not handled by array2string function
         # (tentative workaround)
-        ds = data.squeeze().copy()
+        ds = data.copy()
 
         if hasattr(ds, 'mask'): # handle the case of ndarray with no mask
             ds[np.nonzero(ds.mask)] = -9999
@@ -1992,13 +1954,13 @@ class NDArray(HasTraits):
 
         if not isinstance(key, slice):
             start = key
-            if not isinstance(key, (int, np.int)):
+            if not isinstance(key, (int, np.int, np.int32, np.int64)):
                 start = self._loc2index(key, axis)
             else:
-                if key < 0:  # reverse indexing (on the real shape!)
+                if key < 0:  # reverse indexing
                     start = self._data.shape[axis] + key
-            stop = start + 1
-            step = 1
+            return start
+
         else:
             start, stop, step = key.start, key.stop, key.step
 
@@ -2020,9 +1982,9 @@ class NDArray(HasTraits):
         if step is None:
             step = 1
 
-        keys = slice(start, stop, step)
+        newkey = slice(start, stop, step)
 
-        return keys
+        return newkey
 
     # .........................................................................
     def _make_quaternion(self, data):
@@ -2061,34 +2023,11 @@ class NDArray(HasTraits):
         if len(keys) > self.ndim:
             raise IndexError("invalid index")
 
-        if self._data.ndim != self.ndim:
-            # case or 1D spectra
-            # this need some attention to have a correct slicing
-            # because, the user should not be aware of the internal
-            # representation
-            newkeys = []
-            i = 0
-            for size in self._data.shape:
-                # loop on the real shape, and make the keys corresponding to
-                # dimensions which are not of length 1.
-                # The other have to be replaced by a slice(None) or 0
-                if size == 1:
-                    newkeys.append(slice(None))
-                else:
-                    if not keys:
-                        # list of keys already completely used
-                        newkeys.append(slice(None))
-                    else:
-                        newkeys.append(keys.pop(0))
-
-            keys = newkeys[:]
-        else:
-            # pad the list with additional dimensions
-            for i in range(len(keys), self.ndim):
-                keys.append(slice(None))
+        # pad the list with additional dimensions
+        for i in range(len(keys), self.ndim):
+            keys.append(slice(None))
 
         for axis, key in enumerate(keys):
-
             keys[axis] = self._get_slice(key, axis)
 
         return tuple(keys)
