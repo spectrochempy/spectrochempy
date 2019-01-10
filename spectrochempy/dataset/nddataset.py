@@ -230,7 +230,7 @@ class NDDataset(
 
         cs = self._coordset
         if self.ndim < len(cs):
-            # check that the addition coord connain a data,
+            # check that the additional coord connain a data,
             # else remove it from the returned list
             for i, coord in enumerate(cs[:]):
                 if coord.data is None:
