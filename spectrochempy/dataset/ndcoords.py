@@ -502,7 +502,6 @@ class CoordSet(HasTraits):
                     self._coords.append(item)
 
         # check if we have single dimension axis
-
         for item in self._coords:
             if isinstance(item, CoordSet):
                 # it must be a single dimension axis

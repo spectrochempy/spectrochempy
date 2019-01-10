@@ -1034,7 +1034,7 @@ def test_nddataset_use_of_mask(IR_dataset_1D):
 
 def test_bug1():
     ds = NDDataset([[1, 2, 3, 6, 8, 0]],
-                   coordset=[Coord(data=[1, 2, 3, 4, 5, 6])], units='m')
+                   coordset=[Coord(labels=['undefined']), Coord(data=[1, 2, 3, 4, 5, 6])], units='m')
     print(ds)
 
 
@@ -1092,9 +1092,8 @@ def test_max_min_with_1D(NMR_dataset_1D):
     print(nd1)
     assert "x-coordinate:" in str(nd1)
     mx = nd1.max()
-    assert mx == 821.4872828784091+80.80955334991164j
-    am = nd1.max()
-    print(am)
+    assert mx.data == 821.4872828784091+80.80955334991164j
+    print(mx)
 
     #mi = nd1.min()
     #assert mi == 821.4872828784091 + 80.80955334991164j

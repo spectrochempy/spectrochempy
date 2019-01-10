@@ -257,8 +257,10 @@ class NDMath(object):
             new._mask = ma.mask
         elif isinstance(ma, np.ndarray):
             new._data = ma
+            new._mask = nomask
         else:
-            new._data = np.asarray([ma])
+            new._data = np.asarray([ma,])
+            new._mask = nomask
 
         # if the data are reduced to only a single elements along the summed axis
         # we must reduce the corresponding coordinates
@@ -436,18 +438,19 @@ class NDMath(object):
             if isinstance(other, NDArray):
 
                 # if the first arg (obj) is a nddataset
-                #if isdataset and other._coordset != obj._coordset:
-                    # here it can be several situations
-                    # One acceptable is that e.g., we suppress or add
-                    # a row to the whole dataset
-                    #if other._data.ndim ==1 and \
-                    #    (obj._data.shape[-1], ) != other._data.shape:
-                    #    raise ValueError(
-                    #                "coordinate's sizes do not match")
-                    #if not np.all(obj._coordset[-1]._data ==
-                    #                other._coordset[-1]._data):
-                    #    raise ValueError(
-                    #        "coordinate's values do not match")
+                if isdataset and other._coordset != obj._coordset:
+                    # here it can be several situations:
+                    # One acceptable situation could be that
+                    # e.g., we suppress or add a row to the whole dataset
+                    if other._data.ndim ==1 and \
+                        (obj._data.shape[-1], ) != other._data.shape:
+                        raise ValueError(
+                                    "coordinate's sizes do not match")
+
+                    if not np.all(obj._coordset[-1]._data ==
+                                    other._coordset[-1]._data):
+                        raise ValueError(
+                            "coordinate's values do not match")
 
                 # rescale according to units
                 if not other.unitless:

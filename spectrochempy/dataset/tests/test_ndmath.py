@@ -145,7 +145,7 @@ def test_nddataset_add_mismatch_coords():
     d1 = NDDataset(np.ones((5, 5)), coordset=[coord1, coord2])
     d2 = NDDataset(np.ones((5, 5)), coordset=[coord2, coord1])
     with pytest.raises(ValueError) as exc:
-        d3 = d1 + d2
+        d1 -= d2
     assert exc.value.args[0] == "coordinate's values do not match"
     with pytest.raises(ValueError) as exc:
         d1 += d2

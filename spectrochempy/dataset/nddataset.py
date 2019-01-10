@@ -251,7 +251,7 @@ class NDDataset(
                 value = CoordSet(value)
 
             coordset = CoordSet(
-                [ None for s in self._data.shape])  # basic coordset
+                [ Coord() for s in self._data.shape])  # basic coordset
 
             for i, item in enumerate(value[::-1]):
                 coordset[self._data.ndim - 1 - i] = item
@@ -271,7 +271,8 @@ class NDDataset(
             self._coordset = coordset
         else:
             # no change
-            self._coordset = None
+            pass
+
 
 
     # .........................................................................
