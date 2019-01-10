@@ -41,7 +41,7 @@ from pandas.core.generic import NDFrame, Index
 from ..utils.meta import Meta
 from ..units import Unit, ur, Quantity
 from ..application import log
-from ..utils import (EPSILON, StdDev, is_sequence,
+from ..utils import (EPSILON, INPLACE, StdDev, is_sequence,
                                  numpyprintoptions, quaternion,
                                  SpectroChemPyWarning, docstrings,
                                  make_func_from)
@@ -340,7 +340,15 @@ class NDArray(HasTraits):
     # .........................................................................
     def __getitem__(self, items):
 
-        new = self.copy()
+        # choose, if we keep the same or create new dataset
+        inplace = False
+        if isinstance(items, tuple) and items[-1] == INPLACE:
+            items = list(items)[:-1]
+            inplace = True
+        if inplace:
+            new = self
+        else:
+            new = self.copy()
 
         # get a better representation of the indexes
         keys = self._make_index(items)

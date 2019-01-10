@@ -707,12 +707,15 @@ class NDDataset(
         if inplace:
             new = self
         else:
-            new = self.copy() # type(self)() # self.copy()
+            new = self.copy()
 
         # get a better representation of the indexes
         items = self._make_index(items)
 
-        new = super(NDDataset, self).__getitem__(items)
+        if inplace:
+            new = super(NDDataset, self).__getitem__(items+(INPLACE,))
+        else:
+            new = super(NDDataset, self).__getitem__(items)
 
         if self._coordset is not None:
             new_coordset = []

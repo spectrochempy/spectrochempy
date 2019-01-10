@@ -171,34 +171,38 @@ def concatenate(*datasets, axis=-1, **kwargs):
     # -------------------------------
 
     # coordinates units of NDDatasets must be compatible in all dimensions
-
     # get the coordsets
     coordsets = [dataset.coordset for dataset in datasets]
 
-    # how many different coordsets
-    coordsets = set(coordsets)
-    if len(coordsets)==1 and force_stack:
-        # nothing to do (all datasets have the same coordset and so are
-        # perfectly compatibles for stacking)
-        pass
+    def check_coordinates(coordsets, force_stack):
 
-    else:
-        for i, cs in enumerate(zip(*coordsets)):
+        # We will call this only in case of problems because it takes a lot of time
 
-            axs = set(cs)
-            axref = axs.pop()
-            for ax in axs:
-                # we expect compatible units
-                if not ax.is_units_compatible(axref):
-                    raise ValueError(
-                        "units of the dataset's axis are not compatible"
-                    )
-                if i != axis and ax.size != axref.size:
-                    # and same size for the non-concatenated axis
-                    raise ValueError(
-                        "size of the non-concatenated dimension must be "
-                        "identical"
-                    )
+
+        # how many different coordsets
+        coordsets = set(coordsets)
+        if len(coordsets)==1 and force_stack:
+            # nothing to do (all datasets have the same coordset and so are
+            # perfectly compatibles for stacking)
+            pass
+
+        else:
+            for i, cs in enumerate(zip(*coordsets)):
+
+                axs = set(cs)
+                axref = axs.pop()
+                for ax in axs:
+                    # we expect compatible units
+                    if not ax.is_units_compatible(axref):
+                        raise ValueError(
+                            "units of the dataset's axis are not compatible"
+                        )
+                    if i != axis and ax.size != axref.size:
+                        # and same size for the non-concatenated axis
+                        raise ValueError(
+                            "size of the non-concatenated dimension must be "
+                            "identical"
+                        )
 
     # concatenate or stack the data array + mask
     sss = []
@@ -226,7 +230,7 @@ def concatenate(*datasets, axis=-1, **kwargs):
     else:
         # we take the coordset of the first dataset, en extend the coord
         # along the concatenate axis
-        coordset = datasets[0].copy().coordset
+        coordset = coordsets[0].copy() # datasets[0].copy().coordset
 
         c2arr = lambda x: x if isinstance(x, np.ndarray) else np.array([x])
         coordset[axis]._data = np.concatenate(

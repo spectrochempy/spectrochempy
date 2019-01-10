@@ -1125,3 +1125,23 @@ def test_comparison_of_dataset(NMR_dataset_1D):
     print(lb1)
     print(lb2)
 
+def test_bug_par_arnaud():
+
+    import spectrochempy as scp
+    import numpy as np
+
+    x = scp.Coord(data=np.linspace(1000., 4000., num=6000), title='x')
+    y = scp.Coord(data=np.linspace(0., 10, num=5), title='y')
+
+    data = np.random.rand(x.size, y.size)
+
+    ds = scp.NDDataset(data, coordset=[x, y])
+
+    ds2 = ds[2000.0:3200.0, :]
+
+    assert ds2.coordset._coords[0].data.shape[0] == 2400, 'taille axe 0 doit être 2400'
+    assert ds2.data.shape[0] == 2400, "taille dimension 0 doit être 2400"
+
+    print()
+    print('taille axe 0: ' + str(ds2.coordset._coords[0].data.shape[0]))
+    print('taille dimension 0:' + str(ds2.data.shape[0]))

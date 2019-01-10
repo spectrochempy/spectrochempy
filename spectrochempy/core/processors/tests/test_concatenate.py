@@ -57,9 +57,23 @@ def test_concatenate_1D_along_axis0(IR_dataset_2D):
     assert len(rows)==dataset.shape[0]
 
     # reconstruct
+
     new = stack(rows)
     assert new.shape == dataset.shape
 
+    # now with uncertainty
+
+    rows = []
+    for i in range(len(dataset)):
+        row = dataset[i]
+        row._uncertainty = np.abs(row.data *.001)
+        rows.append(row)
+
+    assert len(rows)==dataset.shape[0]
+
+    # reconstruct
+    new = stack(rows)
+    assert new.shape == dataset.shape
 
 def test_concatenate_along_axis1(IR_dataset_2D):
 
