@@ -17,11 +17,12 @@ import datetime as datetime
 from warnings import warn
 
 from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.dataset.ndcoords import Coord,  CoordSet
 from spectrochempy.utils import (is_sequence, docstrings)
 from spectrochempy.extern.uncertainties import unumpy as unp
 
 
-def concatenate(*datasets, axis=0, **kwargs):
+def concatenate(*datasets, axis=-1, **kwargs):
     """
     Concatenation of |NDDataset| objects along a given axis (by default
     the first)
@@ -41,8 +42,8 @@ def concatenate(*datasets, axis=0, **kwargs):
     *datasets : positional |NDDataset| arguments
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
-        (the first, by default).
-    axis : int, optional, default = 0
+        (the last, by default).
+    axis : int, optional, default = -1
         The axis along which the operation is applied
 
     Returns
@@ -63,12 +64,9 @@ def concatenate(*datasets, axis=0, **kwargs):
 
     or
 
-    >>> D = A.concatenate(B, B)
+    >>> D = A.concatenate(B, B, axis=0)
     >>> A.shape, B.shape, D.shape
     ((55, 5549), (55, 5549), (165, 5549))
-
-    By default concatenation is done along dimension 0 .To make it along
-    another dimension, one should set the `axis` parameters
 
     >>> E = A.concatenate(B, axis=1)
     >>> A.shape, B.shape, E.shape
@@ -108,18 +106,13 @@ def concatenate(*datasets, axis=0, **kwargs):
     # ------------------------------------------------------------------------
 
     # We must have a list of datasets
-
     for dataset in datasets:
-
         if is_sequence(dataset):  # numpy style of passing args
             datasets = dataset
 
     # try to cast of dataset to NDDataset
-
     for dataset in datasets:
-
         if not isinstance(dataset, NDDataset):
-
             try:
                 dataset = NDDataset(dataset)
             except:
@@ -127,12 +120,16 @@ def concatenate(*datasets, axis=0, **kwargs):
                                 "concatenated, not %s, but casting to this "
                                 "type failed. " % type(dataset).__name__)
 
+    # a flag to force stacking of dataset instead of the drfault concatenation
+    force_stack = kwargs.get('force_stack', False)
+    if force_stack:
+        axis = 0
+
     if axis < 0:
         axis = datasets[0].ndim + axis
 
     # check if data shapes are compatible (all dimension size must be the same
     # except the one to be concatenated)
-
     rshapes = []
     for dataset in datasets:
         sh = list(dataset.shape)
@@ -145,6 +142,19 @@ def concatenate(*datasets, axis=0, **kwargs):
                              " all dimensions except the one along which the"
                              " concatenation is performed")
 
+    # are data uncertain?
+    isuncertain = any([dataset.is_uncertain for dataset in datasets])
+
+    if force_stack:
+        # for we need a first additional dimension of lendth 1
+        # for this stack operation
+        for i, dataset in enumerate(datasets):
+            dataset._data = dataset.data[np.newaxis]
+            dataset._mask = dataset.mask[np.newaxis]
+            if isuncertain:
+                dataset._uncertainty = dataset.uncertainty[np.newaxis]
+            dataset.coordset._coords=[Coord(labels=[str(i)])]+dataset.coordset._coords
+
     # Check unit compatibility
     # -------------------------
     units = datasets[0].units
@@ -154,56 +164,54 @@ def concatenate(*datasets, axis=0, **kwargs):
                     'units of the datasets to concatenate are not compatible')
         # if needed transform to the same unit
         dataset.ito(units)
+    # TODO: make concatenation of heterogeneous data possible by using labels
 
-    # are data uncertain?
-    isuncertain = any([dataset.is_uncertain for dataset in datasets])
-
-    # are data complex
-    #iscomplex = [dataset.has_complex_dims for dataset in datasets]
-    #if np.any(iscomplex):
-    #    datacomplex = [dataset._iscomplex for dataset in datasets]
 
     # Check coordinates compatibility
     # -------------------------------
-    # coordinates units of NDDatasets must be compatible in all dimensions
 
-    # first, get the coordsets
+    # coordinates units of NDDatasets must be compatible in all dimensions
+    # get the coordsets
     coordsets = [dataset.coordset for dataset in datasets]
 
-    # how many different coordsets
-    coordsets = set(coordsets)
-    if len(coordsets)==1:
-        # nothing to do (all datasets have the same coordset and so are
-        # perfectly compatibles)
-        pass
-    else:
-        for i, cs in enumerate(zip(*coordsets)):
+    def check_coordinates(coordsets, force_stack):
 
-            axs = set(cs)
-            axref = axs.pop()
-            for ax in axs:
-                # we expect compatible units
-                if not ax.is_units_compatible(axref):
-                    raise ValueError(
-                        "units of the dataset's axis are not compatible"
-                    )
-                if i != axis and ax.size != axref.size:
-                    # and same size for the non-concatenated axis
-                    raise ValueError(
-                        "size of the non-concatenated dimension must be "
-                        "identical"
-                    )
+        # We will call this only in case of problems because it takes a lot of time
 
-    # concatenate or stack the data array + mask and uncertainty
+
+        # how many different coordsets
+        coordsets = set(coordsets)
+        if len(coordsets)==1 and force_stack:
+            # nothing to do (all datasets have the same coordset and so are
+            # perfectly compatibles for stacking)
+            pass
+
+        else:
+            for i, cs in enumerate(zip(*coordsets)):
+
+                axs = set(cs)
+                axref = axs.pop()
+                for ax in axs:
+                    # we expect compatible units
+                    if not ax.is_units_compatible(axref):
+                        raise ValueError(
+                            "units of the dataset's axis are not compatible"
+                        )
+                    if i != axis and ax.size != axref.size:
+                        # and same size for the non-concatenated axis
+                        raise ValueError(
+                            "size of the non-concatenated dimension must be "
+                            "identical"
+                        )
+
+    # concatenate or stack the data array + mask
     sss = []
-    for dataset in datasets:
-        # uncertainty?
+    for i, dataset in enumerate(datasets):
         d = dataset._data
         if isuncertain:
             d = dataset._uarray(d, dataset._uncertainty)
         # masks ?
         d = dataset._umasked(d, dataset._mask)
-
         sss.append(d)
 
     sconcat = np.ma.concatenate(sss, axis=axis)
@@ -222,7 +230,7 @@ def concatenate(*datasets, axis=0, **kwargs):
     else:
         # we take the coordset of the first dataset, en extend the coord
         # along the concatenate axis
-        coordset = datasets[0].copy().coordset
+        coordset = coordsets[0].copy() # datasets[0].copy().coordset
 
         c2arr = lambda x: x if isinstance(x, np.ndarray) else np.array([x])
         coordset[axis]._data = np.concatenate(
@@ -294,7 +302,7 @@ def stack(*datasets):
 
     """
 
-    return concatenate(*datasets, axis=0, force_stack=True)
+    return concatenate(*datasets, force_stack=True)
 
 
 if __name__ == '__main__':

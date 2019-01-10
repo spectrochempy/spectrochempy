@@ -362,9 +362,9 @@ class NDIO(HasTraits):
                     coordset = [Coord() for _ in range(ndim)]
                 els = key.split('_')
                 idx = int(els[1])
-                if obj["data"].shape[idx]==1:
-                    torem.append(idx)
-                    idx+=1
+                #if obj["data"].shape[idx]==1:
+                #    torem.append(idx)
+                #    idx+=1
                 setattr(coordset[idx], "_%s" % els[2], val)
 
             elif key == "pars.json":

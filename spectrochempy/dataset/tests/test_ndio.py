@@ -27,7 +27,7 @@ def test_basic():
     dl = NDDataset.load('essai')
     assert_array_equal(dl.data, ir.data)
 
-    ir = NDDataset([[1.1, 2.2, 3.3]], coordset=[[1, 2, 3]])
+    ir = NDDataset([[1.1, 2.2, 3.3]], coordset=[[0], [1, 2, 3]])
     ir.save('essai')
     dl = NDDataset.load('essai')
     assert_array_equal(dl.data, ir.data)

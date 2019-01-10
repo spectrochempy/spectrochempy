@@ -145,7 +145,7 @@ def test_nddataset_add_mismatch_coords():
     d1 = NDDataset(np.ones((5, 5)), coordset=[coord1, coord2])
     d2 = NDDataset(np.ones((5, 5)), coordset=[coord2, coord1])
     with pytest.raises(ValueError) as exc:
-        d3 = d1 + d2
+        d1 -= d2
     assert exc.value.args[0] == "coordinate's values do not match"
     with pytest.raises(ValueError) as exc:
         d1 += d2
@@ -384,22 +384,38 @@ def test_unary_ufuncs_data_w_uncertainties(nd, name):
 # ----------------------------------------------------------------------------
 # non ufuncs
 # ----------------------------------------------------------------------------
-
 @pytest.mark.parametrize(('operation', 'result'),
-                         [
-                                ('sum', 46 ),
-                                ('cumsum', [1,3,6,10,15,21,28,36,36,46] ),
+                         [      ('max', 10 ),
+                                ('min', 1 ),
+                                ('sum', 55 ),
+                                ('cumsum', [1,3,6,10,15,21,28,36,45,55] ),
                           ])
 def test_non_ufunc_functions(operation, result):
     op = getattr(np, operation)
-    print(op.__doc__)
-    ds = NDDataset([1,2,3,4,5,6,7,8,9,10])
+    #print(op.__doc__)
+    ds = NDDataset([1.,2,3,4,5,6,7,8,9,10])
+    coord0 = Coord(np.arange(10)*.1)
+    ds.coordset = [coord0]
+    ds.units = ur.m
+    dsy = op(ds)
+    print(dsy)
+    assert np.all(dsy.data==result)
+
+@pytest.mark.parametrize(('operation', 'result'),
+                         [      ('max', 10 ),
+                                ('min', 1 ),
+                                ('sum', 46 ),
+                                ('cumsum', [1,3,6,10,15,21,28,36,36,46] ),
+                          ])
+def test_non_ufunc_functions_with_masks(operation, result):
+    op = getattr(np, operation)
+    #print(op.__doc__)
+    ds = NDDataset([1.,2,3,4,5,6,7,8,9,10])
     coord0 = Coord(np.arange(10)*.1)
     ds.coordset = [coord0]
     ds[-2] = masked
-    print(ds)
     ds.units = ur.m
-    dsy = op(ds, axis=-1)
+    dsy = op(ds)
     print(dsy)
     assert np.all(dsy.data==result)
 
