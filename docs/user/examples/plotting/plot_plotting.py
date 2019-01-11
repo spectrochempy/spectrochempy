@@ -21,7 +21,7 @@ dataset = sp.NDDataset.read_omnic(
 ax = dataset[0].plot()
 
 # plot generic style
-ax = dataset[0].plot(style='lcs')
+ax = dataset[0].plot(style='classic')
 
 # check that style reinit to default
 # should be identical to the first

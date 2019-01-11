@@ -156,11 +156,15 @@ def available_styles():
     """
     cfgdir = mpl.get_configdir()
     stylelib = os.path.join(cfgdir, 'stylelib')
-    listdir = os.listdir(stylelib)
+    # AT: checks stylelib exists and adds matplotlib pre-defined styles
     styles = []
-    for style in listdir:
-        if style.endswith('.mplstyle'):
-            styles.append(style.split('.mplstyle')[0])
+    if os.path.isdir(stylelib):
+        listdir = os.listdir(stylelib)
+        for style in listdir:
+            if style.endswith('.mplstyle'):
+                styles.append(style.split('.mplstyle')[0])
+    for style in plt.style.available:
+        styles.append(style)
     return styles
 
 
@@ -548,7 +552,7 @@ class ProjectPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    style = Enum(available_styles(), default_value='sans',
+    style = Enum(available_styles(), default_value='classic',
                  help='Basic matplotlib style to use').tag(config=True,
                                                            type='list')
 

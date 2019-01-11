@@ -57,20 +57,25 @@ def readbtext(f, pos):
 
 # function for loading spa or spg file
 # --------------------------------------
-def read_omnic(dataset=None, filename='', sortbydate=True, **kwargs):
-    """Open a Thermo Nicolet .spg or list of .spa files and set 
+def read_omnic(dataset=None, filename='', **kwargs):
+    """Open a Thermo Nicolet .spg or list of .spa files and set
     data/metadata in the current dataset
 
     Parameters
     ----------
-    dataset : NDDataset
-        The dataset to store the data and the metadata read from the spg file
-    filename: str
-        filename of the file to load
-    directory: str [optional, default=""].
-        From where to read the specified filename. If not sperfied, read i 
-        the current directory.
-
+    :param: dataset : `NDDataset`
+        The dataset to store the data and metadata read from the omnic file(s).
+        If None, a NDDataset is created
+    :param: filename: `None`, `str`, or list of `str`
+        Filename of the file(s) to load. If `None`: opens a dialog box to select
+        ".spa" or ".spg" files. If `str`: a single filename. It list of str:
+        a list of filenames.
+    :param: directory: str [optional, default=""].
+        From where to read the specified filename. If not specified, read in
+        the defaults datadir.
+    :param: sortbydate: bool [optional default = True]. sort spectra by acquisition date
+    :returns: a 'NDDdataset' corresponding to the .spg file or the set of .spa files. A
+    list of datasets is returned if several .spg files are passed.
     Examples
     --------
     >>> from spectrochempy import NDDataset
@@ -94,47 +99,33 @@ def read_omnic(dataset=None, filename='', sortbydate=True, **kwargs):
 
         dataset = NDDataset()  # create a NDDataset
 
+    # check directory
     directory = kwargs.get("directory", datadir.path)
-    if not os.path.exists(directory):
-        raise IOError("directory doesn't exists!")
 
-    if os.path.isdir(directory):
-        filename = os.path.expanduser(os.path.join(directory, filename))
-    else:
-        warnings.warn('Provided directory is a file, '
-                      'so we use its parent directory', SpectroChemPyWarning)
-        filename = os.path.join(os.path.dirname(directory), filename)
-
-
-    # open file dialog box if necessary
+    # returns a list of files to read
     files = readfilename(filename,
                          directory = directory,
-                         filter='OMNIC file (*.spg);;OMNIC file (*.spa)')
-
-    if not files:
-        return None
-
+                         filetypes= [('spa files', '.spa'), ('spg files', '.spg'), ('all files', '.*')])
     datasets = []
-
     for extension in files.keys():
-
-        for filename in files[extension]:
-            if extension == '.spg':
+        if extension == '.spg':
+            for filename in files[extension]:
+                log.debug("reading omnic spg file")
                 datasets.append(_read_spg(dataset, filename))
 
-            elif extension == '.spa':
-                datasets.append(_read_spa(dataset, filename,
-                                         sortbydate=True, **kwargs))
-            else:
-                # try another format!
-                datasets = dataset.read(filename, protocol=extension[1:],
+        elif extension == '.spa':
+            log.debug("reading omnic spa files")
+            datasets.append(_read_spa(dataset, files[extension],
+                                     sortbydate=True))
+        else:
+             # try another format!
+            datasets = dataset.read(filename, protocol=extension[1:],
                                       sortbydate=True, **kwargs)
 
     if len(datasets)==1:
         return datasets[0] # a single dataset is returned
 
-    return datasets  # several datasets returned
-
+    return datasets  # several datasets returned (only if several .spg files have been passed)
 #alias
 read_spg = read_omnic
 read_spa = read_omnic
@@ -378,17 +369,16 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     return dataset
 
 
-def _read_spa(dataset, filename):
+def _read_spa(dataset, filenames, **kwargs):
 
-    # TODO: make the reader for spa files
-
+    nspec = len(filenames)
     # containers to hold values
     nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec,
                                                          'float'), np.zeros(
         nspec, 'float')
     allintensities, alltitles, allacquisitiondates, alltimestamps, allhistories = [], [], [], [], []
 
-    for i, _filename in enumerate(filename):
+    for i, _filename in enumerate(filenames):
 
         with open(_filename, 'rb') as f:
 
@@ -414,7 +404,7 @@ def _read_spa(dataset, filename):
             allacquisitiondates.append(acqdate)
             timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Coord object
             # use datetime.fromtimestamp(d, timezone.utc))
-            # to transform back to datetime obkct
+            # to transform back to datetime object
 
             alltimestamps.append(timestamp)
 
@@ -483,8 +473,6 @@ def _read_spa(dataset, filename):
                         np.fromfile(f, 'float32', int(nintensities)))
                     gotinfos[1] = True
 
-
-                    # todo: extract positions of '1B' code (history text -- sometimes absent, e.g. peakresolve)
                 elif key == 27:
                     f.seek(pos + 2)
                     history_pos = np.fromfile(f, 'uint32', 1)[0]
@@ -501,15 +489,15 @@ def _read_spa(dataset, filename):
     # check the consistency of xaxis
     if np.ptp(nx) != 0:
         print(
-            'Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
+            'Error: Inconsistent data set - number of wavenumber per spectrum should be identical')
         return
     elif np.ptp(firstx) != 0:
         print(
-            'Error: Inconsistant data set - the x axis should start at same value')
+            'Error: Inconsistent data set - the x axis should start at same value')
         return
     elif np.ptp(lastx) != 0:
         print(
-            'Error: Inconsistant data set - the x axis should end at same value')
+            'Error: Inconsistent data set - the x axis should end at same value')
         return
 
     # load into the  Dataset Object of spectral content
@@ -518,27 +506,32 @@ def _read_spa(dataset, filename):
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
     dataset.name = alltitles[0] + ' ... ' + alltitles[-1]
-    dataset._date = datetime.datetime.now()
+    dataset._date = datetime.now()
     dataset._modified = dataset._date
 
-    # TODO: Finish the conversion
-    raise NotImplementedError('implementation not finished')
+    # Create Dataset Object of spectral content
+    dataset.coordset = (np.array(alltimestamps), xaxis)
+    dataset.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
+    dataset.coordset[1].units = 'cm^-1'
+    dataset.coordset[0].labels = (allacquisitiondates, alltitles)
+    dataset.coordset[0].units = 's'
 
-    out.appendlabels(Labels(alltitles, 'Title'))
-    out.appendlabels(Labels(allacquisitiondates, 'Acquisition date (GMT)'))
-    out.appendaxis(Coords(xaxis, 'Wavenumbers (cm-1)'), dim=1)
-    indexFirstSpectrum = 0
-    if sortbydate:
-        out.addtimeaxis()
-        firstTime = min(out.dims[0].axes[0].values)
-        indexFirstSpectrum = out.idx(firstTime, dim=0)
-        out = out.sort(0, 0)
-        out.dims[0].deleteaxis(0)
-    out.description = (
-        'dataset from spa files : ' + out.name + ' \n' + 'History of 1st spectrum: ' +
-        allhistories[indexFirstSpectrum])
-    out.history = (
-    str(datetime.datetime.now()) + ':created by sa.loadspa() \n')
+    # Set description and history
+    dataset.description = (
+        'Dataset from ' + str(nspec)+ ' spa files : \'' + filenames[0] + '...' + filenames[-1 ] + '\n'
+        + 'History of the 1st spectrum: ' + allhistories[0])
+
+    dataset.history = str(datetime.now()) + ':read from spa files \n'
+
+    if kwargs.get('sortbydate', 'True'):
+        dataset.sort(axis=0, inplace=True)
+        dataset.history = 'sorted'
+
+    # Set the NDDataset date
+    dataset._date = datetime.now()
+    dataset._modified = dataset.date
+
+    log.debug("end of reading")
 
     # return the dataset
     return dataset
