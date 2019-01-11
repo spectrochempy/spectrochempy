@@ -426,7 +426,7 @@ nbsphinx_execute_arguments = [
 ]
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
-nbsphinx_execute = 'auto'
+nbsphinx_execute = 'never'
 nbsphinx_allow_errors = True
 
 # Use this kernel instead of the one stored in the notebook metadata:
