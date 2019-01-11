@@ -18,6 +18,7 @@ import pytest
 
 #datasets are defined in conftest as fixture
 
+
 def test_load(IR_dataset_2D):
 
     dataset = IR_dataset_2D
