@@ -11,7 +11,7 @@ import spectrochempy as sp
 import os
 
 
-sp.set_loglevel('DEBUG')
+#sp.set_loglevel('DEBUG')
 
 dataset = sp.NDDataset.read_omnic(
         os.path.join(sp.datadir.path, 'irdata', 'nh4y-activation.spg'))

@@ -7,8 +7,8 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-# We intentionnaly DO NOT SET DOCSTRING, HERE... due to the way doc is
-# builded.
+# We intentionnaly DO NOT SET DOCSTRING, HERE... due to the way the documentation
+# is builded.
 
 # """
 # Main package
@@ -78,8 +78,8 @@ def _setup_backend_and_ipython(backend=None):
         if getattr(get_ipython(), 'kernel', None) is not None:
             # set the ipython matplotlib environments
             try:
-                import ipympl
-                ip.magic('matplotlib widget')
+               #import ipympl
+               ip.magic('matplotlib notebook')  # widget
             except UsageError as e:
                 try:
                     ip.magic('matplotlib qt5')

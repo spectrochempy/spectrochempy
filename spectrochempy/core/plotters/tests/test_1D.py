@@ -14,7 +14,6 @@ from spectrochempy.utils.testing import figures_dir, same_images
 
 # @pytest.mark.skip
 def test_1D():
-    set_loglevel(DEBUG)
 
     dataset = NDDataset.read_omnic(
         os.path.join(datadir.path, 'irdata', 'nh4y-activation.spg'))
