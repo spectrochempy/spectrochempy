@@ -140,31 +140,35 @@ linestyles.remove('')
 linestyles.remove(' ')
 
 
+# ............................................................................
 def available_styles():
     """
     All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
     which are available in |scpy|
-
-    Todo
-    -----
-    Make this list extensible programmatically
 
     Returns
     -------
     A list of matplotlib styles
 
     """
+    # Todo: Make this list extensible programmatically (adding files to stylelib)
+
     cfgdir = mpl.get_configdir()
+
     stylelib = os.path.join(cfgdir, 'stylelib')
-    # AT: checks stylelib exists and adds matplotlib pre-defined styles
-    styles = []
+
+    # AT: checks if stylelib exists and adds matplotlib pre-defined styles
+    styles = plt.style.available
     if os.path.isdir(stylelib):
         listdir = os.listdir(stylelib)
         for style in listdir:
             if style.endswith('.mplstyle'):
-                styles.append(style.split('.mplstyle')[0])
-    for style in plt.style.available:
-        styles.append(style)
+                styles.append(style)
+    styles= list(set(styles))  # in order to remove possible duplicates
+
+    if 'scpy' not in styles:
+        styles.append('scpy') # the standard style of spectrochempy
+
     return styles
 
 
@@ -315,13 +319,14 @@ def _get_pkg_datadir_path(data_name, package=None):
 
 class DataDir(HasTraits):
     """ A class used to determine the path to the testdata
-    directory. """
+    directory. It also give the path of the stylesheets directory"""
 
     # ------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------
 
     path = Unicode()
+    stylesheets = Unicode()
 
     def listing(self):
         """
@@ -362,6 +367,11 @@ class DataDir(HasTraits):
     def _get_path_default(self):
         # the spectra path in package data
         return _get_pkg_datadir_path('testdata', 'scp_data')
+
+    @default('stylesheets')
+    def _get_stylesheets_default(self):
+        # the spectra path in package data
+        return _get_pkg_datadir_path('stylesheets', 'scp_data')
 
     # ------------------------------------------------------------------------
     # private methods
@@ -552,7 +562,7 @@ class ProjectPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------
 
     # ........................................................................
-    style = Enum(available_styles(), default_value='classic',
+    style = Enum(available_styles(), default_value='scpy',
                  help='Basic matplotlib style to use').tag(config=True,
                                                            type='list')
 

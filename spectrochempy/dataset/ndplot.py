@@ -24,6 +24,7 @@ __all__ = ['NDPlot',
 # Python and third parties imports
 # ----------------------------------
 
+import os
 import warnings
 
 from cycler import cycler
@@ -36,7 +37,7 @@ from traitlets import Dict, HasTraits, Instance, default
 # ------------
 from ..utils import (is_sequence, SpectroChemPyDeprecationWarning,
                       docstrings, NBlack, NBlue, NGreen, NRed, get_figure)
-from ..application import app
+from ..application import app, datadir
 
 project_preferences = app.project_preferences
 log = app.log
@@ -563,24 +564,40 @@ def _set_figure_style(**kwargs):
 
     log.debug('set style')
 
-    #reset first to default
+    # first, reset to default
     plt.style.use('classic')
+    try:  # try because if the installation is not correct, this 'scpy' style
+        # may not be found
+        plt.style.use('scpy')
+    except OSError:
+        # scpy not found! may be due to a failing installation
+        # make a basic style here
+        # get the local version:
+        plt.style.use(os.path.join(datadir.stylesheets,'scpy.mplstyle'))
 
+    # now get the required style form args
     style = kwargs.get('style', None)
 
-    mpl.rcParams['figure.max_open_warning'] = 50
     if style:
+        # if a style was passed, then we use it
         if not is_sequence(style):
             style = [style]
         if isinstance(style, dict):
             style = [style]
-        style = ['classic', project_preferences.style] + list(style)
-        plt.style.use(style)
-    else:
-        style = ['classic', project_preferences.style]
-        plt.style.use(style)
-        plt.style.use(project_preferences.style)
+        try:
+            plt.style.use(style)
+        except OSError:
+            # try a local version
+            plt.style.use(os.path.join(datadir.stylesheets, style[0]+'.mplstyle'))
 
+    else:
+        # else, we try to use the preferences
+        if project_preferences.style == 'scpy':
+            # already used
+            return
+
+        plt.style.use(project_preferences.style)
+        # and set some of the parameters here
         fontsize = mpl.rcParams['font.size'] = \
             kwargs.get('fontsize', mpl.rcParams['font.size'])
         mpl.rcParams['legend.fontsize'] = int(fontsize * .8)
@@ -589,8 +606,7 @@ def _set_figure_style(**kwargs):
         mpl.rcParams['axes.prop_cycle'] = (
             cycler('color', [NBlack, NBlue, NRed, NGreen]))
 
-        return mpl.rcParams
-#
+
 # @deprecated('use `available styles` from application instead')
 # # .............................................................................
 # def available_styles():

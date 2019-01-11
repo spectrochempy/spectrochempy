@@ -1,4 +1,4 @@
-# sans (equivalent to scpy: default)
+# scpy
 # ------------------------------------------------------------------------------
 
 axes.prop_cycle: cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
