@@ -334,28 +334,6 @@ epub_copyright = copyright
 # Allow duplicate toc entries.
 # epub_tocdup = True
 
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.6/', None),
-    'pytest': ('https://pytest.org/latest/', None),
-    'ipython': ('https://ipython.readthedocs.org/en/stable/', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    #'matplotlib': ('https://matplotlib.org', None)
-}
-
-
-def linkcode_resolve(domain, info):
-    if domain != 'py':
-        return None
-    if not info['module']:
-        return None
-    filename = info['module'].replace('.', '/')
-    return \
-    "https://bitbucket.org/spectrocat/spectrochempy/src/spectrochempy/%s.py" \
-    % filename
-
-
 # ----------------
 # Autosummary
 # -----------------
@@ -426,8 +404,31 @@ nbsphinx_execute_arguments = [
 ]
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
-nbsphinx_execute = 'never'
+nbsphinx_execute = 'always'
 nbsphinx_allow_errors = True
 
 # Use this kernel instead of the one stored in the notebook metadata:
 nbsphinx_kernel_name = 'python3'
+
+
+# configuration for intersphinx -------------------------------------
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3.7/', None),
+    'pytest': ('https://docs.pytest.org/latest/', None),
+    'ipython': ('https://ipython.readthedocs.io/en/stable/', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    #'matplotlib': ('https://matplotlib.org', None)
+}
+
+
+def linkcode_resolve(domain, info):
+    if domain != 'py':
+        return None
+    if not info['module']:
+        return None
+    filename = info['module'].replace('.', '/')
+    return \
+    "https://bitbucket.org/spectrocat/spectrochempy/src/spectrochempy/%s.py" \
+    % filename
+
+
