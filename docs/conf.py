@@ -38,7 +38,11 @@ sys._called_from_sphinx = True
 extensions = \
     [
     'spectrochempy.sphinxext.autodocsumm',
+    'nbsphinx',
     'sphinx.ext.mathjax',
+    'sphinxcontrib.bibtex',
+    'sphinx_gallery.gen_gallery',
+    'jupyter_sphinx.embed_widgets',
     'spectrochempy.sphinxext.traitlets_sphinxdoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
@@ -49,8 +53,6 @@ extensions = \
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',  # 'sphinx.ext.napoleon',
     'numpydoc',
-    'sphinx_gallery.gen_gallery',
-    'nbsphinx',
     ]
 
 # Numpy autodoc attributes
@@ -335,11 +337,11 @@ epub_copyright = copyright
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.6', None),
+    'python': ('https://docs.python.org/3.6/', None),
     'pytest': ('https://pytest.org/latest/', None),
     'ipython': ('https://ipython.readthedocs.org/en/stable/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    'matplotlib': ('https://matplotlib.org', None)
+    #'matplotlib': ('https://matplotlib.org', None)
 }
 
 
@@ -400,7 +402,7 @@ sphinx_gallery_conf = {
     'backreferences_dir': 'gen_modules/backreferences',
     'doc_module': ('spectrochempy', ), 'reference_url': {
         'spectrochempy': None,
-        'matplotlib': 'https://matplotlib.org',
+        #'matplotlib': 'https://matplotlib.org',
         'numpy': 'https://docs.scipy.org/doc/numpy',
         'sklearn': 'https://scikit-learn.org/stable',
         'ipython': 'https://ipython.readthedocs.org/en/stable/',
@@ -415,3 +417,17 @@ sphinx_gallery_conf = {
         [],
 
 }
+
+# nbsphinx ---------------------------------------------------
+# List of arguments to be passed to the kernel that executes the notebooks:
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc={'figure.dpi': 96}",
+]
+
+# Execute notebooks before conversion: 'always', 'never', 'auto' (default)
+nbsphinx_execute = 'auto'
+nbsphinx_allow_errors = True
+
+# Use this kernel instead of the one stored in the notebook metadata:
+nbsphinx_kernel_name = 'python3'
