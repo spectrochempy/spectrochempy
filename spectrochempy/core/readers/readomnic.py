@@ -378,17 +378,16 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     return dataset
 
 
-def _read_spa(dataset, filename):
+def _read_spa(dataset, filenames, **kwargs):
 
-    # TODO: make the reader for spa files
-
+    nspec = len(filenames)
     # containers to hold values
     nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec,
                                                          'float'), np.zeros(
         nspec, 'float')
     allintensities, alltitles, allacquisitiondates, alltimestamps, allhistories = [], [], [], [], []
 
-    for i, _filename in enumerate(filename):
+    for i, _filename in enumerate(filenames):
 
         with open(_filename, 'rb') as f:
 
@@ -414,7 +413,7 @@ def _read_spa(dataset, filename):
             allacquisitiondates.append(acqdate)
             timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Coord object
             # use datetime.fromtimestamp(d, timezone.utc))
-            # to transform back to datetime obkct
+            # to transform back to datetime object
 
             alltimestamps.append(timestamp)
 
@@ -483,8 +482,6 @@ def _read_spa(dataset, filename):
                         np.fromfile(f, 'float32', int(nintensities)))
                     gotinfos[1] = True
 
-
-                    # todo: extract positions of '1B' code (history text -- sometimes absent, e.g. peakresolve)
                 elif key == 27:
                     f.seek(pos + 2)
                     history_pos = np.fromfile(f, 'uint32', 1)[0]
@@ -501,15 +498,15 @@ def _read_spa(dataset, filename):
     # check the consistency of xaxis
     if np.ptp(nx) != 0:
         print(
-            'Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
+            'Error: Inconsistent data set - number of wavenumber per spectrum should be identical')
         return
     elif np.ptp(firstx) != 0:
         print(
-            'Error: Inconsistant data set - the x axis should start at same value')
+            'Error: Inconsistent data set - the x axis should start at same value')
         return
     elif np.ptp(lastx) != 0:
         print(
-            'Error: Inconsistant data set - the x axis should end at same value')
+            'Error: Inconsistent data set - the x axis should end at same value')
         return
 
     # load into the  Dataset Object of spectral content
@@ -518,27 +515,32 @@ def _read_spa(dataset, filename):
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
     dataset.name = alltitles[0] + ' ... ' + alltitles[-1]
-    dataset._date = datetime.datetime.now()
+    dataset._date = datetime.now()
     dataset._modified = dataset._date
 
-    # TODO: Finish the conversion
-    raise NotImplementedError('implementation not finished')
+    # Create Dataset Object of spectral content
+    dataset.coordset = (np.array(alltimestamps), xaxis)
+    dataset.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
+    dataset.coordset[1].units = 'cm^-1'
+    dataset.coordset[0].labels = (allacquisitiondates, alltitles)
+    dataset.coordset[0].units = 's'
 
-    out.appendlabels(Labels(alltitles, 'Title'))
-    out.appendlabels(Labels(allacquisitiondates, 'Acquisition date (GMT)'))
-    out.appendaxis(Coords(xaxis, 'Wavenumbers (cm-1)'), dim=1)
-    indexFirstSpectrum = 0
-    if sortbydate:
-        out.addtimeaxis()
-        firstTime = min(out.dims[0].axes[0].values)
-        indexFirstSpectrum = out.idx(firstTime, dim=0)
-        out = out.sort(0, 0)
-        out.dims[0].deleteaxis(0)
-    out.description = (
-        'dataset from spa files : ' + out.name + ' \n' + 'History of 1st spectrum: ' +
-        allhistories[indexFirstSpectrum])
-    out.history = (
-    str(datetime.datetime.now()) + ':created by sa.loadspa() \n')
+    # Set description and history
+    dataset.description = (
+        'Dataset from ' + str(nspec)+ ' spa files : \'' + filenames[0] + '...' + filenames[-1 ] + '\n'
+        + 'History of the 1st spectrum: ' + allhistories[0])
+
+    dataset.history = str(datetime.now()) + ':read from spa files \n'
+
+    if kwargs.get('sortbydate', 'True'):
+        dataset.sort(axis=0, inplace=True)
+        dataset.history = 'sorted'
+
+    # Set the NDDataset date
+    dataset._date = datetime.now()
+    dataset._modified = dataset.date
+
+    log.debug("end of reading")
 
     # return the dataset
     return dataset

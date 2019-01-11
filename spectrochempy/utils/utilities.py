@@ -60,17 +60,48 @@ def readXlCellRange(xlFileName, cellRange, sheetNumber=0):
 # =============================================================================
 
 
+def readfilename(filename, **kwargs):
+    """
+    returns a list of the filenames of existing files, filtered by extensions
+    :param filename: Filename of file(s). If `None`: opens a dialog box to select
+    files. If `str`: a single filename. If list of str: a list of filenames.
+    :param directory [optional, default=""]: the directory where to look at. If not specified, read in
+       current directory
+    :param filetypes [optional, default=['all files, '.*)']]
+    :return: a list of the filenames
+    """
 
-def readfilename(filename, directory='', filter=''):
+    directory = kwargs.get("directory", "")
 
-    if os.path.isdir(filename):
-        directory = filename
-        filename = None
+    filetypes = kwargs.get("filetypes", [('all files', '.*')])
+    if not os.path.exists(directory):
+        raise IOError("directory doesn't exists!")
+
+    if isinstance(filename, str) and os.path.isdir(filename):
+        raise IOError('a directory has been provided instead of a filename!')
 
     if not filename:
-        raise IOError('no filename provided!')
+        root = tk.Tk()
+        root.withdraw()
+        root.overrideredirect(True)
+        root.geometry('0x0+0+0')
+        root.deiconify()
+        root.lift()
+        root.focus_force()
+        filenamestring = filedialog.askopenfilenames(parent=root, \
+                                                     filetypes=filetypes,
+                                                     title='Open omnic file')
 
-    else:
+        root.quit()
+        filename = [_filename for _filename in filenamestring]
+
+    if isinstance(filename, list):
+        if not all(isinstance(elem, str) for elem in filename):
+            raise IOError('one of the list elements is not a filename!')
+        else:
+            filenames = [os.path.join(directory, elem) for elem in filename]
+
+    if isinstance(filename, str):
         filenames = [filename]
 
     # filenames passed
@@ -81,8 +112,7 @@ def readfilename(filename, directory='', filter=''):
         if extension in files.keys():
             files[extension].append(filename)
         else:
-            files[extension]=[filename]
-
+            files[extension] = [filename]
     return files
 
 
