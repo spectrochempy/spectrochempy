@@ -31,7 +31,7 @@ from spectrochempy import *
 from docs import apigen
 
 preferences = general_preferences
-set_loglevel(INFO)
+set_loglevel(WARNING)
 
 # from sphinx.util.console import bold, darkgreen
 # TODO: make our message colored too!

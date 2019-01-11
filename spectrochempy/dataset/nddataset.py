@@ -244,7 +244,7 @@ class NDDataset(
 
         if value is not None:
             if self._coordset is not None:
-                log.info("Overwriting NDDataset's current "
+                log.debug("Overwriting NDDataset's current "
                          "coordset with one specified")
 
             if not isinstance(value, CoordSet):
