@@ -57,20 +57,25 @@ def readbtext(f, pos):
 
 # function for loading spa or spg file
 # --------------------------------------
-def read_omnic(dataset=None, filename='', sortbydate=True, **kwargs):
-    """Open a Thermo Nicolet .spg or list of .spa files and set 
+def read_omnic(dataset=None, filename='', **kwargs):
+    """Open a Thermo Nicolet .spg or list of .spa files and set
     data/metadata in the current dataset
 
     Parameters
     ----------
-    dataset : NDDataset
-        The dataset to store the data and the metadata read from the spg file
-    filename: str
-        filename of the file to load
-    directory: str [optional, default=""].
-        From where to read the specified filename. If not sperfied, read i 
-        the current directory.
-
+    :param: dataset : `NDDataset`
+        The dataset to store the data and metadata read from the omnic file(s).
+        If None, a NDDataset is created
+    :param: filename: `None`, `str`, or list of `str`
+        Filename of the file(s) to load. If `None`: opens a dialog box to select
+        ".spa" or ".spg" files. If `str`: a single filename. It list of str:
+        a list of filenames.
+    :param: directory: str [optional, default=""].
+        From where to read the specified filename. If not specified, read in
+        the defaults datadir.
+    :param: sortbydate: bool [optional default = True]. sort spectra by acquisition date
+    :returns: a 'NDDdataset' corresponding to the .spg file or the set of .spa files. A
+    list of datasets is returned if several .spg files are passed.
     Examples
     --------
     >>> from spectrochempy import NDDataset
@@ -94,47 +99,33 @@ def read_omnic(dataset=None, filename='', sortbydate=True, **kwargs):
 
         dataset = NDDataset()  # create a NDDataset
 
+    # check directory
     directory = kwargs.get("directory", datadir.path)
-    if not os.path.exists(directory):
-        raise IOError("directory doesn't exists!")
 
-    if os.path.isdir(directory):
-        filename = os.path.expanduser(os.path.join(directory, filename))
-    else:
-        warnings.warn('Provided directory is a file, '
-                      'so we use its parent directory', SpectroChemPyWarning)
-        filename = os.path.join(os.path.dirname(directory), filename)
-
-
-    # open file dialog box if necessary
+    # returns a list of files to read
     files = readfilename(filename,
                          directory = directory,
-                         filter='OMNIC file (*.spg);;OMNIC file (*.spa)')
-
-    if not files:
-        return None
-
+                         filetypes= [('spa files', '.spa'), ('spg files', '.spg'), ('all files', '.*')])
     datasets = []
-
     for extension in files.keys():
-
-        for filename in files[extension]:
-            if extension == '.spg':
+        if extension == '.spg':
+            for filename in files[extension]:
+                log.debug("reading omnic spg file")
                 datasets.append(_read_spg(dataset, filename))
 
-            elif extension == '.spa':
-                datasets.append(_read_spa(dataset, filename,
-                                         sortbydate=True, **kwargs))
-            else:
-                # try another format!
-                datasets = dataset.read(filename, protocol=extension[1:],
+        elif extension == '.spa':
+            log.debug("reading omnic spa files")
+            datasets.append(_read_spa(dataset, files[extension],
+                                     sortbydate=True))
+        else:
+             # try another format!
+            datasets = dataset.read(filename, protocol=extension[1:],
                                       sortbydate=True, **kwargs)
 
     if len(datasets)==1:
         return datasets[0] # a single dataset is returned
 
-    return datasets  # several datasets returned
-
+    return datasets  # several datasets returned (only if several .spg files have been passed)
 #alias
 read_spg = read_omnic
 read_spa = read_omnic
