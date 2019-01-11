@@ -44,7 +44,7 @@ numpydoc
 nbconvert
 nbsphinx
 sphinxcontrib-bibtex
-jupyter_sphinx
+# jupyter_sphinx
 
 # for matplotlib backend and future gui
 

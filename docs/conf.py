@@ -42,7 +42,7 @@ extensions = \
     'sphinx.ext.mathjax',
     'sphinxcontrib.bibtex',
     'sphinx_gallery.gen_gallery',
-    'jupyter_sphinx.embed_widgets',
+    #'jupyter_sphinx.embed_widgets',
     'spectrochempy.sphinxext.traitlets_sphinxdoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
