@@ -14,20 +14,27 @@ from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_approx_equal
 import pytest
 
-
-def test_read_zip():
+def test_read_zunimplemented():
 
     with pytest.raises(NotImplementedError):
         A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
 
+def test_read_zip():
+
+    #with pytest.raises(NotImplementedError):
+    #    A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
+
     A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
                            origin='omnic_export',
-                           only=10)
-    print(A)
-    assert A.shape == (10, 3736)
+                           only=10,
+                           delimiter = ';')
 
     A.plot_stack()
     show()
+
+    print(A)
+    assert A.shape == (10, 3736)
+
 
 def test_read_csv_tg():
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
@@ -46,3 +53,11 @@ def test_read_csv_IR():
     print(B)
     B.plot()
     show()
+
+def test_read_without_directory():
+    B = NDDataset.read_csv('irdata/ir.csv')
+    print(B)
+
+def test_read_without_filename():
+    B = NDDataset.read_csv()
+    print(B)

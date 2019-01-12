@@ -34,73 +34,61 @@ import numpy as np
 
 from spectrochempy.dataset.ndio import NDIO
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import  log, general_preferences as prefs
+from spectrochempy.application import log, general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
 
-# utility functions
-# -------------------
-def readbtext(f, pos):
-    """Read some text in binary file, until b\0\ is encountered. \
-    Returns utf-8 string """
-    f.seek(pos)  # read first byte, ensure entering the while loop
-    btext = f.read(1)
-    while not (btext[len(
-            btext) - 1] == 0):  # while the last byte of btext differs from zero
-        btext = btext + f.read(1)  # append 1 byte
+# =============================================================================
+# Public functions
+# =============================================================================
 
-    btext = btext[0:len(btext) - 1]  # cuts the last byte
-    text = btext.decode(encoding='utf-8',
-                        errors='ignore')  # decode btext to string
-    return text
-
-
-# function for loading spa or spg file
-# --------------------------------------
-def read_omnic(dataset=None, filename=None, **kwargs):
-    """Open a Thermo Nicolet .spg or list of .spa files and set
+# .............................................................................
+def read_omnic(dataset=None, **kwargs):
+    """Open a Thermo Nicolet \*.spg or a list of \*.spa files and set
     data/metadata in the current dataset
 
     Parameters
     ----------
-    dataset : `NDDataset`
-        The dataset to store the data and metadata read from the omnic file(s).
-        If None, a NDDataset is created
-    filename: `None`, `str`, or list of `str`
+    dataset : |NDDataset|
+        The dataset to store the data and metadata read from the OMNIC file(s).
+        If None, a |NDDataset| is created.
+    filename : `None`, `str`, or list of `str`
         Filename of the file(s) to load. If `None`: opens a dialog box to select
-        ".spa" or ".spg" files. If `str`: a single filename. It list of str:
+        "\*.spa" or "\*.spg" files. If `str`: a single filename. It list of str:
         a list of filenames.
     directory: str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
-    sortbydate: bool, optional, default = True.
+    sortbydate: bool, optional, default : True.
         Sort spectra by acquisition date
 
     Returns
     -------
-    dataset : `NDDdataset`
+    dataset : |NDDdataset|
         A dataset corresponding to the .spg file or the set of .spa files. A
         list of datasets is returned if several .spg files are passed.
 
     Examples
     --------
-    >>> from spectrochempy import *
-
     >>> A = NDDataset.read_omnic('irdata/nh4y-activation.spg')
-    >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> print(A)
     <BLANKLINE>
       name/id: NH4Y-activation.SPG ...
 
 
     """
-    log.debug("reading omnic file")
+    log.debug("reading omnic files")
+
+    # filename will be given by a keyword parameter except the first parameters
+    # is already the filename
+    filename = kwargs.get('filename', None)
 
     # check if the first parameter is a dataset
     # because we allow not to pass it
     if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameters must be the filename
-        if isinstance(dataset, str) and dataset!='':
+        if isinstance(dataset, str) and dataset != '':
             filename = dataset
 
         dataset = NDDataset()  # create a NDDataset
@@ -110,10 +98,18 @@ def read_omnic(dataset=None, filename=None, **kwargs):
 
     # returns a list of files to read
     files = readfilename(filename,
-                         directory = directory,
-                         filetypes= ['OMNIC spa files (*.spa)', 'OMNIC spg files (*.spg)', 'all OMNIC files (*.sp*)', 'all files (*)'])
+                         directory=directory,
+                         filetypes=['OMNIC spa files (*.spa)', 'OMNIC spg files (*.spg)', 'all OMNIC files (*.sp*)'])
+
+    if not files:
+        # there is no files, return nothing
+        return None
+
     datasets = []
     for extension in files.keys():
+
+        extension = extension.lower()
+
         if extension == '.spg':
             for filename in files[extension]:
                 log.debug("reading omnic spg file")
@@ -122,18 +118,20 @@ def read_omnic(dataset=None, filename=None, **kwargs):
         elif extension == '.spa':
             log.debug("reading omnic spa files")
             datasets.append(_read_spa(dataset, files[extension],
-                                     sortbydate=True))
+                                      sortbydate=True))
         else:
-             # try another format!
+            # try another format!
             datasets = dataset.read(filename, protocol=extension[1:],
-                                      sortbydate=True, **kwargs)
+                                    sortbydate=True, **kwargs)
 
-    if len(datasets)==1:
-        return datasets[0] # a single dataset is returned
+    if len(datasets) == 1:
+        return datasets[0]  # a single dataset is returned
 
-    return datasets  # several datasets returned (only if several .spg files have been passed)
+    # several datasets returned (only if several .spg files have been passed)
+    return datasets
 
-#alias
+
+# alias
 read_spg = read_omnic
 read_spa = read_omnic
 
@@ -141,8 +139,27 @@ read_spa = read_omnic
 NDIO.read_spg = read_omnic
 NDIO.read_spa = read_omnic
 
-def _read_spg(dataset, filename, sortbydate=True, **kwargs):
+# =============================================================================
+# private functions
+# =============================================================================
 
+# .............................................................................
+def _readbtext(f, pos):
+    # Read some text in binary file, until b\0\ is encountered.
+    # Returns utf-8 string
+    f.seek(pos)  # read first byte, ensure entering the while loop
+    btext = f.read(1)
+    while not (btext[len(
+        btext) - 1] == 0):  # while the last byte of btext differs from zero
+        btext = btext + f.read(1)  # append 1 byte
+
+    btext = btext[0:len(btext) - 1]  # cuts the last byte
+    text = btext.decode(encoding='utf-8',
+                        errors='ignore')  # decode btext to string
+    return text
+
+# .............................................................................
+def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     # read spg file
     with open(filename, 'rb') as f:
 
@@ -153,7 +170,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         # been saved: it won't match with the actual filename if a subsequent
         # renaming has been done in e.g. Windows.
 
-        spg_title = readbtext(f, 30)
+        spg_title = _readbtext(f, 30)
 
         # The acquisition date (GMT) of 1st spectrum at hex 128 = decimal 296.
         # The format is HFS+ 32 bit hex value, little endian
@@ -201,7 +218,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
 
         if nspec == 0:
             raise IOError('Error: File format not recognized'
-                                     ' - information markers not found')
+                          ' - information markers not found')
 
         ##Get xaxis (e.g. wavenumbers)
 
@@ -214,8 +231,8 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         key_is_02 = (keys == 2)  # ex: [T F F F F T F (...) F T ....]'
         indices02 = np.nonzero(key_is_02)  # ex: [1 9 ...]
         position02 = 304 * np.ones(len(indices02[0]), dtype='int') + 16 * \
-                                                                     indices02[
-                                                                         0]
+                     indices02[
+                         0]
 
         # ex: [304 432 ...]
         for i in range(nspec):
@@ -238,16 +255,15 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         # check the consistency of xaxis
         if np.ptp(nx) != 0:
             raise ValueError('Inconsistant data set'
-                     ' - number of wavenumber per spectrum should be identical')
+                             ' - number of wavenumber per spectrum should be identical')
 
         elif np.ptp(firstx) != 0:
             raise ValueError('Inconsistant data set'
-                                     ' - the x axis should start at same value')
+                             ' - the x axis should start at same value')
 
         elif np.ptp(lastx) != 0:
             raise ValueError('Inconsistant data set'
-                                     ' - the x axis should end at same value')
-
+                             ' - the x axis should end at same value')
 
         xaxis = np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3)
 
@@ -261,7 +277,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         key_is_03 = (keys == 3)
         indices03 = np.nonzero(key_is_03)
         position03 = 304 * np.ones(len(indices03[0]), dtype='int') + 16 * \
-                                                                    indices03[0]
+                     indices03[0]
 
         # Read number of spectral intensities
         for i in range(nspec):
@@ -275,13 +291,13 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         # (probably redundent w/ xaxis check above)
         if np.ptp(intensity_size) != 0:
             raise ValueError('Inconsistent data set'
-                           ' - number of data per spectrum should be identical')
+                             ' - number of data per spectrum should be identical')
 
         nintensities = int(intensity_size[0] / 4)  # 4 = size of uint32
 
         if nintensities != nx[0]:
             raise ValueError('Inconsistent file'
-' - number of wavenumber per spectrum should be equal to number of intensities')
+                             ' - number of wavenumber per spectrum should be equal to number of intensities')
 
         # Read spectral intensities
         data = np.zeros((nspec, nintensities), dtype='float32')
@@ -298,8 +314,8 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         key_is_6B = (keys == 107)
         indices6B = np.nonzero(key_is_6B)
         position6B = 304 * np.ones(len(indices6B[0]), dtype='int') + 16 * \
-                                                                     indices6B[
-                                                                         0]
+                     indices6B[
+                         0]
 
         # read spectra titles and acquisition date
         for i in range(nspec):
@@ -308,7 +324,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
             spa_title_pos = np.fromfile(f, 'uint32', 1)
 
             # read filename
-            spa_title = readbtext(f, spa_title_pos[0])
+            spa_title = _readbtext(f, spa_title_pos[0])
             alltitles.append(spa_title)
 
             # and the acquisition date
@@ -341,7 +357,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
                     history_pos = np.fromfile(f, 'uint32', 1)
 
                     # read history
-                    history = readbtext(f, history_pos[0])
+                    history = _readbtext(f, history_pos[0])
                     allhistories.append(history)
 
     # Create Dataset Object of spectral content
@@ -376,14 +392,15 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     return dataset
 
 
+# .............................................................................
 def _read_spa(dataset, filenames, **kwargs):
-
     nspec = len(filenames)
     # containers to hold values
     nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec,
                                                          'float'), np.zeros(
         nspec, 'float')
-    allintensities, alltitles, allacquisitiondates, alltimestamps, allhistories = [], [], [], [], []
+    allintensities, alltitles, allacquisitiondates, alltimestamps, \
+    allhistories = [], [], [], [], []
 
     for i, _filename in enumerate(filenames):
 
@@ -396,7 +413,7 @@ def _read_spa(dataset, filenames, **kwargs):
             # been saved: it won't match with the actual filename if a subsequent
             # renaming has been done in e.g. Windows.
 
-            alltitles.append(readbtext(f, 30))
+            alltitles.append(_readbtext(f, 30))
 
             # The acquisition date (GMT) is at hex 128 = decimal 296.
             # The format is HFS+ 32 bit hex value, little endian
@@ -409,7 +426,8 @@ def _read_spa(dataset, filenames, **kwargs):
                                tzinfo=timezone.utc) + timedelta(
                 seconds=int(timestamp))
             allacquisitiondates.append(acqdate)
-            timestamp = acqdate.timestamp()  # Transform back to timestamp for storage in the Coord object
+            timestamp = acqdate.timestamp()
+            # Transform back to timestamp for storage in the Coord object
             # use datetime.fromtimestamp(d, timezone.utc))
             # to transform back to datetime object
 
@@ -430,7 +448,6 @@ def _read_spa(dataset, filenames, **kwargs):
             #     key: hex 80, dec 128 : ?
             #     key: hex 82, dec 130 : ?
             #
-
 
             gotinfos = [False, False,
                         False]  # spectral header, intensity, history
@@ -484,7 +501,7 @@ def _read_spa(dataset, filenames, **kwargs):
                     f.seek(pos + 2)
                     history_pos = np.fromfile(f, 'uint32', 1)[0]
                     # read history
-                    history = readbtext(f, history_pos)
+                    history = _readbtext(f, history_pos)
                     allhistories.append(history)
                     gotinfos[2] = True
 
@@ -525,7 +542,7 @@ def _read_spa(dataset, filenames, **kwargs):
 
     # Set description and history
     dataset.description = (
-        'Dataset from ' + str(nspec)+ ' spa files : \'' + filenames[0] + '...' + filenames[-1 ] + '\n'
+        'Dataset from ' + str(nspec) + ' spa files : \'' + filenames[0] + '...' + filenames[-1] + '\n'
         + 'History of the 1st spectrum: ' + allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'
@@ -543,7 +560,6 @@ def _read_spa(dataset, filenames, **kwargs):
     # return the dataset
     return dataset
 
+
 if __name__ == '__main__':
-
     pass
-

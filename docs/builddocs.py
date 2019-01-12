@@ -115,7 +115,6 @@ def make_docs(*args):
     if not nocommit:
         gitcommands()
 
-    set_loglevel(INFO)
     if 'DEBUG' in args:
         set_loglevel(DEBUG)
 

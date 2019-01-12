@@ -249,57 +249,14 @@ class NDIO(HasTraits):
     # Generic load function
     # --------------------------------------------------------------------------
 
-    @classmethod
-    def load(cls,
+    @staticmethod
+    def _load(cls,
              fid='',
              protocol=None,
              directory=prefs.datadir,
              **kwargs
              ):
-        """Load a dataset object saved as a pickle file ( '.scp' file).
 
-        It's a class method, that can be used directly on the class,
-        without prior opening of a class instance.
-
-        Parameters
-        ----------
-        fid : str or file object
-            The name of the file to read (or a file object).
-        protocol : str, optional, default:'scp'
-            The default type for saving.
-        directory : str, optional, default:`prefs.datadir`
-            The directory from where to load the file.
-        kwargs : optional keyword parameters.
-            Any additional keyword(s) to pass to the actual reader.
-
-        Examples
-        --------
-        >>> from spectrochempy import *
-        >>> mydataset = NDDataset.load('mydataset.scp')
-        >>> print(mydataset)                  # doctest: +ELLIPSIS
-        <BLANKLINE>
-        ...
-
-        by default, directory for saving is the `data`.
-        So the same thing can be done simply by:
-
-        >>> from spectrochempy import *
-        >>> mydataset = NDDataset.load('mydataset.scp')
-        >>> print(mydataset)                  # doctest: +ELLIPSIS
-        <BLANKLINE>
-        ...
-
-
-        Notes
-        -----
-        adapted from `numpy.load`
-
-        See Also
-        --------
-        read, save
-
-
-        """
         filename = None
 
         # case where load was call directly from the API
@@ -435,14 +392,78 @@ class NDIO(HasTraits):
 
         return new
 
+    @classmethod
+    def load(cls,
+             fid='',
+             protocol=None,
+             directory=prefs.datadir,
+             **kwargs
+             ):
+        """
+        Load a list of dataset objects saved as a pickle files ( e.g., '\*.scp' file).
+
+        It's a class method, that can be used directly on the class,
+        without prior opening of a class instance.
+
+        Parameters
+        ----------
+        fid : list of `str` or `file` objects
+            The names of the files to read (or the file objects).
+        protocol : str, optional, default:'scp'
+            The default type for saving.
+        directory : str, optional, default:`prefs.datadir`
+            The directory from where to load the file.
+        kwargs : optional keyword parameters.
+            Any additional keyword(s) to pass to the actual reader.
+
+
+        Examples
+        --------
+        >>> from spectrochempy import *
+        >>> mydataset = NDDataset.load('mydataset.scp')
+        >>> print(mydataset)
+        <BLANKLINE>
+        ...
+
+        by default, directory for saving is the `data`.
+        So the same thing can be done simply by:
+
+        >>> mydataset = NDDataset.load('mydataset.scp')
+        >>> print(mydataset)
+        <BLANKLINE>
+        ...
+
+
+        Notes
+        -----
+        adapted from `numpy.load`
+
+        See Also
+        --------
+        read, save
+
+
+        """
+        datasets = []
+        files = fid
+        if not isinstance(fid, (list, tuple)):
+            files = [fid]
+
+        for f in files:
+            nd = NDIO._load(cls, fid=f, protocol=protocol, directory=directory, **kwargs)
+            datasets.append(nd)
+
+            #TODO: allow a concatenation or stack if possible
+
+        if len(datasets)==1:
+            return datasets[0]
 
     # --------------------------------------------------------------------------
     # Generic read function
     # --------------------------------------------------------------------------
 
     @classmethod
-    def read(cls,
-             filename=None, **kwargs):
+    def read(cls, filename=None, **kwargs):
         """
         Generic read function. It's like `load` a class method.
 

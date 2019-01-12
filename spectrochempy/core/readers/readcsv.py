@@ -21,6 +21,7 @@ import warnings
 from io import StringIO
 from datetime import datetime
 import locale
+
 try:
     locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
 except:
@@ -43,11 +44,12 @@ from spectrochempy.application import log, general_preferences as prefs
 from spectrochempy.utils import (readfilename, unzip, is_sequence,
                                  SpectroChemPyWarning)
 
+
 # =============================================================================
 # read_zip
 # =============================================================================
 
-def read_zip(dataset, filename='', **kwargs):
+def read_zip(dataset=None, **kwargs):
     """Open a zipped list of .csv files  and set data/metadata in the
     current dataset
 
@@ -67,30 +69,35 @@ def read_zip(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest: +ELLIPSIS,
-
     >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip', origin='omnic')
-    >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> print(A)
     <BLANKLINE>
       name/id:  ...
 
     """
+    log.debug("reading zipped folder of *.csv files")
 
-    nd = _read(dataset, filename,
-                 filter='zip file (*.zip);', **kwargs)
+    # filename will be given by a keyword parameter except the first parameters
+    # is already the filename
+    filename = kwargs.pop('filename', None)
+
+    nd = _read(dataset, filename=filename, filter='zip file (*.zip);', **kwargs)
 
     return nd
 
+
 # =============================================================================
-# read_csv
+# Public functions
 # =============================================================================
 
-def read_csv(dataset, filename='', **kwargs):
-    """Open a .csv file and set data/metadata in the current dataset
+# .............................................................................
+def read_csv(dataset=None, **kwargs):
+    """Open a *.csv file or a list of *.csv files and set data/metadata
+    in the current dataset
 
     Parameters
     ----------
-    dataset : NDDataset
+    dataset : |NDDataset|
         The dataset to store the data and the metadata read from the spg file
     filename: str
         filename of the file to load
@@ -104,10 +111,8 @@ def read_csv(dataset, filename='', **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-
     >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
-    >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> print(A)
     <BLANKLINE>
       name/id: ...
 
@@ -117,51 +122,47 @@ def read_csv(dataset, filename='', **kwargs):
     without header
 
     """
+    log.debug("reading csv files")
 
-    nd =  _read(dataset, filename,
-                 filter='csv file (*.csv);', **kwargs)
+    # filename will be given by a keyword parameter except the first parameters
+    # is already the filename
+    filename = kwargs.pop('filename', None)
+
+    nd = _read(dataset, filename=filename, filter='csv file (*.csv)', **kwargs)
 
     return nd
+
 
 # =============================================================================
 # private functions
 # =============================================================================
 
-def _read(dataset, filename='',
-          filter='zip file (*.zip);', **kwargs):
-
+# .............................................................................
+def _read(dataset, filename, **kwargs):
     # check if the first parameter is a dataset
     # because we allow not to pass it
     if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameters must be the filename
-        if isinstance(dataset, str) and dataset!= '':
+        if isinstance(dataset, str) and dataset != '':
             filename = dataset
 
         dataset = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", prefs.datadir)
-    if not os.path.exists(directory):
-        raise IOError("directory doesn't exists!")
+    # check if directory was specified
+    directory = kwargs.get("directory", None)
 
-    if os.path.isdir(directory):
-        filename = os.path.expanduser(os.path.join(directory, filename))
-    else:
-        warnings.warn('Provided directory is a file, '
-                      'so we use its parent directory', SpectroChemPyWarning)
-        filename = os.path.join(os.path.dirname(directory), filename)
-
-
-    # open file dialog box if necessary
+    # returns a list of files to read
+    filter = kwargs.get('filter', ['All files (*)'])
     files = readfilename(filename,
-                         directory = directory,
+                         directory=directory,
                          filter=filter)
 
     if not files:
+        # there is no files, return nothing
         return None
 
     datasets = []
-
     for extension in files.keys():
 
         for filename in files[extension]:
@@ -178,14 +179,15 @@ def _read(dataset, filename='',
                     datasets.extend(csv)
             else:
                 # try another format!
-                dat = dataset.read(filename, protocol=extension[1:], **kwargs)
+                dat = dataset.read(filename, protocol=extension[1:],
+                                   sortbydate=True, **kwargs)
                 if isinstance(dat, NDDataset):
                     datasets.append(dat)
                 elif is_sequence(dat):
                     datasets.extend(dat)
 
     # and concatenate them into a single file - this assume they are compatibles
-    if len(datasets)>1:
+    if len(datasets) > 1:
         new = concatenate(datasets, axis=0)
     else:
         new = datasets[0]
@@ -194,18 +196,18 @@ def _read(dataset, filename='',
     return new
 
 
+# .............................................................................
 def _read_zip(dataset, filename, **kwargs):
-
     if not os.path.exists(filename):
-        print('Sorry but this filename (%s) does not exists!'%filename)
+        print('Sorry but this filename (%s) does not exists!' % filename)
         return None
 
-    origin = kwargs.get('origin',None)
+    origin = kwargs.get('origin', None)
     if origin is None:
-        origin ='unknown'
-        raise NotImplementedError ("Sorry, but reading a zip file with origin of "
-                                   "type '%s' is not implemented. Please"
-                                   "set the keyword 'origin'." %origin)
+        origin = 'unknown'
+        raise NotImplementedError("Sorry, but reading a zip file with origin of "
+                                  "type '%s' is not implemented. Please"
+                                  "set the keyword 'origin'." % origin)
 
     temp = os.path.join(os.path.dirname(filename), '~temp')
     basename = os.path.splitext(os.path.basename(filename))[0]
@@ -219,20 +221,19 @@ def _read_zip(dataset, filename, **kwargs):
     filelist = sorted(obj.files)
 
     # read all .csv files?
-    only = kwargs.pop('only',len(filelist))
+    only = kwargs.pop('only', len(filelist))
 
     datasets = []
-
 
     for f in filelist:
 
         if not f.endswith('.csv') or f.startswith('__MACOSX'):
-            continue # bypass non-csv files
+            continue  # bypass non-csv files
 
-        log.debug('reading %s ...' % (f) )
+        log.debug('reading %s ...' % (f))
 
         datasets.append(_read_csv(dataset, filename=f, fid=obj[f], **kwargs))
-        if len(datasets)+1>only:
+        if len(datasets) + 1 > only:
             break
 
     try:
@@ -242,37 +243,44 @@ def _read_zip(dataset, filename, **kwargs):
 
     return datasets
 
-def _read_csv(dataset, filename='', fid=None, **kwargs):
 
+# .............................................................................
+def _read_csv(dataset, filename='', fid=None, **kwargs):
     # this is limited to 1D array (two columns reading!)
     # TODO: improve this for 2D with header
 
-    if not isinstance(fid,bytes) and not os.path.exists(filename):
+    if not isinstance(fid, bytes) and not os.path.exists(filename):
         raise IOError("{} file doesn't exists!".format(filename))
 
-    new = dataset.copy() # important
-    delimiter = kwargs.get("csv_delimiter", prefs.csv_delimiter)
+    new = dataset.copy()  # important
+    delimiter = kwargs.get("delimiter", prefs.csv_delimiter)
     try:
-        if isinstance(fid,bytes):
+        if isinstance(fid, bytes):
             f = StringIO(fid.decode("utf-8"))
         else:
             f = filename
         d = np.loadtxt(f, delimiter=delimiter)
     except ValueError:
         # it might be that the delimiter is not correct (default is ','), but
-        # french excel export for instance, use ";".
-        delimiter =';'
-        # in this case, in french, very often the decimal '.' is replaced by a
-        # comma:  Let's try to correct this
-        with open(f, "r") as f_:
-            txt = f_.read()
-            txt = txt.replace(',','.')
+        # french excel export with the french locale for instance, use ";".
+        _delimiter = ';'
+        try:
+            d = np.loadtxt(f, delimiter=_delimiter)
+        except:
+            # in french, very often the decimal '.' is replaced by a
+            # comma:  Let's try to correct this
+            if not isinstance(f, StringIO):
+                with open(f, "r") as f_:
+                    txt = f_.read()
+            else:
+                txt = f.read()
+            txt = txt.replace(',', '.')
             fil = StringIO(txt)
             try:
                 d = np.loadtxt(fil, delimiter=delimiter)
             except:
                 raise IOError(
-                  '{} is not a .csv file or its structure cannot be recognized')
+                    '{} is not a .csv file or its structure cannot be recognized')
 
     # transpose d so the the rows becomes the last dimensions
     d = d.T
@@ -288,26 +296,27 @@ def _read_csv(dataset, filename='', fid=None, **kwargs):
     new.title = kwargs.get('title', None)
     new.units = kwargs.get('units', None)
     new.description = kwargs.get('description',
-                                    '"name" '+ 'read from .csv file')
+                                 '"name" ' + 'read from .csv file')
     new.coordset = [coord0]
     new.history = str(datetime.now()) + ':read from .csv file \n'
     new._date = datetime.now()
     new._modified = new.date
 
     # here we can check some particular format
-    origin = kwargs.get('origin','')
+    origin = kwargs.get('origin', '')
     if 'omnic' in origin:
         # this will be treated as csv export from omnic (IR data)
-        new._data = new.data[np.newaxis] # add a dimension
+        new._data = new.data[np.newaxis]  # add a dimension
         new = _add_omnic_info(new, **kwargs)
 
     return new
 
-def _add_omnic_info(dataset, **kwargs):
 
+# .............................................................................
+def _add_omnic_info(dataset, **kwargs):
     # get the time and name
     name = desc = dataset.name
-    name, dat =  name.split('_')
+    name, dat = name.split('_')
 
     # if needed convert weekday name to English
     dat = dat.replace('Lun', 'Mon')
@@ -351,13 +360,12 @@ def _add_omnic_info(dataset, **kwargs):
 
     return dataset
 
-#===============================================================================
+
+# ===============================================================================
 # tests
-#===============================================================================
+# ===============================================================================
 if __name__ == '__main__':
-
     from spectrochempy import (NDDataset, set_loglevel, ERROR, show)
-
 
     set_loglevel(ERROR)
 
@@ -366,7 +374,6 @@ if __name__ == '__main__':
     #                        origin='omnic_export')
     # print(A)
     # A.plot_stack()
-
 
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
     print(B)
@@ -382,5 +389,5 @@ if __name__ == '__main__':
     show()
 
     # to open the file dialog editor
-    #C = NDDataset.read_csv(directory=data)
-    #print(C)
+    # C = NDDataset.read_csv(directory=data)
+    # print(C)

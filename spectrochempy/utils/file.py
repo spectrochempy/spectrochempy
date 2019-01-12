@@ -76,11 +76,25 @@ def readfilename(filename=None, **kwargs):
             filename = None
 
     if directory and not os.path.exists(directory):
-        # well the directory doen't exist - we cannot go further without correcting the error
-        raise IOError("directory %s doesn't exists!" % directory)
+        # the directory may be located in our default datadir
+        # or be the default datadir
+        if directory == os.path.basename(prefs.datadir):
+            return prefs.datadir
 
+        _directory = os.path.join(prefs.datadir, directory)
 
-    # now proceed with the filenames
+        if  not os.path.exists(_directory):
+
+            # well the directory doesn't exist - we cannot go further without
+            # correcting this error
+            raise IOError("directory %s doesn't exists!" % directory)
+        else:
+            directory = _directory
+            # if the only thing we need is a valid directory, we are all set!
+            if filetypes == 'directory':
+                return directory
+
+    # now proceed with the filenames or directory
     if filename:
         _filenames = []
         # make a list, even for a single file name
@@ -120,7 +134,10 @@ def readfilename(filename=None, **kwargs):
             # if no directory was eventually specified
             directory = prefs.datadir
 
-        caption = kwargs.get('caption', 'Select file(s)')
+        if filetypes != 'directory':
+            caption = kwargs.get('caption', 'Select file(s)')
+        else:
+            caption = kwargs.get('caption', 'Select folder')
 
         filename = opendialog(  single=False,
                                 directory=directory,
@@ -131,6 +148,11 @@ def readfilename(filename=None, **kwargs):
             # if the dialog has been cancelled or return nothing
             return None
 
+        if filetypes == 'directory':
+            return directory
+
+        # else we have a list of the selected files.
+        # except
 
     if isinstance(filename, list):
         if not all(isinstance(elem, str) for elem in filename):
@@ -145,6 +167,9 @@ def readfilename(filename=None, **kwargs):
     # filenames passed
     files = {}
     for filename in filenames:
+        if filename.endswith('.DS_Store'):
+            # avoid storing bullshit some time present in the directory (MacOSX)
+            continue
         _, extension = os.path.splitext(filename)
         extension = extension.lower()
         if extension in files.keys():

@@ -413,7 +413,7 @@ class GeneralPreferences(MetaConfigurable):
                                         ' project changing or on '
                                         'apllication exit').tag(config=True)
 
-    csv_delimiter = Unicode(';', help='CSV data delimiter').tag(config=True)
+    csv_delimiter = Unicode(',', help='CSV data delimiter').tag(config=True)
 
     project_directory = Unicode(help='Directory where projects are '
                                      'stored by default').tag(config=True,
