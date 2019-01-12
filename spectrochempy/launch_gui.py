@@ -19,7 +19,7 @@ terminal command line
 """
 
 #For compatibility with the pyQtgtaph library we copy the Qt.py part
-# corresponding to PyQt5. indeed, we cann use as later
+# corresponding to PyQt5. indeed, we can use as later
 # import spectrochempy.extern.pyqtgraph.qt because we want a Splash screen
 # before loading the spectrochempy API
 # We're using PyQt5 which has a different structure so we're going to use a shim to

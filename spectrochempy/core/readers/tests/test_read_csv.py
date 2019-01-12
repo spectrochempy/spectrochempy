@@ -9,7 +9,7 @@
 
 
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import datadir
+from spectrochempy.application import general_preferences as prefs
 from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_approx_equal
 import pytest
@@ -31,7 +31,7 @@ def test_read_zip():
 
 def test_read_csv_tg():
     B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
-                           directory=datadir.path,
+                           directory=prefs.datadir,
                            origin='tga')
     assert B.shape == (3446,)
     print(B)
@@ -40,7 +40,7 @@ def test_read_csv_tg():
 
 
 def test_read_csv_IR():
-    B = NDDataset.read_csv('irdata/ir.csv', directory=datadir.path,
+    B = NDDataset.read_csv('irdata/ir.csv', directory=prefs.datadir,
                            origin='ir', csv_delimiter=',')
     assert B.shape == (3736,)
     print(B)

@@ -14,10 +14,12 @@ from spectrochempy import application, APIref, log, version
 application.set_loglevel('WARNING')
 from spectrochempy import *
 
+prefs = general_preferences
+
 styles = ['poster','talk','scpy','sans','serif','grayscale','notebook','paper']
 @pytest.mark.parametrize('style',styles)
 def test_styles(style):
     try:
         plt.style.use(style)
     except OSError:
-        plt.style.use(os.path.join(datadir.stylesheets, style+'.mplstyle'))
+        plt.style.use(os.path.join(prefs.stylesheets, style+'.mplstyle'))

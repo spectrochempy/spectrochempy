@@ -104,11 +104,10 @@ if __name__ == '__main__':
     from spectrochempy import *
 
     dataset1D = NDDataset()
-    path = os.path.join(datadir.path, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join(general_preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
     dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 
     dataset1D /= dataset1D.real.data.max() # normalize
-    #TODO: workaround error with the max function which retur a dataset (issue #7)
 
     p = dataset1D.plot()
     apodfunc = dataset1D.em(lb=100. * ur.Hz, apply=False)

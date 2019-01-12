@@ -23,7 +23,7 @@ from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
 
 
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import datadir
+from spectrochempy.application import general_preferences as prefs
 from spectrochempy.utils import SpectroChemPyWarning, show
 from spectrochempy.units import ur
 
@@ -243,7 +243,7 @@ def test_nmr_prepare_ipynb():
     import os
     def get_dataset1D():
         dataset1D = NDDataset()
-        path = os.path.join(datadir.path, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+        path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
         dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
         return dataset1D
 

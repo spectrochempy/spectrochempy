@@ -8,13 +8,13 @@
 # =============================================================================
 
 
-from spectrochempy import NDDataset, show, datadir
+from spectrochempy import NDDataset, show, general_preferences as prefs
 
 
 def test_plot2D():
 
     A = NDDataset.read_omnic('irdata/nh4y-activation.spg',
-                             directory=datadir.path)
+                             directory=prefs.datadir)
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'

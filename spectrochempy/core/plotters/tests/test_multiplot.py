@@ -9,10 +9,12 @@
 
 from spectrochempy import *
 
+prefs = general_preferences
+
 def test_multiplot():
 
     dataset = NDDataset.read_omnic(
-         os.path.join(datadir.path, 'irdata', 'nh4y-activation.spg'))[0:20]
+         os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))[0:20]
 
     datasets=[dataset, dataset*1.1, dataset*1.2, dataset*1.3]
     labels = ['sample {}'.format(label) for label in

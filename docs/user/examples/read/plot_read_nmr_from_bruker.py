@@ -14,7 +14,7 @@ import spectrochempy as scp
 ##########################################################
 # `datadir.path` contains the path to a default data directory.
 
-datadir = scp.datadir.path
+datadir = scp.general_preferences.datadir
 
 path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
 

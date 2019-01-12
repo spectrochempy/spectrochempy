@@ -37,8 +37,9 @@ from traitlets import Dict, HasTraits, Instance, default
 # ------------
 from ..utils import (is_sequence, SpectroChemPyDeprecationWarning,
                       docstrings, NBlack, NBlue, NGreen, NRed, get_figure)
-from ..application import app, datadir
+from ..application import app
 
+prefs = app.general_preferences
 project_preferences = app.project_preferences
 log = app.log
 do_not_block = app.do_not_block
@@ -573,7 +574,7 @@ def _set_figure_style(**kwargs):
         # scpy not found! may be due to a failing installation
         # make a basic style here
         # get the local version:
-        plt.style.use(os.path.join(datadir.stylesheets,'scpy.mplstyle'))
+        plt.style.use(os.path.join(prefs.stylesheets,'scpy.mplstyle'))
 
     # now get the required style form args
     style = kwargs.get('style', None)
@@ -588,7 +589,7 @@ def _set_figure_style(**kwargs):
             plt.style.use(style)
         except OSError:
             # try a local version
-            plt.style.use(os.path.join(datadir.stylesheets, style[0]+'.mplstyle'))
+            plt.style.use(os.path.join(prefs.stylesheets, style[0]+'.mplstyle'))
 
     else:
         # else, we try to use the preferences

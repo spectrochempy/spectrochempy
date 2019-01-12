@@ -34,7 +34,7 @@ import numpy as np
 
 from spectrochempy.dataset.ndio import NDIO
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import  datadir, log
+from spectrochempy.application import  log, general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
 
@@ -57,28 +57,34 @@ def readbtext(f, pos):
 
 # function for loading spa or spg file
 # --------------------------------------
-def read_omnic(dataset=None, filename='', **kwargs):
+def read_omnic(dataset=None, filename=None, **kwargs):
     """Open a Thermo Nicolet .spg or list of .spa files and set
     data/metadata in the current dataset
 
     Parameters
     ----------
-    :param: dataset : `NDDataset`
+    dataset : `NDDataset`
         The dataset to store the data and metadata read from the omnic file(s).
         If None, a NDDataset is created
-    :param: filename: `None`, `str`, or list of `str`
+    filename: `None`, `str`, or list of `str`
         Filename of the file(s) to load. If `None`: opens a dialog box to select
         ".spa" or ".spg" files. If `str`: a single filename. It list of str:
         a list of filenames.
-    :param: directory: str [optional, default=""].
+    directory: str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
-    :param: sortbydate: bool [optional default = True]. sort spectra by acquisition date
-    :returns: a 'NDDdataset' corresponding to the .spg file or the set of .spa files. A
-    list of datasets is returned if several .spg files are passed.
+    sortbydate: bool, optional, default = True.
+        Sort spectra by acquisition date
+
+    Returns
+    -------
+    dataset : `NDDdataset`
+        A dataset corresponding to the .spg file or the set of .spa files. A
+        list of datasets is returned if several .spg files are passed.
+
     Examples
     --------
-    >>> from spectrochempy import NDDataset
+    >>> from spectrochempy import *
 
     >>> A = NDDataset.read_omnic('irdata/nh4y-activation.spg')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -99,13 +105,13 @@ def read_omnic(dataset=None, filename='', **kwargs):
 
         dataset = NDDataset()  # create a NDDataset
 
-    # check directory
-    directory = kwargs.get("directory", datadir.path)
+    # check if directory was specified
+    directory = kwargs.get("directory", None)
 
     # returns a list of files to read
     files = readfilename(filename,
                          directory = directory,
-                         filetypes= [('spa files', '.spa'), ('spg files', '.spg'), ('all files', '.*')])
+                         filetypes= ['OMNIC spa files (*.spa)', 'OMNIC spg files (*.spg)', 'all OMNIC files (*.sp*)', 'all files (*)'])
     datasets = []
     for extension in files.keys():
         if extension == '.spg':
@@ -126,6 +132,7 @@ def read_omnic(dataset=None, filename='', **kwargs):
         return datasets[0] # a single dataset is returned
 
     return datasets  # several datasets returned (only if several .spg files have been passed)
+
 #alias
 read_spg = read_omnic
 read_spa = read_omnic

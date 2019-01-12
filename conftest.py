@@ -29,7 +29,7 @@ from spectrochempy.dataset.ndarray import NDArray
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.utils.testing import RandomSeedContext
-from spectrochempy.application import datadir
+from spectrochempy.application import general_preferences as prefs
 
 ###########################
 # FIXTURES: some NDArray's
@@ -257,14 +257,14 @@ def dataset3d():
 
 @pytest.fixture(scope="function")
 def IR_dataset_1D():
-    directory = datadir.path
+    directory = prefs.datadir
     dataset = NDDataset.load(
             os.path.join(directory, 'irdata', 'nh4y-activation.spg'))
     return dataset[0]
 
 @pytest.fixture(scope="function")
 def IR_dataset_2D():
-    directory = datadir.path
+    directory = prefs.datadir
     dataset = NDDataset.read_omnic(
             os.path.join(directory, 'irdata', 'nh4y-activation.spg'))
     return dataset
@@ -272,7 +272,7 @@ def IR_dataset_2D():
 # Fixture:  IR spectra
 @pytest.fixture(scope="function")
 def IR_scp_1():
-    directory = datadir.path
+    directory = prefs.datadir
     dataset = NDDataset.load(
             os.path.join(directory, 'irdata', 'nh4.scp'))
     return dataset
@@ -284,7 +284,7 @@ def IR_scp_1():
 
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
-    directory = datadir.path
+    directory = prefs.datadir
     path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
     dataset = NDDataset.read_bruker_nmr(
@@ -294,7 +294,7 @@ def NMR_dataset_1D():
 
 @pytest.fixture(scope="function")
 def NMR_dataset_1D_1H():
-    directory =  datadir.path
+    directory =  prefs.datadir
     path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'tpa')
     dataset = NDDataset.read_bruker_nmr(
@@ -304,7 +304,7 @@ def NMR_dataset_1D_1H():
 
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
-    directory = datadir.path
+    directory = prefs.datadir
     path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_2d')
     dataset = NDDataset.read_bruker_nmr(

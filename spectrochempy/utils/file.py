@@ -15,16 +15,146 @@ from pkgutil import walk_packages
 from numpy.lib.format import read_array
 from numpy.compat import asstr
 from traitlets import import_item
+import warnings
 
-__all__ = [
+from spectrochempy.gui.dialogs import opendialog
 
+__all__ = ['readfilename',
            'list_packages', 'generate_api',
-
            'make_zipfile', 'ScpFile',
-
            'unzip'  #tempo
-
            ]
+
+# =============================================================================
+# Utility function
+# =============================================================================
+
+def readfilename(filename=None, **kwargs):
+    """
+    returns a list of the filenames of existing files, filtered by extensions
+
+    Parameters
+    ----------
+    filename: `str`, `list` of strings, optional.
+        A filename or a list of filenames. If not provided, a dialog box is opened
+        to select files.
+    directory: `str`, optional.
+        The directory where to look at. If not specified, read in
+        default dirdata directory
+    filetypes: `list`, optional, default=['all files, '.*)'].
+
+    Returns
+    --------
+        list of filenames
+
+    """
+
+    from spectrochempy.application import general_preferences as prefs
+    from spectrochempy.utils import SpectroChemPyWarning
+
+
+    # if the directory is not specified we look in the prefs.datadir
+    directory = kwargs.get("directory", None)
+
+    # filters and filetype will be alias (as filters is sometimes used)
+    filetypes = kwargs.get("filetypes",
+                           kwargs.get("filters", ["all files (*)"]))
+
+    if filename:
+        # if a filename or a list of filename was provided
+        # first look if it really a filename and not a directory
+        if isinstance(filename, str) and os.path.isdir(filename):
+            warnings.warn('a directory has been provided instead of a filename!\n',
+                          SpectroChemPyWarning)
+            # we use it instead of the eventually passed directory
+            if directory:
+                warnings.warn('a directory has also been provided!'
+                              ' we will use it instead of this one\n',
+                              SpectroChemPyWarning)
+            else:
+                directory = filename
+            filename = None
+
+    if directory and not os.path.exists(directory):
+        # well the directory doen't exist - we cannot go further without correcting the error
+        raise IOError("directory %s doesn't exists!" % directory)
+
+
+    # now proceed with the filenames
+    if filename:
+        _filenames = []
+        # make a list, even for a single file name
+        filenames = filename
+        if not isinstance(filenames,(list, tuple)):
+            filenames = list([filenames])
+        else:
+            filenames = list(filenames)
+
+        # look if all the filename exists either in the specified directory,
+        # else in the current directory, and finaly in the default preference data directory
+        for i, filename in enumerate(filenames):
+
+            if directory:
+                _f = os.path.expanduser(os.path.join(directory, filename))
+            else:
+                _f = filename
+                if not os.path.exists(_f):
+                    # the filename provided doesn't exists in the specified directory
+                    # or the current directory
+                    # let's try in the default data directory
+                    _f = os.path.join(prefs.datadir, filename)
+                    if not os.path.exists(_f):
+                        raise IOError("Can't find  this filename %s in the specified directory "
+                                      "(or the current one if it was not specified, "
+                                      "nor in the default data directory %s"%(filename, prefs.datadir))
+            _filenames.append(_f)
+
+        # now we have all the filename with their correct location
+        filename = _filenames
+
+    if not filename:
+        # open a file dialog
+        # currently Scpy use QT (needed for next GUI features)
+
+        if not directory:
+            # if no directory was eventually specified
+            directory = prefs.datadir
+
+        caption = kwargs.get('caption', 'Select file(s)')
+
+        filename = opendialog(  single=False,
+                                directory=directory,
+                                caption=caption,
+                                filters = filetypes)
+
+        if not filename:
+            # if the dialog has been cancelled or return nothing
+            return None
+
+
+    if isinstance(filename, list):
+        if not all(isinstance(elem, str) for elem in filename):
+            raise IOError('one of the list elements is not a filename!')
+        else:
+            filenames = filename
+        #    filenames = [os.path.join(directory, elem) for elem in filename]   "already the full path
+
+    if isinstance(filename, str):
+        filenames = [filename]
+
+    # filenames passed
+    files = {}
+    for filename in filenames:
+        _, extension = os.path.splitext(filename)
+        extension = extension.lower()
+        if extension in files.keys():
+            files[extension].append(filename)
+        else:
+            files[extension] = [filename]
+    return files
+
+
+
 
 # ============================================================================
 # PACKAGE and API UTILITIES

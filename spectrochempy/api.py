@@ -21,7 +21,6 @@
 
 import sys
 import os
-import logging
 
 from IPython.core.magic import UsageError
 from IPython import get_ipython
@@ -78,8 +77,9 @@ def _setup_backend_and_ipython(backend=None):
         if getattr(get_ipython(), 'kernel', None) is not None:
             # set the ipython matplotlib environments
             try:
-               #import ipympl
-               ip.magic('matplotlib notebook')  # widget
+               # import ipympl
+               # ip.magic('matplotlib widget')  # TODO: Works but cause problem for documentation
+               ip.magic('matplotlib notebook')
             except UsageError as e:
                 try:
                     ip.magic('matplotlib qt5')
@@ -90,15 +90,21 @@ def _setup_backend_and_ipython(backend=None):
                 ip.magic('matplotlib qt5')
             except:
                  pass
+        # provide the possibility to use Qt events in notebooks (such as filedialog)
+        ip.magic('gui qt')
 
-    #print('backend', backend)
     return (ip, backend)
 
+ip = None
 if not 'pytest' in sys.argv[0] or (len(sys.argv) > 1 and not sys.argv[1].endswith("spectrochempy")): # individual test):
     # and os.environ.get('PWD', None)!='/spectrochempy':
-    _setup_backend_and_ipython()
+    ip, backend = _setup_backend_and_ipython()
 else:
     mpl.use('agg', warn=False, force=True)
+    backend = mpl.get_backend()
+
+#print('ip %s'%ip)
+#print('backend %s'%backend)
 
 # import the core api
 from .core import *
@@ -106,10 +112,9 @@ from spectrochempy import core
 
 __all__ = core.__all__
 
-# ==============================================================================
-# For documentation
-# ==============================================================================
 
+
+# ==============================================================================
 if __name__ == '__main__':
     pass
 

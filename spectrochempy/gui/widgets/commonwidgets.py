@@ -28,7 +28,7 @@ def questionMessage(parent, message):
                                  QMessageBox.Cancel)
     return reply
 
-def OpenExistingDirectory(parent,
+def OpenExistingDirectory(parent=None,
                           caption='Select a folder',
                           directory=''):
 
@@ -48,7 +48,7 @@ def OpenFileName(parent=None,
 
     options = QFileDialog.Options()
     options |= QFileDialog.AnyFile
-    # options |= QFileDialog.DontUseNativeDialog
+    #options |= QFileDialog.DontUseNativeDialog
     filename, _ = QFileDialog.getOpenFileName(parent,
                                               caption=caption,
                                               directory=directory,
@@ -64,7 +64,7 @@ def OpenMultipleFileNames(
                  caption='Select file(s)',
                  filters=["All Files (*)","Text Files (*.txt)"]):
     options = QFileDialog.Options()
-    # options |= QFileDialog.DontUseNativeDialog
+    #options |= QFileDialog.DontUseNativeDialog
     files, _ = QFileDialog.getOpenFileNames(parent,
                                             caption=caption,
                                             directory=directory,
@@ -79,7 +79,7 @@ def SaveFileName(parent=None,
                  caption='Select file',
                  filters=["All Files (*)","Text Files (*.txt)"]):
     options = QFileDialog.Options()
-    # options |= QFileDialog.DontUseNativeDialog
+    #options |= QFileDialog.DontUseNativeDialog
     filename, _ = QFileDialog.getSaveFileName(parent,
                                               caption,
                                               filename,

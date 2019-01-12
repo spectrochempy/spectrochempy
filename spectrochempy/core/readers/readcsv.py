@@ -39,7 +39,7 @@ from numpy.lib.npyio import zipfile_factory, NpzFile
 from spectrochempy.dataset.ndcoords import Coord
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.concatenate import concatenate
-from spectrochempy.application import log, datadir, general_preferences
+from spectrochempy.application import log, general_preferences as prefs
 from spectrochempy.utils import (readfilename, unzip, is_sequence,
                                  SpectroChemPyWarning)
 
@@ -140,7 +140,7 @@ def _read(dataset, filename='',
 
         dataset = NDDataset()  # create a NDDataset
 
-    directory = kwargs.get("directory", datadir.path)
+    directory = kwargs.get("directory", prefs.datadir)
     if not os.path.exists(directory):
         raise IOError("directory doesn't exists!")
 
@@ -251,7 +251,7 @@ def _read_csv(dataset, filename='', fid=None, **kwargs):
         raise IOError("{} file doesn't exists!".format(filename))
 
     new = dataset.copy() # important
-    delimiter = kwargs.get("csv_delimiter", general_preferences.csv_delimiter)
+    delimiter = kwargs.get("csv_delimiter", prefs.csv_delimiter)
     try:
         if isinstance(fid,bytes):
             f = StringIO(fid.decode("utf-8"))

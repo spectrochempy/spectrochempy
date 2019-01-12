@@ -13,7 +13,7 @@
 """
 
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import datadir
+from spectrochempy.application import general_preferences as prefs
 import os
 
 from spectrochempy.utils.testing import assert_array_equal
@@ -44,7 +44,7 @@ def test_save1D(IR_dataset_1D):
     dataset.plot()
     dataset.save('essai')
 
-    os.remove(os.path.join(datadir.path, 'essai.scp'))
+    os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
 def test_save2D(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
@@ -53,7 +53,7 @@ def test_save2D(IR_dataset_2D):
     dataset.plot_stack()
     dataset.save('essai')  # there was a bug due to the saving of mpl axes
 
-    os.remove(os.path.join(datadir.path, 'essai.scp'))
+    os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
 
 def test_save_and_load_mydataset(IR_dataset_2D):

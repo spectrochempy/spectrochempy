@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2018 LCS
+# Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
-"""This module to extend NDDataset with the import methods method.
+"""This module extend NDDataset with some import methods.
 
 """
 __all__ = ['read_dir']
@@ -20,8 +20,6 @@ __dataset_methods__ = __all__
 
 import os
 import warnings
-import tkinter as tk
-from tkinter import filedialog
 
 # ----------------------------------------------------------------------------
 # third party imports
@@ -35,10 +33,10 @@ import numpy as np
 
 from spectrochempy.dataset.ndio import NDIO
 from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import datadir, log
+from spectrochempy.application import log, general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
-from .readomnic import read_omnic
-from .readcsv import read_csv
+from spectrochempy.core.readers.readomnic import read_omnic
+from spectrochempy.core.readers.readcsv import read_csv
 
 
 # function for reading data in a directory
@@ -47,26 +45,34 @@ def read_dir(dataset=None, directory=None, **kwargs):
     """Open readable files in a directory and store
     data/metadata in a dataset or a list of datasets according to the
     following rules:
-    2d spectroscopic data (e.g. valid .spg files)
-    from distinct files are stored in distinct NDdatasets. 1d spectroscopic data (e.g.
-    .spa files) in a given directory are grouped into single NDDatasets, providing their unique dimensions are
-     compatible. Only implemented for omnic files (spa, spg).
+
+    * 2D spectroscopic data (e.g. valid \*.spg files) from distinct files are
+    stored in distinct NDdatasets.
+    * 1D spectroscopic data (e.g., \*.spa files) in a given directory are grouped
+    into single NDDataset, providing their unique dimension are compatible.
+
+    Notes
+    ------
+    Only implemented for OMNIC files (\*.spa, \*.spg).
 
     Parameters
     ----------
-    :param: dataset : `NDDataset`
-        The dataset to store the data and metadata. If None, a NDDataset is created
-    :param: directory: str . If not specified, opens a dialog box.
-    TODO add :param: recursive: bool [optional default = True ]. read also subfolders
-    :param: sortbydate: bool [optional default = True]. sort spectra by acquisition date
-    :returns: a 'NDDdataset' or a list of 'NDdatasets'.
+    dataset : `NDDataset`
+        The dataset to store the data and metadata.
+        If None, a NDDataset is created
+    directory: str, optional.
+        If not specified, opens a dialog box.
+    sortbydate: bool, optional,  default:True.
+        Sort spectra by acquisition date
+
+    Returns
+    --------
+    nddataset : |NDDataset| or list of |NDDataset|
 
 
     Examples
     --------
-    >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS,
-    +NORMALIZE_WHITESPACE
-    SpectroChemPy's API ...
+    >>> from spectrochempy import NDDataset # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     >>> A = NDDataset.read_dir('irdata')
     >>> print(A) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     <BLANKLINE>
@@ -75,6 +81,8 @@ def read_dir(dataset=None, directory=None, **kwargs):
     >>> B = NDDataset.read_dir()
 
     """
+
+    # TODO add :param: recursive: bool [optional default = True ]. read also subfolders
     log.debug("starting read_dir()")
 
     # check if the first parameter is a dataset

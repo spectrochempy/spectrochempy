@@ -9,9 +9,9 @@
 
 import sys
 import os
-from ...extern.pyqtgraph.Qt import QtGui, QtCore
-from .commonwidgets import OpenFileName, OpenExistingDirectory
-from ...application import project_preferences, datadir
+from spectrochempy.extern.pyqtgraph.Qt import QtGui, QtCore
+from spectrochempy.gui.widgets.commonwidgets import OpenFileName, OpenExistingDirectory
+from spectrochempy.application import project_preferences, general_preferences as prefs
 
 class FilePickerWidget(QtGui.QWidget):
     """
@@ -54,7 +54,7 @@ class FilePickerWidget(QtGui.QWidget):
         elif t=='project':
             directory = project_preferences.project_directory
         else:
-            directory = datadir.path
+            directory = prefs.datadir
 
         # when only folders are requested
         if t == 'folder':
@@ -88,4 +88,5 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     gui = FilePickerWidget()
     gui.show()
-    app.exec()
+    x= app.exec()
+    print(x)

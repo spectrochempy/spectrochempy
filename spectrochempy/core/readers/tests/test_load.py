@@ -10,7 +10,7 @@
 
 
 
-from spectrochempy import NDDataset, datadir
+from spectrochempy import NDDataset, general_preferences as prefs
 
 from spectrochempy.utils.testing import assert_approx_equal
 import os
@@ -35,7 +35,7 @@ def test_load(IR_dataset_2D):
 
 def test_methods_read_access():
 
-    path = os.path.join(datadir.path, 'nmrdata', 'bruker', 'tests',
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests',
                         'nmr','bruker_1d')
 
     # load the data in a new dataset

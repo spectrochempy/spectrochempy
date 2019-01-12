@@ -776,7 +776,7 @@ class Project(AbstractProject):
         ----------
         filename : str
             The filename to the file to be read.
-        directory : str, optional, default:`datadir.path`
+        directory : str, optional
             The directory from where to load the file. If this information is
             not given, the project will be loaded if possible from
             the default location defined in the configuration options.

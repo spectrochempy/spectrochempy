@@ -12,6 +12,8 @@ import os
 from spectrochempy.utils.testing import assert_array_equal
 from spectrochempy import *
 
+prefs = general_preferences
+
 # Basic
 # -------
 def test_save_and_load_file_with_nofilename(IR_dataset_2D):
@@ -19,9 +21,9 @@ def test_save_and_load_file_with_nofilename(IR_dataset_2D):
     A.save()
 
     # no directory for saving passed ... it must be in data
-    path = os.path.join(datadir.path, A.filename )
+    path = os.path.join(prefs.datadir, A.filename )
     assert os.path.exists(path)
-    assert A.directory == datadir.path
+    assert A.directory == prefs.datadir
 
     B = NDDataset.load(path)
     assert B.description == A.description
@@ -29,7 +31,7 @@ def test_save_and_load_file_with_nofilename(IR_dataset_2D):
 
     # the filename should be stored in the object just loaded
     assert B.filename == A.filename
-    assert B.directory == datadir.path
+    assert B.directory == prefs.datadir
 
     os.remove(path)
 
@@ -167,7 +169,7 @@ def test_save_and_load_nmr_project():
 
     myp = Project(name='process')
 
-    path = os.path.join(datadir.path, 'nmrdata', 'bruker', 'tests', 'nmr',
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
                         'bruker_1d')
 
     # load the data in a new dataset

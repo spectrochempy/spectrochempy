@@ -11,12 +11,13 @@ import pytest
 from spectrochempy import *
 from spectrochempy.utils.testing import figures_dir, same_images
 
+prefs = general_preferences
 
 # @pytest.mark.skip
 def test_1D():
 
     dataset = NDDataset.read_omnic(
-        os.path.join(datadir.path, 'irdata', 'nh4y-activation.spg'))
+        os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))
 
     # plot generic
     ax = dataset[0].plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),

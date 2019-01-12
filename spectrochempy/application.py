@@ -318,15 +318,13 @@ def _get_pkg_datadir_path(data_name, package=None):
 
 
 class DataDir(HasTraits):
-    """ A class used to determine the path to the testdata
-    directory. It also give the path of the stylesheets directory"""
+    """ A class used to determine the path to the testdata directory. """
 
     # ------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------
 
     path = Unicode()
-    stylesheets = Unicode()
 
     def listing(self):
         """
@@ -368,10 +366,6 @@ class DataDir(HasTraits):
         # the spectra path in package data
         return _get_pkg_datadir_path('testdata', 'scp_data')
 
-    @default('stylesheets')
-    def _get_stylesheets_default(self):
-        # the spectra path in package data
-        return _get_pkg_datadir_path('stylesheets', 'scp_data')
 
     # ------------------------------------------------------------------------
     # private methods
@@ -469,15 +463,25 @@ class GeneralPreferences(MetaConfigurable):
     autoload_project = Bool(False, help='Automatic loading of the last '
                                         'project at startup').tag(config=True)
 
-    datapath = Unicode(help='Directory where to look for data by '
+    datadir = Unicode(help='Directory where to look for data by '
                             'default').tag(config=True, type="folder")
 
-    @default('datapath')
-    def _get_default_datapath(self):
+    stylesheets = Unicode(help='Directory where to look for local defined '
+                             ' matplotlib styles when they are not in the '
+                             ' standard location').tag(config=True,
+                                                       type="folder")
+
+    @default('stylesheets')
+    def _get_stylesheets_default(self):
+        # the spectra path in package data
+        return _get_pkg_datadir_path('stylesheets', 'scp_data')
+
+    @default('datadir')
+    def _get_default_datadir(self):
         return self.parent.datadir.path
 
-    @observe('datapath')
-    def _datapath_changed(self, change):
+    @observe('datadir')
+    def _datadir_changed(self, change):
         self.parent.datadir.path = change['new']
 
     @property
@@ -1190,7 +1194,6 @@ log = app.log
 general_preferences = app.general_preferences
 project_preferences = app.project_preferences
 do_not_block = app.do_not_block
-datadir = app.datadir
 description = app.description
 long_description = app.long_description
 

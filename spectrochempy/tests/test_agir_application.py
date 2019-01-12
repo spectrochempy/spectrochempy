@@ -11,6 +11,7 @@ from spectrochempy import *
 
 import os
 import pytest
+from spectrochempy import general_preferences as prefs
 
 #TODO: to revise with project!
 @pytest.fixture(scope="module")
@@ -22,8 +23,8 @@ def test_samples():
                    'B350':{'label':'$\mathrm{M_B}\,(623\,K)$'}}
 
         for key, sample in _samples.items():
-            # our data are in our test `datadir.path` directory.
-            basename = os.path.join(datadir.path,
+            # our data are in our test `datadir` directory.
+            basename = os.path.join(prefs.datadir,
                                     'agirdata/{}/FTIR/FTIR'.format(key))
             if os.path.exists(basename+'.scp') and not force_original:
                 #check if the scp file have already been saved
@@ -37,7 +38,7 @@ def test_samples():
                 sample['IR'].save(basename + '.scp')
 
         for key, sample in _samples.items():
-            basename = os.path.join(datadir.path,
+            basename = os.path.join(prefs.datadir,
                                                   'agirdata/{}/TGA/tg'.format(key))
             if os.path.exists(basename + '.scp') and not force_original:
                 # check if the scp file have already been saved

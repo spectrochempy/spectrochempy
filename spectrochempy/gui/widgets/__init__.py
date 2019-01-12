@@ -7,3 +7,4 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+from .commonwidgets import *

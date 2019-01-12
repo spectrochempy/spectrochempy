@@ -86,7 +86,6 @@ from spectrochempy.application import (log,
                                        INFO,
                                        ####
                                        app as APPLICATION,
-                                       datadir,
                                        available_styles,
                                        set_loglevel,
                                        )
@@ -101,7 +100,6 @@ __all__ += [
     'INFO',
     'project_preferences',
     'general_preferences',
-    'datadir',
     'available_styles',
     'set_loglevel',
 
