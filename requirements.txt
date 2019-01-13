@@ -27,6 +27,7 @@ ipympl
 widgetsnbextension
 nodejs
 conda-build
+jupytext
 
 # for testing
 

@@ -28,13 +28,10 @@ This notebook and others are used to produce this user guide.
 So this way you can follow the explanations given below.
 
 
-1. Introduction
-----------------
-
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   1.1_introduction
+   1_introduction
 
 
 2. The NDDataset object

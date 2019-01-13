@@ -26,6 +26,7 @@ dependencies:
 - widgetsnbextension
 - nodejs
 - conda-build
+- jupytext
 # for testing
 - pytest
 - pytest-runner
