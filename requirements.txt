@@ -3,8 +3,10 @@
 numpy
 scipy
 matplotlib
-pandas
 traitlets
+
+# some other useful package
+pandas
 xlrd
 requests
 
@@ -18,11 +20,13 @@ ipython
 jupyter
 jupyterlab
 ipykernel
+ipywidgets
 jupyter_nbextensions_configurator
 ipyparallel
 ipympl
 widgetsnbextension
 nodejs
+conda-build
 
 # for testing
 
@@ -30,21 +34,19 @@ pytest
 pytest-runner
 pytest-cov
 pytest-xdist
-
-scikit-image
 pytest-console-scripts
+pytest-qt
+scikit-image
 
 # for docs
 
 sphinx
 sphinx_rtd_theme
 sphinx-gallery
-sphinx-nbexamples
 numpydoc
-nbconvert
 nbsphinx
-sphinxcontrib-bibtex
-# jupyter_sphinx
+jupyter_sphinx
+nbconvert
 
 # for matplotlib backend and future gui
 

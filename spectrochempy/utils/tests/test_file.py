@@ -14,6 +14,7 @@ import os
 import pytest
 from spectrochempy.utils import *
 
+
 def test_readfilename_wo_filename_provided():
 
     # should read in the default prefs.datadir
@@ -47,3 +48,19 @@ def test_readfilename_w_good_filename_in_tesdata():
                                  "all files (*)"] )
     print()
     print(f)
+
+# def test_readfilename(qtbot, monkeypatch):
+# TODO: find  a way to test the user interaction with pytest-qt.
+#
+#     from spectrochempy.gui.widgets.commonwidgets import QFileDialog, QMessageBox
+#     from spectrochempy.extern.pyqtgraph.Qt import QtGui
+#
+#     dialog = QFileDialog()
+#
+#     qtbot.add_widget(dialog)
+#     monkeypatch.setattr(QFileDialog, "accept", lambda *args: QFileDialog.Accept)
+#
+#     f = readfilename()
+#     f = readfilename(filetypes='directory')
+
+

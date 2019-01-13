@@ -54,6 +54,7 @@ So this way you can follow the explanations given below.
    :maxdepth: 1
 
    3.1_importing
+   3.2_exporting
 
 
 4. Units and uncertainty

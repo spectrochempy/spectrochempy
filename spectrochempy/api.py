@@ -74,12 +74,25 @@ def _setup_backend_and_ipython(backend=None):
     # use of IPython (console or notebook)
     ip = get_ipython()
     if ip is not None:
+        # provide the possibility to use Qt events in notebooks (such as filedialog)
+        ip.magic('gui qt')
+
         if getattr(get_ipython(), 'kernel', None) is not None:
             # set the ipython matplotlib environments
             try:
-               # import ipympl
-               # ip.magic('matplotlib widget')  # TODO: Works but cause problem for documentation
-               ip.magic('matplotlib notebook')
+                # This is the sys.argv passed to spectrochempy when building docs susing the nbshinx extension
+                # (in this case we want inline but simple figures
+                # not widgets which I could not make transformed to html/javascript):
+                #
+                #['ipykernel_launcher', '-f', '/var/folders/rn/5d6xlv1d4tg16c7dbsfhx6ym0000gq/T/tmpq2f84lyy.json',
+                # "--InlineBackend.figure_formats={'svg', 'pdf'}", "--InlineBackend.rc={'figure.dpi': 96}"]
+
+                if  'ipykernel_launcher' in sys.argv[0] and "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
+                    ip.magic('matplotlib inline')
+                else:
+                    # here its a normal magic function that works in both jupyter notebook and jupyter lab
+                    ip.magic('matplotlib widget')
+
             except UsageError as e:
                 try:
                     ip.magic('matplotlib qt5')
@@ -87,11 +100,9 @@ def _setup_backend_and_ipython(backend=None):
                     pass
         else:
             try:
-                ip.magic('matplotlib qt5')
+                ip.magic('matplotlib inline')
             except:
                  pass
-        # provide the possibility to use Qt events in notebooks (such as filedialog)
-        ip.magic('gui qt')
 
     return (ip, backend)
 
@@ -112,6 +123,8 @@ from spectrochempy import core
 
 __all__ = core.__all__
 
+from spectrochempy.extern.pyqtgraph.Qt import QtGui
+GUI = QtGui.QApplication(sys.argv)
 
 
 # ==============================================================================

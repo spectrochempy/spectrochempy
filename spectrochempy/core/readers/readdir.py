@@ -115,8 +115,11 @@ def read_dir(dataset=None, **kwargs):
     directory = readfilename(directory=directory,
                              filetypes='directory')
 
+    if directory is None:
+        return
+
     if not isinstance(directory, str):
-        raise TypeError('Error: directory should be of str type')
+        raise TypeError('Error: directory should be of str type, not %s'%type(directory))
 
     datasets = []
 
@@ -155,7 +158,7 @@ def read_dir(dataset=None, **kwargs):
         # else the files are not readable
         else:
             pass
-            #TODO: to extend to we must implement some other readers
+            #TODO: to extend we must implement some other readers
             # case of NMR bruker spectra, for which there is no extension!
 
     return datasets
