@@ -13,7 +13,8 @@ source ~/.bash_profile
 export PATH=$PATH:/Library/TeX/texbin/
 
 # jupytext transform
-# jupytext --to py:percent --pre-commit
+jupytext --to py:percent --pre-commit
+git reset HEAD **/*.ipynb
 
 # test everything and do not commit if errors
 # py.test -x tests || exit 1
