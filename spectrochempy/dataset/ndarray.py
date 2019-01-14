@@ -1964,10 +1964,10 @@ class NDArray(HasTraits):
         else:
             start, stop, step = key.start, key.stop, key.step
 
-            if start is not None and not isinstance(start, (int, np.int_)):
+            if start is not None and not isinstance(start, (int, np.int_, np.int64)):
                 start = self._loc2index(start, axis)
 
-            if stop is not None and not isinstance(stop, (int, np.int_)):
+            if stop is not None and not isinstance(stop, (int, np.int_, np.int64)):
                 stop = self._loc2index(stop, axis)
                 if start is not None and stop < start:  # and self.coordset[axis].reversed:
                     start, stop = stop, start
