@@ -402,7 +402,7 @@ sphinx_gallery_conf = {
 # nbsphinx ---------------------------------------------------
 # List of arguments to be passed to the kernel that executes the notebooks:
 nbsphinx_execute_arguments = [
-    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.figure_formats={'jpg', 'png'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
 ]
 

@@ -1,6 +1,6 @@
 .. _introduction:
 
-A.Introduction
+Introduction
 --------------
 
 .. toctree::

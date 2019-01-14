@@ -15,9 +15,11 @@ Contents
    :maxdepth: 2
 
    *
+   introduction/index
    dataset/index
+   projects/index
    databases/index
-   NMR/index
+   nmr/index
    tutorial/index
 
 
