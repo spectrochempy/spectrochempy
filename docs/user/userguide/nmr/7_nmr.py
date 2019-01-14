@@ -13,7 +13,7 @@
 # ---
 
 # %% [markdown] {"toc-hr-collapsed": false}
-# ## 6.1. Introduction to NMR processing
+# # Introduction to NMR processing
 
 # %%
 #Library Imports
@@ -22,7 +22,7 @@ from spectrochempy import *
 import os
 
 # %% [markdown]
-# ### 6.1.1. Import data
+# ## Import data
 #
 # Here we import two dataset, one is 1D and the other is 2D
 #
@@ -57,7 +57,7 @@ dataset2D = get_dataset2D()
 dataset2D
 
 # %% [markdown]
-# ### 6.1.2. Plot the 1D dataset raw data
+# ## Plot the 1D dataset raw data
 
 # %%
 # restore the original dataset (useful in case of mutiple execution of part of the code, 
@@ -86,7 +86,7 @@ _ = dataset1D.plot(imag=True, color='red', ls='--', ylim=(-600,600),
 _ = dataset1D.plot(show_complex=True, color='green', xlim=(0.,25000.))
 
 # %% [markdown]
-# ### 6.1.3. Plot the 2D dataset raw data
+# ## Plot the 2D dataset raw data
 
 # %%
 # restore the original dataset
@@ -103,10 +103,10 @@ dataset2D.plot_map(xlim=(0.,6000.), ylim=(0.,6000.))
 _ = dataset2D.T.plot_map(cmap='magma', data_only=True, clear=False)
 
 # %% [markdown]
-# ### 6.1.4. Apodization
+# ## Apodization
 
 # %% [markdown]
-# #### 6.1.4.1. Introduction to apodization processing
+# ### Introduction to apodization processing
 
 # %% [markdown]
 # In most situation, there is two syntaxes to perform operation on the dataset.
@@ -182,10 +182,10 @@ lb_dataset.plot(data_only=True, xlim=(0,25000), zlim=(-200,200), color='g', clea
 _ = dataset1D.ax.text(12500,180,'Multiple display (original & em apodized fids + apod.function)', ha='center', fontsize=10)
 
 # %% [markdown]
-# #### 6.1.4.2. available apodization functions
+# ### available apodization functions
 
 # %% [markdown]
-# ##### em
+# #### em
 
 # %%
 # restore original
@@ -223,7 +223,7 @@ lbinv_dataset = dataset1D.em(lb=LB, inv=True, inplace=False) #  apply=True by de
 _ = lbinv_dataset.plot(ylim=(-1.5,1.5), color='m', ls='--', clear=False) 
 
 # %% [markdown]
-# ##### gm
+# #### gm
 
 # %%
 # restore original

@@ -774,3 +774,23 @@ def test_swapaxes_quaternion():
     print('\n-------------d4----')
     print(d4)
 
+############### Bugs Fixes################
+from spectrochempy import Quantity
+
+def test_bug_13(ndarrayunit):
+    nd = ndarrayunit[0]
+    print()
+    print(nd)
+    print(nd.units)
+
+    x = nd[0]
+    assert isinstance(nd[0], NDArray)
+    print('nd :' ,nd[0])
+
+    # reproduce our bug (now solved)
+    nd[0] = Quantity('10 cm.s^-1')
+    print(nd)
+
+    with pytest.raises(DimensionalityError):
+        nd[0] = Quantity('10 cm')
+

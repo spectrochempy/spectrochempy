@@ -22,7 +22,7 @@
 from spectrochempy import *
 
 # %% [markdown]
-# ### Data directory
+# ## Data directory
 #
 # The builtin **datadir** variable contains a path to our *test*'s data.
 #

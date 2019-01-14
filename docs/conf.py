@@ -393,8 +393,8 @@ sphinx_gallery_conf = {
     'examples_dirs': 'user/examples',
 
     # path where to save gallery generated examples
-    'gallery_dirs': 'user/auto_examples',
-                        'user/expected_failing_examples':
+    'gallery_dirs': '~temp/auto_examples',
+                        '~temp/expected_failing_examples':
         [],
 
 }

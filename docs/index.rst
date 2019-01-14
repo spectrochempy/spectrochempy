@@ -77,7 +77,6 @@ User Documentation
     :maxdepth: 2
 
     user/userguide/index
-    user/tutorial/index
     user/api/generated/index
     user/auto_examples/index
     user/faq

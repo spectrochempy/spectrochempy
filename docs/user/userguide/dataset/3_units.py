@@ -13,16 +13,16 @@
 # ---
 
 # %% [markdown]
-# ## 4.1. Units
-#
-#
+# # Units
+
+# %% [markdown]
 # Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform operation on data with units.
 
 # %%
 from spectrochempy import *
 
 # %% [markdown]
-# ### 4.1.1. Create quantities
+# ## Create quantities
 #
 # to create quantity, use for instance, one of the following expression:
 
@@ -46,7 +46,7 @@ Quantity(10.0, ur.cm/ur.km)
 # (and conversion between them)
 
 # %% [markdown]
-# ### 4.1.2 Do arithmetics with units
+# ## Do arithmetics with units
 
 # %%
 a = 900 * ur.km
@@ -60,7 +60,7 @@ a/b
 Quantity("900 km / (8 hours)")
 
 # %% [markdown]
-# ### 4.1.3. Convert between units
+# ## Convert between units
 
 # %%
 c = a/b
@@ -74,7 +74,7 @@ c.ito('m/s')
 c
 
 # %% [markdown]
-# ### 4.1.4. Do math operations with consistent units
+# ## Do math operations with consistent units
 
 # %%
 x = 10 * ur.radians
@@ -119,7 +119,7 @@ ds1
 ds1/ds
 
 # %% [markdown]
-# ## Uncertainties
+# # Uncertainties
 #
 # Spectrochempy can do calculations with uncertainties (and units).
 #

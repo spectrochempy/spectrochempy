@@ -13,7 +13,10 @@
 # ---
 
 # %% [markdown]
-# # 2. Create NDDataset objects
+# # The NDDataset object
+
+# %% [markdown]
+# ## Create a NDDataset object
 
 # %%
 from spectrochempy import *

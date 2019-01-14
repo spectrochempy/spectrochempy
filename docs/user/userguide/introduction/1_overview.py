@@ -4,7 +4,7 @@
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.3'
+#       format_version: '1.2'
 #       jupytext_version: 0.8.6
 #   kernelspec:
 #     display_name: Python 3
@@ -13,8 +13,40 @@
 # ---
 
 # %% [markdown]
-# ## 1.1. Getting Started
+# # Overview
+
+# %% [markdown]
+# ## Getting Started
 #
+
+# %% [markdown]
+# ### Using Jupyter Notebook
+
+# %% [markdown]
+# Assuming Jupyter is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../install)), go to the
+# |scpy| folder. From this location, open a
+# terminal and type something like:
+#
+# ![launch](images/launch_jupyter.png)
+#
+# Your default explorer is now launched.
+#
+# ![launched](images/jupyter_home.png)
+#
+# You can now navigate to the Tutorial notebooks in `docs/user/userguide/tutorial` or the notebooks used for this user guide.
+#
+# Click on the the fist notebook : **introduction.ipynb**
+#
+# ![launched](images/jupyter_intro.png)
+
+# %% [markdown]
+# ### Using Jupyter Lab
+
+# %%
+
+
+# %% [markdown]
+# ### Loading the API
 
 # %% [markdown]
 # <div class="alert alert-info">
@@ -22,9 +54,6 @@
 # **Note:** We assume the spectrochemistry package has been properly installed - if not please go to ``install``
 #
 # </div>
-
-# %% [markdown]
-# ### 1.1.1. Introduction
 
 # %% [markdown]
 # Before using the package, we need to load the **API (Application Programming Interface)**
@@ -62,9 +91,7 @@ mydataset = sc.NDDataset()
 # To get a list of all available methods or objects, type the following command (*remove the leading #, first*):
 
 # %%
-# +
 # APIref
-# -
 
 
 # %% [markdown]
@@ -90,7 +117,7 @@ except:
     pass
 
 # %% [markdown]
-# ### 1.1.2. Configuration
+# ### Configuration
 #
 # Many options of the API can be set up
 
@@ -110,27 +137,23 @@ log.debug('this is a debug message!')
 # If we change it to ``DEBUG``, we should get the two messages
 
 # %%
-# +
 set_loglevel(DEBUG)
 
 log.info('this is an info message!')
 log.debug('this is a debug message!')
-# -
 
 # %% [markdown]
 # Let's now come back to a standard level of message for the rest of the Tutorial.
 
-# %% 
-# +
+# %%
 set_loglevel(WARNING)
 
 log.info('this is an info message!')
 log.debug('this is a debug message!')
 log.warning('this is a warning message!')
-# -
 
 # %% [markdown]
-# ### 1.1.3. Access to scientific libraries
+# ### Access to scientific libraries
 
 # %% [markdown]
 # Several libraries are imported with **SpectroChemPy** (so you don't need to re-import them):
@@ -150,7 +173,7 @@ p.set_color('red')
 plt.show()
 
 # %% [markdown]
-# ### 1.1.4. Units, uncertainties and measurements
+# ### Units, uncertainties and measurements
 
 # %% [markdown]
 # The objets **ur**, **Quantity** and **Measurement**, allows the manipulation of data with units and uncertainties. (see tutorial-1-units-uncertainties)
@@ -159,7 +182,7 @@ plt.show()
 # * **Quantity**: a scalar or an array with some units
 # * **Measurement**: a scalar with units and unertainty
 
-# %% 
+# %%
 ur.cm / ur.s
 
 # %%
@@ -174,7 +197,7 @@ xa[1] * 2.5
 y = Measurement(10, .1, 'km')
 y  
 
-# %% 
+# %%
 z = x.plus_minus(.01)
 z
 
@@ -192,7 +215,7 @@ except AttributeError as e:
 # More information are given in the section [4.1. units and uncertainties](4.1_units_and_uncertainties.ipynb)
 
 # %% [markdown]
-# ## 1.2. NDDataset, the main object
+# ## NDDataset, the main object
 
 # %% [markdown]
 # NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic data.
@@ -206,7 +229,7 @@ nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
 # Note that for this example, we use data stored in a ``test`` directory. For your own usage, you probably have to give the full pathname (see ... for the way to overcome this using `preferences` setting)
 
 # %% [markdown]
-# ### 1.2.1. Display dataset information
+# ### Display dataset information
 
 # %% [markdown]
 # Several ways are available to display the data we have jsut read and that are now stored in the ``source`` dataset 
@@ -216,13 +239,14 @@ nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
 # %%
 print(nd)
 
+# %% [markdown]
 # * **Displaying html**, inside a jupyter notebook, by just typing the name of the dataset (must be the last instruction of a cell, however!)
 
 # %%
 nd
 
 # %% [markdown]
-# ### 1.2.2. Plotting a dataset
+# ### Plotting a dataset
 #
 # Let's plot first a 1D spectrum (for instance one row of nd)
 
@@ -244,7 +268,7 @@ _ = nd.plot(method='map')
 # This can be changed by using the keyword argument `reversed` = `False`.
 
 # %% [markdown]
-# ### 1.2.3. Processing a dataset
+# ### Processing a dataset
 
 # %% [markdown]
 # Some arithmetic can be performed on such dataset. Here is an example where we subtract one reference spectrum to the whole nddataset that we have read above (`nd`).
@@ -252,14 +276,14 @@ _ = nd.plot(method='map')
 # %% [markdown]
 # Lets take, e.g., the last row as reference
 
-# %% 
+# %%
 ref = nd[-1]
 _ = ref.plot() 
 
 # %% [markdown]
 # Now suppress this ref spectrum to all other spectra of the whole dataset
 
-# %% 
+# %%
 nds = nd - ref  
 _ = nds.plot(method='stack')
 
@@ -267,5 +291,5 @@ _ = nds.plot(method='stack')
 # More details on available on available processing and analysis function will be given later in this user guide.
 #
 
-# %%
+# %% [code]{"hide_input": true}
 show() # Note : show all plots (only required if the notebook is exported as a script, to make all plots visibles)

@@ -16,9 +16,6 @@
 # %% [markdown]
 # # Project management
 
-# %% [markdown]
-# ## Library Imports
-
 # %%
 from spectrochempy import *
 import os
@@ -38,10 +35,10 @@ proj.name
 
 # %% [markdown]
 # ------
-# To get the signature of the object, one can use the usual '?'
+# To get the signature of the object, one can use the usual '?'. Uncomment the following line to check
 
 # %%
-Project?
+# Project?
 
 # %% [markdown]
 # ----
