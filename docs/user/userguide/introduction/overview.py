@@ -27,24 +27,23 @@
 # |scpy| folder. From this location, open a
 # terminal and type something like:
 #
-# ![launch](images/launch_jupyter.png)
+# ![launch](../images/launch_jupyter.png)
 #
 # Your default explorer is now launched.
 #
-# ![launched](images/jupyter_home.png)
+# ![launched](../images/jupyter_home.png)
 #
-# You can now navigate to the Tutorial notebooks in `docs/user/userguide/tutorial` or the notebooks used for this user guide.
+# You can now navigate to the Tutorial notebooks in [tutorial]  or the notebooks used for this user guide.
 #
 # Click on the the fist notebook : **introduction.ipynb**
 #
-# ![launched](images/jupyter_intro.png)
+# ![launched](../images/jupyter_intro.png)
 
 # %% [markdown]
 # ### Using Jupyter Lab
 
-# %%
-
-
+# %% [raw]
+# .. todo:
 
 # %% [markdown]
 # ### Loading the API

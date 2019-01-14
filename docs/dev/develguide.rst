@@ -1,7 +1,7 @@
 .. _develguide:
 
-Developer's Guide
-==================
+Contributing to |scpy| 
+#######################
 
 Installing a developper version
 --------------------------------

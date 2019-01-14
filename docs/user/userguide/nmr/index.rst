@@ -6,6 +6,6 @@ Introduction to NMR processing
 .. toctree::
    :glob:
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 3
    
    *

@@ -6,6 +6,6 @@ The NDDataset object
 .. toctree::
    :glob:
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 3
    
    *
