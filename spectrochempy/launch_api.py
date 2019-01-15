@@ -18,12 +18,12 @@ def main():
     """Main call
     """
 
-    import spectrochempy as sc
-    from spectrochempy.application import app, WARNING, DEBUG
+    import spectrochempy as scp
+    from spectrochempy.application import app
 
-    log = sc.log
+    log = scp.log
 
-    sc.set_loglevel(WARNING)
+    scp.set_loglevel("INFO")
     fname = app.startup_filename
 
     if not fname:
@@ -31,12 +31,12 @@ def main():
 
     try:
         log.info("Loading filename: '%s'" % fname)
-        ds = sc.NDDataset.read(fname)
+        ds = scp.NDDataset.read(fname)
         ds.plot()
-        sc.show()
+        scp.show()
 
     except:
-        log.info("'%s' file doesn't exists"%fname)
+        print("Sorry, but the '%s' file couldn't be read."%fname)
         print()
         app.print_help()
 

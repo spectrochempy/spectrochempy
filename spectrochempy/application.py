@@ -825,9 +825,9 @@ class SpectroChemPy(Application):
 
     # filename to load at startup
     # ---------------------------
-    startup_filename = Unicode('nh4-activation.spg', help='File name to load at '
-                                                       'startup').tag(
-        config=True, type='file')
+    startup_filename = Unicode(os.path.join('irdata', 'nh4y-activation.spg'),
+                               help='File name to load at startup').tag(
+                                                       config=True, type='file')
 
     # TESTING
     # --------

@@ -26,8 +26,8 @@ docs/index.doctree
 dist/
 build/
 docs/gen_modules
-docs/user/auto_examples
-docs/user/gen_modules
+docs/gallery/auto_examples
+docs/gallery/gen_modules
 docs/modules/
 docs/savefig/
 docs/_templates_old
@@ -92,3 +92,6 @@ recipes/spectrochempy/linux-aarch64
 /tests_extern_packages/
 /.editorconfig
 /Untitled.ipynb
+/docs/gallery/
+recipes/spectrochempy/win-32/
+recipes/spectrochempy/win-64/

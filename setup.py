@@ -90,29 +90,36 @@ def get_dependencies():
 
 
 def run_setup():
-    setup(name='spectrochempy',  # version=version,
-        use_scm_version=True, packages=find_packages(
-            exclude=['docs', "*.tests", "*.tests.*", "tests.*", "tests"]),
-        include_package_data=True,
-        url='http:/www-lcs.ensicaen.fr/spectrochempy', license='CeCILL-B',
-        author='Arnaud Travert & Christian Fernandez',
-        author_email='spectrochempy@ensicaen.fr',
-        description='Spectra Analysis & Processing with Python',
-        long_description=read('README.rst'),
-        setup_requires=['setuptools_scm', 'matplotlib'],
-        install_requires=get_dependencies(), dependency_links=[],
-        classifiers=["Development Status :: 3 - Alpha", "Topic :: Utilities",
-            "Topic :: Scientific/Engineering",
-            "Intended Audience :: Science/Research",
-            "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
-            "Operating System :: OS Independent",
-            "Programming Language :: Python :: 3.6", ], cmdclass={
-            'develop': PostDevelopCommand, 'install': PostInstallCommand,
-        }, entry_points={
-            'console_scripts': [
-                'scpy=spectrochempy.launch_api:main',
-                'scpygui=spectrochempy.launch_gui:main', ]
-        }, )
+    setup(name='spectrochempy',
+          use_scm_version=True,
+          packages=find_packages(
+              exclude=['docs', "*.tests", "*.tests.*", "tests.*", "tests"]),
+          include_package_data=True,
+          url='http:/www.spectrochempy.fr',
+          license='CeCILL-B',
+          author='Arnaud Travert & Christian Fernandez',
+          author_email='spectrochempy@ensicaen.fr',
+          description='Processing, analysis and modelling Spectroscopic data for '
+                    'Chemistry with Python',
+          long_description=read('README.rst'),
+          setup_requires=['setuptools_scm', 'matplotlib'],
+          install_requires= [], #  get_dependencies(),
+          dependency_links=[],
+          classifiers=["Development Status :: 3 - Alpha",
+                       "Topic :: Utilities",
+                       "Topic :: Scientific/Engineering",
+                       "Intended Audience :: Science/Research",
+                       "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
+                       "Operating System :: OS Independent",
+                       "Programming Language :: Python :: 3.7",
+                       ],
+          cmdclass={ 'develop': PostDevelopCommand,
+                     'install': PostInstallCommand,
+                     },
+          entry_points={ 'console_scripts': ['scpy=spectrochempy.launch_api:main',
+                                             'scpygui=spectrochempy.launch_gui:main', ]
+                         },
+          )
 
 
 # ============================================================================
