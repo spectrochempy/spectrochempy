@@ -3,20 +3,83 @@
 Contributing to |scpy| 
 #######################
 
+
+.. contents:: Table of Contents
+   :local:
+
+
+How to help ?
+=============
+
+Every  user of |scpy| can make useful contributions.
+
+There is several way depending of your knowledge of programming:
+
+* reporting bugs
+* request for enhancement or new features
+* contributing to the documentation
+* making pull request to the |scpy| repository
+* ...
+
+
+.. note::
+
+  Parts of this document come from the `Contributing to xarray
+  guide <http://http://xarray.pydata.org/en/stable/contributing.html>`_.
+
+
+.. _contributing.bug_reports:
+
+Bug reports and enhancement requests
+====================================
+
+Bug reports are an important part of making |scpy| more stable.
+
+Before creating a new issue, it is worth searching for existing bug reports and
+pull requests to see if the issue has already been reported and/or fixed.
+
+Bug reports must:
+
+#. Include a short, self-contained Python snippet reproducing the problem.
+   You can format the code nicely by using `GitHub Flavored Markdown
+   <http://github.github.com/github-flavored-markdown/>`_::
+
+      ```python
+      >>> from spectrochempy import *
+      >>> nd = NDDataset(...)
+      ...
+      ```
+
+#. Include the full version string of |scpy| and its dependencies. You can use the
+   built in function::
+
+      >>> import xarray as xr
+      >>> xr.show_versions()
+
+#. Explain why the current behavior is wrong/not desired and what you expect instead.
+
+The issue will then show up to the *xarray* community and be open to comments/ideas
+from others.
+
+
+Contributing to the code
+=========================
+
 Installing a developper version
---------------------------------
+********************************
 
-The best to proceed with development is that we (the developers) all have a similar
-environment for each python version.
+The best to proceed with development is that the developers have a similar
+python environment.
 
-The master is build on the 3.6 or 3.7 python version. It may work with earlier
+The official master repository has been tested on the 3.6 or 3.7 python version.
+It may work with earlier
 version of python, *e.g.*, <3.6 but this has not yet been tested.
 
 For sure, it will not work for python 2.7.x and no attempt to get such
 compatibility will be made.
 
 Install Anaconda
-****************
+----------------
 
 #.  To install Anaconda (or Miniconda)
 
@@ -31,8 +94,7 @@ Install Anaconda
 .. _clonescpy:
 
 Install a developpement version of SpectroChemPy
-*************************************************
-
+------------------------------------------------
 
 #.  Git clone the |scpy| `Bitbucket repository <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_
 
@@ -67,8 +129,8 @@ Install a developpement version of SpectroChemPy
     .. sourcecode:: bash
     
        $ conda update -n base -c defaults conda
-       $ conda config -\-prepend channels conda-forge
-       $ conda install -\-yes -\-file requirements.txt  
+       $ conda config --prepend channels conda-forge
+       $ conda install --yes --file requirements.txt
 
 #.  Switch to this environment:
 
@@ -258,3 +320,4 @@ Commit and push to the Bitbucket repository
 --------------------------------------------
 
 to do
+

@@ -97,16 +97,16 @@ Documentation
    
 **Developer's Corner**
 
-* :doc:`dev/develguide`
-* :doc:`dev/index`
+* :doc:`dev/contributing`
+* :doc:`dev/api`
 
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: Developper's Corner
 
-   dev/develguide
-   dev/index
+   dev/contributing
+   dev/api
 
 **Credits**
 
