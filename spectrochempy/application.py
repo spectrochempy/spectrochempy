@@ -908,8 +908,10 @@ class SpectroChemPy(Application):
         self.log.debug('initialization of SpectroChemPy')
 
         _do_parse = True
+
+        print(sys.argv)   # to uncommant in case of problems with the arguments
         for arg in ['egg_info', '--egg-base', 'pip-egg-info', 'develop', '-f',
-                    '-x', '-c']:
+                    '-x', '-c', '--mode=client', '--last-failed']:
             if arg in sys.argv:
                 _do_parse = False
 
