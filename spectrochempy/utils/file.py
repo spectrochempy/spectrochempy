@@ -51,7 +51,7 @@ def readfilename(filename=None, **kwargs):
 
     from spectrochempy.application import general_preferences as prefs
     from spectrochempy.utils import SpectroChemPyWarning
-
+    from spectrochempy.application import do_not_block
 
     # if the directory is not specified we look in the prefs.datadir
     directory = kwargs.get("directory", None)
@@ -139,10 +139,15 @@ def readfilename(filename=None, **kwargs):
         else:
             caption = kwargs.get('caption', 'Select folder')
 
-        filename = opendialog(  single=False,
-                                directory=directory,
-                                caption=caption,
-                                filters = filetypes)
+        # We can not do this during full pytest run without blocking the process
+        # TODO: use the pytest-qt to solve this problem
+        if not do_not_block:
+            filename = opendialog(  single=False,
+                                    directory=directory,
+                                    caption=caption,
+                                    filters = filetypes)
+        else:
+            return None
 
         if not filename:
             # if the dialog has been cancelled or return nothing
