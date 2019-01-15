@@ -1,6 +1,6 @@
 package:
   name: spectrochempy
-  version: 0.1.b1
+  version: 0.1.a7
 
 source:
   path: ../../
@@ -12,19 +12,48 @@ requirements:
     - setuptools_scm
 
   run:
-    - python        3.6.*
-    - matplotlib
-    - traitlets
+    - python        3.7.*
     - numpy
     - scipy
+    - matplotlib
+    - traitlets
+    # some other useful package
     - pandas
     - xlrd
-    - ipython
-    - ipykernel
-    - nb_conda
+    - requests
+    # mainly for install and a bit more...
     - setuptools_scm
+    # need this, because the API is mainly designed to run in Jupyter notebook
+    - ipython
+    - jupyter
+    - jupyterlab
+    - ipykernel
+    - ipywidgets
+    - jupyter_nbextensions_configurator
+    - ipyparallel
+    - ipympl
+    - widgetsnbextension
+    - nodejs
+    - conda-build
+    - jupytext
+    - nb_conda
+    # for testing
     - pytest
-    - sip
+    - pytest-runner
+    - pytest-cov
+    - pytest-xdist
+    - pytest-console-scripts
+    - pytest-qt
+    - scikit-image
+    # for docs
+    - sphinx
+    - sphinx_rtd_theme
+    - sphinx-gallery
+    - numpydoc
+    - nbsphinx
+    - jupyter_sphinx
+    - nbconvert
+    # for matplotlib backend and future gui
     - pyqt
 
 #test:
