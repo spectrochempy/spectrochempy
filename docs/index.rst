@@ -29,10 +29,10 @@ It is is cross platform running on Linux, Windows or OS X.
     
     |scpy| is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
-    bugs and crashes!!!. Please report any issues to the
+    bugs and crashes!!! Please report any issues to the
     `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
-    |scpy|-0.1beta is expected to be first released around june or july 2019.
+    |scpy|-0.1 is expected to be first released around june or july 2019.
 
 Documentation
 =============
@@ -83,7 +83,7 @@ Documentation
 
 * :doc:`user/api/generated/index`
 * :doc:`~temp/auto_examples/index`
-* :doc:`help/faq`
+* :doc:`user/faq`
 
 .. toctree::
    :maxdepth: 1

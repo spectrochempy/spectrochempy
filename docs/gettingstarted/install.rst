@@ -3,13 +3,15 @@
 Installation Guide
 ###################
 
+**Table of contents**
 .. contents::
-	:local:
+    :local:
+
 
 Where to Get |scpy|
 ====================
 
-To get a working installation of |scpy| , on any platform (windows, mac OS X, Linux ... ),
+To get a working installation of |scpy|, on any platform (windows, mac OS X, Linux ... ),
 several solutions are (*or will be soon*) available.
 
 * :ref:`pypi`
@@ -44,18 +46,17 @@ The following libraries are also required such as :
 
 Follow the instructions to install these packages on those sites, or, far easier,
 install them as packages from your operating system
-(e.g. apt-get or the synaptic GUI on Ubuntu, `Macports <http://www.macports.org/>`_ on OS X, etc.).
+(e.g. apt-get or the synaptic GUI on Ubuntu,`Macports <http://www.macports.org/>`_ on OS X, etc.).
 
-Regarding the installation of all these above packages, we highy recommend to install **anaconda** or **canopy** python framework (a much straitforward solution!)
-which is available for most platforms.
+Regarding the installation of all these above packages,
+we highy recommend to install **anaconda** or **canopy** python framework (a much straitforward
+solution!) which is available for most platforms.
 
-We prefer the **anaconda distribution**, so tha the rest of this guide will mainly
+We prefer the **anaconda distribution**, so that the rest of this guide will mainly
 use commands for this distribution.
 
-* install the **Anaconda Scientific Python Distribution** : Go to `http://continuum.io/downloads <http://continuum.io/downloads>`_ and follow the instructions for your platform
-
-  If you register as academic member of the university you get interesting
-  add-ons.
+* install the **Anaconda Scientific Python Distribution** :
+  Go to `http://continuum.io/downloads <http://continuum.io/downloads>`_ and follow the instructions for your platform
 
   Finally, see :ref:`conda` for installing the |scpy| conda package.
 
@@ -81,12 +82,12 @@ Very simple, use the following command in a terminal:
 .. sourcecode:: bash
 
    $ conda config –add channels conda-forge
-   $ conda config –add channels fernandezc  #TODO: create a channel spectrocat
+   $ conda config –add channels spectrocat
 
 This will add the necessary channels where to find the various libraries used by |scpy| .
 
-Next we it is recommended to use a dedicated environment for |scpy|, called
-for example `scp37` (using python 3.7)
+Next we recommend to use a dedicated environment for |scpy|, called
+for example ``scp37`` (using python 3.7)
 
 .. sourcecode:: bash
 
@@ -102,7 +103,7 @@ Next one can install |scpy|:
 .. note::
 
    the conda installer doesn't exist right now. It will be present for version
-   1.b1.
+   relase 0.1.b0
 
    For now, use the method described for developper, here: :ref:`develguide`
 
@@ -127,7 +128,7 @@ or to update a previous installation with the latest stable release:
 .. note::
 
    the Pypi installer doesn't exist right now. It will be present for version
-   1.b1.
+   release 0.1.b0
 
 .. _dev:
 
@@ -136,7 +137,7 @@ Installation from zip archives
 
 Downloads of zip source archives working for all platforms are available, on Bitbucket
 
-.. include:: download.rst
+* `Development sources <https://bitbucket.org/spectrocat/spectrochempy/downloads/?tab=tags>`_
 
 or on PyPi:
 
@@ -148,14 +149,6 @@ Ungzip and untar the source package and execute:
 
 	$ cd <directory>    # replace <directory> by the actual download folder
 	$ pip install .
-
-or better :
-
-.. sourcecode:: bash
-
-	$ pip install -e .
-
-to install it in the developper mode.
 
 .. tip::
 
@@ -171,25 +164,7 @@ Alternatively, you can make a clone/fork of the github sources at:
 
 * `https://bitbucket.org/spectrocat/spectrochempy  <https://bitbucket.org/spectrocat/spectrochempy>`_
 
-This is the recommended solution for developpers 
-and those who would like to contribute (see :ref:`develguide`)
-
-Install ipyparallel in Jupyter notebook
-=========================================
-
-Before using parallel computing in the notebbok, one have to install the module
-from pypi or conda
-
-.. sourcecode:: bash
-
-	$ conda install ipyparallel
-
-To enable the IPython Clusters tab in Jupyter Notebook:
-
-.. sourcecode:: bash
-
-	$ ipcluster nbextension enable
-	$ ipcluster start
+This is the recommended solution for developpers and those who would like to contribute (see :ref:`develguide`)
 
 
 Check the Installation

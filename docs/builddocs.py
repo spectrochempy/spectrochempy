@@ -12,7 +12,7 @@
 
 usage::
 
-    python builddocs.py clean html pdf release
+    python builddocs.py [clean html pdf release]
 
 where optional parameters idincates which job to perfom.
 
@@ -22,22 +22,11 @@ import shutil
 import subprocess
 
 from sphinx.application import Sphinx
-
-# set the correct backend for sphinx-gallery
-# import matplotlib as mpl
-# mpl.use('agg')
-
-
 from spectrochempy import *
 from docs import apigen
 
 preferences = general_preferences
 set_loglevel(WARNING)
-
-# from sphinx.util.console import bold, darkgreen
-# TODO: make our message colored too!
-# look at https://github.com/sphinx-doc/sphinx/blob/master/tests/test_util_logging.py
-# from sphinx.cmdline import main as sphinx_build
 
 SERVER = os.environ.get('SERVER_FOR_LCS', None)
 
@@ -217,6 +206,7 @@ def clean():
     shutil.rmtree(BUILDDIR, ignore_errors=True)
     shutil.rmtree(DOCDIR + '/user/auto_examples', ignore_errors=True)
     shutil.rmtree(DOCDIR + '/gen_modules', ignore_errors=True)
+    shutil.rmtree(DOCDIR + '~temp', ignore_errors=True)
     shutil.rmtree(DEVAPI, ignore_errors=True)
     shutil.rmtree(API, ignore_errors=True)
 
@@ -245,10 +235,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2:
         # full make
-        sys.argv.append('clean')
         sys.argv.append('html')
-        sys.argv.append('pdf')
-        sys.argv.append('release')
 
     action = sys.argv[1]
 
