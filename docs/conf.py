@@ -40,9 +40,8 @@ extensions = \
     'spectrochempy.sphinxext.autodocsumm',
     'nbsphinx',
     'sphinx.ext.mathjax',
-    'sphinxcontrib.bibtex',
     'sphinx_gallery.gen_gallery',
-    #'jupyter_sphinx.embed_widgets',
+    'jupyter_sphinx.embed_widgets',
     'spectrochempy.sphinxext.traitlets_sphinxdoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
@@ -106,9 +105,13 @@ release = spectrochempy.application.__release__.split('+')[0]
 # Else, today_fmt is used as the format for a strftime call.
 today_fmt = '%B %d, %Y'
 
+exclude_patterns = []
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['**.ipynb_checkpoints']
+exclude_patterns.append('_templates')
+exclude_patterns.append('_static')
+exclude_patterns.append('**.ipynb_checkpoints')
+exclude_patterns.append('gen_modules')
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -390,8 +393,8 @@ sphinx_gallery_conf = {
     'examples_dirs': 'user/examples',
 
     # path where to save gallery generated examples
-    'gallery_dirs': 'user/auto_examples',
-                        'user/expected_failing_examples':
+    'gallery_dirs': '~temp/auto_examples',
+                        '~temp/expected_failing_examples':
         [],
 
 }
@@ -399,13 +402,14 @@ sphinx_gallery_conf = {
 # nbsphinx ---------------------------------------------------
 # List of arguments to be passed to the kernel that executes the notebooks:
 nbsphinx_execute_arguments = [
-    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.figure_formats={'jpg', 'png'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
 ]
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
-nbsphinx_execute = 'never'
+nbsphinx_execute = 'always'
 nbsphinx_allow_errors = True
+nbsphinx_timeout = 600
 
 # Use this kernel instead of the one stored in the notebook metadata:
 nbsphinx_kernel_name = 'python3'
@@ -414,7 +418,7 @@ nbsphinx_kernel_name = 'python3'
 # configuration for intersphinx -------------------------------------
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.7/', None),
-    'pytest': ('https://docs.pytest.org/latest/', None),
+    'pytest': ('https://docs.pytest.org/en/latest/', None),
     'ipython': ('https://ipython.readthedocs.io/en/stable/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     #'matplotlib': ('https://matplotlib.org', None)

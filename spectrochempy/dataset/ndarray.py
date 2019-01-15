@@ -396,8 +396,7 @@ class NDArray(HasTraits):
     # .........................................................................
     def __setitem__(self, items, value):
 
-        # TODO: this may not work for complex data in other dimensions than the
-        # last
+        # TODO: this may not work for complex data in other dimensions than the last
         keys = self._make_index(items)
         if self.ndim == 1:
             keys = keys[-1]
@@ -411,12 +410,16 @@ class NDArray(HasTraits):
         elif isinstance(value, StdDev):
             # the uncertainties are modified
             self._uncertainty[keys] = value.data
+        elif isinstance(value, Quantity):
+            # first convert value to the current units
+            value.ito(self.units)
+            self._data[keys] = np.array(value.magnitude, subok=True, copy=self._copy)
         else:
             if self.ndim > 1 and self.isquaternion:
                 raise NotImplementedError("Sorry but setting values for"
                                           "hypercomplex array "
                                           "is not yet possible")
-            self.data[keys] = value
+            self._data[keys] = value
 
     # .........................................................................
     def __iter__(self):
@@ -552,9 +555,8 @@ class NDArray(HasTraits):
 
         elif isinstance(data, Quantity):
             #log.debug("init data with data from a Quantity object")
-            self._data_passed_is_quantity = True
-            self._data = np.array(data.magnitude, subok=True,
-                                  copy=self._copy)
+            # self._data_passed_is_quantity = True  # Do not seems to be used anymore
+            self._data = np.array(data.magnitude, subok=True, copy=self._copy)
             self._units = data.units
 
         elif hasattr(data, 'mask'):

@@ -1196,6 +1196,7 @@ project_preferences = app.project_preferences
 do_not_block = app.do_not_block
 description = app.description
 long_description = app.long_description
+datadir = app.datadir
 
 
 def set_loglevel(level=WARNING):

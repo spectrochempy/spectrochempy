@@ -24,8 +24,9 @@ import subprocess
 from sphinx.application import Sphinx
 
 # set the correct backend for sphinx-gallery
-#import matplotlib as mpl
+# import matplotlib as mpl
 # mpl.use('agg')
+
 
 from spectrochempy import *
 from docs import apigen

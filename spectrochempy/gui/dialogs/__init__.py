@@ -33,7 +33,8 @@ def opendialog(single=True,
         Filename or folder name
 
     """
-    gui = QtGui.QApplication(sys.argv)
+    #gui = QtGui.QApplication(sys.argv)
+
     if filters == 'directory':
         if not caption:
             caption = 'Select a folder'
@@ -48,7 +49,7 @@ def opendialog(single=True,
         f = OpenMultipleFileNames(directory=directory, caption=caption,
                                   filters=filters)
 
-    gui.exit()
+    #gui.exit()
     return f
 
 if __name__ == '__main__':

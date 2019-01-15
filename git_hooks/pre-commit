@@ -12,6 +12,10 @@ source ~/.bash_profile
 # to make it work with matplotlib/latex
 export PATH=$PATH:/Library/TeX/texbin/
 
+# jupytext transform
+jupytext --to py --pre-commit
+# git reset HEAD **/*.ipynb # to remove ipynb from commit
+
 # test everything and do not commit if errors
 # py.test -x tests || exit 1
 

@@ -1,21 +1,7 @@
 .. _develdocs:
 
-Developper's documentation
-===========================
-
-Developper guide
------------------
-
-.. toctree::
-   :maxdepth: 2
-
-   develguide
-
-.. _develreference:
-
-
-Code reference
----------------
+Full code reference
+###################
 
 .. currentmodule:: spectrochempy
 
@@ -23,9 +9,8 @@ Code reference
    :no-members:
    :no-inherited-members:
 
-
 Packages
-~~~~~~~~
+--------
 
 .. autosummary::
    :toctree: generated/
@@ -39,7 +24,7 @@ Packages
 
 
 Modules
-~~~~~~~~~~
+-------
 
 .. autosummary::
    :toctree: generated/

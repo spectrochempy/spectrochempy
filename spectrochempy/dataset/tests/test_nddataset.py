@@ -19,7 +19,7 @@ import numpy as np
 # from spectrochempy import *
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.dataset.ndcoords import Coord, CoordSet
-from spectrochempy.units import ur
+from spectrochempy.units import ur, Quantity
 from spectrochempy.api import masked, show
 
 from spectrochempy.extern.pint.errors import (UndefinedUnitError,
@@ -1144,3 +1144,26 @@ def test_bug_par_arnaud():
     print()
     print('taille axe 0: ' + str(ds2.coordset._coords[0].data.shape[0]))
     print('taille dimension 0:' + str(ds2.data.shape[0]))
+
+def test_bug_13(IR_dataset_1D):
+    nd = IR_dataset_1D
+    print(nd)
+    print(type(nd.x))
+    print('\n coord', nd.x)
+
+    nd.x[0] = 0       # here we assume that the value have the same units
+    print('\nnew coord\n', nd.x)
+
+    # reproduce our bug  (now fixed)
+    nd.x[0] = Quantity('0 m^-1')
+    print('\nnew coord\n', nd.x)
+
+    v = Quantity('0.2 m')
+    nd.x[0] = v
+    print('\nnew coord\n', nd.x)
+
+    with pytest.raises(DimensionalityError):
+        v = Quantity('0.1 s')
+        nd.x[0] = v
+
+

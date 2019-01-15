@@ -102,7 +102,6 @@ __all__ += [
     'general_preferences',
     'available_styles',
     'set_loglevel',
-
     ### Info
     'copyright',
     'version',
