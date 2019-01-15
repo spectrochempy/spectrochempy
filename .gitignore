@@ -1,6 +1,7 @@
 # intentionnaly masked with ~
 *~
 ~*
+.DS_Store
 
 # pycharm project
 .idea/
@@ -9,7 +10,6 @@
 .spyderproject
 .spyproject
 
-
 # Example ipython notebook checkpoints
 *.ipynb_checkpoints/
 Untitled.ipynb
@@ -17,6 +17,7 @@ Untitled.ipynb
 # caches
 __pycache__/
 .cache/
+/.pytest_cache/
 
 # Sphinx documentation
 docs/api/
@@ -25,14 +26,14 @@ docs/index.doctree
 *generated
 dist/
 build/
-docs/gen_modules
-docs/gallery/auto_examples
-docs/gallery/gen_modules
+docs/gen_modules/
+docs/gallery/auto_examples/
+docs/gallery/gen_modules/
+docs/gallery/backreferences/
 docs/modules/
 docs/savefig/
 docs/_templates_old
 
-.DS_Store
 *.log
 
 .eggs
@@ -92,6 +93,6 @@ recipes/spectrochempy/linux-aarch64
 /tests_extern_packages/
 /.editorconfig
 /Untitled.ipynb
-/docs/gallery/
 recipes/spectrochempy/win-32/
 recipes/spectrochempy/win-64/
+/.pytest_cache/

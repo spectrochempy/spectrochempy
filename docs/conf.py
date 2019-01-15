@@ -289,24 +289,21 @@ def setup(app):
 
 sphinx_gallery_conf = {
     'plot_gallery': 'True',
-    'backreferences_dir': '~temp/gen_modules/backreferences',
-    'doc_module': ('spectrochempy', ), 'reference_url': {
-        'spectrochempy': None,
-        #'matplotlib': 'https://matplotlib.org',   #<-- do not work
-        'numpy': 'https://docs.scipy.org/doc/numpy',
-        'sklearn': 'https://scikit-learn.org/stable',
-        'ipython': 'https://ipython.readthedocs.org/en/stable/',
-    },
-
+    'backreferences_dir': 'gallery/gen_modules/backreferences',
+    'doc_module': ('spectrochempy', ),
+                   'reference_url': {
+                        'spectrochempy': None,
+                        #'matplotlib': 'https://matplotlib.org',   #<-- do not work
+                        'numpy': 'https://docs.scipy.org/doc/numpy',
+                        'sklearn': 'https://scikit-learn.org/stable',
+                        'ipython': 'https://ipython.readthedocs.org/en/stable/',
+                        },
     # path to the examples scripts
     'examples_dirs': 'user/examples',
-
     # path where to save gallery generated examples
-    'gallery_dirs': '~temp/auto_examples',
-                    '~temp/expected_failing_examples':
-        [],
-
-}
+    'gallery_dirs': 'gallery/auto_examples',
+    'expected_failing_examples': [],
+    }
 
 # nbsphinx ---------------------------------------------------------------------
 

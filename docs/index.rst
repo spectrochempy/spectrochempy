@@ -82,7 +82,7 @@ Documentation
 **Help**
 
 * :doc:`user/api/generated/index`
-* :doc:`~temp/auto_examples/index`
+* :doc:`gallery/auto_examples/index`
 * :doc:`user/faq`
 
 .. toctree::
@@ -91,7 +91,7 @@ Documentation
    :caption: Help
 
    user/api/generated/index
-   ~temp/auto_examples/index
+   gallery/auto_examples/index
    user/faq
    
    

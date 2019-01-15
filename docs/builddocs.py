@@ -204,11 +204,11 @@ def clean():
     shutil.rmtree(BUILDDIR + '/latex', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
     shutil.rmtree(BUILDDIR, ignore_errors=True)
-    shutil.rmtree(DOCDIR + '/user/auto_examples', ignore_errors=True)
-    shutil.rmtree(DOCDIR + '/gen_modules', ignore_errors=True)
-    shutil.rmtree(DOCDIR + '~temp', ignore_errors=True)
-    shutil.rmtree(DEVAPI, ignore_errors=True)
-    shutil.rmtree(API, ignore_errors=True)
+    shutil.rmtree(DOCDIR   + '/user/auto_examples', ignore_errors=True)
+    shutil.rmtree(DOCDIR   + '/gen_modules', ignore_errors=True)
+    shutil.rmtree(DOCDIR   + '/gallery', ignore_errors=True)
+    shutil.rmtree(DEVAPI,   ignore_errors=True)
+    shutil.rmtree(API,      ignore_errors=True)
 
 
 def make_dirs():
