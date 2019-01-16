@@ -88,7 +88,7 @@ def read_omnic(dataset=None, **kwargs):
     if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameters must be the filename
-        if isinstance(dataset, str) and dataset != '':
+        if isinstance(dataset, (str, list)) and dataset != '':
             filename = dataset
 
         dataset = NDDataset()  # create a NDDataset
