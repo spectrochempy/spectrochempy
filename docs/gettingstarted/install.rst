@@ -164,7 +164,26 @@ Alternatively, you can make a clone/fork of the github sources at:
 
 * `https://bitbucket.org/spectrocat/spectrochempy  <https://bitbucket.org/spectrocat/spectrochempy>`_
 
-This is the recommended solution for developpers and those who would like to contribute (see :ref:`develguide`)
+This is the recommended solution for developpers and those who would like to
+contribute (see :ref:`develguide`).
+
+But it is also a simple way to stay up-to-date with the lastest version of |scpy|.
+
+In short, if you have already installed |scpy| using one of the above solutions,
+remove it with the following command,
+else go to the next step :
+
+.. sourcecode:: bash
+
+   $ conda remove --force spectrochempy
+
+then:
+
+.. sourcecode:: bash
+
+   $ git clone https://bitbucket.org/spectrocat/spectrochempy.git
+   $ cd spectrochempy
+   $ pip install -e .
 
 
 Check the Installation
