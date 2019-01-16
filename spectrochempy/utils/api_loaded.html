@@ -1,34 +1,6 @@
-# -*- coding: utf-8 -*-
-#
-# =============================================================================
-# Copyright (©) 2015-2019 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
-# See full LICENSE agreement in the root directory
-# =============================================================================
-
-
-
-
-
-"""
-
-"""
-
-from spectrochempy.utils import *
-import os
-
-def test_dict_compare():
-    x = dict(a=1, b=2)
-    y = dict(a=2, b=2)
-    added, removed, modified, same = dict_compare(x, y, check_equal_only=False)
-    #print(added, removed, modified, same)
-    assert modified == set('a')
-    assert not dict_compare(x, y)
-
-
-_template = """
 {{ widgetcss }}
+
+
 <div class="logo-block">
 {% if logo %}
 <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAlw
@@ -62,24 +34,11 @@ oXatZbu6G0h4VG+ibqq0IJVK6cAjo6serG3vSUezCMct0yQeSOFJSUImqb2qbknUpDqlZxE0QZ+ZUpSl
 JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
 JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
 IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
-     style='height:22px; border-radius:12px; display: inline-block; float: left; vertical-align: middle'></img>
+     style='height:25px; border-radius:12px; display: inline-block; float: left; vertical-align: middle'></img>
 {% endif %}
 {% if message %}
-&nbsp;&nbsp;{{ message }}
+      {{ message }}
 {% endif %}
 
 </div>
-"""
 
-def test_display_info_string(**kwargs):
-
-    from IPython.display import HTML, publish_display_data
-    from jinja2 import Template
-
-    logo = kwargs.get('logo', True)
-    message = kwargs.get('message', 'info ')
-
-    template = Template(_template)
-    html = template.render({'logo': logo,
-                            'message': message})
-    publish_display_data(data={'text/html': html})
