@@ -181,9 +181,9 @@ def _read_single_dir(directory):
                                                sortbydate=True))
 
         elif extension == '.scp':
-            # does not work. see test_load
-            # datasets.append(NDDataset.read(files[extension], protocol=extension[1:]))
-            pass
+            # does not work. see test_load  <- for me all work CF
+            datasets.append(NDDataset.read(files[extension], protocol='scp'))
+            #pass
         # else the files are not readable
         else:
             pass
