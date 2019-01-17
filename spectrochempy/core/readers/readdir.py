@@ -152,10 +152,11 @@ def read_dir(dataset=None, directory=None, **kwargs):
     log.debug("finished read_dir()")
     return datasets  # several datasets returned
 
+
 def _read_single_dir(directory):
     # lists all filenames of readable files in directory:
     filenames = [os.path.join(directory, f) for f in os.listdir(directory)
-        if os.path.isfile(os.path.join(directory, f))]
+                 if os.path.isfile(os.path.join(directory, f))]
 
     datasets = []
 
@@ -169,7 +170,7 @@ def _read_single_dir(directory):
         if extension == '.spg':
             for filename in files[extension]:
                 datasets.append(NDDataset.read_omnic(filename,
-                                                sortbydate=True))
+                                                     sortbydate=True))
 
         elif extension == '.spa':
             datasets.append(NDDataset.read_omnic(files[extension],
@@ -180,18 +181,16 @@ def _read_single_dir(directory):
                                                sortbydate=True))
 
         elif extension == '.scp':
-           # does not work. see test_load
-           # datasets.append(NDDataset.read(files[extension], protocol=extension[1:]))
+            # does not work. see test_load
+            # datasets.append(NDDataset.read(files[extension], protocol=extension[1:]))
             pass
-        #else the files are not readable
+        # else the files are not readable
         else:
             pass
 
-    #TODO: extend to other implemented readers (NMR !)
+    # TODO: extend to other implemented readers (NMR !)
     return datasets
+
 
 if __name__ == '__main__':
     pass
-
-
-

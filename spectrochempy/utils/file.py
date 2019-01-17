@@ -22,8 +22,9 @@ from spectrochempy.gui.dialogs import opendialog
 __all__ = ['readfilename', 'readdirname',
            'list_packages', 'generate_api',
            'make_zipfile', 'ScpFile',
-           'unzip'  #tempo
+           'unzip'  # tempo
            ]
+
 
 # =============================================================================
 # Utility function
@@ -83,7 +84,7 @@ def readfilename(filename=None, **kwargs):
 
         _directory = os.path.join(prefs.datadir, directory)
 
-        if  not os.path.exists(_directory):
+        if not os.path.exists(_directory):
 
             # well the directory doesn't exist - we cannot go further without
             # correcting this error
@@ -99,7 +100,7 @@ def readfilename(filename=None, **kwargs):
         _filenames = []
         # make a list, even for a single file name
         filenames = filename
-        if not isinstance(filenames,(list, tuple)):
+        if not isinstance(filenames, (list, tuple)):
             filenames = list([filenames])
         else:
             filenames = list(filenames)
@@ -120,7 +121,7 @@ def readfilename(filename=None, **kwargs):
                     if not os.path.exists(_f):
                         raise IOError("Can't find  this filename %s in the specified directory "
                                       "(or the current one if it was not specified, "
-                                      "nor in the default data directory %s"%(filename, prefs.datadir))
+                                      "nor in the default data directory %s" % (filename, prefs.datadir))
             _filenames.append(_f)
 
         # now we have all the filename with their correct location
@@ -139,20 +140,17 @@ def readfilename(filename=None, **kwargs):
         # We can not do this during full pytest run without blocking the process
         # TODO: use the pytest-qt to solve this problem
         if not do_not_block:
-            filename = opendialog(  single=False,
-                                    directory=directory,
-                                    caption=caption,
-                                    filters = filetypes)
+            filename = opendialog(single=False,
+                                  directory=directory,
+                                  caption=caption,
+                                  filters=filetypes)
 
         if not filename:
             # if the dialog has been cancelled or return nothing
             return None
 
-
-
         # else we have a list of the selected files or a directory
         # to read in
-
 
     if isinstance(filename, list):
         if not all(isinstance(elem, str) for elem in filename):
@@ -178,6 +176,7 @@ def readfilename(filename=None, **kwargs):
             files[extension] = [filename]
     return files
 
+
 def readdirname(dirname=None, **kwargs):
     """
     returns a valid directory name
@@ -199,7 +198,7 @@ def readdirname(dirname=None, **kwargs):
     from spectrochempy.application import general_preferences as prefs
     from spectrochempy.application import do_not_block
 
-    #Check parent directory
+    # Check parent directory
     parent_dir = kwargs.get("parent_dir", None)
     if parent_dir is not None:
         if os.path.isdir(parent_dir):
@@ -224,9 +223,9 @@ def readdirname(dirname=None, **kwargs):
         if parent_dir is not None:
             if os.path.isdir(os.path.join(parent_dir, dirname)):
                 return os.path.join(parent_dir, dirname)
-        #if no parent directory: look at datadir
+        # if no parent directory: look at datadir
         elif os.path.isdir(os.path.join(prefs.datadir, dirname)):
-                return os.path.join(prefs.datadir, dirname)
+            return os.path.join(prefs.datadir, dirname)
         else:
             raise ValueError("\"%s\" is not a valid directory" % dirname)
 
@@ -240,16 +239,13 @@ def readdirname(dirname=None, **kwargs):
 
         caption = kwargs.get('caption', 'Select folder')
 
-        if not do_not_block: #this is for allowing test to continue in the background
-            directory = opendialog(  single=False,
-                                directory=parent_dir,
-                                caption=caption,
-                                filters = 'directory')
+        if not do_not_block:  # this is for allowing test to continue in the background
+            directory = opendialog(single=False,
+                                   directory=parent_dir,
+                                   caption=caption,
+                                   filters='directory')
 
-        if not directory:
-            # if the dialog has been cancelled or return nothing
-            return None
-
+            return directory
 
 
 # ============================================================================
@@ -277,12 +273,11 @@ def list_packages(package):
 
 # ............................................................................
 def generate_api(api_path):
-
     # name of the package
     dirname, name = os.path.split(os.path.split(api_path)[0])
     if not dirname.endswith('spectrochempy'):
         dirname, _name = os.path.split(dirname)
-        name = _name+'.'+name
+        name = _name + '.' + name
     pkgs = sys.modules['spectrochempy.%s' % name]
     api = sys.modules['spectrochempy.%s.api' % name]
 
@@ -299,7 +294,7 @@ def generate_api(api_path):
             raise ImportError(pkg)
         if not hasattr(pkg, '__all__'):
             continue
-        a = getattr(pkg, '__all__',[])
+        a = getattr(pkg, '__all__', [])
         dmethods = getattr(pkg, '__dataset_methods__', [])
         __all__ += a
         for item in a:
@@ -313,6 +308,7 @@ def generate_api(api_path):
                 setattr(NDDataset, item, getattr(pkg, item))
 
     return __all__
+
 
 # ============================================================================
 # ZIP UTILITIES
@@ -444,7 +440,7 @@ class ScpFile(object):
         elif member and ext in ['.json']:
             return json.loads(asstr(self.zip.read(key)))
 
-        elif member :
+        elif member:
             return self.zip.read(key)
 
         else:
