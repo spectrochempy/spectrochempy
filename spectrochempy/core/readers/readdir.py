@@ -35,14 +35,15 @@ import numpy as np
 from spectrochempy.dataset.ndio import NDIO
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.application import log, general_preferences as prefs
-from spectrochempy.utils import readfilename, SpectroChemPyWarning
-#from spectrochempy.core.readers.readomnic import read_omnic
-#from spectrochempy.core.readers.readcsv import read_csv
+from spectrochempy.utils import readfilename, readdirname
+from spectrochempy.gui.dialogs import opendialog
+from spectrochempy.core.readers.readomnic import read_omnic
+from spectrochempy.core.readers.readcsv import read_csv
 
 
 # function for reading data in a directory
 # --------------------------------------
-def read_dir(dataset=None, **kwargs):
+def read_dir(dataset=None, directory=None, **kwargs):
     """
     Open readable files in a directory and store data/metadata in a dataset or
     a list of datasets according to the following rules:
@@ -50,7 +51,8 @@ def read_dir(dataset=None, **kwargs):
     * 2D spectroscopic data (e.g. valid \*.spg files) from distinct files are
       stored in distinct NDdatasets.
     * 1D spectroscopic data (e.g., \*.spa files) in a given directory are grouped
-      into single NDDataset, providing their unique dimension are compatible.
+      into single NDDataset, providing their unique dimension are compatible. If not,
+      an error is generated.
 
     Notes
     ------
@@ -64,6 +66,8 @@ def read_dir(dataset=None, **kwargs):
         If None, a NDDataset is created
     directory: str, optional.
         If not specified, opens a dialog box.
+    parent_dir: str, optional.
+        The parent directory where to look at
     sortbydate: bool, optional,  default:True.
         Sort spectra by acquisition date
     recursive: bool, optional,  default = True.
@@ -72,7 +76,6 @@ def read_dir(dataset=None, **kwargs):
     Returns
     --------
     nddataset : |NDDataset| or list of |NDDataset|
-
 
     Examples
     --------
@@ -92,56 +95,89 @@ def read_dir(dataset=None, **kwargs):
 
     """
 
-    # TODO add recursive: bool [optional default = True ]. read also subfolders
     log.debug("starting reading in a folder")
 
     # check if the first parameter is a dataset
     # because we allow not to pass it
-    directory = None
     if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameter must be the directory
         if isinstance(dataset, str) and dataset != '':
             directory = dataset
+            dataset = None
 
-        dataset = None # NDDataset()  # we don't need to create the NDDataset now
-
-    # get the directory name possibly passed in the parameters
-    if not directory:
-        directory = kwargs.get('directory', None)
-
-    # check is the directory name was passed
+    # # check directory
+    # if directory is None:
+    #     directory = opendialog( single=False,
+    #                             directory=directory,
+    #                             caption='Select folder to read',
+    #                             filters = 'directory')
     #
-    directory = readfilename(directory=directory,
-                             filetypes='directory')
+    #     if not directory:
+    #         # if the dialog has been cancelled or return nothing
+    #         return None
+    #
+    # if directory is not None and not isinstance(directory, str):
+    #     raise TypeError('directory should be of str type, not ' + type(directory))
+    #
+    # if directory and not os.path.exists(directory):
+    #     # the directory may be located in our default datadir
+    #     # or be the default datadir
+    #     if directory == os.path.basename(prefs.datadir):
+    #         return prefs.datadir
+    #
+    #     _directory = os.path.join(prefs.datadir, directory)
+    #
+    # if not os.path.isdir(directory):
+    #     raise ValueError('\"' + directory + '\" is not a valid directory')
 
-    if directory is None:
+    parent_dir = kwargs.get('parent_dir', None)
+    directory = readdirname(directory, parent_dir=parent_dir)
+
+    if not directory:
+        # probably cancel has been chosen in the open dialog
+        log.info("No directory was selected.")
         return
-
-    if not isinstance(directory, str):
-        raise TypeError('Error: directory should be of str type, not %s'%type(directory))
 
     datasets = []
 
-    recursive = kwargs.get('recursive', False)
+    recursive = kwargs.get('recursive', True)
     if recursive:
-        files = glob.glob(os.path.join(directory,'**','*.*'), recursive=recursive)
+        for i, root in enumerate(os.walk(directory)):
+            if i == 0:
+                log.debug("reading root directory")
+            else:
+                log.debug("reading subdirectory")
+            datasets += _read_single_dir(root[0])
     else:
-        files = glob.glob(os.path.join(directory, '*.*'))
+        log.debug("reading root directory only")
+        datasets += _read_single_dir(directory)
 
-    files = readfilename(files)
+    if len(datasets) == 1:
+        log.debug("finished read_dir()")
+        return datasets[0]  # a single dataset is returned
+
+    log.debug("finished read_dir()")
+    return datasets  # several datasets returned
+
+def _read_single_dir(directory):
+    # lists all filenames of readable files in directory:
+    filenames = [os.path.join(directory, f) for f in os.listdir(directory)
+        if os.path.isfile(os.path.join(directory, f))]
+
+    datasets = []
+
+    if not filenames:
+        log.debug("empty directory")
+        return datasets
+
+    files = readfilename(filenames, directory=directory)
 
     for extension in files.keys():
-
-        extension = extension.lower()
-
-        # only possible if the data are compatible
-        # unlikely true if recursive is True. So by default it is better
-        # to set it to False (except if we are sure the concatenation is possible)
-
         if extension == '.spg':
             for filename in files[extension]:
-                datasets.append(NDDataset.read_omnic(filename))
+                datasets.append(NDDataset.read_omnic(filename,
+                                                sortbydate=True))
 
         elif extension == '.spa':
             datasets.append(NDDataset.read_omnic(files[extension],
@@ -152,18 +188,18 @@ def read_dir(dataset=None, **kwargs):
                                                sortbydate=True))
 
         elif extension == '.scp':
-            datasets.append(NDDataset.read(files[extension], protocol=extension[1:],
-                                           sortbydate=True, **kwargs))
-
-        # else the files are not readable
+           # does not work. see test_load
+           # datasets.append(NDDataset.read(files[extension], protocol=extension[1:]))
+            pass
+        #else the files are not readable
         else:
             pass
-            #TODO: to extend we must implement some other readers
-            # case of NMR bruker spectra, for which there is no extension!
 
+    #TODO: extend to other implemented readers (NMR !)
     return datasets
 
 if __name__ == '__main__':
-
     pass
+
+
 

@@ -19,7 +19,7 @@ import warnings
 
 from spectrochempy.gui.dialogs import opendialog
 
-__all__ = ['readfilename',
+__all__ = ['readfilename', 'readdirname',
            'list_packages', 'generate_api',
            'make_zipfile', 'ScpFile',
            'unzip'  #tempo
@@ -134,10 +134,7 @@ def readfilename(filename=None, **kwargs):
             # if no directory was eventually specified
             directory = prefs.datadir
 
-        if filetypes != 'directory':
-            caption = kwargs.get('caption', 'Select file(s)')
-        else:
-            caption = kwargs.get('caption', 'Select folder')
+        caption = kwargs.get('caption', 'Select folder')
 
         # We can not do this during full pytest run without blocking the process
         # TODO: use the pytest-qt to solve this problem
@@ -153,11 +150,11 @@ def readfilename(filename=None, **kwargs):
             # if the dialog has been cancelled or return nothing
             return None
 
-        if filetypes == 'directory':
-            return directory
 
-        # else we have a list of the selected files.
-        # except
+
+        # else we have a list of the selected files or a directory
+        # to read in
+
 
     if isinstance(filename, list):
         if not all(isinstance(elem, str) for elem in filename):
@@ -183,6 +180,75 @@ def readfilename(filename=None, **kwargs):
             files[extension] = [filename]
     return files
 
+def readdirname(dirname=None, **kwargs):
+    """
+    returns a valid directory name
+
+    Parameters
+    ----------
+    dirname: `str`, optional.
+        A directory name. If not provided, a dialog box is opened
+        to select a directory.
+    parent_dir: `str`, optional.
+        The parent directory where to look at. If not specified, read in
+        default datadir directory
+
+    Returns
+    --------
+        valid directory name
+    """
+
+    from spectrochempy.application import general_preferences as prefs
+
+    #Check parent directory
+    parent_dir = kwargs.get("parent_dir", None)
+    if parent_dir is not None:
+        if os.path.isdir(parent_dir):
+            pass
+        elif prefs.datadir == parent_dir:
+            pass
+        elif os.path.isdir(os.path.join(prefs.datadir, parent_dir)):
+            parent_dir = os.path.join(prefs.datadir, parent_dir)
+        else:
+            raise ValueError("\"%s\" is not a valid parent directory " % parent_dir)
+
+    if dirname:
+        # if a directory name was provided
+        # first look if the type is OK
+        if not isinstance(dirname, str):
+            # well the directory doesn't exist - we cannot go further without
+            # correcting this error
+            raise TypeError("directory %s should be a string!" % dirname)
+
+        # if a valid parent directory has been provided,
+        # checks that parent_dir\\dirname is OK
+        if parent_dir is not None:
+            if os.path.isdir(os.path.join(parent_dir, dirname)):
+                return os.path.join(parent_dir, dirname)
+        #if no parent directory: look at datadir
+        elif os.path.isdir(os.path.join(prefs.datadir, dirname)):
+                return os.path.join(prefs.datadir, dirname)
+        else:
+            raise ValueError("\"%s\" is not a valid directory" % dirname)
+
+    if not dirname:
+        # open a file dialog
+        # currently Scpy use QT (needed for next GUI features)
+
+        if not parent_dir:
+            # if no parent directory was specified
+            parent_dir = prefs.datadir
+
+        caption = kwargs.get('caption', 'Select folder')
+
+        directory = opendialog(  single=False,
+                                directory=parent_dir,
+                                caption=caption,
+                                filters = 'directory')
+
+        if not directory:
+            # if the dialog has been cancelled or return nothing
+            return None
 
 
 

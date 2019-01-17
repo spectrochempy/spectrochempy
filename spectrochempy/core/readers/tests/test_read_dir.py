@@ -17,7 +17,10 @@ import pytest
 # comment the next line to test it manually
 #@pytest.mark.skip('interactive so cannot be used with full testing')
 def test_read_dir():
-    A = NDDataset.read_dir('irdata')
+    A = NDDataset.read_dir(os.path.join('irdata','subdir'))
+    assert len(A) == 4
+
+
 
 
 
