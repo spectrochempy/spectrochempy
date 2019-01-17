@@ -50,7 +50,7 @@ from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
 
-from spectrochempy.utils import docstrings, MetaConfigurable
+from spectrochempy.utils import docstrings, MetaConfigurable, display_info_string
 
 # Log levels
 # -----------------------------------------------------------------------------
@@ -1089,7 +1089,11 @@ class SpectroChemPy(Application):
                 info_string = "SpectroChemPy's API - v.{}\n" \
                               "© Copyright {}".format(__version__,
                                                       __copyright__)
-                print(info_string)
+                ip = get_ipython()
+                if ip is not None and "TerminalInteractiveShell" not in str(ip):
+                    display_info_string(message = info_string)
+                else:
+                    print(info_string)
 
             debug(
                 "The application was launched with ARGV : %s" % str(sys.argv))
