@@ -88,7 +88,7 @@ def read_omnic(dataset=None, **kwargs):
     if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameters must be the filename
-        if isinstance(dataset, str) and dataset != '':
+        if isinstance(dataset, (str, list)) and dataset != '':
             filename = dataset
 
         dataset = NDDataset()  # create an instance of NDDataset
@@ -139,6 +139,7 @@ read_spa = read_omnic
 NDIO.read_spg = read_omnic
 NDIO.read_spa = read_omnic
 
+
 # =============================================================================
 # private functions
 # =============================================================================
@@ -150,13 +151,14 @@ def _readbtext(f, pos):
     f.seek(pos)  # read first byte, ensure entering the while loop
     btext = f.read(1)
     while not (btext[len(
-        btext) - 1] == 0):  # while the last byte of btext differs from zero
+            btext) - 1] == 0):  # while the last byte of btext differs from zero
         btext = btext + f.read(1)  # append 1 byte
 
     btext = btext[0:len(btext) - 1]  # cuts the last byte
     text = btext.decode(encoding='utf-8',
                         errors='ignore')  # decode btext to string
     return text
+
 
 # .............................................................................
 def _read_spg(dataset, filename, sortbydate=True, **kwargs):
@@ -374,8 +376,8 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
 
     # Set description and history
     dataset.description = (
-        'Dataset from spg file : ' + spg_title + ' \n'
-        + 'History of the 1st spectrum: ' + allhistories[0])
+            'Dataset from spg file : ' + spg_title + ' \n'
+            + 'History of the 1st spectrum: ' + allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 
@@ -542,8 +544,8 @@ def _read_spa(dataset, filenames, **kwargs):
 
     # Set description and history
     dataset.description = (
-        'Dataset from ' + str(nspec) + ' spa files : \'' + filenames[0] + '...' + filenames[-1] + '\n'
-        + 'History of the 1st spectrum: ' + allhistories[0])
+            'Dataset from ' + str(nspec) + ' spa files : \'' + filenames[0] + '...' + filenames[-1] + '\n'
+            + 'History of the 1st spectrum: ' + allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'
 

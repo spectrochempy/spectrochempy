@@ -19,11 +19,12 @@ import warnings
 
 from spectrochempy.gui.dialogs import opendialog
 
-__all__ = ['readfilename',
+__all__ = ['readfilename', 'readdirname',
            'list_packages', 'generate_api',
            'make_zipfile', 'ScpFile',
-           'unzip'  #tempo
+           'unzip'  # tempo
            ]
+
 
 # =============================================================================
 # Utility function
@@ -83,7 +84,7 @@ def readfilename(filename=None, **kwargs):
 
         _directory = os.path.join(prefs.datadir, directory)
 
-        if  not os.path.exists(_directory):
+        if not os.path.exists(_directory):
 
             # well the directory doesn't exist - we cannot go further without
             # correcting this error
@@ -99,7 +100,7 @@ def readfilename(filename=None, **kwargs):
         _filenames = []
         # make a list, even for a single file name
         filenames = filename
-        if not isinstance(filenames,(list, tuple)):
+        if not isinstance(filenames, (list, tuple)):
             filenames = list([filenames])
         else:
             filenames = list(filenames)
@@ -120,7 +121,7 @@ def readfilename(filename=None, **kwargs):
                     if not os.path.exists(_f):
                         raise IOError("Can't find  this filename %s in the specified directory "
                                       "(or the current one if it was not specified, "
-                                      "nor in the default data directory %s"%(filename, prefs.datadir))
+                                      "nor in the default data directory %s" % (filename, prefs.datadir))
             _filenames.append(_f)
 
         # now we have all the filename with their correct location
@@ -134,30 +135,22 @@ def readfilename(filename=None, **kwargs):
             # if no directory was eventually specified
             directory = prefs.datadir
 
-        if filetypes != 'directory':
-            caption = kwargs.get('caption', 'Select file(s)')
-        else:
-            caption = kwargs.get('caption', 'Select folder')
+        caption = kwargs.get('caption', 'Select folder')
 
         # We can not do this during full pytest run without blocking the process
         # TODO: use the pytest-qt to solve this problem
         if not do_not_block:
-            filename = opendialog(  single=False,
-                                    directory=directory,
-                                    caption=caption,
-                                    filters = filetypes)
-        else:
-            return None
+            filename = opendialog(single=False,
+                                  directory=directory,
+                                  caption=caption,
+                                  filters=filetypes)
 
         if not filename:
             # if the dialog has been cancelled or return nothing
             return None
 
-        if filetypes == 'directory':
-            return directory
-
-        # else we have a list of the selected files.
-        # except
+        # else we have a list of the selected files or a directory
+        # to read in
 
     if isinstance(filename, list):
         if not all(isinstance(elem, str) for elem in filename):
@@ -184,6 +177,75 @@ def readfilename(filename=None, **kwargs):
     return files
 
 
+def readdirname(dirname=None, **kwargs):
+    """
+    returns a valid directory name
+
+    Parameters
+    ----------
+    dirname: `str`, optional.
+        A directory name. If not provided, a dialog box is opened
+        to select a directory.
+    parent_dir: `str`, optional.
+        The parent directory where to look at. If not specified, read in
+        default datadir directory
+
+    Returns
+    --------
+        valid directory name
+    """
+
+    from spectrochempy.application import general_preferences as prefs
+    from spectrochempy.application import do_not_block
+
+    # Check parent directory
+    parent_dir = kwargs.get("parent_dir", None)
+    if parent_dir is not None:
+        if os.path.isdir(parent_dir):
+            pass
+        elif prefs.datadir == parent_dir:
+            pass
+        elif os.path.isdir(os.path.join(prefs.datadir, parent_dir)):
+            parent_dir = os.path.join(prefs.datadir, parent_dir)
+        else:
+            raise ValueError("\"%s\" is not a valid parent directory " % parent_dir)
+
+    if dirname:
+        # if a directory name was provided
+        # first look if the type is OK
+        if not isinstance(dirname, str):
+            # well the directory doesn't exist - we cannot go further without
+            # correcting this error
+            raise TypeError("directory %s should be a string!" % dirname)
+
+        # if a valid parent directory has been provided,
+        # checks that parent_dir\\dirname is OK
+        if parent_dir is not None:
+            if os.path.isdir(os.path.join(parent_dir, dirname)):
+                return os.path.join(parent_dir, dirname)
+        # if no parent directory: look at datadir
+        elif os.path.isdir(os.path.join(prefs.datadir, dirname)):
+            return os.path.join(prefs.datadir, dirname)
+        else:
+            raise ValueError("\"%s\" is not a valid directory" % dirname)
+
+    if not dirname:
+        # open a file dialog
+        # currently Scpy use QT (needed for next GUI features)
+
+        if not parent_dir:
+            # if no parent directory was specified
+            parent_dir = prefs.datadir
+
+        caption = kwargs.get('caption', 'Select folder')
+
+        if not do_not_block:  # this is for allowing test to continue in the background
+            directory = opendialog(single=False,
+                                   directory=parent_dir,
+                                   caption=caption,
+                                   filters='directory')
+
+            return directory
 
 
 # ============================================================================
@@ -211,12 +273,11 @@ def list_packages(package):
 
 # ............................................................................
 def generate_api(api_path):
-
     # name of the package
     dirname, name = os.path.split(os.path.split(api_path)[0])
     if not dirname.endswith('spectrochempy'):
         dirname, _name = os.path.split(dirname)
-        name = _name+'.'+name
+        name = _name + '.' + name
     pkgs = sys.modules['spectrochempy.%s' % name]
     api = sys.modules['spectrochempy.%s.api' % name]
 
@@ -233,7 +294,7 @@ def generate_api(api_path):
             raise ImportError(pkg)
         if not hasattr(pkg, '__all__'):
             continue
-        a = getattr(pkg, '__all__',[])
+        a = getattr(pkg, '__all__', [])
         dmethods = getattr(pkg, '__dataset_methods__', [])
         __all__ += a
         for item in a:
@@ -247,6 +308,7 @@ def generate_api(api_path):
                 setattr(NDDataset, item, getattr(pkg, item))
 
     return __all__
+
 
 # ============================================================================
 # ZIP UTILITIES
@@ -378,7 +440,7 @@ class ScpFile(object):
         elif member and ext in ['.json']:
             return json.loads(asstr(self.zip.read(key)))
 
-        elif member :
+        elif member:
             return self.zip.read(key)
 
         else:
