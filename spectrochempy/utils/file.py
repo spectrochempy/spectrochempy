@@ -143,8 +143,6 @@ def readfilename(filename=None, **kwargs):
                                     directory=directory,
                                     caption=caption,
                                     filters = filetypes)
-        else:
-            return None
 
         if not filename:
             # if the dialog has been cancelled or return nothing
@@ -199,6 +197,7 @@ def readdirname(dirname=None, **kwargs):
     """
 
     from spectrochempy.application import general_preferences as prefs
+    from spectrochempy.application import do_not_block
 
     #Check parent directory
     parent_dir = kwargs.get("parent_dir", None)
@@ -241,7 +240,8 @@ def readdirname(dirname=None, **kwargs):
 
         caption = kwargs.get('caption', 'Select folder')
 
-        directory = opendialog(  single=False,
+        if not do_not_block: #this is for allowing test to continue in the background
+            directory = opendialog(  single=False,
                                 directory=parent_dir,
                                 caption=caption,
                                 filters = 'directory')
