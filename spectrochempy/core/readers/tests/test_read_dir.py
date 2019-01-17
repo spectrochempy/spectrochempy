@@ -20,6 +20,9 @@ def test_read_dir():
     A = NDDataset.read_dir(os.path.join('irdata','subdir'))
     assert len(A) == 4
 
+    # in case we do not specify a directory:
+    #  - open a dialog but handle the case we clik cancel
+    B = NDDataset.read_dir()
 
 
 
