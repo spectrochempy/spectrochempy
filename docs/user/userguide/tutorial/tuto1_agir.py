@@ -32,7 +32,7 @@ set_loglevel(WARNING)
 #
 # The AGIR instrument setup is displayed in the following figure. 
 #
-# ![fig_agir_setup](figures/annotated_fig_agir_setup.jpg)
+# ![figagirsetup](annotated_fig_agir_setup.jpg)
 #
 # This instrument consists in the combination of an infrared cell and a balance. It allows recording *operando* IR spectra and, simultaneously, the mass of the sample.
 
@@ -389,4 +389,8 @@ _ = plot_multiple(datasets=tga_datasets, labels=labels, pen=True, style='sans', 
 proj.save('HIZECOKE')
 
 # %% [markdown]
-# In the next [notebook](agir_IR_processing.ipynb), we will now proceed with some basic pre-processing of the IR data, such as slicing interesting regions, and masking some data. 
+# In the next [notebook](tuto2_agir_IR_processing.ipynb), we will now proceed with some basic pre-processing of the IR data, such as slicing interesting regions, and masking some data. 
+
+# %%
+
+

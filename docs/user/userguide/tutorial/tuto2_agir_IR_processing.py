@@ -236,4 +236,4 @@ proj.A350.IR[24.17:24.36]=masked
 proj.save('HIZECOKE', overwrite_data=False)
 
 # %% [markdown]
-# In the next [notebook](agir_tg_processing.ipynb), we will proceed with some basic pre-processing of the TGA data.
+# In the next [notebook](tuto3_agir_tg_processing.ipynb), we will proceed with some basic pre-processing of the TGA data.

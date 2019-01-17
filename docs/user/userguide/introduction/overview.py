@@ -23,7 +23,7 @@
 # ### Using Jupyter Notebook
 
 # %% [markdown]
-# Assuming Jupyter is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../install)), go to the
+# Assuming Jupyter is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../../gettingstarted/install)), go to the
 # |scpy| folder. From this location, open a
 # terminal and type something like:
 #
@@ -37,7 +37,7 @@
 #
 # Click on the the fist notebook : **introduction.ipynb**
 #
-# ![launched](../images/jupyter_intro.png)
+# ![introd](../images/jupyter_intro.png)
 
 # %% [markdown]
 # ### Using Jupyter Lab
@@ -211,8 +211,6 @@ try:
 except AttributeError as e:
     log.error(e)
 
-# %% [markdown]
-# More information are given in the section [4.1. units and uncertainties](4.1_units_and_uncertainties.ipynb)
 
 # %% [markdown]
 # ## NDDataset, the main object

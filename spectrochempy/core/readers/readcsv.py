@@ -92,7 +92,7 @@ def read_zip(dataset=None, **kwargs):
 
 # .............................................................................
 def read_csv(dataset=None, **kwargs):
-    """Open a *.csv file or a list of *.csv files and set data/metadata
+    """Open a \*.csv file or a list of \*.csv files and set data/metadata
     in the current dataset
 
     Parameters
@@ -101,13 +101,13 @@ def read_csv(dataset=None, **kwargs):
         The dataset to store the data and the metadata read from the spg file
     filename: str
         filename of the file to load
-    directory: str [optional, default=""].
-        From where to read the specified filename. If not sperfied, read i 
-        the current directory.
+    directory: str, optional, default="".
+        From where to read the specified filename. If not specified, read in
+        the current directory then it the test directory.
 
     Returns
     -------
-    |NDDataset|
+    dataset: |NDDataset|
 
     Examples
     --------
@@ -122,6 +122,8 @@ def read_csv(dataset=None, **kwargs):
     without header
 
     """
+    #TODO: to allow header and nd-data
+
     log.debug("reading csv files")
 
     # filename will be given by a keyword parameter except the first parameters

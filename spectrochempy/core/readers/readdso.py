@@ -26,16 +26,18 @@ __all__ = ['read_dso']
 __dataset_methods__ = __all__
 
 def read_dso(filename='', **kwargs):
-    """Open an eigevector DSO object (.mat file) and return the corresponding dataset
+    """Open an eigevector DSO object (``.mat`` file) and
+        return the corresponding dataset
 
     Parameters
     ===========
     filename : str
-        filename of file to load
+        filename of the file to load
 
     Returns
     ========
-    dataset : : a  dataset object with spectra and metadata
+    dataset : |NDDataset|
+        a  dataset object with spectra and metadata
 
 
     Examples

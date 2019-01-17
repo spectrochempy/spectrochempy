@@ -4,8 +4,9 @@ Installation Guide
 ###################
 
 **Table of contents**
+
 .. contents::
-    :local:
+   :local:
 
 
 Where to Get |scpy|

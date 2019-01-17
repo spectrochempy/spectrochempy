@@ -44,8 +44,8 @@ from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
 # .............................................................................
 def read_omnic(dataset=None, **kwargs):
-    """Open a Thermo Nicolet \*.spg or a list of \*.spa files and set
-    data/metadata in the current dataset
+    """Open a Thermo Nicolet with extension ``.spg`` or a list of ``.spa`` files
+     and set data/metadata in the current dataset
 
     Parameters
     ----------
@@ -54,7 +54,7 @@ def read_omnic(dataset=None, **kwargs):
         If None, a |NDDataset| is created.
     filename : `None`, `str`, or list of `str`
         Filename of the file(s) to load. If `None`: opens a dialog box to select
-        "\*.spa" or "\*.spg" files. If `str`: a single filename. It list of str:
+        ``.spa`` or ``.spg`` files. If `str`: a single filename. It list of str:
         a list of filenames.
     directory: str, optional, default="".
         From where to read the specified filename. If not specified, read in
@@ -64,9 +64,9 @@ def read_omnic(dataset=None, **kwargs):
 
     Returns
     -------
-    dataset : |NDDdataset|
-        A dataset corresponding to the .spg file or the set of .spa files. A
-        list of datasets is returned if several .spg files are passed.
+    dataset : |NDDataset|
+        A dataset corresponding to the ``.spg`` file or the set of ``.spa``
+        files. A list of datasets is returned if several ``.spg`` files are passed.
 
     Examples
     --------
@@ -99,7 +99,9 @@ def read_omnic(dataset=None, **kwargs):
     # returns a list of files to read
     files = readfilename(filename,
                          directory=directory,
-                         filetypes=['OMNIC spa files (*.spa)', 'OMNIC spg files (*.spg)', 'all OMNIC files (*.sp*)'])
+                         filetypes=['OMNIC spa files (*.spa)',
+                                    'OMNIC spg files (*.spg)',
+                                    'all OMNIC files (*.sp*)'])
 
     if not files:
         # there is no files, return nothing
