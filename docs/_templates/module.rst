@@ -12,7 +12,7 @@ Functions
 
 .. autofunction:: {{ item }}
 
-.. include:: ../../gen_modules/backreferences/{{fullname}}.{{item}}.examples
+.. include:: ../../gallery/gen_modules/backreferences/{{fullname}}.{{item}}.examples
 
 .. raw:: html
 
