@@ -19,7 +19,7 @@ rst_epilog = """
 
 .. |scpy| replace:: **SpectroChemPy**
 
-.. |Project| replace:: :class:`~spectrochempy.dataset.ndarray.Project`
+.. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
 
 .. |Script| replace:: :class:`~spectrochempy.dataset.ndarray.Script`
 

@@ -91,7 +91,7 @@ def read_omnic(dataset=None, **kwargs):
         if isinstance(dataset, (str, list)) and dataset != '':
             filename = dataset
 
-        dataset = NDDataset()  # create a NDDataset
+        dataset = NDDataset()  # create an instance of NDDataset
 
     # check if directory was specified
     directory = kwargs.get("directory", None)

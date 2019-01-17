@@ -1975,7 +1975,7 @@ class NDArray(HasTraits):
                     start, stop = stop, start
                 stop = stop + 1
 
-            if step is not None and not isinstance(step, (int, np.int_)):
+            if step is not None and not isinstance(step, (int, np.int_, np.int64)):
                 raise NotImplementedError(
                     'step in location slicing is not yet possible.')
                 # TODO: we have may be a special case with datetime

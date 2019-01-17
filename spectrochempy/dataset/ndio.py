@@ -502,9 +502,7 @@ class NDIO(HasTraits):
             # try:
             # find the adequate reader
         _reader = getattr(cls, 'read_{}'.format(protocol))
-        return _reader(filename, protocol='protocol',
-                       sortbydate=sortbydate,
-                       **kwargs)
+        return _reader(filename, sortbydate=sortbydate, **kwargs)
 
     # --------------------------------------------------------------------------
     # Generic write function
@@ -547,8 +545,7 @@ class NDIO(HasTraits):
         try:
             # find the adequate reader
             _writer = getattr(self, 'write_{}'.format(protocol))
-            return _writer(filename, protocol='protocol',
-                           **kwargs)
+            return _writer(filename, **kwargs)
 
         except:
 
