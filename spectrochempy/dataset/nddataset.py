@@ -33,6 +33,13 @@ from traitlets import (List, Unicode, Instance, Bool, All, Float, validate,
                        observe, default, )
 import matplotlib.pyplot as plt
 
+try:
+    import xarray as xr
+
+    _HAS_XARRAY = True
+except:
+    _HAS_XARRAY = False
+
 # =============================================================================
 # Local imports
 # =============================================================================
@@ -212,7 +219,7 @@ class NDDataset(
             return
         for i, item in enumerate(coordset):
             if isinstance(item, NDArray) and \
-                not isinstance(item, Coord):
+                    not isinstance(item, Coord):
                 coordset[i] = Coord(item)
         return coordset
 
@@ -237,7 +244,6 @@ class NDDataset(
                     cs.coords.remove(coord)
         return cs
 
-
     # .........................................................................
     @coordset.setter
     def coordset(self, value):
@@ -245,13 +251,13 @@ class NDDataset(
         if value is not None:
             if self._coordset is not None:
                 log.debug("Overwriting NDDataset's current "
-                         "coordset with one specified")
+                          "coordset with one specified")
 
             if not isinstance(value, CoordSet):
                 value = CoordSet(value)
 
             coordset = CoordSet(
-                [ Coord() for s in self._data.shape])  # basic coordset
+                [Coord() for s in self._data.shape])  # basic coordset
 
             for i, item in enumerate(value[::-1]):
                 coordset[self._data.ndim - 1 - i] = item
@@ -272,8 +278,6 @@ class NDDataset(
         else:
             # no change
             pass
-
-
 
     # .........................................................................
     @property
@@ -685,6 +689,76 @@ class NDDataset(
     # Create the returned values of functions should be same class as input.
     # The units should have been handled by __array_wrap__ already
 
+    # ... Converters ..........................................................
+    def to_xarray(self, **kwargs):
+        """
+        Convert a NDDataset instance to an `~xarray.DataArray` object
+        ( the xarray library must be available )
+
+        Parameters
+
+        Returns
+        -------
+        xarray : a xarray.DataArray object
+
+
+        """
+        # Information about DataArray from the DataArray docstring
+        #
+        # Attributes
+        # ----------
+        # dims : tuple
+        #     Dimension names associated with this array.
+        # values : np.ndarray
+        #     Access or modify DataArray values as a numpy array.
+        # coords : dict-like
+        #     Dictionary of DataArray objects that label values along each dimension.
+        # name : str or None
+        #     Name of this array.
+        # attrs : OrderedDict
+        #     Dictionary for holding arbitrary metadata.
+        # Init docstring:
+        # Parameters
+        # ----------
+        # data : array_like
+        #     Values for this array. Must be an ``numpy.ndarray``, ndarray like,
+        #     or castable to an ``ndarray``. If a self-described xarray or pandas
+        #     object, attempts are made to use this array's metadata to fill in
+        #     other unspecified arguments. A view of the array's data is used
+        #     instead of a copy if possible.
+        # coords : sequence or dict of array_like objects, optional
+        #     Coordinates (tick labels) to use for indexing along each dimension.
+        #     If dict-like, should be a mapping from dimension names to the
+        #     corresponding coordinates. If sequence-like, should be a sequence
+        #     of tuples where the first element is the dimension name and the
+        #     second element is the corresponding coordinate array_like object.
+        # dims : str or sequence of str, optional
+        #     Name(s) of the data dimension(s). Must be either a string (only
+        #     for 1D data) or a sequence of strings with length equal to the
+        #     number of dimensions. If this argument is omitted, dimension names
+        #     are taken from ``coords`` (if possible) and otherwise default to
+        #     ``['dim_0', ... 'dim_n']``.
+        # name : str or None, optional
+        #     Name of this array.
+        # attrs : dict_like or None, optional
+        #     Attributes to assign to the new instance. By default, an empty
+        #     attribute dictionary is initialized.
+        # encoding : dict_like or None, optional
+        #     Dictionary specifying how to encode this array's data into a
+        #     serialized format like netCDF4. Currently used keys (for netCDF)
+        #     include '_FillValue', 'scale_factor', 'add_offset', 'dtype',
+        #     'units' and 'calendar' (the later two only for datetime arrays).
+        #     Unrecognized keys are ignored.
+
+        x, y = self.x, self.y
+        nx = "%s ($%s$)" % (x.title, x.units)
+        ny = "%s ($%s$)" % (y.title, y.units)
+        da = xr.DataArray(np.array(self.data, dtype=np.float64),
+                          coords=[(ny, y.data), (nx, x.data)],
+                          attrs=self.meta,
+                          )
+        return da
+
     # -------------------------------------------------------------------------
     # special methods
     # -------------------------------------------------------------------------
@@ -702,8 +776,8 @@ class NDDataset(
 
         # choose, if we keep the same or create new dataset
         inplace = False
-        if isinstance(items,tuple) and items[-1]==INPLACE:
-            items=list(items)[:-1]
+        if isinstance(items, tuple) and items[-1] == INPLACE:
+            items = list(items)[:-1]
             inplace = True
         if inplace:
             new = self
@@ -714,7 +788,7 @@ class NDDataset(
         items = self._make_index(items)
 
         if inplace:
-            new = super(NDDataset, self).__getitem__(items+(INPLACE,))
+            new = super(NDDataset, self).__getitem__(items + (INPLACE,))
         else:
             new = super(NDDataset, self).__getitem__(items)
 
@@ -731,7 +805,7 @@ class NDDataset(
     def __getattr__(self, item):
         # when the attribute was not found
         if item in ["__numpy_ufunc__"] or '_validate' in item or \
-            '_changed' in item:
+                '_changed' in item:
             # raise an error so that masked array will be handled correctly
             # with arithmetic operators and more
             raise AttributeError
@@ -832,8 +906,8 @@ class NDDataset(
                                                and coord.data is not None):
                     coord_str = str(coord).replace('\n\n', '\n')
                     # special case when a coordinate has a single element.
-                    if len(self.coordset)>self.ndim:
-                        ndim = self.ndim+1
+                    if len(self.coordset) > self.ndim:
+                        ndim = self.ndim + 1
                     else:
                         ndim = self.ndim
                     out += ' {}-coordinate:\n'.format("wzyx"[-ndim:][idx])
@@ -913,8 +987,8 @@ class NDDataset(
                 if isinstance(coord, list) or (hasattr(coord, 'data')
                                                and coord.data is not None):
                     coord_str = coord._repr_html_()
-                    if len(self.coordset)>self.ndim:
-                        ndim = self.ndim+1
+                    if len(self.coordset) > self.ndim:
+                        ndim = self.ndim + 1
                     else:
                         ndim = self.ndim
                     out += tr.format("%s-coordinate" % "wzyx"[-ndim:][idx], coord_str)

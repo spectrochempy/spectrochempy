@@ -8,7 +8,7 @@ ENV PATH /opt/conda/bin:$PATH
 RUN apt-get -qq update --fix-missing
 
 RUN apt-get -qq -y install curl bzip2 libgl1-mesa-glx libglib2.0-0 ca-certificates libxext6 libsm6 libxrender1 git
-
+RUN apt-get -qq -y --reinstall install libqt5dbus5 libqt5widgets5 libqt5network5 libqt5gui5 libqt5core5a libdouble-conversion1 libxcb-xinerama0
 RUN curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh
 
 RUN bash /tmp/miniconda.sh -bfp /opt/conda && rm -rf /tmp/miniconda.sh
