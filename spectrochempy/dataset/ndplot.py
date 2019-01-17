@@ -33,6 +33,15 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, default
 
+try:
+#if holoview is installed
+#    import holoviews as hv
+#    from holoviews import opts
+    _HAS_HOLOVIEWS = False
+#    hv.extension('bokeh')
+except:
+    _HAS_HOLOVIEWS = False
+
 # local import
 # ------------
 from ..utils import (is_sequence, SpectroChemPyDeprecationWarning,

@@ -74,8 +74,6 @@ def _setup_backend_and_ipython(backend=None):
     # use of IPython (console or notebook)
     ip = get_ipython()
     if ip is not None:
-        # provide the possibility to use Qt events in notebooks (such as filedialog)
-        ip.magic('gui qt')
 
         if getattr(get_ipython(), 'kernel', None) is not None:
             # set the ipython matplotlib environments
@@ -103,6 +101,9 @@ def _setup_backend_and_ipython(backend=None):
                 ip.magic('matplotlib inline')
             except:
                  pass
+
+        # provide the possibility to use Qt events in notebooks (such as filedialog)
+        ip.magic('gui qt')
 
     return (ip, backend)
 

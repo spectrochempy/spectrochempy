@@ -7,6 +7,7 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 
+from spectrochempy import *
 from spectrochempy.utils import show
 from spectrochempy.application import set_loglevel
 
@@ -25,4 +26,8 @@ def test_plot_generic_2D(IR_dataset_2D):
         dataset.plot(method=method)
 
     show()
+
+
+def test_holoviews():
+    pass
 
