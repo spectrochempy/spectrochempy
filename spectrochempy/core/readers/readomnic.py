@@ -155,8 +155,13 @@ def _readbtext(f, pos):
         btext = btext + f.read(1)  # append 1 byte
 
     btext = btext[0:len(btext) - 1]  # cuts the last byte
-    text = btext.decode(encoding='utf-8',
-                        errors='ignore')  # decode btext to string
+    try:
+        text = btext.decode(encoding='utf-8')  # decode btext to string
+    except UnicodeDecodeError:
+        try:
+            text = btext.decode(encoding='latin_1')
+        except:
+            text = btext.decode(encoding='utf-8', errors='ignore')
     return text
 
 
@@ -397,12 +402,16 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
 # .............................................................................
 def _read_spa(dataset, filenames, **kwargs):
     nspec = len(filenames)
+
     # containers to hold values
-    nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec,
-                                                         'float'), np.zeros(
-        nspec, 'float')
-    allintensities, alltitles, allacquisitiondates, alltimestamps, \
-    allhistories = [], [], [], [], []
+    nx = np.zeros(nspec, 'int')
+    firstx = np.zeros(nspec, 'float')
+    lastx = np.zeros(nspec, 'float')
+    allintensities = []
+    alltitles = []
+    allacquisitiondates = []
+    alltimestamps = []
+    allhistories = []
 
     for i, _filename in enumerate(filenames):
 
@@ -422,11 +431,10 @@ def _read_spa(dataset, filenames, **kwargs):
 
             f.seek(296)
 
-            timestamp = np.fromfile(f, dtype=np.uint32, count=1)[
-                0]  # days since 31/12/1899, 00:00
-            acqdate = datetime(1899, 12, 31, 0, 0,
-                               tzinfo=timezone.utc) + timedelta(
-                seconds=int(timestamp))
+            # days since 31/12/1899, 00:00
+            timestamp = np.fromfile(f, dtype=np.uint32, count=1)[0]
+            acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + \
+                      timedelta(seconds=int(timestamp))
             allacquisitiondates.append(acqdate)
             timestamp = acqdate.timestamp()
             # Transform back to timestamp for storage in the Coord object
@@ -528,10 +536,9 @@ def _read_spa(dataset, filenames, **kwargs):
 
     # load into the  Dataset Object of spectral content
     dataset.data = np.array(allintensities)
-    # nd.title = alltitles[0] + ' ... ' + alltitles[-1]
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
-    dataset.name = alltitles[0] + ' ... ' + alltitles[-1]
+    dataset.name = ' ... '.join(set([alltitles[0], alltitles[-1]]))
     dataset._date = datetime.now()
     dataset._modified = dataset._date
 
@@ -543,9 +550,8 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset.coordset[0].units = 's'
 
     # Set description and history
-    dataset.description = (
-            'Dataset from ' + str(nspec) + ' spa files : \'' + filenames[0] + '...' + filenames[-1] + '\n'
-            + 'History of the 1st spectrum: ' + allhistories[0])
+    dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum: {3}".format(
+        nspec, ' ... '.join(set([filenames[0], filenames[-1]])), '1st ' if nspec > 1 else '', allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'
 
