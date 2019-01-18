@@ -214,8 +214,8 @@ __all__ += api.__all__
 # analysis
 # --------
 _update(11, 'Load analysis ...')
-from .analysis.api import *
-from .analysis import api
+from spectrochempy.core.analysis.api import *
+from spectrochempy.core.analysis import api
 
 __all__ += api.__all__
 
@@ -241,6 +241,14 @@ __all__ += api.__all__
 _update(14, 'Load scripts ...')
 from spectrochempy.core.scripts.api import *
 from spectrochempy.core.scripts import api
+
+__all__ += api.__all__
+
+# script
+# -------
+_update(15, 'Load widgets ...')
+from spectrochempy.widgets.api import *
+from spectrochempy.widgets import api
 
 __all__ += api.__all__
 
@@ -281,9 +289,9 @@ APIref = APIref()
 
 __all__.append('APIref')
 
-_update(15, 'API loaded and activated.')
+_update(16, 'API loaded and activated.')
 
-_update(16, '')    # make the last message visible (empirical solution...
+_update(18, '')    # make the last message visible (empirical solution...
 # don't know why this work, at least on Mac OSX.
 
 
