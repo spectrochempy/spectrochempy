@@ -258,19 +258,19 @@ __all__ += api.__all__
 
 try:
     import sympy as sym
-    __HAS_SYMPY__ = True
+    HAS_SYMPY__ = True
     __all__.append('sym')
 except ImportError:
-    __HAS_SYMPY__ = True
-__all__.append('__HAS_SYMPY__')
+    HAS_SYMPY = True
+__all__.append('HAS_SYMPY')
 
 try:
     import sklearn as skl
-    __HAS_SCIKITLEARN__ = True
+    HAS_SCIKITLEARN = True
     __all__.append('skl')
 except ImportError:
-    __HAS_SCIKITLEARN__ = False
-__all__.append('__HAS_SCIKITLEARN__')
+    HAS_SCIKITLEARN = False
+__all__.append('HAS_SCIKITLEARN')
 
 
 # Helpers

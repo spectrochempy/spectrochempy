@@ -35,6 +35,19 @@ from spectrochempy.extern import pint
 # Modify the pint behaviour ####################################################
 #  TODO: better ways ??
 
+_PRETTY_EXPONENTS = '⁰¹²³⁴⁵⁶⁷⁸⁹'
+
+
+def _pretty_fmt_exponent(num):
+    """Format an number into a pretty printed exponent using unicode.
+    """
+    # work badly for decimals as superscript dot do not exist in unicode
+    # (as far as we know)
+    ret = '{0:n}'.format(num).replace('-', '⁻').replace('.',u"\u2027")
+    for n in range(10):
+        ret = ret.replace(str(n), _PRETTY_EXPONENTS[n])
+    return ret
+
 
 formats = {
 
@@ -63,6 +76,16 @@ formats = {
         'division_fmt': r'\frac[{0}][{1}]',
         'power_fmt': '{0}^[{1}]',
         'parentheses_fmt': r'\left({0}\right)',
+    },
+
+    'P': {  # Pretty format.
+        'as_ratio': False,
+        'single_denominator': False,
+        'product_fmt': '·',
+        'division_fmt': '/',
+        'power_fmt': '{}{}',
+        'parentheses_fmt': '({})',
+        'exp_call': _pretty_fmt_exponent,
     },
 
 }

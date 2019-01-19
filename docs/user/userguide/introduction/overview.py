@@ -170,7 +170,7 @@ plt.figure(figsize=(5,2.5))
 p, = plt.plot(x,y)
 p.set_linewidth(2)
 p.set_color('red')
-plt.show()
+#plt.show()
 
 # %% [markdown]
 # ### Units, uncertainties and measurements
@@ -290,7 +290,7 @@ _ = nds.plot(method='stack')
 #
 
 # %% [code]{"hide_input": true}
-show() # Note : show all plots (only required if the notebook is exported as a script, to make all plots visibles)
+# show() # Note : show all plots (only required if the notebook is exported as a script, to make all plots visibles)
 
 # %% [markdown]
 # ## File selector widget

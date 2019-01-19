@@ -53,7 +53,7 @@
 # """
 
 # import the main api
-from .api import *
+from spectrochempy.api import *
 from spectrochempy import api
 
 __all__ = api.__all__
