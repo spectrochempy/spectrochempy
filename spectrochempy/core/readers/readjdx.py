@@ -192,21 +192,21 @@ def read_jdx(filename='', sortbydate=True):
                 xaxis = np.around((xaxis * xfactor), 3)
             else:  # Check the consistency of xaxis
                 if nx[i] - nx[i - 1] != 0:
-                    print(
+                    raise ValueError(
                         'Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
                     return
                 elif firstx[i] - firstx[i - 1] != 0:
-                    print(
+                    raise ValueError(
                         'Error: Inconsistant data set - the x axis should start at same value')
                     return
                 elif lastx[i] - lastx[i - 1] != 0:
-                    print(
+                    raise ValueError(
                         'Error: Inconsistant data set - the x axis should end at same value')
                     return
         else:
-            print((
+            raise ValueError(
                 'Error: ##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°',
-                i + 1))
+                i + 1)
             return
 
             # Creation of the acquisition date

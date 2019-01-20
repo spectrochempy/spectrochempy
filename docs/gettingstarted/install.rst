@@ -88,12 +88,12 @@ Very simple, use the following command in a terminal:
 This will add the necessary channels where to find the various libraries used by |scpy| .
 
 Next we recommend to use a dedicated environment for |scpy|, called
-for example ``scp37`` (using python 3.7)
+for example ``scpy``
 
 .. sourcecode:: bash
 
-   $ conda create -n scp37 python=3.7
-   $ source activate scp37
+   $ conda env create -f=env/scpy.yml
+   $ conda activate scpy
 
 Next one can install |scpy|:
 
@@ -184,6 +184,7 @@ then:
 
    $ git clone https://bitbucket.org/spectrocat/spectrochempy.git
    $ cd spectrochempy
+   $ conda env create -f=env/scpy-dev.yml
    $ pip install -e .
 
 
@@ -205,6 +206,29 @@ Then execute two commands as following:
 	In [2]: NDDataset()
 
 If this goes well, the |scpy| application is likely functional.
+
+Jupyter notebook
+================
+
+After the installation above, to be able to use spectrochempy in notebooks
+with the full plotting capabilities we need to execute the  following command:
+
+.. sourcecode:: bash
+
+    $ conda install -c conda-forge widgetsnbextension
+
+Jupyter lab
+===========
+
+As for notebooks we need these additional steps:
+
+.. sourcecode:: bash
+
+    $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
+    $ jupyter labextension install jupyter-matplotlib
+
+If jupyter lab ask you for building, do it!
+
 
 Getting started
 ===============

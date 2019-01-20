@@ -117,30 +117,20 @@ Install a developpement version of SpectroChemPy
        $ cd <workspace>/spectrochempy
 
 
-#.  Create a `conda` environment called, for example, **scp37**
+#.  Create a `conda` environment called, for example, **scpy**
     by entering the following commands:
 
     .. sourcecode:: bash
 
-       $ conda create -n scp37 python=3.7
-        
-    and now add the required packages (the current directory must be: `<workspace>/spectrochempy`):
-    
-    .. sourcecode:: bash
-    
-       $ conda update -n base -c defaults conda
-       $ conda config --prepend channels conda-forge
-       $ conda install --yes --file requirements.txt
+       $ conda env create -f=env/scpy-dev.yml
+
+    This will add all (or most) of the necessary packages for development.
 
 #.  Switch to this environment:
 
-    On WINDOWS, you should use ``activate scp37``.
-
-    On LINUX or macOS,  ``source activate scp37``.
-
     .. sourcecode:: bash
 
-        $ source activate scp37
+        $ conda activate scpy-dev
 
     You can make it permanent by putting this command in you ``bash_profile``
     (MAC).
@@ -168,7 +158,9 @@ Install a developpement version of SpectroChemPy
 
     .. sourcecode:: bash
 
-       $ conda install -n scp36 <pkgname>
+       $ conda install -n scpy <pkgname>
+
+    ```n scpy`` is just to be sure we install in the correct environment.
 
 .. _forkscpy:
 

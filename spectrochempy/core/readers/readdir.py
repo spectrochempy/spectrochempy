@@ -81,7 +81,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
     --------
     >>> A = NDDataset.read_dir('irdata')
     >>> print(A)
-    [NDDataset: [  ...
+    [NDDataset: [[ ...
 
     >>> B = NDDataset.read_dir()
 

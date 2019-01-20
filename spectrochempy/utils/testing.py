@@ -252,9 +252,12 @@ def example_run(path):
     import subprocess
 
     pipe = None
+    print(os.environ['CONDA_DEFAULT_ENV'])
+
+    pipe = None
     try:
         pipe = subprocess.Popen(
-                ["python", path, " --test=True"],
+                ["python", path, ],
                 stdout=subprocess.PIPE)
         (so, serr) = pipe.communicate()
     except:
@@ -397,8 +400,6 @@ def image_comparison(reference=None,
     -------
 
     """
-
-    #preferences.do_not_block = True
 
     if not reference:
         raise ValueError('no reference image provided. Stopped')

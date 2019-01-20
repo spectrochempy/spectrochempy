@@ -287,9 +287,8 @@ class SpectroChemPyMagics(Magics):
         if cell:
             contents += "\n" + cell
 
-        from spectrochempy.core.scripts.script import Script  # import
-
-        # delayed to avoid circular import error
+        # import delayed to avoid circular import error
+        from spectrochempy.core.scripts.script import Script
         script = Script(name, content=contents)
         projobj[name] = script
 
@@ -851,9 +850,6 @@ class SpectroChemPy(Application):
     test = Bool(False, help='test flag').tag(config=True)
     """Flag to set the application in testing mode"""
 
-    do_not_block = Bool(False)
-    "Flag to make the plots BUT do not stop for TESTS or DOCS building"
-
     # Command line interface
     # ----------------------
 
@@ -909,12 +905,22 @@ class SpectroChemPy(Application):
 
         _do_parse = True
 
-        # print(sys.argv)   # to uncommant in case of problems with the arguments
+        #print(sys.argv)   # to uncomment in case of problems with the arguments
         for arg in ['egg_info', '--egg-base', 'pip-egg-info', 'develop', '-f',
-                    '-x', '-c', '--mode=client', '--last-failed']:
+                    '-x', '-c', '--mode=client', '--last-failed', '-k']:
             if arg in sys.argv:
-                _do_parse = False
+                sys.argv.remove(arg)
+        # problem when some test are executed individually in pycharm.
+        if len(sys.argv)==4 and sys.argv[3].endswith(sys.argv[2]):
+            sys.argv.remove(sys.argv[2])
+        #
+        #for arg in ['egg_info', '--egg-base', 'pip-egg-info', 'develop', '-f',
+        #             '-x', '-c', '--mode=client', '--last-failed']:
+        #     if arg in sys.argv:
+        #         _do_parse = False
 
+        # A problem arise in pycharm when a test is individually executed.
+        #
         if _do_parse:
             self.parse_command_line(sys.argv)
 
@@ -922,35 +928,6 @@ class SpectroChemPy(Application):
         # ---------------------------------------------------------------------
 
         self.init_all_preferences()
-
-        # Test, Sphinx,  ...  detection
-        # ---------------------------------------------------------------------
-
-        for caller in ['builddocs.py', '-c']:
-            # `-c` happen if the pytest is executed in parallel mode
-            # using the plugin pytest-xdist
-
-            if caller in sys.argv[0]:
-                # this is necessary to build doc
-                # with sphinx-gallery and doctests
-                plt.ioff()
-                self.do_not_block = True
-                break
-
-        for caller in ['pytest', 'py.test']:
-
-            if caller in sys.argv[0]:
-                # let's set do_not_block flag to true only if we are running
-                #  the whole suite of tests
-                if len(sys.argv) > 1 and sys.argv[1].endswith("spectrochempy"):
-                    plt.ioff()
-                    self.do_not_block = True
-
-        # case we have passed -test arguments to a script
-        if len(sys.argv) > 1 and "-test" in sys.argv[1]:
-            plt.ioff()
-            self.do_not_block = True
-
 
         # we catch warnings and error for a ligther display to the end-user.
         # except if we are in debugging mode
@@ -1199,7 +1176,6 @@ app = SpectroChemPy()
 log = app.log
 general_preferences = app.general_preferences
 project_preferences = app.project_preferences
-do_not_block = app.do_not_block
 description = app.description
 long_description = app.long_description
 datadir = app.datadir

@@ -367,29 +367,4 @@ def _add_omnic_info(dataset, **kwargs):
 # tests
 # ===============================================================================
 if __name__ == '__main__':
-    from spectrochempy import (NDDataset, set_loglevel, ERROR, show)
-
-    set_loglevel(ERROR)
-
-    # A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
-    #                        directory=data,
-    #                        origin='omnic_export')
-    # print(A)
-    # A.plot_stack()
-
-    B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
-    print(B)
-
-    B = B[-0.5:60.0]
-
-    B.x.units = 'hour'
-    B.x.title = 'time on stream'
-    B.units = 'weight_percent'
-    B.title = 'loss of mass'
-
-    B.plot()
-    show()
-
-    # to open the file dialog editor
-    # C = NDDataset.read_csv(directory=data)
-    # print(C)
+    pass

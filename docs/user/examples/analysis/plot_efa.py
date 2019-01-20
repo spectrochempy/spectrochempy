@@ -51,4 +51,4 @@ cut = np.max(f[:, npc].data)
 
 c = efa.get_conc(npc, plot=True)
 
-scp.show()
+#scp.show()
