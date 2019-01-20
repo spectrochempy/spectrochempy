@@ -97,3 +97,4 @@ recipes/spectrochempy/win-32/
 recipes/spectrochempy/win-64/
 
 /test_hv/
+/spectrochempy/extern/hvplot/
