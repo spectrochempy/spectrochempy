@@ -1,7 +1,8 @@
 name: scp37
 channels:
 - conda
-- conda-forge
+# - conda-forge
+- spectrocat
 dependencies:
 # for the core package
 - numpy
@@ -9,6 +10,12 @@ dependencies:
 - matplotlib
 - traitlets
 # some other useful package
+- xarray
+- bokeh::bokeh=0.13.0
+- ioam::holoviews=1.10.6
+- datashader=0.6.6
+- param=1.6.1
+- dask=0.17.1
 - pandas
 - xlrd
 - requests
