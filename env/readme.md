@@ -60,5 +60,7 @@ To be able to use matplotlib in jupyter lab`` we need to run these two command`:
 ```bash
 $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
 $ jupyter labextension install jupyter-matplotlib
+$ jupyter labextension install @pyviz/jupyterlab_pyviz
+
 ```
 
