@@ -291,3 +291,20 @@ _ = nds.plot(method='stack')
 
 # %% [code]{"hide_input": true}
 show() # Note : show all plots (only required if the notebook is exported as a script, to make all plots visibles)
+
+# %% [markdown]
+# ## File selector widget
+
+# %% [markdown]
+# A widget is provided to help with the selection of file names or directory.  
+
+# %%
+path = general_preferences.datadir
+fs = FileSelector(path = path, filters=['spg','scp'])
+fs
+
+# %% [markdown]
+# After validation of the selection, one can read the path and name of the selected files. 
+
+# %%
+fs.value, fs.path, fs.fullpath

@@ -484,7 +484,7 @@ class NDArray(HasTraits):
             # must set it as quaternion
             self._isquaternion = True
             data = self._make_quaternion(data)
-            data = data.squeeze()
+            # data = data.squeeze()
 
         elif (np.any(np.iscomplex(data)) or data.dtype == np.complex):
             # check if the passed data are complex in the last dimension
@@ -509,7 +509,7 @@ class NDArray(HasTraits):
 
         """
         if self.size == 1:
-            return self._data.squeeze()[()]
+            return self._data   #.squeeze()[()]
 
         return self._data
 
@@ -721,7 +721,7 @@ class NDArray(HasTraits):
             self._mask = np.zeros(self._data.shape).astype(bool)
 
         if self._mask.size == 1:
-            return self._mask.squeeze()[()]
+            return self._mask      #.squeeze()[()]
 
         return self._mask
 

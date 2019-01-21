@@ -12,7 +12,7 @@ This module implements the |NDDataset| class.
 
 """
 
-__all__ = ['NDDataset']
+__all__ = ['NDDataset', 'HAS_XARRAY']
 
 __dataset_methods__ = []
 
@@ -35,10 +35,9 @@ import matplotlib.pyplot as plt
 
 try:
     import xarray as xr
-
-    _HAS_XARRAY = True
+    HAS_XARRAY = True
 except:
-    _HAS_XARRAY = False
+    HAS_XARRAY = False
 
 # =============================================================================
 # Local imports
@@ -749,14 +748,18 @@ class NDDataset(
         #     include '_FillValue', 'scale_factor', 'add_offset', 'dtype',
         #     'units' and 'calendar' (the later two only for datetime arrays).
         #     Unrecognized keys are ignored.
-
+        if not HAS_XARRAY:
+            warnings.warn('Xarray is not available! This function can not be used',
+                          SpectroChemPyWarning)
+            return None
         x, y = self.x, self.y
-        nx = "%s ($%s$)" % (x.title, x.units)
-        ny = "%s ($%s$)" % (y.title, y.units)
+        tx = x.title
+        ty = y.title
         da = xr.DataArray(np.array(self.data, dtype=np.float64),
-                          coords=[(ny, y.data), (nx, x.data)],
+                          coords=[(ty, y.data), (tx, x.data)],
                           attrs=self.meta,
                           )
+        da.attrs['units']= (y.units,x.units,self.units)
         return da
 
     # -------------------------------------------------------------------------

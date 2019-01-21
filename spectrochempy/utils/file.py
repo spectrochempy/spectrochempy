@@ -52,7 +52,7 @@ def readfilename(filename=None, **kwargs):
 
     from spectrochempy.application import general_preferences as prefs
     from spectrochempy.utils import SpectroChemPyWarning
-    from spectrochempy.application import do_not_block
+    from spectrochempy.api import NO_DISPLAY
 
     # if the directory is not specified we look in the prefs.datadir
     directory = kwargs.get("directory", None)
@@ -139,7 +139,7 @@ def readfilename(filename=None, **kwargs):
 
         # We can not do this during full pytest run without blocking the process
         # TODO: use the pytest-qt to solve this problem
-        if not do_not_block:
+        if not NO_DISPLAY:
             filename = opendialog(single=False,
                                   directory=directory,
                                   caption=caption,
@@ -196,7 +196,7 @@ def readdirname(dirname=None, **kwargs):
     """
 
     from spectrochempy.application import general_preferences as prefs
-    from spectrochempy.application import do_not_block
+    from spectrochempy.api import NO_DISPLAY
 
     # Check parent directory
     parent_dir = kwargs.get("parent_dir", None)
@@ -239,7 +239,7 @@ def readdirname(dirname=None, **kwargs):
 
         caption = kwargs.get('caption', 'Select folder')
 
-        if not do_not_block:  # this is for allowing test to continue in the background
+        if not NO_DISPLAY:  # this is for allowing test to continue in the background
             directory = opendialog(single=False,
                                    directory=parent_dir,
                                    caption=caption,

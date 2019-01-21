@@ -8,16 +8,20 @@
 # =============================================================================
 
 from setuptools import setup, find_packages
-from setuptools.command.develop import develop
-from setuptools.command.install import install
+from setuptools.command.develop import develop as _develop
+from setuptools.command.install import install as _install
 
 import os
+import sys
 import subprocess
 import shutil as sh
 import warnings
 
-
 # ----------------------------------------------------------------------------
+
+__DEV__ = False
+if 'develop' in sys.argv:
+    __DEV__ = True
 
 def path():
     return os.path.dirname(__file__)
@@ -28,29 +32,54 @@ def install_styles():
     Install matplotlib styles
 
     """
-    import matplotlib as mpl
-    from pkg_resources import resource_filename
+    try:
+        import matplotlib as mpl
+    except:
+        warnings.warn('Sorry, but we cannot install mpl plotting styles '
+                      'if MatPlotLib is not installed.\n'
+                      'Please install MatPlotLib using:\n'
+                      '  pip install matplotlib\n'
+                      'or\n'
+                      '  conda install matplotlib\n'
+                      'and then install again.')
+        return
+
+    # install all plotting styles in the matplotlib stylelib library
 
     cfgdir = mpl.get_configdir()
     stylelib = os.path.join(cfgdir, 'stylelib')
     if not os.path.exists(stylelib):
         os.mkdir(stylelib)
-
-    styles_path = resource_filename('scp_data', 'stylesheets')
-
+    styles_path = os.path.join(os.path.dirname(__file__),"scp_data","stylesheets")
     styles = os.listdir(styles_path)
-
     for style in styles:
         src = os.path.join(styles_path, style)
         dest = os.path.join(stylelib, style)
         sh.copy(src, dest)
 
 
-class PostDevelopCommand(develop):
+def install_requires(dev=False):
+    import yaml
+    envyml = 'env/scpy{}.yml'.format('-dev' if dev else '')
+
+    with open(envyml, 'r') as f:
+        req = yaml.load(f)
+
+    for i, item in enumerate(req['dependencies']):
+        if '::' in item:
+            req['dependencies'][i] = req['dependencies'][i].split('::')[1]
+        if '>' not in item and '<' not in item and '=' in item:
+            req['dependencies'][i] = req['dependencies'][i].replace('=', '==')
+
+    print(req['dependencies'])
+    return req['dependencies']
+
+
+class PostDevelopCommand(_develop):
     """Post-installation for development mode."""
 
     def run(self):
-        develop.run(self)
+        _develop.run(self)
         for item in ['pre-commit', 'pre-push']:
             hook = os.path.join(path(), '.git', 'hooks', item)
             if os.path.exists(hook):
@@ -61,67 +90,95 @@ class PostDevelopCommand(develop):
         install_styles()
 
 
-class PostInstallCommand(install):
+class PostInstallCommand(_install):
     """Post-installation for installation mode."""
 
     def run(self):
-        install.run(self)
+        _install.run(self)
         install_styles()
-
 
 def read(fname):
     with open(os.path.join(path(), fname), 'r') as f:
         return f.read()
 
+# Data for setuptools
+packages = []
 
-def get_dependencies():
-    with open(os.path.join(path(), "requirements.txt"), 'r') as f:
-        pkg = f.read().split("\n")
-        while '' in pkg:
-            pkg.remove('')
-        for item in pkg:
-            if item.startswith('#'):
-                pkg.remove(item)
-        # found a problem during pip install with pyqt (works when
-        # replaced by PyQt5)
-        pkg = ['PyQt5' if item.strip() == 'pyqt' else item for item in pkg]
+extras_require = {
+        'tests':[
+            "pytest",
+            "pytest-runner",
+            "pytest-console-scripts",
+            "scikit-image",
+        ],
+        }
 
-        return pkg
+setup_args = dict(
 
+    # packages informations
+    name = "spectrochempy",
+    use_scm_version = True,
+    license="CeCILL-B",
+    author="Arnaud Travert & Christian Fernandez",
+    author_email="developpers@spectrochempy.fr",
+    maintainer="SpectroChempy Developpers",
+    maintainer_email="developpers@spectrochempy.fr",
+    url = 'http:/www.spectrochempy.fr',
+    description='Processing, analysis and modelling Spectroscopic data for '
+                'Chemistry with Python',
+    long_description=read('README.rst'),
+    classifiers=["Development Status :: 3 - Alpha",
+                 "Topic :: Utilities",
+                 "Topic :: Scientific/Engineering",
+                 "Topic :: Software Development :: Libraries",
+                 "Intended Audience :: Science/Research",
+                 "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
+                 "Operating System :: OS Independent",
+                 "Programming Language :: Python :: 3.7",
+                 "Programming Language :: Python :: 3.6",
+                 ],
+    platforms=['Windows', 'Mac OS X', 'Linux'],
 
-def run_setup():
-    setup(name='spectrochempy',
-          use_scm_version=True,
-          packages=find_packages(
-              exclude=['docs', "*.tests", "*.tests.*", "tests.*", "tests"]),
-          include_package_data=True,
-          url='http:/www.spectrochempy.fr',
-          license='CeCILL-B',
-          author='Arnaud Travert & Christian Fernandez',
-          author_email='spectrochempy@ensicaen.fr',
-          description='Processing, analysis and modelling Spectroscopic data for '
-                    'Chemistry with Python',
-          long_description=read('README.rst'),
-          setup_requires=['setuptools_scm', 'matplotlib'],
-          install_requires= [], #  get_dependencies(),
-          dependency_links=[],
-          classifiers=["Development Status :: 3 - Alpha",
-                       "Topic :: Utilities",
-                       "Topic :: Scientific/Engineering",
-                       "Intended Audience :: Science/Research",
-                       "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
-                       "Operating System :: OS Independent",
-                       "Programming Language :: Python :: 3.7",
-                       ],
-          cmdclass={ 'develop': PostDevelopCommand,
-                     'install': PostInstallCommand,
-                     },
-          entry_points={ 'console_scripts': ['scpy=spectrochempy.launch_api:main',
-                                             'scpygui=spectrochempy.launch_gui:main', ]
-                         },
-          )
+    # packages discovery
+    # zip_safe=False,
+    packages=find_packages() + packages,
+    include_package_data=True,
 
+    # requirements
+    python_requires=">3.5",  # TODO: check if it works also with 3.5
+    setup_requires = ['setuptools_scm', 'pyyaml'],
+    install_requires= install_requires(dev=__DEV__),
+    tests_require=extras_require['tests'],
+
+    # post-commands
+    cmdclass = {'develop': PostDevelopCommand,
+                'install': PostInstallCommand,
+                },
+
+    # entry points for scripts
+    entry_points = {'console_scripts': ['scpy=scripts.launch_api:main', ],
+                    'gui_scripts': ['scpygui=scripts.launch_gui:main', ]
+                    },
+
+)
 
 # ============================================================================
 if __name__ == '__main__':
-    run_setup()
+
+    # Check if the setup is done in a good environment
+    # needed so we do not pollute the normal user environment with additional
+    # packages only used in a developpement process
+
+    # For now we assume we are working with conda
+
+    env = os.environ['CONDA_DEFAULT_ENV']
+    print()
+    print()
+    print("#"*80)
+    print("We are in '%s' conda environment."%env)
+    print("#" * 80)
+    print("args passed : ", sys.argv)
+
+    # Now execute setup
+    setup(**setup_args)
+
