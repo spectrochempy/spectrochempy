@@ -19,6 +19,10 @@ import warnings
 
 # ----------------------------------------------------------------------------
 
+__DEV__ = False
+if 'develop' in sys.argv:
+    __DEV__ = True
+
 def path():
     return os.path.dirname(__file__)
 
@@ -61,6 +65,12 @@ def install_requires(dev=False):
     with open(envyml, 'r') as f:
         req = yaml.load(f)
 
+    for i, item in enumerate(req['dependencies']):
+        if '::' in item:
+            req['dependencies'][i] = req['dependencies'][i].split('::')[1]
+        if '>' not in item and '<' not in item and '=' in item:
+            req['dependencies'][i] = req['dependencies'][i].replace('=', '==')
+
     print(req['dependencies'])
     return req['dependencies']
 
@@ -78,7 +88,6 @@ class PostDevelopCommand(_develop):
             sh.copy(nhook, hook)
             print(('installation of `.git/hooks/{}` made.'.format(item)))
         install_styles()
-        install_requires(dev=True)
 
 
 class PostInstallCommand(_install):
@@ -87,7 +96,6 @@ class PostInstallCommand(_install):
     def run(self):
         _install.run(self)
         install_styles()
-        install_requires()
 
 def read(fname):
     with open(os.path.join(path(), fname), 'r') as f:
@@ -139,7 +147,7 @@ setup_args = dict(
     # requirements
     python_requires=">3.5",  # TODO: check if it works also with 3.5
     setup_requires = ['setuptools_scm', 'pyyaml'],
-    install_requires= install_requires(),
+    install_requires= install_requires(dev=__DEV__),
     tests_require=extras_require['tests'],
 
     # post-commands

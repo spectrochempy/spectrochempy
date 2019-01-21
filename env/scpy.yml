@@ -14,6 +14,11 @@ dependencies:
 - matplotlib
 - numpy >= 1.14
 - scipy
+- xarray
+- bokeh
+- holoviews
+- datashader
+- param
 - pandas
 - xlrd
 - requests
