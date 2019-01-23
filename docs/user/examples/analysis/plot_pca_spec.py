@@ -47,4 +47,4 @@ _ = pca.scoreplot(1, 2, 3)
 
 LT[:4].plot_stack()
 
-scp.show()
+#scp.show()

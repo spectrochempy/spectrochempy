@@ -1,0 +1,40 @@
+name: scpy
+channels:
+- conda
+- spectrocat
+dependencies:
+#
+# setup dependency
+#
+- setuptools_scm
+- pyyaml
+#
+# core
+#
+- matplotlib
+- numpy >= 1.14
+- scipy
+- xarray
+- bokeh::bokeh=0.13.0
+- ioam::holoviews=1.10.6
+- datashader=0.6.6
+- param=1.6.1
+- dask=0.17.1
+- pandas
+- xlrd
+- requests
+#
+# need the following packages because the API is mainly designed
+# to run in Jupyter notebook
+#
+- ipython
+- jupyter
+- jupyterlab
+- ipykernel
+- ipywidgets
+- jupyter_nbextensions_configurator
+- ipympl
+- widgetsnbextension
+- nodejs
+#
+

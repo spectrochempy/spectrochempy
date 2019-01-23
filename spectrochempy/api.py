@@ -22,114 +22,128 @@
 import sys
 import os
 
+from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.magic import UsageError
 from IPython import get_ipython
+
 import matplotlib as mpl
 
 # ----------------------------------------------------------------------------
-# Backend
+# Check the environment for plotting
 # ----------------------------------------------------------------------------
 
-# .........................................................................
-def _setup_backend_and_ipython(backend=None):
-    """Backend and IPython matplotlib environ setup
-
-    Here, we performs this setup before any call to `matplotlib.pyplot`
-    that are performed later in this application
-
-    ..Note:: This method is called automatically at the initialization step
-        if the application is called from the command line
-
-    Parameters
-    ----------
-    backend : str, optional
-        backend to use, default = ``Qt5Agg``.
-
-    """
-
-    # change backend here before the project module is imported
-    #if backend == 'spectrochempy_gui':
-    #    # this happen when the GUI is used
-    #    backend = 'module://spectrochempy_gui.backend'
-
-    # the current backend
-    backend = mpl.get_backend()
-    if backend == 'module://ipykernel.pylab.backend_inline'  or backend == \
-          'MacOSX':
-        # Force QT5
-        backend = 'Qt5Agg'
-        # mpl.rcParams['backend.qt5'] = 'PyQt5'  # <-- This is deprecated in
-        # version 2.2 of matplotlib, but it seems, this doesn't make
-        # difference for our notebooks
-
-    # if we are building the docs, in principle it should be done using
-    # the builddocs.py located in the scripts folder
-    #print('sys.argv', sys.argv, backend)
-    if not 'builddocs.py' in sys.argv[0] :
-        mpl.use(backend, warn = False, force = True)
-    else:
-        # 'agg' backend is necessary to build docs with sphinx-gallery
-        mpl.use('agg', warn = False, force = True)
-
-    # use of IPython (console or notebook)
-    ip = get_ipython()
-    if ip is not None:
-
-        if getattr(get_ipython(), 'kernel', None) is not None:
-            # set the ipython matplotlib environments
-            try:
-                # This is the sys.argv passed to spectrochempy when building docs susing the nbshinx extension
-                # (in this case we want inline but simple figures
-                # not widgets which I could not make transformed to html/javascript):
-                #
-                #['ipykernel_launcher', '-f', '/var/folders/rn/5d6xlv1d4tg16c7dbsfhx6ym0000gq/T/tmpq2f84lyy.json',
-                # "--InlineBackend.figure_formats={'svg', 'pdf'}", "--InlineBackend.rc={'figure.dpi': 96}"]
-
-                if  'ipykernel_launcher' in sys.argv[0] and "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
-                    ip.magic('matplotlib inline')
-                else:
-                    # here its a normal magic function that works in both jupyter notebook and jupyter lab
-                    ip.magic('matplotlib widget')
-
-            except UsageError as e:
-                try:
-                    ip.magic('matplotlib qt5')
-                except:
-                    pass
-        else:
-            try:
-                ip.magic('matplotlib inline')
-            except:
-                 pass
-
-        # provide the possibility to use Qt events in notebooks (such as filedialog)
-        ip.magic('gui qt')
-
-    return (ip, backend)
-
+# Do we run in IPython ?
+IN_IPYTHON = False
+kernel = None
 ip = None
-if not 'pytest' in sys.argv[0] or (len(sys.argv) > 1 and not sys.argv[1].endswith("spectrochempy")): # individual test):
-    # and os.environ.get('PWD', None)!='/spectrochempy':
-    ip, backend = _setup_backend_and_ipython()
-else:
-    mpl.use('agg', warn=False, force=True)
-    backend = mpl.get_backend()
+if InteractiveShell.initialized():
+    IN_IPYTHON = True
+    ip = get_ipython()
+    kernel = getattr(ip, "kernel", None)
 
-#print('ip %s'%ip)
-#print('backend %s'%backend)
+# Which backend to choose for matplotlib ?
+
+# That is from the matplotlib doc:
+# What is a backend?
+# A lot of documentation on the website and in the mailing lists refers to
+# the "backend" and many new users are confused by this term. matplotlib
+# targets many different use cases and output formats. Some people use
+# matplotlib interactively from the python shell and have plotting windows
+# pop up when they type commands. Some people run Jupyter notebooks and draw
+# inline plots for quick data analysis. Others embed matplotlib into graphical
+# user interfaces like wxpython or pygtk to build rich applications. Some people
+# use matplotlib in batch scripts to generate postscript images from numerical
+# simulations, and still others run web application servers to dynamically
+# serve up graphs.
+#
+# To support all of these use cases, matplotlib can target different outputs,
+# and each of these capabilities is called a backend; the "frontend" is the user
+# facing code, i.e., the plotting code, whereas the "backend" does all the hard
+# work behind-the-scenes to make the figure. There are two types of backends:
+# user interface backends (for use in pygtk, wxpython, tkinter, qt4, or macosx;
+# also referred to as "interactive backends") and hardcopy backends to make
+# image files (PNG, SVG, PDF, PS; also referred to as "non-interactive
+# backends").
+
+# There is different way to setup the backend externally: using environment
+# variable or setting up in the matplotlibrc file. But when a script depends on
+# a specific backend it is advised to use the use() function:
+
+# import matplotlib
+# matplotlib.use('PS')   # generate postscript output by default
+
+# So what we will do in spectrochempy ?:
+
+# For non interactive processs -> backend agg
+# else TkAgg (which has no dependency - conversely to QT) except if PyQT5
+# is already imported.
+#
+# if we are not running in a jupyter notebook or lab
+#
+# if we are in a notebook, we will encounter two situztion (real interactive job)
+# or execution o notebook in the background uning ``nbspinx``.
+
+NO_DISPLAY = False
+
+# Are we buidings the docs ?
+if 'builddocs.py' in sys.argv[0]:
+    # if we are building the documentation, in principle it should be done
+    # using the builddocs.py located in the scripts folder.
+    NO_DISPLAY = True
+    mpl.use('agg', warn=False, force=True)
+
+# Are we running pytest ?
+
+if 'pytest' in sys.argv[0]:
+    # if we are testing we also like a silent work with no figure popup!
+    NO_DISPLAY = True
+    # ok but if we are doing individual module or function testing in PyCharm
+    # it is interesting to see the plots!
+    if len(sys.argv) > 1 and not sys.argv[1].endswith("tests"):
+        # individual module testing
+            NO_DISPLAY = False
+    if NO_DISPLAY:
+        mpl.use('agg', warn=False, force=True)
+
+if IN_IPYTHON and kernel and not NO_DISPLAY:
+    # Now we have several situation even if we are running in Jupyter notebook or
+    # Jupyter Lab, or we are executing IPython from a terminal (with no graphic
+    # capabilities) or we are running from nbsphinx in the background
+    try:
+        if 'ipykernel_launcher' in sys.argv[0] and \
+                "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
+            # We are running from NBSphinx - the plot must be inline to show up.
+            ip.magic('matplotlib inline')
+        else:
+            # here its a normal magic function that works in both
+            # jupyter notebook and jupyter lab
+            ip.magic('matplotlib widget')
+
+    except:
+        ip.magic('matplotlib tk')
+else:
+    try:
+        import PyQt5
+        backend = 'Qt5Agg'
+        mpl.use('Qt5Agg', warn=False, force=True)
+    except:
+        mpl.use('tkagg', warn=False, force=True)
+
+# ----------------------------------------------------------------------------
+# Now we can start loading the API
+# ----------------------------------------------------------------------------
 
 # import the core api
-from .core import *
+from spectrochempy.core import *
 from spectrochempy import core
 
 __all__ = core.__all__
+__all__ += ['IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
 
-from spectrochempy.extern.pyqtgraph.Qt import QtGui
-GUI = QtGui.QApplication(sys.argv)
-
+# Normally this will be remove for the notebook application
+#from spectrochempy.extern.pyqtgraph.Qt import QtGui
+#GUI = QtGui.QApplication(sys.argv)
 
 # ==============================================================================
 if __name__ == '__main__':
     pass
-
-

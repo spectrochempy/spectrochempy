@@ -74,8 +74,9 @@ def show():
     Method to force the `matplotlib` figure display
 
     """
-    from spectrochempy.application import do_not_block
-    if not do_not_block:
+    from spectrochempy import NO_DISPLAY
+
+    if not NO_DISPLAY:
 
         if get_figure(clear=False):  # True to avoid opening a new one
             plt.show(block=True)

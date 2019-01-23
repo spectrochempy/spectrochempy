@@ -37,10 +37,10 @@ try:
 #if holoview is installed
 #    import holoviews as hv
 #    from holoviews import opts
-    _HAS_HOLOVIEWS = False
+    HAS_HOLOVIEWS = False
 #    hv.extension('bokeh')
 except:
-    _HAS_HOLOVIEWS = False
+    HAS_HOLOVIEWS = False
 
 # local import
 # ------------
@@ -51,7 +51,6 @@ from ..application import app
 prefs = app.general_preferences
 project_preferences = app.project_preferences
 log = app.log
-do_not_block = app.do_not_block
 
 
 from ..core.plotters.plot1d import plot_1D

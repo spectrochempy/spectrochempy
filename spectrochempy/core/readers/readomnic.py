@@ -524,19 +524,19 @@ def _read_spa(dataset, filenames, **kwargs):
 
     # check the consistency of xaxis
     if np.ptp(nx) != 0:
-        print(
+        raise ValueError(
             'Error: Inconsistent data set - number of wavenumber per spectrum should be identical')
         return
     elif np.ptp(firstx) != 0:
-        print(
+        raise ValueError(
             'Error: Inconsistent data set - the x axis should start at same value')
         return
     elif np.ptp(lastx) != 0:
-        print(
+        raise ValueError(
             'Error: Inconsistent data set - the x axis should end at same value')
         return
 
-    # load into the  Dataset Object of spectral content
+    # load into the  NDDataset Object of spectral content
     dataset.data = np.array(allintensities)
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'

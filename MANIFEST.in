@@ -1,3 +1,4 @@
-recursive-include spectrochempy *
+include LICENSE CHANGELOG MANIFEST.in README.rst
+graft env
+graft tests
 recursive-include scp_data *
-
