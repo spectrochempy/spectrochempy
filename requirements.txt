@@ -9,7 +9,7 @@ traitlets
 pandas
 xlrd
 requests
-
+xarray
 # mainly for install and a bit more...
 
 setuptools_scm

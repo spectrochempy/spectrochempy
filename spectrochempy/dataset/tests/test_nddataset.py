@@ -1095,8 +1095,9 @@ def test_max_min_with_1D(NMR_dataset_1D):
     print(nd1)
     assert "x-coordinate:" in str(nd1)
     mx = nd1.max()
-    assert mx.data == 821.4872828784091 + 80.80955334991164j
+    assert mx.data == pytest.approx(821.4872828784091 + 80.80955334991164j)
     print(mx)
+
 
     # mi = nd1.min()
     # assert mi == 821.4872828784091 + 80.80955334991164j
@@ -1172,7 +1173,6 @@ def test_bug_13(IR_dataset_1D):
         nd.x[0] = v
 
 ################# Holoview interface #########
-
 def test_xarray_export(IR_dataset_2D):
     nd = IR_dataset_2D.copy()
     da = nd.to_xarray()
