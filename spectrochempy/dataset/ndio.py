@@ -497,7 +497,7 @@ class NDIO(HasTraits):
 
         if protocol == 'scp':
             # default reader
-            return cls.load(filename)
+            return cls.load(filename, protocol='scp')
 
             # try:
             # find the adequate reader

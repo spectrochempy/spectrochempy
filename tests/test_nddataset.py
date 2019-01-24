@@ -527,7 +527,7 @@ def test_nddataset_simple_slicing():
     assert d1.shape == (5, 5)
 
     d2 = d1[2:3, 2:3]
-    assert d2.data.shape == (1,1)
+    assert d2.data.shape == ()
     assert (d1 is not d2)
     d3 = d1[2, 2]
     assert d3.data.shape == ()
@@ -1095,8 +1095,9 @@ def test_max_min_with_1D(NMR_dataset_1D):
     print(nd1)
     assert "x-coordinate:" in str(nd1)
     mx = nd1.max()
-    assert mx.data.round(3) == 821.487 + 80.810j
+    assert mx.data == pytest.approx(821.4872828784091 + 80.80955334991164j)
     print(mx)
+
 
     # mi = nd1.min()
     # assert mi == 821.4872828784091 + 80.80955334991164j
@@ -1172,17 +1173,9 @@ def test_bug_13(IR_dataset_1D):
         nd.x[0] = v
 
 ################# Holoview interface #########
-
 def test_xarray_export(IR_dataset_2D):
-
     nd = IR_dataset_2D.copy()
     da = nd.to_xarray()
-    print(da)
-
-def test_xarray_export_w_spa():
-    na = NDDataset.read_omnic('/Users/spectrocat/Dropbox/spectrochempy/scp_data/testdata/irdata/subdir/7_CZ0-100 Pd_101.SPA')
-    print(na)
-    da = na.to_xarray()
     print(da)
 
 
