@@ -25,7 +25,10 @@ import locale
 try:
     locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
 except:
-    warnings.warn('Could not set locale: en_US')
+    try:
+        locale.setlocale(locale.LC_ALL, 'en_US.utf8')  # to avoid problems with date format
+    except:
+        warnings.warn('Could not set locale: en_US or en_US.utf8')
 
 # ----------------------------------------------------------------------------
 # third party imports
