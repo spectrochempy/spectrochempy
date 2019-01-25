@@ -8,7 +8,6 @@
 # =============================================================================
 
 import os
-print('env', os.environ['CONDA_DEFAULT_ENV'])
 from spectrochempy import *
 
 import os

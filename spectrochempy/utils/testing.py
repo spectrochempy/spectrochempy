@@ -252,7 +252,6 @@ def example_run(path):
     import subprocess
 
     pipe = None
-    print(os.environ['CONDA_DEFAULT_ENV'])
 
     pipe = None
     try:
