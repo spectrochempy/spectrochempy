@@ -18,11 +18,18 @@ import pytest
 #@pytest.mark.skip('interactive so cannot be used with full testing')
 def test_read_dir():
     A = NDDataset.read_dir(os.path.join('irdata','subdir'))
-    assert len(A) == 4
+    assert len(A) == 10
 
     # in case we do not specify a directory:
     #  - open a dialog but handle the case we clik cancel
     B = NDDataset.read_dir()
+
+    C = NDDataset.read_dir(os.path.join('matlabdata'))
+    print('Matrixes in .mat files:')
+    for x in C:
+        print(C)
+    assert len(C)== 34
+    assert C[3].shape == (204, 96)
 
 
 

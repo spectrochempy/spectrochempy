@@ -181,16 +181,18 @@ def _read_single_dir(directory):
                                                sortbydate=True))
 
         elif extension == '.scp':
-            # does not work. see test_load  <- for me all work CF
             datasets.append(NDDataset.read(files[extension], protocol='scp'))
-            #pass
-        # else the files are not readable
+
+        elif extension == '.mat':
+            for filename in files[extension]:
+                matlist = NDDataset.read_matlab(filename)
+                for mat in matlist:
+                    datasets.append(mat)
+        # else the files are not (yet) readable
         else:
             pass
-
     # TODO: extend to other implemented readers (NMR !)
     return datasets
-
 
 if __name__ == '__main__':
     pass
