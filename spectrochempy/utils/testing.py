@@ -251,8 +251,10 @@ def notebook_run(path):
 def example_run(path):
     import subprocess
 
-    pipe = None
-
+    try:
+        print('env', os.environ['CONDA_DEFAULT_ENV'])
+    except:
+        log.debug('no conda env')
     pipe = None
     try:
         pipe = subprocess.Popen(
