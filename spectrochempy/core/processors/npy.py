@@ -437,7 +437,8 @@ def dot(a, b, strict=True, out=None):
     new._data = data
     new._mask = mask
     new._uncertainty = uncertainty
-    new._coordset =  type(new.coordset)(coordset)
+    if new.coordset is not None:
+        new._coordset = type(new.coordset)(coordset)
     new.history = history
 
     return new

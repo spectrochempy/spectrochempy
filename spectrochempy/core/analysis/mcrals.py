@@ -17,6 +17,7 @@ from traitlets import HasTraits, Instance
 
 from spectrochempy.dataset.nddataset import NDDataset
 from spectrochempy.application import log
+from spectrochempy.core.processors.npy import dot
 
 
 class MCRALS(HasTraits):
@@ -24,43 +25,41 @@ class MCRALS(HasTraits):
 
     """
 
-    X = Instance(NDDataset)
-    guess = Instance(NDDataset)
-    C = Instance(NDDataset)
-    St = Instance(NDDataset)
+    _C = Instance(NDDataset)
+    """|NDDataset| - Concentration profile of pure species"""
+    _St = Instance(NDDataset)
+    """|NDDataset| - Spectra profile of pure species"""
+    _param = Instance(dict)
+    """|dict| - Parameters of the MCS-ALS optimization"""
 
     def __init__(self, X, guess, **kwargs):
         """
         Parameters
         -----------
         X : |NDDataset|
-            The dataset on which to perfomr the MCR-ALS analysis
+            The dataset on which to perform the MCR-ALS analysis
         guess : |NDDataset|
             Initial concentration or spectra
-
-        Other Parameters
-        ----------------
-        **kwargs : optional parameters
-            The possible parameters are described below
-        tol : float, optional, default=1e-3
-            convergence tolerance
-        maxit : maximum number of ALS minimizations
-        maxdiv : maximum number of non-converging iteratiobs
-        nonnegConc : array or tuple indicating species non-negative concentration
+        param : dict
+            dict of optimization parameters with the following keys:
+                'tol': float, optional, default=1e-3
+                'maxit' : maximum number of ALS minimizations
+                'maxdiv' : maximum number of non-converging iteratiobs
+                'nonnegConc' : array or tuple indicating species non-negative concentration
                        profiles. For instance [1, 0, 1] indicates that species #0
                        and #2 have non-negative conc profiles while species #1
                        can have negative concentrations
                        Default [1, ..., 1]  (only non-negative cocentrations)
-        unimodConc : array or tuple indicating species having unimodal concentrations
+                'unimodConc' : array or tuple indicating species having unimodal concentrations
                        profiles.
                        Default [1, ..., 1]  (only unimodal cocentration profiles)
-        nonnegSpec : array or tuple indicating species having non-negative spectra
+               'nonnegSpec' : array or tuple indicating species having non-negative spectra
                        Default [1, ..., 1]  (only non-negative spectra)
-        unimodSpec : array or tuple indicating species having unimodal spectra
+                'unimodSpec' : array or tuple indicating species having unimodal spectra
                        Default [0, ..., 0]  (no unimodal cocentration profiles)
 
         """
-        # TODO: make a test file
+        # TODO: add example
 
         # Check initial data
         # ------------------------------------------------------------------------
@@ -70,46 +69,50 @@ class MCRALS(HasTraits):
         if X.shape[0] == guess.shape[0]:
             initConc = True
             C = guess.copy()
+            C.name = 'Pure conc. profile, mcs-als of ' + X.name
             nspecies = C.shape[1]
 
-        elif X.guess[1] == guess.shape[1]:
+        elif X.shape[1] == guess.shape[1]:
             initSpec = True
             St = guess.copy()
+            St.name ='Pure spectra profile, mcs-als of ' + X.name
             nspecies = St.shape[0]
 
         else:
             raise ValueError('the dimensions of initial concentration '
                              'or spectra dataset do not match the data')
 
-        nspc, nwn = X.shape
+        ny, nx = X.shape
 
         # Get optional parameters in kwargs or set them to their default
         # ------------------------------------------------------------------------
 
-        # TODO: make a reference  file to set this kwargs
-        tol = kwargs.get('tol', 0.001)
+        # TODO: make a preference  file to set this kwargs
+        param = kwargs.get('param', dict())
 
-        maxit = kwargs.get('maxit', 50)
+        tol = param.get('tol', 0.001)
 
-        maxdiv = kwargs.get('maxdiv', 5)
+        maxit = param.get('maxit', 50)
 
-        nonnegConc = kwargs.get('nonnegConc', [1] * nspecies)
+        maxdiv = param.get('maxdiv', 5)
 
-        unimodConc = kwargs.get('unimodConc', [1] * nspecies)
+        nonnegConc = param.get('nonnegConc', [1] * nspecies)
 
-        unimodTol = kwargs.get('unimodTol', 1.1)
+        unimodConc = param.get('unimodConc', [1] * nspecies)
 
-        unimodMod = kwargs.get('unimodMod', 'strict')
+        unimodTol = param.get('unimodTol', 1.1)
 
-        monoDecConc = kwargs.get('monoDecConc', [0] * nspecies)
+        unimodMod = param.get('unimodMod', 'strict')
 
-        monoDecTol = kwargs.get('monoDecTol', 1.1)
+        monoDecConc = param.get('monoDecConc', [0] * nspecies)
 
-        monoIncConc = kwargs.get('monoIncConc', [0] * nspecies)
+        monoDecTol = param.get('monoDecTol', 1.1)
 
-        monoIncTol = kwargs.get('monoIncTol', 1.1)
+        monoIncConc = param.get('monoIncConc', [0] * nspecies)
 
-        nonnegSpec = kwargs.get('nonnegSpec', [1] * nspecies)
+        monoIncTol = param.get('monoIncTol', 1.1)
+
+        nonnegSpec = param.get('nonnegSpec', [1] * nspecies)
 
         #    if ('unimodSpec' in kwargs): unimodSpec = kwargs['unimodSpec']
         #    else: unimodSpec = np.zeros((1, nspecies))
@@ -118,19 +121,21 @@ class MCRALS(HasTraits):
         # ------------------------------------------------------------------------
 
         if initConc:
-            C_i = C.data
-            St_i = np.linalg.lstsq(C_i, X.data)[0]
-            self.St = St = NDDataset(St_i)
-            St.name = C.name + ' \ ' + X.name
-            St.coordset = [C.y, X.x]
+            St =  NDDataset(np.linalg.lstsq(C.data, X.data)[0])
+            St.name = 'Pure spectra profile, mcs-als of ' + X.name
+            St.x = X.x
+            if C.x is not None:
+                St.y = C.x
+
 
         if initSpec:
-            St_i = St.data
-            Ct_i = np.linalg.lstsq(St_i.T, X.data.T)[0]
-            C_i = Ct_i.T
-            self.C = C = NDDataset(C_i)
-            C.name = X.name + ' / ' + St.name
-            C.coordset = [St.y, X.x]
+            Ct = np.linalg.lstsq(St.data.T, X.data.T)[0]
+            C = NDDataset(Ct.T)
+            C.name = 'Pure conc. profile, mcs-als of ' + X.name
+            if X.coordset is not None:
+                C.coordset = [X.y, C.y]
+            if St.y is not None and C.coordset is not None:
+                C.coordset[1] = St.y
 
         delta = tol + 1
         niter = 0
@@ -139,76 +144,75 @@ class MCRALS(HasTraits):
 
         while delta >= tol and niter < maxit and ndiv < maxdiv:
 
-            Ct_i = np.linalg.lstsq(St_i.T, X.data.T)[0]
-            C_i = Ct_i.T
+            C.data = np.linalg.lstsq(St.data.T, X.data.T)[0].T
             niter += 1
 
             # Force non-negative concentration
             # --------------------------------
             if np.nonzero(nonnegConc)[0].size != 0:
                 for s in np.nditer(np.nonzero(nonnegConc)):
-                    C_i[:, s] = C_i[:, s].clip(min=0)
+                    C.data[:, s] = C.data[:, s].clip(min=0)
 
             # Force unimodal concentration
             # ----------------------------
             if np.nonzero(unimodConc)[0].size != 0:
                 for s in np.nditer(np.nonzero(unimodConc)):
-                    maxid = np.argmax(C_i[:, s])
-                    curmax = C_i[maxid, s]
+                    maxid = np.argmax(C.data[:, s])
+                    curmax = C.data[maxid, s]
                     curid = maxid
 
                     while curid > 0:
                         curid -= 1
-                        if C_i[curid, s] > curmax * unimodTol:
+                        if C.data[curid, s] > curmax * unimodTol:
                             if unimodMod == 'strict':
-                                C_i[curid, s] = C_i[curid + 1, s]
+                                C.data[curid, s] = C.data[curid + 1, s]
                             if unimodMod == 'smooth':
-                                C_i[curid, s] = (C_i[curid, s] + C_i[
+                                C.data[curid, s] = (C.data[curid, s] + C.data[
                                     curid + 1, s]) / 2
-                                C_i[curid + 1, s] = C_i[curid, s]
+                                C.data[curid + 1, s] = C.data[curid, s]
                                 curid = curid + 2
-                        curmax = C_i[curid, s]
+                        curmax = C.data[curid, s]
 
                     curid = maxid
-                    while curid < nspc - 1:
+                    while curid < ny - 1:
                         curid += 1
-                        if C_i[curid, s] > curmax * unimodTol:
+                        if C.data[curid, s] > curmax * unimodTol:
                             if unimodMod == 'strict':
-                                C_i[curid, s] = C_i[curid - 1, s]
+                                C.data[curid, s] = C.data[curid - 1, s]
                             if unimodMod == 'smooth':
-                                C_i[curid, s] = (C_i[curid, s] + C_i[
+                                C.data[curid, s] = (C.data[curid, s] + C.data[
                                     curid - 1, s]) / 2
-                                C_i[curid - 1, s] = C_i[curid, s]
+                                C.data[curid - 1, s] = C.data[curid, s]
                                 curid = curid - 2
-                        curmax = C_i[curid, s]
+                        curmax = C.data[curid, s]
 
             # Force monotonic increase
             # ------------------------
             if np.nonzero(monoIncConc)[0].size != 0:
                 for s in np.nditer(np.nonzero(monoIncConc)):
-                    for curid in np.arange(nspc - 1):
-                        if C_i[curid + 1, s] < C_i[curid, s] / monoIncTol:
-                            C_i[curid + 1, s] = C_i[curid, s]
+                    for curid in np.arange(ny - 1):
+                        if C.data[curid + 1, s] < C.data[curid, s] / monoIncTol:
+                            C.data[curid + 1, s] = C.data[curid, s]
 
             # Force monotonic decrease
             # ------------------------
             if np.nonzero(monoDecConc)[0].size != 0:
                 for s in np.nditer(np.nonzero(monoDecConc)):
-                    for curid in np.arange(nspc - 1):
-                        if C_i[curid + 1, s] > C_i[curid, s] * monoDecTol:
-                            C_i[curid + 1, s] = C_i[curid, s]
+                    for curid in np.arange(ny - 1):
+                        if C.data[curid + 1, s] > C.data[curid, s] * monoDecTol:
+                            C.data[curid + 1, s] = C.data[curid, s]
 
-            St_i = np.linalg.lstsq(C_i, X.data)[0]
+            St.data = np.linalg.lstsq(C.data, X.data)[0]
 
             # Force non-negative spectra
             # --------------------------
             if np.nonzero(nonnegSpec)[0].size != 0:
                 for s in np.nditer(np.nonzero(nonnegSpec)):
-                    St_i[s, :] = St_i[s, :].clip(min=0)
+                    St.data[s, :] = St.data[s, :].clip(min=0)
 
             # compute residuals
             # -----------------
-            res2 = np.linalg.norm(X.data - np.dot(C_i, St_i))
+            res2 = np.linalg.norm(X.data - np.dot(C.data, St.data))
             delta = res2 - res
             res = res2
             log.info(niter, res2, delta)
@@ -218,8 +222,11 @@ class MCRALS(HasTraits):
             else:
                 delta = -delta
 
-        C.data = C_i
-        St.data = St_i
+        self._X = X
+        self._param = param
+        self._C = C
+        self._St = St
+
 
     def transform(self):
         """
@@ -233,4 +240,48 @@ class MCRALS(HasTraits):
             The spectra matrix
 
         """
-        return self.C, self.St
+        return self._C, self._St
+
+    def inverse_transform(self):
+        """
+        Transform data back to the original space.
+
+        The following matrice operation is performed: :math:`X'_{hat} = C'.S'^t`
+
+        Return
+        ------
+        X_hat : |NDDataset|
+            The reconstructed dataset based on the MCS-ALS optimization.
+
+        """
+
+        # reconstruct from scores and loadings using n_pc components
+        C = self._C
+        St = self._St
+
+        X_hat = dot(C, St)
+
+        X_hat.history = 'Dataset reconstructed by MCS ALS optimization'
+        X_hat.title = 'X_hat: ' + self._X.title
+        return X_hat
+
+    def plot(self, **kwargs):
+        """
+        Plots the input dataset, reconstructed dataset and residuals
+
+        """
+
+        colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
+        pen = kwargs.get('pen', True)
+
+        X_hat = self.inverse_transform()
+        res = self._X - X_hat
+
+        ax = self._X.plot()
+        ax.plot(X_hat.data.T, color=colXhat)
+        ax.plot(res.data.T, color=colRes)
+        ax.set_title('MCR ALS plot')
+        return ax
+
+
+
