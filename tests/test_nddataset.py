@@ -527,7 +527,7 @@ def test_nddataset_simple_slicing():
     assert d1.shape == (5, 5)
 
     d2 = d1[2:3, 2:3]
-    assert d2.data.shape == ()
+    assert d2.data.shape == (1,1)
     assert (d1 is not d2)
     d3 = d1[2, 2]
     assert d3.data.shape == ()
