@@ -1172,6 +1172,17 @@ def test_bug_13(IR_dataset_1D):
         v = Quantity('0.1 s')
         nd.x[0] = v
 
+
+def test_dot_product_of_minimal_datasets():
+    # due to a bug in dot()
+    from spectrochempy.core import dot
+    A = NDDataset(np.random.rand(5, 4))
+    B = NDDataset(np.random.rand(4, 10))
+
+    dot(A, B)
+
+
+
 ################# Holoview interface #########
 def test_xarray_export(IR_dataset_2D):
     nd = IR_dataset_2D.copy()
