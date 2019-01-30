@@ -32,9 +32,6 @@ nd = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 # where we select only region (OH region)
 
 ndOH = nd[54, 3700.:3400.]
-da = nd.to_xarray()
-da.plot()
-
 ndOH.plot()
 
 ########################################################################
