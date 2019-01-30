@@ -87,7 +87,6 @@ f1 = scp.Fit(ndOH, script, silent=True)
 f1.dry_run()
 
 ndOH.plot(plot_model=True)
-show()
 
 f1.run(maxiter=1000)
 
@@ -95,5 +94,5 @@ f1.run(maxiter=1000)
 # Show the result after 1000 iterations
 
 ndOH.plot(plot_model=True)
-show()
+
 
