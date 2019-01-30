@@ -155,6 +155,10 @@ class Fit(HasTraits):
         
         """
 
+    def dry_run(self):
+        return self.run(dry=True)
+
+
     def run(self, maxiter=100, maxfun=None, every=10,
             method='simplex', **kwargs):
         """ Main fitting procedure
@@ -164,7 +168,8 @@ class Fit(HasTraits):
         maxiter : int, maximum number of iteration
         maxfun : int, maximum number of function calls
         every : int, number of function call between two displays
-        method : str, etheir 'simplex' or 'hopping'
+        method : str, ether 'simplex' or 'hopping'
+        dryrun : bool
 
         """
 
@@ -258,7 +263,10 @@ class Fit(HasTraits):
 
         fp = self.fp  # starting parameters
 
-        fp, fopt = optimize(funchi2, fp,
+        dry = kwargs.get("dry", False)
+
+        if not dry:
+            fp, fopt = optimize(funchi2, fp,
                             args=(self.datasets,),
                             maxfun=maxfun,
                             maxiter=maxiter,
@@ -269,11 +277,14 @@ class Fit(HasTraits):
         # replace the previous script with new fp parameters
         self.parameterscript.script = str(fp)
 
-        if not self.silent:
+        if not self.silent :
             # log.info the results
             log.info("\n")
             log.info('*' * 50)
-            log.info("  Result:")
+            if not dry:
+                log.info("  Result:")
+            else:
+                log.info("  Starting parameters:")
             log.info('*' * 50)
             log.info(self.parameterscript.script)
 
