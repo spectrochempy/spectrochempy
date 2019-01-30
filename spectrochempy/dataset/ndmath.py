@@ -447,10 +447,11 @@ class NDMath(object):
                         raise ValueError(
                                     "coordinate's sizes do not match")
 
-                    if not np.all(obj._coordset[-1]._data ==
-                                    other._coordset[-1]._data):
-                        raise ValueError(
-                            "coordinate's values do not match")
+                    if obj._coordset is not None and other._coordset is not None:
+                        if not np.all(obj._coordset[-1]._data ==
+                                        other._coordset[-1]._data):
+                            raise ValueError(
+                                "coordinate's values do not match")
 
                 # rescale according to units
                 if not other.unitless:

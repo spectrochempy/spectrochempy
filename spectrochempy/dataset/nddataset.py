@@ -373,7 +373,7 @@ class NDDataset(
             #     return new
             # return self.coordset[-2]
         if self.coordset is None or self.coordset[-2].size == 0:  # no axis
-            new = Coord(range(self.shape[-1]), title='index')
+            new = Coord(range(self.shape[-2]), title='index')
             return new
         return self.coordset[-2]
 

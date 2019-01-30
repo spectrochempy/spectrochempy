@@ -448,7 +448,7 @@ def dot(a, b, strict=True, out=None):
 def diag(dataset, k=0):
     """
     Extract a diagonal or construct a diagonal array.
-
+a
     See the more detailed documentation for ``numpy.diagonal`` if you use this
     function to extract a diagonal and wish to write to the resulting array;
     whether it returns a copy or a view depends on what version of numpy you
