@@ -605,12 +605,17 @@ class ProjectPreferences(MetaConfigurable):
                      help='Default plot methods for 1D datasets').tag(
         config=True, type='list')
 
-    # 2D options
+    # 2D/3D options
     # ----------
 
     method_2D = Enum(['map', 'image', 'stack', '3D'], default_value='stack',
                      help='Default plot methods for 2D datasets').tag(
         config=True, type='list')
+
+    method_3D = Enum(['surface'], default_value='surface',
+                     help='Default plot methods for 3D datasets').tag(
+        config=True, type='list')
+
 
     colorbar = Bool(True, help='Show color bar for 2D plots').tag(config=True)
 
@@ -644,6 +649,16 @@ class ProjectPreferences(MetaConfigurable):
                                                 'levels').tag(
         config=True)
 
+    antialiased = Bool(True, help='antialiased option for surface plot').tag(
+        config=True)
+
+    rcount = Integer(50, help='rcount (steps in the row mode) for surface plot').tag(
+        config=True)
+
+    ccount = Integer(50, help='ccount (steps in the column mode) for surface plot').tag(
+        config=True)
+
+
     # colors / style
     # --------------
 
@@ -670,6 +685,10 @@ class ProjectPreferences(MetaConfigurable):
 
     colormap_stack = Enum(cmaps, default_value='viridis',
                           help='Default colormap for stack plots').tag(
+        config=True, type='list')
+
+    colormap_surface = Enum(cmaps, default_value='jet',
+                          help='Default colormap for surface plots').tag(
         config=True, type='list')
 
     colormap_transposed = Enum(cmaps, default_value='magma',
