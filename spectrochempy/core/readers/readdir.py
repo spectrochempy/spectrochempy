@@ -10,7 +10,7 @@
 """This module extend NDDataset with some import methods.
 
 """
-__all__ = ['read_dir']
+__all__ = ['read_dir', 'read_carroucell']
 
 __dataset_methods__ = __all__
 
@@ -196,3 +196,105 @@ def _read_single_dir(directory):
 
 if __name__ == '__main__':
     pass
+
+# function for reading data in a directory
+# --------------------------------------
+def read_carroucell(dataset=None, directory=None, **kwargs):
+    """
+    Open .spa files in a directory after a carroucell experiment.
+    The files are and grouped in NDDatasets depending on there root name
+    (and sorted by date)
+    Notes
+    ------
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The dataset to store the data and metadata.
+        If None, a NDDataset is created
+    directory: str, optional.
+        If not specified, opens a dialog box.
+    parent_dir: str, optional.
+        The parent directory where to look at
+
+    Returns
+    --------
+    nddataset : |NDDataset| or list of |NDDataset|
+
+    Examples
+    --------
+
+    """
+
+    log.debug("starting reading in a folder")
+
+    # check if the first parameter is a dataset
+    # because we allow not to pass it
+    if not isinstance(dataset, NDDataset):
+        # probably did not specify a dataset
+        # so the first parameter must be the directory
+        if isinstance(dataset, str) and dataset != '':
+            directory = dataset
+            dataset = None
+
+    # # check directory
+    # if directory is None:
+    #     directory = opendialog( single=False,
+    #                             directory=directory,
+    #                             caption='Select folder to read',
+    #                             filters = 'directory')
+    #
+    #     if not directory:
+    #         # if the dialog has been cancelled or return nothing
+    #         return None
+    #
+    # if directory is not None and not isinstance(directory, str):
+    #     raise TypeError('directory should be of str type, not ' + type(directory))
+    #
+    # if directory and not os.path.exists(directory):
+    #     # the directory may be located in our default datadir
+    #     # or be the default datadir
+    #     if directory == os.path.basename(prefs.datadir):
+    #         return prefs.datadir
+    #
+    #     _directory = os.path.join(prefs.datadir, directory)
+    #
+    # if not os.path.isdir(directory):
+    #     raise ValueError('\"' + directory + '\" is not a valid directory')
+
+    parent_dir = kwargs.get('parent_dir', None)
+    directory = readdirname(directory, parent_dir=parent_dir)
+
+    if not directory:
+        # probably cancel has been chosen in the open dialog
+        log.info("No directory was selected.")
+        return
+
+    datasets = []
+
+    # get the sorted list of spa files in the directory
+    spafiles = sorted([f for f in os.listdir(directory)
+                       if (os.path.isfile(os.path.join(directory, f))
+                           and f[-4:].lower() == '.spa')])
+
+    curfilelist = [spafiles[0]]
+    curprefix = spafiles[0][::-1].split("_", 1)[1][::-1]
+
+    for f in spafiles[1:]:
+        if f[::-1].split("_", 1)[1][::-1] != curprefix:
+            datasets.append(NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory))
+            datasets[-1].name = os.path.basename(curprefix)
+            curfilelist = [f]
+            curprefix = f[::-1].split("_", 1)[1][::-1]
+        else:
+            curfilelist.append(f)
+
+    datasets.append(NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory))
+    datasets[-1].name = os.path.basename(curprefix)
+
+    if len(datasets) == 1:
+        log.debug("finished read_dir()")
+        return datasets[0]  # a single dataset is returned
+
+    log.debug("finished read_dir()")
+    return datasets  # several datasets returned
