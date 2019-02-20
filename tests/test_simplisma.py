@@ -23,9 +23,9 @@ def test_SIMPLISMA():
     X = data[0]
     print('\n test simplisma on {}\n'.format(X.name))
     pure  = SIMPLISMA(X, n_pc=20, tol=0.2,  noise=3, verbose=True)
-    [C, St] = pure.transform()
 
+    [C, St] = pure.transform()
     C.T.plot()
     St.plot()
-
+    pure.plot()
     assert '3     29      29.0     0.0072     0.9981' in pure._log

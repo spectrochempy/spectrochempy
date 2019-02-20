@@ -57,8 +57,9 @@ class SIMPLISMA(HasTraits):
         interactive: bool, optional, default=False
             If True, the determination of purest variables is carried out interactively
 
-        n_pc: int, optional, default: 2
-            The maximum number of pure compounds. Used only for non interactive analysis.
+        n_pc: int, optional, default: 2 in non-interactive mode; 100 in interactive mode
+            The maximum number of pure compounds. Used only for non interactive analysis
+            (the default in interative mode (100) will never be reached in practice)
 
         tol: float, optional, default: 0.1
             The convergence criterion on the percent of unexplained variance.
@@ -72,6 +73,7 @@ class SIMPLISMA(HasTraits):
 
         Attributes
         ----------
+        self._X : the original dataset
         self._St: spectra of pure compounds
         self._C : intensities ('concentrations') of pure compounds in spectra
         self._Pt: purity spectra
@@ -112,15 +114,16 @@ class SIMPLISMA(HasTraits):
             warnings.warn('SIMPLISMA does not handle easily negative values.')
             # TODO: check whether negative values should be set to zero or not.
 
-        n_pc = kwargs.get('n_pc', 2)
-        if n_pc < 2 or not isinstance(n_pc, int):
-            raise ValueError('Oh you did not just... \'MA\' in simplisMA stands for Mixture Analysis. '
-                             'The number of pure compounds should be an integer larger than 2')
-
         verbose = kwargs.get('verbose', True)
         interactive = kwargs.get('interactive', False)
         tol = kwargs.get('tol', 0.1)
         noise = kwargs.get('noise', 3)
+        n_pc = kwargs.get('n_pc', 2)
+        if n_pc < 2 or not isinstance(n_pc, int):
+            raise ValueError('Oh you did not just... \'MA\' in simplisMA stands for Mixture Analysis. '
+                             'The number of pure compounds should be an integer larger than 2')
+        if interactive:
+            n_pc = 100
 
         # ------------------------------------------------------------------------
         # Core
@@ -347,6 +350,14 @@ class SIMPLISMA(HasTraits):
 
                     elif ans.lower() == 'f':
                         finished = True
+                        j = j + 1
+                        llog = ('\n**** Interrupted by user at compound # {} \n**** End of SIMPL(I)SMA analysis.'
+                                .format(j))
+                        log += llog + '\n'
+                        Pt = Pt[0:j,:]
+                        St = St[0:j, :]
+                        s = s[0:j, :]
+                        C = C[:, 0:j]
                 # not interactive
                 else:
                     j = j + 1
@@ -354,26 +365,34 @@ class SIMPLISMA(HasTraits):
                         llog = ('\n**** Unexplained variance lower than \'tol\' ({}%) \n**** End of SIMPL(I)SMA analysis.'
                                 .format(tol))
                         log += llog + '\n'
+                        Pt = Pt[0:j,:]
+                        St = St[0:j, :]
+                        s = s[0:j, :]
+                        C = C[:, 0:j]
+
                         if verbose:
                             print(llog)
                         finished = True
             if j == n_pc:
-                llog = ('\n**** Reached maximum nomber of pure compounds \'n_pc\' ({}) \n**** End of SIMPL(I)SMA analysis.'
-                        .format(n_pc))
-                log += llog + '\n'
-                if verbose:
-                    print(llog)
-                finished = True
+                if not interactive:
+                    llog = ('\n**** Reached maximum number of pure compounds \'n_pc\' ({}) \n**** End of SIMPL(I)SMA analysis.'
+                            .format(n_pc))
+                    log += llog + '\n'
+                    if verbose:
+                        print(llog)
+                    finished = True
+
 
         Pt.description = 'Purity spectra from SIMPLISMA:\n' + log
         C.description = 'Concentration/contribution matrix from SIMPLISMA:\n' + log
         St.description = 'Pure compound spectra matrix from SIMPLISMA:\n' + log
+        s.description = 'Standard deviation spectra matrix from SIMPLISMA:\n' + log
         self._log = log
+        self._X = X
         self._Pt = Pt
         self._C = C
         self._St = St
-
-
+        self._s = s
 
     # ------------------------------------------------------------------------
     # Special methods
@@ -385,7 +404,7 @@ class SIMPLISMA(HasTraits):
     def transform(self):
         """
         Return the concentration and spectra matrix determined by SIMPLISMA
-
+        TODO: allow normalization of spectra
         Returns
         -------
         C : |NDDataset|
@@ -395,6 +414,48 @@ class SIMPLISMA(HasTraits):
 
         """
         return self._C, self._St
+
+    def inverse_transform(self):
+        """
+        Transform data back to the original space.
+
+        The following matrice operation is performed: :math:`X'_{hat} = C'.S'^t`
+
+        Return
+        ------
+        X_hat : |NDDataset|
+            The reconstructed dataset based on the SIMPLISMA Analysis.
+
+        """
+
+        # reconstruct from concentration and spectra profiles
+        C = self._C
+        St = self._St
+
+        X_hat = dot(C, St)
+        X_hat.description = 'Dataset reconstructed by SIMPLISMA\n' + self._log
+        X_hat.title = 'X_hat: ' + self._X.title
+        return X_hat
+
+
+    def plot(self, **kwargs):
+        """
+        Plots the input dataset, reconstructed dataset and residuals
+
+        """
+
+        colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
+
+        X_hat = self.inverse_transform()
+
+        res = self._X - X_hat
+
+        ax = self._X.plot(labbel='$X$')
+        ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
+        ax.plot(res.data.T, color=colRes, label='Residual')
+        ax.set_title('SIMPLISMA plot: ' + self._X.name)
+        return ax
+
 
 # ============================================================================
 if __name__ == '__main__':
