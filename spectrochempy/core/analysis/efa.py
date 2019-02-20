@@ -245,7 +245,7 @@ class EFA(HasTraits):
 
         profiles = [c.T[j] for j in range(npc)]
 
-        labels = ["PC#%d" % i for i in range(npc)]
+        labels = ['PC#{}'.format(i+1) for i in range(npc)]
 
         plot_multiple(profiles, labels=labels, yscale='log',
                       clear=clear, legend=legend)
