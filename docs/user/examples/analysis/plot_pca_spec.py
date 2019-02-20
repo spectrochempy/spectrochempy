@@ -7,10 +7,9 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 """
-NDDataset PCA analysis example
+NDDataset MCR ALS optimization example
 -------------------------------
-In this example, we perform the PCA dimensionality reduction of a spectra
-dataset
+In this example, we perform the MCR ALS optimization of a dataset.
 
 """
 
@@ -31,7 +30,7 @@ pca = scp.PCA(dataset, centered=False)
 # Reduce the dataset to a lower dimensionality (number of
 # components is automatically determined)
 
-LT, S = pca.transform(n_pc='auto')
+S, LT = pca.transform(n_pc='auto')
 
 print(LT)
 

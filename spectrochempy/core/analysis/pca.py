@@ -147,7 +147,7 @@ class PCA(HasTraits):
 
         # perform SVD
         # -----------
-        svd = svd = SVD(Xsc)
+        svd = SVD(Xsc)
         sigma = diag(svd.s)
         U = svd.U
         VT = svd.VT
@@ -201,7 +201,7 @@ class PCA(HasTraits):
              '     variance\n'
         for i in range(n_pc):
             tup = (
-            i, self.ev.data[i], self.ev_ratio.data[i], self.ev_cum.data[i])
+            i+1, self.ev.data[i], self.ev_ratio.data[i], self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tup)
 
         return s
@@ -334,7 +334,7 @@ class PCA(HasTraits):
 
         Returns
         -------
-        LT, S : |NDDataset| objects.
+        S, LT : |NDDataset| objects.
             n_pc loadings and their corresponding scores for each observations.
 
 
@@ -351,7 +351,7 @@ class PCA(HasTraits):
         S = self._S[:, :n_pc]
         LT = self._LT[:n_pc]
 
-        return LT, S
+        return S, LT
 
 
     def inverse_transform(self, n_pc=None):
@@ -493,9 +493,9 @@ class PCA(HasTraits):
             ax.set_title('Score plot')
 
             ax.set_xlabel('PC# {} ({:.3f}%)'.format(
-                                           pcs[0], self.ev_ratio.data[pcs[0]]))
+                                           pcs[0]+1, self.ev_ratio.data[pcs[0]]))
             ax.set_ylabel('PC# {} ({:.3f}%)'.format(
-                                           pcs[1], self.ev_ratio.data[pcs[1]]))
+                                           pcs[1]+1, self.ev_ratio.data[pcs[1]]))
             axsc = ax.scatter( self._S.masked_data[:, pcs[0]],
                         self._S.masked_data[:, pcs[1]],
                         s=30,
@@ -519,13 +519,13 @@ class PCA(HasTraits):
             ax = plt.axes(projection='3d')
             ax.set_title('Score plot')
             ax.set_xlabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[0], self.ev_ratio.data[pcs[
+                    'PC# {} ({:.3f}%)'.format(pcs[0]+1, self.ev_ratio.data[pcs[
                         0]]))
             ax.set_ylabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[1], self.ev_ratio.data[pcs[
+                    'PC# {} ({:.3f}%)'.format(pcs[1]+1, self.ev_ratio.data[pcs[
                         1]]))
             ax.set_zlabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[2], self.ev_ratio.data[pcs[
+                    'PC# {} ({:.3f}%)'.format(pcs[2]+1, self.ev_ratio.data[pcs[
                         2]]))
             axsc = ax.scatter(self._S.masked_data[:, pcs[0]],
                        self._S.masked_data[:, pcs[1]],
@@ -547,9 +547,6 @@ class PCA(HasTraits):
                                           label=l))
 
             ax.legend(handles=leg, loc='best')
-
-
-
 
         return ax
 
