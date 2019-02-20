@@ -9,7 +9,7 @@
 
 import os
 
-from spectrochempy import NDDataset, MCRALS
+from spectrochempy import NDDataset, MCRALS, EFA
 
 
 def test_MCRALS():
@@ -20,20 +20,28 @@ def test_MCRALS():
     for mat in data:
         print('    ' + mat.name, str(mat.shape))
 
-    print('\n test on single experiment (m1) with estimate of pure species (spure)...')
+    print('\n test on single experiment (m1) with given estimate of pure species (spure)...\n')
 
     X = data[0]
     guess = data[1]
-
-    mcr  = MCRALS(X, guess)
+    mcr  = MCRALS(X, guess, verbose=True)
     [C, St] = mcr.transform()
 
-    print(C)
-    C.T.plot()
-    print(St)
-    St.plot()
 
+    C.T.plot()
+    St.plot()
     mcr.plot()
+
+    print('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
+    guess = EFA(X).get_conc(4, plot=False)
+
+    param = {'normSpec':'euclid', 'maxit':100}
+    mcr2 = MCRALS(X, guess, param=param, verbose=False)
+    mcr2.plot()
+
+    assert 'converged !' in mcr2._log[-15:]
+
+
 
 # =============================================================================
 if __name__ == '__main__':
