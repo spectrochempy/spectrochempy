@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 
@@ -13,7 +13,7 @@
 import os
 import pytest
 from spectrochempy.utils import *
-
+from spectrochempy.core import log
 
 def test_readfilename_wo_filename_provided():
 
@@ -21,8 +21,7 @@ def test_readfilename_wo_filename_provided():
     f = readfilename( filetypes=["OMNIC files (*.sp*)",
                                  "SpectroChemPy files (*.scp)",
                                  "all files (*)"] )
-    print()
-    print(f)
+    log.info(f)
 
 def test_readfilename_w_directory_instead_of_filename():
     # should read in the specified directory
@@ -30,8 +29,7 @@ def test_readfilename_w_directory_instead_of_filename():
                         filetypes=["OMNIC files (*.sp*)",
                                  "SpectroChemPy files (*.scp)",
                                  "all files (*)"] )
-    print()
-    print(f)
+    log.info(f)
 
 def test_readfilename_w_bad_filename():
     # should raise an error
@@ -46,14 +44,13 @@ def test_readfilename_w_good_filename_in_tesdata():
                             filetypes=["OMNIC files (*.sp*)",
                                  "SpectroChemPy files (*.scp)",
                                  "all files (*)"] )
-    print()
-    print(f)
+    log.info(f)
 
 # def test_readfilename(qtbot, monkeypatch):
 # TODO: find  a way to test the user interaction with pytest-qt.
 #
 #     from spectrochempy.gui.widgets.commonwidgets import QFileDialog, QMessageBox
-#     from spectrochempy.extern.pyqtgraph.Qt import QtGui
+#     from pyqtgraph.Qt import QtGui
 #
 #     dialog = QFileDialog()
 #

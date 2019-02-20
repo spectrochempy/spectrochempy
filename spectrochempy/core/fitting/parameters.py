@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
-
-
+# ======================================================================================================================
 
 
 """
@@ -24,20 +22,21 @@ import re  # For regular expression search
 from collections import \
     UserDict  # This is to be able to create a special dictionary
 
-from spectrochempy.application import app
+from spectrochempy.core import app
+
 log = app.log
 project_preferences = app.project_preferences
 preferences = app.general_preferences
 
-from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.nddataset import NDDataset
 
 import numpy as np
-
 
 # =================
 # enthought import
 # =================
 from traitlets import (HasTraits, Unicode, Instance, List, observe)
+
 
 # =============
 # id_generator
@@ -71,7 +70,7 @@ class FitParameters(UserDict):
     if any.
     """
 
-    # ------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def __init__(self):
         UserDict.__init__(self)  # Create a dictionary class
         self.lob = {}  # Lower bound
@@ -85,7 +84,7 @@ class FitParameters(UserDict):
         self.expvars = []  # list of parameters which are experiment dependent
         self.expnumber = 1  # number of experiments
 
-    # ---------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def __setitem__(self, key, value):
         key = str(key)
         if key not in self.reference:
@@ -114,29 +113,29 @@ class FitParameters(UserDict):
             self.upb[key] = None
             self.fixed[key] = False
 
-    # --------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def __getitem__(self, key):
         key = str(key)
         if key in self.data:
             return self.data[key]
         raise KeyError("parameter %s is not found" % key)
 
-    # -------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def iteritems(self):
         return iter(self.data.items())
 
-    # --------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def _checkerror(self, key):
         key = str(key)
         if self.lob[key] is None and self.upb[key] is None:
             return False
         elif (self.lob[key] is not None and self.data[key] < self.lob[key]) \
                 or (self.upb[key] is not None and self.data[key] > self.upb[
-                    key]):
+            key]):
             raise ValueError(
                 '%s value %s is out of bounds' % (key, str(self.data[key])))
 
-    # -----------------
+    # ------------------------------------------------------------------------------------------------------------------
     def __str__(self):
 
         # .............................................................
@@ -159,7 +158,7 @@ class FitParameters(UserDict):
                 val = str(self.data[key])
 
                 return "%s: %10.4f, %s, %s \n" % (
-                keystring, float(val), lob, upb)
+                    keystring, float(val), lob, upb)
 
         # ..............................................................
 
@@ -191,7 +190,7 @@ class FitParameters(UserDict):
                 message += makestr(key)
         return message
 
-    # -------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def _evaluate(strg):
         """
@@ -241,7 +240,7 @@ class FitParameters(UserDict):
 
         return res
 
-    # ----------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def to_internal(self, key, expi=None):
         """
         if expi is not none, several parameters to create
@@ -277,7 +276,7 @@ class FitParameters(UserDict):
             pi = pe
         return pi
 
-    # ------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def to_external(self, key, pi):
 
         key = str(key)
@@ -354,7 +353,7 @@ class ParameterScript(HasTraits):
     # ===========================================================================
     # properties
     # ===========================================================================
-    # --------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     @observe('script')
     def _check_parameters(self, change):
         """
@@ -362,7 +361,7 @@ class ParameterScript(HasTraits):
         """
         self.fp = self._interpret(self.script)
 
-    # -----------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def _interpret(self, script):
         """
         Interpreter of the script content
@@ -419,7 +418,7 @@ class ParameterScript(HasTraits):
             elif key.startswith("experiment"):  # must be in common
                 if not common:
                     raise ValueError(
-                            "'experiment_...' specification was found outside the common block.")
+                        "'experiment_...' specification was found outside the common block.")
                 if "variables" in key:
                     expvars = values.lower().strip()
                     expvars = expvars.replace(',', ' ').replace(';', ' ')
@@ -429,7 +428,7 @@ class ParameterScript(HasTraits):
             else:
                 if modlabel is None and not common:
                     raise ValueError(
-                            "The first definition should be a label for a model or a block of variables or constants.")
+                        "The first definition should be a label for a model or a block of variables or constants.")
                 # get the parameters
                 if key.startswith('*'):
                     fixed = True
@@ -459,7 +458,7 @@ class ParameterScript(HasTraits):
                         'line %d: value, min, max should be defined in this order' % lc)
                 elif len(s) == 2:
                     raise ValueError('only two items in line %d' % lc)
-                    #s.append('none')
+                    # s.append('none')
                 elif len(s) == 1:
                     s.extend(['none', 'none'])
                 value, mini, maxi = s
@@ -487,8 +486,8 @@ class ParameterScript(HasTraits):
                         # if the parameter is already a list, that's ok if the number of parameters is ok
                         if len(val) != fp.expnumber:
                             raise ValueError(
-                                    'the number of parameters for %s is not the number of experiments.' % len(
-                                        val))
+                                'the number of parameters for %s is not the number of experiments.' % len(
+                                    val))
                         if key not in fp.expvars:
                             raise ValueError(
                                 'parameter %s is not declared as variable' % key)

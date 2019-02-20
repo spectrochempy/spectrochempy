@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 __all__ = ['read_zip', 'read_csv']
 
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # standard imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import os
 import shutil
@@ -30,36 +30,35 @@ except:
     except:
         warnings.warn('Could not set locale: en_US or en_US.utf8')
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # third party imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
 from numpy.lib.npyio import zipfile_factory, NpzFile
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # Local imports
-# -----------------------------------------------------------------------------
-from spectrochempy.dataset.ndcoords import Coord
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.core.processors.concatenate import concatenate
-from spectrochempy.application import log, general_preferences as prefs
-from spectrochempy.utils import (readfilename, unzip, is_sequence,
+# ----------------------------------------------------------------------------------------------------------------------
+from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoords import CoordSet
+from spectrochempy.core.processors.concatenate import stack
+from spectrochempy.core import log, general_preferences as prefs
+from spectrochempy.utils import (readfilename, is_sequence,
                                  SpectroChemPyWarning)
 
 
-# =============================================================================
-# read_zip
-# =============================================================================
+# ======================================================================================================================
+# Public functions
+# ======================================================================================================================
 
-def read_zip(dataset=None, **kwargs):
+def read_zip(*args, **kwargs):
     """Open a zipped list of .csv files  and set data/metadata in the
     current dataset
 
     Parameters
     ----------
-    dataset : |NDDataset|
-        The dataset to store the data and the metadata read from the spg file
     filename: str
         filename of the file to load
     directory: str, optional, default="".
@@ -82,26 +81,23 @@ def read_zip(dataset=None, **kwargs):
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
-    filename = kwargs.pop('filename', None)
+    if args and args[0]:
+        filename = args[0]
+    else:
+        filename = None
+    filename = kwargs.pop('filename', filename)
 
-    nd = _read(dataset, filename=filename, filter='zip file (*.zip);', **kwargs)
+    nd = _read(filename=filename, filter='zip file (*.zip);', **kwargs)
 
     return nd
 
-
-# =============================================================================
-# Public functions
-# =============================================================================
-
 # .............................................................................
-def read_csv(dataset=None, **kwargs):
+def read_csv(*args, **kwargs):
     """Open a \*.csv file or a list of \*.csv files and set data/metadata
     in the current dataset
 
     Parameters
     ----------
-    dataset : |NDDataset|
-        The dataset to store the data and the metadata read from the spg file
     filename: str
         filename of the file to load
     directory: str, optional, default="".
@@ -125,34 +121,29 @@ def read_csv(dataset=None, **kwargs):
     without header
 
     """
-    #TODO: to allow header and nd-data
+    # TODO: to allow header and nd-data
 
     log.debug("reading csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
-    filename = kwargs.pop('filename', None)
+    if args and args[0]:
+        filename = args[0]
+    else:
+        filename = None
+    filename = kwargs.pop('filename', filename)
 
-    nd = _read(dataset, filename=filename, filter='csv file (*.csv)', **kwargs)
+    nd = _read(filename=filename, filter='csv file (*.csv)', **kwargs)
 
     return nd
 
 
-# =============================================================================
+# ======================================================================================================================
 # private functions
-# =============================================================================
+# ======================================================================================================================
 
 # .............................................................................
-def _read(dataset, filename, **kwargs):
-    # check if the first parameter is a dataset
-    # because we allow not to pass it
-    if not isinstance(dataset, NDDataset):
-        # probably did not specify a dataset
-        # so the first parameters must be the filename
-        if isinstance(dataset, str) and dataset != '':
-            filename = dataset
-
-        dataset = NDDataset()  # create a NDDataset
+def _read(filename, **kwargs):
 
     # check if directory was specified
     directory = kwargs.get("directory", None)
@@ -173,10 +164,10 @@ def _read(dataset, filename, **kwargs):
         for filename in files[extension]:
             if extension == '.zip':
                 # zip returns a list, so we extend the list of datasets
-                datasets.extend(_read_zip(dataset, filename, **kwargs))
+                datasets.extend(_read_zip(filename, **kwargs))
 
             elif extension == '.csv':
-                csv = _read_csv(dataset, filename, **kwargs)
+                csv = _read_csv(filename, **kwargs)
                 # check is it is a list of datasets or a single
                 if isinstance(csv, NDDataset):
                     datasets.append(csv)
@@ -184,25 +175,27 @@ def _read(dataset, filename, **kwargs):
                     datasets.extend(csv)
             else:
                 # try another format!
-                dat = dataset.read(filename, protocol=extension[1:],
+                dat = NDDataset.read(filename, protocol=extension[1:],
                                    sortbydate=True, **kwargs)
                 if isinstance(dat, NDDataset):
                     datasets.append(dat)
                 elif is_sequence(dat):
                     datasets.extend(dat)
 
-    # and concatenate them into a single file - this assume they are compatibles
+    # and stack them along the y-dimension into a single file - this assume they are compatible
     if len(datasets) > 1:
-        new = concatenate(datasets, axis=0)
+        new = stack(datasets)
     else:
-        new = datasets[0]
+        # else, squeeze a unidimensional dataset
+        new = datasets[0].squeeze()
 
     # now we return the results
     return new
 
 
 # .............................................................................
-def _read_zip(dataset, filename, **kwargs):
+def _read_zip(filename, **kwargs):
+
     if not os.path.exists(filename):
         print('Sorry but this filename (%s) does not exists!' % filename)
         return None
@@ -237,7 +230,7 @@ def _read_zip(dataset, filename, **kwargs):
 
         log.debug('reading %s ...' % (f))
 
-        datasets.append(_read_csv(dataset, filename=f, fid=obj[f], **kwargs))
+        datasets.append(_read_csv(filename=f, fid=obj[f], **kwargs))
         if len(datasets) + 1 > only:
             break
 
@@ -250,14 +243,13 @@ def _read_zip(dataset, filename, **kwargs):
 
 
 # .............................................................................
-def _read_csv(dataset, filename='', fid=None, **kwargs):
+def _read_csv(filename='', fid=None, **kwargs):
     # this is limited to 1D array (two columns reading!)
     # TODO: improve this for 2D with header
 
     if not isinstance(fid, bytes) and not os.path.exists(filename):
         raise IOError("{} file doesn't exists!".format(filename))
 
-    new = dataset.copy()  # important
     delimiter = kwargs.get("delimiter", prefs.csv_delimiter)
     try:
         if isinstance(fid, bytes):
@@ -290,19 +282,25 @@ def _read_csv(dataset, filename='', fid=None, **kwargs):
     # transpose d so the the rows becomes the last dimensions
     d = d.T
 
-    # First row should now be the coordinates, and data the rest of the array
-    coord0 = d[0]
-    data = d[1]
+    # First column should now be the x coordinates
+    coordx = Coord(d[0])
+
+    # create a second coordinate for dimension x of size 1
+    coordy = Coord([0])
+
+    # and data is the second column -  we make it a vector
+    data = d[1].reshape((1, coordx.size))
 
     # create the dataset
-    new.data = data
+    new = NDDataset(data, coords=CoordSet(coordy, coordx))
+
+    # set the additional attributes
     name = os.path.splitext(os.path.basename(filename))[0]
     new.name = kwargs.get('name', name)
     new.title = kwargs.get('title', None)
     new.units = kwargs.get('units', None)
     new.description = kwargs.get('description',
                                  '"name" ' + 'read from .csv file')
-    new.coordset = [coord0]
     new.history = str(datetime.now()) + ':read from .csv file \n'
     new._date = datetime.now()
     new._modified = new.date
@@ -311,8 +309,10 @@ def _read_csv(dataset, filename='', fid=None, **kwargs):
     origin = kwargs.get('origin', '')
     if 'omnic' in origin:
         # this will be treated as csv export from omnic (IR data)
-        new._data = new.data[np.newaxis]  # add a dimension
         new = _add_omnic_info(new, **kwargs)
+    elif 'tga' in origin:
+        # this will be treated as csv export from tga analysis
+        new = _add_tga_info(new, **kwargs)
 
     return new
 
@@ -346,12 +346,11 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
     dataset.name = name
-    xaxis = dataset.coordset[-1]
-    dataset.coordset = [np.array([timestamp]), xaxis]
-    dataset.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
-    dataset.coordset[1].units = 'cm^-1'
-    dataset.coordset[0].labels = np.array([[acqdate], [name]])
-    dataset.coordset[0].units = 's'
+    dataset._coords[0] = Coord(np.array([timestamp]), name='y')
+    dataset.coords.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
+    dataset.coords[1].units = 'cm^-1'
+    dataset.coords[0].labels = np.array([[acqdate], [name]])
+    dataset.coords[0].units = 's'
 
     # Set description and history
     dataset.description = (
@@ -365,9 +364,20 @@ def _add_omnic_info(dataset, **kwargs):
 
     return dataset
 
+def _add_tga_info(dataset, **kwargs):
 
-# ===============================================================================
+    # for TGA, some information are needed.
+    # we add them here
+    dataset.x.units = 'hour'
+    dataset.units = 'weight_percent'
+    dataset.x.title = 'Time-on-stream'
+    dataset.title = 'Mass change'
+
+    return dataset
+
+
+# ======================================================================================================================
 # tests
-# ===============================================================================
+# ======================================================================================================================
 if __name__ == '__main__':
     pass

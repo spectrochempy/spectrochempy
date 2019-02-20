@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 __all__ = ['MCRALS']
@@ -15,8 +15,9 @@ __dataset_methods__ = ['MCRALS']
 import numpy as np
 from traitlets import HasTraits, Instance
 
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import log
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.analysis.pca import PCA
+from spectrochempy.core import log
 from spectrochempy.core.processors.npy import dot
 
 
@@ -31,9 +32,12 @@ class MCRALS(HasTraits):
     """|NDDataset| - Spectra profile of pure species"""
     _param = Instance(dict)
     """|dict| - Parameters of the MCS-ALS optimization"""
+    _log = Instance(str)
+    """|dict| - Log of the MCS-ALS iterations"""
 
     def __init__(self, X, guess, **kwargs):
         """
+
         Parameters
         -----------
         X : |NDDataset|
@@ -42,21 +46,25 @@ class MCRALS(HasTraits):
             Initial concentration or spectra
         param : dict
             dict of optimization parameters with the following keys:
-                'tol': float, optional, default=1e-3
-                'maxit' : maximum number of ALS minimizations
-                'maxdiv' : maximum number of non-converging iteratiobs
+                'tol': float, optional, convergence criterion on the change of resisuals
+                (percent change of standard deviation of residuals). default=0.1
+                'maxit' : maximum number of ALS minimizations. default = 50
+                'maxdiv' : maximum number of successive non-converging iterations. default=5
                 'nonnegConc' : array or tuple indicating species non-negative concentration
                        profiles. For instance [1, 0, 1] indicates that species #0
                        and #2 have non-negative conc profiles while species #1
                        can have negative concentrations
-                       Default [1, ..., 1]  (only non-negative cocentrations)
+                       Default [1, ..., 1]  (only non-negative concentrations)
                 'unimodConc' : array or tuple indicating species having unimodal concentrations
                        profiles.
-                       Default [1, ..., 1]  (only unimodal cocentration profiles)
+                       Default [1, ..., 1]  (only unimodal concentration profiles)
                'nonnegSpec' : array or tuple indicating species having non-negative spectra
                        Default [1, ..., 1]  (only non-negative spectra)
                 'unimodSpec' : array or tuple indicating species having unimodal spectra
                        Default [0, ..., 0]  (no unimodal cocentration profiles)
+        verbose : bool
+            if set to True, prints a summary of residuals and residuals change at each iteration. default = False.
+            In anyu case, the same information is returned in self._log
 
         """
         # TODO: add example
@@ -75,7 +83,7 @@ class MCRALS(HasTraits):
         elif X.shape[1] == guess.shape[1]:
             initSpec = True
             St = guess.copy()
-            St.name ='Pure spectra profile, mcs-als of ' + X.name
+            St.name = 'Pure spectra profile, mcs-als of ' + X.name
             nspecies = St.shape[0]
 
         else:
@@ -84,17 +92,28 @@ class MCRALS(HasTraits):
 
         ny, nx = X.shape
 
+        # makes a PCA with same number of species
+
+        X.coords = [X.y, X.x]
+        Xpca = PCA(X).inverse_transform(n_pc=nspecies)
+
         # Get optional parameters in kwargs or set them to their default
         # ------------------------------------------------------------------------
 
         # TODO: make a preference  file to set this kwargs
         param = kwargs.get('param', dict())
 
-        tol = param.get('tol', 0.001)
+        ### optimization
+
+        tol = param.get('tol', 0.1)
 
         maxit = param.get('maxit', 50)
 
         maxdiv = param.get('maxdiv', 5)
+
+        verbose = kwargs.get('verbose', False)
+
+        ### constraints on concentrations
 
         nonnegConc = param.get('nonnegConc', [1] * nspecies)
 
@@ -112,7 +131,11 @@ class MCRALS(HasTraits):
 
         monoIncTol = param.get('monoIncTol', 1.1)
 
+        ### constraints on concentrations
+
         nonnegSpec = param.get('nonnegSpec', [1] * nspecies)
+
+        normSpec = param.get('normSpec', 'no')
 
         #    if ('unimodSpec' in kwargs): unimodSpec = kwargs['unimodSpec']
         #    else: unimodSpec = np.zeros((1, nspecies))
@@ -121,28 +144,34 @@ class MCRALS(HasTraits):
         # ------------------------------------------------------------------------
 
         if initConc:
-            St =  NDDataset(np.linalg.lstsq(C.data, X.data)[0])
+            if C.coords is None:
+                C.coords = [X.y, C.x]
+            St = NDDataset(np.linalg.lstsq(C.data, X.data)[0])
             St.name = 'Pure spectra profile, mcs-als of ' + X.name
-            St.x = X.x
-            if C.x is not None:
-                St.y = C.x
-
+            St.title = X.title
+            St.coords = [C.x, X.x]
 
         if initSpec:
+            if St.coords is None:
+                St.coords = [St.y, X.x]
             Ct = np.linalg.lstsq(St.data.T, X.data.T)[0]
             C = NDDataset(Ct.T)
             C.name = 'Pure conc. profile, mcs-als of ' + X.name
-            if X.coordset is not None:
-                C.coordset = [X.y, C.y]
-            if St.y is not None and C.coordset is not None:
-                C.coordset[1] = St.y
+            C.title = 'Concentration'
+            C.coords = [X.y, St.y]
 
-        delta = tol + 1
+        change = tol + 1
+        stdev = X.std().data[0]
         niter = 0
         ndiv = 0
-        res = np.infty
 
-        while delta >= tol and niter < maxit and ndiv < maxdiv:
+        log = '*** ALS optimisation log***\n'
+        log += '#iter     Error/PCA        Error/Exp      %change\n'
+        log += '---------------------------------------------------'
+        if verbose:
+            print(log)
+
+        while change >= tol and niter < maxit and ndiv < maxdiv:
 
             C.data = np.linalg.lstsq(St.data.T, X.data.T)[0].T
             niter += 1
@@ -210,23 +239,62 @@ class MCRALS(HasTraits):
                 for s in np.nditer(np.nonzero(nonnegSpec)):
                     St.data[s, :] = St.data[s, :].clip(min=0)
 
+            # rescale spectra & concentrations
+            if normSpec == 'max':
+                alpha = np.max(St.data, axis=1).reshape(nspecies, 1)
+                St.data = St.data / alpha
+                C.data = C.data * alpha.T
+            elif normSpec == 'euclid':
+                alpha = np.linalg.norm(St.data, axis=1).reshape(nspecies, 1)
+                St = St / alpha
+                C.data = C.data * alpha.T
+
             # compute residuals
             # -----------------
-            res2 = np.linalg.norm(X.data - np.dot(C.data, St.data))
-            delta = res2 - res
-            res = res2
-            log.info(niter, res2, delta)
+            X_hat = dot(C, St)
+            stdev2 = (X_hat - X).std().data[0]
+            change = 100 * (stdev2 - stdev) / stdev
 
-            if delta > 0:
+            stdev_PCA = (X_hat - Xpca).std().data[0]
+
+            logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
+            log += logentry + '\n'
+            if verbose:
+                print(logentry)
+            stdev = stdev2
+
+            if change > 0:
                 ndiv += 1
             else:
-                delta = -delta
+                ndiv = 0
+                change = -change
+
+            if change < tol:
+                logentry = 'converged !'
+                log += logentry + '\n'
+                if verbose:
+                    print(logentry)
+
+            if ndiv == maxdiv:
+                logline = 'Optimization not improved since {} iterations... unconverged or \'tol\' set too small ?\n'.format(
+                    maxdiv)
+                logline += 'Stop ALS optimization'
+                log += logline + '\n'
+                if verbose:
+                    print(logline)
+
+            if niter == maxit:
+                logline = 'Convergence criterion (\'tol\') not reached after {:d} iterations.'.format(maxit)
+                logline += 'Stop ALS optimization'
+                log += logline + '\n'
+                if verbose:
+                    print(logline)
 
         self._X = X
         self._param = param
         self._C = C
         self._St = St
-
+        self._log = log
 
     def transform(self):
         """
@@ -255,7 +323,7 @@ class MCRALS(HasTraits):
 
         """
 
-        # reconstruct from scores and loadings using n_pc components
+        # reconstruct from concentration and spectra profiles
         C = self._C
         St = self._St
 
@@ -272,16 +340,13 @@ class MCRALS(HasTraits):
         """
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
-        pen = kwargs.get('pen', True)
 
         X_hat = self.inverse_transform()
+
         res = self._X - X_hat
 
-        ax = self._X.plot()
-        ax.plot(X_hat.data.T, color=colXhat)
-        ax.plot(res.data.T, color=colRes)
-        ax.set_title('MCR ALS plot')
+        ax = self._X.plot(labbel='$X$')
+        ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
+        ax.plot(res.data.T, color=colRes, label='Residual')
+        ax.set_title('MCR ALS plot: ' + self._X.name)
         return ax
-
-
-

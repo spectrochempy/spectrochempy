@@ -1,4 +1,4 @@
-# ---
+# ----------------------------------------------------------------------------------------------------------------------
 # jupyter:
 #   jupytext:
 #     text_representation:
@@ -10,7 +10,7 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
-# ---
+# ----------------------------------------------------------------------------------------------------------------------
 
 # %% [markdown]
 # # Baseline corrections
@@ -23,8 +23,8 @@ dataset = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
 dataset
 
 # %%
-s = dataset[:, 1260.0:5999.0]  
-s = s - s[-1]
+s = dataset[1260.0:5999.0]
+s = s - s[:,-1]
 
 # Important note that we use floating point number
 # integer would mean points, not wavenumbers!

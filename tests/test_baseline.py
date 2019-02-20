@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 # noinspection PyUnresolvedReferences
@@ -21,58 +21,50 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 def test_basecor_sequential(IR_dataset_2D):
 
-    dataset = IR_dataset_2D[:5]
+    dataset = IR_dataset_2D[5]
 
     basc = BaselineCorrection(dataset)
-    s = basc([6000.,3500.],[1800.,1500.])
-
+    s = basc([6000.,3500.],[2200.,1500.], method='sequential', interpolation='pchip')
     s.plot()
-    show()
+    s = basc([6000.,3500.],[2200.,1500.], method='sequential', interpolation='polynomial')
+    s.plot(clear=False, color='red')
 
-
-def test_basecor_sequential_pchip(IR_dataset_2D):
-
-    dataset = IR_dataset_2D[:5]
+    dataset = IR_dataset_2D[:15]
 
     basc = BaselineCorrection(dataset)
-    s = basc([6000., 3500.], [1800., 1500.],
-                              interpolation='pchip')
+    s = basc([6000.,3500.],[2200.,1500.], method='sequential', interpolation='pchip')
     s.plot()
+    s = basc([6000.,3500.],[2200.,1500.], method='sequential', interpolation='polynomial')
+    s.plot(cmap='copper')
+
     show()
 
 
 def test_basecor_multivariate(IR_dataset_2D):
 
-    dataset = IR_dataset_2D[:5]
+    dataset = IR_dataset_2D[5]
 
     basc = BaselineCorrection(dataset)
-    s = basc([6000., 3500.], [1800., 1500.],
-                              method='multivariate',
-                              interpolation='polynomial')
+    s = basc([6000., 3500.], [1800., 1500.], method='multivariate', interpolation='pchip')
     s.plot()
-    show()
+    s = basc([6000., 3500.], [1800., 1500.], method='multivariate', interpolation='polynomial')
+    s.plot(clear=False, color='red')
 
-
-def test_basecor_multivariate_pchip(IR_dataset_2D):
-
-    dataset = IR_dataset_2D[:5]
+    dataset = IR_dataset_2D[:15]
 
     basc = BaselineCorrection(dataset)
-    s = basc([6000., 3500.], [1800., 1500.],
-                              method='multivariate',
-                              interpolation='pchip')
+    s = basc([6000., 3500.], [1800., 1500.], method='multivariate', interpolation='pchip')
     s.plot()
+    s = basc([6000., 3500.], [1800., 1500.], method='multivariate', interpolation='polynomial')
+    s.plot(cmap='copper')
     show()
-
 
 def test_notebook_basecor_bug():
     # coding: utf-8
 
-    dataset = NDDataset.read_omnic(
-        os.path.join('irdata', 'nh4y-activation.spg'))
-    dataset
+    dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 
-    s = dataset[:, 1260.0 :5999.0]
+    s = dataset[:, 1260.0:5999.0]
     s = s - s[-1]
 
     # Important note that we use floating point number

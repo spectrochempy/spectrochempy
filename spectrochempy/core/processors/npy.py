@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 In this module, we define basic functions adapted from numpy but able to handle
@@ -15,14 +15,14 @@ our NDDataset objects
 __all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'zeros_like', 'ones',
            'ones_like', 'full', 'full_like']
 
-
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # third party imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.utils import nomask
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import NOMASK
+
 
 def empty(shape, dtype=None, **kwargs):
     """
@@ -64,7 +64,8 @@ def empty(shape, dtype=None, **kwargs):
     NDDataset: [[...]] s
 
     """
-    return NDDataset(np.empty(shape, dtype=dtype), **kwargs)
+    return NDDataset(np.empty(shape, dtype=np.dtype(dtype)), **kwargs)
+
 
 def empty_like(a, dtype=None):
     """
@@ -100,7 +101,10 @@ def empty_like(a, dtype=None):
 
     """
     new = a.copy()
+    if dtype:
+        new._dtype = np.dtype(dtype)
     return new
+
 
 def zeros(shape, dtype=None, **kwargs):
     """
@@ -139,7 +143,7 @@ def zeros(shape, dtype=None, **kwargs):
                 [   0.000,    0.000]] m
 
     """
-    return NDDataset(np.zeros(shape, dtype=dtype), **kwargs)
+    return NDDataset(np.zeros(shape, dtype=np.dtype(dtype)), **kwargs)
 
 
 def ones(shape, dtype=None, **kwargs):
@@ -178,10 +182,10 @@ def ones(shape, dtype=None, **kwargs):
                 [   1.000,    1.000]] unitless
 
     """
-    return NDDataset(np.ones(shape, dtype=dtype), **kwargs)
+    return NDDataset(np.ones(shape, dtype=np.dtype(dtype)), **kwargs)
 
 
-def zeros_like(a, dtype=None,):
+def zeros_like(a, dtype=None, ):
     """
     Return a |NDDataset| of zeros with the same shape and type as a given
     array.
@@ -221,7 +225,9 @@ def zeros_like(a, dtype=None,):
 
     """
     new = a.copy()
-    new.data = np.zeros_like(a)
+    if dtype:
+        new._dtype = np.dtype(dtype)
+    new.data = np.zeros_like(a, dtype=np.dtype(dtype))
     return new
 
 
@@ -229,7 +235,7 @@ def ones_like(a, dtype=None):
     """
     Return |NDDataset| of ones with the same shape and type as a given array.
 
-    It preserves original mask, units, coords and uncertainty
+    It preserves original mask, units, and coords
 
     Parameters
     ----------
@@ -265,8 +271,11 @@ def ones_like(a, dtype=None):
 
     """
     new = a.copy()
-    new.data = np.ones_like(a)
+    if dtype:
+        new._dtype = np.dtype(dtype)
+    new.data = np.ones_like(a, dtype=np.dtype(dtype))
     return new
+
 
 def full(shape, fill_value, dtype=None, **kwargs):
     """
@@ -310,8 +319,9 @@ def full(shape, fill_value, dtype=None, **kwargs):
                 [      10,       10]] unitless
 
     """
-    return NDDataset(np.full(shape, fill_value=fill_value, dtype=dtype),
+    return NDDataset(np.full(shape, fill_value=fill_value, dtype=np.dtype(dtype)),
                      **kwargs)
+
 
 def full_like(a, fill_value, dtype=None):
     """
@@ -358,7 +368,9 @@ def full_like(a, fill_value, dtype=None):
 
     """
     new = a.copy()
-    new.data = np.full_like(a, fill_value=fill_value, dtype=dtype)
+    if dtype:
+        new._dtype = np.dtype(dtype)
+    new.data = np.full_like(a, fill_value=fill_value, dtype=np.dtype(dtype))
     return new
 
 
@@ -409,36 +421,32 @@ def dot(a, b, strict=True, out=None):
                         ' of type {} has been provided'.format(
             type(b).__name__))
 
-    #TODO: may be we can be less strict, and allow dot products with
+    # TODO: may be we can be less strict, and allow dot products with
     # different kind of objects, as far they are numpy-like arrays
 
     data = np.ma.dot(a.masked_data, b.masked_data)
     mask = data.mask
     data = data.data
-    uncertainty = None
-    if a.is_uncertain or b.is_uncertain:
-            raise NotImplementedError('uncertainty not yet implemented')
 
-    coordset = None
-    if a.coordset is not None:
-        coordset = [a.coordset[0]]
-    if b.coordset is not None:
-        if coordset is None:
-            coordset = [None]
-        coordset.append(b.coordset[1])
-    elif coordset is not None:
-        coordset.append(None)
+    coords = None
+    if a.coords is not None:
+        coords = [a.coords[0]]
+    if b.coords is not None:
+        if coords is None:
+            coords = [None]
+        coords.append(b.coords[1])
+    elif coords is not None:
+        coords.append(None)
 
-    history = 'dot product between %s and %s'%(a.name, b.name)
+    history = 'dot product between %s and %s' % (a.name, b.name)
 
     # make the output
-    # ---------------
+    # ------------------------------------------------------------------------------------------------------------------
     new = a.copy()
     new._data = data
     new._mask = mask
-    new._uncertainty = uncertainty
-    if new.coordset is not None:
-        new._coordset = type(new.coordset)(coordset)
+    if new.coords is not None:
+        new._coords = type(new.coords)(coords)
     new.history = history
 
     return new
@@ -448,7 +456,7 @@ def dot(a, b, strict=True, out=None):
 def diag(dataset, k=0):
     """
     Extract a diagonal or construct a diagonal array.
-a
+
     See the more detailed documentation for ``numpy.diagonal`` if you use this
     function to extract a diagonal and wish to write to the resulting array;
     whether it returns a copy or a view depends on what version of numpy you
@@ -474,7 +482,7 @@ a
     """
 
     # check if we have the correct input
-    # ----------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     if not dataset.implements('NDDataset'):
         raise TypeError('A dataset of type NDDataset is  '
@@ -488,17 +496,14 @@ a
         # construct a diagonal array
         # --------------------------
         data = np.diag(dataset.data)
-        mask = nomask
+        mask = NOMASK
         if dataset.is_masked:
             size = dataset.size
             m = np.repeat(dataset.mask, size).reshape(size, size)
             mask = m | m.T
-        uncertainty = None
-        if dataset.is_uncertain:
-            uncertainty = np.diag(dataset.uncertainty)
-        coordset = None
-        if dataset.coordset is not None:
-            coordset = [dataset.coordset[0]]*2
+        coords = None
+        if dataset.coords is not None:
+            coords = [dataset.coords[0]] * 2
         history = 'diagonal array build from the 1D dataset'
 
     elif len(s) == 2:
@@ -508,31 +513,26 @@ a
         mask = None
         if dataset.is_masked:
             mask = np.diagonal(dataset.mask, k).copy()
-        uncertainty = None
-        if dataset.is_uncertain:
-            uncertainty = np.diagonal(dataset.uncertainty, k).copy()
-        coordset = None
-        if dataset.coordset is not None:
-            coordset = [dataset.coordset[0]]  # TODO: this is likely not
-                                             #       correct for k != 0
-        history = 'diagonal of rank %d extracted from original dataset'%k
+        coords = None
+        if dataset.coords is not None:
+            coords = [dataset.coords[0]]  # TODO: this is likely not
+            #       correct for k != 0
+        history = 'diagonal of rank %d extracted from original dataset' % k
 
     else:
         raise ValueError("Input must be 1- or 2-d.")
 
     # make the output
-    # ---------------
+    # ------------------------------------------------------------------------------------------------------------------
     new = dataset.copy()
     new._data = data
     new._mask = mask
-    new._uncertainty = uncertainty
-    new.coordset = coordset
+    new.coords = coords
     new.history = history
 
     return new
 
 
-
-# =============================================================================
+# ======================================================================================================================
 if __name__ == '__main__':
     pass

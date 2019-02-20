@@ -1,4 +1,4 @@
-# ---
+# ----------------------------------------------------------------------------------------------------------------------
 # jupyter:
 #   jupytext:
 #     text_representation:
@@ -10,7 +10,7 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
-# ---
+# ----------------------------------------------------------------------------------------------------------------------
 
 # %% [markdown]
 # # Import and export of NDDataset objects
@@ -29,8 +29,11 @@ from spectrochempy import *
 # However it is always possible to specify alternative locations: Any existing file path can be specified in import
 # functions calls.
 #
-# <div class='alert alert-info'>**NOTE:**
+# <div class='alert alert-info'>
+#     
+# **NOTE:**
 # In import function calls, if we do not specify the **datadir**, the application will first look in this directory by default, if it doesn't find the path in the current directory.
+#
 # </div>
 
 # %%
@@ -39,6 +42,31 @@ import os
 datadir = general_preferences.datadir
 if os.path.exists(datadir):
     assert datadir.endswith("/spectrochempy/scp_data/testdata")
+
+# %% [markdown]
+# ## File selector widget
+
+# %% [markdown]
+# A widget is provided to help with the selection of file names or directory. 
+#
+# <div class ="alert alert-warning">
+#     
+# **WARNING:**
+# Experimental feature - subject to changes
+#     
+# </div>
+
+# %%
+path = general_preferences.datadir
+fs = FileSelector(path = path, filters=['spg','spa'])   
+fs
+
+# %% [markdown]
+# After validation of the selection, one can read the path and name of the selected files. 
+
+# %%
+fs.value, fs.path, fs.fullpath
+
 
 # %% [markdown]
 # ##  Infrared spectroscopy OMNIC file Import (.spg extension)

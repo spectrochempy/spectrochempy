@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# ---
+# ----------------------------------------------------------------------------------------------------------------------
 # jupyter:
 #   jupytext:
 #     text_representation:
@@ -11,7 +11,7 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
-# ---
+# ----------------------------------------------------------------------------------------------------------------------
 
 # %% [markdown] {"cell_style": "center", "nbpresent": {"id": "8c1a09c3-41be-4a90-bb14-9ee105fbd2a4"}, "slideshow": {"slide_type": "slide"}}
 # # A full working example: an AGIR study of coked zeolites
@@ -392,5 +392,6 @@ proj.save('HIZECOKE')
 # In the next [notebook](tuto2_agir_IR_processing.ipynb), we will now proceed with some basic pre-processing of the IR data, such as slicing interesting regions, and masking some data. 
 
 # %%
+
 
 

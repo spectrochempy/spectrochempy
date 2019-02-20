@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 import os
 
@@ -15,7 +15,7 @@ from spectrochempy import *
 prefs = general_preferences
 
 # Basic
-# -------
+# ----------------------------------------------------------------------------------------------------------------------
 def test_save_and_load_file_with_nofilename(IR_dataset_2D):
     A = IR_dataset_2D.copy()
     A.save()
@@ -43,15 +43,14 @@ def test_project(ds1, ds2, dsm):
     ds2.name = 'tata'
     dsm.name = 'titi'
 
-    ds = ds1[:10, INPLACE]
+    ds = ds1[:, 10, INPLACE]
     assert ds1.shape == ds.shape
     assert ds is ds1
 
     myp.add_datasets(ds1, ds2, dsm)
 
     print(myp.datasets_names)
-    assert myp.datasets_names[
-               -1] == 'titi'  # because toto has changed to *toto
+    assert myp.datasets_names[-1] == 'toto'
     assert ds1.parent == myp
 
     # iteration
@@ -59,7 +58,7 @@ def test_project(ds1, ds2, dsm):
     for item in myp:
         d.append(item)
 
-    assert d[1][0] == 'tata'
+    assert d[1][0] == 'titi'
 
     ##
     # add sub project

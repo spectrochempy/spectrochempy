@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-# ============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# ============================================================================
-
+# ======================================================================================================================
 
 
 """
@@ -21,22 +20,23 @@ __all__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar',
 __dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter',
                        'plot_bar']
 
-
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # third party imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from ...application import app,  log
+from spectrochempy.core import log, project_preferences
 from .utils import make_label
 from ...utils import is_sequence, deprecated
-from ...extern.pyqtgraph.functions import mkPen
 
-# ----------------------------------------------------------------------------
+
+# from pyqtgraph.functions import mkPen
+
+# ----------------------------------------------------------------------------------------------------------------------
 # localimports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 # plot scatter ---------------------------------------------------------------
 
@@ -62,9 +62,10 @@ def plot_lines(dataset, **kwargs):
     Alias of plot (with `method` argument set to ``lines``.
 
     """
-    kwargs['method'] = 'lines'
+    kwargs['method'] = 'pen'
     ax = plot_1D(dataset, **kwargs)
     return ax
+
 
 # plot pen (default) ---------------------------------------------------------
 
@@ -78,6 +79,7 @@ def plot_pen(dataset, **kwargs):
     kwargs['method'] = 'pen'
     ax = plot_1D(dataset, **kwargs)
     return ax
+
 
 # plot bars ------------------------------------------------------------------
 
@@ -96,7 +98,7 @@ def plot_bar(dataset, **kwargs):
 # plot multiple --------------------------------------------------------------
 
 def plot_multiple(datasets, method='scatter', pen=True,
-                  labels = None, **kwargs):
+                  labels=None, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot
     with optional lines between markers.
@@ -117,13 +119,13 @@ def plot_multiple(datasets, method='scatter', pen=True,
         # we need a sequence. Else it is a single plot.
         return datasets.plot(**kwargs)
 
-    if not is_sequence(labels) or len(labels)!=len(datasets):
+    if not is_sequence(labels) or len(labels) != len(datasets):
         # we need a sequence of labels of same lentgh as datasets
         raise ValueError('the list of labels must be of same length '
                          'as the datasets list')
 
     for dataset in datasets:
-        if dataset.ndim > 1:
+        if dataset._squeeze_ndim > 1:
             raise NotImplementedError('plot multiple is designed to work on '
                                       '1D dataset only. you may achieved '
                                       'several plots with '
@@ -131,18 +133,17 @@ def plot_multiple(datasets, method='scatter', pen=True,
                                       'around '
                                       'solution')
 
-
     # do not save during this plots, nor apply any commands
     # we will make this when all plots will be done
 
     output = kwargs.get('output', None)
-    kwargs['output']=None
+    kwargs['output'] = None
     commands = kwargs.get('commands', [])
     kwargs['commands'] = []
     clear = kwargs.pop('clear', True)
-    for s in datasets : #, colors, markers):
+    for s in datasets:  # , colors, markers):
 
-        ax = s.plot(method= method,
+        ax = s.plot(method=method,
                     pen=pen,
                     marker='AUTO',
                     color='AUTO',
@@ -166,9 +167,9 @@ def plot_multiple(datasets, method='scatter', pen=True,
     return ax
 
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # plot_1D
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 def plot_1D(dataset, **kwargs):
     """
@@ -250,30 +251,31 @@ def plot_1D(dataset, **kwargs):
 
     """
     # get all plot preferences
-    # ------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     prefs = dataset.plotmeta
     if not prefs.style:
         # not yet set, initialize with default project preferences
-        prefs.update(app.project_preferences.to_dict())
+        prefs.update(project_preferences.to_dict())
 
     usempl = True  # by default we use matplotlib for plotting
 
     # make a copy
-    # -----------
-    new = dataset.copy()
+    # ------------------------------------------------------------------------------------------------------------------
+    new = dataset #.copy()  # Do we need a copy?
 
     # If we are in the GUI, we will plot on a widget: but which one?
-    # ---------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     widget = kwargs.get('widget', None)
 
+    # this is not active for now
     if widget is not None:
         if hasattr(widget, 'implements') and widget.implements('PyQtGraphWidget'):
             # let's go to a particular treament for the pyqtgraph plots
             kwargs['usempl'] = usempl = False
             # we try to have a commmon interface for both plot library
-            kwargs['ax'] = ax = widget # return qt_plot_1D(dataset, **kwargs)
+            kwargs['ax'] = ax = widget  # return qt_plot_1D(dataset, **kwargs)
         else:
             # this must be a matplotlibwidget
             kwargs['usempl'] = usempl = True
@@ -286,7 +288,7 @@ def plot_1D(dataset, **kwargs):
     method = kwargs.pop('method', prefs.method_1D)
 
     # some addtional options may exists in kwargs
-    pen = kwargs.pop('pen', False) #  it is scatter, but also show the lines
+    pen = kwargs.pop('pen', False)  # lines and pen synonyms
 
     # final choice of method
     pen = (method == 'pen') or pen
@@ -295,7 +297,7 @@ def plot_1D(dataset, **kwargs):
     bar = (method == 'bar')
 
     # Figure setup
-    # ------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     new._figure_setup(pen=pen or scatterpen, scatter=scatter or scatterpen,
                       **kwargs)
@@ -304,7 +306,7 @@ def plot_1D(dataset, **kwargs):
     ax.prefs = prefs
 
     # plot method
-    # -----------
+    # ------------------------------------------------------------------------------------------------------------------
 
     # is that a plot with twin axis
     is_twinx = kwargs.pop('twinx', None) is not None
@@ -313,7 +315,7 @@ def plot_1D(dataset, **kwargs):
     show_complex = kwargs.pop('show_complex', False)
 
     # some pen or scatter property
-    color = kwargs.get('color', kwargs.get('c',   prefs.pen_color))
+    color = kwargs.get('color', kwargs.get('c', prefs.pen_color))
     lw = kwargs.get('linewidth', kwargs.get('lw', prefs.pen_linewidth))
     ls = kwargs.get('linestyle', kwargs.get('ls', prefs.pen_linestyle))
     marker = kwargs.get('marker', kwargs.get('m', prefs.marker))
@@ -344,17 +346,20 @@ def plot_1D(dataset, **kwargs):
     ax.set_xscale(xscale, nonposx='mask')
     ax.set_yscale(yscale, nonposy='mask')
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # plot the dataset
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     # abscissa axis
-    x = new.x
+    # the actual dimension name is the first in the new.dims list
+    dimx = new.dims[-1]
+    x = getattr(new, dimx)
+    assert x.ndim == 1
 
     # take into account the fact that sometimes axis have just labels
     xdata = x.data
-    if not np.any(xdata):
-        xdata = range(1,len(x.labels)+1)
+    if xdata is None:
+        xdata = range(new.size)
 
     # ordinates (by default we plot real part of the data)
     if not kwargs.pop('imag', False) or kwargs.get('show_complex', False):
@@ -369,67 +374,65 @@ def plot_1D(dataset, **kwargs):
     zdata = zdata - offset
 
     # plot_lines
-    # -----------------------------
-
+    # ------------------------------------------------------------------------------------------------------------------
     if scatterpen:
         # pen + scatter
-        line, = ax.plot(xdata, zdata,
-                        #marker = marker,
-                        markersize = markersize,
-                        markevery = markevery,
-                        markeredgewidth = 1.,
-                        #markerfacecolor = markerfacecolor,
-                        markeredgecolor = markeredgecolor)
+        line, = ax.plot(xdata, zdata.T,
+                        # marker = marker,
+                        markersize=markersize,
+                        markevery=markevery,
+                        markeredgewidth=1.,
+                        # markerfacecolor = markerfacecolor,
+                        markeredgecolor=markeredgecolor)
     elif scatter:
         # scatter only
-        line, = ax.plot(xdata, zdata,
-                        ls = "",
-                        #marker = marker,
-                        markersize = markersize,
-                        markeredgewidth = 1.,
-                        markevery = markevery,
-                        markerfacecolor = markerfacecolor,
-                        markeredgecolor = markeredgecolor)
+        line, = ax.plot(xdata, zdata.T,
+                        ls="",
+                        # marker = marker,
+                        markersize=markersize,
+                        markeredgewidth=1.,
+                        markevery=markevery,
+                        markerfacecolor=markerfacecolor,
+                        markeredgecolor=markeredgecolor)
     elif pen:
         # pen only
-        line, = ax.plot(xdata, zdata, marker="")
+        line, = ax.plot(xdata, zdata.T, marker="")
 
     elif bar:
         # bar only
-        #TODO: make pyqtgraph equivalent
-        line = ax.bar(xdata, zdata, color=color,
+        line = ax.bar(xdata, zdata.squeeze(), color=color,
                       edgecolor='k', align='center')
         barwidth = line[0].get_width()
 
     if show_complex and pen:
         # add the imaginaly part for pen only plot
         zimagdata = new.imag.masked_data
-        ax.plot(xdata, zimagdata, ls='--')
+        ax.plot(xdata, zimagdata.T, ls='--')
 
     if kwargs.get('plot_model', False):
-        modeldata = new.modeldata                     #TODO: what's about mask?
-        ax.plot(xdata, modeldata.T, ls=':', lw='2')   #TODO: improve this!!!
+        modeldata = new.modeldata  # TODO: what's about mask?
+        ax.plot(xdata, modeldata.T, ls=':', lw='2')  # TODO: improve this!!!
 
     # line attributes
-    if (pen or scatterpen) and color!='AUTO':
+    if (pen or scatterpen) and color != 'AUTO':
         # set the color if defined in the preferences or options
         line.set_color(color)
 
-    if (pen or scatterpen) and lw!='AUTO':
+    if (pen or scatterpen) and lw != 'AUTO':
         # set the line width if defined in the preferences or options
         line.set_linewidth(lw)
 
-    if (pen or scatterpen) and ls!='AUTO':
+    if (pen or scatterpen) and ls != 'AUTO':
         # set the line style if defined in the preferences or options
         line.set_linestyle(ls)
 
-    if (scatter or scatterpen) and marker!='AUTO':
+    if (scatter or scatterpen) and marker != 'AUTO':
         # set the line style if defined in the preferences or options
         line.set_marker(marker)
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # axis
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     data_only = kwargs.get('data_only', False)
 
@@ -437,10 +440,10 @@ def plot_1D(dataset, **kwargs):
     xl = [xdata[0], xdata[-1]]
     xl.sort()
 
-    if bar or len(x.labels) < number_x_labels+1:
+    if bar or x.size < number_x_labels + 1:
         # extend the axis so that the labels are not too close to the limits
-        inc = (xdata[1]-xdata[0])*.5
-        xl = [xl[0]-inc, xl[1]+inc]
+        inc = (xdata[1] - xdata[0]) * .5
+        xl = [xl[0] - inc, xl[1] + inc]
 
     # ordinates limits?
     amp = np.ma.ptp(z.masked_data) / 50.
@@ -463,7 +466,7 @@ def plot_1D(dataset, **kwargs):
         xl = ax.get_xlim()
 
     xlim = list(kwargs.get('xlim', xl))  # we read the argument xlim
-                                         # that should have the priority
+    # that should have the priority
     xlim.sort()
 
     # reversed axis?
@@ -475,8 +478,8 @@ def plot_1D(dataset, **kwargs):
         zl = ax.get_ylim()
 
     zlim = list(kwargs.get('zlim', kwargs.get('ylim', zl)))
-                                # we read the argument zlim or ylim
-                                # which have the priority
+    # we read the argument zlim or ylim
+    # which have the priority
     zlim.sort()
 
     # set the limits
@@ -488,29 +491,28 @@ def plot_1D(dataset, **kwargs):
 
     ax.set_ylim(zlim)
 
-
     if data_only:
         # if data only (we will  ot set axes and labels
         # it was probably done already in a previous plot
         new._plot_resume(dataset, **kwargs)
         return ax
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # labels
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     # x label
 
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        xlabel = make_label(new.x, 'x', usempl)
+        xlabel = make_label(x, dimx, usempl)
     ax.set_xlabel(xlabel)
 
     # x tick labels
 
     uselabel = kwargs.get('uselabel', False)
     if uselabel or not np.any(x.data):
-        #TODO refine this to use different orders of labels
+        # TODO refine this to use different orders of labels
         ax.set_xticks(xdata)
         ax.set_xticklabels(x.labels)
 
@@ -520,7 +522,7 @@ def plot_1D(dataset, **kwargs):
     if not zlabel:
         zlabel = make_label(new, 'z', usempl)
 
-    #ax.set_ylabel(zlabel)
+    # ax.set_ylabel(zlabel)
 
     # do we display the ordinate axis?
     if kwargs.get('show_z', True) and not is_twinx:
@@ -540,5 +542,4 @@ def plot_1D(dataset, **kwargs):
 
 
 if __name__ == '__main__':
-
     pass

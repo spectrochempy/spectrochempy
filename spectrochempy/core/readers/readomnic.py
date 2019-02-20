@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """This module to extend NDDataset with the import methods method.
 
@@ -14,33 +14,33 @@ __all__ = ['read_omnic', 'read_spg', 'read_spa']
 
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # standard imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import os
 import warnings
 from datetime import datetime, timezone, timedelta
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # third party imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # local imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.dataset.ndio import NDIO
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import log, general_preferences as prefs
+from spectrochempy.core.dataset.ndio import NDIO
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core import log, general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
 
-# =============================================================================
+# ======================================================================================================================
 # Public functions
-# =============================================================================
+# ======================================================================================================================
 
 # .............................................................................
 def read_omnic(dataset=None, **kwargs):
@@ -73,18 +73,16 @@ def read_omnic(dataset=None, **kwargs):
     >>> A = NDDataset.read_omnic('irdata/nh4y-activation.spg')
     >>> print(A)
     <BLANKLINE>
-      name/id: NH4Y-activation.SPG ...
+      id: NH4Y-activation.SPG ...
 
 
     """
     log.debug("reading omnic files")
 
-    # filename will be given by a keyword parameter except the first parameters
-    # is already the filename
+    # filename will be given by a keyword parameter except if the first parameters is already the filename
     filename = kwargs.get('filename', None)
 
-    # check if the first parameter is a dataset
-    # because we allow not to pass it
+    # check if the first parameter is a dataset because we allow not to pass it
     if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameters must be the filename
@@ -119,12 +117,10 @@ def read_omnic(dataset=None, **kwargs):
 
         elif extension == '.spa':
             log.debug("reading omnic spa files")
-            datasets.append(_read_spa(dataset, files[extension],
-                                      sortbydate=True))
+            datasets.append(_read_spa(dataset, files[extension], sortbydate=True))
         else:
             # try another format!
-            datasets = dataset.read(filename, protocol=extension[1:],
-                                    sortbydate=True, **kwargs)
+            datasets = dataset.read(filename, protocol=extension[1:], sortbydate=True, **kwargs)
 
     if len(datasets) == 1:
         return datasets[0]  # a single dataset is returned
@@ -142,9 +138,9 @@ NDIO.read_spg = read_omnic
 NDIO.read_spa = read_omnic
 
 
-# =============================================================================
+# ======================================================================================================================
 # private functions
-# =============================================================================
+# ======================================================================================================================
 
 # .............................................................................
 def _readbtext(f, pos):
@@ -309,10 +305,12 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
                              ' - number of wavenumber per spectrum should be equal to number of intensities')
 
         # Read spectral intensities
-        data = np.zeros((nspec, nintensities), dtype='float32')
+        # ..............................................................................................................
+        data = np.zeros((nspec, nintensities), dtype='float32')   # NOTE: reversed / version 0.1.a9
         for i in range(nspec):
             f.seek(intensity_pos[i])
             data[i, :] = np.fromfile(f, 'float32', int(nintensities))
+        # ..............................................................................................................
 
         ## Get spectra titles & acquisition dates & history text
         # container to hold values
@@ -375,11 +373,11 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     dataset.title = 'Absorbance'
     dataset.name = spg_title
     dataset.filename = os.path.basename(filename).split('.')[0]
-    dataset.coordset = (np.array(alltimestamps), xaxis)
-    dataset.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
-    dataset.coordset[1].units = 'cm^-1'
-    dataset.coordset[0].labels = (allacquisitiondates, alltitles)
-    dataset.coordset[0].units = 's'
+    dataset.coords = (np.array(alltimestamps), xaxis)
+    dataset.coords.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
+    dataset.coords[1].units = 'cm^-1'
+    dataset.coords[0].labels = (allacquisitiondates, alltitles)
+    dataset.coords[0].units = 's'
 
     # Set description and history
     dataset.description = (
@@ -389,7 +387,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 
     if kwargs.get('sortbydate', 'True'):
-        dataset.sort(axis=0, inplace=True)
+        dataset.sort(dim=0, inplace=True)
         dataset.history = 'sorted'
 
     # Set the NDDataset date
@@ -545,11 +543,11 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset._modified = dataset._date
 
     # Create Dataset Object of spectral content
-    dataset.coordset = (np.array(alltimestamps), xaxis)
-    dataset.coordset.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
-    dataset.coordset[1].units = 'cm^-1'
-    dataset.coordset[0].labels = (allacquisitiondates, alltitles)
-    dataset.coordset[0].units = 's'
+    dataset.coords = (np.array(alltimestamps), xaxis)
+    dataset.coords.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
+    dataset.coords[1].units = 'cm^-1'
+    dataset.coords[0].labels = (allacquisitiondates, alltitles)
+    dataset.coords[0].units = 's'
 
     # Set description and history
     dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum: {3}".format(
@@ -558,7 +556,7 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset.history = str(datetime.now()) + ':read from spa files \n'
 
     if kwargs.get('sortbydate', 'True'):
-        dataset.sort(axis=0, inplace=True)
+        dataset.sort(dim=0, inplace=True)
         dataset.history = 'sorted'
 
     # Set the NDDataset date

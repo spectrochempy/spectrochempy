@@ -1,49 +1,47 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
-
-
-
+# ======================================================================================================================
 
 """The core interface to the Pint library
 
 """
 
-__all__ = ['Unit', 'Quantity', 'Measurement', 'ur', 'set_nmr_context',
-           'DimensionalityError']
+__all__ = ['Unit', 'Quantity', 'ur', 'set_nmr_context', 'DimensionalityError']
 
 from warnings import warn
 
-from spectrochempy.extern.pint import set_application_registry
-from spectrochempy.extern.pint import UnitRegistry, DimensionalityError
-from spectrochempy.extern.pint.unit import UnitsContainer
-from spectrochempy.extern.pint.quantity import _Quantity as Quantity
-from spectrochempy.extern.pint.measurement import _Measurement as Measure
-from spectrochempy.extern.pint.unit import _Unit as Unit
-from spectrochempy.extern.pint import formatting
-from spectrochempy.extern.pint.formatting import siunitx_format_unit
-from spectrochempy.extern.pint import Context
-from spectrochempy.extern.pint.converters import ScaleConverter
-from spectrochempy.extern.pint.unit import UnitDefinition
-from spectrochempy.extern import pint
+from pint import set_application_registry
+from pint import UnitRegistry, DimensionalityError
+from pint.unit import UnitsContainer
+from pint.quantity import _Quantity as Quantity
+from pint.measurement import _Measurement as Measure
+from pint.unit import _Unit as Unit
+from pint import formatting
+from pint.formatting import siunitx_format_unit
+from pint import Context
+from pint.converters import ScaleConverter
+from pint.unit import UnitDefinition
 
-# Modify the pint behaviour ####################################################
+# ======================================================================================================================
+# Modify the pint behaviour
+# ======================================================================================================================
 #  TODO: better ways ??
 
 _PRETTY_EXPONENTS = '⁰¹²³⁴⁵⁶⁷⁸⁹'
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 def _pretty_fmt_exponent(num):
     """Format an number into a pretty printed exponent using unicode.
     """
     # work badly for decimals as superscript dot do not exist in unicode
     # (as far as we know)
-    ret = '{0:n}'.format(num).replace('-', '⁻').replace('.',u"\u2027")
+    ret = '{0:n}'.format(num).replace('-', '⁻').replace('.', u"\u2027")
     for n in range(10):
         ret = ret.replace(str(n), _PRETTY_EXPONENTS[n])
     return ret
@@ -96,20 +94,17 @@ formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ['~'])
 setattr(Quantity, '_repr_html_', lambda cls: cls.__format__('~H'))
 setattr(Quantity, '_repr_latex_', lambda cls: "$" + cls.__format__('~L') + "$")
 
-setattr(Measure, '_repr_html_', lambda cls: cls.__format__('~H'))
-
 # TODO: work on this latex format
 
-setattr(Unit, 'scaling', property(lambda u:
-                                  u._REGISTRY.Quantity(1.,
-                                           u._units).to_base_units().magnitude))
+setattr(Unit, 'scaling', property(lambda u: u._REGISTRY.Quantity(1., u._units).to_base_units().magnitude))
 
+
+# ----------------------------------------------------------------------------------------------------------------------
 def __format__(self, spec):
     spec = spec or self.default_format
 
     # special cases
     if 'Lx' in spec:  # the LaTeX siunitx code
-
 
         opts = ''
         ustr = siunitx_format_unit(self)
@@ -125,14 +120,16 @@ def __format__(self, spec):
                 units = UnitsContainer({'%': 1})
             elif self._units == 'weight_percent':
                 units = UnitsContainer({'wt.%': 1})
+            elif self._units == 'radian':
+                units = UnitsContainer({'rad': 1})
             elif self._units == 'absorbance':
                 units = UnitsContainer({'a.u.': 1})
             elif abs(self.scaling - 1.) < 1.e-10:
                 units = UnitsContainer({'dimensionless': 1})
             else:
                 units = UnitsContainer(
-                        {'scaled-dimensionless (%.2g)' % self.scaling
-                         : 1})
+                    {'scaled-dimensionless (%.2g)' % self.scaling
+                     : 1})
         else:
             units = UnitsContainer(dict((self._REGISTRY._get_symbol(key),
                                          value)
@@ -145,8 +142,6 @@ def __format__(self, spec):
 
 
 setattr(Unit, '__format__', __format__)
-
-################################################################################
 
 if globals().get('U_', None) is None:
     # filename = resource_filename(PKG, 'spectrochempy.txt')
@@ -169,13 +164,10 @@ U_.define(UnitDefinition('weight_percent', 'wt_pct', (), ScaleConverter(1 / 100.
 U_.default_format = ''  # .2fK'
 Q_ = U_.Quantity
 Q_.default_format = ''  # .2fK'
-M_ = U_.Measurement
-M_.default_format = 'uK'
-
 
 
 # Context for NMR
-# -----------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 def set_nmr_context(larmor):
     """Set a NMR context ur\_ relative to the given Larmor frequency
@@ -245,11 +237,10 @@ def set_nmr_context(larmor):
 
 
 # set alias for units and uncertainties
-# --------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 ur = U_
 Quantity = Q_
-Measurement = M_
 
-# ===========================================================================
+# ======================================================================================================================
 if __name__ == '__main__':
     pass

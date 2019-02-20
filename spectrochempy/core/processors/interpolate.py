@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 This module defines functions related to interpolations
@@ -16,18 +16,18 @@ __all__ = ['interpolate', 'align']
 
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # third party imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import scipy.interpolate
 import numpy as np
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # localimports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.utils import SpectroChemPyWarning, NOMASK
 
 
 # ............................................................................
@@ -38,8 +38,7 @@ def interpolate(dataset, axis=0, size=None):
 
 
 # ............................................................................
-def align(dataset, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan,
-          inplace=False):
+def align(dataset, ref, **kwargs):
     """Align the current dataset on a reference dataset along a given axis by
     interpolation
 
@@ -68,6 +67,8 @@ def align(dataset, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan
     """
     # TODO: Perform an alignment along numeric labels
 
+    axis = dataset.get_axis(**kwargs)
+    refaxis = kwargs.pop('refdim', None)
 
     if refaxis is None:
         refaxis = axis
@@ -76,48 +77,49 @@ def align(dataset, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan
         axis = dataset.ndim - 1
 
     # reorders dataset and reference in ascending order
-    datasetordered = dataset.sort(axis)
-    refordered = ref.sort(refaxis)
+    is_sorted = False
+    if dataset.coords(axis).reversed:
+        datasetordered = dataset.sort(axis, descend=False)
+        refordered = ref.sort(refaxis, descend=False)
+        is_sorted = True
+    else:
+        datasetordered = dataset.copy()
+        refordered = ref.copy()
 
     try:
-        datasetordered.coordset(axis).to(refordered.coordset(refaxis).units)
+        datasetordered.coords(axis).to(refordered.coords(refaxis).units)
     except:
         raise ValueError(
-                'units of the dataset and reference axes on which interpolate are not compatible')
+            'units of the dataset and reference axes on which interpolate are not compatible')
 
-    oldaxisdata = datasetordered.coordset(axis).data
-    refaxisdata = refordered.coordset(
-            refaxis).data  # TODO: at the end restore the original order
+    oldaxisdata = datasetordered.coords(axis).data
+    refaxisdata = refordered.coords(refaxis).data  # TODO: at the end restore the original order
+
+    method = kwargs.pop('method', 'linear')
+    fill_value = kwargs.pop('fill_value', np.NaN)
 
     if method == 'linear':
-
-        interpolator = lambda data, ax=-1: scipy.interpolate.interp1d(
-                oldaxisdata, data, axis=ax, kind=method,
-                bounds_error=False, fill_value=fill_value,
-                assume_sorted=True)
+        interpolator = lambda data, ax=0: scipy.interpolate.interp1d(
+                 oldaxisdata, data, axis=ax, kind=method, bounds_error=False, fill_value=fill_value, assume_sorted=True)
 
     elif method == 'pchip':
-
-        interpolator = lambda data, ax=-1: scipy.interpolate.PchipInterpolator(
-                oldaxisdata, data,
-                axis=ax, extrapolate=False)
+        interpolator = lambda data, ax=0: scipy.interpolate.PchipInterpolator(
+                                                                          oldaxisdata, data, axis=ax, extrapolate=False)
     else:
-        raise AttributeError('Not recognised option method for `align`')
+        raise AttributeError(f'{method} is not a recognised option method for `align`')
 
     interpolate_data = interpolator(datasetordered.data, axis)
     newdata = interpolate_data(refaxisdata)
 
-    interpolate_mask = interpolator(datasetordered.mask, axis)
-    newmask = interpolate_mask(refaxisdata)
+    if datasetordered.is_masked:
+        interpolate_mask = interpolator(datasetordered.mask, axis)
+        newmask = interpolate_mask(refaxisdata)
+    else:
+        newmask = NOMASK
 
-    interpolate_uncertainty = interpolator(datasetordered.uncertainty, axis)
-    newuncertainty = interpolate_uncertainty(refaxisdata)
-
-    interpolate_axis = interpolator(datasetordered.coordset(axis).data)
-    newaxisdata = interpolate_axis(refaxisdata)
-
-    interpolate_axis_mask = interpolator(datasetordered.coordset(axis).mask)
-    newaxismask = interpolate_axis_mask(refaxisdata)
+    #interpolate_axis = interpolator(datasetordered.coords(axis).data)
+    #newaxisdata = interpolate_axis(refaxisdata)
+    newaxisdata = refaxisdata.copy()
 
     if method == 'pchip' and not np.isnan(fill_value):
         index = np.any(np.isnan(newdata))
@@ -127,26 +129,30 @@ def align(dataset, ref, axis=0, refaxis=None, method='linear', fill_value=np.nan
         newaxisdata[index] = fill_value
 
     # create the new axis
-    newaxes = dataset.coordset.copy()
+    newaxes = dataset.coords.copy()
     newaxes[axis]._data = newaxisdata
-    newaxes[axis]._mask = newaxismask
     newaxes[axis]._labels = np.array([''] * newaxisdata.size)
 
     # transform the dataset
+    inplace = kwargs.pop('inplace', False)
+
     if inplace:
         out = dataset
     else:
         out = dataset.copy()
 
     out._data = newdata
-    out._coordset = newaxes
+    out._coords = newaxes
     out._mask = newmask
-    out._uncertainty = newuncertainty
 
     out.name = '*' + dataset.name
     out.title = '*' + dataset.title
 
     out.history = '{}: aligned along dim {} with respect to dataset {} using coords {} \n'.format(
-            str(dataset.modified), axis, ref.name, ref.coordset[refaxis].title)
+        str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)
+
+    if is_sorted and out.coords(axis).reversed:
+        out.sort(axis, descend=True, inplace = True)
+        ref.sort(refaxis, descend=True, inplace=True)
 
     return out

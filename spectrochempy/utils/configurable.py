@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 from traitlets.config.configurable import Configurable, Config
 from traitlets import All, observe
+
 
 class MetaConfigurable(Configurable):
 
@@ -52,6 +53,7 @@ class MetaConfigurable(Configurable):
 
             self.updated = True
 
-# =============================================================================
+
+# ======================================================================================================================
 if __name__ == '__main__':
     pass

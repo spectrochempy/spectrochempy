@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop as _develop
@@ -17,7 +17,7 @@ import subprocess
 import shutil as sh
 import warnings
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 __DEV__ = False
 if 'develop' in sys.argv:
@@ -58,22 +58,24 @@ def install_styles():
         sh.copy(src, dest)
 
 
-def install_requires(dev=False):
-    import yaml
-    envyml = 'env/scpy{}.yml'.format('-dev' if dev else '')
+# def install_requires(dev=False):
+#     import yaml
+#     envyml = 'env/scpy{}.yml'.format('-dev' if dev else '')
+#
+#     with open(envyml, 'r') as f:
+#         req = yaml.load(f)
+#
+#     for i, item in enumerate(req['dependencies']):
+#         if '::' in item:
+#             req['dependencies'][i] = req['dependencies'][i].split('::')[1]
+#         if '>' not in item and '<' not in item and '=' in item:
+#             req['dependencies'][i] = req['dependencies'][i].replace('=', '==')
+#
+#     print(req['dependencies'])
+#     return req['dependencies']
 
-    with open(envyml, 'r') as f:
-        req = yaml.load(f)
-
-    for i, item in enumerate(req['dependencies']):
-        if '::' in item:
-            req['dependencies'][i] = req['dependencies'][i].split('::')[1]
-        if '>' not in item and '<' not in item and '=' in item:
-            req['dependencies'][i] = req['dependencies'][i].replace('=', '==')
-
-    print(req['dependencies'])
-    return req['dependencies']
-
+def install_requires():
+    return []
 
 class PostDevelopCommand(_develop):
     """Post-installation for development mode."""
@@ -147,7 +149,7 @@ setup_args = dict(
     # requirements
     python_requires=">3.5",  # TODO: check if it works also with 3.5
     setup_requires = ['setuptools_scm', 'pyyaml'],
-    install_requires= install_requires(dev=__DEV__),
+    install_requires= [], # install_requires(dev=__DEV__),
     tests_require=extras_require['tests'],
 
     # post-commands
@@ -156,29 +158,20 @@ setup_args = dict(
                 },
 
     # entry points for scripts
-    entry_points = {'console_scripts': ['scpy=scripts.launch_api:main', ],
-                    'gui_scripts': ['scpygui=scripts.launch_gui:main', ]
+    #scripts = {'scripts/launch_api.py'},
+    entry_points = {
+        'console_scripts': ['scpy=spectrochempy.scripts.launch_api:main', ],
                     },
 
 )
 
-# ============================================================================
+# ======================================================================================================================
 if __name__ == '__main__':
 
-    # Check if the setup is done in a good environment
-    # needed so we do not pollute the normal user environment with additional
-    # packages only used in a developpement process
-
-    # For now we assume we are working with conda
-
-    env = os.environ['CONDA_DEFAULT_ENV']
-    print()
-    print()
-    print("#"*80)
-    print("We are in '%s' conda environment."%env)
-    print("#" * 80)
-    print("args passed : ", sys.argv)
-
-    # Now execute setup
+    # execute setup
     setup(**setup_args)
 
+    # Install quaternion package (#TODO: may be we can make a single setup file)
+    from subprocess import check_output
+    out = check_output("""cd quaternion; python setup.py develop; cd .. """, shell=True)
+    print(out)

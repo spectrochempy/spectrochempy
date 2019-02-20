@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 Module to perform fitting of 1D or n-D spectral data.
@@ -16,26 +16,26 @@ __all__ = ['Fit']
 
 __dataset_methods__ = ['Fit']
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # standard imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import sys
 import re
 from warnings import warn
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # third party imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 from traitlets import (HasTraits, Bool, Any, List, Unicode, Instance)
 import numpy as np
 # IPython
 from IPython import display
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # localimports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.fitting.parameters import ParameterScript
 from spectrochempy.core.fitting.models import getmodel
@@ -43,12 +43,12 @@ from spectrochempy.core.fitting.models import getmodel
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 
-from spectrochempy.application import general_preferences, log
+from spectrochempy.core import general_preferences, log
 
 
-# ============================================================================
+# ======================================================================================================================
 #  Fit : main object to handle a fit
-# ============================================================================
+# ======================================================================================================================
 
 class Fit(HasTraits):
     """
@@ -79,7 +79,7 @@ class Fit(HasTraits):
 
     _ = Any
 
-    datasets = List(Instance('spectrochempy.dataset.nddataset.NDDataset'))
+    datasets = List(Instance('spectrochempy.core.dataset.nddataset.NDDataset'))
 
     parameterscript = Instance(ParameterScript)
 
@@ -158,7 +158,6 @@ class Fit(HasTraits):
     def dry_run(self):
         return self.run(dry=True)
 
-
     def run(self, maxiter=100, maxfun=None, every=10,
             method='simplex', **kwargs):
         """ Main fitting procedure
@@ -198,12 +197,14 @@ class Fit(HasTraits):
             for exp_idx, dataset in enumerate(datasets):
                 modeldata = self._get_modeldata(dataset, exp_idx)[0]
                 # baseline is already summed with modeldata[-1]
+
                 # important to work with the real part of dataset
                 # not the complex number
-                data = dataset.data
+                data = dataset.real.data.squeeze()
 
                 # if not dataset.is_2d:
                 mdata = modeldata[-1]  # modelsum
+
                 # else:
                 #    mdata = modeldata.values
 
@@ -239,7 +240,6 @@ class Fit(HasTraits):
 
         # end chi2 function ---------------------------------------------------
 
-
         # callback function--------------------------------------------------------
         def callback(*args, **kwargs):
             """
@@ -256,7 +256,7 @@ class Fit(HasTraits):
             if not self.silent:
                 display.clear_output(wait=True)
                 print(("Iterations: %d, Calls: %d (chi2: %.5f)" % (
-                niter, ncalls, chi2)))
+                    niter, ncalls, chi2)))
                 sys.stdout.flush()
 
         # end callback function ---------------------------------------------------
@@ -267,17 +267,17 @@ class Fit(HasTraits):
 
         if not dry:
             fp, fopt = optimize(funchi2, fp,
-                            args=(self.datasets,),
-                            maxfun=maxfun,
-                            maxiter=maxiter,
-                            method=method,
-                            constraints=kwargs.get('constraints', None),
-                            callback=callback)
+                                args=(self.datasets,),
+                                maxfun=maxfun,
+                                maxiter=maxiter,
+                                method=method,
+                                constraints=kwargs.get('constraints', None),
+                                callback=callback)
 
         # replace the previous script with new fp parameters
         self.parameterscript.script = str(fp)
 
-        if not self.silent :
+        if not self.silent:
             # log.info the results
             log.info("\n")
             log.info('*' * 50)
@@ -331,27 +331,28 @@ class Fit(HasTraits):
         # This name must always be 'modeldata'
         # which will be returned to the main program.
 
-        expedata = dataset.real.data
-        x = dataset.coordset[-1].data
+        expedata = dataset.real.data.squeeze()
+        x = dataset.coords[-1].data
 
-        if dataset.ndim > 1:
+        if expedata.ndim > 1:
             # nD data
             raise NotImplementedError("Fit not implemented for nD data yet!")
 
-        modeldata = np.zeros((nbmodels + 2, x.size)).astype(float)
+        modeldata = np.zeros((nbmodels + 2, x.size), dtype = np.float64)
 
         if nbmodels < 1:
             names = ['baseline', 'modelsum']
             return modeldata, names
 
         # Calculates model data
+
         # The first row (i=0) of the modeldata array is the baseline,
         # so we fill the array starting at row 1
         row = 0
         names = ['baseline', ]
 
         for model in models:
-            calc = getmodel(x, modelname=model, par=parameters, dataset=dataset)
+            calc = getmodel(x, modelname=model, par=parameters) #, dataset=dataset)
             if not model.startswith('baseline'):
                 row += 1
                 modeldata[row] = calc
@@ -363,7 +364,7 @@ class Fit(HasTraits):
         modeldata[row + 1] = modeldata.sum(axis=0)
         names.append('modelsum')
 
-        # remove unused row
+        # remove unused column
         modeldata = modeldata[:row + 2]
 
         xi = np.arange(float(x.size))
@@ -447,19 +448,19 @@ class Fit(HasTraits):
         sId = sum(xi ** 2)
 
         a = (-sE * (sF * sFI - sFd * sI) + sEF * (n * sFI - sF * sI) - sEI * (
-        n * sFd - sF ** 2)
+                n * sFd - sF ** 2)
              ) / (
-            n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+                    n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
 
         A = (sE * (sF * sId - sFI * sI) - sEF * (n * sId - sI ** 2) + sEI * (
-        n * sFI - sF * sI)
+                n * sFI - sF * sI)
              ) / (
-            n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+                    n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
 
         b = (sE * (sFI ** 2 - sFd * sId) + sEF * (sF * sId - sFI * sI) - sEI * (
-        sF * sFI - sFd * sI)
+                sF * sFI - sFd * sI)
              ) / (
-            n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
+                    n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
 
         # in case the modeldata is zero, to avoid further errors
         if np.isnan(A): A = 0.0
@@ -486,56 +487,56 @@ class Fit(HasTraits):
         sJd = sum(yj ** 2)
 
         c = (sE * (
-            -m * n * sFd * sId * sJd + m * sFJ ** 2 * sId + n * sFI ** 2 * sJd - 2 * sFI * sFJ * sIJ + sFd * sIJ ** 2) + sEF * (
-                 m * n * sF * sId * sJd
-                 - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ + n * sFI * sIJ * sJ - sF * sIJ ** 2) + sEI * (
-                 m * n * sFd * sI * sJd
-                 - m * sFJ ** 2 * sI - n * sF * sFI * sJd + n * sFI * sFJ * sJ - n * sFd * sIJ * sJ + sF * sFJ * sIJ) + sEJ * (
-                 m * n * sFd * sId * sJ - m * sF * sFJ * sId
-                 + m * sFI * sFJ * sI - m * sFd * sI * sIJ - n * sFI ** 2 * sJ + sF * sFI * sIJ)) / (
-                -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId
-                + m ** 2 * n * sFd * sI ** 2 * sJd - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd
-                - 2 * m * n * sF * sFI * sI * sJd - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ
-                + m * n * sFd * sIJ ** 2 + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+                -m * n * sFd * sId * sJd + m * sFJ ** 2 * sId + n * sFI ** 2 * sJd - 2 * sFI * sFJ * sIJ + sFd * sIJ ** 2) + sEF * (
+                     m * n * sF * sId * sJd
+                     - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ + n * sFI * sIJ * sJ - sF * sIJ ** 2) + sEI * (
+                     m * n * sFd * sI * sJd
+                     - m * sFJ ** 2 * sI - n * sF * sFI * sJd + n * sFI * sFJ * sJ - n * sFd * sIJ * sJ + sF * sFJ * sIJ) + sEJ * (
+                     m * n * sFd * sId * sJ - m * sF * sFJ * sId
+                     + m * sFI * sFJ * sI - m * sFd * sI * sIJ - n * sFI ** 2 * sJ + sF * sFI * sIJ)) / (
+                    -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId
+                    + m ** 2 * n * sFd * sI ** 2 * sJd - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd
+                    - 2 * m * n * sF * sFI * sI * sJd - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ
+                    + m * n * sFd * sIJ ** 2 + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
 
         a = (n * sEF * (
-            m * n * sFI * sJd - m * sF * sI * sJd + m * sFJ * sI * sJ - m * sFJ * sIJ - n * sFI * sJ ** 2 + sF * sIJ * sJ) + n * sEI * (
-                 -m * n * sFd * sJd
-                 + m * sFJ ** 2 + n * sFd * sJ ** 2 + sF ** 2 * sJd - 2 * sF * sFJ * sJ) + sE * (
-                 m * n * sFd * sI * sJd - m * sFJ ** 2 * sI - n * sF * sFI * sJd
-                 + n * sFI * sFJ * sJ - n * sFd * sIJ * sJ + sF * sFJ * sIJ) - sEJ * (
-                 m * n * sFI * sFJ + m * n * sFd * sI * sJ - m * n * sFd * sIJ - m * sF * sFJ * sI
-                 - n * sF * sFI * sJ + sF ** 2 * sIJ)) / (
-                -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+                m * n * sFI * sJd - m * sF * sI * sJd + m * sFJ * sI * sJ - m * sFJ * sIJ - n * sFI * sJ ** 2 + sF * sIJ * sJ) + n * sEI * (
+                     -m * n * sFd * sJd
+                     + m * sFJ ** 2 + n * sFd * sJ ** 2 + sF ** 2 * sJd - 2 * sF * sFJ * sJ) + sE * (
+                     m * n * sFd * sI * sJd - m * sFJ ** 2 * sI - n * sF * sFI * sJd
+                     + n * sFI * sFJ * sJ - n * sFd * sIJ * sJ + sF * sFJ * sIJ) - sEJ * (
+                     m * n * sFI * sFJ + m * n * sFd * sI * sJ - m * n * sFd * sIJ - m * sF * sFJ * sI
+                     - n * sF * sFI * sJ + sF ** 2 * sIJ)) / (
+                    -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
+                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
+                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
+                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
 
         A = (m * n * sEF * (
-            -m * n * sId * sJd + m * sI ** 2 * sJd + n * sId * sJ ** 2 - 2 * sI * sIJ * sJ + sIJ ** 2) + m * sEJ * (
-                 m * n * sFJ * sId - m * sFJ * sI ** 2
-                 - n * sF * sId * sJ + n * sFI * sI * sJ - n * sFI * sIJ + sF * sI * sIJ) + n * sEI * (
-                 m * n * sFI * sJd - m * sF * sI * sJd + m * sFJ * sI * sJ
-                 - m * sFJ * sIJ - n * sFI * sJ ** 2 + sF * sIJ * sJ) + sE * (
-                 m * n * sF * sId * sJd - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ
-                 + n * sFI * sIJ * sJ - sF * sIJ ** 2)) / (
-                -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+                -m * n * sId * sJd + m * sI ** 2 * sJd + n * sId * sJ ** 2 - 2 * sI * sIJ * sJ + sIJ ** 2) + m * sEJ * (
+                     m * n * sFJ * sId - m * sFJ * sI ** 2
+                     - n * sF * sId * sJ + n * sFI * sI * sJ - n * sFI * sIJ + sF * sI * sIJ) + n * sEI * (
+                     m * n * sFI * sJd - m * sF * sI * sJd + m * sFJ * sI * sJ
+                     - m * sFJ * sIJ - n * sFI * sJ ** 2 + sF * sIJ * sJ) + sE * (
+                     m * n * sF * sId * sJd - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ
+                     + n * sFI * sIJ * sJ - sF * sIJ ** 2)) / (
+                    -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
+                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
+                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
+                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
 
         b = (m * sEF * (
-            m * n * sFJ * sId - m * sFJ * sI ** 2 - n * sF * sId * sJ + n * sFI * sI * sJ - n * sFI * sIJ + sF * sI * sIJ) + m * sEJ * (
-                 -m * n * sFd * sId
-                 + m * sFd * sI ** 2 + n * sFI ** 2 + sF ** 2 * sId - 2 * sF * sFI * sI) + sE * (
-                 m * n * sFd * sId * sJ - m * sF * sFJ * sId + m * sFI * sFJ * sI
-                 - m * sFd * sI * sIJ - n * sFI ** 2 * sJ + sF * sFI * sIJ) - sEI * (
-                 m * n * sFI * sFJ + m * n * sFd * sI * sJ - m * n * sFd * sIJ - m * sF * sFJ * sI
-                 - n * sF * sFI * sJ + sF ** 2 * sIJ)) / (
-                -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+                m * n * sFJ * sId - m * sFJ * sI ** 2 - n * sF * sId * sJ + n * sFI * sI * sJ - n * sFI * sIJ + sF * sI * sIJ) + m * sEJ * (
+                     -m * n * sFd * sId
+                     + m * sFd * sI ** 2 + n * sFI ** 2 + sF ** 2 * sId - 2 * sF * sFI * sI) + sE * (
+                     m * n * sFd * sId * sJ - m * sF * sFJ * sId + m * sFI * sFJ * sI
+                     - m * sFd * sI * sIJ - n * sFI ** 2 * sJ + sF * sFI * sIJ) - sEI * (
+                     m * n * sFI * sFJ + m * n * sFd * sI * sJ - m * n * sFd * sIJ - m * sF * sFJ * sI
+                     - n * sF * sFI * sJ + sF ** 2 * sIJ)) / (
+                    -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
+                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
+                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
+                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
 
         # in case the modeldata is zero, to avoid further errors
         if np.isnan(A): A = 0.0

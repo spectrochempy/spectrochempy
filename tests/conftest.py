@@ -1,330 +1,260 @@
-# coding=utf-8
-try:
-    import spectrochempy
-except ModuleNotFoundError as e:
-    print(e.args)
-    raise IOError('You must install spectrochempy before executing tests!')
+# -*- coding: utf-8 -*-
+#
+# ======================================================================================================================
+# Copyright (©) 2015-2019 LCS
+# Laboratoire Catalyse et Spectrochimie, Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory
+# ======================================================================================================================
 
 
 import sys
 import os
-
-import pytest
-
 import numpy as np
 import pandas as pd
+import pytest
 
-print("PYTEST sys.args:", sys.argv)
-
-#############################################################
 # initialize a ipython session before calling spectrochempy
-#############################################################
+# ----------------------------------------------------------------------------------------------------------------------
 
-@pytest.fixture(scope="module")
-def ip():
-    from IPython.testing.globalipapp import get_ipython as getipy
-    ip = getipy()
-    ip.run_cell("from spectrochempy import *")
-    return ip
+from IPython.testing.globalipapp import start_ipython
+
+
+@pytest.fixture(scope='session')
+def session_ip():
+    return start_ipython()
+
+
+@pytest.fixture(scope='module')
+def ip(session_ip):
+    yield session_ip
+
 
 try:
-    ip()
-    # we need to go into this before anything else in the test
-    # to have the IPython session available.
-except:
-    pass
+    # work only if spectrochempy is installed
+    from spectrochempy.core import app
+except ModuleNotFoundError as e:
+    raise ModuleNotFoundError('You must install spectrochempy and its dependencies '
+                              'before executing tests!')
 
-from spectrochempy.dataset.ndarray import NDArray
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.dataset.ndcoords import CoordSet, Coord
+# ======================================================================================================================
+# FIXTURES
+# ======================================================================================================================
+
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
 from spectrochempy.utils.testing import RandomSeedContext
-from spectrochempy.application import general_preferences as prefs
-
-###########################
-# FIXTURES: some NDArray's
-###########################
-
-@pytest.fixture(scope="module")
-def ndarray():
-    # return a simple ndarray with some data
-    with RandomSeedContext(12345):
-        dx = 10.*np.random.random((10, 10))-5.
-    _nd = NDArray()
-    _nd.data = dx
-    return _nd.copy()
-
-@pytest.fixture(scope="module")
-def ndarrayunit(ndarray):
-    # return a simple ndarray with some data
-    _nd = ndarray.copy()
-    _nd.units = 'm/s'
-    return _nd.copy()
-
-@pytest.fixture(scope="module")
-def ndarraycplx(ndarray):
-    # return a complex ndarray
-    # with some complex data
-    _nd = ndarray.copy()
-    _nd.set_complex(inplace=True)  # this means that the data are complex
-    return _nd.copy()
-
-@pytest.fixture(scope="module")
-def ndarrayquaternion(ndarray):
-    # return a complex ndarray
-    # with hypercomplex data
-    _nd = ndarray.copy()
-    _nd.set_complex(inplace=True)
-    _nd.set_quaternion(inplace=True)  # this means that the data are hypercomplex
-    return _nd.copy()
-
-#########################
-# FIXTURES: some datasets
-#########################
-@pytest.fixture()
-def ndcplx():
-    # return a complex ndarray
-    _nd = NDDataset()
-    with RandomSeedContext(1234):
-        _nd._data = np.random.random((10, 10))
-    _nd.set_complex(axis=-1)  # this means that the data are complex in
-    # the last dimension
-    return _nd
+from spectrochempy.core import general_preferences as prefs
 
 
-@pytest.fixture()
-def nd1d():
-    # a simple ndarray with negative elements
-    _nd = NDDataset()
-    _nd._data = np.array([1., 2., 3., -0.4])
-    return _nd
+# Handle command line argument for spectrochempy
+# ----------------------------------------------------------------------------------------------------------------------
 
-@pytest.fixture()
-def nd2d():
-    # a simple 2D ndarray with negative elements
-    _nd = NDDataset()
-    _nd._data = np.array([[1., 2., 3., -0.4], [-1., -.1, 1., 2.]])
-    return _nd
-
-
-@pytest.fixture()
-def nd():
-    # return a simple (positive) ndarray
-    _nd = NDDataset()
-    with RandomSeedContext(145):
-        _nd._data = np.random.random((10, 10))
-    return _nd.copy()
-
-@pytest.fixture()
-def ds1():
-
-    with RandomSeedContext(12345):
-        dx = np.random.random((10, 100, 3))
-        # make complex along first dimension
-        iscomplex = [False, False, False]  # TODO: check with complex
-
-    coord0 = Coord(data=np.linspace(4000., 1000., 10),
-                 labels='a b c d e f g h i j'.split(),
-                 units="cm^-1",
-                 title='wavenumber')
-
-    coord1 = Coord(data=np.linspace(0., 60., 100),
-                 units="s",
-                 title='time-on-stream')
-
-    coord2 = Coord(data=np.linspace(200., 300., 3),
-                 labels=['cold', 'normal', 'hot'],
-                 units="K",
-                 title='temperature')
-
-    da = NDDataset(dx,
-                   iscomplex=iscomplex,
-                   coordset=[coord0, coord1, coord2],
-                   title='Absorbance',
-                   units='absorbance',
-                   uncertainty=dx * 0.1,
-                   )
-    return da.copy()
+def pytest_cmdline_preparse(config, args):
+    for item in args[:]:
+        for k in list(app.flags.keys()):
+            if item.startswith("--" + k) or k in ['--help', '--help-all']:
+                args.remove(item)
+            continue
+        for k in list(app.aliases.keys()):
+            if item.startswith("-" + k) or k in ['h', ]:
+                args.remove.append(item)
 
 
-@pytest.fixture()
-def ds2():
-    with RandomSeedContext(12345):
-        dx = np.random.random((9, 50, 4))
-        # make complex along first dimension
-        iscomplex = [False, False, False]  # TODO: check with complex
+# create reference arrays
+# ----------------------------------------------------------------------------------------------------------------------
 
-    coord0 = Coord(data=np.linspace(4000., 1000., 9),
-                 labels='a b c d e f g h i'.split(),
-                 units="cm^-1",
-                 title='wavenumber')
+with RandomSeedContext(12345):
+    ref_data = 10. * np.random.random((10, 8)) - 5.
+    ref3d_data = 10. * np.random.random((10, 100, 3)) - 5.
+    ref3d_2_data = np.random.random((9, 50, 4))
 
-    coord1 = Coord(data=np.linspace(0., 60., 50),
-                 units="s",
-                 title='time-on-stream')
-
-    coord2 = Coord(data=np.linspace(200., 1000., 4),
-                 labels=['cold', 'normal', 'hot', 'veryhot'],
-                 units="K",
-                 title='temperature')
-
-    da = NDDataset(dx,
-                   iscomplex=iscomplex,
-                   coordset=[coord0, coord1, coord2],
-                   title='Absorbance',
-                   units='absorbance',
-                   uncertainty=dx * 0.1,
-                   )
-    return da.copy()
+ref_mask = ref_data < -4
+ref3d_mask = ref3d_data < -3
+ref3d_2_mask = ref3d_2_data < -2
 
 
-@pytest.fixture()
-def dsm():  # dataset with coords containing several axis
-
-    with RandomSeedContext(12345):
-        dx = np.random.random((9, 50))
-        # make complex along first dimension
-        iscomplex = [False, False]  # TODO: check with complex
-
-    coord0 = Coord(data=np.linspace(4000., 1000., 9),
-                 labels='a b c d e f g h i'.split(),
-                 units="cm^-1",
-                 title='wavenumber')
-
-    coord11 = Coord(data=np.linspace(0., 60., 50),
-                  units="s",
-                  title='time-on-stream')
-
-    coord12 = Coord(data=np.logspace(1., 4., 50),
-                  units="K",
-                  title='temperature')
-
-    coordmultiple = CoordSet(coord11, coord12)
-    da = NDDataset(dx,
-                   iscomplex=iscomplex,
-                   coordset=[coord0, coordmultiple],
-                   title='Absorbance',
-                   units='absorbance',
-                   uncertainty=dx * 0.1,
-                   )
-    return da.copy()
-
-
-# Datasets and CoordSet
-@pytest.fixture()
-def dataset1d():
-
-    # create a simple 1D
-    length = 10.
-    x_axis = Coord(np.arange(length) * 1000.,
-                  title='wavelengths',
-                  units='cm^-1')
-    with RandomSeedContext(125):
-        ds = NDDataset(np.random.randn(length),
-                       coordset=[x_axis],
-                       title='absorbance',
-                       units='dimensionless')
-    return ds.copy()
-
-
-@pytest.fixture()
-def dataset3d():
-
-    with RandomSeedContext(12345):
-        dx = np.random.random((10, 100, 3))
-
-    coord0 = Coord(np.linspace(4000., 1000., 10),
-                labels='a b c d e f g h i j'.split(),
-                mask=None,
-                units="cm^-1",
-                title='wavelength')
-
-    coord1 = Coord(np.linspace(0., 60., 100),
-                labels=None,
-                mask=None,
-                units="s",
-                title='time-on-stream')
-
-    coord2 = Coord(np.linspace(200., 300., 3),
-                labels=['cold', 'normal', 'hot'],
-                mask=None,
-                units="K",
-                title='temperature')
-
-    da = NDDataset(dx,
-                coordset=[coord0, coord1, coord2],
-                title='absorbance',
-                units='dimensionless',
-                uncertainty=dx * 0.1,
-                mask=np.zeros_like(dx)  # no mask
-                )
-    return da.copy()
-
-
-# ------------------------------
-# Fixture:  IR spectra (SPG)
-# -----------------------------
+# Fixtures: some NDArray's
+# ----------------------------------------------------------------------------------------------------------------------
 
 @pytest.fixture(scope="function")
-def IR_dataset_1D():
-    directory = prefs.datadir
-    dataset = NDDataset.load(
-            os.path.join(directory, 'irdata', 'nh4y-activation.spg'))
-    return dataset[0]
+def refarray():
+    return ref_data.copy()
+
+
+@pytest.fixture(scope="function")
+def refmask():
+    return ref_mask.copy()
+
+
+@pytest.fixture(scope="function")
+def ndarray():
+    # return a simple ndarray with some data
+    return NDArray(ref_data, copy=True)
+
+
+@pytest.fixture(scope="function")
+def ndarrayunit():
+    # return a simple ndarray with some data and units
+    return NDArray(ref_data, units='m/s', copy=True)
+
+
+@pytest.fixture(scope="function")
+def ndarraymask():
+    # return a simple ndarray with some data and units
+    return NDArray(ref_data, mask=ref_mask, units='m/s', copy=True)
+
+
+# Fixtures: Some NDComplex's array
+# ----------------------------------------------------------------------------------------------------------------------
+
+@pytest.fixture(scope="function")
+def ndarraycplx():
+    # return a complex ndarray
+    return NDComplexArray(ref_data, units='m/s', dtype=np.complex128, copy=True)
+
+
+@pytest.fixture(scope="function")
+def ndarrayquaternion():
+    # return a quaternion ndarray
+    return NDComplexArray(ref_data, units='m/s', dtype=np.quaternion, copy=True)
+
+
+# Fixtures: Some NDDatasets
+# ----------------------------------------------------------------------------------------------------------------------
+
+coord0_ = Coord(data=np.linspace(4000., 1000., 10), labels=list('abcdefghij'), units="cm^-1", title='wavenumber')
+@pytest.fixture(scope="function")
+def coord0():
+    return coord0_
+
+coord1_ = Coord(data=np.linspace(0., 60., 100), units="s", title='time-on-stream')
+@pytest.fixture(scope="function")
+def coord1():
+    return coord1_
+
+coord2_ = Coord(data=np.linspace(200., 300., 3), labels=['cold', 'normal', 'hot'], units="K", title='temperature')
+@pytest.fixture(scope="function")
+def coord2():
+    return coord2_
+
+coord2b_ = Coord(data=np.linspace(1., 20., 3), labels=['low', 'medium', 'high'], units="tesla", title='magnetic field')
+@pytest.fixture(scope="function")
+def coord2b():
+    return coord2b_
+
+coord0_2_ = Coord(data=np.linspace(4000., 1000., 9), labels=list('abcdefghi'), units="cm^-1", title='wavenumber')
+@pytest.fixture(scope="function")
+def coord0_2():
+    return coord0_2_
+
+coord1_2_ = Coord(data=np.linspace(0., 60., 50), units="s", title='time-on-stream')
+@pytest.fixture(scope="function")
+def coord1_2():
+    return coord1_2_
+
+coord2_2_ = Coord(data=np.linspace(200., 1000., 4), labels=['cold', 'normal', 'hot', 'veryhot'], units="K",
+                 title='temperature')
+@pytest.fixture(scope="function")
+def coord2_2():
+    return coord2_2_
+
+@pytest.fixture(scope="function")
+def nd1d():
+    # a simple ddataset
+    return NDDataset(ref_data[:, 1].squeeze()).copy()
+
+
+@pytest.fixture(scope="function")
+def nd2d():
+    # a simple 2D ndarrays
+    return NDDataset(ref_data).copy()
+
+
+@pytest.fixture(scope="function")
+def ref_ds():
+    # a dataset with coordinates
+    return ref3d_data.copy()
+
+
+@pytest.fixture(scope="function")
+def ds1():
+    # a dataset with coordinates
+    return NDDataset(ref3d_data, coords=[coord0_, coord1_, coord2_], title='Absorbance', units='absorbance')
+
+
+@pytest.fixture(scope="function")
+def ds2():
+    # another dataset
+    return NDDataset(ref3d_2_data, coords=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance', units='absorbance')
+
+
+@pytest.fixture(scope="function")
+def dsm():
+    # dataset with coords containing several axis and a mask
+
+    coordmultiple = CoordSet(coord2_, coord2b_)
+    return NDDataset(ref3d_data, coords=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
+                     units='absorbance')
+
+
+# Fixtures:  IR spectra (SPG)
+# ----------------------------------------------------------------------------------------------------------------------
+
+directory = prefs.datadir
+dataset = NDDataset.read_omnic(os.path.join(directory, 'irdata', 'nh4y-activation.spg'))
+
 
 @pytest.fixture(scope="function")
 def IR_dataset_2D():
-    directory = prefs.datadir
-    dataset = NDDataset.read_omnic(
-            os.path.join(directory, 'irdata', 'nh4y-activation.spg'))
     return dataset
 
-# Fixture:  IR spectra
+
+@pytest.fixture(scope="function")
+def IR_dataset_1D():
+    return dataset[0].squeeze()
+
+
 @pytest.fixture(scope="function")
 def IR_scp_1():
     directory = prefs.datadir
-    dataset = NDDataset.load(
-            os.path.join(directory, 'irdata', 'nh4.scp'))
+    dataset = NDDataset.load(os.path.join(directory, 'irdata', 'nh4.scp'))
     return dataset
 
 
-# ------------------------
 # Fixture : NMR spectra
-# ------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
     directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr',
-                        'bruker_1d')
-    dataset = NDDataset.read_bruker_nmr(
-            path, expno=1, remove_digital_filter=True)
+    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return dataset
 
 
 @pytest.fixture(scope="function")
 def NMR_dataset_1D_1H():
-    directory =  prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr',
-                        'tpa')
-    dataset = NDDataset.read_bruker_nmr(
-            path, expno=10, remove_digital_filter=True)
+    directory = prefs.datadir
+    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'tpa')
+    dataset = NDDataset.read_bruker_nmr(path, expno=10, remove_digital_filter=True)
     return dataset
 
 
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
     directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr',
-                        'bruker_2d')
-    dataset = NDDataset.read_bruker_nmr(
-            path, expno=1, remove_digital_filter=True)
+    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
+    dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return dataset
 
-# -------------------------------------------------
-# init with panda structure
+
 # Some panda structure for dataset initialization
-# -------------------------------------------------
-@pytest.fixture()
+# ----------------------------------------------------------------------------------------------------------------------
+
+@pytest.fixture(scope="function")
 def series():
     with RandomSeedContext(2345):
         arr = pd.Series(np.random.randn(4), index=np.arange(4) * 10.)
@@ -332,17 +262,16 @@ def series():
     return arr
 
 
-@pytest.fixture()
+@pytest.fixture(scope="function")
 def dataframe():
     with RandomSeedContext(23451):
-        arr = pd.DataFrame(np.random.randn(6, 4), index=np.arange(6) * 10.,
-                           columns=np.arange(4) * 10.)
-    for ax, name in zip(arr.axes, ['y', 'x']):
+        arr = pd.DataFrame(np.random.randn(6, 4), index=np.arange(6) * 10., columns=np.arange(4) * 10.)
+    for ax, name in zip(arr.axes, ['time', 'temperature']):
         ax.name = name
     return arr
 
 
-@pytest.fixture()
+@pytest.fixture(scope="function")
 def panel():
     shape = (7, 6, 5)
     with RandomSeedContext(23452):
@@ -350,30 +279,15 @@ def panel():
         arr = pd.Panel(np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
                        major_axis=np.arange(shape[1]) * 10.,
                        minor_axis=np.arange(shape[2]) * 10.)
-
-    for ax, name in zip(arr.axes, ['z', 'y', 'x']):
+    for ax, name in zip(arr.axes, ['axe0', 'axe1', 'axe2']):
         ax.name = name
     return arr
 
-
-@pytest.fixture()
-def panelnocoordname():
-    shape = (7, 6, 5)
-    with RandomSeedContext(2452):
-        arr = pd.Panel(np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
-                       major_axis=np.arange(shape[1]) * 10.,
-                       minor_axis=np.arange(shape[2]) * 10.)
-    return arr
-
-
-
-
-# ----------------------------------------------------------------------------
 # GUI Fixtures
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
-#from spectrochempy.extern.pyqtgraph import mkQApp
+# from pyqtgraph import mkQApp
 
-#@pytest.fixture(scope="module")
-#def app():
+# @pytest.fixture(scope="module")
+# def app():
 #    return mkQApp()

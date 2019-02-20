@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 
@@ -32,7 +32,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 def test_nmr_1D_show(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
     ax1 = dataset.plot()
-    assert dataset.iscomplex
+    assert dataset.is_complex
     show()
     pass
 

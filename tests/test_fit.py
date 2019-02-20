@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 
@@ -20,6 +20,17 @@ from spectrochempy.utils.testing import assert_approx_equal
 def script():
 
     return """
+    
+    #-----------------------------------------------------------
+    # syntax for parameters definition:
+    # name: value, low_bound,  high_bound
+    #  * for fixed parameters
+    #  $ for variable parameters
+    #  > for reference to a parameter in the COMMON block
+    #    (> is forbidden in the COMMON block)
+    # common block parameters should not have a _ in their names
+    #-----------------------------------------------------------
+    #
     COMMON:
     # common parameters ex.
     # $ gwidth: 1.0, 0.0, none

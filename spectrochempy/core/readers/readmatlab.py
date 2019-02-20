@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
-
-
+# ======================================================================================================================
 
 
 """Plugin module to extend NDDataset with the import methods method.
@@ -21,11 +19,10 @@ __all__ = ['read_matlab']
 
 __dataset_methods__ = __all__
 
-from spectrochempy.dataset.ndio import NDIO
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import log, general_preferences as prefs
+from spectrochempy.core.dataset.ndio import NDIO
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core import log, general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
-
 
 
 def read_matlab(dataset=None, **kwargs):
@@ -87,7 +84,6 @@ def read_matlab(dataset=None, **kwargs):
 
     datasets = []
 
-
     for file in files:
         content = sio.whosmat(file)
         f = sio.loadmat(file)
@@ -97,7 +93,7 @@ def read_matlab(dataset=None, **kwargs):
         for x in content:
 
             if x[2] in ['double', 'single', 'int8', 'int16',
-                                'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64']:
+                        'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64']:
                 # this is an array of numbers
                 name = x[0]
                 data = f[name]
@@ -109,10 +105,10 @@ def read_matlab(dataset=None, **kwargs):
 
             else:
                 log.debug('unsupported data type')
-                #TODO: implement DSO reader
+                # TODO: implement DSO reader
                 datasets.append((x[0], f[x[0]]))
 
     if len(datasets) == 1:
-        return(datasets[0])
+        return (datasets[0])
     else:
         return datasets

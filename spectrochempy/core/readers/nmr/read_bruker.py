@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2016 Christian Fernandez
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
-
+# ======================================================================================================================
 
 
 """ Bruker file (single dimension FID or multidimensional SER) importers
@@ -17,48 +16,46 @@ __all__ = ['read_bruker_nmr']
 
 __dataset_methods__ = __all__
 
-
-# =============================================================================
+# ======================================================================================================================
 # Standard python imports
-# =============================================================================
+# ======================================================================================================================
 
 import glob
 import os
 
-# =============================================================================
+# ======================================================================================================================
 # Third party imports
-# =============================================================================
+# ======================================================================================================================
 import numpy as np
 
-from spectrochempy.application import app
+from spectrochempy.core import app
 
 project_preferences = app.project_preferences
 log = app.log
 preferences = app.general_preferences
-from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, \
-    read_lowmem
+from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
-# =============================================================================
+# ======================================================================================================================
 # Local imports
-# =============================================================================
+# ======================================================================================================================
 from spectrochempy.utils.meta import Meta
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.units import ur, Quantity
 from .parameter import nmr_valid_meta
 
-
-# =============================================================================
+# ======================================================================================================================
 # Constants
-# =============================================================================
+# ======================================================================================================================
 
 FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI",
           "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
-# =============================================================================
+
+# ======================================================================================================================
 # Utilities
-# =============================================================================
+# ======================================================================================================================
 
 def _get_par_files(_dir, _procno, _processed=False):
     # get all possible parameters files
@@ -83,9 +80,9 @@ def _get_par_files(_dir, _procno, _processed=False):
     return _dir, parfiles
 
 
-# =============================================================================
+# ======================================================================================================================
 # Digital filter functions
-# =============================================================================
+# ======================================================================================================================
 # Extracted from nmrglue.fileio.bruker.py (BSD License)
 
 # Table of points to frequency shift Bruker data to remove digital filter
@@ -230,7 +227,7 @@ def _remove_digital_filter(dic, data):
     # fft
     si = data.shape[-1]
     pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(
-            si / 2)
+        si / 2)
     pdata = (pdata.T - pdata.T[0]).T  # TODO: this allow generally to
     # TODO: remove Bruker smiles, not so sure actually
 
@@ -241,12 +238,12 @@ def _remove_digital_filter(dic, data):
 
     # ifft
     data = np.fft.ifft(np.fft.ifftshift(pdata, -1), si, axis=-1) * float(
-            si / 2)
+        si / 2)
 
     # remove last points * 2
-    rp = 2*(phase // 2)
+    rp = 2 * (phase // 2)
     td = dic['acqus']['TD'] // 2
-    td = int(td)-int(rp)
+    td = int(td) - int(rp)
     dic['acqus']['TD'] = td * 2
     data = data[..., :td]
 
@@ -290,9 +287,9 @@ def _remove_digital_filter(dic, data):
 #     else:
 #         return scal()
 
-# =============================================================================
+# ======================================================================================================================
 # bruker import function
-# =============================================================================
+# ======================================================================================================================
 def read_bruker_nmr(dataset, *args, **kwargs):
     """
     Import Bruker dataset
@@ -379,9 +376,9 @@ def read_bruker_nmr(dataset, *args, **kwargs):
     if lowmem:
         log.debug('import with low memory handling (lowmem)')
 
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # start reading ....
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     procno = '1'
     p = path.split(os.path.sep)
@@ -405,7 +402,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     list_data = []
     list_meta = []
-    list_coordset = []
+    list_coords = []
 
     for idx, path in enumerate(paths):
 
@@ -441,11 +438,9 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 datatype = '3D'
         else:
             if not datatype:
-                raise KeyError(
-                        "No Bruker binary file could be found in %s" % path)
+                raise KeyError(f"No Bruker binary file could be found in {path}")
             elif processed:
-                log.warning("No processed Bruker binary file could be found"
-                            " in %s. Use fid's." % path)
+                log.warning(f"No processed Bruker binary file could be found in {path}. Use fid's.")
 
         # we read all parameters file whatever the datatype
         npath, par_files = _get_par_files(path, procno, processed)
@@ -455,10 +450,9 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 dic, data = read(npath, acqus_files=par_files,
                                  read_pulseprogram=False)
             else:
-                dic, data = read_lowmem(npath, acqus_files=par_files,
-                                        read_pulseprogram=False)
+                dic, data = read_lowmem(npath, acqus_files=par_files, read_pulseprogram=False)
 
-            # look the case whn the reshscpng was not correct
+            # look the case when the reshaping was not correct
             # for example, this happen when the number
             # of accumulated row was incomplete
             if datatype in ['SER'] and data.ndim == 1:
@@ -471,17 +465,14 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                         td = dic['acqu']['TD'] // 2
                         data = data.reshape(-1, td)
                     except ValueError:
-                        raise KeyError(
-                                "Inconsistency between TD's and data size")
+                        raise KeyError("Inconsistency between TD's and data size")
 
                 # reduce to td
                 ntd = dic['acqus']['TD'] // 2
-                data = data[...,
-                         :ntd]  # necessary for agreement with bruker data and
-                                # phase
+                data = data[..., :ntd]  # necessary for agreement with bruker data and phase
         else:
 
-            log.debug('Reading processed %d:%s' % (idx, path))
+            log.debug(f'Reading processed {idx}:{path}')
 
             dic, data = read_pdata(npath, procs_files=par_files, )
 
@@ -497,11 +488,13 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                                                      True):
             data = _remove_digital_filter(dic, data)
 
+        # ..............................................................................................................
         # we now make some rearrangement of the dic
         # to have something more user friendly
         # we assume that all experiments have similar (important)
         # parameters so that the experiments are
-        # compatibles
+        # compatible
+
 
         meta = Meta()  # This is the parameter dictionary
 
@@ -509,11 +502,9 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
         # we need the ndim of the data
         parmode = int(dic['acqus']['PARMODE'])
-        if parmode+1 != data.ndim:
-            raise KeyError("The NMR data were not read properly "
-                          "as the PARMODE+1 parameter ({}) doesn't fit "
-                          "the actual number of dimensions ({})".format(
-                    parmode+1, data.ndim))
+        if parmode + 1 != data.ndim:
+            raise KeyError(f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't fit"
+                           f" the actual number of dimensions ({data.ndim})")
 
         # read the acqu and proc
         valid_keys = list(zip(*nmr_valid_meta))[0]
@@ -533,7 +524,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                     value = dic[item][key]
                     units = ur(keys_units[key.lower()]) \
                         if keys_units[key.lower()] else None
-                    # print( key, value, units)
+
                     if units is not None:
                         if isinstance(value, (float, int)):
                             value = value * units  # make a quantity
@@ -596,9 +587,9 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         meta.tdeff = meta.td[:]
         meta.td = list(data.shape)
 
-        for axis in range(parmode+1):
+        for axis in range(parmode + 1):
             if meta.iscomplex[axis]:
-                if axis != parmode: # already done for last axis
+                if axis != parmode:  # already done for last axis
                     meta.td[axis] = meta.td[axis] // 2
                 meta.tdeff[axis] = meta.tdeff[axis] // 2
 
@@ -631,8 +622,8 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         list_meta.append(meta)
 
         # make the corresponding axis
-        log.debug('Create coordset...')
-        coordset = []
+        log.debug('Create coords...')
+        coords = []
         axe_range = list(range(parmode + 1))
         for axis in axe_range:
             if not meta.isfreq[axis]:
@@ -640,12 +631,12 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 dw = (1. / meta.sw_h[axis]).to('us')
                 coordpoints = np.arange(meta.td[axis])
                 coord = Coord(coordpoints * dw,
-                           name='F{}'.format(axis),
-                           title="acquisition time")
-                coordset.append(coord)
+                              name='F{}'.format(axis),
+                              title="acquisition time")
+                coords.append(coord)
             else:
                 raise NotImplementedError('Not yet implemented')
-        list_coordset.append(coordset)
+        list_coords.append(coords)
 
         # # store also the varpars of the series
         # varpars = kargs.get('varpars')
@@ -677,15 +668,17 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         dataset.data = list_data[0]
 
         for axis, cplex in enumerate(meta.iscomplex[::-1]):
-            if cplex and axis>0:
+            if cplex and axis > 0:
                 dataset.set_quaternion(inplace=True)
 
         dataset.meta.update(list_meta[0])
         dataset.meta.readonly = True
-        dataset.coordset = list_coordset[0]
+        dataset.coords = list_coords[0]
         dataset.title = 'intensity'
 
     else:
+
+        #TODO : Check this -
         # case of multiple experiments to merge
 
         # find difference in data.shape
@@ -697,10 +690,10 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 diff = True
 
         if not diff:
-            # find difference in coordsets
-            coordset = list_coordset[0]
-            for a in list_coordset[1:]:
-                if np.any(a != coordset):
+            # find difference in coordss
+            coords = list_coords[0]
+            for a in list_coords[1:]:
+                if np.any(a != coords):
                     diff = True
 
         if not diff:
@@ -760,7 +753,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 if iscomplex:
                     dataset.set_complex(axis)
 
-            # new coordset
+            # new coords
             vkey = kwargs.get('var_key', None)
             vkey = vkey.lower()
 
@@ -784,11 +777,11 @@ def read_bruker_nmr(dataset, *args, **kwargs):
             labels = np.array(labels, dtype=object)
             axis.labels = labels
 
-            # now make the coordset it in the current dataset
-            # only one coordset of the list is taken: they are all the same
+            # now make the coords it in the current dataset
+            # only one coords of the list is taken: they are all the same
             # in principle... if not problem above or the experiments
             # are not compatibles
-            dataset.coordset = [axis] + list_coordset[-1]
+            dataset.coords = [axis] + list_coords[-1]
 
     return dataset
 

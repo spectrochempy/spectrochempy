@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 
@@ -15,30 +15,31 @@ __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
 
 __dataset_methods__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # standard imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 from copy import copy
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # third party imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # localimports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 from ...core.plotters.utils import make_label
-from ...application import app, project_preferences, general_preferences, log
+from ...core import project_preferences, general_preferences, log
 
-# =============================================================================
+
+# ======================================================================================================================
 # nddataset plot2D functions
-# =============================================================================
+# ======================================================================================================================
 
 # contour map (default) -------------------------------------------------------
 
@@ -79,7 +80,7 @@ def plot_image(dataset, **kwargs):
     """
     kwargs['method'] = 'image'
     ax = plot_2D(dataset, **kwargs)
-    return  ax
+    return ax
 
 
 # generic plot (default stack plot) -------------------------------------------
@@ -120,15 +121,15 @@ def plot_2D(dataset, **kwargs):
     """.format(dataset._general_parameters_doc_)
 
     # get all plot preferences
-    # ------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     prefs = dataset.plotmeta
     if not prefs.style:
         # not yet set, initialize with default project preferences
-        prefs.update(app.project_preferences.to_dict())
+        prefs.update(project_preferences.to_dict())
 
     # If we are in the GUI, we will plot on a widget: but which one?
-    # ---------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     widget = kwargs.get('widget', None)
 
@@ -137,7 +138,7 @@ def plot_2D(dataset, **kwargs):
             # let's go to a particular treament for the pyqtgraph plots
             kwargs['usempl'] = usempl = False
             # we try to have a commmon interface for both plot library
-            kwargs['ax'] = ax = widget # return qt_plot_1D(dataset, **kwargs)
+            kwargs['ax'] = ax = widget  # return qt_plot_1D(dataset, **kwargs)
         else:
             # this must be a matplotlibwidget
             kwargs['usempl'] = usempl = True
@@ -145,8 +146,7 @@ def plot_2D(dataset, **kwargs):
             kwargs['ax'] = ax = fig.gca()
 
     # method of plot
-    # ------------
-
+    # ------------------------------------------------------------------------------------------------------------------
 
     method = kwargs.get('method', prefs.method_2D)
 
@@ -156,21 +156,20 @@ def plot_2D(dataset, **kwargs):
 
     if data_transposed:
         new = dataset.T  # transpose dataset
-        nameadd='T'
+        nameadd = 'T'
     else:
-        new = dataset.copy()
-        nameadd =''
+        new = dataset.copy() #TODO: why loose time to make a copy?
+        nameadd = ''
 
     # figure setup
-    # ------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     new._figure_setup(ndim=2, **kwargs)
     ax = new.ndaxes['main']
-    ax.name = ax.name+nameadd
+    ax.name = ax.name + nameadd
 
     # Other properties
-    # ------------------
-
+    # ------------------------------------------------------------------------------------------------------------------
 
     colorbar = kwargs.get('colorbar', project_preferences.colorbar)
 
@@ -183,16 +182,15 @@ def plot_2D(dataset, **kwargs):
 
     if styles and not "grayscale" in styles and cmap == "viridis":
 
-        if method in ['map','image']:
+        if method in ['map', 'image']:
             cmap = colormap = kwargs.get('colormap',
-                            kwargs.get('cmap', project_preferences.colormap))
+                                         kwargs.get('cmap', project_preferences.colormap))
         elif data_transposed:
             cmap = colormap = kwargs.get('colormap',
-                kwargs.get('cmap', project_preferences.colormap_transposed))
+                                         kwargs.get('cmap', project_preferences.colormap_transposed))
         else:
             cmap = colormap = kwargs.get('colormap',
-                kwargs.get('cmap', project_preferences.colormap_stack))
-
+                                         kwargs.get('cmap', project_preferences.colormap_stack))
 
     lw = kwargs.get('linewidth', kwargs.get('lw',
                                             project_preferences.pen_linewidth))
@@ -211,25 +209,26 @@ def plot_2D(dataset, **kwargs):
     ax.xaxis.set_major_formatter(formatter)
     ax.yaxis.set_major_formatter(formatter)
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # Set axis
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     # set the abscissa axis
-    # ---------------------
-
-    x = new.x
+    # ------------------------------------------------------------------------------------------------------------------
+    # the actual dimension name is the last in the new.dims list
+    dimx = new.dims[-1]
+    x = getattr(new, dimx)
     xdata = x.data
     discrete_data = False
     if not np.any(xdata):
         discrete_data = True
         # take into account the fact that sometimes axis have just labels
-        xdata = range(1,len(x.labels)+1)
+        xdata = range(1, len(x.labels) + 1)
 
     xl = [xdata[0], xdata[-1]]
     xl.sort()
 
-    if len(x.labels) < number_x_labels + 1:
+    if x.size < number_x_labels + 1:
         # extend the axis so that the labels are not too close to the limits
         inc = abs(xdata[1] - xdata[0]) * .5
         xl = [xl[0] - inc, xl[1] + inc]
@@ -248,18 +247,19 @@ def plot_2D(dataset, **kwargs):
     ax.set_xlim(xlim)
 
     # set the ordinates axis
-    # ----------------------
-
-    y = new.y
+    # ------------------------------------------------------------------------------------------------------------------
+    # the actual dimension name is the second in the new.dims list
+    dimy = new.dims[-2]
+    y = getattr(new, dimy)
     ydata = y.data
     if not np.any(ydata):
         # take into account the fact that sometimes axis have just labels
-        ydata = range(1,len(y.labels)+1)
+        ydata = range(1, len(y.labels) + 1)
 
     yl = [ydata[0], ydata[-1]]
     yl.sort()
 
-    if len(y.labels) < number_y_labels + 1:
+    if y.size < number_y_labels + 1:
         # extend the axis so that the labels are not too close to the limits
         inc = abs(ydata[1] - ydata[0]) * .5
         yl = [yl[0] - inc, yl[1] + inc]
@@ -273,12 +273,13 @@ def plot_2D(dataset, **kwargs):
     xlim[0] = max(ylim[0], yl[0])
 
     # z intensity (by default we plot real part of the data)
-    # ------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     if not kwargs.get('imag', False):
         zdata = new.RR.masked_data
     else:
         zdata = new.RI.masked_data
+
     zlim = kwargs.get('zlim', (zdata.min(), zdata.max()))
 
     if method in ['stack']:
@@ -315,14 +316,13 @@ def plot_2D(dataset, **kwargs):
         # ----------------
         ax.set_ylim(ylim)
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # plot the dataset
     # by default contours are plotted
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     normalize = kwargs.get('normalize', None)
 
     if method in ['map', 'image']:
-
         zmin, zmax = zlim
         zmin = min(zmin, -zmax)
         zmax = max(-zmin, zmax)
@@ -338,7 +338,7 @@ def plot_2D(dataset, **kwargs):
             if new.clevels is None:
                 new.clevels = clevels(zdata, **kwargs)
             c = ax.contourf(xdata, ydata, zdata,
-                                   new.clevels, linewidths=lw, alpha=alpha)
+                            new.clevels, linewidths=lw, alpha=alpha)
             c.set_cmap(cmap)
             c.set_norm(norm)
 
@@ -355,10 +355,9 @@ def plot_2D(dataset, **kwargs):
 
             for i in ydata:
                 for j in xdata:
-
-                    l, =  ax.plot(j, i, lw=lw, marker='o',
-                                  markersize = markersize)
-                    l.set_color(scalarMap.to_rgba(zdata[i-1,j-1]))
+                    l, = ax.plot(j, i, lw=lw, marker='o',
+                                 markersize=markersize)
+                    l.set_color(scalarMap.to_rgba(zdata[i - 1, j - 1]))
 
 
         else:
@@ -368,7 +367,7 @@ def plot_2D(dataset, **kwargs):
                 new.clevels = clevels(zdata, **kwargs)
 
             c = ax.contour(xdata, ydata, zdata,
-                                  new.clevels, linewidths=lw, alpha=alpha)
+                           new.clevels, linewidths=lw, alpha=alpha)
             c.set_cmap(cmap)
             c.set_norm(norm)
 
@@ -384,9 +383,9 @@ def plot_2D(dataset, **kwargs):
 
         vmin, vmax = ylim
         norm = mpl.colors.Normalize(vmin=vmin,
-                                     vmax=vmax)  # we normalize to the max time
+                                    vmax=vmax)  # we normalize to the max time
         if normalize is not None:
-             norm.vmax = normalize
+            norm.vmax = normalize
 
         _colormap = cm = plt.get_cmap(cmap)
         scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
@@ -399,7 +398,6 @@ def plot_2D(dataset, **kwargs):
         if not clear and not data_transposed:
             lines.extend(ax.lines)  # keep the old lines
 
-
         line0, = ax.plot(xdata, zdata[0], lw=lw, picker=True)
 
         for i in range(zdata.shape[0]):
@@ -408,7 +406,7 @@ def plot_2D(dataset, **kwargs):
             lines.append(l)
             l.set_color(scalarMap.to_rgba(ydata[i]))
             l.set_label("{:.5f}".format(ydata[i]))
-            l.set_zorder(zdata.shape[0]+1-i)
+            l.set_zorder(zdata.shape[0] + 1 - i)
 
         # store the full set of lines
         new._ax_lines = lines[:]
@@ -416,7 +414,7 @@ def plot_2D(dataset, **kwargs):
         # but display only a subset of them in order to accelerate the drawing
         maxlines = kwargs.get('maxlines',
                               general_preferences.max_lines_in_stack)
-        log.debug('max number of lines %d'% maxlines)
+        log.debug('max number of lines %d' % maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 
@@ -426,12 +424,12 @@ def plot_2D(dataset, **kwargs):
         new._plot_resume(dataset, **kwargs)
         return ax
 
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # labels
-    # -------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     # x label
-    # -------
+    # ------------------------------------------------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
         xlabel = make_label(x, 'x')
@@ -440,13 +438,13 @@ def plot_2D(dataset, **kwargs):
     # x tick labels
 
     uselabelx = kwargs.get('uselabel_x', False)
-    if (uselabelx or not np.any(x.data)) and len(x.labels)<number_x_labels+1:
-        #TODO refine this to use different orders of labels
+    if (uselabelx or not np.any(x.data)) and len(x.labels) < number_x_labels + 1:
+        # TODO refine this to use different orders of labels
         ax.set_xticks(xdata)
         ax.set_xticklabels(x.labels)
 
     # y label
-    # --------
+    # ------------------------------------------------------------------------------------------------------------------
     ylabel = kwargs.get("ylabel", None)
     if not ylabel:
         if method in ['stack']:
@@ -457,13 +455,13 @@ def plot_2D(dataset, **kwargs):
             # y tick labels
             uselabely = kwargs.get('uselabel_y', False)
             if (uselabely or not np.any(y.data)) and \
-                            len(y.labels)<number_y_labels:
+                    len(y.labels) < number_y_labels:
                 # TODO refine this to use different orders of labels
                 ax.set_yticks(ydata)
                 ax.set_yticklabels(y.labels)
 
     # z label
-    # --------
+    # ------------------------------------------------------------------------------------------------------------------
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         if method in ['stack']:
@@ -481,7 +479,7 @@ def plot_2D(dataset, **kwargs):
 
         if not new._axcb:
             axec = new.ndaxes['colorbar']
-            axec.name = axec.name+nameadd
+            axec.name = axec.name + nameadd
             new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
             new._axcb.set_label(zlabel)
             # new._axcb.ax.yaxis.set_major_formatter(y_formatter)
@@ -497,9 +495,9 @@ def plot_2D(dataset, **kwargs):
     return ax
 
 
-# =============================================================================
+# ======================================================================================================================
 # clevels
-# =============================================================================
+# ======================================================================================================================
 
 def clevels(data, **kwargs):
     """Utility function to determine contours levels
@@ -518,13 +516,13 @@ def clevels(data, **kwargs):
 
     c = np.arange(nlevels)
     cl = np.log(c + 1.)
-    clevel = cl * (maximum-start)/cl.max() + start
+    clevel = cl * (maximum - start) / cl.max() + start
     clevelneg = - clevel
     if negative:
-        clevelc = sorted(list(np.concatenate((clevel,clevelneg))))
+        clevelc = sorted(list(np.concatenate((clevel, clevelneg))))
 
     return clevelc
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     pass

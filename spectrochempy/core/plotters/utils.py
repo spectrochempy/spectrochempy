@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 __all__ = []
-
 
 import numpy as np
 
 from spectrochempy.utils import NGreen, NRed, NBlue, NBlack
+
 
 # ............................................................................
 def make_label(ss, lab='<no_axe_label>', usempl=True):
@@ -27,7 +27,7 @@ def make_label(ss, lab='<no_axe_label>', usempl=True):
     if usempl:
         if ss.units is not None and str(ss.units) != 'dimensionless':
             units = r"/\ {:~L}".format(ss.units)
-            units = units.replace('%',r'\%')
+            units = units.replace('%', r'\%')
         else:
             units = ''
         label = r"%s $\mathrm{%s}$" % (label, units)

@@ -12,17 +12,20 @@ dependencies:
 # core
 #
 - matplotlib
-- numpy >= 1.14
+- numpy
 - scipy
 - xarray
-- bokeh::bokeh=0.13.0
-- ioam::holoviews=1.10.6
-- datashader=0.6.6
-- param=1.6.1
-- dask=0.17.1
+- pint
+- uncertainties
+- bokeh
+- holoviews
+- datashader
+- param
+- dask
 - pandas
 - xlrd
 - requests
+- numba
 #
 # need the following packages because the API is mainly designed
 # to run in Jupyter notebook

@@ -529,7 +529,7 @@ Constants
 
 
 def write_prefs():
-    from spectrochempy.application import app
+    from spectrochempy.core import app
 
     trait_aliases = reverse_aliases(app)
     text = ""

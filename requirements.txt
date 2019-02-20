@@ -1,46 +1,53 @@
+# dependencies:
 # for the core package
-
 numpy
-scipy
 matplotlib
 traitlets
+pint
+
+# NMR
+nmrglue
 
 # some other useful package
+xarray
+bokeh
+holoviews
+datashader
+param
+dask
+intake
+intake-parquet
+s3fs
 pandas
 xlrd
 requests
-xarray
-# mainly for install and a bit more...
+scipy
+numba
 
+# mainly for install and a bit more...
 setuptools_scm
 
 # need this, because the API is mainly designed to run in Jupyter notebook
-
 ipython
 jupyter
 jupyterlab
 ipykernel
 ipywidgets
 jupyter_nbextensions_configurator
-ipyparallel
 ipympl
 widgetsnbextension
 nodejs
-conda-build
 jupytext
 
 # for testing
-
 pytest
 pytest-runner
 pytest-cov
 pytest-xdist
 pytest-console-scripts
-pytest-qt
 scikit-image
 
 # for docs
-
 sphinx
 sphinx_rtd_theme
 sphinx-gallery
@@ -49,6 +56,5 @@ nbsphinx
 jupyter_sphinx
 nbconvert
 
-# for matplotlib backend and future gui
-
-pyqt
+# conda recipes
+conda-build

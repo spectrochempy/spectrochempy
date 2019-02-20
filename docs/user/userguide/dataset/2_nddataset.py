@@ -27,7 +27,7 @@ from spectrochempy import *
 # ``NDDataset`` objects mostly behave as numpy's `numpy.ndarray`.
 #
 # However, unlike raw numpy's ndarray, the presence of optional properties such
-# as `uncertainty`, `mask`, `units`, `axes`, and axes `labels` make them
+# as `mask`, `units`, `axes`, and axes `labels` make them
 # (hopefully) more appropriate for handling spectroscopic information, one of
 # the major objectives of the SpectroChemPy package.
 #
@@ -40,15 +40,27 @@ from spectrochempy import *
 # In the following example, a minimal 1D dataset is created from a simple list, to which we can add some metadata:
 
 # %%
-da = NDDataset([1,2,3])
-da.title = 'intensity'   
+da = NDDataset([1, 2, 3])
+da.title = 'intensity'
+da.name = 'mydataset'
 da.history = 'created from scratch'
 da.description = 'Some experimental measurements'
 da.units = 'dimensionless'
+print_(da) 
+
+# %% [markdown]
+# <div class='alert-info'>
+#
+# **Note** : In the above code, we use of `print_` (with an underscore) not the usual `print` function. 
+# The `print` output only a short line of information
+#
+# </div>
+
+# %%
 print(da)
 
 # %% [markdown]
-# to get a rich display of the dataset, simply type on the last line of the cell.
+# To get a rich display of the dataset, we can simply type on the last line of the cell: This output a html version of the information string.
 
 # %%
 da
@@ -60,11 +72,11 @@ da
 # operation with these objects:
 
 # %%
-da2 = np.sqrt(da**3)
+da2 = np.sqrt(da ** 3)
 da2
 
 # %%
-da3 = da + da/2.
+da3 = da + da / 2.
 da3
 
 # %% [markdown]
@@ -80,23 +92,23 @@ da3
 # Let's first create the 3 one-dimensional coordinates, for which we can define labels, units, and masks! 
 
 # %%
-coord0 = Coord(data = np.linspace(200., 300., 3),
-            labels = ['cold', 'normal', 'hot'],
-            mask = None,
-            units = "K",
-            title = 'temperature')
+coord0 = Coord(data=np.linspace(4000., 1000., 100),
+               labels=None,
+               mask=None,
+               units="cm^-1",
+               title='wavenumber')
 
-coord1 = Coord(data = np.linspace(0., 60., 100),
-            labels = None,
-            mask = None,
-            units = "minutes",
-            title = 'time-on-stream')
+coord1 = Coord(data=np.linspace(0., 60., 60),
+               labels=None,
+               mask=None,
+               units="minutes",
+               title='time-on-stream')
 
-coord2 = Coord(data = np.linspace(4000., 1000., 100),
-            labels = None,
-            mask = None,
-            units = "cm^-1",
-            title = 'wavenumber')
+coord2 = Coord(data=np.linspace(200., 300., 3),
+               labels=['cold', 'normal', 'hot'],
+               mask=None,
+               units="K",
+               title='temperature')
 
 # %% [markdown]
 # Here is the displayed info for coord1 for instance:
@@ -108,8 +120,9 @@ coord1
 # Now we create some 3D data (a ``numpy.ndarray``):
 
 # %%
-nd_data=np.array([np.array([np.sin(coord2.data*2.*np.pi/4000.)*np.exp(-y/60.) for y in coord1.data])*float(t) 
-         for t in coord0.data])**2
+nd_data = np.array(
+    [np.array([np.sin(coord2.data * 2. * np.pi / 4000.) * np.exp(-y / 60.) for y in coord1.data]) * float(t)
+     for t in coord0.data]) ** 2
 
 # %% [markdown]
 # The dataset is now created with these data and axis. All needed information are passed as parameter of the 
@@ -117,10 +130,11 @@ nd_data=np.array([np.array([np.sin(coord2.data*2.*np.pi/4000.)*np.exp(-y/60.) fo
 
 # %%
 mydataset = NDDataset(nd_data,
-               coordset = [coord0, coord1, coord2],
-               title='Absorbance',
-               units='absorbance'
-              )
+                      name = 'mydataset',
+                      coords=[coord0, coord1, coord2],
+                      title='Absorbance',
+                      units='absorbance'
+                      )
 
 mydataset.description = """Dataset example created for this tutorial. 
 It's a 3-D dataset (with dimensionless intensity)"""
@@ -131,8 +145,10 @@ mydataset.author = 'Blake & Mortimer'
 # We can get some information about this object:
 
 # %%
-print(mydataset)
 mydataset
+
+# %% [markdown]
+# **Note** : It is worth noting that the names of the dimensions follow the natural matrix order, e.g. for an array of shape (10,4,2), the fisrt dimension of size 10 is called `x`, the second of size 4: `y`, and the last :`z`.  
 
 # %% [markdown]
 # ## Copying existing NDDataset
@@ -152,37 +168,44 @@ da_copy = da[:]
 # Finally, it is also possible to initialize a dataset using an existing one:
 
 # %%
-dc = NDDataset(da3, name='duplicate', units='absorbance')
+dc = NDDataset(mydataset, name='duplicate of %s'%mydataset.name , units='absorbance')
 dc
 
 # %% [markdown]
 # ### Other ways to create NDDatasets
 #
-# Any numpy creation function can be used to set up the initial dataset array:
+# Some numpy creation function can be used to set up the initial dataset array:
 #        [numpy array creation routines](https://docs.scipy.org/doc/numpy/reference/routines.array-creation.html#routines-array-creation)
 #
 
 # %%
-zeros((2,2), units='meters', title='Datasets with only zeros')
+dz = zeros((2, 2), units='meters', title='Datasets with only zeros')
+dz
 
 # %%
-ones((2,2), units='kilograms', title='Datasets with only ones')
+do = ones((2, 2), units='kilograms', title='Datasets with only ones')
+do
 
 # %%
-full((2,2), fill_value=1.25, units='radians', title = 'with only float=1.25')  #TODO: check the pb. of radians not displaying
+df = full((2, 2), fill_value=1.25, units='radians',
+     title='with only float=1.25')  
+df
 
 # %% [markdown]
 # As with numpy, it is also possible to take another dataset as a template:
 
 # %%
-ds = ones((2,3), dtype='bool')
-ds
+do = ones((2, 3), dtype=bool)
+do[1,1]=0
+do
 
 # %% [markdown]
-# Now we use ``ds`` as a template, for the shape, but we can change the `dtype`.
+# Now we use the previous dataset ``do`` as a template, for the shape, but we can change the `dtype`.
 
 # %%
-full_like(ds, dtype=float, fill_value=2.5)
+df = full_like(dc, dtype=np.float64, fill_value=2.5)
+df
+
 
 # %% [markdown]
 # ## Importing from external dataset
@@ -195,7 +218,7 @@ full_like(ds, dtype=float, fill_value=2.5)
 # let check if this directory exists and display its actual content:
 import os
 
-datadir = general_preferences.datadir   
+datadir = general_preferences.datadir
 if os.path.exists(datadir):
     # let's display only the last part of the path
     print(os.path.basename(datadir))
@@ -231,41 +254,34 @@ new
 # or using the axes labels:
 
 # %%
-new = mydataset['hot']
+new = mydataset[..., 'hot']
 new
 
 # %% [markdown]
 # Be sure to use the correct type for slicing.
 #
-# Floats are use for slicing by values
+# Floats are used for slicing by values
 
 # %%
-correct = mydataset[...,2000.]
+correct = mydataset[2000.]
+correct
 
 # %%
-outside_limits = mydataset[...,10000.]
+outside_limits = mydataset[2000]
 
 # %% [markdown]
-# <div class='alert alert-info'>**NOTE:**
-#
-# If one use an integer value (2000), then the slicing is made **by index not by value**, and in the following particular case, an `IndexError` is issued as index 2000 does not exists (size along axis -1 is only 100, so that index vary between 0 and 99!).
+# <div class='alert alert-info'>
+#     
+# **NOTE:**
+# If one use an integer value (2000), then the slicing is made **by index not by value**, and in the following particular case, an `Error` is issued as index 2000 does not exists (size along axis `x` (axis:0) is only 100, so that index vary between 0 and 99!). 
 #
 # </div>
-
-# %% [markdown]
-# When slicing by index, an error is generated is the index is out of limits:
-
-# %%
-try:
-    fail = mydataset[...,2000]
-except IndexError as e:
-    log.error(e)
 
 # %% [markdown]
 # One can mixed slicing methods for different dimension:
 
 # %%
-new = mydataset['normal':'hot', 0, 4000.0:2000.]
+new = mydataset[4000.0:2000., 0, 'normal':'hot']
 new
 
 # %% [markdown]
@@ -279,7 +295,7 @@ new
 # Now, lets load a NMR dataset (in the Bruker format).
 
 # %%
-path = os.path.join(datadir, 'nmrdata','bruker', 'tests', 'nmr','bruker_1d')
+path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
 
 # load the data in a new dataset
 ndd = NDDataset()
@@ -291,7 +307,7 @@ ndd
 _ = ndd.plot(color='blue')
 
 # %%
-path = os.path.join(datadir, 'nmrdata','bruker', 'tests', 'nmr','bruker_2d')
+path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
 
 # load the data directly (no need to create the dataset first)
 ndd2 = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
@@ -300,7 +316,8 @@ ndd2 = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 ndd2.x.to('s')
 ndd2.y.to('ms')
 
-ax = ndd2.plot() 
+ax = ndd2.plot(method='map')
+ndd2
 
 # %% [markdown]
 # ### IR data
@@ -310,25 +327,36 @@ dataset = NDDataset.read_omnic(os.path.join(datadir, 'irdata', 'NH4Y-activation.
 dataset
 
 # %%
-dataset = read_omnic(NDDataset(), filename=os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
-
-# %%
 ax = dataset.plot(method='stack')
 
 # %% [markdown]
 # ## Masks
+
+# %% [markdown]
+# if we try to get for example the maximum of the previous dataset, we face a problem due to the saturation around 1100 cm$^{-1}$.
+
+# %%
+dataset.max()
+
+# %% [markdown]
+# One way is to apply the max function to only a part of the spectrum. Another way is to mask the undesired data.
 #
 # Masking values in a dataset is straigthforward. Just set a value `masked` or True for those data you want to mask.
 
 # %%
-dataset[:,1290.:890.] = masked
-ax = dataset.plot_stack()
+dataset[1290.:890.] = MASKED
+
+# %% [markdown]
+# Now the max function return the  correct position 
+
+# %%
+dataset.max().x
 
 # %% [markdown]
 # Here is a display the figure with the new mask
 
 # %%
-_ = dataset.plot_stack(figsize=(9, 4))
+_ = dataset.plot_stack()
 
 # %% [markdown]
 # ## Transposition
@@ -340,11 +368,18 @@ _ = dataset.plot_stack(figsize=(9, 4))
 datasetT = dataset.T
 datasetT
 
+# %% [markdown]
+# As it can be observed the dimension `x`and `y`have been exchanged, *e.g.* the originalshape was **(x:5549, y:55)**, and after transposition it is **(y:55, x:5549)**.
+# (the dimension names stay the same, but the index of the corresponding axis are exchanged).
+
+# %% [markdown]
+# Let's vizualize the result:
+
 # %%
 _ = datasetT.plot()
 
 # %%
-_ = dataset.T[4000.:3000.].plot_stack()
+dataset[4000.:3000.], datasetT[:,4000.:3000.]
 
 # %% [markdown]
 # ## Units
@@ -363,13 +398,13 @@ Quantity('10.0 cm^-1')
 Quantity(1.0, 'cm^-1/hour')
 
 # %%
-Quantity(10.0, ur.cm/ur.km)
+Quantity(10.0, ur.cm / ur.km)
 
 # %% [markdown]
 # or may be (?) simpler,
 
 # %%
-10.0 * ur.meter/ur.gram/ur.volt
+10.0 * ur.meter / ur.gram / ur.volt
 
 # %% [markdown]
 # `ur` stands for **unit registry**, which handle many type of units
@@ -381,7 +416,7 @@ Quantity(10.0, ur.cm/ur.km)
 # %%
 a = 900 * ur.km
 b = 4.5 * ur.hours
-a/b
+a / b
 
 # %% [markdown]
 # Such calculations can also be done using the following syntax, using a string expression
@@ -393,7 +428,7 @@ Quantity("900 km / (8 hours)")
 # ### Convert between units
 
 # %%
-c = a/b
+c = a / b
 c.to('cm/s')
 
 # %% [markdown]
@@ -437,20 +472,9 @@ ds
 # %%
 ds.to('kg/m^3')
 
-# %% [markdown]
-# ## Uncertainties
-#
-# Spectrochempy can do calculations with uncertainties (and units).
-#
-# A quantity, with an `uncertainty` is called a **Measurement** .
-#
-# Use one of the following expression to create such `Measurement`:
 
 # %%
-Measurement(10.0, .2, 'cm') 
-
-# %%
-Quantity(10.0, 'cm').plus_minus(.2)   
+Quantity(10.0, 'cm').plus_minus(.2)
 
 # %% [markdown]
 # ## Numpy universal functions (ufunc's)
@@ -501,13 +525,29 @@ except DimensionalityError as e:
 # .g.,* allows 2D-hypercomplex array that can be transposed (useful for NMR data).
 
 # %%
-da = NDDataset([  [1.+2.j, 2.+0j], [1.3+2.j, 2.+0.5j],[1.+4.2j, 2.+3j], [5.+4.2j, 2.+3j ] ])
+da = NDDataset([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j], [5. + 4.2j, 2. + 3j]])
 da
 
 # %% [markdown]
-# if the dataset is also complex in the first dimension (columns) then we
-# should have (note the shape description!):
+# A dataset of type float can be transformed into a complex dataset (using two cionsecutive rows to create a complex row)
 
 # %%
-da.set_complex(0)
+da = NDDataset(np.arange(40).reshape(10,4))
 da
+
+# %%
+dac = da.set_complex()
+dac
+
+# %% [markdown]
+# Note the `x`dimension size is divided by a factor of two 
+
+# %% [markdown]
+# A dataset which is complex in two dimensions is called hypercomplex (it's datatype in SpectroChemPy is set to quaternion). 
+
+# %%
+daq = da.set_quaternion()   # equivalently one can use the set_hypercomplex method
+daq
+
+# %%
+daq.dtype

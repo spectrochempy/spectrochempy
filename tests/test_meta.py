@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 
@@ -84,13 +84,29 @@ def test_copy():
     assert meta2 is not meta
     assert sorted([val for val in meta2]) == ['ls', 'ns', 'si', 'td']
 
-def test_swapaxes():
+def test_swap():
     meta = Meta()
     meta.td = [200, 400, 500]
     meta.xe = [30, 40, 80]
     meta.si = 2048
-    meta.swapaxes(1,2)
-    assert meta.xe == [30,80,40]
+    meta.swap(1,2)
+    assert meta.td == [200,500,400]
+    assert meta.xe == [30, 80, 40]
+    assert meta.si == 2048
+
+
+def test_permute():
+    meta = Meta()
+    meta.td = [200, 400, 500]
+    meta.xe = [30, 40, 80]
+    meta.si = 2048
+
+    p = (2,0,1)
+    meta.permute(*p)
+    assert meta.td == [500,200,400]
+    assert meta.xe == [80, 30, 40]
+    assert meta.si == 2048
+
 
 
 

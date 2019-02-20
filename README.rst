@@ -6,30 +6,27 @@ Spectrochempy
 What is |scpy|?
 =================
 
-|scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic
-data for **Chem**\ istry with **Py**\ thon. It is a cross platform software,
-running on Linux, Windows or OS X.
+|scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic data for **Chem**\ istry with **Py**\ thon.
+It is a cross platform software, running on Linux, Windows or OS X.
 
-#.  A ``NDDataset`` object embedding array of data with labeled axes and
-    metadata.
+Among its major features:
+
+#.  A ``NDDataset`` object embedding array of data with labeled axes and metadata.
 #.  A ``Project`` manager to work on multiple ``NDDataset`` simultaneously.
-#.  Physical ``Units`` and ``Uncertainty`` for ``NDDataset``.
-#.  Mathematical operations over ``NDDataset`` such addition,
-    multiplication and many more ...
+#.  Physical ``Units`` for ``NDDataset``.
+#.  Mathematical operations over ``NDDataset`` such addition, multiplication and many more ...
 #.  Import functions to read data from experiments or modeling programs ...
 #.  Display functions such as ``plot`` for 1D or nD datasets ...
-#.  Export functions to **csv**, **xls** formats ...
-#.  Preprocessing functions such as baseline correction, automatic
-    subtraction and many more ...
+#.  Export functions to *csv*, *xls* formats ...
+#.  Preprocessing functions such as baseline correction, automatic subtraction and many more ...
 #.  Fitting capabilities for single or multiple datasets ...
 #.  Exploratory analysis such as ``SVD``, ``PCA``, ``MCR_ALS``, ``EFA`` ...
 
 
 .. warning::
 
-	|scpy| is still experimental and under active development.
-	Its current design is subject to major changes, reorganizations, bugs
-	and crashes!!!. Please report any issues to the 
+	|scpy| is still experimental and under active development. Its current design is subject to major changes,
+	reorganizations, bugs and crashes!!!. Please report any issues to the
 	`Issue Tracker <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
 
@@ -50,8 +47,7 @@ Installation
 Issue Tracker
 ===============
 
-You find a problem, want to suggest enhancements or want to look at the current
-issues and milestones, you can go there:
+You find a problem, want to suggest enhancements or want to look at the current issues and milestones, you can go there:
 
 * `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
@@ -67,19 +63,17 @@ The possible roadmap for this project is here:
 Citing |scpy|
 ===============
 
-When using |scpy| for your own work, you are kindly requested to cite it this
-way::
+When using |scpy| for your own work, you are kindly requested to cite it this way::
 
      Arnaud Travert & Christian Fernandez,
      SpectroChemPy, a framework for processing, analyzing and modeling
      of Spectroscopic data for Chemistry with Python
      https://bitbucket.org/spectrocat/spectrochempy, (version 0.1)
      Laboratoire Catalyse and Spectrochemistry,
-     ENSICAEN/Universit\'e de Caen/CNRS, 2017
+     ENSICAEN/Universit\'e de Caen/CNRS, 2019
 
 
 .. |scpy| replace:: **SpectroChemPy**
-
 
 
 License

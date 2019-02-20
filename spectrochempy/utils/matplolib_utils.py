@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 __all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen',
            'figure', 'show', 'get_figure']
-
 
 import os
 import shutil as sh
@@ -17,6 +16,7 @@ from pkg_resources import resource_filename
 
 from matplotlib import pyplot as plt
 import matplotlib as mpl
+
 
 # ............................................................................
 # color conversion function
@@ -39,9 +39,8 @@ def cmyk2rgb(C, M, Y, K):
     return (R, G, B)
 
 
-
 # Constants
-# ---------
+# ----------------------------------------------------------------------------------------------------------------------
 
 # For color blind people, it is safe to use only 4 colors in graphs:
 # see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf
@@ -53,6 +52,7 @@ NBlack = (0, 0, 0)
 NRed = cmyk2rgb(0, 77, 100, 0)
 NBlue = cmyk2rgb(100, 30, 0, 0)
 NGreen = cmyk2rgb(85, 0, 60, 10)
+
 
 # .............................................................................
 def figure(**kwargs):
@@ -108,4 +108,3 @@ def get_figure(clear=True, **kwargs):
 
     # a figure already exists - if several we take the last
     return plt.figure(n[-1])
-

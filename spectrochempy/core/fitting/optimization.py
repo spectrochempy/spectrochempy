@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 __all__ = ["optimize", ]
 
-# ===============================================================================
+# ======================================================================================================================
 # imports
-# ===============================================================================
+# ======================================================================================================================
 
 
 from warnings import warn
 
 import scipy.optimize
 
-from spectrochempy.application import app
+from spectrochempy.core import app
 
 project_preferences = app.project_preferences
 log = app.log
@@ -152,7 +152,6 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
     fpe = restore_external(fp0, res, keys)
     # for i, key in enumerate(keys):
     #    fp0.to_external(key, res[i])
-
 
     if warnmess == 1:
         warn("Maximum number of function evaluations made.")

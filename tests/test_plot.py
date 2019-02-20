@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 
@@ -79,15 +79,15 @@ def test_plot_stack_generic(IR_dataset_2D):
 def test_plot_stack_masked(IR_dataset_2D):
     # just to see if masked area do not apppear on the figure
     dataset = IR_dataset_2D.copy() * 2.
-    dataset[:, 1300.:900.] = masked
+    dataset[1300.:900.] = MASKED
     dataset.plot_stack(colorbar=False)
     dataset.plot_map(colorbar=False)
-
+    show()
 
 def test_plot_stack_multiple(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
     s1 = dataset[-10:]
-    s2 = dataset[:10]
+    s2 = dataset[0:5]
     row = s1[-1]
     row.plot()
     # two on the same plot
@@ -100,7 +100,7 @@ def test_plot_stack_multiple(IR_dataset_2D):
 
 def test_successive_plot_bug_1a3_28(IR_dataset_2D):
     dataset = IR_dataset_2D.copy() * 2.
-    dataset[:, 1300.:900.] = masked
+    dataset[:, 1300.:900.] = MASKED
     dataset.plot_stack(colorbar=False)
     dataset.plot()  # in 0.1a3.28 bug because key colorbar is missing.
     show()
@@ -108,7 +108,7 @@ def test_successive_plot_bug_1a3_28(IR_dataset_2D):
 
 def test_successive_plot_bug_with_colorbars(IR_dataset_2D):
     dataset = IR_dataset_2D.copy() * 2.
-    dataset[:, 1300.:900.] = masked
+    dataset[1300.:900.] = MASKED
     dataset.plot_stack()
     dataset.plot()
     dataset.plot()  # bug colorbars stacked on the first plot
@@ -137,21 +137,20 @@ def test_multiplot(IR_dataset_2D):
                              'multiple_IR_dataset_1D_scatter_sans',
                              'multiple_IR_dataset_1D_scatter',
                              ], force_creation=FORCE)
-def tests_multipleplots_and_styles():
-    dataset = NDDataset.read_omnic(
-            os.path.join('irdata', 'nh4y-activation.spg'))
+def tests_multipleplots_and_styles(IR_dataset_1D,IR_dataset_2D):
 
+    dataset = IR_dataset_1D
 
     # plot generic
-    ax = dataset[0].copy().plot()
+    ax = dataset.copy().plot()
 
     # plot generic style
-    ax = dataset[0].copy().plot(style='sans')
+    ax = dataset.copy().plot(style='sans')
 
     # check that style reinit to default
-    ax = dataset[0].copy().plot()
+    ax = dataset.copy().plot()
 
-    dataset = dataset[:,::100]
+    dataset = IR_dataset_2D
 
     datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
     labels = ['sample {}'.format(label) for label in

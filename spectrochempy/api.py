@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 # We intentionnaly DO NOT SET DOCSTRING, HERE... due to the way the documentation
 # is builded.
@@ -28,9 +28,10 @@ from IPython import get_ipython
 
 import matplotlib as mpl
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # Check the environment for plotting
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 # Do we run in IPython ?
 IN_IPYTHON = False
@@ -40,6 +41,7 @@ if InteractiveShell.initialized():
     IN_IPYTHON = True
     ip = get_ipython()
     kernel = getattr(ip, "kernel", None)
+
 
 # Which backend to choose for matplotlib ?
 
@@ -97,18 +99,51 @@ if 'builddocs.py' in sys.argv[0]:
 if 'pytest' in sys.argv[0]:
     # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
+
     # ok but if we are doing individual module or function testing in PyCharm
     # it is interesting to see the plots!
-    if len(sys.argv) > 1 and not sys.argv[1].endswith("tests"):
+    if len(sys.argv) > 1 \
+            and not any([argv.endswith("tests") for argv in sys.argv[1:]]) \
+            and '--nodisplay' not in sys.argv:
         # individual module testing
-            NO_DISPLAY = False
+        NO_DISPLAY = False
+
     if NO_DISPLAY:
         mpl.use('agg', warn=False, force=True)
 
+if not (IN_IPYTHON and kernel and not NO_DISPLAY):
+    try:
+        import PyQt5
+
+        backend = 'Qt5Agg'
+        mpl.use('Qt5Agg', warn=False, force=True)
+    except:
+        mpl.use('tkagg', warn=False, force=True)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Now we can start loading the API
+# ----------------------------------------------------------------------------------------------------------------------
+
+# import the core api
+from spectrochempy.core import *
+from spectrochempy import core
+
+__all__ = core.__all__
+__all__ += ['IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
+
+
+from PyQt5 import QtWidgets
+
+GUI = QtWidgets.QApplication(sys.argv)
+
+if not IN_IPYTHON:
+    # needed in windows terminal - but must not be inited in Jupyter notebook
+    from colorama import init as initcolor
+
+    initcolor()
+
 if IN_IPYTHON and kernel and not NO_DISPLAY:
-    # Now we have several situation even if we are running in Jupyter notebook or
-    # Jupyter Lab, or we are executing IPython from a terminal (with no graphic
-    # capabilities) or we are running from nbsphinx in the background
     try:
         if 'ipykernel_launcher' in sys.argv[0] and \
                 "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
@@ -118,31 +153,8 @@ if IN_IPYTHON and kernel and not NO_DISPLAY:
             # here its a normal magic function that works in both
             # jupyter notebook and jupyter lab
             ip.magic('matplotlib widget')
-
     except:
         ip.magic('matplotlib tk')
-else:
-    try:
-        import PyQt5
-        backend = 'Qt5Agg'
-        mpl.use('Qt5Agg', warn=False, force=True)
-    except:
-        mpl.use('tkagg', warn=False, force=True)
-
-# ----------------------------------------------------------------------------
-# Now we can start loading the API
-# ----------------------------------------------------------------------------
-
-# import the core api
-from spectrochempy.core import *
-from spectrochempy import core
-
-__all__ = core.__all__
-__all__ += ['IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
-
-# Normally this will be remove for the notebook application
-#from spectrochempy.extern.pyqtgraph.Qt import QtGui
-#GUI = QtGui.QApplication(sys.argv)
 
 # ==============================================================================
 if __name__ == '__main__':

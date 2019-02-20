@@ -164,6 +164,7 @@ log.warning('this is a warning message!')
 # Optionally, **scipy** and **sympy** can be available, if **SpectroChempy** can find these libraries installed on your system.
 
 # %%
+# %matplotlib inline
 x = np.linspace(0, 2*np.pi, 100)
 y = np.sin(x)
 plt.figure(figsize=(5,2.5))
@@ -173,14 +174,13 @@ p.set_color('red')
 plt.show()
 
 # %% [markdown]
-# ### Units, uncertainties and measurements
+# ### Units
 
 # %% [markdown]
-# The objets **ur**, **Quantity** and **Measurement**, allows the manipulation of data with units and uncertainties. (see tutorial-1-units-uncertainties)
+# The objets **ur**, **Quantity**  allows the manipulation of data with units, thanks to pint. (see tutorial-1-units)
 #
 # * **ur**: the unit registry
 # * **Quantity**: a scalar or an array with some units
-# * **Measurement**: a scalar with units and unertainty
 
 # %%
 ur.cm / ur.s
@@ -192,24 +192,6 @@ x * 2.
 # %%
 xa = Quantity(np.array((1,2)), 'km')
 xa[1] * 2.5
-
-# %%
-y = Measurement(10, .1, 'km')
-y  
-
-# %%
-z = x.plus_minus(.01)
-z
-
-# %% [markdown]
-# **Warning**, this is not available for numpy.array based quantities !  For this we will use NDDataset described 
-# below
-
-# %%
-try:
-    za = xa.plus_minus(.01)
-except AttributeError as e:
-    log.error(e)
 
 
 # %% [markdown]
@@ -230,12 +212,18 @@ nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
 # ### Display dataset information
 
 # %% [markdown]
-# Several ways are available to display the data we have jsut read and that are now stored in the ``source`` dataset 
+# Several ways are available to display the data we have jsut read and that are now stored in the dataset 
 #
-# * **Printing** them, using the print function of python to get a text version of the `source` information
+# * **Printing** them, using the print function of python to get a short text version of the dataset information.
 
 # %%
 print(nd)
+
+# %% [markdown]
+# A much Longer (and colored) information text can be obtained using the spectrochempy provided ``print_`` function.
+
+# %%
+print_(nd)
 
 # %% [markdown]
 # * **Displaying html**, inside a jupyter notebook, by just typing the name of the dataset (must be the last instruction of a cell, however!)
@@ -246,24 +234,28 @@ nd
 # %% [markdown]
 # ### Plotting a dataset
 #
-# Let's plot first a 1D spectrum (for instance one row of nd)
+# Let's plot first a 1D spectrum (for instance one column of nd)
 
 # %%
-row = nd[-1]
+row = nd[:,-1]
 _ = row.plot()
 
+# %% [markdown]
+# 2D plots can be also generated as stacked plot
+
+# %%
 _ = nd.plot(method='stack') # or nd.plot_stack()
 
 # %% [markdown]
 # or as a contour plot: 
 
 # %%
-_ = nd.plot(method='map')
+_ = nd.plot(method='map') # or nd.plot_map()
 
 # %% [markdown]
-# Note that as we plot wavenumbers as abcissa, by convention the coordinates dirtection is reversed.
+# Note that as we plot wavenumbers as abcissa, by convention the coordinates direction is reversed.
 #
-# This can be changed by using the keyword argument `reversed` = `False`.
+# This can be changed by using the keyword argument `reversed = False`.
 
 # %% [markdown]
 # ### Processing a dataset
@@ -275,7 +267,7 @@ _ = nd.plot(method='map')
 # Lets take, e.g., the last row as reference
 
 # %%
-ref = nd[-1]
+ref = nd[:,0]
 _ = ref.plot() 
 
 # %% [markdown]
@@ -288,23 +280,3 @@ _ = nds.plot(method='stack')
 # %% [markdown]
 # More details on available on available processing and analysis function will be given later in this user guide.
 #
-
-# %% [code]{"hide_input": true}
-show() # Note : show all plots (only required if the notebook is exported as a script, to make all plots visibles)
-
-# %% [markdown]
-# ## File selector widget
-
-# %% [markdown]
-# A widget is provided to help with the selection of file names or directory.  
-
-# %%
-path = general_preferences.datadir
-fs = FileSelector(path = path, filters=['spg','scp'])
-fs
-
-# %% [markdown]
-# After validation of the selection, one can read the path and name of the selected files. 
-
-# %%
-fs.value, fs.path, fs.fullpath

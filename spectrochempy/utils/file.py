@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# ============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# ============================================================================
+# ======================================================================================================================
 
 import os
 import sys
@@ -17,7 +17,7 @@ from numpy.compat import asstr
 from traitlets import import_item
 import warnings
 
-from spectrochempy.gui.dialogs import opendialog
+from .qtfiledialogs import opendialog
 
 __all__ = ['readfilename', 'readdirname',
            'list_packages', 'generate_api',
@@ -26,9 +26,9 @@ __all__ = ['readfilename', 'readdirname',
            ]
 
 
-# =============================================================================
+# ======================================================================================================================
 # Utility function
-# =============================================================================
+# ======================================================================================================================
 
 def readfilename(filename=None, **kwargs):
     """
@@ -50,7 +50,7 @@ def readfilename(filename=None, **kwargs):
 
     """
 
-    from spectrochempy.application import general_preferences as prefs
+    from spectrochempy.core import general_preferences as prefs
     from spectrochempy.utils import SpectroChemPyWarning
     from spectrochempy.api import NO_DISPLAY
 
@@ -195,7 +195,7 @@ def readdirname(dirname=None, **kwargs):
         valid directory name
     """
 
-    from spectrochempy.application import general_preferences as prefs
+    from spectrochempy.core import general_preferences as prefs
     from spectrochempy.api import NO_DISPLAY
 
     # Check parent directory
@@ -248,9 +248,9 @@ def readdirname(dirname=None, **kwargs):
             return directory
 
 
-# ============================================================================
+# ======================================================================================================================
 # PACKAGE and API UTILITIES
-# ============================================================================
+# ======================================================================================================================
 
 # ............................................................................
 def list_packages(package):
@@ -291,6 +291,7 @@ def generate_api(api_path):
         try:
             pkg = import_item(pkg)
         except:
+            pkg = import_item(pkg)
             raise ImportError(pkg)
         if not hasattr(pkg, '__all__'):
             continue
@@ -304,15 +305,15 @@ def generate_api(api_path):
 
             # some  methods are class method of NDDatasets
             if item in dmethods:
-                from spectrochempy.dataset.nddataset import NDDataset
+                from spectrochempy.core.dataset.nddataset import NDDataset
                 setattr(NDDataset, item, getattr(pkg, item))
 
     return __all__
 
 
-# ============================================================================
+# ======================================================================================================================
 # ZIP UTILITIES
-# ============================================================================
+# ======================================================================================================================
 
 # ............................................................................
 def make_zipfile(file, **kwargs):
@@ -433,7 +434,7 @@ class ScpFile(object):
             return read_array(f, allow_pickle=True)
 
         elif member and ext in ['.scp']:
-            from spectrochempy.dataset.nddataset import NDDataset
+            from spectrochempy.core.dataset.nddataset import NDDataset
             f = io.BytesIO(self.zip.read(key))
             return NDDataset.load(f)
 
