@@ -1174,7 +1174,6 @@ def test_bug_13(IR_dataset_1D):
 
 
 def test_dot_product_of_minimal_datasets():
-    # due to a bug in dot()
     from spectrochempy.core import dot
     A = NDDataset(np.random.rand(5, 4))
     B = NDDataset(np.random.rand(4, 10))
@@ -1182,8 +1181,6 @@ def test_dot_product_of_minimal_datasets():
     dot(A, B)
 
 def test_sub_of_datasets_coords():
-    # due to a bug in dot()
-    from spectrochempy.core import dot
     A = NDDataset(np.random.rand(5, 4))
     B = NDDataset(np.random.rand(5, 4))
 
