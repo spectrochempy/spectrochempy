@@ -455,7 +455,8 @@ class NDIO(HasTraits):
 
         if len(datasets)==1:
             return datasets[0]
-
+        else:
+            return datasets
     # --------------------------------------------------------------------------
     # Generic read function
     # --------------------------------------------------------------------------
