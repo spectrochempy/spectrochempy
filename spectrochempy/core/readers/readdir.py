@@ -20,20 +20,22 @@ __dataset_methods__ = __all__
 
 import os
 import warnings
-import glob
+import datetime
+import scipy.interpolate
+import numpy as np
 
 # ----------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------
 
-import numpy as np
+import xlrd
 
 # ----------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------
 
 from spectrochempy.dataset.ndio import NDIO
-from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.dataset.nddataset import NDDataset, Coord
 from spectrochempy.application import log, general_preferences as prefs
 from spectrochempy.utils import readfilename, readdirname
 from spectrochempy.gui.dialogs import opendialog
@@ -97,31 +99,6 @@ def read_dir(dataset=None, directory=None, **kwargs):
         if isinstance(dataset, str) and dataset != '':
             directory = dataset
             dataset = None
-
-    # # check directory
-    # if directory is None:
-    #     directory = opendialog( single=False,
-    #                             directory=directory,
-    #                             caption='Select folder to read',
-    #                             filters = 'directory')
-    #
-    #     if not directory:
-    #         # if the dialog has been cancelled or return nothing
-    #         return None
-    #
-    # if directory is not None and not isinstance(directory, str):
-    #     raise TypeError('directory should be of str type, not ' + type(directory))
-    #
-    # if directory and not os.path.exists(directory):
-    #     # the directory may be located in our default datadir
-    #     # or be the default datadir
-    #     if directory == os.path.basename(prefs.datadir):
-    #         return prefs.datadir
-    #
-    #     _directory = os.path.join(prefs.datadir, directory)
-    #
-    # if not os.path.isdir(directory):
-    #     raise ValueError('\"' + directory + '\" is not a valid directory')
 
     parent_dir = kwargs.get('parent_dir', None)
     directory = readdirname(directory, parent_dir=parent_dir)
@@ -194,18 +171,24 @@ def _read_single_dir(directory):
     # TODO: extend to other implemented readers (NMR !)
     return datasets
 
-if __name__ == '__main__':
-    pass
 
 # function for reading data in a directory
 # --------------------------------------
 def read_carroucell(dataset=None, directory=None, **kwargs):
     """
     Open .spa files in a directory after a carroucell experiment.
-    The files are and grouped in NDDatasets depending on there root name
-    (and sorted by date)
+    The files for a given sample are grouped in NDDatasets (sorted by acquisition date).
+    The NDDatasets are returned in a list sorted by sample number.
+    When the file containing the temperature data is present, the temperature is read
+    and assigned as a label to each spectrum.
+
+
     Notes
     ------
+    All files are expected to be present in the same directory and their filenames
+    are expected to be in the format: X_samplename_YYY.spa
+    and for the backround files: X_BCKG_YYYBG.spa
+    where X is the sample holder number and YYY the spectrum number.
 
     Parameters
     ----------
@@ -216,6 +199,16 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         If not specified, opens a dialog box.
     parent_dir: str, optional.
         The parent directory where to look at
+    spectra: arraylike of 2 int (min, max), optional, default=None
+        The first and last spectrum to be loaded as determined by their number.
+         If None all spectra are loaded
+    discardbg: bool, optional, default=True
+        If True: do not load background (sample #9)
+
+    delta_clocks: int, optional, default=0
+        Difference in seconds between the clocks used for spectra and temperature acquisition.
+        Defined as t(thermocouple clock) - t(spectrometer clock).
+
 
     Returns
     --------
@@ -227,7 +220,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     """
 
     log.debug("starting reading in a folder")
-
     # check if the first parameter is a dataset
     # because we allow not to pass it
     if not isinstance(dataset, NDDataset):
@@ -237,31 +229,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
             directory = dataset
             dataset = None
 
-    # # check directory
-    # if directory is None:
-    #     directory = opendialog( single=False,
-    #                             directory=directory,
-    #                             caption='Select folder to read',
-    #                             filters = 'directory')
-    #
-    #     if not directory:
-    #         # if the dialog has been cancelled or return nothing
-    #         return None
-    #
-    # if directory is not None and not isinstance(directory, str):
-    #     raise TypeError('directory should be of str type, not ' + type(directory))
-    #
-    # if directory and not os.path.exists(directory):
-    #     # the directory may be located in our default datadir
-    #     # or be the default datadir
-    #     if directory == os.path.basename(prefs.datadir):
-    #         return prefs.datadir
-    #
-    #     _directory = os.path.join(prefs.datadir, directory)
-    #
-    # if not os.path.isdir(directory):
-    #     raise ValueError('\"' + directory + '\" is not a valid directory')
-
     parent_dir = kwargs.get('parent_dir', None)
     directory = readdirname(directory, parent_dir=parent_dir)
 
@@ -270,12 +237,34 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         log.info("No directory was selected.")
         return
 
+    spectra = kwargs.get('spectra', None)
+    discardbg = kwargs.get('discardbg', True)
+
+    delta_clocks = datetime.timedelta(seconds = kwargs.get('delta_clocks', 0))
+
     datasets = []
 
     # get the sorted list of spa files in the directory
     spafiles = sorted([f for f in os.listdir(directory)
                        if (os.path.isfile(os.path.join(directory, f))
-                           and f[-4:].lower() == '.spa')])
+                           and f[-4:].lower() == '.spa'  )])
+
+    # discard BKG files
+    if discardbg:
+        spafiles = sorted([f for f in spafiles if 'BCKG' not in f])
+
+    # select files
+    if spectra is not None:
+        [min, max] = spectra
+        if discardbg:
+            spafiles = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
+                                  and 'BCKG' not in f])
+        if not discardbg:
+            spafilespec  = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
+                           and 'BCKG' not in f])
+            spafileback = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-6]) <= max
+                           and 'BCKG' in f])
+            spafiles = spafilespec + spafileback
 
     curfilelist = [spafiles[0]]
     curprefix = spafiles[0][::-1].split("_", 1)[1][::-1]
@@ -292,9 +281,58 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     datasets.append(NDDataset.read_omnic(curfilelist, sortbydate=True, directory=directory))
     datasets[-1].name = os.path.basename(curprefix)
 
+    # Now manage temperature
+    Tfile = sorted([f for f in os.listdir(directory)
+                                if f[-4:].lower() == '.xls'])
+    if len(Tfile) == 0:
+        log.debug("no temperature file")
+    elif len(Tfile) > 1:
+        warnings.warn("several .xls/.csv files. The temperature will not be read")
+    else:
+        Tfile = Tfile[0]
+        if Tfile[-4:].lower() == '.xls':
+            book = xlrd.open_workbook(os.path.join(directory, Tfile))
+
+        # determine experiment start and end time (thermocouple clock)
+        ti = datasets[0].y.labels[0][0] + delta_clocks
+        tf = datasets[-1].y.labels[0][-1] + delta_clocks
+
+        # get thermocouple time and T information during the experiment
+        t = []
+        T = []
+        sheet = book.sheet_by_index(0)
+        for i in range(9, sheet.nrows):
+            try:
+                time = datetime.datetime.strptime(sheet.cell(i, 0).value, '%d/%m/%y %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
+                if ti <= time <= tf:
+                    t.append(time)
+                    T.append(sheet.cell(i, 4).value)
+            except ValueError:
+                log.debug('incorrect date or temperature format in row {}'.format(i))
+                pass
+            except TypeError:
+                log.debug('incorrect date or temperature format in row {}'.format(i))
+                pass
+
+        # interpolate T = f(timestamp)
+        tstamp = [time.timestamp() for time in t]
+        # interpolate, except for the first and last points that are extrapolated
+        interpolator = scipy.interpolate.interp1d(tstamp, T, fill_value='extrapolate', assume_sorted=True)
+
+        for ds in datasets:
+            # timestamp of spectra for the thermocouple clock
+            tstamp_ds = [(time + delta_clocks).timestamp() for time in ds.y.labels[0]]
+            T_ds = interpolator(tstamp_ds)
+            newlabels = np.vstack((ds.y.labels, T_ds))
+            ds.y = Coord(title=ds.y.title, data=ds.y.data, labels= newlabels)
+
     if len(datasets) == 1:
         log.debug("finished read_dir()")
         return datasets[0]  # a single dataset is returned
 
     log.debug("finished read_dir()")
-    return datasets  # several datasets returned
+    # several datasets returned, sorted by sample #
+    return sorted(datasets, key = lambda ds: int(ds.name.split('_')[0]))
+
+if __name__ == '__main__':
+    pass
