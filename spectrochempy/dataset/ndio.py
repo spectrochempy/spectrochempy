@@ -100,9 +100,7 @@ class NDIO(HasTraits):
     # Generic save function
     # --------------------------------------------------------------------------
 
-    def save(self, filename='', directory=prefs.datadir,
-             **kwargs
-             ):
+    def save(self, filename='', **kwargs):
         """
         Save the current |NDDataset| (default extension: ``.scp`` ).
 
@@ -457,7 +455,8 @@ class NDIO(HasTraits):
 
         if len(datasets)==1:
             return datasets[0]
-
+        else:
+            return datasets
     # --------------------------------------------------------------------------
     # Generic read function
     # --------------------------------------------------------------------------

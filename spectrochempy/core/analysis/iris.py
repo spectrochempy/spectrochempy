@@ -9,55 +9,129 @@
 
 __all__ = ['IRIS']
 
+from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.dataset.ndcoords import Coord
+from spectrochempy.core.processors.npy import dot
 
 import numpy as np
-
+from matplotlib import pyplot as plt
 from scipy import optimize
 
 
 class IRIS:
     """
-    Infrared inversion spectroscopy
+    2D Infrared inversion spectroscopy
 
     """
 
-    def __init__(self, X, invertParam):
+    def __init__(self, X, param, **kwargs):
+        """
+        Parameters
+        -----------
+        X : |NDDataset|
+            The dataset on which to perform the 2D-IRIS analysis
+
+        param : dict
+            dict of inversion parameters with the following keys:
+                'kernel': the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional relationship holding
+                between 'p', the experimental variable that was changed in the rows direction of X
+                (e.g. temperature, pressure, time, ...) and the concentration of pure species characterized
+                by the physico-chemical parameter 'eps' (e.g. adsorption/desorption energy, ...).
+                default: 'langmuir'
+                If another kernel name is given, the kernel function  must be passed in param['ker']
+
+                'ker': a two-variable lambda function ker(p, eps) where p and eps are the external experimental
+                 variable and  the internal physico-chemical parameter, respectively
+                #TODO: implement other kernels: e.g. 'CA', 'TPD'
+
+                'epsRange': array_like of three values [start, stop, num] defining the interval of eps values.
+                start, stop: the starting and end values of eps, num: number of values.
+
+                'lambdaRange': array_like of three values [start, stop, num] defining the interval of regularization
+                 parameter. Its values are speced evenly on a log scale with 10^start and 10^stop: a the starting and
+                 end values and num the number of values.
+
+                'p': array or coordinate of the external variable. If none is given, p = X.y.values
+
+                'guess': |string| method to guess the initial distribution function for the current wavelength.
+                'previous': takes the distribution at the previous wavelength, 'zero' takes a null
+                distribution function, 'random'  takes a random distribution function.
+
+        verbose : |bool|
+            if set to True, prints informations during the 2D IRIS  analysis.
+            In any case, the same information is returned in self._log
+
+        """
 
         # check options
-        if 'kernel' in invertParam:
-            kernel = invertParam['kernel']
+        # defined the kernel
+        if 'kernel' in param:
+            kername = param['kernel']
+            if param['kernel'].lower() not in ['langmuir', 'ca']:
+                try:
+                    ker = param['ker']
+                except KeyError:
+                    print('A kernel function must be given')
+
+            elif param['kernel'].lower() == 'langmuir':
+                ker = lambda p_, eps_: np.exp(-eps_) * p_ / (1 + np.exp(-eps_) * p_)
+
+            elif param['kernel'].lower() == 'ca':
+                ker = lambda p_, eps_: 0 if p_ < np.exp(eps_) else 1
+
+
         else:
-            kernel = 'langmuir'
+            # set the kernel to default ('langmuir')
+            kername = 'langmuir'
+            ker = lambda p_, eps_: np.exp(-eps_) * p_ / (1 + np.exp(-eps_) * p_)
 
-        eps = np.linspace(invertParam['epsRange'][0],
-                          invertParam['epsRange'][1],
-                          invertParam['epsRange'][2])
+        eps = np.linspace(param['epsRange'][0],
+                          param['epsRange'][1],
+                          param['epsRange'][2])
 
-        w = np.zeros((invertParam['epsRange'][2], 1))
-        w[0] = 0.5 * (g[-1] - g[0]) / (invertParam['epsRange'][2] - 1)    #
-        # TODO this cannot work!!! what is this g!
+        lambdaReg = np.logspace(param['lambdaRange'][0],
+                                param['lambdaRange'][1],
+                                param['lambdaRange'][2])
+
+        if 'p' in param:
+            p = param['p']
+            #check p
+            if isinstance(p, Coord):
+                if p.shape[1] != X.shape[0]:
+                    raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
+                pval = p.values
+            else:
+                if len(p) != X.shape[0]:
+                    raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
+                p = Coord(p, title='External variable')
+                pval = p.values
+        else:
+            p = X.y
+            pval = X.y.values
+
+        if 'guess' in param:
+            guess = param['guess']
+        else:
+            guess = 'previous'
+
+        verbose = kwargs.get('verbose', False)
+
+        w = np.zeros((len(eps), 1))
+        w[0] = 0.5 * (eps[-1] - eps[0]) / (len(eps) - 1)    #
         w[-1] = w[0]
 
-        for j in range(1, invertParam['epsRange'][2] - 1):
+        for j in range(1, len(eps) - 1):
             w[j] = 2 * w[0]
 
-        K = np.zeros((X.shape[0], invertParam['epsRange'][2]))
+        K = NDDataset(np.zeros((p.size, len(eps))))
+        K.coordset = (p, Coord(eps, title='epsilon'))
+        for i, p_i in enumerate(pval):
+            for j, eps_j in enumerate(eps):
+                K.data[i,j] = w[j] * ker(p_i, eps_j)
 
-        if kernel == 'langmuir':
-            for i in range(X.shape[0]):
-                for j in range(invertParam['epsRange'][2]):
-                    K[i, j] = w[j] * X.dims[0].axes[1][i] * np.exp(-eps[j]) / (
-                    1 + X.dims[0].axes[1][i] * np.exp(-eps[j]))
-        if kernel == 'custom':
-            for i in range(X.shape[0]):
-                for j in range(invertParam['epsRange'][2]):
-                    pass
-                    # todo....
-                    # K[i,j] = w[j] * fun(X.dims[0].axes[1][i], eps[j]) 
+        W = NDDataset(np.eye(X.shape[0]))
 
-        W = np.eye(X.shape[0])
-
-        m = invertParam['epsRange'][2]
+        m = len(eps)
 
         S = np.zeros((m, m))
         S[0, 0] = 6
@@ -83,31 +157,35 @@ class IRIS:
         S[m - 1, m - 2] = -4
         S[m - 1, m - 1] = 6
 
-        S = ((g[m - 1] - g[0]) / (m - 1)) ** (-3) * S
+        S = ((eps[m - 1] - eps[0]) / (m - 1)) ** (-3) * S
 
-        lambdaReg = np.logspace(invertParam['lambdaRange'][0],
-                                invertParam['lambdaRange'][1],
-                                invertParam['lambdaRange'][2])
         n_lambda = lambdaReg.shape[0]
-        f = np.zeros((m, X.shape[1], n_lambda))
-        RSS = np.zeros((X.shape[1], n_lambda))
-        SM = np.zeros((X.shape[1], n_lambda))
-        RSST = np.zeros((n_lambda, 1))
-        SMT = np.zeros((n_lambda, 1))
+        f = np.zeros((n_lambda, m, len(X.x.data)))
 
-        print(('Solving for ' + str(
-            n_lambda) + ' regularization parameters (lambda) \n'))
+        RSS = np.zeros((n_lambda, 1))
+        SM = np.zeros((n_lambda, 1))
+
+        if verbose:
+            print('Solving for {} wavenumbers and {} regularization parameters \n'.format(X.shape[1], n_lambda))
 
         for i, lambdaR in enumerate(lambdaReg):
-            print(('... Solving for lambda = ' + str(lambdaR) + '...'))
-            Q = 2 * (np.dot(K.T, np.dot(W, K)) + lambdaR * S)
-            c = -2 * np.dot(X.data.T, np.dot(W, K))
+            if verbose:
+                print('... Solving for lambda = {} ...'.format(lambdaR))
+
+            Q = 2 * (np.dot(K.data.T, np.dot(W.data, K.data)) + lambdaR * S)
+            c = -2 * np.dot(X.data.T, np.dot(W.data, K.data))
 
             x_prec = np.random.randn(m, 1)
-            for j, freq in enumerate(X.dims[1].axes[0]):
-                x0 = x_prec
 
-                # x0 = np.zeros((m,1))
+            for j, freq in enumerate(X.x.data):
+
+                if guess == 'previous':
+                    x0 = x_prec
+                elif guess == 'zero':
+                    x0 = np.zeros((m,1))
+                elif guess == 'random':
+                    x0 = np.random.randn(m, 1)
+
                 def objective(x, sign=1.):
                     return sign * (
                     0.5 * np.dot(x.T, np.dot(Q, x)) + np.dot(c[j, :], x))
@@ -125,15 +203,85 @@ class IRIS:
                                              constraints=cons,
                                              method='SLSQP', options=opt)
 
-                f[:, j, i] = res_cons['x']
-                RSS[j, i] = np.linalg.norm(X.data[:, j] - np.dot(K, f[:, j, i]))
-                SM[j, i] = np.linalg.norm(
-                    np.dot(np.dot(np.transpose(f[:, j, i]), S), f[:, j, i]))
-                x_prec = res_cons['x']
+                x_prec = f[i, :, j] = res_cons['x']
 
-        RSST[i] = sum(RSS[:, i])
-        SMT[i] = sum(SM[:, i])
+            res = X.data - np.dot(K.data, f[i].data)
+            RSS[i] = np.sum(res**2)
+            SM[i] = np.linalg.norm(
+                np.dot(np.dot(np.transpose(f[i]), S), f[i]))
 
-        print('\n Done')
-        # TODO: check this. __init__ should not return a value
-        #         return(f)
+        if verbose:
+            print('\n Done')
+
+        f = NDDataset(f)
+        f.name  =  '2D distribution functions'
+        f.title = 'pseudo-concentration'
+        f.history = '2D IRIS analysis of {} dataset with the {} kernel'.format(X.name, kername)
+        xcoord = X.coordset[1]
+        ycoord = Coord(data=eps, title='epsilon')
+        zcoord = Coord(data=lambdaReg, title='lambda')
+        f.coordset = [zcoord, ycoord, xcoord]
+        self._f = f
+        self._K = K
+        self._X = X
+        self._RSS = RSS
+        self._SM = SM
+
+
+    def transform(self):
+        """
+        Apply the inversion of the X dataset (m x n) and returns
+        the 2D distribution functions `f[i]` obtained for a given
+        regularization parameter :math:`\lambda_i` using the following
+        factorization: :math:`X = K.f[i]`.
+        :math:`K` is a (m x q) matrix holding the values of the kernel
+        function for the m values of the external variable (`p`) and the
+         q values of the internal variable (`epsilon`).
+        :math: `f[i]` is the (q x n) matrix holding the values of the
+        2D-distribution function
+
+        Return
+        -------
+        f : |NDDataset| object (l x m x n) containing the l 2D-distribution
+        functions f[i] obtained for each value of the regularization parameter.
+        """
+
+        return self._f
+
+    def inverse_transform(self):
+        """
+        Transform data back to the original space
+
+        The following matrix operation is performed: :math:`\hat{X} = K.f[i]`
+        for each value of the regularization parameter.
+
+        Return
+        ------
+        X_hat : |NDDataset|
+            The reconstructed datasets.
+        """
+        X_hat = NDDataset(np.zeros((self._f.z.size, self._X.y.size, self._X.x.size)))
+        X_hat.name = '2D-IRIS Reconstructed datasets'
+        X_hat.coordset = [self._f.z, self._X.y, self._X.x]
+        for i in range(X_hat.z.size):
+            X_hat[i] = np.dot(self._K.data, self._f[i].data)
+        return X_hat
+
+    def plotlcurve(self, **kwargs):
+        ''' plots the L Curve
+        scale : string
+        2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
+        axes should be log scales. default: 'll'
+        '''
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_title('L curve')
+        scale = kwargs.get('scale', 'll').lower()
+        ax.scatter(self._RSS, self._SM)
+        ax.set_xlabel('Residuals')
+        ax.set_ylabel('Smoothness')
+        if scale[1] == 'l':
+            ax.set_xscale('log')
+        if scale[0] == 'l':
+            ax.set_yscale('log')
+        return ax
