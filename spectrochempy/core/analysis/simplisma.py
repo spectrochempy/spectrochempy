@@ -103,6 +103,12 @@ class SIMPLISMA(HasTraits):
             string = '{:4}  {:5}  {:8.1f} {:10.4f} {:10.4f} '.format(j + 1, index, coord, stdev_res, rsquare)
             return string
 
+        def get_x_data(X):
+            if X.x is not None and not X.x.is_empty: #TODO what about labels?
+                return X.x.data
+            else:
+                return np.arange(X.shape[-1])
+
         # ------------------------------------------------------------------------
         # Check data
         # ------------------------------------------------------------------------
@@ -151,17 +157,17 @@ class SIMPLISMA(HasTraits):
         # but could also be concentrations if X.T is passed)
         Pt = NDDataset(np.zeros((n_pc, X.shape[-1])))
         Pt.name = 'Purity spectra'
-        Pt.coordset = [Pt.y, X.x]
+        Pt.coords = [Pt.y, X.x]
         Pt.y.title = '# pure compound'
 
         # weight matrix
         w = NDDataset(np.zeros((n_pc, X.shape[-1])))
-        w.coordset = [Pt.y, X.x]
+        w.coords = [Pt.y, X.x]
 
         # Stdev spectrum
         s = NDDataset(np.zeros((n_pc, X.shape[-1])))
         s.name = 'Standard deviation spectra'
-        s.coordset = [Pt.y, X.x]
+        s.coords = [Pt.y, X.x]
 
         # maximum purity indexes and coordinates
         maxPIndex = [0] * n_pc
@@ -170,14 +176,13 @@ class SIMPLISMA(HasTraits):
         # Concentration matrix
         C = NDDataset(np.zeros((X.shape[-2], n_pc)))
         C.name = 'Relative Concentrations'
-        C.coordset = [X.y, C.x]
+        C.coords = [X.y, C.x]
         C.x.title = '# pure compound'
 
         # Pure component spectral profiles
         St = NDDataset(np.zeros((n_pc, X.shape[-1])))
         St.name = 'Pure compound spectra'
-        St.coordset = [Pt.y, X.x]
-        St.y.title = '# pure compound'
+        St.coords = [Pt.y, X.x]
 
         # Compute Statistics
         # ------------------
@@ -191,7 +196,7 @@ class SIMPLISMA(HasTraits):
         Xscaled = X.data / np.sqrt(mu ** 2 + (sigma + alpha) ** 2)
 
         # COO dispersion matrix
-        COO = (1 / X.y.size) * np.dot(Xscaled.T, Xscaled)
+        COO = (1 / X.shape[-2]) * np.dot(Xscaled.T, Xscaled)
 
         # Determine the purest variables
         j = 0
@@ -205,7 +210,7 @@ class SIMPLISMA(HasTraits):
 
                 # get index and coordinate of pure variable
                 maxPIndex[j] = np.argmax(Pt[j, :].data)
-                maxPCoordinate[j] = X.x.values[maxPIndex[j]]
+                maxPCoordinate[j] = get_x_data(X)[maxPIndex[j]]
 
                 # compute figures of merit
                 rsquare0, stdev_res0 = figures_of_merit(X, maxPIndex, C, St, j)
@@ -239,12 +244,12 @@ class SIMPLISMA(HasTraits):
                         try:
                             new = int(new)
                             maxPIndex[j] = new
-                            maxPCoordinate[j] = X.x.values[maxPIndex[j]]
+                            maxPCoordinate[j] = get_x_data(X)[maxPIndex[j]]
                         except ValueError:
                             try:
                                 new = float(new)
-                                maxPIndex[j] = np.argmin(abs(X.x.values - new))
-                                maxPCoordinate[j] = X.x.values[maxPIndex[j]]
+                                maxPIndex[j] = np.argmin(abs(get_x_data(X) - new))
+                                maxPCoordinate[j] =get_x_data(X)[maxPIndex[j]]
                             except ValueError:
                                 print('Incorrect answer. Please enter a valid index or value')
 
@@ -277,7 +282,7 @@ class SIMPLISMA(HasTraits):
 
                 # get index and coordinate of jth pure variable
                 maxPIndex[j] = np.argmax(Pt[j, :].data)
-                maxPCoordinate[j] = X.x.values[maxPIndex[j]]
+                maxPCoordinate[j] = get_x_data(X)[maxPIndex[j]]
 
                 # compute figures of merit
                 rsquarej, stdev_resj = figures_of_merit(X, maxPIndex, C, St, j)
@@ -291,7 +296,7 @@ class SIMPLISMA(HasTraits):
                 if verbose or interactive:
                     print(llog)
 
-                if interactive:
+                if interactive:  # TODO: I suggest to use jupyter widgets for the interactivity!
                     # should plot purity and stdev, does not work for the moment
                     # TODO: fix the code below
                     # ax1.clear()
@@ -317,12 +322,12 @@ class SIMPLISMA(HasTraits):
                         try:
                             new = int(new)
                             maxPIndex[j] = new
-                            maxPCoordinate[j] = X.x.values[maxPIndex[j]]
+                            maxPCoordinate[j] = get_x_data(X)[maxPIndex[j]]
                         except ValueError:
                             try:
                                 new = float(new)
-                                maxPIndex[j] = np.argmin(abs(X.x.values - new))
-                                maxPCoordinate[j] = X.x.values[maxPIndex[j]]
+                                maxPIndex[j] = np.argmin(abs(get_x_data(X) - new))
+                                maxPCoordinate[j] = get_x_data(X)[maxPIndex[j]]
                             except ValueError:
                                 print('   |--> Incorrect answer. Please enter a valid index or value')
 
