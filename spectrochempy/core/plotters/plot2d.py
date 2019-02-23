@@ -498,6 +498,12 @@ def plot_2D(dataset, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines()
 
+    # display a title
+    # ------------------------------------------------------------------------------------------------------------------
+    title=  kwargs.get('title',None)
+    if title:
+        ax.set_title(title)
+
     new._plot_resume(dataset, **kwargs)
 
     return ax

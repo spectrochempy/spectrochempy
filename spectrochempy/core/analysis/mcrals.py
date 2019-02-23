@@ -94,7 +94,7 @@ class MCRALS(HasTraits):
 
         # makes a PCA with same number of species
 
-        X.coords = [X.y, X.x]
+        # X.coords = [X.y, X.x] # not necessary!
         Xpca = PCA(X).inverse_transform(n_pc=nspecies)
 
         # Get optional parameters in kwargs or set them to their default
@@ -161,7 +161,7 @@ class MCRALS(HasTraits):
             C.coords = [X.y, St.y]
 
         change = tol + 1
-        stdev = X.std().data[0]
+        stdev = X.std() #.data[0]
         niter = 0
         ndiv = 0
 
@@ -252,10 +252,10 @@ class MCRALS(HasTraits):
             # compute residuals
             # -----------------
             X_hat = dot(C, St)
-            stdev2 = (X_hat - X).std().data[0]
+            stdev2 = (X_hat - X).std()
             change = 100 * (stdev2 - stdev) / stdev
 
-            stdev_PCA = (X_hat - Xpca).std().data[0]
+            stdev_PCA = (X_hat - Xpca).std() # TODO: Check PCA : values are different from the Arnaud version ?
 
             logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
             log += logentry + '\n'
