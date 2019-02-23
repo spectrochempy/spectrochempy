@@ -77,7 +77,10 @@ class EFA(HasTraits):
         K = min(M, N)
 
         # in case some row are masked, we need to take this into account
-        masked_rows = np.all(X.mask, axis=-1)
+        if X.is_masked:
+            masked_rows = np.all(X.mask, axis=-1)
+        else:
+            masked_rows = np.array([False]*M)
 
         K = min(K, len(np.where(~ masked_rows)[0]))
 
@@ -86,7 +89,7 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         self.fefa = f = NDDataset(np.zeros((M, K)),
-                                  coords=[X.y.copy(), Coord(range(K))],
+                                  coords=[X.y, Coord(range(K))],
                                   title='EigenValues',
                                   description='Forward EFA of ' + X.name)
 
@@ -111,7 +114,7 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         self.befa = b = NDDataset(np.zeros((M, K)),
-                                  coords=[X.y.copy(), Coord(range(K))],
+                                  coords=[X.y, Coord(range(K))],
                                   title='EigenValues',
                                   name='Backward EFA of ' + X.name)
 
@@ -210,11 +213,14 @@ class EFA(HasTraits):
 
         xcoord = Coord(range(npc), title='PC#')
         c = NDDataset(np.zeros((M, npc)),
-                      coords=[self._X.y.copy(), xcoord],
+                      coords=[self._X.y, xcoord],
                       name='C_EFA[{}]'.format(self._X.name),
                       title='relative concentration',
                       )
-        masked_rows = np.all(self._X.mask, axis=-1)
+        if self._X.is_masked:
+            masked_rows = np.all(self._X.mask, axis=-1)
+        else:
+            masked_rows = np.array([False]*M)
 
         for i in range(M):
             if masked_rows[i]:
