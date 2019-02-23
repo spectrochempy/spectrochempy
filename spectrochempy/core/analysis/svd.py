@@ -185,10 +185,8 @@ class SVD(HasTraits):
             U = NDDataset(U)
             U.name = 'U'
             U.title = 'left singular vectors of ' + X.name
-            U.coords = CoordSet(X.coords[0],
-                                Coord(None,
-                                      labels=['#%d' % (i + 1) for i in range(KU)],
-                                      title='Components')
+            U.coords = CoordSet(X.coords[0] if X.coords else None,
+                                Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components')
                                 )
             U.description = 'left singular vectors of ' + X.name
             U.history = 'created by SVD \n'
@@ -199,10 +197,8 @@ class SVD(HasTraits):
             VT = NDDataset(VT)
             VT.name = 'V.T'
             VT.title = 'Loadings (V.t) of ' + X.name
-            VT.coords = CoordSet(Coord(None,
-                                       labels=['#%d' % (i + 1) for i in range(KV)],
-                                       title='Components'),
-                                 X.coords[1])
+            VT.coords = CoordSet(Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'),
+                                 X.coords[1] if X.coords else None)
             VT.description = (
                     'Loadings obtained by singular value decomposition of ' + X.name)
             VT.history = (str(VT.modified) + ': created by SVD \n')
@@ -229,10 +225,22 @@ class SVD(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     @property
+    def sv(self):
+        """|NDDataset|, Singular values """
+        size = self.s.size
+        sv = self.s.copy()
+        sv.name = 'sv'
+        sv.title = 'Singular values'
+        sv.coords = CoordSet(Coord(None,
+                                   labels=['#%d' % (i + 1) for i in range(size)],
+                                   title='Components'))
+        return sv
+
+    @property
     def ev(self):
         """|NDDataset|,  Explained variance """
         size = self.s.size
-        ev = (self.s ** 2) / (size - 1)
+        ev = self.s**2 / (size-1)
         ev.name = 'ev'
         ev.title = 'Explained variance'
         ev.coords = CoordSet(Coord(None,

@@ -852,7 +852,9 @@ class NDDataset(
                 name = self.dims[i]
                 # get the corresponding index in the coordinate's names list
                 idx = names.index(name)
-                if isinstance(item, slice):
+                if self._coords[idx].is_empty:
+                    new_coords[idx] = Coord(None, name=self._coords[idx].name)
+                elif isinstance(item, slice):
                     # add the slice on the corresponding coordinates on the dim to the new list of coordinates
                     new_coords[idx] = self._coords[idx][item]
                 elif isinstance(item, (np.ndarray, list)):

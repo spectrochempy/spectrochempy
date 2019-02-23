@@ -218,17 +218,22 @@ def plot_2D(dataset, **kwargs):
     # the actual dimension name is the last in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
-    xdata = x.data
-    discrete_data = False
-    if not np.any(xdata):
-        discrete_data = True
-        # take into account the fact that sometimes axis have just labels
-        xdata = range(1, len(x.labels) + 1)
+    xsize = new.shape[-1]
+    if x is not None and (not x.is_empty or x.is_labeled):
+        xdata = x.data
+        discrete_data = False
+        if not np.any(xdata):
+            if x.labels:
+                discrete_data = True
+                # take into account the fact that sometimes axis have just labels
+                xdata = range(1, len(x.labels) + 1)
+    else:
+        xdata = range(xsize)
 
     xl = [xdata[0], xdata[-1]]
     xl.sort()
 
-    if x.size < number_x_labels + 1:
+    if xsize < number_x_labels + 1:
         # extend the axis so that the labels are not too close to the limits
         inc = abs(xdata[1] - xdata[0]) * .5
         xl = [xl[0] - inc, xl[1] + inc]
@@ -241,7 +246,7 @@ def plot_2D(dataset, **kwargs):
     xlim[-1] = min(xlim[-1], xl[-1])
     xlim[0] = max(xlim[0], xl[0])
 
-    if kwargs.get('x_reverse', kwargs.get('reverse', x.reversed)):
+    if kwargs.get('x_reverse', kwargs.get('reverse', x.reversed if x else False)):
         xlim.reverse()
 
     ax.set_xlim(xlim)
@@ -251,15 +256,19 @@ def plot_2D(dataset, **kwargs):
     # the actual dimension name is the second in the new.dims list
     dimy = new.dims[-2]
     y = getattr(new, dimy)
-    ydata = y.data
-    if not np.any(ydata):
-        # take into account the fact that sometimes axis have just labels
-        ydata = range(1, len(y.labels) + 1)
+    ysize = new.shape[-2]
+    if y is not None and (not y.is_empty or y.is_labeled):
+        ydata = y.data
+        if not np.any(ydata):
+            if x.labels:
+                ydata = range(1, len(y.labels) + 1)
+    else:
+        ydata = range(ysize)
 
     yl = [ydata[0], ydata[-1]]
     yl.sort()
 
-    if y.size < number_y_labels + 1:
+    if ysize < number_y_labels + 1:
         # extend the axis so that the labels are not too close to the limits
         inc = abs(ydata[1] - ydata[0]) * .5
         yl = [yl[0] - inc, yl[1] + inc]
@@ -308,7 +317,7 @@ def plot_2D(dataset, **kwargs):
 
         ylim = list(kwargs.get('ylim', ylim))
         ylim.sort()
-        y_reverse = kwargs.get('y_reverse', y.reversed)
+        y_reverse = kwargs.get('y_reverse', x.reversed if y else False)
         if y_reverse:
             ylim.reverse()
 
@@ -432,13 +441,13 @@ def plot_2D(dataset, **kwargs):
     # ------------------------------------------------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        xlabel = make_label(x, 'x')
+        xlabel = make_label(x, 'x') if x else ''
     ax.set_xlabel(xlabel)
 
     # x tick labels
 
     uselabelx = kwargs.get('uselabel_x', False)
-    if (uselabelx or not np.any(x.data)) and len(x.labels) < number_x_labels + 1:
+    if x  and x.is_labeled and (uselabelx or not np.any(x.data))and len(x.labels) < number_x_labels + 1:
         # TODO refine this to use different orders of labels
         ax.set_xticks(xdata)
         ax.set_xticklabels(x.labels)
@@ -451,11 +460,10 @@ def plot_2D(dataset, **kwargs):
             ylabel = make_label(new, 'z')
 
         else:
-            ylabel = make_label(y, 'y')
+            ylabel = make_label(y, 'y') if y else ''
             # y tick labels
             uselabely = kwargs.get('uselabel_y', False)
-            if (uselabely or not np.any(y.data)) and \
-                    len(y.labels) < number_y_labels:
+            if y  and y.is_labeled and (uselabely or not np.any(y.data)) and len(y.labels) < number_y_labels:
                 # TODO refine this to use different orders of labels
                 ax.set_yticks(ydata)
                 ax.set_yticklabels(y.labels)
@@ -465,7 +473,7 @@ def plot_2D(dataset, **kwargs):
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         if method in ['stack']:
-            zlabel = make_label(y, 'y')
+            zlabel = make_label(y, 'y') if y else ''
         else:
             zlabel = make_label(new, 'z')
 

@@ -175,6 +175,9 @@ class PCA(HasTraits):
         # other attributes
         # ----------------
 
+        self.sv = svd.sv
+        self.sv.x.title = 'PC #'
+
         self.ev = svd.ev
         self.ev.x.title = 'PC #'
 
@@ -196,9 +199,11 @@ class PCA(HasTraits):
             '%cumulative\n'
         s += '   \t\tof cov(X)\t\t per PC\t' \
              '     variance\n'
+
+        n_pc = min(n_pc, len(self.ev.data))
         for i in range(n_pc):
             tup = (
-                i + 1, self.ev.data[i], self.ev_ratio.data[i], self.ev_cum.data[i])
+                i + 1, np.sqrt(self.ev.data[i]), self.ev_ratio.data[i], self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tup)
 
         return s
@@ -377,8 +382,7 @@ class PCA(HasTraits):
 
         X = dot(S, LT)
 
-        # try to reconstruct something close to the original scaled,
-        # standardized or centered data
+        # try to reconstruct something close to the original scaled, standardized or centered data
         if self._scaled:
             X *= self._ampl
             X += self._min
@@ -417,8 +421,8 @@ class PCA(HasTraits):
             Number of components to plot.
 
         """
-        # get n_pc (automatic or determined by the n_pc arguments)
-        n_pc = self._get_n_pc(n_pc)
+        # get n_pc (automatic or determined by the n_pc arguments) - min = 3
+        n_pc = max(self._get_n_pc(n_pc), 3)
 
         color1, color2 = kwargs.get('colors', [NBlue, NRed])
         pen = kwargs.get('pen', True)
