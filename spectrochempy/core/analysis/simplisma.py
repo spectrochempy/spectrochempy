@@ -26,7 +26,7 @@ from traitlets import HasTraits, Instance
 # ----------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------
-from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.npy import dot
 
 # ============================================================================

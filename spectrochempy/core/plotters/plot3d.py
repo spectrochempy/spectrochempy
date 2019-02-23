@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
-
+# ======================================================================================================================
 
 
 """
@@ -24,10 +23,9 @@ __dataset_methods__ = ['plot_3D', 'plot_surface']
 # ----------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------
-from ...application import app, project_preferences, general_preferences, log
+from spectrochempy.core import project_preferences
 
 
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -90,7 +88,7 @@ def plot_3D(dataset, **kwargs):
     prefs = dataset.plotmeta
     if not prefs.style:
         # not yet set, initialize with default project preferences
-        prefs.update(app.project_preferences.to_dict())
+        prefs.update(project_preferences.to_dict())
 
     # If we are in the GUI, we will plot on a widget: but which one?
     # ---------------------------------------------------------------
@@ -140,7 +138,7 @@ def plot_3D(dataset, **kwargs):
 
         if method in ['surface']:
             cmap = colormap = kwargs.get('colormap',
-                            kwargs.get('cmap', project_preferences.colormap_surface))
+                                         kwargs.get('cmap', project_preferences.colormap_surface))
         else:
             #other methods to be implemented
             pass

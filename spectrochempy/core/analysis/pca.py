@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 This module implement the PCA (Principal Component Analysis) class.
@@ -15,9 +15,9 @@ __all__ = ['PCA']
 
 __dataset_methods__ = ['PCA']
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 import numpy as np
 import warnings
 from scipy.special import gammaln
@@ -26,22 +26,20 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from spectrochempy.dataset.nddataset import NDDataset, CoordSet
-from spectrochempy.dataset.ndcoords import Coord
+# ----------------------------------------------------------------------------------------------------------------------
+# localimports
+# ----------------------------------------------------------------------------------------------------------------------
+from spectrochempy.core.dataset.nddataset import NDDataset, CoordSet
+from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.processors.npy import diag, dot
-from spectrochempy.application import project_preferences
+from spectrochempy.core import project_preferences
 from spectrochempy.utils import docstrings, NRed, NBlue
 
 
-# ----------------------------------------------------------------------------
-# localimports
-# ----------------------------------------------------------------------------
-
-
-# ============================================================================
+# ======================================================================================================================
 # class PCA
-# ============================================================================
+# ======================================================================================================================
 
 class PCA(HasTraits):
     """
@@ -66,8 +64,7 @@ class PCA(HasTraits):
     _X = Instance(NDDataset)
 
     ev = Instance(NDDataset)
-    """|NDDataset| - Explained variances (The eigenvalues of the covariance 
-    matrix)."""
+    """|NDDataset| - Explained variances (The eigenvalues of the covariance matrix)."""
 
     ev_ratio = Instance(NDDataset)
     """|NDDataset| - Explained variance per singular values."""
@@ -75,14 +72,14 @@ class PCA(HasTraits):
     ev_cum = Instance(NDDataset)
     """|NDDataset| - Cumulative Explained Variances."""
 
-    # ........................................................................
+    # ..................................................................................................................
     docstrings.keep_params('SVD.parameters', 'dataset')
 
     @docstrings.dedent
     def __init__(self, dataset,
                  centered=True,
                  standardized=False,
-                 scaled = False):
+                 scaled=False):
         """
         Parameters
         ----------
@@ -106,7 +103,7 @@ class PCA(HasTraits):
             from spectrochempy import *
             dataset = upload_IRIS()
             pca = PCA(dataset, centered=True)
-            LT, S = pca.transform(n_pc='auto')
+            S, LT = pca.transform(n_pc='auto')
             _ = pca.screeplot()
             _ = pca.scoreplot(1,2, color_mapping='labels')
             show()
@@ -123,7 +120,7 @@ class PCA(HasTraits):
         if centered:
             self._center = center = np.mean(X, axis=0)
             Xsc = X - center
-            Xsc.title = "centered %s"% X.title
+            Xsc.title = "centered %s" % X.title
 
         # Standardization
         # ---------------
@@ -165,9 +162,9 @@ class PCA(HasTraits):
 
         S = dot(U, sigma)
         S.title = 'scores (S) of ' + X.name
-        S.coordset = CoordSet(X.y, Coord(None,
-                          labels=['#%d' % (i + 1) for i in range(svd.s.size)],
-                              title='principal component'))
+        S.coords = CoordSet(X.y, Coord(None,
+                                       labels=['#%d' % (i + 1) for i in range(svd.s.size)],
+                                       title='principal component'))
 
         S.description = 'scores (S) of ' + X.name
         S.history = 'created by PCA'
@@ -181,7 +178,7 @@ class PCA(HasTraits):
         self.ev = svd.ev
         self.ev.x.title = 'PC #'
 
-        self.ev_ratio= svd.ev_ratio
+        self.ev_ratio = svd.ev_ratio
         self.ev_ratio.x.title = 'PC #'
 
         self.ev_cum = svd.ev_cum
@@ -189,9 +186,9 @@ class PCA(HasTraits):
 
         return
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # Special methods
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     def __str__(self, n_pc=5):
 
@@ -201,14 +198,14 @@ class PCA(HasTraits):
              '     variance\n'
         for i in range(n_pc):
             tup = (
-            i+1, self.ev.data[i], self.ev_ratio.data[i], self.ev_cum.data[i])
+                i + 1, self.ev.data[i], self.ev_ratio.data[i], self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tup)
 
         return s
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # Private methods
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     def _get_n_pc(self, n_pc=None):
 
@@ -227,7 +224,7 @@ class PCA(HasTraits):
             else:
                 warnings.warn('Cannot use `auto` if n_observations < '
                               'n_features. Try with threshold 0.9999')
-                n_pc= 0.9999
+                n_pc = 0.9999
 
         if 0 < n_pc < 1.0:
             # number of PC for which the cumulated explained variance is
@@ -236,8 +233,6 @@ class PCA(HasTraits):
             return n_pc
         else:
             raise ValueError('could not get a valid number of components')
-
-
 
     def _assess_dimension_(self, rank):
         """Compute the likelihood of a rank ``rank`` dataset
@@ -271,7 +266,7 @@ class PCA(HasTraits):
         pu = -rank * np.log(2.)
         for i in range(rank):
             pu += (gammaln((N - i) / 2.) - np.log(np.pi) * (
-            N - i) / 2.)
+                    N - i) / 2.)
 
         pl = np.sum(np.log(spectrum[:rank]))
         pl = -pl * M / 2.
@@ -292,7 +287,7 @@ class PCA(HasTraits):
         for i in range(rank):
             for j in range(i + 1, len(spectrum)):
                 pa += np.log((spectrum[i] - spectrum[j]) * (
-                1. / spectrum_[j] - 1. / spectrum_[i])) + np.log(M)
+                        1. / spectrum_[j] - 1. / spectrum_[i])) + np.log(M)
 
         ll = pu + pl + pv + pp - pa / 2. - rank * np.log(M) / 2.
 
@@ -313,9 +308,9 @@ class PCA(HasTraits):
             ll[rank] = self._assess_dimension_(rank)
         return ll.argmax()
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # Public methods
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     def transform(self, n_pc=None):
         """
@@ -352,7 +347,6 @@ class PCA(HasTraits):
         LT = self._LT[:n_pc]
 
         return S, LT
-
 
     def inverse_transform(self, n_pc=None):
         """
@@ -428,27 +422,26 @@ class PCA(HasTraits):
 
         color1, color2 = kwargs.get('colors', [NBlue, NRed])
         pen = kwargs.get('pen', True)
-        ylim1, ylim2 = kwargs.get('ylims', [(0,100), 'auto'])
+        ylim1, ylim2 = kwargs.get('ylims', [(0, 100), 'auto'])
 
         if ylim2 == 'auto':
-            y1 = np.around(self.ev_ratio.data[0]*.95,-1)
+            y1 = np.around(self.ev_ratio.data[0] * .95, -1)
             y2 = 101.
             ylim2 = (y1, y2)
 
-        ax1 = self.ev_ratio[:n_pc].plot_bar(ylim = ylim1,
-                                           color = color1,
-                                           title='Scree plot')
-        ax2 = self.ev_cum[:n_pc].plot_scatter(ylim = ylim2,
-                                             color=color2,
-                                             pen=True,
-                                             markersize = 7.,
-                                             twinx = ax1
-                                            )
+        ax1 = self.ev_ratio[:n_pc].plot_bar(ylim=ylim1,
+                                            color=color1,
+                                            title='Scree plot')
+        ax2 = self.ev_cum[:n_pc].plot_scatter(ylim=ylim2,
+                                              color=color2,
+                                              pen=True,
+                                              markersize=7.,
+                                              twinx=ax1
+                                              )
         ax1.set_title('Scree plot')
         return ax1, ax2
 
-
-    def scoreplot(self, *pcs, colormap='viridis', color_mapping='index' ,
+    def scoreplot(self, *pcs, colormap='viridis', color_mapping='index',
                   **kwargs):
         """
         2D or 3D scoreplot of samples.
@@ -466,7 +459,7 @@ class PCA(HasTraits):
 
         """
 
-        if isinstance(pcs[0], (list,tuple, set)):
+        if isinstance(pcs[0], (list, tuple, set)):
             pcs = pcs[0]
 
         # transform to internal index of component's index (1->0 etc...)
@@ -493,14 +486,14 @@ class PCA(HasTraits):
             ax.set_title('Score plot')
 
             ax.set_xlabel('PC# {} ({:.3f}%)'.format(
-                                           pcs[0]+1, self.ev_ratio.data[pcs[0]]))
+                pcs[0] + 1, self.ev_ratio.data[pcs[0]]))
             ax.set_ylabel('PC# {} ({:.3f}%)'.format(
-                                           pcs[1]+1, self.ev_ratio.data[pcs[1]]))
-            axsc = ax.scatter( self._S.masked_data[:, pcs[0]],
-                        self._S.masked_data[:, pcs[1]],
-                        s=30,
-                        c=colors,
-                        cmap=colormap)
+                pcs[1] + 1, self.ev_ratio.data[pcs[1]]))
+            axsc = ax.scatter(self._S.masked_data[:, pcs[0]],
+                              self._S.masked_data[:, pcs[1]],
+                              s=30,
+                              c=colors,
+                              cmap=colormap)
 
             number_x_labels = project_preferences.number_of_x_labels  # get
             # from config
@@ -519,36 +512,37 @@ class PCA(HasTraits):
             ax = plt.axes(projection='3d')
             ax.set_title('Score plot')
             ax.set_xlabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[0]+1, self.ev_ratio.data[pcs[
-                        0]]))
+                'PC# {} ({:.3f}%)'.format(pcs[0] + 1, self.ev_ratio.data[pcs[
+                    0]]))
             ax.set_ylabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[1]+1, self.ev_ratio.data[pcs[
-                        1]]))
+                'PC# {} ({:.3f}%)'.format(pcs[1] + 1, self.ev_ratio.data[pcs[
+                    1]]))
             ax.set_zlabel(
-                    'PC# {} ({:.3f}%)'.format(pcs[2]+1, self.ev_ratio.data[pcs[
-                        2]]))
+                'PC# {} ({:.3f}%)'.format(pcs[2] + 1, self.ev_ratio.data[pcs[
+                    2]]))
             axsc = ax.scatter(self._S.masked_data[:, pcs[0]],
-                       self._S.masked_data[:, pcs[1]],
-                       self._S.masked_data[:, pcs[2]],
-                       zdir='z',
-                       s=30,
-                       c=colors,
-                       cmap=colormap,
-                       depthshade=True)
+                              self._S.masked_data[:, pcs[1]],
+                              self._S.masked_data[:, pcs[2]],
+                              zdir='z',
+                              s=30,
+                              c=colors,
+                              cmap=colormap,
+                              depthshade=True)
 
         if color_mapping == 'labels':
             import matplotlib.patches as mpatches
 
-            leg= []
+            leg = []
             for l in labels:
                 i = labels.index(l)
-                c = axsc.get_cmap().colors[int(255/(len(labels)-1)*i)]
+                c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
                 leg.append(mpatches.Patch(color=c,
                                           label=l))
 
             ax.legend(handles=leg, loc='best')
 
         return ax
+
 
 # ============================================================================
 if __name__ == '__main__':

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 
@@ -31,7 +31,7 @@ def test_nmr_2D_em_(NMR_dataset_2D):
     dataset = NMR_dataset_2D.copy()
     dataset.plot_map()
     assert dataset.shape == (96, 948)
-    dataset.em(lb=100. * ur.Hz)
+    dataset.em(lb=100. * ur.Hz, axis=-1)
     assert dataset.shape == (96, 948)
     dataset.em(lb=50. * ur.Hz, axis=0)
     assert dataset.shape == (96, 948)

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
+
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
-from spectrochempy import masked, EFA, show
+from spectrochempy import MASKED, EFA, show
 
 
 def test_EFA(IR_dataset_2D):
@@ -17,14 +18,14 @@ def test_EFA(IR_dataset_2D):
     print(ds)
 
     # columns masking
-    ds[:, 1230.0:920.0] = masked  # do not forget to use float in slicing
-    ds[:, 5900.0:5890.0] = masked
+    ds[:, 1230.0:920.0] = MASKED  # do not forget to use float in slicing
+    ds[:, 5900.0:5890.0] = MASKED
 
     # difference spectra
     ds -= ds[-1]
 
-    # row masking
-    ds[10:12] = masked
+    # column masking for bad columns
+    ds[10:12] = MASKED
 
     efa = EFA(ds)
 
@@ -36,6 +37,6 @@ def test_EFA(IR_dataset_2D):
 
 
 
-# =============================================================================
+# ======================================================================================================================
 if __name__ == '__main__':
     pass

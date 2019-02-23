@@ -16,11 +16,12 @@ Packages
    :toctree: generated/
    :template: module.rst
 
-   spectrochempy.dataset
    spectrochempy.core
    spectrochempy.units
    spectrochempy.databases
    spectrochempy.utils
+   spectrochempy.widgets
+   spectrochempy.scripts
 
 
 Modules
@@ -31,6 +32,4 @@ Modules
    :template: module.rst
 
    spectrochempy.application
-   spectrochempy.launch_api
-   spectrochempy.launch_gui
 

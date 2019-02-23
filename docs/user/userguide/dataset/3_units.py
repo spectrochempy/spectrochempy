@@ -117,28 +117,3 @@ ds1
 
 # %%
 ds1/ds
-
-# %% [markdown]
-# # Uncertainties
-#
-# Spectrochempy can do calculations with uncertainties (and units).
-#
-# A quantity, with an `uncertainty` is called a **Measurement** .
-#
-# Use one of the following expression to create such `Measurement`:
-
-# %%
-Measurement(10.0, .2, 'cm') 
-
-# %%
-Quantity(10.0, 'cm').plus_minus(.2)   
-
-# %% [markdown]
-# Dataset can also have uncertainties (by default a new dataset is created, but the addition of uncertainty can be done inplace too)
-
-# %%
-ds1 = ds.plus_minus(.1)
-ds1
-
-# %%
-ds.plus_minus(.1, inplace=True)

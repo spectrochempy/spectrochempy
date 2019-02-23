@@ -39,6 +39,7 @@ from collections import defaultdict
 
 from ipython_genutils.text import indent, dedent
 
+
 def setup(app):
     """Registers the Sphinx extension.
 
@@ -49,6 +50,7 @@ def setup(app):
     metadata = {'parallel_read_safe': True, 'parallel_write_safe': True}
     return metadata
 
+
 def interesting_default_value(dv):
     if (dv is None) or (dv is Undefined):
         return False
@@ -56,12 +58,14 @@ def interesting_default_value(dv):
         return bool(dv)
     return True
 
+
 def format_aliases(aliases):
     fmted = []
     for a in aliases:
         dashes = '-' if len(a) == 1 else '--'
         fmted.append('``%s%s``' % (dashes, a))
     return ', '.join(fmted)
+
 
 def class_config_rst_doc(cls, trait_aliases):
     """Generate rST documentation for this class' config options.
@@ -76,7 +80,7 @@ def class_config_rst_doc(cls, trait_aliases):
         fullname = classname + '.' + trait.name
         lines += ['.. configtrait:: ' + fullname,
                   ''
-                 ]
+                  ]
 
         help = trait.help.rstrip() or 'No description'
         lines.append(indent(dedent(help), 4) + '\n')
@@ -113,6 +117,7 @@ def class_config_rst_doc(cls, trait_aliases):
 
     return '\n'.join(lines)
 
+
 def reverse_aliases(app):
     """Produce a mapping of trait names to lists of command line aliases.
     """
@@ -129,9 +134,10 @@ def reverse_aliases(app):
             if len(cls_cfg) == 1:
                 traitname = list(cls_cfg)[0]
                 if cls_cfg[traitname] is True:
-                    res[classname+'.'+traitname].append(flag)
+                    res[classname + '.' + traitname].append(flag)
 
     return res
+
 
 def write_doc(path, title, app, preamble=None):
     """Write a rst file documenting config options for a traitlets application.

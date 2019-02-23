@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import general_preferences as prefs
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_approx_equal
 import pytest

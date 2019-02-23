@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 
@@ -60,40 +60,29 @@ def test_unit_dimensionality():
     b = a/Quantity(1., 'km')
     print(b._repr_html_())
 
-def test_unit_measurement():
-    a = Quantity(1., 'cm')
-    b = a.plus_minus(.1)
-    print(b ** 2)
-    print(b._repr_html_())
-
-    xa = Quantity(np.array((1, 2)), 'km')
-    with raises(AttributeError):
-        ba = xa.plus_minus(.1)
-
-
-def test_matplotlib():
-
-    import matplotlib.pyplot as plt
-    import numpy as np
-    from spectrochempy.extern import pint
-
-    ureg = pint.UnitRegistry()
-    ureg.setup_matplotlib(True)
-
-    y = np.linspace(0, 30) * ureg.miles
-    x = np.linspace(0, 5) * ureg.hours
-
-    fig, ax = plt.subplots()
-    ax.yaxis.set_units(ureg.inches)
-    ax.xaxis.set_units(ureg.seconds)
-
-    ax.plot(x, y, 'tab:blue')
-
-    ax.axhline(26400 * ureg.feet, color='tab:red')
-    ax.axvline(120 * ureg.minutes, color='tab:green')
-
-    # here we just test that we can add some label to the default unit labeling
-    ax.set_xlabel('xxx ({})'.format(ax.get_xlabel()))
-    assert ax.get_xlabel() == 'xxx (second)'
-
-    show()
+# def test_matplotlib():
+#
+#     import matplotlib.pyplot as plt
+#     import numpy as np
+#     import pint
+#
+#     ureg = pint.UnitRegistry()
+#     ureg.setup_matplotlib(True)
+#
+#     y = np.linspace(0, 30) * ureg.miles
+#     x = np.linspace(0, 5) * ureg.hours
+#
+#     fig, ax = plt.subplots()
+#     ax.yaxis.set_units(ureg.inches)
+#     ax.xaxis.set_units(ureg.seconds)
+#
+#     ax.plot(x, y, 'tab:blue')
+#
+#     ax.axhline(26400 * ureg.feet, color='tab:red')
+#     ax.axvline(120 * ureg.minutes, color='tab:green')
+#
+#     # here we just test that we can add some label to the default unit labeling
+#     ax.set_xlabel('xxx ({})'.format(ax.get_xlabel()))
+#     assert ax.get_xlabel() == 'xxx (second)'
+#
+#     show()

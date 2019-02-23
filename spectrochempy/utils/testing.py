@@ -2,13 +2,12 @@
 
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
-
+# ======================================================================================================================
 
 
 """
@@ -25,7 +24,7 @@ __all__ = ["assert_equal",
            "is_sequence",
            "preferences",
            "datadir"
-          ]
+           ]
 
 import os
 import sys
@@ -43,31 +42,38 @@ from nbconvert.preprocessors.execute import CellExecutionError
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_approx_equal)
 
+
 #  we defer import in order to avoid importing all the spectroscopy namespace
 def preferences():
-    from spectrochempy.application import app
+    from spectrochempy.core import app
     return app
+
+
 preferences = preferences()
 
-def datadir():
-    from spectrochempy.application import app
-    return app.datadir.path
-datadir = datadir()
 
+def datadir():
+    from spectrochempy.core import app
+    return app.datadir.path
+
+
+datadir = datadir()
 
 figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
 os.makedirs(figures_dir, exist_ok=True)
 
 # utilities
-is_sequence= lambda arg: (not hasattr(arg, 'strip')) and hasattr(arg,
-                                                                 "__iter__")
+is_sequence = lambda arg: (not hasattr(arg, 'strip')) and hasattr(arg,
+                                                                  "__iter__")
 
 import numpy as np
+
 EPSILON = epsilon = np.finfo(float).eps
 
-# =============================================================================
+
+# ======================================================================================================================
 # RandomSeedContext
-# =============================================================================
+# ======================================================================================================================
 
 # .............................................................................
 class RandomSeedContext(object):
@@ -110,13 +116,13 @@ class RandomSeedContext(object):
         random.set_state(self.startstate)
 
 
-# =============================================================================
+# ======================================================================================================================
 # raises and assertions (mostly copied from astropy)
-# =============================================================================
+# ======================================================================================================================
 
 # .............................................................................
 def assert_equal_units(unit1, unit2):
-    from spectrochempy.extern.pint import DimensionalityError
+    from pint import DimensionalityError
     try:
         x = (1. * unit1) / (1. * unit2)
     except DimensionalityError:
@@ -206,9 +212,9 @@ class catch_warnings(warnings.catch_warnings):
         pass
 
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # Testing examples and notebooks in docs
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 # .............................................................................
 def notebook_run(path):
@@ -233,7 +239,7 @@ def notebook_run(path):
         nb = nbformat.read(f, as_version=4)
         nb.metadata.get('kernelspec', {})['name'] = kernel_name
         ep = ExecutePreprocessor(kernel_name=kernel_name,
-                                 timeout=10 , allow_errors=True)
+                                 timeout=10, allow_errors=True)
 
         try:
             ep.preprocess(nb, {'metadata': {'path': this_file_directory}})
@@ -258,8 +264,8 @@ def example_run(path):
     pipe = None
     try:
         pipe = subprocess.Popen(
-                ["python", path, ],
-                stdout=subprocess.PIPE)
+            ["python", path, ],
+            stdout=subprocess.PIPE)
         (so, serr) = pipe.communicate()
     except:
         pass
@@ -267,9 +273,9 @@ def example_run(path):
     return pipe.returncode, so, serr
 
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # Matplotlib testing utilities
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 # .............................................................................
 def _compute_rms(x, y):
@@ -305,8 +311,8 @@ def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
     except TypeError as e:
         # this happen sometimes and erratically during testing using
         # pytest-xdist (parallele testing). This is work-around the problem
-        if e.args[0]=="unsupported operand type(s) " \
-                   "for -: 'PngImageFile' and 'int'" and not REDO_ON_TYPEERROR:
+        if e.args[0] == "unsupported operand type(s) " \
+                        "for -: 'PngImageFile' and 'int'" and not REDO_ON_TYPEERROR:
             REDO_ON_TYPEERROR = True
             rms = sim = -1
         else:
@@ -314,11 +320,11 @@ def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
 
     return (sim, rms, REDO_ON_TYPEERROR)
 
+
 # .............................................................................
 def compare_images(imgpath1, imgpath2,
-                max_rms=None,
-                min_similarity=None,):
-
+                   max_rms=None,
+                   min_similarity=None, ):
     sim, rms, _ = _image_compare(imgpath1, imgpath2, False)
 
     CHECKSIM = (min_similarity is not None)
@@ -339,10 +345,12 @@ def compare_images(imgpath1, imgpath2,
 
     return message
 
+
 # .............................................................................
 def same_images(imgpath1, imgpath2):
     if compare_images(imgpath1, imgpath2).startswith('identical'):
         return True
+
 
 # .............................................................................
 def image_comparison(reference=None,
@@ -350,7 +358,7 @@ def image_comparison(reference=None,
                      max_rms=None,
                      min_similarity=None,
                      force_creation=False,
-                     savedpi = 150):
+                     savedpi=150):
     """
     image file comparison decorator.
 
@@ -445,7 +453,7 @@ def image_comparison(reference=None,
                 # no figure where generated
                 raise RuntimeError('No figure was generated '
                                    'by the "{}" function. Stopped'.format(
-                        func.__name__))
+                    func.__name__))
 
             if len(reference) != len(curfignums):
                 raise ValueError('number of reference figures provided desn\'t'
@@ -460,10 +468,10 @@ def image_comparison(reference=None,
                     referfile = os.path.join(figures_dir,
                                              '{}.{}'.format(ref, extension))
 
-                    fig = plt.figure(fignum)   # work around to set
-                                               # the correct style: we
-                                               # we have saved the rcParams
-                                               # in the figure attributes
+                    fig = plt.figure(fignum)  # work around to set
+                    # the correct style: we
+                    # we have saved the rcParams
+                    # in the figure attributes
                     plt.rcParams.update(fig.rcParams)
                     fig = plt.figure(fignum)
 
@@ -474,8 +482,8 @@ def image_comparison(reference=None,
                     else:
                         # else we create a temporary file to save the figure
                         fd, tmpfile = tempfile.mkstemp(
-                                prefix='temp{}-'.format(fignum),
-                                suffix='.{}'.format(extension), text=True)
+                            prefix='temp{}-'.format(fignum),
+                            suffix='.{}'.format(extension), text=True)
                         os.close(fd)
 
                     fig.savefig(tmpfile, dpi=savedpi)
@@ -505,9 +513,9 @@ def image_comparison(reference=None,
                         message = "different images {}".format(MESSSIM)
 
                     message += "\n\t reference: {}".format(
-                            os.path.basename(referfile))
+                        os.path.basename(referfile))
                     message += "\n\t generated: {}\n".format(
-                            tmpfile)
+                        tmpfile)
 
                     if not message.startswith("identical"):
                         errors += message
@@ -529,8 +537,8 @@ def image_comparison(reference=None,
     return make_image_comparison
 
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # main
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     pass

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 __all__ = ['MCRALS']
@@ -15,9 +15,9 @@ __dataset_methods__ = ['MCRALS']
 import numpy as np
 from traitlets import HasTraits, Instance
 
-from spectrochempy.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
-from spectrochempy.application import log
+from spectrochempy.core import log
 from spectrochempy.core.processors.npy import dot
 
 
@@ -37,6 +37,7 @@ class MCRALS(HasTraits):
 
     def __init__(self, X, guess, **kwargs):
         """
+
         Parameters
         -----------
         X : |NDDataset|
@@ -82,7 +83,7 @@ class MCRALS(HasTraits):
         elif X.shape[1] == guess.shape[1]:
             initSpec = True
             St = guess.copy()
-            St.name ='Pure spectra profile, mcs-als of ' + X.name
+            St.name = 'Pure spectra profile, mcs-als of ' + X.name
             nspecies = St.shape[0]
 
         else:
@@ -93,7 +94,7 @@ class MCRALS(HasTraits):
 
         # makes a PCA with same number of species
 
-        X.coordset = [X.y,X.x]
+        X.coords = [X.y, X.x]
         Xpca = PCA(X).inverse_transform(n_pc=nspecies)
 
         # Get optional parameters in kwargs or set them to their default
@@ -143,29 +144,28 @@ class MCRALS(HasTraits):
         # ------------------------------------------------------------------------
 
         if initConc:
-            if C.coordset is None:
-                C.coordset = [X.y, C.x]
-            St =  NDDataset(np.linalg.lstsq(C.data, X.data)[0])
+            if C.coords is None:
+                C.coords = [X.y, C.x]
+            St = NDDataset(np.linalg.lstsq(C.data, X.data)[0])
             St.name = 'Pure spectra profile, mcs-als of ' + X.name
             St.title = X.title
-            St.coordset = [C.x, X.x]
+            St.coords = [C.x, X.x]
 
         if initSpec:
-            if St.coordset is None:
-                St.coordset = [St.y, X.x]
+            if St.coords is None:
+                St.coords = [St.y, X.x]
             Ct = np.linalg.lstsq(St.data.T, X.data.T)[0]
             C = NDDataset(Ct.T)
             C.name = 'Pure conc. profile, mcs-als of ' + X.name
             C.title = 'Concentration'
-            C.coordset = [X.y, St.y]
-
+            C.coords = [X.y, St.y]
 
         change = tol + 1
         stdev = X.std().data[0]
         niter = 0
         ndiv = 0
 
-        log  = '*** ALS optimisation log***\n'
+        log = '*** ALS optimisation log***\n'
         log += '#iter     Error/PCA        Error/Exp      %change\n'
         log += '---------------------------------------------------'
         if verbose:
@@ -241,19 +241,19 @@ class MCRALS(HasTraits):
 
             # rescale spectra & concentrations
             if normSpec == 'max':
-                    alpha = np.max(St.data, axis=1).reshape(nspecies,1)
-                    St.data = St.data / alpha
-                    C.data = C.data * alpha.T
+                alpha = np.max(St.data, axis=1).reshape(nspecies, 1)
+                St.data = St.data / alpha
+                C.data = C.data * alpha.T
             elif normSpec == 'euclid':
-                    alpha = np.linalg.norm(St.data, axis=1).reshape(nspecies,1)
-                    St = St / alpha
-                    C.data = C.data * alpha.T
+                alpha = np.linalg.norm(St.data, axis=1).reshape(nspecies, 1)
+                St = St / alpha
+                C.data = C.data * alpha.T
 
             # compute residuals
             # -----------------
             X_hat = dot(C, St)
             stdev2 = (X_hat - X).std().data[0]
-            change = 100*(stdev2 - stdev)/stdev
+            change = 100 * (stdev2 - stdev) / stdev
 
             stdev_PCA = (X_hat - Xpca).std().data[0]
 
@@ -262,7 +262,6 @@ class MCRALS(HasTraits):
             if verbose:
                 print(logentry)
             stdev = stdev2
-
 
             if change > 0:
                 ndiv += 1
@@ -277,7 +276,8 @@ class MCRALS(HasTraits):
                     print(logentry)
 
             if ndiv == maxdiv:
-                logline = 'Optimization not improved since {} iterations... unconverged or \'tol\' set too small ?\n'.format(maxdiv)
+                logline = 'Optimization not improved since {} iterations... unconverged or \'tol\' set too small ?\n'.format(
+                    maxdiv)
                 logline += 'Stop ALS optimization'
                 log += logline + '\n'
                 if verbose:
@@ -295,7 +295,6 @@ class MCRALS(HasTraits):
         self._C = C
         self._St = St
         self._log = log
-
 
     def transform(self):
         """
@@ -351,6 +350,3 @@ class MCRALS(HasTraits):
         ax.plot(res.data.T, color=colRes, label='Residual')
         ax.set_title('MCR ALS plot: ' + self._X.name)
         return ax
-
-
-

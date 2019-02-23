@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
-import pytest
 
-from spectrochempy import application, APIref, log, version
-
-application.set_loglevel('WARNING')
 from spectrochempy import *
-
+set_loglevel('WARNING')
 
 def test_api():
 
@@ -38,10 +34,16 @@ def test_api():
 
 def test_magic_addscript(ip):
 
+    from spectrochempy.application import SpectroChemPyMagics
+    ip.register_magics(SpectroChemPyMagics)
+
+    ip.run_cell("from spectrochempy import *")
+
     assert "available_styles" in ip.user_ns.keys()
+    print (ip.user_ns.keys())
     ip.run_cell("print(available_styles())", store_history=True)
     ip.run_cell("project = Project()", store_history=True)
-    x = ip.magic('addscript -p project -o style -n available_styles 1')
+    x = ip.run_line_magic('addscript','-p project -o style -n available_styles 2')
                     # script with the definition of the function
                     # `available_styles` content of cell 2
 

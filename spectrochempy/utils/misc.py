@@ -1,17 +1,25 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 Various methods and classes used in other part of the program
 
 """
-__all__ =  [
+__all__ = [
+
+    "TYPE_INTEGER",
+    "TYPE_COMPLEX",
+    "TYPE_FLOAT",
+    "HAS_PANDAS",
+    "HAS_XARRAY",
+
+    "make_new_object",
     "closer_power_of_two",
     "getdocfrom",
     "dict_compare",
@@ -23,7 +31,6 @@ __all__ =  [
     "silence",
     "makedirs",
     "multisort",
-    "numpyprintoptions",
     'makestr',
     'srepr',
     'largest_power_of_2',
@@ -33,6 +40,7 @@ __all__ =  [
     'make_func_from',
     #
     'display_info_string',
+    #
 ]
 
 import re
@@ -41,23 +49,68 @@ import os
 import numpy as np
 import sys
 from contextlib import contextmanager
-from spectrochempy.extern.uncertainties.core import Variable
 import inspect
 import functools
-
+from datetime import datetime
+import uuid
+import warnings
 from IPython.display import HTML, publish_display_data
 from jinja2 import Template
 
-# =============================================================================
+#
+# constants
+#
+TYPE_INTEGER = (int, np.int_, np.int32, np.int64)
+TYPE_FLOAT = (float, np.float_, np.float32, np.float64)
+TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
+
+try:
+    import pandas as pd
+    HAS_PANDAS = True
+except ImportError:
+    HAS_PANDAS = False
+
+
+try:
+    import xarray as xr
+    HAS_XARRAY = True
+except ImportError:
+    HAS_XARRAY = False
+
+def make_new_object(obj):
+    """
+    Make a new object of type obj
+
+    Parameters
+    ----------
+    obj : the poject type
+
+    Returns
+    -------
+    new : the new object of same type.
+
+    """
+
+    new = type(obj)()
+
+    # new id and date
+    new._id = "{}_{}".format(type(obj).__name__, str(uuid.uuid1()).split('-')[0])
+    new._date = datetime.now()
+
+    return new
+
+
+# ======================================================================================================================
 # Ignored context
-# =============================================================================
+# ======================================================================================================================
 
 try:
     from contextlib import ignored
 except ImportError:
     @contextmanager
     def ignored(*exceptions):
-        """A context manager for ignoring exceptions.  Equivalent to::
+        """
+        A context manager for ignoring exceptions.  Equivalent to::
 
             try:
                 <body>
@@ -79,24 +132,30 @@ except ImportError:
             pass
 
 
-# =============================================================================
+# ======================================================================================================================
 # dummy file
-# =============================================================================
+# ======================================================================================================================
 
 class _DummyFile(object):
-    """A noop writeable object."""
+    """
+    A noop writeable object.
+
+    """
 
     def write(self, s):
         pass
 
 
-# =============================================================================
+# ======================================================================================================================
 # silence
-# =============================================================================
+# ======================================================================================================================
 
 @contextmanager
 def silence():
-    """A context manager that silences sys.stdout and sys.stderr."""
+    """
+    A context manager that silences sys.stdout and sys.stderr.
+
+    """
 
     old_stdout = sys.stdout
     old_stderr = sys.stderr
@@ -107,21 +166,44 @@ def silence():
     sys.stderr = old_stderr
 
 
-# =============================================================================
+# ======================================================================================================================
 # check for a number
-# =============================================================================
+# ======================================================================================================================
 
 def is_number(x):
     try:
+        if isinstance(x, np.ndarray):
+            return False
         x + 1
         return True
     except TypeError:
         return False
 
 
-# =============================================================================
+# ======================================================================================================================
+# Epsilon
+# ======================================================================================================================
+
+def gt_eps(arr):
+    """lambda function to check that an array has at least some values
+    greater than epsilon
+
+    Parameters
+    -----------
+    arr : array to check
+
+    Returns
+    --------
+    bool : results ot checking
+        True means that at least some values are greater than epsilon
+
+    """
+    return np.any(arr > EPSILON)
+
+
+# ======================================================================================================================
 # sequence check
-# =============================================================================
+# ======================================================================================================================
 
 def is_iterable(arg):
     """
@@ -137,9 +219,9 @@ def is_sequence(arg):
     return (not hasattr(arg, 'strip')) and hasattr(arg, "__iter__")
 
 
-# =============================================================================
+# ======================================================================================================================
 # sorting
-# =============================================================================
+# ======================================================================================================================
 
 def multisort(*args, **kargs):
     z = list(zip(*args))
@@ -147,17 +229,19 @@ def multisort(*args, **kargs):
     return list(zip(*z))
 
 
-# =============================================================================
+# ======================================================================================================================
 # makedirs
-# =============================================================================
+# ======================================================================================================================
 
-def makedirs(
-        newdir):  # from active recipes http://code.activestate.com/recipes/82465-a-friendly-mkdir/
-    """works the way a good mkdir should :)
+def makedirs(newdir):
+    """
+    works the way a good mkdir should :)
         - already exists, silently complete
         - regular file in the way, raise an exception
         - parent directory(ies) does not exist, make them as well
     """
+    # from active recipes http://code.activestate.com/recipes/82465-a-friendly-mkdir/
+
     newdir = os.path.expanduser(newdir)
     if os.path.isdir(newdir):
         pass
@@ -173,12 +257,13 @@ def makedirs(
             os.mkdir(newdir)
 
 
-# =============================================================================
+# ======================================================================================================================
 # Dictionary comparison
-# =============================================================================
+# ======================================================================================================================
 
 def dict_compare(d1, d2, check_equal_only=True):
-    """ Compare two dictionaries
+    """
+    Compare two dictionaries
 
     Examples
     --------
@@ -225,70 +310,37 @@ def dict_compare(d1, d2, check_equal_only=True):
         return True
 
 
-# =============================================================================
-# numpy print options
-# =============================================================================
-
-def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
-                      formatter=None, spc=4, linewidth=150, **kargs):
-
-    def _format_object(x):
-
-        if hasattr(x, 'uncert_data'):
-            x = x.uncert_data[()]
-
-        if isinstance(x, (float, np.float_, np.float32)) :
-            fmt = '{:{l}.0{prec}f}'.format(x,
-                                prec=precision - 1,
-                                l=precision + spc)
-        elif isinstance(x, np.complex) :
-            fmt =  '{:{l}.0{prec}f}{:+{lc}.0{prec}f}j'.format(
-                    x.real, x.imag,
-                    prec=precision - 1, l=precision + spc, lc=precision)
-        elif isinstance(x, np.ma.core.MaskedConstant):
-            fmt = '  {}'.format(x)
-        elif isinstance(x, Variable):
-            fmt = '{:{l}.0{prec}f}+/-{:.0{prec}f}'.format(
-                    x.nominal_value, x.std_dev,
-                    prec=precision - 1, l=precision + spc)
-        elif isinstance(x, np.int_) :
-            fmt = '{:>{l}d}'.format(x, l=precision + spc)
-        else:
-            fmt = '{}'.format(x)
-
-        return fmt
-
-    if not formatter:
-        spc = 4
-        formatter = {
-            'all': _format_object,
-        }
-
-    np.set_printoptions(precision=precision, threshold=threshold,
-                        edgeitems=edgeitems, suppress=suppress,
-                        formatter=formatter, linewidth=linewidth, **kargs)
-
-
-# =============================================================================
+# ======================================================================================================================
 # doc utilities
-# =============================================================================
+# ======================================================================================================================
 def getdocfrom(origin):
-
     def decorated(func):
         func.__doc__ = origin.__doc__
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             response = func(*args, **kwargs)
             return response
+
         return wrapper
+
     return decorated
 
 
 def htmldoc(text):
     """
     format docstring in html for a nice display in IPython
-    :param text:
-    :return:
+
+    Parameters
+    ----------
+    text : str
+        The string to convert to html
+
+    Returns
+    -------
+    out : str
+        the html string
+
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r'<b>\1</b>\2', text)
@@ -323,6 +375,7 @@ def srepr(arg):
 def makestr(l):
     """
     make a string from a list of string
+
     """
 
     if is_sequence(l):
@@ -331,6 +384,7 @@ def makestr(l):
     l = l.replace(' ', '\ ')
     l = r'$%s$' % l
     return l
+
 
 def primefactors(n):
     from itertools import chain
@@ -376,6 +430,7 @@ def largest_power_of_2(value):
     p = int(pow(2, np.ceil(np.log(value) / np.log(2))))
     return p
 
+
 def closer_power_of_two(value):
     """
     Find the nearest power of two equal to or larger than a value.
@@ -394,11 +449,12 @@ def closer_power_of_two(value):
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
 
-# =============================================================================
+# ======================================================================================================================
 # function signature
-# =============================================================================
+# ======================================================================================================================
 
 import types
+
 
 def change_func_args(func, new_args):
     """
@@ -413,24 +469,25 @@ def change_func_args(func, new_args):
     new_varnames = tuple(list(new_args))
 
     new_code_obj = types.CodeType(
-            code_obj.co_argcount,             #   integer
-            code_obj.co_kwonlyargcount,       #   integer
-            code_obj.co_nlocals,              #   integer
-            code_obj.co_stacksize,            #   integer
-            code_obj.co_flags,                #   integer
-            code_obj.co_code,                 #   bytes
-            code_obj.co_consts,               #   tuple
-            code_obj.co_names,                #   tuple
-        new_varnames,                         #   tuple
-            code_obj.co_filename,             #   string
-            code_obj.co_name,                 #   string
-            code_obj.co_firstlineno,          #   integer
-            code_obj.co_lnotab,               #   bytes
-            code_obj.co_freevars,             #   tuple
-            code_obj.co_cellvars              #   tuple
-                                  )
+        code_obj.co_argcount,  # integer
+        code_obj.co_kwonlyargcount,  # integer
+        code_obj.co_nlocals,  # integer
+        code_obj.co_stacksize,  # integer
+        code_obj.co_flags,  # integer
+        code_obj.co_code,  # bytes
+        code_obj.co_consts,  # tuple
+        code_obj.co_names,  # tuple
+        new_varnames,  # tuple
+        code_obj.co_filename,  # string
+        code_obj.co_name,  # string
+        code_obj.co_firstlineno,  # integer
+        code_obj.co_lnotab,  # bytes
+        code_obj.co_freevars,  # tuple
+        code_obj.co_cellvars  # tuple
+    )
     modified = types.FunctionType(new_code_obj, func.__globals__)
     func.__code__ = modified.__code__  # replace code portion of original
+
 
 def change_first_func_args(func, new_arg):
     """ This will change the first argument of function
@@ -442,6 +499,7 @@ def change_first_func_args(func, new_arg):
                          list(code_obj.co_varnames[
                               1:code_obj.co_argcount]))
     change_func_args(func, new_varnames)
+
 
 def make_func_from(func, first=None):
     """
@@ -455,21 +513,21 @@ def make_func_from(func, first=None):
     new_varnames = tuple(new_varnames)
 
     new_code_obj = types.CodeType(
-            code_obj.co_argcount,  # integer
-            code_obj.co_kwonlyargcount,  # integer
-            code_obj.co_nlocals,  # integer
-            code_obj.co_stacksize,  # integer
-            code_obj.co_flags,  # integer
-            code_obj.co_code,  # bytes
-            code_obj.co_consts,  # tuple
-            code_obj.co_names,  # tuple
-            new_varnames,  # tuple
-            code_obj.co_filename,  # string
-            code_obj.co_name,  # string
-            code_obj.co_firstlineno,  # integer
-            code_obj.co_lnotab,  # bytes
-            code_obj.co_freevars,  # tuple
-            code_obj.co_cellvars  # tuple
+        code_obj.co_argcount,  # integer
+        code_obj.co_kwonlyargcount,  # integer
+        code_obj.co_nlocals,  # integer
+        code_obj.co_stacksize,  # integer
+        code_obj.co_flags,  # integer
+        code_obj.co_code,  # bytes
+        code_obj.co_consts,  # tuple
+        code_obj.co_names,  # tuple
+        new_varnames,  # tuple
+        code_obj.co_filename,  # string
+        code_obj.co_name,  # string
+        code_obj.co_firstlineno,  # integer
+        code_obj.co_lnotab,  # bytes
+        code_obj.co_freevars,  # tuple
+        code_obj.co_cellvars  # tuple
     )
     modified = types.FunctionType(new_code_obj,
                                   func.__globals__,
@@ -479,10 +537,10 @@ def make_func_from(func, first=None):
     modified.__doc__ = func.__doc__
     return modified
 
-def display_info_string(**kwargs):
 
+def display_info_string(**kwargs):
     _template = """
-    {{ widgetcss }}
+    {{widgetcss}}
     <table><tr><td>
     {% if logo %}
     <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAlw
@@ -531,5 +589,5 @@ def display_info_string(**kwargs):
 
     template = Template(_template)
     html = template.render({'logo': logo,
-                            'message': message.replace('\n','<br/>')})
+                            'message': message.strip().replace('\n', '<br/>')})
     publish_display_data(data={'text/html': html})

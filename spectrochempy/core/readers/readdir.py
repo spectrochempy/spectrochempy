@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 #
+# ======================================================================================================================
 # =============================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """This module extend NDDataset with some import methods.
 
@@ -14,14 +15,20 @@ __all__ = ['read_dir', 'read_carroucell']
 
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # standard imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import os
 import warnings
 import datetime
 import scipy.interpolate
+import glob
+
+# ----------------------------------------------------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------------------------------------------------
+
 import numpy as np
 
 # ----------------------------------------------------------------------------
@@ -31,20 +38,21 @@ import numpy as np
 import xlrd
 
 # ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # local imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.dataset.ndio import NDIO
-from spectrochempy.dataset.nddataset import NDDataset, Coord
-from spectrochempy.application import log, general_preferences as prefs
+from spectrochempy.core.dataset.ndio import NDIO
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core import log, general_preferences as prefs
 from spectrochempy.utils import readfilename, readdirname
-from spectrochempy.gui.dialogs import opendialog
+from spectrochempy.utils.qtfiledialogs import opendialog
 from spectrochempy.core.readers.readomnic import read_omnic
 from spectrochempy.core.readers.readcsv import read_csv
 
 
 # function for reading data in a directory
-# --------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 def read_dir(dataset=None, directory=None, **kwargs):
     """
     Open readable files in a directory and store data/metadata in a dataset or

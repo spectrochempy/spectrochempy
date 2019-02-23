@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 import pytest
 
@@ -53,7 +53,7 @@ def test_implicit_lstsq():
                  title='time')
 
     d = sc.NDDataset(data = [-1, 0.2, 0.9, 2.1],
-                     coordset=[t],
+                     coords=[t],
                      units='kilometer',
                      title='distance')
 
@@ -63,7 +63,7 @@ def test_implicit_lstsq():
     #    d = v.t + d0
 
     lstsq= sc.LSTSQ(d)  #
-    v, d0 = lstsq.trans()
+    v, d0 = lstsq.transform()
 
     print(v, d0)
 
@@ -81,7 +81,7 @@ def test_lstq_2D():
 
 
 
-# =============================================================================
+# ======================================================================================================================
 if __name__ == '__main__':
 
     pass

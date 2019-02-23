@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """ Tests for the SVD class
 
@@ -37,8 +37,8 @@ def test_svd(IR_dataset_2D):
 
 
     # with masks
-    dataset[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
-    dataset[10:12] = masked
+    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
+    dataset[10:12] = MASKED
 
     ax = dataset.plot_stack()
 
@@ -55,8 +55,8 @@ def test_svd(IR_dataset_2D):
     assert_allclose(svd.ev_ratio[0].data, 93.803, rtol=1e-5, atol=0.0001)
 
     # with masks
-    dataset[:, 1240.0:920.0] = masked  # do not forget to use float in slicing
-    dataset[10:12] = masked
+    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
+    dataset[10:12] = MASKED
 
     ax = dataset.plot_stack()
 

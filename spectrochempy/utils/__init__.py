@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 Package containing various utilities classes and functions.
 
 """
 # some useful constants
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 import numpy as np
+
 EPSILON = epsilon = np.finfo(float).eps
 "Minimum value before considering it as zero value"
 
@@ -21,24 +22,28 @@ INPLACE = "INPLACE"
 "Flag used to specify inplace slicing"
 
 # masked arrays
-# ----------------------------------------------------------------------------
-from numpy.ma.core import masked, nomask
+# ----------------------------------------------------------------------------------------------------------------------
+from numpy.ma.core import (masked as MASKED, nomask as NOMASK, MaskedArray,
+                           MaskedConstant)
 
-
+# import util files content
+# ----------------------------------------------------------------------------------------------------------------------
 from .exceptions import *
+from .fake import *
 from .file import *
 from .misc import *
+from .print import *
 from .system import *
 from .utilities import *
 from .matplolib_utils import *
 from .arrayutils import *
 from .docstring import *
-from .traittypes import *
 from .meta import *
 from .configurable import MetaConfigurable
 
-# internal utilities
 
+# internal utilities
+# ----------------------------------------------------------------------------------------------------------------------
 class _TempBool(object):
     """Wrapper around a boolean defining an __enter__ and __exit__ method
 
@@ -74,7 +79,7 @@ class _TempBool(object):
             self.value = self.default
 
     def __bool__(self):
-            return self.value
+        return self.value
 
     def __repr__(self):
         return repr(bool(self))
@@ -113,6 +118,7 @@ def _temp_bool_prop(propname, doc="", default=False):
         The documentation of the property
     default: bool
         The default value of the _TempBool class"""
+
     def getx(self):
         if getattr(self, '_' + propname, None) is not None:
             return getattr(self, '_' + propname)

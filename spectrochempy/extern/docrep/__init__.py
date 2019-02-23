@@ -1,29 +1,42 @@
 import types
 import six
+import inspect
 import re
 from warnings import warn
 
-
-__version__ = '0.1.2'
+__version__ = '0.2.5'
 
 __author__ = 'Philipp Sommer'
-
 
 try:
     from matplotlib.cbook import dedent as dedents
 except ImportError:
     from textwrap import dedent as _dedents
 
+
     def dedents(s):
         return '\n'.join(_dedents(s or '').splitlines()[1:])
 
-
 substitution_pattern = re.compile(
-    r"""(?<!%)(%%)*%(?!%)   # uneven number of %
-        \((?P<key>(?s).*?)\)# key enclosed in brackets""", re.VERBOSE)
+    r"""(?s)(?<!%)(%%)*%(?!%)   # uneven number of %
+        \((?P<key>.*?)\)# key enclosed in brackets""", re.VERBOSE)
+
+summary_patt = re.compile(r'(?s).*?(?=(\n\s*\n)|$)')
 
 
-summary_patt = re.compile(r'(?s).*?(?=(\n\n)|$)')
+class _StrWithIndentation(object):
+    """A convenience class that indents the given string if requested through
+    the __str__ method"""
+
+    def __init__(self, s, indent=0, *args, **kwargs):
+        self._indent = '\n' + ' ' * indent
+        self._s = s
+
+    def __str__(self):
+        return self._indent.join(self._s.splitlines())
+
+    def __repr__(self):
+        return repr(self._indent.join(self._s.splitlines()))
 
 
 def safe_modulo(s, meta, checked='', print_warning=True, stacklevel=2):
@@ -50,12 +63,16 @@ def safe_modulo(s, meta, checked='', print_warning=True, stacklevel=2):
     --------
     The effects are demonstrated by this example::
 
-        >>> from psyplot.docstring import safe_modulo
+        >>> from docrep import safe_modulo
         >>> s = "That's %(one)s string %(with)s missing 'with' and %s key"
-        >>> s % {'one': 1}
-        # raises KeyError because of missing 'with'
-        >>> s % {'one': 1, 'with': 2}
-        # raises TypeError because of '%s'
+        >>> s % {'one': 1}          # raises KeyError because of missing 'with'
+        Traceback (most recent call last):
+          File "<stdin>", line 1, in <module>
+        KeyError: 'with'
+        >>> s % {'one': 1, 'with': 2}        # raises TypeError because of '%s'
+        Traceback (most recent call last):
+          File "<stdin>", line 1, in <module>
+        TypeError: not enough arguments for format string
         >>> safe_modulo(s, {'one': 1})
         "That's 1 string %(with)s missing 'with' and %s key"
     """
@@ -95,7 +112,7 @@ class DocstringProcessor(object):
     --------
     Create docstring processor via::
 
-        >>> from psyplot.docstring import DocstringProcessor
+        >>> from docrep import DocstringProcessor
         >>> d = DocstringProcessor(doc_key='My doc string')
 
     And then use it as a decorator to process the docstring::
@@ -106,7 +123,7 @@ class DocstringProcessor(object):
         ...     pass
 
         >>> print(doc_test.__doc__)
-        That's my doc string
+        That's My doc string
 
     Use the :meth:`get_sectionsf` method to extract Parameter sections (or
     others) form the docstring for later usage (and make sure, that the
@@ -131,7 +148,7 @@ class DocstringProcessor(object):
         ...     Some dummy example doc'''
         ...     print(a)
 
-        >>> @docstrings.dedent
+        >>> @d.dedent
         ... def second_test(a=1, b=2):
         ...     '''
         ...     My second function where I want to use the docstring from
@@ -149,17 +166,44 @@ class DocstringProcessor(object):
         >>> print(second_test.__doc__)
         My second function where I want to use the docstring from
         above
-
+        <BLANKLINE>
         Parameters
         ----------
         a: int, optional
             A dummy parameter description
         b: int, optional
             A second dummy parameter
-
+        <BLANKLINE>
         Examples
         --------
         Some dummy example doc
+
+    Another example uses non-dedented docstrings::
+
+        >>> @d.get_sectionsf('not_dedented')
+        ... def doc_test2(a=1):
+        ...     '''That's the summary
+        ...
+        ...     Parameters
+        ...     ----------
+        ...     a: int, optional
+        ...         A dummy parameter description'''
+        ...     print(a)
+
+    These sections must then be used with the :meth:`with_indent` method to
+    indent the inserted parameters::
+
+        >>> @d.with_indent(4)
+        ... def second_test2(a=1):
+        ...     '''
+        ...     My second function where I want to use the docstring from
+        ...     above
+        ...
+        ...     Parameters
+        ...     ----------
+        ...     %(not_dedented.parameters)s'''
+        ...     pass
+
     """
 
     #: :class:`dict`. Dictionary containing the compiled patterns to identify
@@ -175,9 +219,22 @@ class DocstringProcessor(object):
     #: list
     param_like_sections = ['Parameters', 'Other Parameters', 'Returns',
                            'Raises']
-    #: sections that include (possibly unintended) text
+    #: sections that include (possibly not list-like) text
     text_sections = ['Warnings', 'Notes', 'Examples', 'See Also',
                      'References']
+
+    #: The action on how to react on classes in python 2
+    #:
+    #: When calling::
+    #:
+    #:     >>> @docstrings
+    #:     ... class NewClass(object):
+    #:     ...     """%(replacement)s"""
+    #:
+    #: This normaly raises an AttributeError, because the ``__doc__`` attribute
+    #: of a class in python 2 is not writable. This attribute may be one of
+    #: ``'ignore', 'raise' or 'warn'``
+    python2_classes = 'ignore'
 
     def __init__(self, *args, **kwargs):
         """
@@ -194,21 +251,37 @@ class DocstringProcessor(object):
         all_sections = self.param_like_sections + self.text_sections
         for section in self.param_like_sections:
             patterns[section] = re.compile(
-                '(?<=%s\n%s\n)(?s)(.+?)(?=\n\n\S+|$)' % (
-                    section, '-'*len(section)))
+                '(?s)(?<=%s\n%s\n)(.+?)(?=\n\n\S+|$)' % (
+                    section, '-' * len(section)))
         all_sections_patt = '|'.join(
-            '%s\n%s\n' % (s, '-'*len(s)) for s in all_sections)
+            '%s\n%s\n' % (s, '-' * len(s)) for s in all_sections)
         # examples and see also
         for section in self.text_sections:
             patterns[section] = re.compile(
-                '(?<=%s\n%s\n)(?s)(.+?)(?=%s|$)' % (
-                    section, '-'*len(section), all_sections_patt))
+                '(?s)(?<=%s\n%s\n)(.+?)(?=%s|$)' % (
+                    section, '-' * len(section), all_sections_patt))
+        self._extended_summary_patt = re.compile(
+            '(?s)(.+?)(?=%s|$)' % all_sections_patt)
+        self._all_sections_patt = re.compile(all_sections_patt)
         self.patterns = patterns
 
     def __call__(self, func):
-        func.__doc__ = func.__doc__ and safe_modulo(func.__doc__, self.params,
-                                                    stacklevel=3)
-        return func
+        """
+        Substitute in a docstring of a function with :attr:`params`
+
+        Parameters
+        ----------
+        func: function
+            function with the documentation whose sections
+            shall be inserted from the :attr:`params` attribute
+
+        See Also
+        --------
+        dedent: also dedents the doc
+        with_indent: also indents the doc"""
+        doc = func.__doc__ and safe_modulo(func.__doc__, self.params,
+                                           stacklevel=3)
+        return self._set_object_doc(func, doc)
 
     def get_sections(self, s, base,
                      sections=['Parameters', 'Other Parameters']):
@@ -246,9 +319,23 @@ class DocstringProcessor(object):
             for saving an entire docstring
         """
         params = self.params
+        # Remove the summary and dedent the rest
+        s = self._remove_summary(s)
         for section in sections:
             key = '%s.%s' % (base, section.lower().replace(' ', '_'))
             params[key] = self._get_section(s, section)
+        return s
+
+    def _remove_summary(self, s):
+        # if the string does not start with one of the sections, we remove the
+        # summary
+        if not self._all_sections_patt.match(s.lstrip()):
+            # remove the summary
+            lines = summary_patt.sub('', s, 1).splitlines()
+            # look for the first line with content
+            first = next((i for i, l in enumerate(lines) if l.strip()), 0)
+            # dedent the lines
+            s = dedents('\n' + '\n'.join(lines[first:]))
         return s
 
     def _get_section(self, s, section):
@@ -272,11 +359,30 @@ class DocstringProcessor(object):
         function
             Wrapper that takes a function as input and registers its sections
             via the :meth:`get_sections` method"""
+
         def func(f):
             doc = f.__doc__
             self.get_sections(doc or '', *args, **kwargs)
             return f
+
         return func
+
+    def _set_object_doc(self, obj, doc, stacklevel=3):
+        """Convenience method to set the __doc__ attribute of a python object
+        """
+        if isinstance(obj, types.MethodType) and six.PY2:
+            obj = obj.im_func
+        try:
+            obj.__doc__ = doc
+        except AttributeError:  # probably python2 class
+            if (self.python2_classes != 'raise' and
+                    (inspect.isclass(obj) and six.PY2)):
+                if self.python2_classes == 'warn':
+                    warn("Cannot modify docstring of classes in python2!",
+                         stacklevel=stacklevel)
+            else:
+                raise
+        return obj
 
     def dedent(self, func):
         """
@@ -287,11 +393,8 @@ class DocstringProcessor(object):
         func: function
             function with the documentation to dedent and whose sections
             shall be inserted from the :attr:`params` attribute"""
-        if isinstance(func, types.MethodType) and not six.PY3:
-            func = func.im_func
-        func.__doc__ = func.__doc__ and self.dedents(func.__doc__,
-                                                     stacklevel=4)
-        return func
+        doc = func.__doc__ and self.dedents(func.__doc__, stacklevel=4)
+        return self._set_object_doc(func, doc)
 
     def dedents(self, s, stacklevel=3):
         """
@@ -308,6 +411,60 @@ class DocstringProcessor(object):
         s = dedents(s)
         return safe_modulo(s, self.params, stacklevel=stacklevel)
 
+    def with_indent(self, indent=0):
+        """
+        Substitute in the docstring of a function with indented :attr:`params`
+
+        Parameters
+        ----------
+        indent: int
+            The number of spaces that the substitution should be indented
+
+        Returns
+        -------
+        function
+            Wrapper that takes a function as input and substitutes it's
+            ``__doc__`` with the indented versions of :attr:`params`
+
+        See Also
+        --------
+        with_indents, dedent"""
+
+        def replace(func):
+            doc = func.__doc__ and self.with_indents(
+                func.__doc__, indent=indent, stacklevel=4)
+            return self._set_object_doc(func, doc)
+
+        return replace
+
+    def with_indents(self, s, indent=0, stacklevel=3):
+        """
+        Substitute a string with the indented :attr:`params`
+
+        Parameters
+        ----------
+        s: str
+            The string in which to substitute
+        indent: int
+            The number of spaces that the substitution should be indented
+        stacklevel: int
+            The stacklevel for the warning raised in :func:`safe_module` when
+            encountering an invalid key in the string
+
+        Returns
+        -------
+        str
+            The substituted string
+
+        See Also
+        --------
+        with_indent, dedents"""
+        # we make a new dictionary with objects that indent the original
+        # strings if necessary. Note that the first line is not indented
+        d = {key: _StrWithIndentation(val, indent)
+             for key, val in six.iteritems(self.params)}
+        return safe_modulo(s, d, stacklevel=stacklevel)
+
     def delete_params(self, base_key, *params):
         """
         Method to delete a parameter from a parameter documentation.
@@ -316,6 +473,12 @@ class DocstringProcessor(object):
         :attr:`params` dictionary and creates a new item with the original
         documentation without the description of the param. This method works
         for the ``'Parameters'`` sections.
+
+        The new docstring without the selected parts will be accessible as
+        ``base_key + '.no_' + '|'.join(params)``, e.g.
+        ``'original_key.no_param1|param2'``.
+
+        See the :meth:`keep_params` method for an example.
 
         Parameters
         ----------
@@ -327,10 +490,10 @@ class DocstringProcessor(object):
 
         See Also
         --------
-        delete_types"""
+        delete_types, keep_params"""
         self.params[
             base_key + '.no_' + '|'.join(params)] = self.delete_params_s(
-                self.params[base_key], params)
+            self.params[base_key], params)
 
     @staticmethod
     def delete_params_s(s, params):
@@ -352,8 +515,8 @@ class DocstringProcessor(object):
         str
             The modified string `s` without the descriptions of `params`
         """
-        patt = '|'.join(
-            '(?<=\n)' + s + '\s*:(?s).+?\n(?=\S+|$)' for s in params)
+        patt = '(?s)' + '|'.join(
+            '(?<=\n)' + s + '\s*:.+?\n(?=\S+|$)' for s in params)
         return re.sub(patt, '', '\n' + s.strip() + '\n').strip()
 
     def delete_kwargs(self, base_key, args=None, kwargs=None):
@@ -433,6 +596,9 @@ class DocstringProcessor(object):
         documentation without the description of the param. This method works
         for ``'Results'`` like sections.
 
+
+        See the :meth:`keep_types` method for an example.
+
         Parameters
         ----------
         base_key: str
@@ -469,8 +635,9 @@ class DocstringProcessor(object):
         str
             The modified string `s` without the descriptions of `types`
         """
-        patt = '|'.join('(?<=\n)' + s + '\n(?s).+?\n(?=\S+|$)' for s in types)
-        return re.sub(patt, '', '\n' + s.strip() + '\n',).strip()
+        patt = '(?s)' + '|'.join(
+            '(?<=\n)' + s + '\n.+?\n(?=\S+|$)' for s in types)
+        return re.sub(patt, '', '\n' + s.strip() + '\n', ).strip()
 
     def keep_params(self, base_key, *params):
         """
@@ -480,6 +647,10 @@ class DocstringProcessor(object):
         :attr:`params` dictionary and creates a new item with the original
         documentation with only the description of the param. This method works
         for ``'Parameters'`` like sections.
+
+        The new docstring with the selected parts will be accessible as
+        ``base_key + '.' + '|'.join(params)``, e.g.
+        ``'original_key.param1|param2'``
 
         Parameters
         ----------
@@ -491,7 +662,68 @@ class DocstringProcessor(object):
 
         See Also
         --------
-        keep_types"""
+        keep_types, delete_params
+
+        Examples
+        --------
+        To extract just two parameters from a function and reuse their
+        docstrings, you can type::
+
+            >>> from docrep import DocstringProcessor
+            >>> d = DocstringProcessor()
+            >>> @d.get_sectionsf('do_something')
+            ... def do_something(a=1, b=2, c=3):
+            ...     '''
+            ...     That's %(doc_key)s
+            ...
+            ...     Parameters
+            ...     ----------
+            ...     a: int, optional
+            ...         A dummy parameter description
+            ...     b: int, optional
+            ...         A second dummy parameter that will be excluded
+            ...     c: float, optional
+            ...         A third parameter'''
+            ...     print(a)
+
+            >>> d.keep_params('do_something.parameters', 'a', 'c')
+
+            >>> @d.dedent
+            ... def do_less(a=1, c=4):
+            ...     '''
+            ...     My second function with only `a` and `c`
+            ...
+            ...     Parameters
+            ...     ----------
+            ...     %(do_something.parameters.a|c)s'''
+            ...     pass
+
+            >>> print(do_less.__doc__)
+            My second function with only `a` and `c`
+            <BLANKLINE>
+            Parameters
+            ----------
+            a: int, optional
+                A dummy parameter description
+            c: float, optional
+                A third parameter
+
+        Equivalently, you can use the :meth:`delete_params` method to remove
+        parameters::
+
+            >>> d.delete_params('do_something.parameters', 'b')
+
+            >>> @d.dedent
+            ... def do_less(a=1, c=4):
+            ...     '''
+            ...     My second function with only `a` and `c`
+            ...
+            ...     Parameters
+            ...     ----------
+            ...     %(do_something.parameters.no_b)s'''
+            ...     pass
+
+        """
         self.params[base_key + '.' + '|'.join(params)] = self.keep_params_s(
             self.params[base_key], params)
 
@@ -515,8 +747,8 @@ class DocstringProcessor(object):
         str
             The modified string `s` with only the descriptions of `params`
         """
-        patt = '|'.join(
-            '(?<=\n)' + s + '\s*:(?s).+?\n(?=\S+|$)' for s in params)
+        patt = '(?s)' + '|'.join(
+            '(?<=\n)' + s + '\s*:.+?\n(?=\S+|$)' for s in params)
         return ''.join(re.findall(patt, '\n' + s.strip() + '\n')).rstrip()
 
     def keep_types(self, base_key, out_key, *types):
@@ -541,7 +773,63 @@ class DocstringProcessor(object):
 
         See Also
         --------
-        keep_params"""
+        delete_types, keep_params
+
+        Examples
+        --------
+        To extract just two return arguments from a function and reuse their
+        docstrings, you can type::
+
+            >>> from docrep import DocstringProcessor
+            >>> d = DocstringProcessor()
+            >>> @d.get_sectionsf('do_something', sections=['Returns'])
+            ... def do_something():
+            ...     '''
+            ...     That's %(doc_key)s
+            ...
+            ...     Returns
+            ...     -------
+            ...     float
+            ...         A random number
+            ...     int
+            ...         A random integer'''
+            ...     return 1.0, 4
+
+            >>> d.keep_types('do_something.returns', 'int_only', 'int')
+
+            >>> @d.dedent
+            ... def do_less():
+            ...     '''
+            ...     My second function that only returns an integer
+            ...
+            ...     Returns
+            ...     -------
+            ...     %(do_something.returns.int_only)s'''
+            ...     return do_something()[1]
+
+            >>> print(do_less.__doc__)
+            My second function that only returns an integer
+            <BLANKLINE>
+            Returns
+            -------
+            int
+                A random integer
+
+        Equivalently, you can use the :meth:`delete_types` method to remove
+        parameters::
+
+            >>> d.delete_types('do_something.returns', 'no_float', 'float')
+
+            >>> @d.dedent
+            ... def do_less():
+            ...     '''
+            ...     My second function with only `a` and `c`
+            ...
+            ...     Returns
+            ...     ----------
+            ...     %(do_something.returns.no_float)s'''
+            ...     return do_something()[1]
+        """
         self.params['%s.%s' % (base_key, out_key)] = self.keep_types_s(
             self.params[base_key], types)
 
@@ -574,14 +862,16 @@ class DocstringProcessor(object):
 
         Like the :meth:`get_sectionsf` method this method serves as a
         descriptor for functions but saves the entire docstring"""
+
         def func(f):
             self.params[key] = f.__doc__ or ''
             return f
+
         return func
 
     def get_summary(self, s, base=None):
         """
-        Get the summary of the given docstring s
+        Get the summary of the given docstring
 
         This method extracts the summary from the given docstring `s` which is
         basicly the part until two newlines appear
@@ -606,7 +896,7 @@ class DocstringProcessor(object):
 
     def get_summaryf(self, *args, **kwargs):
         """
-        Decorator method to extract summary from a function docstring
+        Extract the summary from a function docstring
 
         Parameters
         ----------
@@ -619,8 +909,119 @@ class DocstringProcessor(object):
         function
             Wrapper that takes a function as input and registers its summary
             via the :meth:`get_summary` method"""
+
         def func(f):
             doc = f.__doc__
             self.get_summary(doc or '', *args, **kwargs)
             return f
+
+        return func
+
+    def get_extended_summary(self, s, base=None):
+        """Get the extended summary from a docstring
+
+        This here is the extended summary
+
+        Parameters
+        ----------
+        s: str
+            The docstring to use
+        base: str or None
+            A key under which the summary shall be stored in the :attr:`params`
+            attribute. If not None, the summary will be stored in
+            ``base + '.summary_ext'``. Otherwise, it will not be stored at
+            all
+
+        Returns
+        -------
+        str
+            The extracted extended summary"""
+        # Remove the summary and dedent
+        s = self._remove_summary(s)
+        ret = ''
+        if not self._all_sections_patt.match(s):
+            m = self._extended_summary_patt.match(s)
+            if m is not None:
+                ret = m.group().strip()
+        if base is not None:
+            self.params[base + '.summary_ext'] = ret
+        return ret
+
+    def get_extended_summaryf(self, *args, **kwargs):
+        """Extract the extended summary from a function docstring
+
+        This function can be used as a decorator to extract the extended
+        summary of a function docstring (similar to :meth:`get_sectionsf`).
+
+        Parameters
+        ----------
+        ``*args`` and ``**kwargs``
+            See the :meth:`get_extended_summary` method. Note, that the first
+            argument will be the docstring of the specified function
+
+        Returns
+        -------
+        function
+            Wrapper that takes a function as input and registers its summary
+            via the :meth:`get_extended_summary` method"""
+
+        def func(f):
+            doc = f.__doc__
+            self.get_extended_summary(doc or '', *args, **kwargs)
+            return f
+
+        return func
+
+    def get_full_description(self, s, base=None):
+        """Get the full description from a docstring
+
+        This here and the line above is the full description (i.e. the
+        combination of the :meth:`get_summary` and the
+        :meth:`get_extended_summary`) output
+
+        Parameters
+        ----------
+        s: str
+            The docstring to use
+        base: str or None
+            A key under which the description shall be stored in the
+            :attr:`params` attribute. If not None, the summary will be stored
+            in ``base + '.full_desc'``. Otherwise, it will not be stored
+            at all
+
+        Returns
+        -------
+        str
+            The extracted full description"""
+        summary = self.get_summary(s)
+        extended_summary = self.get_extended_summary(s)
+        ret = (summary + '\n\n' + extended_summary).strip()
+        if base is not None:
+            self.params[base + '.full_desc'] = ret
+        return ret
+
+    def get_full_descriptionf(self, *args, **kwargs):
+        """Extract the full description from a function docstring
+
+        This function can be used as a decorator to extract the full
+        descriptions of a function docstring (similar to
+        :meth:`get_sectionsf`).
+
+        Parameters
+        ----------
+        ``*args`` and ``**kwargs``
+            See the :meth:`get_full_description` method. Note, that the first
+            argument will be the docstring of the specified function
+
+        Returns
+        -------
+        function
+            Wrapper that takes a function as input and registers its summary
+            via the :meth:`get_full_description` method"""
+
+        def func(f):
+            doc = f.__doc__
+            self.get_full_description(doc or '', *args, **kwargs)
+            return f
+
         return func

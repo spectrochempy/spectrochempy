@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 
 
@@ -22,8 +22,8 @@ from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
                          raises)
 
 
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.application import general_preferences as prefs
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import SpectroChemPyWarning, show
 from spectrochempy.units import ur
 
@@ -99,7 +99,7 @@ def test_nmr_em_calculated_notapplied(NMR_dataset_1D):
     assert isinstance(arr, NDDataset)
 
     # here we assume it is 100 Hz
-    x = dataset.coordset[-1]
+    x = dataset.coords[-1]
     tc = (1./(lb * ur.Hz)).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
@@ -115,7 +115,7 @@ def test_nmr_em_calculated_applied(NMR_dataset_1D):
     arr = dataset.em(lb=lb, apply=False)
 
     # here we assume it is 100 Hz
-    x = dataset.coordset[-1]
+    x = dataset.coords[-1]
     tc = (1. / (lb * ur.Hz)).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
@@ -136,7 +136,7 @@ def test_nmr_em_calculated_Hz(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
 
     lb = 200 * ur.Hz
-    x = dataset.coordset[-1]
+    x = dataset.coords[-1]
     tc = (1. / lb).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
@@ -155,7 +155,7 @@ def test_nmr_em_calculated_inplace(NMR_dataset_1D):
 
     lb = 200 * ur.Hz
 
-    x = dataset.coordset[-1]
+    x = dataset.coords[-1]
     tc = (1. / lb).to(x.units)
     e = np.pi * np.abs(x) / tc
     arrcalc = np.exp(-e.data)
@@ -236,7 +236,7 @@ def test_nmr_1D_gm(NMR_dataset_1D):
 #     pass
 
 
-# ----------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 def test_nmr_prepare_ipynb():
 
     # 1D dataset getting function
@@ -252,7 +252,7 @@ def test_nmr_prepare_ipynb():
     dataset1D = dataset1D[0.:14000.0]
 
     # normalize amplitude
-    dataset1D /= dataset1D.max()
+    dataset1D /= dataset1D.abs().max().values
 
     # apodize
     LB = 100. * ur.Hz

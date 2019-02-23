@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
-
+# ======================================================================================================================
 
 
 __all__ = []
@@ -15,31 +14,33 @@ rst_epilog = """
 
 .. |ndarray| replace:: :class:`~numpy.ndarray`
 
-.. |ma_ndarray| replace:: :class:`~numpy.ma.array`
+.. |ma.ndarray| replace:: :class:`~numpy.ma.array`
 
 .. |scpy| replace:: **SpectroChemPy**
 
 .. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
 
-.. |Script| replace:: :class:`~spectrochempy.dataset.ndarray.Script`
+.. |Script| replace:: :class:`~spectrochempy.core.dataset.ndarray.Script`
 
-.. |NDArray| replace:: :class:`~spectrochempy.dataset.ndarray.NDArray`
+.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
 
-.. |NDDataset| replace:: :class:`~spectrochempy.dataset.nddataset.NDDataset`
+.. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
 
-.. |Coord| replace:: :class:`~spectrochempy.dataset.ndcoord.Coord`
+.. |NDPanel| replace:: :class:`~spectrochempy.core.dataset.ndpanel.NDPanel`
 
-.. |CoordRange| replace:: :class:`~spectrochempy.dataset.ndcoord.CoordRange`
+.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
 
-.. |CoordSet| replace:: :class:`~spectrochempy.dataset.ndarray.CoordSet`
+.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoord.CoordRange`
 
-.. |NDIO| replace:: :class:`~spectrochempy.dataset.ndio.NDIO`
+.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndarray.CoordSet`
 
-.. |NDMath| replace:: :class:`~spectrochempy.dataset.ndmath.NDMath`
+.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
 
-.. |Meta| replace:: :class:`~spectrochempy.dataset.ndmeta.Meta`
+.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDMath`
 
-.. |NDPlot| replace:: :class:`~spectrochempy.dataset.ndplot.NDPlot`
+.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta`
+
+.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
 
 .. |Unit| replace:: :class:`~spectrochempy.units.units.Unit`
 

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 __all__ = ['IRIS']
 
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.core.processors.npy import dot
 
 import numpy as np
@@ -188,7 +188,7 @@ class IRIS:
 
                 def objective(x, sign=1.):
                     return sign * (
-                    0.5 * np.dot(x.T, np.dot(Q, x)) + np.dot(c[j, :], x))
+                            0.5 * np.dot(x.T, np.dot(Q, x)) + np.dot(c[j, :], x))
 
                 def jac(x, sign=1.):
                     return sign * (np.dot(x.T, Q) + c[j, :])

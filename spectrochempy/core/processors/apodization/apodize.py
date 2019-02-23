@@ -1,33 +1,33 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 __all__ = ["apodize"]
 
 __dataset_methods__ = ['apodize']
 
-
-# =============================================================================
+# ======================================================================================================================
 # Third party imports
-# =============================================================================
+# ======================================================================================================================
 import numpy as np
 
-# =============================================================================
+# ======================================================================================================================
 # Local imports
-# =============================================================================
+# ======================================================================================================================
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import epsilon
-from spectrochempy.application import  log, general_preferences
+from spectrochempy.core import log, general_preferences
 
-# =============================================================================
+
+# ======================================================================================================================
 # generic apodization function
-# =============================================================================
+# ======================================================================================================================
 def apodize(dataset, **kwargs):
     """Calculate an apodization function
 
@@ -98,9 +98,9 @@ def apodize(dataset, **kwargs):
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    lastcoord = new.coordset[-1]
+    lastcoord = new.coords[-1]
     if (lastcoord.unitless or lastcoord.dimensionless or
-                lastcoord.units.dimensionality != '[time]'):
+            lastcoord.units.dimensionality != '[time]'):
         log.error('apodization functions apply only to dimensions '
                   'with [time] dimensionality')
         return dataset
@@ -170,8 +170,8 @@ def apodize(dataset, **kwargs):
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
     # TODO: CHECK IF THIS WORK WITH 2D DATA - IMPORTANT - CHECK IN PARTICULAR IF SWAPING ALSO SWAP METADATA (NOT SURE FOR NOW)
-    iscomplex = new.iscomplex
-    isquaternion = new.isquaternion
+    iscomplex = new.is_complex
+    isquaternion = new.is_quaternion
     encoding = new.meta.encoding[-1]
     # TODO: handle this eventual complexity
 
@@ -192,7 +192,7 @@ def apodize(dataset, **kwargs):
     if apply:
         name = kwargs.pop('method_name', 'em')
         new.history = str(
-                new.modified) + ': ' + '%s apodization performed: ' % name + str(
+            new.modified) + ': ' + '%s apodization performed: ' % name + str(
             apod) + '\n'
 
     return new

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 This module implement the NNMF (Non Negative Matrix Factorization) class
@@ -24,7 +24,7 @@ from sys import stdout
 
 from traitlets import HasTraits, Instance
 
-from spectrochempy.application import log
+from spectrochempy.core import log
 
 
 class NNMF(HasTraits):
@@ -166,6 +166,6 @@ class NNMF(HasTraits):
             if myiter % 10 == 0: stdout.write('.')
 
         log.info(
-                '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
-                                                                 projnorm))
+            '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
+                                                             projnorm))
         return W, H

@@ -64,3 +64,8 @@ $ jupyter labextension install @pyviz/jupyterlab_pyviz
 
 ```
 
+```plantuml
+digraph Test {
+A -> B
+}
+```

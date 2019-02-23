@@ -1,25 +1,28 @@
 name: scpy-dev
 channels:
 - conda
-# - conda-forge
 - spectrocat
 dependencies:
 # for the core package
-- python>3.5
 - numpy
-- scipy
 - matplotlib
 - traitlets
+- pint
 # some other useful package
 - xarray
-- bokeh::bokeh=0.13.0
-- ioam::holoviews=1.10.6
-- datashader=0.6.6
-- param=1.6.1
-- dask=0.17.1
+- bokeh
+- holoviews
+- datashader
+- param
+- dask
+- intake
+- intake-parquet
+- s3fs
 - pandas
 - xlrd
 - requests
+- numba
+- scipy
 # mainly for install and a bit more...
 - setuptools_scm
 # need this, because the API is mainly designed to run in Jupyter notebook

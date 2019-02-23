@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 import pytest
 from spectrochempy import *
@@ -19,17 +19,20 @@ def test_1D():
     dataset = NDDataset.read_omnic(
         os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))
 
+    # get first spectrum
+    nd0 = dataset[0]
+
     # plot generic
-    ax = dataset[0].plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
+    ax = nd0.plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
                          savedpi=150)
 
     # plot generic style
-    ax = dataset[0].plot(style='sans',
-                         output=os.path.join(figures_dir, 'IR_dataset_1D_sans'),
+    ax = nd0.plot(style='poster',
+                         output=os.path.join(figures_dir, 'IR_dataset_1D_poster'),
                          savedpi=150)
 
     # check that style reinit to default
-    ax = dataset[0].plot(output='IR_dataset_1D', savedpi=150)
+    ax = nd0.plot(output='IR_dataset_1D', savedpi=150)
     try:
         assert same_images('IR_dataset_1D.png',
                            os.path.join(figures_dir, 'IR_dataset_1D.png'))
@@ -38,11 +41,20 @@ def test_1D():
         raise AssertionError('comparison fails')
     os.remove('IR_dataset_1D.png')
 
-    dataset = dataset[:, ::100]
+    # try other type of plots
+    ax = nd0.plot_pen()
+    ax = nd0[:,::100].plot_scatter()
+    ax = nd0.plot_lines()
+    ax = nd0[:,::100].plot_bar()
 
-    datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
+    show()
+
+    # mulitple
+    d = dataset[:,::100]
+    datasets = [d[0], d[10], d[20], d[50], d[53]]
     labels = ['sample {}'.format(label) for label in
               ["S1", "S10", "S20", "S50", "S53"]]
+
 
     # plot multiple
     plot_multiple(method='scatter',
@@ -75,6 +87,6 @@ def test_1D():
     show()
 
 
-# =============================================================================
+# ======================================================================================================================
 if __name__ == '__main__':
     pass

@@ -9,7 +9,8 @@
 
 import os
 
-from spectrochempy import NDDataset, SIMPLISMA
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.analysis.simplisma import SIMPLISMA
 
 
 def test_SIMPLISMA():

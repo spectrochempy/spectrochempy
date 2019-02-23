@@ -1,11 +1,11 @@
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # Modified from intake.gui
 #
 # Copyright (c) 2012 - 2018, Anaconda, Inc. and Intake contributors
 # All rights reserved.
 #
 # The full license is in the LICENSE file, distributed with this software.
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 """
 Widgets for the Jupyter noteboobk and Jupyter lab
@@ -40,7 +40,6 @@ def ignore(ob):
 
 
 class Base(object):
-
     done_callback = None
 
     def stop(self, ok=False):
@@ -51,7 +50,7 @@ class Base(object):
             self.done_callback(None)
 
     def __repr__(self):
-        return ("Intake GUI instance: to get widget to display, you must "
+        return ("To get widget to display, you must "
                 "install ipy/jupyter-widgets, run in a notebook and, in "
                 "the case of jupyter-lab, install the jlab extension.")
 
@@ -112,11 +111,16 @@ class FileSelector(Base):
             files.
         """
         self.done_callback = done_callback
-        self.filters = [''] if filters is None else filters
+        if filters:
+            if not isinstance(filters, (list, tuple)):
+                filters = [filters]
+            self.filters = list(filters)
+        else:
+            self.filters = ['']
         if not path or not os.path.exists(path):
             self.path = os.getcwd() + '/'
         else:
-            self.path = (path + '/').replace('//',',')
+            self.path = (path + '/').replace('//', ',')
         self.main = widgets.Select(rows=7)
         self.button = widgets.Button(
             icon='chevron-left', tooltip='Parent',
@@ -156,7 +160,8 @@ class FileSelector(Base):
                     not any(f.startswith(prefix) for prefix in "._~")):
                 out.append(f + '/')
             elif (not any(f.startswith(prefix) for prefix in "._~") and
-                  any(f.endswith(ext) for ext in self.filters)):
+                  any(f.endswith(ext) for ext in self.filters + \
+                                                 list(map(str.upper, self.filters)))):
                 out.append(f)
         self.main.value = self.value = None
         self.fullpath = self.path

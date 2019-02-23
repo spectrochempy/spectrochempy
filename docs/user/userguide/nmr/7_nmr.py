@@ -1,4 +1,4 @@
-# ---
+# ----------------------------------------------------------------------------------------------------------------------
 # jupyter:
 #   jupytext:
 #     text_representation:
@@ -10,7 +10,7 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
-# ---
+# ----------------------------------------------------------------------------------------------------------------------
 
 # %% [markdown] {"toc-hr-collapsed": false}
 # # Introduction to NMR processing
@@ -74,7 +74,7 @@ _ = dataset1D.plot(imag=True, color='red', ls='--', ylim=(-600,600),
                    data_only=True, clear=False)
 
 # Note the two additional flags:
-# ------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # `clear=False`to plot on the previous plot (without this a new plot is created)
 # `data_only =True` to plot only the additional data, without updating the figure setting 
 #  such as xlim and so on, except if they are specifically indicated.

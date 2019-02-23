@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 """
 This module to extend NDDataset with the import methods method.
@@ -16,17 +16,17 @@ __all__ = ['read_jdx']
 
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # standard imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 import os as os
 import numpy as np
 from datetime import datetime, timezone, timedelta
 
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # third party imports
-# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 from traitlets import HasTraits, Unicode, List
 
@@ -173,7 +173,7 @@ def read_jdx(filename='', sortbydate=True):
                                   1:]  # for each line, get all the values exept the first one (first value = wavenumber)
                     allintensities = allintensities + intensities
                 spectra = np.array([
-                                       allintensities])  # convert allintensities into an array
+                    allintensities])  # convert allintensities into an array
                 spectra[
                     spectra == '?'] = 'nan'  # deals with missing or out of range intensity values
                 spectra = spectra.astype(float)
@@ -211,7 +211,7 @@ def read_jdx(filename='', sortbydate=True):
 
             # Creation of the acquisition date
         if (
-                                year != '' and month != '' and day != '' and hour != '' and minute != '' and second != ''):
+                year != '' and month != '' and day != '' and hour != '' and minute != '' and second != ''):
             acqdate = datetime.datetime(int(year), int(month), int(day),
                                         int(hour), int(minute), int(second))
         else:
@@ -258,9 +258,9 @@ def read_jdx(filename='', sortbydate=True):
         out.sort(0, 0)
         out.dims[0].deleteaxis(0)
     out.description = (
-    'dataset "' + out.name + '" : imported from jdx file. \n')
+            'dataset "' + out.name + '" : imported from jdx file. \n')
     out.history = (
-    str(out.date) + " : Created by jdxload('" + filename + "') \n")
+            str(out.date) + " : Created by jdxload('" + filename + "') \n")
 
     # make sure that the lowest( index correspond to th largest wavenember*
     # for compatibility with dataset creacted by spgload:

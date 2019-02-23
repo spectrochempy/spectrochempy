@@ -1,29 +1,59 @@
 # intentionnaly masked with ~
+# ----------------------------------------------------------------------------------------------------------------------
 *~
 ~*
+
+# ignored extensions
+# ----------------------------------------------------------------------------------------------------------------------
+*.log
+.eggs
+*.egg-info
+*.bak
+*.pkl
+.gitignore_*
+*.orig
+*.so
+*.mo
+*.pot
+*.tar
+*.bz2
+.editorconfig
+
+# Mac OS specific
+# ----------------------------------------------------------------------------------------------------------------------
 .DS_Store
 
 # pycharm project
+# ----------------------------------------------------------------------------------------------------------------------
 .idea/
 
 # Spyder project
+# ----------------------------------------------------------------------------------------------------------------------
 .spyderproject
 .spyproject
 
-# Example ipython notebook checkpoints
+# Example, ipython notebook checkpoints
+# ----------------------------------------------------------------------------------------------------------------------
 *.ipynb_checkpoints/
 Untitled.ipynb
+essai.ipynb
+
+# VS
+# ----------------------------------------------------------------------------------------------------------------------
+.vscode
 
 # caches
+# ----------------------------------------------------------------------------------------------------------------------
 __pycache__/
 .cache/
 /.pytest_cache/
 
 # Sphinx documentation
+# ----------------------------------------------------------------------------------------------------------------------
 docs/api/
 docs/_build/
 docs/index.doctree
-*generated
+generated/
 dist/
 build/
 docs/gen_modules/
@@ -34,66 +64,82 @@ docs/modules/
 docs/savefig/
 docs/_templates_old
 
-*.log
-
-.eggs
-*.egg-info
-
-cov/
-*.fdb_latexmk
-
-
-# data
-*.scp
-scpy.svg
-*.pyc
-
-*.sample
-todo.txt
-*.bak
-*.pkl
-
+# tests
+# ----------------------------------------------------------------------------------------------------------------------
 tests/figures
-.coverage*
-scp_data/testdata/figures
-.gitignore_*
-*.orig
-
-# C extensions
-*.so
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+/tests_extern_packages/
 
 # Unit test / coverage reports
+# ----------------------------------------------------------------------------------------------------------------------
 htmlcov/
 .tox/
 .coverage
 .coverage.*
 coverage.xml
 *,cover
+cov/
+.coverage*
 
-# Translations
-*.mo
-*.pot
+# latex
+# ----------------------------------------------------------------------------------------------------------------------
+*.fdb_latexmk
+
+# data
+# ----------------------------------------------------------------------------------------------------------------------
+*.scp
+scpy.svg
+*.sample
+scp_data/testdata/figures
+
+# Installer logs
+# ----------------------------------------------------------------------------------------------------------------------
+pip-log.txt
+pip-delete-this-directory.txt
 
 # various files related to conda recipes
-recipes/spectrochempy/linux-32
-recipes/spectrochempy/linux-64
-recipes/spectrochempy/linux-aarch64
-*.tar.bz2
-
-.dockerignore
-.pipeline*.sh
-
-/docs/user/userguide/essai.ipynb
-.vscode
-
-/tests_extern_packages/
-/.editorconfig
-/Untitled.ipynb
+# ----------------------------------------------------------------------------------------------------------------------
+recipes/spectrochempy/linux-32/
+recipes/spectrochempy/linux-64/
+recipes/spectrochempy/linux-aarch64/
 recipes/spectrochempy/win-32/
 recipes/spectrochempy/win-64/
 
+# Docker / bitbucket
+# ----------------------------------------------------------------------------------------------------------------------
+.dockerignore
+.pipeline*.sh
 
+# personnal files
+# ----------------------------------------------------------------------------------------------------------------------
+mymd.md
+myrst.rst
+mytodo.txt
+Untitled.py
+
+# some addition to check
+# ************************
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec

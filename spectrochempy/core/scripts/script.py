@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# ============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# ============================================================================
+# ======================================================================================================================
 
 import re
 import ast
@@ -13,11 +13,12 @@ import ast
 from traitlets import (HasTraits, Unicode, validate, TraitError, Instance,
                        Float, )
 
-from spectrochempy.core.projects.baseproject import AbstractProject
+from spectrochempy.core.project.baseproject import AbstractProject
 
-__all__ = ['Script','run_script','run_all_scripts']
+__all__ = ['Script', 'run_script', 'run_all_scripts']
 
-from spectrochempy.application import log
+from spectrochempy.core import log
+
 
 class Script(HasTraits):
     """
@@ -42,20 +43,20 @@ class Script(HasTraits):
         self.parent = parent
         self.priority = priority
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # special methods
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     def __dir__(self):
-        return ['name', 'content', 'parent' ]
+        return ['name', 'content', 'parent']
 
     def __call__(self, *args):
 
         return self.execute(*args)
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # properties
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
 
     @property
     def name(self):
@@ -106,12 +107,12 @@ class Script(HasTraits):
     def parent(self, value):
         self._parent = value
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # private methods
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def execute(self, localvars=None):
         co = 'from spectrochempy import *\n' \
-             'import spectrochempy as scp\n'+self._content
+             'import spectrochempy as scp\n' + self._content
         code = compile(co, '<string>', 'exec')
         if localvars is None:
             # locals was not passed, try to avoid missing values for name
@@ -119,8 +120,8 @@ class Script(HasTraits):
             # other missing name if they correspond to the parent project
             # will be subtitued latter upon exception
             localvars = locals()
-            #localvars['proj']=self.parent
-            #localvars['project']=self.parent
+            # localvars['proj']=self.parent
+            # localvars['project']=self.parent
 
         try:
             exec(code, globals(), localvars)
@@ -138,6 +139,7 @@ class Script(HasTraits):
         except NameError as e:
             log.error(e + '. pass the variable `locals()` : this may solve '
                           'this problem! ')
+
 
 def run_script(script, localvars=None):
     """
@@ -170,6 +172,7 @@ def run_all_scripts(project):
         The project in which the scripts have to be executed
 
     """
-if __name__ == '__main__':
 
+
+if __name__ == '__main__':
     pass

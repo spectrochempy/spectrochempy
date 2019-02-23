@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
 #
-# =============================================================================
+# ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
-# =============================================================================
+# ======================================================================================================================
 
 # TODO: create tests
 
-__all__ = ['LSTSQ'] #, 'NNLS']
+__all__ = ['LSTSQ']  # , 'NNLS']
 
 import numpy as np
 
 from traitlets import HasTraits, Instance
 
-from spectrochempy.dataset.nddataset import NDDataset
-from spectrochempy.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndarray import NDArray
 
 from spectrochempy.units import Quantity
+
 
 class LSTSQ(HasTraits):
     """
@@ -46,16 +47,16 @@ class LSTSQ(HasTraits):
 
         """
 
-        if len(datasets)>2 or len(datasets)<1:
+        if len(datasets) > 2 or len(datasets) < 1:
             raise ValueError('one or two dataset at max are expected')
 
-        if len(datasets)==2:
+        if len(datasets) == 2:
             X, Y = datasets
-            if Y.coordset is not None:
+            if Y.coords is not None:
                 if np.any(X.data != Y.x.data) or X.units != Y.x.units:
                     raise ValueError('X and Y dataset are not compatible')
 
-        else: # nb dataset ==1
+        else:  # nb dataset ==1
             # abscissa coordinates are the X
             X = datasets[0].x
 
@@ -87,7 +88,7 @@ class LSTSQ(HasTraits):
         X = self.X
         Y = self.Y
 
-        if P.shape == (2, ):
+        if P.shape == (2,):
             # this is the result of the single equation, so only one value
             # should be returned
             A = P[0] * Y.units / X.units
@@ -97,16 +98,16 @@ class LSTSQ(HasTraits):
             A = NDDataset(data=P[0],
                           units=Y.units / X.units,
                           title="%s/%s" % (Y.title, X.title), )
-            B = NDDataset(data=P[1]* np.ones(X.size),
-                      units=Y.units,
-                      title="%s at origin"%Y.title)
+            B = NDDataset(data=P[1] * np.ones(X.size),
+                          units=Y.units,
+                          title="%s at origin" % Y.title)
 
             A.history = 'computed by spectrochempy.lstsq \n'
             B.history = 'computed by spectrochempy.lstsq \n'
 
         return A, B
 
-    trans = transform   # short-cut
+    trans = transform  # short-cut
 
     def inverse_transform(self):
         """
@@ -231,7 +232,7 @@ def NNLS(C, d, x0=None, tol=None, itmax_factor=3):
                 max_error = z[PP - 1].max()
                 raise Exception(
                     'Exiting: Iteration count (=%d) exceeded\n Try raising the tolerance tol. (max_error=%d)' % (
-                    it, max_error))
+                        it, max_error))
 
             QQ = np.where((z <= tol) & (P != 0))[0]
             alpha = min(x[QQ] / (x[QQ] - z[QQ]))
@@ -258,6 +259,6 @@ def NNLS(C, d, x0=None, tol=None, itmax_factor=3):
 
     return x, sum(resid * resid), resid
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     pass
