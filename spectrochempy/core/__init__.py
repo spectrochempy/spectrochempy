@@ -103,6 +103,7 @@ long_description = app.long_description
 def set_loglevel(level=WARNING):
     general_preferences.log_level = level
 
+
 # set_loglevel('DEBUG')
 
 __all__ += [

@@ -495,7 +495,6 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         # parameters so that the experiments are
         # compatible
 
-
         meta = Meta()  # This is the parameter dictionary
 
         keys = sorted(dic.keys())
@@ -678,7 +677,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     else:
 
-        #TODO : Check this -
+        # TODO : Check this -
         # case of multiple experiments to merge
 
         # find difference in data.shape

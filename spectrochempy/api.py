@@ -42,7 +42,6 @@ if InteractiveShell.initialized():
     ip = get_ipython()
     kernel = getattr(ip, "kernel", None)
 
-
 # Which backend to choose for matplotlib ?
 
 # That is from the matplotlib doc:
@@ -120,7 +119,6 @@ if not (IN_IPYTHON and kernel and not NO_DISPLAY):
     except:
         mpl.use('tkagg', warn=False, force=True)
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Now we can start loading the API
 # ----------------------------------------------------------------------------------------------------------------------
@@ -131,7 +129,6 @@ from spectrochempy import core
 
 __all__ = core.__all__
 __all__ += ['IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
-
 
 from PyQt5 import QtWidgets
 

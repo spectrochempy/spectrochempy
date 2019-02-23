@@ -35,6 +35,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoords import Coord
 from spectrochempy.utils import show
 
+
 # ............................................................................
 def upload_IRIS():
     """
@@ -49,7 +50,7 @@ def upload_IRIS():
     except requests.ConnectTimeout:
         connection = False
 
-    if connection: # Download data
+    if connection:  # Download data
         txtdata = ''
         for rd in response.iter_content():
             txtdata += rd.decode('utf8')
@@ -104,6 +105,7 @@ def upload_IRIS():
         else:
 
             raise IOError('Failed in uploading the IRIS dataset!')
+
 
 # make a NDDataset class method
 NDDataset.upload_IRIS = upload_IRIS

@@ -14,6 +14,7 @@ terminal command line
 import sys
 import os
 
+
 def main():
     """Main call
     """
@@ -36,11 +37,11 @@ def main():
         scp.show()
 
     except:
-        print("Sorry, but the '%s' file couldn't be read."%fname)
+        print("Sorry, but the '%s' file couldn't be read." % fname)
         print()
         app.print_help()
 
+
 # ======================================================================================================================
 if __name__ == '__main__':
-
     main()

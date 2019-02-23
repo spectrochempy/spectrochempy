@@ -248,14 +248,14 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     spectra = kwargs.get('spectra', None)
     discardbg = kwargs.get('discardbg', True)
 
-    delta_clocks = datetime.timedelta(seconds = kwargs.get('delta_clocks', 0))
+    delta_clocks = datetime.timedelta(seconds=kwargs.get('delta_clocks', 0))
 
     datasets = []
 
     # get the sorted list of spa files in the directory
     spafiles = sorted([f for f in os.listdir(directory)
                        if (os.path.isfile(os.path.join(directory, f))
-                           and f[-4:].lower() == '.spa'  )])
+                           and f[-4:].lower() == '.spa')])
 
     # discard BKG files
     if discardbg:
@@ -266,12 +266,12 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         [min, max] = spectra
         if discardbg:
             spafiles = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
-                                  and 'BCKG' not in f])
+                               and 'BCKG' not in f])
         if not discardbg:
-            spafilespec  = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
-                           and 'BCKG' not in f])
+            spafilespec = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
+                                  and 'BCKG' not in f])
             spafileback = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-6]) <= max
-                           and 'BCKG' in f])
+                                  and 'BCKG' in f])
             spafiles = spafilespec + spafileback
 
     curfilelist = [spafiles[0]]
@@ -291,7 +291,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     # Now manage temperature
     Tfile = sorted([f for f in os.listdir(directory)
-                                if f[-4:].lower() == '.xls'])
+                    if f[-4:].lower() == '.xls'])
     if len(Tfile) == 0:
         log.debug("no temperature file")
     elif len(Tfile) > 1:
@@ -311,7 +311,8 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         sheet = book.sheet_by_index(0)
         for i in range(9, sheet.nrows):
             try:
-                time = datetime.datetime.strptime(sheet.cell(i, 0).value, '%d/%m/%y %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
+                time = datetime.datetime.strptime(sheet.cell(i, 0).value, '%d/%m/%y %H:%M:%S').replace(
+                    tzinfo=datetime.timezone.utc)
                 if ti <= time <= tf:
                     t.append(time)
                     T.append(sheet.cell(i, 4).value)
@@ -332,7 +333,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
             tstamp_ds = [(time + delta_clocks).timestamp() for time in ds.y.labels[0]]
             T_ds = interpolator(tstamp_ds)
             newlabels = np.vstack((ds.y.labels, T_ds))
-            ds.y = Coord(title=ds.y.title, data=ds.y.data, labels= newlabels)
+            ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
 
     if len(datasets) == 1:
         log.debug("finished read_dir()")
@@ -340,7 +341,8 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     log.debug("finished read_dir()")
     # several datasets returned, sorted by sample #
-    return sorted(datasets, key = lambda ds: int(ds.name.split('_')[0]))
+    return sorted(datasets, key=lambda ds: int(ds.name.split('_')[0]))
+
 
 if __name__ == '__main__':
     pass

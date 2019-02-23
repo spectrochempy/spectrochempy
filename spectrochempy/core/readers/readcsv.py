@@ -91,6 +91,7 @@ def read_zip(*args, **kwargs):
 
     return nd
 
+
 # .............................................................................
 def read_csv(*args, **kwargs):
     """Open a \*.csv file or a list of \*.csv files and set data/metadata
@@ -144,7 +145,6 @@ def read_csv(*args, **kwargs):
 
 # .............................................................................
 def _read(filename, **kwargs):
-
     # check if directory was specified
     directory = kwargs.get("directory", None)
 
@@ -176,7 +176,7 @@ def _read(filename, **kwargs):
             else:
                 # try another format!
                 dat = NDDataset.read(filename, protocol=extension[1:],
-                                   sortbydate=True, **kwargs)
+                                     sortbydate=True, **kwargs)
                 if isinstance(dat, NDDataset):
                     datasets.append(dat)
                 elif is_sequence(dat):
@@ -195,7 +195,6 @@ def _read(filename, **kwargs):
 
 # .............................................................................
 def _read_zip(filename, **kwargs):
-
     if not os.path.exists(filename):
         print('Sorry but this filename (%s) does not exists!' % filename)
         return None
@@ -364,8 +363,8 @@ def _add_omnic_info(dataset, **kwargs):
 
     return dataset
 
-def _add_tga_info(dataset, **kwargs):
 
+def _add_tga_info(dataset, **kwargs):
     # for TGA, some information are needed.
     # we add them here
     dataset.x.units = 'hour'

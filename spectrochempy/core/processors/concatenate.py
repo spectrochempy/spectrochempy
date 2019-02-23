@@ -78,7 +78,6 @@ def concatenate(*datasets, **kwargs):
     # checks dataset validity
     # ------------------------------------------------------------------------------------------------------------------
 
-
     # We must have a list of datasets
     for dataset in datasets:
         if is_sequence(dataset):  # numpy style of passing args
@@ -91,7 +90,7 @@ def concatenate(*datasets, **kwargs):
                 dataset = NDDataset(dataset)
             except:
                 raise TypeError(f"Only instance of NDDataset can be concatenated, not {type(dataset).__name__}, "
-                                f"but casting to this type failed. " )
+                                f"but casting to this type failed. ")
 
     # a flag to force stacking of dataset instead of the default concatenation
     force_stack = kwargs.get('force_stack', False)
@@ -126,8 +125,7 @@ def concatenate(*datasets, **kwargs):
                 continue
             dataset._data = dataset.data[np.newaxis]
             dataset._mask = dataset.mask[np.newaxis]
-            dataset.coords._coords =  [Coord(labels=[str(i)])]+dataset.coords._coords
-
+            dataset.coords._coords = [Coord(labels=[str(i)])] + dataset.coords._coords
 
     # Check unit compatibility
     # ------------------------------------------------------------------------------------------------------------------
@@ -200,7 +198,8 @@ def concatenate(*datasets, **kwargs):
         coords = coordss[0].copy()
 
         try:
-            coords[axis]._data = np.concatenate(tuple((c[axis].data for c in coordss))) #np.concatenate( tuple((dataset.coords[axis].data for dataset in datasets)))
+            coords[axis]._data = np.concatenate(tuple((c[axis].data for c in
+                                                       coordss)))  # np.concatenate( tuple((dataset.coords[axis].data for dataset in datasets)))
         except ValueError:
             pass
 
@@ -212,7 +211,6 @@ def concatenate(*datasets, **kwargs):
                 is_labeled = True
                 # multilabel
 
-
         if is_labeled:
             labels = []
             # be sure that now all the coordinates have a label, or create one
@@ -220,12 +218,12 @@ def concatenate(*datasets, **kwargs):
             for i, coord in enumerate(coords):
                 if coord.is_labeled:
                     labels.append(coord)
-                    continue # nothing to do for this one
+                    continue  # nothing to do for this one
                 else:
                     pass
 
             coords[axis]._labels = np.concatenate(
-              tuple((dataset.coords[axis].labels for dataset in datasets)))
+                tuple((dataset.coords[axis].labels for dataset in datasets)))
 
     out = NDDataset(data, coords=coords, mask=mask, units=units)
 

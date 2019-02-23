@@ -100,11 +100,11 @@ def align(dataset, ref, **kwargs):
 
     if method == 'linear':
         interpolator = lambda data, ax=0: scipy.interpolate.interp1d(
-                 oldaxisdata, data, axis=ax, kind=method, bounds_error=False, fill_value=fill_value, assume_sorted=True)
+            oldaxisdata, data, axis=ax, kind=method, bounds_error=False, fill_value=fill_value, assume_sorted=True)
 
     elif method == 'pchip':
         interpolator = lambda data, ax=0: scipy.interpolate.PchipInterpolator(
-                                                                          oldaxisdata, data, axis=ax, extrapolate=False)
+            oldaxisdata, data, axis=ax, extrapolate=False)
     else:
         raise AttributeError(f'{method} is not a recognised option method for `align`')
 
@@ -117,8 +117,8 @@ def align(dataset, ref, **kwargs):
     else:
         newmask = NOMASK
 
-    #interpolate_axis = interpolator(datasetordered.coords(axis).data)
-    #newaxisdata = interpolate_axis(refaxisdata)
+    # interpolate_axis = interpolator(datasetordered.coords(axis).data)
+    # newaxisdata = interpolate_axis(refaxisdata)
     newaxisdata = refaxisdata.copy()
 
     if method == 'pchip' and not np.isnan(fill_value):
@@ -152,7 +152,7 @@ def align(dataset, ref, **kwargs):
         str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)
 
     if is_sorted and out.coords(axis).reversed:
-        out.sort(axis, descend=True, inplace = True)
+        out.sort(axis, descend=True, inplace=True)
         ref.sort(refaxis, descend=True, inplace=True)
 
     return out

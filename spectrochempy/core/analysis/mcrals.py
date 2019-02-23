@@ -161,7 +161,7 @@ class MCRALS(HasTraits):
             C.coords = [X.y, St.y]
 
         change = tol + 1
-        stdev = X.std() #.data[0]
+        stdev = X.std()  # .data[0]
         niter = 0
         ndiv = 0
 
@@ -255,7 +255,7 @@ class MCRALS(HasTraits):
             stdev2 = (X_hat - X).std()
             change = 100 * (stdev2 - stdev) / stdev
 
-            stdev_PCA = (X_hat - Xpca).std() # TODO: Check PCA : values are different from the Arnaud version ?
+            stdev_PCA = (X_hat - Xpca).std()  # TODO: Check PCA : values are different from the Arnaud version ?
 
             logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
             log += logentry + '\n'

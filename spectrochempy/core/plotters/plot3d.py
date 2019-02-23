@@ -19,12 +19,10 @@ __all__ = ['plot_3D', 'plot_surface']
 
 __dataset_methods__ = ['plot_3D', 'plot_surface']
 
-
 # ----------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------
 from spectrochempy.core import project_preferences
-
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -101,7 +99,7 @@ def plot_3D(dataset, **kwargs):
             # let's go to a particular treament for the pyqtgraph plots
             kwargs['usempl'] = usempl = False
             # we try to have a commmon interface for both plot library
-            kwargs['ax'] = ax = widget # return qt_plot_1D(dataset, **kwargs)
+            kwargs['ax'] = ax = widget  # return qt_plot_1D(dataset, **kwargs)
         else:
             # this must be a matplotlibwidget
             kwargs['usempl'] = usempl = True
@@ -110,7 +108,6 @@ def plot_3D(dataset, **kwargs):
 
     # method of plot
     # ------------
-
 
     method = kwargs.get('method', prefs.method_3D)
 
@@ -140,7 +137,7 @@ def plot_3D(dataset, **kwargs):
             cmap = colormap = kwargs.get('colormap',
                                          kwargs.get('cmap', project_preferences.colormap_surface))
         else:
-            #other methods to be implemented
+            # other methods to be implemented
             pass
 
     lw = kwargs.get('linewidth', kwargs.get('lw',
@@ -151,7 +148,6 @@ def plot_3D(dataset, **kwargs):
     rcount = kwargs.get('rcount', project_preferences.rcount)
 
     ccount = kwargs.get('ccount', project_preferences.ccount)
-
 
     if method == 'surface':
         X, Y = np.meshgrid(new.x.data, new.y.data)
@@ -167,5 +163,3 @@ def plot_3D(dataset, **kwargs):
             ax.set_zlabel(new.title)
 
     return ax
-
-

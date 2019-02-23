@@ -17,6 +17,7 @@ __all__ = ['SpectroChemPyWarning',
            'info_', 'debug_', 'error_', 'warning_'
            ]
 
+
 # ======================================================================================================================
 # Exception and warning  subclass
 # ======================================================================================================================
@@ -77,7 +78,7 @@ def info_(*args, **kwargs):
     s = ""
     for a in args:
         s += pstr(a, **kwargs)
-        s = s.replace('\0','')
+        s = s.replace('\0', '')
     log.info(s)
 
 
@@ -87,7 +88,7 @@ def debug_(*args):
     s = ""
     for a in args:
         s += pstr(a)
-        s = s.replace('\0','')
+        s = s.replace('\0', '')
     log.debug(s)
 
 
@@ -97,7 +98,7 @@ def error_(*args):
     s = ""
     for a in args:
         s += pstr(a)
-        s = s.replace('\0','')
+        s = s.replace('\0', '')
     log.error(s)
 
 
@@ -106,9 +107,8 @@ def warning_(*args):
     s = ""
     for a in args:
         s += pstr(a)
-        s = s.replace('\0','')
+        s = s.replace('\0', '')
     warnings.warn(s, SpectroChemPyWarning)
-
 
 # ======================================================================================================================
 # EOF

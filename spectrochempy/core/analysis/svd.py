@@ -240,12 +240,12 @@ class SVD(HasTraits):
     def ev(self):
         """|NDDataset|,  Explained variance """
         size = self.s.size
-        ev = self.s**2 / (size-1)
+        ev = self.s ** 2 / (size - 1)
         ev.name = 'ev'
         ev.title = 'Explained variance'
         ev.coords = CoordSet(Coord(None,
-                             labels=['#%d' % (i + 1) for i in range(size)],
-                             title='Components'))
+                                   labels=['#%d' % (i + 1) for i in range(size)],
+                                   title='Components'))
         return ev
 
     @property

@@ -306,7 +306,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
 
         # Read spectral intensities
         # ..............................................................................................................
-        data = np.zeros((nspec, nintensities), dtype='float32')   # NOTE: reversed / version 0.1.a9
+        data = np.zeros((nspec, nintensities), dtype='float32')  # NOTE: reversed / version 0.1.a9
         for i in range(nspec):
             f.seek(intensity_pos[i])
             data[i, :] = np.fromfile(f, 'float32', int(nintensities))

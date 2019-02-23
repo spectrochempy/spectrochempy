@@ -14,11 +14,10 @@ testing our various |scpy| analysis methods
 """
 __all__ = ['generate_fake']
 
-
 import numpy as np
 
-def _make_spectra_matrix(pos, width, ampl):
 
+def _make_spectra_matrix(pos, width, ampl):
     from spectrochempy.core.dataset.ndcoords import Coord
     from spectrochempy.core.dataset.nddataset import NDDataset
     from spectrochempy.core.fitting.models import gaussianmodel
@@ -37,7 +36,6 @@ def _make_spectra_matrix(pos, width, ampl):
 
 
 def _make_concentrations_matrix(*profiles):
-
     from spectrochempy.core.dataset.ndcoords import Coord
     from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -73,7 +71,6 @@ def _generate_2D_spectra(concentrations, spectra):
 
 
 def generate_fake():
-
     from spectrochempy.utils import show
 
     # define properties of the spectra and concentration profiles
@@ -104,6 +101,7 @@ def generate_fake():
     d.save('test_full2D')
     spec.save('test_spectra')
     conc.save('test_concentration')
+
 
 # ======================================================================================================================
 if __name__ == '__main__':

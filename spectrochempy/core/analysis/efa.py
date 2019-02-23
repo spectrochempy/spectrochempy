@@ -80,7 +80,7 @@ class EFA(HasTraits):
         if X.is_masked:
             masked_rows = np.all(X.mask, axis=-1)
         else:
-            masked_rows = np.array([False]*M)
+            masked_rows = np.array([False] * M)
 
         K = min(K, len(np.where(~ masked_rows)[0]))
 
@@ -220,7 +220,7 @@ class EFA(HasTraits):
         if self._X.is_masked:
             masked_rows = np.all(self._X.mask, axis=-1)
         else:
-            masked_rows = np.array([False]*M)
+            masked_rows = np.array([False] * M)
 
         for i in range(M):
             if masked_rows[i]:
@@ -248,7 +248,7 @@ class EFA(HasTraits):
         ct = c.T
         profiles = [ct[j] for j in range(npc)]
 
-        labels = ['PC#{}'.format(i+1) for i in range(npc)]
+        labels = ['PC#{}'.format(i + 1) for i in range(npc)]
 
         plot_multiple(profiles, labels=labels, yscale='log', clear=clear, legend=legend)
 

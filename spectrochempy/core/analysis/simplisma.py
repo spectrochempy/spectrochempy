@@ -29,6 +29,7 @@ from traitlets import HasTraits, Instance
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.npy import dot
 
+
 # ============================================================================
 # class SIMPLISMA
 # ============================================================================
@@ -99,15 +100,14 @@ class SIMPLISMA(HasTraits):
 
         def str_iter_summary(j, index, coord, rsquare, stdev_res, diff):
             '''return formatted list of figure of merits at a given iteration'''
-            string = '{:4}  {:5}  {:8.1f} {:10.4f} {:10.4f} '.format(j+1, index, coord, stdev_res, rsquare)
+            string = '{:4}  {:5}  {:8.1f} {:10.4f} {:10.4f} '.format(j + 1, index, coord, stdev_res, rsquare)
             return string
-
 
         # ------------------------------------------------------------------------
         # Check data
         # ------------------------------------------------------------------------
 
-        if len(X.shape) != 2 :
+        if len(X.shape) != 2:
             raise ValueError('For now, SIMPLISMA only handles 2D Datasets')
 
         if np.min(X.data) < 0:
@@ -147,35 +147,34 @@ class SIMPLISMA(HasTraits):
 
         # Containers for returned objects and intermediate data
         # ---------------------------------------------------
-            # purity 'spectra' (generally spectra if X is passed,
-            # but could also be concentrations if X.T is passed)
-        Pt = NDDataset(np.zeros((n_pc, X.x.size)))
+        # purity 'spectra' (generally spectra if X is passed,
+        # but could also be concentrations if X.T is passed)
+        Pt = NDDataset(np.zeros((n_pc, X.shape[-1])))
         Pt.name = 'Purity spectra'
         Pt.coordset = [Pt.y, X.x]
         Pt.y.title = '# pure compound'
 
-            # weight matrix
-        w = NDDataset(np.zeros((n_pc, X.x.size)))
+        # weight matrix
+        w = NDDataset(np.zeros((n_pc, X.shape[-1])))
         w.coordset = [Pt.y, X.x]
 
-            # Stdev spectrum
-        s = NDDataset(np.zeros((n_pc, X.x.size)))
+        # Stdev spectrum
+        s = NDDataset(np.zeros((n_pc, X.shape[-1])))
         s.name = 'Standard deviation spectra'
-        s.y.title = '# pure compound'
         s.coordset = [Pt.y, X.x]
 
-            # maximum purity indexes and coordinates
+        # maximum purity indexes and coordinates
         maxPIndex = [0] * n_pc
         maxPCoordinate = [0] * n_pc
 
-            # Concentration matrix
-        C = NDDataset(np.zeros((X.y.size, n_pc)))
+        # Concentration matrix
+        C = NDDataset(np.zeros((X.shape[-2], n_pc)))
         C.name = 'Relative Concentrations'
         C.coordset = [X.y, C.x]
         C.x.title = '# pure compound'
 
-            # Pure component spectral profiles
-        St = NDDataset(np.zeros((n_pc, X.x.size)))
+        # Pure component spectral profiles
+        St = NDDataset(np.zeros((n_pc, X.shape[-1])))
         St.name = 'Pure compound spectra'
         St.coordset = [Pt.y, X.x]
         St.y.title = '# pure compound'
@@ -220,16 +219,16 @@ class SIMPLISMA(HasTraits):
                     print(llog)
 
                 if interactive:
-                    #should plot purity and stdev, does not work for the moment
-                    #TODO: fix the code below
-                        # fig1, (ax1, ax2) = plt.subplots(2,1)
-                        # Pt[j, :].plot(ax=ax1)
-                        # ax1.set_title('Purity spectrum #{}'.format(j+1))
-                        # ax1.axvline(maxPCoordinate[j], color='r')
-                        # s[j, :].plot(ax=ax2)
-                        # ax2.set_title('standard deviation spectrum #{}'.format(j+1))
-                        # ax2.axvline(maxPCoordinate[j], color='r')
-                        # plt.show()
+                    # should plot purity and stdev, does not work for the moment
+                    # TODO: fix the code below
+                    # fig1, (ax1, ax2) = plt.subplots(2,1)
+                    # Pt[j, :].plot(ax=ax1)
+                    # ax1.set_title('Purity spectrum #{}'.format(j+1))
+                    # ax1.axvline(maxPCoordinate[j], color='r')
+                    # s[j, :].plot(ax=ax2)
+                    # ax2.set_title('standard deviation spectrum #{}'.format(j+1))
+                    # ax2.axvline(maxPCoordinate[j], color='r')
+                    # plt.show()
 
                     ans = ''
                     while ans.lower() not in ['a', 'c']:
@@ -257,16 +256,16 @@ class SIMPLISMA(HasTraits):
                         print(llog)
 
                         ans = input('   |--> (a) Accept, (c) Change : ')
-                    #ans was [a]ccept
+                    # ans was [a]ccept
                     j += 1
                 if not interactive:
-                    j+=1
+                    j += 1
 
                 prev_stdev_res = stdev_res0
 
             else:
                 # compute jth purest variable
-                for i in range(X.x.size):
+                for i in range(X.shape[-1]):
                     Mji = np.zeros((j + 1, j + 1))
                     idx = [i] + maxPIndex[0:j]
                     for line in range(j + 1):
@@ -282,7 +281,7 @@ class SIMPLISMA(HasTraits):
 
                 # compute figures of merit
                 rsquarej, stdev_resj = figures_of_merit(X, maxPIndex, C, St, j)
-                diff = 100 * (stdev_resj - prev_stdev_res)/ prev_stdev_res
+                diff = 100 * (stdev_resj - prev_stdev_res) / prev_stdev_res
                 prev_stdev_res = stdev_resj
 
                 # add summary to log
@@ -295,19 +294,19 @@ class SIMPLISMA(HasTraits):
                 if interactive:
                     # should plot purity and stdev, does not work for the moment
                     # TODO: fix the code below
-                        # ax1.clear()
-                        # ax1.set_title('Purity spectrum #{}'.format(j+1))
-                        # Pt[j, :].plot(ax=ax1)
-                        # for coord in maxPCoordinate[:-1]:
-                        #     ax1.axvline(coord, color='g')
-                        # ax1.axvline(maxPCoordinate[j], color='r')
-                        # ax2.clear()
-                        # ax2.set_title('standard deviation spectrum #{}'.format(j+1))
-                        # s[j, :].plot(ax=ax2)
-                        # for coord in maxPCoordinate[:-1]:
-                        #     ax2.axvline(coord, color='g')
-                        # ax2.axvline(maxPCoordinate[j], color='r')
-                        # plt.show()
+                    # ax1.clear()
+                    # ax1.set_title('Purity spectrum #{}'.format(j+1))
+                    # Pt[j, :].plot(ax=ax1)
+                    # for coord in maxPCoordinate[:-1]:
+                    #     ax1.axvline(coord, color='g')
+                    # ax1.axvline(maxPCoordinate[j], color='r')
+                    # ax2.clear()
+                    # ax2.set_title('standard deviation spectrum #{}'.format(j+1))
+                    # s[j, :].plot(ax=ax2)
+                    # for coord in maxPCoordinate[:-1]:
+                    #     ax2.axvline(coord, color='g')
+                    # ax2.axvline(maxPCoordinate[j], color='r')
+                    # plt.show()
 
                     ans = ''
                     while ans.lower() not in ['a', 'c', 'r', 'f']:
@@ -328,25 +327,26 @@ class SIMPLISMA(HasTraits):
                                 print('   |--> Incorrect answer. Please enter a valid index or value')
 
                         rsquarej, stdev_resj = figures_of_merit(X, maxPIndex, C, St, j)
-                        diff = 100 * (stdev_resj - prev_stdev_res)/ prev_stdev_res
+                        diff = 100 * (stdev_resj - prev_stdev_res) / prev_stdev_res
                         prev_stdev_res + stdev_resj
 
-                        log += '   |--> changed pure variable #{}\n'.format(j+1)
+                        log += '   |--> changed pure variable #{}\n'.format(j + 1)
                         llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j], rsquarej, stdev_resj, 'diff')
                         log += llog + '\n'
                         print(llog)
 
-                        print('purest variable #{} set at index = {} ; x = {}'.format(j+1, maxPIndex[j], maxPCoordinate[j]))
+                        print('purest variable #{} set at index = {} ; x = {}'.format(j + 1, maxPIndex[j],
+                                                                                      maxPCoordinate[j]))
                         ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop: ')
 
                     if ans.lower() == 'r':
                         maxPCoordinate[j] = 0
                         maxPIndex[j] = 0
                         log += '   |--> rejected pure variable #{}\n'.format(j + 1)
-                        j = j-1
+                        j = j - 1
 
                     elif ans.lower() == 'a':
-                        j = j+1
+                        j = j + 1
 
                     elif ans.lower() == 'f':
                         finished = True
@@ -354,18 +354,19 @@ class SIMPLISMA(HasTraits):
                         llog = ('\n**** Interrupted by user at compound # {} \n**** End of SIMPL(I)SMA analysis.'
                                 .format(j))
                         log += llog + '\n'
-                        Pt = Pt[0:j,:]
+                        Pt = Pt[0:j, :]
                         St = St[0:j, :]
                         s = s[0:j, :]
                         C = C[:, 0:j]
                 # not interactive
                 else:
                     j = j + 1
-                    if (1 - rsquarej) < tol/100:
-                        llog = ('\n**** Unexplained variance lower than \'tol\' ({}%) \n**** End of SIMPL(I)SMA analysis.'
+                    if (1 - rsquarej) < tol / 100:
+                        llog = (
+                            '\n**** Unexplained variance lower than \'tol\' ({}%) \n**** End of SIMPL(I)SMA analysis.'
                                 .format(tol))
                         log += llog + '\n'
-                        Pt = Pt[0:j,:]
+                        Pt = Pt[0:j, :]
                         St = St[0:j, :]
                         s = s[0:j, :]
                         C = C[:, 0:j]
@@ -375,13 +376,13 @@ class SIMPLISMA(HasTraits):
                         finished = True
             if j == n_pc:
                 if not interactive:
-                    llog = ('\n**** Reached maximum number of pure compounds \'n_pc\' ({}) \n**** End of SIMPL(I)SMA analysis.'
+                    llog = (
+                        '\n**** Reached maximum number of pure compounds \'n_pc\' ({}) \n**** End of SIMPL(I)SMA analysis.'
                             .format(n_pc))
                     log += llog + '\n'
                     if verbose:
                         print(llog)
                     finished = True
-
 
         Pt.description = 'Purity spectra from SIMPLISMA:\n' + log
         C.description = 'Concentration/contribution matrix from SIMPLISMA:\n' + log
@@ -436,7 +437,6 @@ class SIMPLISMA(HasTraits):
         X_hat.description = 'Dataset reconstructed by SIMPLISMA\n' + self._log
         X_hat.title = 'X_hat: ' + self._X.title
         return X_hat
-
 
     def plot(self, **kwargs):
         """

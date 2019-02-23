@@ -530,9 +530,9 @@ class NDMath(object):
                             "coordinate's sizes do not match")
 
                     if other._squeeze_ndim != 1 and \
-                            obj.coords and other.coords and  \
+                            obj.coords and other.coords and \
                             not (obj._coords[0].is_empty and obj._coords[0].is_empty) and \
-                                    not np.all(obj._coords[0]._data == other._coords[0]._data):
+                            not np.all(obj._coords[0]._data == other._coords[0]._data):
                         raise ValueError(
                             "coordinate's values do not match")
 

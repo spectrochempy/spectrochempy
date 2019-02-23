@@ -7,12 +7,14 @@ __all__ = ['numpyprintoptions', 'insert_masked_print',
            'TBold', 'TRed', 'TGreen', 'TBlue', 'TCyan', 'TMagenta',
            'TYellow', 'colored', 'colored_output', 'pstr', 'print_']
 
+
 def pstr(object, **kwargs):
     from spectrochempy.core.dataset.ndarray import NDArray
     if isinstance(object, NDArray) and hasattr(object, '_cstr'):
         return object._cstr(**kwargs)
     else:
         return str(object)
+
 
 def print_(object, **kwargs):
     """
@@ -25,7 +27,7 @@ def print_(object, **kwargs):
     -------
 
     """
-    txt = pstr(object, **kwargs).replace('\0','')
+    txt = pstr(object, **kwargs).replace('\0', '')
     print(txt)
 
 

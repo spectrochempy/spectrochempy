@@ -158,7 +158,7 @@ def plot_2D(dataset, **kwargs):
         new = dataset.T  # transpose dataset
         nameadd = 'T'
     else:
-        new = dataset.copy() #TODO: why loose time to make a copy?
+        new = dataset.copy()  # TODO: why loose time to make a copy?
         nameadd = ''
 
     # figure setup
@@ -447,7 +447,7 @@ def plot_2D(dataset, **kwargs):
     # x tick labels
 
     uselabelx = kwargs.get('uselabel_x', False)
-    if x  and x.is_labeled and (uselabelx or not np.any(x.data))and len(x.labels) < number_x_labels + 1:
+    if x and x.is_labeled and (uselabelx or not np.any(x.data)) and len(x.labels) < number_x_labels + 1:
         # TODO refine this to use different orders of labels
         ax.set_xticks(xdata)
         ax.set_xticklabels(x.labels)
@@ -463,7 +463,7 @@ def plot_2D(dataset, **kwargs):
             ylabel = make_label(y, 'y') if y else ''
             # y tick labels
             uselabely = kwargs.get('uselabel_y', False)
-            if y  and y.is_labeled and (uselabely or not np.any(y.data)) and len(y.labels) < number_y_labels:
+            if y and y.is_labeled and (uselabely or not np.any(y.data)) and len(y.labels) < number_y_labels:
                 # TODO refine this to use different orders of labels
                 ax.set_yticks(ydata)
                 ax.set_yticklabels(y.labels)
@@ -500,7 +500,7 @@ def plot_2D(dataset, **kwargs):
 
     # display a title
     # ------------------------------------------------------------------------------------------------------------------
-    title=  kwargs.get('title',None)
+    title = kwargs.get('title', None)
     if title:
         ax.set_title(title)
 

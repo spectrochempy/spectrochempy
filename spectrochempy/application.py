@@ -623,7 +623,6 @@ class ProjectPreferences(MetaConfigurable):
                      help='Default plot methods for 3D datasets').tag(
         config=True, type='list')
 
-
     colorbar = Bool(True, help='Show color bar for 2D plots').tag(config=True)
 
     show_projections = Bool(False, help='Show all projections').tag(
@@ -665,7 +664,6 @@ class ProjectPreferences(MetaConfigurable):
     ccount = Integer(50, help='ccount (steps in the column mode) for surface plot').tag(
         config=True)
 
-
     # colors / style
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -695,7 +693,7 @@ class ProjectPreferences(MetaConfigurable):
         config=True, type='list')
 
     colormap_surface = Enum(cmaps, default_value='jet',
-                          help='Default colormap for surface plots').tag(
+                            help='Default colormap for surface plots').tag(
         config=True, type='list')
 
     colormap_transposed = Enum(cmaps, default_value='magma',

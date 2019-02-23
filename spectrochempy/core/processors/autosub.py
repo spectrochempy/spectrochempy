@@ -120,13 +120,13 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     s = []
     r = []
 
-    #TODO: this do not work obviously for axis != -1 - correct this
+    # TODO: this do not work obviously for axis != -1 - correct this
     for xpair in xrange:
         # determine the slices
 
         sl = slice(*xpair)
-        s.append(dataset[...,sl].data)
-        r.append(ref[...,sl].data)
+        s.append(dataset[..., sl].data)
+        r.append(ref[..., sl].data)
 
     X_r = np.concatenate((*s,), axis=-1)
     ref_r = np.concatenate((*r,), axis=-1).squeeze()
@@ -134,7 +134,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     indices, _ = list(zip(*np.ndenumerate(X_r[..., 0])))  # .squeeze())))
 
     # two methods
-    #@jit
+    # @jit
     def f_(alpha, p):
         if method == 'chi2':
             return np.sum((p - alpha * ref_r) ** 2)

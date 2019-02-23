@@ -104,7 +104,7 @@ def read_matlab(dataset=None, **kwargs):
                 ds.data = data
                 ds.name = name
                 datasets.append(ds)
-                #TODO: reshape from fortran/Matlab order to C opder
+                # TODO: reshape from fortran/Matlab order to C opder
                 # for 3D or higher datasets ?
 
             elif x[2] == 'object':
@@ -138,7 +138,7 @@ def _read_DSO(f, x):
         typedata = typedata_mat[0]
 
     if typedata != 'data':
-        return((x[0], f[x[0]]))
+        return ((x[0], f[x[0]]))
 
     else:
         author_mat = f[dso]['author'][0][0]

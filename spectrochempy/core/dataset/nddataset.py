@@ -37,6 +37,7 @@ import matplotlib.pyplot as plt
 
 try:
     import xarray as xr
+
     HAS_XARRAY = True
 except:
     HAS_XARRAY = False
@@ -44,6 +45,7 @@ except:
 try:
     import pandas as pd
     from pandas.core.generic import NDFrame
+
     HAS_PANDAS = True
 except:
     HAS_PANDAS = False
@@ -276,12 +278,12 @@ class NDDataset(
                 continue
 
             # For coord to be acceptable, we require at least a NDArray, a NDArray subclass or a CoordSet
-            if not isinstance(coord, (Coord,CoordSet)):
+            if not isinstance(coord, (Coord, CoordSet)):
                 if isinstance(coord, NDArray):
                     coord = coords[k] = Coord(coord)
                 else:
                     raise TypeError('Coordinates must be an instance or a subclass of Coord class or NDArray, or of '
-                                     f' CoordSet class, but an instance of {type(coord)} has been passed')
+                                    f' CoordSet class, but an instance of {type(coord)} has been passed')
 
             if self.dims and coord.name not in self.dims:
                 raise AttributeError(f'The name of a coordinate must have name among the current dims: {self.dims}'
@@ -289,7 +291,7 @@ class NDDataset(
 
             # check the validity of the given coordinates in terms of size
             size = coord.size
-            idx = self._get_dims_index(coord.name)[0] #idx in self.dims
+            idx = self._get_dims_index(coord.name)[0]  # idx in self.dims
             if size != self._data.shape[idx]:
                 raise ValueError(
                     f'the size of each coordinates array must None or be equal to that of the respective `{coord.name}`'
@@ -327,11 +329,12 @@ class NDDataset(
                 if i >= self.ndim:
                     # there are too many coords
                     warnings.warn(f"There is too many coordinates defined for this dataset."
-                                  f" The extra {i}'s coordinates ({coord.name}) will be eliminated. ", SpectroChemPyWarning)
+                                  f" The extra {i}'s coordinates ({coord.name}) will be eliminated. ",
+                                  SpectroChemPyWarning)
                     # remove this extra coordinates
                     del coords[self.ndim]
 
-                    continue # bypass the remaining code
+                    continue  # bypass the remaining code
 
             # eventually set the names
             coords.names = DEFAULT_DIM_NAME[-self.ndim:]
@@ -535,7 +538,7 @@ class NDDataset(
 
         """
         new = super().transpose(*dims, inplace=inplace)
-        new.history = 'Data transposed'+ f' between dims: {dims}' if dims else ''
+        new.history = 'Data transposed' + f' between dims: {dims}' if dims else ''
         return new
 
     # ..................................................................................................................
@@ -585,7 +588,7 @@ class NDDataset(
         axis = self._get_dims_index(dims)
         axis = axis[0] if axis else None
 
-        #indices = indices.tolist()
+        # indices = indices.tolist()
         if axis is None:
             # just do a fancy indexing
             return self[indices]
@@ -625,20 +628,20 @@ class NDDataset(
 
         """
 
-        inplace=kwargs.get('inplace',False)
+        inplace = kwargs.get('inplace', False)
         if not inplace:
             new = self.copy()
         else:
             new = self
 
-        pos=kwargs.pop('pos',None)
-        by=kwargs.pop('by','value')
+        pos = kwargs.pop('pos', None)
+        by = kwargs.pop('by', 'value')
 
         axis = self.get_axis(**kwargs)
         if axis is None:
             axis = 0
 
-        descend=kwargs.pop('descend',None)
+        descend = kwargs.pop('descend', None)
         if descend is None:
             # when non specified, default is False (except for reversed coordinates
             descend = self._coords[axis].reversed
@@ -845,8 +848,8 @@ class NDDataset(
             return None
 
         if self._coords is not None:
-            names = self.coords.names # all names of the current coordinates
-            new_coords = [None]*len(names)
+            names = self.coords.names  # all names of the current coordinates
+            new_coords = [None] * len(names)
             for i, item in enumerate(items):
                 # get the corresponding dimension name in the dims list
                 name = self.dims[i]
@@ -876,17 +879,17 @@ class NDDataset(
         elif item in DEFAULT_DIM_NAME:  # syntax such as ds.x, ds.y, etc...
             return self.coord(item)
 
-#        return super().__getattr__(item)
+    #        return super().__getattr__(item)
 
     def __setattr__(self, item, value):
         # debug_(item, value)
-        if item in DEFAULT_DIM_NAME: #:# syntax such as ds.x, ds.y, etc...
+        if item in DEFAULT_DIM_NAME:  #:# syntax such as ds.x, ds.y, etc...
             # Note the above test is important to avoid errors with traitlets
             # even if it looks redundant with the folllowing
             if item in self.dims:
                 if self.coords is None:
                     # we need to create a coordset first
-                    self.coords = [None]*self.ndim
+                    self.coords = [None] * self.ndim
                 idx = self.coords.names.index(item)
                 _coords = self.coords
                 _coords[idx] = Coord(value, name=item)
@@ -897,7 +900,6 @@ class NDDataset(
 
         else:
             super().__setattr__(item, value)
-
 
     # ..................................................................................................................
     def __eq__(self, other, attrs=None):

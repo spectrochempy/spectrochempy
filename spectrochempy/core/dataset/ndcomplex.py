@@ -588,7 +588,7 @@ class NDComplexArray(NDArray):
     # ..................................................................................................................
     def _make_quaternion(self, data):
 
-        if data.ndim % 2 != 0 :
+        if data.ndim % 2 != 0:
             raise ValueError("An array of data to be transformed to quaternion must be 2D.")
 
         if data.dtype not in TYPE_COMPLEX:

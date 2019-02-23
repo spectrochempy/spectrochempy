@@ -66,16 +66,18 @@ TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
 
 try:
     import pandas as pd
+
     HAS_PANDAS = True
 except ImportError:
     HAS_PANDAS = False
 
-
 try:
     import xarray as xr
+
     HAS_XARRAY = True
 except ImportError:
     HAS_XARRAY = False
+
 
 def make_new_object(obj):
     """

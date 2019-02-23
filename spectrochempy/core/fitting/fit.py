@@ -338,7 +338,7 @@ class Fit(HasTraits):
             # nD data
             raise NotImplementedError("Fit not implemented for nD data yet!")
 
-        modeldata = np.zeros((nbmodels + 2, x.size), dtype = np.float64)
+        modeldata = np.zeros((nbmodels + 2, x.size), dtype=np.float64)
 
         if nbmodels < 1:
             names = ['baseline', 'modelsum']
@@ -352,7 +352,7 @@ class Fit(HasTraits):
         names = ['baseline', ]
 
         for model in models:
-            calc = getmodel(x, modelname=model, par=parameters) #, dataset=dataset)
+            calc = getmodel(x, modelname=model, par=parameters)  # , dataset=dataset)
             if not model.startswith('baseline'):
                 row += 1
                 modeldata[row] = calc

@@ -224,7 +224,7 @@ class Coord(NDMath, NDArray):
     # ------------------------------------------------------------------------------------------------------------------
     # ..................................................................................................................
     def __copy__(self):
-        res = self.copy(deep=False)   # we keep name of the coordinate by default
+        res = self.copy(deep=False)  # we keep name of the coordinate by default
         res.name = self.name
         return res
 
@@ -244,15 +244,15 @@ class Coord(NDMath, NDArray):
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):
         # we need to keep the names when copying coordinates to avoid later problems
-        res = super().__getitem__(items, return_index = return_index)
+        res = super().__getitem__(items, return_index=return_index)
         res.name = self.name
         return res
 
     # ..................................................................................................................
     def __str__(self):
-            return repr(self)
+        return repr(self)
 
-    def _cstr(self , header='  coordinates: ... \n', print_size=True):
+    def _cstr(self, header='  coordinates: ... \n', print_size=True):
 
         out = ''
         if not self.is_empty and print_size:
@@ -318,7 +318,6 @@ class CoordSet(HasTraits):
     _id = Unicode()
     _name = Unicode()
 
-
     # Hidden attribute to specify if the collection is for a single dimension
     _is_same_dim = Bool(False)
     _copy = Bool(False)
@@ -355,8 +354,7 @@ class CoordSet(HasTraits):
 
         # initialise the coordinate list
         # max number of dimensions in a coordset = len(DEFAULT_DIM_NAME)
-        _coords = [None]*len(DEFAULT_DIM_NAME)
-
+        _coords = [None] * len(DEFAULT_DIM_NAME)
 
         # First evaluate passed args
         if coords:
@@ -386,20 +384,20 @@ class CoordSet(HasTraits):
                         coords = copy.deepcopy(coords)
                     _coords = coords[0]._coords
                 else:
-                    for idx, coord in enumerate(coords[::-1]): #we fill from the end of the list (in reverse order)
-                        id = len(_coords)-1-idx
+                    for idx, coord in enumerate(coords[::-1]):  # we fill from the end of the list (in reverse order)
+                        id = len(_coords) - 1 - idx
                         if not isinstance(coord, CoordSet):
                             coord = Coord(coord)  # be sure to cast to the correct type
                         # set the name from the position except if we copy a coordset
                         keepnames = kwargs.get('keepnames', False)
                         if not keepnames:
-                            coord.name = DEFAULT_DIM_NAME[id] # get the name in fonction of the position
-                        _coords[id]=coord
+                            coord.name = DEFAULT_DIM_NAME[id]  # get the name in fonction of the position
+                        _coords[id] = coord
 
         # now evaluate keywords argument
         for key, coord in kwargs.items():
             # prepare values to Coord or CoordSet
-            if isinstance(coord, (list, tuple))  : # make sure it's a coordset
+            if isinstance(coord, (list, tuple)):  # make sure it's a coordset
                 coord = CoordSet(coord)
             elif isinstance(coord, np.ndarray) or coord is None:
                 coord = Coord(coord)
@@ -709,7 +707,6 @@ class CoordSet(HasTraits):
             idx = self.names.index(item)
             return self._coords[idx]
 
-
     # ..................................................................................................................
     def __getitem__(self, index):
 
@@ -739,19 +736,19 @@ class CoordSet(HasTraits):
                 # let try with the canonical dimension names defined by  DEFAULT_DIM_NAME
                 if index[0] in self.names:
                     # ok we can find it a a canonical name:
-                    c= self._coords.__getitem__(self.names.index(index[0]))
-                    if len(index)>1 and index[1]=='_' and isinstance(c, CoordSet):
+                    c = self._coords.__getitem__(self.names.index(index[0]))
+                    if len(index) > 1 and index[1] == '_' and isinstance(c, CoordSet):
                         c = c.__getitem__(index[1:])
                     return c
             except IndexError:
                 pass
 
             log.error(f"Could not find `{index}` in coordinates names or titles")
-            return  None
+            return None
 
         res = self._coords.__getitem__(index)
         if isinstance(index, slice):
-            return CoordSet(res, keepnames = True)
+            return CoordSet(res, keepnames=True)
         else:
             return res
 
@@ -786,8 +783,8 @@ class CoordSet(HasTraits):
                 # let try with the canonical dimension names defined by  DEFAULT_DIM_NAME
                 if index[0] in self.names:
                     # ok we can find it a a canonical name:
-                    c= self._coords.__getitem__(self.names.index(index[0]))
-                    if len(index)>1 and index[1]=='_' and isinstance(c, CoordSet):
+                    c = self._coords.__getitem__(self.names.index(index[0]))
+                    if len(index) > 1 and index[1] == '_' and isinstance(c, CoordSet):
                         c.__setitem__(index[1:], coord)
                     return
 
@@ -795,7 +792,6 @@ class CoordSet(HasTraits):
                 pass
 
             raise IndexError(f"Could not find `{index}` in coordinates names or titles")
-
 
         self._coords[index] = coord
 
@@ -814,7 +810,7 @@ class CoordSet(HasTraits):
         s = []
         for item in self._coords:
             if isinstance(item, CoordSet):
-                s.append(f"{item.name}:"+repr(item).replace('CoordSet: ',''))
+                s.append(f"{item.name}:" + repr(item).replace('CoordSet: ', ''))
             else:
                 s.append(f"{item.name}:{item.title}")
         out = out.format(*s)
@@ -825,15 +821,15 @@ class CoordSet(HasTraits):
         return repr(self)
 
     # ..................................................................................................................
-    def _cstr(self, header = '   Multicoord: ... \n'):
-        out=""
+    def _cstr(self, header='   Multicoord: ... \n'):
+        out = ""
         for i, item in enumerate(self._coords):
-            if i==0 :
+            if i == 0:
                 out += f'{item._str_shape().rstrip()}\n'
                 out += header
             txt = f'{item._cstr(print_size=False)}\n'
             out += format(textwrap.indent(txt, ' ' * 4))
-            out = out.replace('        title', f'({item.name}){" "*(6-len(item.name))}title')
+            out = out.replace('        title', f'({item.name}){" " * (6 - len(item.name))}title')
 
         return out
 
@@ -850,6 +846,7 @@ class CoordSet(HasTraits):
         return coords
 
         # ..................................................................................................................
+
     def __eq__(self, other):
         if other is None:
             return False

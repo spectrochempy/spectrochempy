@@ -262,7 +262,7 @@ def plot_1D(dataset, **kwargs):
 
     # make a copy
     # ------------------------------------------------------------------------------------------------------------------
-    new = dataset #.copy()  # Do we need a copy?
+    new = dataset  # .copy()  # Do we need a copy?
 
     # If we are in the GUI, we will plot on a widget: but which one?
     # ------------------------------------------------------------------------------------------------------------------

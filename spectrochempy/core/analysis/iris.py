@@ -95,7 +95,7 @@ class IRIS:
 
         if 'p' in param:
             p = param['p']
-            #check p
+            # check p
             if isinstance(p, Coord):
                 if p.shape[1] != X.shape[0]:
                     raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
@@ -117,7 +117,7 @@ class IRIS:
         verbose = kwargs.get('verbose', False)
 
         w = np.zeros((len(eps), 1))
-        w[0] = 0.5 * (eps[-1] - eps[0]) / (len(eps) - 1)    #
+        w[0] = 0.5 * (eps[-1] - eps[0]) / (len(eps) - 1)  #
         w[-1] = w[0]
 
         for j in range(1, len(eps) - 1):
@@ -127,7 +127,7 @@ class IRIS:
         K.coordset = (p, Coord(eps, title='epsilon'))
         for i, p_i in enumerate(pval):
             for j, eps_j in enumerate(eps):
-                K.data[i,j] = w[j] * ker(p_i, eps_j)
+                K.data[i, j] = w[j] * ker(p_i, eps_j)
 
         W = NDDataset(np.eye(X.shape[0]))
 
@@ -182,7 +182,7 @@ class IRIS:
                 if guess == 'previous':
                     x0 = x_prec
                 elif guess == 'zero':
-                    x0 = np.zeros((m,1))
+                    x0 = np.zeros((m, 1))
                 elif guess == 'random':
                     x0 = np.random.randn(m, 1)
 
@@ -206,7 +206,7 @@ class IRIS:
                 x_prec = f[i, :, j] = res_cons['x']
 
             res = X.data - np.dot(K.data, f[i].data)
-            RSS[i] = np.sum(res**2)
+            RSS[i] = np.sum(res ** 2)
             SM[i] = np.linalg.norm(
                 np.dot(np.dot(np.transpose(f[i]), S), f[i]))
 
@@ -214,7 +214,7 @@ class IRIS:
             print('\n Done')
 
         f = NDDataset(f)
-        f.name  =  '2D distribution functions'
+        f.name = '2D distribution functions'
         f.title = 'pseudo-concentration'
         f.history = '2D IRIS analysis of {} dataset with the {} kernel'.format(X.name, kername)
         xcoord = X.coordset[1]
@@ -226,7 +226,6 @@ class IRIS:
         self._X = X
         self._RSS = RSS
         self._SM = SM
-
 
     def transform(self):
         """

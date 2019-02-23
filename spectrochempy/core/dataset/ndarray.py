@@ -25,7 +25,6 @@ import uuid
 import itertools
 import sys
 
-
 # ======================================================================================================================
 # Third party imports
 # ======================================================================================================================
@@ -33,7 +32,6 @@ import sys
 from traitlets import List, Unicode, Instance, Bool, Union, Int, HasTraits, default, validate
 from pint.errors import DimensionalityError
 import numpy as np
-
 
 # ======================================================================================================================
 # local imports
@@ -258,7 +256,7 @@ class NDArray(HasTraits):
                                                            "_%s" % attr))
                 if not eq:
                     debug_(f"attributes '{attr}' are not equals or one is missing: \n"
-                              "{} != {}".format(getattr(self, f'_{attr}'), getattr(other, f'_{attr}')))
+                           "{} != {}".format(getattr(self, f'_{attr}'), getattr(other, f'_{attr}')))
                     return False
             else:
                 return False
@@ -267,9 +265,9 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):
 
-        if isinstance(items,list):
+        if isinstance(items, list):
             # Special case of fancy indexing
-            items = (items, )
+            items = (items,)
 
         # choose, if we keep the same or create new object
         inplace = False
@@ -297,7 +295,7 @@ class NDArray(HasTraits):
 
         if new.is_empty:
             error_(f"Empty array of shape {new._data.shape} resulted from slicing.\n"
-                             f"Check the indexes and make sure to use floats for location slicing")
+                   f"Check the indexes and make sure to use floats for location slicing")
             new = None
 
         elif (self._data is not None) and hasattr(udata, 'mask'):
@@ -479,7 +477,7 @@ class NDArray(HasTraits):
             See the :ref:`userguide` for more information
 
         """
-        #if self._data is None and self.is_labeled:
+        # if self._data is None and self.is_labeled:
         #    # label only
         #    return self._labels.squeeze()
 
@@ -637,14 +635,14 @@ class NDArray(HasTraits):
             else:
                 if (self.data is not None) and (labels.shape[0] != self.shape[0]):
                     # allow the fact that the labels may have been passed in a transposed array
-                    if labels.ndim>1 and (labels.shape[-1] == self.shape[0]):
+                    if labels.ndim > 1 and (labels.shape[-1] == self.shape[0]):
                         labels = labels.T
                     else:
                         raise ValueError(f"labels {labels.shape} and data {self.shape} shape mismatch!")
 
                 if np.any(self._labels):
                     info_(f"{type(self).__name__} is already a labeled array.\nThe explicitly provided labels will "
-                             f"be appended to the current labels")
+                          f"be appended to the current labels")
 
                     labels = labels.squeeze()
                     self._labels = self._labels.squeeze()
@@ -698,7 +696,7 @@ class NDArray(HasTraits):
                 # this should happen when a new mask is added to an existing one
                 # mask to be combined to an existing one
                 info_(f"{type(self).__name__} is already a masked array.\n The new mask will be combined with the "
-                         f"current array's mask.")
+                      f"current array's mask.")
                 self._mask |= mask  # combine (is a copy!)
             else:
                 if self._copy:
@@ -817,7 +815,7 @@ class NDArray(HasTraits):
         # number of dimension
         ndim = self.ndim
         if ndim > 0:
-            #if len(self._dims)< ndim:
+            # if len(self._dims)< ndim:
             #    self._dims = self._dims_default()
             dims = self._dims[:ndim]
             return dims
@@ -893,6 +891,7 @@ class NDArray(HasTraits):
             return False
 
         return True
+
     # ..................................................................................................................
     @property
     def is_labeled(self):
@@ -1111,7 +1110,7 @@ class NDArray(HasTraits):
                 setattr(new, f"_{attr}", _attr)
 
         # name must be changed
-        new.name = '*'+self.name
+        new.name = '*' + self.name
 
         return new
 
@@ -1538,7 +1537,7 @@ class NDArray(HasTraits):
 
             text += mkbody(data, '', units)
 
-        out = '' #f'        title: {self.title}\n' if self.title else ''
+        out = ''  # f'        title: {self.title}\n' if self.title else ''
         text = text.strip()
         if '\n' not in text:  # single line!
             out += header.replace('...', f'\0{text}\0')
@@ -1715,7 +1714,7 @@ class NDArray(HasTraits):
 
         # Check if keyword dims (or synonym axis) exists
         axis = kwargs.pop('axis', None)
-        #if axis is not None:
+        # if axis is not None:
         #    warnings.warn('keyword `axis` is deprecated. Use `dims` instead.', SpectroChemPyDeprecationWarning)
 
         kdims = kwargs.pop('dims', kwargs.pop('dim', axis))  # dim or dims keyword
@@ -1795,7 +1794,7 @@ class NDArray(HasTraits):
                 if start is not None and stop < start:
                     start, stop = stop, start
                 if stop != start:
-                    stop = stop + 1 #to include last loc or label index
+                    stop = stop + 1  # to include last loc or label index
             if step is not None and not isinstance(step, (int, np.int_, np.int64)):
                 raise NotImplemented('step in location slicing is not yet possible.')
                 # TODO: we have may be a special case with datetime
@@ -1803,7 +1802,7 @@ class NDArray(HasTraits):
         if step is None:
             step = 1
         if start is not None and stop is not None and start == stop and info is None:
-            stop = stop + 1 #to include last index
+            stop = stop + 1  # to include last index
 
         newkey = slice(start, stop, step)
         return newkey
@@ -1822,7 +1821,6 @@ class NDArray(HasTraits):
             keys = list(key)
         else:
             keys = [key, ]
-
 
         def ellipsisinkeys(keys):
             try:
