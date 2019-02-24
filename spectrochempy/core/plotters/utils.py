@@ -19,10 +19,16 @@ def make_label(ss, lab='<no_axe_label>', usempl=True):
     """ make a label from title and units
 
     """
+    if ss is None:
+        return lab
+
     if ss.title:
         label = ss.title  # .replace(' ', r'\ ')
     else:
         label = lab
+
+    if '<untitled>' in label:
+        label = 'values'
 
     if usempl:
         if ss.units is not None and str(ss.units) != 'dimensionless':

@@ -26,7 +26,7 @@ from spectrochempy.utils import SpectroChemPyWarning
 
 
 
-
+@pytest.mark.skip('not yet finish')
 def test_nmr_2D_em_(NMR_dataset_2D):
     dataset = NMR_dataset_2D.copy()
     dataset.plot_map()

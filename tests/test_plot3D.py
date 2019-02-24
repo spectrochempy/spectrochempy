@@ -28,7 +28,7 @@ def test_plot2D_as_3D():
 
 
     X.plot_surface(colorbar=True)
-    
+
     show()
 
     pass

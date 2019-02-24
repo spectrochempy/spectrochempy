@@ -11,9 +11,9 @@
 """
 
 """
-__all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
+__all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_surface']
 
-__dataset_methods__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image']
+__dataset_methods__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_surface']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
@@ -25,6 +25,7 @@ from copy import copy
 # ----------------------------------------------------------------------------------------------------------------------
 
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -83,6 +84,20 @@ def plot_image(dataset, **kwargs):
     return ax
 
 
+# surface plot -----------------------------------------------------------------
+
+def plot_surface(dataset, **kwargs):
+    """
+    Plot a 2D dataset as a a 3D-surface.
+
+    Alias of plot_2D (with `method` argument set to ``surface``.
+
+    """
+    kwargs['method'] = 'surface'
+    ax = plot_2D(dataset, **kwargs)
+    return ax
+
+
 # generic plot (default stack plot) -------------------------------------------
 
 def plot_2D(dataset, **kwargs):
@@ -124,9 +139,21 @@ def plot_2D(dataset, **kwargs):
     # ------------------------------------------------------------------------------------------------------------------
 
     prefs = dataset.plotmeta
+
+    # method of plot
+    # ------------------------------------------------------------------------------------------------------------------
+    method = kwargs.get('method', None)
+
     if not prefs.style:
         # not yet set, initialize with default project preferences
         prefs.update(project_preferences.to_dict())
+
+        # surface specific setting
+        if method not in ['surface']:
+            prefs['colorbar'] = False
+
+    if method is None:
+        method = prefs.method_2D
 
     # If we are in the GUI, we will plot on a widget: but which one?
     # ------------------------------------------------------------------------------------------------------------------
@@ -145,18 +172,13 @@ def plot_2D(dataset, **kwargs):
             fig = widget.fig
             kwargs['ax'] = ax = fig.gca()
 
-    # method of plot
-    # ------------------------------------------------------------------------------------------------------------------
-
-    method = kwargs.get('method', prefs.method_2D)
-
     data_only = kwargs.get('data_only', False)
 
     data_transposed = kwargs.get('data_transposed', False)
 
     if data_transposed:
         new = dataset.T.copy()  # transpose dataset
-        nameadd = 'T'
+        nameadd = '.T'
     else:
         new = dataset.copy()  # TODO: why loose time to make a copy?
         nameadd = ''
@@ -173,38 +195,48 @@ def plot_2D(dataset, **kwargs):
     # Other properties
     # ------------------------------------------------------------------------------------------------------------------
 
-    colorbar = kwargs.get('colorbar', project_preferences.colorbar)
+    colorbar = kwargs.get('colorbar', prefs.colorbar)
 
     cmap = mpl.rcParams['image.cmap']
 
     # viridis is the default setting,
     # so we assume that it must be overwritten here
     # except if style is grayscale which is a particular case.
-    styles = kwargs.get('style', project_preferences.style)
+    styles = kwargs.get('style', prefs.style)
 
     if styles and not "grayscale" in styles and cmap == "viridis":
 
         if method in ['map', 'image']:
             cmap = colormap = kwargs.get('colormap',
-                                         kwargs.get('cmap', project_preferences.colormap))
+                                         kwargs.get('cmap', prefs.colormap))
         elif data_transposed:
             cmap = colormap = kwargs.get('colormap',
-                                         kwargs.get('cmap', project_preferences.colormap_transposed))
+                                         kwargs.get('cmap', prefs.colormap_transposed))
+        elif method in ['surface']:
+            cmap = colormap = kwargs.get('colormap',
+                                         kwargs.get('cmap', prefs.colormap_surface))
         else:
             cmap = colormap = kwargs.get('colormap',
-                                         kwargs.get('cmap', project_preferences.colormap_stack))
+                                         kwargs.get('cmap', prefs.colormap_stack))
 
     lw = kwargs.get('linewidth', kwargs.get('lw',
-                                            project_preferences.pen_linewidth))
+                                            prefs.pen_linewidth))
 
-    alpha = kwargs.get('calpha', project_preferences.contour_alpha)
+    alpha = kwargs.get('calpha', prefs.contour_alpha)
 
-    number_x_labels = project_preferences.number_of_x_labels
-    number_y_labels = project_preferences.number_of_y_labels
+    antialiased = kwargs.get('antialiased', prefs.antialiased)
+
+    rcount = kwargs.get('rcount', prefs.rcount)
+
+    ccount = kwargs.get('ccount', prefs.ccount)
+
+    number_x_labels = prefs.number_of_x_labels
+    number_y_labels = prefs.number_of_y_labels
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-    ax.xaxis.set_ticks_position('bottom')
-    ax.yaxis.set_ticks_position('left')
+    if method not in ['surface']:
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
 
     # the next lines are to avoid multipliers in axis scale
     formatter = ScalarFormatter(useOffset=False)
@@ -225,7 +257,7 @@ def plot_2D(dataset, **kwargs):
         xdata = x.data
         discrete_data = False
         if not np.any(xdata):
-            if x.labels:
+            if x.is_labeled:
                 discrete_data = True
                 # take into account the fact that sometimes axis have just labels
                 xdata = range(1, len(x.labels) + 1)
@@ -262,7 +294,7 @@ def plot_2D(dataset, **kwargs):
     if y is not None and (not y.is_empty or y.is_labeled):
         ydata = y.data
         if not np.any(ydata):
-            if x.labels:
+            if y.is_labeled:
                 ydata = range(1, len(y.labels) + 1)
     else:
         ydata = range(ysize)
@@ -289,7 +321,7 @@ def plot_2D(dataset, **kwargs):
     if not kwargs.get('imag', False):
         zdata = new.real.masked_data
     else:
-        zdata = new.RI.masked_data # new.imag.masked_data #TODO: quaternion case (3 imag.parts)
+        zdata = new.RI.masked_data  # new.imag.masked_data #TODO: quaternion case (3 imag.parts)
 
     zlim = kwargs.get('zlim', (zdata.min(), zdata.max()))
 
@@ -333,13 +365,24 @@ def plot_2D(dataset, **kwargs):
     # ------------------------------------------------------------------------------------------------------------------
     normalize = kwargs.get('normalize', None)
 
-    if method in ['map', 'image']:
+    if method in ['map', 'image', 'surface']:
         zmin, zmax = zlim
         zmin = min(zmin, -zmax)
         zmax = max(-zmin, zmax)
         norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
 
-    if method in ['image']:
+    if method in ['surface']:
+        X, Y = np.meshgrid(xdata, ydata)
+        Z = zdata
+
+        # Plot the surface.
+        surf = ax.plot_surface(X, Y, Z, cmap=cmap, linewidth=lw,
+                               antialiased=antialiased,
+                               rcount=rcount, ccount=ccount,
+                               norm=norm,
+                               )
+
+    elif method in ['image']:
         if discrete_data:
             method = 'map'
         else:
@@ -353,7 +396,7 @@ def plot_2D(dataset, **kwargs):
             c.set_cmap(cmap)
             c.set_norm(norm)
 
-    if method in ['map']:
+    elif method in ['map']:
 
         if discrete_data:
 
@@ -430,7 +473,7 @@ def plot_2D(dataset, **kwargs):
         ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 
     if data_only:
-        # if data only (we will  ot set axes and labels
+        # if data only (we will not set axes and labels
         # it was probably done already in a previous plot
         new._plot_resume(dataset, **kwargs)
         return ax
@@ -443,7 +486,7 @@ def plot_2D(dataset, **kwargs):
     # ------------------------------------------------------------------------------------------------------------------
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        xlabel = make_label(x, 'x') if x else ''
+        xlabel = make_label(x, new.dims[-1])
     ax.set_xlabel(xlabel)
 
     # x tick labels
@@ -459,10 +502,10 @@ def plot_2D(dataset, **kwargs):
     ylabel = kwargs.get("ylabel", None)
     if not ylabel:
         if method in ['stack']:
-            ylabel = make_label(new, 'z')
+            ylabel = make_label(new, 'values')
 
         else:
-            ylabel = make_label(y, 'y') if y else ''
+            ylabel = make_label(y, new.dims[-2])
             # y tick labels
             uselabely = kwargs.get('uselabel_y', False)
             if y and y.is_labeled and (uselabely or not np.any(y.data)) and len(y.labels) < number_y_labels:
@@ -475,7 +518,10 @@ def plot_2D(dataset, **kwargs):
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
         if method in ['stack']:
-            zlabel = make_label(y, 'y') if y else ''
+            zlabel = make_label(y, new.dims[-2])
+        elif method in ['surface']:
+            zlabel = make_label(new, 'values')
+            ax.set_zlabel(zlabel)
         else:
             zlabel = make_label(new, 'z')
 
@@ -485,7 +531,7 @@ def plot_2D(dataset, **kwargs):
     else:
         ax.set_yticks([])
 
-    if colorbar:
+    if colorbar and 'surface' not in method:
 
         if not new._axcb:
             axec = new.ndaxes['colorbar']
@@ -494,7 +540,8 @@ def plot_2D(dataset, **kwargs):
             new._axcb.set_label(zlabel)
             # new._axcb.ax.yaxis.set_major_formatter(y_formatter)
             # #this doesn't work
-        pass
+    elif colorbar:
+        new._fig.colorbar(surf, shrink=0.5, aspect=10)
 
     # do we display the zero line
     if kwargs.get('show_zero', False):

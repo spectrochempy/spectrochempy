@@ -28,6 +28,7 @@ import warnings
 
 from cycler import cycler
 import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, default
@@ -214,8 +215,10 @@ class NDPlot(HasTraits):
         # pyqtgraph in the GUI - usempl is the flag for that option
 
         usempl = kwargs.get('usempl', True)
+        method = kwargs.get('method', project_preferences.method_2D)
+        ax3d = '3d' if method in ['surface'] else None
 
-        # make matplolig specific setup
+        # make matplolib specific setup
 
         if usempl:
             _set_figure_style(**kwargs)
@@ -276,7 +279,7 @@ class NDPlot(HasTraits):
             self.ndaxes = self._fig.get_axes()
         else:
             # or create a new subplot
-            ax = self._fig.gca()
+            ax = self._fig.gca(projection=ax3d)
             ax.name = 'main'
             self.ndaxes['main'] = ax
 
@@ -359,7 +362,7 @@ class NDPlot(HasTraits):
                 axey.name = 'yproj'
                 self.ndaxes['yproj'] = axey
 
-            if colorbar:
+            if colorbar and not ax3d:
                 axec = divider.append_axes("right", .15, pad=0.1, frameon=0,
                                            xticks=[], yticks=[])
                 axec.tick_params(right='off', left='off')

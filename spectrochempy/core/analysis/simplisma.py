@@ -104,7 +104,7 @@ class SIMPLISMA(HasTraits):
             return string
 
         def get_x_data(X):
-            if X.x is not None and not X.x.is_empty: #TODO what about labels?
+            if X.x is not None and not X.x.is_empty:  # TODO what about labels?
                 return X.x.data
             else:
                 return np.arange(X.shape[-1])
@@ -249,7 +249,7 @@ class SIMPLISMA(HasTraits):
                             try:
                                 new = float(new)
                                 maxPIndex[j] = np.argmin(abs(get_x_data(X) - new))
-                                maxPCoordinate[j] =get_x_data(X)[maxPIndex[j]]
+                                maxPCoordinate[j] = get_x_data(X)[maxPIndex[j]]
                             except ValueError:
                                 print('Incorrect answer. Please enter a valid index or value')
 

@@ -615,13 +615,13 @@ class ProjectPreferences(MetaConfigurable):
     # 2D/3D options
     # ----------
 
-    method_2D = Enum(['map', 'image', 'stack', '3D'], default_value='stack',
+    method_2D = Enum(['map', 'image', 'stack', 'surface', '3D'], default_value='stack',
                      help='Default plot methods for 2D datasets').tag(
         config=True, type='list')
 
-    method_3D = Enum(['surface'], default_value='surface',
-                     help='Default plot methods for 3D datasets').tag(
-        config=True, type='list')
+    # method_3D = Enum(['surface'], default_value='surface',
+    #                 help='Default plot methods for 3D datasets').tag(
+    #    config=True, type='list')
 
     colorbar = Bool(True, help='Show color bar for 2D plots').tag(config=True)
 

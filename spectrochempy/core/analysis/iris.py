@@ -100,16 +100,16 @@ class IRIS:
             if isinstance(p, Coord):
                 if p.shape[1] != X.shape[0]:
                     raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
-                pval = p.data #values
+                pval = p.data  # values
                 # (values contains unit! to use it we must either have eps with units or noramlise p
             else:
                 if len(p) != X.shape[0]:
                     raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
                 p = Coord(p, title='External variable')
-                pval = p.data #values
+                pval = p.data  # values
         else:
             p = X.y
-            pval = X.y.data # values
+            pval = X.y.data  # values
 
         if 'guess' in param:
             guess = param['guess']
@@ -262,7 +262,7 @@ class IRIS:
             The reconstructed datasets.
         """
         X_hat = NDDataset(np.zeros((self._f.z.size, self._X.y.size, self._X.x.size)),
-                          title = self._X.title, units=self._X.units)
+                          title=self._X.title, units=self._X.units)
 
         X_hat.name = '2D-IRIS Reconstructed datasets'
         X_hat.coords = [self._f.z, self._X.y, self._X.x]
