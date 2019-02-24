@@ -33,7 +33,8 @@ class IRIS:
 
         param : dict
             dict of inversion parameters with the following keys:
-                'kernel': the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional relationship holding
+                'kernel': the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional
+                relationship holding
                 between 'p', the experimental variable that was changed in the rows direction of X
                 (e.g. temperature, pressure, time, ...) and the concentration of pure species characterized
                 by the physico-chemical parameter 'eps' (e.g. adsorption/desorption energy, ...).
@@ -99,15 +100,16 @@ class IRIS:
             if isinstance(p, Coord):
                 if p.shape[1] != X.shape[0]:
                     raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
-                pval = p.values
+                pval = p.data #values
+                # (values contains unit! to use it we must either have eps with units or noramlise p
             else:
                 if len(p) != X.shape[0]:
                     raise ValueError('\'p\' should be consistent with the y coordinate of the dataset')
                 p = Coord(p, title='External variable')
-                pval = p.values
+                pval = p.data #values
         else:
             p = X.y
-            pval = X.y.values
+            pval = X.y.data # values
 
         if 'guess' in param:
             guess = param['guess']
@@ -124,7 +126,7 @@ class IRIS:
             w[j] = 2 * w[0]
 
         K = NDDataset(np.zeros((p.size, len(eps))))
-        K.coordset = (p, Coord(eps, title='epsilon'))
+        K.coords = (p, Coord(eps, title='epsilon'))
         for i, p_i in enumerate(pval):
             for j, eps_j in enumerate(eps):
                 K.data[i, j] = w[j] * ker(p_i, eps_j)
@@ -217,10 +219,10 @@ class IRIS:
         f.name = '2D distribution functions'
         f.title = 'pseudo-concentration'
         f.history = '2D IRIS analysis of {} dataset with the {} kernel'.format(X.name, kername)
-        xcoord = X.coordset[1]
+        xcoord = X.coords[1]
         ycoord = Coord(data=eps, title='epsilon')
         zcoord = Coord(data=lambdaReg, title='lambda')
-        f.coordset = [zcoord, ycoord, xcoord]
+        f.coords = [zcoord, ycoord, xcoord]
         self._f = f
         self._K = K
         self._X = X
@@ -259,11 +261,13 @@ class IRIS:
         X_hat : |NDDataset|
             The reconstructed datasets.
         """
-        X_hat = NDDataset(np.zeros((self._f.z.size, self._X.y.size, self._X.x.size)))
+        X_hat = NDDataset(np.zeros((self._f.z.size, self._X.y.size, self._X.x.size)),
+                          title = self._X.title, units=self._X.units)
+
         X_hat.name = '2D-IRIS Reconstructed datasets'
-        X_hat.coordset = [self._f.z, self._X.y, self._X.x]
+        X_hat.coords = [self._f.z, self._X.y, self._X.x]
         for i in range(X_hat.z.size):
-            X_hat[i] = np.dot(self._K.data, self._f[i].data)
+            X_hat[i] = np.dot(self._K.data, self._f[i].data.squeeze())
         return X_hat
 
     def plotlcurve(self, **kwargs):

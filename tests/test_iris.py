@@ -10,7 +10,10 @@
 import os
 import numpy as np
 
-from spectrochempy import NDDataset, Coord, IRIS, show
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.analysis.iris import IRIS
+from spectrochempy.utils import show, info_
 
 def test_IRIS():
     print('start test IRIS')
@@ -21,7 +24,11 @@ def test_IRIS():
          0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
          0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 
-    X.coordset[0] = Coord(p, title='pressure')
+    X.coords.update(y=Coord(p, title='pressure', units='torr'))   # This method is mandatory because it will preserve the name
+                                                    # setting using X.coords[0] = Coord(...) fails
+                                                    # unless name is specified : Coord(..., name='y')
+
+    #X.plot()
 
     ############################################################
     # set the optimization parameters, perform the analysis
@@ -31,13 +38,17 @@ def test_IRIS():
              'lambdaRange': [-7, -5, 3],
              'kernel': 'langmuir'}
 
-    iris = IRIS(X[:, 2250.:1950.], param, verbose=True)
+    X_ = X[:, 2250.:1950.]
+    X_.plot()
+
+    iris = IRIS(X_, param, verbose=True)
+
     f = iris.transform()
     X_hat = iris.inverse_transform()
 
-    iris.plotlcurve()
-    f[-2].plot(method='map')
-    X_hat[-2].plot()
+    iris.plotlcurve(scale='ln')
+    f[0].plot(method='map', plottitle=True)
+    X_hat[0].plot(plottitle=True)
 
     show()
 
