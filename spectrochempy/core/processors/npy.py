@@ -21,7 +21,8 @@ __all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'zeros_like', 'ones',
 
 import numpy as np
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import NOMASK
+from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.utils import NOMASK, make_new_object
 
 
 def empty(shape, dtype=None, **kwargs):
@@ -428,25 +429,26 @@ def dot(a, b, strict=True, out=None):
     mask = data.mask
     data = data.data
 
-    coords = None
     if a.coords is not None:
-        coords = [a.coords[0]]
+        idx = a.coords.names.index(a.dims[0])
+        coordy = Coord(a.coords[idx])
+    else:
+        coordy = None
     if b.coords is not None:
-        if coords is None:
-            coords = [None]
-        coords.append(b.coords[1])
-    elif coords is not None:
-        coords.append(None)
+        idx = b.coords.names.index(b.dims[1])
+        coordx = Coord(b.coords[idx])
+    else:
+        coordx = None
+    coords = CoordSet(y=coordy, x=coordx)
 
     history = 'dot product between %s and %s' % (a.name, b.name)
 
     # make the output
     # ------------------------------------------------------------------------------------------------------------------
-    new = a.copy()
+    new = make_new_object(a)
     new._data = data
     new._mask = mask
-    if new.coords is not None:
-        new._coords = type(new.coords)(coords)
+    new._coords = coords
     new.history = history
 
     return new

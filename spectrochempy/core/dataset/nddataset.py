@@ -291,6 +291,7 @@ class NDDataset(
 
             # check the validity of the given coordinates in terms of size
             size = coord.size
+
             idx = self._get_dims_index(coord.name)[0]  # idx in self.dims
             if size != self._data.shape[idx]:
                 raise ValueError(
