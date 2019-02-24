@@ -5,15 +5,12 @@ Introduction to the plotting librairie
 
 
 """
-
-
-import spectrochempy as scp
-import os
-
+from spectrochempy import *
+# this also import the os namespace
 
 #sp.set_loglevel('DEBUG')
-datadir = scp.general_preferences.datadir
-dataset = scp.NDDataset.read_omnic(
+datadir = general_preferences.datadir
+dataset = NDDataset.read_omnic(
         os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
 
 
@@ -34,16 +31,16 @@ labels = ['sample {}'.format(label) for label in
           ["S1", "S10", "S20", "S50", "S53"]]
 
 # plot multiple
-scp.plot_multiple(method = 'scatter',
+plot_multiple(method = 'scatter',
                 datasets=datasets, labels=labels, legend='best')
 
 # plot mupltiple with  style
-scp.plot_multiple(method='scatter', style='sans',
+plot_multiple(method='scatter', style='sans',
               datasets=datasets, labels=labels, legend='best')
 
 # check that style reinit to default
-scp.plot_multiple(method='scatter',
+plot_multiple(method='scatter',
               datasets=datasets, labels=labels, legend='best')
 
 
-
+#show() # uncomment to show plot if needed()

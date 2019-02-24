@@ -20,12 +20,12 @@ of spectrochempy in 'als2004dataset.MAT'
 
 """
 
-import spectrochempy as scp
+from spectrochempy import *
 
 ############################################################
 # Load the dataset
 
-datasets = scp.read_matlab("matlabdata/als2004dataset.MAT")
+datasets = read_matlab("matlabdata/als2004dataset.MAT")
 
 # As the .mat file contains 6 matrices, 6 NDDataset objects are returned:
 
@@ -45,7 +45,7 @@ guess = datasets[1]
 
 ##############################################################
 # Create a MCR-ALS object with the default settings and the verbose optionto get a summary of optimization steps:
-mcr = scp.MCRALS(X, guess, verbose=True)
+mcr = MCRALS(X, guess, verbose=True)
 
 ##############################################################
 # The optimization has converged. We can get the concentration (C) and pure spectra profiles (St)
@@ -62,4 +62,4 @@ St.plot()
 X_hat = mcr.plot()
 
 
-scp.show()
+#show() # uncomment to show plot if needed()

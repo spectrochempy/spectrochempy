@@ -7,24 +7,23 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 """
-NDDataset MCR ALS optimization example
--------------------------------
-In this example, we perform the MCR ALS optimization of a dataset.
+PCA analysis example
+---------------------
+In this example, we perform the PCA dimensionality reduction of the classical
+``iris`` dataset.
 
 """
 
-import spectrochempy as scp
+from spectrochempy import *
 
 ############################################################
-# Load a dataset
+# Upload a dataset form a distant server
 
-dataset = scp.read_omnic("irdata/nh4y-activation.spg")
-print(dataset)
-dataset.plot_stack()
+dataset = upload_IRIS()
 
 ##############################################################
 # Create a PCA object
-pca = scp.PCA(dataset, centered=False)
+pca = PCA(dataset, centered=True)
 
 ##############################################################
 # Reduce the dataset to a lower dimensionality (number of
@@ -36,14 +35,8 @@ print(LT)
 
 ###############################################################@
 # Finally, display the results graphically
-
 _ = pca.screeplot()
-_ = pca.scoreplot(1, 2)
-_ = pca.scoreplot(1, 2, 3)
+_ = pca.scoreplot(1, 2, color_mapping='labels')
+_ = pca.scoreplot(1, 2, 3, color_mapping='labels')
 
-##############################################################################
-# Displays the 4-first loadings
-
-LT[:4].plot_stack()
-
-#scp.show()
+#show() # uncomment to show plot if needed()

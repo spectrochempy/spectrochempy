@@ -234,11 +234,18 @@ nd
 # %% [markdown]
 # ### Plotting a dataset
 #
-# Let's plot first a 1D spectrum (for instance one column of nd)
+# Let's plot first a 1D spectrum (for instance one row of nd)
 
 # %%
-row = nd[:,-1]
+row = nd[-1]
 _ = row.plot()
+
+# %% [markdown]
+# or a column ...
+
+# %%
+col = nd[:, 3500.]  # note the indexing using wavenumber!
+_ = col.plot_scatter()
 
 # %% [markdown]
 # 2D plots can be also generated as stacked plot
@@ -267,7 +274,7 @@ _ = nd.plot(method='map') # or nd.plot_map()
 # Lets take, e.g., the last row as reference
 
 # %%
-ref = nd[:,0]
+ref = nd[0]
 _ = ref.plot() 
 
 # %% [markdown]

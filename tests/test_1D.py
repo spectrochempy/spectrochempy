@@ -84,6 +84,10 @@ def test_1D():
         raise AssertionError('comparison fails')
     os.remove('multiple_IR_dataset_1D_scatter.png')
 
+    # plot 1D column
+    col = dataset[:, 3500.]  # note the indexing using wavenumber!
+    _ = col.plot_scatter()
+
     show()
 
 

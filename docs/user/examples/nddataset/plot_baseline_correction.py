@@ -18,30 +18,29 @@ interactively, using the ``multivariate`` method and a ``pchip`` interpolation.
 
 ###############################################################################
 # As usual we start by importing the useful library, and at least  the
-# spectrochempy scp.
+# spectrochempy library.
 
-import spectrochempy as scp
-import os
+from spectrochempy import *
 
 ###############################################################################
 # Load data
 
-datadir = scp.general_preferences.datadir
+datadir = general_preferences.datadir
 
-nd = scp.NDDataset.read_omnic(
+nd = NDDataset.read_omnic(
     os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
 
 ###############################################################################
 # Do some slicing to keep only the interesting region
 
-ndp = (nd - nd[-1])[1291.0:5999.0]
+ndp = (nd - nd[-1])[:, 1291.0:5999.0]
 # Important:  notice that we use floating point number
 # integer would mean points, not wavenumbers!
 
 ###############################################################################
 # Define the BaselineCorrection object.
 
-ibc = scp.BaselineCorrection(ndp, axis=-1, method='multivariate',
+ibc = BaselineCorrection(ndp, method='multivariate',
                              interpolation='pchip', npc=5, zoompreview=3)
 
 ###############################################################################
@@ -55,6 +54,4 @@ span = ibc.run(*ranges)
 
 print(ibc.corrected)
 
-# ======================================================================================================================
-if __name__ == '__main__':
-    pass
+#show() # uncomment to show plot if needed()

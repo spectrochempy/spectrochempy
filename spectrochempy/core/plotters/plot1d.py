@@ -262,7 +262,8 @@ def plot_1D(dataset, **kwargs):
 
     # make a copy
     # ------------------------------------------------------------------------------------------------------------------
-    new = dataset  # .copy()  # Do we need a copy?
+    new = dataset.copy()  # Do we need a copy?
+    new = new.squeeze()   # and squeeze it
 
     # If we are in the GUI, we will plot on a widget: but which one?
     # ------------------------------------------------------------------------------------------------------------------
@@ -354,12 +355,21 @@ def plot_1D(dataset, **kwargs):
     # the actual dimension name is the first in the new.dims list
     dimx = new.dims[-1]
     x = getattr(new, dimx)
-    assert x.ndim == 1
+    xsize = new.size
+    if x is not None and (not x.is_empty or x.is_labeled):
+        xdata = x.data
+        discrete_data = False
+        if not np.any(xdata):
+            if x.is_labeled:
+                discrete_data = True
+                # take into account the fact that sometimes axis have just labels
+                xdata = range(1, len(x.labels) + 1)
+    else:
+        xdata = range(xsize)
 
     # take into account the fact that sometimes axis have just labels
-    xdata = x.data
     if xdata is None:
-        xdata = range(new.size)
+        xdata = range(xsize)
 
     # ordinates (by default we plot real part of the data)
     if not kwargs.pop('imag', False) or kwargs.get('show_complex', False):
@@ -470,8 +480,7 @@ def plot_1D(dataset, **kwargs):
     xlim.sort()
 
     # reversed axis?
-    reverse = new.x.reversed
-    if kwargs.get('reverse', reverse):
+    if kwargs.get('x_reverse', kwargs.get('reverse', x.reversed if x else False)):
         xlim.reverse()
 
     if data_only:
@@ -505,13 +514,13 @@ def plot_1D(dataset, **kwargs):
 
     xlabel = kwargs.get("xlabel", None)
     if not xlabel:
-        xlabel = make_label(x, dimx, usempl)
+        xlabel = make_label(x, new.dims[-1])
     ax.set_xlabel(xlabel)
 
     # x tick labels
 
-    uselabel = kwargs.get('uselabel', False)
-    if uselabel or not np.any(x.data):
+    uselabelx = kwargs.get('uselabel_x', False)
+    if x and x.is_labeled and (uselabelx or not np.any(x.data)) and len(x.labels) < number_x_labels + 1:
         # TODO refine this to use different orders of labels
         ax.set_xticks(xdata)
         ax.set_xticklabels(x.labels)

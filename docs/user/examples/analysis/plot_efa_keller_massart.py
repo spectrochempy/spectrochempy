@@ -14,55 +14,57 @@ In this example, we perform the Evolving Factor Analysis of a TEST dataset
 12 (1992) 209-224 )
 
 """
-import os
-import numpy as np
-import spectrochempy as scp
+from spectrochempy import *
 
 # sphinx_gallery_thumbnail_number = 5
 
-############################################################
+########################################################################################################################
 # Generate a test dataset
 # ----------------------------------------------------------------------------------------------------------------------
 # 1) Simulated Chromatogram
 #
-t = scp.Coord(np.arange(15), units='minutes', title='time')
-c = np.zeros((2,15), dtype=np.float64)
-c[0, 3:8] = [1,3,6,3,1] # compound 1
-c[1, 5:11] = [1,3,5,3,1,0.5] #compound 2
 
-dsc = scp.NDDataset(data=c, coords=[scp.Coord(range(2)), t])
+t = Coord(np.arange(15), units='minutes', title='time')  # time coordinates
+c = Coord(range(2), title = 'components')                                      # component coordinates
 
-##############################################################################
+data = np.zeros((2,15), dtype=np.float64)
+data[0, 3:8] = [1,3,6,3,1] # compound 1
+data[1, 5:11] = [1,3,5,3,1,0.5] #compound 2
+
+dsc = NDDataset(data=data, coords=[c, t])
+
+########################################################################################################################
 # 2) Adsorption spectra
 #
-s = np.array([[2.,3.,4.,2.],[3.,4.,2.,1.]])
-w = scp.Coord(np.arange(1,5,1), units='nm', title='wavelength')
 
-dss = scp.NDDataset(data=s, coords=[scp.Coord(range(2)), w])
+spec = np.array([[2.,3.,4.,2.],[3.,4.,2.,1.]])
+w = Coord(np.arange(1,5,1), units='nm', title='wavelength')
 
-##############################################################################
+dss = NDDataset(data=spec, coords=[c, w])
+
+########################################################################################################################
 # --> Simulated data matrix
 #
 
-dataset = scp.dot(dsc.T, dss)
+dataset = dot(dsc.T, dss)
 dataset.data = np.random.normal(dataset.data,.2)
 dataset.title = 'intensity'
 
 dataset.plot_stack()
 
-############################################################
+########################################################################################################################
 #  Evolving Factor Analysis
 
-efa = scp.EFA(dataset)
+efa = EFA(dataset)
 
-############################################################
+########################################################################################################################
 # Plots of the log(EV) for the forward and backward analysis
 #
 
 f = efa.get_forward(plot=True)
 b = efa.get_backward(plot=True)
 
-#############################################################
+########################################################################################################################
 # Looking at these EFA curves, it is quite obvious that only two components
 # are really significant, and this correspond to the data that we have in
 # input.
@@ -78,7 +80,7 @@ efa.get_backward(plot=True, npc=2, cutoff=cut, clear=False, legend='lower right'
 # TODO: solve the problem with legends when two plots on the same figures
 
 
-##############################################################################
+########################################################################################################################
 # Get the abstract concentration profile based on the FIFO EFA analysis
 #
 
