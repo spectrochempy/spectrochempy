@@ -709,8 +709,11 @@ class NDDataset(
         if new._coords is not None:
             # if there are coordinates they have to be squeezed as well (remove
             # coordinate for the squeezed axis)
-            for i in axis[::-1]:
-                del new._coords[i]
+
+            for i in axis:
+                dim = self.dims[i]
+                idx = new._coords.names.index(dim)
+                del new._coords[idx]
 
         return new
 

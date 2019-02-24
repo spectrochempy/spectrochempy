@@ -148,9 +148,6 @@ mydataset.author = 'Blake & Mortimer'
 mydataset
 
 # %% [markdown]
-# **Note** : It is worth noting that the names of the dimensions follow the natural matrix order, e.g. for an array of shape (10,4,2), the fisrt dimension of size 10 is called `x`, the second of size 4: `y`, and the last :`z`.  
-
-# %% [markdown]
 # ## Copying existing NDDataset
 #
 # To copy an existing dataset, this is as simple as:

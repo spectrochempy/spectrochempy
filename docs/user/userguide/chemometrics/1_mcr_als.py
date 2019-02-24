@@ -46,20 +46,20 @@ for a in A:
 X = A[0]
 X
 
-X.plot()
+_ = X.plot()
 
 # The original dataset is the 'm1' matrix and does not contain information as to the actual elution time, wavelength, and data units. Hence the resulting NDDataset has no coordinates and on the plot, only the matrix line and row indexes are indicated. For the clarity of the tutorial, we add: (i) a proper title to the data, (ii) the default coordinates (index) do the NDDataset and (iii) a proper name for these coordinates:
 
 X.title = 'absorbance'
-X.coordset = [X.y, X.x]
-X.y.title = 'Elution Time'
-X.x.title = 'Wavelength'
+X.coords = [None, None]
+X.title = 'concentration'
+X.coords.titles = ['wavelength', 'elution time']
 X
 
 # From now on, these names will be taken into account by Scpy in the plottings as well as in the analysis treatments (PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:
 
-plt.figure()
-X.plot_3D(cmap='viridis', linewidth=0, ccount=100)
+surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10,5))
+surf.grid('off')
 
 # ## 3 Initial guess and MCR ALS optimization
 #
@@ -74,7 +74,7 @@ X.plot_3D(cmap='viridis', linewidth=0, ccount=100)
 # The matrix spure provided in the initial dataset is a guess for the spectral profiles. Let's name it 'St0', and plot it:  
 
 St0 = A[1]
-St0.plot()
+_ = St0.plot()
 
 # Note that, again, no information has been given as to the ordinate ad abscissa data. We could add them as previously but this is niot very important. The key point is that the 'wavelength' dimension is compatible with the data 'X', which is indeed the case (both have a legth of 95). If it was not, an error would be generated in the following.  
 #
@@ -112,11 +112,11 @@ C1, St1 = mcr1.transform()
 
 # As the dimensions of C are such that the rows direction (C.y) corresponds to the elution time and the columns direction (C.x) correspond to the four pure species, it is necessary to transpose it before plotting in order to plot the concentration vs. the elution time.
 
-C1.T.plot()
+_ = C1.T.plot()
 
 # On the other hand, the spectra of the pure species can be plot directly:
 
-St1.plot()
+_ = St1.plot()
 
 # #### 3.1.3 A basic illustration of the rotational ambiguity
 # We have thus obtained the elution profiles of the four pure species. Note that the 'concentration' vaules are very low. This results from the fact that the absorbance values in X are on the order of 0-1 while the absorbances of the initial pure spectra are of the order of 10^4. As can be seen above, the absorbance of the final spectra is of the same order of magnitude.
@@ -127,13 +127,13 @@ mcr2 = MCRALS(X, St0, param={'normSpec': 'euclid'})
 C2, St2 = mcr2.transform()
 mcr3 = MCRALS(X, St0, param={'normSpec': 'max'})
 C3, St3 = mcr3.transform()
-St1.plot()
-St2.plot()
-St3.plot()
+_ = St1.plot()
+_ = St2.plot()
+_ = St3.plot()
 
-C1.T.plot()
-C2.T.plot()
-C3.T.plot()
+_ = C1.T.plot()
+_ = C2.T.plot()
+_ = C3.T.plot()
 
 # It is clear that the normalization affects the relative intensity of the spectra and of the concentration. This is a basic example of the well known rotational ambiguity of the MCS ALS solutions.
 
@@ -147,14 +147,14 @@ C3.T.plot()
 
 pca = PCA(X)
 pca.printev(n_pc=10)
-pca.screeplot(n_pc=8)
+_ = pca.screeplot(n_pc=8)
 
 # The number of significant PC's is clearly larger or equal to 2. It is, however, difficult tto determine whether it sould be set to 3 or 4...  Let's look at the score and loading matrices:
 #
 
 S, LT = pca.transform(n_pc=8)
-S.T.plot()
-LT.plot()
+_ = S.T.plot()
+_ = LT.plot()
 
 # Examination of the scores and loadings indicate that the 4th component has structured, non random scores and loadings. Hence we will fix the number of pure species to 4.
 #
@@ -171,7 +171,7 @@ S3.shape
 #
 
 efa = EFA(X)
-C0 = efa.get_conc(npc=4)
+C0 = efa.get_conc(n_pc=4)
 
 # The MCR ALS can then be launched using this new guess:
 

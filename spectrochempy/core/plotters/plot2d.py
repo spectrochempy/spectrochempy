@@ -253,9 +253,9 @@ def plot_2D(dataset, **kwargs):
     dimx = new.dims[-1]
     x = getattr(new, dimx)
     xsize = new.shape[-1]
+    discrete_data = False
     if x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
-        discrete_data = False
         if not np.any(xdata):
             if x.is_labeled:
                 discrete_data = True
@@ -397,7 +397,6 @@ def plot_2D(dataset, **kwargs):
             c.set_norm(norm)
 
     elif method in ['map']:
-
         if discrete_data:
 
             _colormap = cm = plt.get_cmap(cmap)

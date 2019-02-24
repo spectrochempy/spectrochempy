@@ -62,6 +62,7 @@ Documentation
 * :doc:`user/userguide/introduction/index`
 * :doc:`user/userguide/dataset/index`
 * :doc:`user/userguide/projects/index`
+* :doc:`user/userguide/chemometrics/index`
 * :doc:`user/userguide/nmr/index`
 * :doc:`user/userguide/tutorial/index`
 
@@ -73,6 +74,7 @@ Documentation
    user/userguide/introduction/index
    user/userguide/dataset/index
    user/userguide/projects/index
+   user/userguide/chemometrics/index
    user/userguide/nmr/index
    user/userguide/tutorial/index
    

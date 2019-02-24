@@ -171,7 +171,6 @@ plt.figure(figsize=(5,2.5))
 p, = plt.plot(x,y)
 p.set_linewidth(2)
 p.set_color('red')
-plt.show()
 
 # %% [markdown]
 # ### Units
