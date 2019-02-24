@@ -36,8 +36,8 @@ dataset.plot_stack()
 efa = EFA(dataset)
 
 
-f = efa.get_forward(npc=7, plot=True)
-b = efa.get_backward(npc=7, plot=True)
+f = efa.get_forward(n_pc=7, plot=True)
+b = efa.get_backward(n_pc=7, plot=True)
 
 
 ##############################################################################
@@ -48,8 +48,8 @@ b = efa.get_backward(npc=7, plot=True)
 npc = 4
 cut = np.max(f[:, npc].data)
 
-f = efa.get_forward(npc=4, cutoff=cut, plot=True)
-b = efa.get_backward(npc=4, cutoff=cut, plot=True)
+f = efa.get_forward(n_pc=4, cutoff=cut, plot=True)
+b = efa.get_backward(n_pc=4, cutoff=cut, plot=True)
 
 
 c = efa.get_conc(npc, cutoff=cut, plot=True)

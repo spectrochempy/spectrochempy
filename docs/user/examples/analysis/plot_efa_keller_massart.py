@@ -71,11 +71,11 @@ b = efa.get_backward(plot=True)
 # We can consider that the third EFA components is mainly due to the noise,
 # and so we can use it to set a cut of values
 
-npc = 2
-cut = np.max(f[:, npc].data)
+n_pc = 2
+cut = np.max(f[:, n_pc].data)
 
-efa.get_forward(plot=True, npc=2, cutoff=cut, legend='upper right')
-efa.get_backward(plot=True, npc=2, cutoff=cut, clear=False, legend='lower right')
+efa.get_forward(plot=True, n_pc=2, cutoff=cut, legend='upper right')
+efa.get_backward(plot=True, n_pc=2, cutoff=cut, clear=False, legend='lower right')
 # with clear=False, we will plot the two graphs on the same figure
 # TODO: solve the problem with legends when two plots on the same figures
 
@@ -84,4 +84,4 @@ efa.get_backward(plot=True, npc=2, cutoff=cut, clear=False, legend='lower right'
 # Get the abstract concentration profile based on the FIFO EFA analysis
 #
 
-c = efa.get_conc(npc, cutoff=cut, plot=True)
+c = efa.get_conc(n_pc, cutoff=cut, plot=True)
