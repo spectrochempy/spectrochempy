@@ -703,6 +703,7 @@ class NDDataset(
             If `dim` is not `None`, and the dimension being squeezed is not
             of length 1
         """
+        old = self.dims[:]
 
         new, axis = super(NDDataset, self).squeeze(*dims, inplace=inplace, return_axis=True)
 
@@ -711,7 +712,7 @@ class NDDataset(
             # coordinate for the squeezed axis)
 
             for i in axis:
-                dim = self.dims[i]
+                dim = old[i] 
                 idx = new._coords.names.index(dim)
                 del new._coords[idx]
 
