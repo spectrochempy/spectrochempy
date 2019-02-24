@@ -424,16 +424,15 @@ To use the API, one must load it using one of the following syntax:
 >>> from spectrochempy import *
 
 In the second syntax, as usual in python, access to the objects/functions 
-may be simplified (*e.g.*, we can use `plot_stack` instead of 
-`scp.plot_stack` but there is always a risk of overwriting some variables 
-already in the namespace. Therefore, the first syntax is in general 
+may be simplified (*e.g.*, we can use `plot_stack` instead of  `scp.plot_stack` but there is always a risk of 
+overwriting some variables already in the namespace. Therefore, the first syntax is in general 
 recommended,
 although that, in the examples in this documentation, we have often use the 
 second one for simplicity.
 
 To go deeper in the core of |scpy|, look at 
 the :ref:`Developper's documentation<develdocs>` and 
-:ref:`Code Reference<develreference>`.
+:ref:`Code Reference <develreference>`.
 
 Objects
 -------

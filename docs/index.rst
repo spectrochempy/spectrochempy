@@ -5,23 +5,21 @@
 |scpy|: Processing, analysing and modelling data for spectrochemistry
 ######################################################################
 
-|scpy| is a framework for processing, analysing and modelling **Spectro**\ scopic
-data for **Chem**\ istry with **Py**\ thon. 
+|scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic data for **Chem**\ istry with **Py**\ thon.
+It is a cross platform software, running on Linux, Windows or OS X.
 
-It is is cross platform running on Linux, Windows or OS X.
+Among its major features:
 
-**Main features**
-
-#.  A |NDDataset| object embedding array of data with coordinates and metadata.
-#.  A |Project| manager to work on multiple |NDDataset| simultaneoulsly.
-#.  ``Units`` and ``Uncertainties`` for |NDDataset| and NDDataset coordinates |Coord|.
-#.  Mathematical operations over |NDDataset| such addition, multiplication and many more ...
-#.  Import functions to read data from experiments or modelling programs ...
-#.  Display functions such as ``plot`` ...
-#.  Export functions to ``csv``, ``xls`` ... 
-#.  Preprocessing functions such as baseline correction, masking bad data, automatic subtraction 
-    and many more ...
-#.  Exploratory analysis such as ``svd``, ``pca``, ``mcr_als``, ``efa`` ...
+#.  A ``NDDataset`` object embedding array of data with labeled axes and metadata.
+#.  A ``Project`` manager to work on multiple ``NDDataset`` simultaneously.
+#.  Physical ``Units`` for ``NDDataset``.
+#.  Mathematical operations over ``NDDataset`` such addition, multiplication and many more ...
+#.  Import functions to read data from experiments or modeling programs ...
+#.  Display functions such as ``plot`` for 1D or nD datasets ...
+#.  Export functions to *csv*, *xls* formats ...
+#.  Preprocessing functions such as baseline correction, automatic subtraction and many more ...
+#.  Fitting capabilities for single or multiple datasets ...
+#.  Exploratory analysis such as ``SVD``, ``PCA``, ``MCR_ALS``, ``EFA`` ...
 
 .. warning::
 
@@ -36,6 +34,8 @@ It is is cross platform running on Linux, Windows or OS X.
 
 Documentation
 =============
+
+.. _gettingstarted:
 
 **Getting Started**
 
@@ -56,7 +56,9 @@ Documentation
    gettingstarted/license
    gettingstarted/changelog
 
-   
+
+.. _userguide:
+
 **User Guide** 
 
 * :doc:`user/userguide/introduction/index`
@@ -94,7 +96,8 @@ Documentation
    gallery/auto_examples/index
    user/faq
    
-   
+.. _develreference:
+
 **Developer's Corner**
 
 * :doc:`dev/contributing`

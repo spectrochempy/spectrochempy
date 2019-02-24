@@ -604,7 +604,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
             else:
                 max_chars = max(10, max_item_chars - len(display_name))
                 sig = mangle_signature(sig, max_chars=max_chars)
-                sig = sig.replace('*', r'\*')
+                #sig = sig.replace('*', r'\*')
 
             # -- Grab the documentation
 

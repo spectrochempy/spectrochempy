@@ -8,7 +8,7 @@
 # =============================================================================
 """
 NDDataset MCR ALS optimization example
--------------------------------
+--------------------------------------
 In this example, we perform the MCR ALS optimization of a dataset 
 corresponding to a HPLC-DAD run, from Jaumot et al. Chemolab, 76 (2005), 
 pp. 101-110 and Jaumot et al. Chemolab, 140 (2015) pp. 1-12.

@@ -47,7 +47,7 @@ def read_matlab(dataset=None, **kwargs):
 
     Returns
     -------
-    dataset : |list| or |NDDataset|
+    dataset : list or |NDDataset|
         A dataset or a list of datasets or tuples (name, object) if some content
         is not recognized in the .mat file.
 

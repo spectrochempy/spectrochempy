@@ -6,7 +6,10 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
+"""
+This module implement the IRIS class.
 
+"""
 __all__ = ['IRIS']
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -30,36 +33,27 @@ class IRIS:
         -----------
         X : |NDDataset|
             The dataset on which to perform the 2D-IRIS analysis
-
         param : dict
-            dict of inversion parameters with the following keys:
-                'kernel': the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional
-                relationship holding
-                between 'p', the experimental variable that was changed in the rows direction of X
+            Dict of inversion parameters with the following keys:
+
+            *   'kernel': the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional
+                relationship holding between 'p', the experimental variable that was changed in the rows direction of X
                 (e.g. temperature, pressure, time, ...) and the concentration of pure species characterized
                 by the physico-chemical parameter 'eps' (e.g. adsorption/desorption energy, ...).
-                default: 'langmuir'
-                If another kernel name is given, the kernel function  must be passed in param['ker']
-
-                'ker': a two-variable lambda function ker(p, eps) where p and eps are the external experimental
-                 variable and  the internal physico-chemical parameter, respectively
-                #TODO: implement other kernels: e.g. 'CA', 'TPD'
-
-                'epsRange': array_like of three values [start, stop, num] defining the interval of eps values.
+                Default: 'langmuir'. If another kernel name is given, the kernel function must be passed in param['ker']
+            *   'ker': a two-variable lambda function ker(p, eps) where p and eps are the external experimental
+                variable and  the internal physico-chemical parameter, respectively - TODO: implement other kernels: e.g. 'CA', 'TPD'
+            *   'epsRange': array_like of three values [start, stop, num] defining the interval of eps values.
                 start, stop: the starting and end values of eps, num: number of values.
-
-                'lambdaRange': array_like of three values [start, stop, num] defining the interval of regularization
-                 parameter. Its values are speced evenly on a log scale with 10^start and 10^stop: a the starting and
-                 end values and num the number of values.
-
-                'p': array or coordinate of the external variable. If none is given, p = X.y.values
-
-                'guess': |string| method to guess the initial distribution function for the current wavelength.
-                'previous': takes the distribution at the previous wavelength, 'zero' takes a null
-                distribution function, 'random'  takes a random distribution function.
-
-        verbose : |bool|
-            if set to True, prints informations during the 2D IRIS  analysis.
+            *   'lambdaRange': array_like of three values [start, stop, num] defining the interval of regularization
+                parameter. Its values are speced evenly on a log scale with 10^start and 10^stop: a the starting and
+                end values and num the number of values.
+            *   'p': array or coordinate of the external variable. If none is given, p = X.y.values
+            *   'guess': method to guess the initial distribution function for the current wavelength.
+            *   'previous': takes the distribution at the previous wavelength, 'zero' takes a null distribution
+                function, 'random'  takes a random distribution function.
+        verbose : bool
+            If set to True, prints informations during the 2D IRIS  analysis.
             In any case, the same information is returned in self._log
 
         """
@@ -237,14 +231,17 @@ class IRIS:
         factorization: :math:`X = K.f[i]`.
         :math:`K` is a (m x q) matrix holding the values of the kernel
         function for the m values of the external variable (`p`) and the
-         q values of the internal variable (`epsilon`).
+        q values of the internal variable (`epsilon`).
         :math: `f[i]` is the (q x n) matrix holding the values of the
         2D-distribution function
 
         Return
         -------
-        f : |NDDataset| object (l x m x n) containing the l 2D-distribution
-        functions f[i] obtained for each value of the regularization parameter.
+        f : |NDDataset|
+            object (l x m x n) containing the l 2D-distribution
+            functions f[i] obtained for each value of the regularization
+            parameter.
+
         """
 
         return self._f
@@ -259,7 +256,8 @@ class IRIS:
         Return
         ------
         X_hat : |NDDataset|
-            The reconstructed datasets.
+            The reconstructed dataset.
+
         """
         X_hat = NDDataset(np.zeros((self._f.z.size, self._X.y.size, self._X.x.size)),
                           title=self._X.title, units=self._X.units)
@@ -271,11 +269,21 @@ class IRIS:
         return X_hat
 
     def plotlcurve(self, **kwargs):
-        ''' plots the L Curve
-        scale : string
-        2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
-        axes should be log scales. default: 'll'
-        '''
+        """
+        Plots the L Curve
+
+        Parameters
+        ----------
+        scale : str, optional, default: 'll'
+            2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
+            axes should be log scales.
+
+        Returns
+        -------
+        ax : subplot axis
+
+        """
+
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.set_title('L curve')
@@ -287,4 +295,5 @@ class IRIS:
             ax.set_xscale('log')
         if scale[0] == 'l':
             ax.set_yscale('log')
+
         return ax

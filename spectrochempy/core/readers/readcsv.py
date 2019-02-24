@@ -67,7 +67,7 @@ def read_zip(*args, **kwargs):
 
     Returns
     -------
-    |NDDataset|
+    dataset : |NDDataset|
 
     Examples
     --------

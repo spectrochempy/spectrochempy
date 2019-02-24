@@ -9,6 +9,7 @@
 
 """
 This module implement the SIMPLISMA class.
+
 """
 
 __all__ = ['SIMPLISMA']
@@ -38,11 +39,11 @@ class SIMPLISMA(HasTraits):
     """
     SIMPLe to use Interactive Self-modeling Mixture Analysis
 
-    This class performs a SIMPLISMA analysis of
-    a 2D |NDDataset|. The algorithm is adapted from Windig's paper,
+    This class performs a SIMPLISMA analysis of a 2D |NDDataset|. The algorithm is adapted from Windig's paper,
     Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16.
 
     TODO: adapt to 3DDataset ?
+
     """
 
     _St = Instance(NDDataset)
@@ -53,43 +54,40 @@ class SIMPLISMA(HasTraits):
         """
         Parameters
         ----------
-        X: |NDDataset| a 2D dataset containing the data matrix (spectra in rows).
-
-        interactive: bool, optional, default=False
+        X : |NDDataset|
+            A 2D dataset containing the data matrix (spectra in rows).
+        interactive : bool, optional, default: False
             If True, the determination of purest variables is carried out interactively
-
-        n_pc: int, optional, default: 2 in non-interactive mode; 100 in interactive mode
+        n_pc : int, optional, default: 2 in non-interactive mode; 100 in interactive mode
             The maximum number of pure compounds. Used only for non interactive analysis
             (the default in interative mode (100) will never be reached in practice)
-
-        tol: float, optional, default: 0.1
+        tol : float, optional, default: 0.1
             The convergence criterion on the percent of unexplained variance.
-
-        noise: float or int, optional, default: 5
-          a correction factor (%) for low intensity variables (0 - no
-        offset, 15 - large offset).
-
-        verbose: bool, optional, default=True
+        noise : float or int, optional, default: 5
+            A correction factor (%) for low intensity variables (0 - no offset, 15 - large offset).
+        verbose : bool, optional, default=True
             If true some information is given during the analysis
 
         Attributes
         ----------
-        self._X : the original dataset
-        self._St: spectra of pure compounds
-        self._C : intensities ('concentrations') of pure compounds in spectra
-        self._Pt: purity spectra
-        self._s : standard deviation spectra
+        _X : the original dataset
+        _St: spectra of pure compounds
+        _C : intensities ('concentrations') of pure compounds in spectra
+        _Pt: purity spectra
+        _s : standard deviation spectra
 
         Examples
         --------
+
         """
+        #TODO: in the above doctrings the attributes are private members.
+        # so either we provide public members or create some property (or getting functions) to access them
 
         # ------------------------------------------------------------------------
         # Utility functions
         # ------------------------------------------------------------------------
         def figures_of_merit(X, maxPIndex, C, St, j):
-            '''return %explained variance and stdev of residuals
-            when the jth compound is added '''
+            # return %explained variance and stdev of residuals when the jth compound is added
             C.data[:, j] = X.data[:, maxPIndex[j]]
             St.data[0:j + 1, :] = np.linalg.lstsq(C.data[:, 0:j + 1], X.data)[0]
             Xhat = dot(C[:, 0:j + 1], St[0:j + 1, :])
@@ -99,7 +97,8 @@ class SIMPLISMA(HasTraits):
             return rsquare, stdev_res
 
         def str_iter_summary(j, index, coord, rsquare, stdev_res, diff):
-            '''return formatted list of figure of merits at a given iteration'''
+            # return formatted list of figure of merits at a given iteration
+
             string = '{:4}  {:5}  {:8.1f} {:10.4f} {:10.4f} '.format(j + 1, index, coord, stdev_res, rsquare)
             return string
 
@@ -410,7 +409,9 @@ class SIMPLISMA(HasTraits):
     def transform(self):
         """
         Return the concentration and spectra matrix determined by SIMPLISMA
+
         TODO: allow normalization of spectra
+
         Returns
         -------
         C : |NDDataset|
@@ -447,6 +448,11 @@ class SIMPLISMA(HasTraits):
         """
         Plots the input dataset, reconstructed dataset and residuals
 
+
+        Returns
+        -------
+        ax : subplot
+
         """
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
@@ -455,10 +461,11 @@ class SIMPLISMA(HasTraits):
 
         res = self._X - X_hat
 
-        ax = self._X.plot(labbel='$X$')
+        ax = self._X.plot(label='$X$')
         ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
         ax.plot(res.data.T, color=colRes, label='Residual')
         ax.set_title('SIMPLISMA plot: ' + self._X.name)
+
         return ax
 
 

@@ -58,7 +58,6 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
 
     Returns
     --------
-
     out : |NDDataset|.
         The subtracted dataset
 

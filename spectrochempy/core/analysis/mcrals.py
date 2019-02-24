@@ -6,7 +6,10 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
+"""
+This module implements the MCRALS class.
 
+"""
 
 __all__ = ['MCRALS']
 
@@ -22,7 +25,8 @@ from spectrochempy.core.processors.npy import dot
 
 
 class MCRALS(HasTraits):
-    """Performs MCR-ALS of a dataset knowing the initial C or St matrix
+    """
+    Performs MCR-ALS of a dataset knowing the initial C or St matrix
 
     """
 
@@ -37,33 +41,32 @@ class MCRALS(HasTraits):
 
     def __init__(self, X, guess, **kwargs):
         """
-
         Parameters
-        -----------
+        ----------
         X : |NDDataset|
             The dataset on which to perform the MCR-ALS analysis
         guess : |NDDataset|
             Initial concentration or spectra
         param : dict
-            dict of optimization parameters with the following keys:
-                'tol': float, optional, convergence criterion on the change of resisuals
+            Dict of optimization parameters with the following keys:
+
+            *   'tol': float, optional, convergence criterion on the change of resisuals.
                 (percent change of standard deviation of residuals). default=0.1
-                'maxit' : maximum number of ALS minimizations. default = 50
-                'maxdiv' : maximum number of successive non-converging iterations. default=5
-                'nonnegConc' : array or tuple indicating species non-negative concentration
-                       profiles. For instance [1, 0, 1] indicates that species #0
-                       and #2 have non-negative conc profiles while species #1
-                       can have negative concentrations
-                       Default [1, ..., 1]  (only non-negative concentrations)
-                'unimodConc' : array or tuple indicating species having unimodal concentrations
-                       profiles.
-                       Default [1, ..., 1]  (only unimodal concentration profiles)
-               'nonnegSpec' : array or tuple indicating species having non-negative spectra
-                       Default [1, ..., 1]  (only non-negative spectra)
-                'unimodSpec' : array or tuple indicating species having unimodal spectra
-                       Default [0, ..., 0]  (no unimodal cocentration profiles)
+            *   'maxit' : maximum number of ALS minimizations. default = 50
+            *   'maxdiv' : maximum number of successive non-converging iterations. default=5
+            *   'nonnegConc' : array or tuple indicating species non-negative concentration
+                profiles. For instance [1, 0, 1] indicates that species #0
+                and #2 have non-negative conc profiles while species #1
+                can have negative concentrations.
+                Default [1, ..., 1]  (only non-negative concentrations)
+            *   'unimodConc' : array or tuple indicating species having unimodal concentrationsprofiles.
+                Default [1, ..., 1]  (only unimodal concentration profiles)
+            *   'nonnegSpec' : array or tuple indicating species having non-negative spectra
+                Default [1, ..., 1]  (only non-negative spectra)
+            *   'unimodSpec' : array or tuple indicating species having unimodal spectra
+                Default [0, ..., 0]  (no unimodal cocentration profiles)
         verbose : bool
-            if set to True, prints a summary of residuals and residuals change at each iteration. default = False.
+            If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
             In anyu case, the same information is returned in self._log
 
         """
@@ -337,6 +340,10 @@ class MCRALS(HasTraits):
         """
         Plots the input dataset, reconstructed dataset and residuals
 
+        Returns
+        -------
+        ax : subplot
+
         """
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
@@ -349,4 +356,5 @@ class MCRALS(HasTraits):
         ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
         ax.plot(res.data.T, color=colRes, label='Residual')
         ax.set_title('MCR ALS plot: ' + self._X.name)
+
         return ax

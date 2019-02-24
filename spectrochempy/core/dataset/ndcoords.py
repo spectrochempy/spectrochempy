@@ -80,6 +80,7 @@ class Coord(NDMath, NDArray):
             `data` before passing it in the object constructor if that's the
             desired behavior or set the `copy` argument to True.
         %(NDArray.parameters.no_data|mask)s
+
         Examples
         --------
         We first import the object from the api:
@@ -336,7 +337,7 @@ class CoordSet(HasTraits):
             that all coordinates in this coords describe the same axis.
             It is assumed that the coordinates are passed in the order of the
             dimensions of a nD numpy array (
-            `row-major<https://docs.scipy.org/doc/numpy-1.14.1/glossary.html#term-row-major>`_
+            `row-major <https://docs.scipy.org/doc/numpy-1.14.1/glossary.html#term-row-major>`_
             order), i.e., for a 3d object: 'z', 'y', 'x'.
         x : |NDarray|, |NDArray| subclass or |CoordSet|
             A single coordinate associated to the 'x'-dimension.
@@ -349,6 +350,7 @@ class CoordSet(HasTraits):
             if true, all elements of coords describes a single dimension.
             By default, this is false, which means that each item describes
             a different dimension.
+
         """
 
         self._copy = kwargs.pop('copy', False)
@@ -643,13 +645,16 @@ class CoordSet(HasTraits):
 
     # ..................................................................................................................
     def to_index(self):
-        """Convert all index coordinates into a `pandas.Index`
+        """
+        Convert all index coordinates into a `pandas.Index`
+
         Returns
         -------
         pandas.Index
             Index subclass corresponding to the outer-product of all dimension
             coordinates. This will be a MultiIndex if this object is has more
             than more dimension.
+
         """
         import pandas as pd
         if len(self) == 0:
@@ -666,7 +671,7 @@ class CoordSet(HasTraits):
 
         Parameters
         ----------
-        \*\*kwarg : Only keywords among the CoordSet.names are allowed - they denotes the name of a dimension.
+        kwarg : Only keywords among the CoordSet.names are allowed - they denotes the name of a dimension.
 
         """
         dims = kwargs.keys()

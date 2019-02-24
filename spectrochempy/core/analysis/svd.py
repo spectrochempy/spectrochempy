@@ -48,13 +48,13 @@ class SVD(HasTraits):
     """
 
     U = Instance(NDDataset, allow_none=True)
-    """|NDDataset| - Contains the left unitary matrix. Its shape depends on `full_matrices`."""
+    """|NDDataset| - Contains the left unitary matrix. Its shape depends on `full_matrices`"""
 
     s = Instance(NDDataset)
     """|NDDataset| - Vector of singular values"""
 
     VT = Instance(NDDataset, allow_none=True)
-    """ |NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices` """
+    """|NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices`"""
 
     @docstrings.get_sectionsf('SVD')
     @docstrings.dedent
@@ -63,17 +63,17 @@ class SVD(HasTraits):
         Parameters
         -----------
         dataset : |NDDataset| object
-            The `dataset` ``X`` has shape (`M`, `N`). `M` is the number of
-            observations (for examples a series of IR spectra) while `N`
+            The dataset X has shape (M, N). M is the number of
+            observations (for examples a series of IR spectra) while N
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
-        full_matrices : bool, optional, default:`False`.
-            If `False` , `U` and `VT` have the shapes (``M``,  ``k``) and
-            (``k``, ``N``), respectively, where ``k`` = min(``M``, ``N``).
-            Otherwise the shapes will be (``M``, ``M``) and (``N``, ``N``),
+        full_matrices : bool, optional, default: False.
+            If False , U and VT have the shapes (M,  k) and
+            (k, N), respectively, where k = min(M, N).
+            Otherwise the shapes will be (M, M) and (N, N),
             respectively.
         compute_uv : bool, optional, default:True.
-            Whether or not to compute `U` and `VT` in addition to `s`.
+            Whether or not to compute U and VT in addition to s.
 
         Examples
         --------
@@ -226,7 +226,7 @@ class SVD(HasTraits):
 
     @property
     def sv(self):
-        """|NDDataset|, Singular values """
+        """|NDDataset|, Singular values"""
         size = self.s.size
         sv = self.s.copy()
         sv.name = 'sv'
@@ -238,7 +238,7 @@ class SVD(HasTraits):
 
     @property
     def ev(self):
-        """|NDDataset|,  Explained variance """
+        """|NDDataset|, Explained variance"""
         size = self.s.size
         ev = self.s ** 2 / (size - 1)
         ev.name = 'ev'
@@ -250,7 +250,7 @@ class SVD(HasTraits):
 
     @property
     def ev_cum(self):
-        """|NDDataset|,  Cumulative Explained Variance """
+        """|NDDataset|, Cumulative Explained Variance"""
         ev_cum = np.cumsum(self.ev_ratio)
         ev_cum.name = 'ev_cum'
         ev_cum.title = 'Cumulative explained variance'
@@ -259,7 +259,7 @@ class SVD(HasTraits):
 
     @property
     def ev_ratio(self):
-        """|NDDataset|,  Explained Variance per singular values """
+        """|NDDataset|,  Explained Variance per singular values"""
         ratio = self.ev * 100. / np.sum(self.ev)
         ratio.name = 'ev_ratio'
         ratio.title = 'Explained variance'

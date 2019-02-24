@@ -748,7 +748,7 @@ class SpectroChemPy(Application):
 
     @default('long_description')
     def _get_long_description(self):
-        desc = """\
+        desc = """
     Welcome to <strong>SpectroChemPy</strong> Application<br><br>
     <p><strong>SpectroChemPy</strong> is a framework for processing, 
     analysing and 
@@ -770,12 +770,11 @@ class SpectroChemPy(Application):
     kindly 
     requested to cite it this way:
     <pre>
-     Arnaud Travert & Christian Fernandez,
-     SpectroChemPy, a framework for processing, analysing and modelling of 
-     Spectroscopic data for Chemistry with Python
-     https://www.spectrochempy.fr, (version {version})
-     Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
-     Caen/CNRS, 2019
+    Arnaud Travert & Christian Fernandez,
+    SpectroChemPy, a framework for processing, analysing and modelling of 
+    Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
+    Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
+    Caen/CNRS, 2019
     </pre>
     </p>
 

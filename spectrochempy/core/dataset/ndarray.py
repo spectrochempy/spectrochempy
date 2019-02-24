@@ -119,7 +119,6 @@ class NDArray(HasTraits):
     @docstrings.dedent
     def __init__(self, data=None, **kwargs):
         """
-
         Parameters
         ----------
         data : array of floats.
@@ -796,9 +795,11 @@ class NDArray(HasTraits):
     def dimensionless(self):
         """
         bool - True if the `data` array is dimensionless (Readonly property).
+
         Notes
         -----
         `Dimensionless` is different of `unitless` which means no unit.
+
         See Also
         --------
         unitless, has_units
@@ -827,6 +828,7 @@ class NDArray(HasTraits):
     def has_units(self):
         """
         bool - True if the `data` array have units (Readonly property).
+
         See Also
         --------
         unitless, dimensionless
@@ -861,7 +863,7 @@ class NDArray(HasTraits):
     @property
     def is_integer(self):
         """
-        bool - True if the 'data' are integer values (Readonly property).
+        bool - True if the `data` are integer values (Readonly property).
         """
         if self.data is None:
             return False
@@ -1017,6 +1019,7 @@ class NDArray(HasTraits):
     def unitless(self):
         """
         bool - True if the `data` have `units` (Readonly property).
+
         """
         return not self.has_units
 
@@ -1026,6 +1029,7 @@ class NDArray(HasTraits):
         """
         |ndarray|, dtype:object - The actual values (data, units)
         contained in this object (Readonly property).
+
         """
 
         if self._data is not None:
@@ -1043,6 +1047,7 @@ class NDArray(HasTraits):
         """
         |NDArray| - Transposed array.
         The same object is returned if `ndim` is less than 2.
+
         """
         return self.transpose()
 
@@ -1076,6 +1081,7 @@ class NDArray(HasTraits):
         -------
         object
             An exact copy of the current object.
+
         Examples
         --------
         >>> nd1 = NDArray([1.+2.j,2.+ 3.j])
@@ -1181,6 +1187,7 @@ class NDArray(HasTraits):
         -------
         result
             True if units are compatible
+
         Examples
         --------
         >>> nd1 = NDArray([1.+2.j,2.+ 3.j], units='meters')
@@ -1344,6 +1351,7 @@ class NDArray(HasTraits):
          Returns
         -------
         %(generic_method.returns.object)s
+
         Examples
         --------
         >>> np.random.seed(12345)

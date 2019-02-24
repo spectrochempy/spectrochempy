@@ -9,6 +9,7 @@
 
 """
 This module implement the EFA (Evolving Factor Analysis) class.
+
 """
 
 __all__ = ['EFA']

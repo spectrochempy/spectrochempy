@@ -174,6 +174,7 @@ class DocstringProcessor(object):
         b: int, optional
             A second dummy parameter
         <BLANKLINE>
+
         Examples
         --------
         Some dummy example doc
@@ -810,6 +811,7 @@ class DocstringProcessor(object):
             >>> print(do_less.__doc__)
             My second function that only returns an integer
             <BLANKLINE>
+
             Returns
             -------
             int

@@ -90,9 +90,8 @@ class BaselineCorrection(HasTraits):
             from spectrochempy import *
             nd = NDDataset.read_omnic(os.path.join('irdata',
                                         'nh4y-activation.spg'))
-            ndp = nd[1291.0:5999.0]
-            bc = BaselineCorrection(ndp, axis=0,
-                                        method='multivariate',
+            ndp = nd[:, 1291.0:5999.0]
+            bc = BaselineCorrection(ndp,method='multivariate',
                                         interpolation='pchip',
                                         npc=8)
             ranges=[[5996., 5998.], [1290., 1300.],

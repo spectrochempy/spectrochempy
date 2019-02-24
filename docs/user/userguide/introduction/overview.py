@@ -23,7 +23,7 @@
 # ### Using Jupyter Notebook
 
 # %% [markdown]
-# Assuming Jupyter is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../../gettingstarted/install)), go to the
+# Assuming Jupyter is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../../gettingstarted/install.rst)), go to the
 # |scpy| folder. From this location, open a
 # terminal and type something like:
 #

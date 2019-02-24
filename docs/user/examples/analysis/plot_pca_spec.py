@@ -7,9 +7,10 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 """
-NDDataset MCR ALS optimization example
+NDDataset PCA analysis example
 -------------------------------
-In this example, we perform the MCR ALS optimization of a dataset.
+In this example, we perform the PCA dimensionality reduction of a spectra
+dataset
 
 """
 
