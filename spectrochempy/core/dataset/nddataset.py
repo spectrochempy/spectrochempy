@@ -297,6 +297,7 @@ class NDDataset(
                     f'the size of each coordinates array must None or be equal to that of the respective `{coord.name}`'
                     f' data dimension but coordinate size={size} != data shape[{idx}]={self._data.shape[idx]}')
 
+        coords._parent = self
         return coords
 
     # ..................................................................................................................

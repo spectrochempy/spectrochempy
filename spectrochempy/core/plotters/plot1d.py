@@ -536,6 +536,14 @@ def plot_1D(dataset, **kwargs):
     if kwargs.get('show_zero', False):
         ax.haxlines(label='zero_line')
 
+    # display a title
+    # ------------------------------------------------------------------------------------------------------------------
+    title = kwargs.get('title', None)
+    if title:
+        ax.set_title(title)
+    elif kwargs.get('plottitle', False):
+        ax.set_title(new.name)
+
     new._plot_resume(dataset, **kwargs)
 
     return ax

@@ -155,11 +155,13 @@ def plot_2D(dataset, **kwargs):
     data_transposed = kwargs.get('data_transposed', False)
 
     if data_transposed:
-        new = dataset.T  # transpose dataset
+        new = dataset.T.copy()  # transpose dataset
         nameadd = 'T'
     else:
         new = dataset.copy()  # TODO: why loose time to make a copy?
         nameadd = ''
+
+    new = new.squeeze()
 
     # figure setup
     # ------------------------------------------------------------------------------------------------------------------
@@ -279,15 +281,15 @@ def plot_2D(dataset, **kwargs):
     ylim = list(kwargs.get("ylim", yl))
     ylim.sort()
     ylim[-1] = min(ylim[-1], yl[-1])
-    xlim[0] = max(ylim[0], yl[0])
+    ylim[0] = max(ylim[0], yl[0])
 
     # z intensity (by default we plot real part of the data)
     # ------------------------------------------------------------------------------------------------------------------
 
     if not kwargs.get('imag', False):
-        zdata = new.RR.masked_data
+        zdata = new.real.masked_data
     else:
-        zdata = new.RI.masked_data
+        zdata = new.RI.masked_data # new.imag.masked_data #TODO: quaternion case (3 imag.parts)
 
     zlim = kwargs.get('zlim', (zdata.min(), zdata.max()))
 
@@ -317,7 +319,7 @@ def plot_2D(dataset, **kwargs):
 
         ylim = list(kwargs.get('ylim', ylim))
         ylim.sort()
-        y_reverse = kwargs.get('y_reverse', x.reversed if y else False)
+        y_reverse = kwargs.get('y_reverse', y.reversed if y else False)
         if y_reverse:
             ylim.reverse()
 
@@ -503,6 +505,8 @@ def plot_2D(dataset, **kwargs):
     title = kwargs.get('title', None)
     if title:
         ax.set_title(title)
+    elif kwargs.get('plottitle', False):
+        ax.set_title(new.name)
 
     new._plot_resume(dataset, **kwargs)
 

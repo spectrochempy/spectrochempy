@@ -27,7 +27,7 @@ import re
 # ----------------------------------------------------------------------------------------------------------------------
 import numpy as np
 from traitlets import (HasTraits, List, Bool, Unicode, observe, All, validate,
-                       TraitType, TraitError, class_of, default)
+                       TraitType, TraitError, class_of, default, Instance)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
@@ -164,9 +164,9 @@ class Coord(NDMath, NDArray):
         return None
 
     # ..................................................................................................................
-    @property
-    def values(self):
-        return super().values
+    #@property
+    #def values(self):
+    #    return super().values
 
     # ..................................................................................................................
     @property
@@ -312,6 +312,7 @@ class CoordSet(HasTraits):
     # Hidden attributes containing the collection of objects
     _id = Unicode()
     _coords = List(allow_none=True)
+    _parent = Instance('spectrochempy.core.dataset.nddataset.NDDataset', allows_none=True)
 
     _updated = Bool(False)
     # Hidden id and name of the object
@@ -658,6 +659,22 @@ class CoordSet(HasTraits):
             return pd.Index(coord.values, name=coord.title)  # TODO: keep the units
         else:
             return pd.MultiIndex.from_product(self.coords, names=self.titles)
+
+    def update(self, **kwargs):
+        """
+        Update a specific coordinates in the CoordSet.
+
+        Parameters
+        ----------
+        \*\*kwarg : Only keywords among the CoordSet.names are allowed - they denotes the name of a dimension.
+
+        """
+        dims = kwargs.keys()
+        for dim in list(dims)[:]:
+            if dim in self.names:
+                # we can replace the given coordinates
+                idx = self.names.index(dim)
+                self.coords[idx] = Coord(kwargs.pop(dim), name=dim)
 
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
