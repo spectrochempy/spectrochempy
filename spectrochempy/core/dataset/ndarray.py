@@ -647,7 +647,7 @@ class NDArray(HasTraits):
                     self._labels = self._labels.squeeze()
                     if self._labels.ndim > 1:
                         self._labels = self._labels.T
-                    self._labels = np.stack((self._labels, labels)).T
+                    self._labels = np.vstack((self._labels, labels)).T
 
                 else:
                     if self._copy:

@@ -1430,6 +1430,39 @@ def test_nddataset_set_coordinates(nd2d, ds1):
         nd.z = None
 
 
+### issue 29
+def test_issue_29_mulitlabels():
+    from spectrochempy import NDDataset, Coord, print_
+    from numpy.random import rand
+
+    DS = NDDataset(rand(3,4))
+
+    with pytest.raises(ValueError):
+        # shape data and label mismatch
+        DS.coords = (DS.y, Coord(title='xaxis', units='s', data=[1, 2, 3, 4], labels=['a', 'b', 'c']))
+
+    DS.coords = (DS.y, Coord(title='xaxis', units='s', data=[1, 2, 3, 4], labels=['a', 'b', 'c', 'd']))
+    DS.coords = (DS.y, Coord(title='xaxis', units='s', data=[1, 2, 3, 4], labels=[['a', 'c', 'b', 'd'],['e', 'f', 'g', 'h']]))
+    print_(DS.x)
+    DS.x.labels = ['alpha', 'beta', 'omega', 'gamma']
+    print_(DS)
+    print_(DS.x)
+    assert DS.x.labels.shape == (4,3)
+
+    # sort
+    DS1 = DS.sort(axis=1, by='value', descend=True)
+    assert_array_equal(DS1.x,[4,3,2,1])
+
+    # sort
+    assert DS.dims('y','x')
+    DS1 = DS.sort(dim='x', by='label', descend=False)
+    assert_array_equal(DS1.x,[1,3,2,4])
+
+    DS1 = DS.sort(dim='x', by='label', pos=2, descend=False)
+    assert_array_equal(DS1.x,[1,2,4,3])
+
+
+
 ################# Xarray conversion #########
 
 def test_nddataset_xarray_export(IR_dataset_2D):
