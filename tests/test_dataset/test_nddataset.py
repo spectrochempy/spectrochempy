@@ -1454,13 +1454,14 @@ def test_issue_29_mulitlabels():
     assert_array_equal(DS1.x,[4,3,2,1])
 
     # sort
-    assert DS.dims('y','x')
+    assert DS.dims==['y','x']
     DS1 = DS.sort(dim='x', by='label', descend=False)
     assert_array_equal(DS1.x,[1,3,2,4])
 
     DS1 = DS.sort(dim='x', by='label', pos=2, descend=False)
     assert_array_equal(DS1.x,[1,2,4,3])
 
+    
 
 
 ################# Xarray conversion #########
