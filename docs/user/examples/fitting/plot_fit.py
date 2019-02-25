@@ -16,12 +16,13 @@ equation.
 """
 # sphinx_gallery_thumbnail_number = 2
 
-from spectrochempy import *
+import spectrochempy as scp
+import os
 
 ########################################################################
 #  Let's take an IR spectrum
 
-nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+nd = scp.NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 
 ########################################################################
 # where we select only region (OH region)
@@ -74,7 +75,7 @@ shape: assymvoigtmodel
 ##############################################################################
 # create a fit object
 
-f1 = Fit(ndOH, script, silent=True)
+f1 = scp.Fit(ndOH, script, silent=True)
 
 ##############################################################################
 # Show plot and the starting model before the fit (of course it is advisable

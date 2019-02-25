@@ -9,10 +9,10 @@ Functions
 ---------
 
 {% for item in functions %}
-
 .. autofunction:: {{ item }}
 
-.. include:: ../../gallery/gen_modules/backreferences/{{fullname}}.{{item}}.examples
+
+.. include:: /gen_modules/backreferences/{{fullname}}.{{item}}.examples
 
 .. raw:: html
 
@@ -34,6 +34,11 @@ Classes
    :show-inheritance:
 
 
+.. include:: /gen_modules/backreferences/{{fullname}}.{{item}}.examples
+
+.. raw:: html
+
+   <div style='clear:both'></div>
 {%- endfor %}
 {% endif %}
 {% endblock %}

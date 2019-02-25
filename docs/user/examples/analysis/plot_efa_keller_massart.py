@@ -7,14 +7,15 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 """
-EFA analysis example
----------------------
+EFA analysis (Keller and Massart original example)
+--------------------------------------------------
 In this example, we perform the Evolving Factor Analysis of a TEST dataset
 (ref. Keller and Massart, Chemometrics and Intelligent Laboratory Systems,
 12 (1992) 209-224 )
 
 """
-from spectrochempy import *
+import spectrochempy as scp
+import numpy as np
 
 # sphinx_gallery_thumbnail_number = 5
 
@@ -22,40 +23,42 @@ from spectrochempy import *
 # Generate a test dataset
 # ----------------------------------------------------------------------------------------------------------------------
 # 1) Simulated Chromatogram
-#
+# *************************
 
-t = Coord(np.arange(15), units='minutes', title='time')  # time coordinates
-c = Coord(range(2), title = 'components')                                      # component coordinates
+t = scp.Coord(np.arange(15), units='minutes', title='time')  # time coordinates
+c = scp.Coord(range(2), title = 'components')                                      # component coordinates
 
 data = np.zeros((2,15), dtype=np.float64)
 data[0, 3:8] = [1,3,6,3,1] # compound 1
 data[1, 5:11] = [1,3,5,3,1,0.5] #compound 2
 
-dsc = NDDataset(data=data, coords=[c, t])
+dsc = scp.NDDataset(data=data, coords=[c, t])
 
 ########################################################################################################################
 # 2) Adsorption spectra
-#
+# **********************
+
 
 spec = np.array([[2.,3.,4.,2.],[3.,4.,2.,1.]])
-w = Coord(np.arange(1,5,1), units='nm', title='wavelength')
+w = scp.Coord(np.arange(1,5,1), units='nm', title='wavelength')
 
-dss = NDDataset(data=spec, coords=[c, w])
+dss = scp.NDDataset(data=spec, coords=[c, w])
 
 ########################################################################################################################
-# --> Simulated data matrix
-#
+# 3) Simulated data matrix
+# ************************
 
-dataset = dot(dsc.T, dss)
+dataset = scp.dot(dsc.T, dss)
 dataset.data = np.random.normal(dataset.data,.2)
 dataset.title = 'intensity'
 
 dataset.plot_stack()
 
 ########################################################################################################################
-#  Evolving Factor Analysis
+# 4) Evolving Factor Analysis
+# ***************************
 
-efa = EFA(dataset)
+efa = scp.EFA(dataset)
 
 ########################################################################################################################
 # Plots of the log(EV) for the forward and backward analysis

@@ -14,16 +14,16 @@ In this example, we perform the PCA dimensionality reduction of the classical
 
 """
 
-from spectrochempy import *
+import spectrochempy as scp
 
 ############################################################
 # Upload a dataset form a distant server
 
-dataset = upload_IRIS()
+dataset = scp.upload_IRIS()
 
 ##############################################################
 # Create a PCA object
-pca = PCA(dataset, centered=True)
+pca = scp.PCA(dataset, centered=True)
 
 ##############################################################
 # Reduce the dataset to a lower dimensionality (number of
@@ -35,8 +35,16 @@ print(LT)
 
 ###############################################################@
 # Finally, display the results graphically
+#
+# ScreePlot
 _ = pca.screeplot()
+
+########################################################################################################################
+# ScorePlot of 2 PC's
 _ = pca.scoreplot(1, 2, color_mapping='labels')
+
+########################################################################################################################
+# or in 3D for 3 PC's
 _ = pca.scoreplot(1, 2, 3, color_mapping='labels')
 
 #show() # uncomment to show plot if needed()

@@ -83,7 +83,7 @@ Documentation
    
 **Help**
 
-* :doc:`user/api/generated/index`
+* :doc:`api/generated/index`
 * :doc:`gallery/auto_examples/index`
 * :doc:`user/faq`
 
@@ -92,7 +92,7 @@ Documentation
    :hidden:
    :caption: Help
 
-   user/api/generated/index
+   api/generated/index
    gallery/auto_examples/index
    user/faq
    

@@ -12,22 +12,23 @@ EFA analysis example
 In this example, we perform the Evolving Factor Analysis
 
 """
-from spectrochempy import *
+import spectrochempy as scp
+import os
 
-# sphinx_gallery_thumbnail_number = 4
+# sphinx_gallery_thumbnail_number = 2
 
 ########################################################################################################################
 # Upload and preprocess a dataset
 
-datadir = general_preferences.datadir
-dataset = read_omnic(os.path.join(datadir, 'irdata',
+datadir = scp.general_preferences.datadir
+dataset = scp.read_omnic(os.path.join(datadir, 'irdata',
                                       'nh4y-activation.spg'))
 
 ########################################################################################################################
 # columns masking
 
-dataset[:, 1230.0:920.0] = MASKED  # do not forget to use float in slicing
-dataset[:, 5997.0:5993.0] = MASKED
+dataset[:, 1230.0:920.0] = scp.MASKED  # do not forget to use float in slicing
+dataset[:, 5997.0:5993.0] = scp.MASKED
 
 ########################################################################################################################
 # difference spectra
@@ -38,12 +39,12 @@ dataset.plot_stack()   # figure 1
 ########################################################################################################################
 # column masking for bad columns
 
-dataset[10:12] = MASKED
+dataset[10:12] = scp.MASKED
 
 ########################################################################################################################
 #  Evolving Factor Analysis
 
-efa = EFA(dataset)
+efa = scp.EFA(dataset)
 
 
 ########################################################################################################################

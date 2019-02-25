@@ -13,17 +13,17 @@ Project creation
 In this example, we create a Project from scratch
 
 """
-from spectrochempy import *
+import  spectrochempy as scp
 
 ##############################################################################
 # Let's assume we have three subproject to group in a single project
 
-proj = Project(
+proj = scp.Project(
 
     # subprojects
-    Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
-    Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
-    Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
+    scp.Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+    scp.Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
+    scp.Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
 
     # attributes
     name='project_1',
@@ -36,9 +36,9 @@ assert proj.projects_names == ['A350', 'B350', 'P350']
 ##############################################################################
 # Add for example two datasets to the ``A350`` subproject.
 
-ir = NDDataset([1.1, 2.2, 3.3], coords=[[1, 2, 3]])
+ir = scp.NDDataset([1.1, 2.2, 3.3], coords=[[1, 2, 3]])
 print(ir)
-tg = NDDataset([1, 3, 4], coords=[[1, 2, 3]])
+tg = scp.NDDataset([1, 3, 4], coords=[[1, 2, 3]])
 print(tg)
 proj.A350['IR'] = ir
 proj.A350['TG'] = tg
@@ -59,7 +59,7 @@ proj.save()
 ##############################################################################
 # RELOAD the project from disk as newproj
 
-newproj = Project.load('project_1')
+newproj = scp.Project.load('project_1')
 print(newproj)
 
 assert str(newproj) == str(proj)
@@ -74,7 +74,7 @@ set_loglevel(INFO)
 log.info('samples contained in the project are:%s'%proj.projects_names)
 """
 
-proj['print_info'] = Script('print_info', script_source)
+proj['print_info'] = scp.Script('print_info', script_source)
 print(proj)
 print('*******************************************')
 ##############################################################################
@@ -85,13 +85,13 @@ proj.save(overwrite_data=False)
 ##############################################################################
 # RELOAD it
 
-newproj = Project.load('project_1')
+newproj = scp.Project.load('project_1')
 print(newproj)
 
 ##############################################################################
 # Execute a script
 
-run_script(newproj.print_info)
+scp.run_script(newproj.print_info)
 
 ##############################################################################
 # Another way to do the same thing is ith the following syntax (which may
@@ -105,7 +105,7 @@ script_source_2 = """
 proj.A350.TG.plot_scatter(title='my scatter plot')
 #show()
 """
-proj['tgscatter'] = Script('tgscatter', script_source_2)
+proj['tgscatter'] = scp.Script('tgscatter', script_source_2)
 
 proj.tgscatter()
 

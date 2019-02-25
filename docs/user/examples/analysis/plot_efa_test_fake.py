@@ -12,13 +12,13 @@ EFA analysis example
 In this example, we perform the Evolving Factor Analysis
 
 """
-from spectrochempy import *
-# this also import numpy namespace as np
+import spectrochempy as scp
+import numpy as np
 
 ############################################################
 # Upload and preprocess a dataset
 
-dataset = load("irdata/nh4y-activation.spg")
+dataset = scp.load("irdata/nh4y-activation.spg")
 
 
 # columns masking
@@ -33,7 +33,7 @@ dataset.plot_stack()
 ############################################################
 #  Evolving Factor Analysis
 
-efa = EFA(dataset)
+efa = scp.EFA(dataset)
 
 
 f = efa.get_forward(n_pc=7, plot=True)

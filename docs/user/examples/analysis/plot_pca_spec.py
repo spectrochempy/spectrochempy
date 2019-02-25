@@ -14,18 +14,18 @@ dataset
 
 """
 
-from spectrochempy import *
+import spectrochempy as scp
 
 ############################################################
 # Load a dataset
 
-dataset = read_omnic("irdata/nh4y-activation.spg")
+dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 print(dataset)
 dataset.plot_stack()
 
 ##############################################################
 # Create a PCA object
-pca = PCA(dataset, centered=False)
+pca = scp.PCA(dataset, centered=False)
 
 ##############################################################
 # Reduce the dataset to a lower dimensionality (number of
@@ -35,11 +35,17 @@ S, LT = pca.transform(n_pc=.99)
 
 print(LT)
 
-###############################################################@
+###############################################################
 # Finally, display the results graphically
-
+# ScreePlot
 _ = pca.screeplot()
+
+########################################################################################################################
+# Score Plot
 _ = pca.scoreplot(1, 2)
+
+########################################################################################################################
+# Score Plot for 3 PC's in 3D
 _ = pca.scoreplot(1, 2, 3)
 
 ##############################################################################

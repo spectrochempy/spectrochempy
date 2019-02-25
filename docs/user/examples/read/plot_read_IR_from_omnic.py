@@ -7,14 +7,15 @@ Here we load an experimental SPG file (OMNIC) and plot it.
 
 """
 
-from spectrochempy import *
+import spectrochempy as scp
+import os
 
 ###################################################################
 # Loading and stacked plot of the original
 
-datadir = general_preferences.datadir
+datadir = scp.general_preferences.datadir
 
-dataset = NDDataset.read_omnic(os.path.join(datadir,
+dataset = scp.NDDataset.read_omnic(os.path.join(datadir,
                                               'irdata', 'nh4y-activation.spg'))
 
 dataset.plot_stack(style='paper')

@@ -43,6 +43,7 @@ extensions = \
     'sphinx_gallery.gen_gallery',
     'jupyter_sphinx.embed_widgets',
     'spectrochempy.sphinxext.traitlets_sphinxdoc',
+    'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
@@ -289,7 +290,7 @@ def setup(app):
 
 sphinx_gallery_conf = {
     'plot_gallery': 'True',
-    'backreferences_dir': 'gallery/gen_modules/backreferences',
+    'backreferences_dir': 'gen_modules/backreferences',
     'doc_module': ('spectrochempy', ),
                    'reference_url': {
                         'spectrochempy': None,
@@ -302,7 +303,9 @@ sphinx_gallery_conf = {
     'examples_dirs': 'user/examples',
     # path where to save gallery generated examples
     'gallery_dirs': 'gallery/auto_examples',
+    'abort_on_example_error': False,
     'expected_failing_examples': [],
+    'download_all_examples': False,
     }
 
 # nbsphinx ---------------------------------------------------------------------

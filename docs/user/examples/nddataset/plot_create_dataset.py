@@ -11,7 +11,8 @@ and then we plot one section (a 2D plane)
 ###############################################################################
 # As usual, we start by loading the spectrochempy library
 
-from spectrochempy import *
+import spectrochempy as scp
+import numpy as np
 
 ###############################################################################
 # Creation
@@ -36,13 +37,13 @@ nd_data = np.array([np.array(
 # The `Coord` object allow making an array of coordinates
 # with additional metadata such as units, labels, title, etc
 
-coord0 = Coord(data=c0, labels=['cold', 'normal', 'hot'], units="K",
+coord0 = scp.Coord(data=c0, labels=['cold', 'normal', 'hot'], units="K",
                    title='temperature')
 
-coord1 = Coord(data=c1, labels=None, units="minutes",
+coord1 = scp.Coord(data=c1, labels=None, units="minutes",
                    title='time-on-stream')
 
-coord2 = Coord(data=c2, labels=None, units="cm^-1", title='wavenumber')
+coord2 = scp.Coord(data=c2, labels=None, units="cm^-1", title='wavenumber')
 
 ###############################################################################
 # Labels can be useful for instance for indexing
@@ -55,7 +56,7 @@ print(a)
 # +++++++++++
 # The |NDDataset| object allow making the array of data with units, etc...
 
-mydataset = NDDataset(nd_data, coords=[coord0, coord1, coord2],
+mydataset = scp.NDDataset(nd_data, coords=[coord0, coord1, coord2],
                           title='Absorbance', units='absorbance')
 
 mydataset.description = """Dataset example created for this tutorial. 
@@ -100,6 +101,6 @@ new.plot(method='stack')
 ##################################################################
 # Note that the scp allows one to use this syntax too:
 
-plot_stack(new)
+scp.plot_stack(new)
 
 #show() # uncomment to show plot if needed()

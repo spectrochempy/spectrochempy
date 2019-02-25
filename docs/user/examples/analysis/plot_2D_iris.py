@@ -14,18 +14,19 @@ In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide
 
 """
 
-from spectrochempy import *
+import spectrochempy as scp
+import os
 
 ########################################################################################################################
 # Upload dataset and add pressure coordinates
 
-X = NDDataset.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
+X = scp.NDDataset.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
 
 p = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
      0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
      0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 
-X.coords.update(y=Coord(p, title='pressure', units='torr'))
+X.coords.update(y=scp.Coord(p, title='pressure', units='torr'))
 # Using the `update` method is mandatory because it will preserve the name.
 # Indeed, setting using X.coords[0] = Coord(...) fails unless name is specified : Coord(..., name='y')
 
@@ -47,7 +48,7 @@ X_.plot()
 ########################################################################################################################
 # Perform the IRIS processing
 
-iris = IRIS(X_, param, verbose=True)
+iris = scp.IRIS(X_, param, verbose=True)
 f = iris.transform()
 X_hat = iris.inverse_transform()
 

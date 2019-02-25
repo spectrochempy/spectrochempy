@@ -34,7 +34,7 @@ PROJECT = "spectrochempy"
 
 DOCDIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
-API = os.path.join(DOCDIR, 'user', 'api', 'generated')
+API = os.path.join(DOCDIR, 'api', 'generated')
 DEVAPI = os.path.join(DOCDIR, 'dev', 'generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees')

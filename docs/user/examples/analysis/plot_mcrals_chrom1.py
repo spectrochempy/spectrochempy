@@ -7,8 +7,8 @@
 # See full LICENSE agreement in the root directory
 # =============================================================================
 """
-NDDataset MCR ALS optimization example
---------------------------------------
+MCR ALS optimization example (original example from Jaumot)
+------------------------------------------------------------
 In this example, we perform the MCR ALS optimization of a dataset 
 corresponding to a HPLC-DAD run, from Jaumot et al. Chemolab, 76 (2005), 
 pp. 101-110 and Jaumot et al. Chemolab, 140 (2015) pp. 1-12.
@@ -20,12 +20,12 @@ of spectrochempy in 'als2004dataset.MAT'
 
 """
 
-from spectrochempy import *
+import spectrochempy as scp
 
 ############################################################
 # Load the dataset
 
-datasets = read_matlab("matlabdata/als2004dataset.MAT")
+datasets = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
 # As the .mat file contains 6 matrices, 6 NDDataset objects are returned:
 
@@ -45,7 +45,7 @@ guess = datasets[1]
 
 ##############################################################
 # Create a MCR-ALS object with the default settings and the verbose optionto get a summary of optimization steps:
-mcr = MCRALS(X, guess, verbose=True)
+mcr = scp.MCRALS(X, guess, verbose=True)
 
 ##############################################################
 # The optimization has converged. We can get the concentration (C) and pure spectra profiles (St)

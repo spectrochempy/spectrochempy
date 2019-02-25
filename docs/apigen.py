@@ -472,7 +472,7 @@ Constants
 .. autoclass:: {api}.{klass}
    :members:
 
-.. include:: ../../../gallery/gen_modules/backreferences/{api}.{klass}.examples
+.. include:: /gen_modules/backreferences/{api}.{klass}.examples
 
 .. raw:: html
 
@@ -487,7 +487,7 @@ Constants
 
 .. autofunction:: {api}.{func}
  
-.. include:: ../../../gallery/gen_modules/backreferences/{api}.{func}.examples
+.. include:: /gen_modules/backreferences/{api}.{func}.examples
 
 .. raw:: html
 
@@ -518,8 +518,6 @@ Constants
     _classes = "    ".join(lclasses)
     _funcs = "    ".join(lfuncs)
     _consts = "".join(lconsts)
-    
-    # _consts = _consts.replace('/Users/christian/Dropbox/D.PROGRAMMES/', '~/')
 
     text = indextemplate.format(consts=_consts, preferences=write_prefs(),
                                 classes="    " + _classes,
@@ -544,7 +542,7 @@ if __name__ == "__main__":
 
     DOCDIR = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
-    API = os.path.join(DOCDIR, 'user', 'api', 'generated')
+    API = os.path.join(DOCDIR, 'api', 'generated')
     DEVAPI = os.path.join(DOCDIR, 'dev', 'generated')
 
     main(PROJECT, tocdepth=1, includeprivate=True, destdir=DEVAPI,
