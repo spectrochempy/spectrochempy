@@ -266,7 +266,7 @@ class Coord(NDMath, NDArray):
 
         if self.is_labeled:
             header = '       labels: ... \n'
-            text = str(self.labels).strip()
+            text = str(self.labels.T).strip()
             if '\n' not in text:  # single line!
                 out += header.replace('...', '\0\0{}\0\0'.format(text))
             else:

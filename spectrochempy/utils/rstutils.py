@@ -50,5 +50,9 @@ rst_epilog = """
 
 .. |Axes| replace:: :class:`~matplotlib.Axes`
 
+.. |userguide| replace:: User Guide 
+
+.. _userguide:  ../../user/userguide/introduction/index.html
+
 
 """

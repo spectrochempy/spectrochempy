@@ -473,7 +473,7 @@ class NDArray(HasTraits):
         If there is no data but labels, then the labels are returned instead of data.
 
         .. note::
-            See the :ref:`userguide` for more information
+            See the |userguide|_ for more information
 
         """
         # if self._data is None and self.is_labeled:
