@@ -670,7 +670,7 @@ def test_nddataset_simple_slicing():
     assert d3.shape == (1, 5)
 
 
-def test_ndataset_slicing_with_mask():
+def test_nddataset_slicing_with_mask():
     mask = np.zeros((5, 5)).astype(bool)
     mask[1, 1] = True
     d1 = NDDataset(np.ones((5, 5)), mask=mask)
@@ -678,7 +678,7 @@ def test_ndataset_slicing_with_mask():
     assert d1[1, 1].mask
 
 
-def test_ndataset_slicing_with_mask_units():
+def test_nddataset_slicing_with_mask_units():
     u1 = np.ones((5, 5)) * 3
     mask = np.zeros((5, 5)).astype(bool)
     mask[1, 1] = True
@@ -1431,7 +1431,7 @@ def test_nddataset_set_coordinates(nd2d, ds1):
 
 
 ### issue 29
-def test_issue_29_mulitlabels():
+def test_nddataset_issue_29_mulitlabels():
     from spectrochempy import NDDataset, Coord, print_
     from numpy.random import rand
 
@@ -1467,7 +1467,10 @@ def test_issue_29_mulitlabels():
     DS2 = DS.sort(dim='y')
     assert_array_equal(DS2.y.labels ,['alpha',  'gamma', 'omega'])
 
-
+    # indexing
+    print_(DS[..., 'a':'c'])
+    print_(DS['alpha', 'e':'f'])
+    
 ################# Xarray conversion #########
 
 def test_nddataset_xarray_export(IR_dataset_2D):
