@@ -636,6 +636,7 @@ class NDDataset(
         else:
             new = self
 
+
         pos = kwargs.pop('pos', None)
         by = kwargs.pop('by', 'value')
 
@@ -651,7 +652,7 @@ class NDDataset(
         indexes = []
         for i in range(self.ndim):
             if i == axis:
-                if self._coords[axis].size == 0:
+                if not self._coords[axis].has_data:
                     # sometimes we have only label for Coord objects.
                     # in this case, we sort labels if they exist!
                     if self._coords[axis].is_labeled:
