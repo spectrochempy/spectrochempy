@@ -204,7 +204,6 @@ def clean():
     shutil.rmtree(BUILDDIR + '/latex', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
     shutil.rmtree(BUILDDIR, ignore_errors=True)
-    shutil.rmtree(DOCDIR   + '/user/auto_examples', ignore_errors=True)
     shutil.rmtree(DOCDIR   + '/gen_modules', ignore_errors=True)
     shutil.rmtree(DOCDIR   + '/gallery', ignore_errors=True)
     shutil.rmtree(DEVAPI,   ignore_errors=True)
@@ -222,7 +221,7 @@ def make_dirs():
                   os.path.join(BUILDDIR, 'pdf'),
                   os.path.join(DOCDIR, '_static'),
                   os.path.join(DOCDIR, 'dev', 'generated'),
-                  os.path.join(DOCDIR, 'user', 'api', 'generated')
+                  os.path.join(DOCDIR, 'api', 'generated')
                   ]
     for d in build_dirs:
         try:

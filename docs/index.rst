@@ -35,8 +35,6 @@ Among its major features:
 Documentation
 =============
 
-.. _gettingstarted:
-
 **Getting Started**
 
 * :doc:`gettingstarted/whyscpy`
@@ -46,57 +44,36 @@ Documentation
 * :doc:`gettingstarted/changelog`
 
 .. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Getting Started
-   
-   gettingstarted/whyscpy
-   gettingstarted/install
-   gettingstarted/usage
-   gettingstarted/license
-   gettingstarted/changelog
+    :maxdepth: 1
+    :hidden:
+    :caption: Getting Started
 
+    gettingstarted/whyscpy
+    gettingstarted/install
+    gettingstarted/usage
+    gettingstarted/license
+    gettingstarted/changelog
 
-.. _userguide:
 
 **User Guide** 
 
-* :doc:`user/userguide/introduction/index`
-* :doc:`user/userguide/dataset/index`
-* :doc:`user/userguide/projects/index`
-* :doc:`user/userguide/chemometrics/index`
-* :doc:`user/userguide/nmr/index`
-* :doc:`user/userguide/tutorial/index`
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: User Guide
-
-   user/userguide/introduction/index
-   user/userguide/dataset/index
-   user/userguide/projects/index
-   user/userguide/chemometrics/index
-   user/userguide/nmr/index
-   user/userguide/tutorial/index
-   
-   
-**Help**
-
-* :doc:`api/generated/index`
+* :doc:`user/userguide/index`
+* :doc:`user/tutorial/index`
 * :doc:`gallery/auto_examples/index`
-* :doc:`user/faq`
+* :doc:`api/generated/index`
+* :doc:`main/faq`
 
 .. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Help
+    :maxdepth: 2
+    :hidden:
+    :caption: User Guide & Tutorials
 
-   api/generated/index
-   gallery/auto_examples/index
-   user/faq
-   
-.. _develreference:
+    user/userguide/index
+    user/tutorials/index
+    api/generated/index
+    gallery/auto_examples/index
+    main/faq
+
 
 **Developer's Corner**
 
@@ -104,12 +81,13 @@ Documentation
 * :doc:`dev/api`
 
 .. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Developper's Corner
+    :maxdepth: 1
+    :hidden:
+    :caption: Developper's Corner
 
-   dev/contributing
-   dev/api
+    dev/contributing
+    dev/api
+
 
 **Credits**
 
@@ -118,12 +96,12 @@ Documentation
 * :doc:`main/seealso`
    
 .. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Credits
+    :maxdepth: 1
+    :hidden:
+    :caption: Credits
    
-   main/credits
-   main/citing
-   main/seealso
+    main/credits
+    main/citing
+    main/seealso
 
 

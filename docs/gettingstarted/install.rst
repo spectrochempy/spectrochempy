@@ -233,7 +233,7 @@ If jupyter lab ask you for building, do it!
 Getting started
 ===============
 
-The recommended next step is to proceed to the :ref:`userguide`
+The recommended next step is to proceed to the |userguide|_
 
 
 .. _`easy_install`: http://pypi.python.org/pypi/setuptools

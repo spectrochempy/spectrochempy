@@ -80,16 +80,115 @@ da3 = da + da / 2.
 da3
 
 # %% [markdown]
+# da is a 1D (1-dimensional) dataset with only one dimension. 
+#
+# Some attributes are useful to check this kind of information:
+
+# %%
+da.shape # the shape of 1D contain only one dimension size
+
+# %%
+da.ndim # the number of dimensions
+
+# %%
+da.dims # the name of the dimension (it has been automatically attributed)
+
+# %% [markdown]
+# **Note** : The names of the dimensions are set automatically. For now there is no way to change them
+
+# %% [markdown]
+# To create a nD NDDataset, we have to provide a nD-array like object to the NDDataset instance constructor
+
+# %%
+arr = np.random.rand(2,4,6) # note here that np (for numpy space has been automatically 
+                            # imported with spectrochempy, thus no need to use the 
+                            # classical `import numpy as np`)
+arr
+
+# %%
+ds = NDDataset(arr)
+ds.title = 'Energy'
+ds.name = '3D dataset creation'
+ds.history = 'created from scratch'
+ds.description = 'Some example'
+ds.units = 'eV'
+ds
+
+# %%
+ds.dims # 3 automatic dimension names
+
+# %%
+ds.ndim
+
+# %%
+ds.shape
+
+# %% [markdown]
+# There is 3 dimensions but no coordinate
+
+# %% [markdown]
+# To get the list of all defined coordnates, we can use the `coords` attribute:
+
+# %%
+ds.coords  # no coordinates, so it returns nothing (None)
+
+# %%
+ds.x       # the same for coordinate  x, y or z
+
+# %% [markdown]
+# To add coordinates, on way is to set them one by one:
+
+# %%
+ds.x = np.arange(6)*.1 # we need a sequence of 6 values for axe x (see shape above) 
+ds.x.title = 'meters'
+ds.coords # now return a list of coordinates
+
+# %%
+ds.x
+
+# %%
+ds.coords[-1]   # ds.x is a faster way to get this information 
+
+# %%
+ds.coords('x')  # another alternative way to get a given coordinates
+
+# %% [markdown]
+# The two other coordinates are empty
+
+# %%
+ds.z, ds.y
+
+# %% [markdown]
+# Programatically, we can use the attribute `is_empty` or `has_data` to check this
+
+# %%
+ds.z.has_data, ds.coords[0].is_empty
+
+# %% [markdown]
+# It is possible to use labels instead of numerical coordinates. They are sequence of objects .The length of the sequence must be equal to the size of a dimension
+
+# %%
+from datetime import datetime, timedelta, time
+timedelta()
+
+# %%
+tags = list('abcdef')
+start = timedelta(0)
+times = [start + timedelta(seconds=x*60) for x in range(6)]
+ds.x.labels = (tags, times)
+ds.x
+
+# %% [markdown]
 # ## Create a NDDataset : full example
 #
-# There are many ways to create |NDDataset| objects.
+# There are many ways to create `NDDataset` objects.
 #
-# Above we have created a NDDataset from a simple list, but it is generally more
+# Above we have created a `NDDataset` from a simple list, but it is generally more
 # convenient to create `numpy.ndarray`).
 #
-# Below is an example of a 3D-Dataset created from a ``numpy.ndarray`` to which axes can be added. 
+# Below is an example of a 3D-Dataset created from a ``numpy.ndarray`` to which axes for each dimension can be added. 
 #
-# Let's first create the 3 one-dimensional coordinates, for which we can define labels, units, and masks! 
+# Let's first create the 3 one-dimensional coordinates, for which we can define `labels`, `units`, and `masks`! 
 
 # %%
 coord0 = Coord(data=np.linspace(4000., 1000., 100),

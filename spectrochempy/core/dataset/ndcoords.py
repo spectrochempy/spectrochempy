@@ -102,7 +102,7 @@ class Coord(NDMath, NDArray):
         >>> print(c1) # doctest: +NORMALIZE_WHITESPACE
         title: Mylabels
         labels: [a b c d e f]
-        Some other examples will found in the :ref:`userguide`.
+        Some other examples will found in the |userguide|_.
         """
         super(Coord, self).__init__(data, **kwargs)
 
