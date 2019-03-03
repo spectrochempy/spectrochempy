@@ -1,5 +1,6 @@
 name: scpy-dev
 channels:
+- conda-forge
 - conda
 - spectrocat
 dependencies:

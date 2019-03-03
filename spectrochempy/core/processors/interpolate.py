@@ -67,7 +67,7 @@ def align(dataset, ref, **kwargs):
     """
     # TODO: Perform an alignment along numeric labels
 
-    axis = dataset.get_axis(**kwargs)
+    axis, dim = dataset.get_axis(**kwargs)
     refaxis = kwargs.pop('refdim', None)
 
     if refaxis is None:

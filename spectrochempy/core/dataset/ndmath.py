@@ -355,7 +355,7 @@ class NDMath(object):
         keepunits = kwargs.pop('keepunits', True)
 
         # handle the various syntax to pass the axis
-        axis = self.get_axis(*args, **kwargs)
+        axis, dim = self.get_axis(*args, **kwargs)
         kwargs['axis'] = axis
 
         # dim or dims keyword not accepted by the np function, so remove it

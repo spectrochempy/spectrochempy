@@ -28,7 +28,7 @@ from numba import jit
 # ----------------------------------------------------------------------------------------------------------------------
 
 import matplotlib.pyplot as plt
-from spectrochempy.core.dataset.ndcoords import CoordRange
+from spectrochempy.core.dataset.ndcoordrange import CoordRange
 
 
 def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
@@ -89,7 +89,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     # to subtract.
 
     # Swap the axes to be sure to be in this situation
-    axis = new.get_axis(dim)
+    axis, dim = new.get_axis(dim)
 
     if axis == new.ndim - 1:
         axis = -1

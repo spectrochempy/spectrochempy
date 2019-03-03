@@ -40,7 +40,7 @@ from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 # ======================================================================================================================
 from spectrochempy.utils.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
 from .parameter import nmr_valid_meta
 
@@ -630,8 +630,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 dw = (1. / meta.sw_h[axis]).to('us')
                 coordpoints = np.arange(meta.td[axis])
                 coord = Coord(coordpoints * dw,
-                              name='F{}'.format(axis),
-                              title="acquisition time")
+                              title=f"F{axis+1} acquisition time")    #TODO: use AQSEQ for >2D data
                 coords.append(coord)
             else:
                 raise NotImplementedError('Not yet implemented')
@@ -672,11 +671,11 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
         dataset.meta.update(list_meta[0])
         dataset.meta.readonly = True
-        dataset.coords = list_coords[0]
+        dataset.set_coords(*tuple(list_coords[0]))    # must be a tuple
         dataset.title = 'intensity'
 
     else:
-
+        
         # TODO : Check this -
         # case of multiple experiments to merge
 

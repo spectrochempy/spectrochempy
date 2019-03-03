@@ -519,6 +519,23 @@ def test_ndarray_slicing(refarray, ndarray):
     assert_array_equal(nd[..., am].data, amm)
 
 
+def test_dim_names_specified(refarray, ndarray):
+
+    ref = refarray
+    nd = ndarray.copy()
+    assert not nd.is_masked
+    assert nd.dims == ['y', 'x']
+
+    #set dim names
+    nd.dims = ['t','y']
+
+    info_(nd)
+    assert nd.dims == ['t', 'y']
+
+    info_(nd[1])
+    assert nd.dims == ['t', 'y']
+
+
 def test_ndarray_slice_labels():
     # slicing only-label array
 
@@ -589,3 +606,4 @@ def test_ndarray_bug_13(ndarrayunit):
 
     with pytest.raises(DimensionalityError):
         nd[0] = Quantity('10 cm')
+

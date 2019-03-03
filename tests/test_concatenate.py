@@ -93,7 +93,7 @@ def test_concatenate_along_dim_x(IR_dataset_2D):
 
     dim = 'x'
     dataset = IR_dataset_2D
-    dim = axis = dataset.get_axis(dim)
+    axis, dim = dataset.get_axis(dim)
     coord = dataset.coord(dim=dim)
 
     # test along dim x

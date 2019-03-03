@@ -18,13 +18,14 @@ import numpy as np
 import pytest
 
 from traitlets import TraitError, HasTraits
-from spectrochempy.core.dataset.ndcoords import Coord, CoordRange, CoordSet, Range
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
 from spectrochempy.core.dataset.ndarray import NDArray
 
 from spectrochempy.utils.testing import (assert_array_equal,
                                          assert_equal_units, raises)
-from spectrochempy.core import log
+from spectrochempy.utils import info_
+from spectrochempy.core import log, print_
 
 
 # ======================================================================================================================
@@ -308,17 +309,20 @@ def test_coord_slicing():
     assert_array_equal(a.values, a.labels)
 
 
-#########
 # Math
-#########
+# ----------------------------------------------------------------------------------------------------------------------
 
 # first operand has units km, second is a scalar with units m
-@pytest.mark.parametrize(('operation', 'result_units'), [
-    ('__add__', ur.km),
-    ('__sub__', ur.km),
-    ('__mul__', ur.km * ur.m),
-    ('__truediv__', ur.km / ur.m)])
-def test_coord_unit_conversion_operators(operation, result_units):
+@pytest.mark.parametrize( ('operation', 'result_units'),
+                          [
+                            ('__add__', ur.km),
+                            ('__sub__', ur.km),
+                            ('__mul__', ur.km * ur.m),
+                            ('__truediv__', ur.km / ur.m)
+                            ]
+                         )
+def test_coord_unit_conversion_operators_a(operation, result_units):
+    print(operation, result_units)
     in_km = Coord(data=np.linspace(4000, 1000, 10),
                   units='km',
                   mask=None,
@@ -329,30 +333,8 @@ def test_coord_unit_conversion_operators(operation, result_units):
     operator_km = in_km.__getattribute__(operation)
 
     combined = operator_km(scalar_in_m)
-    log.debug(f'{operation}, {combined}')
+    info_(f'{operation}, {combined}')
     assert_equal_units(combined.units, result_units)
-
-
-# first operand has units km, second is an array with units m
-@pytest.mark.parametrize(('operation', 'result_units'), [
-    ('__add__', ur.km),
-    ('__sub__', ur.km),
-    ('__mul__', ur.km * ur.m),
-    ('__truediv__', ur.km / ur.m)])
-def test_coord_unit_conversion_operators(operation, result_units):
-    in_km = Coord(data=np.linspace(4000, 1000, 10),
-                  units='km',
-                  mask=None,
-                  title='something')
-
-    array_in_m = np.arange(in_km.size) * ur.m
-
-    operator_km = in_km.__getattribute__(operation)
-
-    combined = operator_km(array_in_m)
-    log.debug(f'{operation}, {combined}')
-    assert_equal_units(combined.units, result_units)
-    assert isinstance(combined, Coord)
 
 
 UNARY_MATH = ["fabs", "ceil", "floor", "negative", "reciprocal",
@@ -405,172 +387,3 @@ def test_coord_not_implemented(name):
     with pytest.raises(NotImplementedError):
         f = getattr(coord0, name)()
 
-# ======================================================================================================================
-# CoordSet
-# ======================================================================================================================
-
-def test_coordset_init():
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   title='wavelength0')
-    coord1 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   title='titi')
-    coord2 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=list('abcdefghij'),
-                   mask=None,
-                   title='wavelength2')
-    coord3 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels=None,
-                   mask=None,
-                   title='wavelength3')
-
-    coordsa = CoordSet([coord0, coord3, coord2])   # one syntax
-    coordsb = CoordSet(coord0, coord3, coord2)     # a second syntax : equivalent
-    coordsc = CoordSet(x=coord2, y=coord3,z=coord0) # third syntax
-    coordsc1 = CoordSet({'x':coord2, 'y':coord3, 'z':coord0})
-    coordsd = CoordSet(coord3, x=coord2, y=coord3, z=coord0) # conflict (keyw replace args)
-    assert coordsa == coordsb
-    assert coordsa == coordsc
-    assert coordsa == coordsd
-    assert coordsa == coordsc1
-    c = coordsa["x"]
-    assert c == coord2
-    c = coordsa["y"]
-    assert c == coord3
-    assert coordsa['wavelength0'] == coord0
-
-    coord4 = copy(coord2)
-    coordsc = CoordSet([coord1, coord2, coord4])
-    assert coordsa != coordsc
-
-    coordse = CoordSet(x=[coord1,coord2], y=coord3, z=coord0) # coordset as coordinates
-    assert coordse['x'] == CoordSet(coord1,coord2)
-    assert coordse['x_1'] == coord2
-    assert coordse['titi'] == coord1
-
-    # iteration
-    for coord in coordsa:
-        assert isinstance(coord, Coord)
-
-    for i, coord in enumerate(coordsa):
-        assert isinstance(coord, Coord)
-
-
-
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels='a b c d e f g h i j'.split(),
-                   units='cm^-1',
-                   mask=None,
-                   title='wavelength')
-
-    log.debug(str(coord0))
-    log.debug(repr(coord0))
-    assert repr(
-        coord0) == "Coord: [float64] cm^-1"
-
-    coords = CoordSet([coord0, coord0.copy()])
-    log.debug(str(coords))
-
-    assert repr(coords).startswith("CoordSet: [y:wavelength, x:wavelength]")
-
-    # copy
-
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels='a b c d e f g h i j'.split(),
-                   units='cm^-1',
-                   mask=None,
-                   title='wavelength')
-
-    coords = CoordSet([coord0, coord0.copy()])
-    coords1 = coords[:]
-    assert coords is not coords1
-
-
-def test_coords_multicoord_for_a_single_dim():
-    # normal coord (single numerical array for a axis)
-
-    coord1 = NDArray(data=np.linspace(1000., 4000., 5),
-                     labels='a b c d e'.split(), mask=None, units='cm^1',
-                     title='wavelengths')
-
-    coord0 = NDArray(data=np.linspace(20, 500, 5),
-                     labels='very low-low-normal-high-very high'.split('-'),
-                     mask=None, units='K', title='temperature')
-
-    # pass as a list of coord
-    coordsa = CoordSet([coord1, coord0])
-    assert repr(coordsa) == 'CoordSet: [y:wavelengths, x:temperature]'
-    assert not coordsa.is_same_dim
-
-    # try to pass as an CoordSet
-    coordsb = CoordSet(coordsa)
-    assert not coordsb.is_same_dim
-
-    # try to pass a arguments, each being an coord
-    coordsc = CoordSet(coord1, coord0)
-    assert not coordsc.is_same_dim
-    assert repr(coordsc) == 'CoordSet: [y:wavelengths, x:temperature]'
-    assert not coordsa.is_same_dim
-
-    # try to pass arguments where each are a coords
-    coordsd = CoordSet(coordsa, coordsc)
-    assert repr(coordsd) == "CoordSet: [y:[_0:wavelengths, _1:temperature], x:[_0:wavelengths, _1:temperature]]"
-
-    assert not coordsd.is_same_dim
-    assert np.all([item.is_same_dim for item in coordsd])
-
-    coordse = CoordSet(coordsa, coord1)
-    assert repr(coordse) == "CoordSet: [y:[_0:wavelengths, _1:temperature], x:wavelengths]"
-
-    assert not coordse.is_same_dim
-    assert coordse[0].is_same_dim
-
-    # bug with copy (lost name in copy)
-
-    co = coordse[-1]
-    assert isinstance(co, Coord)
-
-    co = coordse[-1:]
-    assert isinstance(co, CoordSet)
-    assert co.names == ['x']  # should keep the original name (solved)
-    assert co.x == coord1
-
-
-
-# ======================================================================================================================
-# CoordRange
-# ======================================================================================================================
-
-def test_coordrange():
-    r = CoordRange()
-    assert r == []
-
-    r = CoordRange(3, 2)
-    assert r[0] == [2, 3]
-
-    r = CoordRange((3, 2), (4.4, 10), (4, 5))
-    assert r[-1] == [4, 10]
-    assert r == [[2, 3], [4, 10]]
-
-    r = CoordRange((3, 2), (4.4, 10), (4, 5),
-                   reversed=True)
-    assert r == [[10, 4], [3, 2]]
-
-
-# ======================================================================================================================
-# Range
-# ======================================================================================================================
-
-def test_range():
-
-    class MyClass(HasTraits):
-        r = Range()  # Initialized with some default values
-
-    c = MyClass()
-    c.r = [10, 5]
-    assert c.r == [5,10]
-    with raises(TraitError):
-        c.r = [10, 5, 1]

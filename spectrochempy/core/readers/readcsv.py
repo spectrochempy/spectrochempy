@@ -40,9 +40,9 @@ from numpy.lib.npyio import zipfile_factory, NpzFile
 # ----------------------------------------------------------------------------------------------------------------------
 # Local imports
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import CoordSet
+from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.processors.concatenate import stack
 from spectrochempy.core import log, general_preferences as prefs
 from spectrochempy.utils import (readfilename, is_sequence,
@@ -345,11 +345,11 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
     dataset.name = name
-    dataset._coords[0] = Coord(np.array([timestamp]), name='y')
-    dataset.coords.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
-    dataset.coords[1].units = 'cm^-1'
-    dataset.coords[0].labels = np.array([[acqdate], [name]])
-    dataset.coords[0].units = 's'
+    dataset.y = Coord(np.array([timestamp]), name='y')
+    dataset.set_coordtitles(y='Acquisition timestamp (GMT)', x='Wavenumbers')
+    dataset.x.units = 'cm^-1'
+    dataset.y.labels = np.array([[acqdate], [name]])
+    dataset.y.units = 's'
 
     # Set description and history
     dataset.description = (

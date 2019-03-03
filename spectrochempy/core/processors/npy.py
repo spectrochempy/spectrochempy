@@ -21,7 +21,8 @@ __all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'zeros_like', 'ones',
 
 import numpy as np
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import NOMASK, make_new_object
 
 

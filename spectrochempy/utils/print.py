@@ -10,7 +10,7 @@ __all__ = ['numpyprintoptions', 'insert_masked_print',
 
 def pstr(object, **kwargs):
     from spectrochempy.core.dataset.ndarray import NDArray
-    if isinstance(object, NDArray) and hasattr(object, '_cstr'):
+    if hasattr(object, '_cstr'):   # isinstance(object, NDArray) and
         return object._cstr(**kwargs)
     else:
         return str(object)

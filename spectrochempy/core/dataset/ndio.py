@@ -42,7 +42,8 @@ from traitlets import HasTraits, Unicode
 # ----------------------------------------------------------------------------------------------------------------------
 
 from .ndarray import NDArray
-from .ndcoords import Coord, CoordSet
+from .ndcoord import Coord
+from .ndcoordset import CoordSet
 from spectrochempy.utils import SpectroChemPyWarning
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity

@@ -44,7 +44,8 @@ except ModuleNotFoundError as e:
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import CoordSet, Coord
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils.testing import RandomSeedContext
 from spectrochempy.core import general_preferences as prefs
 

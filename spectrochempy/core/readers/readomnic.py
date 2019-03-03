@@ -34,6 +34,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import log, general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 
@@ -373,11 +374,14 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     dataset.title = 'Absorbance'
     dataset.name = spg_title
     dataset.filename = os.path.basename(filename).split('.')[0]
-    dataset.coords = (np.array(alltimestamps), xaxis)
-    dataset.coords.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
-    dataset.coords[1].units = 'cm^-1'
-    dataset.coords[0].labels = (allacquisitiondates, alltitles)
-    dataset.coords[0].units = 's'
+    
+    # now add coordinates
+    _x = Coord(xaxis, title='Wavenumbers', units='cm^-1')
+    _y = Coord(alltimestamps,
+               title='Acquisition timestamp (GMT)',
+               units='s',
+               labels = (allacquisitiondates, alltitles))
+    dataset.set_coords(y=_y, x=_x)
 
     # Set description and history
     dataset.description = (
@@ -387,7 +391,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 
     if kwargs.get('sortbydate', 'True'):
-        dataset.sort(dim=0, inplace=True)
+        dataset.sort(dim='y', inplace=True)
         dataset.history = 'sorted'
 
     # Set the NDDataset date
@@ -543,12 +547,11 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset._modified = dataset._date
 
     # Create Dataset Object of spectral content
-    dataset.coords = (np.array(alltimestamps), xaxis)
-    dataset.coords.titles = ('Acquisition timestamp (GMT)', 'Wavenumbers')
-    dataset.coords[1].units = 'cm^-1'
-    dataset.coords[0].labels = (allacquisitiondates, alltitles)
-    dataset.coords[0].units = 's'
-
+    # now add coordinates
+    _x = Coord(xaxis, title='Wavenumbers', units='cm^-1')
+    _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels = (allacquisitiondates, alltitles))
+    dataset.set_coords(y=_y, x=_x)
+    
     # Set description and history
     dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum: {3}".format(
         nspec, ' ... '.join(set([filenames[0], filenames[-1]])), '1st ' if nspec > 1 else '', allhistories[0])

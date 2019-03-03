@@ -41,7 +41,7 @@ from ...units import Unit, ur, Quantity
 from ...utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence, is_number,
                       numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
                       SpectroChemPyDeprecationWarning, deprecated, info_, debug_, error_, warning_, make_func_from,
-                      make_new_object, HAS_PANDAS, HAS_XARRAY)
+                      make_new_object, convert_to_html, HAS_PANDAS, HAS_XARRAY)
 from ...extern.traittypes import Array
 
 if HAS_PANDAS:
@@ -55,7 +55,7 @@ if HAS_XARRAY:
 # constants
 # ======================================================================================================================
 
-DEFAULT_DIM_NAME = list('xyzuvw')[::-1]
+DEFAULT_DIM_NAME = list('xyzuvwt')[::-1]
 
 # ======================================================================================================================
 # Printing settings
@@ -75,12 +75,11 @@ class NDArray(HasTraits):
     The |NDArray| class is an array
     (numpy |ndarray|-like) container, usually not intended to be used directly,
     as its basic functionalities may be quite limited, but to be subclassed.
-    Indeed, both the class |Coord| which handles the coordinates in a given
-    dimension and the class |NDDataset| which implements a full dataset (with
-    coordinates) are derived from |NDArray| in |scpy|.
-    The key distinction from raw numpy \|ndarrays| is the presence of
-    optional properties such as labels, masks,
-    units and/or extensible metadata dictionary.
+    Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
+    coordinates)  and the coordinates in a given dimension, are derived from |NDArray| in |scpy|.
+
+    The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
+    labels, masks, units and/or extensible metadata dictionary.
 
     """
 
@@ -112,7 +111,7 @@ class NDArray(HasTraits):
 
     # other settings
     _text_width = Int(130)
-    _html_output = False
+    _html_output = Bool(False)
 
     # ..................................................................................................................
     @docstrings.get_sectionsf('NDArray')
@@ -132,6 +131,10 @@ class NDArray(HasTraits):
             them if that's the desired behavior or set the `copy` argument to True.
         dtype: str or dtype, optional, default: np.float64
             If specified, the data will be casted to this dtype, else the type of the data will be used
+        dims: list of chars, optional.
+            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
+            taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
+            this order.
         name: str, optional
             A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
             used as a name.
@@ -575,6 +578,37 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     @property
+    def dims(self):
+        # the name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension
+        ndim = self.ndim
+        if ndim > 0:
+            # if len(self._dims)< ndim:
+            #    self._dims = self._dims_default()
+            dims = self._dims[:ndim]
+            return dims
+        else:
+            return []
+
+    # ..................................................................................................................
+    @dims.setter
+    def dims(self, values):
+        """
+        The dimension's names
+        """
+        if not is_sequence(values) or len(values) != self.ndim:
+            raise ValueError(f'a sequence of chars with a length of {self.ndim} is expected, but `{values}` '
+                             f'has been provided')
+
+        for value in values:
+            if value not in DEFAULT_DIM_NAME:
+                raise ValueError(f"{value} value is not admitted. Dimension's name must be among "
+                                 f"{DEFAULT_DIM_NAME[::-1]}.")
+
+        self._dims = tuple(values)
+
+
+    # ..................................................................................................................
+    @property
     def dlabel(self):
         """
         An user friendly data label (str). It's an alias of the `title` property
@@ -811,20 +845,6 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     @property
-    def dims(self):
-        # the name of the dimensions are 'x', 'y', 'z'.... depending on the
-        # number of dimension
-        ndim = self.ndim
-        if ndim > 0:
-            # if len(self._dims)< ndim:
-            #    self._dims = self._dims_default()
-            dims = self._dims[:ndim]
-            return dims
-        else:
-            return []
-
-    # ..................................................................................................................
-    @property
     def has_units(self):
         """
         bool - True if the `data` array have units (Readonly property).
@@ -842,6 +862,15 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     @property
+    def has_defined_name(self):
+        """
+        bool - True is the name has been defined
+
+        """
+        return not(self.name == self.id)
+
+    # ..................................................................................................................
+    @property
     def id(self):
         """
         str - Object identifier (Readonly property).
@@ -852,7 +881,7 @@ class NDArray(HasTraits):
     @property
     def is_float(self):
         """
-        bool - True if the 'data' are real values (Readonly property).
+        bool - True if the `data` are real values (Readonly property).
         """
         if self.data is None:
             return False
@@ -1133,16 +1162,20 @@ class NDArray(HasTraits):
 
         Returns
         -------
-        axis : int
-            The axis indexes
+        axis, dim : int and str
+            A tuple with the axis indexes and the axis name
 
         """
         # handle the various syntax to pass the axis
         dims = self._get_dims_from_args(*args, **kwargs)
         axis = self._get_dims_index(dims)
         axis = axis[0] if axis else None
-
-        return axis
+        if axis is not None:
+            dim = self.dims[axis]
+        else:
+            dim = None
+            
+        return axis, dim
 
     # ..................................................................................................................
     def get_labels(self, level=0):
@@ -1417,6 +1450,39 @@ class NDArray(HasTraits):
         # if not inplace:
         return new
 
+        # conversion
+
+    # ..................................................................................................................
+    def to_pandas(self):
+        """
+        Convert NDArray into a `pandas` object
+
+        Returns
+        -------
+        out : pandas object
+            Index for a single dimensional dataarray without units
+            MultiIndex for single dimensional dataarray with units
+            DataFrame for multidimentional arrays
+
+        """
+        if HAS_PANDAS:
+            import pandas as pd
+        else:
+            raise ImportError('Cannot perform this conversion as Pandas is not installed.')
+    
+        if self.is_empty and not self.is_labeled:
+            raise ValueError('no valid index for a 0-dimensional object.')
+    
+        if self.ndim==1:
+            if self.has_units:
+                out = pd.MultiIndex.from_product([[str(self.units)],self.data], names=['units', self.title])
+            else:
+                out = pd.Index(self.data, name=self.title)
+        else:
+            raise NotImplementedError('Not yet implemented')
+        
+        return out
+
     # ..................................................................................................................
     @docstrings.dedent
     def transpose(self, *dims, inplace=False):
@@ -1589,56 +1655,7 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def _repr_html_(self):
-
-        tr = "<tr>" \
-             "<td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'>{0}</td>" \
-             "<td style='text-align:left; padding-bottom:0px; padding-top:0px; {2} '>{1}</td><tr>\n"
-
-        self._html_output = True
-
-        out = self._cstr()
-
-        regex = r'\0{3}[\w\W]*?\0{3}'
-        # noinspection PyPep8
-        subst = lambda match: "<div>{}</div>".format(match.group(0).replace('\n', '<br/>').replace('\0', ''))
-        out = re.sub(regex, subst, out, 0, re.MULTILINE)
-
-        regex = r"^(\W*\w+\W?\w+)(:.*$)"
-        subst = r"<font color='green'>\1</font> \2"
-        out = re.sub(regex, subst, out, 0, re.MULTILINE)
-
-        regex = r"^(.*(DIMENSION|DATA).*)$"
-        subst = r"<strong>\1</strong>"
-        out = re.sub(regex, subst, out, 0, re.MULTILINE)
-
-        regex = r'\0{2}[\w\W]*?\0{2}'
-        # noinspection PyPep8
-        subst = lambda match: "<div><font color='darkcyan'>{}</font></div>".format(
-            match.group(0).replace('\n', '<br/>').replace('\0', ''))
-        out = re.sub(regex, subst, out, 0, re.MULTILINE)
-
-        regex = r'\0{1}[\w\W]*?\0{1}'
-        # noinspection PyPep8
-        subst = lambda match: "<div><font color='blue'>{}</font></div>".format(
-            match.group(0).replace('\n', '<br/>').replace('\0', ''))
-        out = re.sub(regex, subst, out, 0, re.MULTILINE)
-
-        regex = r'\.{3}\s+\n'
-        out = re.sub(regex, '', out, 0, re.MULTILINE)
-
-        html = "<table style='background:transparent'>\n"
-        for line in out.splitlines():
-            if '</font> :' in line:
-                # keep only first match
-                parts = line.split(':')
-                html += tr.format(parts[0], ':'.join(parts[1:]), 'border:.5px solid lightgray; ')
-            elif '<strong>' in line:
-                html += tr.format(line, '<hr/>', 'padding-top:10px;')
-        html += "</table>"
-
-        self._html_output = False
-
-        return html
+        return convert_to_html(self)
 
     # ..................................................................................................................
     def _argsort(self, by='value', pos=None, descend=False):
@@ -1785,7 +1802,7 @@ class NDArray(HasTraits):
                     return slice(None)
             else:
                 if key < 0:  # reverse indexing
-                    axis = self.get_axis(dim)
+                    axis, dim = self.get_axis(dim)
                     start = self._data.shape[axis] + key
             stop = start + 1  # in order to keep an unsqueezed slice
             return slice(start, stop, 1)

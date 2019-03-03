@@ -15,7 +15,8 @@ import pytest
 
 # from spectrochempy import *
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import (MASKED, TYPE_FLOAT, TYPE_INTEGER,
                                  TYPE_COMPLEX)
@@ -360,7 +361,7 @@ def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs
     ds2 = NDDataset(d2D, dtype='float64')
     coord0 = Coord(np.arange(4) * .1)
     coord1 = Coord(np.arange(5) * .2)
-    ds2.coords = [coord0, coord1]
+    ds2.coords = (coord0, coord1)
     ds2.units = ur.m
 
     dsy = runop(ds2, args, kwargs)
@@ -390,7 +391,7 @@ def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs
 
     ds1 = NDDataset(d1D, dtype='float64')
     coord0 = Coord(np.arange(10) * .1)
-    ds1.coords = [coord0]
+    ds1.coords = (coord0,)
     dsy = runop(ds1, args, kwargs)
 
     info_(str(ds1))

@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.core.dataset.ndcoords import CoordRange
+from spectrochempy.core.dataset.ndcoordrange import CoordRange
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings
@@ -118,7 +118,7 @@ class BaselineCorrection(HasTraits):
             self.ranges.extend(ranges)
 
     def _setup(self, **kwargs):
-        self.axis = self.dataset.get_axis(**kwargs)  # using dim, dims or axis keyword arguments
+        self.axis, dim = self.dataset.get_axis(**kwargs)  # using dim, dims or axis keyword arguments
         if self.axis is None:
             self.axis = -1
         self.method = kwargs.get('method', self.method)

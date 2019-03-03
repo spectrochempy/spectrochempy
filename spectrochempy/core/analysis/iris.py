@@ -13,7 +13,7 @@ This module implement the IRIS class.
 __all__ = ['IRIS']
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.processors.npy import dot
 
 import numpy as np

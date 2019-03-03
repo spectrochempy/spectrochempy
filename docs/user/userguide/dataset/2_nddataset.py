@@ -16,7 +16,16 @@
 # # The NDDataset object
 
 # %% [markdown]
-# ## Create a NDDataset object
+# The NDDataset is the main object use by **SpectroChemPy**. 
+#
+# Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to matematical operations. 
+#
+# But, in addition, NDDataset may have units and coordinates with units for all dimensions. This make NDDataset aware of unit compatibility, e.g., for binary operation such as addtions or subtraction or during the application of mathematical operations. In addition or in replacement of numerical data for coordinates, NDDatset can aslo have labeled coordinates where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc...). 
+#
+# This offer a lot of flexibility in using NDDatasets that,  we hope, will be useful for applications. See the **Tutorials** for more information about such possible applications. 
+
+# %% [markdown]
+# **Below (and in the next sections), we try to give an almost complete view of the NDDataset features.**
 
 # %%
 from spectrochempy import *
@@ -156,7 +165,10 @@ ds.coords('x')  # another alternative way to get a given coordinates
 # The two other coordinates are empty
 
 # %%
-ds.z, ds.y
+ds.y
+
+# %%
+ds.z
 
 # %% [markdown]
 # Programatically, we can use the attribute `is_empty` or `has_data` to check this

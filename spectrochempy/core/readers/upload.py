@@ -32,8 +32,7 @@ import requests
 # ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord
-from spectrochempy.utils import show
+from spectrochempy.core.dataset.ndcoord import Coord
 
 
 # ............................................................................

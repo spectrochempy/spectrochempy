@@ -30,7 +30,7 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.nddataset import NDDataset, CoordSet
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.processors.npy import diag, dot
 from spectrochempy.core import project_preferences

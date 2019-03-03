@@ -40,6 +40,8 @@ __all__ = [
     'make_func_from',
     #
     'display_info_string',
+    'convert_to_html',
+    
     #
 ]
 
@@ -78,6 +80,58 @@ try:
 except ImportError:
     HAS_XARRAY = False
 
+
+def convert_to_html(obj):
+    
+    tr = "<tr>" \
+         "<td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'>{0}</td>" \
+         "<td style='text-align:left; padding-bottom:0px; padding-top:0px; {2} '>{1}</td><tr>\n"
+
+    obj._html_output = True
+    
+    out = obj._cstr()
+    
+    regex = r'\0{3}[\w\W]*?\0{3}'
+    # noinspection PyPep8
+    subst = lambda match: "<div>{}</div>".format(match.group(0).replace('\n', '<br/>').replace('\0', ''))
+    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    
+    regex = r"^(\W*\w+\W?\w+)(:.*$)"
+    subst = r"<font color='green'>\1</font> \2"
+    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    
+    regex = r"^(.*(DIMENSION|DATA).*)$"
+    subst = r"<strong>\1</strong>"
+    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    
+    regex = r'\0{2}[\w\W]*?\0{2}'
+    # noinspection PyPep8
+    subst = lambda match: "<div><font color='darkcyan'>{}</font></div>".format(
+        match.group(0).replace('\n', '<br/>').replace('\0', ''))
+    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    
+    regex = r'\0{1}[\w\W]*?\0{1}'
+    # noinspection PyPep8
+    subst = lambda match: "<div><font color='blue'>{}</font></div>".format(
+        match.group(0).replace('\n', '<br/>').replace('\0', ''))
+    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    
+    regex = r'\.{3}\s+\n'
+    out = re.sub(regex, '', out, 0, re.MULTILINE)
+    
+    html = "<table style='background:transparent'>\n"
+    for line in out.splitlines():
+        if '</font> :' in line:
+            # keep only first match
+            parts = line.split(':')
+            html += tr.format(parts[0], ':'.join(parts[1:]), 'border:.5px solid lightgray; ')
+        elif '<strong>' in line:
+            html += tr.format(line, '<hr/>', 'padding-top:10px;')
+    html += "</table>"
+    
+    obj._html_output = False
+
+    return html
 
 def make_new_object(obj):
     """

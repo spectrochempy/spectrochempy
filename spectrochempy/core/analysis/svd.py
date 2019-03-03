@@ -26,7 +26,8 @@ import numpy as np
 # local imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndarray import MASKED, NOMASK
 from spectrochempy.utils import docstrings

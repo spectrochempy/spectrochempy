@@ -18,7 +18,7 @@ import numpy as np
 
 
 def _make_spectra_matrix(pos, width, ampl):
-    from spectrochempy.core.dataset.ndcoords import Coord
+    from spectrochempy.core.dataset.ndcoord import Coord
     from spectrochempy.core.dataset.nddataset import NDDataset
     from spectrochempy.core.fitting.models import gaussianmodel
 
@@ -36,7 +36,7 @@ def _make_spectra_matrix(pos, width, ampl):
 
 
 def _make_concentrations_matrix(*profiles):
-    from spectrochempy.core.dataset.ndcoords import Coord
+    from spectrochempy.core.dataset.ndcoord import Coord
     from spectrochempy.core.dataset.nddataset import NDDataset
 
     t = Coord(np.linspace(0, 10, 50), units='hour', title='time')

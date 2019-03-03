@@ -53,7 +53,8 @@ from spectrochempy.units import Unit, ur, Quantity
 from spectrochempy.utils.meta import Meta
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndmath import NDMath
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
@@ -79,15 +80,13 @@ class NDPanel(
     A dataset consists of ndarrays (|NDArray| objects), coordinates (|Coord|
     objets) and metadata.
 
-    A dataset can contains heterogeneous data (e.g., 1D and ND arrays), but their
-    dimensions must be compatibles or subject to alignment.
-
-    For the moment there is no uncertainties, no labels, no masks
+    A dataset can contains heterogeneous data (e.g., 1D and ND arrays with various data units), but their
+    dimensions must be compatible or subject to alignment.
 
     """
 
     # main data
-    _variable = Dict(traits={'ndarray': Instance(NDArray),
+    _arrays = Dict(traits={'ndarray': Instance(NDArray),
                              'ndcomplexarray': Instance(NDComplexArray)},
                      allow_none=True)
     _coords = Dict(Instance(Coord), allow_none=True)
@@ -114,7 +113,6 @@ class NDPanel(
             and if present the data coordinates.
             Units for data and coordinates will also be extracted.
             Compatibilities between the data is expected.
-
         kwargs
 
 
@@ -126,9 +124,10 @@ class NDPanel(
         # TODO: For now only NDDataset as args are implemented
 
         """
-        datasets = args
-        coords = kwargs.get('coords', None)
-        meta
+
+        arrays = kwargs.get('arrays', args[0] if len(args)>0 else None)
+        coords = kwargs.get('coords', args[0] if len(args)>0 else None)
+
         if datasets is not None:
             # we assume a list of objects have been provided
             if not isinstance(datasets, (list, tuple)):

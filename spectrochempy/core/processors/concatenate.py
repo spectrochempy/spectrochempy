@@ -16,7 +16,8 @@ import datetime as datetime
 from warnings import warn
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord, CoordSet
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import (is_sequence, docstrings)
 
 
@@ -98,7 +99,7 @@ def concatenate(*datasets, **kwargs):
         axis = 0
     else:
         # get axis from arguments
-        axis = datasets[0].get_axis(**kwargs)
+        axis, dim = datasets[0].get_axis(**kwargs)
 
     if axis < 0:
         axis = datasets[0].ndim + axis
