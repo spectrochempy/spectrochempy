@@ -338,6 +338,7 @@ class NDPlot(HasTraits):
             #
             # This is necessary for projections and colorbar
 
+            self._divider = None
             if (SHOWXPROJ or SHOWYPROJ or colorbar) \
                     and self._divider is None:
                 self._divider = make_axes_locatable(ax)
@@ -383,9 +384,12 @@ class NDPlot(HasTraits):
         # (we have worked on a copy in plot)
         if not kwargs.get('data_transposed', False):
             origin.ndaxes = self.ndaxes
+            if not hasattr(self, '_ax_lines'):
+                self._ax_lines = None
             origin._ax_lines = self._ax_lines
-            if hasattr(self, "_axcb"):
-                origin._axcb = origin._axcb
+            if not hasattr(self, "_axcb"):
+                self._axcb = None
+            origin._axcb = self._axcb
         else:
             nda = {}
             for k, v in self.ndaxes.items():
@@ -393,7 +397,7 @@ class NDPlot(HasTraits):
             origin.ndaxes = nda
             origin._axT_lines = self._ax_lines
             if hasattr(self, "_axcb"):
-                origin._axcbT = origin._axcb
+                origin._axcbT = self._axcb
 
         origin._fig = self._fig
 

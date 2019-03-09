@@ -80,9 +80,9 @@ def concatenate(*datasets, **kwargs):
     # ------------------------------------------------------------------------------------------------------------------
 
     # We must have a list of datasets
-    for dataset in datasets:
-        if is_sequence(dataset):  # numpy style of passing args
-            datasets = dataset
+    if isinstance(datasets, tuple):
+        if isinstance(datasets[0], (list, tuple)):
+            datasets = datasets[0]
 
     # try to cast of dataset to NDDataset
     for dataset in datasets:
@@ -96,13 +96,10 @@ def concatenate(*datasets, **kwargs):
     # a flag to force stacking of dataset instead of the default concatenation
     force_stack = kwargs.get('force_stack', False)
     if force_stack:
-        axis = 0
+        axis, dim = datasets[0].get_axis(0)
     else:
         # get axis from arguments
         axis, dim = datasets[0].get_axis(**kwargs)
-
-    if axis < 0:
-        axis = datasets[0].ndim + axis
 
     # check if data shapes are compatible (all dimension must have the same size
     # except the one to be concatenated)
@@ -119,14 +116,14 @@ def concatenate(*datasets, **kwargs):
                              " concatenation is performed")
 
     if force_stack:
-        # for this stack operation, we need the last additional dimension of length 1
+        # for this stack operation, we need the a dimension y of at least length 1
         # except if it is already of size 1
         for i, dataset in enumerate(datasets):
             if dataset.shape[-1] >= 1:
                 continue
             dataset._data = dataset.data[np.newaxis]
             dataset._mask = dataset.mask[np.newaxis]
-            dataset.coords._coords = [Coord(labels=[str(i)])] + dataset.coords._coords
+            dataset.set_coords(y=Coord(labels=[str(i)]))
 
     # Check unit compatibility
     # ------------------------------------------------------------------------------------------------------------------
@@ -199,32 +196,29 @@ def concatenate(*datasets, **kwargs):
         coords = coordss[0].copy()
 
         try:
-            coords[axis]._data = np.concatenate(tuple((c[axis].data for c in
-                                                       coordss)))  # np.concatenate( tuple((dataset.coords[axis].data for dataset in datasets)))
+            coords[dim]._data = np.concatenate(tuple((c[dim].data for c in coordss)))
         except ValueError:
             pass
 
         # concatenation of the labels (fist check the presence of at least one labeled coordinates)
         is_labeled = False
-        for i, coord in enumerate(tuple(zip(*coordss))[axis]):
-            if coord.is_labeled:
+        for i, c in enumerate(coordss):
+            if c[dim].is_labeled:
                 # at least one of the coord is labeled
                 is_labeled = True
-                # multilabel
+                break
+                
 
         if is_labeled:
             labels = []
             # be sure that now all the coordinates have a label, or create one
-            c2arr = lambda x: x if isinstance(x, np.ndarray) else np.array([x])
-            for i, coord in enumerate(coords):
-                if coord.is_labeled:
-                    labels.append(coord)
-                    continue  # nothing to do for this one
+            for i, c in enumerate(coordss):
+                if c[dim].is_labeled:
+                    labels.append(c[dim].labels)
                 else:
-                    pass
+                    labels.append(str(i))
 
-            coords[axis]._labels = np.concatenate(
-                tuple((dataset.coords[axis].labels for dataset in datasets)))
+            coords[dim]._labels = np.concatenate(labels)
 
     out = NDDataset(data, coords=coords, mask=mask, units=units)
 
@@ -245,6 +239,7 @@ def concatenate(*datasets, **kwargs):
             out.author = out.author + ' & ' + dataset.author
 
         out.description += ', {}'.format(dataset.name)
+        
     out.description += ' )'
     out._date = out._modified = datetime.datetime.now()
     out._history = [str(out.date) + ':created by %s' % thist]

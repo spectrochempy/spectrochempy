@@ -156,17 +156,17 @@ class SIMPLISMA(HasTraits):
         # but could also be concentrations if X.T is passed)
         Pt = NDDataset(np.zeros((n_pc, X.shape[-1])))
         Pt.name = 'Purity spectra'
-        Pt.coords = [Pt.y, X.x]
+        Pt.set_coords(y=Pt.y, x=X.x)
         Pt.y.title = '# pure compound'
 
         # weight matrix
         w = NDDataset(np.zeros((n_pc, X.shape[-1])))
-        w.coords = [Pt.y, X.x]
+        w.set_coords(y=Pt.y, x=X.x)
 
         # Stdev spectrum
         s = NDDataset(np.zeros((n_pc, X.shape[-1])))
         s.name = 'Standard deviation spectra'
-        s.coords = [Pt.y, X.x]
+        s.set_coords(y=Pt.y, x=X.x)
 
         # maximum purity indexes and coordinates
         maxPIndex = [0] * n_pc
@@ -175,13 +175,13 @@ class SIMPLISMA(HasTraits):
         # Concentration matrix
         C = NDDataset(np.zeros((X.shape[-2], n_pc)))
         C.name = 'Relative Concentrations'
-        C.coords = [X.y, C.x]
+        C.set_coords(y=X.y, x=C.x)
         C.x.title = '# pure compound'
 
         # Pure component spectral profiles
         St = NDDataset(np.zeros((n_pc, X.shape[-1])))
         St.name = 'Pure compound spectra'
-        St.coords = [Pt.y, X.x]
+        St.set_coords(y=Pt.y, x=X.x)
 
         # Compute Statistics
         # ------------------

@@ -10,11 +10,12 @@ __all__ = ['numpyprintoptions', 'insert_masked_print',
 
 def pstr(object, **kwargs):
     from spectrochempy.core.dataset.ndarray import NDArray
-    if hasattr(object, '_cstr'):   # isinstance(object, NDArray) and
+    from spectrochempy.core.dataset.ndcoordset import CoordSet
+    
+    if isinstance(object, (NDArray, CoordSet)) :
         return object._cstr(**kwargs)
     else:
         return str(object)
-
 
 def print_(object, **kwargs):
     """
@@ -28,7 +29,7 @@ def print_(object, **kwargs):
 
     """
     txt = pstr(object, **kwargs).replace('\0', '')
-    print(txt)
+    print('\n',txt)
 
 
 # ======================================================================================================================
@@ -43,7 +44,7 @@ TBlue = lambda text: Fore.BLUE + str(text) + Fore.RESET
 TMagenta = lambda text: Fore.MAGENTA + str(text) + Fore.RESET
 TYellow = lambda text: Fore.YELLOW + str(text) + Fore.RESET
 TCyan = lambda text: Fore.CYAN + str(text) + Fore.RESET
-
+TBlack = lambda text: Fore.BLACK + str(text) + Fore.RESET
 
 def colored(text, color):
     c = getattr(Fore, color)
@@ -53,16 +54,20 @@ def colored(text, color):
 def colored_output(out):
     import re
 
-    regex = r"^(\W*\w+\W?\w+)(:.*$)"
-    subst = TGreen(r"\1") + r"\2"
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
-
-    regex = r"^(.*(DIMENSION|DATA).*)$"
+    regex = r"^(\W*(DIMENSION|DATA).*)$"
     subst = TBold(r"\1")
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
+    regex = r"^(\W{10}\(_\d{1}\))"
+    subst = TBold(r"\1")
+    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    
     regex = r'\0{3}([\w\W]*?)\0{3}'
-    subst = r"\1"
+    subst = TBlack(r"\1")
+    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+
+    regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"
+    subst = TGreen(r"\1") + r"\2"
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
     regex = r'\0{2}([\w\W]*?)\0{2}'
@@ -290,13 +295,13 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
                 fmt = 'n.d.'
 
         elif isinstance(x, TYPE_FLOAT):
-            fmt = '{:{l}.0{prec}f}'.format(
+            fmt = '{:{l}.0{prec}g}'.format(
                 x,
-                prec=precision - 1,
+                prec=precision, # - 1,
                 l=precision + spc)
 
         elif isinstance(x, TYPE_COMPLEX):
-            fmt = '{:{l}.0{prec}f}{:+{lc}.0{prec}f}j'.format(
+            fmt = '{:{l}.0{prec}g}{:+{lc}.0{prec}g}j'.format(
                 x.real, x.imag, prec=precision - 1,
                 l=precision + spc,
                 lc=precision)

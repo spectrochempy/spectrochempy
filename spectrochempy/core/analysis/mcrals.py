@@ -96,8 +96,6 @@ class MCRALS(HasTraits):
         ny, nx = X.shape
 
         # makes a PCA with same number of species
-
-        # X.coords = [X.y, X.x] # not necessary!
         Xpca = PCA(X).inverse_transform(n_pc=nspecies)
 
         # Get optional parameters in kwargs or set them to their default
@@ -148,20 +146,24 @@ class MCRALS(HasTraits):
 
         if initConc:
             if C.coords is None:
-                C.coords = [X.y, C.x]
+                C.set_coords(y=X.y, x=C.x)
             St = NDDataset(np.linalg.lstsq(C.data, X.data)[0])
             St.name = 'Pure spectra profile, mcs-als of ' + X.name
             St.title = X.title
-            St.coords = [C.x, X.x]
+            cy = C.x.copy() if C.x else None
+            cx = X.x.copy() if X.x else None
+            St.set_coords(y=cy, x=cx)
 
         if initSpec:
             if St.coords is None:
-                St.coords = [St.y, X.x]
+                St.set_coords(y=St.y, x=X.x)
             Ct = np.linalg.lstsq(St.data.T, X.data.T)[0]
             C = NDDataset(Ct.T)
             C.name = 'Pure conc. profile, mcs-als of ' + X.name
             C.title = 'Concentration'
-            C.coords = [X.y, St.y]
+            cx = St.y.copy() if St.y else None
+            cy = X.y.copy() if X.y else None
+            C.set_coords(y=cy, x=cx)
 
         change = tol + 1
         stdev = X.std()  # .data[0]
@@ -249,7 +251,7 @@ class MCRALS(HasTraits):
                 C.data = C.data * alpha.T
             elif normSpec == 'euclid':
                 alpha = np.linalg.norm(St.data, axis=1).reshape(nspecies, 1)
-                St = St / alpha
+                St.data = St.data / alpha
                 C.data = C.data * alpha.T
 
             # compute residuals

@@ -145,8 +145,8 @@ def align(dataset, ref, **kwargs):
     out._coords = newaxes
     out._mask = newmask
 
-    out.name = '*' + dataset.name
-    out.title = '*' + dataset.title
+    out.name = dataset.name
+    out.title = dataset.title
 
     out.history = '{}: aligned along dim {} with respect to dataset {} using coords {} \n'.format(
         str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)

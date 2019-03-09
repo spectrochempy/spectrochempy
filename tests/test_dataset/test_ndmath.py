@@ -361,7 +361,7 @@ def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs
     ds2 = NDDataset(d2D, dtype='float64')
     coord0 = Coord(np.arange(4) * .1)
     coord1 = Coord(np.arange(5) * .2)
-    ds2.coords = (coord0, coord1)
+    ds2.set_coords(coord0, coord1)
     ds2.units = ur.m
 
     dsy = runop(ds2, args, kwargs)
@@ -391,7 +391,7 @@ def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs
 
     ds1 = NDDataset(d1D, dtype='float64')
     coord0 = Coord(np.arange(10) * .1)
-    ds1.coords = (coord0,)
+    ds1.set_coords(coord0,)
     dsy = runop(ds1, args, kwargs)
 
     info_(str(ds1))
@@ -430,9 +430,9 @@ def test_ndmath_absolute_of_quaternion():
                     [5., 4.2, 2., 3., 3., 3.]])
     nd = NDDataset(na0, dtype=quaternion)
     print(nd)
-    coords = CoordSet([np.linspace(-1, 1, 2), np.linspace(-10., 10., 3)])
+    coords = CoordSet(np.linspace(-1, 1, 2), np.linspace(-10., 10., 3))
     assert nd.shape == (2, 3)
-    nd.coords = coords
+    nd.set_coords(**coords)
     val = np.abs(nd)
 
 

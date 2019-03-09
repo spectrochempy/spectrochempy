@@ -47,13 +47,14 @@ class BaselineCorrection(HasTraits):
       and calculation of the modelled baseline spectra.
 
     Interactive mode is proposed using the interactive function : :meth:`run`.
-
+    
     """
     dataset = Instance(NDDataset)
     corrected = Instance(NDDataset)
     method = Unicode('multivariate')
     interpolation = Unicode('pchip')
-    axis = Int(allow_none=True)
+    axis = Int(-1)
+    dim = Unicode('')
     order = Int(6, min=1, allow_none=True)
     npc = Int(5, min=1, allow_none=True)
     zoompreview = Float(1.)
@@ -107,20 +108,21 @@ class BaselineCorrection(HasTraits):
 
         self._setup(**kwargs)
 
-        dimx = dataset.dims[self.axis]
-        x = getattr(dataset, dimx).data
+        x = getattr(dataset, self.dim).data
 
-        self.ranges = [
-            [x[0], x[2]],
-            [x[-3], x[-1]]
-        ]
+        self.ranges = [[x[0], x[2]], [x[-3], x[-1]]]
+        
         if ranges:
             self.ranges.extend(ranges)
 
     def _setup(self, **kwargs):
-        self.axis, dim = self.dataset.get_axis(**kwargs)  # using dim, dims or axis keyword arguments
-        if self.axis is None:
-            self.axis = -1
+        
+        if 'axis' in kwargs.keys() or 'dim' in kwargs.keys():
+            self.axis, self.dim = self.dataset.get_axis(**kwargs)  # using dim, dims or axis keyword arguments
+            
+        if not self.dim:
+            self.dim = self.dataset.dims[self.axis]
+            
         self.method = kwargs.get('method', self.method)
         self.interpolation = kwargs.get('interpolation', self.interpolation)
         if self.interpolation == 'polynomial':
@@ -164,14 +166,12 @@ class BaselineCorrection(HasTraits):
             swaped = True
 
         # most of the time we need sorted axis, so let's do it now
-        coords = new.coords(0)
-
         is_sorted = False
-        if new.coords(-1).reversed:
-            new.sort(axis=-1, inplace=True, descend=False)
+        if new.coords[self.dim].reversed:
+            new.sort(dim=self.dim, inplace=True, descend=False)
             is_sorted = True
 
-        coords = new.coords(-1)
+        coords = new.coords[self.dim]
         baseline = np.zeros_like(new)
 
         if ranges:
@@ -189,10 +189,9 @@ class BaselineCorrection(HasTraits):
             sl = slice(*pair)
             s.append(new[..., sl])
 
-        sbase = s[0].concatenate(*s[1:], axis=-1)
-
+        sbase = NDDataset.concatenate(s, axis=-1)
         # TODO: probably we could use masked data instead of concatenating - could be faster
-        xbase = sbase.coords(-1)
+        xbase = sbase.coords(self.dim)
 
         if self.method == 'sequential':
 

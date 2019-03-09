@@ -47,16 +47,16 @@ class SVD(HasTraits):
     ignored in the calculation.
 
     """
-
+    
     U = Instance(NDDataset, allow_none=True)
     """|NDDataset| - Contains the left unitary matrix. Its shape depends on `full_matrices`"""
-
+    
     s = Instance(NDDataset)
     """|NDDataset| - Vector of singular values"""
-
+    
     VT = Instance(NDDataset, allow_none=True)
     """|NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices`"""
-
+    
     @docstrings.get_sectionsf('SVD')
     @docstrings.dedent
     def __init__(self, dataset, full_matrices=False, compute_uv=True):
@@ -88,14 +88,14 @@ class SVD(HasTraits):
         [  94.539    5.059 ...    0.000    0.000]
 
         """
-
+        
         self._compute_uv = compute_uv
-
+        
         # check if we have the correct input
         # ----------------------------------
-
+        
         X = dataset
-
+        
         if isinstance(X, NDDataset):
             # As seen below, we cannot performs SVD on the masked array
             # so let's take the ndarray only.
@@ -104,48 +104,48 @@ class SVD(HasTraits):
             # data, not complex or hypercomplex.
             data = X._data
             M, N = X._data.shape
-
+        
         else:
             raise TypeError(f'A dataset of type NDDataset is expected as a dataset of data, but an object of type'
                             f' {type(X).__name__} has been provided')
-
+        
         # Retains only valid rows and columns
         # -----------------------------------
-
+        
         # unfortunately, the present SVD implementation in linalg library
         # doesn't support numpy masked arrays as input. So we will have to
         # remove the masked values ourselves
-
+        
         # the following however assumes that entire rows or columns are masked,
         # not only some individual data (if this is what you wanted, this
         # will fail)
-
+        
         if np.any(X._mask):
             masked_columns = np.all(X._mask, axis=-2)
             masked_rows = np.all(X._mask, axis=-1)
         else:
             masked_columns = np.zeros(X._data.shape[-1], dtype=bool)
             masked_rows = np.zeros(X._data.shape[-2], dtype=bool)
-
+        
         data = data[:, ~ masked_columns]
         data = data[~ masked_rows]
-
+        
         # Performs the SVD
         # ----------------
-
+        
         if data.size == 0 and np.product(data.shape[-2:]) == 0:
             raise np.linalg.LinAlgError("Arrays cannot be empty. You may "
                                         "want to check the masked data. ")
-
+        
         res = np.linalg.svd(data, full_matrices, compute_uv)
         if compute_uv:
             U, s, VT = res
         else:
             s = res
-
+        
         # Returns the diagonal sigma matrix as a NDDataset object
         # -------------------------------------------------------
-
+        
         s = NDDataset(s)
         s.title = 'Singular values of ' + X.name
         s.name = 'sigma'
@@ -154,7 +154,7 @@ class SVD(HasTraits):
                 'Vector of singular values obtained  by SVD '
                 'decomposition of ' + X.name)
         self.s = s
-
+        
         if compute_uv:
             # Put back masked columns in  VT
             # ------------------------------
@@ -166,7 +166,7 @@ class SVD(HasTraits):
                 Vtemp[:, ~ masked_columns] = VT
                 Vtemp[:, masked_columns] = MASKED
                 VT = Vtemp
-
+            
             # Put back masked rows in U
             # -------------------------
             KU = U.shape[1]
@@ -175,56 +175,53 @@ class SVD(HasTraits):
                 Utemp[~ masked_rows] = U
                 Utemp[masked_rows] = MASKED
                 U = Utemp
-
+            
             # Sign correction to ensure deterministic output from SVD.
             # This doesn't work will full_matrices=True.
             if not full_matrices:
                 U, VT = self.svd_flip(U, VT)
-
+            
             # Returns U as a NDDataset object
             # --------------------------------
             U = NDDataset(U)
             U.name = 'U'
             U.title = 'left singular vectors of ' + X.name
-            U.coords = CoordSet(X.coords[0] if X.coords else None,
-                                Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components')
-                                )
+            U.set_coords(x=Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components'), y=X.y)
             U.description = 'left singular vectors of ' + X.name
             U.history = 'created by SVD \n'
-
+            
             # Returns the loadings (VT) as a NDDataset object
             # ------------------------------------------------
-
+            
             VT = NDDataset(VT)
             VT.name = 'V.T'
             VT.title = 'Loadings (V.t) of ' + X.name
-            VT.coords = CoordSet(Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'),
-                                 X.coords[1] if X.coords else None)
+            VT.set_coords(x=X.x, y=Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'))
             VT.description = (
                     'Loadings obtained by singular value decomposition of ' + X.name)
             VT.history = (str(VT.modified) + ': created by SVD \n')
-
+            
             self.U = U
             self.VT = VT
         else:
             self.U = None
             self.VT = None
-
+    
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
     # ------------------------------------------------------------------------------------------------------------------
-
+    
     def __repr__(self):
         if self._compute_uv:
             return '<svd: U%s, s(%s), VT%s>' % (
                 self.U.shape, self.s.size, self.VT.shape)
         else:
             return '<svd: s(%s), U,VT:not computed>' % (self.s.size,)
-
+    
     # ------------------------------------------------------------------------------------------------------------------
     #  Properties
     # ------------------------------------------------------------------------------------------------------------------
-
+    
     @property
     def sv(self):
         """|NDDataset|, Singular values"""
@@ -232,11 +229,9 @@ class SVD(HasTraits):
         sv = self.s.copy()
         sv.name = 'sv'
         sv.title = 'Singular values'
-        sv.coords = CoordSet(Coord(None,
-                                   labels=['#%d' % (i + 1) for i in range(size)],
-                                   title='Components'))
+        sv.set_coords(Coord(None,labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
         return sv
-
+    
     @property
     def ev(self):
         """|NDDataset|, Explained variance"""
@@ -244,11 +239,9 @@ class SVD(HasTraits):
         ev = self.s ** 2 / (size - 1)
         ev.name = 'ev'
         ev.title = 'Explained variance'
-        ev.coords = CoordSet(Coord(None,
-                                   labels=['#%d' % (i + 1) for i in range(size)],
-                                   title='Components'))
+        ev.set_coords(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
         return ev
-
+    
     @property
     def ev_cum(self):
         """|NDDataset|, Cumulative Explained Variance"""
@@ -257,7 +250,7 @@ class SVD(HasTraits):
         ev_cum.title = 'Cumulative explained variance'
         ev_cum.units = 'percent'
         return ev_cum
-
+    
     @property
     def ev_ratio(self):
         """|NDDataset|,  Explained Variance per singular values"""
@@ -266,7 +259,7 @@ class SVD(HasTraits):
         ratio.title = 'Explained variance'
         ratio.units = 'percent'
         return ratio
-
+    
     def svd_flip(self, U, VT, u_based_decision=True):
         """
         Sign correction to ensure deterministic output from SVD.
@@ -284,7 +277,7 @@ class SVD(HasTraits):
         Copied and modified from scikit-learn.utils.extmath (BSD 3 Licence)
 
         """
-
+        
         if u_based_decision:
             # columns of U, rows of VT
             max_abs_cols = np.argmax(np.abs(U), axis=0)
@@ -297,7 +290,7 @@ class SVD(HasTraits):
             signs = np.sign(VT[range(VT.shape[0]), max_abs_rows])
             U *= signs
             VT *= signs[:, np.newaxis]
-
+        
         return U, VT
 
 

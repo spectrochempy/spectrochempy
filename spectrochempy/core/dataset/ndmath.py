@@ -182,7 +182,7 @@ class NDMath(object):
         if not new.has_complex_dims:
             return np.fabs(new)  # not a complex, return fabs should be faster
 
-        elif not new._is_quaternion:
+        elif not new.is_quaternion:
             new = np.sqrt(new.real ** 2 + new.imag ** 2)
         else:
             new = np.sqrt(new.real ** 2 + new.part('IR') ** 2 + new.part('RI') ** 2 + new.part('II') ** 2)

@@ -131,10 +131,8 @@ def plot_2D(dataset, **kwargs):
 
     kwargs : additional keywords
 
-    {}
-
-    """.format(dataset._general_parameters_doc_)
-
+    """
+    
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -389,7 +387,7 @@ def plot_2D(dataset, **kwargs):
             # image plot
             # ----------
             kwargs['nlevels'] = 500
-            if new.clevels is None:
+            if not hasattr(new, 'clevels') or new.clevels is None:
                 new.clevels = clevels(zdata, **kwargs)
             c = ax.contourf(xdata, ydata, zdata,
                             new.clevels, linewidths=lw, alpha=alpha)
@@ -412,11 +410,10 @@ def plot_2D(dataset, **kwargs):
                                  markersize=markersize)
                     l.set_color(scalarMap.to_rgba(zdata[i - 1, j - 1]))
 
-
         else:
             # contour plot
             # -------------
-            if new.clevels is None:
+            if not hasattr(new, 'clevels') or new.clevels is None:
                 new.clevels = clevels(zdata, **kwargs)
 
             c = ax.contour(xdata, ydata, zdata,

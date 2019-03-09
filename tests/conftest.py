@@ -93,19 +93,19 @@ def refmask():
 @pytest.fixture(scope="function")
 def ndarray():
     # return a simple ndarray with some data
-    return NDArray(ref_data, copy=True)
+    return NDArray(ref_data, copy=True).copy()
 
 
 @pytest.fixture(scope="function")
 def ndarrayunit():
     # return a simple ndarray with some data and units
-    return NDArray(ref_data, units='m/s', copy=True)
+    return NDArray(ref_data, units='m/s', copy=True).copy()
 
 
 @pytest.fixture(scope="function")
 def ndarraymask():
     # return a simple ndarray with some data and units
-    return NDArray(ref_data, mask=ref_mask, units='m/s', copy=True)
+    return NDArray(ref_data, mask=ref_mask, units='m/s', copy=True).copy()
 
 
 # Fixtures: Some NDComplex's array
@@ -114,13 +114,13 @@ def ndarraymask():
 @pytest.fixture(scope="function")
 def ndarraycplx():
     # return a complex ndarray
-    return NDComplexArray(ref_data, units='m/s', dtype=np.complex128, copy=True)
+    return NDComplexArray(ref_data, units='m/s', dtype=np.complex128, copy=True).copy()
 
 
 @pytest.fixture(scope="function")
 def ndarrayquaternion():
     # return a quaternion ndarray
-    return NDComplexArray(ref_data, units='m/s', dtype=np.quaternion, copy=True)
+    return NDComplexArray(ref_data, units='m/s', dtype=np.quaternion, copy=True).copy()
 
 
 # Fixtures: Some NDDatasets
@@ -129,38 +129,38 @@ def ndarrayquaternion():
 coord0_ = Coord(data=np.linspace(4000., 1000., 10), labels=list('abcdefghij'), units="cm^-1", title='wavenumber')
 @pytest.fixture(scope="function")
 def coord0():
-    return coord0_
+    return coord0_.copy()
 
 coord1_ = Coord(data=np.linspace(0., 60., 100), units="s", title='time-on-stream')
 @pytest.fixture(scope="function")
 def coord1():
-    return coord1_
+    return coord1_.copy()
 
 coord2_ = Coord(data=np.linspace(200., 300., 3), labels=['cold', 'normal', 'hot'], units="K", title='temperature')
 @pytest.fixture(scope="function")
 def coord2():
-    return coord2_
+    return coord2_.copy()
 
 coord2b_ = Coord(data=np.linspace(1., 20., 3), labels=['low', 'medium', 'high'], units="tesla", title='magnetic field')
 @pytest.fixture(scope="function")
 def coord2b():
-    return coord2b_
+    return coord2b_.copy()
 
 coord0_2_ = Coord(data=np.linspace(4000., 1000., 9), labels=list('abcdefghi'), units="cm^-1", title='wavenumber')
 @pytest.fixture(scope="function")
 def coord0_2():
-    return coord0_2_
+    return coord0_2_.copy()
 
 coord1_2_ = Coord(data=np.linspace(0., 60., 50), units="s", title='time-on-stream')
 @pytest.fixture(scope="function")
 def coord1_2():
-    return coord1_2_
+    return coord1_2_.copy()
 
 coord2_2_ = Coord(data=np.linspace(200., 1000., 4), labels=['cold', 'normal', 'hot', 'veryhot'], units="K",
                  title='temperature')
 @pytest.fixture(scope="function")
 def coord2_2():
-    return coord2_2_
+    return coord2_2_.copy()
 
 @pytest.fixture(scope="function")
 def nd1d():
@@ -183,13 +183,13 @@ def ref_ds():
 @pytest.fixture(scope="function")
 def ds1():
     # a dataset with coordinates
-    return NDDataset(ref3d_data, coords=[coord0_, coord1_, coord2_], title='Absorbance', units='absorbance')
+    return NDDataset(ref3d_data, coords=[coord0_, coord1_, coord2_], title='Absorbance', units='absorbance').copy()
 
 
 @pytest.fixture(scope="function")
 def ds2():
     # another dataset
-    return NDDataset(ref3d_2_data, coords=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance', units='absorbance')
+    return NDDataset(ref3d_2_data, coords=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance', units='absorbance').copy()
 
 
 @pytest.fixture(scope="function")
@@ -198,7 +198,7 @@ def dsm():
 
     coordmultiple = CoordSet(coord2_, coord2b_)
     return NDDataset(ref3d_data, coords=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
-                     units='absorbance')
+                     units='absorbance').copy()
 
 
 # Fixtures:  IR spectra (SPG)
@@ -210,19 +210,19 @@ dataset = NDDataset.read_omnic(os.path.join(directory, 'irdata', 'nh4y-activatio
 
 @pytest.fixture(scope="function")
 def IR_dataset_2D():
-    return dataset
+    return dataset.copy()
 
 
 @pytest.fixture(scope="function")
 def IR_dataset_1D():
-    return dataset[0].squeeze()
+    return dataset[0].squeeze().copy()
 
 
 @pytest.fixture(scope="function")
 def IR_scp_1():
     directory = prefs.datadir
     dataset = NDDataset.load(os.path.join(directory, 'irdata', 'nh4.scp'))
-    return dataset
+    return dataset.copy()
 
 
 # Fixture : NMR spectra
@@ -233,7 +233,7 @@ def NMR_dataset_1D():
     directory = prefs.datadir
     path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
     dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-    return dataset
+    return dataset.copy()
 
 
 @pytest.fixture(scope="function")
@@ -241,7 +241,7 @@ def NMR_dataset_1D_1H():
     directory = prefs.datadir
     path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'tpa')
     dataset = NDDataset.read_bruker_nmr(path, expno=10, remove_digital_filter=True)
-    return dataset
+    return dataset.copy()
 
 
 @pytest.fixture(scope="function")
@@ -249,7 +249,7 @@ def NMR_dataset_2D():
     directory = prefs.datadir
     path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
     dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-    return dataset
+    return dataset.copy()
 
 
 # Some panda structure for dataset initialization
@@ -260,7 +260,7 @@ def series():
     with RandomSeedContext(2345):
         arr = pd.Series(np.random.randn(4), index=np.arange(4) * 10.)
     arr.index.name = 'un nom'
-    return arr
+    return arr.copy()
 
 
 @pytest.fixture(scope="function")
@@ -269,7 +269,7 @@ def dataframe():
         arr = pd.DataFrame(np.random.randn(6, 4), index=np.arange(6) * 10., columns=np.arange(4) * 10.)
     for ax, name in zip(arr.axes, ['time', 'temperature']):
         ax.name = name
-    return arr
+    return arr.copy()
 
 
 @pytest.fixture(scope="function")
@@ -282,7 +282,7 @@ def panel():
                        minor_axis=np.arange(shape[2]) * 10.)
     for ax, name in zip(arr.axes, ['axe0', 'axe1', 'axe2']):
         ax.name = name
-    return arr
+    return arr.copy()
 
 # GUI Fixtures
 # ----------------------------------------------------------------------------------------------------------------------

@@ -28,6 +28,7 @@ from traitlets import HasTraits, Instance
 # ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import docstrings, MASKED
 from spectrochempy.core.analysis.svd import SVD
@@ -214,7 +215,7 @@ class EFA(HasTraits):
 
         xcoord = Coord(range(n_pc), title='PC#')
         c = NDDataset(np.zeros((M, n_pc)),
-                      coords=[self._X.y, xcoord],
+                      coords=CoordSet(y=self._X.y, x=xcoord),
                       name='C_EFA[{}]'.format(self._X.name),
                       title='relative concentration',
                       )

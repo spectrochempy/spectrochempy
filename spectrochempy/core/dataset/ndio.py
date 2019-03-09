@@ -176,7 +176,7 @@ class NDIO(HasTraits):
 
             for key in _names:
 
-                val = getattr(obj, "_%s" % key)
+                val = getattr(obj, f"_{key}")
 
                 if isinstance(val, np.ndarray):
 
@@ -184,17 +184,20 @@ class NDIO(HasTraits):
                         write_array(fid, np.asanyarray(val), allow_pickle=True)
 
                     zipf.write(tmpfile, arcname=level + key + '.npy')
-
-                elif isinstance(val, Coord):
-
-                    _objnames = dir(val)
-                    _loop_on_obj(_objnames, level=key + '.')
+                    
 
                 elif isinstance(val, CoordSet):
-
-                    for i, val in enumerate(val._coords):
-                        _objnames = dir(val)
-                        _loop_on_obj(_objnames, obj=val, level="coord_%d_" % i)
+                    
+                    for v in val._coords:
+                        _objnames = dir(v)
+                        if isinstance(v, Coord):
+                            _loop_on_obj(_objnames, obj=v, level=f"coord_{v.name}_")
+                        elif isinstance(v, CoordSet):
+                            _objnames.remove('coords')
+                            _loop_on_obj(_objnames, obj=v, level=f"coordset_{v.name}_")
+                            for vi in v:
+                                _objnames = dir(vi)
+                                _loop_on_obj(_objnames, obj=vi, level=f"coordset_{v.name}_coord_{vi.name[1:]}_")
 
                 elif isinstance(val, datetime.datetime):
 
@@ -311,22 +314,31 @@ class NDIO(HasTraits):
         log.debug(str(obj.files) + '\n')
 
         # interpret
-        ndim = obj["data"].ndim
         coords = None
         new = cls()
 
-        torem = []
         for key, val in list(obj.items()):
             if key.startswith('coord_'):
                 if not coords:
-                    coords = [Coord() for _ in range(ndim)]
+                    coords = {}
                 els = key.split('_')
-                idx = int(els[1])
-                # if obj["data"].shape[idx]==1:
-                #    torem.append(idx)
-                #    idx+=1
-                setattr(coords[idx], "_%s" % els[2], val)
+                dim = els[1]
+                if dim not in coords.keys():
+                    coords[dim] = Coord()
+                setattr(coords[dim], "_%s" % els[2], val)
 
+            if key.startswith('coordset_'):
+                if not coords:
+                    coords = {}
+                els = key.split('_')
+                dim = els[1]
+                idx = "_"+els[3]
+                if dim not in coords.keys():
+                    coords[dim] = CoordSet({idx:Coord()})
+                if idx not in coords[dim].names:
+                    coords[dim].set(**{idx:Coord()})
+                setattr(coords[dim][idx], "_%s" % els[4], val)
+            
             elif key == "pars.json":
                 pars = json.loads(asstr(val))
             else:
@@ -375,11 +387,19 @@ class NDIO(HasTraits):
             if key.startswith('coord_'):
 
                 els = key.split('_')
-                idx = int(els[1])
-                if obj["data"].shape[idx] == 1:
-                    idx += 1
-                setattributes(coords[idx], els[2], val)
+                dim = els[1]
+                setattributes(coords[dim], els[2], val)
 
+            elif key.startswith('coordset_'):
+                els = key.split('_')
+                dim = els[1]
+                if key.endswith("is_same_dim"):
+                    setattributes(coords[dim], "is_same_dim", val)
+                elif key.endswith("name"):
+                    setattributes(coords[dim], "name", val)
+                else:
+                    idx = "_"+els[3]
+                    setattributes(coords[dim][idx], els[4], val)
             else:
 
                 setattributes(new, key, val)
@@ -388,11 +408,7 @@ class NDIO(HasTraits):
             new._filename = filename
 
         if coords:
-            ncoords = []
-            for idx, v in enumerate(coords):
-                if idx not in torem:
-                    ncoords.append(coords[idx])
-            new.coords = ncoords
+            new.set_coords(coords)
 
         return new
 

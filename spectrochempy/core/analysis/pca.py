@@ -162,9 +162,8 @@ class PCA(HasTraits):
 
         S = dot(U, sigma)
         S.title = 'scores (S) of ' + X.name
-        S.coords = CoordSet(X.y, Coord(None,
-                                       labels=['#%d' % (i + 1) for i in range(svd.s.size)],
-                                       title='principal component'))
+        S.set_coords(y=X.y, x=Coord(None, labels=['#%d' % (i + 1) for i in range(svd.s.size)],
+                                    title='principal component'))
 
         S.description = 'scores (S) of ' + X.name
         S.history = 'created by PCA'

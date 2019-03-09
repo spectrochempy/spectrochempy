@@ -8,7 +8,7 @@
 # ======================================================================================================================
 
 from spectrochempy.core.processors.concatenate import concatenate, stack
-from spectrochempy.core.dataset.ndcoords import CoordRange
+from spectrochempy.core.dataset.ndcoordrange import CoordRange
 from spectrochempy.units import ur
 from spectrochempy.utils import info_, MASKED, show
 
@@ -23,7 +23,7 @@ def test_concatenate(IR_dataset_2D):
     s = concatenate(s1, s2, dims=dim)
     assert s.units == s1.units
     assert s.shape[-1] == (s1.shape[-1] + s2.shape[-1])
-    assert s.coords(-1).size == (s1.coords(-1).size + s2.coords(-1).size)
+    assert s.x.size == (s1.x.size + s2.x.size)
     assert s.x != dataset.x
     s = s.sort(dims=dim, descend=True)  #
     assert s.x == dataset.x
@@ -37,7 +37,7 @@ def test_concatenate(IR_dataset_2D):
     s = concatenate(s1, s2, dim=0)
     assert s.units == s1.units
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
-    assert s.coords(0).size == (s1.coords(0).size + s2.coords(0).size)
+    assert s.y.size == (s1.y.size + s2.y.size)
     s = s.sort(dim='y')
     s.plot()
 
@@ -45,13 +45,13 @@ def test_concatenate(IR_dataset_2D):
     s = s1.concatenate(s2, dim=0)
     assert s.units == s1.units
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
-    assert s.coords(0).size == (s1.coords(0).size + s2.coords(0).size)
+    assert s.y.size == (s1.y.size + s2.y.size)
 
     # third syntax
     s = concatenate((s1, s2), dim=0)
     assert s.units == s1.units
     assert s.shape[0] == (s1.shape[0] + s2.shape[0])
-    assert s.coords(0).size == (s1.coords(0).size + s2.coords(0).size)
+    assert s.y.size == (s1.y.size + s2.y.size)
 
 
 def test_concatenate_1D_along_axis1(IR_dataset_2D):
@@ -109,10 +109,10 @@ def test_concatenate_along_dim_x(IR_dataset_2D):
         s.append(dataset[..., sl])
 
     sbase = concatenate(*s, dim=dim)
-    xbase = sbase.coord(dim=dim)
+    xbase = sbase.x
 
     assert sbase.shape[axis] == (s[0].shape[axis] + s[1].shape[axis])
-    assert xbase.size == (s[0].coords(axis).size + s[1].coords(axis).size)
+    assert xbase.size == (s[0].x.size + s[1].x.size)
 
     sbase.plot_stack()
     show()

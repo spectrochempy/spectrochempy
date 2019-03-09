@@ -291,7 +291,7 @@ def _read_csv(filename='', fid=None, **kwargs):
     data = d[1].reshape((1, coordx.size))
 
     # create the dataset
-    new = NDDataset(data, coords=CoordSet(coordy, coordx))
+    new = NDDataset(data, coords=(coordy, coordx))
 
     # set the additional attributes
     name = os.path.splitext(os.path.basename(filename))[0]

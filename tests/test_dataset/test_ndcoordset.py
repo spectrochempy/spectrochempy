@@ -51,8 +51,6 @@ def test_coordset_init(coord0, coord1, coord2):
     assert coordsb.names == ['x', 'y', 'z']
     
     # but warning
-    
-    
     coordsa1 = CoordSet([coord0[:3], coord3[:3], coord2[:3]])   # A list means that it is a sub-coordset (different meaning)
     assert coordsa1.names == ['x']
     assert coordsa1.x.names == ['_1', '_2', '_3']
@@ -116,6 +114,17 @@ def test_coordset_init(coord0, coord1, coord2):
     with pytest.raises(ValueError):
         coords = CoordSet(x=coord2, y=coord3, z=3)  # wrong coordinate value
     
+    # set a coordset from another one
+    coords = CoordSet(**coordse)
+    assert coordse.names == ['x', 'y', 'z']
+    assert coords.names == ['x', 'y', 'z']
+    assert coords == coordse
+    
+    # not recommended
+    coords2 = CoordSet(*coordse) # loose the names so the ordering may be different
+    assert coords2.names == ['x', 'y', 'z']
+    print_(coords2)
+    assert coords.x == coords2.z
     
 def test_coordset_multicoord_for_a_single_dim():
     # normal coord (single numerical array for a axis)
@@ -356,3 +365,17 @@ def test_coordset_set(coord0, coord1, coord2):
     assert str(coords)  == 'CoordSet: [x:zaza, y:[_1:zaza, _2:temperature], z:time-on-stream]'
     
     coords.set(coord1, coord0, coord2)
+    assert str(coords) == 'CoordSet: [x:zaza, y:wavenumber, z:time-on-stream]'
+    
+    coords.z = coord0
+    assert str(coords) == 'CoordSet: [x:zaza, y:wavenumber, z:wavenumber]'
+    
+    coords.zaza = coord0
+    assert str(coords) == 'CoordSet: [x:wavenumber, y:wavenumber, z:wavenumber]'
+    
+    print_(coords.zaza)
+    
+    coords.wavenumber = coord2
+    assert str(coords) == 'CoordSet: [x:zaza, y:wavenumber, z:wavenumber]'
+
+    print_(coords.zaza)

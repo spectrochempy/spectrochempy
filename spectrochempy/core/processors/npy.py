@@ -423,7 +423,7 @@ def dot(a, b, strict=True, out=None):
                         ' of type {} has been provided'.format(
             type(b).__name__))
 
-    # TODO: may be we can be less strict, and allow dot products with
+    #TODO: may be we can be less strict, and allow dot products with
     # different kind of objects, as far they are numpy-like arrays
 
     data = np.ma.dot(a.masked_data, b.masked_data)
@@ -431,17 +431,14 @@ def dot(a, b, strict=True, out=None):
     data = data.data
 
     if a.coords is not None:
-        idx = a.coords.names.index(a.dims[0])
-        coordy = Coord(a.coords[idx])
+        coordy = getattr(a, a.dims[0])
     else:
         coordy = None
     if b.coords is not None:
-        idx = b.coords.names.index(b.dims[1])
-        coordx = Coord(b.coords[idx])
+        coordx = getattr(b, b.dims[1])
     else:
         coordx = None
-    coords = CoordSet(y=coordy, x=coordx)
-
+    
     history = 'dot product between %s and %s' % (a.name, b.name)
 
     # make the output
@@ -449,7 +446,7 @@ def dot(a, b, strict=True, out=None):
     new = make_new_object(a)
     new._data = data
     new._mask = mask
-    new._coords = coords
+    new.set_coords(y=coordy, x=coordx)
     new.history = history
 
     return new
@@ -530,8 +527,9 @@ def diag(dataset, k=0):
     new = dataset.copy()
     new._data = data
     new._mask = mask
-    new.coords = coords
     new.history = history
+    if coords:
+        new.set_coords(coords)
 
     return new
 

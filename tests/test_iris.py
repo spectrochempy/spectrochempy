@@ -11,7 +11,7 @@ import os
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoords import Coord
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.analysis.iris import IRIS
 from spectrochempy.utils import show, info_
 

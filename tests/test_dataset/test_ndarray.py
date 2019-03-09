@@ -181,6 +181,13 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d9.is_labeled
     info_('\n', d9)
     
+    # fortran order
+    x = ndarraymask.copy()
+    x.asfortranarray()
+    d10 = NDArray(x)
+    assert d10 == x
+    assert d10.data.flags['F_CONTIGUOUS']
+    
 def test_ndarray_copy():
 
     d0 = NDArray(np.linspace(4000, 1000, 10),
@@ -222,6 +229,7 @@ def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion
     # test comparison
 
     nd1 = ndarray.copy()
+    
     assert nd1 == ndarray
     assert nd1 is not ndarray
 
@@ -238,7 +246,30 @@ def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion
     assert nd4 == ndarrayquaternion
 
     assert nd1 != 'xxxx'
+    
+    nd2n = nd2.to(None, force=True)
+    assert nd2n != nd2
 
+def test_ndarray_to_pandas(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion):
+    import pandas as pd
+    
+    nd = ndarray[0].squeeze()
+    p = nd.to_pandas()
+    info_(p)
+    assert isinstance(p, pd.Index)
+    
+    nd.units = 'km'
+    p = nd.to_pandas()
+    info_(p)
+    assert isinstance(p, pd.MultiIndex)
+    
+    nd = ndarray.copy()
+    with pytest.raises(NotImplementedError):  #TODO: implement this
+        p = nd.to_pandas()
+    
+    with pytest.raises(ValueError):
+        nd = NDArray()
+        nd.to_pandas()
 
 def test_ndarray_sort():
     # labels and sort
@@ -428,7 +459,16 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     assert d4.shape == (3, 4)
     assert d4._data.shape == (3, 4)
 
-
+    # test iter
+    for i, item in enumerate(ndd):
+        assert item == ndd[i]
+        
+    ndz = NDArray()
+    assert not list(item for item in ndz)
+    
+    assert str(ndz) == repr(ndz) == 'NDArray: empty (size: 0)'
+    
+    
 ################
 # TEST SLICING #
 ################
@@ -453,6 +493,9 @@ def test_ndarray_slicing(refarray, ndarray):
     assert isinstance(nd1.data, np.ndarray)
     assert isinstance(nd1.values, TYPE_FLOAT)
 
+    nd1b, id = nd.__getitem__((0,0), return_index=True)
+    assert nd1b == nd1
+    
     nd1a = nd[0, 0:2]
     assert_equal(nd1a.data, nd.data[0:1, 0:2])
     assert nd1a is not nd[0, 0:2]

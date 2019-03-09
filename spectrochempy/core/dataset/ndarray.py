@@ -1085,7 +1085,7 @@ class NDArray(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    def asfortanarray(self):
+    def asfortranarray(self):
 
         # data and mask will be converted to F_CONTIGUOUS mode
         if not self._data.flags['F_CONTIGUOUS']:
@@ -1094,7 +1094,7 @@ class NDArray(HasTraits):
                 self._mask = np.asfortranarray(self._mask)
 
     # ..................................................................................................................
-    def copy(self, deep=True, memo=None):
+    def copy(self, deep=True, memo=None, keepname=False):
         """
         Make a disconnected copy of the current object.
 
@@ -1145,7 +1145,9 @@ class NDArray(HasTraits):
                 setattr(new, f"_{attr}", _attr)
 
         # name must be changed
-        new.name = '*' + self.name
+        if not keepname:
+            self.name = self.name.replace('* ','')
+            new.name = '* ' + self.name
 
         return new
 
@@ -1319,7 +1321,7 @@ class NDArray(HasTraits):
         if self.is_masked:
             new._mask = new._mask.squeeze(axis=axis)
 
-        if return_axis:  # in case we need to now which axis has been squeezed
+        if return_axis:  # in case we need to know which axis has been squeezed
             return new, axis
 
         return new
@@ -1423,6 +1425,9 @@ class NDArray(HasTraits):
         if other is None:
             units = None
             if self.units is None:
+                return new
+            elif force:
+                new._units = None
                 return new
         elif isinstance(other, str):
             units = ur.Unit(other)

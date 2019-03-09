@@ -13,15 +13,18 @@
 """
 
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core import general_preferences as prefs, log
+
 import os
 
+from spectrochempy.utils import info_
 from spectrochempy.utils.testing import assert_array_equal
 
 
 # Basic
 # ----------------------------------------------------------------------------------------------------------------------
-def test_basic():
+def test_ndio_basic():
     ir = NDDataset([1.1, 2.2, 3.3], coords=[[1, 2, 3]])
     ir.save('essai')
     dl = NDDataset.load('essai')
@@ -37,8 +40,23 @@ def test_basic():
     dl = NDDataset.load('essai')
     assert_array_equal(dl.data, ir.data)
 
+def test_ndio_less_basic(coord2, coord2b, dsm):  # dsm is defined in conftest
+    
+    coordm = CoordSet(coord2, coord2b)
+    
+    # for multiple coordinates
+    assert dsm.coords['x'] == coordm
 
-def test_save1D_load(IR_dataset_1D):
+    info_(dsm)
+    
+    dsm.save('essai')
+    da = NDDataset.load('essai')
+    
+    info_(da)
+    
+    assert da == dsm
+
+def test_ndio_save1D_load(IR_dataset_1D):
     dataset = IR_dataset_1D.copy()
     log.debug(dataset)
     dataset.save('essai')
@@ -47,7 +65,7 @@ def test_save1D_load(IR_dataset_1D):
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
 
-def test_save2D_load(IR_dataset_2D):
+def test_ndio_save2D_load(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
     log.debug(dataset)
     dataset.save('essai')
@@ -56,7 +74,7 @@ def test_save2D_load(IR_dataset_2D):
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
 
-def test_save_and_load_mydataset(IR_dataset_2D):
+def test_ndio_save_and_load_mydataset(IR_dataset_2D):
     ds = IR_dataset_2D.copy()
     ds.save('mydataset')
     dl = NDDataset.load('mydataset')
@@ -65,3 +83,4 @@ def test_save_and_load_mydataset(IR_dataset_2D):
     assert (dl == ds)
     assert (dl.meta == ds.meta)
     assert (dl.plotmeta == ds.plotmeta)
+

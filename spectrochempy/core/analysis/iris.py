@@ -120,7 +120,7 @@ class IRIS:
             w[j] = 2 * w[0]
 
         K = NDDataset(np.zeros((p.size, len(eps))))
-        K.coords = (p, Coord(eps, title='epsilon'))
+        K.set_coords(y=p, x=Coord(eps, title='epsilon'))
         for i, p_i in enumerate(pval):
             for j, eps_j in enumerate(eps):
                 K.data[i, j] = w[j] * ker(p_i, eps_j)
@@ -213,10 +213,10 @@ class IRIS:
         f.name = '2D distribution functions'
         f.title = 'pseudo-concentration'
         f.history = '2D IRIS analysis of {} dataset with the {} kernel'.format(X.name, kername)
-        xcoord = X.coords[1]
+        xcoord = X.coords['x']
         ycoord = Coord(data=eps, title='epsilon')
         zcoord = Coord(data=lambdaReg, title='lambda')
-        f.coords = [zcoord, ycoord, xcoord]
+        f.set_coords(z=zcoord, y=ycoord, x=xcoord)
         self._f = f
         self._K = K
         self._X = X
@@ -263,7 +263,7 @@ class IRIS:
                           title=self._X.title, units=self._X.units)
 
         X_hat.name = '2D-IRIS Reconstructed datasets'
-        X_hat.coords = [self._f.z, self._X.y, self._X.x]
+        X_hat.set_coords(z=self._f.z, y=self._X.y, x=self._X.x)
         for i in range(X_hat.z.size):
             X_hat[i] = np.dot(self._K.data, self._f[i].data.squeeze())
         return X_hat
