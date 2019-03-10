@@ -45,17 +45,21 @@ from spectrochempy import *
 
 # %% [markdown]
 # ## Create a ND-Dataset from scratch
-#
+
+# %% [markdown]
+# ### 1D-Dataset
+
+# %% [markdown]
 # In the following example, a minimal 1D dataset is created from a simple list, to which we can add some metadata:
 
 # %%
-da = NDDataset([1, 2, 3])
-da.title = 'intensity'
-da.name = 'mydataset'
-da.history = 'created from scratch'
-da.description = 'Some experimental measurements'
-da.units = 'dimensionless'
-print_(da) 
+d1D = NDDataset([10., 20., 30.])
+d1D.title = 'intensity'
+d1D.name = 'mydataset'
+d1D.history = 'created from scratch'
+d1D.description = 'Some experimental measurements'
+d1D
+
 
 # %% [markdown]
 # <div class='alert-info'>
@@ -66,13 +70,13 @@ print_(da)
 # </div>
 
 # %%
-print(da)
+print_(d1D)
 
 # %% [markdown]
 # To get a rich display of the dataset, we can simply type on the last line of the cell: This output a html version of the information string.
 
 # %%
-da
+d1D
 
 # %% [markdown]
 # Except few addtional metadata such `author`, `created` ..., there is not much
@@ -81,100 +85,161 @@ da
 # operation with these objects:
 
 # %%
-da2 = np.sqrt(da ** 3)
-da2
+np.sqrt(d1D ** 3)
 
 # %%
-da3 = da + da / 2.
-da3
+d1D + d1D / 2.
 
 # %% [markdown]
-# da is a 1D (1-dimensional) dataset with only one dimension. 
+# d1D is a 1D (1-dimensional) dataset with only one dimension. 
 #
 # Some attributes are useful to check this kind of information:
 
 # %%
-da.shape # the shape of 1D contain only one dimension size
+d1D.shape # the shape of 1D contain only one dimension size
 
 # %%
-da.ndim # the number of dimensions
+d1D.ndim # the number of dimensions
 
 # %%
-da.dims # the name of the dimension (it has been automatically attributed)
+d1D.dims # the name of the dimension (it has been automatically attributed)
 
 # %% [markdown]
-# **Note** : The names of the dimensions are set automatically. For now there is no way to change them
+# **Note** : The names of the dimensions are set automatically. But they can be changed, with the limitation that the name must be a single letter among the following list: `x`, `y`, `z`, `u`, `v`, `w` or `t`.
+
+# %%
+d1D.dims = ['t']  # change the list of dim names.
+
+# %%
+d1D.dims
+
+# %% [markdown]
+# ### nD-Dataset
 
 # %% [markdown]
 # To create a nD NDDataset, we have to provide a nD-array like object to the NDDataset instance constructor
 
 # %%
-arr = np.random.rand(2,4,6) # note here that np (for numpy space has been automatically 
+a = np.random.rand(2,4,6) # note here that np (for numpy space has been automatically 
                             # imported with spectrochempy, thus no need to use the 
                             # classical `import numpy as np`)
-arr
+a
 
 # %%
-ds = NDDataset(arr)
-ds.title = 'Energy'
-ds.name = '3D dataset creation'
-ds.history = 'created from scratch'
-ds.description = 'Some example'
-ds.units = 'eV'
-ds
+d2D = NDDataset(a)
+d2D.title = 'Energy'
+d2D.name = '3D dataset creation'
+d2D.history = 'created from scratch'
+d2D.description = 'Some example'
+d2D.dims = ['v','u','t']
+d2D
 
 # %%
-ds.dims # 3 automatic dimension names
+d2D.dims # 3 names attributed at the creation (if they are not provided, then the name are : 'z','y','x' automatically attributed)
 
 # %%
-ds.ndim
+d2D.ndim
 
 # %%
-ds.shape
+d2D.shape
 
 # %% [markdown]
-# There is 3 dimensions but no coordinate
+# ### Units
 
 # %% [markdown]
-# To get the list of all defined coordnates, we can use the `coords` attribute:
+# One interesting possibility for a NDDataset is to have defined units for the internal data.
 
 # %%
-ds.coords  # no coordinates, so it returns nothing (None)
+d1D.units = 'eV'
 
 # %%
-ds.x       # the same for coordinate  x, y or z
+d1D  # note the eV symbol of the units added to the values field below
+
+# %% [markdown]
+# This allows to make units-aware calculations:
+
+# %%
+np.sqrt(d1D) # note the results en eV^0.5
+
+# %%
+time = 5.*ur.second   # ur is a registry containing all available units
+d1D/time              # here we get results in eV/s
+
+# %% [markdown]
+# Conversion can be done between different units transparently
+
+# %%
+d1D.to('J')
+
+# %%
+d1D.to('K')
+
+# %% [markdown]
+# ### Coordinates
+
+# %% [markdown]
+# The above created `d2D` dataset has 3 dimensions, but no coordinate for these dimensions. Here arises a big difference with simple `numpy`-arrays: 
+# * We can add coordinates to each dimensions of a NDDataset. 
+
+# %% [markdown]
+# To get the list of all defined coordinates, we can use the `coords` attribute:
+
+# %%
+d2D.coords  # no coordinates, so it returns nothing (None)
+
+# %%
+d2D.t       # the same for coordinate  u, v, t which are not yet set
 
 # %% [markdown]
 # To add coordinates, on way is to set them one by one:
 
 # %%
-ds.x = np.arange(6)*.1 # we need a sequence of 6 values for axe x (see shape above) 
-ds.x.title = 'meters'
-ds.coords # now return a list of coordinates
+d2D.t = np.arange(6)*.1 # we need a sequence of 6 values for axe x (see shape above) 
+d2D.t.title = 'time'
+d2D.t.units = 'seconds'
+d2D.coords # now return a list of coordinates
 
 # %%
-ds.x
+d2D.t   
 
 # %%
-ds.coords[-1]   # ds.x is a faster way to get this information 
+d2D.coords('t')  # Alternative way to get a given coordinates
 
 # %%
-ds.coords('x')  # another alternative way to get a given coordinates
+d2D['t'] # another alternative way to get a given coordinates
 
 # %% [markdown]
-# The two other coordinates are empty
+# The two other coordinates u and v are still undefined
 
 # %%
-ds.y
+d2D.u
 
 # %%
-ds.z
+d2D.v
 
 # %% [markdown]
 # Programatically, we can use the attribute `is_empty` or `has_data` to check this
 
 # %%
-ds.z.has_data, ds.coords[0].is_empty
+d2D.v.has_data, d2D.v.is_empty
+
+# %% [markdown]
+# An error is raised when a coordinate doesn't exist
+
+# %%
+try:
+    d2D.x
+except KeyError:
+    log.error('not found')
+
+# %% [markdown]
+# In some case it can also be usefull to get a coordinate from its title instead of its name (the militation is that if several coordinates have the same title, then only the first ones that is found in the coordinate list, will be returned - this can be ambiguous) 
+
+# %%
+d2D['time']
+
+# %%
+d2D.time
 
 # %% [markdown]
 # It is possible to use labels instead of numerical coordinates. They are sequence of objects .The length of the sequence must be equal to the size of a dimension
@@ -184,21 +249,32 @@ from datetime import datetime, timedelta, time
 timedelta()
 
 # %%
-tags = list('abcdef')
 start = timedelta(0)
 times = [start + timedelta(seconds=x*60) for x in range(6)]
-ds.x.labels = (tags, times)
-ds.x
+d2D.t = None
+d2D.t.labels = times
+d2D.t.title = 'time'
+d2D
+
+# %%
+tags = list('abcdef')
+d2D.t.labels = tags
+d2D
+
+# %% [markdown]
+# In this case, getting a coordinate that doesn't possess numerical data but labels, will return the labelq
+
+# %%
+d2D.time
 
 # %% [markdown]
 # ## Create a NDDataset : full example
 #
 # There are many ways to create `NDDataset` objects.
 #
-# Above we have created a `NDDataset` from a simple list, but it is generally more
-# convenient to create `numpy.ndarray`).
+# Above we have created a `NDDataset` from a simple list, but also from a `numpy.ndarray`).
 #
-# Below is an example of a 3D-Dataset created from a ``numpy.ndarray`` to which axes for each dimension can be added. 
+# Below is an example of a 3D-Dataset created from a ``numpy.ndarray`` to which axes for each dimension can be added at creation. 
 #
 # Let's first create the 3 one-dimensional coordinates, for which we can define `labels`, `units`, and `masks`! 
 
@@ -240,23 +316,23 @@ nd_data = np.array(
 # NDDataset instance constructor. 
 
 # %%
-mydataset = NDDataset(nd_data,
+d3D = NDDataset(nd_data,
                       name = 'mydataset',
                       coords=[coord0, coord1, coord2],
                       title='Absorbance',
                       units='absorbance'
                       )
 
-mydataset.description = """Dataset example created for this tutorial. 
+d3D.description = """Dataset example created for this tutorial. 
 It's a 3-D dataset (with dimensionless intensity)"""
 
-mydataset.author = 'Blake & Mortimer'
+d3D.author = 'Blake & Mortimer'
 
 # %% [markdown]
 # We can get some information about this object:
 
 # %%
-mydataset
+d3D
 
 # %% [markdown]
 # ## Copying existing NDDataset
@@ -264,20 +340,20 @@ mydataset
 # To copy an existing dataset, this is as simple as:
 
 # %%
-da_copy = da.copy()
+d3D_copy = d3D.copy()
 
 # %% [markdown]
 # or alternatively:
 
 # %%
-da_copy = da[:]
+d3D_copy = d3D[:]
 
 # %% [markdown]
 # Finally, it is also possible to initialize a dataset using an existing one:
 
 # %%
-dc = NDDataset(mydataset, name='duplicate of %s'%mydataset.name , units='absorbance')
-dc
+d3Dduplicate = NDDataset(d3D, name='duplicate of %s'%d3D.name , units='absorbance')
+d3Dduplicate
 
 # %% [markdown]
 # ### Other ways to create NDDatasets
@@ -311,7 +387,7 @@ do
 # Now we use the previous dataset ``do`` as a template, for the shape, but we can change the `dtype`.
 
 # %%
-df = full_like(dc, dtype=np.float64, fill_value=2.5)
+df = full_like(d3D, dtype=np.float64, fill_value=2.5)
 df
 
 
@@ -355,14 +431,14 @@ dataset
 # 3. by labels, using a slice such as ['monday':'friday'], ...
 
 # %%
-new = mydataset[..., 0]
+new = d3D[..., 0]
 new
 
 # %% [markdown]
 # or using the axes labels:
 
 # %%
-new = mydataset[..., 'hot']
+new = d3D[..., 'hot']
 new
 
 # %% [markdown]
@@ -371,11 +447,11 @@ new
 # Floats are used for slicing by values
 
 # %%
-correct = mydataset[2000.]
+correct = d3D[2000.]
 correct
 
 # %%
-outside_limits = mydataset[2000]
+outside_limits = d3D[2000]
 
 # %% [markdown]
 # <div class='alert alert-info'>
@@ -389,7 +465,7 @@ outside_limits = mydataset[2000]
 # One can mixed slicing methods for different dimension:
 
 # %%
-new = mydataset[4000.0:2000., 0, 'normal':'hot']
+new = d3D[4000.0:2000., 0, 'normal':'hot']
 new
 
 # %% [markdown]
@@ -487,7 +563,7 @@ datasetT
 _ = datasetT.plot()
 
 # %%
-dataset[4000.:3000.], datasetT[:,4000.:3000.]
+dataset[:, 4000.:3000.], datasetT[4000.:3000.]
 
 # %% [markdown]
 # ## Units

@@ -1010,7 +1010,7 @@ class NDArray(HasTraits):
         For only labelled array, there is no data, so it is the 1D and the size is the size of the array of labels.
         """
         if self._data is None and self.is_labeled:
-            return (self.labels.shape[-1],)
+            return (self.labels.shape[0],)
         elif self._data is None:
             return ()
         else:

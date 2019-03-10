@@ -979,13 +979,14 @@ class SpectroChemPy(Application):
             ip = get_ipython()
 
             def _custom_exc(shell, etype, evalue, tb, tb_offset=None):
+                
                 if self.log_level == logging.DEBUG:
                     shell.showtraceback((etype, evalue, tb),
                                         tb_offset=tb_offset)
                 else:
                     self.log.error("%s: %s" % (etype.__name__, evalue))
 
-                ip.set_custom_exc((Exception,), _custom_exc)
+            ip.set_custom_exc((Exception,), _custom_exc)
 
             # load our custom magic extensions
             # --------------------------------------------------------------------

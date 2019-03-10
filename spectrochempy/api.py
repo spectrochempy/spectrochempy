@@ -32,7 +32,6 @@ import matplotlib as mpl
 # Check the environment for plotting
 # ----------------------------------------------------------------------------------------------------------------------
 
-
 # Do we run in IPython ?
 IN_IPYTHON = False
 kernel = None
@@ -95,7 +94,7 @@ if 'builddocs.py' in sys.argv[0]:
 
 # Are we running pytest ?
 
-if 'pytest' in sys.argv[0]:
+if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
 

@@ -67,7 +67,7 @@ from .ndio import NDIO
 from .ndplot import NDPlot
 from spectrochempy.utils import (INPLACE, TYPE_INTEGER,
                                  TYPE_COMPLEX, TYPE_FLOAT,
-                                 colored_output)
+                                 colored_output, convert_to_html, print_)
 
 
 # ======================================================================================================================
@@ -905,10 +905,11 @@ class NDDataset(
     # ..................................................................................................................
     def __getattr__(self, item):
         # when the attribute was not found
-        if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction'] or '_validate' in item or \
+        if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction',
+                    '_ipython_canary_method_should_not_exist_',
+                    '_ax_lines', '_axcb', 'clevels', '__wrapped__'] or '_validate' in item or \
                 '_changed' in item:
-            # raise an error so that masked array will be handled correctly
-            # with arithmetic operators and more
+            # raise an error so that traits, ipython operation and more ... will be handled correctly
             raise AttributeError
         
         # syntax such as ds.x, ds.y, etc...
@@ -922,11 +923,11 @@ class NDDataset(
                         return c
                     else:
                         raise AttributeError
-                except:
+                except Exception as err:
                     if item in self.dims:
                         return None
                     else:
-                        raise AttributeError
+                        raise err
                 
             return None
         
@@ -936,10 +937,11 @@ class NDDataset(
     def __setattr__(self, key, value):
     
         keyb = key[1:] if key.startswith('_') else key
-        if keyb in ['copy', 'title', 'modified', 'units', 'meta', 'name', 'parent',
-                    'data', 'date', 'filename', 'coords',
+        if keyb in ['copy', 'title', 'modified', 'units', 'meta', 'name', 'parent', 'author', 'dtype',
+                    'data', 'date', 'filename', 'coords', 'html_output',
                     'description', 'history', 'id', 'dims', 'mask', '_mask_metadata',
                     'labels', 'plotmeta', 'modeldata', 'modelnames',
+                    'figsize', 'fig', 'ndaxes', 'clevels', 'divider', 'fignum', 'ax_lines', 'axcb',
                     'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
             super().__setattr__(key, value)
             return
@@ -1054,21 +1056,16 @@ class NDDataset(
             return ''
         if not self._coords or len(self._coords) < 1:
             return ''
-        txt = ''
-        # for dim, idx in zip(self.coords.names, self._get_dims_index(self.coords.names)):
-        #     txt += ' DIMENSION `{}`\n'.format(dim)
-        #     txt += '        index: {}\n'.format(idx)
-        #     if hasattr(self, 'coords') and self.coords:
-        #         # coordinates if available
-        #         coord = self.coord(dim)
-        #         coord._html_output = self._html_output
-        #         txt += '{}\n'.format(coord._cstr())
-        txt += self._coords._cstr()
+        
+        self._coords._html_output = self._html_output  # transfert the html flag if necessary : false by default
+        
+        txt = self._coords._cstr()
         txt = txt.rstrip()  # remove the trailing '\n'
         return txt
     
     _repr_dims = _str_dims
-    
+
+
     # ------------------------------------------------------------------------------------------------------------------
     # events
     # ------------------------------------------------------------------------------------------------------------------

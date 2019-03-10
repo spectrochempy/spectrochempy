@@ -758,7 +758,7 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     def __setattr__(self, key, value):
         keyb = key[1:] if key.startswith('_') else key
-        if keyb  in ['parent', 'copy', 'sorted', 'coords', 'updated', 'name',
+        if keyb  in ['parent', 'copy', 'sorted', 'coords', 'updated', 'name', 'html_output',
                      'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
             super().__setattr__(key, value)
             return
@@ -914,8 +914,8 @@ class CoordSet(HasTraits):
                     if not coord.is_empty:
                         if print_size:
                             txt += f'{coord[0]._str_shape().rstrip()}\n'
+                            
                         coord._html_output = self._html_output
-                        #txt += 'Multiple coord.\n'
                         for idx_s, dim_s in enumerate(coord.names):
                             c = getattr(coord, dim_s)
                             txt += f'          ({dim_s}) ...\n'

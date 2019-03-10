@@ -6,6 +6,13 @@
 # to make it work with matplotlib/latex
 #export PATH=$PATH:/Library/TeX/texbin/
 
-#python docs/builddocs.py release
+# test everything and do not commit if errors
+py.test -x tests || exit 1
+
+## install to check setup
+pip uninstall -y spectrochempy
+pip install -e . || exit 1
+
+python docs/builddocs.py html release
 
 
