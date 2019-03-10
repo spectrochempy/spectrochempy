@@ -20,7 +20,7 @@ Chemometrics
    :glob:
    :maxdepth: 3
 
-   chemometric/*
+   chemometrics/*
 
 NMR
 ----
