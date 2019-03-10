@@ -17,8 +17,4 @@ conda activate scpy-dev
 jupytext --to py --pre-commit
 git reset HEAD **/*.ipynb # to remove ipynb from commit
 
-#read -p "Appuyer sur une touche pour continuer ..."
-
-
-
 
