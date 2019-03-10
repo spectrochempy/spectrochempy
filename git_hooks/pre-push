@@ -1,18 +1,18 @@
-#!/bin/bash
-
+#!/bin/sh
 
 #source ~/.bash_profile
+#conda activate scpy-dev
 
 # to make it work with matplotlib/latex
 #export PATH=$PATH:/Library/TeX/texbin/
 
 # test everything and do not commit if errors
-py.test  -x "not example" --nodisplay --reset_config tests || exit 1
+# pytest -x "not example" tests --nodisplay --reset_config  || exit 1
 
 ## install to check setup
-pip uninstall -y spectrochempy
-pip install -e . || exit 1
+#pip uninstall -y spectrochempy
+#pip install -e . || exit 1
 
-python docs/builddocs.py html 
+#python docs/builddocs.py html
 
 

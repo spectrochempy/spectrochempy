@@ -13,7 +13,7 @@ conda activate scpy-dev
 # to make it work with matplotlib/latex
 # export PATH=$PATH:/Library/TeX/texbin/
 
-# jupytext transform
+echo 'jupytext transform'
 jupytext --to py --pre-commit
 git reset HEAD **/*.ipynb # to remove ipynb from commit
 
