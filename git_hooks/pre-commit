@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # run test for python 3.6
 #-------------------------
@@ -8,6 +8,7 @@
 # TODO: activate in windows?
 
 source ~/.bash_profile
+conda activate scpy-dev
 
 # to make it work with matplotlib/latex
 export PATH=$PATH:/Library/TeX/texbin/
@@ -16,7 +17,7 @@ export PATH=$PATH:/Library/TeX/texbin/
 jupytext --to py --pre-commit
 git reset HEAD **/*.ipynb # to remove ipynb from commit
 
-
+read -p "Appuyer sur une touche pour continuer ..."
 
 
 
