@@ -51,9 +51,8 @@ _ = X.plot()
 # The original dataset is the 'm1' matrix and does not contain information as to the actual elution time, wavelength, and data units. Hence the resulting NDDataset has no coordinates and on the plot, only the matrix line and row indexes are indicated. For the clarity of the tutorial, we add: (i) a proper title to the data, (ii) the default coordinates (index) do the NDDataset and (iii) a proper name for these coordinates:
 
 X.title = 'absorbance'
-X.coords = [None, None]
-X.title = 'concentration'
-X.coords.titles = ['elution time', 'wavelength']
+X.set_coords(None, None)
+X.set_coordtitles(y='elution time', x='wavelength')
 X
 
 # From now on, these names will be taken into account by Scpy in the plottings as well as in the analysis treatments (PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:
@@ -189,9 +188,8 @@ _ = ST4.plot()
 
 X2 = A[3]
 X2.title = 'absorbance'
-X2.coords = [None, None]
-X2.title = 'concentration'
-X2.coords.titles = ['elution time', 'wavelength']
+X2.set_coords(None, None)
+X2.set_coordtitles(y='elution time', x='wavelength')
 _ = X2.plot(method='map')
 
 mcr5 = MCRALS(X2, guess=St0, param={'unimodConc': [0] * 4}, verbose=True)
