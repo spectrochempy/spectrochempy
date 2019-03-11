@@ -4,14 +4,26 @@ __all__ = []
 
 # TODO : put a tk versio to avoid dependencies to PyQT
 
-from PyQt5 import QtGui, QtWidgets
+HAS_QT = False
+try:
+    from PyQt5 import QtGui, QtWidgets
+    QFileDialog = QtWidgets.QFileDialog
+    HAS_QT = True
+except ImportError:
+    pass
 
-QFileDialog = QtWidgets.QFileDialog
 
+def _noqt():
+    from spectrochempy.core import log
+    log.error('QT is necessary for this function, but QT is not installed.' )
+    return None
 
 def OpenExistingDirectory(parent=None,
                           caption='Select a folder',
                           directory=''):
+    if not HAS_QT:
+        return _noqt()
+    
     options = QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly
     directory = QFileDialog.getExistingDirectory(parent,
                                                  caption=caption,
@@ -25,6 +37,10 @@ def OpenFileName(parent=None,
                  directory='',
                  caption='Select file',
                  filters=["All Files (*)", "Text Files (*.txt)"]):
+    
+    if not HAS_QT:
+        return _noqt()
+    
     options = QFileDialog.Options()
     options |= QFileDialog.AnyFile
     # options |= QFileDialog.DontUseNativeDialog
@@ -42,6 +58,10 @@ def OpenMultipleFileNames(
         directory='',
         caption='Select file(s)',
         filters=["All Files (*)", "Text Files (*.txt)"]):
+    
+    if not HAS_QT:
+        return _noqt()
+    
     options = QFileDialog.Options()
     # options |= QFileDialog.DontUseNativeDialog
     files, _ = QFileDialog.getOpenFileNames(parent,
@@ -57,6 +77,10 @@ def SaveFileName(parent=None,
                  filename='',
                  caption='Select file',
                  filters=["All Files (*)", "Text Files (*.txt)"]):
+    
+    if not HAS_QT:
+        return _noqt()
+    
     options = QFileDialog.Options()
     # options |= QFileDialog.DontUseNativeDialog
     filename, _ = QFileDialog.getSaveFileName(parent,
@@ -95,6 +119,9 @@ def opendialog(single=True,
 
     """
     # gui = QtGui.QApplication(sys.argv)
+
+    if not HAS_QT:
+        return _noqt()
 
     if filters == 'directory':
         if not caption:

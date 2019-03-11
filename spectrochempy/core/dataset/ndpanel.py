@@ -24,12 +24,14 @@ import itertools
 import textwrap
 from datetime import datetime
 import warnings
+import uuid
+
 
 # ======================================================================================================================
 # third-party imports
 # ======================================================================================================================
 import numpy as np
-from traitlets import (HasTraits, Dict, Set, List, Union,
+from traitlets import (HasTraits, Dict, Set, List, Union, Any,
                        Unicode, Instance, Bool, All,
                        Float, validate, observe, default, )
 import matplotlib.pyplot as plt
@@ -86,10 +88,8 @@ class NDPanel(
     """
 
     # main data
-    _arrays = Dict(traits={'ndarray': Instance(NDArray),
-                             'ndcomplexarray': Instance(NDComplexArray)},
-                     allow_none=True)
-    _coords = Dict(Instance(Coord), allow_none=True)
+    _datasets = Any()
+    _coords = Instance(CoordSet, allow_none=True)
     _meta = Instance(Meta, allow_none=True)
 
     # main attributes
@@ -101,6 +101,23 @@ class NDPanel(
     # some settings
     _copy = Bool()
 
+    # ..................................................................................................................
+    @validate('_datasets')
+    def _datasets_validate(self, proposal):
+    
+        datasets = proposal['value']
+    
+        if datasets:
+            # we assume a sequence of objects have been provided
+            if not isinstance(datasets, (list, tuple)):
+                datasets = [datasets]
+        else:
+            return {}
+        
+        for d in datasets:
+            pass
+        
+    # ..................................................................................................................
     def __init__(self, *args, **kwargs):
         """
 
@@ -119,23 +136,82 @@ class NDPanel(
         Examples
         ========
 
-
-
-        # TODO: For now only NDDataset as args are implemented
+        
 
         """
 
-        arrays = kwargs.get('arrays', args[0] if len(args)>0 else None)
-        coords = kwargs.get('coords', args[0] if len(args)>0 else None)
+        self._datasets = kwargs.get('datasets', args)
+        self._coords = kwargs.get('coords', None)
+        self._name = kwargs.get('name', None)
+        self._meta = kwargs.get('meta', None)
 
-        if datasets is not None:
-            # we assume a list of objects have been provided
-            if not isinstance(datasets, (list, tuple)):
-                datasets = [datasets]
 
-        for d in datasets:
-            pass
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Read Only Properties
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # ..................................................................................................................
+    @property
+    def datasets(self):
+        return self._datasets
+
+    # ..................................................................................................................
+    @property
+    def coords(self):
+        return self._coords
+    
+    # ..................................................................................................................
+    @default('_id')
+    def _id_default(self):
+        # a unique id
+        return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
+
+    # ..................................................................................................................
+    @property
+    def id(self):
+        """
+        str - Object identifier (Readonly property).
+        """
+        return self._id
+
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Mutable Properties
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # ..................................................................................................................
+    @property
+    def name(self):
+        if self._name:
+            return self._name
+        else:
+            return self._id
+
+    @name.setter
+    def name(self, value):
+        if value is not None:
+            self._name = value
+
+        # ..................................................................................................................
+    @property
+    def meta(self):
+        """
+        |Meta| instance object - Additional metadata.
+        """
+        return self._meta
+
+    # ..................................................................................................................
+    @meta.setter
+    def meta(self, meta):
+        # property.setter for meta
+        if meta is not None:
+            self._meta.update(meta)
+            
+    # ------------------------------------------------------------------------------------------------------------------
+    # Public functions
+    # ------------------------------------------------------------------------------------------------------------------
+    
     def to_dataframe(self):
         """
         Convert a NDPanel to a pandas DataFrame

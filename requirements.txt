@@ -29,7 +29,6 @@ setuptools_scm
 
 # need this, because the API is mainly designed to run in Jupyter notebook
 ipython
-jupyter
 jupyterlab
 ipykernel
 ipywidgets

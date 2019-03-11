@@ -29,7 +29,7 @@ def session_ip():
 def ip(session_ip):
     yield session_ip
 
-
+from spectrochempy.core import app
 try:
     # work only if spectrochempy is installed
     from spectrochempy.core import app

@@ -127,11 +127,16 @@ from spectrochempy.core import *
 from spectrochempy import core
 
 __all__ = core.__all__
-__all__ += ['IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
+__all__ += ['HAS_QT', 'IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
 
-from PyQt5 import QtWidgets
+HAS_QT = False
+try:
+    from PyQt5 import QtWidgets
+    GUI = QtWidgets.QApplication(sys.argv)
+    HAS_QT = True
+except ImportError:
+    pass
 
-GUI = QtWidgets.QApplication(sys.argv)
 
 if not IN_IPYTHON:
     # needed in windows terminal - but must not be inited in Jupyter notebook

@@ -31,7 +31,6 @@ dependencies:
 # to run in Jupyter notebook
 #
 - ipython
-- jupyter
 - jupyterlab
 - ipykernel
 - ipywidgets
