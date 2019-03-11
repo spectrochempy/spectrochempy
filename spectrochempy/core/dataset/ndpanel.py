@@ -209,9 +209,25 @@ class NDPanel(
             self._meta.update(meta)
             
     # ------------------------------------------------------------------------------------------------------------------
-    # Public functions
+    # Public methods
     # ------------------------------------------------------------------------------------------------------------------
-    
+
+    # ..................................................................................................................
+    def implements(self, name=None):
+        """
+        Utility to check if the current object implement `NDPanel`.
+        
+        Rather than isinstance(obj, NDPanel) use object.implements('NDPanel').
+        
+        This is useful to check type without importing the module
+        
+        """
+        if name is None:
+            return 'NDPanel'
+        else:
+            return name == 'NDPanel'
+        
+    # ..................................................................................................................
     def to_dataframe(self):
         """
         Convert a NDPanel to a pandas DataFrame

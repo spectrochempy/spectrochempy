@@ -103,11 +103,17 @@ class Coord(NDMath, NDArray):
 
     # ..................................................................................................................
     def implements(self, name=None):
-        # Rather than isinstance(obj, NDDataset) use object.implements(
-        # 'NDDataset')
-        # This is useful to check type without importing the module
+        """
+        Utility to check if the current object implement `Coord`.
+        
+        Rather than isinstance(obj, Coord) use object.implements('Coord').
+        
+        This is useful to check type without importing the module
+        
+        """
+    
         if name is None:
-            return ['Coord']
+            return 'Coord'
         else:
             return name == 'Coord'
 

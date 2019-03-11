@@ -197,10 +197,16 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def implements(self, name=None):
-        # Rather than isinstance(obj, NDArray) use object.implements('NDArray').
-        # This is useful to check type without importing the module
+        """
+        Utility to check if the current object implement `NDArray`.
+       
+        Rather than isinstance(obj, NDArrray) use object.implements('NDArray').
+       
+        This is useful to check type without importing the module
+       
+        """
         if name is None:
-            return ['NDArray']
+            return 'NDArray'
         else:
             return name == 'NDArray'
 

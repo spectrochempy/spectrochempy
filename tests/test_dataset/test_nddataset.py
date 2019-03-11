@@ -195,6 +195,7 @@ def test_nddataset_init_panel(panel):
 # ======================================================================================================================
 
 def test_nddataset_coords():
+    
     # init coordinates at NDDataset initialization
 
     dx = np.random.random((10, 7, 3))
@@ -268,7 +269,6 @@ def test_nddataset_with_a_coordset():
     ds.history = 'essai: 1'
     ds.history = 'try:2'
     print_(ds)
-
 
 def test_nddataset_coords_valid():
     coord1 = Coord(np.arange(10), title='wavelengths')  # , units='m')
@@ -1292,12 +1292,15 @@ def test_nddataset_comparison_of_dataset(NMR_dataset_1D):
 def test_nddataset_complex_dataset_slicing_by_index():
     na0 = np.array([1. + 2.j, 2., 0., 0., -1.j, 1j] * 4)
     nd = NDDataset(na0)
-    info_(nd)
-    coords = (np.linspace(-10., 10., 24), )
-    nd.set_coords(coords)
-
     assert nd.shape == (24,)
     assert nd.data.shape == (24,)
+    coords = (np.linspace(-10., 10., 24), )
+    nd.set_coords(coords)
+    x1 = nd.x.copy()
+    info_(nd)
+    nd.coords = coords
+    x2 = nd.x.copy()
+    assert x1 == x2
     info_(nd)
 
     # slicing
@@ -1318,7 +1321,9 @@ def test_nddataset_complex_dataset_slicing_by_index():
     nd.set_coords(**coords)
     assert nd.shape == (6, 4)
     assert nd.data.shape == (6, 4)
+    nd.coords = coords
     info_(nd)
+
 
     # slicing 2D
     nd1 = nd[0]

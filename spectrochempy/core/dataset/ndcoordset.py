@@ -29,7 +29,8 @@ from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, de
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-from .ndarray import NDArray, DEFAULT_DIM_NAME, HAS_PANDAS, HAS_XARRAY
+from .ndarray import NDArray, DEFAULT_DIM_NAME
+from ...core import HAS_PANDAS, HAS_XARRAY
 from .ndcoord import Coord
 from ...core import log
 from ...utils import is_sequence, colored_output, convert_to_html
@@ -199,10 +200,16 @@ class CoordSet(HasTraits):
 
     # ..................................................................................................................
     def implements(self, name=None):
-        # Rather than isinstance(obj,CoordSet) use object.implements('CoordSet')
-        # This is useful to check type without importing the module
+        """
+        Utility to check if the current object implement `CoordSet`.
+        
+        Rather than isinstance(obj, CoordSet) use object.implements('CoordSet').
+        
+        This is useful to check type without importing the module
+        
+        """
         if name is None:
-            return ['CoordSet']
+            return 'CoordSet'
         else:
             return name == 'CoordSet'
 

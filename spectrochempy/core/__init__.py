@@ -165,6 +165,46 @@ from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE
 
 __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 
+# optional libraries
+# ----------------------------------------------------------------------------------------------------------------------
+
+try:
+    import sympy as sym
+    HAS_SYMPY__ = True
+    __all__.append('sym')
+except ImportError:
+    HAS_SYMPY = True
+
+__all__.append('HAS_SYMPY')
+
+try:
+    import sklearn as skl
+    
+    HAS_SCIKITLEARN = True
+    __all__.append('skl')
+except ImportError:
+    HAS_SCIKITLEARN = False
+
+__all__.append('HAS_SCIKITLEARN')
+
+try:
+    import xarray as xr
+    HAS_XARRAY = True
+    __all__.append('xr')
+except:
+    HAS_XARRAY = False
+
+__all__.append('HAS_XARRAY')
+
+try:
+    import pandas as pd
+    HAS_PANDAS = True
+    __all__.append('pd')
+except:
+    HAS_PANDAS = False
+
+__all__.append('HAS_PANDAS')
+
 # methods from utils
 from spectrochempy.utils import print_
 
@@ -265,27 +305,6 @@ from spectrochempy.widgets.api import *
 from spectrochempy.widgets import api
 
 __all__ += api.__all__
-
-# optional libraries
-# ----------------------------------------------------------------------------------------------------------------------
-
-try:
-    import sympy as sym
-
-    HAS_SYMPY__ = True
-    __all__.append('sym')
-except ImportError:
-    HAS_SYMPY = True
-__all__.append('HAS_SYMPY')
-
-try:
-    import sklearn as skl
-
-    HAS_SCIKITLEARN = True
-    __all__.append('skl')
-except ImportError:
-    HAS_SCIKITLEARN = False
-__all__.append('HAS_SCIKITLEARN')
 
 
 # Helpers

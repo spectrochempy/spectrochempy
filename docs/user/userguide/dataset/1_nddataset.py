@@ -358,13 +358,45 @@ d3D
 # One can add several coordinates to the same dimension
 
 # %%
-x1 = coord2
-x2 = Coord([1,2,3], units='millitesla', title='magnetic field')
+coord2b = Coord([1,2,3], units='millitesla', title='magnetic field')
 
 # %%
-d3D.set_coords(x=CoordSet(x1,x2), y=coord1, z=coord0)
+d3D.set_coords(x=CoordSet(coord2,coord2b), y=coord1, z=coord0)
 d3D
 
+
+# %% [markdown]
+# Some additional information about coordinate setting syntax
+
+# %%
+# A. fist syntax (probably the safer because thename of the dimension is specified, so this is less prone to errors!)
+d3D.set_coords(x=CoordSet(coord2,coord2b), y=coord1, z=coord0)
+d3D.set_coords(x=[coord2,coord2b], y=coord1, z=coord0) # equivalent
+
+# B. second syntax in the order of the dimensions : z,y,x (if no swap or transpopse has been performed)
+d3D.set_coords(coord0, coord1, [coord2,coord2b])
+d3D.set_coords((coord0, coord1, [coord2,coord2b]))  # equivalent
+   
+# C. third syntax (from a dictionary)
+d3D.set_coords({'z':coord0, 'y':coord1, 'x':[coord2,coord2b]})
+
+# D. Fourth syntax (from another coordset)
+d3D.set_coords(**CoordSet(z=coord0, y=coord1, x=[coord2,coord2b]))   # note the **
+
+# It is also possible to use the coords property (with slightly less possibility)
+d3D.coords = coord0, coord1,[coord2,coord2b]
+d3D.coords = {'z':coord0, 'y':coord1, 'x':[coord2,coord2b]}
+d3D.coords = CoordSet(z=coord0, y=coord1, x=[coord2,coord2b])
+
+# %% [markdown]
+# WARNING: do not use list for setting multiples coordinates! use tuples
+
+# %%
+# This works
+d3D.coords = (coord0, coord1, coord2) 
+
+# But this raise an error (list have another signification: it's used to set a "same dim" CoordSet see example A or B)
+d3D.coords = [coord0, coord1, coord2]  
 
 # %% [markdown]
 # ## Copying existing NDDataset
