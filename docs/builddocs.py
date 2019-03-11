@@ -179,9 +179,9 @@ def do_release():
             path, _ = os.path.split(path)
         path, _ = os.path.split(path)
         cmd = 'rsync -e ssh -avz  --exclude="~*" ' \
-              '{FROM} {SERVER}:{PROJECT}/'.format(
+              '{FROM} {SERVER}:{PROJECT}/html/'.format(
             PROJECT=PROJECT,
-            FROM=os.path.join(path, '%s_doc' % PROJECT, '*'),
+            FROM=os.path.join(path, '%s_doc/html' % PROJECT, '*'),
             SERVER=SERVER)
 
         print(cmd)

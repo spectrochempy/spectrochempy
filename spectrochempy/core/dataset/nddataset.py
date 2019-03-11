@@ -893,7 +893,16 @@ class NDDataset(
                     new_coords[idx] = Coord(None, name=name)
                 elif isinstance(item, slice):
                     # add the slice on the corresponding coordinates on the dim to the new list of coordinates
-                    new_coords[idx] = self._coords[idx][item]
+                    if not isinstance(self._coords[idx], CoordSet):
+                        new_coords[idx] = self._coords[idx][item]
+                    else:
+                        # we must slice all internal coordinates
+                        newc = []
+                        for c in self._coords[idx]:
+                            newc.append(c[item])
+                        new_coords[idx] = CoordSet(*newc, name=name)
+                        
+                        
                 elif isinstance(item, (np.ndarray, list)):
                     new_coords[idx] = Coord(item, name=self._coords[idx].name)
 
@@ -1046,6 +1055,7 @@ class NDDataset(
                 ' by location ({}) needs coords definition.'.format(loc))
         
         coord = self.coord(dim)
+        
         return coord._loc2index(loc)
     
     # ..................................................................................................................

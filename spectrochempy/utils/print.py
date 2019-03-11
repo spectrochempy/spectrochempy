@@ -111,7 +111,11 @@ def convert_to_html(obj):
     regex = r"^(.*(DIMENSION|DATA).*)$"
     subst = r"<strong>\1</strong>"
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
-    
+
+    regex = r"^(\W{10}\(_\d{1}\)).*$"
+    subst = r"<strong>\1</strong>"
+    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+
     regex = r'\0{2}[\w\W]*?\0{2}'
     # noinspection PyPep8
     subst = lambda match: "<div><font color='darkcyan'>{}</font></div>".format(

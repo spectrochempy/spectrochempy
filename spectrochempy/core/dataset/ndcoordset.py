@@ -92,7 +92,8 @@ class CoordSet(HasTraits):
         self._copy = kwargs.pop('copy', True)
         self._sorted = kwargs.pop('sorted', True)
         keepnames = kwargs.pop('keepnames', False)
-
+        
+        self.name = kwargs.pop('name', None)
         
         # initialise the coordinate list
         self._coords = []
@@ -374,7 +375,8 @@ class CoordSet(HasTraits):
 
     @name.setter
     def name(self, value):
-        self._name = value
+        if value is not None:
+            self._name = value
 
 
     # ..................................................................................................................
@@ -600,6 +602,7 @@ class CoordSet(HasTraits):
         else:
             return pd.MultiIndex.from_product([item.data for item in self], names=self.titles)
 
+    # ..................................................................................................................
     def update(self, **kwargs):
         """
         Update a specific coordinates in the CoordSet.
@@ -616,7 +619,6 @@ class CoordSet(HasTraits):
                 idx = self.names.index(dim)
                 self[idx] = Coord(kwargs.pop(dim), name=dim)
 
-
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -630,13 +632,28 @@ class CoordSet(HasTraits):
             self._coords = (*coord, ) + tuple(self._coords)                          # instead of append, fire the validation process
         else:
             self._coords = (*coord, )
-            
+
+    # ..................................................................................................................
+    def _loc2index(self, loc):
+        # Return the index of a location
+        error = None
+        for coord in self.coords:
+            try:
+                return coord._loc2index(loc)
+            except IndexError as error:
+                continue
+        # not found!
+        if error is not None:
+            raise error
+        
+    # ..................................................................................................................
     def _set_names(self, names):
         # utility function to change names of coordinates (in batch)
         # useful when a coordinate is a CoordSet itself
         for coord, name in zip(self._coords, names):
             coord.name = name
-      
+     
+    # ..................................................................................................................
     def _set_parent_dim(self, name):
         # utility function to set the paretn name for sub coordset
         for coord in self._coords:
@@ -758,7 +775,7 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     def __setattr__(self, key, value):
         keyb = key[1:] if key.startswith('_') else key
-        if keyb  in ['parent', 'copy', 'sorted', 'coords', 'updated', 'name', 'html_output',
+        if keyb  in ['parent', 'copy', 'sorted', 'coords', 'updated', 'name', 'html_output', 'is_same_dim', 'parent_dim',
                      'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
             super().__setattr__(key, value)
             return
@@ -910,7 +927,7 @@ class CoordSet(HasTraits):
                 txt += ' DIMENSION `{}`\n'.format(dim)
                 
                 if isinstance(coord, CoordSet):
-                    txt += '        index: {}\n'.format(idx)
+                    #txt += '        index: {}\n'.format(idx)
                     if not coord.is_empty:
                         if print_size:
                             txt += f'{coord[0]._str_shape().rstrip()}\n'
@@ -919,12 +936,13 @@ class CoordSet(HasTraits):
                         for idx_s, dim_s in enumerate(coord.names):
                             c = getattr(coord, dim_s)
                             txt += f'          ({dim_s}) ...\n'
+                            c._html_output = self._html_output
                             sub = c._cstr(header='  coordinates: ... \n', print_size=False) #, indent=4, first_indent=-6)
                             txt +=  f"{sub}\n"
                 
                 elif not coord.is_empty:
                     # coordinates if available
-                    txt += '        index: {}\n'.format(idx)
+                    #txt += '        index: {}\n'.format(idx)
                     coord._html_output = self._html_output
                     txt += '{}\n'.format(coord._cstr(header=header, print_size=print_size))
                 

@@ -1,4 +1,4 @@
-# ----------------------------------------------------------------------------------------------------------------------
+# ---
 # jupyter:
 #   jupytext:
 #     text_representation:
@@ -10,7 +10,7 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
-# ----------------------------------------------------------------------------------------------------------------------
+# ---
 
 # %%
 import matplotlib.pyplot as plt
@@ -61,4 +61,7 @@ plt.subplots_adjust(top=1., bottom=0.0, left=0.0, right=1.0)#, wspace=0.5)
 ax.set_xlim(500,5400)
 extension = '.jpg'
 fig.savefig('annotated_fig_agir_setup%s'%extension,figsize=(3.6,5), dpi=100)
+
+
+# %%
 

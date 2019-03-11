@@ -1720,7 +1720,7 @@ class NDArray(HasTraits):
 
         if isinstance(loc, datetime):
             # not implemented yet
-            return None  # TODO: date!
+            raise NotImplementedError("datetime as location is not yet impemented")  # TODO: date!
 
         if labels is not None:
             # was not a location? it's may be a label

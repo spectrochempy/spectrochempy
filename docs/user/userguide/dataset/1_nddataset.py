@@ -335,6 +335,38 @@ d3D.author = 'Blake & Mortimer'
 d3D
 
 # %% [markdown]
+# One can set all the coordinates independantly
+
+# %%
+d3D = NDDataset(nd_data,
+                      name = 'mydataset',
+                      title='Absorbance',
+                      units='absorbance'
+                      )
+d3D.description = """Dataset example created for this tutorial. 
+It's a 3-D dataset (with dimensionless intensity)"""
+
+d3D.author = 'Blake & Mortimer'
+d3D
+
+# %%
+d3D.set_coords(x=coord2, y=coord1, z=coord0)          # syntax 1
+d3D.set_coords({'x':coord2, 'y':coord1, 'z':coord0})  # syntax 2
+d3D
+
+# %% [markdown]
+# One can add several coordinates to the same dimension
+
+# %%
+x1 = coord2
+x2 = Coord([1,2,3], units='millitesla', title='magnetic field')
+
+# %%
+d3D.set_coords(x=CoordSet(x1,x2), y=coord1, z=coord0)
+d3D
+
+
+# %% [markdown]
 # ## Copying existing NDDataset
 #
 # To copy an existing dataset, this is as simple as:
