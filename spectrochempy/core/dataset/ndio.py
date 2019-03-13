@@ -397,6 +397,8 @@ class NDIO(HasTraits):
                     setattributes(coords[dim], "is_same_dim", val)
                 elif key.endswith("name"):
                     setattributes(coords[dim], "name", val)
+                elif key.endswith("reference"):
+                    setattributes(coords[dim], "reference", val)
                 else:
                     idx = "_"+els[3]
                     setattributes(coords[dim][idx], els[4], val)

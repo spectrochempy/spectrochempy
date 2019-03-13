@@ -857,8 +857,10 @@ def test_nddataset_sorting(ds1):  # ds1 is defined in conftest
     info_(dataset)
     dataset.sort(inplace=True)
     labels = np.array(list('abc'))
-    assert_array_equal(dataset.coords['z'].labels, labels)  # nochange because the  axis is naturally iversed to force it
+    assert_array_equal(dataset.coords['z'].labels, labels)
+    # nochange because the  axis is naturally iversed to force it
     # we need to specify descend
+    
     dataset.sort(inplace=True, descend=False)  # order value in increasing order
     info_(dataset)
     labels = np.array(list('cba'))
@@ -1450,9 +1452,8 @@ def test_nddataset_set_coordinates_withnames(nd2d, ds1):
     # set coordinates all together
     nd = nd2d.copy()
     ny, nx = nd.shape
-    with pytest.raises(AttributeError):
-        nd.coords = CoordSet(u=np.arange(nx), v=np.arange(ny))
-        assert nd.dims != ['u', 'v']
+    nd.coords = CoordSet(u=np.arange(nx), v=np.arange(ny))
+    assert nd.dims != ['u', 'v'] # dims = ['y','x']
 
     #set dim names
     nd.dims = ['u','v']
@@ -1523,5 +1524,12 @@ def test_nddataset_xarray_export_w_spa():
     da = na.to_xarray()
     info_(da)
 
-
-
+# additional test
+def test_nddataset_square_dataset_with_identical_coordinates():
+    
+    a = np.random.rand(3,3)
+    c = Coord(np.arange(3)*.25, title='time', units='us')
+    nd = NDDataset(a, coords=CoordSet(x=c, y='x'))
+    info_(nd)
+    info_(nd.y)
+    assert nd.x == nd.y

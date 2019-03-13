@@ -24,7 +24,7 @@ import uuid
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
 import numpy as np
-from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, default, Instance, TraitError
+from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, default, Dict
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
@@ -33,7 +33,7 @@ from .ndarray import NDArray, DEFAULT_DIM_NAME
 from ...core import HAS_PANDAS, HAS_XARRAY
 from .ndcoord import Coord
 from ...core import log
-from ...utils import is_sequence, colored_output, convert_to_html
+from ...utils import is_sequence, colored_output, convert_to_html, info_
 
 
 # ======================================================================================================================
@@ -47,8 +47,9 @@ class CoordSet(HasTraits):
     # Hidden attributes containing the collection of objects
     _id = Unicode()
     _coords = List(allow_none=True)
-    
+    _reference = Dict({})
     _updated = Bool(False)
+    
     # Hidden id and name of the object
     _id = Unicode()
     _name = Unicode()
@@ -160,7 +161,11 @@ class CoordSet(HasTraits):
             elif isinstance(coord, np.ndarray) or coord is None:
                 coord = Coord(coord, copy=True)                 # make sure it's a Coord
                                                                 # (even if it is None -> Coord(None)
-
+            elif isinstance(coord, str) and coord in DEFAULT_DIM_NAME:
+                # may be a reference to another coordinates (e.g. same coordinates for various dimensions)
+                self._reference[key] = coord  # store this reference
+                continue
+                
             # populate the coords with coord and coord's name.
             if isinstance(coord, (NDArray, Coord, CoordSet)):
                 if key in self.available_names or (len(key)==2 and key.startswith('_') and key[1] in list("123456789")):
@@ -325,7 +330,12 @@ class CoordSet(HasTraits):
         property).
         """
         return self._is_same_dim
-
+    
+    # ..................................................................................................................
+    @property
+    def reference(self):
+        return self._reference
+    
     # ..................................................................................................................
     @property
     def sizes(self):
@@ -444,14 +454,15 @@ class CoordSet(HasTraits):
         Returns
         -------
         out : list
-            list of all coordinates names
+            list of all coordinates names (including reference to other coordinates)
             
         """
+        keys = []
         if self.names:
-            return self.names
-        else:
-            return []
-        
+            keys.extend(self.names)
+        if self._reference:
+            keys.extend(list(self._reference.keys()))
+        return keys
     
     # ..................................................................................................................
     def set(self, *args, **kwargs):
@@ -673,7 +684,7 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @staticmethod
     def __dir__():
-        return ['coords', 'is_same_dim', 'name']
+        return ['coords', 'reference', 'is_same_dim', 'name']
 
     # ..................................................................................................................
     def __call__(self, *args, **kwargs):
@@ -736,6 +747,10 @@ class CoordSet(HasTraits):
                 return self._coords.__getitem__(idx)
 
             # ok we did not find it!
+            # let's try in references
+            if index in self._reference.keys():
+                return self._reference[index]
+            
             # let's try in the title
             if index in self.titles:
                 # selection by coord titles

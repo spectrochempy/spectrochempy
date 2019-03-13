@@ -148,7 +148,7 @@ class NDDataset(
         """
         super().__init__(data, **kwargs)
         
-        self.parent = None
+        self._parent = None
         self._modified = self._date
         self._history = []
         
@@ -198,6 +198,142 @@ class NDDataset(
         
         if description:
             self.description = description
+    
+    # ------------------------------------------------------------------------------------------------------------------
+    # special methods
+    # ------------------------------------------------------------------------------------------------------------------
+    
+    # ..................................................................................................................
+    def __dir__(self):
+        return ['data', 'dims', 'mask', 'units',
+                'meta', 'plotmeta', 'name', 'title', 'coords', 'description',
+                'history', 'date', 'modified', 'modeldata'] + NDIO().__dir__()
+    
+    # ..................................................................................................................
+    def __getitem__(self, items):
+        
+        saveditems = items
+        
+        # coordinate selection to test first
+        if isinstance(items, str):
+            try:
+                return self._coords[items]
+            except:
+                pass
+        
+        # slicing
+        new, items = super().__getitem__(items, return_index=True)
+        
+        if new is None:
+            return None
+        
+        if self._coords is not None:
+            names = self._coords.names  # all names of the current coordinates
+            new_coords = [None] * len(names)
+            for i, item in enumerate(items):
+                # get the corresponding dimension name in the dims list
+                name = self.dims[i]
+                # get the corresponding index in the coordinate's names list
+                idx = names.index(name)
+                if self._coords[idx].is_empty:
+                    new_coords[idx] = Coord(None, name=name)
+                elif isinstance(item, slice):
+                    # add the slice on the corresponding coordinates on the dim to the new list of coordinates
+                    if not isinstance(self._coords[idx], CoordSet):
+                        new_coords[idx] = self._coords[idx][item]
+                    else:
+                        # we must slice all internal coordinates
+                        newc = []
+                        for c in self._coords[idx]:
+                            newc.append(c[item])
+                        new_coords[idx] = CoordSet(*newc, name=name)
+                
+                
+                elif isinstance(item, (np.ndarray, list)):
+                    new_coords[idx] = Coord(item, name=self._coords[idx].name)
+            
+            new.set_coords(*new_coords, keepnames=True)
+        
+        new.history = f'slice extracted: ({saveditems})'
+        return new
+    
+    # ..................................................................................................................
+    def __getattr__(self, item):
+        # when the attribute was not found
+        if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction',
+                    '_ipython_canary_method_should_not_exist_',
+                    '_ax_lines', '_axcb', 'clevels', '__wrapped__'] or '_validate' in item or \
+                '_changed' in item:
+            # raise an error so that traits, ipython operation and more ... will be handled correctly
+            raise AttributeError
+        
+        # syntax such as ds.x, ds.y, etc...
+        
+        if item in self.dims or self._coords:
+            
+            if self._coords:
+                try:
+                    c = self._coords[item]
+                    if isinstance(c, str) and c in self.dims:
+                        # probaly a reference to another coordinate name
+                        c = self._coords[c]
+                        
+                    if c.name in self.dims or c._parent_dim in self.dims:
+                        return c
+                    else:
+                        raise AttributeError
+                except Exception as err:
+                    if item in self.dims:
+                        return None
+                    else:
+                        raise err
+            
+            return None
+        
+        raise AttributeError
+    
+    def __setattr__(self, key, value):
+    #
+    #     keyb = key[1:] if key.startswith('_') else key
+    #     if keyb in ['copy', 'title', 'modified', 'units', 'meta', 'name', 'parent', 'author', 'dtype',
+    #                 'data', 'date', 'filename', 'coords', 'html_output',
+    #                 'description', 'history', 'id', 'dims', 'mask', '_mask_metadata',
+    #                 'labels', 'plotmeta', 'modeldata', 'modelnames',
+    #                 'figsize', 'fig', 'ndaxes', 'clevels', 'divider', 'fignum', 'ax_lines', 'axcb',
+    #                 'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
+    #         super().__setattr__(key, value)
+    #         return
+    #
+        if key in DEFAULT_DIM_NAME:  #:# syntax such as ds.x, ds.y, etc...
+            # Note the above test is important to avoid errors with traitlets
+            # even if it looks redundant with the folllowing
+            if key in self.dims:
+                if self._coords is None:
+                    # we need to create a coordset first
+                    self.set_coords(dict((self.dims[i], None) for i in range(self.ndim)))
+                idx = self._coords.names.index(key)
+                _coords = self._coords
+                _coords[idx] = Coord(value, name=key)
+                _coords = self._valid_coords(_coords)
+                self._coords.set(_coords)
+            else:
+                raise AttributeError(f'Coordinate `{key}` is not used.')
+        else:
+            super().__setattr__(key, value)
+    
+    # ..................................................................................................................
+    def __eq__(self, other, attrs=None):
+        attrs = self.__dir__()
+        for attr in ('filename', 'plotmeta', 'name', 'description',
+                     'history', 'date', 'modified'):
+            attrs.remove(attr)
+        # some attrib are not important for equality
+        return super(NDDataset, self).__eq__(other, attrs)
+    
+    # ..................................................................................................................
+    def __hash__(self):
+        # all instance of this class has same hash, so they can be compared
+        return super().__hash__ + hash(self._coords)
     
     # ------------------------------------------------------------------------------------------------------------------
     # Default values
@@ -267,7 +403,7 @@ class NDDataset(
     # ------------------------------------------------------------------------------------------------------------------
     # Read only properties (not in the NDArray base class)
     # ------------------------------------------------------------------------------------------------------------------
-
+    
     # ..................................................................................................................
     @property
     def coordtitles(self):
@@ -279,7 +415,7 @@ class NDDataset(
         """
         if self._coords is not None:
             return self._coords.titles
-
+    
     # ..................................................................................................................
     @property
     def coordunits(self):
@@ -291,7 +427,7 @@ class NDDataset(
         """
         if self._coords is not None:
             return self._coords.units
-        
+    
     # ..................................................................................................................
     @property
     def modified(self):
@@ -300,7 +436,29 @@ class NDDataset(
 
         """
         return self._modified
+
+    # ..................................................................................................................
+    @property
+    def dim_properties(self):
+        """
+        Dimensions properties
+        
+        Returns
+        -------
+        out : dict
+            A dictionary containing min properties for each dimensions
+            
+        """
+        properties = {}
+        for i, dim in enumerate(self.dims):
+            properties[dim] = [self.shape[i],
+                               getattr(self, dim, 'units'),
+                               getattr(self, dim, 'title'),
+                               getattr(self, dim, 'data'),
+                               getattr(self, dim, 'labels')]
     
+        return properties
+        
     # ..................................................................................................................
     @property
     def T(self):
@@ -315,7 +473,7 @@ class NDDataset(
     # ------------------------------------------------------------------------------------------------------------------
     # Mutable properties (not in the NDArray base class)
     # ------------------------------------------------------------------------------------------------------------------
-
+    
     # ..................................................................................................................
     @property
     def coords(self):
@@ -335,7 +493,7 @@ class NDDataset(
             self.set_coords(**coords)
         else:
             self.set_coords(coords)
-        
+    
     # ..................................................................................................................
     @property
     def data(self):
@@ -868,138 +1026,8 @@ class NDDataset(
         return new
     
     # ------------------------------------------------------------------------------------------------------------------
-    # special methods
+    # private methods
     # ------------------------------------------------------------------------------------------------------------------
-    
-    # ..................................................................................................................
-    def __dir__(self):
-        return ['data', 'dims', 'mask', 'labels', 'units',
-                'meta', 'plotmeta', 'name', 'title', 'coords', 'description',
-                'history', 'date', 'modified', 'modeldata'] + NDIO().__dir__()
-    
-    # ..................................................................................................................
-    def __getitem__(self, items):
-        
-        saveditems = items
-        
-        # coordinate selection to test first
-        if isinstance(items, str):
-            try:
-                return self._coords[items]
-            except:
-                pass
-        
-        # slicing
-        new, items = super().__getitem__(items, return_index=True)
-        
-        if new is None:
-            return None
-        
-        if self._coords is not None:
-            names = self._coords.names  # all names of the current coordinates
-            new_coords = [None] * len(names)
-            for i, item in enumerate(items):
-                # get the corresponding dimension name in the dims list
-                name = self.dims[i]
-                # get the corresponding index in the coordinate's names list
-                idx = names.index(name)
-                if self._coords[idx].is_empty:
-                    new_coords[idx] = Coord(None, name=name)
-                elif isinstance(item, slice):
-                    # add the slice on the corresponding coordinates on the dim to the new list of coordinates
-                    if not isinstance(self._coords[idx], CoordSet):
-                        new_coords[idx] = self._coords[idx][item]
-                    else:
-                        # we must slice all internal coordinates
-                        newc = []
-                        for c in self._coords[idx]:
-                            newc.append(c[item])
-                        new_coords[idx] = CoordSet(*newc, name=name)
-                
-                
-                elif isinstance(item, (np.ndarray, list)):
-                    new_coords[idx] = Coord(item, name=self._coords[idx].name)
-            
-            new.set_coords(*new_coords, keepnames=True)
-        
-        new.history = f'slice extracted: ({saveditems})'
-        return new
-    
-    # ..................................................................................................................
-    def __getattr__(self, item):
-        # when the attribute was not found
-        if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction',
-                    '_ipython_canary_method_should_not_exist_',
-                    '_ax_lines', '_axcb', 'clevels', '__wrapped__'] or '_validate' in item or \
-                '_changed' in item:
-            # raise an error so that traits, ipython operation and more ... will be handled correctly
-            raise AttributeError
-        
-        # syntax such as ds.x, ds.y, etc...
-        
-        if item in self.dims or self._coords:
-            
-            if self._coords:
-                try:
-                    c = self._coords[item]
-                    if c.name in self.dims or c._parent_dim in self.dims:
-                        return c
-                    else:
-                        raise AttributeError
-                except Exception as err:
-                    if item in self.dims:
-                        return None
-                    else:
-                        raise err
-            
-            return None
-        
-        raise AttributeError
-    
-    def __setattr__(self, key, value):
-        
-        keyb = key[1:] if key.startswith('_') else key
-        if keyb in ['copy', 'title', 'modified', 'units', 'meta', 'name', 'parent', 'author', 'dtype',
-                    'data', 'date', 'filename', 'coords', 'html_output',
-                    'description', 'history', 'id', 'dims', 'mask', '_mask_metadata',
-                    'labels', 'plotmeta', 'modeldata', 'modelnames',
-                    'figsize', 'fig', 'ndaxes', 'clevels', 'divider', 'fignum', 'ax_lines', 'axcb',
-                    'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
-            super().__setattr__(key, value)
-            return
-        
-        if key in DEFAULT_DIM_NAME:  #:# syntax such as ds.x, ds.y, etc...
-            # Note the above test is important to avoid errors with traitlets
-            # even if it looks redundant with the folllowing
-            if key in self.dims:
-                if self._coords is None:
-                    # we need to create a coordset first
-                    self.set_coords(dict((self.dims[i], None) for i in range(self.ndim)))
-                idx = self._coords.names.index(key)
-                _coords = self._coords
-                _coords[idx] = Coord(value, name=key)
-                _coords = self._valid_coords(_coords)
-                self._coords.set(_coords)
-            else:
-                raise AttributeError(f'Coordinate `{key}` is not used.')
-        
-        else:
-            # print(item, value)
-            super().__setattr__(key, value)
-    
-    # ..................................................................................................................
-    def __eq__(self, other, attrs=None):
-        attrs = self.__dir__()
-        for attr in ('filename', 'plotmeta', 'name', 'description',
-                     'history', 'date', 'modified'):
-            attrs.remove(attr)
-        # some attrib are not important for equality
-        return super(NDDataset, self).__eq__(other, attrs)
-    
-    # ..................................................................................................................
-    def __hash__(self):
-        # all instance of this class has same hash, so they can be compared
-        return super().__hash__ + hash(self._coords)
     
     # ..................................................................................................................
     def _cstr(self):
@@ -1052,10 +1080,6 @@ class NDDataset(
             return colored_output(out.rstrip())
         else:
             return out.rstrip()
-    
-    # ------------------------------------------------------------------------------------------------------------------
-    # private methods
-    # ------------------------------------------------------------------------------------------------------------------
     
     # ..................................................................................................................
     def _loc2index(self, loc, dim):

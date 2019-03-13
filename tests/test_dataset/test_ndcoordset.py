@@ -109,7 +109,7 @@ def test_coordset_init(coord0, coord1, coord2):
     assert coords.z.size == 3
 
     with pytest.raises(KeyError):
-        coords = CoordSet(x=coord2, y=coord3, f=np.array((1,2,3)))  # wrong key
+        coords = CoordSet(x=coord2, y=coord3, fx=np.array((1,2,3)))  # wrong key (must be a single char)
 
     with pytest.raises(ValueError):
         coords = CoordSet(x=coord2, y=coord3, z=3)  # wrong coordinate value
