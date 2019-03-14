@@ -47,7 +47,7 @@ class CoordSet(HasTraits):
     # Hidden attributes containing the collection of objects
     _id = Unicode()
     _coords = List(allow_none=True)
-    _reference = Dict({})
+    _references = Dict({})
     _updated = Bool(False)
     
     # Hidden id and name of the object
@@ -163,7 +163,7 @@ class CoordSet(HasTraits):
                                                                 # (even if it is None -> Coord(None)
             elif isinstance(coord, str) and coord in DEFAULT_DIM_NAME:
                 # may be a reference to another coordinates (e.g. same coordinates for various dimensions)
-                self._reference[key] = coord  # store this reference
+                self._references[key] = coord  # store this reference
                 continue
                 
             # populate the coords with coord and coord's name.
@@ -333,8 +333,8 @@ class CoordSet(HasTraits):
     
     # ..................................................................................................................
     @property
-    def reference(self):
-        return self._reference
+    def references(self):
+        return self._references
     
     # ..................................................................................................................
     @property
@@ -460,8 +460,8 @@ class CoordSet(HasTraits):
         keys = []
         if self.names:
             keys.extend(self.names)
-        if self._reference:
-            keys.extend(list(self._reference.keys()))
+        if self._references:
+            keys.extend(list(self.references.keys()))
         return keys
     
     # ..................................................................................................................
@@ -684,7 +684,7 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     @staticmethod
     def __dir__():
-        return ['coords', 'reference', 'is_same_dim', 'name']
+        return ['coords', 'references', 'is_same_dim', 'name']
 
     # ..................................................................................................................
     def __call__(self, *args, **kwargs):
@@ -748,8 +748,8 @@ class CoordSet(HasTraits):
 
             # ok we did not find it!
             # let's try in references
-            if index in self._reference.keys():
-                return self._reference[index]
+            if index in self._references.keys():
+                return self._references[index]
             
             # let's try in the title
             if index in self.titles:
@@ -930,23 +930,18 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     def _cstr(self, header='  coordinates: ... \n', print_size=True):
         
-        #
-        # out = header
-        # for i, item in enumerate(self._coords):
-        #     txt =""
-        #     if print_size:
-        #         txt = f'{item._str_shape().rstrip()}\n'
-        #     txt += f'{item._cstr(print_size=False)}\n'
-        #
-        #     out += format(textwrap.indent(txt, ' ' * 4))
-        #     out = out.replace('        title', f'({item.name}){" " * (6 - len(item.name))}title')
-
         txt = ''
         for idx, dim in enumerate(self.names):
             coord = getattr(self, dim)
             
             if coord:
-                txt += ' DIMENSION `{}`\n'.format(dim)
+                
+                dimension = f' DIMENSION `{dim}`'
+                for k,v in self.references.items():
+                    if dim == v:
+                        # reference to this dimension
+                        dimension += f'=`{k}`'
+                txt += dimension+'\n'
                 
                 if isinstance(coord, CoordSet):
                     #txt += '        index: {}\n'.format(idx)

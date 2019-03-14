@@ -601,7 +601,27 @@ class NDDataset(
     # ------------------------------------------------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
+
+    # ..................................................................................................................
+    def add_coords(self, *args, **kwargs):
     
+        if not args and not kwargs:
+            # reset coordinates
+            self._coords = None
+            return
+    
+        if self._coords is None:
+            self._coords = CoordSet(*args, **kwargs)
+        else:
+            self._coords._append(*args, **kwargs)
+    
+        if self._coords:
+            # set a notifier to the updated traits of the CoordSet instance
+            HasTraits.observe(self._coords, self._dims_update, '_updated')
+            # force it one time after this initialization
+            self._coords._updated = True
+
+
     # ..................................................................................................................
     def coord(self, dim='x'):
         """
@@ -663,19 +683,20 @@ class NDDataset(
     
     # ..................................................................................................................
     def set_coords(self, *args, **kwargs):
+        """
+        Set one or more coordinates at once
         
-        if not args and not kwargs:
-            # reset coordinates
-            self._coords = None
-            return
+        Warnings
+        --------
+        This method replace all existing coordinates
         
-        self._coords = CoordSet(*args, **kwargs)
-        
-        if self._coords:
-            # set a notifier to the updated traits of the CoordSet instance
-            HasTraits.observe(self._coords, self._dims_update, '_updated')
-            # force it one time after this initialization
-            self._coords._updated = True
+        See Also
+        --------
+        add_coords, set_coordtitles, set_coordunits
+
+        """
+        self._coords = None
+        self.add_coords(*args, **kwargs)
     
     # ..................................................................................................................
     def set_coordtitles(self, *args, **kwargs):

@@ -176,6 +176,9 @@ class NDArray(HasTraits):
         if data is not None:
             self.data = data
 
+        if 'dims' in kwargs.keys():
+            self.dims = kwargs.pop('dims')
+
         if self._labels_allowed:
             self.labels = kwargs.pop('labels', None)
 
@@ -602,6 +605,9 @@ class NDArray(HasTraits):
         """
         The dimension's names
         """
+        if isinstance(values, str) and len(values)==1:
+            values = [values]
+            
         if not is_sequence(values) or len(values) != self.ndim:
             raise ValueError(f'a sequence of chars with a length of {self.ndim} is expected, but `{values}` '
                              f'has been provided')

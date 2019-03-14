@@ -26,7 +26,6 @@ from datetime import datetime
 import warnings
 import uuid
 
-
 # ======================================================================================================================
 # third-party imports
 # ======================================================================================================================
@@ -38,7 +37,7 @@ import matplotlib.pyplot as plt
 
 try:
     import xarray as xr
-
+    
     HAS_XARRAY = True
 except:
     HAS_XARRAY = False
@@ -46,24 +45,16 @@ except:
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.utils import (SpectroChemPyWarning,
-                                 get_user_and_node, set_operators, docstrings,
-                                 make_func_from, )
-from spectrochempy.extern.traittypes import Array
-from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.units import Unit, ur, Quantity
-from spectrochempy.utils.meta import Meta
-from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndmath import NDMath
-from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.core.dataset.ndplot import NDPlot
-from spectrochempy.core.dataset.nddataset import NDDataset
 
-from spectrochempy.core import log
-from spectrochempy.utils import INPLACE
+from ...core import log
+from ...extern.orderedset import OrderedSet
+
+from .ndarray import NDArray, DEFAULT_DIM_NAME
+from .nddataset import NDDataset
+from .ndcomplex import NDComplexArray
+from .ndcoord import Coord
+from .ndcoordset import CoordSet
+from .ndio import NDIO
 
 
 # ======================================================================================================================
@@ -71,52 +62,25 @@ from spectrochempy.utils import INPLACE
 # ======================================================================================================================
 
 class NDPanel(
-    NDIO,
-    NDPlot,
-    NDMath,
-    HasTraits
+    NDDataset
 ):
     """
     A multi-dimensional array container.
 
-    A dataset consists of ndarrays (|NDArray| objects), coordinates (|Coord|
+    A NDPanel consists of ndarrays (|NDArray| objects), coordinates (|Coord|
     objets) and metadata.
 
-    A dataset can contains heterogeneous data (e.g., 1D and ND arrays with various data units), but their
-    dimensions must be compatible or subject to alignment.
+    A NDPanel can contains heterogeneous data (e.g., 1D and ND arrays with various data units), but their
+    dimensions must be compatible or subject to alignement.
 
     """
-
-    # main data
+    
     _datasets = Any()
-    _coords = Instance(CoordSet, allow_none=True)
-    _meta = Instance(Meta, allow_none=True)
-
-    # main attributes
-    _id = Unicode()
-    _name = Unicode(allow_none=True)
-    _date = Instance(datetime)
-    _title = Unicode(allow_none=True)
-
-    # some settings
-    _copy = Bool()
-
-    # ..................................................................................................................
-    @validate('_datasets')
-    def _datasets_validate(self, proposal):
     
-        datasets = proposal['value']
+    # ------------------------------------------------------------------------------------------------------------------
+    # initialization
+    # ------------------------------------------------------------------------------------------------------------------
     
-        if datasets:
-            # we assume a sequence of objects have been provided
-            if not isinstance(datasets, (list, tuple)):
-                datasets = [datasets]
-        else:
-            return {}
-        
-        for d in datasets:
-            pass
-        
     # ..................................................................................................................
     def __init__(self, *args, **kwargs):
         """
@@ -139,78 +103,282 @@ class NDPanel(
         
 
         """
+        
+        datasets = kwargs.pop('datasets', args)
+        merge = kwargs.pop('merge', True)
+        align = kwargs.pop('align', False)
+        
+        super().__init__(**kwargs)
 
-        self._datasets = kwargs.get('datasets', args)
-        self._coords = kwargs.get('coords', None)
-        self._name = kwargs.get('name', None)
-        self._meta = kwargs.get('meta', None)
+        self._set_datasets(datasets, merge=merge, align=align)
+    
+    # ------------------------------------------------------------------------------------------------------------------
+    # special methods
+    # ------------------------------------------------------------------------------------------------------------------
 
+    # ..................................................................................................................
+    def __dir__(self):
+        return ['datasets', 'dims', 'coords', 'meta', 'plotmeta',
+                'name', 'title', 'description', 'history', 'date', 'modified'] + NDIO().__dir__()
+
+
+    # ..................................................................................................................
+    def __getitem__(self, item):
+        
+        # dataset names selection first
+        if isinstance(item, str):
+            try:
+                dataset = self._datasets[item]
+                if self._coords:
+                    c = {}
+                    for dim in dataset.dims:
+                        c[dim] = self.coords[dim]
+                    dataset.set_coords(c)
+                return dataset
+                
+            except:
+                pass
+
+        return super().__getitem__(item)
+        
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # validators
+    # ------------------------------------------------------------------------------------------------------------------
+    
+    # ..................................................................................................................
+    @validate('_datasets')
+    def _datasets_validate(self, proposal):
+        
+        datasets = proposal['value']
+        
+        return datasets
+                
+    
+    # ------------------------------------------------------------------------------------------------------------------
+    # Private methods
+    # ------------------------------------------------------------------------------------------------------------------
+    
+    def _set_data(self, data):
+        # go to set_datasets
+        if data:
+            self._set_datasets(data)
+    
+    # ..................................................................................................................
+    def _set_datasets(self, datasets, merge=True, align=False):
+        
+        if datasets:
+            # we assume a sequence of objects have been provided
+            if not isinstance(datasets, (list, tuple)):
+                datasets = [datasets]
+    
+        for dataset in datasets:
+        
+            if isinstance(dataset, NDPanel):
+                for name in dataset.names:
+                    self.add_dataset(dataset[name], name=name, merge=merge, align=align)
+                
+            elif isinstance(dataset, (NDDataset, CoordSet, Coord)):
+                self.add_dataset(dataset, merge=merge, align=align)
+                continue
+        
+            else:
+                # create a NDataset
+                self.add_dataset(NDDataset(dataset), merge=merge, align=align)
+
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Default setting
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # ..................................................................................................................
+    @default('_datasets')
+    def _datasets_default(self):
+        return {}
+
+    # ..................................................................................................................
+    @default('_dims')
+    def _dims_default(self):
+        return []
 
 
     # ------------------------------------------------------------------------------------------------------------------
     # Read Only Properties
     # ------------------------------------------------------------------------------------------------------------------
-
+    
     # ..................................................................................................................
     @property
-    def datasets(self):
+    def data(self):
+        """alias of datasets"""
+        
         return self._datasets
 
     # ..................................................................................................................
     @property
-    def coords(self):
-        return self._coords
+    def ndim(self):
+        """
+        int - The number of dimensions present in the panel.
+        
+        """
+        if self._datasets is None:
+            return 0
+        
+        else:
+            dims = []
+            for dataset in self._datasets:
+                dims += dataset.dims
+                
+            return len(set(dims))
     
-    # ..................................................................................................................
-    @default('_id')
-    def _id_default(self):
-        # a unique id
-        return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
-
-    # ..................................................................................................................
     @property
-    def id(self):
+    def dims(self):
         """
-        str - Object identifier (Readonly property).
+        Dimension names
+        
+        Returns
+        -------
+        out: list
+            A list with the current dimension names
+            
         """
-        return self._id
+        dims = []
+        for dataset in self._datasets.values():
+            dims += list(dataset.dims)
+            
+        return sorted(list(set(dims)))
+    
+    @property
+    def dim_properties(self):
+        """
+        Dimension properties
+        
+        Returns
+        -------
+        out: dict
+            A dictionary with the current dimension properties
+            
+        """
+        properties = {}
+        for dataset in self._datasets.values():
+            properties.update(dataset.dim_properties)
+    
+        return properties
 
-
+    @property
+    def names(self):
+        """
+        dataset names
+        
+        Returns
+        -------
+        out: list
+            A list with the current dataset names
+            
+        """
+        return sorted(list(self._datasets.keys()))
+    
+    
     # ------------------------------------------------------------------------------------------------------------------
     # Mutable Properties
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
     @property
-    def name(self):
-        if self._name:
-            return self._name
-        else:
-            return self._id
-
-    @name.setter
-    def name(self, value):
-        if value is not None:
-            self._name = value
-
-        # ..................................................................................................................
-    @property
-    def meta(self):
+    def datasets(self):
         """
-        |Meta| instance object - Additional metadata.
-        """
-        return self._meta
-
-    # ..................................................................................................................
-    @meta.setter
-    def meta(self, meta):
-        # property.setter for meta
-        if meta is not None:
-            self._meta.update(meta)
+        Dictionary of NDDatasets contained in the current NDPanel
+        
+        Returns
+        -------
+        out: dict
+            Dictionary of NDDataset
             
+        """
+    
+        return self._datasets
+
+    @datasets.setter
+    def datasets(self, datasets):
+    
+        self._set_datasets(datasets)
+        
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------------------------------------------------------
+
+    # ..................................................................................................................
+    def add_dataset(self, dataset, name=None, merge=True, align=False):
+        """
+        Add a single dataset (or coordinates) to the NDPanel
+        
+        Parameters
+        ----------
+        dataset
+        name
+        merge
+
+        Returns
+        -------
+
+        """
+        dataset = dataset.copy(keepname=True)
+        
+        if not isinstance(dataset, (NDPanel, NDDataset, CoordSet, Coord)):
+            self._set_datasets(dataset)
+            return
+           
+        if dataset.has_defined_name:
+            name = dataset.name
+            
+        if name is None or name in self.names :
+            name = f"data_{len(self._datasets)}"
+        
+        # handle the dimension names
+        dims = dataset.dims
+        coords = dataset.coords # get the dataset Coordset
+        dataset.delete_coords() # datasets in panel have no internal coordinates
+        
+        def make_dim_and_coord(dim):
+            new_dim_name = (OrderedSet(DEFAULT_DIM_NAME)-self._dims).pop()
+            index = dataset._dims.index(dim)
+            dataset._dims[index] = new_dim_name
+            self._dims.insert(0, new_dim_name)
+            if coords:
+                coords[dim].name = new_dim_name
+                self.add_coords(coords[new_dim_name])
+            
+        def can_merge(dataset, dim, merge):
+            prop = self.dim_properties # current dim properties
+            datasetprop = dataset.dim_properties
+            if merge:
+                # same dimension properties ?
+                return datasetprop[dim] == prop[dim]
+            return False
+            
+        for index, dim in enumerate(dims[::-1]):
+    
+            if dim in self.dim_properties:  # current dim properties
+                # already in current dims
+                
+                if can_merge(dataset, dim, merge):
+                    # can merge: so it's natural to use the same dimension
+                    # nothing else to do as dim and coords are already set for this dimension
+                    continue
+                else:
+                    # not the same dim or not merge allowed
+                    # create a new one using the next available names
+                    make_dim_and_coord(dim)
+                    
+            else:
+                # not yet in self.dims, we can safely add it to the dims and coordinates
+                self._dims.insert(0, dim)
+                if coords:
+                    coords[dim].name = dim
+                    self.add_coords(coords[dim])
+
+        self._datasets[name] = dataset.copy()
+        
+
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -226,7 +394,7 @@ class NDPanel(
             return 'NDPanel'
         else:
             return name == 'NDPanel'
-        
+    
     # ..................................................................................................................
     def to_dataframe(self):
         """
@@ -236,15 +404,15 @@ class NDPanel(
         -------
 
         """
-
+    
     # ------------------------------------------------------------------------------------------------------------------
     # Events
     # ------------------------------------------------------------------------------------------------------------------
-
+    
     # ..................................................................................................................
     @observe(All)
     def _anytrait_changed(self, change):
-
+        
         # ex: change {
         #   'owner': object, # The HasTraits instance
         #   'new': 6, # The new value
@@ -252,5 +420,5 @@ class NDPanel(
         #   'name': "foo", # The name of the changed trait
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
-
+        
         log.debug('changes in NDPanel: ' + change.name)

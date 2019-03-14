@@ -47,7 +47,7 @@ from spectrochempy import *
 # ## Create a ND-Dataset from scratch
 
 # %% [markdown]
-# ### 1D-Dataset
+# ### 1D-Dataset (unidimensional dataset)
 
 # %% [markdown]
 # In the following example, a minimal 1D dataset is created from a simple list, to which we can add some metadata:
@@ -58,7 +58,7 @@ d1D.title = 'intensity'
 d1D.name = 'mydataset'
 d1D.history = 'created from scratch'
 d1D.description = 'Some experimental measurements'
-d1D
+print_(d1D)
 
 
 # %% [markdown]
@@ -70,7 +70,7 @@ d1D
 # </div>
 
 # %%
-print_(d1D)
+print(d1D)
 
 # %% [markdown]
 # To get a rich display of the dataset, we can simply type on the last line of the cell: This output a html version of the information string.
@@ -105,16 +105,16 @@ d1D.ndim # the number of dimensions
 d1D.dims # the name of the dimension (it has been automatically attributed)
 
 # %% [markdown]
-# **Note** : The names of the dimensions are set automatically. But they can be changed, with the limitation that the name must be a single letter among the following list: `x`, `y`, `z`, `u`, `v`, `w` or `t`.
+# **Note** : The names of the dimensions are set automatically. But they can be changed, with the limitation that the name must be a single letter.
 
 # %%
-d1D.dims = ['t']  # change the list of dim names.
+d1D.dims = ['q']  # change the list of dim names.
 
 # %%
 d1D.dims
 
 # %% [markdown]
-# ### nD-Dataset
+# ### nD-Dataset (multidimensional dataset)
 
 # %% [markdown]
 # To create a nD NDDataset, we have to provide a nD-array like object to the NDDataset instance constructor
@@ -134,8 +134,19 @@ d2D.description = 'Some example'
 d2D.dims = ['v','u','t']
 d2D
 
+# %% [markdown]
+# We can also add all information in a single statement
+
 # %%
-d2D.dims # 3 names attributed at the creation (if they are not provided, then the name are : 'z','y','x' automatically attributed)
+d2D = NDDataset(a, dims = ['v','u','t'], title = 'Energy', name = '3D_dataset', 
+                history = 'created from scratch', description = 'a single line creation example')
+d2D
+
+# %% [markdown]
+# Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are : 'z','y','x' automatically attributed)
+
+# %%
+d2D.dims 
 
 # %%
 d2D.ndim
@@ -194,7 +205,7 @@ d2D.t       # the same for coordinate  u, v, t which are not yet set
 # To add coordinates, on way is to set them one by one:
 
 # %%
-d2D.t = np.arange(6)*.1 # we need a sequence of 6 values for axe x (see shape above) 
+d2D.t = np.arange(6)*.1 # we need a sequence of 6 values for `t` dimension (see shape above) 
 d2D.t.title = 'time'
 d2D.t.units = 'seconds'
 d2D.coords # now return a list of coordinates
@@ -266,6 +277,16 @@ d2D
 
 # %%
 d2D.time
+
+# %% [markdown]
+# Sometimes it is not necessary to have different coordinates for the axis. 
+#
+# For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can refer to the first.
+
+# %%
+a = np.diag((3,3,2.5))
+nd = NDDataset(a, coords=CoordSet(x=np.arange(3), y='x'))
+nd
 
 # %% [markdown]
 # ## Create a NDDataset : full example
