@@ -23,7 +23,7 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndpanel import NDPanel
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-from spectrochempy.core import log
+from spectrochempy.core import log, print_
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils import (SpectroChemPyWarning, info_, debug_,
                                  INPLACE, MASKED,
@@ -42,13 +42,11 @@ def test_ndpanel_init():
     assert not panel.meta
     assert panel.name == panel.id
     assert panel.dims == []
-    assert panel.dim_properties == {}
     
     # without coordinates
     arr1 = np.random.rand(2,4)
     panel = NDPanel(arr1)
     assert panel.dims == ['x','y']
-    assert panel.dim_properties == {'x':[4, None, None, None, None], 'y':[2, None, None, None, None]}
     assert panel.names == ['data_0']
     assert panel['data_0'].dims == ['y','x']
     assert panel.x is None
@@ -58,13 +56,13 @@ def test_ndpanel_init():
     # without coordinates, multiple datasets, merge dimension
     arr2 = np.random.rand(3,4)
     na2 = NDArray(arr2, name='na2')
-    panel = NDPanel(arr1, na2)
-    assert panel.dims == ['x','y','z']  # by default alignement is automatic
+    panel = NDPanel(arr1, na2)          #  merge=True by default
+    assert panel.dims == ['x','y','z']  #  then merge is automatic
     assert panel.names == ['data_0', 'na2']
     assert panel['data_0'].dims == ['y','x']
     assert panel['na2'].dims == ['z','x']
 
-    # without coordinates, muliple datasets, dimensions not merged
+    # without coordinates, multiple datasets, dimensions not merged
     panel = NDPanel(arr1, na2, merge=False)
     assert panel.dims == ['u', 'x', 'y', 'z']  # dims are ordered by name
     assert panel.names == ['data_0', 'na2']
@@ -72,13 +70,13 @@ def test_ndpanel_init():
     assert panel['na2'].dims == ['u','z']
     
     # with coordinates, multiple sets, dimensions not merged
-    arr1 = np.random.rand(2,4)
+    arr1 = np.random.rand(10,4)
     cx = Coord(np.arange(4), title='tx', units='s')
-    cy = Coord(np.arange(2), title='ty', units='km')
+    cy = Coord(np.arange(10), title='ty', units='km')
     nd1 = NDDataset(arr1, coords=(cy, cx), name='arr1')
     
-    arr2 = np.random.rand(3,4)
-    cy2 = Coord(np.arange(3), title='ty2', units='eV')
+    arr2 = np.random.rand(15,4)
+    cy2 = Coord(np.linspace(0,10,15)*1000., title='ty2', units='m')
     nd2 = NDDataset(arr2, coords=(cy2, cx), name='arr2')
 
     panel = NDPanel(nd1, nd2, merge=False)
@@ -92,9 +90,28 @@ def test_ndpanel_init():
     assert panel['arr1'].dims == ['y', 'x']
     assert panel['arr2'].dims == ['z', 'x']
     
+    # dataset alignment during init (cy and cy2 can be aligned) but the title must be the same
+    nd2.y.title = nd1.y.title
+    panel = NDPanel(nd1, nd2, align='outer')
+    assert panel.dims == ['x','y']
+    assert panel['arr1'].dims == ['y', 'x']
+    assert panel['arr2'].dims == ['y', 'x']
+    info_()
+    info_(nd1)
     
+    # test print
+    print(nd1)
+    print(panel)
+    print_(panel)
+    info_(panel)
+    
+    # test _repr_html
+    info_(panel._repr_html_())
+    
+    # TODO: check alignement errors
 
-
+    
+    
 # ============================================================================
 if __name__ == '__main__':
     pass

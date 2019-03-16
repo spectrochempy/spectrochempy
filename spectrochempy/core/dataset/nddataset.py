@@ -269,7 +269,15 @@ class NDDataset(
         
         # syntax such as ds.x, ds.y, etc...
         
-        if item in self.dims or self._coords:
+        if item[0] in self.dims or self._coords:
+            
+            # look also properties
+            attribute = None
+            index = 0
+            if len(item) > 2 and item[1] == '_':
+                attribute = item[1:]
+                item = item[0]
+                index = self.dims.index(item)
             
             if self._coords:
                 try:
@@ -277,33 +285,44 @@ class NDDataset(
                     if isinstance(c, str) and c in self.dims:
                         # probaly a reference to another coordinate name
                         c = self._coords[c]
-                        
+                    
                     if c.name in self.dims or c._parent_dim in self.dims:
-                        return c
+                        if attribute is not None:
+                            # get the attribute
+                            return getattr(c, attribute)
+                        else:
+                            return c
                     else:
                         raise AttributeError
+                
                 except Exception as err:
                     if item in self.dims:
                         return None
                     else:
                         raise err
+            elif attribute is not None:
+                if attribute == 'size':
+                    # we want the size but there is no coords, get it from the data shape
+                    return self.shape[index]
+                else:
+                    raise AttributeError(f'Can not find `{attribute}` when no coordinate is defined')
             
             return None
         
         raise AttributeError
     
     def __setattr__(self, key, value):
-    #
-    #     keyb = key[1:] if key.startswith('_') else key
-    #     if keyb in ['copy', 'title', 'modified', 'units', 'meta', 'name', 'parent', 'author', 'dtype',
-    #                 'data', 'date', 'filename', 'coords', 'html_output',
-    #                 'description', 'history', 'id', 'dims', 'mask', '_mask_metadata',
-    #                 'labels', 'plotmeta', 'modeldata', 'modelnames',
-    #                 'figsize', 'fig', 'ndaxes', 'clevels', 'divider', 'fignum', 'ax_lines', 'axcb',
-    #                 'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
-    #         super().__setattr__(key, value)
-    #         return
-    #
+        #
+        #     keyb = key[1:] if key.startswith('_') else key
+        #     if keyb in ['copy', 'title', 'modified', 'units', 'meta', 'name', 'parent', 'author', 'dtype',
+        #                 'data', 'date', 'filename', 'coords', 'html_output',
+        #                 'description', 'history', 'id', 'dims', 'mask', '_mask_metadata',
+        #                 'labels', 'plotmeta', 'modeldata', 'modelnames',
+        #                 'figsize', 'fig', 'ndaxes', 'clevels', 'divider', 'fignum', 'ax_lines', 'axcb',
+        #                 'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
+        #         super().__setattr__(key, value)
+        #         return
+        #
         if key in DEFAULT_DIM_NAME:  #:# syntax such as ds.x, ds.y, etc...
             # Note the above test is important to avoid errors with traitlets
             # even if it looks redundant with the folllowing
@@ -391,11 +410,15 @@ class NDDataset(
                 # check the validity of the given coordinates in terms of size (if it correspond to one of the dims)
                 size = coord.size
                 
-                idx = self._get_dims_index(coord.name)[0]  # idx in self.dims
-                if size != self._data.shape[idx]:
-                    raise ValueError(
-                        f'the size of a coordinates array must None or be equal to that of the respective `{coord.name}`'
+                if self.implements('NDDataset'):
+                    idx = self._get_dims_index(coord.name)[0]  # idx in self.dims
+                    if size != self._data.shape[idx]:
+                        raise ValueError(
+                        f'the size of a coordinates array must None or be equal'
+                        f' to that of the respective `{coord.name}`'
                         f' data dimension but coordinate size={size} != data shape[{idx}]={self._data.shape[idx]}')
+                else:
+                    pass # bypass this checking for any other derived type (should be done in the subclass)
         
         coords._parent = self
         return coords
@@ -436,29 +459,7 @@ class NDDataset(
 
         """
         return self._modified
-
-    # ..................................................................................................................
-    @property
-    def dim_properties(self):
-        """
-        Dimensions properties
-        
-        Returns
-        -------
-        out : dict
-            A dictionary containing min properties for each dimensions
-            
-        """
-        properties = {}
-        for i, dim in enumerate(self.dims):
-            properties[dim] = [self.shape[i],
-                               getattr(self, dim, 'units'),
-                               getattr(self, dim, 'title'),
-                               getattr(self, dim, 'data'),
-                               getattr(self, dim, 'labels')]
     
-        return properties
-        
     # ..................................................................................................................
     @property
     def T(self):
@@ -599,29 +600,42 @@ class NDDataset(
         raise NotImplementedError
     
     # ------------------------------------------------------------------------------------------------------------------
+    # hidden read_only properties
+    # ------------------------------------------------------------------------------------------------------------------
+    
+    # ..................................................................................................................
+    @property
+    def _dict_dims(self):
+        _dict = {}
+        for index, dim in enumerate(self.dims):
+            if dim not in _dict:
+                _dict[dim] = {'size': self.shape[index],
+                              'coord': getattr(self, dim)}
+        return _dict
+    
+    # ------------------------------------------------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
-
+    
     # ..................................................................................................................
     def add_coords(self, *args, **kwargs):
-    
+        
         if not args and not kwargs:
             # reset coordinates
             self._coords = None
             return
-    
+        
         if self._coords is None:
             self._coords = CoordSet(*args, **kwargs)
         else:
             self._coords._append(*args, **kwargs)
-    
+        
         if self._coords:
             # set a notifier to the updated traits of the CoordSet instance
             HasTraits.observe(self._coords, self._dims_update, '_updated')
             # force it one time after this initialization
             self._coords._updated = True
-
-
+    
     # ..................................................................................................................
     def coord(self, dim='x'):
         """
@@ -1054,12 +1068,10 @@ class NDDataset(
     def _cstr(self):
         # Display the metadata of the object and partially the data
         out = ''
-        out += '           id: {}\n'.format(self.id)
-        out += '         name: {}\n'.format(self.name) if self._name else ''
+        out += '         name: {}\n'.format(self.name)
         out += '       author: {}\n'.format(self.author)
         out += '      created: {}\n'.format(self._date)
-        out += '     modified: {}\n'.format(self._modified) \
-            if self._modified != self._date else ''
+        out += '     modified: {}\n'.format(self._modified) if (self.modified-self.date).seconds>1 else ''
         
         wrapper1 = textwrap.TextWrapper(initial_indent='',
                                         subsequent_indent=' ' * 15,
@@ -1090,7 +1102,7 @@ class NDDataset(
             out += hist  # '\0\0\0{}\0\0\0\n'
         
         out += '{}\n'.format(self._str_value().rstrip())
-        out += '{}\n'.format(self._str_shape().rstrip())
+        out += '{}\n'.format(self._str_shape().rstrip()) if self._str_shape() else ''
         out += '{}\n'.format(self._str_dims().rstrip())
         
         if not out.endswith('\n'):
@@ -1157,16 +1169,6 @@ class NDDataset(
         
         if change['name'] in ["_date", "_modified", "trait_added"]:
             return
-        
-        # changes in data -> we must update dates
-        if change['name'] == '_data' and self._date == datetime(1970, 1, 1, 0,
-                                                                0):
-            debug_('changes in NDDataset: ' + change.name)
-            
-            self._date = datetime.now()
-            self._modified = datetime.now()
-            
-            # self._dims_update()
         
         # all the time -> update modified date
         self._modified = datetime.now()

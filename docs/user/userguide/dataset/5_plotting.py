@@ -38,7 +38,7 @@ print(dataset.description)
 # To plot a dataset, use the `plot` command (generic plot). As the current NDDataset is 2D, a contour plot is displayed by default.
 
 # %%
-_ = dataset.plot() # plot the source.  
+_ = dataset.plot(colorbar=True) # plot the source.  
 
 # %%
 #import matplotlib as mpl
@@ -72,7 +72,7 @@ _ = dataset.plot(style='serif')
 # * grayscale
 
 # %%
-_ = dataset.plot(style='paper', colorbar=False)
+_ = dataset.plot(style='paper', colorbar=True)
 
 # %% [markdown]
 # To get a list of all available styles :
@@ -84,7 +84,7 @@ available_styles()
 # these styles can be combined
 
 # %%
-_ = dataset.plot(style=['sans','paper','grayscale'], colorbar=False)
+_ = dataset.plot(style=['sans','paper','grayscale'], colorbar=True)
 
 # %% [markdown]
 # New styles can also be created, using a simple dictionary:

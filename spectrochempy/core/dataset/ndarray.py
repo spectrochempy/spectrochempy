@@ -165,6 +165,8 @@ class NDArray(HasTraits):
             Perform a copy of the passed object.
 
         """
+        # creation date
+        self._date = datetime.now()
 
         # by default, we try to keep a reference to the data, not copy them
         self._copy = kwargs.pop('copy', False)  #
@@ -736,7 +738,7 @@ class NDArray(HasTraits):
 
         # finally set the mask of the object
         if isinstance(mask, MaskedConstant):
-            self._mask = mask
+            self._mask = NOMASK if self._data is None else np.ones(self._data.shape).astype(bool)
         else:
             if np.any(self._mask):
                 # this should happen when a new mask is added to an existing one
@@ -1159,8 +1161,7 @@ class NDArray(HasTraits):
 
         # name must be changed
         if not keepname:
-            self.name = self.name.replace('* ','')
-            new.name = '* ' + self.name
+            new.name = ""  # default
 
         return new
 
@@ -1715,36 +1716,52 @@ class NDArray(HasTraits):
             raise NotImplemented(f'not implemented for {type(self).__name__} objects which are not 1-dimensional '
                                  f'(current ndim:{self.ndim})')
 
-        data = self._data
-        labels = self._labels
-
-        if not self.is_empty and is_number(loc):
-            # get the index of a given values
-            error = None
-            if np.all(loc > data.max()) or np.all(loc < data.min()):
-                debug_(f'This coordinate ({loc}) is outside the axis limits ({data.min()}-{data.max()}).\n'
-                       f'The closest limit index is returned')
-                error = 'out_of_limits'
-            index = (np.abs(data - loc)).argmin()
-            if not error:
-                return index
-            else:
-                return index, error
-
-        if isinstance(loc, datetime):
-            # not implemented yet
-            raise NotImplementedError("datetime as location is not yet impemented")  # TODO: date!
-
-        if labels is not None:
-            # was not a location? it's may be a label
-            indexes = np.argwhere(labels == loc).flatten()
-            if indexes.size > 0:
-                return indexes[0]
-            else:
-                raise IndexError(f'Could not find this label: {loc}')
-
+        if self.is_empty and not self.is_labeled:
+                
+                raise IndexError(f'Could not find this location: {loc} on an empty array')
+        
         else:
-            raise IndexError(f'Could not find this location: {loc}')
+            
+            data = self._data
+    
+            if is_number(loc):
+                # get the index of a given values
+                error = None
+                if np.all(loc > data.max()) or np.all(loc < data.min()):
+                    debug_(f'This coordinate ({loc}) is outside the axis limits ({data.min()}-{data.max()}).\n'
+                           f'The closest limit index is returned')
+                    error = 'out_of_limits'
+                index = (np.abs(data - loc)).argmin()
+                # TODO: add some precison to this result
+                if not error:
+                    return index
+                else:
+                    return index, error
+            
+            elif is_sequence(loc):
+                # TODO: is there a simpler way to do this with numpy functions
+                index = []
+                for l in loc:
+                    index.append((np.abs(data - l)).argmin())
+                    # TODO: add some precison to this result
+                return index
+    
+            elif isinstance(loc, datetime):
+                # not implemented yet
+                raise NotImplementedError("datetime as location is not yet impemented")  # TODO: date!
+
+            elif self.is_labeled:
+
+                # TODO: look in all row of labels
+                labels = self._labels
+                indexes = np.argwhere(labels == loc).flatten()
+                if indexes.size > 0:
+                    return indexes[0]
+                else:
+                    raise IndexError(f'Could not find this label: {loc}')
+
+            else:
+                raise IndexError(f'Could not find this location: {loc}')
 
     # ..................................................................................................................
     def _get_dims_from_args(self, *dims, **kwargs):

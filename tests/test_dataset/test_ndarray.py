@@ -60,7 +60,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     d0.data = [1, 2, 3]  # put some data
     assert_array_equal(d0.data, np.array([1, 2, 3]))
     assert d0.dtype in TYPE_INTEGER
-    assert d0.date == datetime(1970, 1, 1, 0, 0)
+    assert d0.date.date() == datetime.today().date()
     d0.date = datetime(2005, 10, 12)
     d0.date = "25/12/2025"
     assert d0.date == datetime(2025, 12, 25, 0, 0)

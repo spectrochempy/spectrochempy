@@ -11,6 +11,7 @@ User Guide
     introduction/*
     dataset/*
     projects/*
+    processing/*
 
 
 

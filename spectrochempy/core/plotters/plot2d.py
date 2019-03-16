@@ -529,7 +529,7 @@ def plot_2D(dataset, **kwargs):
 
     if colorbar and 'surface' not in method:
 
-        if not new._axcb:
+        if not hasattr(new, '_axcb') or not new._axcb:
             axec = new.ndaxes['colorbar']
             axec.name = axec.name + nameadd
             new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)

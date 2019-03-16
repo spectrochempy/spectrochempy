@@ -13,9 +13,10 @@ from .print import pstr
 __all__ = ['SpectroChemPyWarning',
            'SpectroChemPyDeprecationWarning',
            'SpectroChemPyException',
+           'UnitsCompatibilityError',
            'deprecated',
            'info_', 'debug_', 'error_', 'warning_'
-           ]
+          ]
 
 
 # ======================================================================================================================
@@ -26,6 +27,7 @@ __all__ = ['SpectroChemPyWarning',
 class SpectroChemPyWarning(Warning):
     """
     The base warning class for SpectroChemPy warnings.
+    
     """
 
 
@@ -33,6 +35,7 @@ class SpectroChemPyWarning(Warning):
 class SpectroChemPyDeprecationWarning(SpectroChemPyWarning):
     """
     A warning class to indicate that something is deprecated.
+    
     """
 
 
@@ -40,7 +43,16 @@ class SpectroChemPyDeprecationWarning(SpectroChemPyWarning):
 class SpectroChemPyException(Exception):
     """
     The base exception class for SpectroChemPy
+    
     """
+
+# ----------------------------------------------------------------------------------------------------------------------
+class UnitsCompatibilityError(SpectroChemPyException):
+    """
+    Exception raised when units are not compatible, preventing some mathematical operations
+    
+    """
+    
 
 
 # ----------------------------------------------------------------------------------------------------------------------

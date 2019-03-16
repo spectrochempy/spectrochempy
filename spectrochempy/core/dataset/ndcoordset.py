@@ -936,7 +936,7 @@ class CoordSet(HasTraits):
             
             if coord:
                 
-                dimension = f' DIMENSION `{dim}`'
+                dimension = f'     DIMENSION `{dim}`'
                 for k,v in self.references.items():
                     if dim == v:
                         # reference to this dimension

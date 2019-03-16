@@ -14,6 +14,7 @@ import os
 import pandas as pd
 import pytest
 import numpy as np
+from numpy.random import rand
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoordset import CoordSet
@@ -21,9 +22,8 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
 
 from pint.errors import (UndefinedUnitError, DimensionalityError)
-from spectrochempy.utils import MASKED, NOMASK, TYPE_FLOAT, TYPE_INTEGER, info_, debug_, warning_, error_
-
-from spectrochempy.utils import Meta, SpectroChemPyWarning, SpectroChemPyException, print_
+from spectrochempy.utils import (MASKED, NOMASK, TYPE_FLOAT, TYPE_INTEGER, info_, debug_, warning_, error_, print_,
+                                 Meta, SpectroChemPyException)
 from spectrochempy.utils.testing import (assert_equal, assert_array_equal, raises, RandomSeedContext)
 
 from quaternion import quaternion
@@ -699,7 +699,7 @@ def test_nddataset_mask_init_without_np_array(mask_in):
     assert (ndd.mask == mask_in).all()
 
 
-def test_ndddata_with_mask_acts_like_masked_array():
+def test_nddataset_with_mask_acts_like_masked_array():
     # test for #2414
     input_mask = np.array([True, False, False])
     input_data = np.array([1., 2., 3.])
@@ -912,7 +912,6 @@ def test_nddataset_square_dataset_with_identical_coordinates():
     c = Coord(np.arange(3)*.25, title='time', units='us')
     nd = NDDataset(a, coords=CoordSet(x=c, y='x'))
     info_(nd)
-    #info_(nd.y)
     assert nd.x == nd.y
     
 #### Test masks ######
@@ -1434,8 +1433,6 @@ def test_nddataset_set_coordinates_withnames(nd2d, ds1):
 
 ### issue 29
 def test_nddataset_issue_29_mulitlabels():
-    from spectrochempy import NDDataset, Coord, print_
-    from numpy.random import rand
 
     DS = NDDataset(rand(3,4))
 

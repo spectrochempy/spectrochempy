@@ -110,6 +110,9 @@ _ = proj.NMR_1D.plot()
 # %%
 proj['NMR_1D'].data
 
+# %%
+proj.NMR_2D
+
 # %% [markdown]
 # ## Saving and loading projects
 
@@ -132,4 +135,4 @@ proj2 = Project.load('NMR')
 proj2
 
 # %%
-proj2.NMR_2D
+proj2.NMR_2D    #TODO: something wrong there!

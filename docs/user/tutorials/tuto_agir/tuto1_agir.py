@@ -390,8 +390,3 @@ proj.save('HIZECOKE')
 
 # %% [markdown]
 # In the next [notebook](tuto2_agir_IR_processing.ipynb), we will now proceed with some basic pre-processing of the IR data, such as slicing interesting regions, and masking some data. 
-
-# %%
-
-
-

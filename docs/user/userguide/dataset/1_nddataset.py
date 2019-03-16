@@ -20,9 +20,11 @@
 #
 # Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to matematical operations. 
 #
-# But, in addition, NDDataset may have units and coordinates with units for all dimensions. This make NDDataset aware of unit compatibility, e.g., for binary operation such as addtions or subtraction or during the application of mathematical operations. In addition or in replacement of numerical data for coordinates, NDDatset can aslo have labeled coordinates where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc...). 
+# But, in addition, NDDataset may have units, can be masked and each dimensions can have coordinates also with units. This make NDDataset aware of unit compatibility, *e.g.*, for binary operation such as addtions or subtraction or during the application of mathematical operations. In addition or in replacement of numerical data for coordinates, NDDatset can also have labeled coordinates where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc...). 
 #
-# This offer a lot of flexibility in using NDDatasets that,  we hope, will be useful for applications. See the **Tutorials** for more information about such possible applications. 
+# This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful for applications. See the **Tutorials** for more information about such possible applications. 
+#
+# **SpectroChemPy** provides another kind of data structure, aggregating several datasets: **NDPanel**: See 
 
 # %% [markdown]
 # **Below (and in the next sections), we try to give an almost complete view of the NDDataset features.**
@@ -35,13 +37,13 @@ from spectrochempy import *
 #
 # ``NDDataset`` objects mostly behave as numpy's `numpy.ndarray`.
 #
-# However, unlike raw numpy's ndarray, the presence of optional properties such
-# as `mask`, `units`, `axes`, and axes `labels` make them
-# (hopefully) more appropriate for handling spectroscopic information, one of
-# the major objectives of the SpectroChemPy package.
+# However, unlike raw numpy's ndarray, the presence of optional properties make them (hopefully) more appropriate for handling spectroscopic information, one of the major objectives of the SpectroChemPy package.
 #
-# Additional metadata can also be added to the instances of this class through the
-# `meta` properties.
+# * **`mask`**, 
+# * **`units`**, 
+# * and **`coords`**.
+#
+# Additional metadata can also be added to the instances of this class through the `meta` properties.
 
 # %% [markdown]
 # ## Create a ND-Dataset from scratch
@@ -54,10 +56,6 @@ from spectrochempy import *
 
 # %%
 d1D = NDDataset([10., 20., 30.])
-d1D.title = 'intensity'
-d1D.name = 'mydataset'
-d1D.history = 'created from scratch'
-d1D.description = 'Some experimental measurements'
 print_(d1D)
 
 
@@ -89,6 +87,34 @@ np.sqrt(d1D ** 3)
 
 # %%
 d1D + d1D / 2.
+
+# %% [markdown]
+# As seen above, there is some metadata taht are automatically added to the dataset:
+#
+# * **`id`**      : This is a unique identifier for the object
+# * **`author`**  : author determined from the computer name
+# * **`created`** : date/time of creation
+# * **`modified`**: date/time of modification
+#
+# additionaly, dataset can have a **`name`** (equal to the `id` if it is not provided)
+#
+# Some other metadata are defined:
+#
+# * **`history`** : history of operation achieved on the object since the object creation
+# * **`description`** : A user friendly description of the objects purpose or contents.
+# * **`title`** : A title that will be used in plots or in some other operation on the objects.
+#
+#
+# All this metadata (except, the `id`, `created`, `modified`) can be changed by the user.
+#
+# For instance:
+
+# %%
+d1D.title = 'intensity'
+d1D.name = 'mydataset'
+d1D.history = 'created from scratch'
+d1D.description = 'Some experimental measurements'
+d1D
 
 # %% [markdown]
 # d1D is a 1D (1-dimensional) dataset with only one dimension. 
@@ -417,7 +443,10 @@ d3D.coords = CoordSet(z=coord0, y=coord1, x=[coord2,coord2b])
 d3D.coords = (coord0, coord1, coord2) 
 
 # But this raise an error (list have another signification: it's used to set a "same dim" CoordSet see example A or B)
-d3D.coords = [coord0, coord1, coord2]  
+try:
+    d3D.coords = [coord0, coord1, coord2]
+except ValueError:
+    log.error('Coordinates must be of the same size for a dimension with multiple coordinates')
 
 # %% [markdown]
 # ## Copying existing NDDataset

@@ -11,14 +11,15 @@
 """ Tests for the interpolate module
 
 """
-from spectrochempy.core.processors.interpolate import align
+import pytest
+
+from spectrochempy.utils import info_
+from spectrochempy.core.processors.interpolate import interpolate
 
 # align
 #-------
-def test_align(ds1, ds2):
 
-    ds3 = ds2.align(ds1, dim=1, inplace=True)
-    assert(ds3.shape == (9,100,4))
-    assert(ds3 is ds2)
-
-
+@pytest.mark.skip
+def test_interpolate(ds1, ds2):
+    pass
+    
