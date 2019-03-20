@@ -16,39 +16,6 @@
 # # Overview
 
 # %% [markdown]
-# ## Getting Started
-#
-
-# %% [markdown]
-# Obviously, you can use ``jupyter notebook`` from any folder you want, *e.g.* when you create a particular workspace for your work with **SpectroChemPy**.
-#
-
-# %% [markdown]
-# ### Using `Jupyter` Lab
-#
-# Using the new application ``jupyter lab`` is very similar to the ``jupyter notebook``. 
-#
-# We recommend to use this application as it is quite intuitive to use, and advantageously replace the traditional ``jupyter notebook`` application.
-#
-# To get more information on its usage, one can go to : 
-# [https://jupyterlab.readthedocs.io](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)
-#
-# Open a terminal and issue commands as follows:
-#
-# ![launch](../images/launch_jupyter_lab.png)
-#
-# The home window should looks similar to this:
-#
-# ![launch](../images/jupyter_lab_home.png)
-
-# %% [markdown]
-# As above, you can now navigate to the present notebook source: docs/user/userguide/introduction  or the notebooks used for this user guide.
-#
-# Click on the the fist notebook : **introduction.ipynb**
-#
-#
-
-# %% [markdown]
 # ### Loading the API
 
 # %% [markdown]

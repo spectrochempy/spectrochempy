@@ -439,14 +439,14 @@ d3D.coords = CoordSet(z=coord0, y=coord1, x=[coord2,coord2b])
 # WARNING: do not use list for setting multiples coordinates! use tuples
 
 # %%
-# This works
-d3D.coords = (coord0, coord1, coord2) 
-
-# But this raise an error (list have another signification: it's used to set a "same dim" CoordSet see example A or B)
+# This raise an error (list have another signification: it's used to set a "same dim" CoordSet see example A or B)
 try:
     d3D.coords = [coord0, coord1, coord2]
 except ValueError:
     log.error('Coordinates must be of the same size for a dimension with multiple coordinates')
+    
+# This works (not a tuple `()`, not a list `[]`)
+d3D.coords = (coord0, coord1, coord2) 
 
 # %% [markdown]
 # ## Copying existing NDDataset
