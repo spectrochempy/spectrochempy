@@ -115,10 +115,10 @@ class NDMath(object):
         if ufunc.__name__ in ['absolute', 'abs']:
             f = np.fabs
 
-        data, units, mask = self._op(ufunc, inputs, isufunc=True)
+        data, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
         history = 'ufunc %s applied.' % ufunc.__name__
 
-        return self._op_result(data, units, mask, history)
+        return self._op_result(data, units, mask, history, returntype)
 
     def __array_wrap__(self, *args):
         # not sure we still need this
@@ -500,8 +500,7 @@ class NDMath(object):
 
             if hasattr(obj, 'units'):
                 if not obj.dimensionless:
-                    q = Quantity(1.,
-                                 obj.units)  # create a Quantity from the units
+                    q = Quantity(1., obj.units)  # create a Quantity from the units
                 else:
                     q = 1.
                 d = obj.magnitude
@@ -594,10 +593,20 @@ class NDMath(object):
             mask = np.zeros_like(data, dtype=bool)
 
         # redo the calculation with the units to found the final one
-        if fname in ['positive']:
+        returntype = None
+        
+        if fname in ['positive', 'fabs', 'spacing',]:
+            # units is lost for these operations : attempt to correct this behavior
             units = obj.units
+        elif fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit', ]:
+            # should return a simple masked array
+            units = None
+            returntype = 'masked_array'
         else:
-            q = f(q, *argunits)
+            if fname == 'cbrt':  # ufunc missing in pint
+                q = q ** (1./3.)
+            else:
+                q = f(q, *argunits)
             if hasattr(q, 'units'):
                 units = q.units
             else:
@@ -630,16 +639,16 @@ class NDMath(object):
         #        if item:
         #            data_iscomplex[i] |= item[i]  # `or` operation
 
-        return data, units, mask
+        return data, units, mask, returntype
 
     @staticmethod
     def _unary_op(f):
         @functools.wraps(f)
         def func(self):
-            data, units, mask = self._op(f, [self])
+            data, units, mask, returntype = self._op(f, [self])
             if hasattr(self, 'history'):
                 history = 'unary operation %s applied' % f.__name__
-            return self._op_result(data, units, mask, history)
+            return self._op_result(data, units, mask, history, returntype)
 
         return func
 
@@ -651,13 +660,13 @@ class NDMath(object):
                 objs = [self, other]
             else:
                 objs = [other, self]
-            data, units, mask = self._op(f, objs)
+            data, units, mask, returntype = self._op(f, objs)
             if hasattr(self, 'history'):
                 history = 'binary operation ' + f.__name__ + \
                           ' with `%s` has been performed' % get_name(other)
             else:
                 history = None
-            return self._op_result(data, units, mask, history)
+            return self._op_result(data, units, mask, history, returntype)
 
         return func
 
@@ -666,7 +675,7 @@ class NDMath(object):
         @functools.wraps(f)
         def func(self, other):
             objs = [self, other]
-            data, units, mask = self._op(f, objs)
+            data, units, mask, returntype = self._op(f, objs)
             self._data = data
             self._units = units
             self._mask = mask
@@ -677,7 +686,7 @@ class NDMath(object):
 
         return func
 
-    def _op_result(self, data, units=None, mask=None, history=None):
+    def _op_result(self, data, units=None, mask=None, history=None, returntype=None):
         # make a new NDArray resulting of some operation
 
         new = self.copy()
@@ -685,15 +694,15 @@ class NDMath(object):
         new._data = copy.deepcopy(data)
 
         # update the attributes
-        if units is not None:
-            new._units = copy.copy(units)
-        if mask is not None:
-            new._mask = copy.copy(mask)
+        new._units = copy.copy(units)
+        new._mask = copy.copy(mask)
         if history is not None and hasattr(new, 'history'):
             new._history.append(history.strip())
-        # if quaternion is not None:
-        #    new._is_quaternion = quaternion#
 
+        # case when we want to return a simple masked ndarray
+        if returntype is not None:
+            return new.masked_data
+        
         return new
 
 
