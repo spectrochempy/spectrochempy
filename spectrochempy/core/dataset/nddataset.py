@@ -1099,7 +1099,10 @@ class NDDataset(
                 hist += '{}\n'.format(wrapper1.fill(pars[0]))
             for par in pars[1:]:
                 hist += '{}\n'.format(textwrap.indent(par, ' ' * 15))
-            out += hist  # '\0\0\0{}\0\0\0\n'
+            # the three escaped null characters are here to facilitate
+            # the generation of html outputs
+            hist = '\0\0\0{}\0\0\0\n'.format(hist.rstrip())
+            out += hist
         
         out += '{}\n'.format(self._str_value().rstrip())
         out += '{}\n'.format(self._str_shape().rstrip()) if self._str_shape() else ''
