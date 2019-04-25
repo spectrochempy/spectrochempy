@@ -26,11 +26,7 @@ import matplotlib as mpl
 
 from spectrochempy.core.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
-from spectrochempy.core import app
-
-log = app.log
-preferences = app.general_preferences
-project_preferences = app.project_preferences
+from spectrochempy.core import general_preferences, project_preferences
 
 
 # .............................................................................

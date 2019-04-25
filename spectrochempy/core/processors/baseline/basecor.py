@@ -244,17 +244,17 @@ class BaselineCorrection(HasTraits):
 
         new.history = str(new.modified) + \
                       ': ' + 'Baseline correction.' + ' Method: '
-        if self.method == 'multivariate':
-            new.history = 'multivariate (' + str(self.npc) + ' PCs).'
+        if self.method == 'Multivariate':
+            new.history = 'Multivariate (' + str(self.npc) + ' PCs).'
         else:
-            new.history = 'sequential.'
+            new.history = 'Sequential.'
 
         new.history = 'Interpolation: '
 
         if self.interpolation == 'polynomial':
-            new.history = 'polynomial, order=' + str(self.order) + '.\n'
+            new.history = 'Polynomial, order=' + str(self.order) + '.\n'
         else:
-            new.history = 'pchip. \n'
+            new.history = 'Pchip. \n'
 
         if swaped:
             new = new.swapaxes(self.axis, -1)

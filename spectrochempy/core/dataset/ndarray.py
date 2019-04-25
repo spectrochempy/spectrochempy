@@ -38,9 +38,10 @@ import numpy as np
 # ======================================================================================================================
 
 from ...units import Unit, ur, Quantity
+from ...core import info_, debug_, error_, warning_
 from ...utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence, is_number,
                       numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
-                      SpectroChemPyDeprecationWarning, deprecated, info_, debug_, error_, warning_, make_func_from,
+                      SpectroChemPyDeprecationWarning, deprecated,
                       make_new_object, convert_to_html, HAS_PANDAS, HAS_XARRAY)
 from ...extern.traittypes import Array
 
@@ -91,7 +92,7 @@ class NDArray(HasTraits):
     _data = Array(allow_none=True)
     _dtype = Instance(np.dtype, allow_none=True)
     _dims = List(Unicode())
-    _mask = Union((Instance(MaskedConstant), Bool(), Array(Bool())))
+    _mask = Union((Bool(), Array(Bool()), Instance(MaskedConstant) ))
     _labels = Array(allow_none=True)
     _units = Instance(Unit, allow_none=True)
 

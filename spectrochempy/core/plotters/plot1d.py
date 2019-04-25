@@ -27,7 +27,7 @@ __dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter',
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from spectrochempy.core import log, project_preferences
+from spectrochempy.core import project_preferences
 from .utils import make_label
 from ...utils import is_sequence, deprecated
 

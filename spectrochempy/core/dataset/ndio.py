@@ -44,10 +44,11 @@ from traitlets import HasTraits, Unicode
 from .ndarray import NDArray
 from .ndcoord import Coord
 from .ndcoordset import CoordSet
-from spectrochempy.utils import SpectroChemPyWarning
-from spectrochempy.utils.meta import Meta
-from spectrochempy.units import Unit, Quantity
-from spectrochempy.core import log, general_preferences as prefs
+from ...utils import SpectroChemPyWarning
+from ...utils.meta import Meta
+from ...units import Unit, Quantity
+from ...core import general_preferences as prefs
+from ...core import info_, debug_, error_, warning_
 
 
 # ==============================================================================
@@ -311,7 +312,7 @@ class NDIO(HasTraits):
         # get zip file
         obj = NpzFile(fid, allow_pickle=True)
 
-        log.debug(str(obj.files) + '\n')
+        debug_(str(obj.files) + '\n')
 
         # interpret
         coords = None

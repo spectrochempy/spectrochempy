@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 0.8.6
+#       jupytext_version: 1.0.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -49,7 +49,7 @@ _ = multiplot_map(datasets=[nd1, nd2, nd3, nd4],  colormap='viridis',
 try:
     nd2 + nd4
 except ArithmeticError:
-    log.error('Cannot add unaligned datasets')
+    error_('Cannot add unaligned datasets')
 
 # %% [markdown]
 # Let try to align them, in the `y` dimension (*i.e.* the first) as this the one which differ in size.

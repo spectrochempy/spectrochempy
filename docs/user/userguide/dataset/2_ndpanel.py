@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 0.8.6
+#       jupytext_version: 1.0.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -17,6 +17,11 @@
 
 # %%
 from spectrochempy import *
+
+# %% [markdown]
+# `NDPanel` objects are very similar to `NDDataset` in the sense they can contain array and coordinates.
+#
+# However unlike `NDDataset`s, `NDPanel`s can contain several arrays whith different shapes, units and/or coordinates. They can store heterogeneous data coming for example from different types of experiments. Arrays present in `NDPanel` can be aligned during objects initialization.   
 
 # %% [markdown]
 # ## Creating a NDPanel object
@@ -69,7 +74,7 @@ ndp.coords
 
 # %% [markdown]
 # Why dimension `y` is different from those of `nda` and `ndb`?
-# because by default dimensions are merged and aligned (using the 'outer' mathod)
+# because by default dimensions are merged and aligned (using the 'outer' method)
 #
 # If we want to avoid this behavior, we need to specify in the arguments:
 #

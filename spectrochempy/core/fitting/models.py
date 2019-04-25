@@ -16,13 +16,9 @@ __all__ = []
 
 import os
 import numpy as np
-from spectrochempy.core import app
-
-project_preferences = app.project_preferences
-log = app.log
-preferences = app.general_preferences
-
+from spectrochempy.core import project_preferences, general_preferences
 from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.core import info_
 
 
 ############

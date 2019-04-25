@@ -24,8 +24,8 @@ from spectrochempy.core.dataset.ndarray import NDArray
 
 from spectrochempy.utils.testing import (assert_array_equal,
                                          assert_equal_units, raises)
-from spectrochempy.utils import info_
-from spectrochempy.core import log, print_
+
+from spectrochempy.core import info_, debug_, print_
 
 
 # ======================================================================================================================
@@ -44,7 +44,7 @@ def test_coord():
     assert not a.is_labeled
     assert a.units is None
     assert a.unitless
-    log.debug(a.meta)
+    debug_(a.meta)
     assert not a.meta
     assert a.name == 'x'
 
@@ -86,8 +86,8 @@ def test_coord():
     # even an array
     a._labels[3] = range(10)
     assert a._labels[3][2] == 2
-    log.info('\n'+str(a))
-    log.info('\n'+repr(a))
+    info_('\n'+str(a))
+    info_('\n'+repr(a))
 
     # coords with datetime
 
@@ -100,7 +100,7 @@ def test_coord():
     assert isinstance(a.data, np.ndarray)
     assert isinstance(a.labels, np.ndarray)
     b = a._sort(by='label', descend=True)
-    log.info('\n'+str(b))
+    info_('\n'+str(b))
 
 
     # but coordinates must be 1D
@@ -120,7 +120,7 @@ def test_coord():
     assert coord0.data[0] == 4000.
     assert repr(coord0) == "Coord: [float64] unitless"
 
-    log.info('\n'+str(coord0))
+    info_('\n'+str(coord0))
 
     # dimensionless coordinates
 
@@ -132,7 +132,7 @@ def test_coord():
     assert coord0.units.dimensionless
     assert coord0.units.scaling == 1.
     assert coord0.data[0] == 4000.
-    assert repr(coord0) == "Coord: [float64] dimensionless"
+    assert repr(coord0) == "Coord: [float64]"
 
     # scaled dimensionless coordinates
 
@@ -154,7 +154,7 @@ def test_coord():
     assert coord0.units.dimensionless
     assert coord0.data[0] == 4000.  # <- displayed data to be multiplied by the scale factor
     assert repr(coord0) == "Coord: [float64] scaled-dimensionless (0.001)"
-    log.info('\n'+str(coord0))
+    info_('\n'+str(coord0))
 
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels=list('abcdefghij'),
@@ -368,7 +368,7 @@ def test_coord_unit_conversion_operators(operation, result_units):
     operator_km = in_km.__getattribute__(operation)
 
     combined = operator_km(scalar)
-    log.debug(f'{operation}, {combined}')
+    debug_(f'{operation}, {combined}')
     assert_equal_units(combined.units, result_units)
 
 

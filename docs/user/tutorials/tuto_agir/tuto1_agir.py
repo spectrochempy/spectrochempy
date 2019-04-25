@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 0.8.6
+#       jupytext_version: 1.0.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -144,6 +144,7 @@ def readIR(name, force_read_original=False):
         
     return dataset
 
+
 # %% [markdown] {"nbpresent": {"id": "9aaf6138-8601-4b8d-bb9a-0a1bd021c475"}}
 # Ok, now we use this function to read the 3 FTIR file and we add them to the corresponding sub-project of our project
 
@@ -259,6 +260,7 @@ _ = multiplot_map(datasets=datasets, labels=labels,
                 nrow=1, ncol=3, sharex=False, sharey=True, 
                 figsize=(6.8,3), dpi=100, style='sans') #<--'Sans-serif style (default)'
 
+
 # %% [markdown] {"nbpresent": {"id": "f2f2d6a1-4e39-43eb-ac49-2be9c17aa5a0"}}
 # This is much better!
 
@@ -280,6 +282,7 @@ def readTGA(name, force_read_original=False):
         dataset = NDDataset.read_csv(filename)
         dataset.save(basename + '.scp')
     return dataset
+
 
 # %% [markdown] {"nbpresent": {"id": "fbeb48f0-6db5-4f38-b974-3e1e88141cfc"}}
 # Now we read the TGA datasets and add them to our current project

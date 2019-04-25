@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 0.8.6
+#       jupytext_version: 1.0.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -37,11 +37,11 @@ from spectrochempy import *
 #
 # ``NDDataset`` objects mostly behave as numpy's `numpy.ndarray`.
 #
-# However, unlike raw numpy's ndarray, the presence of optional properties make them (hopefully) more appropriate for handling spectroscopic information, one of the major objectives of the SpectroChemPy package.
+# However, unlike raw numpy's ndarray, the presence of optional properties make them (hopefully) more appropriate for handling spectroscopic information, one of the major objectives of the SpectroChemPy package:
 #
-# * **`mask`**, 
-# * **`units`**, 
-# * and **`coords`**.
+# * **mask**, 
+# * **units**, 
+# * and **coords**.
 #
 # Additional metadata can also be added to the instances of this class through the `meta` properties.
 
@@ -267,7 +267,7 @@ d2D.v.has_data, d2D.v.is_empty
 try:
     d2D.x
 except KeyError:
-    log.error('not found')
+    error_('not found')
 
 # %% [markdown]
 # In some case it can also be usefull to get a coordinate from its title instead of its name (the militation is that if several coordinates have the same title, then only the first ones that is found in the coordinate list, will be returned - this can be ambiguous) 
@@ -443,7 +443,7 @@ d3D.coords = CoordSet(z=coord0, y=coord1, x=[coord2,coord2b])
 try:
     d3D.coords = [coord0, coord1, coord2]
 except ValueError:
-    log.error('Coordinates must be of the same size for a dimension with multiple coordinates')
+    error_('Coordinates must be of the same size for a dimension with multiple coordinates')
     
 # This works (not a tuple `()`, not a list `[]`)
 d3D.coords = (coord0, coord1, coord2) 
@@ -758,7 +758,7 @@ x = 10 * ur.meters
 try:
     np.cos(x)
 except DimensionalityError as e:
-    log.error(e)
+    error_(e)
 
 # %% [markdown]
 # Units can be set for NDDataset data and/or Coordinates
@@ -809,7 +809,7 @@ da.units = ur.cm
 try:
     np.log10(da)
 except DimensionalityError as e:
-    log.error(e)
+    error_(e)
 
 # %% [markdown]
 # ## Complex or hypercomplex NDDatasets

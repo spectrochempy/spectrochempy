@@ -172,6 +172,6 @@ if __name__ == '__main__':
     setup(**setup_args)
 
     # Install quaternion package (#TODO: may be we can make a single setup file)
-    from subprocess import check_output
-    out = check_output("""cd quaternion; python setup.py develop; cd .. """, shell=True)
-    print(out)
+    # from subprocess import check_output
+    # out = check_output("""cd quaternion; python setup.py develop; cd .. """, shell=True)
+    # print(out)

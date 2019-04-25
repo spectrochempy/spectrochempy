@@ -22,7 +22,7 @@ import numpy as np
 # ======================================================================================================================
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import epsilon
-from spectrochempy.core import log, general_preferences
+from spectrochempy.core import general_preferences
 
 
 # ======================================================================================================================
@@ -101,7 +101,7 @@ def apodize(dataset, **kwargs):
     lastcoord = new.coords[-1]
     if (lastcoord.unitless or lastcoord.dimensionless or
             lastcoord.units.dimensionality != '[time]'):
-        log.error('apodization functions apply only to dimensions '
+        error_('apodization functions apply only to dimensions '
                   'with [time] dimensionality')
         return dataset
 

@@ -41,7 +41,6 @@ from .docstring import *
 from .meta import *
 from .configurable import MetaConfigurable
 
-
 # internal utilities
 # ----------------------------------------------------------------------------------------------------------------------
 class _TempBool(object):

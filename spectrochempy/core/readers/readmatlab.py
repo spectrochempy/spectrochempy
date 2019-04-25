@@ -22,9 +22,9 @@ __dataset_methods__ = __all__
 
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import log, general_preferences as prefs
+from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
-
+from ...core import info_, debug_, error_, warning_
 
 def read_matlab(dataset=None, **kwargs):
     """Open a matlab file with extension ``.mat`` and returns its content as a list.
@@ -55,7 +55,7 @@ def read_matlab(dataset=None, **kwargs):
     --------
 
     """
-    log.debug("reading .mat file")
+    debug_("reading .mat file")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -91,7 +91,7 @@ def read_matlab(dataset=None, **kwargs):
         content = sio.whosmat(file)
         f = sio.loadmat(file)
         if len(content) > 1:
-            log.debug("several elements")
+            debug_("several elements")
 
         for x in content:
             if x[2] in ['double', 'single', 'int8', 'int16',
@@ -112,7 +112,7 @@ def read_matlab(dataset=None, **kwargs):
                 ds = _read_DSO(f, x)
                 datasets.append(ds)
             else:
-                log.debug('unsupported data type')
+                debug_('unsupported data type')
                 # TODO: implement DSO reader
                 datasets.append((x[0], f[x[0]]))
 
@@ -224,5 +224,5 @@ def _read_DSO(f, x):
         for i in f[dso]['history'][0][0][0][0]:
             ds.history.append(i)
 
-        ds.history = (str(datetime.now()) + ': imported by spectrochempy ')
+        ds.history = (str(datetime.now()) + ': Imported by spectrochempy ')
     return ds

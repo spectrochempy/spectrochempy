@@ -44,10 +44,10 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.processors.concatenate import stack
-from spectrochempy.core import log, general_preferences as prefs
+from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import (readfilename, is_sequence,
                                  SpectroChemPyWarning)
-
+from ...core import info_, debug_, error_, warning_
 
 # ======================================================================================================================
 # Public functions
@@ -77,7 +77,7 @@ def read_zip(*args, **kwargs):
       name/id:  ...
 
     """
-    log.debug("reading zipped folder of *.csv files")
+    debug_("reading zipped folder of *.csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -124,7 +124,7 @@ def read_csv(*args, **kwargs):
     """
     # TODO: to allow header and nd-data
 
-    log.debug("reading csv files")
+    debug_("reading csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -227,7 +227,7 @@ def _read_zip(filename, **kwargs):
         if not f.endswith('.csv') or f.startswith('__MACOSX'):
             continue  # bypass non-csv files
 
-        log.debug('reading %s ...' % (f))
+        debug_('reading %s ...' % (f))
 
         datasets.append(_read_csv(filename=f, fid=obj[f], **kwargs))
         if len(datasets) + 1 > only:

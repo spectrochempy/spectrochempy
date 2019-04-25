@@ -46,14 +46,14 @@ from .ndarray import NDArray, DEFAULT_DIM_NAME
 from .ndcomplex import NDComplexArray
 from .ndcoord import Coord
 from .ndcoordset import CoordSet
-from .ndmath import NDMath
+from .ndmath import NDMath, set_operators, make_func_from
 from .ndio import NDIO
 from .ndplot import NDPlot
-from ...core import log, HAS_XARRAY, HAS_PANDAS
+from ...core import HAS_XARRAY, HAS_PANDAS, info_, debug_, error_, warning_, print_
 from ...utils import (INPLACE, TYPE_INTEGER, TYPE_COMPLEX, TYPE_FLOAT,
-                      colored_output, convert_to_html, print_, info_, debug_, error_, warning_,
+                      colored_output, convert_to_html,
                       SpectroChemPyWarning, SpectroChemPyDeprecationWarning, SpectroChemPyException,
-                      get_user_and_node, set_operators, docstrings, make_func_from, deprecated)
+                      get_user_and_node, docstrings, deprecated)
 
 
 # ======================================================================================================================
@@ -254,7 +254,7 @@ class NDDataset(
             
             new.set_coords(*new_coords, keepnames=True)
         
-        new.history = f'slice extracted: ({saveditems})'
+        new.history = f'Slice extracted: ({saveditems})'
         return new
     
     # ..................................................................................................................
@@ -262,6 +262,7 @@ class NDDataset(
         # when the attribute was not found
         if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction',
                     '_ipython_canary_method_should_not_exist_',
+                    '_baseclass', '_fill_value',
                     '_ax_lines', '_axcb', 'clevels', '__wrapped__'] or '_validate' in item or \
                 '_changed' in item:
             # raise an error so that traits, ipython operation and more ... will be handled correctly
@@ -795,6 +796,9 @@ class NDDataset(
             # when non specified, default is False (except for reversed coordinates
             descend = coord.reversed
         
+        #import warnings
+        #warnings.simplefilter("error")
+        
         indexes = []
         for i in range(self.ndim):
             if i == axis:
@@ -814,9 +818,9 @@ class NDDataset(
             else:
                 indexes.append(slice(None))
         
-        new._data = new._data[indexes]
+        new._data = new._data[tuple(indexes)]
         if new.is_masked:
-            new._mask = new._mask[indexes]
+            new._mask = new._mask[tuple(indexes)]
         
         return new
     
@@ -945,11 +949,6 @@ class NDDataset(
         return pd.DataFrame(OrderedDict(zip(columns, data)), index=index)
     
     # ..................................................................................................................
-    def to_panel(self, **kwargs):
-        # TODO: for now I just return a list, waiting that the NDPanel structure is finished
-        return [self]
-    
-    # ..................................................................................................................
     def to_xarray(self, **kwargs):
         """
         Convert a NDDataset instance to an `~xarray.DataArray` object
@@ -1057,7 +1056,7 @@ class NDDataset(
 
         """
         new = super().transpose(*dims, inplace=inplace)
-        new.history = 'Data transposed' + f' between dims: {dims}' if dims else ''
+        new.history = f'Data transposed between dims: {dims}' if dims else ''
         return new
     
     # ------------------------------------------------------------------------------------------------------------------
@@ -1183,24 +1182,41 @@ class NDDataset(
 # module function
 # ======================================================================================================================
 
-# make some functions also accessible from the scp API
+# make some NDDataset operation accessible from the spectrochempy API
 # We want a slightly different docstring so we cannot just make:
 #     func = NDDataset.func
-
+copy = make_func_from(NDDataset.copy, first='dataset')
 sort = make_func_from(NDDataset.sort, first='dataset')
+squeeze = make_func_from(NDDataset.squeeze, first='dataset')
 swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')
 transpose = make_func_from(NDDataset.transpose, first='dataset')
+to_xarray = make_func_from(NDDataset.to_xarray, first='dataset')
+to_dataframe = make_func_from(NDDataset.to_dataframe, first='dataset')
+take = make_func_from(NDDataset.take, first='dataset')
 
-abs = make_func_from(NDDataset.abs, first='dataset')
-conjugate = make_func_from(NDDataset.conjugate, first='dataset')  # defined in ndarray
-set_complex = make_func_from(NDDataset.set_complex, first='dataset')
-
-__all__ += ['sort',
+__all__ += ['copy',
+            'sort',
+            'squeeze',
             'swapaxes',
             'transpose',
-            'abs',
+            'to_xarray',
+            'to_dataframe',
+            'take',
+    ]
+
+# The following operation act only on complex NDDataset
+abs = make_func_from(NDDataset.abs, first='dataset')
+conjugate = make_func_from(NDDataset.conjugate, first='dataset')  # defined in ndarray
+conj = make_func_from(conjugate)
+conj.__doc__ = "Short alias of `conjugate` "
+set_complex = make_func_from(NDDataset.set_complex, first='dataset')
+set_quaternion = make_func_from(NDDataset.set_quaternion, first='dataset')
+
+__all__ += ['abs',
             'conjugate',
+            'conj',
             'set_complex',
+            'set_quaternion',
             ]
 
 # ======================================================================================================================

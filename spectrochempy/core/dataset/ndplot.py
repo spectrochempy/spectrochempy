@@ -46,11 +46,11 @@ except:
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.utils import (is_sequence, SpectroChemPyDeprecationWarning,
                                  docstrings, NBlack, NBlue, NGreen, NRed, get_figure)
-from spectrochempy.core import app
+from spectrochempy.core import general_preferences, project_preferences
+from ...core import info_, debug_, error_, warning_
 
-prefs = app.general_preferences
-project_preferences = app.project_preferences
-log = app.log
+prefs = general_preferences
+
 
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
@@ -139,7 +139,7 @@ class NDPlot(HasTraits):
                           SpectroChemPyDeprecationWarning)
 
         method = kwargs.pop('method', method)
-        log.debug('Call to plot_{}'.format(method))
+        debug_('Call to plot_{}'.format(method))
 
         # Find or guess the adequate plotter
         # -----------------------------------
@@ -147,7 +147,7 @@ class NDPlot(HasTraits):
         _plotter = getattr(self, 'plot_{}'.format(method), None)
         if _plotter is None:
             # no plotter found
-            log.error('The specified plotter for method '
+            error_('The specified plotter for method '
                       '`{}` was not found!'.format(method))
             raise IOError
 
@@ -195,7 +195,7 @@ class NDPlot(HasTraits):
             ax = plot_3D(self, **kwargs)
 
         else:
-            log.error('Cannot guess an adequate plotter, nothing done!')
+            error_('Cannot guess an adequate plotter, nothing done!')
             return False
 
         return ax
@@ -207,7 +207,7 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     def _figure_setup(self, ndim=1, **kwargs):
 
-        log.debug('figure setup')
+        debug_('figure setup')
 
         # by default we use the matplotlib librairy especially for plotting
         # in the jupyter notebook
@@ -378,7 +378,7 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     def _plot_resume(self, origin, **kwargs):
 
-        log.debug('resume plot')
+        debug_('resume plot')
 
         # put back the axes in the original dataset
         # (we have worked on a copy in plot)
@@ -426,7 +426,7 @@ class NDPlot(HasTraits):
         if savename is not None:
             # we save the figure with options found in kwargs
             # starting with `save`
-            log.debug('save plot to {}'.format(savename))
+            debug_('save plot to {}'.format(savename))
             kw = {}
             for key, value in kwargs.items():
                 if key.startswith('save'):
@@ -500,7 +500,7 @@ class NDPlot(HasTraits):
         if isinstance(axes, list):
             # a list a axes have been passed
             for ax in axes:
-                log.debug('add axe: {}'.format(ax.name))
+                debug_('add axe: {}'.format(ax.name))
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)
@@ -576,7 +576,7 @@ class NDPlot(HasTraits):
 def _set_figure_style(**kwargs):
     # set temporarily a new style if any
 
-    log.debug('set style')
+    debug_('set style')
 
     # first, reset to default
     plt.style.use('classic')

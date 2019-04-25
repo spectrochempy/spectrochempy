@@ -35,8 +35,8 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 
 from ...core.plotters.utils import make_label
-from ...core import project_preferences, general_preferences, log
-
+from ...core import project_preferences, general_preferences
+from ...core import info_, debug_, error_, warning_
 
 # ======================================================================================================================
 # nddataset plot2D functions
@@ -464,7 +464,7 @@ def plot_2D(dataset, **kwargs):
         # but display only a subset of them in order to accelerate the drawing
         maxlines = kwargs.get('maxlines',
                               general_preferences.max_lines_in_stack)
-        log.debug('max number of lines %d' % maxlines)
+        debug_('max number of lines %d' % maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 

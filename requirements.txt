@@ -4,9 +4,7 @@ numpy
 matplotlib
 traitlets
 pint
-
-# NMR
-nmrglue
+quaternion
 
 # some other useful package
 xarray

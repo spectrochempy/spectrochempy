@@ -71,7 +71,7 @@ assert newproj.A350.label == proj.A350.label
 
 script_source = """
 set_loglevel(INFO)
-log.info('samples contained in the project are:%s'%proj.projects_names)
+info_('samples contained in the project are:%s'%proj.projects_names)
 """
 
 proj['print_info'] = scp.Script('print_info', script_source)

@@ -27,8 +27,9 @@ import numpy as np
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.utils import NOMASK, MASKED, warning_, error_, UnitsCompatibilityError
+from spectrochempy.utils import NOMASK, MASKED, UnitsCompatibilityError
 from spectrochempy.extern.orderedset import OrderedSet
+from spectrochempy.core import warning_, error_
 
 # ............................................................................
 def interpolate(dataset, axis=0, size=None):

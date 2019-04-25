@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 0.8.6
+#       jupytext_version: 1.0.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -64,4 +64,3 @@ fig.savefig('annotated_fig_agir_setup%s'%extension,figsize=(3.6,5), dpi=100)
 
 
 # %%
-

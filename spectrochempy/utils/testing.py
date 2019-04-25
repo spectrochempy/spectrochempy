@@ -260,7 +260,7 @@ def example_run(path):
     try:
         print('env', os.environ['CONDA_DEFAULT_ENV'])
     except:
-        log.debug('no conda env')
+        debug_('no conda env')
     pipe = None
     try:
         pipe = subprocess.Popen(

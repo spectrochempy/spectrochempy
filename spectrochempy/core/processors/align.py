@@ -27,8 +27,9 @@ import numpy as np
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.utils import NOMASK, MASKED, warning_, error_, UnitsCompatibilityError
+from spectrochempy.utils import NOMASK, MASKED, UnitsCompatibilityError
 from spectrochempy.extern.orderedset import OrderedSet
+from spectrochempy.core import warning_, error_
 
 
 # ..................................................................................................................
@@ -398,7 +399,7 @@ def align(dataset, *datasets, **kwargs):
         out.name = dataset.name
         out.title = dataset.title
     
-        out.history = '{}: aligned along dim {} with respect to dataset {} using coords {} \n'.format(
+        out.history = '{}: Aligned along dim {} with respect to dataset {} using coords {} \n'.format(
             str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)
     
         if is_sorted and out.coords(axis).reversed:

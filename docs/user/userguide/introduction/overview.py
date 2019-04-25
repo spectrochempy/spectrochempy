@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 0.8.6
+#       jupytext_version: 1.0.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -28,7 +28,7 @@
 # %% [markdown]
 # Before using the package, we need to load the **API (Application Programming Interface)**
 #
-# The simplest way is to import all the objects and methods at once into your python namespace.
+# The simplest way is to import all the objects and methods at once into your python namespace, using a wildcard import (*).
 
 # %%
 from spectrochempy import *
@@ -36,17 +36,17 @@ from spectrochempy import *
 # %% [markdown]
 # but you can also import method only when it is needed.
 #
-# For instances, one object very usefull in the following will be a nd-dataset to contain some data. Instead of issuing the previous command, one can do:
+# For instances, one object very usefull in the following will be a multidimensional dataset to contain some data. Instead of issuing the previous command, one can do:
 
 # %%
 from spectrochempy import NDDataset
 mydataset = NDDataset()
 
 # %% [markdown]
-# In the second line we have defined a new empty instance of **NDDataset**, wich will be further use to load our data.
+# In the second line we have defined a new empty instance of **NDDataset**, which will be further use to load our data.
 
 # %% [markdown]
-# Another way to proceed is to not mix the API namespace with your normal python. 
+# Another way to proceed is to not mix the API namespace with your normal python namespace (this is slightly less straigthforward to use, but it may prevent problems with namespace collisions - *i.e.,* when two commands or variables have the same name in different librairies. 
 #
 # In this case, you can simply do:
 #
@@ -65,20 +65,22 @@ mydataset = sc.NDDataset()
 
 
 # %% [markdown]
-# If something goes wrong with during a cell execution,  a ``traceback`` is displayed.
+# If something goes wrong during a cell execution,  a `traceback` is displayed.
 #
-# For instance, the object or method ``toto`` does not exist in the API, so an error (**ImportError**) is generated when trying to import this from the API. Here we catch the error with a try except structure
+# For instance, the object or method `toto` does not exist in the API, so an error (**ImportError**) is generated when trying to import this from the API. 
+#
+# Here we catch the error with a try except classical python structure
 
 # %%
 try:
     from spectrochempy import toto
 except ImportError as e:
-    log.error("OOPS, THAT'S AN IMPORT ERROR! : %s"%e)
+    print_("OOPS, I", e)
 
 # %% [markdown]
-# The error will stop the execution if not catched.
+# The error will stop the notebook execution if not catched. 
 #
-# This is a basic behavior of python : on way to avoid. stoppping the execution without displaying a message is :
+# This is a basic behavior of python : The way to avoid stoppping the execution without displaying a message is :
 
 # %%
 try:
@@ -95,11 +97,13 @@ except:
 set_loglevel(INFO)
 
 # %% [markdown]
-# In the above cell, we have set the **log** level to display ``info`` messages, such as this one:
+# In the above cell, we have set the **logger** level to display ``info`` messages, such as this one:
 
 # %%
-log.info('this is an info message!')
-log.debug('this is a debug message!')
+error_('this is an error message!')
+warning_('this is a warning message!')
+info_('this is an info message!')
+debug_('this is a debug message!')
 
 # %% [markdown]
 # Only the info message is displayed, as expected.
@@ -109,8 +113,10 @@ log.debug('this is a debug message!')
 # %%
 set_loglevel(DEBUG)
 
-log.info('this is an info message!')
-log.debug('this is a debug message!')
+error_('this is an error message!')
+warning_('this is a warning message!')
+info_('this is an info message!')
+debug_('this is a debug message!')
 
 # %% [markdown]
 # Let's now come back to a standard level of message for the rest of the Tutorial.
@@ -118,20 +124,31 @@ log.debug('this is a debug message!')
 # %%
 set_loglevel(WARNING)
 
-log.info('this is an info message!')
-log.debug('this is a debug message!')
-log.warning('this is a warning message!')
+error_('this is an error message!')
+info_('this is an info message!')
+debug_('this is a debug message!')
+warning_('this is a warning message!')
 
 # %% [markdown]
 # ### Access to scientific libraries
 
 # %% [markdown]
-# Several libraries are imported with **SpectroChemPy** (so you don't need to re-import them):
+# Several libraries are imported with **SpectroChemPy**:
 #
-# - **np** :  This is actually the **`numpy`** library, to perform numerical calculation on nD arrays. 
-# - **plt** : This is the **`matplotlib`** library, to allow plotting data 
+# - **np** :  This is actually the `numpy` library, to perform numerical calculation on nD arrays. 
+# - **plt** : This is the `matplotlib` library, to allow plotting data 
 #
 # Optionally, **scipy** and **sympy** can be available, if **SpectroChempy** can find these libraries installed on your system.
+#
+# <div class="alert warning">
+#
+# **Note:** The `numpy` and other libraries above cited are imported only if the wildcard import (*) is done. If it is not the case then you must import them manually (if you need them of course): 
+#     
+# - **import numpy as np** 
+# - **import matplotlib.pyplot as plt**
+#     
+# </div>
+#
 
 # %%
 # %matplotlib inline
@@ -146,7 +163,7 @@ p.set_color('red')
 # ### Units
 
 # %% [markdown]
-# The objets **ur**, **Quantity**  allows the manipulation of data with units, thanks to pint. (see tutorial-1-units)
+# The objets `ur`, `Quantity`  allows the manipulation of data with units, thanks to pint. (see tutorial-1-units)
 #
 # * **ur**: the unit registry
 # * **Quantity**: a scalar or an array with some units
@@ -167,9 +184,9 @@ xa[1] * 2.5
 # ## NDDataset, the main object
 
 # %% [markdown]
-# NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic data.
+# `NDDataset` is a python object, actually a container, which can represent most of your multidimensional spectroscopic data. A limitation however is that a dataset must contains homogeneous data, with the same units, same coordinates, etc. If you need a more complex data structure, where heterogeneous data can be stored, you can use the `NDPanel`  object (see [NDPanel description](../dataset/2_ndpanel.ipynb)).
 #
-# For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:
+# As an example of `NDDataset`, in the following we read data from a series of FTIR experiments, provided by the OMNIC software:
 
 # %%
 nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
@@ -189,7 +206,7 @@ nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
 print(nd)
 
 # %% [markdown]
-# A much Longer (and colored) information text can be obtained using the spectrochempy provided ``print_`` function.
+# A much longer (and colored) information text can be obtained using the spectrochempy provided `print_` function.
 
 # %%
 print_(nd)

@@ -13,7 +13,8 @@ import numpy as np
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.analysis.iris import IRIS
-from spectrochempy.utils import show, info_
+from spectrochempy.utils import show
+from spectrochempy.core import info_
 
 def test_IRIS():
     print('start test IRIS')

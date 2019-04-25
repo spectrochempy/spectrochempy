@@ -10,7 +10,8 @@
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.core.dataset.ndcoordrange import CoordRange
 from spectrochempy.units import ur
-from spectrochempy.utils import info_, MASKED, show
+from spectrochempy.utils import  MASKED, show
+from spectrochempy.core import info_
 
 def test_concatenate(IR_dataset_2D):
     dataset = IR_dataset_2D

@@ -22,11 +22,7 @@ import re  # For regular expression search
 from collections import \
     UserDict  # This is to be able to create a special dictionary
 
-from spectrochempy.core import app
-
-log = app.log
-project_preferences = app.project_preferences
-preferences = app.general_preferences
+from spectrochempy.core import project_preferences, general_preferences, info_, warning_
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -377,7 +373,7 @@ class ParameterScript(HasTraits):
 
         # set the number of experiments
         fp.expnumber = len(self.datasets)
-        log.info("The number of experiment(s) is set to %d" % fp.expnumber)
+        info_("The number of experiment(s) is set to %d" % fp.expnumber)
 
         # start interpreting ------------------------------------------------------
         lines = script.split('\n')

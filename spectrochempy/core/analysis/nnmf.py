@@ -22,9 +22,7 @@ from numpy.linalg import norm
 from time import time
 from sys import stdout
 
-from traitlets import HasTraits, Instance
-
-from spectrochempy.core import log
+from traitlets import HasTraits
 
 
 class NNMF(HasTraits):
@@ -126,7 +124,7 @@ class NNMF(HasTraits):
                         Hp = Hn
 
             if n_iter == maxiter:
-                log.info('Max iter in nlssubprob')
+                info_('Max iter in nlssubprob')
 
             return H, grad, n_iter
 
@@ -139,7 +137,7 @@ class NNMF(HasTraits):
         gradW = np.dot(W, np.dot(H, H.T)) - np.dot(V, H.T)
         gradH = np.dot(np.dot(W.T, W), H) - np.dot(W.T, V)
         initgrad = norm(np.r_[gradW, gradH.T])
-        log.info('Init gradient norm {:.3f}'.format(initgrad))
+        info_('Init gradient norm {:.3f}'.format(initgrad))
         tolW = max(0.001, tol) * initgrad
         tolH = tolW
 
@@ -165,7 +163,7 @@ class NNMF(HasTraits):
 
             if myiter % 10 == 0: stdout.write('.')
 
-        log.info(
+        info_(
             '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
                                                              projnorm))
         return W, H

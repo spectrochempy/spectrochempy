@@ -9,6 +9,7 @@ dependencies:
 - matplotlib
 - traitlets
 - pint
+- quaternion
 # some other useful package
 - xarray
 - bokeh
@@ -24,6 +25,7 @@ dependencies:
 - requests
 - numba
 - scipy
+- colorama
 # mainly for install and a bit more...
 - setuptools_scm
 # need this, because the API is mainly designed to run in Jupyter notebook

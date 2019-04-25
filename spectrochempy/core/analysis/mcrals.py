@@ -20,9 +20,8 @@ from traitlets import HasTraits, Instance
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
-from spectrochempy.core import log
 from spectrochempy.core.processors.npy import dot
-
+from spectrochempy.core import info_, set_loglevel, INFO
 
 class MCRALS(HasTraits):
     """
@@ -35,9 +34,9 @@ class MCRALS(HasTraits):
     _St = Instance(NDDataset)
     """|NDDataset| - Spectra profile of pure species"""
     _param = Instance(dict)
-    """|dict| - Parameters of the MCS-ALS optimization"""
+    """dict - Parameters of the MCS-ALS optimization"""
     _log = Instance(str)
-    """|dict| - Log of the MCS-ALS iterations"""
+    """str - Log of the MCS-ALS iterations"""
 
     def __init__(self, X, guess, **kwargs):
         """
@@ -71,6 +70,10 @@ class MCRALS(HasTraits):
 
         """
         # TODO: add example
+
+        verbose = kwargs.get('verbose', False)
+        if verbose:
+            set_loglevel(INFO)
 
         # Check initial data
         # ------------------------------------------------------------------------
@@ -111,8 +114,6 @@ class MCRALS(HasTraits):
         maxit = param.get('maxit', 50)
 
         maxdiv = param.get('maxdiv', 5)
-
-        verbose = kwargs.get('verbose', False)
 
         ### constraints on concentrations
 
@@ -170,11 +171,10 @@ class MCRALS(HasTraits):
         niter = 0
         ndiv = 0
 
-        log = '*** ALS optimisation log***\n'
-        log += '#iter     Error/PCA        Error/Exp      %change\n'
-        log += '---------------------------------------------------'
-        if verbose:
-            print(log)
+        logs = '*** ALS optimisation log***\n'
+        logs += '#iter     Error/PCA        Error/Exp      %change\n'
+        logs += '---------------------------------------------------'
+        info_(logs)
 
         while change >= tol and niter < maxit and ndiv < maxdiv:
 
@@ -263,9 +263,8 @@ class MCRALS(HasTraits):
             stdev_PCA = (X_hat - Xpca).std()  # TODO: Check PCA : values are different from the Arnaud version ?
 
             logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
-            log += logentry + '\n'
-            if verbose:
-                print(logentry)
+            logs += logentry + '\n'
+            info_(logentry)
             stdev = stdev2
 
             if change > 0:
@@ -276,30 +275,27 @@ class MCRALS(HasTraits):
 
             if change < tol:
                 logentry = 'converged !'
-                log += logentry + '\n'
-                if verbose:
-                    print(logentry)
+                logs += logentry + '\n'
+                info_(logentry)
 
             if ndiv == maxdiv:
                 logline = 'Optimization not improved since {} iterations... unconverged or \'tol\' set too small ?\n'.format(
                     maxdiv)
                 logline += 'Stop ALS optimization'
-                log += logline + '\n'
-                if verbose:
-                    print(logline)
+                logs += logline + '\n'
+                info_(logline)
 
             if niter == maxit:
                 logline = 'Convergence criterion (\'tol\') not reached after {:d} iterations.'.format(maxit)
                 logline += 'Stop ALS optimization'
-                log += logline + '\n'
-                if verbose:
-                    print(logline)
+                logs += logline + '\n'
+                info_(logline)
 
         self._X = X
         self._param = param
         self._C = C
         self._St = St
-        self._log = log
+        self._log = logs
 
     def transform(self):
         """

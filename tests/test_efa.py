@@ -9,7 +9,8 @@
 # ======================================================================================================================
 
 from spectrochempy.core.analysis.efa import EFA
-from spectrochempy.utils import MASKED, show, info_
+from spectrochempy.utils import MASKED, show
+from spectrochempy.core import info_
 
 
 def test_EFA(IR_dataset_2D):

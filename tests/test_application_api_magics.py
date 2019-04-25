@@ -26,10 +26,10 @@ def test_api():
 
     # test log
     set_loglevel("WARNING")
-    assert log.level == 30
-    log.warning('Ok, this is nicely executing!')
-    log.level=10
-    assert log.level == 10  # DEBUG Level by default
+    assert get_loglevel() == 30
+    warning_('Ok, this is nicely executing!')
+    set_loglevel(10)
+    assert get_loglevel() == 10
 
 
 def test_magic_addscript(ip):

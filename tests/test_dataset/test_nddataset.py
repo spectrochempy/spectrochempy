@@ -20,9 +20,11 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
+from spectrochempy.core import info_, debug_, warning_, error_, print_
+from spectrochempy import *
 
 from pint.errors import (UndefinedUnitError, DimensionalityError)
-from spectrochempy.utils import (MASKED, NOMASK, TYPE_FLOAT, TYPE_INTEGER, info_, debug_, warning_, error_, print_,
+from spectrochempy.utils import (MASKED, NOMASK, TYPE_FLOAT, TYPE_INTEGER,
                                  Meta, SpectroChemPyException)
 from spectrochempy.utils.testing import (assert_equal, assert_array_equal, raises, RandomSeedContext)
 
@@ -547,8 +549,8 @@ def test_nddataset_slicing_by_values(ref_ds, ds1):
 
 def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     import logging
-    log = logging.getLogger('SpectroChemPy')
-    log.propagate = True
+    logger = logging.getLogger('SpectroChemPy')
+    logger.propagate = True
     caplog.set_level(logging.DEBUG)
 
     da = ds1
@@ -559,7 +561,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     y2 = da[2000]
     assert y2 is None  # as we are out of limits
     assert caplog.records[-1].levelname == 'ERROR'
-    assert caplog.records[-1].message.startswith('Empty array of shape (0, 100, 3) resulted from slicing.')
+    assert caplog.records[-1].message.startswith('ERROR: Empty array of shape (0, 100, 3) resulted from slicing.')
 
     y3 = da[:, 95:105]
     assert str(y3) == 'NDDataset: [float64] a.u. (shape: (z:10, y:5, x:3))'
@@ -568,7 +570,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     y4 = da[5000.:4001.]
     assert y2 is None  # as we are out of limits
     assert caplog.records[-1].levelname == 'ERROR'
-    assert caplog.records[-1].message.startswith('Empty array of shape (0, 100, 3) resulted from slicing.')
+    assert caplog.records[-1].message.startswith('ERROR: Empty array of shape (0, 100, 3) resulted from slicing.')
 
     y5 = da[5000.:3000.]
     assert str(y5) == 'NDDataset: [float64] a.u. (shape: (z:4, y:100, x:3))'
@@ -1473,6 +1475,16 @@ def test_nddataset_issue_29_mulitlabels():
     print_(DS[..., 'a':'c'])
     print_(DS['alpha', 'e':'f'])
 
+def test_nddataset_apply_funcs(IR_dataset_1D):
+    
+    # convert to masked array
+    out = np.ma.array(IR_dataset_1D)
+    IR_dataset_1D[1] = MASKED
+    out = np.ma.array(IR_dataset_1D)
+    out = array(IR_dataset_1D)
+    
+    print(out)
+    
 # ----------------------------------------------------------------------------------------------------------------------
 # Pandas
 # ----------------------------------------------------------------------------------------------------------------------

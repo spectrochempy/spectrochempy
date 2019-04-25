@@ -15,9 +15,9 @@ import pytest
 from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core import log
+from spectrochempy.core import info_, debug_
 from spectrochempy.units import ur, Quantity
-from spectrochempy.utils import (SpectroChemPyWarning, info_, debug_,
+from spectrochempy.utils import (SpectroChemPyWarning,
                                  INPLACE, MASKED,
                                  TYPE_INTEGER, TYPE_FLOAT)
 from spectrochempy.utils.testing import (assert_equal, assert_array_equal,

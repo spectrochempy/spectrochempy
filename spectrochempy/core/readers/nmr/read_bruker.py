@@ -27,21 +27,22 @@ import os
 # Third party imports
 # ======================================================================================================================
 import numpy as np
-
 from spectrochempy.core import app
 
 project_preferences = app.project_preferences
 log = app.log
 preferences = app.general_preferences
-from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
+from ....core import project_preferences, general_preferences as preferences
+from ....core import info_, debug_, error_, warning_
+from ....extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.utils.meta import Meta
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.units import ur, Quantity
+from ....utils.meta import Meta
+from ....core.dataset.nddataset import NDDataset
+from ....core.dataset.ndcoord import Coord
+from ....units import ur, Quantity
 from .parameter import nmr_valid_meta
 
 # ======================================================================================================================
@@ -192,7 +193,7 @@ def _remove_digital_filter(dic, data):
     Remove the digital filter from Bruker data.
     nmrglue modified Digital Filter Processing
     """
-    log.debug('Bruker digital filter...')
+    debug_('Bruker digital filter...')
 
     if 'acqus' not in dic:
         raise KeyError("dictionary does not contain acqus parameters")
@@ -247,7 +248,7 @@ def _remove_digital_filter(dic, data):
     dic['acqus']['TD'] = td * 2
     data = data[..., :td]
 
-    log.debug('Bruker digital filter: removed %s points' % rp)
+    debug_('Bruker digital filter: removed %s points' % rp)
 
     return data
 
@@ -318,7 +319,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     """
 
-    log.debug('Bruker imports...')
+    debug_('Bruker imports...')
 
     # determine if the method was called as a classmethod or not
     # if yes create a dataset
@@ -374,7 +375,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     lowmem = kwargs.get('lowmem', False)  # load all in memero by default
     if lowmem:
-        log.debug('import with low memory handling (lowmem)')
+        debug_('import with low memory handling (lowmem)')
 
     # ------------------------------------------------------------------------------------------------------------------
     # start reading ....
@@ -406,7 +407,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     for idx, path in enumerate(paths):
 
-        log.debug('Reading %d:%s' % (idx, path))
+        debug_('Reading %d:%s' % (idx, path))
 
         # Acquisition parameters
 
@@ -423,7 +424,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 path = os.path.join(path, str(expno))
         else:
             if not processed:
-                log.warning('No binary fid or ser found in %s.\n'
+                warning_('No binary fid or ser found in %s.\n'
                             'Try processed files...' % path)
                 processed = True
 
@@ -440,7 +441,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
             if not datatype:
                 raise KeyError(f"No Bruker binary file could be found in {path}")
             elif processed:
-                log.warning(f"No processed Bruker binary file could be found in {path}. Use fid's.")
+                warning_(f"No processed Bruker binary file could be found in {path}. Use fid's.")
 
         # we read all parameters file whatever the datatype
         npath, par_files = _get_par_files(path, procno, processed)
@@ -472,7 +473,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 data = data[..., :ntd]  # necessary for agreement with bruker data and phase
         else:
 
-            log.debug(f'Reading processed {idx}:{path}')
+            debug_(f'Reading processed {idx}:{path}')
 
             dic, data = read_pdata(npath, procs_files=par_files, )
 
@@ -621,7 +622,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         list_meta.append(meta)
 
         # make the corresponding axis
-        log.debug('Create coords...')
+        debug_('Create coords...')
         coords = []
         axe_range = list(range(parmode + 1))
         for axis in axe_range:
@@ -656,12 +657,12 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         #     ldates.append(adic.par.DATE)  # and the date
 
         # store temporarily these data
-        log.debug('data read finished: type: %s' % datatype)
+        debug_('data read finished: type: %s' % datatype)
 
         list_data.append(data)
 
     if len(list_data) == 1:
-        log.debug('One experiment read. Make it the current dataset')
+        debug_('One experiment read. Make it the current dataset')
 
         dataset.data = list_data[0]
 
@@ -695,7 +696,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                     diff = True
 
         if not diff:
-            log.info('the experiments look perfectly compatibles'
+            info_('the experiments look perfectly compatibles'
                      ' regarding the shape and the axis!')
 
         # find what are the differences in meta
@@ -714,7 +715,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
         # some keys should not vary for homogeneous data but lets the
         # user decide
-        log.info("keys which have varied: %s" % mkeys)
+        info_("keys which have varied: %s" % mkeys)
 
         mkeys = list(mkeys)
         meta_diffs = {}

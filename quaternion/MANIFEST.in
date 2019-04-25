@@ -1,2 +1,0 @@
-include README.md LICENSE_QUATERNION
-include numpy_quaternion.c quaternion.c quaternion.h math_msvc_compatibility.h

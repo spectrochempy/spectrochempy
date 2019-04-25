@@ -13,7 +13,7 @@
 import os
 import pytest
 from spectrochempy.utils import *
-from spectrochempy.core import log
+from spectrochempy.core import info_
 
 def test_readfilename_wo_filename_provided():
 
@@ -21,7 +21,7 @@ def test_readfilename_wo_filename_provided():
     f = readfilename( filetypes=["OMNIC files (*.sp*)",
                                  "SpectroChemPy files (*.scp)",
                                  "all files (*)"] )
-    log.info(f)
+    info_(f)
 
 def test_readfilename_w_directory_instead_of_filename():
     # should read in the specified directory
@@ -29,7 +29,7 @@ def test_readfilename_w_directory_instead_of_filename():
                         filetypes=["OMNIC files (*.sp*)",
                                  "SpectroChemPy files (*.scp)",
                                  "all files (*)"] )
-    log.info(f)
+    info_(f)
 
 def test_readfilename_w_bad_filename():
     # should raise an error
@@ -44,7 +44,7 @@ def test_readfilename_w_good_filename_in_tesdata():
                             filetypes=["OMNIC files (*.sp*)",
                                  "SpectroChemPy files (*.scp)",
                                  "all files (*)"] )
-    log.info(f)
+    info_(f)
 
 # def test_readfilename(qtbot, monkeypatch):
 # TODO: find  a way to test the user interaction with pytest-qt.

@@ -14,17 +14,10 @@ __all__ = ["optimize", ]
 # imports
 # ======================================================================================================================
 
-
-from warnings import warn
-
 import scipy.optimize
 
-from spectrochempy.core import app
-
-project_preferences = app.project_preferences
-log = app.log
-preferences = app.general_preferences
-
+from spectrochempy.core import project_preferences, general_preferences
+from spectrochempy.core import info_, warning_
 from spectrochempy.core.fitting.parameters import FitParameters
 
 
@@ -154,9 +147,9 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
     #    fp0.to_external(key, res[i])
 
     if warnmess == 1:
-        warn("Maximum number of function evaluations made.")
+        warning_("Maximum number of function evaluations made.")
     if warnmess == 2:
-        warn("Maximum number of iterations reached.")
+        warning_("Maximum number of iterations reached.")
 
     return fpe, fopt
 

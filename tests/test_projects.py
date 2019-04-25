@@ -126,7 +126,7 @@ def test_project_with_script():
 
 
     script_source = 'set_loglevel(INFO)\n' \
-                    'log.info("samples contained in the project are: ' \
+                    'info_("samples contained in the project are: ' \
                               '%s"%proj.projects_names)'
 
 

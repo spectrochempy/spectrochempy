@@ -118,7 +118,7 @@ def make_docs(*args):
     if 'clean' in args:
         clean()
         args.remove('clean')
-        log.info('\nOld documentation now erased.\n')
+        info_('\nOld documentation now erased.\n')
 
     if builders and 'no_apigen' not in args:
         make_dirs()
@@ -138,19 +138,19 @@ def make_docs(*args):
 
         sp.build()
         res = sp.statuscode
-        log.debug(res)
+        debug_(res)
 
         if builder == 'latex':
             cmd = "cd {BUILDDIR}/latex; " \
                   "make; mv {PROJECT}.pdf " \
                   " ../pdf/{PROJECT}.pdf".format(BUILDDIR=BUILDDIR, PROJECT=PROJECT)
             res = subprocess.call([cmd], shell=True, executable='/bin/bash')
-            log.info(res)
+            info_(res)
 
         if not nocommit:
             gitcommands()  # update repository
 
-        log.info(
+        info_(
             "\n\nBuild finished. The {0} pages are in {1}/{2}.".format(
                 builder.upper(), BUILDDIR, builder))
 
@@ -173,7 +173,7 @@ def do_release():
     # upload docs to the remote web server
     if SERVER:
 
-        log.info("uploads to the server of the html/pdf files")
+        info_("uploads to the server of the html/pdf files")
         path = sys.argv[0]
         while not path.endswith(PROJECT):
             path, _ = os.path.split(path)
@@ -185,14 +185,14 @@ def do_release():
             SERVER=SERVER)
 
         print(cmd)
-        log.debug(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
+        debug_(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
 
         res = subprocess.call([cmd], shell=True, executable='/bin/bash')
-        log.info(res)
-        log.info('\n' + cmd + "Finished")
+        info_(res)
+        info_('\n' + cmd + "Finished")
 
     else:
-        log.error('Cannot find the upload server: {}!'.format(SERVER))
+        error_('Cannot find the upload server: {}!'.format(SERVER))
 
 
 def clean():

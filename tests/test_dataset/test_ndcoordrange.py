@@ -24,8 +24,7 @@ from spectrochempy.core.dataset.ndarray import NDArray
 
 from spectrochempy.utils.testing import (assert_array_equal,
                                          assert_equal_units, raises)
-from spectrochempy.utils import info_
-from spectrochempy.core import log, print_
+from spectrochempy.core import info_, print_
 
 
 # ======================================================================================================================

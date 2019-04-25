@@ -129,7 +129,7 @@ def test_nmr_em_calculated_applied(NMR_dataset_1D):
 
     # but also the datasets as whole entity
     dataset4 = arrcalc * dataset2
-    dataset3 == dataset4
+
     assert(dataset3 == dataset4)
 
 def test_nmr_em_calculated_Hz(NMR_dataset_1D):

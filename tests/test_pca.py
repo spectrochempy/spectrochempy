@@ -10,12 +10,16 @@
 """ Tests for the PCA module
 
 """
+import pytest
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
-from spectrochempy.utils import MASKED, show, info_
+from spectrochempy.utils import MASKED, show
+from spectrochempy.core import info_
 from spectrochempy.utils.testing import assert_array_almost_equal, assert_array_equal
+from spectrochempy.core import HAS_SCIKITLEARN
+
 # test pca
-#---------
+# ---------
 
 def test_pca(IR_dataset_2D):
 
@@ -41,8 +45,9 @@ def test_pca(IR_dataset_2D):
 
     show()
 
+@pytest.mark.skipif(not HAS_SCIKITLEARN, reason="scikit-learn library not loaded")
 def test_compare_scikit_learn(IR_dataset_2D):
-
+    
     import numpy as np
     from sklearn.decomposition import PCA as PCAs
 

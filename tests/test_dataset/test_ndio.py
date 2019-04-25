@@ -14,11 +14,11 @@
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core import general_preferences as prefs, log
+from spectrochempy.core import general_preferences as prefs
 
 import os
 
-from spectrochempy.utils import info_
+from spectrochempy.core import info_, debug_
 from spectrochempy.utils.testing import assert_array_equal
 
 
@@ -58,19 +58,19 @@ def test_ndio_less_basic(coord2, coord2b, dsm):  # dsm is defined in conftest
 
 def test_ndio_save1D_load(IR_dataset_1D):
     dataset = IR_dataset_1D.copy()
-    log.debug(dataset)
+    debug_(dataset)
     dataset.save('essai')
     ir = NDDataset.load("essai")
-    log.debug(ir)
+    debug_(ir)
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
 
 def test_ndio_save2D_load(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
-    log.debug(dataset)
+    debug_(dataset)
     dataset.save('essai')
     ir = dataset.load("essai")
-    log.debug(ir)
+    debug_(ir)
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
 

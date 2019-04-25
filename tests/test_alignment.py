@@ -11,7 +11,7 @@
 """ Tests for the interpolate module
 
 """
-from spectrochempy.utils import info_
+from spectrochempy.core import info_
 from spectrochempy.core.processors.align import align
 
 # align

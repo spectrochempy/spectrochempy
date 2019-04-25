@@ -16,10 +16,8 @@ import pytest
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core import log, print_
+from spectrochempy.core import info_, print_
 from spectrochempy.units import ur, Quantity
-
-from spectrochempy.utils import info_
 from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
                                          raises, catch_warnings,
                                          assert_approx_equal)
@@ -251,7 +249,7 @@ def test_ndcomplex_complex(ndarraycplx):
 
     nd = ndarraycplx.copy()
 
-    ndc = nd.conj()
+    ndc = nd.conjugate()
     assert_array_equal(ndc.data.imag, -nd.data.imag)
     assert ndc.is_complex
     assert ndc.size == nd.size

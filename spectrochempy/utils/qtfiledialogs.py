@@ -14,8 +14,8 @@ except ImportError:
 
 
 def _noqt():
-    from spectrochempy.core import log
-    log.error('QT is necessary for this function, but QT is not installed.' )
+    from spectrochempy.core import error_
+    error_('QT is necessary for this function, but QT is not installed.' )
     return None
 
 def OpenExistingDirectory(parent=None,

@@ -439,7 +439,7 @@ def dot(a, b, strict=True, out=None):
     else:
         coordx = None
     
-    history = 'dot product between %s and %s' % (a.name, b.name)
+    history = 'Dot product between %s and %s' % (a.name, b.name)
 
     # make the output
     # ------------------------------------------------------------------------------------------------------------------
@@ -504,7 +504,7 @@ def diag(dataset, k=0):
         coords = None
         if dataset.coords is not None:
             coords = [dataset.coords[0]] * 2
-        history = 'diagonal array build from the 1D dataset'
+        history = 'Diagonal array build from the 1D dataset'
 
     elif len(s) == 2:
         # extract a diagonal
@@ -517,7 +517,7 @@ def diag(dataset, k=0):
         if dataset.coords is not None:
             coords = [dataset.coords[0]]  # TODO: this is likely not
             #       correct for k != 0
-        history = 'diagonal of rank %d extracted from original dataset' % k
+        history = 'Diagonal of rank %d extracted from original dataset' % k
 
     else:
         raise ValueError("Input must be 1- or 2-d.")

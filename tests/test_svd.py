@@ -11,7 +11,8 @@
 
 """
 from spectrochempy.core.analysis.svd import SVD
-from spectrochempy.utils import MASKED, info_
+from spectrochempy.utils import MASKED
+from spectrochempy.core import info_
 from numpy.testing import assert_allclose
 
 # test svd

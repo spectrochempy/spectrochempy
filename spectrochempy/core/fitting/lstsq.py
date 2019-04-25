@@ -102,8 +102,8 @@ class LSTSQ(HasTraits):
                           units=Y.units,
                           title="%s at origin" % Y.title)
 
-            A.history = 'computed by spectrochempy.lstsq \n'
-            B.history = 'computed by spectrochempy.lstsq \n'
+            A.history = 'Computed by spectrochempy.lstsq \n'
+            B.history = 'Computed by spectrochempy.lstsq \n'
 
         return A, B
 

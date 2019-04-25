@@ -73,7 +73,7 @@ def upload_IRIS():
                         name='IRIS Dataset',
                         units='cm')
 
-        history = 'loaded from UC Irvine machine learning repository'
+        history = 'Loaded from UC Irvine machine learning repository'
 
         return new
 
@@ -97,7 +97,7 @@ def upload_IRIS():
                             name='IRIS Dataset',
                             units='cm')
 
-            history = 'loaded from scikit-learn datasets'
+            history = 'Loaded from scikit-learn datasets'
 
             return new
 

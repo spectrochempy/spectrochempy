@@ -43,7 +43,7 @@ from spectrochempy.core.fitting.models import getmodel
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 
-from spectrochempy.core import general_preferences, log
+from spectrochempy.core import general_preferences, info_
 
 
 # ======================================================================================================================
@@ -173,9 +173,9 @@ class Fit(HasTraits):
         """
 
         if not self.silent:
-            log.info('*' * 50)
-            log.info('  Entering fitting procedure')
-            log.info('*' * 50)
+            info_('*' * 50)
+            info_('  Entering fitting procedure')
+            info_('*' * 50)
 
         global niter, chi2, everyiter, ncalls
         ncalls = 0
@@ -251,8 +251,8 @@ class Fit(HasTraits):
             if niter % everyiter != 0:
                 return
 
-            log.info(kwargs)
-            log.info(args)
+            info_(kwargs)
+            info_(args)
             if not self.silent:
                 display.clear_output(wait=True)
                 print(("Iterations: %d, Calls: %d (chi2: %.5f)" % (
@@ -279,14 +279,14 @@ class Fit(HasTraits):
 
         if not self.silent:
             # log.info the results
-            log.info("\n")
-            log.info('*' * 50)
+            info_("\n")
+            info_('*' * 50)
             if not dry:
-                log.info("  Result:")
+                info_("  Result:")
             else:
-                log.info("  Starting parameters:")
-            log.info('*' * 50)
-            log.info(self.parameterscript.script)
+                info_("  Starting parameters:")
+            info_('*' * 50)
+            info_(self.parameterscript.script)
 
         # store the models
         for exp_idx, dataset in enumerate(self.datasets):

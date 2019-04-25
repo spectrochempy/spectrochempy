@@ -112,7 +112,7 @@ def __format__(self, spec):
         return ret
 
     if '~' in spec or 'K' in spec or 'T' in spec or 'L' in spec:  # spectrochempy modified
-        if self.dimensionless:
+        if self.dimensionless and 'absorbance' not in self._units:
 
             if self._units == 'ppm':
                 units = UnitsContainer({'ppm': 1})
@@ -122,17 +122,17 @@ def __format__(self, spec):
                 units = UnitsContainer({'wt.%': 1})
             elif self._units == 'radian':
                 units = UnitsContainer({'rad': 1})
-            elif self._units == 'absorbance':
-                units = UnitsContainer({'a.u.': 1})
+            elif self._units == 'degree':
+                units = UnitsContainer({'deg': 1})
+            #elif self._units == 'absorbance':
+            #    units = UnitsContainer({'a.u.': 1})
             elif abs(self.scaling - 1.) < 1.e-10:
-                units = UnitsContainer({'dimensionless': 1})
+                units = UnitsContainer({'': 1})
             else:
                 units = UnitsContainer(
-                    {'scaled-dimensionless (%.2g)' % self.scaling
-                     : 1})
+                    {'scaled-dimensionless (%.2g)' % self.scaling: 1})
         else:
-            units = UnitsContainer(dict((self._REGISTRY._get_symbol(key),
-                                         value)
+            units = UnitsContainer(dict((self._REGISTRY._get_symbol(key), value)
                                         for key, value in list(self._units.items())))
         spec = spec.replace('~', '')
     else:
@@ -153,10 +153,9 @@ if globals().get('U_', None) is None:
 else:
     warn('Unit registry was already set up. Bypassed the new loading')
 
-U_.define(
-    '__wrapped__ = 1')  # <- hack to avoid an error with pytest (doctest activated)
+U_.define('__wrapped__ = 1')  # <- hack to avoid an error with pytest (doctest activated)
 U_.define('ppm = 1. = ppm')
-U_.define('absorbance = 1. = AU')
+U_.define('absorbance = 1. = a.u.')
 
 U_.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
 U_.define(UnitDefinition('weight_percent', 'wt_pct', (), ScaleConverter(1 / 100.0)))

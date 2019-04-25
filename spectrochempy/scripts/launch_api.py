@@ -20,9 +20,7 @@ def main():
     """
 
     import spectrochempy as scp
-    from spectrochempy.core import app
-
-    log = scp.log
+    from spectrochempy.core import app, info_
 
     scp.set_loglevel("INFO")
     fname = app.startup_filename
@@ -31,7 +29,7 @@ def main():
         return
 
     try:
-        log.info("Loading filename: '%s'" % fname)
+        info_("Loading filename: '%s'" % fname)
         ds = scp.NDDataset.read(fname)
         ds.plot()
         scp.show()

@@ -156,7 +156,7 @@ class PCA(HasTraits):
 
         LT = VT
         LT.title = 'Loadings (L^T) of ' + X.name
-        LT.history = 'created by PCA'
+        LT.history = 'Created by PCA'
 
         # scores
 
@@ -166,7 +166,7 @@ class PCA(HasTraits):
                                     title='principal component'))
 
         S.description = 'scores (S) of ' + X.name
-        S.history = 'created by PCA'
+        S.history = 'Created by PCA'
 
         self._LT = LT
         self._S = S

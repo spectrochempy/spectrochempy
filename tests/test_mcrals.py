@@ -13,7 +13,8 @@ import numpy as np
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.efa import EFA
 from spectrochempy.core.analysis.mcrals import MCRALS
-from spectrochempy.utils import show, info_
+from spectrochempy.utils import show
+from spectrochempy.core import info_
 
 def test_MCRALS_no_coords():
     print('')

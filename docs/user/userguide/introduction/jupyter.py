@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 0.8.6
+#       jupytext_version: 1.0.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -19,7 +19,7 @@
 # Indeed, at this time, there is no particular graphical user interface (GUI) available. This may change in the future
 # but for now we prefer to recommend the use of `Jupyter Notebook` document (see https://jupyter.org/).
 #
-# ## Using Jupyter Notebook
+# ## Using `Jupyter Notebook`
 #
 # Assuming `Jupyter` is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../../gettingstarted/install.rst)), go to your favorite user document folder (*e.g.,* `$HOME/workspace/) or any other folder you want to use to store your development).
 #
@@ -34,8 +34,9 @@
 # ![launched](../images/jupyter_home.png)
 #
 # Here you can create a new notebook and follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst).
-#
-# ## Using `Jupyter` Lab
+
+# %% [markdown]
+# ## Using `Jupyter Lab`
 #
 # Using the new application `jupyter lab` is very similar to the `jupyter notebook`. 
 #
@@ -55,4 +56,3 @@
 # From there, it is quite easy to create new notebooks or to navigate to already existing ones.
 #
 # Then follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst) to get strated with **SpectroChemPy**
-#

@@ -149,7 +149,7 @@ class SVD(HasTraits):
         s = NDDataset(s)
         s.title = 'Singular values of ' + X.name
         s.name = 'sigma'
-        s.history = 'created by SVD \n'
+        s.history = 'Created by SVD \n'
         s.description = (
                 'Vector of singular values obtained  by SVD '
                 'decomposition of ' + X.name)
@@ -188,7 +188,7 @@ class SVD(HasTraits):
             U.title = 'left singular vectors of ' + X.name
             U.set_coords(x=Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components'), y=X.y)
             U.description = 'left singular vectors of ' + X.name
-            U.history = 'created by SVD \n'
+            U.history = 'Created by SVD \n'
             
             # Returns the loadings (VT) as a NDDataset object
             # ------------------------------------------------
@@ -199,7 +199,7 @@ class SVD(HasTraits):
             VT.set_coords(x=X.x, y=Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'))
             VT.description = (
                     'Loadings obtained by singular value decomposition of ' + X.name)
-            VT.history = (str(VT.modified) + ': created by SVD \n')
+            VT.history = (str(VT.modified) + ': Created by SVD \n')
             
             self.U = U
             self.VT = VT

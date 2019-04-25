@@ -11,7 +11,7 @@
 from spectrochempy.core.readers.upload import upload_IRIS
 from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.core import show
-from spectrochempy.utils import info_
+from spectrochempy.core import info_
 
 def test_upload():
 

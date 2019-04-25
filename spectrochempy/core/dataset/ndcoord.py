@@ -27,9 +27,9 @@ from traitlets import Bool, observe, All, Unicode
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 from .ndarray import NDArray
-from .ndmath import NDMath
-from ...core import log
-from ...utils import (set_operators, docstrings, colored_output, NOMASK)
+from .ndmath import NDMath, set_operators
+from ...core import info_, debug_, error_, warning_
+from ...utils import (docstrings, colored_output, NOMASK)
 
 
 # ======================================================================================================================
@@ -309,13 +309,14 @@ class Coord(NDMath, NDArray):
         #   'name': "foo", # The name of the changed trait
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
-        log.debug(f'changes in Coord: {change.name}')
+        debug_(f'changes in Coord: {change.name}')
 
 
 # ======================================================================================================================
 # Set the operators
 # ======================================================================================================================
 set_operators(Coord, priority=50)
+
 
 # ======================================================================================================================
 if __name__ == '__main__':

@@ -34,8 +34,8 @@ from quaternion import as_float_array, as_quat_array
 # Local imports
 # ======================================================================================================================
 from .ndarray import NDArray
-from ...utils import (SpectroChemPyWarning, NOMASK, TYPE_FLOAT, TYPE_COMPLEX, insert_masked_print, docstrings,
-                      make_func_from, info_, debug_, warning_, error_)
+from ...utils import (SpectroChemPyWarning, NOMASK, TYPE_FLOAT, TYPE_COMPLEX, insert_masked_print, docstrings)
+from ...core import info_, debug_, error_, warning_
 from ...units.units import Quantity
 
 # ======================================================================================================================
@@ -294,10 +294,10 @@ class NDComplexArray(NDArray):
             new = self.copy()
         else:
             new = self  # work inplace
-
+    
         dims = self._get_dims_from_args()
         axis = self._get_dims_index(dims)
-
+    
         if new.is_quaternion:
             # TODO:
             new.swapaxes(axis, -1, inplace=True)
@@ -306,9 +306,6 @@ class NDComplexArray(NDArray):
         else:
             new._data = new._data.conj()
         return new
-
-    conj = make_func_from(conjugate)
-    conj.__doc__ = "Short alias of `conjugate` "
 
     # ..................................................................................................................
     def part(self, select='REAL'):

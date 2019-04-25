@@ -44,12 +44,12 @@ import xlrd
 
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import log, general_preferences as prefs
+from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import readfilename, readdirname
 from spectrochempy.utils.qtfiledialogs import opendialog
 from spectrochempy.core.readers.readomnic import read_omnic
 from spectrochempy.core.readers.readcsv import read_csv
-
+from ...core import info_, debug_, error_, warning_
 
 # function for reading data in a directory
 # ----------------------------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     """
 
-    log.debug("starting reading in a folder")
+    debug_("starting reading in a folder")
 
     # check if the first parameter is a dataset
     # because we allow not to pass it
@@ -113,7 +113,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     if not directory:
         # probably cancel has been chosen in the open dialog
-        log.info("No directory was selected.")
+        info_("No directory was selected.")
         return
 
     datasets = []
@@ -122,19 +122,19 @@ def read_dir(dataset=None, directory=None, **kwargs):
     if recursive:
         for i, root in enumerate(os.walk(directory)):
             if i == 0:
-                log.debug("reading root directory")
+                debug_("reading root directory")
             else:
-                log.debug("reading subdirectory")
+                debug_("reading subdirectory")
             datasets += _read_single_dir(root[0])
     else:
-        log.debug("reading root directory only")
+        debug_("reading root directory only")
         datasets += _read_single_dir(directory)
 
     if len(datasets) == 1:
-        log.debug("finished read_dir()")
+        debug_("finished read_dir()")
         return datasets[0]  # a single dataset is returned
 
-    log.debug("finished read_dir()")
+    debug_("finished read_dir()")
     return datasets  # several datasets returned
 
 
@@ -146,7 +146,7 @@ def _read_single_dir(directory):
     datasets = []
 
     if not filenames:
-        log.debug("empty directory")
+        debug_("empty directory")
         return datasets
 
     files = readfilename(filenames, directory=directory)
@@ -227,7 +227,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     """
 
-    log.debug("starting reading in a folder")
+    debug_("starting reading in a folder")
     # check if the first parameter is a dataset
     # because we allow not to pass it
     if not isinstance(dataset, NDDataset):
@@ -242,7 +242,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     if not directory:
         # probably cancel has been chosen in the open dialog
-        log.info("No directory was selected.")
+        info_("No directory was selected.")
         return
 
     spectra = kwargs.get('spectra', None)
@@ -293,7 +293,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     Tfile = sorted([f for f in os.listdir(directory)
                     if f[-4:].lower() == '.xls'])
     if len(Tfile) == 0:
-        log.debug("no temperature file")
+        debug_("no temperature file")
     elif len(Tfile) > 1:
         warnings.warn("several .xls/.csv files. The temperature will not be read")
     else:
@@ -317,10 +317,10 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
                     t.append(time)
                     T.append(sheet.cell(i, 4).value)
             except ValueError:
-                log.debug('incorrect date or temperature format in row {}'.format(i))
+                debug_('incorrect date or temperature format in row {}'.format(i))
                 pass
             except TypeError:
-                log.debug('incorrect date or temperature format in row {}'.format(i))
+                debug_('incorrect date or temperature format in row {}'.format(i))
                 pass
 
         # interpolate T = f(timestamp)
@@ -336,10 +336,10 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
             ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
 
     if len(datasets) == 1:
-        log.debug("finished read_dir()")
+        debug_("finished read_dir()")
         return datasets[0]  # a single dataset is returned
 
-    log.debug("finished read_dir()")
+    debug_("finished read_dir()")
     # several datasets returned, sorted by sample #
     return sorted(datasets, key=lambda ds: int(ds.name.split('_')[0]))
 

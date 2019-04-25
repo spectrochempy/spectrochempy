@@ -30,10 +30,9 @@ from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, de
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 from .ndarray import NDArray, DEFAULT_DIM_NAME
-from ...core import HAS_PANDAS, HAS_XARRAY
+from ...core import HAS_PANDAS, HAS_XARRAY, info_, debug_, error_, warning_
 from .ndcoord import Coord
-from ...core import log
-from ...utils import is_sequence, colored_output, convert_to_html, info_
+from ...utils import is_sequence, colored_output, convert_to_html
 
 
 # ======================================================================================================================
@@ -1019,7 +1018,7 @@ class CoordSet(HasTraits):
         #   'name': "foo", # The name of the changed trait
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
-        log.debug('changes in CoordSet: %s to %s' % (change.name, change.new))
+        debug_('changes in CoordSet: %s to %s' % (change.name, change.new))
         if change.name == '_updated' and change.new:
             self._updated = False  # reset
 

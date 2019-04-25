@@ -6,31 +6,18 @@ from colorama import Fore, Back, Style
 
 __all__ = ['numpyprintoptions', 'insert_masked_print',
            'TBold', 'TRed', 'TGreen', 'TBlue', 'TCyan', 'TMagenta',
-           'TYellow', 'colored', 'colored_output', 'pstr', 'print_', 'convert_to_html']
+           'TYellow', 'colored', 'colored_output', 'pstr', 'convert_to_html']
 
 
 def pstr(object, **kwargs):
-    from spectrochempy.core.dataset.ndarray import NDArray
-    from spectrochempy.core.dataset.ndcoordset import CoordSet
     
-    if isinstance(object, (NDArray, CoordSet)) :
+    if hasattr(object, 'implements') \
+            and object.implements in ['NDArray', 'NDDataset', 'NDPanel', 'Coord', 'CoordSet'] :
         return object._cstr(**kwargs)
     else:
         return str(object)
 
-def print_(object, **kwargs):
-    """
 
-    Parameters
-    ----------
-    object
-
-    Returns
-    -------
-
-    """
-    txt = pstr(object, **kwargs).replace('\0', '')
-    print('\n',txt)
 
 
 # ======================================================================================================================

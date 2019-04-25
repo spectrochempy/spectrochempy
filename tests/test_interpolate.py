@@ -13,7 +13,7 @@
 """
 import pytest
 
-from spectrochempy.utils import info_
+from spectrochempy.core import info_
 from spectrochempy.core.processors.interpolate import interpolate
 
 # align

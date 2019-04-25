@@ -14,11 +14,8 @@ __all__ = []
 # ======================================================================================================================
 # Standard python imports
 # ======================================================================================================================
-from spectrochempy.core import app
+from spectrochempy.core import project_preferences, general_preferences, error_, info_
 
-project_preferences = app.project_preferences
-log = app.log
-preferences = app.general_preferences
 # ======================================================================================================================
 # Third party imports
 # ======================================================================================================================
@@ -79,7 +76,7 @@ def ft(self, **kwargs):
 
     if (lastaxe.unitless or lastaxe.dimensionless or
             lastaxe.units.dimensionality != '[time]'):
-        log.error('ft apply only to dimensions with [time] dimensionality')
+        error_('ft apply only to dimensions with [time] dimensionality')
         return self
 
     # first parameters ?

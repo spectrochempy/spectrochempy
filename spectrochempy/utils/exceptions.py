@@ -15,7 +15,6 @@ __all__ = ['SpectroChemPyWarning',
            'SpectroChemPyException',
            'UnitsCompatibilityError',
            'deprecated',
-           'info_', 'debug_', 'error_', 'warning_'
           ]
 
 
@@ -77,50 +76,6 @@ def deprecated(message):
         return wrapper
 
     return deprecation_decorator
-
-
-# ======================================================================================================================
-# logging functions
-# ======================================================================================================================
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-def info_(*args, **kwargs):
-    from spectrochempy.core import log
-    s = ""
-    for a in args:
-        s += pstr(a, **kwargs)
-        s = s.replace('\0', '')
-    log.info(s)
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-def debug_(*args):
-    from spectrochempy.core import log
-    s = ""
-    for a in args:
-        s += pstr(a)
-        s = s.replace('\0', '')
-    log.debug(s)
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-def error_(*args):
-    from spectrochempy.core import log
-    s = ""
-    for a in args:
-        s += pstr(a)
-        s = s.replace('\0', '')
-    log.error(s)
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-def warning_(*args):
-    s = ""
-    for a in args:
-        s += pstr(a)
-        s = s.replace('\0', '')
-    warnings.warn(s, SpectroChemPyWarning)
 
 # ======================================================================================================================
 # EOF

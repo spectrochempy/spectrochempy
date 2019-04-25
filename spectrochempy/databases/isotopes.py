@@ -24,9 +24,7 @@ import numpy as np
 import pandas as pd
 from pkg_resources import resource_filename
 
-from spectrochempy.core import app
-
-log = app.log
+from spectrochempy.core import info_, warning_
 
 # ======================================================================================================================
 # Third-party imports
@@ -238,14 +236,14 @@ class Isotopes(HasTraits):
             self.nucleus = nucleus
             return self
 
-        log.warning('The isotope attribute {0} does not exists!'.format(item))
+        warning_('The isotope attribute {0} does not exists!'.format(item))
         return None
 
     # ------------------------------------------------------------------------------------------------------------------
     # events
     # ------------------------------------------------------------------------------------------------------------------
     def __nucleus_changed(self):
-        log.info('Current nucleus has been set to {}'.format(self.nucleus))
+        info_('Current nucleus has been set to {}'.format(self.nucleus))
 
 
 # ======================================================================================================================

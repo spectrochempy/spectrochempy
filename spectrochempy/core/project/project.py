@@ -20,8 +20,7 @@ from functools import wraps
 
 from traitlets import (Dict, Instance, Unicode, This, default)
 
-from spectrochempy.core import app
-from spectrochempy.application import ProjectPreferences
+from spectrochempy.core import project_preferences, general_preferences, config_manager, config_dir
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
@@ -29,11 +28,8 @@ from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.units.units import Quantity
 
-log = app.log
-preferences = app.general_preferences
-project_preferences = app.project_preferences
-cfg = app.config_manager
-
+cfg = config_manager
+preferences = general_preferences
 
 # ======================================================================================================================
 # Project class
@@ -646,7 +642,7 @@ class Project(AbstractProject):
 
         # get the filename associated to this project
 
-        directory = kwargs.get("directory", preferences.project_directory)
+        directory = kwargs.get("directory", general_preferences.project_directory)
 
         if not filename:
             # the current file name or default filename (project name)
@@ -757,7 +753,7 @@ class Project(AbstractProject):
         zipf.write(tmpfile, arcname='pars.json')
 
         # add also the preference json in the zipfile
-        prefjsonfile = os.path.join(app.config_dir, 'ProjectPreferences.json')
+        prefjsonfile = os.path.join(config_dir, 'ProjectPreferences.json')
         if os.path.exists(prefjsonfile):
             zipf.write(prefjsonfile, arcname='ProjectPreferences.json')
 

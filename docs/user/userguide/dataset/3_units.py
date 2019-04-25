@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 0.8.6
+#       jupytext_version: 1.0.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -95,7 +95,7 @@ x = 10 * ur.meters
 try:
     np.cos(x)
 except DimensionalityError as e:
-    log.error(e)
+    error_(e)
 
 # %% [markdown]
 # Units can be set for NDDataset data and/or Coordinates

@@ -17,8 +17,6 @@ from spectrochempy.core.project.baseproject import AbstractProject
 
 __all__ = ['Script', 'run_script', 'run_all_scripts']
 
-from spectrochempy.core import log
-
 
 class Script(HasTraits):
     """
@@ -137,7 +135,7 @@ class Script(HasTraits):
         try:
             exec(code, globals(), localvars)
         except NameError as e:
-            log.error(e + '. pass the variable `locals()` : this may solve '
+            error_(e + '. pass the variable `locals()` : this may solve '
                           'this problem! ')
 
 

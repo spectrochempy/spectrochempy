@@ -29,6 +29,7 @@ from traitlets import HasTraits, Instance
 # ----------------------------------------------------------------------------
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.npy import dot
+from spectrochempy.core import info_, set_loglevel, INFO
 
 
 # ============================================================================
@@ -120,6 +121,9 @@ class SIMPLISMA(HasTraits):
             # TODO: check whether negative values should be set to zero or not.
 
         verbose = kwargs.get('verbose', True)
+        if verbose:
+            set_loglevel(INFO)
+            
         interactive = kwargs.get('interactive', False)
         tol = kwargs.get('tol', 0.1)
         noise = kwargs.get('noise', 3)
@@ -135,20 +139,19 @@ class SIMPLISMA(HasTraits):
         # ------------------------------------------------------------------------
 
         if not interactive:
-            log = '*** Automatic SIMPL(I)SMA analysis *** \n'
+            logs = '*** Automatic SIMPL(I)SMA analysis *** \n'
         else:
-            log = '*** Interative SIMPLISMA analysis *** \n'.format(X.name)
-        log += 'dataset: {}\n'.format(X.name)
-        log += '  noise: {:2} %\n'.format(noise)
+            logs = '*** Interative SIMPLISMA analysis *** \n'.format(X.name)
+        logs += 'dataset: {}\n'.format(X.name)
+        logs += '  noise: {:2} %\n'.format(noise)
         if not interactive:
-            log += '    tol: {:2} %\n'.format(tol)
-            log += '   n_pc: {:2}\n'.format(n_pc)
-        log += '\n'
-        log += '#iter index_pc  coord_pc   Std(res)   R^2   \n'
-        log += '---------------------------------------------'
-        if verbose:
-            print(log)
-        log += '\n'
+            logs += '    tol: {:2} %\n'.format(tol)
+            logs += '   n_pc: {:2}\n'.format(n_pc)
+        logs += '\n'
+        logs += '#iter index_pc  coord_pc   Std(res)   R^2   \n'
+        logs += '---------------------------------------------'
+        info_(logs)
+        logs += '\n'
 
         # Containers for returned objects and intermediate data
         # ---------------------------------------------------
@@ -217,7 +220,7 @@ class SIMPLISMA(HasTraits):
                 # add summary to log
                 llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j],
                                         rsquare0, stdev_res0, '')
-                log += llog + '\n'
+                logs += llog + '\n'
 
                 if verbose or interactive:
                     print(llog)
@@ -255,9 +258,9 @@ class SIMPLISMA(HasTraits):
                         rsquare0, stdev_res0 = figures_of_merit(X, maxPIndex, C, St, j)
 
                         llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j], rsquare0, stdev_res0, '')
-                        log += '   |--> changed pure variable #1'
-                        log += llog + '\n'
-                        print(llog)
+                        logs += '   |--> changed pure variable #1'
+                        logs += llog + '\n'
+                        info_(llog)
 
                         ans = input('   |--> (a) Accept, (c) Change : ')
                     # ans was [a]ccept
@@ -290,10 +293,10 @@ class SIMPLISMA(HasTraits):
 
                 # add summary to log
                 llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j], rsquarej, stdev_resj, diff)
-                log += llog + '\n'
+                logs += llog + '\n'
 
                 if verbose or interactive:
-                    print(llog)
+                    info_(llog)
 
                 if interactive:  # TODO: I suggest to use jupyter widgets for the interactivity!
                     # should plot purity and stdev, does not work for the moment
@@ -334,19 +337,19 @@ class SIMPLISMA(HasTraits):
                         diff = 100 * (stdev_resj - prev_stdev_res) / prev_stdev_res
                         prev_stdev_res + stdev_resj
 
-                        log += '   |--> changed pure variable #{}\n'.format(j + 1)
+                        logs += '   |--> changed pure variable #{}\n'.format(j + 1)
                         llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j], rsquarej, stdev_resj, 'diff')
-                        log += llog + '\n'
-                        print(llog)
+                        logs += llog + '\n'
+                        info_(llog)
 
-                        print('purest variable #{} set at index = {} ; x = {}'.format(j + 1, maxPIndex[j],
+                        info_('purest variable #{} set at index = {} ; x = {}'.format(j + 1, maxPIndex[j],
                                                                                       maxPCoordinate[j]))
                         ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop: ')
 
                     if ans.lower() == 'r':
                         maxPCoordinate[j] = 0
                         maxPIndex[j] = 0
-                        log += '   |--> rejected pure variable #{}\n'.format(j + 1)
+                        logs += '   |--> rejected pure variable #{}\n'.format(j + 1)
                         j = j - 1
 
                     elif ans.lower() == 'a':
@@ -357,7 +360,7 @@ class SIMPLISMA(HasTraits):
                         j = j + 1
                         llog = ('\n**** Interrupted by user at compound # {} \n**** End of SIMPL(I)SMA analysis.'
                                 .format(j))
-                        log += llog + '\n'
+                        logs += llog + '\n'
                         Pt = Pt[0:j, :]
                         St = St[0:j, :]
                         s = s[0:j, :]
@@ -369,30 +372,28 @@ class SIMPLISMA(HasTraits):
                         llog = (
                             '\n**** Unexplained variance lower than \'tol\' ({}%) \n**** End of SIMPL(I)SMA analysis.'
                                 .format(tol))
-                        log += llog + '\n'
+                        logs += llog + '\n'
                         Pt = Pt[0:j, :]
                         St = St[0:j, :]
                         s = s[0:j, :]
                         C = C[:, 0:j]
 
-                        if verbose:
-                            print(llog)
+                        info_(llog)
                         finished = True
             if j == n_pc:
                 if not interactive:
                     llog = (
                         '\n**** Reached maximum number of pure compounds \'n_pc\' ({}) \n**** End of SIMPL(I)SMA analysis.'
                             .format(n_pc))
-                    log += llog + '\n'
-                    if verbose:
-                        print(llog)
+                    logs += llog + '\n'
+                    info_(llog)
                     finished = True
 
-        Pt.description = 'Purity spectra from SIMPLISMA:\n' + log
-        C.description = 'Concentration/contribution matrix from SIMPLISMA:\n' + log
-        St.description = 'Pure compound spectra matrix from SIMPLISMA:\n' + log
-        s.description = 'Standard deviation spectra matrix from SIMPLISMA:\n' + log
-        self._log = log
+        Pt.description = 'Purity spectra from SIMPLISMA:\n' + logs
+        C.description = 'Concentration/contribution matrix from SIMPLISMA:\n' + logs
+        St.description = 'Pure compound spectra matrix from SIMPLISMA:\n' + logs
+        s.description = 'Standard deviation spectra matrix from SIMPLISMA:\n' + logs
+        self._log = logs
         self._X = X
         self._Pt = Pt
         self._C = C

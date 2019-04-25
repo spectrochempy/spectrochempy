@@ -19,24 +19,12 @@ processing, analysis, etc...
 
 import warnings
 
-warnings.simplefilter('ignore', (DeprecationWarning,
-                                 FutureWarning, UserWarning))
+# warnings.simplefilter('ignore', (DeprecationWarning,
+#                                 FutureWarning, UserWarning))
 
 import os
 import sys
 import time
-
-
-# check for sys.gui_splash flag which exist only if application is lauched
-# in the GUI mode.
-# (See comment on `sys.gui_splash` in launch_gui)
-def _update(i, text):
-    if hasattr(sys, 'gui_splash'):
-        sys.gui_splash(i, text)
-        time.sleep(.15)  # intentionally limit the speed.
-    else:
-        log.info(text)
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -67,11 +55,74 @@ __all__ = [
 # here we also construct the __all__ list automatically
 # ======================================================================================================================
 
-
 from spectrochempy.application import SpectroChemPy
 
 app = SpectroChemPy()
-log = app.log
+#__all__ += ['app']
+
+# ======================================================================================================================
+# logging functions
+# ======================================================================================================================
+
+from spectrochempy.utils import pstr
+
+def print_(*args, **kwargs):
+    """
+    Formatted printing
+    """
+    s = ""
+    for a in args:
+        s += pstr(a, **kwargs)
+    s = s.replace('\0', '')
+    print(s)
+
+# ----------------------------------------------------------------------------------------------------------------------
+def info_(*args, **kwargs):
+    s = ""
+    for a in args:
+        s += pstr(a, **kwargs)
+    s = s.replace('\0', '')
+    app.log.info(s)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def debug_(*args, **kwargs):
+    s = ""
+    for a in args:
+        s += pstr(a, **kwargs)
+        s = s.replace('\0', '')
+    app.log.debug(s)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def error_(*args, **kwargs):
+    s = ""
+    for a in args:
+        s += pstr(a, **kwargs)
+        s = s.replace('\0', '')
+    app.log.error(f"ERROR: {s}")
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def warning_(*args, **kwargs):
+    s = ""
+    for a in args:
+        s += pstr(a, **kwargs)
+        s = s.replace('\0', '')
+    app.log.warning(f"WARNING: {s}")
+
+__all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
+
+
+# check for sys.gui_splash flag which exist only if application is lauched
+# in the GUI mode.
+# (See comment on `sys.gui_splash` in launch_gui)
+def _update(i, text):
+    if hasattr(sys, 'gui_splash'):
+        sys.gui_splash(i, text)
+        time.sleep(.15)  # intentionally limit the speed.
+    else:
+        info_(text)
 
 _update(1, 'Load API ...')
 
@@ -96,19 +147,19 @@ general_preferences = app.general_preferences
 project_preferences = app.project_preferences
 description = app.description
 long_description = app.long_description
-
+config_manager = app.config_manager
+config_dir = app.config_dir
 
 # datadir = app.datadir
 
 def set_loglevel(level=WARNING):
     general_preferences.log_level = level
 
-
-# set_loglevel('DEBUG')
+def get_loglevel():
+    return general_preferences.log_level
 
 __all__ += [
     ### Helpers
-    'log',
     'DEBUG',
     'WARNING',
     'ERROR',
@@ -116,8 +167,12 @@ __all__ += [
     'INFO',
     'project_preferences',
     'general_preferences',
+    'config_manager',
+    'config_dir',
     'available_styles',
     'set_loglevel',
+    'get_loglevel',
+
     ### Info
     'copyright',
     'version',
@@ -204,11 +259,6 @@ except:
     HAS_PANDAS = False
 
 __all__.append('HAS_PANDAS')
-
-# methods from utils
-from spectrochempy.utils import print_
-
-__all__ += ['print_']
 
 # dataset
 # ----------------------------------------------------------------------------------------------------------------------

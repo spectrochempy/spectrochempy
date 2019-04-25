@@ -27,7 +27,7 @@ def test_load(IR_dataset_2D):
     assert_approx_equal(dataset.data[0,0], 2.05, significant=2)
     B = dataset * 1.98
     assert_approx_equal(B.data[0, 0], 2.05 * 1.98, significant=2)
-    assert "binary operation mul with `1.98` has been performed" in B.history
+    assert "Binary operation mul with `1.98` has been performed" in B.history
 
     filename = os.path.join('irdata', 'nh4.scp')
     dataset.save(filename)
