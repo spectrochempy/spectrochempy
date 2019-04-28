@@ -15,7 +15,7 @@ __all__ = ['CoordSet']
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
-import copy
+import copy as cpy
 import warnings
 import textwrap
 import uuid
@@ -139,7 +139,7 @@ class CoordSet(HasTraits):
                     else:
                         coord = Coord(coord, copy=True)                    # be sure to cast to the correct type
                 else:
-                    coord = copy.deepcopy(coord)
+                    coord = cpy.deepcopy(coord)
                     
                 if not keepnames:
                     coord.name = self.available_names.pop() # take the last available name of

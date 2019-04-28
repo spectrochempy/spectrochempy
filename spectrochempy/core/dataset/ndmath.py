@@ -19,7 +19,7 @@ __dataset_methods__ = []
 # ======================================================================================================================
 # Standard python imports
 # ======================================================================================================================
-import copy
+import copy as cpy
 import functools
 import sys
 
@@ -729,7 +729,7 @@ class NDMath(object):
                     
                         
         # Take the first object out of the objs list
-        obj = copy.deepcopy(inputs.pop(0))
+        obj = cpy.deepcopy(inputs.pop(0))
 
         # Get its type
         objtype = type(obj).__name__
@@ -808,7 +808,7 @@ class NDMath(object):
         argunits = []
 
         for o in inputs:
-            other = copy.deepcopy(o)
+            other = cpy.deepcopy(o)
 
             # Is other a NDDataset or Coord?
             othertype = type(other).__name__
@@ -1038,11 +1038,11 @@ class NDMath(object):
             from spectrochempy.core.dataset.nddataset import NDDataset
             new = NDDataset(new)
 
-        new._data = copy.deepcopy(data)
+        new._data = cpy.deepcopy(data)
 
         # update the attributes
-        new._units = copy.copy(units)
-        new._mask = copy.copy(mask)
+        new._units = cpy.copy(units)
+        new._mask = cpy.copy(mask)
         if history is not None and hasattr(new, 'history'):
             new._history.append(history.strip())
 

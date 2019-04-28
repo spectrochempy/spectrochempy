@@ -312,15 +312,15 @@ class FitParameters(UserDict):
 
     def copy(self):
 
-        import copy
+        import copy as cpy
 
-        data = copy.copy(self.data)
-        lob = copy.copy(self.lob)
-        upb = copy.copy(self.upb)
-        fixed = copy.copy(self.fixed)
-        reference = copy.copy(self.reference)
+        data = cpy.copy(self.data)
+        lob = cpy.copy(self.lob)
+        upb = cpy.copy(self.upb)
+        fixed = cpy.copy(self.fixed)
+        reference = cpy.copy(self.reference)
 
-        c = copy.copy(self)
+        c = cpy.copy(self)
 
         c.data = data
         c.lob = lob

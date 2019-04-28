@@ -18,7 +18,7 @@ __dataset_methods__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
-from copy import copy
+from copy import copy as cpy
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -451,7 +451,7 @@ def plot_2D(dataset, **kwargs):
         line0, = ax.plot(xdata, zdata[0], lw=lw, picker=True)
 
         for i in range(zdata.shape[0]):
-            l = copy(line0)
+            l = cpy(line0)
             l.set_ydata(zdata[i])
             lines.append(l)
             l.set_color(scalarMap.to_rgba(ydata[i]))

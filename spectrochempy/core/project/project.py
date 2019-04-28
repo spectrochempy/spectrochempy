@@ -13,7 +13,7 @@ import os
 import uuid
 import json
 import warnings
-from copy import copy as _copy
+from copy import copy as cpy
 from collections import OrderedDict
 
 from functools import wraps
@@ -219,14 +219,14 @@ class Project(AbstractProject):
     def __dir__(self):
         return ['name', 'meta', 'parent', 'datasets', 'projects', 'scripts', ]
 
-    def __copy__(self):
+    def _cpy__(self):
         new = Project()
-        new.name = self.name + '_copy'
+        new.name = self.name + 'cpy'
         for item in self.__dir__():
             if item == 'name':
                 continue
             item = "_" + item
-            setattr(new, item, _copy(getattr(self, item)))
+            setattr(new, item, cpy(getattr(self, item)))
             if item == '_projects':
                 print()
         return new
@@ -428,7 +428,7 @@ class Project(AbstractProject):
         Make an exact copy of the current project
 
         """
-        return _copy(self)
+        return cpy(self)
 
     # ..................................................................................................................
     # dataset items

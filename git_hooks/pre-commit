@@ -15,6 +15,6 @@ conda activate scpy-dev
 
 echo 'jupytext transform'
 jupytext --to py --pre-commit
-git reset HEAD **/*.ipynb # to remove ipynb from commit
+git reset HEAD **/*.ipynb
 
 

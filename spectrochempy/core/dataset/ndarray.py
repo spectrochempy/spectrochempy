@@ -17,7 +17,7 @@ __all__ = ['NDArray']
 # ======================================================================================================================
 
 from datetime import datetime
-import copy
+import copy as cpy
 import warnings
 import re
 import textwrap
@@ -546,7 +546,7 @@ class NDArray(HasTraits):
                 try:
                     val = getattr(data, f"_{attr}")
                     if self._copy:
-                        val = copy.deepcopy(val)
+                        val = cpy.deepcopy(val)
                     setattr(self, f"_{attr}", val)
                 except AttributeError:
                     # some attribute of NDDataset are missing in NDArray
@@ -1165,9 +1165,9 @@ class NDArray(HasTraits):
         """
 
         if deep:
-            do_copy = copy.deepcopy
+            do_copy = cpy.deepcopy
         else:
-            do_copy = copy.copy
+            do_copy = cpy.copy
 
         new = make_new_object(self)
         for attr in self.__dir__():  # do not use  dir(self) as the order in __dir__ list is important
@@ -1177,7 +1177,7 @@ class NDArray(HasTraits):
 
             except ValueError:
                 # ensure that if deepcopy do not work, a shadow copy can be done
-                _attr = copy.copy(getattr(self, f"_{attr}"))
+                _attr = cpy.copy(getattr(self, f"_{attr}"))
                 _attr = do_copy(getattr(self, f"_{attr}"))
                 setattr(new, f"_{attr}", _attr)
 
