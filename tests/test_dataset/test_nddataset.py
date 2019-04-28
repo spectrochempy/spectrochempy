@@ -561,7 +561,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     y2 = da[2000]
     assert y2 is None  # as we are out of limits
     assert caplog.records[-1].levelname == 'ERROR'
-    assert caplog.records[-1].message.startswith('ERROR: Empty array of shape (0, 100, 3) resulted from slicing.')
+    assert caplog.records[-1].message.startswith('Empty array of shape (0, 100, 3) resulted from slicing.')
 
     y3 = da[:, 95:105]
     assert str(y3) == 'NDDataset: [float64] a.u. (shape: (z:10, y:5, x:3))'
@@ -570,7 +570,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     y4 = da[5000.:4001.]
     assert y2 is None  # as we are out of limits
     assert caplog.records[-1].levelname == 'ERROR'
-    assert caplog.records[-1].message.startswith('ERROR: Empty array of shape (0, 100, 3) resulted from slicing.')
+    assert caplog.records[-1].message.startswith('Empty array of shape (0, 100, 3) resulted from slicing.')
 
     y5 = da[5000.:3000.]
     assert str(y5) == 'NDDataset: [float64] a.u. (shape: (z:4, y:100, x:3))'
@@ -1049,7 +1049,7 @@ def test_nddataset_bug_par_arnaud():
 def test_nddataset_bug_13(IR_dataset_1D):
     nd = IR_dataset_1D
     info_(nd)
-    info_(type(nd.x))
+    info_(type(nd.x).__name__)
     info_('\n coord %s' % nd.x)
 
     nd.x[0] = 0  # here we assume that the value have the same units
