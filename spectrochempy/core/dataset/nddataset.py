@@ -1189,7 +1189,7 @@ class NDDataset(
 # We want a slightly different docstring so we cannot just make:
 #     func = NDDataset.func
 
-# copy = make_func_from(NDDataset.copy, first='dataset')
+#
 sort = make_func_from(NDDataset.sort, first='dataset')
 squeeze = make_func_from(NDDataset.squeeze, first='dataset')
 swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')
@@ -1197,6 +1197,7 @@ transpose = make_func_from(NDDataset.transpose, first='dataset')
 to_xarray = make_func_from(NDDataset.to_xarray, first='dataset')
 to_dataframe = make_func_from(NDDataset.to_dataframe, first='dataset')
 take = make_func_from(NDDataset.take, first='dataset')
+# copy = make_func_from(NDDataset.copy, first='dataset')
 
 __all__ += ['copy',
             'sort',
