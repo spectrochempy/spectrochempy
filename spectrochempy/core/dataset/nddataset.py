@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (ï¿½) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -113,6 +113,7 @@ class NDDataset(
                  coordunits=None,
                  coordtitles=None,
                  description='',
+                 history='',
                  **kwargs):
         """
         Parameters
@@ -150,7 +151,6 @@ class NDDataset(
         
         self._parent = None
         self._modified = self._date
-        self._history = []
         
         # eventually set the coordinates with optional units and title
         
@@ -198,6 +198,10 @@ class NDDataset(
         
         if description:
             self.description = description
+
+        self._history = []
+        if history:
+            self.history = history
     
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
@@ -347,7 +351,7 @@ class NDDataset(
         for attr in ('filename', 'plotmeta', 'name', 'description', 'history', 'date', 'modified'):
             # these attibutes are not used for comparison (comparison based on data and units!)
             attrs.remove(attr)
-        return super(NDDataset, self).__eq__(other, attrs)
+        return super().__eq__(other, attrs)
     
     # ..................................................................................................................
     def __hash__(self):
@@ -851,7 +855,7 @@ class NDDataset(
         old = self.dims[:]
         
         # squeeze the data and determine which axis must be squeezed
-        new, axis = super(NDDataset, self).squeeze(*dims, inplace=inplace, return_axis=True)
+        new, axis = super().squeeze(*dims, inplace=inplace, return_axis=True)
         
         if new._coords is not None:
             # if there are coordinates they have to be squeezed as well (remove
@@ -1185,7 +1189,7 @@ class NDDataset(
 # We want a slightly different docstring so we cannot just make:
 #     func = NDDataset.func
 
-copy = make_func_from(NDDataset.copy, first='dataset')
+# copy = make_func_from(NDDataset.copy, first='dataset')
 sort = make_func_from(NDDataset.sort, first='dataset')
 squeeze = make_func_from(NDDataset.squeeze, first='dataset')
 swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')

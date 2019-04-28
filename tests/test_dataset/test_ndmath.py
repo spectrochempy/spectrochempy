@@ -143,16 +143,10 @@ def test_bug_lost_dimensionless_units():
 # BINARY MATH
 # ------------
 
-def test_logaddexp(nd2d):
-    nd1 = nd2d.copy()  # divide to avoid some overflow in exp ufuncs
-    nd2 = nd1.copy() + np.zeros_like(nd1)
-    r = np.logaddexp(nd1, nd2)
-    info_('after ', r)
-
 @pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
-def test_ndmath_binary_ufuncs_simple_data(nd2d, pnl, name, comment):
-    nd1 = nd2d.copy()  # divide to avoid some overflow in exp ufuncs
-    nd2 = nd1.copy() + np.zeros_like(nd1)
+def test_ndmath_binary_ufuncs_two_datasets(nd2d, pnl, name, comment):
+    nd1 = nd2d.copy()
+    nd2 = nd1.copy() + np.ones_like(nd1)*.001
     
     info_(f"\n{name}   # {comment}")
     
@@ -164,6 +158,32 @@ def test_ndmath_binary_ufuncs_simple_data(nd2d, pnl, name, comment):
     info_(r)
     assert isinstance(r, NDDataset)
 
+    # NDDataset with units
+    # -----------------------
+    nd1.units = ur.absorbance
+    f = getattr(np, name)
+    r = f(nd1, nd2)
+    info_(r)
+    assert isinstance(r, NDDataset)
+    if name not in ['logaddexp', 'logaddexp2', 'true_divide', 'floor_divide', ]:
+        assert r.units == nd1.units
+
+
+@pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
+def test_ndmath_binary_ufuncs_scalar(nd2d, pnl, name, comment):
+    nd1 = nd2d.copy()
+    nd2 = 2.
+    
+    info_(f"\n{name}   # {comment}")
+    
+    # simple NDDataset
+    # -----------------
+    
+    f = getattr(np, name)
+    r = f(nd1, nd2)
+    info_(r)
+    assert isinstance(r, NDDataset)
+    
     # NDDataset with units
     # -----------------------
     nd1.units = ur.absorbance
@@ -225,48 +245,6 @@ def test():
     
     info_('-' * 60)
 
-
-def test_ndmath_ufunc_method(nd2d):
-    nd = nd2d.copy()
-    assert isinstance(nd, NDDataset)
-    
-    nda = np.sin(nd)
-    assert nda is not nd
-    assert nda._data is not nd._data
-    
-    assert_array_equal(nda._data, np.sin(nd._data))
-    
-    nda.units = 'm'
-    
-    ndb = np.sqrt(nda)
-    assert ndb.units == ur.m ** .5
-    
-    sqrt = np.sqrt
-    if ndb.dtype in TYPE_COMPLEX:
-        sqrt = np.emath.sqrt
-    
-    assert_array_equal(ndb._data, sqrt(nda._data))
-
-
-"""
-add(x1, x2, /[, out, where, casting, order, …])	Add arguments element-wise.
-subtract(x1, x2, /[, out, where, casting, …])	Subtract arguments, element-wise.
-multiply(x1, x2, /[, out, where, casting, …])	Multiply arguments element-wise.
-divide(x1, x2, /[, out, where, casting, …])	Returns a true division of the inputs, element-wise.
-logaddexp(x1, x2, /[, out, where, casting, …])	Logarithm of the sum of exponentiations of the inputs.
-logaddexp2(x1, x2, /[, out, where, casting, …])	Logarithm of the sum of exponentiations of the inputs in base-2.
-true_divide(x1, x2, /[, out, where, …])	Returns a true division of the inputs, element-wise.
-floor_divide(x1, x2, /[, out, where, …])	Return the largest integer smaller or equal to the division of the inputs.
-power(x1, x2, /[, out, where, casting, …])	First array elements raised to powers from second array, element-wise.
-remainder(x1, x2, /[, out, where, casting, …])	Return element-wise remainder of division.
-mod(x1, x2, /[, out, where, casting, order, …])	Return element-wise remainder of division.
-fmod(x1, x2, /[, out, where, casting, …])	Return the element-wise remainder of division.
-divmod(x1, x2[, out1, out2], / [[, out, …])	Return element-wise quotient and remainder simultaneously.
-heaviside(x1, x2, /[, out, where, casting, …])	Compute the Heaviside step function.
-gcd(x1, x2, /[, out, where, casting, order, …])	Returns the greatest common divisor of |x1| and |x2|
-lcm(x1, x2, /[, out, where, casting, order, …])	Returns the lowest common multiple of |x1| and |x2|
-
-"""
 
 # ----------------------------------------------------------------------------------------------------------------------
 # non ufuncs

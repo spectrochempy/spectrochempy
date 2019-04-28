@@ -199,7 +199,7 @@ class NDArray(HasTraits):
         self.name = kwargs.pop('name', None)
 
         # process eventual kwargs, adressing HasTrait class
-        super(NDArray, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     # ..................................................................................................................
     def implements(self, name=None):

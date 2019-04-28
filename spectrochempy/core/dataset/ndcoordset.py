@@ -152,7 +152,10 @@ class CoordSet(HasTraits):
         # now evaluate keywords argument
         # ------------------------------
         
-        for key, coord in kwargs.items():
+        for key, coord in list(kwargs.items())[:]:
+            # remove the already user kwarg (Fix: deprecation warning in Traitlets - all args, kwargs must be used)
+            del kwargs[key]
+
             # prepare values to be either Coord or CoordSet
             if isinstance(coord, (list, tuple)):
                 coord = CoordSet(coord, sorted=False)           # make sure in this case it becomes a CoordSet instance
@@ -187,7 +190,7 @@ class CoordSet(HasTraits):
                 
             else:
                 raise ValueError(f'Probably an invalid type of coordinates has been passed: {key}:{coord} ')
-
+            
         # store the item (validation will be performed)
         #self._coords = _coords
 

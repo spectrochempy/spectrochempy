@@ -102,7 +102,7 @@ def error_(*args, **kwargs):
     for a in args:
         s += pstr(a, **kwargs)+' '
         s = s.replace('\0', '').strip()
-    app.log.error(f"ERROR: {s}")
+    app.log.error(s)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ def warning_(*args, **kwargs):
     for a in args:
         s += pstr(a, **kwargs)+' '
         s = s.replace('\0', '').strip()
-    app.log.warning(f"WARNING: {s}")
+    app.log.warning(s)
 
 __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
 
