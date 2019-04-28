@@ -1184,6 +1184,7 @@ class NDDataset(
 # make some NDDataset operation accessible from the spectrochempy API
 # We want a slightly different docstring so we cannot just make:
 #     func = NDDataset.func
+
 # copy = make_func_from(NDDataset.copy, first='dataset')
 sort = make_func_from(NDDataset.sort, first='dataset')
 squeeze = make_func_from(NDDataset.squeeze, first='dataset')
