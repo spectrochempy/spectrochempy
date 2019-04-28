@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (Â©) 2015-2019 LCS
+# Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -1185,7 +1185,7 @@ class NDDataset(
 # We want a slightly different docstring so we cannot just make:
 #     func = NDDataset.func
 
-# copy = make_func_from(NDDataset.copy, first='dataset')
+copy = make_func_from(NDDataset.copy, first='dataset')
 sort = make_func_from(NDDataset.sort, first='dataset')
 squeeze = make_func_from(NDDataset.squeeze, first='dataset')
 swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')
