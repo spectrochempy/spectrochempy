@@ -979,13 +979,13 @@ class CoordSet(HasTraits):
     
     # ..................................................................................................................
     def __deepcopy__(self, memo):
-        coords = self.__class__(tuple(copy.deepcopy(ax, memo=memo) for ax in self), keepnames=True)
+        coords = self.__class__(tuple(cpy.deepcopy(ax, memo=memo) for ax in self), keepnames=True)
         coords.name = self.name
         return coords
 
     # ..................................................................................................................
     def __copy__(self):
-        coords = self.__class__(tuple(copy.copy(ax) for ax in self), keepnames=True)
+        coords = self.__class__(tuple(cpy.copy(ax) for ax in self), keepnames=True)
         coords.name = self.name
         return coords
 

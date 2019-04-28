@@ -101,6 +101,12 @@ class Meta(object):  # HasTraits):
         """
         self._data = dict(data)
 
+    def implements(self, name=None):
+        if name is None:
+            return 'Meta'
+        else:
+            return name == 'Meta'
+    
     def __setattr__(self, key, value):
         if key not in ['readonly', '_data', '_trait_values', '_trait_notifiers',
                        '_trait_validators', '_cross_validation_lock']:
