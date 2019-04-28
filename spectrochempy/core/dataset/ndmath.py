@@ -48,6 +48,8 @@ get_name = lambda x: str(x.name if hasattr(x, 'name') else x)
 
 DIMENSIONLESS = ur('dimensionless').units
 UNITLESS = None
+TYPEPRIORITY = {'Coord':2, 'NDDataset': 3, 'NDPanel':4}
+
 
 # ======================================================================================================================
 # function signature
@@ -157,9 +159,6 @@ sqrt(x, [, out, where, casting, order, …])    Return the non-negative square-r
 square(x, [, out, where, casting, order, …])    Return the element-wise square of the input.
 cbrt(x, [, out, where, casting, order, …])    Return the cube-root of an array, element-wise.
 reciprocal(x, [, out, where, casting, …])    Return the reciprocal of the argument, element-wise.
-
-# Trigonometric functions
-
 sin(x, [, out, where, casting, order, …])    Trigonometric sine, element-wise.
 cos(x, [, out, where, casting, order, …])    Cosine element-wise.
 tan(x, [, out, where, casting, order, …])    Compute tangent element-wise.
@@ -174,9 +173,6 @@ arccosh(x, [, out, where, casting, order, …])    Inverse hyperbolic cosine, el
 arctanh(x, [, out, where, casting, order, …])    Inverse hyperbolic tangent element-wise.
 deg2rad(x, [, out, where, casting, order, …])    Convert angles from degrees to radians.
 rad2deg(x, [, out, where, casting, order, …])    Convert angles from radians to degrees.
-
-# Floating functions
-
 floor(x, [, out, where, casting, order, …])    Return the floor of the input, element-wise.
 ceil(x, [, out, where, casting, order, …])    Return the ceiling of the input, element-wise.
 trunc(x, [, out, where, casting, order, …])    Return the truncated value of the input, element-wise.
@@ -201,7 +197,7 @@ def unary_ufuncs():
 for func in unary_ufuncs():
     setattr(thismodule, func, getattr(np, func))
     __all__ += [func]
-    
+
 
 
 binary_str = """
@@ -220,27 +216,8 @@ floor_divide(x1, x2, [, out, where, …])    Return the largest integer smaller 
 remainder(x1, x2, [, out, where, casting, …])    Return element-wise remainder of division.
 mod(x1, x2, [, out, where, casting, order, …])    Return element-wise remainder of division.
 fmod(x1, x2, [, out, where, casting, …])    Return the element-wise remainder of division.
-heaviside(x1, x2, [, out, where, casting, …])    Compute the Heaviside step function.
 
 copysign(x1, x2, [, out, where, casting, …])    Change the sign of x1 to that of x2, element-wise.
-
-# Trigonometric functions
-
-arctan2(x1, x2, [, out, where, casting, …])    Element-wise arc tangent of x1/x2 choosing the quadrant correctly.
-# hypot(x1, x2, [, out, where, casting, …])    Given the “legs” of a right triangle, return its hypotenuse.
-
-# Comparison functions
-
-greater(x1, x2, [, out, where, casting, …])    Return the truth value of (x1 > x2) element-wise.
-greater_equal(x1, x2, [, out, where, …])    Return the truth value of (x1 >= x2) element-wise.
-less(x1, x2, [, out, where, casting, …])    Return the truth value of (x1 < x2) element-wise.
-less_equal(x1, x2, [, out, where, casting, …])    Return the truth value of (x1 =< x2) element-wise.
-not_equal(x1, x2, [, out, where, casting, …])    Return (x1 != x2) element-wise.
-equal(x1, x2, [, out, where, casting, …])    Return (x1 == x2) element-wise.
-maximum(x1, x2, [, out, where, casting, …])    Element-wise maximum of array elements.
-minimum(x1, x2, [, out, where, casting, …])    Element-wise minimum of array elements.
-fmax(x1, x2, [, out, where, casting, …])    Element-wise maximum of array elements.
-fmin(x1, x2, [, out, where, casting, …])    Element-wise minimum of array elements.
 
 """
 
@@ -256,6 +233,36 @@ def binary_ufuncs():
         item = item.split('(')
         ufuncs[item[0]] = item[1]
     return ufuncs
+
+comp_str = """
+# Comparison functions
+
+greater(x1, x2, [, out, where, casting, …])    Return the truth value of (x1 > x2) element-wise.
+greater_equal(x1, x2, [, out, where, …])    Return the truth value of (x1 >= x2) element-wise.
+less(x1, x2, [, out, where, casting, …])    Return the truth value of (x1 < x2) element-wise.
+less_equal(x1, x2, [, out, where, casting, …])    Return the truth value of (x1 =< x2) element-wise.
+not_equal(x1, x2, [, out, where, casting, …])    Return (x1 != x2) element-wise.
+equal(x1, x2, [, out, where, casting, …])    Return (x1 == x2) element-wise.
+maximum(x1, x2, [, out, where, casting, …])    Element-wise maximum of array elements.
+minimum(x1, x2, [, out, where, casting, …])    Element-wise minimum of array elements.
+fmax(x1, x2, [, out, where, casting, …])    Element-wise maximum of array elements.
+fmin(x1, x2, [, out, where, casting, …])    Element-wise minimum of array elements.
+
+"""
+
+def comp_ufuncs():
+    liste = comp_str.split("\n")
+    ufuncs = {}
+    for item in liste:
+        item = item.strip()
+        if not item:
+            continue
+        if item.startswith('#'):
+            continue
+        item = item.split('(')
+        ufuncs[item[0]] = item[1]
+    return ufuncs
+
 
 class NDMath(object):
     """
@@ -702,9 +709,9 @@ class NDMath(object):
 
     # ..................................................................................................................
     def _op(self, f, inputs, isufunc=False):
-        # achieve an operation f on the objs
-
-        fname = f.__name__  # name of the function to use
+        # Achieve an operation f on the objs
+        
+        fname = f.__name__     # name of the function to use
         inputs = list(inputs)  # work with a list of objs not tuples
 
         # For binary function, determine if the function needs compatible units
@@ -720,68 +727,68 @@ class NDMath(object):
                         raise DimensionalityError(*u,
                                                   extra_msg= f", Units must be compatible for the `{fname}` operator")
                     
+                        
         # Take the first object out of the objs list
         obj = copy.deepcopy(inputs.pop(0))
 
-        # get its type
+        # Get its type
         objtype = type(obj).__name__
+
+        # Default type of the object to return ?
+        returntype = objtype
         
-        # Some flags to be set depending of the object
-        isquaternion = False
-        isdataset = False
-        ismasked = False
-        
-        # if our first objet is a NDPanel
+        # If our first objet is a NDPanel ------------------------------------------------------------------------------
         if objtype == 'NDPanel':
-            
+    
+            # Some ufunc can not be applied to panels
             if fname in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit', ]:
-                # this ufunc  can not be applied to panels
-                raise TypeError(f'`{fname}` can not be applied to NDPanel objects')
+                raise TypeError(f'`{fname}` ufunc can not be applied to NDPanel objects.')
             
+            # Iterate on all internal dataset of the panel
             datasets = []
-            # iterate on all internal dataset of the panel
             for k,v in obj.datasets.items():
                 v._coords = obj.coords
                 v.name = k
                 datasets.append(f(v, *inputs))
                 
-            # return a list of datasets
+            # Return a list of datasets
             return datasets
-            
-        # or a NDdataset or Coord
-        elif objtype in ['NDDataset', 'Coord']:
+
+        # If one of the input is hypercomplex, this will demand a special treatment
+        isquaternion = False
+        for inp in inputs:
+            if hasattr(inp, 'is_quaternion'):
+                isquaternion = inp.is_quaternion
+            #elif   #TODO: check if it is a quaternion scalar
+
+        # Do we have to deal with mask?
+        ismasked = False
+        for inp in inputs:
+            if hasattr(inp, 'mask') and np.any(inp.mask):
+                ismasked = True
+          
+        # If our first object is a NDdataset or Coord ------------------------------------------------------------------
+        if objtype in ['NDDataset', 'Coord']:
             
             isdataset = False
             if objtype == 'NDDataset':
                 isdataset = True
             
-            # get the underlying data
-            d = obj._data
-
-            # do we have units?
+            # Do we have units?
             if not obj.unitless:
                 units = obj.units
             else:
                 units = UNITLESS
 
-            if isdataset:
-                # Our data may be hypercomplex which will demand a special treatment
-                isquaternion = obj.is_quaternion
+            # Get the underlying data
+            d = obj._data
 
-                # do we have to deal with mask?
-                ismasked = obj.is_masked
-                
-                # ok but mask can also be for the other objects
-                for inp in inputs:
-                    if hasattr(inp, 'mask') and obj.mask is not None and np.any(inp.mask):
-                        ismasked = True
-                        
-                if ismasked:
-                    d = obj._umasked(d, obj.mask)
+            # If one of the input is masked, we will work with masked array
+            if ismasked and isdataset:
+                d = obj._umasked(d, obj.mask)
 
         else:
-            # obj is not a NDDarray
-            # assume an array or a scalar (possibly a Quantity)
+            # Obj is not a NDDarray, so we assume an array or a scalar (possibly a Quantity)
             isdataset = False
 
             if hasattr(obj, 'units'):
@@ -792,6 +799,10 @@ class NDMath(object):
                 units = UNITLESS
                 d = obj
 
+            # If one of the input is masked, and d is a numpy array, we will work with masked array
+            if ismasked and isinstance(d, np.ndarray):
+                d = obj.view(np.ma.MaskedArray)
+            
         # Now we analyse the other operands
         args = []
         argunits = []
@@ -799,42 +810,52 @@ class NDMath(object):
         for o in inputs:
             other = copy.deepcopy(o)
 
-            # is other a NDDataset or Coord?
+            # Is other a NDDataset or Coord?
             othertype = type(other).__name__
+            
+            # If inputs are all datasets
+            if isdataset and othertype == 'NDDataset' and other._coords != obj._coords:
+                # here it can be several situations:
+                # One acceptable situation could be that
+                # e.g., we suppress or add a row to the whole dataset
+                if other._squeeze_ndim == 1 and obj._data.shape[-1] != other._data.size:
+                    raise ValueError(
+                        "coordinate's sizes do not match")
+    
+                if other._squeeze_ndim != 1 and \
+                        obj.coords and other.coords and \
+                        not (obj._coords[0].is_empty and obj._coords[0].is_empty) and \
+                        not np.all(obj._coords[0]._data == other._coords[0]._data):
+                    raise ValueError(
+                        "coordinate's values do not match")
             
             if othertype in ['NDDataset', 'Coord']:
 
-                # if the first arg (obj) is a nddataset
-                if isdataset and other._coords != obj._coords:
-                    # here it can be several situations:
-                    # One acceptable situation could be that
-                    # e.g., we suppress or add a row to the whole dataset
-                    if other._squeeze_ndim == 1 and obj._data.shape[-1] != other._data.size:
-                        raise ValueError(
-                            "coordinate's sizes do not match")
-
-                    if other._squeeze_ndim != 1 and \
-                            obj.coords and other.coords and \
-                            not (obj._coords[0].is_empty and obj._coords[0].is_empty) and \
-                            not np.all(obj._coords[0]._data == other._coords[0]._data):
-                        raise ValueError(
-                            "coordinate's values do not match")
-
+                # Eventually set the returntype
+                if objtype != 'NDDataset':
+                    returntype = othertype
+                
+                if objtype == 'Coord':
+                    returntype = othertype
+                    
                 # rescale according to units
                 if not other.unitless:
-                    if hasattr(obj, 'units'):  # obj is a Quantity
-                        if other.units == obj.units and compatible_units:
+                    if hasattr(obj, 'units'):
+                        # obj is a Quantity
+                        if compatible_units:  #other.units == obj.units and
                             other.to(obj.units, inplace=True)
                         argunits.append(other.units)
                     else:
-                        argunits.append(UNITLESS)
+                        # obj has no dimension so we get the units of the other quantity
+                        argunits.append(other.units)
                 else:
                     argunits.append(UNITLESS)
 
                 arg = other._data
 
                 # mask?
-                arg = other._umasked(arg, other._mask)
+                if ismasked:
+                    arg = other._umasked(arg, other._mask)
 
             else:
                 # Not a NDArray.
@@ -855,9 +876,7 @@ class NDMath(object):
         # Calculate the resulting units (and their compatibility for such operation)
         # --------------------------------------------------------------------------------------------------------------
         # Do the calculation with the units to found the final one
-        
-        returntype = None
-        
+
         def check_require_units(fname, _units):
             if fname in self.__require_units:
                 requnits = self.__require_units[fname]
@@ -902,7 +921,7 @@ class NDMath(object):
                 elif fname.startswith('exp'):
                     f = np.exp   # all similar regardings units
                 
-                print(f, q, *argunits)
+                #print(f, q, *argunits)
                 q = f(q, *argunits)
     
             if hasattr(q, 'units'):
@@ -919,7 +938,7 @@ class NDMath(object):
                 # try to apply the ufunc
                 data = getattr(np, fname)(d, *args)
                 
-                # if a warning occurs, let handle it with complex numbers or retrun an exception:
+                # if a warning occurs, let handle it with complex numbers or return an exception:
                 if ws and 'invalid value encountered in ' in ws[-1].message.args[0]:
                     ws = [] # clear
                     # this can happen with some function that do not work on some real values such as log(-1)
@@ -969,6 +988,8 @@ class NDMath(object):
             data, units, mask, returntype = self._op(f, [self])
             if hasattr(self, 'history'):
                 history = f'Unary operation {f.__name__} applied'
+            else:
+                history = None
             return self._op_result(data, units, mask, history, returntype)
 
         return func
@@ -1011,7 +1032,11 @@ class NDMath(object):
     def _op_result(self, data, units=None, mask=None, history=None, returntype=None):
         # make a new NDArray resulting of some operation
 
+        
         new = self.copy()
+        if returntype =='NDDataset' and not new.implements('NDDataset'):
+            from spectrochempy.core.dataset.nddataset import NDDataset
+            new = NDDataset(new)
 
         new._data = copy.deepcopy(data)
 
@@ -1022,7 +1047,7 @@ class NDMath(object):
             new._history.append(history.strip())
 
         # case when we want to return a simple masked ndarray
-        if returntype is not None:
+        if returntype == 'masked_array':
             return new.masked_data
         
         return new

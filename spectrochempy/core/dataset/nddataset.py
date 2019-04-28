@@ -344,10 +344,9 @@ class NDDataset(
     # ..................................................................................................................
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
-        for attr in ('filename', 'plotmeta', 'name', 'description',
-                     'history', 'date', 'modified'):
+        for attr in ('filename', 'plotmeta', 'name', 'description', 'history', 'date', 'modified'):
+            # these attibutes are not used for comparison (comparison based on data and units!)
             attrs.remove(attr)
-        # some attrib are not important for equality
         return super(NDDataset, self).__eq__(other, attrs)
     
     # ..................................................................................................................
@@ -1185,7 +1184,7 @@ class NDDataset(
 # make some NDDataset operation accessible from the spectrochempy API
 # We want a slightly different docstring so we cannot just make:
 #     func = NDDataset.func
-copy = make_func_from(NDDataset.copy, first='dataset')
+# copy = make_func_from(NDDataset.copy, first='dataset')
 sort = make_func_from(NDDataset.sort, first='dataset')
 squeeze = make_func_from(NDDataset.squeeze, first='dataset')
 swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')

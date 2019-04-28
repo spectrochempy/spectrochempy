@@ -23,12 +23,13 @@ from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
 
 
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import SpectroChemPyWarning, show
 from spectrochempy.units import ur
 
 # nmr_processing
-#-----------------------------
+# -----------------------------
 
 def test_nmr_1D_show(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
@@ -139,26 +140,35 @@ def test_nmr_em_calculated_Hz(NMR_dataset_1D):
     x = dataset.coords[-1]
     tc = (1. / lb).to(x.units)
     e = np.pi * np.abs(x) / tc
-    arrcalc = np.exp(-e.data)
+    arrcalc = np.exp(-e)
 
     dataset2 = dataset.copy()
     dataset3 = dataset.em(lb=lb, inplace=False)
 
     # the datasets should be equal
-    assert(dataset3 == arrcalc*dataset2)
+    ddd = arrcalc*dataset2
+    assert(dataset3.data == ddd.data)
+    assert(dataset3 == ddd)
 
     # and the original untouched
     assert (dataset != dataset3)
 
 def test_nmr_em_calculated_inplace(NMR_dataset_1D):
+    
     dataset = NMR_dataset_1D.copy()
 
     lb = 200 * ur.Hz
 
     x = dataset.coords[-1]
     tc = (1. / lb).to(x.units)
-    e = np.pi * np.abs(x) / tc
-    arrcalc = np.exp(-e.data)
+    
+    e = np.pi * np.abs(x)
+    assert isinstance(e, Coord)
+
+    e /= tc
+    assert isinstance(e, Coord)
+    
+    arrcalc = np.exp(-e)
 
     dataset2 = dataset.copy()
     dataset.em(lb=lb)  # inplace transformation
@@ -167,10 +177,12 @@ def test_nmr_em_calculated_inplace(NMR_dataset_1D):
     s = arrcalc * dataset2
     assert(np.all(dataset.data == s.data))
 
-    # as well as the whole new datasets
-    assert (dataset == arrcalc * dataset2)
+    # as well as the whole new datasets`
+    ddd = dataset2 * arrcalc
+    assert (dataset == ddd)
 
-
+    ddd = arrcalc * dataset2
+    assert (dataset == ddd)
 
 def test_nmr_1D_em_(NMR_dataset_1D):
 

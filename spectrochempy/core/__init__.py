@@ -25,6 +25,8 @@ import warnings
 import os
 import sys
 import time
+import warnings
+warnings.filterwarnings("ignore")
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -72,16 +74,16 @@ def print_(*args, **kwargs):
     """
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)
-    s = s.replace('\0', '')
+        s += pstr(a, **kwargs)+' '
+    s = s.replace('\0', '').strip()
     print(s)
 
 # ----------------------------------------------------------------------------------------------------------------------
 def info_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)
-    s = s.replace('\0', '')
+        s += pstr(a, **kwargs)+' '
+    s = s.replace('\0', '').strip()
     app.log.info(s)
 
 
@@ -89,8 +91,8 @@ def info_(*args, **kwargs):
 def debug_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)
-        s = s.replace('\0', '')
+        s += pstr(a, **kwargs)+' '
+        s = s.replace('\0', '').strip()
     app.log.debug(s)
 
 
@@ -98,8 +100,8 @@ def debug_(*args, **kwargs):
 def error_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)
-        s = s.replace('\0', '')
+        s += pstr(a, **kwargs)+' '
+        s = s.replace('\0', '').strip()
     app.log.error(f"ERROR: {s}")
 
 
@@ -107,8 +109,8 @@ def error_(*args, **kwargs):
 def warning_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)
-        s = s.replace('\0', '')
+        s += pstr(a, **kwargs)+' '
+        s = s.replace('\0', '').strip()
     app.log.warning(f"WARNING: {s}")
 
 __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
@@ -189,7 +191,8 @@ __all__ += [
 # load the default style
 # print("mpl_config_dir", mpl.get_configdir(), plt.style.available)
 try:
-    plt.style.use(app.project_preferences.style)
+    #print('styles', project_preferences.style)
+    plt.style.use(project_preferences.style)
 except:
     pass  # if the scp styles are not yet installed, ignore it
 
@@ -384,6 +387,7 @@ if _started else "API was not started!")
 _update(20, '')  # make the last message visible (empirical solution...
 # don't know why this work, at least on Mac OSX.
 
+warnings.filterwarnings("default")
 
 # ======================================================================================================================
 if __name__ == '__main__':

@@ -12,10 +12,10 @@ __all__ = ['numpyprintoptions', 'insert_masked_print',
 def pstr(object, **kwargs):
     
     if hasattr(object, 'implements') \
-            and object.implements in ['NDArray', 'NDDataset', 'NDPanel', 'Coord', 'CoordSet'] :
-        return object._cstr(**kwargs)
+            and object.implements() in ['NDArray', 'NDDataset', 'NDPanel', 'Coord', 'CoordSet'] :
+        return object._cstr(**kwargs).strip()
     else:
-        return str(object)
+        return str(object).strip()
 
 
 

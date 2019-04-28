@@ -21,7 +21,7 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import (MASKED, TYPE_FLOAT, TYPE_INTEGER,
                                  TYPE_COMPLEX)
-from spectrochempy.core import info_, debug_, warning_, error_
+from spectrochempy.core import info_, debug_, warning_, error_, print_
 
 from pint.errors import (UndefinedUnitError,
                          DimensionalityError)
@@ -52,26 +52,27 @@ def test_ndmath_show():
 
 
 # UNARY MATHS
-
+# -----------
 @pytest.mark.parametrize(('name', 'comment'), unary_ufuncs().items())
 def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
     nd1 = nd2d.copy() / 1.e+10  # divide to avoid some overflow in exp ufuncs
-    print(f"\n{name}   # {comment}")
+    info_(f"\n{name}   # {comment}")
     
     # simple NDDataset
     # -----------------
-    print(nd1)
+    info_(nd1)
+    print_(nd1)
     assert nd1.unitless
     
     f = getattr(np, name)
     r = f(nd1)
-    print('after ', r)
+    info_('after ', r)
     # assert isinstance(r, NDDataset)
     
     # NDDataset with units
     # ----------
     nd1.units = ur.absorbance
-    print('units ', nd1)
+    info_('units ', nd1)
     f = getattr(np, name)
     
     # TODO: some ufunc suppress the units! see pint.
@@ -93,16 +94,16 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
         try:
             r = f(nd1)
             # assert isinstance(r, NDDataset)
-            print('after units ', r)
+            info_('after units ', r)
             
             nd1 = nd2d.copy()  # reset nd
             
             # with units and mask
             nd1.units = ur.absorbance
             nd1[1, 1] = MASKED
-            print('mask ', nd1)
+            info_('mask ', nd1)
             r = f(nd1)
-            print('after mask', r)
+            info_('after mask', r)
             # assert isinstance(r, NDDataset)
         
         except DimensionalityError as e:
@@ -111,16 +112,17 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
     # NDPanel
     # -----------------
     if name not in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit', ]:
-        print('panel before', pnl)
+        info_('panel before', pnl)
         
         f = getattr(np, name)
         try:
             r = f(pnl)
-            print('panel after ', r)
+            info_('panel after ', r)
         except TypeError as e:
             error_(e)
-    
-    print('-' * 60)
+
+    info_('-' * 60)
+    info_(' ')
 
 
 def test_bug_lost_dimensionless_units():
@@ -139,6 +141,7 @@ def test_bug_lost_dimensionless_units():
 
 
 # BINARY MATH
+# ------------
 
 def test_logaddexp(nd2d):
     nd1 = nd2d.copy()  # divide to avoid some overflow in exp ufuncs
@@ -170,11 +173,8 @@ def test_ndmath_binary_ufuncs_simple_data(nd2d, pnl, name, comment):
     assert isinstance(r, NDDataset)
     if name not in ['logaddexp', 'logaddexp2', 'true_divide', 'floor_divide', ]:
         assert r.units == nd1.units
-    
-    
 
-    
-    
+
 def test():
     
     # TODO: some ufunc suppress the units! see pint.
@@ -456,7 +456,7 @@ def test_ndmath_absolute_of_quaternion():
     assert nd.shape == (2, 3)
     nd.set_coords(**coords)
     val = np.abs(nd)
-    
+
     # TODO: add more testings
 
 

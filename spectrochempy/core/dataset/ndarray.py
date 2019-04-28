@@ -240,6 +240,9 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def __eq__(self, other, attrs=None):
+        
+        eq = True
+        
         if not isinstance(other, NDArray):
             # try to make some assumption to make useful comparison.
             if isinstance(other, Quantity):
@@ -258,22 +261,40 @@ class NDArray(HasTraits):
             else:
                 return False
             return eq
-        eq = True
+        
         if attrs is None:
             attrs = self.__dir__()
-            # attrs.remove('title')  # should we use title for comparison?
+            # attrs.remove('title')  #TODO: should we use title for comparison?
             attrs.remove('name')
+            
         for attr in attrs:
-            if hasattr(other, "_%s" % attr):
-                eq &= np.all(
-                    getattr(self, "_%s" % attr) == getattr(other,
-                                                           "_%s" % attr))
-                if not eq:
-                    debug_(f"attributes '{attr}' are not equals or one is missing: \n"
-                           "{} != {}".format(getattr(self, f'_{attr}'), getattr(other, f'_{attr}')))
+            if attr != 'units':
+                sattr = getattr(self, f'_{attr}')
+                if hasattr(other, f'_{attr}'):
+                    oattr = getattr(other, f'_{attr}')
+                    eq &= np.all(sattr == oattr)
+                    if not eq:
+                        debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                        return False
+                else:
                     return False
             else:
-                return False
+                # unitlesss and dimensionless are supposed equals
+                sattr = self._units
+                if sattr is None:
+                    sattr = ur.dimensionless
+                if hasattr(other, '_units'):
+                    oattr = other._units
+                    if oattr is None:
+                        oattr = ur.dimensionless
+                        
+                    eq &= np.all(sattr == oattr)
+                    if not eq:
+                        debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                        return False
+                else:
+                    return False
+
         return eq
 
     # ..................................................................................................................

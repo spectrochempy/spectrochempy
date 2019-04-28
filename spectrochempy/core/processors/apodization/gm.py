@@ -97,7 +97,7 @@ def gm(dataset, *args, **kwargs):
         if tc1.magnitude > epsilon:
             e = np.pi * x / tc1
         else:
-            e = e = np.zeros_like(x)
+            e = np.zeros_like(x)
         if tc2.magnitude > epsilon:
             g = 0.6 * np.pi * (x - shifted) / tc2
         else:
