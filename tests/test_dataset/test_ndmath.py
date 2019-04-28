@@ -85,7 +85,7 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
                     'log2', 'log10', 'log1p', 'exp2', 'expm1']:
             pass  # already solved
         else:
-            print(f"\n =======> {name} remove units! \n")
+            info_(f"\n =======> {name} remove units! \n")
     except DimensionalityError as e:
         error_(f"{name} :", e)
         skip = True
@@ -137,7 +137,7 @@ def test_bug_lost_dimensionless_units():
     y = np.log2(dataset)
     y._repr_html_()
     print_(y)
-    print(y)
+    info_(y)
 
 
 # BINARY MATH
@@ -147,21 +147,21 @@ def test_logaddexp(nd2d):
     nd1 = nd2d.copy()  # divide to avoid some overflow in exp ufuncs
     nd2 = nd1.copy() + np.zeros_like(nd1)
     r = np.logaddexp(nd1, nd2)
-    print('after ', r)
+    info_('after ', r)
 
 @pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
 def test_ndmath_binary_ufuncs_simple_data(nd2d, pnl, name, comment):
     nd1 = nd2d.copy()  # divide to avoid some overflow in exp ufuncs
     nd2 = nd1.copy() + np.zeros_like(nd1)
     
-    print(f"\n{name}   # {comment}")
+    info_(f"\n{name}   # {comment}")
     
     # simple NDDataset
     # -----------------
     
     f = getattr(np, name)
     r = f(nd1, nd2)
-    print(r)
+    info_(r)
     assert isinstance(r, NDDataset)
 
     # NDDataset with units
@@ -169,7 +169,7 @@ def test_ndmath_binary_ufuncs_simple_data(nd2d, pnl, name, comment):
     nd1.units = ur.absorbance
     f = getattr(np, name)
     r = f(nd1, nd2)
-    print(r)
+    info_(r)
     assert isinstance(r, NDDataset)
     if name not in ['logaddexp', 'logaddexp2', 'true_divide', 'floor_divide', ]:
         assert r.units == nd1.units
@@ -187,7 +187,7 @@ def test():
                     'log2', 'log10', 'log1p', 'exp2', 'expm1']:
             pass  # already solved
         else:
-            print(f"\n =======> {name} remove units! \n")
+            info_(f"\n =======> {name} remove units! \n")
     except DimensionalityError as e:
         error_(f"{name} :", e)
         skip = True
@@ -196,16 +196,16 @@ def test():
         try:
             r = f(nd1)
             # assert isinstance(r, NDDataset)
-            print('after units ', r)
+            info_('after units ', r)
             
             nd1 = nd2d.copy()  # reset nd
             
             # with units and mask
             nd1.units = ur.absorbance
             nd1[1, 1] = MASKED
-            print('mask ', nd1)
+            info_('mask ', nd1)
             r = f(nd1)
-            print('after mask', r)
+            info_('after mask', r)
             # assert isinstance(r, NDDataset)
         
         except DimensionalityError as e:
@@ -214,16 +214,16 @@ def test():
     # NDPanel
     # -----------------
     if name not in ['sign', 'logical_not', 'isnan', 'isfinite', 'isinf', 'signbit', ]:
-        print('panel before', pnl)
+        info_('panel before', pnl)
         
         f = getattr(np, name)
         try:
             r = f(pnl)
-            print('panel after ', r)
+            info_('panel after ', r)
         except TypeError as e:
             error_(e)
     
-    print('-' * 60)
+    info_('-' * 60)
 
 
 def test_ndmath_ufunc_method(nd2d):
@@ -437,12 +437,12 @@ def test_ndmath_absolute_of_complex():
     ndd = NDDataset([1., 2. + 1j, 3.])
     
     val = np.abs(ndd)
-    print(val)
+    info_(val)
     
     val = ndd[1] * 1.2 - 10.
     
     val = np.abs(val)
-    print(val)
+    info_(val)
 
 
 def test_ndmath_absolute_of_quaternion():
@@ -451,7 +451,7 @@ def test_ndmath_absolute_of_quaternion():
                     [1, 4.2, 2., 3., 2., 2.],
                     [5., 4.2, 2., 3., 3., 3.]])
     nd = NDDataset(na0, dtype=quaternion)
-    print(nd)
+    info_(nd)
     coords = CoordSet(np.linspace(-1, 1, 2), np.linspace(-10., 10., 3))
     assert nd.shape == (2, 3)
     nd.set_coords(**coords)
