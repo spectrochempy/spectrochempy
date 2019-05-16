@@ -62,7 +62,7 @@ class IRIS:
         # defined the kernel
         if 'kernel' in param:
             kername = param['kernel']
-            if param['kernel'].lower() not in ['langmuir', 'ca']:
+            if param['kernel'].lower() not in ['langmuir', 'ca', 'kin_1_product', 'kin1_1_reactant']:
                 try:
                     ker = param['ker']
                 except KeyError:
@@ -74,6 +74,11 @@ class IRIS:
             elif param['kernel'].lower() == 'ca':
                 ker = lambda p_, eps_: 0 if p_ < np.exp(eps_) else 1
 
+            elif param['kernel'].lower() == 'kin_1_product':
+                ker = lambda t, lnk : np.exp(-1 * np.exp(lnk) * t)
+
+            elif param['kernel'].lower() == 'kin1_1_reactant':
+                ker = lambda t, lnk : 1 - np.exp(-1 * np.exp(lnk) * t)
 
         else:
             # set the kernel to default ('langmuir')
