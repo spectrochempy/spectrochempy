@@ -58,7 +58,7 @@ X
 # From now on, these names will be taken into account by Scpy in the plottings as well as in the analysis treatments (PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:
 
 surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10,5))
-surf.grid('off')
+surf.grid(False)
 
 # ## 3 Initial guess and MCR ALS optimization
 #
