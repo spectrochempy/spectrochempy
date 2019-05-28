@@ -132,12 +132,14 @@ Install a developpement version of SpectroChemPy
 
         $ conda activate scpy-dev
 
-    You can make it permanent by putting this command in you ``bash_profile``
-    (MAC).
+    You can make it permanent by putting this command in your ``bash_profile``
+    (MAC), ``.bashrc`` (LINUX) or using the following batch file (WIN)
 
-    .. note::
+    .. sourcecode:: 
 
-        What's the equivalent for windows???  ##TODO
+        @REM launch a cmd window in scpy-dev environment (path should be adapted)
+        @CALL CD C:\your\favorite\folder
+        @CALL CMD /K C:\your\anaconda\folder\Scripts\activate.bat scpy-dev
 
 #. 	Install the spectrochempy package
 
