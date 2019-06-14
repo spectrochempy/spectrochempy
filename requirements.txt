@@ -48,7 +48,6 @@ scikit-image
 sphinx
 sphinx_rtd_theme
 sphinx-gallery
-numpydoc
 nbsphinx
 jupyter_sphinx
 nbconvert

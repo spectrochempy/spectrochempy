@@ -52,7 +52,7 @@ extensions = \
     'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
-    'numpydoc',
+    'spectrochempy.sphinxext.numpydoc',  # pinned to v. 0.8 as 0.9 doesn't work
     ]
 
 # Numpy autodoc attributes
