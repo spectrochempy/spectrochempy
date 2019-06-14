@@ -939,16 +939,19 @@ class NDMath(object):
             with catch_warnings(record=True) as ws:
                 
                 # try to apply the ufunc
-                data = getattr(np, fname)(d, *args)
+                if fname == 'log1p':
+                    fname = 'log'
+                    d = d + 1.
+                if fname in ['arccos', 'arcsin', 'arctanh', 'log', 'log10', 'log2', 'logn', 'sqrt']:
+                    data = getattr(np.emath, fname)(d, *args)
+                else:
+                    data = getattr(np, fname)(d, *args)
                 
                 # if a warning occurs, let handle it with complex numbers or return an exception:
                 if ws and 'invalid value encountered in ' in ws[-1].message.args[0]:
                     ws = [] # clear
                     # this can happen with some function that do not work on some real values such as log(-1)
                     # then try to use complex
-                    if fname == 'log1p':
-                        fname = 'log'
-                        d = d + 1.
                     data = getattr(np, fname)(d.astype(np.complex128), *args) # data = getattr(np.emath, fname)(d, *args)
                     if ws:
                         raise ValueError(ws[-1].message.args[0])

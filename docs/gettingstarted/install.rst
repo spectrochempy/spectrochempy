@@ -82,6 +82,7 @@ Very simple, use the following command in a terminal:
 
 .. sourcecode:: bash
 
+   $ conda update -n base conda
    $ conda config –add channels conda-forge
    $ conda config –add channels spectrocat
 

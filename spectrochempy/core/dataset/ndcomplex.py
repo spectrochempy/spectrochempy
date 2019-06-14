@@ -203,9 +203,9 @@ class NDComplexArray(NDArray):
             return None
 
         ma = new._masked_data
-        if ma.dtype == np.float:
+        if ma.dtype in TYPE_FLOAT:
             new._data = np.zeros_like(ma.data)
-        elif ma.dtype == np.complex:
+        elif ma.dtype in TYPE_COMPLEX:
             new._data = ma.imag.data
         elif ma.dtype == typequaternion:
             # this is a more complex situation than for real part
