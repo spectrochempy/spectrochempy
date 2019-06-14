@@ -317,8 +317,8 @@ class MCRALS(HasTraits):
 
         The following matrice operation is performed: :math:`X'_{hat} = C'.S'^t`
 
-        Return
-        ------
+        Returns
+        -------
         X_hat : |NDDataset|
             The reconstructed dataset based on the MCS-ALS optimization.
 

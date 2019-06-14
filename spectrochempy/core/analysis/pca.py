@@ -365,8 +365,8 @@ class PCA(HasTraits):
         n_pc : int, optional
             The number of PC to use for the reconstruction.
 
-        Return
-        ------
+        Returns
+        -------
         X_reconstructed : |NDDataset|
             The reconstructed dataset based on n_pc principal components.
 

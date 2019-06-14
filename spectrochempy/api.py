@@ -157,6 +157,9 @@ if IN_IPYTHON and kernel and not NO_DISPLAY:
     except:
         ip.magic('matplotlib tk')
 
+import warnings
+warnings.filterwarnings( action='ignore', module='matplotlib', category=UserWarning)
+
 # ==============================================================================
 if __name__ == '__main__':
     pass

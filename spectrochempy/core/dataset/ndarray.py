@@ -264,7 +264,11 @@ class NDArray(HasTraits):
         
         if attrs is None:
             attrs = self.__dir__()
-            # attrs.remove('title')  #TODO: should we use title for comparison?
+        
+        #if 'title' in attrs:
+        #    attrs.remove('title')  #TODO: should we use title for comparison?
+        
+        if 'name' in attrs:
             attrs.remove('name')
             
         for attr in attrs:

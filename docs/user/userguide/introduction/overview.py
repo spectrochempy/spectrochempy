@@ -1,11 +1,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.0.5
+#       jupytext_version: 1.1.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -16,25 +17,28 @@
 # # Overview
 
 # %% [markdown]
-# ### Loading the API
+# ## Loading the API
 
 # %% [markdown]
+#  
 # <div class="alert alert-info">
 #
-# **Note:** We assume the spectrochemistry package has been properly installed - if not please go to ``install``
+# **Note:** We assume the spectrochemistry package has been properly installed - if not please go to the &#9655; __[Installation Guide](https://www.spectrochempy.fr/gettingstarted/install.html)__
 #
 # </div>
 
 # %% [markdown]
-# Before using the package, we need to load the **API (Application Programming Interface)**
+# Before using the package, we need to load the **API**.
 #
-# The simplest way is to import all the objects and methods at once into your python namespace, using a wildcard import (*).
+# **API** stands for **Application Programming Interface**, that is, in the case of **SpectroChemPy**, a set of methods, functions and various tools for building scripts used for solving spectroscopic analysis problems. 
+#
+# The simplest way is to import all the objects and methods at once into your python namespace, using a wildcard import (*****).
 
 # %%
 from spectrochempy import *
 
 # %% [markdown]
-# but you can also import method only when it is needed.
+# However, you can also import method only when it is needed.
 #
 # For instances, one object very usefull in the following will be a multidimensional dataset to contain some data. Instead of issuing the previous command, one can do:
 
@@ -57,12 +61,6 @@ mydataset = sc.NDDataset()
 
 # %% [markdown]
 # As such, the above command ``from spectrochempy import *``, lead to import of several objects and methods in the namespace.
-#
-# To get a list of all available methods or objects, type the following command (*remove the leading #, first*):
-
-# %%
-# APIref
-
 
 # %% [markdown]
 # If something goes wrong during a cell execution,  a `traceback` is displayed.
@@ -89,8 +87,9 @@ except:
     pass
 
 # %% [markdown]
-# ### Configuration
-#
+# ## Configuration
+
+# %% [markdown]
 # Many options of the API can be set up
 
 # %%
@@ -106,9 +105,9 @@ info_('this is an info message!')
 debug_('this is a debug message!')
 
 # %% [markdown]
-# Only the info message is displayed, as expected.
+# Only the `info` message is displayed as well as the `warning` and `error` messages, as expected.
 #
-# If we change it to ``DEBUG``, we should get the two messages
+# If we change it to ``DEBUG``, we should get also the `debug` message (a a somewhat more verbose output).
 
 # %%
 set_loglevel(DEBUG)
@@ -130,7 +129,7 @@ debug_('this is a debug message!')
 warning_('this is a warning message!')
 
 # %% [markdown]
-# ### Access to scientific libraries
+# ## Access to scientific libraries
 
 # %% [markdown]
 # Several libraries are imported with **SpectroChemPy**:
@@ -151,7 +150,8 @@ warning_('this is a warning message!')
 #
 
 # %%
-# %matplotlib inline
+from spectrochempy import *
+
 x = np.linspace(0, 2*np.pi, 100)
 y = np.sin(x)
 plt.figure(figsize=(5,2.5))
@@ -160,31 +160,12 @@ p.set_linewidth(2)
 p.set_color('red')
 
 # %% [markdown]
-# ### Units
-
-# %% [markdown]
-# The objets `ur`, `Quantity`  allows the manipulation of data with units, thanks to pint. (see tutorial-1-units)
-#
-# * **ur**: the unit registry
-# * **Quantity**: a scalar or an array with some units
-
-# %%
-ur.cm / ur.s
-
-# %%
-x = Quantity(10., 'km')
-x * 2.
-
-# %%
-xa = Quantity(np.array((1,2)), 'km')
-xa[1] * 2.5
-
-
-# %% [markdown]
 # ## NDDataset, the main object
 
 # %% [markdown]
-# `NDDataset` is a python object, actually a container, which can represent most of your multidimensional spectroscopic data. A limitation however is that a dataset must contains homogeneous data, with the same units, same coordinates, etc. If you need a more complex data structure, where heterogeneous data can be stored, you can use the `NDPanel`  object (see [NDPanel description](../dataset/2_ndpanel.ipynb)).
+# `NDDataset` is a python object, actually a container, which can represent most of your multidimensional spectroscopic data. A limitation however is that a dataset must contains homogeneous data, with the same units, same coordinates, etc. 
+#
+# If you need a more complex data structure, where heterogeneous data can be stored, you can use the `NDPanel`  object (see [NDPanel description](https://www.spectrochempy.fr/user/userguide/dataset/2_ndpanel.html)).
 #
 # As an example of `NDDataset`, in the following we read data from a series of FTIR experiments, provided by the OMNIC software:
 
@@ -223,6 +204,8 @@ nd
 # Let's plot first a 1D spectrum (for instance one row of nd)
 
 # %%
+import warnings
+
 row = nd[-1]
 _ = row.plot()
 

@@ -21,9 +21,15 @@ where optional parameters idincates which job to perfom.
 import shutil
 import subprocess
 
-from sphinx.application import Sphinx
+from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
 from spectrochempy import *
 from docs import apigen
+
+import warnings
+warnings.filterwarnings( action='ignore', category=DeprecationWarning)
+warnings.filterwarnings( action='ignore', category=RemovedInSphinx30Warning)
+warnings.filterwarnings( action='ignore', category=RemovedInSphinx40Warning)
+warnings.filterwarnings( action='ignore', module='matplotlib', category=UserWarning)
 
 preferences = general_preferences
 set_loglevel(WARNING)

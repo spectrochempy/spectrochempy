@@ -519,7 +519,7 @@ class CoordSet(HasTraits):
             keyword attribution of the titles. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set titles as this will be less prone to errors.
             
-        Exemples
+        Examples
         --------
 
         """

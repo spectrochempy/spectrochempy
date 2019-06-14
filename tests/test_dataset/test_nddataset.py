@@ -706,11 +706,15 @@ def test_nddataset_with_mask_acts_like_masked_array():
     input_mask = np.array([True, False, False])
     input_data = np.array([1., 2., 3.])
     ndd_masked = NDDataset(input_data.copy(), mask=input_mask.copy())
+ #   ndd_masked = np.sqrt(ndd_masked)
     other = - np.ones_like(input_data)
-    result1 = ndd_masked * other
-    result2 = other * ndd_masked
+    
+    result1 = np.multiply(ndd_masked,other)
+    result2 = ndd_masked * other
+    result3 = other * ndd_masked
+    result4 = other / ndd_masked
     # Test for both orders of multiplication
-    for result in [result1, result2]:
+    for result in [result1, result2, result3, result4]:
         assert result.is_masked
         # Result mask should match input mask because other has no mask
         assert np.all(result.mask == input_mask)

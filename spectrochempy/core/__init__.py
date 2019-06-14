@@ -387,7 +387,7 @@ if _started else "API was not started!")
 _update(20, '')  # make the last message visible (empirical solution...
 # don't know why this work, at least on Mac OSX.
 
-warnings.filterwarnings("default")
+warnings.filterwarnings( action='ignore', module='matplotlib', category=UserWarning)
 
 # ======================================================================================================================
 if __name__ == '__main__':

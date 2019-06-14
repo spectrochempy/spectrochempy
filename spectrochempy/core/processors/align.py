@@ -113,9 +113,10 @@ def align(dataset, *datasets, **kwargs):
     aligned_datasets : tuple of |NDDataset|s or a |NDPanel|s.
         Same objects as datasets with dimensions aligned
 
-    Exceptions
-    ----------
-    ValueError: issued when the dimensions given in `dim` or `dims` argument are not compatibles (units, titles, etc...)
+    Raises
+    ------
+    ValueError
+        issued when the dimensions given in `dim` or `dims` argument are not compatibles (units, titles, etc...)
     
     """
     # TODO: Perform an alignment along numeric labels

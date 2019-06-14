@@ -11,19 +11,21 @@ the automodule (or autoclass) directive.
 This extension gives also the possibility to choose which data shall be shown
 and to include the docstring of the ``'__call__'`` attribute.
 """
+import logging
 import re
 import six
 import sphinx
 from sphinx.ext.autodoc import (
     ClassDocumenter, ModuleDocumenter, ALL, PycodeError,
     ModuleAnalyzer, bool_option, AttributeDocumenter, DataDocumenter, Options,
-    force_decode, prepare_docstring)
+    prepare_docstring)
 import sphinx.ext.autodoc as ad
-from sphinx.ext.autosummary import Autosummary, ViewList, mangle_signature
+from sphinx.ext.autosummary import Autosummary, mangle_signature
 from docutils import nodes
+from docutils.statemachine import ViewList
 
 if sphinx.__version__ >= '1.7':
-    from sphinx.ext.autodoc import Signature, AutodocRegistry, get_documenters
+    from sphinx.ext.autodoc import Signature, get_documenters
     from sphinx.ext.autodoc.directive import (
         AutodocDirective, AUTODOC_DEFAULT_OPTIONS, DocumenterBridge,
         process_documenter_options)
@@ -31,6 +33,12 @@ else:
     from sphinx.ext.autodoc import (
         getargspec, formatargspec, AutoDirective as AutodocDirective,
         AutoDirective as AutodocRegistry)
+
+if sphinx.__version__ >= '2.0':
+    from sphinx.util import force_decode
+else:
+    from sphinx.ext.autodoc import force_decode
+
 
 try:
     from cyordereddict import OrderedDict
@@ -43,11 +51,14 @@ except ImportError:
 if six.PY2:
     from itertools import imap as map
 
-__version__ = '0.1.7'
+__version__ = '0.1.10'
 
 __author__ = "Philipp Sommer"
 
-sphinx_version = list(map(float, re.findall('\d+', sphinx.__version__)[:3]))
+
+sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
+
+logger = logging.getLogger(__name__)
 
 
 class AutosummaryDocumenter(object):
@@ -106,7 +117,7 @@ class AutosummaryDocumenter(object):
             # be cached anyway)
             self.analyzer.find_attr_docs()
         except PycodeError as err:
-            self.env.app.debug('[autodoc] module analyzer failed: %s', err)
+            logger.debug('[autodocsumm] module analyzer failed: %s', err)
             # no source file -- e.g. for builtin and C modules
             self.analyzer = None
             # at least add the module.__file__ as a dependency
@@ -120,7 +131,7 @@ class AutosummaryDocumenter(object):
             self.env.temp_data['autodoc:class'] = self.objpath[0]
 
         want_all = all_members or self.options.inherited_members or \
-                   self.options.members is ALL
+            self.options.members is ALL
         # find out which members are documentable
         members_check_module, members = self.get_object_members(want_all)
 
@@ -146,7 +157,7 @@ class AutosummaryDocumenter(object):
             # give explicitly separated module name, so that members
             # of inner classes can be documented
             full_mname = self.modname + '::' + \
-                         '.'.join(self.objpath + [mname])
+                '.'.join(self.objpath + [mname])
 
             documenter = classes[-1](self.directive, full_mname, self.indent)
             memberdocumenters.append((documenter,
@@ -188,7 +199,7 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
         (ad.ExceptionDocumenter.member_order, 'Exceptions'),
         (ad.FunctionDocumenter.member_order, 'Functions'),
         (ad.DataDocumenter.member_order, 'Data'),
-    ])
+        ])
     """:class:`~collections.OrderedDict` that includes the autosummary sections
 
     This dictionary defines the sections for the autosummmary option. The
@@ -217,7 +228,7 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     member_sections = OrderedDict([
         (ad.MethodDocumenter.member_order, 'Methods'),
         (ad.AttributeDocumenter.member_order, 'Attributes'),
-    ])
+        ])
     """:class:`~collections.OrderedDict` that includes the autosummary sections
 
     This dictionary defines the sections for the autosummmary option. The
@@ -410,12 +421,13 @@ class AutoSummDirective(AutodocDirective, Autosummary):
         doc_nodes = AutodocDirective.run(self)
         if 'autosummary' not in self.options:
             return doc_nodes
-        self.warnings = []
         try:
             self.env = self.state.document.settings.env
         except AttributeError:
             pass  # is set automatically with sphinx >= 1.8.0
-        self.result = ViewList()
+        if sphinx_version < [2, 0]:
+            self.warnings = []
+            self.result = ViewList()
         documenter = self.autosummary_documenter
         grouped_documenters = documenter.get_grouped_documenters()
         summ_nodes = self.autosumm_nodes(documenter, grouped_documenters)
@@ -496,7 +508,6 @@ class AutoSummDirective(AutodocDirective, Autosummary):
         Notes
         -----
         `doc_nodes` are modified in place and not copied!"""
-
         def inject_summary(node):
             if isinstance(node, nodes.section):
                 for sub in node:
@@ -511,7 +522,6 @@ class AutoSummDirective(AutodocDirective, Autosummary):
                     return
                 for summ_node in node_summ_nodes[::-1]:
                     self._insert_after_paragraphs(node, summ_node)
-
         for node in doc_nodes:
             inject_summary(node)
         return doc_nodes
@@ -559,7 +569,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
                     if hasattr(mdocumenter, 'get_grouped_documenters'):
                         summ_nodes.update(self.autosumm_nodes(
                             mdocumenter, mdocumenter.get_grouped_documenters())
-                        )
+                            )
         summ_nodes[documenter.fullname] = this_nodes
         return summ_nodes
 
@@ -583,9 +593,23 @@ class AutoSummDirective(AutodocDirective, Autosummary):
 
         max_item_chars = 50
         base_documenter = self.autosummary_documenter
-        base_documenter.analyzer = ModuleAnalyzer.for_module(
-            base_documenter.real_modname)
-        attr_docs = base_documenter.analyzer.find_attr_docs()
+        try:
+            base_documenter.analyzer = ModuleAnalyzer.for_module(
+                    base_documenter.real_modname)
+            attr_docs = base_documenter.analyzer.find_attr_docs()
+        except PycodeError as err:
+            logger.debug('[autodocsumm] module analyzer failed: %s', err)
+            # no source file -- e.g. for builtin and C modules
+            base_documenter.analyzer = None
+            attr_docs = {}
+            # at least add the module.__file__ as a dependency
+            if (hasattr(base_documenter.module, '__file__') and
+                    base_documenter.module.__file__):
+                base_documenter.directive.filename_set.add(
+                    base_documenter.module.__file__)
+        else:
+            base_documenter.directive.filename_set.add(
+                base_documenter.analyzer.srcname)
 
         for documenter, check_module in documenters:
             documenter.parse_name()
@@ -593,6 +617,8 @@ class AutoSummDirective(AutodocDirective, Autosummary):
             documenter.real_modname = documenter.get_real_modname()
             real_name = documenter.fullname
             display_name = documenter.object_name
+            if display_name is None:  # for instance attributes
+                display_name = documenter.objpath[-1]
             if check_module and not documenter.check_module():
                 continue
 
@@ -604,7 +630,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
             else:
                 max_chars = max(10, max_item_chars - len(display_name))
                 sig = mangle_signature(sig, max_chars=max_chars)
-                #sig = sig.replace('*', r'\*')
+#                sig = sig.replace('*', r'\*')
 
             # -- Grab the documentation
 
@@ -672,7 +698,7 @@ def dont_document_data(config, fullname):
     else:
         not_document_data = config.not_document_data
     return (
-        # data should not be documented
+            # data should not be documented
             (any(re.match(p, fullname) for p in not_document_data)) or
             # or data is not included in what should be documented
             (not any(re.match(p, fullname) for p in document_data)))
@@ -730,8 +756,12 @@ def setup(app):
                 app.add_autodocumenter(cls)
 
     # directives
-    app.add_directive('automodule', AutoSummDirective)
-    app.add_directive('autoclass', AutoSummDirective)
+    if sphinx.__version__ >= '1.8':
+        app.add_directive('automodule', AutoSummDirective, override=True)
+        app.add_directive('autoclass', AutoSummDirective, override=True)
+    else:
+        app.add_directive('automodule', AutoSummDirective)
+        app.add_directive('autoclass', AutoSummDirective)
 
     # group event
     app.add_event('autodocsumm-grouper')

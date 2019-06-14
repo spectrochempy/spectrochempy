@@ -147,7 +147,7 @@ def test_nmr_em_calculated_Hz(NMR_dataset_1D):
 
     # the datasets should be equal
     ddd = arrcalc*dataset2
-    assert(dataset3.data == ddd.data)
+    assert np.all(dataset3.data == ddd.data)
     assert(dataset3 == ddd)
 
     # and the original untouched

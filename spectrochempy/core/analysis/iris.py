@@ -235,7 +235,7 @@ class IRIS:
         :math: `f[i]` is the (q x n) matrix holding the values of the
         2D-distribution function
 
-        Return
+        Returns
         -------
         f : |NDDataset|
             object (l x m x n) containing the l 2D-distribution
@@ -253,8 +253,8 @@ class IRIS:
         The following matrix operation is performed: :math:`\hat{X} = K.f[i]`
         for each value of the regularization parameter.
 
-        Return
-        ------
+        Returns
+        -------
         X_hat : |NDDataset|
             The reconstructed dataset.
 

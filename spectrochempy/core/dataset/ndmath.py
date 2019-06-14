@@ -22,6 +22,7 @@ __dataset_methods__ = []
 import copy as cpy
 import functools
 import sys
+import operator
 
 # ======================================================================================================================
 # third-party imports
@@ -208,14 +209,6 @@ add(x1, x2, [, out, where, casting, order, …])    Add arguments element-wise.
 subtract(x1, x2, [, out, where, casting, …])    Subtract arguments, element-wise.
 multiply(x1, x2, [, out, where, casting, …])    Multiply arguments element-wise.
 divide(x1, x2, [, out, where, casting, …])    Returns a true division of the inputs, element-wise.
-logaddexp(x1, x2, [, out, where, casting, …])    Logarithm of the sum of exponentiations of the inputs.
-logaddexp2(x1, x2, [, out, where, casting, …])    Logarithm of the sum of exponentiations of the inputs in base-2.
-true_divide(x1, x2, [, out, where, …])    Returns a true division of the inputs, element-wise.
-floor_divide(x1, x2, [, out, where, …])    Return the largest integer smaller or equal to the division of the inputs.
-
-remainder(x1, x2, [, out, where, casting, …])    Return element-wise remainder of division.
-mod(x1, x2, [, out, where, casting, order, …])    Return element-wise remainder of division.
-fmod(x1, x2, [, out, where, casting, …])    Return the element-wise remainder of division.
 
 copysign(x1, x2, [, out, where, casting, …])    Change the sign of x1 to that of x2, element-wise.
 
@@ -271,8 +264,7 @@ class NDMath(object):
     Below is a list of mathematical functions (numpy) implemented (or
     planned for implementation)
 
-    Ufuncs
-    ------
+    **Ufuncs**
 
     These functions should work like for numpy-ndarray, except that they
     may be units-aware.
@@ -710,33 +702,84 @@ class NDMath(object):
     # ..................................................................................................................
     def _op(self, f, inputs, isufunc=False):
         # Achieve an operation f on the objs
-        
-        fname = f.__name__     # name of the function to use
+
+        fname = f.__name__
         inputs = list(inputs)  # work with a list of objs not tuples
-
-        # For binary function, determine if the function needs compatible units
-        compatible_units = False
-        if fname in self._compatible_units:
-            compatible_units = True
-            u = OrderedSet()
-            for i in inputs[::-1]:
-                if hasattr(i, 'units'):
-                    u.add(ur.get_dimensionality(i.units))
-                    if len(u)>1:
-                        u = list(u)
-                        raise DimensionalityError(*u,
-                                                  extra_msg= f", Units must be compatible for the `{fname}` operator")
-                    
-                        
-        # Take the first object out of the objs list
-        obj = cpy.deepcopy(inputs.pop(0))
-
-        # Get its type
-        objtype = type(obj).__name__
-
-        # Default type of the object to return ?
-        returntype = objtype
+        #print(fname)
         
+        # By default the type of the result is set regarding the first obj in inputs
+        # (except for some ufuncs that can return numpy arrays or masked numpy arrays
+        # but sometimes we have something such as 2 * nd where nd is a NDDataset: In this case we expect a dataset.
+        # Actually, the if there is at least a NDPanel in the calculation, we expect a NDPanel as a results,
+        # if there is a NDDataset, but no NDPanel, then it should be a NDDataset and so on with Coords.
+
+        # For binary function, we also determine if the function needs object with compatible units.
+        # If the object are not compatible then we raise an error
+        
+        # Take the objects out of the input list and get their types and units. Additionally determine if we need to
+        # use operation on masked arrays and/or on quaternion
+        
+        objtypes = []
+        objunits = OrderedSet()
+        returntype = None
+        isquaternion = False
+        ismasked = False
+        compatible_units = (fname in self._compatible_units)
+        for i, obj in enumerate(inputs):
+            # units
+            if hasattr(obj, 'units'):
+                objunits .add(ur.get_dimensionality(obj.units))
+                if len(objunits)>1 and compatible_units:
+                    objunits  = list(objunits )
+                    raise DimensionalityError(*objunits[::-1],
+                                              extra_msg= f", Units must be compatible for the `{fname}` operator")
+            # type
+            objtype = type(obj).__name__
+            objtypes.append(objtype)
+            if objtype == 'NDPanel':
+                returntype = 'NDPanel'
+            elif objtype == 'NDDataset' and returntype != 'NDPanel':
+                returntype = 'NDDataset'
+            elif objtype == 'Coord' and returntype not in ['NDPanel', 'NDDataset']:
+                returntype = 'Coord'
+            else:
+                # only the three above type have math capabilities in spectrochempy.
+                pass
+
+            # If one of the input is hypercomplex, this will demand a special treatment
+            if hasattr(obj, 'is_quaternion'):
+                isquaternion = obj.is_quaternion
+            #elif   #TODO: check if it is a quaternion scalar
+    
+            # Do we have to deal with mask?
+            if hasattr(obj, 'mask') and np.any(obj.mask):
+                ismasked = True
+                
+        # it may be necessary to change the object order regarding the types
+        if returntype in ['NDPanel', 'NDDataset', 'Coord'] and objtypes[0] != returntype:
+            
+            inputs.reverse()
+            objtypes.reverse()
+            
+            if fname in ['mul', 'multiply', 'add', 'iadd']:
+                pass
+            elif fname in ['truediv', 'divide', 'true_divide']:
+                fname = 'multiply'
+                inputs[0] = np.reciprocal(inputs[0])
+            elif fname in ['isub', 'sub', 'subtract']:
+                fname = 'add'
+                inputs[0] = np.negative(inputs[0])
+            else:
+                raise NotImplementedError()
+        
+        # Now we can proceed
+        obj = cpy.copy(inputs.pop(0))
+        objtype = objtypes.pop(0)
+        other = None
+        if inputs:
+            other = cpy.copy(inputs.pop(0))
+            othertype = objtypes.pop(0)
+            
         # If our first objet is a NDPanel ------------------------------------------------------------------------------
         if objtype == 'NDPanel':
     
@@ -754,105 +797,66 @@ class NDMath(object):
             # Return a list of datasets
             return datasets
 
-        # If one of the input is hypercomplex, this will demand a special treatment
-        isquaternion = False
-        for inp in inputs:
-            if hasattr(inp, 'is_quaternion'):
-                isquaternion = inp.is_quaternion
-            #elif   #TODO: check if it is a quaternion scalar
 
-        # Do we have to deal with mask?
-        ismasked = False
-        for inp in inputs:
-            if hasattr(inp, 'mask') and np.any(inp.mask):
-                ismasked = True
-          
-        # If our first object is a NDdataset or Coord ------------------------------------------------------------------
-        if objtype in ['NDDataset', 'Coord']:
-            
-            isdataset = False
-            if objtype == 'NDDataset':
-                isdataset = True
-            
-            # Do we have units?
-            if not obj.unitless:
-                units = obj.units
-            else:
-                units = UNITLESS
+        # Our first object is a NDdataset or a Coord ------------------------------------------------------------------
 
-            # Get the underlying data
+        isdataset = (objtype == 'NDDataset')
+        
+        # Do we have units?
+        if not obj.unitless:
+            units = obj.units
+        else:
+            units = UNITLESS
+        
+        # Get the underlying data : If one of the input is masked, we will work with masked array
+        if ismasked and isdataset:
+            d = obj._umasked(obj._data, obj.mask)
+        else:
             d = obj._data
 
-            # If one of the input is masked, we will work with masked array
-            if ismasked and isdataset:
-                d = obj._umasked(d, obj.mask)
-
-        else:
-            # Obj is not a NDDarray, so we assume an array or a scalar (possibly a Quantity)
-            isdataset = False
-
-            if hasattr(obj, 'units'):
-                # we assume its a pint.Quantity object
-                units = obj.units
-                d = obj.magnitude
-            else:
-                units = UNITLESS
-                d = obj
-
-            # If one of the input is masked, and d is a numpy array, we will work with masked array
-            if ismasked and isinstance(d, np.ndarray):
-                d = obj.view(np.ma.MaskedArray)
-            
-        # Now we analyse the other operands
+        # Now we analyse the other operands ---------------------------------------------------------------------------
         args = []
         argunits = []
-
-        for o in inputs:
-            other = cpy.deepcopy(o)
-
-            # Is other a NDDataset or Coord?
-            othertype = type(other).__name__
+        
+        if other is not None:
+            
+            otherunits = UNITLESS
             
             # If inputs are all datasets
-            if isdataset and othertype == 'NDDataset' and other._coords != obj._coords:
+            if isdataset and (othertype == 'NDDataset') and (other._coords != obj._coords):
                 # here it can be several situations:
-                # One acceptable situation could be that
-                # e.g., we suppress or add a row to the whole dataset
-                if other._squeeze_ndim == 1 and obj._data.shape[-1] != other._data.size:
+                # One acceptable situation could be that we have a single value
+                if other._squeeze_ndim == 0:
+                    pass
+                
+                
+                # or that we suppress or add a row to the whole dataset
+                elif other._squeeze_ndim == 1 and obj._data.shape[-1] != other._data.size:
                     raise ValueError(
                         "coordinate's sizes do not match")
-    
-                if other._squeeze_ndim != 1 and \
-                        obj.coords and other.coords and \
+
+                    
+                elif other._squeeze_ndim > 1 and obj.coords and other.coords and \
                         not (obj._coords[0].is_empty and obj._coords[0].is_empty) and \
                         not np.all(obj._coords[0]._data == other._coords[0]._data):
                     raise ValueError(
                         "coordinate's values do not match")
             
             if othertype in ['NDDataset', 'Coord']:
-
-                # Eventually set the returntype
-                if objtype != 'NDDataset':
-                    returntype = othertype
-                
-                if objtype == 'Coord':
-                    returntype = othertype
-                    
                 # rescale according to units
                 if not other.unitless:
                     if hasattr(obj, 'units'):
                         # obj is a Quantity
-                        if compatible_units:  #other.units == obj.units and
-                            other.to(obj.units, inplace=True)
-                        argunits.append(other.units)
+                        if compatible_units:
+                            other.ito(obj.units)
+                        otherunits = other.units
                     else:
                         # obj has no dimension so we get the units of the other quantity
-                        argunits.append(other.units)
+                        otherunits = other.units
                 else:
-                    argunits.append(UNITLESS)
+                    otherunits = UNITLESS
 
                 arg = other._data
-
                 # mask?
                 if ismasked:
                     arg = other._umasked(arg, other._mask)
@@ -863,13 +867,14 @@ class NDMath(object):
                 # if it is a quantity than separate units and magnitude
                 if isinstance(other, Quantity):
                     arg = other.magnitude
-                    argunits.append(other.units)
+                    otherunits = other.units
                 
                 # no units
                 else:
                     arg = other
-                    argunits.append(UNITLESS)
-
+                    otherunits = UNITLESS
+                    
+            argunits.append(otherunits)
             args.append(arg)
 
             
@@ -885,7 +890,7 @@ class NDMath(object):
                     _units = ur(requnits)
             return _units
 
-        # define a quantity `q` on which to perform the units calculation
+        # define an arbitrary quantity `q` on which to perform the units calculation
         if units is not None:
             q = .999 * check_require_units(fname, units)
         else:
@@ -914,9 +919,7 @@ class NDMath(object):
             if fname == 'cbrt':  # ufunc missing in pint
                 q = q ** (1./3.)
             else:
-                if fname.startswith('logaddexp'):
-                    f = np.logaddexp
-                elif fname.startswith('log'):
+                if fname.startswith('log'):
                     f = np.log   # all similar regardings units
                 elif fname.startswith('exp'):
                     f = np.exp   # all similar regardings units
@@ -927,7 +930,7 @@ class NDMath(object):
             if hasattr(q, 'units'):
                 units = q.units
             else:
-                units = None
+                units = UNITLESS
 
         # perform operation on magnitudes
         # --------------------------------------------------------------------------------------------------------------
@@ -985,9 +988,10 @@ class NDMath(object):
     def _unary_op(f):
         @functools.wraps(f)
         def func(self):
+            fname = f.__name__
             data, units, mask, returntype = self._op(f, [self])
             if hasattr(self, 'history'):
-                history = f'Unary operation {f.__name__} applied'
+                history = f'Unary operation {fname} applied'
             else:
                 history = None
             return self._op_result(data, units, mask, history, returntype)
@@ -995,40 +999,84 @@ class NDMath(object):
         return func
 
     # ..................................................................................................................
+    def _check_order(self, fname, inputs):
+        objtypes = []
+        returntype = None
+        for i, obj in enumerate(inputs):
+            # type
+            objtype = type(obj).__name__
+            objtypes.append(objtype)
+            if objtype == 'NDPanel':
+                returntype = 'NDPanel'
+            elif objtype == 'NDDataset' and returntype != 'NDPanel':
+                returntype = 'NDDataset'
+            elif objtype == 'Coord' and returntype not in ['NDPanel', 'NDDataset']:
+                returntype = 'Coord'
+            else:
+                # only the three above type have math capabilities in spectrochempy.
+                pass
+            
+        # it may be necessary to change the object order regarding the types
+        if returntype in ['NDPanel', 'NDDataset', 'Coord'] and objtypes[0] != returntype:
+        
+            inputs.reverse()
+            objtypes.reverse()
+        
+            if fname in ['mul', 'multiply', 'add', 'iadd']:
+                pass
+            elif fname in ['truediv', 'divide', 'true_divide']:
+                fname = 'multiply'
+                inputs[0] = np.reciprocal(inputs[0])
+            elif fname in ['isub', 'sub', 'subtract']:
+                fname = 'add'
+                inputs[0] = np.negative(inputs[0])
+            else:
+                raise NotImplementedError()
+            
+        f = getattr(operator, fname)
+        return f, inputs
+    # ..................................................................................................................
     @staticmethod
     def _binary_op(f, reflexive=False):
         @functools.wraps(f)
         def func(self, other):
+            fname = f.__name__
             if not reflexive:
                 objs = [self, other]
             else:
                 objs = [other, self]
-            data, units, mask, returntype = self._op(f, objs)
+            fm, objs = self._check_order(fname, objs)
+            data, units, mask, returntype = self._op(fm, objs)
             if hasattr(self, 'history'):
-                history = f'Binary operation {f.__name__} with `{get_name(other)}` has been performed'
+                history = f'Binary operation {fname} with `{get_name(other)}` has been performed'
             else:
                 history = None
             return self._op_result(data, units, mask, history, returntype)
 
         return func
-
+    
+    # ..................................................................................................................
     @staticmethod
     def _inplace_binary_op(f):
         @functools.wraps(f)
         def func(self, other):
+            fname = f.__name__
             objs = [self, other]
-            data, units, mask, returntype = self._op(f, objs)
+            fm, objs = self._check_order(fname, objs)
+            data, units, mask, returntype = self._op(fm, objs)
             self._data = data
             self._units = units
             self._mask = mask
             if hasattr(self, 'history'):
-                self.history = f'Inplace binary op : {f.__name__}  with `{get_name(other)}` '
+                self.history = f'Inplace binary op : {fname}  with `{get_name(other)}` '
             else:
                 history = None
             return self
 
         return func
+    
 
+    # ..................................................................................................................
     def _op_result(self, data, units=None, mask=None, history=None, returntype=None):
         # make a new NDArray resulting of some operation
 
@@ -1055,8 +1103,6 @@ class NDMath(object):
 # ----------------------------------------------------------------------------------------------------------------------
 # ARITHMETIC ON NDArray
 # ----------------------------------------------------------------------------------------------------------------------
-
-import operator
 
 # unary operators
 UNARY_OPS = ['neg', 'pos', 'abs']
@@ -1117,7 +1163,7 @@ array = make_func_from(np.ma.array, first='dataset')
 array.__doc__ = """
 Return a numpy masked array (i.e., other NDDataset attributes are lost.
 
-Example:
+Examples
 ========
 
 >>> a = array(dataset)

@@ -50,8 +50,8 @@ def test_logger(caplog):
     assert caplog.records[-1].message == 'OK - info in DEBUG level'
     warning_('OK this is a Warning')
     assert caplog.records[-1].levelname == 'WARNING'
-    assert caplog.records[-1].message == 'WARNING: OK this is a Warning'
+    assert caplog.records[-1].message == 'OK this is a Warning'
     error_('OK This is an Error')
     assert caplog.records[-1].levelname == 'ERROR'
-    assert caplog.records[-1].message == 'ERROR: OK This is an Error'
+    assert caplog.records[-1].message == 'OK This is an Error'
 

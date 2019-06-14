@@ -194,7 +194,7 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, pnl, name, comment):
     if name not in ['logaddexp', 'logaddexp2', 'true_divide', 'floor_divide', ]:
         assert r.units == nd1.units
 
-
+@pytest.mark.skip()
 def test():
     
     # TODO: some ufunc suppress the units! see pint.

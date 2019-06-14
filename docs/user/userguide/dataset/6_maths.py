@@ -2,11 +2,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.0.5
+#       jupytext_version: 1.1.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -58,6 +59,14 @@ np.sqrt(pnl)
 # For instance, the square root can be calculated using the following syntax:
 
 # %%
+import spectrochempy as scp 
+scp.sqrt(dx)
+
+# %% [markdown]
+# or
+
+# %%
+from spectrochempy import *
 sqrt(dx)
 
 # %% [markdown]
@@ -217,9 +226,6 @@ _ = out.plot(figsize=(6,2.5))
 # #### Functions affecting magnitudes of the number but also units
 # ##### sqrt
 # Return the non-negative square-root of an array, element-wise.
-
-# %%
-d = dataset-np.min(dataset)
 
 # %%
 out = np.sqrt(dataset)   # as they are some negative elements, return dataset has complex dtype.

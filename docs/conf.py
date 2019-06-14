@@ -37,14 +37,14 @@ sys._called_from_sphinx = True
 
 extensions = \
     [
-    'spectrochempy.sphinxext.autodocsumm',
     'nbsphinx',
     'sphinx.ext.mathjax',
     'sphinx_gallery.gen_gallery',
     'jupyter_sphinx.embed_widgets',
     'spectrochempy.sphinxext.traitlets_sphinxdoc',
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
+    'spectrochempy.sphinxext.autodocsumm',
+    #'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
