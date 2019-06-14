@@ -71,8 +71,7 @@ def can_merge_or_align(coord1, coord2):
     
 # ............................................................................
 def align(dataset, *datasets, **kwargs):
-    """
-    Align individual |NDDataset| or |NDPanel| along given dimensions using various methods
+    """Align individual |NDDataset| or |NDPanel| along given dimensions using various methods
 
     Parameters
     -----------

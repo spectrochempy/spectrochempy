@@ -20,6 +20,12 @@
 from spectrochempy import *
 
 # %% [markdown]
+#  <div class="alert alert">
+#
+# **Warning:** This is still experimental and under rapid evolution - we recommend not to use this feature for now
+#
+# </div>
+#
 # `NDPanel` objects are very similar to `NDDataset` in the sense they can contain array and coordinates.
 #
 # However unlike `NDDataset`s, `NDPanel`s can contain several arrays whith different shapes, units and/or coordinates. They can store heterogeneous data coming for example from different types of experiments. Arrays present in `NDPanel` can be aligned during objects initialization.   
