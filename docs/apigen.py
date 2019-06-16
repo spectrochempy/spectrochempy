@@ -431,7 +431,7 @@ although that, in the examples in this documentation, we have often use the
 second one for simplicity.
 
 To go deeper in the core of |scpy|, look at 
-the :ref:`Developper's documentation<develdocs>` and 
+the :ref:`Developper's documentation<develguide>` and
 :ref:`Code Reference <develreference>`.
 
 Objects

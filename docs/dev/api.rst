@@ -1,4 +1,4 @@
-.. _develdocs:
+.. _develreference:
 
 Full code reference
 ###################

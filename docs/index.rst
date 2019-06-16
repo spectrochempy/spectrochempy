@@ -58,7 +58,7 @@ Documentation
 **User Guide** 
 
 * :doc:`user/userguide/index`
-* :doc:`user/tutorial/index`
+* :doc:`user/tutorials/index`
 * :doc:`gallery/auto_examples/index`
 * :doc:`api/generated/index`
 * :doc:`main/faq`

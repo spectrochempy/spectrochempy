@@ -283,9 +283,10 @@ class NDComplexArray(NDArray):
         ----------
         %(generic_method.parameters.dims|inplace)s
 
-         Returns
+        Returns
         -------
         %(generic_method.returns.object)s
+        
         See Also
         --------
         conj, real, imag, RR, RI, IR, II, part, set_complex, is_complex
@@ -322,7 +323,7 @@ class NDComplexArray(NDArray):
             that we take the real component in each dimension except the last
             one, for which imaginary component is preferred.
 
-         Returns
+        Returns
         -------
         %(generic_method.returns.object)s
         """
@@ -430,7 +431,7 @@ class NDComplexArray(NDArray):
         ----------
         %(generic_method.parameters.inplace)s
 
-         Returns
+        Returns
         -------
         %(generic_method.returns)s
 

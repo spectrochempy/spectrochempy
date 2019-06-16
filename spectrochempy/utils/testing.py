@@ -404,10 +404,6 @@ def image_comparison(reference=None,
 
         dot per inch of the generated figures
 
-
-    Returns
-    -------
-
     """
 
     if not reference:

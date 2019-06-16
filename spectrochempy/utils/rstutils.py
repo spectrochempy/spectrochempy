@@ -52,7 +52,7 @@ rst_epilog = """
 
 .. |userguide| replace:: User Guide 
 
-.. _userguide:  ../../user/userguide/introduction/index.html
+.. _userguide:  ../../user/userguide/index.html
 
 
 """

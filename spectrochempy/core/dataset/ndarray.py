@@ -509,7 +509,7 @@ class NDArray(HasTraits):
     @property
     def data(self):
         """
-        |ndarray|, The `data` array.
+        |ndarray| - The `data` array.
 
         If there is no data but labels, then the labels are returned instead of data.
 
@@ -517,9 +517,6 @@ class NDArray(HasTraits):
             See the |userguide|_ for more information
 
         """
-        # if self._data is None and self.is_labeled:
-        #    # label only
-        #    return self._labels.squeeze()
 
         return self._data
 
@@ -597,7 +594,7 @@ class NDArray(HasTraits):
     @property
     def date(self):
         """
-        `Datetime` object - creation date
+        `Datetime` - creation date object
         """
         return self._date
 
@@ -617,7 +614,12 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @property
     def dims(self):
-        # the name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension
+        """
+        list -  Names of the dimensions
+        
+        The name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension.
+        """
+        
         ndim = self.ndim
         if ndim > 0:
             # if len(self._dims)< ndim:
@@ -630,9 +632,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @dims.setter
     def dims(self, values):
-        """
-        The dimension's names
-        """
+
         if isinstance(values, str) and len(values)==1:
             values = [values]
             
@@ -652,7 +652,9 @@ class NDArray(HasTraits):
     @property
     def dlabel(self):
         """
-        An user friendly data label (str). It's an alias of the `title` property
+        str - An user friendly data label.
+        
+        It's an alias of the `title` property
         """
         return self.title
 
@@ -665,7 +667,7 @@ class NDArray(HasTraits):
     @property
     def dtype(self):
         """
-        dtype of the data
+        numpy dtype - data type
 
         """
         if self.data is None:
@@ -677,7 +679,7 @@ class NDArray(HasTraits):
     @property
     def labels(self):
         """
-        |ndarray|, dtype:object - Labels for `data`.
+        |ndarray| (str) - An array of labels for `data`.
 
         An array of objects of any type (but most generally string), with the last dimension size equal to that of the
         dimension of data. Note that's labelling is possible only for 1D data. One classical application is
@@ -689,8 +691,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @labels.setter
     def labels(self, labels):
-        # Property setter for labels
-
+        
         if labels is None:
             return
 
@@ -734,7 +735,8 @@ class NDArray(HasTraits):
     @property
     def mask(self):
         """
-        |ndarray|, dtype:bool - Mask for the data
+        |ndarray| (bool) - Mask for the data
+        
         """
         if not self.is_masked:
             return NOMASK
@@ -744,7 +746,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @mask.setter
     def mask(self, mask):
-        # property.setter for mask
+        
         if mask is NOMASK or mask is MASKED:
             pass
         elif isinstance(mask, (np.bool_, bool)):
@@ -782,14 +784,14 @@ class NDArray(HasTraits):
     @property
     def meta(self):
         """
-        |Meta| instance object - Additional metadata.
+        |Meta| - Additional metadata.
         """
         return self._meta
 
     # ..................................................................................................................
     @meta.setter
     def meta(self, meta):
-        # property.setter for meta
+        
         if meta is not None:
             self._meta.update(meta)
 
@@ -797,9 +799,11 @@ class NDArray(HasTraits):
     @property
     def title(self):
         """
-        An user friendly title (str).
+        str - An user friendly title.
+        
         When the title is provided, it can be used for labeling the object,
         e.g., axe title in a matplotlib plot.
+        
         """
         if self._title:
             return self._title
@@ -809,7 +813,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @title.setter
     def title(self, title):
-        # property.setter for title
+        
         if title:
             self._title = title
 
@@ -817,7 +821,8 @@ class NDArray(HasTraits):
     @property
     def name(self):
         """
-        An user friendly name (str).
+        str - An user friendly name.
+        
         When the name is not provided, the `id` of the object is retruned instead
 
         """
@@ -829,7 +834,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @name.setter
     def name(self, name):
-        # property.setter for name
+        
         if name:
             if self._name:
                 debug_("Overwriting current name")
@@ -839,13 +844,15 @@ class NDArray(HasTraits):
     @property
     def units(self):
         """
-        |Unit| instance object - The units of the data.
+        |Unit| - The units of the data.
+        
         """
         return self._units
 
     # ..................................................................................................................
     @units.setter
     def units(self, units):
+        
         if units is None:
             return
         if isinstance(units, str):
@@ -1148,7 +1155,7 @@ class NDArray(HasTraits):
             This parameter ensure compatibility with deepcopy() from the copy
             package.
 
-         Returns
+        Returns
         -------
         object
             An exact copy of the current object.
@@ -1259,7 +1266,7 @@ class NDArray(HasTraits):
         other: |ndarray|
             The ndarray object for which we want to compare units compatibility
 
-         Returns
+        Returns
         -------
         result
             True if units are compatible
@@ -1299,10 +1306,11 @@ class NDArray(HasTraits):
         force: bool, optional, default= `False`
             If True the change of units is forced, even for incompatible units
 
-         Returns
+        Returns
         -------
         object
             same object with new units.
+            
         See Also
         --------
         to
@@ -1328,13 +1336,13 @@ class NDArray(HasTraits):
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
 
-         Returns
+        Returns
         -------
         squeezed: same object type
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
 
-         Raises
+        Raises
         ------
         ValueError
             If `dims` is not `None`, and the dimension being squeezed is not
@@ -1382,9 +1390,10 @@ class NDArray(HasTraits):
             Second dimension index
         %(generic_method.parameters.inplace)s
 
-         Returns
+        Returns
         -------
         %(generic_method.returns)s
+        
         See Also
         --------
         transpose
@@ -1545,12 +1554,14 @@ class NDArray(HasTraits):
         %(generic_method.parameters.inplace)s
 
  
-         Returns
+        Returns
         -------
         %(generic_method.returns)s
+        
         See Also
         --------
         swapaxes
+        
         """
         if not inplace:
             new = self.copy()
