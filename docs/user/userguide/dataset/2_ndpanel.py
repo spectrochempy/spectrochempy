@@ -61,17 +61,22 @@ nda
 # %%
 # create a second dataset
 b = np.random.rand(10,8) 
-cz = Coord(np.linspace(600,4000,8), units='cm^-1', title='wabenumber')
+cz = Coord(np.linspace(600,4000,8), units='cm^-1', title='wavenumber')
 cu = Coord(np.linspace(0,10,10), units='s', title='time')
 ndb = NDDataset(b, coords=(cu, cz), name='b', title='dataset b', units='eV')
 ndb
 
 # %% [markdown]
+# This second dataset has the same `x` coordinates than the first one, but differs by the second (actually its shape is different).
+#
 # Now we will create a NDPanel using these two datasets
 
 # %%
 ndp = NDPanel(nda, ndb)
 ndp
+
+# %% [markdown]
+# The two datasets have compatible dimensions so the default behavior is to merge and align them. 
 
 # %%
 ndp.dims
@@ -80,7 +85,8 @@ ndp.dims
 ndp.coords
 
 # %% [markdown]
-# Why dimension `y` is different from those of `nda` and `ndb`?
+# **Why dimension `y` is different from those of `nda` and `ndb`?**
+#
 # because by default dimensions are merged and aligned (using the 'outer' method)
 #
 # If we want to avoid this behavior, we need to specify in the arguments:
@@ -93,12 +99,12 @@ ndp.coords
 #
 
 # %% [markdown]
-# Examples
+# ### Examples
 
 # %%
 # no merging of the dimensions (4 distinct dimensions)
 ndp = NDPanel(nda, ndb, merge=False)  
-ndp.dims
+ndp
 
 # %%
 # merging of the dimensions, but no alignment of the coordinates (dimensions x for both dataset
@@ -109,8 +115,27 @@ ndp.dims
 # %%
 # the default behavior
 ndp = NDPanel(nda, ndb, merge=True, align='outer')  
-ndp.dims
+ndp
 
 # %%
+# get only intersection
+ndp = NDPanel(nda, ndb, merge=True, align='inner')  
+ndp
 
 
+
+# %%
+# Align on the first dataset
+ndp = NDPanel(nda, ndb, merge=True, align='first')  
+ndp
+
+# %%
+# Align on the last dataset
+ndp = NDPanel(nda, ndb, merge=True, align='last')  
+ndp
+
+# %% [markdown]
+# ## Mathematics with NDPanels 
+
+# %% [markdown]
+# TODO

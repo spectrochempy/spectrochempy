@@ -96,19 +96,25 @@ def test_ndpanel_init():
     assert panel.dims == ['x','y']
     assert panel['arr1'].dims == ['y', 'x']
     assert panel['arr2'].dims == ['y', 'x']
-    info_()
-    info_(nd1)
     
+    info_('\n-----nd1')
+    info_(nd1)
+    info_('\n-----nd2')
+    info_(nd2)
     # test print
-    print(nd1)
-    print(panel)
-    print_(panel)
+    #print(nd1)
+    #print(panel)
+    #print_(panel)
+    info_('\n\nouter')
     info_(panel)
     
-    # test _repr_html
-    info_(panel._repr_html_())
-    
-    # TODO: check alignement errors
+    #TODO: check alignement errors
+    panel = NDPanel(nd1, nd2, align='inner')
+    assert panel.dims == ['x','y']
+    assert panel['arr1'].dims == ['y', 'x']
+    assert panel['arr2'].dims == ['y', 'x']
+    info_('\n\ninner')
+    info_(panel)
 
 def test_ndpanel_fixture():
     with RandomSeedContext(12345):
