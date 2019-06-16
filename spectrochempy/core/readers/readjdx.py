@@ -258,9 +258,9 @@ def read_jdx(filename='', sortbydate=True):
         out.sort(0, 0)
         out.dims[0].deleteaxis(0)
     out.description = (
-            'dataset "' + out.name + '" : imported from jdx file. \n')
+            'dataset "' + out.name + '": imported from jdx file. \n')
     out.history = (
-            str(out.date) + " : Created by jdxload('" + filename + "') \n")
+            str(out.date) + ": Created by jdxload('" + filename + "') \n")
 
     # make sure that the lowest( index correspond to th largest wavenember*
     # for compatibility with dataset creacted by spgload:

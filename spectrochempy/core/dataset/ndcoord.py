@@ -61,7 +61,7 @@ class Coord(NDMath, NDArray):
         """
         Parameters
         -----------
-        data : ndarray, tuple or list
+        data: ndarray, tuple or list
             The actual data array contained in the |Coord| object.
             The given array (with a single dimension) can be a list,
             a tuple, a |ndarray|, or a |ndarray|-like object.
@@ -78,23 +78,28 @@ class Coord(NDMath, NDArray):
         --------
         We first import the object from the api:
         >>> from spectrochempy import *
+        
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
         >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
         >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [   1.000,    3.000,    5.000,    7.000,    9.000,   11.000] Hz
+        
         We can take a series of str to create a non numerical but labelled
         axis:
         >>> tarr = list('abcdef')
         >>> tarr
         ['a', 'b', 'c', 'd', 'e', 'f']
+        
         >>> c1 = Coord(labels=tarr, title='mylabels')
         >>> c1   # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [a, b, c, d, e, f]
+        
         >>> print(c1) # doctest: +NORMALIZE_WHITESPACE
         title: Mylabels
         labels: [a b c d e f]
+        
         Some other examples will found in the |userguide|_.
         """
         super(Coord, self).__init__(data, **kwargs)

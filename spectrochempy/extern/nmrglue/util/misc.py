@@ -19,26 +19,26 @@ def pair_similar(dic1, data1, dic2, data2, verb=False, atol=ATOL, rtol=RTOL,
 
     Parameters
     ----------
-    dic1 : dict
+    dic1: dict
         First dictionary of NMR parameters.
-    data1 : ndarray
+    data1: ndarray
         First array of NMR data
-    dic2 : dict
+    dic2: dict
         Second dictionary of NMR parameters
-    data2 : ndarray
+    data2: ndarray
         Second array of NMR data
-    verb : bool, optional
+    verb: bool, optional
         Set True for verbose reporting.
-    atol : float, optional
+    atol: float, optional
         The absolute tolerent parameter to pass to numpy.allclose.
-    rtol : float, optional
+    rtol: float, optional
         The relative tolenance parameter to pass to numpy.allclose.
 
     Returns
     -------
-    r1 : bool
+    r1: bool
         True is data1 and data2 are similar, False if they differ.
-    r2 : bool
+    r2: bool
         True is dic1 and dic2 are similar, False if they differ.
 
     """
@@ -54,20 +54,20 @@ def isdatasimilar(data1, data2, verb=False, atol=ATOL, rtol=RTOL):
 
     Parameters
     ----------
-    data1 : ndarray
+    data1: ndarray
         First array of NMR data
-    data2 : ndarray
+    data2: ndarray
         Second array of NMR data
-    verb : bool, optional
+    verb: bool, optional
         Set True for verbose reporting.
-    atol : float, optional
+    atol: float, optional
         The absolute tolerent parameter to pass to numpy.allclose.
-    rtol : float, optional
+    rtol: float, optional
         The relative tolenance parameter to pass to numpy.allclose.
 
     Returns
     -------
-    r1 : bool
+    r1: bool
         True is data1 and data2 are similar, False if they differ.
 
     """
@@ -136,19 +136,19 @@ def isdicsimilar(dic1, dic2, verb=False, dtol=DTOL, ignore_pipe_display=False):
 
     Parameters
     ----------
-    dic1 : dict
+    dic1: dict
         First dictionary of NMR parameters.
-    dic2 : dict
+    dic2: dict
         Second dictionary of NMR parameters
-    verb : bool, optional
+    verb: bool, optional
         Set True for verbose reporting.
-    dtol : float, optional
+    dtol: float, optional
         Maximum allowable difference between int and float elements if dic1
         and dic2.
 
     Returns
     -------
-    r1 : bool
+    r1: bool
         True is dic1 and dic2 are similar, False if they differ.
 
     """

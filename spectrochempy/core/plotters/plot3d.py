@@ -51,7 +51,7 @@ def plot_3D(dataset, **kwargs):
     #
     # method: str [optional among ``surface``, ... (other to be implemented)..., default=``surface``]
     #
-    # style : str, optional, default = 'notebook'
+    # style: str, optional, default = 'notebook'
     #     Matplotlib stylesheet (use `available_style` to get a list of available
     #     styles for plotting
     #
@@ -63,7 +63,7 @@ def plot_3D(dataset, **kwargs):
     #
     # x_reverse: `bool` or None [optional, default= None
     #
-    # kwargs : additional keywords
+    # kwargs: additional keywords
     #
     # {}
     #

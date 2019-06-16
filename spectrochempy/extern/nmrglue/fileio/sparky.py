@@ -31,17 +31,17 @@ def make_uc(dic, data, dim=-1):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of Sparky parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    dim : int, optional
+    dim: int, optional
         Dimension number to create unit conversion object for.  Default is for
         last dimension.
 
     Returns
     -------
-    uc : unit conversion object.
+    uc: unit conversion object.
         Unit conversion object for given dimension.
 
     """
@@ -73,14 +73,14 @@ def guess_udic(dic, data):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of Sparky parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameter.
 
     """
@@ -108,16 +108,16 @@ def create_dic(udic, datetimeobj=datetime.datetime.now(), user='user'):
 
     Parameters
     ----------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
-    datatimeobj : datetime object, optional
+    datatimeobj: datetime object, optional
         Datetime to record in Sparky dictionary
-    user : str, optional
+    user: str, optional
         Username to record in Sparky dictionary. Default is 'user'
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Sparky parameters.
 
     """
@@ -166,16 +166,16 @@ def create_axisdic(adic, tlen, dlen):
 
     Parameters
     ----------
-    adic : dict
+    adic: dict
         Axis dictionary from a universal dictionary.
-    tlen : int
+    tlen: int
         Tile length of axis.
-    dlen : int
+    dlen: int
         Data length of axis.
 
     Returns
     -------
-    sdic : dict
+    sdic: dict
         Sparky axis dictionary
 
     """
@@ -217,14 +217,14 @@ def calc_tshape(shape, kbyte_max=128):
 
     Parameters
     ----------
-    shape : tuple
+    shape: tuple
         Shape of NMR data (data.shape).
-    kbyte_max : float or int
+    kbyte_max: float or int
         Maximum tile size in Kilobytes.
 
     Returns
     -------
-    tshape : tuple
+    tshape: tuple
         Shape of tile.
 
     """
@@ -246,20 +246,20 @@ def read(filename):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Sparky file to read.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Sparky parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     See Also
     --------
-    read_lowmem : Sparky file reading with minimal memory usage.
-    write : Write a Sparky file.
+    read_lowmem: Sparky file reading with minimal memory usage.
+    write: Write a Sparky file.
 
     """
     # open the file
@@ -283,20 +283,20 @@ def read_lowmem(filename):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Sparky file to read.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Sparky parameters.
-    data : array_like
+    data: array_like
         Low memory object which can access NMR data on demand.
 
     See Also
     --------
-    read : Read a Sparky file.
-    write_lowmem : Write a Sparky file using mimimal memory.
+    read: Read a Sparky file.
+    write_lowmem: Write a Sparky file using mimimal memory.
 
     """
     # open the file
@@ -320,20 +320,20 @@ def write(filename, dic, data, overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Sparky file to write to.
-    dic : dict
+    dic: dict
         Dictionary of Sparky parameters.
-    data : array_like
+    data: array_like
         Array of NMR data.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Set True to overwrite files, False will raise a Warning if the file
         exists.
 
     See Also
     --------
-    write_lowmem : Write a Sparky file using minimal amounts of memory.
-    read : Read a Sparky file.
+    write_lowmem: Write a Sparky file using minimal amounts of memory.
+    read: Read a Sparky file.
 
     """
     n = dic["naxis"]
@@ -352,20 +352,20 @@ def write_lowmem(filename, dic, data, overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Sparky file to write to.
-    dic : dict
+    dic: dict
         Dictionary of Sparky parameters.
-    data : array_like.
+    data: array_like.
         Array of NMR data.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Set True to overwrite files, False will raise a Warning if the file
         exists.
 
     See Also
     --------
-    write : Write a Sparky file.
-    read_lowmem : Read a Sparky file using mimimal amounts of memory.
+    write: Write a Sparky file.
+    read_lowmem: Read a Sparky file using mimimal amounts of memory.
 
     """
     # write also writes tile by tile...
@@ -545,9 +545,9 @@ class sparky_2d(fileiobase.data_nd):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of 2D Sparky file.
-    order : tuple, optional
+    order: tuple, optional
         Order of axes against file.  None is equivelent to (0, 1).
 
     """
@@ -678,9 +678,9 @@ class sparky_3d(fileiobase.data_nd):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of 3D Sparky file.
-    order : tuple
+    order: tuple
         Ordering of axes against file. None is equilent to (0, 1, 2)
 
     """
@@ -829,16 +829,16 @@ def get_tilen(f, n_tile, tw_tuple):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         Open file object pointing to a Sparky file.
-    n_tile : int
+    n_tile: int
         Tile number to read
-    tw_tuple : tuple of ints
+    tw_tuple: tuple of ints
         Tile size
 
     Returns
     -------
-    tile : ndarray
+    tile: ndarray
         Tile of NMR data. Data is returned as a 1D array.
 
     Notes
@@ -863,14 +863,14 @@ def get_tile(f, num_points):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         Open file object pointing to a Sparky file.
-    num_points : int
+    num_points: int
         Number of points in the tile.
 
     Returns
     -------
-    tile : ndarray
+    tile: ndarray
         Tile of NMR data. Data is returned as a 1D array.
 
     """
@@ -884,9 +884,9 @@ def put_tile(f, tile):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         Open file object pointing to a Sparky file, to be written to.
-    tile : ndarray
+    tile: ndarray
         Tile of NMR data to be written.
 
     """
@@ -920,16 +920,16 @@ def find_tilen_2d(data, ntile, tile_size):
 
     Parameters
     ----------
-    data : 2D ndarray
+    data: 2D ndarray
         NMR data, untiled/standard format.
-    ntile : int
+    ntile: int
         Tile number to extract.
-    (lentY, lentX) : tuple of ints
+    (lentY, lentX): tuple of ints
         Tile size (w1, w2).
 
     Returns
     -------
-    tile : 1D ndarray
+    tile: 1D ndarray
         Tile of NMR data, returned as 1D array.
 
     Notes
@@ -970,14 +970,14 @@ def tile_data2d(data, tile_size):
 
     Parameters
     ----------
-    data : 2D ndarray
+    data: 2D ndarray
         NMR data, untiled/standard format.
-    (lentY, lentX) : tuple of ints
+    (lentY, lentX): tuple of ints
         Tile size.
 
     Returns
     -------
-    tdata : 1D ndarray
+    tdata: 1D ndarray
         Tiled/Sparky formatted NMR data, returned as 1D array.
 
     """
@@ -1006,16 +1006,16 @@ def untile_data2D(data, tile_size, data_size):
 
     Parameters
     ----------
-    data : 1D ndarray
+    data: 1D ndarray
         Tiled/Sparky formatted 2D NMR data.
-    (lentY, lenX) : tuple of ints
+    (lentY, lenX): tuple of ints
         Size of tile.
-    (lenY, lenX) : tuple of ints
+    (lenY, lenX): tuple of ints
         Size of NMR data.
 
     Returns
     -------
-    sdata : 2D ndarray
+    sdata: 2D ndarray
         NMR data, untiled/standard format.
 
     """
@@ -1065,16 +1065,16 @@ def find_tilen_3d(data, ntile, tile_size):
 
     Parameters
     ----------
-    data : 3D ndarray
+    data: 3D ndarray
         NMR data, untiled/standard format.
-    ntile : int
+    ntile: int
         Tile number to extract.
-    (lentZ, lentY, lentX) : tuple of ints
+    (lentZ, lentY, lentX): tuple of ints
         Tile size (w1, w2, w3).
 
     Returns
     -------
-    tile : 1D ndarray
+    tile: 1D ndarray
         Tile of NMR data, returned as 1D array.
 
     Notes
@@ -1120,14 +1120,14 @@ def tile_data3d(data, tile_size):
 
     Parameters
     ----------
-    data : 3D ndarray
+    data: 3D ndarray
         NMR data, untiled/standard format.
-    (lentZ, lentY, lentX) : tuple of ints
+    (lentZ, lentY, lentX): tuple of ints
         Tile size (w1, w2, w3).
 
     Returns
     -------
-    tile : 1D ndarray
+    tile: 1D ndarray
         Tiled/Sparky formatted NMR data, returned as 1D array.
 
     """
@@ -1157,16 +1157,16 @@ def untile_data3D(data, tile_size, data_size):
 
     Parameters
     ----------
-    data : 1D ndarray
+    data: 1D ndarray
         Tiled/Sparky formatted 2D NMR data.
-    (lentZ, lentY, lentX) : tuple of ints
+    (lentZ, lentY, lentX): tuple of ints
         Size of tile
-    (lenZ, lenY, lenX) : tuple of ints
+    (lenZ, lenY, lenX): tuple of ints
         Size of NMR data.
 
     Returns
     -------
-    sdata : 3D ndarray
+    sdata: 3D ndarray
         NMR data, untiled/standard format.
 
     """

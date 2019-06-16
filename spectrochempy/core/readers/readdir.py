@@ -67,11 +67,11 @@ def read_dir(dataset=None, directory=None, **kwargs):
     Notes
     ------
     Only implemented for OMNIC files (\*.spa, \*.spg), \*.csv, \*.mat and the
-    native format for spectrochempy : \*.scp).
+    native format for spectrochempy: \*.scp).
 
     Parameters
     ----------
-    dataset : `NDDataset`
+    dataset: `NDDataset`
         The dataset to store the data and metadata.
         If None, a NDDataset is created
     directory: str, optional.
@@ -85,7 +85,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     Returns
     --------
-    nddataset : |NDDataset| or list of |NDDataset|
+    nddataset: |NDDataset| or list of |NDDataset|
 
     Examples
     --------
@@ -200,7 +200,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     Parameters
     ----------
-    dataset : `NDDataset`
+    dataset: `NDDataset`
         The dataset to store the data and metadata.
         If None, a NDDataset is created
     directory: str, optional.
@@ -220,7 +220,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     Returns
     --------
-    nddataset : |NDDataset| or list of |NDDataset|
+    nddataset: |NDDataset| or list of |NDDataset|
 
     Examples
     --------

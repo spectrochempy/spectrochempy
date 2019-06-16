@@ -240,7 +240,7 @@ def IR_scp_1():
     return dataset.copy()
 
 
-# Fixture : NMR spectra
+# Fixture: NMR spectra
 # ----------------------------------------------------------------------------------------------------------------------
 
 @pytest.fixture(scope="function")

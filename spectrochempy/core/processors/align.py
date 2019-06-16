@@ -39,12 +39,12 @@ def can_merge_or_align(coord1, coord2):
     
     Parameters
     ----------
-    coord1, coord2 : |Coord|
+    coord1, coord2: |Coord|
         coordinates to merge or align
 
     Returns
     -------
-    can_merge, can_align : tuple of bools
+    can_merge, can_align: tuple of bools
         Two flags about merge and alignment possibility
         
     """
@@ -75,15 +75,15 @@ def align(dataset, *datasets, **kwargs):
 
     Parameters
     -----------
-    *datasets : |NDDataset| or |NDPanel|.
+    *datasets: |NDDataset| or |NDPanel|.
         NDDataset or NDPanel objects to align.
         If NDPanel objects are provided, internal datasets will be aligned along the given dimension.
         Aligning more than one panel is not implemented.
-    dim : str. Optional, default: 'x'.
+    dim: str. Optional, default: 'x'.
         Along which axis to perform the alignment.
-    dims : list of str, optional, default : None
+    dims: list of str, optional, default: None
         Align along all dims defined in dims (if dim or axis is also defined, then dims have higher priority).
-    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'], optional, default: 'outer'
+    method: enum ['outer', 'inner', 'first', 'last', 'interpolate'], optional, default: 'outer'
         Which method to use for the alignment.
         
         If align is defined:
@@ -93,23 +93,23 @@ def align(dataset, *datasets, **kwargs):
         * 'first' means that the first dataset is used as reference
         * 'last' means that the last dataset is used as reference
         * 'interpolate' means that interpolation is performed relative to the first dataset.
-    interpolate_method : enum ['linear','pchip']. Optional, default:'linear'.
+    interpolate_method: enum ['linear','pchip']. Optional, default:'linear'.
         Method of interpolation to performs for the alignment.
-    interpolate_sampling : `auto`, int or float. Optional, default: `auto`.
+    interpolate_sampling: `auto`, int or float. Optional, default: `auto`.
         
         * `auto`: sampling is determined automatically from the existing data.
         * int:  if an integer values is specified, then the
           sampling interval for the interpolated data will be splitted in this number of points.
-        * float : If a float value is provided, it determines the interval between the interpolated data
-    coord = |Coord|, optional, default : None
+        * float: If a float value is provided, it determines the interval between the interpolated data
+    coord = |Coord|, optional, default: None
         coordinates to use for alignment. Ignore those corresponding to the dimensions to align
-    copy : bool, optional, default: True
+    copy: bool, optional, default: True
         If False then the returned objects will share memory with the original objects, whenever it is possible:
         in principle only if reindexing is not necessary.
     
     Returns
     --------
-    aligned_datasets : tuple of |NDDataset|s or a |NDPanel|s.
+    aligned_datasets: tuple of |NDDataset|s or a |NDPanel|s.
         Same objects as datasets with dimensions aligned
 
     Raises

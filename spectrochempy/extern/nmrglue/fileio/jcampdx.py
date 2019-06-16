@@ -494,14 +494,14 @@ def read(filename):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         File to read from.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data, or a list NMR data arrays in order [real, imaginary]
     """
 
@@ -610,14 +610,14 @@ def guess_udic(dic, data):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of JCAMP-DX parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
     """
 

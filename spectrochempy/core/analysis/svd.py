@@ -63,17 +63,17 @@ class SVD(HasTraits):
         """
         Parameters
         -----------
-        dataset : |NDDataset| object
+        dataset: |NDDataset| object
             The dataset X has shape (M, N). M is the number of
             observations (for examples a series of IR spectra) while N
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
-        full_matrices : bool, optional, default: False.
+        full_matrices: bool, optional, default: False.
             If False , U and VT have the shapes (M,  k) and
             (k, N), respectively, where k = min(M, N).
             Otherwise the shapes will be (M, M) and (N, N),
             respectively.
-        compute_uv : bool, optional, default:True.
+        compute_uv: bool, optional, default:True.
             Whether or not to compute U and VT in addition to s.
 
         Examples
@@ -268,7 +268,7 @@ class SVD(HasTraits):
 
         Parameters
         ----------
-        u_based_decision : boolean, (default=True)
+        u_based_decision: boolean, (default=True)
             If True, use the columns of u as the basis for sign flipping.
             Otherwise, use the rows of v.
 

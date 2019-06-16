@@ -76,7 +76,7 @@ def test_autosub(IR_dataset_2D):
     ref2 = s5[:,0].squeeze()
     ranges2 = [0,5], [45, 54]
 
-    # TODO : not yet implemented
+    # TODO: not yet implemented
     #s6 = s5.autosub(ref2, *ranges2, dim='y', method='varfit', inplace=False)
     #s6.plot()
 

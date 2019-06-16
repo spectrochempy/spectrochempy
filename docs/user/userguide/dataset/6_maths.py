@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.1.1
+#       jupytext_version: 1.1.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -75,71 +75,71 @@ sqrt(dx)
 # if an Ufunc works on `NDDataset` but not on `NDPanel`, this is specified in the list below.
 #
 # ### Functions affecting magnitudes of the number but keeping units
-# * [negative](#negative)(x, \*\*kwargs) : Numerical negative, element-wise. 
-# * [absolute](#abs)(x, \*\*kwargs) : Calculate the absolute value, element-wise. Alias: [abs](#abs)
-# * [fabs](#abs)(x, \*\*kwargs) : Calculate the absolute value, element-wise. Complex values are not handled, use [absolute](#absolute) to find the absolute values of complex data.
-# * [conj](#)(x, \*\*kwargs) : Return the complex conjugate, element-wise. 
+# * [negative](#negative)(x, \*\*kwargs): Numerical negative, element-wise. 
+# * [absolute](#abs)(x, \*\*kwargs): Calculate the absolute value, element-wise. Alias: [abs](#abs)
+# * [fabs](#abs)(x, \*\*kwargs): Calculate the absolute value, element-wise. Complex values are not handled, use [absolute](#absolute) to find the absolute values of complex data.
+# * [conj](#)(x, \*\*kwargs): Return the complex conjugate, element-wise. 
 # * [rint](#rint)(x, \*\*kwargs) :Round to the nearest integer, element-wise.  
-# * [floor](#floor)(x, \*\*kwargs) : Return the floor of the input, element-wise.
-# * [ceil](#ceil)(x, \*\*kwargs) : Return the ceiling of the input, element-wise.
-# * [trunc](#trunc)(x, \*\*kwargs) : Return the truncated value of the input, element-wise. 
+# * [floor](#floor)(x, \*\*kwargs): Return the floor of the input, element-wise.
+# * [ceil](#ceil)(x, \*\*kwargs): Return the ceiling of the input, element-wise.
+# * [trunc](#trunc)(x, \*\*kwargs): Return the truncated value of the input, element-wise. 
 #
 # ### Functions affecting magnitudes of the number but also units
-# * [sqrt](#sqrt)(x, \*\*kwargs) : Return the non-negative square-root of an array, element-wise.
-# * [square](#square)(x, \*\*kwargs) : Return the element-wise square of the input.
-# * [cbrt](#cbrt)(x, \*\*kwargs) : Return the cube-root of an array, element-wise.
-# * [reciprocal](#reciprocal)(x, \*\*kwargs) : Return the reciprocal of the argument, element-wise.
+# * [sqrt](#sqrt)(x, \*\*kwargs): Return the non-negative square-root of an array, element-wise.
+# * [square](#square)(x, \*\*kwargs): Return the element-wise square of the input.
+# * [cbrt](#cbrt)(x, \*\*kwargs): Return the cube-root of an array, element-wise.
+# * [reciprocal](#reciprocal)(x, \*\*kwargs): Return the reciprocal of the argument, element-wise.
 #
 # ### Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.
-# * [exp](#exp)(x, \*\*kwargs) : Calculate the exponential of all elements in the input array.
-# * [exp2](#exp)(x, \*\*kwargs) : Calculate 2\*\*p for all p in the input array.
-# * [expm1](#exp)(x, \*\*kwargs) : Calculate `exp(x) - 1` for all elements in the array. 
-# * [log](#log)(x, \*\*kwargs) : Natural logarithm, element-wise. 
-# * [log2](#log)(x, \*\*kwargs) : Base-2 logarithm of x.
-# * [log10](#log)(x, \*\*kwargs) : Return the base 10 logarithm of the input array, element-wise. 
-# * [log1p](#log)(x, \*\*kwargs) : Return `log(x + 1)`, element-wise.
+# * [exp](#exp)(x, \*\*kwargs): Calculate the exponential of all elements in the input array.
+# * [exp2](#exp)(x, \*\*kwargs): Calculate 2\*\*p for all p in the input array.
+# * [expm1](#exp)(x, \*\*kwargs): Calculate `exp(x) - 1` for all elements in the array. 
+# * [log](#log)(x, \*\*kwargs): Natural logarithm, element-wise. 
+# * [log2](#log)(x, \*\*kwargs): Base-2 logarithm of x.
+# * [log10](#log)(x, \*\*kwargs): Return the base 10 logarithm of the input array, element-wise. 
+# * [log1p](#log)(x, \*\*kwargs): Return `log(x + 1)`, element-wise.
 #
 # ### Functions that return numpy arrays (*Work only for NDDataset*)
-# * [sign](#sign)(x) : Returns an element-wise indication of the sign of a number.
-# * [logical_not](#logical_not)(x) : Compute the truth value of NOT x element-wise. 
-# * [isfinite](#isfinite)(x) : Test element-wise for finiteness.
-# * [isinf](#isinf)(x) : Test element-wise for positive or negative infinity.
-# * [isnan](#isnan)(x) : Test element-wise for `NaN` and return result as a boolean array.
-# * [signbit](#signbit)(x) : Returns element-wise `True` where signbit is set.
+# * [sign](#sign)(x): Returns an element-wise indication of the sign of a number.
+# * [logical_not](#logical_not)(x): Compute the truth value of NOT x element-wise. 
+# * [isfinite](#isfinite)(x): Test element-wise for finiteness.
+# * [isinf](#isinf)(x): Test element-wise for positive or negative infinity.
+# * [isnan](#isnan)(x): Test element-wise for `NaN` and return result as a boolean array.
+# * [signbit](#signbit)(x): Returns element-wise `True` where signbit is set.
 #
 # ### Trigonometric functions. Require unitless data or radian units.
-# * [sin](#sin)(x, \*\*kwargs) : Trigonometric sine, element-wise.
-# * [cos](#cos)(x, \*\*kwargs) : Trigonometric cosine element-wise.
-# * [tan](#tan)(x, \*\*kwargs) : Compute tangent element-wise. 
+# * [sin](#sin)(x, \*\*kwargs): Trigonometric sine, element-wise.
+# * [cos](#cos)(x, \*\*kwargs): Trigonometric cosine element-wise.
+# * [tan](#tan)(x, \*\*kwargs): Compute tangent element-wise. 
 #
-# * [arcsin](#arcsin)(x, \*\*kwargs) : Inverse sine, element-wise.
-# * [arccos](#arccos)(x, \*\*kwargs) : Trigonometric inverse cosine, element-wise.
-# * [arctan](#arctan)(x, \*\*kwargs) : Trigonometric inverse tangent, element-wise.
+# * [arcsin](#arcsin)(x, \*\*kwargs): Inverse sine, element-wise.
+# * [arccos](#arccos)(x, \*\*kwargs): Trigonometric inverse cosine, element-wise.
+# * [arctan](#arctan)(x, \*\*kwargs): Trigonometric inverse tangent, element-wise.
 #
 # ### Hyperbolic functions
-# * [sinh](#sinh)(x, \*\*kwargs) : Hyperbolic sine, element-wise.
-# * [cosh](#cosh)(x, \*\*kwargs) : Hyperbolic cosine, element-wise.
-# * [tanh](#tanh)(x, \*\*kwargs) : Compute hyperbolic tangent element-wise.
-# * [arcsinh](#arcsinh)(x, \*\*kwargs) : Inverse hyperbolic sine element-wise.
-# * [arccosh](#arccosh)(x, \*\*kwargs) : Inverse hyperbolic cosine, element-wise.
-# * [arctanh](#arctanh)(x, \*\*kwargs) : Inverse hyperbolic tangent element-wise.
+# * [sinh](#sinh)(x, \*\*kwargs): Hyperbolic sine, element-wise.
+# * [cosh](#cosh)(x, \*\*kwargs): Hyperbolic cosine, element-wise.
+# * [tanh](#tanh)(x, \*\*kwargs): Compute hyperbolic tangent element-wise.
+# * [arcsinh](#arcsinh)(x, \*\*kwargs): Inverse hyperbolic sine element-wise.
+# * [arccosh](#arccosh)(x, \*\*kwargs): Inverse hyperbolic cosine, element-wise.
+# * [arctanh](#arctanh)(x, \*\*kwargs): Inverse hyperbolic tangent element-wise.
 #
 # ### Unit conversions
-# * [deg2rad](#deg2rad)(x, \*\*kwargs) : Convert angles from degrees to radians.
-# * [rad2deg](#rad2deg)(x, \*\*kwargs) : Convert angles from radians to degrees.
+# * [deg2rad](#deg2rad)(x, \*\*kwargs): Convert angles from degrees to radians.
+# * [rad2deg](#rad2deg)(x, \*\*kwargs): Convert angles from radians to degrees.
 #
 # ### Binary Ufuncs
 #
-# * [add](#add)(x1, x2, \*\*kwargs) : Add arguments élement-wise.
-# * [subtract](#subtract)(x1, x2, \*\*kwargs) : Subtract arguments, element-wise.
-# * [multiply](#multiply)(x1, x2, \*\*kwargs) : Multiply arguments element-wise.
-# * [divide](#divide) or [true_divide](#true_divide)(x1, x2, \*\*kwargs) : Returns a true division of the inputs, element-wise.
-# * [floor_divide](#floor_divide)(x1, x2, \*\*kwargs) : Return the largest integer smaller or equal to the division of the inputs.
-# * [mod](#mod) or [remainder](#remainder)(x1, x2,\*\*kwargs) : Return element-wise remainder of division.
-# * [fmod](#fmod)(x1, x2, \*\*kwargs) : Return the element-wise remainder of division. 
-# * [logaddexp](#logaddexp)(x1, x2,\*\*kwargs) : Logarithm of the sum of exponentiations of the inputs.
-# * [logaddexp2](#logaddexp2)(x1, x2, \*\*kwargs) : Logarithm of the sum of exponentiations of the inputs in base-2.
-# * [heaviside](#heaviside)(x1, x2, \*\*kwargs) : Compute the Heaviside step function.
+# * [add](#add)(x1, x2, \*\*kwargs): Add arguments élement-wise.
+# * [subtract](#subtract)(x1, x2, \*\*kwargs): Subtract arguments, element-wise.
+# * [multiply](#multiply)(x1, x2, \*\*kwargs): Multiply arguments element-wise.
+# * [divide](#divide) or [true_divide](#true_divide)(x1, x2, \*\*kwargs): Returns a true division of the inputs, element-wise.
+# * [floor_divide](#floor_divide)(x1, x2, \*\*kwargs): Return the largest integer smaller or equal to the division of the inputs.
+# * [mod](#mod) or [remainder](#remainder)(x1, x2,\*\*kwargs): Return element-wise remainder of division.
+# * [fmod](#fmod)(x1, x2, \*\*kwargs): Return the element-wise remainder of division. 
+# * [logaddexp](#logaddexp)(x1, x2,\*\*kwargs): Logarithm of the sum of exponentiations of the inputs.
+# * [logaddexp2](#logaddexp2)(x1, x2, \*\*kwargs): Logarithm of the sum of exponentiations of the inputs in base-2.
+# * [heaviside](#heaviside)(x1, x2, \*\*kwargs): Compute the Heaviside step function.
 #
 #
 

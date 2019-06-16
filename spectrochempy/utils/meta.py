@@ -95,7 +95,7 @@ class Meta(object):  # HasTraits):
         """
         Parameters
         ----------
-        **data : keywords
+        **data: keywords
             The dictionary can be already inited with some keywords.
 
         """
@@ -187,7 +187,7 @@ class Meta(object):  # HasTraits):
 
         Parameters
         ----------
-        d : dict-like object
+        d: dict-like object
             Any dict-like object can be used, such as `dict`, traits `Dict` or
             another `Meta` object.
 

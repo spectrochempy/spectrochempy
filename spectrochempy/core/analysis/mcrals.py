@@ -42,29 +42,29 @@ class MCRALS(HasTraits):
         """
         Parameters
         ----------
-        X : |NDDataset|
+        X: |NDDataset|
             The dataset on which to perform the MCR-ALS analysis
-        guess : |NDDataset|
+        guess: |NDDataset|
             Initial concentration or spectra
-        param : dict
+        param: dict
             Dict of optimization parameters with the following keys:
 
             *   'tol': float, optional, convergence criterion on the change of resisuals.
                 (percent change of standard deviation of residuals). default=0.1
-            *   'maxit' : maximum number of ALS minimizations. default = 50
-            *   'maxdiv' : maximum number of successive non-converging iterations. default=5
-            *   'nonnegConc' : array or tuple indicating species non-negative concentration
+            *   'maxit': maximum number of ALS minimizations. default = 50
+            *   'maxdiv': maximum number of successive non-converging iterations. default=5
+            *   'nonnegConc': array or tuple indicating species non-negative concentration
                 profiles. For instance [1, 0, 1] indicates that species #0
                 and #2 have non-negative conc profiles while species #1
                 can have negative concentrations.
                 Default [1, ..., 1]  (only non-negative concentrations)
-            *   'unimodConc' : array or tuple indicating species having unimodal concentrationsprofiles.
+            *   'unimodConc': array or tuple indicating species having unimodal concentrationsprofiles.
                 Default [1, ..., 1]  (only unimodal concentration profiles)
-            *   'nonnegSpec' : array or tuple indicating species having non-negative spectra
+            *   'nonnegSpec': array or tuple indicating species having non-negative spectra
                 Default [1, ..., 1]  (only non-negative spectra)
-            *   'unimodSpec' : array or tuple indicating species having unimodal spectra
+            *   'unimodSpec': array or tuple indicating species having unimodal spectra
                 Default [0, ..., 0]  (no unimodal cocentration profiles)
-        verbose : bool
+        verbose: bool
             If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
             In anyu case, the same information is returned in self._log
 
@@ -260,7 +260,7 @@ class MCRALS(HasTraits):
             stdev2 = (X_hat - X).std()
             change = 100 * (stdev2 - stdev) / stdev
 
-            stdev_PCA = (X_hat - Xpca).std()  # TODO: Check PCA : values are different from the Arnaud version ?
+            stdev_PCA = (X_hat - Xpca).std()  # TODO: Check PCA: values are different from the Arnaud version ?
 
             logentry = '{:3d}      {:10f}      {:10f}      {:10f}'.format(niter, stdev_PCA, stdev2, change)
             logs += logentry + '\n'
@@ -303,9 +303,9 @@ class MCRALS(HasTraits):
 
         Returns
         -------
-        C : |NDDataset|
+        C: |NDDataset|
             The concentration matrix
-        St : |NDDataset|
+        St: |NDDataset|
             The spectra matrix
 
         """
@@ -319,7 +319,7 @@ class MCRALS(HasTraits):
 
         Returns
         -------
-        X_hat : |NDDataset|
+        X_hat: |NDDataset|
             The reconstructed dataset based on the MCS-ALS optimization.
 
         """
@@ -340,7 +340,7 @@ class MCRALS(HasTraits):
 
         Returns
         -------
-        ax : subplot
+        ax: subplot
 
         """
 

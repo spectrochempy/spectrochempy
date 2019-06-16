@@ -50,22 +50,22 @@ def read_omnic(dataset=None, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset: |NDDataset|
         The dataset to store the data and metadata read from the OMNIC file(s).
         If None, a |NDDataset| is created.
-    filename : `None`, `str`, or list of `str`
+    filename: `None`, `str`, or list of `str`
         Filename of the file(s) to load. If `None`: opens a dialog box to select
         ``.spa`` or ``.spg`` files. If `str`: a single filename. It list of str:
         a list of filenames.
     directory: str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
-    sortbydate: bool, optional, default : True.
+    sortbydate: bool, optional, default: True.
         Sort spectra by acquisition date
 
     Returns
     -------
-    dataset : |NDDataset|
+    dataset: |NDDataset|
         A dataset corresponding to the ``.spg`` file or the set of ``.spa``
         files. A list of datasets is returned if several ``.spg`` files are passed.
 
@@ -189,17 +189,17 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
         # Each of theses lines provides positions of data and metadata in the file:
         #
-        #     key: hex 02, dec  02 : position of spectral header (=> nx,
+        #     key: hex 02, dec  02: position of spectral header (=> nx,
         #                                 firstx, lastx, nscans, nbkgscans)
-        #     key: hex 03, dec  03 : intensity position
-        #     key: hex 04, dec  04 : user text position
-        #     key: hex 1B, dec  27 : position of History text
-        #     key: hex 69, dec 105 : ?
-        #     key: hex 6a, dec 106 : ?
-        #     key: hex 6b, dec 107 : position of spectrum title, the acquisition
+        #     key: hex 03, dec  03: intensity position
+        #     key: hex 04, dec  04: user text position
+        #     key: hex 1B, dec  27: position of History text
+        #     key: hex 69, dec 105: ?
+        #     key: hex 6a, dec 106: ?
+        #     key: hex 6b, dec 107: position of spectrum title, the acquisition
         #                                 date follows at +256(dec)
-        #     key: hex 80, dec 128 : ?
-        #     key: hex 82, dec 130 : ?
+        #     key: hex 80, dec 128: ?
+        #     key: hex 82, dec 130: ?
         #
         # the number of line per block may change from one omnic version to another,
         # but the total number of lines is given at hex 294, hence allowing counting
@@ -376,7 +376,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
 
     # Set description and history
     dataset.description = (
-            'Dataset from spg file : ' + spg_title + ' \n'
+            'Dataset from spg file: ' + spg_title + ' \n'
             + 'History of the 1st spectrum: ' + allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
@@ -443,15 +443,15 @@ def _read_spa(dataset, filenames, **kwargs):
             # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
             # Each of theses lines provides positions of data and metadata in the file:
             #
-            #     key: hex 02, dec  02 : position of spectral header (=> nx,
+            #     key: hex 02, dec  02: position of spectral header (=> nx,
             #                                 firstx, lastx, nscans, nbkgscans)
-            #     key: hex 03, dec  03 : intensity position
-            #     key: hex 04, dec  04 : user text position
-            #     key: hex 1B, dec  27 : position of History text
-            #     key: hex 69, dec 105 : ?
-            #     key: hex 6a, dec 106 : ?
-            #     key: hex 80, dec 128 : ?
-            #     key: hex 82, dec 130 : ?
+            #     key: hex 03, dec  03: intensity position
+            #     key: hex 04, dec  04: user text position
+            #     key: hex 1B, dec  27: position of History text
+            #     key: hex 69, dec 105: ?
+            #     key: hex 6a, dec 106: ?
+            #     key: hex 80, dec 128: ?
+            #     key: hex 82, dec 130: ?
             #
 
             gotinfos = [False, False,
@@ -544,7 +544,7 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset.set_coords(y=_y, x=_x)
     
     # Set description and history
-    dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum: {3}".format(
+    dataset.description = "Dataset from {0} spa files: '{1}'\nHistory of the {2}spectrum: {3}".format(
         nspec, ' ... '.join(set([filenames[0], filenames[-1]])), '1st ' if nspec > 1 else '', allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'

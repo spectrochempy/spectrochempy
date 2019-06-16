@@ -314,7 +314,7 @@ class NDComplexArray(NDArray):
 
         Parameters
         ----------
-        select : str, optional, default='REAL'
+        select: str, optional, default='REAL'
             if 'REAL', only real part in all dimensions will be selected.
             ELse a string must specify which real (R) or imaginary (I) component
             has to be selected along a specific dimension. For instance,

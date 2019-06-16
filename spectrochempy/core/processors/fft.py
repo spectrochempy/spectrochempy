@@ -44,15 +44,15 @@ def ft(self, **kwargs):
 
     Parameters
     ----------
-    size : int
+    size: int
 
         size of the transformed dataset dimension
 
-    inplace : `bool`, optional, default = `False`
+    inplace: `bool`, optional, default = `False`
 
         Should we make the transform in place or return a new dataset
 
-    axis : optional, default is -1
+    axis: optional, default is -1
 
         The transformation is applied in the last dimension or on the specified
         axis of a dataset.
@@ -60,7 +60,7 @@ def ft(self, **kwargs):
 
     Returns
     -------
-    object : nd-dataset or nd-array
+    object: nd-dataset or nd-array
         transformed dataset
 
     """

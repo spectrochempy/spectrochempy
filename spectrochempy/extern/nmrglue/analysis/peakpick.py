@@ -20,59 +20,59 @@ def pick(data, pthres, nthres=None, msep=None, algorithm='connected',
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Region of NMR spectrum to pick peaks from.
-    pthres : float
+    pthres: float
         Minimum peak height for positive peaks. None to not detect positive
         peaks.
-    nthres : float
+    nthres: float
         Minimum peak height for negative peaks (typically a negative value).
         None to not detect negative peaks.
-    msep : tuple of ints, optional
+    msep: tuple of ints, optional
         N-tuple of minimum peak seperations along each axis. Must be provided
         if algorithm is 'thresh' or 'thresh-fast'.
-    algorithm : {'thres', thresh-fast', 'downward', 'connected'}, optional
+    algorithm: {'thres', thresh-fast', 'downward', 'connected'}, optional
         Peak picking algorithm to use.  Default is 'connected'.
-    est_params : bool, optional
+    est_params: bool, optional
         True to perform an estimate of linewidths and amplitude for all peaks
         picked.  False, the default, will return only the peak locations.
-    lineshapes : list, optional
+    lineshapes: list, optional
         A list of lineshape classes or string shortcuts for each dimension.
         If not specified Gaussian type lineshapes with a FWHM  linewidth
         parameter is assumed in each dimension. This parameter if only used
         if est_params is True.
-    edge : tuple of ints, optional
+    edge: tuple of ints, optional
         Tuple to add to peak locations representing the edge of the region.
         None, the default, skips this addition.
-    diag : bool, optional
+    diag: bool, optional
         True to consider diagonal points to be  touching in peak finding
         algorithm and clustering.
-    c_struc : ndarray, optional
+    c_struc: ndarray, optional
         Structure element to use when applying dilation on segments before
         applying clustering algorithm. None will apply a default square
         structure with connectivity one will be applied.
-    c_ndil : int, optional
+    c_ndil: int, optional
         Number of dilations to perform on segments before applying clustering
         algorithm.
-    cluster : bool, optional
+    cluster: bool, optional
         True to cluster touching peaks. False does not apply clustering.
-    table : bool, optional
+    table: bool, optional
         True to return a table. False to return lists.
-    axis_names : list. optional
+    axis_names: list. optional
         List of axis names, the last n will be used for column name prefixes
         in table where n is the number of dimensions.
 
     Returns
     -------
-    locations : list, returned when table is False
+    locations: list, returned when table is False
         Peak locations.
-    cluster_ids : list, returned when table is False and cluster is True
+    cluster_ids: list, returned when table is False and cluster is True
         Cluster numbers for peaks.
-    scales : list, returned when table is False and est_params is True
+    scales: list, returned when table is False and est_params is True
         Estimated peak scales (linewidths).
-    amps : list, returned when table is False and est_params is True
+    amps: list, returned when table is False and est_params is True
         Estimated peak amplitudes.
-    table : recarray, returned when table is True
+    table: recarray, returned when table is True
         Table of request peak parameters.
 
     """
@@ -250,26 +250,26 @@ def clusters(data, locations, pthres, nthres, d_struc=None, l_struc=None,
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of data which has been peak picked.
-    locations : list
+    locations: list
         List of peak locations.
-    pthres : float
+    pthres: float
         Postive peak threshold. None for no postive peaks.
-    nthres : float
+    nthres: float
         Negative peak threshold. None for no negative peaks.
-    d_struc : ndarray, optional
+    d_struc: ndarray, optional
         Structure of binary dilation to apply on segments before clustering.
         None uses a square structure with connectivity of one.
-    l_struc : ndarray, optional
+    l_struc: ndarray, optional
         Structure to use for determining segment connectivity in clustering.
         None uses square structure with connectivity of one.
-    dnil : int, optional
+    dnil: int, optional
         Number of dilation to apply on segments before determining clusters.
 
     Returns
     -------
-    cluster_ids : list
+    cluster_ids: list
         List of cluster number corresponding to peak locations.
 
     """
@@ -298,24 +298,24 @@ def pack_table(locations, cluster_ids=None, scales=None, amps=None,
 
     Parameters
     ----------
-    locations : list
+    locations: list
         List of peak locations.
-    cluster_ids : list, optional
+    cluster_ids: list, optional
         List of cluster numbers. None will not include cluster number in the
         table.
-    scales : list, optional
+    scales: list, optional
         List of peak scales (linewidths). None will not include peak scales in
         the table.
-    amps : list, optional
+    amps: list, optional
         List of peak amplitudes. None will not include peak amplitudes in the
         table.
-    axis_names : list, optional
+    axis_names: list, optional
         List of axis names, the last n will be used for column name prefixes
         where n is the number of dimensions.
 
     Returns
     -------
-    table : recarray
+    table: recarray
         nmrglue table with column representing peak parameters. Peak locations
         are given column names like 'X_AXIS', 'Y_AXIS', etc. Cluster_ids are
         given a column name of 'cID'. Peak scales (linewidths) are given
@@ -347,22 +347,22 @@ def guess_params_slice(data, location, seg_slice, ls_classes):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         NMR data.
-    location : tuple
+    location: tuple
         Peak locations.
-    seg_slice : list of slices
+    seg_slice: list of slices
         List slices which slice data to give the desired segment.
-    lineshapes : list
+    lineshapes: list
         List of lineshape classes.
 
     Returns
     -------
-    location : list
+    location: list
         Peak locations.
-    scale : list
+    scale: list
         Peak scales (linewidths).
-    amp : list
+    amp: list
         Peak amplitudes.
 
     """
@@ -411,21 +411,21 @@ def find_all_thres(data, thres, msep, find_segs=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         NMR data.
-    thres : float
+    thres: float
         Threshold value for minimum peak height
-    msep : tuple
+    msep: tuple
         Tuple of minimum peak seperations along each axis.
-    find_segs : bool, optional
+    find_segs: bool, optional
         True  to find segments and return a list of slices which select that
         segment.  False performs no segmentation discovery.
 
     Returns
     -------
-    locations : list
+    locations: list
         List of peak locations
-    seg_slices : list, optional
+    seg_slices: list, optional
         List of slices which extract a region around each peak. Only returned
         when find_segs is True.
 

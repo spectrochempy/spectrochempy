@@ -482,7 +482,7 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     assert row1.dims == ['x']
     assert row1.shape == (3,)
     assert row1.mask.shape == (3,)
-    info_("row1 : \n", row1)
+    info_("row1: \n", row1)
     element = row1[..., 0]
     assert element.x == coords[0][0]
 
@@ -1379,7 +1379,7 @@ def test_nddataset_set_coordinates(nd2d, ds1):
     assert nd.dims == ['x', 'y']
     assert nd.x == np.arange(nx)
 
-    # set coordinate with one set to None : should work!
+    # set coordinate with one set to None: should work!
     # set coordinates from tuple
     nd = nd2d.copy()
     ny, nx = nd.shape
@@ -1547,7 +1547,7 @@ def test_nddataset_init_pandas(series, dataframe, panel):
 # Xarray
 # ----------------------------------------------------------------------------------------------------------------------
 
-# TODO :  dataset from xarray
+# TODO:  dataset from xarray
 
 def test_nddataset_xarray_export(IR_dataset_2D):
     nd = IR_dataset_2D.copy()

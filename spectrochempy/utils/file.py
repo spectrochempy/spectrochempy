@@ -383,7 +383,7 @@ class ScpFile(object):
         """
         Parameters
         ----------
-        fid : file or str
+        fid: file or str
             The zipped archive to open. This is either a file-like object
             or a string containing the path to the archive.
 

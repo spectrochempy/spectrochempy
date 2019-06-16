@@ -47,7 +47,7 @@ from spectrochempy.core import general_preferences, info_
 
 
 # ======================================================================================================================
-#  Fit : main object to handle a fit
+#  Fit: main object to handle a fit
 # ======================================================================================================================
 
 class Fit(HasTraits):
@@ -57,19 +57,19 @@ class Fit(HasTraits):
 
     Parameters
     ----------
-    dataset : Dataset or list of Dataset instance
+    dataset: Dataset or list of Dataset instance
         The data to fit
 
-    mode : Unicode, optional
+    mode: Unicode, optional
         Reserved - not used for now
 
     Attributes
     ----------
-    fp : Dict
+    fp: Dict
         Fit parameters dictionary (read-only, but individual elements of the dict
         can be changed)
 
-    script : Unicode
+    script: Unicode
         A string representation of the fp dict,
         which can be used as input for other a fit (read-only)
 
@@ -164,11 +164,11 @@ class Fit(HasTraits):
 
         Parameters
         ----------
-        maxiter : int, maximum number of iteration
-        maxfun : int, maximum number of function calls
-        every : int, number of function call between two displays
-        method : str, ether 'simplex' or 'hopping'
-        dryrun : bool
+        maxiter: int, maximum number of iteration
+        maxfun: int, maximum number of function calls
+        every: int, number of function call between two displays
+        method: str, ether 'simplex' or 'hopping'
+        dryrun: bool
 
         """
 

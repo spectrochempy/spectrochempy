@@ -49,7 +49,7 @@ proj
 #
 # * `proj.P350.IR[:, 3000.0:3100.0]` will select all columns from wavenumbers 3000 to 3100. 
 #
-# <div class='alert alert-info'>**IMPORTANT** : 
+# <div class='alert alert-info'>**IMPORTANT**:
 #
 # * When doing such slicing, the wavenumbers must be expressed as **floating numbers** (with the decimal separator present) or it will fail!.
 #

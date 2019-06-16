@@ -26,17 +26,17 @@ def make_uc(dic, data, dim=-1):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of RNMRTK parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    dim : int, optional
+    dim: int, optional
         Demension number to create unit conversion object for. Default is for
         the last dimension.
 
     Returns
     -------
-    uc : unit conversion object.
+    uc: unit conversion object.
         Unit conversion object for given dimension.
 
     """
@@ -77,14 +77,14 @@ def guess_udic(dic, data):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of RNMRTK parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
 
     """
@@ -132,16 +132,16 @@ def create_dic(udic, dim_order=None):
 
     Parameters
     ----------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
-    dim_order : list, optional
+    dim_order: list, optional
         List mapping axis numbers in the universal dictionary to the order
         in which they will appear in the RNMRTK dictionary.  If None, the
         default [0, 1, 2, ...] is used.
 
     Returns
     --------
-    dic : dict
+    dic: dict
         Dictionary of RNMRTK parameters.
 
     """
@@ -221,17 +221,17 @@ def read(filename, par_file=None):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of RNMRTK file to read (.sec).
-    par_file : str or None, optional
+    par_file: str or None, optional
         Filename of RNMRTK parameter file. If None (default) a the last four
         characters of `file` are changed to .par.
 
     Returns
     -------
-    dic : dic
+    dic: dic
         Dictionary of RNMRTK parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Notes
@@ -242,8 +242,8 @@ def read(filename, par_file=None):
 
     See Also
     --------
-    read_lowmem : Read RNMRTK files with minimal memory usage.
-    write : Write RNMRTK files.
+    read_lowmem: Read RNMRTK files with minimal memory usage.
+    write: Write RNMRTK files.
 
     """
     # determine par_file name if not given
@@ -267,17 +267,17 @@ def read_lowmem(filename, par_file=None):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of RNMRTK file to read (.sec).
-    par_file : str or None, optional
+    par_file: str or None, optional
         Filename of RNMRTK parameter file. If None (default) a the last four
         characters of `file` are changed to .par.
 
     Returns
     -------
-    dic : dic
+    dic: dic
         Dictionary of RNMRTK parameters.
-    data : array_like
+    data: array_like
         Low memory object which can access NMR data on demand.
 
     Notes
@@ -288,8 +288,8 @@ def read_lowmem(filename, par_file=None):
 
     See Also
     --------
-    read : Read RNMRTK files.
-    write : Write RNMRTK files.
+    read: Read RNMRTK files.
+    write: Write RNMRTK files.
 
     """
     # determine par_file name if not given
@@ -313,23 +313,23 @@ def write(filename, dic, data, par_file=None, overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of RNMRTK file to write to (.sec).
-    dic : dict
+    dic: dict
         Dictionary of RNMRTK parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    par_file : str or None, optional
+    par_file: str or None, optional
         Filename of RNMRTK parameter file. If None (default) a the last four
         characters of `file` are changed to .par.
-    overwrite : bool, optional
+    overwrite: bool, optional
         True to overwrite existing files. False will raises a Warning if the
         file exists.
 
     See Also
     --------
-    write_lowmem : Write RNMRTK files using minimal amounts of memory.
-    read : Read RNMRTK files.
+    write_lowmem: Write RNMRTK files using minimal amounts of memory.
+    read: Read RNMRTK files.
 
     """
     # determine par_file name if not given
@@ -346,23 +346,23 @@ def write_lowmem(filename, dic, data, par_file=None, overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of RNMRTK file to write to (.sec).
-    dic : dict
+    dic: dict
         Dictionary of RNMRTK parameters.
-    data : array_like
+    data: array_like
         Array of NMR data.
-    par_file : str or None, optional
+    par_file: str or None, optional
         Filename of RNMRTK parameter file. If None (default) a the last four
         characters of `file` are changed to .par.
-    overwrite : bool, optional
+    overwrite: bool, optional
         True to overwrite existing files. False will raises a Warning if the
         file exists.
 
     See Also
     --------
-    write : Write RNMRTK files using minimal amounts of memory.
-    read_lowmem : Read RNMRTK files using minimal amounts of memory.
+    write: Write RNMRTK files using minimal amounts of memory.
+    read_lowmem: Read RNMRTK files using minimal amounts of memory.
 
     """
     # determine par_file name if not given
@@ -390,19 +390,19 @@ def write_sec(filename, data, dtype='f4', overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of RNMRTK file to write to (.sec).
-    data : array_like
+    data: array_like
         Array of NMR data.
-    dtype : dtype
+    dtype: dtype
         Data type to convert data to before writing to disk.
-    overwrite : bool, optional
+    overwrite: bool, optional
         True to overwrite existing files. False will raises a Warning if the
         file exists.
 
     See Also
     --------
-    write : Write RNMRTK files.
+    write: Write RNMRTK files.
 
     """
     # open file
@@ -424,18 +424,18 @@ def read_sec(filename, dtype, shape, cplex):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of RNMRTK (.sec) file to read .
-    dtype : dtype
+    dtype: dtype
         Type of data in file, typically 'float32'.
-    shape : tuple
+    shape: tuple
         Shape of data.
-    cplex : bool
+    cplex: bool
         True if the last (fast) dimension is complex. False is real only.
 
     Returns
     -------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     """
@@ -456,14 +456,14 @@ def get_data(filename, dtype):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of RNMRTK file (.sec) to get data from.
-    dtype : dtype
+    dtype: dtype
         Type of data in file, typically 'float32'
 
     Returns
     -------
-    rdata : ndarray
+    rdata: ndarray
         Raw NMR data, unshaped and typically not complex.
 
     """
@@ -476,16 +476,16 @@ def get_trace(f, num_points, big):
 
     Parameters
     -----------
-    f : file object
+    f: file object
         Open file object to read from.
-    num_points : int
+    num_points: int
         Number of points in trace (R+I)
-    big : bool
+    big: bool
         True for data that is big-endian, False for little-endian.
 
     Returns
     -------
-    trace : ndarray
+    trace: ndarray
         Raw trace of NMR data.
 
     """
@@ -503,9 +503,9 @@ def put_trace(f, trace):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         Open file object to read from.
-    trace : ndarray
+    trace: ndarray
         Raw trace of NMR data, may be complex64.
 
     """
@@ -549,15 +549,15 @@ class rnmrtk_nd(fileiobase.data_nd):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of RNMRTK file (.sec) to read.
-    fshape : tuple of ints
+    fshape: tuple of ints
         Shape of data in file.
-    cplex : bool
+    cplex: bool
         True if the last (fast) axis is complex.
-    big : bool
+    big: bool
         True for big-endian data, False for little-endian.
-    order : tuple
+    order: tuple
         Ordering of axes against file. None for (0, 1, 2, ...).
 
     """
@@ -652,14 +652,14 @@ def find_dic_dim(dic, dim):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of RNMRTK parameters.
-    dim : int, non-negative
+    dim: int, non-negative
         Dimension of data array.
 
     Returns
     -------
-    ddim : int
+    ddim: int
         Dimension in dic which corresponds to array dimension, dim.
 
     """
@@ -673,14 +673,14 @@ def find_array_dim(dic, ddim):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of RNMRTK parameters.
-    ddim : int, non-negative
+    ddim: int, non-negative
         Dimension in dictionary.
 
     Returns
     -------
-    dim : int
+    dim: int
         Dimension in array which corresponds to dictionary dimension, ddim.
 
     """
@@ -698,12 +698,12 @@ def read_par(filename):
 
     Parameters
     ----------
-    file : str
+    file: str
         Filename of RNMRTK parameter file (.par) to read
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of RNMRTK parameters.
 
     """
@@ -728,11 +728,11 @@ def write_par(par_file, dic, overwrite):
 
     Parameters
     -----------
-    par_file : str
+    par_file: str
         Filename of RNMRTK parameter file (.par) to write.
-    dic : dict
+    dic: dict
         Dictionary of NMR parameters.
-    overwrite : bool
+    overwrite: bool
         Set True to overwrite existing files, False will raise a Warning if the
         file exists.
 

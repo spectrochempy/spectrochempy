@@ -11,20 +11,20 @@
 
 ;Avance II+ version
 ;parameters:
-;d0  : incremented delay (2D) [3 usec]
-;d1 : recycle delay
-;pl1 : for 90 degree BABA pulses
-;pl2 : = 120 dB, not used
-;pl12 : for decoupling
-;cpdprg2 : decoupling sequence (tppm, cw, etc.)
-;p1 : 90 degree pulse (in BABA sequence)
-;pcpd2 : pulse length in decoupling sequence
-;cnst31 : rotation rate in Hz
-;ns : n*16
+;d0 : incremented delay (2D) [3 usec]
+;d1: recycle delay
+;pl1: for 90 degree BABA pulses
+;pl2: = 120 dB, not used
+;pl12: for decoupling
+;cpdprg2: decoupling sequence (tppm, cw, etc.)
+;p1: 90 degree pulse (in BABA sequence)
+;pcpd2: pulse length in decoupling sequence
+;cnst31: rotation rate in Hz
+;ns: n*16
 ;FnMode: States-TPPI or STATES
 ;l1  :number of rotor cycles for recoupling m any integer
 ;l2  :l2*4=l1 = (number of rotorcycles)
-;ns  : n*16
+;ns : n*16
 ;FnMode: States-TPPI or STATES
 # 29 "/home/nmr/prog/pp/babasansdec.cm"
 ;$COMMENT=SQ-DQ experiment with BABA for 4 rotor periods
@@ -38,7 +38,7 @@ define delay tau
 "tau=0.5s/cnst31-p1*2"
 
 "d0=1u"
-;cnst11 : to adjust t=0 for acquisition, if digmod = baseopt
+;cnst11: to adjust t=0 for acquisition, if digmod = baseopt
 "acqt0=1u*cnst11"
 # 1 "mc_line 43 file /home/nmr/prog/pp/babasansdec.cm exp. def. part of mc cmd. before ze"
 define delay MCWRK

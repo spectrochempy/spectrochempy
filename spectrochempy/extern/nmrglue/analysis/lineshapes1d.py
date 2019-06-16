@@ -27,16 +27,16 @@ def sim_gauss_sigma(x, x0, sigma):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of values at which to evaluate the distribution.
-    x0 : float
+    x0: float
         Center (mean) of Gaussian distribution.
-    sigma : float
+    sigma: float
         Scale (variance) of the Gaussian distribution.
 
     Returns
     -------
-    f : ndarray
+    f: ndarray
         Distribution evaluated at points in x.
 
     """
@@ -57,16 +57,16 @@ def sim_gauss_fwhm(x, x0, fwhm):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of values at which to evaluate distribution.
-    x0 : float
+    x0: float
         Center (mean) of Gaussian distribution.
-    fwhm : float
+    fwhm: float
         Full-width at half-maximum of distribution.
 
     Returns
     -------
-    f : ndarray
+    f: ndarray
         Distribution evaluated at points in x.
 
     """
@@ -88,16 +88,16 @@ def sim_lorentz_gamma(x, x0, gamma):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of values at which to evaluate distribution.
-    x0 : float
+    x0: float
         Center of the distribution.
-    gamma : float
+    gamma: float
         Scale parameter, half-width at half-maximum, of distribution.
 
     Returns
     -------
-    f : ndarray
+    f: ndarray
         Distribution evaluated at points in x.
 
     """
@@ -118,16 +118,16 @@ def sim_lorentz_fwhm(x, x0, fwhm):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of values at which to evaluate distribution.
-    x0 : float
+    x0: float
         Center of the distribution.
-    fwhm : float
+    fwhm: float
         Full-width at half-maximum of distribution.
 
     Returns
     -------
-    f : ndarray
+    f: ndarray
         Distribution evaluated at points in x.
 
     """
@@ -155,18 +155,18 @@ def sim_voigt_fwhm(x, x0, fwhm_g, fwhm_l):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of values at which to evalutate distribution.
-    x0 : float
+    x0: float
         Center of the distribution.
-    fwhm_g : float
+    fwhm_g: float
         Full-width at half-maximum of the Gaussian component.
-    fwhm_l : float
+    fwhm_l: float
         Full-width at half-maximum of the Lorentzian component.
 
     Returns
     -------
-    f : ndarray
+    f: ndarray
         Distribution evaluated at points in x.
 
     """
@@ -195,20 +195,20 @@ def sim_voigt_sigmagamma(x, x0, sigma, gamma):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of values at which to evalutate distribution.
-    x0 : float
+    x0: float
         Center of the distribution
-    sigma : float
+    sigma: float
         Gaussian scale component of Voigt profile.  Variance of the Gaussian
         distribution.
-    gamma : float
+    gamma: float
         Lorentzian scale component of Voigt profile.  Half-width at
         half-maximum of the Lorentzian component.
 
     Returns
     -------
-    f : ndarray
+    f: ndarray
         Distribution evaluated at points in x.
 
     """
@@ -238,18 +238,18 @@ def sim_pvoigt_fwhm(x, x0, fwhm, eta):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of values at which to evalutate distribution.
-    x0 : float
+    x0: float
         Center of the distribution.
-    fwhm : float
+    fwhm: float
         Full-width at half-maximum of the Pseudo Voigt profile.
-    eta : float
+    eta: float
         Lorentzian/Gaussian mixing parameter.
 
     Returns
     -------
-    f : ndarray
+    f: ndarray
         Distribution evaluated at points in x.
 
     """

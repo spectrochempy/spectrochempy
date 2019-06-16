@@ -117,7 +117,7 @@ def plot_2D(dataset, **kwargs):
 
     method: str [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
 
-    style : str, optional, default = 'notebook'
+    style: str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
 
@@ -129,7 +129,7 @@ def plot_2D(dataset, **kwargs):
 
     x_reverse: `bool` or None [optional, default= None
 
-    kwargs : additional keywords
+    kwargs: additional keywords
 
     """
     

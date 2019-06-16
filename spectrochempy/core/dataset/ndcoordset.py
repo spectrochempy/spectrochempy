@@ -69,21 +69,21 @@ class CoordSet(HasTraits):
         """
         Parameters
         ----------
-        coords : |NDarray|, |NDArray| subclass or |CoordSet| sequence of objects.
+        coords: |NDarray|, |NDArray| subclass or |CoordSet| sequence of objects.
             If an instance of CoordSet is found, instead of an array, this means
             that all coordinates in this coords describe the same axis.
             It is assumed that the coordinates are passed in the order of the
             dimensions of a nD numpy array (
             `row-major <https://docs.scipy.org/doc/numpy-1.14.1/glossary.html#term-row-major>`_
             order), i.e., for a 3d object: 'z', 'y', 'x'.
-        x : |NDarray|, |NDArray| subclass or |CoordSet|
+        x: |NDarray|, |NDArray| subclass or |CoordSet|
             A single coordinate associated to the 'x'-dimension.
             If a coord was already passed in the argument, this will overwrite
             the previous. It is thus not recommended to simultaneously use
             both way to initialize the coordinates to avoid such conflicts.
         y, z, u, ...: |NDarray|, |NDArray| subclass or |CoordSet|
             Same as `x` for the others dimensions.
-        is_same_dim : bool, optional, default:False
+        is_same_dim: bool, optional, default:False
             if true, all elements of coords describes a single dimension.
             By default, this is false, which means that each item describes
             a different dimension.
@@ -455,7 +455,7 @@ class CoordSet(HasTraits):
         
         Returns
         -------
-        out : list
+        out: list
             list of all coordinates names (including reference to other coordinates)
             
         """
@@ -512,10 +512,10 @@ class CoordSet(HasTraits):
         
         Parameters
         ----------
-        args : str(s)
+        args: str(s)
             The list of titles to apply to the set of coordinates (they must be given according to the coordinate's name
             alphabetical order
-        kwargs : str
+        kwargs: str
             keyword attribution of the titles. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set titles as this will be less prone to errors.
             
@@ -549,10 +549,10 @@ class CoordSet(HasTraits):
         
         Parameters
         ----------
-        args : str(s)
+        args: str(s)
             The list of units to apply to the set of coordinates (they must be given according to the coordinate's name
             alphabetical order
-        kwargs : str
+        kwargs: str
             keyword attribution of the units. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set units as this will be less prone to errors.
         force: bool, optional, default=False
@@ -629,7 +629,7 @@ class CoordSet(HasTraits):
 
         Parameters
         ----------
-        kwarg : Only keywords among the CoordSet.names are allowed - they denotes the name of a dimension.
+        kwarg: Only keywords among the CoordSet.names are allowed - they denotes the name of a dimension.
 
         """
         dims = kwargs.keys()

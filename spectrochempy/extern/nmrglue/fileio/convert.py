@@ -125,9 +125,9 @@ class converter(object):
 
         Parameters
         ----------
-        dic : dict
+        dic: dict
             Dictionary of universal parameters.
-        data : array_like
+        data: array_like
             NMR data.
 
         """
@@ -144,11 +144,11 @@ class converter(object):
 
         Parameters
         ----------
-        dic : dict
+        dic: dict
             Dictionary of Agilent/Varian parameters.
-        data : array_like
+        data: array_like
             NMR data.
-        udic : dict, optional
+        udic: dict, optional
             Universal dictionary, if not provided will be guesses from dic.
 
         """
@@ -171,13 +171,13 @@ class converter(object):
 
         Parameters
         ----------
-        dic : dict
+        dic: dict
             Dictionary of RNMRTK parameters.
-        data : array_like
+        data: array_like
             NMR data.
-        udic : dict, optional
+        udic: dict, optional
             Universal dictionary, if not provided will be guesses from dic.
-        agilent_compatible : bool, optional
+        agilent_compatible: bool, optional
             True when RNMRTK data is being compared to Agilent/Varian data.
 
         """
@@ -202,11 +202,11 @@ class converter(object):
 
         Parameters
         ----------
-        dic : dict
+        dic: dict
             Dictionary of NMRPipe parameters.
-        data : array_like
+        data: array_like
             NMR data.
-        udic : dict, optional
+        udic: dict, optional
             Universal dictionary, if not provided will be guesses from dic.
 
         """
@@ -226,11 +226,11 @@ class converter(object):
 
         Parameters
         ----------
-        dic : dict
+        dic: dict
             Dictionary of Sparky parameters.
-        data : array_like
+        data: array_like
             NMR data.
-        udic : dict, optional
+        udic: dict, optional
             Universal dictionary, if not provided will be guesses from dic.
 
         """
@@ -250,13 +250,13 @@ class converter(object):
 
         Parameters
         ----------
-        dic : dict
+        dic: dict
             Dictionary of Bruker parameters.
-        data : array_like
+        data: array_like
             NMR data.
-        udic : dict, optional
+        udic: dict, optional
             Universal dictionary, if not provided will be guesses from dic.
-        remove_digital_filter : bool, optional
+        remove_digital_filter: bool, optional
             True to remove the Bruker digital filter.  Do not use this
             option with low memory data or when the `udic` parameter is
             specified.  False leave the digital filter in place.
@@ -284,9 +284,9 @@ class converter(object):
 
         Returns
         -------
-        dic : dict
+        dic: dict
             Dictionary of Universal parameters.
-        data : array_like
+        data: array_like
             NMR data in format as provided.
 
         """
@@ -305,15 +305,15 @@ class converter(object):
 
         Parameters
         ----------
-        datetime : datetime object, optional
+        datetime: datetime object, optional
             Datetime object to include in the NMRPipe parameters.  The current
             date and time is used by default.
 
         Returns
         -------
-        dic : dict
+        dic: dict
             Dictionary of NMRPipe parameters.
-        data : array_like
+        data: array_like
             NMR data in NMRPipe format.
 
         """
@@ -335,9 +335,9 @@ class converter(object):
 
         Parameters
         ----------
-        agilent_compatible : bool, optional
+        agilent_compatible: bool, optional
             True when RNMRTK data is being compared to Agilent/Varian data.
-        dim_order : list, optional
+        dim_order: list, optional
             List mapping axis numbers in the universal dictionary to the to the
             order in which they will appear in the RNMRTK dictionary.  If None,
             the default, [0, 1, 2, ...] will be used.
@@ -345,9 +345,9 @@ class converter(object):
 
         Returns
         -------
-        dic : dict
+        dic: dict
             Dictionary of RNMRTK parameters.
-        data : array_like
+        data: array_like
             NMR data in RNMRTK format.
 
         """
@@ -373,9 +373,9 @@ class converter(object):
 
         Returns
         -------
-        dic : dict
+        dic: dict
             Dictionary of Agilent/Varian parameters.
-        data : array_like
+        data: array_like
             NMR data in Agilent/Varian format.
 
         """
@@ -394,18 +394,18 @@ class converter(object):
 
         Parameters
         ----------
-        datetime : datetime object, optional
+        datetime: datetime object, optional
             Datetime object to include in the Sparky parameters.  The current
             date and time is used by default.
-        user : str, optional
+        user: str, optional
             Username to include in the Sparky parameters. 'user' is the
             default.
 
         Returns
         -------
-        dic : dict
+        dic: dict
             Dictionary of Sparky parameters.
-        data : array_like
+        data: array_like
             NMR data in Sparky format.
 
         """
@@ -424,9 +424,9 @@ class converter(object):
 
         Returns
         -------
-        dic : dict
+        dic: dict
             Dictionary of Bruker parameters.
-        data : array_like
+        data: array_like
             NMR data in Bruker format.
 
         """
@@ -453,15 +453,15 @@ class udata_nd(fileiobase.data_nd):
 
     Parameters
     ----------
-    edata : fileiobase.data_nd derived object
+    edata: fileiobase.data_nd derived object
         Data object to wrap.
-    iproc : dict
+    iproc: dict
         Dictionary of processing required by input format.
     oproc :
         Dictionary of processing required by output format.
-    odtype : dtype
+    odtype: dtype
         Output dtype.
-    order : tuple
+    order: tuple
         Axis ordering relative to input data.
 
     Notes

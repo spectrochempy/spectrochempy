@@ -24,6 +24,6 @@ def test_read_with_filename():
     A = NDDataset.read_matlab(os.path.join('matlabdata','als2004dataset.MAT'))
     info_('Matrices in .mat file:')
     for x in A:
-        info_('  ' + x.name + ' : ' + str(x.shape))
+        info_('  ' + x.name + ': ' + str(x.shape))
     assert len(A)==6
     assert A[3].shape == (204, 96)

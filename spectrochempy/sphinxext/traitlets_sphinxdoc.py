@@ -145,13 +145,13 @@ def write_doc(path, title, app, preamble=None):
     Parameters
     ----------
 
-    path : str
+    path: str
         The file to be written
-    title : str
+    title: str
         The human-readable title of the document
-    app : traitlets.config.Application
+    app: traitlets.config.Application
         An instance of the application class to be documented
-    preamble : str
+    preamble: str
         Extra text to add just after the title (optional)
     """
     trait_aliases = reverse_aliases(app)

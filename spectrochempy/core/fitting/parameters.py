@@ -200,7 +200,7 @@ class FitParameters(UserDict):
 
         Return
         ------
-        value : float or bool
+        value: float or bool
             Value of the string, or False, if there is an error
 
         """
@@ -389,7 +389,7 @@ class ParameterScript(HasTraits):
             s = line.split(':')
             if len(s) != 2:
                 raise ValueError(
-                    'Cannot interpret line %d : A semi-column is missing?' % lc)
+                    'Cannot interpret line %d: A semi-column is missing?' % lc)
 
             key, values = s
             key = key.strip().lower()

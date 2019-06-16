@@ -51,6 +51,7 @@ sphinx-gallery
 nbsphinx
 jupyter_sphinx
 nbconvert
+numpydoc==0.8
 
 # conda recipes
 conda-build

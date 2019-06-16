@@ -119,14 +119,14 @@ class NDDataset(
         Parameters
         ----------
         %(NDArray.parameters.no_labels)s
-        coords : An instance of |CoordSet|, optional
+        coords: An instance of |CoordSet|, optional
             `coords` contains the coordinates for the different
             dimensions of the `data`. if `coords` is provided, it must
             specified
             the `coord` and `labels` for all dimensions of the `data`.
             Multiple `coord`'s can be specified in an |CoordSet| instance
             for each dimension.
-        description : str, optional
+        description: str, optional
             A optional description of the nd-dataset.
 
         Notes
@@ -142,7 +142,7 @@ class NDDataset(
         >>> from spectrochempy import *
 
         >>> x = NDDataset([1,2,3])
-        >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
+        >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
         [       1        2        3]
 
 
@@ -647,7 +647,7 @@ class NDDataset(
 
         Parameters
         ----------
-        dim : int or str.
+        dim: int or str.
             A dimension index or name, default index = `x`.
             If an integer is provided, it is equivalent to the `axis` parameter for numpy array.
 
@@ -753,15 +753,15 @@ class NDDataset(
 
         Parameters
         ----------
-        dim : str or int, optional, default = 0
+        dim: str or int, optional, default = 0
             dimension index or name along which to sort.
         pos: int , optional
             If labels are multidimensional  - allow to sort on a define
             row of labels: labels[pos]. Experimental: Not yet checked
-        by : str among ['value', 'label'], optional, default = ``value``.
+        by: str among ['value', 'label'], optional, default = ``value``.
             Indicate if the sorting is following the order of labels or
             numeric coord values.
-        descend : `bool`, optional, default = `False`.
+        descend: `bool`, optional, default = `False`.
             If true the dataset is sorted in a descending direction. Default is False  except if coordinates
             are reversed.
         %(generic_method.parameters.inplace)s
@@ -834,14 +834,14 @@ class NDDataset(
 
         Parameters
         ----------
-        dim : None or int or tuple of ints, optional
+        dim: None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
 
         Returns
         -------
-        squeezed : same object type
+        squeezed: same object type
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
 
@@ -875,9 +875,9 @@ class NDDataset(
 
         Parameters
         ----------
-        dim1 : int
+        dim1: int
             First axis.
-        dim2 : int
+        dim2: int
             Second axis.
         %(generic_method.parameters.inplace)s
 
@@ -932,7 +932,7 @@ class NDDataset(
         Convert to a tidy structured Pandas DataFrame.
         (needs Pandas library installed)
 
-        tidy data :  http://www.jstatsoft.org/v59/i10/
+        tidy data:  http://www.jstatsoft.org/v59/i10/
 
         Each column holds a different variable (For a NDDataset there is only one column)
         Each rows holds a different observation.
@@ -961,7 +961,7 @@ class NDDataset(
 
         Returns
         -------
-        xarray : a xarray.DataArray object
+        xarray: a xarray.DataArray object
 
 
         """
@@ -969,43 +969,43 @@ class NDDataset(
         #
         # Attributes
         # ----------
-        # dims : tuple
+        # dims: tuple
         #     Dimension names associated with this array.
-        # values : np.ndarray
+        # values: np.ndarray
         #     Access or modify DataArray values as a numpy array.
-        # coords : dict-like
+        # coords: dict-like
         #     Dictionary of DataArray objects that label values along each dimension.
-        # name : str or None
+        # name: str or None
         #     Name of this array.
-        # attrs : OrderedDict
+        # attrs: OrderedDict
         #     Dictionary for holding arbitrary metadata.
         # Init docstring:
         # Parameters
         # ----------
-        # data : array_like
+        # data: array_like
         #     Values for this array. Must be an ``numpy.ndarray``, ndarray like,
         #     or castable to an ``ndarray``. If a self-described xarray or pandas
         #     object, attempts are made to use this array's metadata to fill in
         #     other unspecified arguments. A view of the array's data is used
         #     instead of a copy if possible.
-        # coords : sequence or dict of array_like objects, optional
+        # coords: sequence or dict of array_like objects, optional
         #     Coordinates (tick labels) to use for indexing along each dimension.
         #     If dict-like, should be a mapping from dimension names to the
         #     corresponding coordinates. If sequence-like, should be a sequence
         #     of tuples where the first element is the dimension name and the
         #     second element is the corresponding coordinate array_like object.
-        # dims : str or sequence of str, optional
+        # dims: str or sequence of str, optional
         #     Name(s) of the data dimension(s). Must be either a string (only
         #     for 1D data) or a sequence of strings with length equal to the
         #     number of dimensions. If this argument is omitted, dimension names
         #     are taken from ``coords`` (if possible) and otherwise default to
         #     ``['dim_0', ... 'dim_n']``.
-        # name : str or None, optional
+        # name: str or None, optional
         #     Name of this array.
-        # attrs : dict_like or None, optional
+        # attrs: dict_like or None, optional
         #     Attributes to assign to the new instance. By default, an empty
         #     attribute dictionary is initialized.
-        # encoding : dict_like or None, optional
+        # encoding: dict_like or None, optional
         #     Dictionary specifying how to encode this array's data into a
         #     serialized format like netCDF4. Currently used keys (for netCDF)
         #     include '_FillValue', 'scale_factor', 'add_offset', 'dtype',
@@ -1044,7 +1044,7 @@ class NDDataset(
 
         Parameters
         ----------
-        dims : sequence of dimension indexes or names, optional.
+        dims: sequence of dimension indexes or names, optional.
             By default, reverse the dimensions, otherwise permute the dimensions
             according to the values given.
         %(generic_method.parameters.inplace)s
@@ -1142,7 +1142,7 @@ class NDDataset(
         if not self._coords or len(self._coords) < 1:
             return ''
         
-        self._coords._html_output = self._html_output  # transfert the html flag if necessary : false by default
+        self._coords._html_output = self._html_output  # transfert the html flag if necessary: false by default
         
         txt = self._coords._cstr()
         txt = txt.rstrip()  # remove the trailing '\n'

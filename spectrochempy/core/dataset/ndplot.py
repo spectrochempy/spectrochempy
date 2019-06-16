@@ -96,26 +96,26 @@ class NDPlot(HasTraits):
 
         Parameters
         ----------
-        method : str, optional
+        method: str, optional
             The method of plot of the dataset, which will determine the
             plotter to use. For instance, for 2D data, it can be `map`,
             `stack` or `image` among other method.
-        ax : |Axes| instance. Optional, default:current or new one
+        ax: |Axes| instance. Optional, default:current or new one
             The axe where to plot
-        figsize : tuple, optional, default is mpl.rcParams['figure.figsize']
+        figsize: tuple, optional, default is mpl.rcParams['figure.figsize']
             The figure size
-        fontsize : int, optional
+        fontsize: int, optional
             The font size in pixels, default is 10 (or read from preferences)
-        clear : `bool`, optional, default = `True`.
+        clear: `bool`, optional, default = `True`.
             Should we plot on the ax previously used or create a new figure?
-        style : str
-        autolayout : `bool`, optional, default=True
+        style: str
+        autolayout: `bool`, optional, default=True
             if True, layout will be set automatically
         output: str
             A string containing a path to a filename. The output format is deduced
             from the extension of the filename. If the filename has no extension,
             the value of the rc parameter savefig.format is used.
-        dpi : [ None | scalar > 0]
+        dpi: [ None | scalar > 0]
             The resolution in dots per inch. If None it will default to the
             value savefig.dpi in the matplotlibrc file.
 
@@ -169,16 +169,16 @@ class NDPlot(HasTraits):
         Parameters
         ----------
 
-        ax : :class:`matplotlib.axe`
+        ax: :class:`matplotlib.axe`
 
             the viewplot where to plot.
 
-        kwargs : optional additional arguments
+        kwargs: optional additional arguments
 
         Returns
         -------
 
-        ax : return the handler to ax where the main plot was done
+        ax: return the handler to ax where the main plot was done
 
         """
 

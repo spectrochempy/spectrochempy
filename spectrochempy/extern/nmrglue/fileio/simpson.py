@@ -18,27 +18,27 @@ def read(filename, ftype=None, ndim=None, NP=None, NI=None, spe=None):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Name of SIMPSON file to read data from.
-    ftype : {None, 'TEXT', 'BINARY', 'XREIM', 'XYREIM', 'RAWBIN'}, optional
+    ftype: {None, 'TEXT', 'BINARY', 'XREIM', 'XYREIM', 'RAWBIN'}, optional
         A string indicating the type of SIMPSON file:
 
-        ``TEXT`` : SIMPSON text format, no fsave arguments.
+        ``TEXT``: SIMPSON text format, no fsave arguments.
 
-        ``BINARY`` : SIMPSON binary format, -binary fsave argument.
+        ``BINARY``: SIMPSON binary format, -binary fsave argument.
 
-        ``XREIM`` : Indexed 1D format, rows of frequency/time, real and
+        ``XREIM``: Indexed 1D format, rows of frequency/time, real and
         imaginary parts of the data.  Saved with -xreim argument.
 
-        ``XYREIM`` : Indexed 2D format, rows of frequency/time (indirect
+        ``XYREIM``: Indexed 2D format, rows of frequency/time (indirect
         dimension then direct dimension), real and imaginary parts of the
         data. Saved with -xyreim argument.
 
-        ``RAWBIN`` : Raw binary format.  Saved with -raw_bin argument.  ndim
+        ``RAWBIN``: Raw binary format.  Saved with -raw_bin argument.  ndim
         and spe must also be provided.  In addition if ndim is 2, NP and NI
         must be defined.
 
-        ``None`` : Automatically determine file type.  If this fails the file
+        ``None``: Automatically determine file type.  If this fails the file
         type should be implicitly provided.
 
         Other formats of files may be created by SIMPSON, but are not currently
@@ -46,25 +46,25 @@ def read(filename, ftype=None, ndim=None, NP=None, NI=None, spe=None):
 
     Other Parameters
     ----------------
-    ndim : {None, 1, 2}, optional
+    ndim: {None, 1, 2}, optional
         Dimensionality of the data in the file, only used when ftype is
         "RAWBIN".
-    NP : int, optional
+    NP: int, optional
         Number of points {R|I} in the direct dimension.  Only used when
         ftype is "RAWBIN" and ndim is 2.
-    NI : int, optional
+    NI: int, optional
         Number of points in the indirect dimension.  Only used when ftype is
         "RAWBIN" and ndim is 2.
-    spe : bool, optional
+    spe: bool, optional
         True when the data is in the frequency domain, False for time domain
         data.  Only used when ftype is "RAWBIN"
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of spectra parameters.  For some file formats this may be
         empty.
-    data : ndarray
+    data: ndarray
         Complex array of spectral data.
 
     """

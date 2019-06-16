@@ -56,15 +56,15 @@ class unit_conversion():
 
     Parameters
     ----------
-    size : int
+    size: int
         Number of points in dimension (R|I).
-    cplex : bool
+    cplex: bool
         True if dimension is complex, False is real.
-    sw : float
+    sw: float
         Spectral width in Hz.
-    obs : float
+    obs: float
         Observation frequency in MHz.
-    car : float
+    car: float
         Carrier frequency in Hz.
 
     """
@@ -336,15 +336,15 @@ def uc_from_udic(udic, dim=-1):
 
     Parameters
     ----------
-    udic : dic
+    udic: dic
         Universal dictionary of spectral parameters.
-    dim : int. optional
+    dim: int. optional
         Dimension number to create unit conversion object for.  Default is for
         last dimension.
 
     Returns
     -------
-    uc : unit conversion object.
+    uc: unit conversion object.
         Unit conversion object for given dimension.
     """
     if dim == -1:
@@ -360,16 +360,16 @@ def uc_from_freqscale(scale, obs, unit='ppm'):
 
     Parameters
     ----------
-    scale : array like
+    scale: array like
         array of spectrum axis
-    obs : float
+    obs: float
         Observation frequency in MHz.
     unit: {'ppm', 'hz', 'khz'}
         The unit of the scale axis.
 
     Returns
     -------
-    uc : unit conversion object.
+    uc: unit conversion object.
         Unit conversion object for given axis.
     """
     scale = np.array(scale)
@@ -584,11 +584,11 @@ class data_nd(object):
 
     __init__ which must set up the object and defines at minimum:
 
-        self.fshape : tuple
+        self.fshape: tuple
             Shape of the data on disk, the shape when order = (0, 1, 2, ..)
-        self.order : tuple
+        self.order: tuple
             Ordering of the axes
-        self.dtype : dtype
+        self.dtype: dtype
             Dtype of the emulated ndarray
 
         self.__setdimandshape__ should be called if self.dim and self.shape
@@ -708,7 +708,7 @@ class data_nd(object):
 
         Parameters
         ----------
-        axes : None, tuple or ints, or `n` ints
+        axes: None, tuple or ints, or `n` ints
             * None or no arguments: reverse order of the axes
 
             * tuple of ints: `i` in the `j`-th place in the tuples means the
@@ -718,7 +718,7 @@ class data_nd(object):
 
         Returns
         -------
-        out : data_nd object
+        out: data_nd object
             Object whose axes are permuted.
 
         """

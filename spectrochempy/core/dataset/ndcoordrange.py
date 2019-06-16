@@ -31,11 +31,11 @@ class Range(List):
     Parameters
     ----------
 
-    trait : TraitType [ optional ]
+    trait: TraitType [ optional ]
         the type for restricting the contents of the Container.
         If unspecified, types are not checked.
 
-    default_value : SequenceType [ optional ]
+    default_value: SequenceType [ optional ]
         The default value for the Trait.  Must be list/tuple/set, and
         will be cast to the container type.
 
@@ -108,12 +108,12 @@ class CoordRange(HasTraits):
         """
         Parameters
         -----------
-        ranges :  iterable
+        ranges:  iterable
             An interval or a set of intervals.
             set of  intervals. If none is given, the range
             will be a set of an empty interval [[]]. The interval limits do not
             need to be ordered, and the intervals do not need to be distincts.
-        reversed : bool, optional.
+        reversed: bool, optional.
             The intervals are ranked by decreasing order if True
             or increasing order if False.
         """

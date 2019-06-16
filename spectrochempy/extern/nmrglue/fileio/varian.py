@@ -51,14 +51,14 @@ def guess_udic(dic, data):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
 
     """
@@ -78,12 +78,12 @@ def create_dic(udic):
 
     Parameters
     ----------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian parameters
     """
     ddic = udic[udic["ndim"] - 1]   # direct dimension dictionary
@@ -202,33 +202,33 @@ def read(dir=".", fid_file="fid", procpar_file="procpar", read_blockhead=False,
 
     Parameters
     ----------
-    dir : str, optional
+    dir: str, optional
         Directory holding Agilent/Varian data. Default is the current working
         directory.
-    fid_file : str, optional
+    fid_file: str, optional
         Filename of binary (fid) file in directory.
-    procpar_file : str, optional
+    procpar_file: str, optional
         Filename of procpar file in directory.
-    read_blockhead : bool, optional
+    read_blockhead: bool, optional
         True to read blockheader(s) and return then in the Agilent/Varian
         parameter dictionary. False (default) does not perform this reading.
-    shape : tuple of ints, optional
+    shape: tuple of ints, optional
         Shape of data in binary file. None (default)  will attempt to finds
         this automatically.
-    torder : {None, 'r', 'o', 'f' or a Python function} , optional
+    torder: {None, 'r', 'o', 'f' or a Python function} , optional
         Description of the mapping of traces in the file to the NMR data
         matrix. None (the default) will attempt to find this automatically
         which is typically fine for most NMR experiments. See below for
         additional details.
-    as_2d : bool, optional
+    as_2d: bool, optional
         True to return data as a 2D array ignorning the shape and torder
         parameters.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data
 
     Notes
@@ -256,8 +256,8 @@ def read(dir=".", fid_file="fid", procpar_file="procpar", read_blockhead=False,
 
     See Also
     --------
-    read_lowmem : Read Agilent/Varian files using mimimal amounts of memory.
-    write : Write Agilent/Varian files.
+    read_lowmem: Read Agilent/Varian files using mimimal amounts of memory.
+    write: Write Agilent/Varian files.
 
     """
     if os.path.isdir(dir) is False:
@@ -290,20 +290,20 @@ def read_lowmem(dir=".", fid_file="fid", procpar_file="procpar",
 
     Parameters
     ----------
-    dir : str, optional
+    dir: str, optional
         Directory holding Agilent/Varian data. Default is the current working
         directory.
-    fid_file : str, optional
+    fid_file: str, optional
         Filename of binary (fid) file in directory.
-    procpar_file : str, optional
+    procpar_file: str, optional
         Filename of procpar file in directory.
-    read_blockhead : bool, optional
+    read_blockhead: bool, optional
         True to read blockheader(s) and return then in the Agilent/Varian
         parameter dictionary. False (default) does not perform this reading.
-    shape : tuple of ints, optional
+    shape: tuple of ints, optional
         Shape of data in binary file. None (default)  will attempt to finds
         this automatically.
-    torder : {None, 'r', 'o', 'f' or a Python function} , optional
+    torder: {None, 'r', 'o', 'f' or a Python function} , optional
         Description of the mapping of traces in the file to the NMR data
         matrix. None (the default) will attempt to find this automatically
         which is typically fine for most NMR experiments. See :py:func:`read`
@@ -311,15 +311,15 @@ def read_lowmem(dir=".", fid_file="fid", procpar_file="procpar",
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian parameters.
-    data : array_like
+    data: array_like
         Low memory object which can access NMR data on demand.
 
     See Also
     --------
-    read : Read Agilent/Varian files.
-    write_lowmem : Write Agilent/Varian files using mimimal memory
+    read: Read Agilent/Varian files.
+    write_lowmem: Write Agilent/Varian files using mimimal memory
 
     """
     if os.path.isdir(dir) is False:
@@ -351,32 +351,32 @@ def write(dir, dic, data, fid_file="fid", procpar_file="procpar",
 
     Parameters
     ----------
-    dir : str
+    dir: str
         Name of the directory to write to.
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian parameters.
-    data : array_like
+    data: array_like
         Array of NMR data to write.
-    fid_file : str, optional
+    fid_file: str, optional
         Filename of binary (fid) file in directory to write to.
-    procpar_file : str, optional
+    procpar_file: str, optional
         Filename of procpar file in directory to write to.
-    torder : {None, 'r', 'o', 'f' or a Python function} , optional
+    torder: {None, 'r', 'o', 'f' or a Python function} , optional
         Description of the mapping of traces in the file to the NMR data
         matrix. None (the default) will attempt to find this automatically
         which is typically fine for most NMR experiments. See :py:func:`read`
         for additional details.
-    repack : bool, optional
+    repack: bool, optional
         True to repack file and block headers. False (default) leaves these as
         is.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Set to True to overwrite existing files, False will raise a Warning if
         files already exist.
 
     See Also
     --------
-    write_lowmem : Write Agilent/Varian files using mimimal memory
-    read : Read Agilent/Varian files.
+    write_lowmem: Write Agilent/Varian files using mimimal memory
+    read: Read Agilent/Varian files.
 
     """
     if torder is None and data.ndim >= 3:
@@ -399,32 +399,32 @@ def write_lowmem(dir, dic, data, fid_file="fid", procpar_file="procpar",
 
     Parameters
     ----------
-    dir : str
+    dir: str
         Name of the directory to write to.
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian parameters.
-    data : array_like
+    data: array_like
         Array of NMR data to write.
-    fid_file : str, optional
+    fid_file: str, optional
         Filename of binary (fid) file in directory to write to.
-    procpar_file : str, optional
+    procpar_file: str, optional
         Filename of procpar file in directory to write to.
-    torder : {None, 'r', 'o', 'f' or a Python function} , optional
+    torder: {None, 'r', 'o', 'f' or a Python function} , optional
         Description of the mapping of traces in the file to the NMR data
         matrix. None (the default) will attempt to find this automatically
         which is typically fine for most NMR experiments. See :py:func:`read`
         for additional details.
-    repack : bool, optional
+    repack: bool, optional
         True to repack file and block headers. False (default) leaves these as
         is.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Set to True to overwrite existing files, False will raise a Warning if
         files already exist.
 
     See Also
     --------
-    write : Write Agilent/Varian files.
-    read_lowmem : Read Agilent/Varian using minimal amounts of memory.
+    write: Write Agilent/Varian files.
+    read_lowmem: Read Agilent/Varian using minimal amounts of memory.
 
     """
     # always find trace ording
@@ -455,14 +455,14 @@ def find_torder(dic, shape):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of parameters in the procpar file.
-    shaoe : tuple of ints
+    shaoe: tuple of ints
         Shape of NMR data.
 
     Returns
     --------
-    torder : {'r', 'f', 'o'}
+    torder: {'r', 'f', 'o'}
         File ording for using in :py:func:`read` or :py:func:`write`.
 
     """
@@ -552,16 +552,16 @@ def reorder_data(data, shape, torder):
 
     Parameters
     ----------
-    data : 2D ndarray
+    data: 2D ndarray
         Raw data as ordered in binary file.
-    shape : tuple of ints
+    shape: tuple of ints
         Shape of the NMR data.
-    torder : {'f', 'r', 'o' of Pytho function}
+    torder: {'f', 'r', 'o' of Pytho function}
         Trace ordering . See :py:func:`read` for details.
 
     Returns
     -------
-    tdata : ndarray
+    tdata: ndarray
         Array of NMR data.
 
     Notes
@@ -600,14 +600,14 @@ def order_data(data, torder):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    torder : {'f', 'r', 'o'}
+    torder: {'f', 'r', 'o'}
         Trace ordering.  See :py:func:`read` for details.
 
     Returns
     -------
-    raw_data : 2D ndarray
+    raw_data: 2D ndarray
         2D array ordered for writing to Agilent/Varian binary file.
 
     """
@@ -644,32 +644,32 @@ def read_fid(filename, shape=None, torder='flat', as_2d=False,
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Agilent/Varian binary file (fid) to read.
-    shape : tuple of ints, optional
+    shape: tuple of ints, optional
         Shape of the binary data. If not provided data is returned as a 2D
         array. Required if more than one trace per block (non-standard).
-    torder : {'f', 'n', 'o'}
+    torder: {'f', 'n', 'o'}
         Trace order. See :py:func:`read` for details.
-    as_2d : bool, optional
+    as_2d: bool, optional
         True to return the data as a 2D array, ignoring the shape and torder
         parameters.
-    read_blockhead : bool, optional
+    read_blockhead: bool, optional
         True to read the Agilent/Varian blockheaders(s) into the returned
         dictionary. False ignores them.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian binary file parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     See Also
     --------
-    read_fid_lowmem : Read a Agilent/Varian binary file using minimal amounts
+    read_fid_lowmem: Read a Agilent/Varian binary file using minimal amounts
         of memory.
-    read : Read Agilent/Varian files from a directory.
+    read: Read Agilent/Varian files from a directory.
 
     """
     # open the file
@@ -739,27 +739,27 @@ def read_fid_lowmem(filename, shape=None, torder='flat', as_2d=False,
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Agilent/Varian binary file (fid) to read.
-    shape : tuple of ints, optional
+    shape: tuple of ints, optional
         Shape of the binary data. If not provided data is returned as a 2D
         array. Required if more than one trace per block (non-standard).
-    torder : {'f', 'n', 'o'}
+    torder: {'f', 'n', 'o'}
         Trace order. See :py:func:`read` for details.
-    read_blockhead : bool, optional
+    read_blockhead: bool, optional
         Not used, retained for compatibility with :py:func:`read_fid`
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian binary file parameters.
-    data : array_like
+    data: array_like
         Low memory object which can access NMR data on demand.
 
     See Also
     --------
-    read_fid : Read a Agilent/Varian binary file.
-    read_lowmem : Read Agilent/Varian files from a directory using minimal
+    read_fid: Read a Agilent/Varian binary file.
+    read_lowmem: Read Agilent/Varian files from a directory using minimal
     amounts of memory.
 
     """
@@ -786,31 +786,31 @@ def read_fid_ntraces(filename, shape=None, torder='flat', as_2d=False,
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Agilent/Varian binary file (fid) to read.
-    shape : tuple of ints, optional
+    shape: tuple of ints, optional
         Shape of the binary data. If not provided data is returned as a 2D
         array. Required if more than one trace per block (non-standard).
-    torder : {'f', 'n', 'o'}
+    torder: {'f', 'n', 'o'}
         Trace order. See :py:func:`read` for details.
-    as_2d : bool, optional
+    as_2d: bool, optional
         True to return the data as a 2D array, ignoring the shape and torder
         parameters.
-    read_blockhead : bool, optional
+    read_blockhead: bool, optional
         True to read the Agilent/Varian blockheaders(s) into the returned
         dictionary. False ignores them.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian binary file parameters.
-    data : array_like
+    data: array_like
         Low memory object which can access NMR data on demand.
 
     See Also
     --------
-    read_fid : Read a Agilent/Varian binary file with one trace per block.
-    read_fid_lowmem : Read a Agilent/Varian binary file with one trace per
+    read_fid: Read a Agilent/Varian binary file with one trace per block.
+    read_fid_lowmem: Read a Agilent/Varian binary file with one trace per
         block using minimal amounts of memory.
 
     """
@@ -873,30 +873,30 @@ def write_fid(filename, dic, data, torder='flat', repack=False, correct=True,
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Agilent/Varian binary file to write to.
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian file parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    torder : {'f', 'r', 'o'}
+    torder: {'f', 'r', 'o'}
         Trace ordering.  See :py:func:`read` for details.
-    repack : bool, optional
+    repack: bool, optional
         True to repack file and block headers. False leave as is.
-    correct : bool, optional
+    correct: bool, optional
         True (the default) will correct mis-sized np and nblocks values in dic.
         False will write out the incorrect values to the file header and
         record the full data set, the resulting file will not be readable by
         nmrglue.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Set True to overwrite an existing file, False will raise a Warning if
         the file exists.
 
     See Also
     --------
-    write_fid_lowmem : Write a Agilent/Varian binary file using mimimal
+    write_fid_lowmem: Write a Agilent/Varian binary file using mimimal
         amounts of memory
-    write : Write Agilent/Varian files to a directory.
+    write: Write Agilent/Varian files to a directory.
 
     """
     data = np.array(data)
@@ -962,29 +962,29 @@ def write_fid_lowmem(filename, dic, data, torder='f', repack=False,
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Agilent/Varian binary file to write to.
-    dic : dict
+    dic: dict
         Dictionary of Agilent/Varian file parameters.
-    data : array_like
+    data: array_like
         Array of NMR data.
-    torder : {'f', 'r', 'o'}
+    torder: {'f', 'r', 'o'}
         Trace ordering.  See :py:func:`read` for details.
-    repack : bool, optional
+    repack: bool, optional
         True to repack file and block headers. False leave as is.
-    correct : bool, optional
+    correct: bool, optional
         True (the default) will correct mis-sized np and nblocks values in dic.
         False will write out the incorrect values to the file header and
         record the full data set, the resulting file will not be readable by
         nmrglue.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Set True to overwrite an existing file, False will raise a Warning if
         the file exists.
 
     See Also
     --------
-    write_fid : Write a Agilent/Varian binary.
-    write : Write Agilent/Varian files to a directory.
+    write_fid: Write a Agilent/Varian binary.
+    write: Write Agilent/Varian files to a directory.
 
     """
     # convert 1D data to 2D
@@ -1049,25 +1049,25 @@ def get_nblocks(f, nblocks, pts, nbheaders, dt, read_blockhead):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         File object of open Agilent/Varian binary file.
-    nblock : int
+    nblock: int
         Number of blocks to read.
-    pts : int
+    pts: int
         Number of points per trace.
-    nbheaders : int
+    nbheaders: int
         Number of block header in each block.
-    dt : dtype
+    dt: dtype
         Data type of data in binary file (real type).
-    read_blockheaders : bool
+    read_blockheaders: bool
         True to read the blockheader(s) and return them in the returned
         dictionary.  False ignores blockheader, reading over them.
 
     Returns
     -------
-    dic : dict, optional
+    dic: dict, optional
         Dictionary of blockheaders, only returned if read_blockheaders is True.
-    data : 2D ndarray of size (nblocks, pts)
+    data: 2D ndarray of size (nblocks, pts)
         Array of read blocks.
 
     """
@@ -1096,23 +1096,23 @@ def get_block(f, pts, nbheaders, dt, read_blockhead=False):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         File object of open Agilent/Varian binary file.
-    pts : int
+    pts: int
         Number of points per trace.
-    nbheaders : int
+    nbheaders: int
         Number of block header in each block.
-    dt : dtype
+    dt: dtype
         Data type of data in binary file (real type).
-    read_blockheaders : bool, optional.
+    read_blockheaders: bool, optional.
         True to read the blockheader(s) and return them in the returned
         dictionary.  False (default) ignores blockheader, reading over them.
 
     Returns
     -------
-    dic : dict, optional
+    dic: dict, optional
         Dictionary of blockheaders, only returned if read_blockheaders is True.
-    data : ndarray of size
+    data: ndarray of size
         Array of read block.
 
     """
@@ -1145,27 +1145,27 @@ def get_nblocks_ntraces(f, nblocks, ntraces, pts, nbheaders, dt,
 
     Parameters
     ----------
-    f : file object
+    f: file object
         File object of open Agilent/Varian binary file.
-    nblock : int
+    nblock: int
         Number of blocks to read.
-    ntrace : int
+    ntrace: int
         Number of traces per block
-    pts : int
+    pts: int
         Number of points per trace.
-    nbheaders : int
+    nbheaders: int
         Number of block header in each block.
-    dt : dtype
+    dt: dtype
         Data type of data in binary file (real type).
-    read_blockheaders : bool
+    read_blockheaders: bool
         True to read the blockheader(s) and return them in the returned
         dictionary.  False ignores blockheader, reading over them.
 
     Returns
     -------
-    dic : dict, optional
+    dic: dict, optional
         Dictionary of blockheaders, only returned if read_blockheaders is True.
-    data : 2D ndarray of size (nblocks * ntraces, pts)
+    data: 2D ndarray of size (nblocks * ntraces, pts)
         Array of read blocks.
 
     """
@@ -1196,25 +1196,25 @@ def get_block_ntraces(f, ntraces, pts, nbheaders, dt, read_blockhead=False):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         File object of open Agilent/Varian binary file.
-    ntrace : int
+    ntrace: int
         Number of traces per block
-    pts : int
+    pts: int
         Number of points per trace.
-    nbheaders : int
+    nbheaders: int
         Number of block header in each block.
-    dt : dtype
+    dt: dtype
         Data type of data in binary file (real type).
-    read_blockheaders : bool
+    read_blockheaders: bool
         True to read the blockheader(s) and return them in the returned
         dictionary.  False ignores blockheader, reading over them.
 
     Returns
     -------
-    dic : dict, optional
+    dic: dict, optional
         Dictionary of blockheaders, only returned if read_blockheaders is True.
-    data : 2D ndarray of shape (ntraces, pts)
+    data: 2D ndarray of shape (ntraces, pts)
         Array of read blocks.
 
     """
@@ -1349,15 +1349,15 @@ def put_block(f, trace, nbheaders, bh, hh=False):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         Open file object to write to.
-    trace : ndarray
+    trace: ndarray
         Trace to write to current block.
-    nbheaders : int
+    nbheaders: int
         Number of block headers.
-    bh : list
+    bh: list
         Blockheader list.
-    hh : list, optional
+    hh: list, optional
         Hyperheader list. Required when nbheaders >= 2.
 
     Notes
@@ -1398,9 +1398,9 @@ def put_fileheader(f, fh):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         Open file object to write to.
-    fh : list with 9 elements
+    fh: list with 9 elements
         Fileheader list.
 
     """
@@ -1414,9 +1414,9 @@ def put_blockheader(f, bh):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         Open file object to write to.
-    bh : list with 9 elements
+    bh: list with 9 elements
         Blockheaders list.
 
     """
@@ -1430,9 +1430,9 @@ def put_hyperheader(f, hh):
 
     Parameters
     ----------
-    f : file object
+    f: file object
         Open file object to write to.
-    hh : list with 9 elements
+    hh: list with 9 elements
         Hyperheader list.
 
     """
@@ -2000,13 +2000,13 @@ class fid_nd(fileiobase.data_nd):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Agilent/Varian binary file.
-    i2t_func : function
+    i2t_func: function
         Python function which maps an index to a trace.
-    fshape : tuple of ints, optional
+    fshape: tuple of ints, optional
         Shape of data in file, if None will be assumed to be 2D data.
-    order : tuple
+    order: tuple
         Ordering of axes compared to file. None will results in (0, 1, 2, ...)
         ordering.
 

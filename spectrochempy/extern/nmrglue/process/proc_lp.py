@@ -38,45 +38,45 @@ def lp(data, pred=1, slice=slice(None), order=8, mode="f", append="after",
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         1D or 2D NMR data with the last (-1) axis in the time domain.
-    pred : int
+    pred: int
         Number of points to predict along the last axis.
-    slice : slice object, optional
+    slice: slice object, optional
         Slice object which selects the region along the last axis to use in LP
         equation.  The default (slice(None)) will use all points.
-    order : int
+    order: int
         Prediction order, number of LP coefficients calculated.
-    mode : {'f', 'b', 'fb' or 'bf'}
+    mode: {'f', 'b', 'fb' or 'bf'}
         Mode to generate LP filter. 'f' for forward,'b' for backward, fb for
         'forward-backward and 'bf' for backward-forward.
-    extend : {'before', 'after'}
+    extend: {'before', 'after'}
         Location to extend the data, either 'before' the current data, or
         'after' the existing data. This is independent of the `mode` parameter.
-    bad_roots : {'incr', 'decr', None, 'auto'}
+    bad_roots: {'incr', 'decr', None, 'auto'}
         Type of roots which to consider bad and to stabilize.  Option are those
         with increasing signals 'incr' or decreasing signals 'decr'.  None will
         perform no root stabiliting.  The default ('auto') will set the
         parameter based on the `mode` parameter.  'f' or 'fb' `mode` will
         results in a 'incr' `bad_roots` parameter, 'b' or 'bf` in 'decr'
-    fix_mode : {'on', 'reflect'}
+    fix_mode: {'on', 'reflect'}
         Method used to stabilize bad roots, 'on' to move the roots onto the
         unit circle, 'reflect' to reflect bad roots across the unit circle.
         This parameter is ignored when `bad_roots` is None.
-    mirror : {None, '0', '180'}
+    mirror: {None, '0', '180'}
         Mode to form mirror image of data before processing.  None will
         process the data trace as provided (no mirror image). '0' or '180'
         forms a mirror image of the sliced trace to calculate the LP filter.
         '0' should be used with data with no delay, '180' with data
         with an initial half-point delay.
-    method : {'svd', 'qr', 'choleskey', 'tls'}
+    method: {'svd', 'qr', 'choleskey', 'tls'}
         Method to use to calculate the LP filter. Choices are a SVD ('svd'), QR
         ('qr'), or Choleskey ('choleskey') decomposition, or Total Least
         Squares ('tls').
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         NMR data with `pred` number of points linear predicted and appended to
         the original data.
 
@@ -170,45 +170,45 @@ def lp_1d(trace, pred=1, slice=slice(None), order=8, mode="f", append="after",
 
     Parameters
     ----------
-    trace : ndarray
+    trace: ndarray
         1D NMR data in the time domain.
-    pred : int
+    pred: int
         Number of points to predict along the last axis.
-    slice : slice object, optional
+    slice: slice object, optional
         Slice object which selects the region along the last axis to use in LP
         equation.  The default (slice(None)) will use all points.
-    order : int
+    order: int
         Prediction order, number of LP coefficients calculated.
-    mode : {'f', 'b', 'fb' or 'bf'}
+    mode: {'f', 'b', 'fb' or 'bf'}
         Mode to generate LP filter. 'f' for forward,'b' for backward, fb for
         'forward-backward and 'bf' for backward-forward.
-    extend : {'before', 'after'}
+    extend: {'before', 'after'}
         Location to extend the data, either 'before' the current data, or
         'after' the existing data. This is independent of the `mode` parameter.
-    bad_roots : {'incr', 'decr', None, 'auto'}
+    bad_roots: {'incr', 'decr', None, 'auto'}
         Type of roots which to consider bad and to stabilize.  Option are those
         with increasing signals 'incr' or decreasing signals 'decr'.  None will
         perform no root stabiliting.  The default ('auto') will set the
         parameter based on the `mode` parameter.  'f' or 'fb' `mode` will
         results in a 'incr' `bad_roots` parameter, 'b' or 'bf` in 'decr'
-    fix_mode : {'on', 'reflect'}
+    fix_mode: {'on', 'reflect'}
         Method used to stabilize bad roots, 'on' to move the roots onto the
         unit circle, 'reflect' to reflect bad roots across the unit circle.
         This parameter is ignored when `bad_roots` is None.
-    mirror : {None, '0', '180'}
+    mirror: {None, '0', '180'}
         Mode to form mirror image of data before processing.  None will
         process the data trace as provided (no mirror image). '0' or '180'
         forms a mirror image of the sliced trace to calculate the LP filter.
         '0' should be used with data with no delay, '180' with data
         with an initial half-point delay.
-    method : {'svd', 'qr', 'choleskey', 'tls'}
+    method: {'svd', 'qr', 'choleskey', 'tls'}
         Method to use to calculate the LP filter. Choices are a SVD ('svd'), QR
         ('qr'), or Choleskey ('choleskey') decomposition, or Total Least
         Squares ('tls').
 
     Returns
     -------
-    ntrace : ndarray
+    ntrace: ndarray
         NMR data with `pred` number of points linear predicted and appended to
         the original data.
 
@@ -226,7 +226,7 @@ def lp_1d(trace, pred=1, slice=slice(None), order=8, mode="f", append="after",
 
     See Also
     --------
-    lp : 1D or 2D linear prediction extrapolation.
+    lp: 1D or 2D linear prediction extrapolation.
 
     """
     # check for bad arguments
@@ -324,27 +324,27 @@ def lp2d(data, pred, P, M, mirror='0', fix_points=True, method='svd'):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         2D NMR data (time domain for last axes).
-    pred : int
+    pred: int
         Number of points to predict along the last (1) axes.
-    P : int
+    P: int
         Prediction matrix length along the non-predicted (0) axis.
-    M : int
+    M: int
         Prediction matrix length along the predicted (1) axis.
-    mirror : {'0' or '180'}
+    mirror: {'0' or '180'}
         Method to use for forming the mirror image of the non-predicted axis.
         '0' indicated no initial delay, '180' for a half-point delay.
-    fix_points : bool
+    fix_points: bool
         True to reduce predicted points with magnitude larger than the largest
         data point. False leaved predicted points  unaltered.
-    method : {'svd', 'qr', 'cholesky', 'tls'}
+    method: {'svd', 'qr', 'cholesky', 'tls'}
         Method used to calculate the LP prediction matrix.  See :py:func:`lp`
         for a description of theses methods.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         2D NMR data with `pred` points appended to the last (1) axes.
 
     Notes
@@ -479,23 +479,23 @@ def cadzow(data, M, K, niter, min_var=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         1D or 2D NMR data to enhance.
-    M : int
+    M: int
         Large prediction order.  For best results should be between
         K + 5 and 2 * K.
-    K : int
+    K: int
         Reduced prediction order.
-    niter : int
+    niter: int
         Number if iteration of the Cadzow procedure to perform.
-    min_var : bool
+    min_var: bool
         True to adjust retained singular values using the  minimum variance
         method. False does not correct the singular values and is the
         Cadzow method.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of enhanced data
 
     """
@@ -562,40 +562,40 @@ def lp_model(trace, slice=slice(None), order=8, mode="f", mirror=None,
 
     Parameters
     ----------
-    trace : 1D ndarray
+    trace: 1D ndarray
         One dimensional time domain NMR data to model.
-    slice : slice object, optional
+    slice: slice object, optional
         Slice object which selects the region along the last axis to use in LP
         equation.  The default, slice(None), will use all points.
-    order : int
+    order: int
         Prediction order, number of LP coefficients calculated.
-    mode : {'f', 'b'}
+    mode: {'f', 'b'}
         Mode to generate LP filter. 'f' for forward,'b' for backward.
-    mirror : {None, '0', '180'}
+    mirror: {None, '0', '180'}
         Mode to form mirror image of data before processing.  None will
         process the data trace as provided (no mirror image). '0' or '180'
         forms a mirror image of the sliced trace to calculate the LP filter.
         '0' should be used with data with no delay, '180' with data
         with an initial half-point delay.
-    method : {'svd', 'qr', 'choleskey', 'tls'}
+    method: {'svd', 'qr', 'choleskey', 'tls'}
         Method to use to calculate the LP filter. Choices are a SVD ('svd'), QR
         ('qr'), or Choleskey ('choleskey') decomposition, or Hankel SVD
         ('hsvd').
-    full : bool
+    full: bool
         True to return amplitudes and phases calculated by performing a least
         squares fitting to the data after LP modeling.  False will return only
         the damping (relaxation) factors and signal frequencies.
 
     Returns
     -------
-    damp : list
+    damp: list
         List of damping (relaxation) factors found from LP modeling.
-    freq : list
+    freq: list
         List of signal frequencies found from LP modeling.
-    amp : list, optional
+    amp: list, optional
         List of signal amplitudes found by least squares fitting of data after
         LP modeling, only returned when `full` parameter is True.
-    phase : list, optional.
+    phase: list, optional.
         List of signal phases found by least squares fitting of data after LP
         modeling, only returned when `full` parameter is True.
 
@@ -760,9 +760,9 @@ def make_mirror(x, mode):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         1D array to form mirrored trace from.
-    mode : {'180', '0'}
+    mode: {'180', '0'}
         Mirror mode, see above.
 
     """
@@ -978,22 +978,22 @@ def find_lproots_hsvd(x, M, K, mode, zmethod='sm'):
 
     Parameters
     ----------
-    x : 1D ndarray
+    x: 1D ndarray
         1D trace of NMR data in the time domain, the FID.
-    M : int
+    M: int
         Length (M+1) of data matrix to form.
-    K : int
+    K: int
         Reduced prediction order (number of signal roots) Must be less than the
         smaller of M + 1 or len(x) - M.
-    mode : {'f', 'b'}
+    mode: {'f', 'b'}
         Mode to perform LP. 'f' for forward,'b' for backward.
-    zmethod : {'lstsq', 'sm'}
+    zmethod: {'lstsq', 'sm'}
         Method used to find Z' 'lstsq' for least squares, 'sm' for
         Sherman-Morrison.
 
     Returns
     -------
-    y : ndarray
+    y: ndarray
         Array of signal roots (poles)
 
     """
@@ -1045,15 +1045,15 @@ def find_roots(a, mode="f"):
 
     Parameters
     ----------
-    a : array
+    a: array
         LP coefficients.
-    mode : {'f', 'b'}
+    mode: {'f', 'b'}
         Mode of LP coefficients.  'f' for coefficients ordered m, m - 1,..., 1.
         'b' for coefficients ordered 1, 2, ...., m
 
     Returns
     -------
-    roots : array
+    roots: array
         LP roots (poles)
 
     """
@@ -1086,15 +1086,15 @@ def find_coeff(poles, mode="f"):
 
     Parameters
     ----------
-    poles : ndarray
+    poles: ndarray
         Array of LP roots (poles)
-    mode : {'f', 'b'}
+    mode: {'f', 'b'}
         Mode in which LP coefficients should be returned.  'f' for coefficients
         ordered m, m - 1,..., 1. 'b' for coefficients ordered 1, 2, ...., m.
 
     Returns
     -------
-    c : ndarray
+    c: ndarray
         LP coefficients ordered according to `mode`.
 
     """
@@ -1126,18 +1126,18 @@ def fix_roots(poles, fix_roots="incr", fix_mode="reflect"):
 
     Parameters
     ----------
-    poles : ndarray
+    poles: ndarray
         Array of LP roots (poles).
-    fix_roots : {'incr', 'decr'}
+    fix_roots: {'incr', 'decr'}
         Type of roots which to consider bad and to stabilize.  Either those
         with increasing signals 'incr' or decreasing signals 'decr'.
-    fix_mode : {'on', 'reflect'}
+    fix_mode: {'on', 'reflect'}
         Method used to stabilize bad roots, 'on' to move the roots onto the
         unit circle, 'reflect' to reflect bad roots across the unit circle.
 
     Returns
     -------
-    npoles : ndarray
+    npoles: ndarray
         Array of stabilized LP roots (poles).
 
     """
@@ -1176,20 +1176,20 @@ def extrapolate(trace, a, pred, append):
 
     Parameters
     ----------
-    trace : 1D ndarray
+    trace: 1D ndarray
         1D array to extrapolate from and append to.
-    a : ndarray
+    a: ndarray
         LP coefficients, must be ordered according to direction of
         extrapolation.
-    pred : int
+    pred: int
         Number of points to predict using LP.
-    append : {'a', 'b'}
+    append: {'a', 'b'}
         Location to append new points, 'a' for after the current data, 'b' for
         before the current data.
 
     Returns
     -------
-    ntrace : 1D ndarray
+    ntrace: 1D ndarray
         1D array with extrapolated points appended
 
     """

@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.1.1
+#       jupytext_version: 1.1.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -85,11 +85,11 @@ ndp.coords
 #
 # If we want to avoid this behavior, we need to specify in the arguments:
 #
-# * **merge** : True or False
+# * **merge**: True or False
 #
 # and/or
 #
-# * **align** : None, 'outer', 'inner', 'first' or 'last' 
+# * **align**: None, 'outer', 'inner', 'first' or 'last' 
 #
 
 # %% [markdown]

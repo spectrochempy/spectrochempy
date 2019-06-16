@@ -121,7 +121,7 @@ class NDArray(HasTraits):
         """
         Parameters
         ----------
-        data : array of floats.
+        data: array of floats.
             Data array contained in the object. The data can be a list, a tuple, a |ndarray|, a ndarray-like,
             a |NDArray| or any subclass of |NDArray|. Any size or shape of data is accepted. If not given, an empty
             |NDArray| will be inited.
@@ -139,30 +139,30 @@ class NDArray(HasTraits):
         name: str, optional
             A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
             used as a name.
-        labels : array of objects, optional
+        labels: array of objects, optional
             Labels for the `data`. labels can be used only for 1D-datasets.
             The labels array may have an additional dimension, meaning several series of labels for the same data.
             The given array can be a list, a tuple, a |ndarray|, a ndarray-like, a |NDArray| or any subclass of
             |NDArray|.
-        mask : array of bool or `NOMASK`, optional
+        mask: array of bool or `NOMASK`, optional
             Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
             a tuple, or a |ndarray|. Each values in the array must be `False` where the data are *valid* and True when
             they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
             array object (such as a |NDArray| or subclass of it), providing a `mask` here will causes the mask from the
             masked array to be ignored.
-        units : |Unit| instance or str, optional
+        units: |Unit| instance or str, optional
             Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
             explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
             package.
-        title : str, optional
+        title: str, optional
             The title of the dimension. It will later be used for instance for labelling plots of the data.
             It is optional but recommended to give a title to each ndarray.
-        dlabel :  str, optional
+        dlabel:  str, optional
             Alias of `title`.
-        meta : dict-like object, optional.
+        meta: dict-like object, optional.
             Additional metadata for this object. Must be dict-like but no
             further restriction is placed on meta.
-        copy : bool, optional
+        copy: bool, optional
             Perform a copy of the passed object.
 
         """
@@ -1116,6 +1116,7 @@ class NDArray(HasTraits):
     def T(self):
         """
         |NDArray| - Transposed array.
+        
         The same object is returned if `ndim` is less than 2.
 
         """
@@ -1141,9 +1142,9 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        deep : bool, optional
+        deep: bool, optional
             If True a deepcopy is performed which is the default behavior
-        memo : Not used
+        memo: Not used
             This parameter ensure compatibility with deepcopy() from the copy
             package.
 
@@ -1198,13 +1199,13 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        dim, axis, dims : str, int, or list of str or index
+        dim, axis, dims: str, int, or list of str or index
             The axis indexes or dimensions names - they can be specified as argument or using keyword 'axis', 'dim'
             or 'dims'
 
         Returns
         -------
-        axis, dim : int and str
+        axis, dim: int and str
             A tuple with the axis indexes and the axis name
 
         """
@@ -1228,7 +1229,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        level : int, optional, default:0
+        level: int, optional, default:0
 
         Returns
         -------
@@ -1255,7 +1256,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |ndarray|
+        other: |ndarray|
             The ndarray object for which we want to compare units compatibility
 
          Returns
@@ -1293,9 +1294,9 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Unit|, |Quantity| or str
+        other: |Unit|, |Quantity| or str
             Destination units.
-        force : bool, optional, default= `False`
+        force: bool, optional, default= `False`
             If True the change of units is forced, even for incompatible units
 
          Returns
@@ -1322,14 +1323,14 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        dims : None or int or tuple of ints, optional
+        dims: None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
 
          Returns
         -------
-        squeezed : same object type
+        squeezed: same object type
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
 
@@ -1375,9 +1376,9 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        dim1 : int or str
+        dim1: int or str
             First dimension index
-        dim2 : int
+        dim2: int
             Second dimension index
         %(generic_method.parameters.inplace)s
 
@@ -1416,7 +1417,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Quantity| or str.
+        other: |Quantity| or str.
             Destination units.
         %(generic_method.parameters.inplace)s
         force: bool, optional, default: False
@@ -1504,7 +1505,7 @@ class NDArray(HasTraits):
 
         Returns
         -------
-        out : pandas object
+        out: pandas object
             Index for a single dimensional dataarray without units
             MultiIndex for single dimensional dataarray with units
             DataFrame for multidimentional arrays
@@ -1536,7 +1537,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        dims : list int or str
+        dims: list int or str
             Sequence of dimension indexes or names, optional.
             By default, reverse the dimensions, otherwise permute the dimensions
             according to the values given. If specified the list of dimension

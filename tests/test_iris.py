@@ -27,7 +27,7 @@ def test_IRIS():
 
     X.coords.update(y=Coord(p, title='pressure', units='torr'))
     # Using the `update` method is mandatory because it will preserve the name.
-    # Indeed, setting using X.coords[0] = Coord(...) fails unless name is specified : Coord(..., name='y')
+    # Indeed, setting using X.coords[0] = Coord(...) fails unless name is specified: Coord(..., name='y')
 
     ############################################################
     # set the optimization parameters, perform the analysis

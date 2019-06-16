@@ -105,14 +105,14 @@ def plot_multiple(datasets, method='scatter', pen=True,
 
     Parameters
     ----------
-    datasets : a list of ndatasets
-    method : str among [scatter, pen]
-    pen : bool, optional, default:True
+    datasets: a list of ndatasets
+    method: str among [scatter, pen]
+    pen: bool, optional, default:True
         if method is scatter, this flag tells to draw also the lines
         between the marks.
-    labels : a list of str, optional
+    labels: a list of str, optional
         labels used for the legend.
-    **kwargs : other parameters that will be passed to the plot1D function
+    **kwargs: other parameters that will be passed to the plot1D function
 
     """
     if not is_sequence(datasets):
@@ -177,22 +177,22 @@ def plot_1D(dataset, **kwargs):
 
     Parameters
     ----------
-    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
+    dataset: :class:`~spectrochempy.ddataset.nddataset.NDDataset`
         Source of data to plot.
-    widget : Matplotlib or PyQtGraph widget (for GUI only)
+    widget: Matplotlib or PyQtGraph widget (for GUI only)
         The widget where to plot in the GUI application. This is not used if the
         plots are made in jupyter notebook.
-    method : str, optional, default:pen
+    method: str, optional, default:pen
         The method can be one among ``pen``, ``bar``,  or ``scatter``
         Default values is ``pen``, i.e., solid lines are drawn.
         To draw a Bar graph, use method: ``bar``.
         For a Scatter plot, use method: ``scatter``.
-    twinx : :class:`~matplotlib.Axes` instance, optional, default:None
+    twinx: :class:`~matplotlib.Axes` instance, optional, default:None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     title: str
         Title of the plot (or subplot) axe.
-    style : str, optional, default = 'notebook'
+    style: str, optional, default = 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
     reverse: bool or None [optional, default= None/False
@@ -247,7 +247,7 @@ def plot_1D(dataset, **kwargs):
         name of the file to save the figure
     vshift: float, optional
         vertically shift the line from its baseline
-    kwargs : additional keywords
+    kwargs: additional keywords
 
     """
     # get all plot preferences

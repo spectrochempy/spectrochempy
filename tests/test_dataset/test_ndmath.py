@@ -107,7 +107,7 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
             # assert isinstance(r, NDDataset)
         
         except DimensionalityError as e:
-            error_(f"{name} : ", e)
+            error_(f"{name}: ", e)
     
     # NDPanel
     # -----------------
@@ -229,7 +229,7 @@ def test():
             # assert isinstance(r, NDDataset)
         
         except DimensionalityError as e:
-            error_(f"{name} : ", e)
+            error_(f"{name}: ", e)
     
     # NDPanel
     # -----------------

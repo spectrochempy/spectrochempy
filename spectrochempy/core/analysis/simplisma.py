@@ -55,27 +55,27 @@ class SIMPLISMA(HasTraits):
         """
         Parameters
         ----------
-        X : |NDDataset|
+        X: |NDDataset|
             A 2D dataset containing the data matrix (spectra in rows).
-        interactive : bool, optional, default: False
+        interactive: bool, optional, default: False
             If True, the determination of purest variables is carried out interactively
-        n_pc : int, optional, default: 2 in non-interactive mode; 100 in interactive mode
+        n_pc: int, optional, default: 2 in non-interactive mode; 100 in interactive mode
             The maximum number of pure compounds. Used only for non interactive analysis
             (the default in interative mode (100) will never be reached in practice)
-        tol : float, optional, default: 0.1
+        tol: float, optional, default: 0.1
             The convergence criterion on the percent of unexplained variance.
-        noise : float or int, optional, default: 5
+        noise: float or int, optional, default: 5
             A correction factor (%) for low intensity variables (0 - no offset, 15 - large offset).
-        verbose : bool, optional, default=True
+        verbose: bool, optional, default=True
             If true some information is given during the analysis
 
         Attributes
         ----------
-        _X : the original dataset
+        _X: the original dataset
         _St: spectra of pure compounds
-        _C : intensities ('concentrations') of pure compounds in spectra
+        _C: intensities ('concentrations') of pure compounds in spectra
         _Pt: purity spectra
-        _s : standard deviation spectra
+        _s: standard deviation spectra
 
         Examples
         --------
@@ -239,7 +239,7 @@ class SIMPLISMA(HasTraits):
 
                     ans = ''
                     while ans.lower() not in ['a', 'c']:
-                        ans = input('   |--> (a) Accept, (c) Change : ')
+                        ans = input('   |--> (a) Accept, (c) Change: ')
 
                     while ans.lower() != 'a':
                         new = input('   |--> enter the new index (int) or variable value (float): ')
@@ -262,7 +262,7 @@ class SIMPLISMA(HasTraits):
                         logs += llog + '\n'
                         info_(llog)
 
-                        ans = input('   |--> (a) Accept, (c) Change : ')
+                        ans = input('   |--> (a) Accept, (c) Change: ')
                     # ans was [a]ccept
                     j += 1
                 if not interactive:
@@ -415,9 +415,9 @@ class SIMPLISMA(HasTraits):
 
         Returns
         -------
-        C : |NDDataset|
+        C: |NDDataset|
             The concentration/contribution matrix
-        St : |NDDataset|
+        St: |NDDataset|
             The pure compound spectra matrix
 
         """
@@ -431,7 +431,7 @@ class SIMPLISMA(HasTraits):
 
         Returns
         -------
-        X_hat : |NDDataset|
+        X_hat: |NDDataset|
             The reconstructed dataset based on the SIMPLISMA Analysis.
 
         """
@@ -452,7 +452,7 @@ class SIMPLISMA(HasTraits):
 
         Returns
         -------
-        ax : subplot
+        ax: subplot
 
         """
 

@@ -33,21 +33,21 @@ def read_table(filename):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of NMRPipe table file to read.
 
     Returns
     -------
-    pcomments : list
+    pcomments: list
         List of NMRPipe comment lines
     pformat: list
         List of NMRPipe table column format strings.
-    rec : recarray
+    rec: recarray
         Records array with named fields.
 
     See Also
     --------
-    write_table : Write a NMRPipe table file.
+    write_table: Write a NMRPipe table file.
 
     """
     # divide up into comment lines and data lines
@@ -92,13 +92,13 @@ def write_table(filename, pcomments, pformats, rec, overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of file to write to.
     pcomments: list
         List of NMRPipe comment lines.
     pformats :
         List of NMRPipe table column formats strings.
-    rec : recarray
+    rec: recarray
         Records array of table.
     overwrite: bool, optional
         True to overwrite file if it exists, False will raise a Warning if the
@@ -106,7 +106,7 @@ def write_table(filename, pcomments, pformats, rec, overwrite=False):
 
     See Also
     --------
-    read_table : Read a NMRPipe table file.
+    read_table: Read a NMRPipe table file.
 
     """
     if len(rec[0]) != len(pformats):
@@ -148,17 +148,17 @@ def make_uc(dic, data, dim=-1):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of NMRPipe parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    dim : int, optional
+    dim: int, optional
         Dimension number to create unit conversion object for. Default is for
         last (direct) dimension.
 
     Returns
     -------
-    uc : unit conversion object
+    uc: unit conversion object
         Unit conversion object for given dimension.
 
     """
@@ -217,14 +217,14 @@ def guess_udic(dic, data):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of NMRPipe parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
 
     """
@@ -282,14 +282,14 @@ def create_dic(udic, datetimeobj=datetime.datetime.now()):
 
     Parameters
     ----------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
-    datetimeobj : datetime object, optional
+    datetimeobj: datetime object, optional
         Datetime to record in NMRPipe dictionary
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary NMRPipe parameters.
 
     """
@@ -496,20 +496,20 @@ def read(filename):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename or filemask of NMRPipe file(s) to read.
 
     Returns
     --------
-    dic : dict
+    dic: dict
         Dictionary of NMRPipe parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     See Also
     --------
-    read_lowmem : NMRPipe file reading with minimal memory usage.
-    write : Write a NMRPipe data to file(s).
+    read_lowmem: NMRPipe file reading with minimal memory usage.
+    write: Write a NMRPipe data to file(s).
 
     """
     if filename.count("%") == 1:
@@ -548,15 +548,15 @@ def read_lowmem(filename):
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of NMRPipe parameters.
-    data : array_like
+    data: array_like
         Low memory object which can access NMR data on demand.
 
     See Also
     --------
-    read : Read NMRPipe files.
-    write_lowmem : Write NMRPipe files using minimal amounts of memory.
+    read: Read NMRPipe files.
+    write_lowmem: Write NMRPipe files using minimal amounts of memory.
 
     """
     if filename.count("%") == 1:
@@ -742,13 +742,13 @@ def write(filename, dic, data, overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of NMRPipe to write to.  See Notes.
-    dic : dict
+    dic: dict
         Dictionary of NMRPipe parameters.
-    data : array_like
+    data: array_like
         Array of NMR data.
-    overwrite : bool, optional.
+    overwrite: bool, optional.
         Set True to overwrite files, False will raise a Warning if file
         exists.
 
@@ -770,8 +770,8 @@ def write(filename, dic, data, overwrite=False):
 
     See Also
     --------
-    write_lowmem : Write NMRPipe files using minimal amounts of memory.
-    read : Read NMRPipe files.
+    write_lowmem: Write NMRPipe files using minimal amounts of memory.
+    read: Read NMRPipe files.
 
     """
     # load all data if the data is not a numpy ndarray
@@ -859,20 +859,20 @@ def write_lowmem(filename, dic, data, overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of NMRPipe to write to.  See :py:func:`write` for details.
-    dic : dict
+    dic: dict
         Dictionary of NMRPipe parameters.
-    data : array_like
+    data: array_like
         Array of NMR data.
-    overwrite : bool, optional.
+    overwrite: bool, optional.
         Set True to overwrite files, False will raise a Warning if file
         exists.
 
     See Also
     --------
-    write : Write a NMRPipe file to disk.
-    read_lowmem : Read a NMRPipe file using minimal memory.
+    write: Write a NMRPipe file to disk.
+    read_lowmem: Read a NMRPipe file using minimal memory.
 
     """
     if data.ndim == 1:
@@ -1071,15 +1071,15 @@ def write_slice_3D(filemask, dic, data, shape, slices):
 
     Parameters
     ----------
-    filemask : str
+    filemask: str
         String of NMRPipe file with single formatting operator (%).
-    dic : dict
+    dic: dict
         Dictionary of NMRPipe parameters.
-    data : ndarray
+    data: ndarray
         3D array of NMR data.
-    shape : tuple
+    shape: tuple
         Tuple of 3 integers indicating the overall matrix shape.
-    (sz, sy, sx) : slices
+    (sz, sy, sx): slices
         Slice objects which specify the location of the to be written data.
 
     Notes
@@ -1090,7 +1090,7 @@ def write_slice_3D(filemask, dic, data, shape, slices):
 
     See Also
     --------
-    iter3D : Users should use this object, not this function.
+    iter3D: Users should use this object, not this function.
 
     """
     sz, sy, sx = slices
@@ -1266,12 +1266,12 @@ class iter3D(object):
 
         Parameters
         ----------
-        filemask : str
+        filemask: str
             String file with single formatter (%) which represents which
             indicates which NMRPipe file to read.
-        in_lead : ('x', 'y', 'z'), optional
+        in_lead: ('x', 'y', 'z'), optional
             Axis name of last (1st) axis in outputted 2D
-        out_lead : ('x', 'y', 'z', 'DEFAULT'), optional
+        out_lead: ('x', 'y', 'z', 'DEFAULT'), optional
             Axis name of axis to be written, typically this is the same as
             in_load, which is the used if 'DEFAULT' is given.
 
@@ -1629,15 +1629,15 @@ def get_trace(fhandle, ntrace, pts, bswap, cplex):
 
     Parameters
     ----------
-    fhandle : file object
+    fhandle: file object
         File object of open NMRPipe file.
-    ntrace : int
+    ntrace: int
         Trace numbers (starting from 0).
-    pts : int
+    pts: int
         Number of points in trace, R|I.
-    bswap : bool
+    bswap: bool
         True to perform byteswap on trace.
-    cplex : bool
+    cplex: bool
         True to unappend imaginary data.
 
     """
@@ -1670,9 +1670,9 @@ class pipe_2d(fileiobase.data_nd):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of 2D NMRPipe file.
-    order : tuple
+    order: tuple
         Ordering of axes against file.
 
     """
@@ -1761,12 +1761,12 @@ class pipe_3d(fileiobase.data_nd):
 
     Parameters
     ----------
-    filemask : str
+    filemask: str
         Filename of 3D NMRPipe file. Should contain one formatter '%'
         operator.
-    order : tuple
+    order: tuple
         Ordering of axes against file.
-    fcheck : bool, optional.
+    fcheck: bool, optional.
         True to perform a basic check to see if all files expected for the data
         set exist.  Raises a IOError if files are missing. Default is False.
 
@@ -1881,9 +1881,9 @@ class pipestream_3d(fileiobase.data_nd):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of 3D NMRPipe stream file.
-    order : tuple
+    order: tuple
         Ordering of axes against file.
 
     """
@@ -1973,11 +1973,11 @@ class pipe_4d(fileiobase.data_nd):
 
     Parameters
     ----------
-    filemask : str
+    filemask: str
         Filename of 4D NMRPipe file with one or two formatter (%) operators.
-    order : tuple
+    order: tuple
         Ordering of axes against file.
-    fcheck : bool, optional.
+    fcheck: bool, optional.
         True to perform a basic check to see if all files expected for the data
         set exist.  Raises a IOError if files are missing. Default is False.
 
@@ -2105,9 +2105,9 @@ class pipestream_4d(fileiobase.data_nd):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of 4D NMRPipe stream file.
-    order : tuple
+    order: tuple
         Ordering of axes against file.
 
     """

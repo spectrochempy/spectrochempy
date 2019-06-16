@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.1.1
+#       jupytext_version: 1.1.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -63,7 +63,7 @@ print_(d1D)
 # %% [markdown]
 # <div class='alert-info'>
 #
-# **Note** : In the above code, we use of `print_` (with an underscore) not the usual `print` function. 
+# **Note**: In the above code, we use of `print_` (with an underscore) not the usual `print` function. 
 # The `print` output only a short line of information
 #
 # </div>
@@ -92,18 +92,18 @@ d1D + d1D / 2.
 # %% [markdown]
 # As seen above, there is some metadata taht are automatically added to the dataset:
 #
-# * **`id`**      : This is a unique identifier for the object
-# * **`author`**  : author determined from the computer name
-# * **`created`** : date/time of creation
+# * **`id`**     : This is a unique identifier for the object
+# * **`author`** : author determined from the computer name
+# * **`created`**: date/time of creation
 # * **`modified`**: date/time of modification
 #
 # additionaly, dataset can have a **`name`** (equal to the `id` if it is not provided)
 #
 # Some other metadata are defined:
 #
-# * **`history`** : history of operation achieved on the object since the object creation
-# * **`description`** : A user friendly description of the objects purpose or contents.
-# * **`title`** : A title that will be used in plots or in some other operation on the objects.
+# * **`history`**: history of operation achieved on the object since the object creation
+# * **`description`**: A user friendly description of the objects purpose or contents.
+# * **`title`**: A title that will be used in plots or in some other operation on the objects.
 #
 #
 # All this metadata (except, the `id`, `created`, `modified`) can be changed by the user.
@@ -132,7 +132,7 @@ d1D.ndim # the number of dimensions
 d1D.dims # the name of the dimension (it has been automatically attributed)
 
 # %% [markdown]
-# **Note** : The names of the dimensions are set automatically. But they can be changed, with the limitation that the name must be a single letter.
+# **Note**: The names of the dimensions are set automatically. But they can be changed, with the limitation that the name must be a single letter.
 
 # %%
 d1D.dims = ['q']  # change the list of dim names.
@@ -170,7 +170,7 @@ d2D = NDDataset(a, dims = ['v','u','t'], title = 'Energy', name = '3D_dataset',
 d2D
 
 # %% [markdown]
-# Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are : 'z','y','x' automatically attributed)
+# Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are: 'z','y','x' automatically attributed)
 
 # %%
 d2D.dims 
@@ -316,7 +316,7 @@ nd = NDDataset(a, coords=CoordSet(x=np.arange(3), y='x'))
 nd
 
 # %% [markdown]
-# ## Create a NDDataset : full example
+# ## Create a NDDataset: full example
 #
 # There are many ways to create `NDDataset` objects.
 #
@@ -421,7 +421,7 @@ d3D
 d3D.set_coords(x=CoordSet(coord2,coord2b), y=coord1, z=coord0)
 d3D.set_coords(x=[coord2,coord2b], y=coord1, z=coord0) # equivalent
 
-# B. second syntax in the order of the dimensions : z,y,x (if no swap or transpopse has been performed)
+# B. second syntax in the order of the dimensions: z,y,x (if no swap or transpopse has been performed)
 d3D.set_coords(coord0, coord1, [coord2,coord2b])
 d3D.set_coords((coord0, coord1, [coord2,coord2b]))  # equivalent
    

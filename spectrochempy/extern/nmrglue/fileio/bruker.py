@@ -58,9 +58,9 @@ def guess_udic(dic, data, strip_fake=False):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
     strip_fake: bool
         If data is proceed (i.e. read using `bruker.read_pdata`) and the Bruker
@@ -71,7 +71,7 @@ def guess_udic(dic, data, strip_fake=False):
 
     Returns
     -------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
 
     """
@@ -98,11 +98,11 @@ def add_axis_to_udic(udic, dic, udim, strip_fake):
 
     Parameters
     ----------
-    udic : dict
+    udic: dict
         Universal dictionary to update, modified in place.
-    dic : dict
+    dic: dict
         Bruker dictionary used to determine axes parameters.
-    dim : int
+    dim: int
         Universal dictionary dimension to update.
     strip_fake: bool
         See `bruker.guess_udic`
@@ -219,12 +219,12 @@ def create_dic(udic):
 
     Parameters
     ----------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
 
     """
@@ -295,49 +295,49 @@ def read(dir=".", bin_file=None, acqus_files=None, pprog_file=None, shape=None,
 
     Parameters
     ----------
-    dir : str
+    dir: str
         Directory to read from.
-    bin_file : str, optional
+    bin_file: str, optional
         Filename of binary file in directory. None uses standard files.
-    acqus_files : list, optional
+    acqus_files: list, optional
         List of filename(s) of acqus parameter files in directory. None uses
         standard files.
-    pprog_file : str, optional
+    pprog_file: str, optional
         Filename of pulse program in directory. None uses standard files.
-    shape : tuple, optional
+    shape: tuple, optional
         Shape of resulting data.  None will guess the shape from the spectral
         parameters.
-    cplex : bool, optional
+    cplex: bool, optional
         True is direct dimension is complex, False otherwise. None will guess
         quadrature from spectral parameters.
-    big : bool or None, optional
+    big: bool or None, optional
         Endianness of binary file. True for big-endian, False for
         little-endian, None to determine endianness from acqus file(s).
-    isfloat : bool or None, optional
+    isfloat: bool or None, optional
         Data type of binary file. True for float64, False for int32. None to
         determine data type from acqus file(s).
-    read_pulseprogram : bool, optional
+    read_pulseprogram: bool, optional
         True to read pulse program, False prevents reading.
-    read_acqus : bool, optional
+    read_acqus: bool, optional
         True to read acqus files(s), False prevents reading.
-    procs_files : list, optional
+    procs_files: list, optional
         List of filename(s) of procs parameter files in directory. None uses
         standard files.
-    read_procs : bool, optional
+    read_procs: bool, optional
         True to read procs files(s), False prevents reading.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     See Also
     --------
-    read_pdata : Read Bruker processed files.
-    read_lowmem : Low memory reading of Bruker files.
-    write : Write Bruker files.
+    read_pdata: Read Bruker processed files.
+    read_lowmem: Low memory reading of Bruker files.
+    write: Write Bruker files.
 
     """
     if os.path.isdir(dir) is not True:
@@ -440,15 +440,15 @@ def read_lowmem(dir=".", bin_file=None, acqus_files=None, pprog_file=None,
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
-    data : array_like
+    data: array_like
         Low memory object which can access NMR data on demand.
 
     See Also
     --------
-    read : Read Bruker files.
-    write_lowmem : Write Bruker files using minimal amounts of memory.
+    read: Read Bruker files.
+    write_lowmem: Write Bruker files using minimal amounts of memory.
 
     """
 
@@ -544,15 +544,15 @@ def read_acqus_file(dir='.', acqus_files=None):
 
     Parameters
     ----------
-    dir : str
+    dir: str
         Directory to read from.
-    acqus_files : list, optional
+    acqus_files: list, optional
         List of filename(s) of acqus parameter files in directory. None uses
         standard files.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
     """
     if acqus_files is None:
@@ -576,15 +576,15 @@ def read_procs_file(dir='.', procs_files=None):
 
     Parameters
     ----------
-    dir : str
+    dir: str
         Directory to read from.
-    procs_files : list, optional
+    procs_files: list, optional
         List of filename(s) of procs parameter files in directory. None uses
         standard files.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
     """
     if procs_files is None:
@@ -625,38 +625,38 @@ def write(dir, dic, data, bin_file=None, acqus_files=None, procs_files=None,
 
     Parameters
     ----------
-    dir : str
+    dir: str
         Directory to write files to.
-    dir : dict
+    dir: dict
         Dictionary of Bruker parameters.
-    data : array_like
+    data: array_like
         Array of NMR data
-    bin_file : str, optional
+    bin_file: str, optional
         Filename of binary file in directory. None uses standard files.
-    acqus_files : list, optional
+    acqus_files: list, optional
         List of filename(s) of acqus parameter files in directory. None uses
         standard files.
-    procs_file : list, optional
+    procs_file: list, optional
         List of filename(s) of procs parameter files (to write out). None uses a
         list of standard files
-    pprog_file : str, optional
+    pprog_file: str, optional
         Filename of pulse program in directory. None uses standard files.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Set True to overwrite files, False will raise a Warning if files
         exist.
-    big : bool or None, optional
+    big: bool or None, optional
         Endianness of binary file. True for big-endian, False for
         little-endian, None to determine endianness from Bruker dictionary.
-    isfloat : bool or None, optional
+    isfloat: bool or None, optional
         Data type of binary file. True for float64, False for int32. None to
         determine data type from Bruker dictionary.
-    write_pprog : bool, optional
+    write_pprog: bool, optional
         True to write the pulse program file, False prevents writing.
-    write_acqus : bool, optional
+    write_acqus: bool, optional
         True to write the acqus files(s), False prevents writing.
-    write_procs : bool, optional
+    write_procs: bool, optional
         True to write the procs files(s), False prevents writing.
-    pdata_folder : int, optional
+    pdata_folder: int, optional
         Makes a folder and a subfolder ('pdata/pdata_folder') inside the given
         directory where pdata_folder is an integer. procN and procNs files are
         stored inside pdata_folder. pdata_folder=False (or =0) does not make the
@@ -664,8 +664,8 @@ def write(dir, dic, data, bin_file=None, acqus_files=None, procs_files=None,
 
     See Also
     --------
-    write_lowmem : Write Bruker files using minimal amounts of memory.
-    read : Read Bruker files.
+    write_lowmem: Write Bruker files using minimal amounts of memory.
+    read: Read Bruker files.
 
     """
     # determine parameters automatically
@@ -754,8 +754,8 @@ def write_lowmem(dir, dic, data, bin_file=None, acqus_files=None,
 
     See Also
     --------
-    write : Write Bruker files.
-    read_lowmem : Read Bruker files using minimal amounts of memory.
+    write: Write Bruker files.
+    read_lowmem: Read Bruker files using minimal amounts of memory.
 
     """
     # determine parameters automatically
@@ -816,49 +816,49 @@ def write_pdata(dir, dic, data, roll=False, shape=None, submatrix_shape=None,
 
     Parameters
     ----------
-    dir : str
+    dir: str
         Directory to write files to.
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
-    data : array_like
+    data: array_like
         Array of NMR data
-    roll : int
+    roll: int
         Number of points by which a circular shift needs to be applied to the data
         True will apply a circular shift of 1 data point
-    shape : tuple, optional
+    shape: tuple, optional
         Shape of data, if file is to be written with a shape
         different than data.shape
-    submatrix_shape : tuple, optional
+    submatrix_shape: tuple, optional
         Shape of the submatrix used to store data (using Bruker specifications)
         If this is not given, the submatrix shape will be guessed from dic
-    scale_data : Bool
+    scale_data: Bool
         Apply a reverse scaling using the scaling factor defined in procs file
         By default, the array to be written will not be scaled using the value
         in procs but will be e scaled so  that the max intensity in that array
         will have a value between 2**28 and 2**29. scale_data is to be used when 
         the array is itself a processed  bruker file that was read into nmrglue
-    bin_file : str, optional
+    bin_file: str, optional
         Filename of binary file in directory. None uses standard files.
-    procs_file : list, optional
+    procs_file: list, optional
         List of filename(s) of procs parameter files (to write out). None uses a
         list of standard files
-    write_procs : Bool
+    write_procs: Bool
         True to write out the procs files
-    pdata_folder : int, optional
+    pdata_folder: int, optional
         Makes a folder and a subfolder ('pdata/pdata_folder') inside the given
         directory where pdata_folder is an integer. All files (procs and data) are
         stored inside pdata_folder. pdata_folder=False (or =0) does not make the
         pdata folder and pdata_folder=True makes folder '1'.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Set True to overwrite files, False will raise a Warning if files
         exist.
-    big : bool or None, optional
+    big: bool or None, optional
         Endianness of binary file. True for big-endian, False for
         little-endian, None to determine endianness from Bruker dictionary.
-    isfloat : bool or None, optional
+    isfloat: bool or None, optional
         Data type of binary file. True for float64, False for int32. None to
         determine data type from Bruker dictionary.
-    restrict_access : not implemented
+    restrict_access: not implemented
 
     """
 
@@ -931,9 +931,9 @@ def guess_shape(dic):
 
     Returns
     -------
-    shape : tuple
+    shape: tuple
         Shape of data in Bruker binary file (R+I for all dimensions).
-    cplex : bool
+    cplex: bool
         True for complex data in last (direct) dimension, False otherwise.
 
     """
@@ -1114,46 +1114,46 @@ def read_pdata(dir=".", bin_files=None, procs_files=None, read_procs=True,
 
     Parameters
     ----------
-    dir : str
+    dir: str
         Directory to read from.
-    bin_files : list of str, optional
+    bin_files: list of str, optional
         List of filename of binary file in directory. None uses standard
         files.
-    procs_files : list, optional
+    procs_files: list, optional
         List of filename(s) of procs parameter files in directory. None uses
         standard files.
-    read_procs : bool, optional
+    read_procs: bool, optional
         True to read procs files(s), False prevents reading.
-    acqus_files : list, optional
+    acqus_files: list, optional
         List of filename(s) of acqus parameter files in directory. None uses
         standard files.
-    read_acqus : bool, optional
+    read_acqus: bool, optional
         True to read acqus files(s), False prevents reading.
-    scale_data : bool, optional
+    scale_data: bool, optional
         True, the default, to apply scaling defined in the procs file.  The
         data should almost always be scaled. False, returns the
         data as it appears in the file.
-    shape : tuple, optional
+    shape: tuple, optional
         Shape of resulting data.  None will guess the shape from the
         parameters in the procs file(s).
-    submatrix_shape : tuple, optional
+    submatrix_shape: tuple, optional
         Shape of submatrix for 2D+ data.  None will guess the shape from
         the metadata in the procs file(s).
-    all_components : bool
+    all_components: bool
         True to return a list of all components, False returns just the
         all real component (1r, 2rr, 3rrr, etc).
-    big : bool or None, optional
+    big: bool or None, optional
         Endianness of binary file. True for big-endian, False for
         little-endian, None to determine endianness from procs file(s).
-    isfloat : bool or None, optional
+    isfloat: bool or None, optional
         Data type of binary file. True for float64, False for int32. None to
         determine data type from procs file(s).
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
-    data : ndarray or list
+    data: ndarray or list
         Array of NMR data.  If all_components is True this is a list of array
         with each quadrature component.
 
@@ -1262,17 +1262,17 @@ def scale_pdata(dic, data, reverse=False):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    reverse : Bool
+    reverse: Bool
         True to reverse the scaling, i.e. multiply by the
         scaling factor rather than divide
 
     Returns
     -------
-    sdata : array
+    sdata: array
         Scaled data.
     """
     try:
@@ -1294,15 +1294,15 @@ def array_to_int(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data (float64 or int32).
-    reverse : Bool
+    reverse: Bool
         True to reverse the scaling, i.e. multiply by the
         scaling factor rather than divide
 
     Returns
     -------
-    intdata : array
+    intdata: array
         Real valued data scaled to have the maximum intensity between
         2**28 and 2**29, converted to type int32
     """
@@ -1374,23 +1374,23 @@ def read_pdata_binary(filename, shape=None, submatrix_shape=None, big=True,
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Bruker binary file.
-    shape : tuple
+    shape: tuple
         Shape of resulting data.  None will return 1D data.
-    submatrix_shape : tuple
+    submatrix_shape: tuple
         Tuple describing shape of resulting data.  None will return 1D data.
-    big : bool
+    big: bool
         Endianness of binary file, True for big-endian, False for
         little-endian.
-    isfloat : bool
+    isfloat: bool
         Data type of binary file. True for float64, False for int32.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary containing "FILE_SIZE" key and value.
-    data : ndarray
+    data: ndarray
         Array of raw NMR data.
 
     """
@@ -1419,20 +1419,20 @@ def reorder_submatrix(data, shape, submatrix_shape, reverse=False):
 
     Parameters
     ----------
-    data : array
+    data: array
 
-    shape : tuple
+    shape: tuple
         Shape of final data.
-    submatrix_shape : tuple
+    submatrix_shape: tuple
         Shape of submatrix.
-    reverse : Bool
+    reverse: Bool
         True to reverse the reordering of a submatrix.
         This options is used to reorder a numpy matrix that is
         ordered correctly into the Bruker format using submatrix_shape
 
     Returns
     -------
-    rdata : array
+    rdata: array
         Array in which data has been reordered and correctly shaped.
 
     """
@@ -1473,28 +1473,28 @@ def read_binary(filename, shape=(1), cplex=True, big=True, isfloat=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Bruker binary file.
-    shape : tuple
+    shape: tuple
         Tuple describing shape of resulting data.
-    cplex : bool
+    cplex: bool
         Flag indicating if direct dimension is complex.
-    big : bool
+    big: bool
         Endianness of binary file, True for big-endian, False for
         little-endian.
-    isfloat : bool
+    isfloat: bool
         Data type of binary file. True for float64, False for int32.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary containing "FILE_SIZE" key and value.
-    data : ndarray
+    data: ndarray
         Array of raw NMR data.
 
     See Also
     --------
-    read_binary_lowmem : Read Bruker binary file using minimal memory.
+    read_binary_lowmem: Read Bruker binary file using minimal memory.
 
     """
     # open the file and get the data
@@ -1527,9 +1527,9 @@ def read_binary_lowmem(filename, shape=(1), cplex=True, big=True,
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary containing "FILE_SIZE" key and value.
-    data : array_like
+    data: array_like
         Low memory object which can access NMR data on demand.
 
     See Also
@@ -1550,23 +1550,23 @@ def write_binary(filename, dic, data, overwrite=False, big=True,
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename to write to.
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    overwrite : bool
+    overwrite: bool
         True to overwrite files, False will raise a Warning if file exists.
-    big : bool
+    big: bool
         Endianness to write binary data with True for big-endian, False for
         little-endian.
-    isfloat : bool
+    isfloat: bool
         Data type of binary file. True for float64, False for int32.
 
     See Also
     --------
-    write_binary_lowmem : Write Bruker binary data using minimal memory.
+    write_binary_lowmem: Write Bruker binary data using minimal memory.
 
     """
     # open the file for writing
@@ -1593,7 +1593,7 @@ def write_binary_lowmem(filename, dic, data, overwrite=False, big=True,
 
     See Also
     --------
-    write_binary : Write Bruker binary data to file.
+    write_binary: Write Bruker binary data to file.
 
     """
     # open the file for writing
@@ -1628,17 +1628,17 @@ class bruker_nd(fileiobase.data_nd):
     Parameters
     ----------
 
-    filename : str
+    filename: str
         Filename of Bruker binary file.
-    fshape : tuple
+    fshape: tuple
         Shape of NMR data.
-    cplex : bool
+    cplex: bool
         Flag indicating if direct dimension is complex.
-    big : bool
+    big: bool
         Endianness of data.  True for big-endian, False for little-endian.
-    isfloat : bool
+    isfloat: bool
         Data type of binary file. True for float64, False for int32.
-    order : tuple
+    order: tuple
         Ordering of axis against file.
 
     """
@@ -1831,95 +1831,95 @@ def uncomplexify_data(data_in, isfloat):
 # http://sbtools.uchc.edu/help/nmr/nmr_toolkit/bruker_dsp_table.asp
 
 # The rounding in the above tables appear to be based on k / (2*DECIM)
-# for example 2 : 44.75   = 44 + 3/4
-#             4 : 66.625  = 66 + 5/8
-#             8 : 68.563 ~= 68 + 9/16 = 68.5625
+# for example 2: 44.75   = 44 + 3/4
+#             4: 66.625  = 66 + 5/8
+#             8: 68.563 ~= 68 + 9/16 = 68.5625
 # Using this the un-rounded table was created by checking possible unrounded
 # fracions which would round to those in the original table.
 
 bruker_dsp_table = {
     10: {
-        2    : 44.75,
-        3    : 33.5,
-        4    : 66.625,
-        6    : 59.083333333333333,
-        8    : 68.5625,
-        12   : 60.375,
-        16   : 69.53125,
-        24   : 61.020833333333333,
-        32   : 70.015625,
-        48   : 61.34375,
-        64   : 70.2578125,
-        96   : 61.505208333333333,
-        128  : 70.37890625,
-        192  : 61.5859375,
-        256  : 70.439453125,
-        384  : 61.626302083333333,
-        512  : 70.4697265625,
-        768  : 61.646484375,
-        1024 : 70.48486328125,
-        1536 : 61.656575520833333,
-        2048 : 70.492431640625,
+        2   : 44.75,
+        3   : 33.5,
+        4   : 66.625,
+        6   : 59.083333333333333,
+        8   : 68.5625,
+        12  : 60.375,
+        16  : 69.53125,
+        24  : 61.020833333333333,
+        32  : 70.015625,
+        48  : 61.34375,
+        64  : 70.2578125,
+        96  : 61.505208333333333,
+        128 : 70.37890625,
+        192 : 61.5859375,
+        256 : 70.439453125,
+        384 : 61.626302083333333,
+        512 : 70.4697265625,
+        768 : 61.646484375,
+        1024: 70.48486328125,
+        1536: 61.656575520833333,
+        2048: 70.492431640625,
     },
     11: {
-        2    : 46.,
-        3    : 36.5,
-        4    : 48.,
-        6    : 50.166666666666667,
-        8    : 53.25,
-        12   : 69.5,
-        16   : 72.25,
-        24   : 70.166666666666667,
-        32   : 72.75,
-        48   : 70.5,
-        64   : 73.,
-        96   : 70.666666666666667,
-        128  : 72.5,
-        192  : 71.333333333333333,
-        256  : 72.25,
-        384  : 71.666666666666667,
-        512  : 72.125,
-        768  : 71.833333333333333,
-        1024 : 72.0625,
-        1536 : 71.916666666666667,
-        2048 : 72.03125
+        2   : 46.,
+        3   : 36.5,
+        4   : 48.,
+        6   : 50.166666666666667,
+        8   : 53.25,
+        12  : 69.5,
+        16  : 72.25,
+        24  : 70.166666666666667,
+        32  : 72.75,
+        48  : 70.5,
+        64  : 73.,
+        96  : 70.666666666666667,
+        128 : 72.5,
+        192 : 71.333333333333333,
+        256 : 72.25,
+        384 : 71.666666666666667,
+        512 : 72.125,
+        768 : 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125
     },
     12: {
-        2    : 46.,
-        3    : 36.5,
-        4    : 48.,
-        6    : 50.166666666666667,
-        8    : 53.25,
-        12   : 69.5,
-        16   : 71.625,
-        24   : 70.166666666666667,
-        32   : 72.125,
-        48   : 70.5,
-        64   : 72.375,
-        96   : 70.666666666666667,
-        128  : 72.5,
-        192  : 71.333333333333333,
-        256  : 72.25,
-        384  : 71.666666666666667,
-        512  : 72.125,
-        768  : 71.833333333333333,
-        1024 : 72.0625,
-        1536 : 71.916666666666667,
-        2048 : 72.03125
+        2   : 46.,
+        3   : 36.5,
+        4   : 48.,
+        6   : 50.166666666666667,
+        8   : 53.25,
+        12  : 69.5,
+        16  : 71.625,
+        24  : 70.166666666666667,
+        32  : 72.125,
+        48  : 70.5,
+        64  : 72.375,
+        96  : 70.666666666666667,
+        128 : 72.5,
+        192 : 71.333333333333333,
+        256 : 72.25,
+        384 : 71.666666666666667,
+        512 : 72.125,
+        768 : 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125
     },
     13: {
-        2    : 2.75,
-        3    : 2.8333333333333333,
-        4    : 2.875,
-        6    : 2.9166666666666667,
-        8    : 2.9375,
-        12   : 2.9583333333333333,
-        16   : 2.96875,
-        24   : 2.9791666666666667,
-        32   : 2.984375,
-        48   : 2.9895833333333333,
-        64   : 2.9921875,
-        96   : 2.9947916666666667
+        2   : 2.75,
+        3   : 2.8333333333333333,
+        4   : 2.875,
+        6   : 2.9166666666666667,
+        8   : 2.9375,
+        12  : 2.9583333333333333,
+        16  : 2.96875,
+        24  : 2.9791666666666667,
+        32  : 2.984375,
+        48  : 2.9895833333333333,
+        64  : 2.9921875,
+        96  : 2.9947916666666667
     }
 }
 
@@ -1930,27 +1930,27 @@ def remove_digital_filter(dic, data, truncate=True, post_proc=False):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of Bruker parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data to remove digital filter from.
-    truncate : bool, optional
+    truncate: bool, optional
         True to truncate the phase shift prior to removing the digital filter.
         This typically produces a better looking spectrum but may remove
         useful data.  False uses a non-truncated phase.
-    post_proc : bool, optional
+    post_proc: bool, optional
         True if the digitial filter is to be removed post processing, i.e after
         fourier transformation. The corrected FID will not be returned, only a
         corrected spectrum in the frequency dimension will be returned
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with digital filter removed
 
     See Also
     ---------
-    rm_dig_filter : Remove digital filter by specifying parameters.
+    rm_dig_filter: Remove digital filter by specifying parameters.
 
     """
     if 'acqus' not in dic:
@@ -1979,21 +1979,21 @@ def rm_dig_filter(
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data to remove digital filter from.
-    decim : int
+    decim: int
         Decimation rate (Bruker DECIM parameter).
-    dspfvs : int
+    dspfvs: int
         Firmware version (Bruker DSPFVS parameter).
-    grpdly : float, optional
+    grpdly: float, optional
         Group delay. (Bruker GRPDLY parameter). When non-zero decim and
         dspfvs are ignored.
-    truncate_grpdly : bool, optional
+    truncate_grpdly: bool, optional
         True to truncate the value of grpdly provided or determined from
         the decim and dspfvs parameters before removing the digital filter.
         This typically produces a better looking spectrum but may remove useful
         data.  False uses a non-truncated grpdly value.
-    post_proc : bool, optional
+    post_proc: bool, optional
         True if the digitial filter is to be removed post processing, i.e after
         fourier transformation. The corrected time domain data will not be
         returned, only the corrected spectrum in the frequency dimension will
@@ -2001,12 +2001,12 @@ def rm_dig_filter(
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with digital filter removed.
 
     See Also
     --------
-    remove_digital_filter : Remove digital filter using Bruker dictionary.
+    remove_digital_filter: Remove digital filter using Bruker dictionary.
 
     """
     # Case I: post_proc flag is set to False (default)
@@ -2035,7 +2035,7 @@ def rm_dig_filter(
     #    alone.
     # -----------------------------------------------------------------------
 
-    # Case II : post_proc flag is True
+    # Case II: post_proc flag is True
     # 1. In this case, it is assumed that the data is already fourier
     #    transformed
     # 2. A first order phase correction equal to 2*PI*GRPDLY is applied to the
@@ -2098,17 +2098,17 @@ def read_jcamp(filename):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of Bruker JCAMP-DX file.
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of parameters in file.
 
     See Also
     --------
-    write_jcamp : Write a Bruker JCAMP-DX file.
+    write_jcamp: Write a Bruker JCAMP-DX file.
 
     Notes
     -----
@@ -2224,17 +2224,17 @@ def write_jcamp(dic, filename, overwrite=False):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of parameters to write
-    filename : str
+    filename: str
         Filename of JCAMP-DX file to write
-    overwrite : bool, optional
+    overwrite: bool, optional
         True to overwrite an existing file, False will raise a Warning if the
         file already exists.
 
     See Also
     --------
-    read_jcamp : Read a Bruker JCAMP-DX file.
+    read_jcamp: Read a Bruker JCAMP-DX file.
 
     """
 
@@ -2354,17 +2354,17 @@ def read_pprog(filename):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of pulseprogram file to read from,
 
     Returns
     -------
-    dic : dict
+    dic: dict
         A dictionary with keys described above.
 
     See Also
     --------
-    write_pprog : Write a Bruker pulse program to file.
+    write_pprog: Write a Bruker pulse program to file.
 
     """
 
@@ -2498,17 +2498,17 @@ def write_pprog(filename, dic, overwrite=False):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Filename of file to write pulse program to.
-    dic : dict
+    dic: dict
         Dictionary of pulse program parameters.
-    overwrite : bool, optional
+    overwrite: bool, optional
         True to overwrite an existing file, False will raise a Warning if the
         file already exists.
 
     See Also
     --------
-    read_pprog : Read a Bruker pulse program.
+    read_pprog: Read a Bruker pulse program.
 
     """
 

@@ -84,13 +84,13 @@ class PCA(HasTraits):
         Parameters
         ----------
         %(SVD.parameters.dataset)s
-        centered : bool, optional, default:True
+        centered: bool, optional, default:True
             If True the data are centered around the mean values:
             :math:`X' = X - mean(X)`.
-        standardized : bool, optional, default:False
+        standardized: bool, optional, default:False
             If True the data are scaled to unit standard deviation:
             :math:`X' = X / \sigma`.
-        scaled : bool, optional, default:False
+        scaled: bool, optional, default:False
             If True the data are scaled in the interval [0-1]:
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
 
@@ -245,7 +245,7 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        rank : int
+        rank: int
             Tested rank value.
 
         Returns
@@ -326,14 +326,14 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        n_pc : int, optional
+        n_pc: int, optional
             The number of principal components to compute. If not set all
             components are returned, except if n_pc is set to ``auto`` for
             an automatic determination of the number of components.
 
         Returns
         -------
-        S, LT : |NDDataset| objects.
+        S, LT: |NDDataset| objects.
             n_pc loadings and their corresponding scores for each observations.
 
 
@@ -362,12 +362,12 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        n_pc : int, optional
+        n_pc: int, optional
             The number of PC to use for the reconstruction.
 
         Returns
         -------
-        X_reconstructed : |NDDataset|
+        X_reconstructed: |NDDataset|
             The reconstructed dataset based on n_pc principal components.
 
         """
@@ -401,7 +401,7 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        n_pc : int, optional
+        n_pc: int, optional
             The number of components to print.
 
         """
@@ -453,9 +453,9 @@ class PCA(HasTraits):
         ----------
         *pcs: a series of int argument or a list/tuple
             Must contain 2 or 3 elements.
-        colormap : str
+        colormap: str
             A matplotlib colormap.
-        color_mapping : 'index' or 'labels'
+        color_mapping: 'index' or 'labels'
             If 'index', then the colors of each n_scores is mapped sequentially
             on the colormap. If labels, the labels of the n_observation are
             used for color mapping.

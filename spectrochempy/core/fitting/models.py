@@ -228,21 +228,21 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
 
     Parameters
     -----------
-    x : ndarray
+    x: ndarray
         Array of frequency where to evaluate the model values returned by the
         f function.
-    y : ndarray or None
+    y: ndarray or None
         None for 1D, or index for the second dimension
-    modelname : str
+    modelname: str
         name of the model class to use.
-    par : :class:`Parameters` instance
+    par: :class:`Parameters` instance
         parameter to pass to the f function
     kargs: any
         Keywords arguments to pass the the f function
 
     Returns
     -------
-    ndarray : float
+    ndarray: float
         an array containing the calculated model.
 
     """

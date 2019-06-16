@@ -38,18 +38,18 @@ def concatenate(*datasets, **kwargs):
 
     Parameters
     ----------
-    *datasets : positional |NDDataset| arguments
+    *datasets: positional |NDDataset| arguments
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
         (the last, by default).
-    dims : str, optional, default = 'x'
+    dims: str, optional, default = 'x'
         The dimension along which the operation is applied
-    axis : int, optional, default = None
+    axis: int, optional, default = None
         Alternative to the the dim keyword. Direct specification of the axis index to use for concatenation.
 
     Returns
     --------
-    out : |NDDataset|
+    out: |NDDataset|
         A dataset created from the contenations of the |NDDataset| input
         objects
 
@@ -262,12 +262,12 @@ def stack(*datasets):
 
     Parameters
     ----------
-    *datasets : a series of |NDDataset|
+    *datasets: a series of |NDDataset|
         The dataset to be stacked to the current dataset
 
     Returns
     --------
-    out : |NDDataset|
+    out: |NDDataset|
         A dataset created from the stack of the `datasets` datasets
 
     Examples

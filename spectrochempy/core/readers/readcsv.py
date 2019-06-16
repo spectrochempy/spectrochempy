@@ -67,7 +67,7 @@ def read_zip(*args, **kwargs):
 
     Returns
     -------
-    dataset : |NDDataset|
+    dataset: |NDDataset|
 
     Examples
     --------
@@ -353,7 +353,7 @@ def _add_omnic_info(dataset, **kwargs):
 
     # Set description and history
     dataset.description = (
-        'Dataset from .csv file : {}\n'.format(desc))
+        'Dataset from .csv file: {}\n'.format(desc))
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 

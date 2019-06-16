@@ -81,11 +81,11 @@ def make_new_object(obj):
 
     Parameters
     ----------
-    obj : the poject type
+    obj: the poject type
 
     Returns
     -------
-    new : the new object of same type.
+    new: the new object of same type.
 
     """
 
@@ -188,11 +188,11 @@ def gt_eps(arr):
 
     Parameters
     -----------
-    arr : array to check
+    arr: array to check
 
     Returns
     --------
-    bool : results ot checking
+    bool: results ot checking
         True means that at least some values are greater than epsilon
 
     """
@@ -331,12 +331,12 @@ def htmldoc(text):
 
     Parameters
     ----------
-    text : str
+    text: str
         The string to convert to html
 
     Returns
     -------
-    out : str
+    out: str
         the html string
 
     """
@@ -435,12 +435,12 @@ def closer_power_of_two(value):
 
     Parameters
     ----------
-    value : int
+    value: int
         Value to find nearest power of two equal to or larger than.
 
     Returns
     -------
-    pw : int
+    pw: int
         Power of 2.
 
     """

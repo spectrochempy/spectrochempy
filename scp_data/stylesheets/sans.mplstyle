@@ -4,32 +4,32 @@
 axes.prop_cycle: cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
 
 axes.titlesize: 14
-axes.grid : False
+axes.grid: False
 
 image.cmap: viridis
 
-figure.figsize          : 6.8, 4.4
-figure.dpi              : 100
-figure.facecolor        : white
-figure.edgecolor        : white
-figure.autolayout       : True
-figure.subplot.wspace   : 0.0
-figure.subplot.hspace   : 0.0
-figure.subplot.top      : 0.98
-figure.subplot.bottom   : 0.12
-figure.subplot.left     : 0.15
-figure.subplot.right    : .95
+figure.figsize         : 6.8, 4.4
+figure.dpi             : 100
+figure.facecolor       : white
+figure.edgecolor       : white
+figure.autolayout      : True
+figure.subplot.wspace  : 0.0
+figure.subplot.hspace  : 0.0
+figure.subplot.top     : 0.98
+figure.subplot.bottom  : 0.12
+figure.subplot.left    : 0.15
+figure.subplot.right   : .95
 
-savefig.dpi       : 600
-savefig.facecolor : white
-savefig.edgecolor : white
+savefig.dpi      : 600
+savefig.facecolor: white
+savefig.edgecolor: white
 
-font.family       : sans-serif
-font.sans-serif   : DejaVu Sans, Arial, Liberation Sans, Bitstream Vera Sans, sans-serif
-font.serif        : Times New Roman, Times, Palatino, DejaVu Serif, Computer Modern Roman, New Century Schoolbook,serif
-font.size         : 10
-font.style        : normal
-font.weight       : normal
+font.family      : sans-serif
+font.sans-serif  : DejaVu Sans, Arial, Liberation Sans, Bitstream Vera Sans, sans-serif
+font.serif       : Times New Roman, Times, Palatino, DejaVu Serif, Computer Modern Roman, New Century Schoolbook,serif
+font.size        : 10
+font.style       : normal
+font.weight      : normal
 
 grid.color: .85
 grid.linestyle: -
@@ -39,9 +39,9 @@ legend.fontsize: 9
 legend.frameon: False
 legend.numpoints: 1
 legend.scatterpoints: 1
-legend.labelspacing  : 0.2
-legend.handletextpad : 0.1
-legend.columnspacing : .5
+legend.labelspacing : 0.2
+legend.handletextpad: 0.1
+legend.columnspacing: .5
 
 lines.linewidth: 0.75
 lines.markeredgewidth: 0
@@ -61,11 +61,11 @@ ytick.color: .15
 ytick.direction: out
 ytick.labelsize: 10
 
-mathtext.fontset  : dejavusans
-mathtext.rm       : dejavusans
-mathtext.it       : dejavusans:italic
-mathtext.bf       : dejavusans:bold
-mathtext.cal      : cursive
-mathtext.default  : rm
+mathtext.fontset : dejavusans
+mathtext.rm      : dejavusans
+mathtext.it      : dejavusans:italic
+mathtext.bf      : dejavusans:bold
+mathtext.cal     : cursive
+mathtext.default : rm
 
-text.usetex       : False
+text.usetex      : False

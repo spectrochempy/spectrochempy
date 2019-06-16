@@ -19,7 +19,7 @@
 # %% [markdown]
 # <div class='alert alert-info'>
 #
-# **NOTE** : By default, all matplolib figures will be plotted **inline** in this notebook. 
+# **NOTE**: By default, all matplolib figures will be plotted **inline** in this notebook. 
 # to change this behaviour, uncomment (which means: remove the #) the next line (which must be placed before importing the  ``spectrochempy.api`` library!
 #
 # </div>

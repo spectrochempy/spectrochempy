@@ -50,7 +50,7 @@ class Isotopes(HasTraits):
 
     Parameters
     ----------
-    nucleus : String, optional, default='1H'
+    nucleus: String, optional, default='1H'
         In the AX form where A is the atomic mass and X the atom symbol
 
 

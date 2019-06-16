@@ -20,19 +20,19 @@ def autops(data, fn, p0=0.0, p1=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    fn : str or function
+    fn: str or function
         Algorithm to use for phase scoring. Built in functions can be
         specified by one of the following strings: "acme", "peak_minima"
-    p0 : float
+    p0: float
         Initial zero order phase in degrees.
-    p1 : float
+    p1: float
         Initial first order phase in degrees.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Phased NMR data.
 
     """
@@ -57,14 +57,14 @@ def _ps_acme_score(ph, data):
 
     Parameters
     ----------
-    pd : tuple
+    pd: tuple
         Current p0 and p1 values
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    score : float
+    score: float
         Value of the objective function (phase score)
 
     """
@@ -108,14 +108,14 @@ def _ps_peak_minima_score(ph, data):
 
     Parameters
     ----------
-    pd : tuple
+    pd: tuple
         Current p0 and p1 values
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    score : float
+    score: float
         Value of the objective function (phase score)
 
     """
@@ -147,15 +147,15 @@ def manual_ps(data, notebook=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    notebook : Bool
+    notebook: Bool
         True for plotting interactively in Jupyter Notebook
         Uses ipywidgets instead of matplotlib widgets
 
     Returns
     -------
-    p0, p1 : float
+    p0, p1: float
         Linear phase correction parameters. Zero and first order phase
         corrections in degrees calculated from pc0, pc1 and pivot displayed
         in the interactive window.

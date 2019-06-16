@@ -59,7 +59,7 @@ def test_magic_addscript(ip):
 
 def test_console(script_runner):
     # to test this, the scripts must be installed so the spectrochempy
-    # package must be installed : use pip install -e .
+    # package must be installed: use pip install -e .
 
     ret = script_runner.run('scpy')
     assert ret.success

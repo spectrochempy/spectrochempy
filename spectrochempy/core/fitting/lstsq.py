@@ -38,7 +38,7 @@ class LSTSQ(HasTraits):
         """
         Parameters
         ----------
-        *datasets : one or two |NDDataset|'s or array-like objects
+        *datasets: one or two |NDDataset|'s or array-like objects
             If a single dataset `Y` is provided, the `X` data will be the `x`
             coordinates of the `Y` dataset, or the index of the data if not
             coordinates exists.

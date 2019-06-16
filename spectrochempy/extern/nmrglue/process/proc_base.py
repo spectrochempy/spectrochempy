@@ -31,21 +31,21 @@ def em(data, lb=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    lb : float
+    lb: float
         Exponential line broadening, in units of points. To apply a similar
         apodization as NMRPipe's EM function, use lb = lb_hz / sw_hz,
         where lb_hz is the amount of broadening to apply in Hz and sw_hz
         is the spectral width of the last dimension in Hz.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
+    rev: bool, optional.
         True to reverse the apodization before applying it to the data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with apodization applied.
 
     """
@@ -74,22 +74,22 @@ def gm(data, g1=0.0, g2=0.0, g3=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    g1 : float
+    g1: float
         Inverse exponential width.
-    g2 : float
+    g2: float
         Gaussian broadening width.
-    g3 : float
+    g3: float
         Location of Gaussian maximum.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
+    rev: bool, optional.
         True to reverse the apodization before applying it to the data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with apodization applied.
 
     """
@@ -115,20 +115,20 @@ def gmb(data, a=0.0, b=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    a : float
+    a: float
         Exponential term in apodization.
-    b : float
+    b: float
         Gaussian term in apodization.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
+    rev: bool, optional.
         True to reverse the apodization before applying it to the data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with apodization applied.
 
     """
@@ -154,22 +154,22 @@ def jmod(data, e=0.0, off=0.0, end=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    e : float
+    e: float
         Exponential apodization term.
-    off : float
+    off: float
         Start of J-modulation in fractions of pi radians (180 degrees).
-    end : float
+    end: float
         End of J-modulation in fractions of pi radians (180 degrees).
-    inv : bool, optional
+    inv: bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
+    rev: bool, optional.
         True to reverse the apodization before applying it to the data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with apodization applied.
 
     """
@@ -196,22 +196,22 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    off : float
+    off: float
         Offset start of sine-bell as a percentage of the trace (0 -> 1).
-    end : float
+    end: float
         End of of sine-bell as a percentage of the trace (0 -> 1).
-    pow : float
+    pow: float
         Power to raise sine-bell to.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
+    rev: bool, optional.
         True to reverse the apodization before applying it to the data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with apodization applied.
 
     """
@@ -244,20 +244,20 @@ def tm(data, t1=0.0, t2=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    t1 : int
+    t1: int
         Length of left ramp in points.
-    t2 : int
+    t2: int
         Length of right ramp in points.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
+    rev: bool, optional.
         True to reverse the apodization before applying it to the data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with apodization applied.
 
     """
@@ -286,23 +286,23 @@ def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    loc : int or "auto"
+    loc: int or "auto"
         Location of triangle apex. 'auto' set the apex to the middle of the
         trace (default).
-    lHi : float
+    lHi: float
         Starting height of the left side of the triangle.
-    rHi : float
+    rHi: float
         Starting height of the right side of the triangle.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
+    rev: bool, optional.
         True to reverse the apodization before applying it to the data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with apodization applied.
 
     """
@@ -331,17 +331,17 @@ def rs(data, pts=0.0):
     ----------
     data :
         Array of NMR data.
-    pts : int
+    pts: int
         Number of points to right shift.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data right shifted and zero filled.
 
     See Also
     --------
-    roll : shift without zero filling.
+    roll: shift without zero filling.
 
     """
     data = np.roll(data, int(pts), axis=-1)
@@ -357,17 +357,17 @@ def ls(data, pts=0.0):
     ----------
     data :
         Array of NMR data.
-    pts : int
+    pts: int
         Number of points to left shift.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data left shifted and zero filled.
 
     See Also
     --------
-    roll : shift without zero filling.
+    roll: shift without zero filling.
 
     """
     data = np.roll(data, -int(pts), axis=-1)
@@ -381,17 +381,17 @@ def cs(data, pts=0.0, neg=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    pts : int
+    pts: int
         Number of points to shift.  Positive value will right shift the data,
         negative values will left shift the data.
-    neg : bool
+    neg: bool
         True to negate the shifted points.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of shifted NMR data.
 
     """
@@ -404,17 +404,17 @@ def roll(data, pts=0.0, neg=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    pts : int
+    pts: int
         Number of points to shift.  Positive value will right shift the data,
         negative values will left shift the data.
-    neg : bool
+    neg: bool
         True to negate the shifted points.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with last axis rolled.
 
     """
@@ -433,15 +433,15 @@ def fsh(data, pts):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    pts : float
+    pts: float
         Number of points to frequency shift the data.  Positive value will
         shift the spectrum to the right, negative values to the left.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with last axis rolled.
 
     """
@@ -463,15 +463,15 @@ def fsh2(data, pts):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    pts : float
+    pts: float
         Number of points to frequency shift the data.  Positive value will
         shift the spectrum to the right, negative values to the left.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with last axis rolled.
 
     """
@@ -509,12 +509,12 @@ def rft(x):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of NMR data.
 
     Returns
     -------
-    y : ndarray
+    y: ndarray
         Array of NMR data with real Fourier transform applied.
 
     """
@@ -534,12 +534,12 @@ def irft(xp):
 
     Parameters
     ----------
-    x : ndarray
+    x: ndarray
         Array of NMR data.
 
     Returns
     -------
-    y : ndarray
+    y: ndarray
         Array of NMR data with an inverse real Fourier transform applied.
 
     """
@@ -597,19 +597,19 @@ def fft(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Fourier transform of NMR data in 'NMR order'.
 
     See Also
     --------
-    ifft : Inversion Fourier transform.
-    fft_norm : Norm (power) conserving Fourier transform.
-    fft_positive : Forier transform with a positive exponential.
+    ifft: Inversion Fourier transform.
+    fft_norm: Norm (power) conserving Fourier transform.
+    fft_positive: Forier transform with a positive exponential.
 
 
     """
@@ -628,19 +628,19 @@ def fft_norm(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Fourier transform of NMR data in 'NMR order'.
 
     See Also
     --------
-    ifft_norm : Inversion Fourier transform.
-    fft : None-norm (power) conserving Fourier transform.
-    fft_positive : Forier transform with a positive exponential.
+    ifft_norm: Inversion Fourier transform.
+    fft: None-norm (power) conserving Fourier transform.
+    fft_positive: Forier transform with a positive exponential.
 
     """
     return fft(data) / np.sqrt(float(data.shape[-1]))
@@ -657,19 +657,19 @@ def fft_positive(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Fourier transform of NMR data in 'NMR order'.
 
     See Also
     --------
-    ifft_positive : Inversion Fourier transform.
-    fft_norm : Norm (power) conserving Fourier transform.
-    fft_positive : Forier transform with a positive exponential.
+    ifft_positive: Inversion Fourier transform.
+    fft_norm: Norm (power) conserving Fourier transform.
+    fft_positive: Forier transform with a positive exponential.
 
     """
     # a positive exponential is the same as a IFFT, but we need to undo
@@ -688,19 +688,19 @@ def ifft(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Inverse fourier transform of NMR data in 'NMR order'.
 
     See Also
     --------
-    fft : Fourier transform.
-    ifft_norm : Norm (power) conserving inverse Fourier transform.
-    ifft_positive : inverse Forier transform with a positive exponential.
+    fft: Fourier transform.
+    ifft_norm: Norm (power) conserving inverse Fourier transform.
+    ifft_positive: inverse Forier transform with a positive exponential.
 
     """
     return np.fft.ifft(np.fft.ifftshift(data, -1), axis=-1).astype(data.dtype)
@@ -718,19 +718,19 @@ def ifft_norm(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Inverse fourier transform of NMR data in 'NMR order'.
 
     See Also
     --------
-    fft_norm : Norm (power) conserving Fourier transform.
-    ifft : Non-norm (power) conserving inverse Fourier transform.
-    ifft_positive : inverse Forier transform with a positive exponential.
+    fft_norm: Norm (power) conserving Fourier transform.
+    ifft: Non-norm (power) conserving inverse Fourier transform.
+    ifft_positive: inverse Forier transform with a positive exponential.
 
     """
     return ifft(data) * np.sqrt(float(data.shape[-1]))
@@ -745,19 +745,19 @@ def ifft_positive(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Inverse fourier transform of NMR data in 'NMR order'.
 
     See Also
     --------
-    fft_postive : Fourier transform with a positive exponential.
-    ifft_norm : Norm (power) conserving inverse Fourier transform.
-    ifft : Inverse Forier transform with a negative exponential.
+    fft_postive: Fourier transform with a positive exponential.
+    ifft_norm: Norm (power) conserving inverse Fourier transform.
+    ifft: Inverse Forier transform with a negative exponential.
 
     """
     # a inverse fft with positive exponential in the FFT definition is the
@@ -805,12 +805,12 @@ def ha(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Hadamard transform of NMR data.
 
     Notes
@@ -858,14 +858,14 @@ def ht(data, N=None):
 
     Parameters
     ----------
-    data : ndarrat
+    data: ndarrat
         Array of NMR data.
-    N : int or None
+    N: int or None
         Number of Fourier components.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         NMR data which has been Hilvert transformed.
 
     """
@@ -897,12 +897,12 @@ def di(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data without imaginaries.
 
     """
@@ -915,18 +915,18 @@ def ps(data, p0=0.0, p1=0.0, inv=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    p0 : float
+    p0: float
         Zero order phase in degrees.
-    p1 : float
+    p1: float
         First order phase in degrees.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse phase correction
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Phased NMR data.
 
     """
@@ -946,18 +946,18 @@ def ps_exp(data, p0=0.0, tc=0.0, inv=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    p0 : float
+    p0: float
         Zero order phase in degrees.
-    tc : float
+    tc: float
         Exponential decay constant.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse phase correction
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Phased NMR data.
 
     """
@@ -976,14 +976,14 @@ def tp(data, hyper=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    hyper : bool
+    hyper: bool
         True if hypercomplex data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with axes transposed.
 
     """
@@ -1007,12 +1007,12 @@ def tp_hyper(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of hypercomplex NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of hypercomplex NMR data with axes transposed.
     """
     return c2ri(ri2c(data).transpose())
@@ -1024,14 +1024,14 @@ def zf_inter(data, pts=1):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    pts : int
+    pts: int
         Number zeros to add between points.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data to which `pts` zero have been added between all
         points.
 
@@ -1049,16 +1049,16 @@ def zf_pad(data, pad=0, mid=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    pad : int
+    pad: int
         Number of zeros to pad data with.
-    mid : bool
+    mid: bool
         True to zero fill in middle of data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data to which `pad` zeros have been appended to the end or
         middle of the data.
 
@@ -1083,16 +1083,16 @@ def zf_double(data, n, mid=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    n : int
+    n: int
         Number of times to double the size of the data.
-    mid : bool
+    mid: bool
         True to zero fill in the middle of data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Zero filled array of NMR data.
 
     """
@@ -1105,16 +1105,16 @@ def zf_size(data, size, mid=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    size : int
+    size: int
         Size of data after zero filling.
-    mid : bool
+    mid: bool
         True to zero fill in the middle of data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Zero filled array of NMR data.
 
     """
@@ -1127,12 +1127,12 @@ def largest_power_of_2(value):
 
     Parameters
     ----------
-    value : int
+    value: int
         Value to find nearest power of two equal to or larger than.
 
     Returns
     -------
-    pw : int
+    pw: int
         Power of 2.
 
     """
@@ -1145,14 +1145,14 @@ def zf_auto(data, mid=False):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    mid : bool
+    mid: bool
         True to zero fill in the middle of data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Zero filled array of NMR data.
 
     """
@@ -1171,20 +1171,20 @@ def add(data, r=0.0, i=0.0, c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    r : float
+    r: float
         Constant to add to real data.
-    i : float
+    i: float
         Constant to add to imaginary data, ignored if no data does not have
         imaginary data.
-    c : float
+    c: float
         Constant to add to both real and imaginary data.  This constant is only
         added to the real data if no imaginary data is present.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with constant added.
 
     """
@@ -1200,12 +1200,12 @@ def add_ri(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of complex NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Sum of real and imaginary component of NMR data.
 
     """
@@ -1221,12 +1221,12 @@ def dx(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Derivate of NMR data.
 
     """
@@ -1246,20 +1246,20 @@ def ext(data, x0=None, xn=None, y0=None, yn=None):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    x0 : int
+    x0: int
         X-axis extract region start.
-    xn : int
+    xn: int
         X-axis extract region end.
-    y0 : int
+    y0: int
         Y-axis extract region start.
-    yn : int
+    yn: int
         Y-axis extract region end.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Extracted region.
 
     """
@@ -1272,12 +1272,12 @@ def ext_left(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Left half of spectrum.
 
     """
@@ -1290,12 +1290,12 @@ def ext_right(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Right half of spectrum.
 
     """
@@ -1308,12 +1308,12 @@ def ext_mid(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Middle half of spectrum.
 
     """
@@ -1329,12 +1329,12 @@ def integ(data):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Integrated NMR data.
 
     """
@@ -1403,19 +1403,19 @@ def mult(data, r=1.0, i=1.0, c=1.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    r : float
+    r: float
         Constant to multiply real channel by.
-    i : float
+    i: float
         Constant to multiply imaginary channel by. If data has no imaginary
         component, this parameter is ignored.
-    c : float
+    c: float
         Constant to multiply both channels by.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data which has been multiplied by a constant.
 
     """
@@ -1440,14 +1440,14 @@ def set(data, c):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    c : float or complex
+    c: float or complex
         Constant to set data to.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of constants.
 
     Notes
@@ -1466,14 +1466,14 @@ def set_complex(data, v):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    v : float
+    v: float
         Constant to set both real and imaginary component of `data` to.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array with real and imaginary components set to v.
 
     Notes
@@ -1494,14 +1494,14 @@ def set_real(data, v):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    v : float
+    v: float
         Constant to set both real component of `data` to.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with real components set to v.
 
     Notes
@@ -1520,14 +1520,14 @@ def set_imag(data, v):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    v : float
+    v: float
         Constant to set both imaginary component of `data` to.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with imaginary components set to v.
 
     Notes
@@ -1811,11 +1811,11 @@ def coadd(data, clist, axis=-1):
 
     Parameters
     ----------
-    data : 2D ndarray
+    data: 2D ndarray
         Array of NMR data data.
-    clist : list
+    clist: list
         List of Coefficients
-    axis : {0, 1, -1}
+    axis: {0, 1, -1}
         Axis to reduce. 0 for Y, 1 or -1 for X.
 
     """
@@ -1853,14 +1853,14 @@ def thres(data, thres=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    thres : float
+    thres: float
         Threshold value.
 
     Returns
     -------
-    ndata : masked ndarray
+    ndata: masked ndarray
         Masked array of NMR data with values less than thres masked.
 
     """
@@ -1875,18 +1875,18 @@ def conv(data, kern=[1.], m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    kern : array_like
+    kern: array_like
         Convolution kernel
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of convolution are dealt with.
-    c : float
+    c: float
         Constant value for use when m is  'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         NMR data which has been convolved with the given kernel.
 
     """
@@ -1907,18 +1907,18 @@ def corr(data, kern=[1.], m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    kern : array_like
+    kern: array_like
         Correlation kernel (weights).
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of correlation are dealt with.
-    c : float
+    c: float
         Constant value for use when m is  'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         NMR data which has been correlated with the given kernel.
 
     """
@@ -1941,18 +1941,18 @@ def filter_median(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -1969,18 +1969,18 @@ def filter_min(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -1997,18 +1997,18 @@ def filter_max(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2025,20 +2025,20 @@ def filter_percentile(data, percentile, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    percentile : float
+    percentile: float
         Filter percentile parameter.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2057,20 +2057,20 @@ def filter_rank(data, rank, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    rank : int
+    rank: int
         Filter rank parameter.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2092,18 +2092,18 @@ def filter_amin(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2123,18 +2123,18 @@ def filter_amax(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2154,18 +2154,18 @@ def filter_range(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2185,18 +2185,18 @@ def filter_avg(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2216,18 +2216,18 @@ def filter_dev(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2247,18 +2247,18 @@ def filter_sum(data, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2278,20 +2278,20 @@ def filter_generic(data, filter, s=(1, 1), m="wrap", c=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    filter : functions
+    filter: functions
         Python function which takes an array and returns a single value.
-    s : tuple
+    s: tuple
         Shape or size taken for each step of the filter.
-    m : {'reflect', 'constant', 'nearest', 'wrap'}
+    m: {'reflect', 'constant', 'nearest', 'wrap'}
         How edges of are dealt with.
-    c : float
+    c: float
         Constant value for use when m is 'constant'.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Filtered NMR data.
 
     """
@@ -2338,11 +2338,11 @@ def qart(data, a=0.0, f=0.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    a : float
+    a: float
         Amplitude adjustment.
-    f : float
+    f: float
         Phase adjustment.
 
     Returns
@@ -2395,15 +2395,15 @@ def qmix(data, carr):
 
     Parameters
     ----------
-    data : 2D ndarray
+    data: 2D ndarray
         Array of NMR data.
-    carr : array_liek
+    carr: array_liek
         Array of coefficients for mixing.  The size of carr must evenly divide
         qmix.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with channels mixed.
 
     """
@@ -2434,14 +2434,14 @@ def smo(data, n):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    n : int
+    n: int
         Size of smoothing window (+/- points)
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of smoothed NMR data.
 
     """
@@ -2471,14 +2471,14 @@ def center(data, n):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    n : int
+    n: int
         Size of centering window (+/- points)
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of centered NMR data.
 
     """
@@ -2491,20 +2491,20 @@ def zd(data, window, x0=0.0, slope=1.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    window : ndarray
+    window: ndarray
         Window to apply to diagonal band.
-    wide : int
+    wide: int
         Diagonal band half width in points.
-    x0 : int
+    x0: int
         Starting location of diagonal band in points.
-    slope : float
+    slope: float
         Slope of diagonal band.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with diagonal band set to zero.
 
 
@@ -2545,18 +2545,18 @@ def zd_boxcar(data, wide=1, x0=0.0, slope=1.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    wide : int
+    wide: int
         Diagonal band half width in points.
-    x0 : int
+    x0: int
         Starting location of diagonal band in points.
-    slope : float
+    slope: float
         Slope of diagonal band.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with diagonal band set to zero.
 
     """
@@ -2570,18 +2570,18 @@ def zd_triangle(data, wide=1.0, x0=0.0, slope=1.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    wide : int
+    wide: int
         Diagonal band half width in points.
-    x0 : int
+    x0: int
         Starting location of diagonal band in points.
-    slope : float
+    slope: float
         Slope of diagonal band.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with diagonal band set to zero.
 
     """
@@ -2596,18 +2596,18 @@ def zd_sinebell(data, wide=1.0, x0=0.0, slope=1.0):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    wide : int
+    wide: int
         Diagonal band half width in points.
-    x0 : int
+    x0: int
         Starting location of diagonal band in points.
-    slope : float
+    slope: float
         Slope of diagonal band.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with diagonal band set to zero.
 
     """
@@ -2621,20 +2621,20 @@ def zd_gaussian(data, wide=1.0, x0=0.0, slope=1.0, g=1):
 
     Parameters
     ----------
-    data : ndarray
+    data: ndarray
         Array of NMR data.
-    wide : int
+    wide: int
         Diagonal band half width in points.
-    x0 : int
+    x0: int
         Starting location of diagonal band in points.
-    slope : float
+    slope: float
         Slope of diagonal band.
-    g : float
+    g: float
         Width of Gaussian function.
 
     Returns
     -------
-    ndata : ndarray
+    ndata: ndarray
         Array of NMR data with diagonal band set to zero.
 
     """

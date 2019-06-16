@@ -29,7 +29,7 @@ import os
 proj = Project()
 
 # %% [markdown]
-# As we did not specify a name, a name has been attributed automatically : 
+# As we did not specify a name, a name has been attributed automatically: 
 
 # %%
 proj.name

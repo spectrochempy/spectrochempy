@@ -33,14 +33,14 @@ def empty(shape, dtype=None, **kwargs):
 
     Parameters
     ----------
-    shape : int or tuple of int
+    shape: int or tuple of int
         Shape of the empty array
-    dtype : data-type, optional
+    dtype: data-type, optional
         Desired output data-type.
 
     Returns
     -------
-    out : |NDDataset|
+    out: |NDDataset|
         Array of uninitialized (arbitrary) data of the given shape, dtype, and
         order.  Object arrays will be initialized to None.
 
@@ -75,25 +75,25 @@ def empty_like(a, dtype=None):
 
     Parameters
     ----------
-    a : array_like
+    a: array_like
         The shape and data-type of `a` define these same attributes of the
         returned array.
-    dtype : data-type, optional
+    dtype: data-type, optional
         Overrides the data type of the result.
 
     Returns
     -------
-    out : ndarray
+    out: ndarray
         Array of uninitialized (arbitrary) data with the same
         shape and type as `a`.
 
     See Also
     --------
-    ones_like : Return an array of ones with shape and type of input.
-    zeros_like : Return an array of zeros with shape and type of input.
-    empty : Return a new uninitialized array.
-    ones : Return a new array setting values to one.
-    zeros : Return a new array setting values to zero.
+    ones_like: Return an array of ones with shape and type of input.
+    zeros_like: Return an array of zeros with shape and type of input.
+    empty: Return a new uninitialized array.
+    ones: Return a new array setting values to one.
+    zeros: Return a new array setting values to zero.
 
     Notes
     -----
@@ -114,16 +114,16 @@ def zeros(shape, dtype=None, **kwargs):
 
     Parameters
     ----------
-    shape : int or sequence of ints
+    shape: int or sequence of ints
         Shape of the new array, e.g., ``(2, 3)`` or ``2``.
-    dtype : data-type, optional
+    dtype: data-type, optional
         The desired data-type for the array, e.g., `numpy.int8`.  Default is
         `numpy.float64`.
-    **kwargs : keyword args to pass to the |NDDataset| constructor
+    **kwargs: keyword args to pass to the |NDDataset| constructor
 
     Returns
     -------
-    out : |NDDataset|
+    out: |NDDataset|
         Array of zeros with the given shape, dtype.
 
     See Also
@@ -154,16 +154,16 @@ def ones(shape, dtype=None, **kwargs):
 
     Parameters
     ----------
-    shape : int or sequence of ints
+    shape: int or sequence of ints
         Shape of the new array, e.g., ``(2, 3)`` or ``2``.
-    dtype : data-type, optional
+    dtype: data-type, optional
         The desired data-type for the array, e.g., `numpy.int8`.  Default is
         `numpy.float64`.
-    **kwargs : keyword args to pass to the |NDDataset| constructor
+    **kwargs: keyword args to pass to the |NDDataset| constructor
 
     Returns
     -------
-    out : |NDDataset|
+    out: |NDDataset|
         Array of ones with the given shape, dtype.
 
     See Also
@@ -194,22 +194,22 @@ def zeros_like(a, dtype=None, ):
 
     Parameters
     ----------
-    a : |NDDataset|
-    dtype : data-type, optional
+    a: |NDDataset|
+    dtype: data-type, optional
         Overrides the data type of the result.
 
     Returns
     -------
-    out : |NDDataset|
+    out: |NDDataset|
         Array of zeros with the same shape and type as `a`.
 
     See Also
     --------
-    ones_like : Return an array of ones with shape and type of input.
-    empty_like : Return an empty array with shape and type of input.
-    zeros : Return a new array setting values to zero.
-    ones : Return a new array setting values to one.
-    empty : Return a new uninitialized array.
+    ones_like: Return an array of ones with shape and type of input.
+    empty_like: Return an empty array with shape and type of input.
+    zeros: Return a new array setting values to zero.
+    ones: Return a new array setting values to one.
+    empty: Return a new uninitialized array.
 
     Examples
     --------
@@ -241,22 +241,22 @@ def ones_like(a, dtype=None):
 
     Parameters
     ----------
-    a : |NDDataset|
-    dtype : data-type, optional
+    a: |NDDataset|
+    dtype: data-type, optional
         Overrides the data type of the result.
 
     Returns
     -------
-    out : |NDDataset|
+    out: |NDDataset|
         Array of ones with the same shape and type as `a`.
 
     See Also
     --------
-    zeros_like : Return an array of zeros with shape and type of input.
-    empty_like : Return an empty array with shape and type of input.
-    zeros : Return a new array setting values to zero.
-    ones : Return a new array setting values to one.
-    empty : Return a new uninitialized array.
+    zeros_like: Return an array of zeros with shape and type of input.
+    empty_like: Return an empty array with shape and type of input.
+    zeros: Return a new array setting values to zero.
+    ones: Return a new array setting values to one.
+    empty: Return a new uninitialized array.
 
     Examples
     --------
@@ -285,30 +285,30 @@ def full(shape, fill_value, dtype=None, **kwargs):
 
     Parameters
     ----------
-    shape : int or sequence of ints
+    shape: int or sequence of ints
         Shape of the new array, e.g., ``(2, 3)`` or ``2``.
-    fill_value : scalar
+    fill_value: scalar
         Fill value.
-    dtype : data-type, optional
+    dtype: data-type, optional
         The desired data-type for the array, e.g., `np.int8`.  Default
         is `float`, but will change to `np.array(fill_value).dtype` in a
         future release.
-    **kwargs : keyword args to pass to the |NDDataset| constructor
+    **kwargs: keyword args to pass to the |NDDataset| constructor
 
     Returns
     -------
-    out : |NDDataset|
+    out: |NDDataset|
         Array of `fill_value` with the given shape, dtype, and order.
 
     See Also
     --------
-    zeros_like : Return an array of zeros with shape and type of input.
-    ones_like : Return an array of ones with shape and type of input.
-    empty_like : Return an empty array with shape and type of input.
-    full_like : Fill an array with shape and type of input.
-    zeros : Return a new array setting values to zero.
-    ones : Return a new array setting values to one.
-    empty : Return a new uninitialized array.
+    zeros_like: Return an array of zeros with shape and type of input.
+    ones_like: Return an array of ones with shape and type of input.
+    empty_like: Return an empty array with shape and type of input.
+    full_like: Fill an array with shape and type of input.
+    zeros: Return a new array setting values to zero.
+    ones: Return a new array setting values to one.
+    empty: Return a new uninitialized array.
 
     Examples
     --------
@@ -331,10 +331,10 @@ def full_like(a, fill_value, dtype=None):
 
     Parameters
     ----------
-    a : |NDDataset| or array-like
-    fill_value : scalar
+    a: |NDDataset| or array-like
+    fill_value: scalar
         Fill value.
-    dtype : data-type, optional
+    dtype: data-type, optional
         Overrides the data type of the result.
 
     Returns
@@ -344,13 +344,13 @@ def full_like(a, fill_value, dtype=None):
 
     See Also
     --------
-    zeros_like : Return an array of zeros with shape and type of input.
-    ones_like : Return an array of ones with shape and type of input.
-    empty_like : Return an empty array with shape and type of input.
-    zeros : Return a new array setting values to zero.
-    ones : Return a new array setting values to one.
-    empty : Return a new uninitialized array.
-    full : Fill a new array.
+    zeros_like: Return an array of zeros with shape and type of input.
+    ones_like: Return an array of ones with shape and type of input.
+    empty_like: Return an empty array with shape and type of input.
+    zeros: Return a new array setting values to zero.
+    ones: Return a new array setting values to one.
+    empty: Return a new uninitialized array.
+    full: Fill a new array.
 
     Examples
     --------
@@ -390,14 +390,14 @@ def dot(a, b, strict=True, out=None):
 
     Parameters
     ----------
-    a, b : masked_array_like
+    a, b: masked_array_like
         Inputs arrays.
-    strict : bool, optional
+    strict: bool, optional
         Whether masked data are propagated (True) or set to 0 (False) for
         the computation. Default is False.  Propagating the mask means that
         if a masked value appears in a row or column, the whole row or
         column is considered masked.
-    out : masked_array, optional
+    out: masked_array, optional
         Output argument. This must have the exact kind that would be returned
         if it was not used. In particular, it must have the right type, must be
         C-contiguous, and its dtype must be the dtype that would be returned
@@ -407,8 +407,8 @@ def dot(a, b, strict=True, out=None):
 
     See Also
     --------
-    numpy.dot : Equivalent function for ndarrays.
-    numpy.ma.dot : Equivalent function for masked ndarrays
+    numpy.dot: Equivalent function for ndarrays.
+    numpy.ma.dot: Equivalent function for masked ndarrays
 
     """
     if not a.implements('NDDataset'):
@@ -464,18 +464,18 @@ def diag(dataset, k=0):
 
     Parameters
     ----------
-    v : array_like
+    v: array_like
         If `v` is a 2-D array, return a copy of its `k`-th diagonal.
         If `v` is a 1-D array, return a 2-D array with `v` on the `k`-th
         diagonal.
-    k : int, optional
+    k: int, optional
         Diagonal in question. The default is 0. Use `k>0` for diagonals
         above the main diagonal, and `k<0` for diagonals below the main
         diagonal.
 
     Returns
     -------
-    out : ndarray
+    out: ndarray
         The extracted diagonal or constructed diagonal array.
 
     copied from numpy (licence

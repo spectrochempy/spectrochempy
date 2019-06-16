@@ -192,11 +192,11 @@ class EFA(HasTraits):
 
         Parameters
         ----------
-        n_pc : int, optional, default:3
+        n_pc: int, optional, default:3
             Number of components for which the concentration profile must be
             computed.
-        order : str, [not used]
-        plot : bool, optional, default:True
+        order: str, [not used]
+        plot: bool, optional, default:True
             whether or not to display a graph with the concentration profiles
 
         Returns

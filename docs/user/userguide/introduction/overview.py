@@ -78,7 +78,7 @@ except ImportError as e:
 # %% [markdown]
 # The error will stop the notebook execution if not catched. 
 #
-# This is a basic behavior of python : The way to avoid stoppping the execution without displaying a message is :
+# This is a basic behavior of python: The way to avoid stoppping the execution without displaying a message is :
 
 # %%
 try:
@@ -134,8 +134,8 @@ warning_('this is a warning message!')
 # %% [markdown]
 # Several libraries are imported with **SpectroChemPy**:
 #
-# - **np** :  This is actually the `numpy` library, to perform numerical calculation on nD arrays. 
-# - **plt** : This is the `matplotlib` library, to allow plotting data 
+# - **np**:  This is actually the `numpy` library, to perform numerical calculation on nD arrays. 
+# - **plt**: This is the `matplotlib` library, to allow plotting data 
 #
 # Optionally, **scipy** and **sympy** can be available, if **SpectroChempy** can find these libraries installed on your system.
 #

@@ -86,7 +86,7 @@ class RandomSeedContext(object):
 
     Parameters
     ----------
-    seed : int
+    seed: int
         The value to use to seed the numpy RNG
 
     Examples
@@ -224,7 +224,7 @@ def notebook_run(path):
     returns
     -------
 
-     results : (parsed nb object, execution errors)
+     results: (parsed nb object, execution errors)
 
     """
     import sys
@@ -286,7 +286,7 @@ def _compute_rms(x, y):
 def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
     # compare two images saved in files imgpath1 and imgpath2
 
-    from scipy.misc import imread
+    from matplotlib.pyplot import imread
     from skimage.measure import compare_ssim as ssim
 
     # read image
@@ -368,7 +368,7 @@ def image_comparison(reference=None,
 
     Parameters
     ----------
-    reference : list of image filename for the references
+    reference: list of image filename for the references
 
         List the image filenames of the reference figures
         (located in ``.spectrochempy/figures``) which correspond in
@@ -379,28 +379,28 @@ def image_comparison(reference=None,
         of a reference figures, the first time the corresponding figures are
         created.
 
-    extension : str, optional, default=``png``
+    extension: str, optional, default=``png``
 
         Extension to be used to save figure, among
         (eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff)
 
-    force_creation : `bool`, optional, default=`False`.
+    force_creation: `bool`, optional, default=`False`.
 
         if this flag is True, the figures created in the decorated function are
         saved in the reference figures directory (``.spectrocchempy/figures``)
 
-    min_similarity : float (percent).
+    min_similarity: float (percent).
 
         If set, then it will be used to decide if an image is the same (similar)
         or not. In this case max_rms is not used.
 
-    max_rms : float
+    max_rms: float
 
         rms stands for `Root Mean Square`. If set, then it will
         be used to decide if an image is the same
         (less than the acceptable rms). Not used if min_similarity also set.
 
-    savedpi : int, optional, default=150
+    savedpi: int, optional, default=150
 
         dot per inch of the generated figures
 

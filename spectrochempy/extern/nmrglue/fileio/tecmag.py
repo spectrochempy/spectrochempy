@@ -238,14 +238,14 @@ def read(filename):
 
     Parameters
     ----------
-    filename : str
+    filename: str
         Name of file to read from
 
     Returns
     -------
-    dic : dict
+    dic: dict
         Dictionary of Tecmag parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     """
@@ -313,14 +313,14 @@ def guess_udic(dic, data):
 
     Parameters
     ----------
-    dic : dict
+    dic: dict
         Dictionary of Tecmag parameters.
-    data : ndarray
+    data: ndarray
         Array of NMR data.
 
     Returns
     -------
-    udic : dict
+    udic: dict
         Universal dictionary of spectral parameters.
 
     """

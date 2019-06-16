@@ -95,9 +95,9 @@ def _get_par_files(_dir, _procno, _processed=False):
 # http://sbtools.uchc.edu/help/nmr/nmr_toolkit/bruker_dsp_table.asp
 
 # The rounding in the above tables appear to be based on k / (2*DECIM)
-# for example 2 : 44.75   = 44 + 3/4
-#             4 : 66.625  = 66 + 5/8
-#             8 : 68.563 ~= 68 + 9/16 = 68.5625
+# for example 2: 44.75   = 44 + 3/4
+#             4: 66.625  = 66 + 5/8
+#             8: 68.563 ~= 68 + 9/16 = 68.5625
 # Using this the un-rounded table was created by checking possible unrounded
 # fracions which would round to those in the original table.
 
@@ -677,7 +677,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     else:
         
-        # TODO : Check this -
+        # TODO: Check this -
         # case of multiple experiments to merge
 
         # find difference in data.shape

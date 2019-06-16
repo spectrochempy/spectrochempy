@@ -134,11 +134,11 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             Field name in the data to draw x- and y-positions from
-        kind : string, optional
+        kind: string, optional
             The kind of plot to generate, e.g. 'line', 'scatter', etc.
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
@@ -190,9 +190,9 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             Field name to draw x- and y-positions from
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
@@ -207,11 +207,11 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             Field name to draw x- and y-positions from
-        where : string, optional
+        where: string, optional
             Defines where the steps are placed (options: 'mid' (default), 'pre' and 'post')
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
@@ -226,7 +226,7 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             Field name to draw x- and y-positions from
         c: string, optional
             Name of the field to color points by
@@ -234,12 +234,12 @@ class hvPlot(HasTraits):
             Name of the field to scale point size by
         scale: number, optional
             Scaling factor to apply to point scaling
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, kind='scatter', **kwds)
@@ -250,16 +250,16 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y, y2 : string, optional
+        x, y, y2: string, optional
             Field name to draw x- and y-positions from
-        stacked : boolean
+        stacked: boolean
             Whether to stack multiple areas
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         if 'alpha' not in kwds and not stacked:
@@ -272,20 +272,20 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             Field name to draw x- and y-positions from
-        C : string
+        C: string
             Field to draw heatmap color from
         colorbar: boolean
             Whether to display a colorbar
-        reduce_function : function
+        reduce_function: function
             Function to compute statistics for heatmap
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, kind='heatmap', C=C, colorbar=colorbar, **kwds)
@@ -296,20 +296,20 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             Field name to draw x- and y-positions from
-        C : string
+        C: string
             Field to draw heatmap color from
         colorbar: boolean
             Whether to display a colorbar
-        reduce_function : function
+        reduce_function: function
             Function to compute statistics for hexbins
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, kind='hexbin', C=C, colorbar=colorbar, **kwds)
@@ -320,16 +320,16 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             Field name to draw x- and y-positions from
         colorbar: boolean
             Whether to display a colorbar
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, kind='bivariate', colorbar=colorbar, **kwds)
@@ -340,14 +340,14 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             Field name to draw x- and y-positions from
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, kind='bar', **kwds)
@@ -358,12 +358,12 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, kind='barh', **kwds)
@@ -374,16 +374,16 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        y : string or sequence
+        y: string or sequence
             Column in the DataFrame to compute distribution on.
-        by : string or sequence
+        by: string or sequence
             Column in the DataFrame to group by.
-        kwds : optional
+        kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(kind='box', x=None, y=y, by=by, **dict(kwds, hover=False))
@@ -394,16 +394,16 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        y : string or sequence
+        y: string or sequence
             Column in the DataFrame to compute distribution on.
-        by : string or sequence
+        by: string or sequence
             Column in the DataFrame to group by.
-        kwds : optional
+        kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(kind='violin', x=None, y=y, by=by, **dict(kwds, hover=False))
@@ -414,16 +414,16 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        y : string or sequence
+        y: string or sequence
             Column in the DataFrame to compute distribution on.
-        by : string or sequence
+        by: string or sequence
             Column in the DataFrame to group by.
-        kwds : optional
+        kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(kind='hist', x=None, y=y, by=by, **kwds)
@@ -434,16 +434,16 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        y : string or sequence
+        y: string or sequence
             Column in the DataFrame to compute distribution on.
-        by : string or sequence
+        by: string or sequence
             Column in the DataFrame to group by.
-        kwds : optional
+        kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(kind='kde', x=None, y=y, by=by, **kwds)
@@ -454,12 +454,12 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(kind='table', **dict(kwds, columns=columns))
@@ -470,12 +470,12 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(kind='dataset', **dict(kwds, columns=columns))
@@ -486,18 +486,18 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             The coordinate variable along the x- and y-axis
-        z : string, optional
+        z: string, optional
             The data variable to plot
         colorbar: boolean
             Whether to display a colorbar
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, z=z, kind='image', colorbar=colorbar, **kwds)
@@ -508,18 +508,18 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             The coordinate variable along the x- and y-axis
-        bands : string, optional
+        bands: string, optional
             The coordinate variable to draw the RGB channels from
-        z : string, optional
+        z: string, optional
             The data variable to plot
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         if bands is not None:
@@ -532,18 +532,18 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             The coordinate variable along the x- and y-axis
-        z : string, optional
+        z: string, optional
             The data variable to plot
         colorbar: boolean
             Whether to display a colorbar
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, z=z, kind='quadmesh', colorbar=colorbar, **kwds)
@@ -554,20 +554,20 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             The coordinate variable along the x- and y-axis
-        z : string, optional
+        z: string, optional
             The data variable to plot
         levels: int, optional
             The number of contour levels
         colorbar: boolean
             Whether to display a colorbar
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, z=z, kind='contour', colorbar=colorbar, **kwds)
@@ -578,20 +578,20 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             The coordinate variable along the x- and y-axis
-        z : string, optional
+        z: string, optional
             The data variable to plot
         levels: int, optional
             The number of contour levels
         colorbar: boolean
             Whether to display a colorbar
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, z=z, kind='contourf', colorbar=colorbar, **kwds)
@@ -602,14 +602,14 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             The coordinate variable along the x- and y-axis
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, kind='points', **kwds)
@@ -620,16 +620,16 @@ class hvPlot(HasTraits):
 
         Parameters
         ----------
-        x, y : string, optional
+        x, y: string, optional
             The coordinate variable along the x- and y-axis
-        text : string, optional
+        text: string, optional
             The column to draw the text labels from
-        **kwds : optional
+        **kwds: optional
             Keyword arguments to pass on to
             :py:meth:`hvplot.converter.HoloViewsConverter`.
         Returns
         -------
-        obj : HoloViews object
+        obj: HoloViews object
             The HoloViews representation of the plot.
         """
         return self(x, y, text=text, kind='labels', **kwds)
@@ -641,11 +641,11 @@ def save(obj, filename, title=None, resources=None):
 
     Parameters
     ----------
-    obj : HoloViews object
+    obj: HoloViews object
        HoloViews object to export
-    filename : string
+    filename: string
        Filename to save the plot to
-    title : string
+    title: string
        Optional title for the plot
     resources: bokeh resources
        One of the valid bokeh.resources (e.g. CDN or INLINE)
@@ -679,7 +679,7 @@ def showbokeh(obj, filename=None):
 
     Parameters
     ----------
-    obj : HoloViews object
+    obj: HoloViews object
        HoloViews object to export
     """
     if not isinstance(obj, hv.core.Dimensioned):

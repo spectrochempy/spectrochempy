@@ -85,16 +85,16 @@ class NDPanel(
 
         Parameters
         ----------
-        *datasets : |NDARRAY| or subclass of |NDARRAY| objects
+        *datasets: |NDARRAY| or subclass of |NDARRAY| objects
             NDArray, NDComplexArray, NDDataset and/or Coord objects
             can be provided as arguments: Casting if possible to a NDArray
             or NDComplexArray type object will provide the underlining data,
             and if present the data coordinates.
             Units for data and coordinates will also be extracted.
             Compatibilities between the data is expected.
-        merge : bool, optional, default : True
+        merge: bool, optional, default: True
             if set to True, dimensions are merged automatically when they are compatible
-        align : str among [False, ‘outer’, ‘inner’, ‘first’, ‘last’, 'interpolate'], optional, default : False.
+        align: str among [False, ‘outer’, ‘inner’, ‘first’, ‘last’, 'interpolate'], optional, default: False.
             by default there is no alignment of the dimensions, if they can not be merged, a new dimension name and
             eventually the associated coordinates are created for each different dimensions.
      
@@ -105,7 +105,7 @@ class NDPanel(
             * 'first' means that the first dataset is used as reference
             * 'last' means that the last dataset is used as reference
             * 'interpolate' means that interpolation is performed relative to the first dataset.
-        **kwargs : additional keyword arguments
+        **kwargs: additional keyword arguments
 
         Warnings
         --------
@@ -433,14 +433,14 @@ class NDPanel(
         
         Parameters
         ----------
-        dataset : ndarray-like object
+        dataset: ndarray-like object
             The array must be any object that can be transformed into a NDDataset
-        name : str, optional
+        name: str, optional
             If not provided, a name will be created automatically
-        merge : bool, optional, default: True
+        merge: bool, optional, default: True
             Whether or not ot merge the dataset dimensions and eventually the corresponding coordinates
             with the existing one in the NDPanel
-        align : bool, optional, default: False
+        align: bool, optional, default: False
             Whether or not to align compatible coordinates (compatible units and coordinates values)
         
         """
@@ -464,7 +464,7 @@ class NDPanel(
             
             if merge and self._do_merge_or_align(self._dataset_to_be_added, dim, merge, align):
                 # merge allowed
-                # if can merge or do alignement :  use the same dimension
+                # if can merge or do alignement:  use the same dimension
                 # nothing else to do as dim and coords are already set for this dimension
                 # either naturally or inside the '_do_merge_or_align' function
                 continue

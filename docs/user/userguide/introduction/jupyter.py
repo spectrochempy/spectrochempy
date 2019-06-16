@@ -43,7 +43,7 @@
 #
 # We recommend to use this application as it is quite intuitive to use, and advantageously replace the traditional `jupyter notebook` application.
 #
-# To get more information on its usage, one can go to : 
+# To get more information on its usage, one can go to: 
 # [https://jupyterlab.readthedocs.io](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)
 #
 # From you worspace folder or any other location on your computer, open a terminal and issue commands as follows:

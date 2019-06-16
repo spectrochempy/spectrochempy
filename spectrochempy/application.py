@@ -333,7 +333,7 @@ class DataDir(HasTraits):
 
         Returns
         -------
-        listing : str
+        listing: str
 
         """
         strg = os.path.basename(self.path) + "\n"
@@ -440,7 +440,7 @@ class GeneralPreferences(MetaConfigurable):
 
         Returns
         -------
-        dir : str
+        dir: str
             The absolute path to the projects directory.
 
         """
@@ -919,7 +919,7 @@ class SpectroChemPy(Application):
 
         Parameters
         ----------
-        argv :  List, [optional].
+        argv:  List, [optional].
             List of configuration parameters.
 
         """
@@ -1157,7 +1157,7 @@ class SpectroChemPy(Application):
 
         Returns
         -------
-        config_dir : str
+        config_dir: str
             The absolute path to the configuration directory.
 
         """

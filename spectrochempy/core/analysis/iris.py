@@ -31,9 +31,9 @@ class IRIS:
         """
         Parameters
         -----------
-        X : |NDDataset|
+        X: |NDDataset|
             The dataset on which to perform the 2D-IRIS analysis
-        param : dict
+        param: dict
             Dict of inversion parameters with the following keys:
 
             *   'kernel': the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional
@@ -52,7 +52,7 @@ class IRIS:
             *   'guess': method to guess the initial distribution function for the current wavelength.
             *   'previous': takes the distribution at the previous wavelength, 'zero' takes a null distribution
                 function, 'random'  takes a random distribution function.
-        verbose : bool
+        verbose: bool
             If set to True, prints informations during the 2D IRIS  analysis.
             In any case, the same information is returned in self._log
 
@@ -237,7 +237,7 @@ class IRIS:
 
         Returns
         -------
-        f : |NDDataset|
+        f: |NDDataset|
             object (l x m x n) containing the l 2D-distribution
             functions f[i] obtained for each value of the regularization
             parameter.
@@ -255,7 +255,7 @@ class IRIS:
 
         Returns
         -------
-        X_hat : |NDDataset|
+        X_hat: |NDDataset|
             The reconstructed dataset.
 
         """
@@ -274,13 +274,13 @@ class IRIS:
 
         Parameters
         ----------
-        scale : str, optional, default: 'll'
+        scale: str, optional, default: 'll'
             2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
             axes should be log scales.
 
         Returns
         -------
-        ax : subplot axis
+        ax: subplot axis
 
         """
 

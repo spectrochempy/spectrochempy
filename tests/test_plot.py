@@ -112,7 +112,7 @@ def test_successive_plot_bug_with_colorbars(IR_dataset_2D):
     dataset.plot_stack()
     dataset.plot()
     dataset.plot()  # bug colorbars stacked on the first plot
-    dataset.plot(method='map')  # bug : no colorbar
+    dataset.plot(method='map')  # bug: no colorbar
     show()
 
 @image_comparison(reference=['multiplot1','multiplot2'], force_creation=FORCE)

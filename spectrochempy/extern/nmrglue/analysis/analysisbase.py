@@ -15,16 +15,16 @@ def neighbors(pt, shape, structure):
 
     Parameters
     ----------
-    pt : tuple of ints
+    pt: tuple of ints
         Index of the point to find neighbors of.
-    shape : tuple of ints
+    shape: tuple of ints
         Shape of the region.
-    structure : ndarray of bools
+    structure: ndarray of bools
         Structure element that defines connections.
 
     Returns
     -------
-    pts : list of int tuples
+    pts: list of int tuples
         List of tuples which represent indices for all points neighboring pt.
         Edges are treated as stopping points.
 
@@ -65,19 +65,19 @@ def find_limits(pts):
 
     Parameters
     ----------
-    pts : list of int tuples
+    pts: list of int tuples
         List of points [(z0, y0, x0), (z1, y1, x1), ...]
 
     Returns
     -------
-    min : ndarray
+    min: ndarray
         Array of minimum indices: array([zmin, ymin, xmin]
-    max : ndarray
+    max: ndarray
         Array of maximum indices: array([zmin, ymin, xmin]
 
     See Also
     --------
-    limits2slice : Create a list of slices from min, max limits
+    limits2slice: Create a list of slices from min, max limits
 
     """
     arr_pts = np.array(pts)
@@ -95,13 +95,13 @@ def limits2slice(limits):
 
     Returns
     -------
-    slices : list
+    slices: list
         List of slice objects which return points between limits
 
     See Also
     --------
-    find_limits : Find the minimum and maximum limits from a list of points.
-    slice2limits : Find a minimum and maximum limits for a list of slices.
+    find_limits: Find the minimum and maximum limits from a list of points.
+    slice2limits: Find a minimum and maximum limits for a list of slices.
 
     """
     mins, maxs = limits
@@ -114,7 +114,7 @@ def slice2limits(slices):
 
     Parameters
     ----------
-    slices : list
+    slices: list
         List of slice objects which return points between limits
 
     Returns
@@ -124,7 +124,7 @@ def slice2limits(slices):
 
     See Also
     --------
-    limits2slice : Find a list of slices given minumum and maximum limits.
+    limits2slice: Find a list of slices given minumum and maximum limits.
     """
     mins = [s.start for s in slices]
     maxs = [s.stop - 1 for s in slices]
@@ -139,14 +139,14 @@ def squish(r, axis):
 
     Parameters
     ----------
-    r : ndarray
+    r: ndarray
         Array to squish.
-    axis : int
+    axis: int
         Axis of r to squish along.
 
     Returns
     -------
-    s : 1D ndarray
+    s: 1D ndarray
         Array r squished into a single dimension.
 
     """
@@ -175,9 +175,9 @@ class ndwindow(object):
 
     Parameters
     ----------
-    size : tuple of ints
+    size: tuple of ints
         Size of array to generate tuples of slices from.
-    wsize : tuple of ints
+    wsize: tuple of ints
         Window/sub-array size. Size of the area to select from array.  This is
         the maximum size of the window.
 
@@ -218,8 +218,8 @@ class ndwindow(object):
 
     See Also
     --------
-    ndwindow_index : Iterator of a ndwindow and index of the window center
-    ndwindow_inside : Iterator over equal sized windows in the array.
+    ndwindow_index: Iterator of a ndwindow and index of the window center
+    ndwindow_inside: Iterator over equal sized windows in the array.
 
     """
     def __init__(self, shape, wsize):
@@ -261,7 +261,7 @@ class ndwindow_index(object):
     See Also
     --------
     ndwindow: Iterator over only the window slices.
-    ndwindow_inside : Iterator over equal sized windows in the array.
+    ndwindow_inside: Iterator over equal sized windows in the array.
 
     """
     def __init__(self, shape, wsize):
@@ -302,9 +302,9 @@ class ndwindow_inside(object):
 
     Parameters
     ----------
-    size : tuple of ints
+    size: tuple of ints
         Size of array to generate tuples of slices from.
-    wsize : tuple of ints
+    wsize: tuple of ints
         Size of the area to select from array (widow size).
 
     Examples
@@ -324,8 +324,8 @@ class ndwindow_inside(object):
 
     See Also
     --------
-    ndwindow : Iterator over non-uniform windows.
-    ndwindow_inside_index : Iterator of a ndwindow_inside and the index of the
+    ndwindow: Iterator over non-uniform windows.
+    ndwindow_inside_index: Iterator of a ndwindow_inside and the index of the
         window's top left point.
 
     """

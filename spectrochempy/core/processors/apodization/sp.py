@@ -37,31 +37,31 @@ def sp(dataset, *args, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|.
+    dataset: |NDDataset|.
         Dataset we want to apodize using exponential multiplication
-    off : float
+    off: float
         offset - Specifies the starting point of the sine-bell in time units
         The default value is 0.0.
-    end : float
+    end: float
         end - Specifies the ending point of the sine-bell in time units.
-    pow : float
+    pow: float
         pow - Specifies the exponent of the sine-bell; Non-integer values
         are allowed. Common values are 1.0 (for ordinary sine-bell) and 2.0
         (for squared-bell functions). The default value is 1.0.
-    inv : bool, optional
+    inv: bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
+    rev: bool, optional.
         True to reverse the apodization before applying it to the data.
-    apply : `bool`, optional, default = True
+    apply: `bool`, optional, default = True
         Should we apply the calculated apodization to the dataset (default)
         or just return the apodization ndarray.
-    inplace : `bool`, optional, default = True
+    inplace: `bool`, optional, default = True
         Should we make the transform in place or return a new dataset
-    axis : optional, default is -1
+    axis: optional, default is -1
 
     Returns
     -------
-    out : |NDDataset|.
+    out: |NDDataset|.
         The apodized dataset if apply is True, the apodization array if not True.
 
     """
