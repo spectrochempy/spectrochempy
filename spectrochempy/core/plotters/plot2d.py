@@ -532,7 +532,7 @@ def plot_2D(dataset, **kwargs):
         if not hasattr(new, '_axcb') or not new._axcb:
             axec = new.ndaxes['colorbar']
             axec.name = axec.name + nameadd
-            new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
+            new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=plt.get_cmap(cmap), norm=norm)
             new._axcb.set_label(zlabel)
             # new._axcb.ax.yaxis.set_major_formatter(y_formatter)
             # #this doesn't work
