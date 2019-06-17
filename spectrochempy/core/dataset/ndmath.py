@@ -945,7 +945,7 @@ class NDMath(object):
                     fname = 'log'
                     d = d + 1.
                 if fname in ['arccos', 'arcsin', 'arctanh' ]:
-                    if np.any(abs(d) > 1):
+                    if np.any(np.abs(d) > 1):
                         d = d.astype(np.complex128)
                 elif fname in ['log', 'log10', 'log2', 'sqrt']:
                     if np.any(d < 0):
