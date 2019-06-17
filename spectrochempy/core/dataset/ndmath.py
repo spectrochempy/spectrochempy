@@ -698,7 +698,7 @@ class NDMath(object):
                 del new._coords[idx]
         
         return new
-    
+
     # ..................................................................................................................
     def _op(self, f, inputs, isufunc=False):
         # Achieve an operation f on the objs
@@ -726,16 +726,17 @@ class NDMath(object):
         ismasked = False
         compatible_units = (fname in self._compatible_units)
         for i, obj in enumerate(inputs):
+            # type
+            objtype = type(obj).__name__
+            objtypes.append(objtype)
             # units
-            if hasattr(obj, 'units'):
+            if objtype != 'NDPanel' and hasattr(obj, 'units'):
                 objunits.add(ur.get_dimensionality(obj.units))
                 if len(objunits) > 1 and compatible_units:
                     objunits = list(objunits)
                     raise DimensionalityError(*objunits[::-1],
                                               extra_msg=f", Units must be compatible for the `{fname}` operator")
-            # type
-            objtype = type(obj).__name__
-            objtypes.append(objtype)
+            # returntype
             if objtype == 'NDPanel':
                 returntype = 'NDPanel'
             elif objtype == 'NDDataset' and returntype != 'NDPanel':
@@ -747,7 +748,7 @@ class NDMath(object):
                 pass
             
             # If one of the input is hypercomplex, this will demand a special treatment
-            if hasattr(obj, 'is_quaternion'):
+            if objtype != 'NDPanel' and hasattr(obj, 'is_quaternion'):
                 isquaternion = obj.is_quaternion
             # elif   #TODO: check if it is a quaternion scalar
             
@@ -792,7 +793,10 @@ class NDMath(object):
             for k, v in obj.datasets.items():
                 v._coords = obj.coords
                 v.name = k
-                datasets.append(f(v, *inputs))
+                if other is not None:
+                    datasets.append(f(v, other))
+                else:
+                    datasets.append(f(v))
             
             # Return a list of datasets
             return datasets
@@ -940,10 +944,13 @@ class NDMath(object):
                 if fname == 'log1p':
                     fname = 'log'
                     d = d + 1.
-                if fname in ['arccos', 'arcsin', 'arctanh', 'log', 'log10', 'log2', 'logn', 'sqrt']:
-                    data = getattr(np.emath, fname)(d, *args)
-                else:
-                    data = getattr(np, fname)(d, *args)
+                if fname in ['arccos', 'arcsin', 'arctanh' ]:
+                    if np.any(abs(d) > 1):
+                        d = d.astype(np.complex128)
+                elif fname in ['log', 'log10', 'log2', 'sqrt']:
+                    if np.any(d < 0):
+                        d = d.astype(np.complex128)
+                data = getattr(np, fname)(d, *args)
                 
                 # if a warning occurs, let handle it with complex numbers or return an exception:
                 if ws and 'invalid value encountered in ' in ws[-1].message.args[0]:
@@ -991,12 +998,28 @@ class NDMath(object):
         @functools.wraps(f)
         def func(self):
             fname = f.__name__
-            data, units, mask, returntype = self._op(f, [self])
             if hasattr(self, 'history'):
                 history = f'Unary operation {fname} applied'
             else:
                 history = None
-            return self._op_result(data, units, mask, history, returntype)
+                
+            inputtype = type(self).__name__
+            if inputtype == 'NDPanel':
+                # if we have a NDPanel, process the ufuncs on all datasets
+                datasets = self._op(f,[self])
+    
+                # recreate a panel object
+                obj = type(self)
+                panel = obj(*datasets, merge=True, align=None)
+                panel.history = history
+    
+                # return it
+                return panel
+
+            else:
+            
+                data, units, mask, returntype = self._op(f, [self])
+                return self._op_result(data, units, mask, history, returntype)
         
         return func
     
@@ -1049,12 +1072,29 @@ class NDMath(object):
             else:
                 objs = [other, self]
             fm, objs = self._check_order(fname, objs)
-            data, units, mask, returntype = self._op(fm, objs)
+            
             if hasattr(self, 'history'):
-                history = f'Binary operation {fname} with `{get_name(other)}` has been performed'
+                history = f'Binary operation {fm} with `{get_name(objs[-1])}` has been performed'
             else:
                 history = None
-            return self._op_result(data, units, mask, history, returntype)
+
+            inputtype = type(objs[0]).__name__
+            if inputtype == 'NDPanel':
+                # if we have a NDPanel, process the ufuncs on all datasets
+                datasets = self._op(fm, objs)
+    
+                # recreate a panel object
+                obj = type(objs[0])
+                panel = obj(*datasets, merge=True, align=None)
+                panel.history = history
+    
+                # return it
+                return panel
+    
+            else:
+                data, units, mask, returntype = self._op(fm, objs)
+                new = self._op_result(data, units, mask, history, returntype)
+                return new
         
         return func
     
@@ -1064,16 +1104,31 @@ class NDMath(object):
         @functools.wraps(f)
         def func(self, other):
             fname = f.__name__
-            objs = [self, other]
-            fm, objs = self._check_order(fname, objs)
-            data, units, mask, returntype = self._op(fm, objs)
-            self._data = data
-            self._units = units
-            self._mask = mask
             if hasattr(self, 'history'):
                 self.history = f'Inplace binary op: {fname}  with `{get_name(other)}` '
             else:
                 history = None
+            objs = [self, other]
+            fm, objs = self._check_order(fname, objs)
+
+            inputtype = type(objs[0]).__name__
+            if inputtype == 'NDPanel':
+                # if we have a NDPanel, process the ufuncs on all datasets
+                datasets = self._op(fm, objs)
+    
+                # recreate a panel object
+                obj = type(objs[0])
+                panel = obj(*datasets, merge=True, align=None)
+                
+                # return it
+                self = panel
+
+            else:
+                data, units, mask, returntype = self._op(fm, objs)
+                self._data = data
+                self._units = units
+                self._mask = mask
+                
             return self
         
         return func

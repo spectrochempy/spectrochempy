@@ -137,5 +137,31 @@ ndp
 # %% [markdown]
 # ## Mathematics with NDPanels 
 
+# %%
+ndp = NDPanel(nda, ndb, merge=True, align='outer')  
+ndp
+
+# %%
+sqrt(ndp)
+
 # %% [markdown]
-# TODO
+# The function is automatically applied to all contained arrays
+
+# %% [markdown]
+# Simple arithmetics is also possible - The operations are dispatched on all internal dataset individually. 
+
+# %%
+-2*ndp+10.
+
+# %% [markdown]
+# Of course units must be compatibles.
+#
+# For addition and subtraction, if the units of scalar is not given, it is assumed compatible : that's why the above operation worked. But below it doens work because the dataset have `eV` units, not `cm`.
+
+# %%
+2*ndp+10*ur.cm
+
+# %%
+2*ndp+10*ur.eV
+
+# %%

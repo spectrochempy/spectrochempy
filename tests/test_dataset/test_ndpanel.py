@@ -115,7 +115,7 @@ def test_ndpanel_init():
     assert panel['arr2'].dims == ['y', 'x']
     info_('\n\ninner')
     info_(panel)
-
+    
 def test_ndpanel_fixture():
     with RandomSeedContext(12345):
         arr1 = np.random.rand(10,20)
