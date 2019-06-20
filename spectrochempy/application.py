@@ -821,7 +821,7 @@ class SpectroChemPy(Application):
     # Logger at startup
     # ------------------------------------------------------------------------------------------------------------------
 
-    debug = Bool(False, help='Set DEBUG mode, with full outputs').tag(
+    debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(
         config=True)
     """Flag to set debugging mode"""
     info = Bool(False, help='Set INFO mode, with msg outputs').tag(
@@ -1093,7 +1093,7 @@ class SpectroChemPy(Application):
             debug('API already started. Nothing done!')
             return
 
-        self.log.debug("show info on laoding %s" % self.general_preferences.show_info_on_loading)
+        self.log.debug("show info on loading %s" % self.general_preferences.show_info_on_loading)
         if self.general_preferences.show_info_on_loading:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)

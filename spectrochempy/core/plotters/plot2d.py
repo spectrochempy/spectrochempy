@@ -19,6 +19,7 @@ __dataset_methods__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 from copy import copy as cpy
+import sys
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -141,7 +142,7 @@ def plot_2D(dataset, **kwargs):
     # method of plot
     # ------------------------------------------------------------------------------------------------------------------
     method = kwargs.get('method', None)
-
+    
     if not prefs.style:
         # not yet set, initialize with default project preferences
         prefs.update(project_preferences.to_dict())

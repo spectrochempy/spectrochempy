@@ -313,7 +313,9 @@ class Meta(object):  # HasTraits):
         newmeta.readonly = False
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
-                newmeta[key] = list(np.take(newmeta[key], dims))
+                newmeta[key] = type(self[key])()
+                for dim in dims:
+                    newmeta[key].append(self[key][dim])
             else:
                 newmeta[key] = self[key]
 

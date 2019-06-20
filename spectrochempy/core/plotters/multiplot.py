@@ -213,7 +213,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
     suptitle_color: color
 
     """
-
+    
     # some basic checking
     # ------------------------------------------------------------------------------------------------------------------
 

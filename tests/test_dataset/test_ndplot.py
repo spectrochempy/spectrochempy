@@ -26,7 +26,3 @@ def test_plot_generic_2D(IR_dataset_2D):
         dataset.plot(method=method)
 
     show()
-
-
-def test_holoviews():
-    pass

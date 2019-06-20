@@ -22,7 +22,7 @@ from spectrochempy import *
 # %% [markdown]
 #  <div class="alert alert">
 #
-# **Warning:** This is still experimental and under rapid evolution - we recommend not to use this feature for now
+# **Warning:** This is still experimental and not fully functional - we recommend not to use this feature for now
 #
 # </div>
 #
@@ -156,7 +156,7 @@ sqrt(ndp)
 # %% [markdown]
 # Of course units must be compatibles.
 #
-# For addition and subtraction, if the units of scalar is not given, it is assumed compatible : that's why the above operation worked. But below it doens work because the dataset have `eV` units, not `cm`.
+# For addition and subtraction, if the units of scalar is not given, it is assumed compatible : that's why the above operation worked. But below it does'nt work because the dataset have `eV` units, not `cm`.
 
 # %%
 2*ndp+10*ur.cm

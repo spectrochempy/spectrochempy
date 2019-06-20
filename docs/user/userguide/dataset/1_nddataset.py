@@ -32,6 +32,7 @@
 
 # %%
 from spectrochempy import *
+# %matplotlib inline
 
 # %% [markdown]
 # Multidimensional array are defined in Spectrochempy using the ``NDDataset`` object.

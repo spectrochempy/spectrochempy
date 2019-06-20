@@ -1034,8 +1034,27 @@ class NDDataset(
                               )
             da.attrs['units'] = (x.units, self.units)
         
+        da.attrs['title'] = self.title
+        
         return da
-    
+
+    # ..................................................................................................................
+    def to_panel(self, **kwargs):
+        """
+        Transform the current |NDDataset| to a new |NDPanel| object
+        
+        Parameters
+        ----------
+        **kwargs: additional keyword arguments
+
+        Returns
+        -------
+        obj: A |NDPanel| object
+        
+        """
+        import spectrochempy as scp
+        return scp.NDPanel(self, **kwargs)
+        
     # ..................................................................................................................
     @docstrings.dedent
     def transpose(self, *dims, inplace=False):

@@ -13,7 +13,7 @@
 __all__ = ['get_user_and_node',
            'get_user',
            'get_node',
-           'is_kernel'
+           'is_kernel',
            ]
 
 import getpass
@@ -47,3 +47,4 @@ def is_kernel():
     from IPython import get_ipython
     # check for `kernel` attribute on the IPython instance
     return getattr(get_ipython(), 'kernel', None) is not None
+

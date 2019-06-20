@@ -250,6 +250,7 @@ def plot_1D(dataset, **kwargs):
     kwargs: additional keywords
 
     """
+
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 

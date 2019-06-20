@@ -971,13 +971,13 @@ class NDMath(object):
         else:
             # make a simple operation
             try:
-                if not isquaternion:
+                #if not isquaternion:
                     data = f(d, *args)
-                else:
+                #else:
                     # TODO: handle hypercomplex quaternion
-                    print(fname, d, args)
-                    raise NotImplementedError('operation {} not yet implemented '
-                                              'for quaternion'.format(fname))
+                #    print(fname, d, args)
+                #    raise NotImplementedError('operation {} not yet implemented '
+                #                              'for quaternion'.format(fname))
             
             except Exception as e:
                 raise ArithmeticError(e.args[0])
@@ -1074,7 +1074,7 @@ class NDMath(object):
             fm, objs = self._check_order(fname, objs)
             
             if hasattr(self, 'history'):
-                history = f'Binary operation {fm} with `{get_name(objs[-1])}` has been performed'
+                history = f'Binary operation {fm.__name__} with `{get_name(objs[-1])}` has been performed'
             else:
                 history = None
 
