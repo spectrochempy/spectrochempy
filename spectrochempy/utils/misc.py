@@ -81,11 +81,11 @@ def make_new_object(obj):
 
     Parameters
     ----------
-    obj: the poject type
+    obj : the poject type
 
     Returns
     -------
-    new: the new object of same type.
+    new : the new object of same type.
 
     """
 
@@ -110,9 +110,9 @@ except ImportError:
         """
         A context manager for ignoring exceptions.  Equivalent to::
 
-            try:
+            try :
                 <body>
-            except exceptions:
+            except exceptions :
                 pass
 
         Examples
@@ -188,11 +188,11 @@ def gt_eps(arr):
 
     Parameters
     -----------
-    arr: array to check
+    arr : array to check
 
     Returns
     --------
-    bool: results ot checking
+    bool : results ot checking
         True means that at least some values are greater than epsilon
 
     """
@@ -331,12 +331,12 @@ def htmldoc(text):
 
     Parameters
     ----------
-    text: str
+    text : str
         The string to convert to html
 
     Returns
     -------
-    out: str
+    out : str
         the html string
 
     """
@@ -403,11 +403,11 @@ def largest_power_of_2(value):
 
     Parameters
     ----------
-    value: int
+    value : int
 
     Returns
     -------
-    pw: int
+    pw : int
         Power of 2.
 
     Examples
@@ -435,12 +435,12 @@ def closer_power_of_two(value):
 
     Parameters
     ----------
-    value: int
+    value : int
         Value to find nearest power of two equal to or larger than.
 
     Returns
     -------
-    pw: int
+    pw : int
         Power of 2.
 
     """
@@ -485,7 +485,7 @@ def display_info_string(**kwargs):
     JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
     JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
     IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
-         style='height:25px; border-radius:12px; display: inline-block; float: left; vertical-align: middle'></img>
+         style='height:25px; border-radius:12px; display : inline-block; float : left; vertical-align : middle'></img>
     {% endif %}
     </td><td>
     {% if message %}

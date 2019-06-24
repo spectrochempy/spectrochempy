@@ -61,7 +61,7 @@ class Coord(NDMath, NDArray):
         """
         Parameters
         -----------
-        data: ndarray, tuple or list
+        data : ndarray, tuple or list
             The actual data array contained in the |Coord| object.
             The given array (with a single dimension) can be a list,
             a tuple, a |ndarray|, or a |ndarray|-like object.
@@ -76,29 +76,29 @@ class Coord(NDMath, NDArray):
 
         Examples
         --------
-        We first import the object from the api:
+        We first import the object from the api :
         >>> from spectrochempy import *
         
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
         >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
-        >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        >>> c0     # doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [   1.000,    3.000,    5.000,    7.000,    9.000,   11.000] Hz
         
         We can take a series of str to create a non numerical but labelled
-        axis:
+        axis :
         >>> tarr = list('abcdef')
         >>> tarr
         ['a', 'b', 'c', 'd', 'e', 'f']
         
         >>> c1 = Coord(labels=tarr, title='mylabels')
-        >>> c1   # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        >>> c1   # doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [a, b, c, d, e, f]
         
-        >>> print(c1) # doctest: +NORMALIZE_WHITESPACE
-        title: Mylabels
-        labels: [a b c d e f]
+        >>> print(c1) # doctest : +NORMALIZE_WHITESPACE
+        title : Mylabels
+        labels : [a b c d e f]
         
         Some other examples will found in the |userguide|_.
         """
@@ -259,21 +259,21 @@ class Coord(NDMath, NDArray):
         return repr(self)
 
     # ..................................................................................................................
-    def _cstr(self, header='  coordinates: ... \n', print_size=True, **kwargs):
+    def _cstr(self, header='  coordinates : ... \n', print_size=True, **kwargs):
     
         indent = kwargs.get('indent',0)
         
         out = ''
         if not self.is_empty and print_size:
             out += f'{self._str_shape().rstrip()}\n'
-        out += f'        title: {self.title}\n' if self.title else ''
+        out += f'        title : {self.title}\n' if self.title else ''
         if self.has_data:
             out += '{}\n'.format(self._str_value(header=header))
         elif self.is_empty and not self.is_labeled:
             out += header.replace('...', '\0Undefined\0')
 
         if self.is_labeled:
-            header = '       labels: ... \n'
+            header = '       labels : ... \n'
             text = str(self.labels.T).strip()
             if '\n' not in text:  # single line!
                 out += header.replace('...', '\0\0{}\0\0'.format(text))

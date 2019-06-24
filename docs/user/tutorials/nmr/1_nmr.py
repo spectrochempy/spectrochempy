@@ -293,18 +293,31 @@ apodfuncsh.plot(color='g', clear=False)
 _ = gbsh_dataset.plot(xlim=(0,25000), zlim=(-1.5,1.5), color='g', ls='--', clear=False) 
 
 # %% [markdown]
-# #### sp 
+# #### sp (shifted sine-bell apodization)
+
+# %% [markdown]
+# $\text{sp}(x) = \sin(\frac{\pi * o + \pi * (e - o) * x} {n - 1})^{p}$ where 
+#
+# * $o$ specifies the starting point of the sine-bell in time units (The default value is 0.0).
+# * $e$ specifies the ending point of the sine-bell in time units.
+# * $p$ specifies the exponent of the sine-bell; Non-integer values are allowed. Common values are 1.0 (for ordinary sine-bell) and 2.0 (for squared-bell functions). The default value is 1.0.
 
 # %%
-# Plot
+# restore original
 dataset1D = get_dataset1D() # restore original
-dataset1D /= dataset1D.data.max()
+dataset1D /= dataset1D.max()
 
+off = 10.*ur.us
+end = 5000.*ur.us
+pow = 1.
+
+apodfunc = dataset1D.sp(off=off, end=end, pow=pow, apply=False)
+sp_dataset = dataset1D.sp(off=off, end=end, pow=pow, inplace = False)
+
+# plot
 dataset1D.plot() 
-
-apodfunc = dataset1D.sp(off=0, end=10., pow=1.2, apply=False)
-
 apodfunc.plot(color='r', clear=False)
+_ = sp_dataset.plot(color='r', ls='--', clear=False, xlim=(0,25000), zlim=(-1.5,1.5)) 
 
 # %% [markdown]
 # ### Apodization of 2D data

@@ -39,14 +39,14 @@ class BaselineCorrection(HasTraits):
     """
     Baseline Correction processor
 
-    2 methods are proposed:
+    2 methods are proposed :
 
     * ``sequential`` (default) = classical polynom fit or spline
       interpolation with separate fitting of each row (spectrum)
     * ``multivariate`` = SVD modeling of baseline, polynomial fit of PC's
       and calculation of the modelled baseline spectra.
 
-    Interactive mode is proposed using the interactive function: :meth:`run`.
+    Interactive mode is proposed using the interactive function : :meth:`run`.
     
     """
     dataset = Instance(NDDataset)
@@ -69,18 +69,18 @@ class BaselineCorrection(HasTraits):
         """
         Parameters
         ----------
-        dataset: |NDDataset|
+        dataset : |NDDataset|
             The dataset to be transformed
-        *ranges: a variable number of pair-tuples
+        *ranges : a variable number of pair-tuples
             The regions taken into account for the baseline correction.
-        **kwargs: keywords arguments
+        **kwargs : keywords arguments
             Known keywords are given below
 
-            * dim: the dimension along which to apply the baseline correction usually 'x', *i.e.*, along .
-            * method: ``multivariate`` or ``sequential``
-            * interpolation: ``polynomial`` or ``pchip``
-            * order: polynomial order, default=6
-            * npc: number of components for the ``multivariate`` method
+            * dim : the dimension along which to apply the baseline correction usually 'x', *i.e.*, along .
+            * method : ``multivariate`` or ``sequential``
+            * interpolation : ``polynomial`` or ``pchip``
+            * order : polynomial order, default=6
+            * npc : number of components for the ``multivariate`` method
 
         Examples
         --------
@@ -146,8 +146,8 @@ class BaselineCorrection(HasTraits):
         Parameters
         ----------
         %(BaselineCorrection.parameters.no_dataset)s
-        zoompreview: the zoom factor for the preview in interactive mode
-        figsize: Size of the figure to display
+        zoompreview : the zoom factor for the preview in interactive mode
+        figsize : Size of the figure to display
 
         """
 
@@ -243,13 +243,13 @@ class BaselineCorrection(HasTraits):
             new.sort(axis=-1, inplace=True, descend=True)
 
         new.history = str(new.modified) + \
-                      ': ' + 'Baseline correction.' + ' Method: '
+                      ': ' + 'Baseline correction.' + ' Method : '
         if self.method == 'Multivariate':
             new.history = 'Multivariate (' + str(self.npc) + ' PCs).'
         else:
             new.history = 'Sequential.'
 
-        new.history = 'Interpolation: '
+        new.history = 'Interpolation : '
 
         if self.interpolation == 'polynomial':
             new.history = 'Polynomial, order=' + str(self.order) + '.\n'

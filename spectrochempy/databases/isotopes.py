@@ -50,7 +50,7 @@ class Isotopes(HasTraits):
 
     Parameters
     ----------
-    nucleus: String, optional, default='1H'
+    nucleus : String, optional, default='1H'
         In the AX form where A is the atomic mass and X the atom symbol
 
 
@@ -68,12 +68,12 @@ class Isotopes(HasTraits):
 
     How to use it?
 
-    after the |scpy| has been loaded:
+    after the |scpy| has been loaded :
 
     >>> from spectrochempy import *
 
 
-    one can use:
+    one can use :
 
     >>> isotope = Isotopes('129Xe')
     >>> isotope.name

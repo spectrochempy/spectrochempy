@@ -51,17 +51,17 @@ def plot_3D(dataset, **kwargs):
     #
     # method: str [optional among ``surface``, ... (other to be implemented)..., default=``surface``]
     #
-    # style: str, optional, default = 'notebook'
+    # style: str, optional, default= 'notebook'
     #     Matplotlib stylesheet (use `available_style` to get a list of available
     #     styles for plotting
     #
-    # reverse: `bool` or None [optional, default = None
+    # reverse: `bool` or None [optional, default= None
     #     In principle, coordinates run from left to right, except for wavenumbers
     #     (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
     #     will try to guess. But if reverse is set, then this is the
     #     setting which will be taken into account.
     #
-    # x_reverse: `bool` or None [optional, default= None
+    # x_reverse: `bool` or None [optional, default=None
     #
     # kwargs: additional keywords
     #

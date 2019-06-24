@@ -173,7 +173,7 @@ def set_nmr_context(larmor):
 
     Parameters
     ----------
-    larmor: Quantity or float
+    larmor : Quantity or float
         The Larmor frequency of the current nucleus.
         If it is not a quantity it is assumed to be given i MHz
 
@@ -185,7 +185,7 @@ def set_nmr_context(larmor):
 
     >>> set_nmr_context(104.3 * U_.MHz)
 
-    then, we can use the context as follow:
+    then, we can use the context as follow :
 
     >>> fhz = 10000 * U_.Hz
     >>> with U_.context('nmr'):
@@ -200,7 +200,7 @@ def set_nmr_context(larmor):
     >>> print("{:~.3f}".format(fhz))
     10.000 kHz
 
-    Now we update the context:
+    Now we update the context :
 
     >>> with U_.context('nmr', larmor=100. * U_.MHz):
     ...    fppm = fhz.to('ppm')

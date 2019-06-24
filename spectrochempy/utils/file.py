@@ -36,13 +36,13 @@ def readfilename(filename=None, **kwargs):
 
     Parameters
     ----------
-    filename: `str`, `list` of strings, optional.
+    filename : `str`, `list` of strings, optional.
         A filename or a list of filenames. If not provided, a dialog box is opened
         to select files.
-    directory: `str`, optional.
+    directory : `str`, optional.
         The directory where to look at. If not specified, read in
         default dirdata directory
-    filetypes: `list`, optional, default=['all files, '.*)'].
+    filetypes : `list`, optional, default=['all files, '.*)'].
 
     Returns
     --------
@@ -183,10 +183,10 @@ def readdirname(dirname=None, **kwargs):
 
     Parameters
     ----------
-    dirname: `str`, optional.
+    dirname : `str`, optional.
         A directory name. If not provided, a dialog box is opened
         to select a directory.
-    parent_dir: `str`, optional.
+    parent_dir : `str`, optional.
         The parent directory where to look at. If not specified, read in
         default datadir directory
 
@@ -383,7 +383,7 @@ class ScpFile(object):
         """
         Parameters
         ----------
-        fid: file or str
+        fid : file or str
             The zipped archive to open. This is either a file-like object
             or a string containing the path to the archive.
 

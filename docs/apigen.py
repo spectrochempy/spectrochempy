@@ -7,7 +7,7 @@
     ReST files appropriately to create code documentation with Sphinx.  It also
     creates a modules index (named modules.<suffix>).
 
-    This is derived from the "sphinx-autopackage" script, which is:
+    This is derived from the "sphinx-autopackage" script, which is :
     Copyright 2008 Société des arts technologiques (SAT),
     http://www.sat.qc.ca/
 
@@ -282,7 +282,7 @@ def normalize_excludes(rootpath, excludes):
 def is_excluded(root, excludes):
     """Check if the directory is in the exclude list
 
-    Note: by having trailing slashes, we avoid common prefix issues, like
+    Note : by having trailing slashes, we avoid common prefix issues, like
           e.g. an exlude "foo" also accidentally excluding "foobar".
     """
     for exclude in excludes:
@@ -291,53 +291,53 @@ def is_excluded(root, excludes):
     return False
 
 
-def main(rootpath, destdir='./api/generated', exclude_dirs=[],
+def main(rootpath, destdir='./api/generated', exclude_dirs=(),
          **kwargs):
     """
     Modified version of apidoc
 
     Parameters
     ----------
-    rootpath: str
+    rootpath : str
         Path of the package to document. If not given, we will try to guess it
         from the location of apidoc.
-    destdir: str, optional
+    destdir : str, optional
         Path of the output file. By default output='./api/'
-    exclude_dirs: list of str, optional
+    exclude_dirs : list of str, optional
         directory names to exclude from parsing documentation
 
     Other parameters
     ----------------
-    exclude_patterns: list of str, optional
+    exclude_patterns : list of str, optional
         pattern for filenames to exclude
-    force: bool, optional
+    force : bool, optional
         if False old ``rst`` file will not be overwritten
-    dryrun: bool, optional
+    dryrun : bool, optional
         if True, no output file will be created
-    notoc: bool, optional
+    notoc : bool, optional
         No table of content (TOC)produced
-    maxdepth: bool
+    maxdepth : bool
         Maximum depth of submodules to show in the TOC
-    followlinks: bool
+    followlinks : bool
         Follow symbolic links
-    separatemodules: bool, optional
+    separatemodules : bool, optional
         Put documentation for each module on its own page. Default= True
-    includeprivate: bool, optional
+    includeprivate : bool, optional
         Include ``_private`` modules. Default= `False`
-    noheadings: bool
+    noheadings : bool
         Don't create headings for the module/package packages (e.g. when the
         docstrings already contain them
-    modulefirst: bool
+    modulefirst : bool
         Put module documentation before submodule documentation
-    implicit_namespaces: bool
+    implicit_namespaces : bool
         Interpret module paths according to PEP-0420 implicit namespaces
         specification
-    suffix: str, optioanl
+    suffix : str, optioanl
         file suffix, default='rst'
 
     Returns
     -------
-    done: bool
+    done : bool
 
     """
 
@@ -348,11 +348,20 @@ def main(rootpath, destdir='./api/generated', exclude_dirs=[],
 
     # default options
     opts = Options({
-        'exclude_patterns': [], 'force': True, 'tocdepth': 1,
-        'followlinks': False, 'dryrun': False, 'separatemodules': True,
-        'includeprivate': False, 'notoc': True, 'noheadings': False,
-        'modulefirst': True, 'implicit_namespaces': True, 'suffix': 'rst',
-        'developper': False, 'genapi': False,
+        'exclude_patterns': [],
+        'force': False,
+        'tocdepth': 1,
+        'followlinks': False,
+        'dryrun': False,
+        'separatemodules': True,
+        'includeprivate': False,
+        'notoc': True,
+        'noheadings': False,
+        'modulefirst': True,
+        'implicit_namespaces': True,
+        'suffix': 'rst',
+        'developper': False,
+        'genapi': False,
     })
 
     # get options form kwargs
@@ -363,7 +372,7 @@ def main(rootpath, destdir='./api/generated', exclude_dirs=[],
     if opts.force:
         shutil.rmtree(destdir, ignore_errors=True)
     if not opts.dryrun:
-        os.makedirs(destdir, exist_ok=opts.force)
+        os.makedirs(destdir, exist_ok=True)
     if not os.path.isdir(destdir):
         print('%s is not a directory.' % rootpath, file=sys.stderr)
         sys.exit(1)
@@ -417,7 +426,7 @@ User API reference
 
 The |scpy| API exposes many objects and functions that are described below.
 
-To use the API, one must load it using one of the following syntax:
+To use the API, one must load it using one of the following syntax :
 
 >>> import spectrochempy as scp
 
@@ -495,7 +504,7 @@ Constants
 
 """
 
-    lconsts = [":%s: %s\n" % m for m in members if
+    lconsts = [":%s : %s\n" % m for m in members if
                type(m[1]) in [int, float, str, bool, tuple]]
     lclasses = []
     classes = [m[0] for m in members if

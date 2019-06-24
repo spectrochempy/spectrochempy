@@ -281,7 +281,7 @@ class NDMath(object):
         NDDataset: [   0.841,    0.909,    0.141] unitless
 
     In this particular case (*i.e.*, `np.sin` ufuncs) , the `ds` units must be
-    `unitless`, `dimensionless` or angle-units: `radians` or `degrees`,
+    `unitless`, `dimensionless` or angle-units : `radians` or `degrees`,
     or an exception will be raised.
 
 
@@ -290,13 +290,13 @@ class NDMath(object):
 
     >>> from spectrochempy import *
     >>> dataset = NDDataset.load('mydataset.scp')
-    >>> dataset             # doctest: +ELLIPSIS
+    >>> dataset             # doctest : +ELLIPSIS
     NDDataset: [[   2.057,    2.061, ...,    2.013,    2.012],
                 [   2.033,    2.037, ...,    1.913,    1.911],
                 ...,
                 [   1.794,    1.791, ...,    1.198,    1.198],
                 [   1.816,    1.815, ...,    1.240,    1.238]] a.u.
-    >>> np.negative(dataset) # doctest: +ELLIPSIS
+    >>> np.negative(dataset) # doctest : +ELLIPSIS
     NDDataset: [[  -2.057, ... -1.238]] a.u.
 
 
@@ -425,18 +425,18 @@ class NDMath(object):
 
         Parameters
         ----------
-        func: function
+        func : function
             function to apply to the |NDDataset|.
             `\*args`, and `\*\*kwargs` are passed into `func`.
             Alternatively a `(callable, data_keyword)` tuple where
             `data_keyword` is a string indicating the keyword of
             `callable` that expects the array object.
-        *args: positional arguments passed into `func`.
-        **kwargs: keyword arguments passed into `func`.
+        *args : positional arguments passed into `func`.
+        **kwargs : keyword arguments passed into `func`.
 
         Returns
         -------
-        object: the return type of `func`.
+        object : the return type of `func`.
 
         Notes
         -----
@@ -1047,10 +1047,10 @@ class NDMath(object):
             inputs.reverse()
             objtypes.reverse()
             
-            if fname in ['mul', 'multiply', 'add', 'iadd']:
+            if fname in ['mul', 'add', 'iadd']:
                 pass
             elif fname in ['truediv', 'divide', 'true_divide']:
-                fname = 'multiply'
+                fname = 'mul'
                 inputs[0] = np.reciprocal(inputs[0])
             elif fname in ['isub', 'sub', 'subtract']:
                 fname = 'add'
@@ -1105,7 +1105,7 @@ class NDMath(object):
         def func(self, other):
             fname = f.__name__
             if hasattr(self, 'history'):
-                self.history = f'Inplace binary op: {fname}  with `{get_name(other)}` '
+                self.history = f'Inplace binary op : {fname}  with `{get_name(other)}` '
             else:
                 history = None
             objs = [self, other]
@@ -1227,7 +1227,7 @@ Examples
 
 >>> a = array(dataset)
 
-equivalent to:
+equivalent to :
 
 >>> a = np.ma.array(dataset)
 or

@@ -22,8 +22,8 @@ def script():
     return """
     
     #-----------------------------------------------------------
-    # syntax for parameters definition:
-    # name: value, low_bound,  high_bound
+    # syntax for parameters definition :
+    # name : value, low_bound,  high_bound
     #  * for fixed parameters
     #  $ for variable parameters
     #  > for reference to a parameter in the COMMON block

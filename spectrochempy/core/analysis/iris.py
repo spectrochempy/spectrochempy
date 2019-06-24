@@ -31,28 +31,28 @@ class IRIS:
         """
         Parameters
         -----------
-        X: |NDDataset|
+        X : |NDDataset|
             The dataset on which to perform the 2D-IRIS analysis
-        param: dict
-            Dict of inversion parameters with the following keys:
+        param : dict
+            Dict of inversion parameters with the following keys :
 
-            *   'kernel': the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional
+            *   'kernel' : the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional
                 relationship holding between 'p', the experimental variable that was changed in the rows direction of X
                 (e.g. temperature, pressure, time, ...) and the concentration of pure species characterized
                 by the physico-chemical parameter 'eps' (e.g. adsorption/desorption energy, ...).
-                Default: 'langmuir'. If another kernel name is given, the kernel function must be passed in param['ker']
-            *   'ker': a two-variable lambda function ker(p, eps) where p and eps are the external experimental
-                variable and  the internal physico-chemical parameter, respectively - TODO: implement other kernels: e.g. 'CA', 'TPD'
-            *   'epsRange': array_like of three values [start, stop, num] defining the interval of eps values.
-                start, stop: the starting and end values of eps, num: number of values.
-            *   'lambdaRange': array_like of three values [start, stop, num] defining the interval of regularization
-                parameter. Its values are speced evenly on a log scale with 10^start and 10^stop: a the starting and
+                Default : 'langmuir'. If another kernel name is given, the kernel function must be passed in param['ker']
+            *   'ker' : a two-variable lambda function ker(p, eps) where p and eps are the external experimental
+                variable and  the internal physico-chemical parameter, respectively - TODO : implement other kernels : e.g. 'CA', 'TPD'
+            *   'epsRange' : array_like of three values [start, stop, num] defining the interval of eps values.
+                start, stop : the starting and end values of eps, num : number of values.
+            *   'lambdaRange' : array_like of three values [start, stop, num] defining the interval of regularization
+                parameter. Its values are speced evenly on a log scale with 10^start and 10^stop : a the starting and
                 end values and num the number of values.
-            *   'p': array or coordinate of the external variable. If none is given, p = X.y.values
-            *   'guess': method to guess the initial distribution function for the current wavelength.
-            *   'previous': takes the distribution at the previous wavelength, 'zero' takes a null distribution
+            *   'p' : array or coordinate of the external variable. If none is given, p = X.y.values
+            *   'guess' : method to guess the initial distribution function for the current wavelength.
+            *   'previous' : takes the distribution at the previous wavelength, 'zero' takes a null distribution
                 function, 'random'  takes a random distribution function.
-        verbose: bool
+        verbose : bool
             If set to True, prints informations during the 2D IRIS  analysis.
             In any case, the same information is returned in self._log
 
@@ -228,16 +228,16 @@ class IRIS:
         Apply the inversion of the X dataset (m x n) and returns
         the 2D distribution functions `f[i]` obtained for a given
         regularization parameter :math:`\lambda_i` using the following
-        factorization: :math:`X = K.f[i]`.
+        factorization : :math:`X = K.f[i]`.
         :math:`K` is a (m x q) matrix holding the values of the kernel
         function for the m values of the external variable (`p`) and the
         q values of the internal variable (`epsilon`).
-        :math: `f[i]` is the (q x n) matrix holding the values of the
+        :math : `f[i]` is the (q x n) matrix holding the values of the
         2D-distribution function
 
         Returns
         -------
-        f: |NDDataset|
+        f : |NDDataset|
             object (l x m x n) containing the l 2D-distribution
             functions f[i] obtained for each value of the regularization
             parameter.
@@ -250,12 +250,12 @@ class IRIS:
         """
         Transform data back to the original space
 
-        The following matrix operation is performed: :math:`\hat{X} = K.f[i]`
+        The following matrix operation is performed : :math:`\hat{X} = K.f[i]`
         for each value of the regularization parameter.
 
         Returns
         -------
-        X_hat: |NDDataset|
+        X_hat : |NDDataset|
             The reconstructed dataset.
 
         """
@@ -274,13 +274,13 @@ class IRIS:
 
         Parameters
         ----------
-        scale: str, optional, default: 'll'
+        scale : str, optional, default='ll'
             2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
             axes should be log scales.
 
         Returns
         -------
-        ax: subplot axis
+        ax : subplot axis
 
         """
 

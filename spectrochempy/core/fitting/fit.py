@@ -57,19 +57,19 @@ class Fit(HasTraits):
 
     Parameters
     ----------
-    dataset: Dataset or list of Dataset instance
+    dataset : Dataset or list of Dataset instance
         The data to fit
 
-    mode: Unicode, optional
+    mode : Unicode, optional
         Reserved - not used for now
 
     Attributes
     ----------
-    fp: Dict
+    fp : Dict
         Fit parameters dictionary (read-only, but individual elements of the dict
         can be changed)
 
-    script: Unicode
+    script : Unicode
         A string representation of the fp dict,
         which can be used as input for other a fit (read-only)
 
@@ -129,7 +129,7 @@ class Fit(HasTraits):
         """
         s = """
         #-----------------------------------------------------------
-        # syntax for parameters definition:
+        # syntax for parameters definition :
         # name: value, low_bound,  high_bound
         #  * for fixed parameters
         #  $ for variable parameters
@@ -164,11 +164,11 @@ class Fit(HasTraits):
 
         Parameters
         ----------
-        maxiter: int, maximum number of iteration
-        maxfun: int, maximum number of function calls
-        every: int, number of function call between two displays
-        method: str, ether 'simplex' or 'hopping'
-        dryrun: bool
+        maxiter : int, maximum number of iteration
+        maxfun : int, maximum number of function calls
+        every : int, number of function call between two displays
+        method : str, ether 'simplex' or 'hopping'
+        dryrun : bool
 
         """
 
@@ -255,7 +255,7 @@ class Fit(HasTraits):
             info_(args)
             if not self.silent:
                 display.clear_output(wait=True)
-                print(("Iterations: %d, Calls: %d (chi2: %.5f)" % (
+                print(("Iterations : %d, Calls : %d (chi2 : %.5f)" % (
                     niter, ncalls, chi2)))
                 sys.stdout.flush()
 
@@ -418,7 +418,7 @@ class Fit(HasTraits):
                 try:
                     new_param[key] = eval(str(refpar))
                 except:
-                    raise ValueError('Cannot evaluate the expression: %s: %s'
+                    raise ValueError('Cannot evaluate the expression : %s : %s'
                                      % (key, param[refpar]))
 
                 new_param.fixed[key] = True

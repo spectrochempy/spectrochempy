@@ -53,7 +53,7 @@ class _TempBool(object):
     class descriptor"""
 
     #: default boolean value for the :attr:`value` attribute
-    default = False
+    default= False
 
     #: boolean value indicating whether there shall be a validation or not
     value = False
@@ -62,9 +62,9 @@ class _TempBool(object):
         """
         Parameters
         ----------
-        default: bool
+        default=bool
             value of the object"""
-        self.default = default
+        self.default= default
         self.value = default
         self._entered = []
 
@@ -90,7 +90,7 @@ class _TempBool(object):
         """
         Parameters
         ----------
-        value: bool or None
+        value : bool or None
             If None, the current value will be negated. Otherwise the current
             value of this instance is set to the given `value`"""
         if value is None:
@@ -110,12 +110,12 @@ def _temp_bool_prop(propname, doc="", default=False):
 
     Parameters
     ----------
-    propname: str
+    propname : str
         The attribute name to use. The _TempBool instance will be stored in the
         ``'_' + propname`` attribute of the corresponding instance
-    doc: str
+    doc : str
         The documentation of the property
-    default: bool
+    default=bool
         The default value of the _TempBool class"""
 
     def getx(self):

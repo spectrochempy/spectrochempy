@@ -19,13 +19,13 @@ def test_docstrings():
 
         Parameters
         ----------
-        a: int
+        a : int
             The first number
-        b: int
+        b : int
             The second number
-        c: int
+        c : int
             The third number
-        d: int
+        d : int
             Another number
 
         Returns

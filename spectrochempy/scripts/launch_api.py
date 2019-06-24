@@ -29,7 +29,7 @@ def main():
         return
 
     try:
-        info_("Loading filename: '%s'" % fname)
+        info_("Loading filename : '%s'" % fname)
         ds = scp.NDDataset.read(fname)
         ds.plot()
         scp.show()

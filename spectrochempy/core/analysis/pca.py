@@ -51,7 +51,7 @@ class PCA(HasTraits):
     of the data to perform its projection to a lower dimensional space.
 
     The reduction of a dataset :math:`X` with shape (`M`,`N`) is achieved
-    using the decomposition: :math:`X = S.L^T`, where
+    using the decomposition : :math:`X = S.L^T`, where
     :math:`S` is the score's matrix with shape (`M`, `n_pc`) and :math:`L^T` is
     the transposed loading's matrix with shape (`n_pc`, `N`).
 
@@ -84,14 +84,14 @@ class PCA(HasTraits):
         Parameters
         ----------
         %(SVD.parameters.dataset)s
-        centered: bool, optional, default:True
-            If True the data are centered around the mean values:
+        centered : bool, optional, default:True
+            If True the data are centered around the mean values :
             :math:`X' = X - mean(X)`.
-        standardized: bool, optional, default:False
-            If True the data are scaled to unit standard deviation:
+        standardized : bool, optional, default:False
+            If True the data are scaled to unit standard deviation :
             :math:`X' = X / \sigma`.
-        scaled: bool, optional, default:False
-            If True the data are scaled in the interval [0-1]:
+        scaled : bool, optional, default:False
+            If True the data are scaled in the interval [0-1] :
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
 
         Examples
@@ -245,7 +245,7 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        rank: int
+        rank : int
             Tested rank value.
 
         Returns
@@ -255,8 +255,8 @@ class PCA(HasTraits):
 
         Notes
         -----
-        This implements the method of Thomas P. Minka:
-        Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604.
+        This implements the method of Thomas P. Minka :
+        Automatic Choice of Dimensionality for PCA. NIPS 2000 : 598-604.
         Copied and modified from scikit-learn.decomposition.pca (BSD-3 license)
 
         """
@@ -322,18 +322,18 @@ class PCA(HasTraits):
 
         Loadings `L` with shape [``n_pc``, `N`] and scores `S`
         with shape [`M`, `n_pc`] are obtained using the following
-        decomposition: :math:`X = S.L^T`.
+        decomposition : :math:`X = S.L^T`.
 
         Parameters
         ----------
-        n_pc: int, optional
+        n_pc : int, optional
             The number of principal components to compute. If not set all
             components are returned, except if n_pc is set to ``auto`` for
             an automatic determination of the number of components.
 
         Returns
         -------
-        S, LT: |NDDataset| objects.
+        S, LT : |NDDataset| objects.
             n_pc loadings and their corresponding scores for each observations.
 
 
@@ -357,17 +357,17 @@ class PCA(HasTraits):
         Transform data back to the original space using the given number of
         PC's.
 
-        The following matrice operation is performed: :math:`X' = S'.L'^T`
+        The following matrice operation is performed : :math:`X' = S'.L'^T`
         where S'=S[:, n_pc] and L=L[:, n_pc].
 
         Parameters
         ----------
-        n_pc: int, optional
+        n_pc : int, optional
             The number of PC to use for the reconstruction.
 
         Returns
         -------
-        X_reconstructed: |NDDataset|
+        X_reconstructed : |NDDataset|
             The reconstructed dataset based on n_pc principal components.
 
         """
@@ -396,12 +396,12 @@ class PCA(HasTraits):
         return X
 
     def printev(self, n_pc=None):
-        """prints figures of merit: eigenvalues and explained variance
+        """prints figures of merit : eigenvalues and explained variance
         for the first n_pc PS's.
 
         Parameters
         ----------
-        n_pc: int, optional
+        n_pc : int, optional
             The number of components to print.
 
         """
@@ -416,7 +416,7 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        n_pc: int
+        n_pc : int
             Number of components to plot.
 
         """
@@ -451,11 +451,11 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        *pcs: a series of int argument or a list/tuple
+        *pcs : a series of int argument or a list/tuple
             Must contain 2 or 3 elements.
-        colormap: str
+        colormap : str
             A matplotlib colormap.
-        color_mapping: 'index' or 'labels'
+        color_mapping : 'index' or 'labels'
             If 'index', then the colors of each n_scores is mapped sequentially
             on the colormap. If labels, the labels of the n_observation are
             used for color mapping.

@@ -27,7 +27,7 @@ def concatenate(*datasets, **kwargs):
     the first)
 
     Any number of |NDDataset| objects can be concatenated. For this operation
-    to be defined the following must be true:
+    to be defined the following must be true :
 
         #. all inputs must be valid |NDDataset| objects;
         #. units of data and axis must be compatible (rescaling is applied
@@ -38,24 +38,24 @@ def concatenate(*datasets, **kwargs):
 
     Parameters
     ----------
-    *datasets: positional |NDDataset| arguments
+    *datasets : positional |NDDataset| arguments
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
         (the last, by default).
-    dims: str, optional, default = 'x'
+    dims : str, optional, default= 'x'
         The dimension along which the operation is applied
-    axis: int, optional, default = None
+    axis : int, optional, default= None
         Alternative to the the dim keyword. Direct specification of the axis index to use for concatenation.
 
     Returns
     --------
-    out: |NDDataset|
+    out : |NDDataset|
         A dataset created from the contenations of the |NDDataset| input
         objects
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest: +ELLIPSIS
+    >>> from spectrochempy import * # doctest : +ELLIPSIS
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
@@ -252,7 +252,7 @@ def stack(*datasets):
     Stack of |NDDataset| objects along the last dimension
 
     Any number of |NDDataset| objects can be stacked. For this operation
-    to be defined the following must be true:
+    to be defined the following must be true :
 
     #. all inputs must be valid dataset objects,
     #. units of data and axis must be compatible (rescaling is applied
@@ -262,23 +262,23 @@ def stack(*datasets):
 
     Parameters
     ----------
-    *datasets: a series of |NDDataset|
+    *datasets : a series of |NDDataset|
         The dataset to be stacked to the current dataset
 
     Returns
     --------
-    out: |NDDataset|
+    out : |NDDataset|
         A dataset created from the stack of the `datasets` datasets
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy import * # doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
     >>> C = NDDataset.stack( A, B)
-    >>> print(C) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-          name/id: NDDataset...
+    >>> print(C) # doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
+          name/id : NDDataset...
 
     """
 

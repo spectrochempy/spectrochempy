@@ -56,7 +56,7 @@ from ...core import info_, debug_, error_, warning_
 def read_dir(dataset=None, directory=None, **kwargs):
     """
     Open readable files in a directory and store data/metadata in a dataset or
-    a list of datasets according to the following rules:
+    a list of datasets according to the following rules :
 
     * 2D spectroscopic data (e.g. valid \*.spg files or matlab arrays, etc...) from
       distinct files are stored in distinct NDdatasets.
@@ -67,25 +67,25 @@ def read_dir(dataset=None, directory=None, **kwargs):
     Notes
     ------
     Only implemented for OMNIC files (\*.spa, \*.spg), \*.csv, \*.mat and the
-    native format for spectrochempy: \*.scp).
+    native format for spectrochempy : \*.scp).
 
     Parameters
     ----------
-    dataset: `NDDataset`
+    dataset : `NDDataset`
         The dataset to store the data and metadata.
         If None, a NDDataset is created
-    directory: str, optional.
+    directory : str, optional.
         If not specified, opens a dialog box.
-    parent_dir: str, optional.
+    parent_dir : str, optional.
         The parent directory where to look at
-    sortbydate: bool, optional,  default:True.
+    sortbydate : bool, optional,  default:True.
         Sort spectra by acquisition date
-    recursive: bool, optional,  default = True.
+    recursive : bool, optional,  default= True.
         Read also subfolders
 
     Returns
     --------
-    nddataset: |NDDataset| or list of |NDDataset|
+    nddataset : |NDDataset| or list of |NDDataset|
 
     Examples
     --------
@@ -194,33 +194,33 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     Notes
     ------
     All files are expected to be present in the same directory and their filenames
-    are expected to be in the format: X_samplename_YYY.spa
-    and for the backround files: X_BCKG_YYYBG.spa
+    are expected to be in the format : X_samplename_YYY.spa
+    and for the backround files : X_BCKG_YYYBG.spa
     where X is the sample holder number and YYY the spectrum number.
 
     Parameters
     ----------
-    dataset: `NDDataset`
+    dataset : `NDDataset`
         The dataset to store the data and metadata.
         If None, a NDDataset is created
-    directory: str, optional.
+    directory : str, optional.
         If not specified, opens a dialog box.
-    parent_dir: str, optional.
+    parent_dir : str, optional.
         The parent directory where to look at
-    spectra: arraylike of 2 int (min, max), optional, default=None
+    spectra : arraylike of 2 int (min, max), optional, default=None
         The first and last spectrum to be loaded as determined by their number.
          If None all spectra are loaded
-    discardbg: bool, optional, default=True
-        If True: do not load background (sample #9)
+    discardbg : bool, optional, default=True
+        If True : do not load background (sample #9)
 
-    delta_clocks: int, optional, default=0
+    delta_clocks : int, optional, default=0
         Difference in seconds between the clocks used for spectra and temperature acquisition.
         Defined as t(thermocouple clock) - t(spectrometer clock).
 
 
     Returns
     --------
-    nddataset: |NDDataset| or list of |NDDataset|
+    nddataset : |NDDataset| or list of |NDDataset|
 
     Examples
     --------

@@ -49,22 +49,22 @@ def read_omnic(dataset=None, **kwargs):
 
     Parameters
     ----------
-    dataset: |NDDataset|
+    dataset : |NDDataset|
         The dataset to store the data and metadata read from the OMNIC file(s).
         If None, a |NDDataset| is created.
-    filename: `None`, `str`, or list of `str`
-        Filename of the file(s) to load. If `None`: opens a dialog box to select
-        ``.spa`` or ``.spg`` files. If `str`: a single filename. It list of str:
+    filename : `None`, `str`, or list of `str`
+        Filename of the file(s) to load. If `None` : opens a dialog box to select
+        ``.spa`` or ``.spg`` files. If `str` : a single filename. It list of str :
         a list of filenames.
-    directory: str, optional, default="".
+    directory : str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
-    sortbydate: bool, optional, default: True.
+    sortbydate : bool, optional, default=True.
         Sort spectra by acquisition date
 
     Returns
     -------
-    dataset: |NDDataset|
+    dataset : |NDDataset|
         A dataset corresponding to the ``.spg`` file or the set of ``.spa``
         files. A list of datasets is returned if several ``.spg`` files are passed.
 
@@ -73,7 +73,7 @@ def read_omnic(dataset=None, **kwargs):
     >>> A = NDDataset.read_omnic('irdata/nh4y-activation.spg')
     >>> print(A)
     <BLANKLINE>
-      id: NH4Y-activation.SPG ...
+      id : NH4Y-activation.SPG ...
 
 
     """
@@ -222,7 +222,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         nspec = np.count_nonzero((keys == 2))
 
         if nspec == 0:
-            raise IOError('Error: File format not recognized'
+            raise IOError('Error : File format not recognized'
                           ' - information markers not found')
 
         ##Get xaxis (e.g. wavenumbers)
@@ -375,8 +375,8 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
 
     # Set description and history
     dataset.description = (
-            'Dataset from spg file: ' + spg_title + ' \n'
-            + 'History of the 1st spectrum: ' + allhistories[0])
+            'Dataset from spg file : ' + spg_title + ' \n'
+            + 'History of the 1st spectrum : ' + allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 
@@ -517,15 +517,15 @@ def _read_spa(dataset, filenames, **kwargs):
     # check the consistency of xaxis
     if np.ptp(nx) != 0:
         raise ValueError(
-            'Error: Inconsistent data set - number of wavenumber per spectrum should be identical')
+            'Error : Inconsistent data set - number of wavenumber per spectrum should be identical')
         return
     elif np.ptp(firstx) != 0:
         raise ValueError(
-            'Error: Inconsistent data set - the x axis should start at same value')
+            'Error : Inconsistent data set - the x axis should start at same value')
         return
     elif np.ptp(lastx) != 0:
         raise ValueError(
-            'Error: Inconsistent data set - the x axis should end at same value')
+            'Error : Inconsistent data set - the x axis should end at same value')
         return
 
     # load into the  NDDataset Object of spectral content
@@ -543,7 +543,7 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset.set_coords(y=_y, x=_x)
     
     # Set description and history
-    dataset.description = "Dataset from {0} spa files: '{1}'\nHistory of the {2}spectrum: {3}".format(
+    dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum : {3}".format(
         nspec, ' ... '.join(set([filenames[0], filenames[-1]])), '1st ' if nspec > 1 else '', allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'

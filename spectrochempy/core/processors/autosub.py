@@ -36,36 +36,36 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
 
     Parameters
     -----------
-    dataset: |NDDataset|.
+    dataset : |NDDataset|.
         Dataset to which we want to subtract the reference data
 
-    ref: |NDDataset|.
+    ref : |NDDataset|.
          1D reference data, with a size maching the axis to subtract
-         (axis parameter) #TODO: optionally use title of axis
+         (axis parameter) #TODO : optionally use title of axis
 
-    xrange: pair(s) of values. Any number of pairs is allowed.
+    xrange : pair(s) of values. Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized
 
-    inplace: `bool`, optional, default = False.
+    inplace : `bool`, optional, default= False.
         True if the subtraction is done in place.
         In this case we do not need to catch the function output
 
-    dim: str or int [optional, default = 'x].
+    dim : str or int [optional, default= 'x].
         Tells on which dimension to perform the subtraction. If dim is an integer it refers to the axis index.
 
-    method : str [optional, default = 'vardiff'].
+    method : str [optional, default= 'vardiff'].
 
 
     Returns
     --------
-    out: |NDDataset|.
+    out : |NDDataset|.
         The subtracted dataset
 
     Examples
     ---------
 
     >>> import os
-    >>> from spectrochempy import * #doctest: +ELLIPSIS
+    >>> from spectrochempy import * #doctest : +ELLIPSIS
     <BLANKLINE>
     ...
     <BLANKLINE>
@@ -73,7 +73,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     >>> A = NDDataset.load(path_A, protocol='omnic')
     >>> ref = A[:,0]  # let's subtrack the first column
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
-    >>> B #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> B #doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
     NDDataset: [[...]] a.u.
 
     """

@@ -22,8 +22,9 @@ import numpy as np
 # ======================================================================================================================
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import epsilon
-from spectrochempy.core import general_preferences
+from spectrochempy.core import general_preferences, error_
 
+import spectrochempy.extern.nmrglue as ng
 
 # ======================================================================================================================
 # generic apodization function
@@ -37,49 +38,41 @@ def apodize(dataset, **kwargs):
 
     Parameters
     ----------
-    method: Callable,
+    method : Callable,
         Apodization function
-    apod: float or a `Quantity`, default 0, or list
+    apod : float or a `Quantity`, default 0, or list
         Apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
-    apod2: float or a `Quantity`, optional, default 0, or list
+    apod2 : float or a `Quantity`, optional, default 0, or list
         Second apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
-    apod3: float or a `Quantity`, optional, default 0, or list
+    apod3 : float or a `Quantity`, optional, default 0, or list
         third apodization oarameter(s). If it is not a Quantity with units,
         it is assumed to be a broadening expressed in Hz.
-        alias: shifted
-    inv: bool, optional
+        alias : shifted
+    inv : bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev: bool, optional.
+    rev : bool, optional.
         True to reverse the apodization before applying it to the data.
-    apply: `bool`, optional, default = True
-        Should we apply the calculated apodization to the dataset (default)
-        or just return the apodization ndarray.
-    inplace: `bool`, optional, default = True
+    inplace : `bool`, optional, default= True
         Should we make the transform in place or return a new dataset
-    axis: optional, default is -1
+    axis : optional, default is -1
 
     Returns
     -------
-    object: nd-dataset or nd-array
+    object : nd-dataset or nd-array
         apodized dataset if apply is True, the apodization array if not True.
 
     """
 
     # output dataset inplace (by default) or not
     inplace = kwargs.pop('inplace', True)
-
-    # Do we apply the apodization or just return
-    # the apodization array
-    apply = kwargs.pop('apply', True)
-    inplace = inplace and apply  # force inplace false if we do not apply
-
+    
     if not inplace:
         new = dataset.copy()  # copy to be sure not to modify this dataset
     else:
         new = dataset
-
+        
     # On which axis do we want to apodize?
     axis = kwargs.pop('axis', -1)
 
@@ -120,25 +113,25 @@ def apodize(dataset, **kwargs):
     # if no parameter passed
     if np.abs(apod.magnitude) <= epsilon and np.abs(apod2.magnitude) <= epsilon:
         # nothing to do
-        if not apply:
-            # we have to return something as an array of one,
-            # as nothing is calculated
-            new.data = np.ones_like(new.data)
-        return new
+        return new, np.ones_like(new.data)
 
     # create the args list
     args = []
 
     # convert (1./apod) to the axis time units
     if apod.magnitude > epsilon:
-        tc1 = (1. / apod).to(lastcoord.units)
+        if not apod.check('[time]'):
+            apod = 1./apod
+        tc1 = apod.to(lastcoord.units)
         args.append(tc1)
     else:
         args.append(0 * ur.us)
 
     # convert (1./apod2) to the axis time units
     if np.abs(apod2.magnitude) > epsilon:
-        tc2 = (1. / apod2).to(lastcoord.units)
+        if not apod2.check('[time]'):
+            apod2 = 1./apod2
+        tc2 = apod2.to(lastcoord.units)
         args.append(tc2)
     else:
         args.append(0 * ur.us)
@@ -149,9 +142,14 @@ def apodize(dataset, **kwargs):
         # we default to lastcoord.units
         shifted = shifted * lastcoord.units
     else:
+        if not shifted.check('[time]'):
+            shifted = 1./apod2
         shifted = shifted.to(lastcoord.units)
     args.append(shifted)
 
+    pw = kwargs.get('pow', 1.)
+    args.append(pw)
+    
     # compute the apodization function
     x = lastcoord
     method = kwargs.pop('method', None)
@@ -176,8 +174,6 @@ def apodize(dataset, **kwargs):
     # TODO: handle this eventual complexity
 
     data = new.data
-    if not apply:
-        data = np.ones_like(data).astype(new.data.dtype)
     if not isquaternion:
         new._data = data * apod_arr
     else:
@@ -189,13 +185,14 @@ def apodize(dataset, **kwargs):
     if swaped:
         new.swapaxes(axis, -1, inplace=True)  # must be done inplace
 
-    if apply:
-        name = kwargs.pop('method_name', 'em')
-        new.history = str(
-            new.modified) + ': ' + '%s apodization performed: ' % name + str(
-            apod) + '\n'
+    name = kwargs.pop('method_name', 'em')
+    new.history = str(
+        new.modified) + ': ' + '%s apodization performed : ' % name + str(
+        apod) + '\n'
 
-    return new
+    curve = new.copy()
+    curve.data = apod_arr
+    return new, curve
 
     # shifted = args.shifted  # float(kargs.get('top', 0.0))
     # k_shifted = args.k_shifted

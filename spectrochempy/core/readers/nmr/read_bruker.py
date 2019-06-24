@@ -248,7 +248,7 @@ def _remove_digital_filter(dic, data):
     dic['acqus']['TD'] = td * 2
     data = data[..., :td]
 
-    debug_('Bruker digital filter: removed %s points' % rp)
+    debug_('Bruker digital filter : removed %s points' % rp)
 
     return data
 
@@ -297,24 +297,24 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     Parameters
     ----------
-    path: str, optional
+    path : str, optional
         path of the Bruker directory. It path is None, at least the parameters
         `data`, `user`, `name`, `expno` must be provided.
-    data: str,
+    data : str,
         main strorage directory, optional
-    user: str, optional
+    user : str, optional
         user name of the dataset
-    name: str, optional
+    name : str, optional
         name of the dataset
-    expno: int, optional
+    expno : int, optional
         experiment number
-    expnos: list, optional
+    expnos : list, optional
         A list of expno
-    processed: bool, optioanl, default is False
+    processed : bool, optioanl, default is False
         should we load already bruker processed files
-    procno: int
+    procno : int
         processing number
-    silent: bool
+    silent : bool
         should we output details
 
     """
@@ -657,7 +657,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         #     ldates.append(adic.par.DATE)  # and the date
 
         # store temporarily these data
-        debug_('data read finished: type: %s' % datatype)
+        debug_('data read finished : type : %s' % datatype)
 
         list_data.append(data)
 
@@ -715,7 +715,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
         # some keys should not vary for homogeneous data but lets the
         # user decide
-        info_("keys which have varied: %s" % mkeys)
+        info_("keys which have varied : %s" % mkeys)
 
         mkeys = list(mkeys)
         meta_diffs = {}

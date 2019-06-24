@@ -34,20 +34,20 @@ def read_matlab(dataset=None, **kwargs):
 
     Parameters
     ----------
-    dataset: |NDDataset|
+    dataset : |NDDataset|
         The dataset (or list of datasets) to store the data and metadata read from the file(s).
         If None, a |NDDataset| is created.
-    filename: `None`, `str`, or list of `str`
-        Filename of the file(s) to load. If `None`: opens a dialog box to select
-        ``.mat`` files. If `str`: a single filename. It list of str:
+    filename : `None`, `str`, or list of `str`
+        Filename of the file(s) to load. If `None` : opens a dialog box to select
+        ``.mat`` files. If `str` : a single filename. It list of str :
         a list of filenames.
-    directory: str, optional, default="".
+    directory : str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
 
     Returns
     -------
-    dataset: list or |NDDataset|
+    dataset : list or |NDDataset|
         A dataset or a list of datasets or tuples (name, object) if some content
         is not recognized in the .mat file.
 

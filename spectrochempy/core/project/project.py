@@ -55,19 +55,19 @@ class Project(AbstractProject):
         """
         Parameters
         ----------
-        args: series of objects, optional.
+        args : series of objects, optional.
             argument type will be interpreted correctly if they are of type
             |NDDataset|, |Project|, or other objects such as |Script|.
             This is optional, as they can be added later.
-        argnames: list, optional
+        argnames : list, optional
             If not None, this list gives the names associated to each
             objects passed as args. It MUST be the same length that the
             number of args, or an error wil be raised.
             If None, the internal name of each object will be used instead.
-        name: str, optional.
+        name : str, optional.
             The name of the project.  If the name is not provided, it will
             be generated automatically.
-        meta: any other attributes to described the project
+        meta : any other attributes to described the project
 
         """
         self.parent = None
@@ -148,7 +148,7 @@ class Project(AbstractProject):
 
         if key in self.allnames and not isinstance(value, type(self[key])):
             raise ValueError('the key exists but for a different type '
-                             'of object: {}'.format(type(self[key]).__name__))
+                             'of object : {}'.format(type(self[key]).__name__))
 
         if key in self.datasets_names:
             value.parent = self
@@ -440,7 +440,7 @@ class Project(AbstractProject):
 
         Parameters
         ----------
-        datasets: series of |NDDataset|
+        datasets : series of |NDDataset|
             Datasets to add to the current project.
             The name of the entries in the project will be identical to the
             names of the datasets.
@@ -448,10 +448,10 @@ class Project(AbstractProject):
         Examples
         --------
 
-        Assuming that ds1, ds2 and ds3 are already defined datasets:
+        Assuming that ds1, ds2 and ds3 are already defined datasets :
 
         >>> proj = Project()
-        >>> proj.add_datasets(ds1, ds2, ds3) # doctest: +SKIP
+        >>> proj.add_datasets(ds1, ds2, ds3) # doctest : +SKIP
 
         """
         for ds in datasets:
@@ -464,20 +464,20 @@ class Project(AbstractProject):
 
         Parameters
         ----------
-        dataset: |NDDataset|
+        dataset : |NDDataset|
             Datasets to add.
             The name of the entry will be the name of the dataset, except
             if parameter `name` is defined.
-        name: str, optional
+        name : str, optional
             If provided the name will be used to name the entry in the project.
 
         Examples
         --------
 
-        Assuming that ds1 is an already defined dataset:
+        Assuming that ds1 is an already defined dataset :
 
         >>> proj = Project()
-        >>> proj.add_dataset(ds1, name='Toto') # doctest: +SKIP
+        >>> proj.add_dataset(ds1, name='Toto') # doctest : +SKIP
 
         """
 
@@ -493,7 +493,7 @@ class Project(AbstractProject):
 
         Parameters
         ----------
-        name: str
+        name : str
             Name of the dataset to remove.
 
 
@@ -521,7 +521,7 @@ class Project(AbstractProject):
 
         Parameters
         ----------
-        projects: project instances
+        projects : project instances
 
 
         """
@@ -535,7 +535,7 @@ class Project(AbstractProject):
 
         Parameters
         ----------
-        proj: a project instance
+        proj : a project instance
 
 
         """
@@ -551,7 +551,7 @@ class Project(AbstractProject):
 
         Parameters
         ----------
-        name: str
+        name : str
             Name of the project to remove
 
         """
@@ -578,7 +578,7 @@ class Project(AbstractProject):
 
          Parameters
          ----------
-         scripts: |Script| instances
+         scripts : |Script| instances
 
 
          """
@@ -592,8 +592,8 @@ class Project(AbstractProject):
 
         Parameters
         ----------
-        script: a |Script| instance
-        name: str
+        script : a |Script| instance
+        name : str
 
 
         """
@@ -618,16 +618,16 @@ class Project(AbstractProject):
              **kwargs):
         """
         Save the current project
-        (default extension: ``.pscp`` ).
+        (default extension : ``.pscp`` ).
 
         Parameters
         ----------
-        filename: str
+        filename : str
             The filename of the file where to save the current dataset
-        directory: str, optional.
+        directory : str, optional.
             If the destination path is not given, the project will be saved in
             the default location defined in the configuration options.
-        overwrite_data: bool
+        overwrite_data : bool
             If True the default, everything is saved, even if the data
             already exists (overwrite. If False, only other object or
             attributes can be changed. This allow to keep the original data
@@ -765,16 +765,16 @@ class Project(AbstractProject):
 
     @classmethod
     def load(cls, filename='', directory=None, **kwargs):
-        """Load a project file ( extension: ``.pscp``).
+        """Load a project file ( extension : ``.pscp``).
 
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
         Parameters
         ----------
-        filename: str
+        filename : str
             The filename to the file to be read.
-        directory: str, optional
+        directory : str, optional
             The directory from where to load the file. If this information is
             not given, the project will be loaded if possible from
             the default location defined in the configuration options.

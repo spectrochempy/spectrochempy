@@ -7,23 +7,23 @@ def integrate(data, unit_conv, limits, unit='ppm', noise_limits=None,
     Integrate one 1D data array within limits given in units. Data points must
     be equally spaced.
 
-    Functional form of integration is:
+    Functional form of integration is :
 
     .. math::
         value = \sum_a^b s(x_{i}) dx
 
-    Where:
+    Where :
     s is the signal, a and b are the limits of integration and dx is the width
     of each bin.
 
-    The integration error due to baseline noise is calculated as:
+    The integration error due to baseline noise is calculated as :
 
     .. math::
         error = \sigma_{vol} = \sigma \sqrt{n}
 
     if the noise_limits are set.
 
-    Where:
+    Where :
 
     .. math::
         n =  \\frac{|b-a|}{dx}+1
@@ -33,22 +33,22 @@ def integrate(data, unit_conv, limits, unit='ppm', noise_limits=None,
 
     Parameters
     ----------
-    data: array like
+    data : array like
         1d array of intensity
-    unit_conv: `fileiobase.unit_conversion` object
+    unit_conv : `fileiobase.unit_conversion` object
         unit_conversion object associated with data
-    limits: array like
+    limits : array like
         With shape (2,) or (P, 2). Array with lower and upper integration
         limit. Or array with P rows of lower and upper integration limits.
-    noise_limits: Optional[array like]
+    noise_limits : Optional[array like]
         With shape(2, ). Array with lower and upper limits to section of data
         with only noise. A larger range will likely yield a more accurate
         estimate. It is unwise to use the very end of the spectrum for the
         noise range.
-    norm_to_range: Optional[int]
+    norm_to_range : Optional[int]
         If given, all values are normalized to the value determined within the
         range given by limits[norm_to_range, :]
-    calibrate: Optional[float]
+    calibrate : Optional[float]
         If norm_to_range is given, the values are re-normalized so that the
         integral within limits[norm_to_range, :] equals some number.
 
@@ -57,7 +57,7 @@ def integrate(data, unit_conv, limits, unit='ppm', noise_limits=None,
     array
         [value, ...] integration values
 
-    if noise_limits is given:
+    if noise_limits is given :
 
     array
         [[value, error], ...] where error a one sigma estimate of the error
@@ -110,14 +110,14 @@ def ndintegrate(data, unit_conv, limits, unit='ppm', noise_limits=None):
     Integrate one nD data array within limits given in units. Data points must
     be equally spaced. Can only integrate one region per function call.
 
-    The integration error due to baseline noise is calculated as:
+    The integration error due to baseline noise is calculated as :
 
     .. math::
         error = \sigma_{vol} = \sigma \sqrt{\prod_i^{d} n_{i}},
 
     if the noise_limits are set.
 
-    Where:
+    Where :
     sigma is the standard deviation of the baseline noise. n is the number
     of bins in the integration range for each d dimensions.
 
@@ -125,15 +125,15 @@ def ndintegrate(data, unit_conv, limits, unit='ppm', noise_limits=None):
 
     Parameters
     ----------
-    data: array like
+    data : array like
         1d array of intensity
-    unit_convs: [`fileiobase.unit_conversion`, ] list
+    unit_convs : [`fileiobase.unit_conversion`, ] list
         list of unit_conversion object associated with each dim of data.
-    limits: array like
+    limits : array like
         With shape (2,) or (d, 2). 1D Array with lower and upper integration
         limits for 1D . Or array with d rows of lower and upper integration
         limits for each dimension.
-    noise_limits: Optional[array like]
+    noise_limits : Optional[array like]
         With shape(2, ). Array with lower and upper limits to section of data
         with only noise. A larger range will likely yield a more accurate
         estimate. It is unwise to use the very end of the spectrum for the
@@ -144,7 +144,7 @@ def ndintegrate(data, unit_conv, limits, unit='ppm', noise_limits=None):
     array
         [value, ...] integration values
 
-    if noise_limits is given:
+    if noise_limits is given :
 
     array
         [[value, error], ...] where error a one sigma estimate of the error

@@ -62,7 +62,7 @@ oXatZbu6G0h4VG+ibqq0IJVK6cAjo6serG3vSUezCMct0yQeSOFJSUImqb2qbknUpDqlZxE0QZ+ZUpSl
 JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
 JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
 IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
-     style='height:22px; border-radius:12px; display: inline-block; float: left; vertical-align: middle'></img>
+     style='height:22px; border-radius:12px; display : inline-block; float : left; vertical-align : middle'></img>
 {% endif %}
 {% if message %}
 &nbsp;&nbsp;{{ message }}

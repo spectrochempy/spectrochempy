@@ -29,7 +29,7 @@ datasets = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
 # As the .mat file contains 6 matrices, 6 NDDataset objects are returned:
 
-print('\n NDDataset names: ' + str([ds.name for ds in datasets]))
+print('\n NDDataset names : ' + str([ds.name for ds in datasets]))
 
 ##########################################################
 # We are interested in the first dataset ('m1') that contains a single HPLS-DAD run (51x96)  dataset.

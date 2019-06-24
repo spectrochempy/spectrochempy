@@ -120,97 +120,97 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
     Parameters
     ----------
 
-    datasets: nddataset or list of nddataset
+    datasets : nddataset or list of nddataset
 
-    labels: list of str.
+    labels : list of str.
 
         The labels that will be used as title of each axes.
 
-    method: str, default to `map` for 2D and `lines` for 1D data
+    method : str, default to `map` for 2D and `lines` for 1D data
 
         Type of plot to draw in all axes (`lines` , `scatter` , `stack` , `map`
         ,`image` or `with_transposed`).
 
-    nrows, ncols: int, default: 1
+    nrows, ncols : int, default=1
 
         Number of rows/cols of the subplot grid. ncol*nrow must be equal
         to the number of datasets to plot
 
-    sharex, sharey: bool or {'none', 'all', 'row', 'col'}, default: False
+    sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default=False
 
         Controls sharing of properties among x (`sharex`) or y (`sharey`)
         axes::
 
-        - True or 'all': x- or y-axis will be shared among all subplots.
-        - False or 'none': each subplot x- or y-axis will be independent.
-        - 'row': each subplot row will share an x- or y-axis.
-        - 'col': each subplot column will share an x- or y-axis.
+        - True or 'all' : x- or y-axis will be shared among all subplots.
+        - False or 'none' : each subplot x- or y-axis will be independent.
+        - 'row' : each subplot row will share an x- or y-axis.
+        - 'col' : each subplot column will share an x- or y-axis.
 
         When subplots have a shared x-axis along a column, only the x tick
         labels of the bottom subplot are visible.  Similarly, when
         subplots have a shared y-axis along a row, only the y tick labels
         of the first column subplot are visible.
 
-    sharez: bool or {'none', 'all', 'row', 'col'}, default: False
+    sharez : bool or {'none', 'all', 'row', 'col'}, default=False
         equivalent to sharey for 1D plot.
         for 2D plot, z is the intensity axis (i.e., contour levels for maps or
         the vertical axis for stack plot), y is the third axis.
 
-    figsize: 2-tuple of floats
+    figsize : 2-tuple of floats
 
         ``(width, height)`` tuple in inches
 
-    dpi: float
+    dpi : float
 
         Dots per inch
 
-    facecolor: color
+    facecolor : color
 
         The figure patch facecolor; defaults to rc ``figure.facecolor``
 
-    edgecolor: color
+    edgecolor : color
 
         The figure patch edge color; defaults to rc ``figure.edgecolor``
 
-    linewidth: float
+    linewidth : float
 
         The figure patch edge linewidth; the default linewidth of the frame
 
-    frameon: bool
+    frameon : bool
 
         If `False` , suppress drawing the figure frame
 
-    left: float in the [0-1] interval
+    left : float in the [0-1] interval
 
         The left side of the subplots of the figure
 
-    right: float in the [0-1] interval
+    right : float in the [0-1] interval
 
         The right side of the subplots of the figure
 
-    bottom: float in the [0-1] interval
+    bottom : float in the [0-1] interval
 
         The bottom of the subplots of the figure
 
-    top: float in the [0-1] interval
+    top : float in the [0-1] interval
 
         The top of the subplots of the figure
 
-    wspace: float in the [0-1] interval
+    wspace : float in the [0-1] interval
 
         The amount of width reserved for blank space between subplots,
         expressed as a fraction of the average axis width
 
-    hspace: float in the [0-1] interval
+    hspace : float in the [0-1] interval
 
         The amount of height reserved for white space between subplots,
         expressed as a fraction of the average axis height
 
-    suptitle: str
+    suptitle : str
 
         title of the figure to display on top
 
-    suptitle_color: color
+    suptitle_color : color
 
     """
     

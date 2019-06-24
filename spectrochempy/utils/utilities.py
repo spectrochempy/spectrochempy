@@ -17,13 +17,13 @@ import numpy as np
 
 
 def readXlCellRange(xlFileName, cellRange, sheetNumber=0):
-    """ reads data in a cellrange: A23:AD23 ''"""
+    """ reads data in a cellrange : A23:AD23 ''"""
 
     def colNameToColNumber(L):
         """converts the column alphabetical character designator
         to number, e.g. A -> 0; AD -> 29
 
-        L: str, alphabetical character designator"""
+        L : str, alphabetical character designator"""
 
         number = 0
         for i, l in enumerate(L[::-1]):

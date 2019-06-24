@@ -57,8 +57,8 @@ def _generate_2D_spectra(concentrations, spectra):
 
     Parameters
     ----------
-    concentrations: |NDDataset|
-    spectra: |NDDataset|
+    concentrations : |NDDataset|
+    spectra : |NDDataset|
 
     Returns
     -------

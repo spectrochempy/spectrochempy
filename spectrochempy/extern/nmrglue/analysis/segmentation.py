@@ -27,20 +27,20 @@ def find_all_connected(data, thres, find_segs=False, diag=False):
 
     Parameters
     ----------
-    data: ndarray
+    data : ndarray
         Data to perform segmentation on.
-    thres: float
+    thres : float
         Threshold, below this nodes are considered noise.
-    find_segs: bool, optional
+    find_segs : bool, optional
         True to return a list of slices for the segments.
-    diag: bool
+    diag : bool
         True to include diagonal neighbors in connection.
 
     Returns
     -------
-    locations: list
+    locations : list
         List of indicies of local maximum in each segment.
-    seg_slices: list, optional
+    seg_slices : list, optional
         List of slices which extract a given segment from the data. Only
         returned when fig_segs is True.
 
@@ -84,20 +84,20 @@ def find_all_nconnected(data, thres, find_segs=False, diag=False):
 
     Parameters
     ----------
-    data: ndarray
+    data : ndarray
         Data to perform segmentation on.
-    thres: float
+    thres : float
         Threshold, below this nodes are considered noise.
-    find_segs: bool, optional
+    find_segs : bool, optional
         True to return a list of slices for the segments.
-    diag: bool
+    diag : bool
         True to include diagonal neighbors in connection.
 
     Returns
     -------
-    locations: list
+    locations : list
         List of indicies of local maximum in each segment.
-    seg_slices: list, optional
+    seg_slices : list, optional
         List of slices which extract a given segment from the data. Only
         returned when fig_segs is True.
 
@@ -141,13 +141,13 @@ def mark_dseg(mdata, map, pt, mark, structure):
 
     Parameters
     ----------
-    mdata: masked ndarray
+    mdata : masked ndarray
         Masked data array.
     map :
         Array mapping out segments.
-    pt: tuple of ints
+    pt : tuple of ints
         Index of starting node
-    mark: int
+    mark : int
         Integer to mark map with.
 
     """
@@ -211,20 +211,20 @@ def find_all_downward(data, thres, find_segs=False, diag=False):
 
     Parameters
     ----------
-    data: ndarray
+    data : ndarray
         Data to perform segmentation on.
-    thres: float
+    thres : float
         Threshold, below this nodes are considered noise.
-    find_segs: bool, optional
+    find_segs : bool, optional
         True to return a list of slices for the segments.
-    diag: bool, optional
+    diag : bool, optional
         True to include diagonal neighbors in connection.
 
     Returns
     -------
-    locations: list
+    locations : list
         List of indicies of local maximum in each segment.
-    seg_slices: list, optional
+    seg_slices : list, optional
         List of slices which extract a given segment from the data. Only
         returned when fig_segs is True.
 
@@ -259,13 +259,13 @@ def mark_useg(mdata, map, pt, mark, structure):
 
     Parameters
     ----------
-    mdata: masked ndarray
+    mdata : masked ndarray
         Masked data array.
     map :
         Array mapping out segments.
-    pt: tuple of ints
+    pt : tuple of ints
         Index of starting node
-    mark: int
+    mark : int
         Integer to mark map with.
 
     """
@@ -331,20 +331,20 @@ def find_all_upward(data, thres, find_segs=False, diag=False):
 
     Parameters
     ----------
-    data: ndarray
+    data : ndarray
         Data to perform segmentation on.
-    thres: float
+    thres : float
         Threshold, below this nodes are considered noise.
-    find_segs: bool, optional
+    find_segs : bool, optional
         True to return a list of slices for the segments.
-    diag: bool, optional
+    diag : bool, optional
         True to include diagonal neighbors in connection.
 
     Returns
     -------
-    locations: list
+    locations : list
         List of indicies of local maximum in each segment.
-    seg_slices: list, optional
+    seg_slices : list, optional
         List of slices which extract a given segment from the data. Only
         returned when fig_segs is True.
 
@@ -381,18 +381,18 @@ def find_downward(data, pt, thres, diag=False):
 
     Parameters
     ----------
-    data: ndarray
+    data : ndarray
         Array of data.
-    pt: tuple of ints
+    pt : tuple of ints
         Starting point of peak.
-    thres: float
+    thres : float
         Threshold, below this nodes are considered noise.
-    diag: bool, optional
+    diag : bool, optional
         True to include diagonal neighbors in connection.
 
     Returns
     -------
-    nodes: list
+    nodes : list
         Indicies of downward-connected nodes.
 
     """
@@ -429,18 +429,18 @@ def find_connected(data, pt, thres, diag=False):
 
     Parameters
     ----------
-    data: ndarray
+    data : ndarray
         Array of data.
-    pt: tuple of ints
+    pt : tuple of ints
         Starting point of peak.
-    thres: float
+    thres : float
         Threshold, below this nodes are considered noise.
-    diag: bool, optional
+    diag : bool, optional
         True to include diagonal neighbors in connection.
 
     Returns
     -------
-    nodes: list
+    nodes : list
         Indicies of connected nodes.
 
     """
@@ -476,18 +476,18 @@ def find_nconnected(data, pt, thres, diag=False):
 
     Parameters
     ----------
-    data: ndarray
+    data : ndarray
         Array of data.
-    pt: tuple of ints
+    pt : tuple of ints
         Starting point of peak.
-    thres: float
+    thres : float
         Threshold, above this nodes are considered noise.
-    diag: bool, optional
+    diag : bool, optional
         True to include diagonal neighbors in connection.
 
     Returns
     -------
-    nodes: list
+    nodes : list
         Indicies of connected nodes.
 
     """
@@ -523,18 +523,18 @@ def find_upward(data, pt, thres, diag=False):
 
     Parameters
     ----------
-    data: ndarray
+    data : ndarray
         Array of data.
-    pt: tuple of ints
+    pt : tuple of ints
         Starting point of peak.
-    thres: float
+    thres : float
         Threshold, below this nodes are considered noise.
-    diag: bool, optional
+    diag : bool, optional
         True to include diagonal neighbors in connection.
 
     Returns
     -------
-    nodes: list
+    nodes : list
         Indicies of upward-connected nodes.
 
     """

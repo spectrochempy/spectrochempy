@@ -69,14 +69,14 @@ CRITICAL = logging.CRITICAL
 try:
     __release__ = get_distribution('spectrochempy').version
     "Release version string of this package"
-except DistributionNotFound:
+except DistributionNotFound:  # pragma: no cover
     # package is not installed
     __release__ = '0.1a'
 
 try:
     __version__ = get_version(root='..', relative_to=__file__)
     "Version string of this package"
-except:
+except: # pragma: no cover
     __version__ = __release__
 
 
@@ -97,7 +97,7 @@ def _get_release_date():
     try:
         return subprocess.getoutput(
             "git log -1 --tags --date='short' --format='%ad'")
-    except:
+    except: # pragma: no cover
         pass
 
 
@@ -168,7 +168,7 @@ def available_styles():
                 styles.append(style)
     styles = list(set(styles))  # in order to remove possible duplicates
 
-    if 'scpy' not in styles:
+    if 'scpy' not in styles:  # pragma: no cover
         styles.append('scpy')  # the standard style of spectrochempy
 
     return styles
@@ -208,7 +208,7 @@ class SpectroChemPyMagics(Magics):
 
             -p <string>         Name of the project where the script will be stored.
                                 If not provided, a project with a standard
-                                name: `proj` is searched.
+                                name : `proj` is searched.
             -o <string>         script name
             -s <symbols>        Specify function or classes to load from python
                                 source.
@@ -227,7 +227,6 @@ class SpectroChemPyMagics(Magics):
            In[2]: %addscript 7-27
 
            In[3]: %addscript -s MyClass,myfunction myscript.py
-
            In[4]: %addscript MyClass
 
            In[5]: %addscript mymodule.myfunction
@@ -240,7 +239,7 @@ class SpectroChemPyMagics(Magics):
         mode = 'a' if append else 'w'
         search_ns = 'n' in opts
 
-        if not args and not cell and not search_ns:
+        if not args and not cell and not search_ns: # pragma: no cover
             raise UsageError('Missing filename, input history range, '
                              'or element in the user namespace.\n '
                              'If no argument are given then the cell content '
@@ -253,7 +252,7 @@ class SpectroChemPyMagics(Magics):
         proj = 'proj'
         if 'p' in opts:
             proj = opts['p']
-        if proj not in self.shell.user_ns:
+        if proj not in self.shell.user_ns: # pragma: no cover
             raise ValueError('Cannot find any project with name `{}` in the '
                              'namespace.'.format(proj))
         # get the proj object
@@ -269,7 +268,7 @@ class SpectroChemPyMagics(Magics):
             contents += "\n" + self.shell.find_user_code(args,
                                                          search_ns=search_ns) + "\n"
 
-        if 's' in opts:
+        if 's' in opts: # pragma: no cover
             try:
                 blocks, not_found = extract_symbols(contents, opts['s'])
             except SyntaxError:
@@ -312,7 +311,7 @@ def _get_pkg_datadir_path(data_name, package=None):
     path = os.path.dirname(import_item(package).__file__)
     path = os.path.join(path, data_name)
 
-    if not os.path.isdir(path):
+    if not os.path.isdir(path): # pragma: no cover
         return os.path.dirname(path)
 
     return path
@@ -333,7 +332,7 @@ class DataDir(HasTraits):
 
         Returns
         -------
-        listing: str
+        listing : str
 
         """
         strg = os.path.basename(self.path) + "\n"
@@ -396,7 +395,7 @@ class GeneralPreferences(MetaConfigurable):
     Examples
     --------
 
-    >>> import spectrochempy as scp # doctest: +ELLIPSIS
+    >>> import spectrochempy as scp # doctest : +ELLIPSIS
 
     >>> delimiter = scp.general_preferences.csv_delimiter
 
@@ -440,7 +439,7 @@ class GeneralPreferences(MetaConfigurable):
 
         Returns
         -------
-        dir: str
+        dir : str
             The absolute path to the projects directory.
 
         """
@@ -501,7 +500,7 @@ class GeneralPreferences(MetaConfigurable):
         if isinstance(value, str):
             value = getattr(logging, value, None)
             if value is None:
-                warnings.warn('Log level not changed: invalid value given\n'
+                warnings.warn('Log level not changed : invalid value given\n'
                               'string values must be DEBUG, INFO, WARNING, '
                               'or ERROR')
         self.parent.log_level = value
@@ -510,7 +509,7 @@ class GeneralPreferences(MetaConfigurable):
     # General configuration for plotting
     # ------------------------------------------------------------------------------------------------------------------
 
-    leftbuttonpan = Bool(True, help="LeftButtonPan: If false, left button "
+    leftbuttonpan = Bool(True, help="LeftButtonPan : If false, left button "
                                     "drags a rubber band for "
                                     "zooming in viewbox").tag(config=True, )
 
@@ -749,35 +748,34 @@ class SpectroChemPy(Application):
     @default('long_description')
     def _get_long_description(self):
         desc = """
-    Welcome to <strong>SpectroChemPy</strong> Application<br><br>
-    <p><strong>SpectroChemPy</strong> is a framework for processing, 
-    analysing and 
-    modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry 
-    with 
-    <strong>Py</strong>thon. It is a cross platform software, running on 
-    Linux, 
-    Windows or OS X.</p><br><br>
-    <strong>version:</strong> {version}<br>
-    <strong>Authors:</strong> {authors}<br>
-    <strong>License:</strong> {license}<br>
-    <div class='warning'> SpectroChemPy is still experimental and under active 
-    development. Its current design and functionalities are subject to major 
-    changes, reorganizations, bugs and crashes!!!. Please report any issues 
-    to the 
-    <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
-    </div><br><br>
-    When using <strong>SpectroChemPy</strong> for your own work, you are 
-    kindly 
-    requested to cite it this way:
-    <pre>
-    Arnaud Travert & Christian Fernandez,
-    SpectroChemPy, a framework for processing, analysing and modelling of 
-    Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
-    Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
-    Caen/CNRS, 2019
-    </pre>
-    </p>
-
+Welcome to <strong>SpectroChemPy</strong> Application<br><br>
+<p><strong>SpectroChemPy</strong> is a framework for processing,
+analysing and
+modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry
+with
+<strong>Py</strong>thon. It is a cross platform software, running on
+Linux,
+Windows or OS X.</p><br><br>
+<strong>version:</strong> {version}<br>
+<strong>Authors:</strong> {authors}<br>
+<strong>License:</strong> {license}<br>
+<div class='warning'> SpectroChemPy is still experimental and under active
+development. Its current design and functionalities are subject to major
+changes, reorganizations, bugs and crashes!!!. Please report any issues
+to the
+<a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
+</div><br><br>
+When using <strong>SpectroChemPy</strong> for your own work, you are
+kindly
+requested to cite it this way :
+<pre>
+Arnaud Travert & Christian Fernandez,
+SpectroChemPy, a framework for processing, analysing and modelling of
+Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
+Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
+Caen/CNRS, 2019
+</pre>
+</p>
     """.format(version=__release__, authors=__author__, license=__license__)
 
         return desc
@@ -792,7 +790,7 @@ class SpectroChemPy(Application):
 
     reset_config = Bool(False, help='Should we restore a default '
                                     'configuration ?').tag(config=True)
-    """Flag: True if one wants to reset settings to the original config 
+    """Flag : True if one wants to reset settings to the original config 
     defaults"""
 
     config_file_name = Unicode(None, help="Configuration file name").tag(
@@ -919,7 +917,7 @@ class SpectroChemPy(Application):
 
         Parameters
         ----------
-        argv:  List, [optional].
+        argv :  List, [optional].
             List of configuration parameters.
 
         """
@@ -937,7 +935,7 @@ class SpectroChemPy(Application):
         if InteractiveShell.initialized():
             IN_IPYTHON = True
 
-        self.log.debug("scpy command line arguments are: %s" % " ".join(sys.argv))
+        self.log.debug("scpy command line arguments are : %s" % " ".join(sys.argv))
 
         # workaround the problem with argument not in our aliases or flags
         # e.g., when using pytest options or setup.py options
@@ -966,7 +964,7 @@ class SpectroChemPy(Application):
         # warning handler
         # --------------------------------------------------------------------
         def send_warnings_to_log(message, category, filename, lineno, *args):
-            self.log.warning('%s:  %s' % (category.__name__, message))
+            self.log.warning('%s :  %s' % (category.__name__, message))
             return
 
         warnings.showwarning = send_warnings_to_log
@@ -984,7 +982,7 @@ class SpectroChemPy(Application):
                     shell.showtraceback((etype, evalue, tb),
                                         tb_offset=tb_offset)
                 else:
-                    self.log.error("%s: %s" % (etype.__name__, evalue))
+                    self.log.error("%s : %s" % (etype.__name__, evalue))
 
             ip.set_custom_exc((Exception,), _custom_exc)
 
@@ -1106,7 +1104,7 @@ class SpectroChemPy(Application):
 
         self.running = True
 
-        debug('MPL backend: {}'.format(mpl.get_backend()))
+        debug('MPL backend : {}'.format(mpl.get_backend()))
 
         return True
 
@@ -1122,7 +1120,7 @@ class SpectroChemPy(Application):
 
         if not os.path.exists(fname):
             s = self.generate_config_file()
-            self.log.info("Generating default config file: %r" % fname)
+            self.log.info("Generating default config file : %r" % fname)
             with open(fname, 'w') as f:
                 f.write(s)
 
@@ -1157,7 +1155,7 @@ class SpectroChemPy(Application):
 
         Returns
         -------
-        config_dir: str
+        config_dir : str
             The absolute path to the configuration directory.
 
         """

@@ -34,37 +34,42 @@ def em(dataset, *args, **kwargs):
     The data in the last dimension MUST be time-domain,
     or an error is raised.
 
-    Functional form of apodization window:
+    Functional form of apodization window :
 
     .. math::
-        em(x) = \\exp(-pi * x * lb)
+        em(t) = \exp(- R (t-t_0) )
+        
+    where
+    
+    .. math::
+        R = \pi * lb
+        
 
     Parameters
     ----------
-    dataset: |NDDataset|.
+    dataset : |NDDataset|.
         Dataset we want to apodize using exponential multiplication
-    lb: float or `quantity`
+    lb : float or `quantity`
         Exponential line broadening,
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
-    shifted: float or `quantity`
+    shifted : float or `quantity`
         Shift the data time origin by this amount. If it is not a quantity
         it is assumed to be expressed in the data units of the last
         dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization.  False (default) for standard.
-    rev: bool, optional.
+    rev : bool, optional.
         True to reverse the apodization before applying it to the data.
-    apply: `bool`, optional, default = True
-        Should we apply the calculated apodization to the dataset (default)
-        or just return the apodization ndarray.
-    inplace: `bool`, optional, default = True
+    retfunc : `bool`, optional, default= False
+        Should we return the calculated apodization function with the dataset.
+    inplace : `bool`, optional, default= True
         Should we make the transform in place or return a new dataset
-    axis: optional, default is -1
+    axis : optional, default is -1
 
     Returns
     -------
-    out: |NDDataset|.
+    out : |NDDataset|.
         The apodized dataset if apply is True, the apodization array if not True.
 
     """
@@ -72,22 +77,22 @@ def em(dataset, *args, **kwargs):
 
     # what's the line broadening ?
     lb = kwargs.pop('lb', 0)
-    if lb == 0:
+    if lb == 0 :
         # let's try the args if the kwargs was not passed.
         # In this case it should be the first arg
 
-        if len(args) > 0:
+        if len(args) > 0 :
             lb = args.pop(0)
 
     # is it a shifted broadening?
     shifted = kwargs.pop('shifted', 0)
 
-    def func(x, lb, tc2, shifted):
-        # tc2 not used here
-        if lb.magnitude <= epsilon:
+    def func(x, tc1, tc2, shifted, pow) :
+        # tc2 and pow not used here
+        if tc1.magnitude <= epsilon :
             e = np.ones_like(x)
-        else:
-            e = np.pi * np.abs(x - shifted) / lb
+        else :
+            e = np.pi * np.abs(x - shifted) / tc1
         return np.exp(-e.data)
 
     kwargs['method'] = func
@@ -95,13 +100,15 @@ def em(dataset, *args, **kwargs):
     kwargs['apod'] = lb
     kwargs['shifted'] = shifted
 
-    out = apodize(dataset, **kwargs)
+    out, apodcurve = apodize(dataset, **kwargs)
 
+    if kwargs.pop('retfunc', False) :
+        return out, apodcurve
     return out
 
 
 # ======================================================================================================================
-if __name__ == '__main__':
+if __name__ == '__main__' : # pragma: no cover
     from spectrochempy import *
 
     dataset1D = NDDataset()
@@ -111,8 +118,11 @@ if __name__ == '__main__':
     dataset1D /= dataset1D.real.data.max()  # normalize
 
     p = dataset1D.plot()
-    apodfunc = dataset1D.em(lb=100. * ur.Hz, apply=False)
-
-    apodfunc.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, clear=False)
+    
+    new, curve = dataset1D.em(lb=100. * ur.Hz, retfunc=True)
+    
+    curve.plot(color='r', clear=False)
+    new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='r', clear=False)
+    
 
     show()

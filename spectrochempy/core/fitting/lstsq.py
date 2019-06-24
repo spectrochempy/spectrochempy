@@ -38,7 +38,7 @@ class LSTSQ(HasTraits):
         """
         Parameters
         ----------
-        *datasets: one or two |NDDataset|'s or array-like objects
+        *datasets : one or two |NDDataset|'s or array-like objects
             If a single dataset `Y` is provided, the `X` data will be the `x`
             coordinates of the `Y` dataset, or the index of the data if not
             coordinates exists.
@@ -138,12 +138,12 @@ def NNLS(C, d, x0=None, tol=None, itmax_factor=3):
     subject to x >= 0, C and d must be real
 
     # python implementation of NNLS algorithm
-    # References: Lawson, C.L. and R.J. Hanson, Solving Least-Squares Problems,
+    # References : Lawson, C.L. and R.J. Hanson, Solving Least-Squares Problems,
     #             Prentice-Hall, Chapter 23, p. 161, 1974.
     # Contributed by Klaus Schuch (schuch@igi.tugraz.at)
     # based on MATLAB's lsqnonneg function
     #
-    # AT: if C and d are datasets, x will be a dataset with relevant dims
+    # AT : if C and d are datasets, x will be a dataset with relevant dims
     #     else return np array
 
     """
@@ -231,7 +231,7 @@ def NNLS(C, d, x0=None, tol=None, itmax_factor=3):
             if it > itmax:
                 max_error = z[PP - 1].max()
                 raise Exception(
-                    'Exiting: Iteration count (=%d) exceeded\n Try raising the tolerance tol. (max_error=%d)' % (
+                    'Exiting : Iteration count (=%d) exceeded\n Try raising the tolerance tol. (max_error=%d)' % (
                         it, max_error))
 
             QQ = np.where((z <= tol) & (P != 0))[0]

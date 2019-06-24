@@ -104,69 +104,69 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
 
     Parameters
     ----------
-    func: callable
+    func : callable
         should take at least one (possibly length N vector) argument and
         returns M floating point numbers.
-    x0: ndarray
+    x0 : ndarray
         The starting estimate for the minimization.
-    args: tuple
+    args : tuple
         Any extra arguments to func are placed in this tuple.
-    bounds: list
+    bounds : list
         ``(min, max)`` pairs for each element in ``x``, defining
         the bounds on that parameter. Use None for one of ``min`` or
         ``max`` when there is no bound in that direction.
-    Dfun: callable
+    Dfun : callable
         A function or method to compute the Jacobian of func with derivatives
         across the rows. If this is None, the Jacobian will be estimated.
-    full_output: bool
+    full_output : bool
         non-zero to return all optional outputs.
-    col_deriv: bool
+    col_deriv : bool
         non-zero to specify that the Jacobian function computes derivatives
         down the columns (faster, because there is no transpose operation).
-    ftol: float
+    ftol : float
         Relative error desired in the sum of squares.
-    xtol: float
+    xtol : float
         Relative error desired in the approximate solution.
-    gtol: float
+    gtol : float
         Orthogonality desired between the function vector and the columns of
         the Jacobian.
-    maxfev: int
+    maxfev : int
         The maximum number of calls to the function. If zero, then 100*(N+1) is
         the maximum where N is the number of elements in x0.
-    epsfcn: float
+    epsfcn : float
         A suitable step length for the forward-difference approximation of the
         Jacobian (for Dfun=None). If epsfcn is less than the machine precision,
         it is assumed that the relative errors in the functions are of the
         order of the machine precision.
-    factor: float
+    factor : float
         A parameter determining the initial step bound
         (``factor * || diag * x||``). Should be in interval ``(0.1, 100)``.
-    diag: sequence
+    diag : sequence
         N positive entries that serve as a scale factors for the variables.
 
     Returns
     -------
-    x: ndarray
+    x : ndarray
         The solution (or the result of the last iteration for an unsuccessful
         call).
-    cov_x: ndarray
+    cov_x : ndarray
         Uses the fjac and ipvt optional outputs to construct an
         estimate of the jacobian around the solution.  ``None`` if a
         singular matrix encountered (indicates very flat curvature in
         some direction).  This matrix must be multiplied by the
         residual standard deviation to get the covariance of the
         parameter estimates -- see curve_fit.
-    infodict: dict
+    infodict : dict
         a dictionary of optional outputs with the key s::
 
-            - 'nfev': the number of function calls
-            - 'fvec': the function evaluated at the output
-            - 'fjac': A permutation of the R matrix of a QR
+            - 'nfev' : the number of function calls
+            - 'fvec' : the function evaluated at the output
+            - 'fjac' : A permutation of the R matrix of a QR
                      factorization of the final approximate
                      Jacobian matrix, stored column wise.
                      Together with ipvt, the covariance of the
                      estimate can be approximated.
-            - 'ipvt': an integer array of length N which defines
+            - 'ipvt' : an integer array of length N which defines
                      a permutation matrix, p, such that
                      fjac*p = q*r, where r is upper triangular
                      with diagonal elements of nonincreasing
@@ -174,9 +174,9 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                      of the identity matrix.
             - 'qtf' : the vector (transpose(q) * fvec).
 
-    mesg: str
+    mesg : str
         A string message giving information about the cause of failure.
-    ier: int
+    ier : int
         An integer flag.  If it is equal to 1, 2, 3 or 4, the solution was
         found.  Otherwise, the solution was not found. In either case, the
         optional output variable 'mesg' gives more information.
@@ -201,7 +201,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     Contraints on the parameters are enforced using an internal parameter list
     with appropiate transformations such that these internal parameters can be
     optimized without constraints. The transfomation between a given internal
-    parameter, p_i, and a external parameter, p_e, are as follows:
+    parameter, p_i, and a external parameter, p_e, are as follows :
 
     With ``min`` and ``max`` bounds defined ::
 
@@ -252,7 +252,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         args = (args,)
     m = _check_func('leastsq', 'func', func, x0, args, n)[0][0]
     if n > m:
-        raise TypeError('Improper input: N=%s must not exceed M=%s' % (n, m))
+        raise TypeError('Improper input : N=%s must not exceed M=%s' % (n, m))
 
     # define a wrapped func which accept internal parameters, converts them
     # to external parameters and calls func

@@ -42,30 +42,30 @@ class MCRALS(HasTraits):
         """
         Parameters
         ----------
-        X: |NDDataset|
+        X : |NDDataset|
             The dataset on which to perform the MCR-ALS analysis
-        guess: |NDDataset|
+        guess : |NDDataset|
             Initial concentration or spectra
-        param: dict
-            Dict of optimization parameters with the following keys:
+        param : dict
+            Dict of optimization parameters with the following keys :
 
-            *   'tol': float, optional, convergence criterion on the change of resisuals.
+            *   'tol' : float, optional, convergence criterion on the change of resisuals.
                 (percent change of standard deviation of residuals). default=0.1
-            *   'maxit': maximum number of ALS minimizations. default = 50
-            *   'maxdiv': maximum number of successive non-converging iterations. default=5
-            *   'nonnegConc': array or tuple indicating species non-negative concentration
+            *   'maxit' : maximum number of ALS minimizations. default= 50
+            *   'maxdiv' : maximum number of successive non-converging iterations. default=5
+            *   'nonnegConc' : array or tuple indicating species non-negative concentration
                 profiles. For instance [1, 0, 1] indicates that species #0
                 and #2 have non-negative conc profiles while species #1
                 can have negative concentrations.
                 Default [1, ..., 1]  (only non-negative concentrations)
-            *   'unimodConc': array or tuple indicating species having unimodal concentrationsprofiles.
+            *   'unimodConc' : array or tuple indicating species having unimodal concentrationsprofiles.
                 Default [1, ..., 1]  (only unimodal concentration profiles)
-            *   'nonnegSpec': array or tuple indicating species having non-negative spectra
+            *   'nonnegSpec' : array or tuple indicating species having non-negative spectra
                 Default [1, ..., 1]  (only non-negative spectra)
-            *   'unimodSpec': array or tuple indicating species having unimodal spectra
+            *   'unimodSpec' : array or tuple indicating species having unimodal spectra
                 Default [0, ..., 0]  (no unimodal cocentration profiles)
-        verbose: bool
-            If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
+        verbose : bool
+            If set to True, prints a summary of residuals and residuals change at each iteration. default= False.
             In anyu case, the same information is returned in self._log
 
         """
@@ -303,9 +303,9 @@ class MCRALS(HasTraits):
 
         Returns
         -------
-        C: |NDDataset|
+        C : |NDDataset|
             The concentration matrix
-        St: |NDDataset|
+        St : |NDDataset|
             The spectra matrix
 
         """
@@ -315,11 +315,11 @@ class MCRALS(HasTraits):
         """
         Transform data back to the original space.
 
-        The following matrice operation is performed: :math:`X'_{hat} = C'.S'^t`
+        The following matrice operation is performed : :math:`X'_{hat} = C'.S'^t`
 
         Returns
         -------
-        X_hat: |NDDataset|
+        X_hat : |NDDataset|
             The reconstructed dataset based on the MCS-ALS optimization.
 
         """
@@ -331,7 +331,7 @@ class MCRALS(HasTraits):
         X_hat = dot(C, St)
 
         X_hat.history = 'Dataset reconstructed by MCS ALS optimization'
-        X_hat.title = 'X_hat: ' + self._X.title
+        X_hat.title = 'X_hat : ' + self._X.title
         return X_hat
 
     def plot(self, **kwargs):
@@ -340,7 +340,7 @@ class MCRALS(HasTraits):
 
         Returns
         -------
-        ax: subplot
+        ax : subplot
 
         """
 
@@ -353,6 +353,6 @@ class MCRALS(HasTraits):
         ax = self._X.plot(labbel='$X$')
         ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
         ax.plot(res.data.T, color=colRes, label='Residual')
-        ax.set_title('MCR ALS plot: ' + self._X.name)
+        ax.set_title('MCR ALS plot : ' + self._X.name)
 
         return ax

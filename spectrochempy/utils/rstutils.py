@@ -20,7 +20,7 @@ rst_epilog = """
 
 .. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
 
-.. |Script| replace:: :class:`~spectrochempy.core.dataset.ndarray.Script`
+.. |Script| replace:: :class:`~spectrochempy.core.dataset.scripts.Script`
 
 .. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
 
@@ -30,9 +30,9 @@ rst_epilog = """
 
 .. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
 
-.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoord.CoordRange`
+.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoordrange.CoordRange`
 
-.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndarray.CoordSet`
+.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`
 
 .. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
 
@@ -52,7 +52,7 @@ rst_epilog = """
 
 .. |userguide| replace:: User Guide 
 
-.. _userguide:  ../../user/userguide/index.html
+.. _userguide :  ../../user/userguide/index.html
 
 
 """

@@ -39,7 +39,7 @@ dependencies:
 - pytest-console-scripts
 - scikit-image
 # for docs
-- sphinx
+- sphinx=1.8.5
 - sphinx_rtd_theme
 - sphinx-gallery
 - nbsphinx

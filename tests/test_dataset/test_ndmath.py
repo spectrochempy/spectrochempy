@@ -366,7 +366,7 @@ def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs
     
     dsy = runop(ds2, args, kwargs)
     info_(ds2)
-    info_("result operation {}: {}".format(operation, str(dsy)))
+    info_("result operation {} : {}".format(operation, str(dsy)))
     
     assert isinstance(dsy, restype[1])
     if isinstance(dsy, NDDataset):
@@ -395,7 +395,7 @@ def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs
     dsy = runop(ds1, args, kwargs)
     
     info_(str(ds1))
-    info_("result operation {}: {}".format(operation, str(dsy)))
+    info_("result operation {} : {}".format(operation, str(dsy)))
     
     assert isinstance(dsy, restype[0])
     if isinstance(dsy, NDDataset):

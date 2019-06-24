@@ -1,6 +1,6 @@
 """Machinery for documenting traitlets config options with Sphinx.
 
-This includes:
+This includes :
 
 - A Sphinx extension defining directives and roles for config options.
 - A function to generate an rst file given an Application instance.
@@ -30,7 +30,7 @@ The generated rST syntax looks like this::
 
         Description goes here.
 
-    Cross reference like this: :configtrait:`Application.log_datefmt`.
+    Cross reference like this : :configtrait:`Application.log_datefmt`.
 """
 __all__ = []
 
@@ -89,9 +89,9 @@ def class_config_rst_doc(cls, trait_aliases):
         if 'Enum' in ttype:
             # include Enum choices
             lines.append(indent(
-                ':options: ' + ', '.join('``%r``' % x for x in trait.values), 4))
+                ':options : ' + ', '.join('``%r``' % x for x in trait.values), 4))
         else:
-            lines.append(indent(':trait type: ' + ttype, 4))
+            lines.append(indent(':trait type : ' + ttype, 4))
 
         # Default value
         # Ignore boring default values like None, [] or ''
@@ -105,12 +105,12 @@ def class_config_rst_doc(cls, trait_aliases):
                     dvr = dvr[:61] + '...'
                 # Double up backslashes, so they get to the rendered docs
                 dvr = dvr.replace('\\n', '\\\\n')
-                lines.append(indent(':default: ``%s``' % dvr, 4))
+                lines.append(indent(':default=``%s``' % dvr, 4))
 
         # Command line aliases
         if trait_aliases[fullname]:
             fmt_aliases = format_aliases(trait_aliases[fullname])
-            lines.append(indent(':CLI option: ' + fmt_aliases, 4))
+            lines.append(indent(':CLI option : ' + fmt_aliases, 4))
 
         # Blank line
         lines.append('')
@@ -145,13 +145,13 @@ def write_doc(path, title, app, preamble=None):
     Parameters
     ----------
 
-    path: str
+    path : str
         The file to be written
-    title: str
+    title : str
         The human-readable title of the document
-    app: traitlets.config.Application
+    app : traitlets.config.Application
         An instance of the application class to be documented
-    preamble: str
+    preamble : str
         Extra text to add just after the title (optional)
     """
     trait_aliases = reverse_aliases(app)

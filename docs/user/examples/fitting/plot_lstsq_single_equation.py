@@ -56,7 +56,7 @@ d.plot_scatter(markersize=7, mfc='red')
 lst = scp.LSTSQ(t, d)
 
 v, d0 = lst.transform()
-print('speed: {:.3fK},  d0: {:.3fK}'.format(v, d0))
+print('speed : {:.3fK},  d0 : {:.3fK}'.format(v, d0))
 
 
 ##############################################################################
@@ -78,4 +78,4 @@ dfit.plot_pen(clear=False, color='g', label='Fitted line', legend=True)
 lst = scp.LSTSQ(d)
 
 v, d0 = lst.transform()
-print('speed: {:.3fK},  d0: {:.3fK}'.format(v, d0))
+print('speed : {:.3fK},  d0 : {:.3fK}'.format(v, d0))

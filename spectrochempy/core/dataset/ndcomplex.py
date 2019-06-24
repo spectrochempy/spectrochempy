@@ -315,7 +315,7 @@ class NDComplexArray(NDArray):
 
         Parameters
         ----------
-        select: str, optional, default='REAL'
+        select : str, optional, default='REAL'
             if 'REAL', only real part in all dimensions will be selected.
             ELse a string must specify which real (R) or imaginary (I) component
             has to be selected along a specific dimension. For instance,
@@ -356,7 +356,7 @@ class NDComplexArray(NDArray):
             elif select == 'II':
                 ma = z
             else:
-                raise ValueError(f'something wrong: cannot interpret `{select}` for hypercomplex (quaternion) data!')
+                raise ValueError(f'something wrong : cannot interpret `{select}` for hypercomplex (quaternion) data!')
 
         elif self.is_complex:
             w, x = ma.real, ma.imag
@@ -365,7 +365,7 @@ class NDComplexArray(NDArray):
             elif (select == 'I') or (select == 'RI'):
                 ma = x
             else:
-                raise ValueError(f'something wrong: cannot interpret `{select}` for complex data!')
+                raise ValueError(f'something wrong : cannot interpret `{select}` for complex data!')
         else:
             warnings.warn(f'No selection was performed because datasets with complex data have no `{select}` part. ',
                           SpectroChemPyWarning)
@@ -488,7 +488,7 @@ class NDComplexArray(NDArray):
     def _str_shape(self):
 
         if self.is_empty:
-            return '         size: 0\n'
+            return '         size : 0\n'
 
         out = ''
         cplx = [False] * self.ndim
@@ -504,13 +504,13 @@ class NDComplexArray(NDArray):
         size = self.size
         sizecplx = '' if not self.has_complex_dims else " (complex)"
 
-        out += f'         size: {size}{sizecplx}\n' if self.ndim < 2 else f'        shape: ({shape})\n'
+        out += f'         size : {size}{sizecplx}\n' if self.ndim < 2 else f'        shape : ({shape})\n'
 
         return out
 
     # ..................................................................................................................
     def _str_value(self, sep='\n', ufmt=' {:~K}',
-                   header="       values: ... \n"):
+                   header="       values : ... \n"):
         prefix = ['']
         if self.is_empty:
             return header + '{}'.format(textwrap.indent('empty', ' ' * 9))
@@ -556,7 +556,7 @@ class NDComplexArray(NDArray):
                     text += mkbody(data, pref, units)
 
         out = '          DATA \n'
-        out += f'        title: {self.title}\n' if self.title else ''
+        out += f'        title : {self.title}\n' if self.title else ''
         out += header
         out += '\0{}\0'.format(textwrap.indent(text.strip(), ' ' * 9))
         out = out.rstrip()  # remove the trailings '\n'

@@ -64,7 +64,7 @@ class Meta(object):  # HasTraits):
     >>> m.chaine = "a modified string"
     Traceback (most recent call last):
      ...
-    ValueError: 'the metadata `chaine` is read only'
+    ValueError : 'the metadata `chaine` is read only'
     >>> print(m.chaine)
     a string
 
@@ -95,7 +95,7 @@ class Meta(object):  # HasTraits):
         """
         Parameters
         ----------
-        **data: keywords
+        **data : keywords
             The dictionary can be already inited with some keywords.
 
         """
@@ -187,7 +187,7 @@ class Meta(object):  # HasTraits):
 
         Parameters
         ----------
-        d: dict-like object
+        d : dict-like object
             Any dict-like object can be used, such as `dict`, traits `Dict` or
             another `Meta` object.
 
@@ -231,7 +231,7 @@ class Meta(object):  # HasTraits):
         >>> m = Meta()
         >>> m.td = 10
         >>> m.si = 20
-        >>> for key in m:
+        >>> for key in m :
         ...     print(key)
         si
         td

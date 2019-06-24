@@ -293,7 +293,7 @@ def test_nddataset_str():
     info_(arr1d)
     assert '[int64]' in str(arr1d)
     arr2d = NDDataset(np.array([[1, 2], [3, 4]]))
-    assert str(arr2d) == 'NDDataset: [int64] unitless (shape: (y:2, x:2))'
+    assert str(arr2d) == 'NDDataset: [int64] unitless (shape : (y:2, x:2))'
 
 
 def test_nddataset_str_repr(ds1):
@@ -473,7 +473,7 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     element = row0[..., 0]
     assert type(element) == type(da)
     assert element.dims == ['z', 'y', 'x']
-    info_("element: \n", element)
+    info_("element : \n", element)
 
     # squeeze
     row1 = row0.squeeze()
@@ -482,24 +482,24 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     assert row1.dims == ['x']
     assert row1.shape == (3,)
     assert row1.mask.shape == (3,)
-    info_("row1: \n", row1)
+    info_("row1 : \n", row1)
     element = row1[..., 0]
     assert element.x == coords[0][0]
 
     # now a slicing in multi direction
     matrix = da[1:4, 10:40:2, :2]
-    info_("matrix: %s" % matrix)
+    info_("matrix : %s" % matrix)
 
     # now again a slicing in multi direction (full selection)
     matrix = da[:, :, -2]
-    info_("matrix: %s" % matrix)
+    info_("matrix : %s" % matrix)
 
     # now again a slicing in multi direction (ellipsis)
     matrix = da[..., -1]
-    info_("matrix: %s" % matrix)
+    info_("matrix : %s" % matrix)
 
     matrix = da[-1, ...]
-    info_("matrix: %s" % matrix)
+    info_("matrix : %s" % matrix)
 
 
 def test_nddataset_slicing_by_label(ref_ds, ds1):
@@ -556,7 +556,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     da = ds1
     ref = ref_ds
     y1 = da[2000.]
-    assert str(y1) == 'NDDataset: [float64] a.u. (shape: (z:1, y:100, x:3))'
+    assert str(y1) == 'NDDataset: [float64] a.u. (shape : (z:1, y:100, x:3))'
 
     y2 = da[2000]
     assert y2 is None  # as we are out of limits
@@ -564,7 +564,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     assert caplog.records[-1].message.startswith('Empty array of shape (0, 100, 3) resulted from slicing.')
 
     y3 = da[:, 95:105]
-    assert str(y3) == 'NDDataset: [float64] a.u. (shape: (z:10, y:5, x:3))'
+    assert str(y3) == 'NDDataset: [float64] a.u. (shape : (z:10, y:5, x:3))'
 
     info_(da)
     y4 = da[5000.:4001.]
@@ -573,7 +573,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     assert caplog.records[-1].message.startswith('Empty array of shape (0, 100, 3) resulted from slicing.')
 
     y5 = da[5000.:3000.]
-    assert str(y5) == 'NDDataset: [float64] a.u. (shape: (z:4, y:100, x:3))'
+    assert str(y5) == 'NDDataset: [float64] a.u. (shape : (z:4, y:100, x:3))'
 
 
 @raises(IndexError)
@@ -594,7 +594,7 @@ def test_nddataset_slicing_by_index_nocoords(ref_ds, ds1):
     assert type(plane0) == type(da)  # should return a dataset
     assert plane0.ndim == 3
     assert plane0.size == 300
-    info_("Plane0: %s" % plane0)
+    info_("Plane0 : %s" % plane0)
 
 
 def test_nddataset_slicing_by_location_but_nocoords(ref_ds, ds1):
@@ -1046,7 +1046,7 @@ def test_nddataset_bug_par_arnaud():
     assert ds2.coords.y.data.shape[0] == 2400, 'taille axe 0 doit être 2400'
     assert ds2.data.shape[0] == 2400, "taille dimension 0 doit être 2400"
 
-    info_('taille axe 0: ' + str(ds2.coords.y.data.shape[0]))
+    info_('taille axe 0 : ' + str(ds2.coords.y.data.shape[0]))
     info_('taille dimension 0:' + str(ds2.data.shape[0]))
 
 
@@ -1352,9 +1352,9 @@ def test_nddataset_transpose_swapaxes(ds1):
 
     # fix a bug with loc indexation
     nd1 = nd[4000.:3000.]
-    assert str(nd1) == 'NDDataset: [float64] a.u. (shape: (z:4, y:100, x:3))'
+    assert str(nd1) == 'NDDataset: [float64] a.u. (shape : (z:4, y:100, x:3))'
     nd2 = ndt[..., 4000.:3000.]
-    assert str(nd2) == 'NDDataset: [float64] a.u. (shape: (x:3, y:100, z:4))'
+    assert str(nd2) == 'NDDataset: [float64] a.u. (shape : (x:3, y:100, z:4))'
     assert nd1 == nd2.T
 
 

@@ -85,8 +85,13 @@ def api_gen():
                 includeprivate=True,
                 destdir=DEVAPI,
                 exclude_patterns=['api.py', 'test_*', 'tests'],
-                exclude_dirs=['extern', 'sphinxext', '~misc', 'gui',
-                              'tests', '*/tests', '*/*/tests'],
+                exclude_dirs=['extern',
+                              'sphinxext',
+                              '~misc',
+                              'gui',
+                              'tests',
+                              '*/tests',
+                              '*/*/tests'],
                 )
 
     # generate API reference
@@ -132,7 +137,7 @@ def make_docs(*args):
 
     for builder in builders:
 
-        print('building %s documentation (version: %s)' % (builder,
+        print('building %s documentation (version : %s)' % (builder,
                                                            version))
         srcdir = confdir = DOCDIR
         outdir = "{0}/{1}".format(BUILDDIR, builder)
@@ -198,7 +203,7 @@ def do_release():
         info_('\n' + cmd + "Finished")
 
     else:
-        error_('Cannot find the upload server: {}!'.format(SERVER))
+        error_('Cannot find the upload server : {}!'.format(SERVER))
 
 
 def clean():

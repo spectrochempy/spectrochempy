@@ -107,30 +107,30 @@ def plot_2D(dataset, **kwargs):
 
     Parameters
     ----------
-    dataset: :class:`~spectrochempy.ddataset.nddataset.NDDataset` to plot
+    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset` to plot
 
-    data_only: `bool` [optional, default=`False`]
+    data_only : `bool` [optional, default=`False`]
 
         Only the plot is done. No addition of axes or label specifications
         (current if any or automatic settings are kept.
 
-    projections: `bool` [optional, default=False]
+    projections : `bool` [optional, default=False]
 
-    method: str [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
+    method : str [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
 
-    style: str, optional, default = 'notebook'
+    style : str, optional, default= 'notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
 
-    reverse: `bool` or None [optional, default = None
+    reverse : `bool` or None [optional, default= None
         In principle, coordinates run from left to right, except for wavenumbers
         (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
         will try to guess. But if reverse is set, then this is the
         setting which will be taken into account.
 
-    x_reverse: `bool` or None [optional, default= None
+    x_reverse : `bool` or None [optional, default=None
 
-    kwargs: additional keywords
+    kwargs : additional keywords
 
     """
     

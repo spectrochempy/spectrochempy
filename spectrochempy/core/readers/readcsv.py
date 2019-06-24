@@ -28,7 +28,7 @@ except:
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.utf8')  # to avoid problems with date format
     except:
-        warnings.warn('Could not set locale: en_US or en_US.utf8')
+        warnings.warn('Could not set locale : en_US or en_US.utf8')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -59,22 +59,22 @@ def read_zip(*args, **kwargs):
 
     Parameters
     ----------
-    filename: str
+    filename : str
         filename of the file to load
-    directory: str, optional, default="".
+    directory : str, optional, default="".
         From where to read the specified filename. If not sperfied, read in
         the current directory.
 
     Returns
     -------
-    dataset: |NDDataset|
+    dataset : |NDDataset|
 
     Examples
     --------
     >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip', origin='omnic')
     >>> print(A)
     <BLANKLINE>
-      name/id:  ...
+      name/id :  ...
 
     """
     debug_("reading zipped folder of *.csv files")
@@ -99,22 +99,22 @@ def read_csv(*args, **kwargs):
 
     Parameters
     ----------
-    filename: str
+    filename : str
         filename of the file to load
-    directory: str, optional, default="".
+    directory : str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the current directory then it the test directory.
 
     Returns
     -------
-    dataset: |NDDataset|
+    dataset : |NDDataset|
 
     Examples
     --------
     >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
     >>> print(A)
     <BLANKLINE>
-      name/id: ...
+      name/id : ...
 
     Notes
     -----
@@ -353,7 +353,7 @@ def _add_omnic_info(dataset, **kwargs):
 
     # Set description and history
     dataset.description = (
-        'Dataset from .csv file: {}\n'.format(desc))
+        'Dataset from .csv file : {}\n'.format(desc))
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 

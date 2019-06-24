@@ -52,7 +52,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert hash(d0) is not None
 
     info_('\n', repr(d0))
-    assert (repr(d0) == 'NDArray: empty (size: 0)')
+    assert (repr(d0) == 'NDArray: empty (size : 0)')
     info_('\n', d0)
 
     # assignement to basic write allowed properties
@@ -418,7 +418,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
 
     nd = ndarrayunit.copy()
     h, w = ref.shape
-    assert nd.__repr__() == f"NDArray: [float64] m.s^-1 (shape: (y:{h}, x:{w}))"
+    assert nd.__repr__() == f"NDArray: [float64] m.s^-1 (shape : (y:{h}, x:{w}))"
     nd[1] = MASKED
     assert nd.is_masked
 
@@ -466,7 +466,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     ndz = NDArray()
     assert not list(item for item in ndz)
     
-    assert str(ndz) == repr(ndz) == 'NDArray: empty (size: 0)'
+    assert str(ndz) == repr(ndz) == 'NDArray: empty (size : 0)'
     
     
 ################

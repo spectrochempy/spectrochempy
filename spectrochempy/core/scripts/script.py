@@ -72,7 +72,7 @@ class Script(HasTraits):
         p = re.compile("^([^\W0-9]?[a-zA-Z_]+[\w]*)")
         if p.match(pv) and p.match(pv).group() == pv:
             return pv
-        raise TraitError('Not a valid script name: only _ letters and numbers '
+        raise TraitError('Not a valid script name : only _ letters and numbers '
                          'are valids. For the fist character, numbers are '
                          'not allowed')
 
@@ -135,7 +135,7 @@ class Script(HasTraits):
         try:
             exec(code, globals(), localvars)
         except NameError as e:
-            error_(e + '. pass the variable `locals()`: this may solve '
+            error_(e + '. pass the variable `locals()` : this may solve '
                           'this problem! ')
 
 
@@ -145,9 +145,9 @@ def run_script(script, localvars=None):
 
     Parameters
     ----------
-    script: script instance
+    script : script instance
         The script to execute
-    localvars: dict, optional
+    localvars : dict, optional
         If provided it will be used for evaluating the script. In general,
         it can be `localvrs`=``locals()``.
 
@@ -166,7 +166,7 @@ def run_all_scripts(project):
 
     Parameters
     ----------
-    project: project instance
+    project : project instance
         The project in which the scripts have to be executed
 
     """

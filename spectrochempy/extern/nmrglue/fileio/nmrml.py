@@ -15,9 +15,9 @@ def read(filename, data_dtype=None):
 
     Parameters
     ----------
-    filename: str
+    filename : str
         Name of nmrML file to read.
-    data_dtype: str, optional
+    data_dtype : str, optional
         NumPy data type of the data. None, the default, will determine this
         data type from the infomation in the file. Occasionally this
         information is incorrect and this argument can be used to explicitly
@@ -25,9 +25,9 @@ def read(filename, data_dtype=None):
 
     Returns
     -------
-    dic: dict
+    dic : dict
         Dictionary of spectra parameters.
-    data: ndarray, 1D
+    data : ndarray, 1D
         Array of spectral data.
 
     """

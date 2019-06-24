@@ -19,16 +19,16 @@ def base(data, nl, nw=0):
 
     Parameters
     ----------
-    data: 1D or 2D ndarray
+    data : 1D or 2D ndarray
         Array of 1D or 2D NMR data.
-    nl: list
+    nl : list
         List of baseline nodes.
-    nw: float, optional
+    nw : float, optional
         Node half-width in points.
 
     Returns
     -------
-    ndata: ndarray
+    ndata : ndarray
         NMR data with first order baseline correction appied.  For 2D data
         baseline correction is applied for each trace along the last
         dimension.
@@ -48,16 +48,16 @@ def calc_bl_linear(x, nl, nw=0):
 
     Parameters
     ----------
-    x: 1D ndarray
+    x : 1D ndarray
         One-dimensional NMR data.
-    nl: list
+    nl : list
         List of baseline nodes
-    nw: float
+    nw : float
         Node half-width in points
 
     Returns
     -------
-    baseline: ndarray
+    baseline : ndarray
         Base calculated using linear approximation between nodes.
 
     """
@@ -80,18 +80,18 @@ def cbf(data, last=10, apply=slice(None)):
 
     Parameters
     ----------
-    data: 1D or 2D ndarray
+    data : 1D or 2D ndarray
         Array of 1D or 2D NMR data.
-    last: float, optional
+    last : float, optional
         Percent (0 - 100) of last axis used to calculate the baseline
         correction.
-    apply: slice, optional
+    apply : slice, optional
         Slice describing first-axis region(s) to which the baseline correction
         should be applied.  Parameter is ignored for 1D data.
 
     Returns
     -------
-    ndata: 1D or 2D ndarray
+    ndata : 1D or 2D ndarray
         NMR data with a constant baseline subtracted.
 
     """
@@ -113,17 +113,17 @@ def cbf_explicit(data, calc=slice(None), apply=slice(None)):
 
     Parameters
     ----------
-    data: 1D or 2D ndarray
+    data : 1D or 2D ndarray
         Array of 1D or 2D NMR data.
-    calc: slice, optional
+    calc : slice, optional
         Slice describing region to use for calculating the baseline correction.
-    apply: slice, optional
+    apply : slice, optional
         Slice describing first-axis region(s) to which the baseline correction
         should be applied.  Parameter is ignored for 1D data.
 
     Returns
     -------
-    ndata: 1D or 2D ndarray
+    ndata : 1D or 2D ndarray
         NMR data with a constant baseline subtracted.
 
     """
@@ -144,22 +144,22 @@ def med(data, mw=24, sf=16, sigma=5.0):
     """
     Median baseline correction.
 
-    Algorith described in: Friedrichs, M.S. JBNMR 1995 5 147-153.
+    Algorith described in : Friedrichs, M.S. JBNMR 1995 5 147-153.
 
     Parameters
     ----------
-    data: 1D or 2D ndarray
+    data : 1D or 2D ndarray
         Array of 1D or 2D NMR data.
-    mw: float
+    mw : float
         Median window size in pts.
-    sf: float
+    sf : float
         Smooth window size in pts.
-    sigma: float
+    sigma : float
         Standard-deviation of convoluted Gaussian window.
 
     Returns
     -------
-    ndata: 1D or 2D ndarray
+    ndata : 1D or 2D ndarray
         NMR data with the median baseline subtracted.
 
     """
@@ -175,22 +175,22 @@ def calc_bl_med(x, mw, sf, sigma):
     """
     Calculate a baseline using median baseline correction.
 
-    Algorithm described in: Friedrichs, M.S. JBNMR 1995 5 147-153
+    Algorithm described in : Friedrichs, M.S. JBNMR 1995 5 147-153
 
     Parameters
     ----------
-    x: 1D ndarray
+    x : 1D ndarray
         One dimensional NMR data
-    mw: float
+    mw : float
         Median window size in pts.
-    sf: float
+    sf : float
         Smooth window size in pts.
-    sigma: float
+    sigma : float
         Standard-deviation of convoluted Gaussian window.
 
     Returns
     -------
-    baseline: 1D ndarray
+    baseline : 1D ndarray
         Baseline calculated using median baseline correction
 
     """
@@ -217,18 +217,18 @@ def baseline_corrector(data, wd=20):
     """
     Calculate a baseline using a distribution based classification method.
 
-    Algorithm described in: Wang et al. Anal. Chem. 2013, 85, 1231-1239
+    Algorithm described in : Wang et al. Anal. Chem. 2013, 85, 1231-1239
 
     Parameters
     ----------
-    data: 1D ndarray
+    data : 1D ndarray
         One dimensional NMR data with real values
-    wd: float
+    wd : float
         Median window size in pts.
 
     Returns
     -------
-    data: 1D ndarray
+    data : 1D ndarray
         Baseline corrected spectrum  calculated using distribution based
         classification
 
@@ -305,24 +305,24 @@ def sol_general(data, filter, w=16, mode='same'):
     """
     Solvent filter with generic filter.
 
-    Algorithm described in: Marion et al. JMR 1989 84 425-430
+    Algorithm described in : Marion et al. JMR 1989 84 425-430
 
     Parameters
     ----------
-    data: 1D or 2D ndarray
+    data : 1D or 2D ndarray
         Array of 1D or 2D NMR data.
-    filter: ndarray
+    filter : ndarray
         Filter to convolve with data.  Not used in solvent filter functions
         which specific the filter, e.g. sol_boxcar.
-    w: int, optional
+    w : int, optional
         Filter length.  Not used here but is used in solent filter functions
         which specificy the filter, e.g. sol_boxcar.
-    mode: {'valid', 'same', 'full'}, optional
+    mode : {'valid', 'same', 'full'}, optional
         Convolution mode, 'same' should be used.
 
     Returns
     -------
-    ndata: 1D or 2D ndarray
+    ndata : 1D or 2D ndarray
         NMR data with solvent filter applied
 
     """

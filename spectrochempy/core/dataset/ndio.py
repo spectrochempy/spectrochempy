@@ -104,13 +104,13 @@ class NDIO(HasTraits):
 
     def save(self, filename='', **kwargs):
         """
-        Save the current |NDDataset| (default extension: ``.scp`` ).
+        Save the current |NDDataset| (default extension : ``.scp`` ).
 
         Parameters
         ----------
-        filename: str
+        filename : str
             The filename of the file where to save the current dataset
-        directory: str, optional
+        directory : str, optional
             If specified, the given `directory` and the `filename` will be
             appended.
 
@@ -119,7 +119,7 @@ class NDIO(HasTraits):
         Read some experimental data and then save in our proprietary format
         **scp**
 
-        >>> from spectrochempy import * #doctest: +ELLIPSIS
+        >>> from spectrochempy import * #doctest : +ELLIPSIS
 
         >>> mydataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
         >>> mydataset.save('mydataset.scp')
@@ -430,13 +430,13 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-        fid: list of `str` or `file` objects
+        fid : list of `str` or `file` objects
             The names of the files to read (or the file objects).
-        protocol: str, optional, default:'scp'
+        protocol : str, optional, default:'scp'
             The default type for saving.
-        directory: str, optional, default:`prefs.datadir`
+        directory : str, optional, default:`prefs.datadir`
             The directory from where to load the file.
-        kwargs: optional keyword parameters.
+        kwargs : optional keyword parameters.
             Any additional keyword(s) to pass to the actual reader.
 
 
@@ -449,7 +449,7 @@ class NDIO(HasTraits):
         ...
 
         by default, directory for saving is the `data`.
-        So the same thing can be done simply by:
+        So the same thing can be done simply by :
 
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)
@@ -492,12 +492,12 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-        filename: str
+        filename : str
             The path to the file to be read
-        protocol: str
+        protocol : str
             Protocol used for reading. If not provided, the correct protocol
             is evaluated from the file name extension.
-        kwargs: optional keyword parameters
+        kwargs : optional keyword parameters
             Any additional keyword to pass to the actual reader
 
         See Also
@@ -538,13 +538,13 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-        filename: str
+        filename : str
             The path to the file to be read
-        protocol: str
+        protocol : str
             The protocol used to write the
             |NDDataset| in a file,
             which will determine the exporter to use.
-        kwargs: optional keyword parameters
+        kwargs : optional keyword parameters
             Any additional keyword to pass to the actual exporter
 
         See Also

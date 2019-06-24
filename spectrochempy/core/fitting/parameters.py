@@ -139,7 +139,7 @@ class FitParameters(UserDict):
 
             keystring = key.split('_')[0]
             if self.reference[key]:
-                return "\t> %s: %s \n" % (keystring, self.data[key])
+                return "\t> %s : %s \n" % (keystring, self.data[key])
             else:
                 if self.fixed[key]:
                     keystring = "\t* %s" % keystring
@@ -153,20 +153,20 @@ class FitParameters(UserDict):
                     upb = "none"
                 val = str(self.data[key])
 
-                return "%s: %10.4f, %s, %s \n" % (
+                return "%s : %10.4f, %s, %s \n" % (
                     keystring, float(val), lob, upb)
 
         # ..............................................................
 
-        message = "#PARAMETER SCRIPT\n\nCOMMON: \n"
+        message = "#PARAMETER SCRIPT\n\nCOMMON : \n"
 
         var = ""
         for item in self.expvars:
             var += " %s" % item
 
         if var:
-            message += "\texperiment_number: %s \n" % str(self.expnumber)
-            message += "\texperiment_variables: %s \n" % var
+            message += "\texperiment_number : %s \n" % str(self.expnumber)
+            message += "\texperiment_variables : %s \n" % var
 
         # look for common parameters
         for key in list(self.keys()):
@@ -177,8 +177,8 @@ class FitParameters(UserDict):
         # model parameters
         models = self.models
         for model in models:
-            message += "\nMODEL: %s\n" % model
-            message += "shape: %s\n" % self.model[model]
+            message += "\nMODEL : %s\n" % model
+            message += "shape : %s\n" % self.model[model]
             for key in sorted(self.keys()):
                 keyspl = key.split('_')
                 if not model in '_'.join(keyspl[1:]):
@@ -194,13 +194,13 @@ class FitParameters(UserDict):
 
         Parameters
         ----------
-        strg: string
+        strg : string
             A string to evaluate containing multiplier,
             e.g., '10 k' evaluate to 10 000.
 
         Return
         ------
-        value: float or bool
+        value : float or bool
             Value of the string, or False, if there is an error
 
         """
@@ -389,7 +389,7 @@ class ParameterScript(HasTraits):
             s = line.split(':')
             if len(s) != 2:
                 raise ValueError(
-                    'Cannot interpret line %d: A semi-column is missing?' % lc)
+                    'Cannot interpret line %d : A semi-column is missing?' % lc)
 
             key, values = s
             key = key.strip().lower()
@@ -440,7 +440,7 @@ class ParameterScript(HasTraits):
                     key = key[1:].strip()
                 else:
                     raise ValueError(
-                        'Cannot interpret line %d: A parameter definition must start with *,$ or >' % lc)
+                        'Cannot interpret line %d : A parameter definition must start with *,$ or >' % lc)
 
                 # store this parameter
                 s = values.split(',')
@@ -451,7 +451,7 @@ class ParameterScript(HasTraits):
                         s[1:] = s[2:]
                 if len(s) > 3:
                     raise ValueError(
-                        'line %d: value, min, max should be defined in this order' % lc)
+                        'line %d : value, min, max should be defined in this order' % lc)
                 elif len(s) == 2:
                     raise ValueError('only two items in line %d' % lc)
                     # s.append('none')

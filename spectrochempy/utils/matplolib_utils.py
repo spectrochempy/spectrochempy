@@ -61,7 +61,7 @@ def figure(**kwargs):
 
     Parameters
     ----------
-    kwargs: any
+    kwargs : any
         keywords arguments to be passed to the matplotlib figure constructor.
 
     """
@@ -89,9 +89,9 @@ def get_figure(clear=True, **kwargs):
 
     Parameters
     ----------
-    clear: bool
+    clear : bool
         if False the last used figure is used.
-    kwargs: any
+    kwargs : any
         keywords arguments to be passed to the matplotlib figure constructor.
 
     Returns

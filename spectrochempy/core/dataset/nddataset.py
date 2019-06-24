@@ -119,14 +119,14 @@ class NDDataset(
         Parameters
         ----------
         %(NDArray.parameters.no_labels)s
-        coords: An instance of |CoordSet|, optional
+        coords : An instance of |CoordSet|, optional
             `coords` contains the coordinates for the different
             dimensions of the `data`. if `coords` is provided, it must
             specified
             the `coord` and `labels` for all dimensions of the `data`.
             Multiple `coord`'s can be specified in an |CoordSet| instance
             for each dimension.
-        description: str, optional
+        description : str, optional
             A optional description of the nd-dataset.
 
         Notes
@@ -137,12 +137,12 @@ class NDDataset(
 
         Examples
         --------
-        Usage by an end-user:
+        Usage by an end-user :
 
         >>> from spectrochempy import *
 
         >>> x = NDDataset([1,2,3])
-        >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
+        >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
         [       1        2        3]
 
 
@@ -258,7 +258,7 @@ class NDDataset(
             
             new.set_coords(*new_coords, keepnames=True)
         
-        new.history = f'Slice extracted: ({saveditems})'
+        new.history = f'Slice extracted : ({saveditems})'
         return new
     
     # ..................................................................................................................
@@ -647,7 +647,7 @@ class NDDataset(
 
         Parameters
         ----------
-        dim: int or str.
+        dim : int or str.
             A dimension index or name, default index = `x`.
             If an integer is provided, it is equivalent to the `axis` parameter for numpy array.
 
@@ -672,7 +672,7 @@ class NDDataset(
             idx = self._coords.names.index(name)
             return self._coords[idx]
         else:
-            error_(f'could not find this dimenson name: `{name}`')
+            error_(f'could not find this dimenson name : `{name}`')
             return None
     
     # ..................................................................................................................
@@ -753,15 +753,15 @@ class NDDataset(
 
         Parameters
         ----------
-        dim: str or int, optional, default = 0
+        dim : str or int, optional, default= 0
             dimension index or name along which to sort.
-        pos: int , optional
+        pos : int , optional
             If labels are multidimensional  - allow to sort on a define
-            row of labels: labels[pos]. Experimental: Not yet checked
-        by: str among ['value', 'label'], optional, default = ``value``.
+            row of labels : labels[pos]. Experimental : Not yet checked
+        by : str among ['value', 'label'], optional, default= ``value``.
             Indicate if the sorting is following the order of labels or
             numeric coord values.
-        descend: `bool`, optional, default = `False`.
+        descend : `bool`, optional, default= `False`.
             If true the dataset is sorted in a descending direction. Default is False  except if coordinates
             are reversed.
         %(generic_method.parameters.inplace)s
@@ -834,14 +834,14 @@ class NDDataset(
 
         Parameters
         ----------
-        dim: None or int or tuple of ints, optional
+        dim : None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
 
         Returns
         -------
-        squeezed: same object type
+        squeezed : same object type
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
 
@@ -875,9 +875,9 @@ class NDDataset(
 
         Parameters
         ----------
-        dim1: int
+        dim1 : int
             First axis.
-        dim2: int
+        dim2 : int
             Second axis.
         %(generic_method.parameters.inplace)s
 
@@ -932,7 +932,7 @@ class NDDataset(
         Convert to a tidy structured Pandas DataFrame.
         (needs Pandas library installed)
 
-        tidy data:  http://www.jstatsoft.org/v59/i10/
+        tidy data :  http://www.jstatsoft.org/v59/i10/
 
         Each column holds a different variable (For a NDDataset there is only one column)
         Each rows holds a different observation.
@@ -961,7 +961,7 @@ class NDDataset(
 
         Returns
         -------
-        xarray: a xarray.DataArray object
+        xarray : a xarray.DataArray object
 
 
         """
@@ -1045,11 +1045,11 @@ class NDDataset(
         
         Parameters
         ----------
-        **kwargs: additional keyword arguments
+        **kwargs : additional keyword arguments
 
         Returns
         -------
-        obj: A |NDPanel| object
+        obj : A |NDPanel| object
         
         """
         import spectrochempy as scp
@@ -1063,7 +1063,7 @@ class NDDataset(
 
         Parameters
         ----------
-        dims: sequence of dimension indexes or names, optional.
+        dims : sequence of dimension indexes or names, optional.
             By default, reverse the dimensions, otherwise permute the dimensions
             according to the values given.
         %(generic_method.parameters.inplace)s
@@ -1078,7 +1078,7 @@ class NDDataset(
 
         """
         new = super().transpose(*dims, inplace=inplace)
-        new.history = f'Data transposed between dims: {dims}' if dims else ''
+        new.history = f'Data transposed between dims : {dims}' if dims else ''
         return new
     
     # ------------------------------------------------------------------------------------------------------------------
@@ -1089,10 +1089,10 @@ class NDDataset(
     def _cstr(self):
         # Display the metadata of the object and partially the data
         out = ''
-        out += '         name: {}\n'.format(self.name)
-        out += '       author: {}\n'.format(self.author)
-        out += '      created: {}\n'.format(self._date)
-        out += '     modified: {}\n'.format(self._modified) if (self.modified-self.date).seconds>1 else ''
+        out += '         name : {}\n'.format(self.name)
+        out += '       author : {}\n'.format(self.author)
+        out += '      created : {}\n'.format(self._date)
+        out += '     modified : {}\n'.format(self._modified) if (self.modified-self.date).seconds>1 else ''
         
         wrapper1 = textwrap.TextWrapper(initial_indent='',
                                         subsequent_indent=' ' * 15,
@@ -1101,7 +1101,7 @@ class NDDataset(
         
         pars = self.description.strip().splitlines()
         if pars:
-            out += '  description: '
+            out += '  description : '
             desc = ''
             if pars:
                 desc += '{}\n'.format(wrapper1.fill(pars[0]))
@@ -1114,7 +1114,7 @@ class NDDataset(
         
         if self._history:
             pars = self.history
-            out += '      history: '
+            out += '      history : '
             hist = ''
             if pars:
                 hist += '{}\n'.format(wrapper1.fill(pars[0]))

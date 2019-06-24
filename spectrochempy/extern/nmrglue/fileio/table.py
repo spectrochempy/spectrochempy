@@ -18,18 +18,18 @@ def pipe2glue(pcomments, pformat, rec):
 
     Parameters
     ----------
-    pcomments: list
+    pcomments : list
         List of NMRPipe comment lines.
-    pformats: list
+    pformats : list
         List of NMRPipe table column formats strings.
-    rec: recarray
+    rec : recarray
         Records array with named fields.
 
     Returns
     -------
-    comments: list
+    comments : list
         List of comments
-    rec: recarray
+    rec : recarray
         Records array with named fields.
 
     """
@@ -44,20 +44,20 @@ def glue2pipe(comments, rec):
 
     Parameters
     ----------
-    comments: list
+    comments : list
         List of comments
-    rec: recarray
+    rec : recarray
         Records array with named fields.
 
     Returns
     -------
-    pcomments: list
+    pcomments : list
         List of NMRPipe comment lines.
-    pformats: list
+    pformats : list
         List of NMRPipe table column formats strings.  This list is guessed
         from the data types and precision in the reconrds array.  This may not
         be the exact format desired, edit this to your liking.
-    rec: recarray
+    rec : recarray
         Records array with named fields.
 
     """
@@ -76,12 +76,12 @@ def guess_pformat(col):
 
     Parameters
     ----------
-    col: ndarray
+    col : ndarray
         Array from a records array.
 
     Returns
     -------
-    s: str
+    s : str
         String for formatting NMRPipe table.
 
     """
@@ -115,14 +115,14 @@ def read(filename):
 
     Parameters
     ----------
-    filename: str
+    filename : str
         Filename of nmrglue table file to read.
 
     Returns
     -------
-    comments: list
+    comments : list
         List of comments (strings terminated with newline)
-    rec: recarray
+    rec : recarray
         Records array with named fields.
 
     """
@@ -153,13 +153,13 @@ def write(filename, comments, rec, overwrite=False):
 
     Parameters
     ----------
-    filename: str
+    filename : str
         Filename of file to write table to.
-    comments: list
+    comments : list
         List of comments (strings terminated with newline).
-    rec: recarray
+    rec : recarray
         Records array to write to file.
-    overwrite: bool, optional
+    overwrite : bool, optional
         True to overwrite file if it exists. False will raise an Warning if the
         file exists.
 
@@ -200,16 +200,16 @@ def insert_row(rec, N, row):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array.
-    N: int
+    N : int
         Row number to insert new row before.
-    row: array_like
+    row : array_like
         Array or similar object which will be converted into a new row.
 
     Returns
     -------
-    new_rec: recarray
+    new_rec : recarray
         New records array with inserted row.
 
     """
@@ -222,14 +222,14 @@ def append_row(rec, row):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array.
-    row: array_like
+    row : array_like
          Array or similar object which will be converted into a new row.
 
     Returns
     -------
-    new_rec: recarray
+    new_rec : recarray
         New records array with inserted row.
 
     """
@@ -243,19 +243,19 @@ def delete_row(rec, N):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array.
-    N: int
+    N : int
         Row number to delete.
 
     Returns
     -------
-    new_rec: recarray
+    new_rec : recarray
         New records array with row deleted.
 
     See Also
     --------
-    reorder_rows: delete multiple rows in a single call.
+    reorder_rows : delete multiple rows in a single call.
 
     """
     return np.delete(rec, N)
@@ -271,9 +271,9 @@ def reorder_rows(rec, new_order):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array.
-    new_order: list
+    new_order : list
         List of row indices and order in new records array.  Only the rows in
         this list are retained in the new records array.  Therefore this
         function can also be used to delete multiple rows from a records
@@ -281,7 +281,7 @@ def reorder_rows(rec, new_order):
 
     Returns
     -------
-    new_rec: recarray
+    new_rec : recarray
         New records array with rows reordered.
 
     """
@@ -295,19 +295,19 @@ def append_column(rec, col, name=None, format=None):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array.
-    col: array_like
+    col : array_like
         Array or similar object which will be converted into the new column.
-    name: str, optional
+    name : str, optional
         Name of the column. If None col.dtypes.name will be used.
-    format: dtype, optional
+    format : dtype, optional
         Data type to convert the new column into before appending. Required if
         col is not an ndarray.
 
     Returns
     -------
-    new_rec: recarray
+    new_rec : recarray
         New records array with column appended.
 
     """
@@ -321,21 +321,21 @@ def insert_column(rec, N, col, name=None, format=None):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array.
-    col: array_like
+    col : array_like
         Array or similar object which will be converted into the new column.
-    N: int
+    N : int
         Column number to insert new column before.
-    name: str, optional
+    name : str, optional
         Name of the column. If None col.dtypes.name will be used.
-    format: dtype, optional
+    format : dtype, optional
         Data type to convert the new column into before appending. Required if
         col in not an ndarray.
 
     Returns
     -------
-    new_rec: recarray
+    new_rec : recarray
         New records array with column inserted.
 
     """
@@ -372,19 +372,19 @@ def delete_column(rec, N):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array.
-    N: int
+    N : int
         Column number to delete.
 
     Returns
     -------
-    new_rec: recarray
+    new_rec : recarray
         New records array with column deleted.
 
     See Also
     --------
-    reorder_columns: Delete multiple columns from a records array.
+    reorder_columns : Delete multiple columns from a records array.
 
     """
     # remove the column from the list of columns.
@@ -404,9 +404,9 @@ def reorder_columns(rec, new_order):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array.
-    new_order: list
+    new_order : list
         List of column indices and order in new records array.  Only the
         columns in this list are retained in the new records array.
         Therefore this function can also be used to delete multiple columns
@@ -414,7 +414,7 @@ def reorder_columns(rec, new_order):
 
     Returns
     -------
-    new_rec: recarray
+    new_rec : recarray
         New records array with columns reordered.
 
     """

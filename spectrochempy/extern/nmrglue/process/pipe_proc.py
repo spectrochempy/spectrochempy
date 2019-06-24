@@ -4,7 +4,7 @@ NMRPipe like processing functions for use with the
 
 These functions attempt to mimic NMRPipe's processing functions but small
 differences exist between to two implementations.  In particular when using
-this module:
+this module :
 
     * hdr=True overrides all values in the calling function.
     * A di flag is not used, rather the :py:func:`di` function should be used
@@ -18,7 +18,7 @@ Additional differences from NMRPipe's functions are documented in the
 individual processing functions.
 
 The following functions have not been implemented and will raise a
-NotImplemented exception:
+NotImplemented exception :
 
     * ann      Fourier Analysis by Neural Net
     * ebs      EBS Reconstruction
@@ -68,17 +68,17 @@ def make_uc(dic, data, dim=-1):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    dim: int, optional
+    dim : int, optional
         Dimension number to create unit conversion object for.  Default is for
         last (direct) dimension.
 
     Returns
     -------
-    uc: unit conversion object
+    uc : unit conversion object
         Unit conversion object for the given dimension which accepts and
         returns NMRPipe indices (starting from 1).
 
@@ -180,53 +180,53 @@ def apod(dic, data, qName=None, q1=1.0, q2=1.0, q3=1.0, c=1.0, start=1,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    qName: {'SP', 'EM', 'GM', 'GMB', 'TM', 'TRI', 'JMOD'}
+    qName : {'SP', 'EM', 'GM', 'GMB', 'TM', 'TRI', 'JMOD'}
         Abbreviation of apodization function the apply. See the specific
         apodization function for a description.
-    q1: float
+    q1 : float
         First apodization function parameter. See specific apodization function
         for details.
-    q2: float
+    q2 : float
         Second apodization function parameter. See specific apodization
         function for details.
-    q3: float
+    q3 : float
         Third apodization function parameter. See specific apodization function
         for details.
-    c: float
+    c : float
         First point scale value.
-    start: int, optional
+    start : int, optional
         Starting location of apodization window. Default is the first point, 1.
-    size: int, optional
+    size : int, optional
         Size of the apodization window. Default ('default') is the full size of
         the active dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization, False for normal apodization.
-    one: bool, optional
+    one : bool, optional
         True to set points outside of window to 1. False leaves points outside
         the apodization window as is.
-    hdr: bool, optional
+    hdr : bool, optional
         True to read apodization parameters from the the parameters in dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with apodization applied.
 
     See Also
     --------
-    em: Exponential apodization.
-    gm: Lorentz-to-Gauss apodization.
-    gmb: Modified Gaussian apodization.
-    jmod: Exponentially damped J-modulation apodization.
-    sp: Sine bell apodization.
-    tm: Trapezoid apodization.
-    tri: Triangular apodization.
+    em : Exponential apodization.
+    gm : Lorentz-to-Gauss apodization.
+    gmb : Modified Gaussian apodization.
+    jmod : Exponentially damped J-modulation apodization.
+    sp : Sine bell apodization.
+    tm : Trapezoid apodization.
+    tri : Triangular apodization.
 
     """
     if hdr:
@@ -266,32 +266,32 @@ def em(dic, data, lb=0.0, c=1.0, start=1, size='default', inv=False, one=False,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    lb: float
+    lb : float
         Exponential line broadening in Hz.
-    c: float
+    c : float
         First point scale value.
-    start: int, optional
+    start : int, optional
         Starting location of apodization window. Default is the first point, 1.
-    size: int, optional
+    size : int, optional
         Size of the apodization window. Default ('default') is the full size of
         the active dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization, False for normal apodization.
-    one: bool, optional
+    one : bool, optional
         True to set points outside of window to 1. False leaves points outside
         the apodization window as is.
-    hdr: bool, optional
+    hdr : bool, optional
         True to read apodization parameters from the the parameters in dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with exponential apodization applied.
 
     """
@@ -344,36 +344,36 @@ def gm(dic, data, g1=0.0, g2=0.0, g3=0.0, c=1.0, start=1, size='default',
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    g1: float
+    g1 : float
         Inversion exponential width in Hz.
-    g2: float
+    g2 : float
         Gaussian broadening width in Hz
-    g3: float
+    g3 : float
         Location of Gaussian maximum, should be between 0.0 and 1.0.
-    c: float
+    c : float
         First point scale value.
-    start: int, optional
+    start : int, optional
         Starting location of apodization window. Default is the first point, 1.
-    size: int, optional
+    size : int, optional
         Size of the apodization window. Default ('default') is the full size of
         the active dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization, False for normal apodization.
-    one: bool, optional
+    one : bool, optional
         True to set points outside of window to 1. False leaves points outside
         the apodization window as is.
-    hdr: bool, optional
+    hdr : bool, optional
         True to read apodization parameters from the the parameters in dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with lorentz-to-gauss apodization applied.
 
     """
@@ -437,34 +437,34 @@ def gmb(dic, data, lb=0.0, gb=0.0, c=1.0, start=1, size='default', inv=False,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    lb: float
+    lb : float
         Exponential apodization term in Hz.
-    gb: float
+    gb : float
         Gaussian apodization term in Hz.
-    c: float
+    c : float
         First point scale value.
-    start: int, optional
+    start : int, optional
         Starting location of apodization window. Default is the first point, 1.
-    size: int, optional
+    size : int, optional
         Size of the apodization window. Default ('default') is the full size of
         the active dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization, False for normal apodization.
-    one: bool, optional
+    one : bool, optional
         True to set points outside of window to 1. False leaves points outside
         the apodization window as is.
-    hdr: bool, optional
+    hdr : bool, optional
         True to read apodization parameters from the the parameters in dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a modified gaussian apodization applied.
 
     """
@@ -520,41 +520,41 @@ def jmod(dic, data, off=0.0, j=0.0, lb=0.0, sin=False, cos=False, c=1.0,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    off: float
+    off : float
         Starting location of J-modulation in a fractions of pi radians. This
         parameter is ignored if sin or cos parameters are True.
-    j: float
+    j : float
         J-modulation in Hz.
     lb :
         Expoentntial line broadening in Hz.
-    sin: bool
+    sin : bool
         True for sine modulation, off parameter is ignored.
-    cos: bool
+    cos : bool
         True for cosine modulation, off parameter is ignored.
-    c: float
+    c : float
         First point scale value.
-    start: int, optional
+    start : int, optional
         Starting location of apodization window. Default is the first point, 1.
-    size: int, optional
+    size : int, optional
         Size of the apodization window. Default ('default') is the full size of
         the active dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization, False for normal apodization.
-    one: bool, optional
+    one : bool, optional
         True to set points outside of window to 1. False leaves points outside
         the apodization window as is.
-    hdr: bool, optional
+    hdr : bool, optional
         True to read apodization parameters from the the parameters in dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a exponentially damped J-modulation apodization
         applied.
 
@@ -619,36 +619,36 @@ def sp(dic, data, off=0.0, end=1.0, pow=1.0, c=1.0, start=1, size='default',
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    off: float
+    off : float
         Starting location of sine-bell as a fraction of pi radians.
-    end: float
+    end : float
         Ending location of sine-bell as a fraction of pi radians.
-    pow: int
+    pow : int
         Sine-bell power.
-    c: float
+    c : float
         First point scale value.
-    start: int, optional
+    start : int, optional
         Starting location of apodization window. Default is the first point, 1.
-    size: int, optional
+    size : int, optional
         Size of the apodization window. Default ('default') is the full size of
         the active dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization, False for normal apodization.
-    one: bool, optional
+    one : bool, optional
         True to set points outside of window to 1. False leaves points outside
         the apodization window as is.
-    hdr: bool, optional
+    hdr : bool, optional
         True to read apodization parameters from the the parameters in dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a sine-bell apodization applied.
 
     """
@@ -704,34 +704,34 @@ def tm(dic, data, t1=0.0, t2=0.0, c=1.0, start=1, size='default', inv=False,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    t1: float
+    t1 : float
         Length in points of left side of the trapezoid.
-    t2: float
+    t2 : float
         Length in points of right side of the trapezoid.
-    c: float
+    c : float
         First point scale value.
-    start: int, optional
+    start : int, optional
         Starting location of apodization window. Default is the first point, 1.
-    size: int, optional
+    size : int, optional
         Size of the apodization window. Default ('default') is the full size of
         the active dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization, False for normal apodization.
-    one: bool, optional
+    one : bool, optional
         True to set points outside of window to 1. False leaves points outside
         the apodization window as is.
-    hdr: bool, optional
+    hdr : bool, optional
         True to read apodization parameters from the the parameters in dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a trapezoid apodization applied.
 
     """
@@ -787,37 +787,37 @@ def tri(dic, data, loc="auto", lHi=0.0, rHi=0.0, c=1.0, start=1,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    loc: int or "auto"
+    loc : int or "auto"
         Location in points of triangle apex. The default ("auto") is to place
         the apex in the middle.
-    lHi: float
+    lHi : float
         Starting height of the left side of the triangle.
-    rHi: float
+    rHi : float
         Starting height of the right side of the triangle.
-    c: float
+    c : float
         First point scale value.
-    start: int, optional
+    start : int, optional
         Starting location of apodization window. Default is the first point, 1.
-    size: int, optional
+    size : int, optional
         Size of the apodization window. Default ('default') is the full size of
         the active dimension.
-    inv: bool, optional
+    inv : bool, optional
         True for inverse apodization, False for normal apodization.
-    one: bool, optional
+    one : bool, optional
         True to set points outside of window to 1. False leaves points outside
         the apodization window as is.
-    hdr: bool, optional
+    hdr : bool, optional
         True to read apodization parameters from the the parameters in dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a triangular apodization applied.
 
     Notes
@@ -883,20 +883,20 @@ def rs(dic, data, rs=0.0, sw=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    rs: float
+    rs : float
         Number of points to right shift. Negative values will left shift.
-    sw: bool
+    sw : bool
         True to update chemical shift calibration parameters.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been right shifted.
 
     """
@@ -921,20 +921,20 @@ def ls(dic, data, ls=0.0, sw=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    ls: float
+    ls : float
         Number of points to left shift. Negative values will right shift.
-    sw: bool
+    sw : bool
         True to update chemical shift calibration parameters.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been left shifted.
 
     """
@@ -965,25 +965,25 @@ def cs(dic, data, dir, pts=0.0, neg=False, sw=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    dir: {'rs' or 'ls'}
+    dir : {'rs' or 'ls'}
         Direction to shift spectra, 'rs' for right shifting, 'ls' for left
         shifting.
-    pts: float
+    pts : float
         Number of points to shift.
-    neg: bool
+    neg : bool
         True to negative points which are shifted.
-    sw: bool
+    sw : bool
         True to update chemical shift calibration parameters.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been circular shifted.
 
     """
@@ -1010,23 +1010,23 @@ def fsh(dic, data, dir, pts, sw=True):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    dir: {'rs' or 'ls'}
+    dir : {'rs' or 'ls'}
         Direction to shift spectra, 'rs' for right shifting, 'ls' for left
         shifting.
-    pts: float
+    pts : float
         Number of points to shift.
-    sw: bool
+    sw : bool
         True to update chemical shift calibration parameters.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been frequency shifted.
 
     Notes
@@ -1080,33 +1080,33 @@ def ft(dic, data, auto=False, real=False, inv=False, alt=False, neg=False,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    auto: bool
+    auto : bool
         True will choose mode automatically, not recomended.
-    real: bool
+    real : bool
         True to transform real-only data.
-    inv: bool
+    inv : bool
         True to perform an inverse transform.
-    alt: bool
+    alt : bool
         True to alternative the sign of points before transforming.
-    neg: bool
+    neg : bool
         True will negate the imaginary channel before transforming.
-    null: bool
+    null : bool
         True will not apply transform but will update the parameter dictionary.
-    bruk: bool
+    bruk : bool
         True to process Redfield sequential data, this is the same as setting
         alt and real to True.
-    debug: bool
+    debug : bool
         True to print debug info.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been Fourier transformed.
 
     Notes
@@ -1217,18 +1217,18 @@ def rft(dic, data, inv=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    inv: bool
+    inv : bool
         True to perform an inverse transform.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been real Fourier transformed.
 
     Notes
@@ -1264,18 +1264,18 @@ def ha(dic, data, inv=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    inv: bool
+    inv : bool
         True to perform an inverse transform.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been Hadamard transformed.
 
     Notes
@@ -1309,24 +1309,24 @@ def ht(dic, data, mode="ps0-0", zf=False, td=False, auto=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    mode: {'ps0-0', 'ps90-180'}
+    mode : {'ps0-0', 'ps90-180'}
         Mirror image mode.
-    zf: bool
+    zf : bool
         True to zero fill before transform for speed.
-    td: bool
+    td : bool
         True to set the time-domain parameter to half size.
-    auto: bool
+    auto : bool
         True to select mode and zf parameters automatically from dic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been Hilbert transformed.
 
     Notes
@@ -1381,16 +1381,16 @@ def di(dic, data):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data from which imaginaries have been removed.
 
     """
@@ -1419,36 +1419,36 @@ def ps(dic, data, p0=0.0, p1=0.0, inv=False, hdr=False, noup=False, ht=False,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    p0: float
+    p0 : float
         Zero order phase in degrees.
-    p1: float
+    p1 : float
         First order phase in degrees.
-    inv: bool
+    inv : bool
         True to perform inverse phase correction.
-    hdr: bool
+    hdr : bool
         True to use phasing parameters from dic.
-    noup: bool
+    noup : bool
         True to not update phasing paramters in returned ndic.
-    ht: bool
+    ht : bool
         True to perform a Hilbert transform to reconstruction imaginaries
         before phasing.
-    zf: bool
+    zf : bool
         True to zero fill before applied Hilbert transform.
-    exp: bool
+    exp : bool
         True to perform exponential phase correction.  False performs linear
         phase correction.
-    tc: float, optional
+    tc : float, optional
         Exponential decay constant. User when exp is True.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been phased.
 
     Notes
@@ -1489,24 +1489,24 @@ def tp(dic, data, hyper=False, nohyper=False, auto=False, nohdr=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    hyper: bool
+    hyper : bool
         True to perfrom hypercomplex transpose.
-    nohyper: bool
+    nohyper : bool
         True to supress hypercomplex transpose.
-    auto: bool
+    auto : bool
         True to choose transpose mode automatically.
-    nohdr: bool
+    nohdr : bool
         True to not update the transpose parameters in ndic.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been transposed.
 
     """
@@ -1571,30 +1571,30 @@ def zf(dic, data, zf=1, pad="auto", size="auto", mid=False, inter=False,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    zf: int, optional.
+    zf : int, optional.
         Number of times to double the current dimensions size.
-    pad: int
+    pad : int
         Number of zeros to pad the data with.
-    size: int
+    size : int
         Desired final size of the current dimension.
-    mid: bool
+    mid : bool
         True to zero fill in the middle of the current dimension
-    inter: bool
+    inter : bool
         True to zero fill between points.
-    auto: bool
+    auto : bool
         True to round final size to nearest power of two.
-    inv: bool
+    inv : bool
         True to extract the time domain data (remove zero filling).
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has zero filled.
 
     Notes
@@ -1669,24 +1669,24 @@ def base(dic, data, nl=None, nw=0, first=False, last=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    nl: list
+    nl : list
         List of baseline node points.
-    nw: int
+    nw : int
         Node width in points.
-    first: bool
+    first : bool
         True to include the first point in the node list.
-    last: bool
+    last : bool
         True to include the last point in the node list.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a linear baseline correction applied.
 
     """
@@ -1709,25 +1709,25 @@ def cbf(dic, data, last=10, reg=False, slice=slice(None)):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    last: float
+    last : float
         Percentage of trace to use in calculating baseline correction.
-    reg: slice object, optional
+    reg : slice object, optional
         Python slice object describing region(s) from which to calculate the
         baseline correction. If False (default) the last parameter will be used
         to calculate the correction.
-    slice: slice object
+    slice : slice object
         Python slice describing regions to apply the baseline correction
         to.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a constant baseline correction applied.
 
     Notes
@@ -1752,22 +1752,22 @@ def med(dic, data, nw=24, sf=16, sigma=5.0):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    nw: int
+    nw : int
         Median window size in points.
-    sf: int
+    sf : int
         Smoothing filter size in points.
-    sigma: float
+    sigma : float
         Gaussian convolution width.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with an median baseline correction applied.
 
     Notes
@@ -1788,24 +1788,24 @@ def sol(dic, data, mode="low", fl=16, fs=1, head=0):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    mode: {'low'}
+    mode : {'low'}
         Filter mode.  Currenlty only 'low' is implemented.
-    fl: int
+    fl : int
         Length of filter in points.
-    fs: {1, 2, 3}
-        Shape of lowpass filter 1: boxcar, 2: sine 3: sine squared.
+    fs : {1, 2, 3}
+        Shape of lowpass filter 1 : boxcar, 2 : sine 3 : sine squared.
     head :
         Number of points to skip when applying filter.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a solvent filter applied.
 
     Notes
@@ -1838,29 +1838,29 @@ def add(dic, data, r=0.0, i=0.0, c=0.0, ri=False, x1=1.0, xn='default'):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    r: float
+    r : float
         Constant to add to real data.
-    i: float
+    i : float
         Constant to add to imaginary data.
-    c: float
+    c : float
         Constant to add to both real and imaginary data.
-    ri: bool
+    ri : bool
         True to add real and imaginary data into real channel.
-    x1: int
+    x1 : int
         First point of region to add constant to.
-    xn: int or 'default'
+    xn : int or 'default'
         Last point of region to add constant to.  'default' specifies the last
         point.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a constant added.
 
     Notes
@@ -1890,16 +1890,16 @@ def dx(dic, data):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Derivative of of NMR data.
 
     """
@@ -1915,41 +1915,41 @@ def ext(dic, data, x1="default", xn="default", y1="default", yn="default",
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    x1: int or 'default'
+    x1 : int or 'default'
         Starting point of the X-axis extraction. 'default' will start the
         extraction at the first point.
-    xn: int or 'default'
+    xn : int or 'default'
         Ending point of the X-axis extraction. 'default' will stop the
         extraction at the last point.
-    y1: int or 'default'
+    y1 : int or 'default'
         Starting point of the Y-axis extraction. 'default' will start the
         extraction at the first point.
-    yn: int or 'default'
+    yn : int or 'default'
         Ending point of the Y-axis extraction. 'default' will stop the
         extraction at the last point.
-    round: int
+    round : int
         Multiple to round extraction size to.
-    left: bool
+    left : bool
         True to extract the left half of the data.
-    right: bool
+    right : bool
         True to extract the right half of the data.
-    mid: bool
+    mid : bool
         True to extract the central half of the data.
-    pow2: bool
+    pow2 : bool
         True will round the extracted size to the nearest power of 2.
-    sw: bool
+    sw : bool
         True to update the sweep width and ppm calibration parameters,
         recommended.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Extracted region of NMR data.
 
     Notes
@@ -2100,16 +2100,16 @@ def integ(dic, data):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Integrated NMR data.
 
     """
@@ -2124,19 +2124,19 @@ def mc(dic, data, mode="mod"):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    mode: {'mod' or 'pow'}
+    mode : {'mod' or 'pow'}
         'mod' to perform modules calculation, 'pow' to calculated square
         modules.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Modules of NMR data.
 
     """
@@ -2163,24 +2163,24 @@ def mir(dic, data, mode="left", invl=False, invr=False, sw=True):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    mode: {'left', 'right', 'center', 'ps90-180', pw0-0'}
+    mode : {'left', 'right', 'center', 'ps90-180', pw0-0'}
         Type of mirror image to append.
-    invl: bool
+    invl : bool
         True to negate left half.
-    invr: bool
+    invr : bool
         True to negate right half.
-    sw: bool
+    sw : bool
         True to update ppm parameters, recommended.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with mirror image appended.
 
     Notes
@@ -2255,31 +2255,31 @@ def mult(dic, data, r=1.0, i=1.0, c=1.0, inv=False, hdr=False, x1=1.0,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    r: float
+    r : float
         Constant to multiply real data by.
-    i: float
+    i : float
         Constant to multiply imaginary data by.
-    c: float
+    c : float
         Constant to multiply both real and imaginary data by.
-    inv: bool
+    inv : bool
         True to multiply by the inverse of the constant.
-    hdr: bool
+    hdr : bool
         True to use constant defined in dic.
-    x1: int
+    x1 : int
         First point of region to multiply constant by.
-    xn: int or 'default'
+    xn : int or 'default'
         Last point of region to multiple constant by.  'default' specifies the
         last point.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been multiplied by a constant.
 
     Notes
@@ -2317,18 +2317,18 @@ def rev(dic, data, sw=True):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    sw: bool
+    sw : bool
         True to update carrier parameters in ndic, recommended.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been revesed.
 
     """
@@ -2348,30 +2348,30 @@ def set(dic, data, r="a", i="a", c="a", x1=1.0, xn='default'):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    r: float, or 'a'
+    r : float, or 'a'
         Constant to set real data to. "a" sets real data to 0 unless `c` is
         defined.
-    i: float or 'a'
+    i : float or 'a'
         Constant to set imaginary data to. "a" sets imaginary data to 0 unless
         `c` is defined.
-    c: float
+    c : float
         Constant to set both real and imaginary data by. 'a' sets both channels
         to 0 unless r or i in defined.
-    x1: int
+    x1 : int
         First point of region to set to the constant.
-    xn: int or 'default'
+    xn : int or 'default'
         Last point of region to set to the constant.  'default' specifies the
         last point.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been set to a constant.
 
     """
@@ -2410,18 +2410,18 @@ def shuf(dic, data, mode=None):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    modes: str
+    modes : str
         Shuffle mode. See table below for valid modes.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data after shuffle.
 
 
@@ -2432,7 +2432,7 @@ def shuf(dic, data, mode=None):
     implemented.  All modes correctly update minimum and maximum values.  This
     behavor may differ from NMRPipe's SHUF function.
 
-    Valid modes are:
+    Valid modes are :
 
     ======= ===================================
     string  Description
@@ -2519,32 +2519,32 @@ def sign(dic, data, ri=False, r=False, i=False, left=False, right=False,
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    ri: bool
+    ri : bool
         True to negate all data points.
-    r: bool
+    r : bool
         True to negate real data points.
-    i: bool
+    i : bool
         True to negate imaginary data points.
-    left: bool
+    left : bool
         True to negate the left half of the data.
-    right: bool
+    right : bool
         True to negate the right half of the data.
-    alt: bool
+    alt : bool
         True to negate alternating data points.
-    abs: bool
+    abs : bool
         True to replace both real and imaginary data with it's absolute value.
-    sign: bool
+    sign : bool
         True to replace data with the sign (-1 or 1) of the data.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data after sign manipulation.
 
     Notes
@@ -2584,23 +2584,23 @@ def coadd(dic, data, cList=[1, 1], axis='x', time=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    cList: list
+    cList : list
         List of co-addition coefficients.
-    axis: {'x', 'y'}
+    axis : {'x', 'y'}
         Axis to co-add to and from.
-    time: bool
+    time : bool
         True will adjust time-domain parameters in dic to account for the size
         reduction.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data after co-addition.
 
     """
@@ -2632,16 +2632,16 @@ def dev(dic, data):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Original dictionary of NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Original array of NMR data.
 
     """
@@ -2654,30 +2654,30 @@ def img(dic, data, filter, dx=1.0, dy=1.0, kern=[1], conv=False, thres=None):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    filter: {'median', 'min', 'max', 'amin', 'amax', 'range', 'avg', 'dev'}
+    filter : {'median', 'min', 'max', 'amin', 'amax', 'range', 'avg', 'dev'}
         Image processing filter to apply. See table below for descriptions.
-    dx: float
+    dx : float
         Filter width along X-axis in points.
-    dy: float
+    dy : float
         Filter width along Y-axis in points.
-    kern: list
+    kern : list
         List of convolution filter kernel values, only used when conv is True.
-    conv: bool
+    conv : bool
         True to apply convolution filter with kernel of kern.
-    thres: float or None or True
+    thres : float or None or True
         Threshold value.  Only points above this value will have the filter
         applied. None turns thresholding off and the filter will be applied
         to all points. True will set a threshold value of 0.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Imaged processed array of NMR data.
 
     Notes
@@ -2685,7 +2685,7 @@ def img(dic, data, filter, dx=1.0, dy=1.0, kern=[1], conv=False, thres=None):
     This function wraps when regions extend past the edges (NMRPipe doesn't).
     The filter is applied to both the real and imaginary channels
 
-    Supported filters are:
+    Supported filters are :
 
     ======  ==================
     Name    Description
@@ -2743,16 +2743,16 @@ def null(dic, data):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Unmodified array of NMR data.
 
     """
@@ -2766,23 +2766,23 @@ def qart(dic, data, a=0.0, f=0.0, auto=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    a: float
+    a : float
         Amplitude adjustment value.
-    f: float
+    f : float
         Phase adjustment value.
-    auto: bool
+    auto : bool
         True will perform a Gram-Schmidth orthorginalization to fund `a` and
         `f` automatically.  Provided `a` and `f` parameters are ignored.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with scaled quadrature artifacts.
 
     Notes
@@ -2806,23 +2806,23 @@ def qmix(dic, data, ic=1, oc=1, cList=[0], time=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    ic: int
+    ic : int
         Number of input channels
-    oc: int
+    oc : int
         Number of output channels
-    cList: array_like
+    cList : array_like
         Array or mixing coefficients.  This parameter must be able to be
         converted to an array and reshaped to (ic, oc).
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data after complex mixing.
 
     Notes
@@ -2864,21 +2864,21 @@ def save(dic, data, name, overwrite=True):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    name: str
+    name : str
         Filename to save vector to.
-    overwrite: bool
+    overwrite : bool
         True will overwrite existing files, False will raise a Warning if the
         file already exists.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Unmodified array of NMR data.
 
     Notes
@@ -2902,21 +2902,21 @@ def smo(dic, data, n=1, center=False):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    n: int
+    n : int
         Size of smoothing window in points.
-    center: bool
+    center : bool
         True will perform perform a centering on the data (subtract the
         smoothed data).  False returns the smoothed data.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data which has been smoothed or centered.
 
     """
@@ -2937,28 +2937,28 @@ def zd(dic, data, wide=1.0, x0=1.0, slope=0, func=0, g=1):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    wide: int
+    wide : int
         Width of the diagonal band in points.
-    x0: int
+    x0 : int
         Starting location of the diagonal band in points.
-    slope: float
+    slope : float
         Slope of the diagonal band (X/Y ratio). A value of 0 will determine the
         slope automatically.
-    func: {0, 1, 2, 3}
+    func : {0, 1, 2, 3}
         Function to perform zero-ing with. 0 for a boxcar window, 1 for a
         triangle window, 2 for a sine bell, 3 for a Gaussian.
-    g: float
+    g : float
         Width of Gaussian window in points. Only used if func is 3.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with a diagonal band zero-ed.
 
     """
@@ -2999,41 +2999,41 @@ def lp(dic, data, pred="default", x1="default", xn="default", ord=8, mode='f',
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    pred: int
+    pred : int
         Number of points to predict, "default" chooses the vector size for
         forward prediction, 1 for backward prediction
-    x1: int or 'default'
+    x1 : int or 'default'
         First point in 1D vector to use to extract LP filter. 'default' will
         use the first or last point depending on the mode.
-    xn: int or 'default'
+    xn : int or 'default'
         Last point in 1D vector to use to extract LP filter. 'default' will use
         the first or last point depending on the mode.
-    ord: int
+    ord : int
         Prediction order, number of LP coefficients used in prediction.
-    mode: {'f', 'b', 'fb'}
+    mode : {'f', 'b', 'fb'}
         Mode to generate LP filter, 'f' for forward,'b' for backward, 'fb' for
         forward-backward.
-    append: {'before' or 'after'}
+    append : {'before' or 'after'}
         Location to append predicted data, 'before' or 'after' the existing
         data.
     bad_roots {'incr', 'decr', None, 'auto'} :
         Type of roots which are will be marked as bad and stabilized. Choices
         are 'incr' for increasing roots, 'decr' for decreasing roots, or None
         for not root stabilization. The default 'auto' will set this parameter
-        based upon the LP `mode` parameter: 'f' and 'fb' will results in an
+        based upon the LP `mode` parameter : 'f' and 'fb' will results in an
         'incr' parameter. 'b' in 'decr'.
-    mirror: {'90-180', '0-0', None}
+    mirror : {'90-180', '0-0', None}
         Mirror mode, option are '90-180' for a one point shifted mirror image,
         '0-0' for an exact mirror image, and None for no mirror imaging of the
         data.
-    fix_mode: {'on', 'reflect'}
+    fix_mode : {'on', 'reflect'}
         Method used to stabilize bad roots, 'on' moves bad roots onto the unit
         circle, 'reflect' reflect bad roots across the unit circle.
-    method: {'svd', 'qr', 'choleskey', 'tls'}
+    method : {'svd', 'qr', 'choleskey', 'tls'}
         Method to use to calculate the LP filter.
 
     Notes
@@ -3043,9 +3043,9 @@ def lp(dic, data, pred="default", x1="default", xn="default", ord=8, mode='f',
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with linear prediction applied.
 
     """
@@ -3114,39 +3114,39 @@ def lp2d(dic, data, xOrd=8, yOrd=8, xSize="default", ySize="default",
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters.
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    xOrd: int
+    xOrd : int
         X dimension linear prediction order.
-    yOrd: int
+    yOrd : int
         Y dimension linear prediction order.
-    xSize: int
+    xSize : int
         New size of Y-axis, 'default' doubles the current size.
-    ySize: int
+    ySize : int
         New size of Y-axis, 'default' double the current size.
-    xMirror: {'0', '180'}
+    xMirror : {'0', '180'}
     '   Mode in which the mirror image of the X-axis should be formed.  '0'
         indicated no delay, '180' for a half-point delay.
-    yMirror: {'0', '180'}
+    yMirror : {'0', '180'}
         Mode in which the mirror image of the Y-axis should be formed.
-    fix_pts: bool
+    fix_pts : bool
         True to reduce predicted points with magnitude larger than the largest
         data point. False leaved predicted points unaltered.
-    method: {'svd', 'qr', 'cholesky', 'tls'}
+    method : {'svd', 'qr', 'cholesky', 'tls'}
         Method used to calculate the LP prediction filter.
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with 2D linear prediction applied.
 
     Notes
     -----
-    This function applies the LP2D procedure as described in:
+    This function applies the LP2D procedure as described in :
     G. Zhu and A. Bax, Journal of Magnetic Resonance, 1992, 98, 192-199.
     to the data matrix. The parameters and algorith used in NMRPipe's LP2D
     function are not well documented and are not replicated here.
@@ -3212,20 +3212,20 @@ def mac(dic, data, macro=None, noRd=False, noWr=False, all=False, **kwargs):
 
     Parameters
     ----------
-    dic: dict
+    dic : dict
         Dictionary of NMRPipe parameters
-    data: ndarray
+    data : ndarray
         Array of NMR data.
-    macro: callable
+    macro : callable
         Python function to apply.
-    kwargs: keyword arguments
+    kwargs : keyword arguments
         Keyword arguments that get passed to the macro
 
     Returns
     -------
-    ndic: dict
+    ndic : dict
         Dictionary of updated NMRPipe parameters.
-    ndata: ndarray
+    ndata : ndarray
         Array of data with macro function applied.
 
     Notes

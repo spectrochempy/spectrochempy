@@ -22,16 +22,16 @@ def add_to_table(rec, columns, column_names):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array (table).
-    columns: list of ndarrays
+    columns : list of ndarrays
         List of columns data to append to table.
-    column_names: list of str
+    column_names : list of str
         List of names of columns.
 
     Returns
     -------
-    nrec: recarray
+    nrec : recarray
         Records array with columns added
 
     """
@@ -47,20 +47,20 @@ def pack_table(pbest, abest, iers, rec, param_columns, amp_column,
 
     Parameters
     ----------
-    pbest: list
+    pbest : list
         List of best-fit parameters.  See :py:func:`fit_NDregion` for format.
-    abest: list
+    abest : list
         List of best-fit amplitudes.
-    iers: list
+    iers : list
         List of fitting error return values.
-    rec: recarray
+    rec : recarray
         Records array (table) to save fitting parameters into. Updated with
         fitting parameter in place.
-    param_columns: list
+    param_columns : list
         List of parameter columns in rec. Format is the same as pbest.
-    amp_columns: str
+    amp_columns : str
         Name of amplitude column in rec.
-    ier_column: str or None, optional
+    ier_column : str or None, optional
         Name of column in rec to save iers to. None will not record this in the
         table.
 
@@ -84,20 +84,20 @@ def unpack_table(rec, param_columns, amp_column):
 
     Parameters
     ----------
-    rec: recarray
+    rec : recarray
         Records array (table) holding parameters.
-    param_columns: list
+    param_columns : list
         List of column names which hold lineshape parameters.  See
         :py:func:`fit_NDregion` for format.
-    amp_column: str
+    amp_column : str
         Name of columns in rec holding initial amplitudes.
 
     Returns
     -------
-    params: list
+    params : list
         List of initial parameter in the format required for
         :py:func:`fit_NDregion`.
-    amps: list
+    amps : list
         List of initial peak amplitudes.
 
     """
@@ -112,19 +112,19 @@ def estimate_scales(spectrum, centers, box_width, scale_axis=0):
 
     Parameters
     ----------
-    spectrum: array_like
+    spectrum : array_like
         NMR spectral data. ndarray or emulated type which can be sliced.
-    centers: list
+    centers : list
         List of N-tuples indicating peak centers.
-    box_width: tuple
+    box_width : tuple
         N-tuple indicating box width to add and subtract from peak centers to
         form region around peak to fit.
-    scale_axis: int
+    scale_axis : int
         Axis number to estimate scale parameters for.
 
     Returns
     -------
-    scales: list
+    scales : list
         List of estimated scale parameters.
 
     """
@@ -155,54 +155,54 @@ def fit_spectrum(spectrum, lineshapes, params, amps, bounds, ampbounds,
     Parameters
     ----------
 
-    spectrum: array_like
+    spectrum : array_like
         NMR data. ndarray or emulated type, must be slicable.
     lineshape :list
         List of lineshapes by label (str) or a lineshape class. See
         :py:func:`fit_NDregion` for details.
-    params: list
+    params : list
         P-length list (P is the number of peaks in region) of N-length lists
         of tuples where each each tuple is the optimiztion starting parameters
         for a given peak and dimension lineshape.
-    amps: list
+    amps : list
         P-length list of amplitudes.
-    bounds: list
+    bounds : list
         List of bounds for parameter of same shape as params.  If none of the
         parameters in a given dimension have limits None can be used,
         otherwise each dimension should have a list or tuple of (min,max) or
         None for each parameter. min or max may be None when there is no
         bounds in a given direction.
-    ampbounds: list
+    ampbounds : list
         P-length list of bounds for the amplitude with format similar to
         bounds.
-    centers: list
+    centers : list
         List of N-tuples indicating peak centers.
-    rIDs: list
+    rIDs : list
         P-length list of region numbers.  Peak with the same region number
         are fit together.
-    box_width: tuple
+    box_width : tuple
         Tuple of length N indicating box width to add and subtract from peak
         centers to form regions around peak to fit.
-    error_flag: bool
+    error_flag : bool
         True to estimate errors for each lineshape parameter and amplitude.
-    verb: bool, optional
+    verb : bool, optional
         True to print a summary of each region fit, False (the default)
         supresses all printing.
-    **kw: optional
+    **kw : optional
         Additional keywords passed to the scipy.optimize.leastsq function.
 
     Returns
     -------
-    params_best: list
+    params_best : list
         Optimal values for lineshape parameters with same format as params
         input parameter.
-    amp_best: list
+    amp_best : list
         List of optimal peak amplitudes.
-    param_err: list, only returned when error_flag is True
+    param_err : list, only returned when error_flag is True
         Estimated lineshape parameter errors with same format as params.
-    amp_err: list, only returned when error_flag is True
+    amp_err : list, only returned when error_flag is True
         Estimated peak amplitude errors.
-    iers: list
+    iers : list
         List of interger flag from scipy.optimize.leastsq indicating if the
         solution was found for a given peak.  1,2,3,4 indicates that a
         solution was found. Other indicate an error.
@@ -316,50 +316,50 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
     Parameters
     ----------
 
-    region: ndarray
+    region : ndarray
         Region of a NMR data to fit.
     lineshape :list
         List of lineshapes by label (str) or a lineshape class. See
         Notes for details.
-    params: list
+    params : list
         P-length list (P is the number of peaks in region) of N-length lists
         of tuples where each each tuple is the optimiztion starting parameters
         for a given peak and dimension lineshape.
-    amps: list
+    amps : list
         P-length list of amplitudes.
-    bounds: list
+    bounds : list
         List of bounds for parameter of same shape as params.  If none of the
         parameters in a given dimension have limits None can be used,
         otherwise each dimension should have a list or tuple of (min,max) or
         None for each parameter. min or max may be None when there is no
         bounds in a given direction.
-    ampbounds: list
+    ampbounds : list
         P-length list of bounds for the amplitude with format similar to
         bounds.
-    wmask: ndarray, optional
+    wmask : ndarray, optional
         Array with same shape as region which is used to weight points in the
         error calculation, typically a boolean array is used to exclude
         certain points in the region.  Default of None will include all
         points in the region equally in the error calculation.
-    centers: list
+    centers : list
         List of N-tuples indicating peak centers.
-    error_flag: bool
+    error_flag : bool
         True to estimate errors for each lineshape parameter and amplitude.
-    **kw: optional
+    **kw : optional
         Additional keywords passed to the scipy.optimize.leastsq function.
 
     Returns
     -------
-    params_best: list
+    params_best : list
         Optimal values for lineshape parameters with same format as params
         input parameter.
-    amp_best: list
+    amp_best : list
         List of optimal peak amplitudes.
-    param_err: list, only returned when error_flag is True
+    param_err : list, only returned when error_flag is True
         Estimated lineshape parameter errors with same format as params.
-    amp_err: list, only returned when error_flag is True
+    amp_err : list, only returned when error_flag is True
         Estimated peak amplitude errors.
-    iers: list
+    iers : list
         List of interger flag from scipy.optimize.leastsq indicating if the
         solution was found for a given peak.  1,2,3,4 indicates that a
         solution was found. Other indicate an error.
@@ -368,7 +368,7 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
     Notes
     -----
 
-    The lineshape parameter:
+    The lineshape parameter :
 
     Elements of the lineshape parameter list can be string indicating the
     lineshape of given dimension or an instance of a lineshape class
@@ -376,7 +376,7 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
     length of the lineshape the second being a list of lineshape parameters,
     and returns a simulated lineshape as well as a nparam method which when
     given the length of lineshape returns the number of parameters needed to
-    describe the lineshape. Currently the following strings are allowed:
+    describe the lineshape. Currently the following strings are allowed :
 
     * 'g' or 'gauss'    Gaussian (normal) lineshape.
     * 'l' or 'lorentz'  Lorentzian lineshape.
@@ -387,7 +387,7 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
     The first four lineshapes (Gaussian, Lorentzian, Voigt and Pseudo Voigt)
     all take a FWHM scale parameter.
 
-    The following are all valid lineshapes parameters for a 2D Gaussian peak:
+    The following are all valid lineshapes parameters for a 2D Gaussian peak :
 
     * ['g','g']
     * ['gauss','gauss']
@@ -565,21 +565,21 @@ def sim_NDregion(shape, lineshapes, params, amps):
 
     Parameters
     ----------
-    shape: tuple of ints
+    shape : tuple of ints
         Shape of region.
-    lineshapes: list
+    lineshapes : list
         List of lineshapes by label (str) or a lineshape class. See
         :py:func:`fit_NDregion` for additional documentation.
-    params: list
+    params : list
         P-length list (P is the number of peaks in region) of N-length lists
         of tuples where each each tuple is lineshape parameters for a given
         peak and dimension.
-    amps: list
+    amps : list
         P-length of peak amplitudes.
 
     Returns
     -------
-    sim: ndarray with shape, shape.
+    sim : ndarray with shape, shape.
         Simulated region.
 
     """
@@ -636,14 +636,14 @@ def make_slist(l, t_sizes):
 
     Parameters
     ----------
-    l: list or ndarray
+    l : list or ndarray
         List or array to pack into shaped list.
-    t_sizes: list of ints
+    t_sizes : list of ints
         List of tuple sizes.
 
     Returns
     -------
-    slist: list of tuples
+    slist : list of tuples
         List of tuples of lengths given by t_sizes.
 
     """
@@ -668,20 +668,20 @@ def calc_errors(region, ls_classes, p, cov, n_peaks, wmask):
 
     Parameters
     ----------
-    region: ndarray
+    region : ndarray
         Region which was fit.
-    ls_classes: list
+    ls_classes : list
         List of lineshape classes.
-    p: ndarray
+    p : ndarray
         Fit parameters.
-    cov: ndarray
+    cov : ndarray
         Covariance matrix from least squares fitting.
-    n_peaks: int
+    n_peaks : int
         Number of peaks in the region.
 
     Returns
     -------
-    errors: ndarray
+    errors : ndarray
         Array of standard errors of parameters in p.
 
     """
@@ -703,18 +703,18 @@ def s_NDregion(p, shape, ls_classes, n_peaks):
 
     Parameters
     ----------
-    p: list
+    p : list
         List of parameters, must be a list, modified by function.
-    shape: tuple of ints
+    shape : tuple of ints
         Shape of region.
-    ls_classes: list
+    ls_classes : list
         List of lineshape classes.
-    n_peaks: int
+    n_peaks : int
         Number of peaks in region.
 
     Returns
     -------
-    r: ndarray
+    r : ndarray
         Simulated region.
 
     """
@@ -742,16 +742,16 @@ def s_single_NDregion(p, shape, ls_classes):
 
     Parameters
     ----------
-    p: list
+    p : list
         List of parameters, must be a list.
-    shape: tuple
+    shape : tuple
         Shape of region.
-    ls_classes: list
+    ls_classes : list
         List of lineshape classes.
 
     Returns
     -------
-    r: ndarray
+    r : ndarray
         Simulated region.
 
     """
@@ -784,26 +784,26 @@ def f_NDregion(region, ls_classes, p0, p_bounds, n_peaks, wmask, **kw):
 
     Parameters
     ----------
-    region: ndarray
+    region : ndarray
         Region to fit.
-    ls_classes: list
+    ls_classes : list
         List of lineshape classes.
-    p0: ndarray
+    p0 : ndarray
         Initial parameters.
-    p_bounds: list of tuples
+    p_bounds : list of tuples
         List of (min, max) bounds for each element of p0.
-    n_peaks: int
+    n_peaks : int
         Number of peaks in the simulated region.
-    wmask: ndarray
+    wmask : ndarray
         Array with same shape as region which is used to weight points in the
         error calculation, typically a boolean array is used to exclude
         certain points in the region.
-    **kw: optional
+    **kw : optional
         Additional keywords passed to the scipy.optimize.leastsq function.
 
     See Also
     --------
-    fit_NDregion: Fit N-dimensional region with user friendly parameter.
+    fit_NDregion : Fit N-dimensional region with user friendly parameter.
 
     """
     args = (region, region.shape, ls_classes, n_peaks, wmask)
