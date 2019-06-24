@@ -54,7 +54,7 @@ def apodize(dataset, **kwargs):
         True for inverse apodization.  False (default) for standard.
     rev : bool, optional.
         True to reverse the apodization before applying it to the data.
-    inplace : `bool`, optional, default= True
+    inplace : `bool`, optional, default=True
         Should we make the transform in place or return a new dataset
     axis : optional, default is -1
 

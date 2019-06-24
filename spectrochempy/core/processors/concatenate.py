@@ -42,9 +42,9 @@ def concatenate(*datasets, **kwargs):
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
         (the last, by default).
-    dims : str, optional, default= 'x'
+    dims : str, optional, default='x'
         The dimension along which the operation is applied
-    axis : int, optional, default= None
+    axis : int, optional, default=None
         Alternative to the the dim keyword. Direct specification of the axis index to use for concatenation.
 
     Returns

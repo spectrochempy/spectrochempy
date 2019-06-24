@@ -192,7 +192,7 @@ def plot_1D(dataset, **kwargs):
         common x dimension.
     title : str
         Title of the plot (or subplot) axe.
-    style : str, optional, default= 'notebook'
+    style : str, optional, default='notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
     reverse : bool or None [optional, default=None/False

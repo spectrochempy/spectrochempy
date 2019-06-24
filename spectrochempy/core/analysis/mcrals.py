@@ -51,7 +51,7 @@ class MCRALS(HasTraits):
 
             *   'tol' : float, optional, convergence criterion on the change of resisuals.
                 (percent change of standard deviation of residuals). default=0.1
-            *   'maxit' : maximum number of ALS minimizations. default= 50
+            *   'maxit' : maximum number of ALS minimizations. default=50
             *   'maxdiv' : maximum number of successive non-converging iterations. default=5
             *   'nonnegConc' : array or tuple indicating species non-negative concentration
                 profiles. For instance [1, 0, 1] indicates that species #0
@@ -65,7 +65,7 @@ class MCRALS(HasTraits):
             *   'unimodSpec' : array or tuple indicating species having unimodal spectra
                 Default [0, ..., 0]  (no unimodal cocentration profiles)
         verbose : bool
-            If set to True, prints a summary of residuals and residuals change at each iteration. default= False.
+            If set to True, prints a summary of residuals and residuals change at each iteration. default=False.
             In anyu case, the same information is returned in self._log
 
         """

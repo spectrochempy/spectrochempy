@@ -46,14 +46,14 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     xrange : pair(s) of values. Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized
 
-    inplace : `bool`, optional, default= False.
+    inplace : `bool`, optional, default=False.
         True if the subtraction is done in place.
         In this case we do not need to catch the function output
 
-    dim : str or int [optional, default= 'x].
+    dim : str or int [optional, default='x].
         Tells on which dimension to perform the subtraction. If dim is an integer it refers to the axis index.
 
-    method : str [optional, default= 'vardiff'].
+    method : str [optional, default='vardiff'].
 
 
     Returns

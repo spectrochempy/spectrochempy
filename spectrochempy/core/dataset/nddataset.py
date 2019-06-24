@@ -753,15 +753,15 @@ class NDDataset(
 
         Parameters
         ----------
-        dim : str or int, optional, default= 0
+        dim : str or int, optional, default=0
             dimension index or name along which to sort.
         pos : int , optional
             If labels are multidimensional  - allow to sort on a define
             row of labels : labels[pos]. Experimental : Not yet checked
-        by : str among ['value', 'label'], optional, default= ``value``.
+        by : str among ['value', 'label'], optional, default=``value``.
             Indicate if the sorting is following the order of labels or
             numeric coord values.
-        descend : `bool`, optional, default= `False`.
+        descend : `bool`, optional, default=`False`.
             If true the dataset is sorted in a descending direction. Default is False  except if coordinates
             are reversed.
         %(generic_method.parameters.inplace)s

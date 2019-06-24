@@ -97,7 +97,7 @@ class NDPlot(HasTraits):
             The figure size
         fontsize : int, optional
             The font size in pixels, default is 10 (or read from preferences)
-        clear : `bool`, optional, default= `True`.
+        clear : `bool`, optional, default=`True`.
             Should we plot on the ax previously used or create a new figure?
         style : str
         autolayout : `bool`, optional, default=True

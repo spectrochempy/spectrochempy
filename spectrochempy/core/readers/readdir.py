@@ -80,7 +80,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
         The parent directory where to look at
     sortbydate : bool, optional,  default:True.
         Sort spectra by acquisition date
-    recursive : bool, optional,  default= True.
+    recursive : bool, optional,  default=True.
         Read also subfolders
 
     Returns

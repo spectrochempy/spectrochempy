@@ -48,7 +48,7 @@ def ft(self, **kwargs):
 
         size of the transformed dataset dimension
 
-    inplace : `bool`, optional, default= `False`
+    inplace : `bool`, optional, default=`False`
 
         Should we make the transform in place or return a new dataset
 

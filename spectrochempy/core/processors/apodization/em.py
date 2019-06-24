@@ -61,9 +61,9 @@ def em(dataset, *args, **kwargs):
         True for inverse apodization.  False (default) for standard.
     rev : bool, optional.
         True to reverse the apodization before applying it to the data.
-    retfunc : `bool`, optional, default= False
+    retfunc : `bool`, optional, default=False
         Should we return the calculated apodization function with the dataset.
-    inplace : `bool`, optional, default= True
+    inplace : `bool`, optional, default=True
         Should we make the transform in place or return a new dataset
     axis : optional, default is -1
 
