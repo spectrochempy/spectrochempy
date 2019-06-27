@@ -392,6 +392,11 @@ class NDPlot(HasTraits):
 
         origin._fig = self._fig
 
+        loc = kwargs.get("legend", None)
+        if loc:
+            origin.ndaxes['main'].legend(loc=loc)
+        
+        
         # Additional matplotlib commands on the current plot
         # ---------------------------------------------------------------------
 

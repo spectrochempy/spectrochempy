@@ -386,6 +386,7 @@ def plot_1D(dataset, **kwargs):
 
     # plot_lines
     # ------------------------------------------------------------------------------------------------------------------
+    label = kwargs.get('label',None)
     if scatterpen:
         # pen + scatter
         line, = ax.plot(xdata, zdata.T,
@@ -394,7 +395,8 @@ def plot_1D(dataset, **kwargs):
                         markevery=markevery,
                         markeredgewidth=1.,
                         # markerfacecolor = markerfacecolor,
-                        markeredgecolor=markeredgecolor)
+                        markeredgecolor=markeredgecolor,
+                        label=label)
     elif scatter:
         # scatter only
         line, = ax.plot(xdata, zdata.T,
@@ -404,15 +406,16 @@ def plot_1D(dataset, **kwargs):
                         markeredgewidth=1.,
                         markevery=markevery,
                         markerfacecolor=markerfacecolor,
-                        markeredgecolor=markeredgecolor)
+                        markeredgecolor=markeredgecolor,
+                        label=label)
     elif pen:
         # pen only
-        line, = ax.plot(xdata, zdata.T, marker="")
+        line, = ax.plot(xdata, zdata.T, marker="", label=label)
 
     elif bar:
         # bar only
         line = ax.bar(xdata, zdata.squeeze(), color=color,
-                      edgecolor='k', align='center')
+                      edgecolor='k', align='center', label=label)
         barwidth = line[0].get_width()
 
     if show_complex and pen:
@@ -422,7 +425,7 @@ def plot_1D(dataset, **kwargs):
 
     if kwargs.get('plot_model', False):
         modeldata = new.modeldata  # TODO: what's about mask?
-        ax.plot(xdata, modeldata.T, ls=':', lw='2')  # TODO: improve this!!!
+        ax.plot(xdata, modeldata.T, ls=':', lw='2', label=label)  # TODO: improve this!!!
 
     # line attributes
     if (pen or scatterpen) and color != 'AUTO':
