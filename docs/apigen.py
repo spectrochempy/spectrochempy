@@ -371,7 +371,7 @@ def main(rootpath, destdir='./api/generated', exclude_dirs=(),
 
     if opts.force:
         shutil.rmtree(destdir, ignore_errors=True)
-    if not opts.dryrun:
+    if not opts.dryrun or opts.force:
         os.makedirs(destdir, exist_ok=True)
     if not os.path.isdir(destdir):
         print('%s is not a directory.' % rootpath, file=sys.stderr)

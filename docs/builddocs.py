@@ -78,12 +78,13 @@ def gitcommands():
         pass
 
 
-def api_gen():
+def api_gen(force=False):
     # generate DEVAPI reference
     apigen.main(PROJECT,
                 tocdepth=1,
+                force=force,
                 includeprivate=True,
-                destdir=DEVAPI,
+                destdir=API,
                 exclude_patterns=['api.py', 'test_*', 'tests'],
                 exclude_dirs=['extern',
                               'sphinxext',
@@ -95,19 +96,27 @@ def api_gen():
                 )
 
     # generate API reference
-    apigen.main(PROJECT,
-                tocdepth=1,
-                includeprivate=True,
-                destdir=API,
-                genapi=True,
-                )
+    #apigen.main(PROJECT,
+    #            force=force,
+    #            tocdepth=1,
+    #            includeprivate=True,
+    #            destdir=API,
+    #            genapi=True,
+    #            )
 
 def make_docs(*args):
     """Make the html and pdf documentation
 
+    Parameters
+    ----------
+    *args : tuple(any,...)
+        Arguments among:
+        
+        * html
     """
     args = list(args)
-
+    regenerate_api = False
+    
     nocommit = True
     if 'commit' in args:
         nocommit = False
@@ -128,12 +137,15 @@ def make_docs(*args):
 
     if 'clean' in args:
         clean()
-        args.remove('clean')
+        regenerate_api = True
         info_('\nOld documentation now erased.\n')
-
-    if builders and 'no_apigen' not in args:
+        
+    if builders:
+        info_('\nDocumentation directory are created.\n')
         make_dirs()
-        api_gen()
+
+    if  regenerate_api or not os.path.exists(API) or not os.path.exists(DEVAPI):
+        api_gen(force=regenerate_api)
 
     for builder in builders:
 

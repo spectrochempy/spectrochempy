@@ -60,7 +60,6 @@ Documentation
 * :doc:`user/userguide/index`
 * :doc:`user/tutorials/index`
 * :doc:`gallery/auto_examples/index`
-* :doc:`api/generated/index`
 * :doc:`main/faq`
 
 .. toctree::
@@ -70,15 +69,23 @@ Documentation
 
     user/userguide/index
     user/tutorials/index
-    api/generated/index
     gallery/auto_examples/index
     main/faq
 
+**API reference**
+
+* :doc:`api/index`
+
+.. toctree::
+    :maxdepth: 2
+    :hidden:
+    :caption: API reference
+
+    api/index
 
 **Developer's Corner**
 
 * :doc:`dev/contributing`
-* :doc:`dev/api`
 
 .. toctree::
     :maxdepth: 1
@@ -86,8 +93,6 @@ Documentation
     :caption: Developper's Corner
 
     dev/contributing
-    dev/api
-
 
 **Credits**
 
