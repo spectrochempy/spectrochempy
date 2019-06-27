@@ -1206,10 +1206,12 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        dim, axis, dims : str, int, or list of str or index
+        dim, axis, dims : str, int, or list of str or index.
             The axis indexes or dimensions names - they can be specified as argument or using keyword 'axis', 'dim'
             or 'dims'
-
+        negative_axis : bool, optional, default=False.
+            If True a negative index is returned for the axis value (-1 for the last dimension, etc...)
+            
         Returns
         -------
         axis, dim : int and str
@@ -1224,7 +1226,9 @@ class NDArray(HasTraits):
             dim = self.dims[axis]
         else:
             dim = None
-            
+        if axis is not None and kwargs.get('negative_axis', False):
+            if axis>=0:
+                axis = axis - self.ndim
         return axis, dim
 
     # ..................................................................................................................

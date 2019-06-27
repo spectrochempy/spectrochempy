@@ -28,7 +28,7 @@ from spectrochempy.utils import epsilon
 # ======================================================================================================================
 
 def em(dataset, *args, **kwargs):
-    """Calculate an exponential apodization function
+    """Calculate apodization with with an exponential window multiplication
 
     The exponential apodization is calculated in the last dimension on NDDatasets.
     The data in the last dimension MUST be time-domain,

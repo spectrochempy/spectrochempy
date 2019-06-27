@@ -8,7 +8,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["sp"]
+__all__ = ["sp", "sine", "sinm", "qsin"]
 
 __dataset_methods__ = __all__
 
@@ -25,107 +25,39 @@ from spectrochempy.units.units import Quantity
 
 
 # ======================================================================================================================
-# sp function
+# sinm function
 # ======================================================================================================================
 
+
 def sp(dataset, *args, **kwargs):
-    r"""Calculate a Shifted sine-bell apodization
+    r"""Calculate apodization with a Sine window multiplication
 
-    Functional form of apodization window :
+    Functional form of apodization window (cfBruker TOPSPIN manual):
 
     .. math::
-        sp(x) = \sin(\frac{pi * off + pi * (end - off) * x} {size - 1})^{pow}
-
+        sp(t) = \sin(\frac{(\pi - \phi) t }{\text{aq}} + \phi)^{pow}
+        
+    where :math:`0 \lt t \lt \text{aq}` and  :math:`\phi = \pi ⁄ \text{sbb}` when :math:`\text{ssb} \ge 2` or
+    :math:`\phi = 0` when :math:`\text{ssb} \lt 2`
+        
+    :math:`\text{aq}` is an acquisition status parameter and :math:`\text{ssb}` is a processing parameter (see the
+    `ssb` parameter definition below) and :math:`{pow}` is an exponent equal to 1 for a sine bell window
+    or 2 for a squared sine bell window.
+    
     Parameters
     ----------
     dataset : |NDDataset|.
-        Dataset we want to apodize using exponential multiplication
-    off : float
-        offset - Specifies the starting point of the sine-bell in time units
-        The default value is 0.0.
-    end : float
-        end - Specifies the ending point of the sine-bell in time units.
-    pow : float
-        pow - Specifies the exponent of the sine-bell; Non-integer values
-        are allowed. Common values are 1.0 (for ordinary sine-bell) and 2.0
-        (for squared-bell functions). The default value is 1.0.
-    inv : bool, optional
-        True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
-        True to reverse the apodization before applying it to the data.
-    apply : `bool`, optional, default=True
-        Should we apply the calculated apodization to the dataset (default)
-        or just return the apodization ndarray.
-    inplace : `bool`, optional, default=True
-        Should we make the transform in place or return a new dataset
-    axis : optional, default is -1
-
-    Returns
-    -------
-    out : |NDDataset|.
-        The apodized dataset if apply is True, the apodization array if not True.
-
-    """
-    args = list(args)  # important (args is a tuple)
-
-    # off
-    off = kwargs.get('off', 0)
-    if off == 0:
-        # let's try the args if the kwargs was not passed
-        if len(args) > 0:
-            off = args.pop(0)
-
-    # end
-    end = kwargs.get('end', 1.)
-    if end == 1.:
-        # let's try the second args if the kwargs was not passed
-        if len(args) > 0:
-            end = args.pop(0)
-
-    # pow
-    pow = kwargs.pop('pow', 1.)
-    if pow == 1.:
-        # let's try the args if the kwargs was not passed
-        if len(args) > 0:
-            pow = args.pop(0)
-
-    # apod func (must be func(x, tc1, tc2, shifted, pow) form
-    def func(x, off, end, shifted, pow):
-        wx = (x.data[-1] - x.data[0])
-        off = off.to(x.units).magnitude
-        end = end.to(x.units).magnitude
-        return np.sin(np.pi * off/wx + np.pi * (end - off) * x.data/wx**2 ) ** pow
-
-    kwargs['method'] = func
-    kwargs['apod'] = off
-    kwargs['apod2'] = end
-    kwargs['pow'] = pow
-
-    out = apodize(dataset, **kwargs)
-
-    return out
-
-def sp2(dataset, *args, **kwargs):
-    """Calculate a Shifted sine-bell apodization
-
-    Functional form of apodization window :
-
-    .. math::
-        sp(x) = \\sin(\\frac{pi * off + pi * (end - off) * x} {size - 1})^{pow}
-
-    Parameters
-    ----------
-    dataset : |NDDataset|.
-        Dataset we want to apodize using exponential multiplication
-    off : float
-        offset - Specifies the starting point of the sine-bell in time units
-        The default value is 0.0.
-    end : float
-        end - Specifies the ending point of the sine-bell in time units.
-    pow : float
-        pow - Specifies the exponent of the sine-bell; Non-integer values
-        are allowed. Common values are 1.0 (for ordinary sine-bell) and 2.0
-        (for squared-bell functions). The default value is 1.0.
+        Dataset we want to apodize using Sine Bell or Squared Sine Bell window multiplication
+    sbb : int or float, optional, default=1.
+        This processing parameter mimics the behaviour of the SSB parameter on bruker TOPSPIN software:
+        Typical values are 1 for a pure sine function and 2 for a pure cosine function.
+        Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0,
+        have the same effect as :math:`\text{ssb}==1`, namely a pure sine function.
+    pow : enum [1,2], optional, default=1
+        exponent value - If pow==2 a Squared Sine Bell window multiplication is performed.
+        
+    Other Parameters
+    ----------------
     inv : bool, optional
         True for inverse apodization.  False (default) for standard.
     rev : bool, optional.
@@ -145,47 +77,67 @@ def sp2(dataset, *args, **kwargs):
     """
     args = list(args)  # important (args is a tuple)
     
-    # off
-    off = kwargs.get('off', 0)
-    if off == 0:
+    # ssb
+    ssb = kwargs.pop('ssb', None)
+    if ssb is None:
         # let's try the args if the kwargs was not passed
         if len(args) > 0:
-            off = args.pop(0)
-    
-    # end
-    end = kwargs.get('end', 1.)
-    if end == 1.:
-        # let's try the second args if the kwargs was not passed
-        if len(args) > 0:
-            end = args.pop(0)
-    
+            ssb = args.pop(0)
+        else:
+            ssb = 1.
+    if ssb<1.:
+        ssb = 1.
+
     # pow
-    pow = kwargs.pop('pow', 1.)
-    if pow == 1.:
-        # let's try the args if the kwargs was not passed
-        if len(args) > 0:
-            pow = args.pop(0)
+    pow = kwargs.pop('pow', 1)
+    pow = 2 if int(pow)%2 == 0 else 1
     
-    # apod func (must be func(x, tc1, tc2, shifted, pow) form
-    def func(x, off, end, shifted, pow):
-        wx = (x.data[-1] - x.data[0])
-        off = off.to(x.units).magnitude / wx
-        end = end.to(x.units).magnitude / wx
-        print (off, end)
-        xn = x.data / wx
-        return np.sin(np.pi * off + np.pi * (end - off) * xn ) ** pow
+    # func
     
-    kwargs['method'] = func
-    kwargs['apod'] = off
-    kwargs['apod2'] = end
-    kwargs['pow'] = pow
+    def func(x, ssb, pow):
+        aq = (x.data[-1] - x.data[0])
+        t = x.data / aq
+        if ssb<2:
+            phi = 0.
+        else:
+            phi = np.pi / ssb
+        return np.sin((np.pi-phi)*t+phi ) ** pow
     
-    out = apodize(dataset, **kwargs)
-    
+    # call the generic apodization function
+    out, apodcurve = apodize(dataset, func, ssb, pow, **kwargs)
+
+    if kwargs.pop('retfunc', False) :
+        return out, apodcurve
     return out
+
+
+def sine(dataset, *args, **kwargs):
+    """
+    Equivalent to :meth:``sp``.
+    
+    """
+    return sp(dataset, *args, **kwargs)
+
+def sinm(dataset, ssb=1, **kwargs):
+    """
+    Equivalent to :meth:``sp``., with pow = 1 (sine bell apodization window).
+
+    """
+    return sp(dataset, ssb=ssb, pow=1, **kwargs)
+
+
+def qsin(dataset, ssb=1, **kwargs):
+    """
+    Equivalent to :meth:``sp``., with pow = 2 (squared sine bell apodization window).
+
+    """
+    return sp(dataset, ssb=ssb, pow=2, **kwargs)
+
+
 
 # ======================================================================================================================
 if __name__ == '__main__': # pragma: no cover
+    
     from spectrochempy import *
     
     dataset1D = NDDataset()
@@ -196,10 +148,21 @@ if __name__ == '__main__': # pragma: no cover
     
     p = dataset1D.plot()
     
-    new, curve = dataset1D.sp2(20000.* ur.us, 60000. * ur.us, retfunc=True)
-    
+    new, curve = dataset1D.sinm(ssb=2, retfunc=True)
     curve.plot(color='r', clear=False)
     new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='r', clear=False)
+
+    new, curve = dataset1D.sinm(ssb=1, retfunc=True)
+    curve.plot(color='b', clear=False)
+    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='b', clear=False)
+
+    new, curve = dataset1D.qsin(ssb=2, retfunc=True)
+    curve.plot(color='m', clear=False)
+    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='m', clear=False)
     
+    new, curve = dataset1D.qsin(ssb=1, retfunc=True)
+    curve.plot(color='g', clear=False)
+    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='g', clear=False)
+
     show()
     
