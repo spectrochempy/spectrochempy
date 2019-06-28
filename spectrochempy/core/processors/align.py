@@ -152,7 +152,7 @@ def align(dataset, *others, **kwargs):
     for idx, object in enumerate(objects):
         
         if not object.implements('NDDataset') and not object.implements('NDPanel'):
-            error_(f'Bad object(s) found : {object}. Note that only NDDataset or NDPanel objects are accepted '
+            error_(f'Bad object(s) found: {object}. Note that only NDDataset or NDPanel objects are accepted '
                    f'for alignment')
             return None
         
@@ -403,7 +403,7 @@ def align(dataset, *others, **kwargs):
         out.name = dataset.name
         out.title = dataset.title
     
-        out.history = '{} : Aligned along dim {} with respect to dataset {} using coords {} \n'.format(
+        out.history = '{}: Aligned along dim {} with respect to dataset {} using coords {} \n'.format(
             str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)
     
         if is_sorted and out.coords(axis).reversed:

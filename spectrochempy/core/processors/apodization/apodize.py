@@ -165,7 +165,7 @@ def apodize(dataset, method, *apod, inv=False, rev=False, inplace=True, dim=-1, 
         new.swapaxes(axis, -1, inplace=True)  # must be done inplace
 
     name = method.__module__.split('.')[-1]
-    new.history = f'{name} apodization performed on dimension {dim} with parameters :' + str(apod)
+    new.history = f'{name} apodization performed on dimension {dim} with parameters:' + str(apod)
 
     curve = new.copy()
     curve.data = apod_arr

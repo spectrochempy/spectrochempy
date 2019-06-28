@@ -136,10 +136,10 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
 
 
     elif method == "XXXX":
-        raise NotImplementedError("method : %s" % method)
+        raise NotImplementedError("method: %s" % method)
         # TODO: implement other algorithms
     else:
-        raise NotImplementedError("method : %s" % method)
+        raise NotImplementedError("method: %s" % method)
 
     # restore the external parameter
     fpe = restore_external(fp0, res, keys)

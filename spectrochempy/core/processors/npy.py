@@ -57,12 +57,12 @@ def empty(shape, dtype=None, **kwargs):
 
     Examples
     --------
-    >>> import spectrochempy as scp # doctest : +ELLIPSIS
+    >>> import spectrochempy as scp # doctest: +ELLIPSIS
 
-    >>> scp.empty([2, 2]) # doctest : +ELLIPSIS
+    >>> scp.empty([2, 2]) # doctest: +ELLIPSIS
     NDDataset: [[...]] unitless
 
-    >>> scp.empty([2, 2], dtype=int, units='s') # doctest : +ELLIPSIS
+    >>> scp.empty([2, 2], dtype=int, units='s') # doctest: +ELLIPSIS
     NDDataset: [[...]] s
 
     """

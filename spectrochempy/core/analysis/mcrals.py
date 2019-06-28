@@ -331,7 +331,7 @@ class MCRALS(HasTraits):
         X_hat = dot(C, St)
 
         X_hat.history = 'Dataset reconstructed by MCS ALS optimization'
-        X_hat.title = 'X_hat : ' + self._X.title
+        X_hat.title = 'X_hat: ' + self._X.title
         return X_hat
 
     def plot(self, **kwargs):
@@ -353,6 +353,6 @@ class MCRALS(HasTraits):
         ax = self._X.plot(labbel='$X$')
         ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
         ax.plot(res.data.T, color=colRes, label='Residual')
-        ax.set_title('MCR ALS plot : ' + self._X.name)
+        ax.set_title('MCR ALS plot: ' + self._X.name)
 
         return ax

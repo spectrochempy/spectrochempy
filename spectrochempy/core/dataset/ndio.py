@@ -119,7 +119,7 @@ class NDIO(HasTraits):
         Read some experimental data and then save in our proprietary format
         **scp**
 
-        >>> from spectrochempy import * #doctest : +ELLIPSIS
+        >>> from spectrochempy import * #doctest: +ELLIPSIS
 
         >>> mydataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
         >>> mydataset.save('mydataset.scp')

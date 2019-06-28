@@ -43,14 +43,14 @@ class polynomialbaseline(object):
     args = ['ampl']
     args.extend(['c_%d' % i for i in range(2, 11)])
 
-    script = """MODEL : baseline%(id)d\nshape : polynomialbaseline
+    script = """MODEL: baseline%(id)d\nshape: polynomialbaseline
     # This polynom starts at the order 2
     # as a linear baseline is additionnaly fitted automatically
     # parameters must be in the form c_i where i is an integer as shown below
-    $ ampl : %(scale).3g, 0.0, None
-    $ c_2 : 1.0, None, None
-    * c_3 : 0.0, None, None
-    * c_4 : 0.0, None, None
+    $ ampl: %(scale).3g, 0.0, None
+    $ c_2: 1.0, None, None
+    * c_3: 0.0, None, None
+    * c_4: 0.0, None, None
     # etc...
     """
 
@@ -99,10 +99,10 @@ class gaussianmodel(object):
 
     """
     args = ['ampl', 'width', 'pos']
-    script = """MODEL : line%(id)d\nshape : gaussianmodel
-    $ ampl : %(ampl).3f, 0.0, None
-    $ width : %(width).3f, 0.0, None
-    $ pos : %(pos).3f, %(poslb).3f, %(poshb).3f
+    script = """MODEL: line%(id)d\nshape: gaussianmodel
+    $ ampl: %(ampl).3f, 0.0, None
+    $ width: %(width).3f, 0.0, None
+    $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
     """
 
     def f(self, x, ampl, width, pos, **kargs):
@@ -127,10 +127,10 @@ class lorentzianmodel(object):
 
     """
     args = ['ampl', 'width', 'pos']
-    script = """MODEL : line%(id)d\nshape : lorentzianmodel
-    $ ampl : %(ampl).3f, 0.0, None
-    $ width : %(width).3f, 0.0, None
-    $ pos : %(pos).3f, %(poslb).3f, %(poshb).3f
+    script = """MODEL: line%(id)d\nshape: lorentzianmodel
+    $ ampl: %(ampl).3f, 0.0, None
+    $ width: %(width).3f, 0.0, None
+    $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
     """
 
     def f(self, x, ampl, width, pos, **kargs):
@@ -150,11 +150,11 @@ class voigtmodel(object):
 
     """
     args = ['ampl', 'width', 'ratio', 'pos']
-    script = """MODEL : line%(id)d\nshape : voigtmodel
-    $ ampl : %(ampl).3f, 0.0, None
-    $ width : %(width).3f, 0.0, None
-    $ pos : %(pos).3f, %(poslb).3f, %(poshb).3f
-    $ ratio : 0.1, 0.0, 1.0
+    script = """MODEL: line%(id)d\nshape: voigtmodel
+    $ ampl: %(ampl).3f, 0.0, None
+    $ width: %(width).3f, 0.0, None
+    $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
+    $ ratio: 0.1, 0.0, 1.0
     """
 
     def f(self, x, ampl, width, ratio, pos, **kargs):
@@ -180,12 +180,12 @@ class assymvoigtmodel(object):
 
     """
     args = ['ampl', 'width', 'ratio', 'assym', 'pos']
-    script = """MODEL : line%(id)d\nshape : voigtmodel
-        $ ampl : %(ampl).3f, 0.0, None
-        $ width : %(width).3f, 0.0, None
-        $ pos : %(pos).3f, %(poslb).3f, %(poshb).3f
-        $ ratio : 0.1, 0.0, 1.0
-        $ assym : 0.1, 0.0, 1.0
+    script = """MODEL: line%(id)d\nshape: voigtmodel
+        $ ampl: %(ampl).3f, 0.0, None
+        $ width: %(width).3f, 0.0, None
+        $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
+        $ ratio: 0.1, 0.0, 1.0
+        $ assym: 0.1, 0.0, 1.0
         """
 
     def lorentz(self, x, g_, pos):

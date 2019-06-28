@@ -295,7 +295,7 @@ class NDPanel(
         if self.is_empty:
             return '{}'.format(textwrap.indent('empty', ' ' * 9))
 
-        out = f'         size : {len(self.names)} datasets\n'
+        out = f'         size: {len(self.names)} datasets\n'
         
         for name, dataset in self.datasets.items():
             out += f'       DATASET `{name}`'
@@ -315,7 +315,7 @@ class NDPanel(
     def _repr_shape(self):
     
         if not self.is_empty:
-            out = f"size : {len(self.names)} datasets"
+            out = f"size: {len(self.names)} datasets"
         else:
             out = 'empty'
         return out

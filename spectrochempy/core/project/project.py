@@ -148,7 +148,7 @@ class Project(AbstractProject):
 
         if key in self.allnames and not isinstance(value, type(self[key])):
             raise ValueError('the key exists but for a different type '
-                             'of object : {}'.format(type(self[key]).__name__))
+                             'of object: {}'.format(type(self[key]).__name__))
 
         if key in self.datasets_names:
             value.parent = self
@@ -451,7 +451,7 @@ class Project(AbstractProject):
         Assuming that ds1, ds2 and ds3 are already defined datasets :
 
         >>> proj = Project()
-        >>> proj.add_datasets(ds1, ds2, ds3) # doctest : +SKIP
+        >>> proj.add_datasets(ds1, ds2, ds3) # doctest: +SKIP
 
         """
         for ds in datasets:
@@ -477,7 +477,7 @@ class Project(AbstractProject):
         Assuming that ds1 is an already defined dataset :
 
         >>> proj = Project()
-        >>> proj.add_dataset(ds1, name='Toto') # doctest : +SKIP
+        >>> proj.add_dataset(ds1, name='Toto') # doctest: +SKIP
 
         """
 

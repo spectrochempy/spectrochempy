@@ -496,7 +496,7 @@ class NDPlot(HasTraits):
         if isinstance(axes, list):
             # a list a axes have been passed
             for ax in axes:
-                debug_('add axe : {}'.format(ax.name))
+                debug_('add axe: {}'.format(ax.name))
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)

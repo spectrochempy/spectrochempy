@@ -186,10 +186,10 @@ class CoordSet(HasTraits):
                 
                 else:
                     raise KeyError(f'Probably an invalid key (`{key}`) for coordinates has been passed. '
-                                   f'Valid keys are among :{DEFAULT_DIM_NAME}')
+                                   f'Valid keys are among:{DEFAULT_DIM_NAME}')
                 
             else:
-                raise ValueError(f'Probably an invalid type of coordinates has been passed : {key}:{coord} ')
+                raise ValueError(f'Probably an invalid type of coordinates has been passed: {key}:{coord} ')
             
         # store the item (validation will be performed)
         #self._coords = _coords
@@ -930,7 +930,7 @@ class CoordSet(HasTraits):
         return repr(self)
 
     # ..................................................................................................................
-    def _cstr(self, header='  coordinates : ... \n', print_size=True):
+    def _cstr(self, header='  coordinates: ... \n', print_size=True):
         
         txt = ''
         for idx, dim in enumerate(self.names):
@@ -956,7 +956,7 @@ class CoordSet(HasTraits):
                             c = getattr(coord, dim_s)
                             txt += f'          ({dim_s}) ...\n'
                             c._html_output = self._html_output
-                            sub = c._cstr(header='  coordinates : ... \n', print_size=False) #, indent=4, first_indent=-6)
+                            sub = c._cstr(header='  coordinates: ... \n', print_size=False) #, indent=4, first_indent=-6)
                             txt +=  f"{sub}\n"
                 
                 elif not coord.is_empty:

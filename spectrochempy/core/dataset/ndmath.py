@@ -290,13 +290,13 @@ class NDMath(object):
 
     >>> from spectrochempy import *
     >>> dataset = NDDataset.load('mydataset.scp')
-    >>> dataset             # doctest : +ELLIPSIS
+    >>> dataset             # doctest: +ELLIPSIS
     NDDataset: [[   2.057,    2.061, ...,    2.013,    2.012],
                 [   2.033,    2.037, ...,    1.913,    1.911],
                 ...,
                 [   1.794,    1.791, ...,    1.198,    1.198],
                 [   1.816,    1.815, ...,    1.240,    1.238]] a.u.
-    >>> np.negative(dataset) # doctest : +ELLIPSIS
+    >>> np.negative(dataset) # doctest: +ELLIPSIS
     NDDataset: [[  -2.057, ... -1.238]] a.u.
 
 
@@ -1105,7 +1105,7 @@ class NDMath(object):
         def func(self, other):
             fname = f.__name__
             if hasattr(self, 'history'):
-                self.history = f'Inplace binary op : {fname}  with `{get_name(other)}` '
+                self.history = f'Inplace binary op: {fname}  with `{get_name(other)}` '
             else:
                 history = None
             objs = [self, other]
@@ -1227,7 +1227,7 @@ Examples
 
 >>> a = array(dataset)
 
-equivalent to :
+equivalent to:
 
 >>> a = np.ma.array(dataset)
 or

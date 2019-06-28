@@ -278,7 +278,7 @@ class NDArray(HasTraits):
                     oattr = getattr(other, f'_{attr}')
                     eq &= np.all(sattr == oattr)
                     if not eq:
-                        debug_(f"attributes `{attr}` are not equals or one is missing : \n{sattr} != {oattr}")
+                        debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
                         return False
                 else:
                     return False
@@ -294,7 +294,7 @@ class NDArray(HasTraits):
                         
                     eq &= np.all(sattr == oattr)
                     if not eq:
-                        debug_(f"attributes `{attr}` are not equals or one is missing : \n{sattr} != {oattr}")
+                        debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
                         return False
                 else:
                     return False
@@ -864,7 +864,7 @@ class NDArray(HasTraits):
             try:
                 self.to(units)
             except Exception:
-                raise TypeError(f"Provided units {units} does not match data units : {self._units}.\nTo force a change,"
+                raise TypeError(f"Provided units {units} does not match data units: {self._units}.\nTo force a change,"
                                 f" use the to() method, with force flag set to True")
         self._units = units
 
@@ -1449,7 +1449,7 @@ class NDArray(HasTraits):
         ...                        [False, True, False],
         ...                        [False, False, True]],
         ...                units = 'meters')
-        >>> print(ndd)  # doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
+        >>> print(ndd)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         [[  --    0.316    0.184]
          [   0.205   --    0.596]
          [   0.965    0.653   --]] m
@@ -1467,7 +1467,7 @@ class NDArray(HasTraits):
                   [   0.965,    0.653,   --]] s
         By default the conversion is not done inplace, so the original is not
         modified :
-        >>> print(ndd) # doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
+        >>> print(ndd) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         [[  --    0.316    0.184]
          [   0.205   --    0.596]
          [   0.965    0.653   --]] m
@@ -1594,7 +1594,7 @@ class NDArray(HasTraits):
     def _str_shape(self):
 
         if self.is_empty:
-            return '         size : 0\n'
+            return '         size: 0\n'
 
         out = ''
 
@@ -1604,7 +1604,7 @@ class NDArray(HasTraits):
 
         size = self.size
 
-        out += f'         size : {size}\n' if self.ndim < 2 else f'        shape : ({shape})\n'
+        out += f'         size: {size}\n' if self.ndim < 2 else f'        shape: ({shape})\n'
 
         return out
 
@@ -1612,7 +1612,7 @@ class NDArray(HasTraits):
     def _repr_shape(self):
 
         if self.is_empty:
-            return 'size : 0'
+            return 'size: 0'
 
         out = ''
 
@@ -1623,15 +1623,15 @@ class NDArray(HasTraits):
 
         size = self.size
 
-        out += f'size : {size}' if self.ndim < 2 else f'shape : ({shape})'
+        out += f'size: {size}' if self.ndim < 2 else f'shape: ({shape})'
 
         return out
 
     # ..................................................................................................................
     def _str_value(self, sep='\n', ufmt=' {:~K}',
-                   header='         data : ... \n'):
+                   header='         data: ... \n'):
         prefix = ['']
-        if self.is_empty and 'data : ...' not in header:
+        if self.is_empty and 'data: ...' not in header:
             return header + '{}'.format(textwrap.indent('empty', ' ' * 9))
         elif self.is_empty:
             return '{}'.format(textwrap.indent('empty', ' ' * 9))
@@ -1760,7 +1760,7 @@ class NDArray(HasTraits):
 
         if self.is_empty and not self.is_labeled:
                 
-                raise IndexError(f'Could not find this location : {loc} on an empty array')
+                raise IndexError(f'Could not find this location: {loc} on an empty array')
         
         else:
             
@@ -1800,10 +1800,10 @@ class NDArray(HasTraits):
                 if indexes.size > 0:
                     return indexes[0]
                 else:
-                    raise IndexError(f'Could not find this label : {loc}')
+                    raise IndexError(f'Could not find this label: {loc}')
 
             else:
-                raise IndexError(f'Could not find this location : {loc}')
+                raise IndexError(f'Could not find this location: {loc}')
 
     # ..................................................................................................................
     def _get_dims_from_args(self, *dims, **kwargs):
@@ -1846,14 +1846,14 @@ class NDArray(HasTraits):
 
             elif isinstance(dim, str):
                 if dim not in self.dims:
-                    raise ValueError(f"Error : Dimension `{dim}` is not recognized "
-                                     f"(not in the dimension's list : {self.dims}).")
+                    raise ValueError(f"Error: Dimension `{dim}` is not recognized "
+                                     f"(not in the dimension's list: {self.dims}).")
                 id = self.dims.index(dim)
                 axis.append(id)
 
             else:
                 raise TypeError(f'Dimensions must be specified as string or integer index, but a value of type '
-                                f'{type(dim)} has been passed (value :{dim})!')
+                                f'{type(dim)} has been passed (value:{dim})!')
 
         for i, item in enumerate(axis):
             # convert to positive index

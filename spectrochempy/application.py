@@ -395,7 +395,7 @@ class GeneralPreferences(MetaConfigurable):
     Examples
     --------
 
-    >>> import spectrochempy as scp # doctest : +ELLIPSIS
+    >>> import spectrochempy as scp # doctest: +ELLIPSIS
 
     >>> delimiter = scp.general_preferences.csv_delimiter
 
@@ -500,7 +500,7 @@ class GeneralPreferences(MetaConfigurable):
         if isinstance(value, str):
             value = getattr(logging, value, None)
             if value is None:
-                warnings.warn('Log level not changed : invalid value given\n'
+                warnings.warn('Log level not changed: invalid value given\n'
                               'string values must be DEBUG, INFO, WARNING, '
                               'or ERROR')
         self.parent.log_level = value
@@ -509,7 +509,7 @@ class GeneralPreferences(MetaConfigurable):
     # General configuration for plotting
     # ------------------------------------------------------------------------------------------------------------------
 
-    leftbuttonpan = Bool(True, help="LeftButtonPan : If false, left button "
+    leftbuttonpan = Bool(True, help="LeftButtonPan: If false, left button "
                                     "drags a rubber band for "
                                     "zooming in viewbox").tag(config=True, )
 
@@ -766,8 +766,7 @@ to the
 <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
 </div><br><br>
 When using <strong>SpectroChemPy</strong> for your own work, you are
-kindly
-requested to cite it this way :
+kindly requested to cite it this way:
 <pre>
 Arnaud Travert & Christian Fernandez,
 SpectroChemPy, a framework for processing, analysing and modelling of
@@ -790,7 +789,7 @@ Caen/CNRS, 2019
 
     reset_config = Bool(False, help='Should we restore a default '
                                     'configuration ?').tag(config=True)
-    """Flag : True if one wants to reset settings to the original config 
+    """Flag: True if one wants to reset settings to the original config
     defaults"""
 
     config_file_name = Unicode(None, help="Configuration file name").tag(
@@ -935,7 +934,7 @@ Caen/CNRS, 2019
         if InteractiveShell.initialized():
             IN_IPYTHON = True
 
-        self.log.debug("scpy command line arguments are : %s" % " ".join(sys.argv))
+        self.log.debug("scpy command line arguments are: %s" % " ".join(sys.argv))
 
         # workaround the problem with argument not in our aliases or flags
         # e.g., when using pytest options or setup.py options
@@ -964,7 +963,7 @@ Caen/CNRS, 2019
         # warning handler
         # --------------------------------------------------------------------
         def send_warnings_to_log(message, category, filename, lineno, *args):
-            self.log.warning('%s :  %s' % (category.__name__, message))
+            self.log.warning('%s:  %s' % (category.__name__, message))
             return
 
         warnings.showwarning = send_warnings_to_log
@@ -982,7 +981,7 @@ Caen/CNRS, 2019
                     shell.showtraceback((etype, evalue, tb),
                                         tb_offset=tb_offset)
                 else:
-                    self.log.error("%s : %s" % (etype.__name__, evalue))
+                    self.log.error("%s: %s" % (etype.__name__, evalue))
 
             ip.set_custom_exc((Exception,), _custom_exc)
 
@@ -1104,7 +1103,7 @@ Caen/CNRS, 2019
 
         self.running = True
 
-        debug('MPL backend : {}'.format(mpl.get_backend()))
+        debug('MPL backend: {}'.format(mpl.get_backend()))
 
         return True
 
@@ -1120,7 +1119,7 @@ Caen/CNRS, 2019
 
         if not os.path.exists(fname):
             s = self.generate_config_file()
-            self.log.info("Generating default config file : %r" % fname)
+            self.log.info("Generating default config file: %r" % fname)
             with open(fname, 'w') as f:
                 f.write(s)
 

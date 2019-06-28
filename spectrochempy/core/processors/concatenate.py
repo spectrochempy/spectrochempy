@@ -55,7 +55,7 @@ def concatenate(*datasets, **kwargs):
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest : +ELLIPSIS
+    >>> from spectrochempy import * # doctest: +ELLIPSIS
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
@@ -224,7 +224,7 @@ def concatenate(*datasets, **kwargs):
 
     thist = 'Stack' if axis == 0 else 'Concatenation'
 
-    out.description = '{} of {}  datasets :\n'.format(thist, len(datasets))
+    out.description = '{} of {}  datasets:\n'.format(thist, len(datasets))
     out.description += '( {}'.format(datasets[0].name)
     out.title = datasets[0].title
     authortuple = (datasets[0].author,)
@@ -272,12 +272,12 @@ def stack(*datasets):
 
     Examples
     --------
-    >>> from spectrochempy import * # doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     ...
     >>> A = NDDataset.load('spec.spg', protocol='omnic')
     >>> B = NDDataset.load('mydataset.scp')
     >>> C = NDDataset.stack( A, B)
-    >>> print(C) # doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> print(C) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
           name/id : NDDataset...
 
     """

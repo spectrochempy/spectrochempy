@@ -142,7 +142,7 @@ class NDDataset(
         >>> from spectrochempy import *
 
         >>> x = NDDataset([1,2,3])
-        >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
+        >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
         [       1        2        3]
 
 
@@ -258,7 +258,7 @@ class NDDataset(
             
             new.set_coords(*new_coords, keepnames=True)
         
-        new.history = f'Slice extracted : ({saveditems})'
+        new.history = f'Slice extracted: ({saveditems})'
         return new
     
     # ..................................................................................................................
@@ -672,7 +672,7 @@ class NDDataset(
             idx = self._coords.names.index(name)
             return self._coords[idx]
         else:
-            error_(f'could not find this dimenson name : `{name}`')
+            error_(f'could not find this dimenson name: `{name}`')
             return None
     
     # ..................................................................................................................
@@ -1078,7 +1078,7 @@ class NDDataset(
 
         """
         new = super().transpose(*dims, inplace=inplace)
-        new.history = f'Data transposed between dims : {dims}' if dims else ''
+        new.history = f'Data transposed between dims: {dims}' if dims else ''
         return new
     
     # ------------------------------------------------------------------------------------------------------------------
@@ -1089,10 +1089,10 @@ class NDDataset(
     def _cstr(self):
         # Display the metadata of the object and partially the data
         out = ''
-        out += '         name : {}\n'.format(self.name)
-        out += '       author : {}\n'.format(self.author)
-        out += '      created : {}\n'.format(self._date)
-        out += '     modified : {}\n'.format(self._modified) if (self.modified-self.date).seconds>1 else ''
+        out += '         name: {}\n'.format(self.name)
+        out += '       author: {}\n'.format(self.author)
+        out += '      created: {}\n'.format(self._date)
+        out += '     modified: {}\n'.format(self._modified) if (self.modified-self.date).seconds>1 else ''
         
         wrapper1 = textwrap.TextWrapper(initial_indent='',
                                         subsequent_indent=' ' * 15,
@@ -1101,7 +1101,7 @@ class NDDataset(
         
         pars = self.description.strip().splitlines()
         if pars:
-            out += '  description : '
+            out += '  description: '
             desc = ''
             if pars:
                 desc += '{}\n'.format(wrapper1.fill(pars[0]))
@@ -1114,7 +1114,7 @@ class NDDataset(
         
         if self._history:
             pars = self.history
-            out += '      history : '
+            out += '      history: '
             hist = ''
             if pars:
                 hist += '{}\n'.format(wrapper1.fill(pars[0]))

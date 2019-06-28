@@ -243,13 +243,13 @@ class BaselineCorrection(HasTraits):
             new.sort(axis=-1, inplace=True, descend=True)
 
         new.history = str(new.modified) + \
-                      ': ' + 'Baseline correction.' + ' Method : '
+                      ': ' + 'Baseline correction.' + ' Method: '
         if self.method == 'Multivariate':
             new.history = 'Multivariate (' + str(self.npc) + ' PCs).'
         else:
             new.history = 'Sequential.'
 
-        new.history = 'Interpolation : '
+        new.history = 'Interpolation: '
 
         if self.interpolation == 'polynomial':
             new.history = 'Polynomial, order=' + str(self.order) + '.\n'

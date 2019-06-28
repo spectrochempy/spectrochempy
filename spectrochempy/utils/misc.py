@@ -485,7 +485,7 @@ def display_info_string(**kwargs):
     JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
     JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
     IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
-         style='height:25px; border-radius:12px; display : inline-block; float : left; vertical-align : middle'></img>
+         style='height:25px; border-radius:12px; display:inline-block; float:left; vertical-align:middle'></img>
     {% endif %}
     </td><td>
     {% if message %}

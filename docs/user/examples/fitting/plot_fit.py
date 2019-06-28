@@ -38,8 +38,8 @@ ndOH.plot()
 
 script= """
 #-----------------------------------------------------------
-# syntax for parameters definition :
-# name : value, low_bound,  high_bound
+# syntax for parameters definition:
+# name: value, low_bound,  high_bound
 #  * for fixed parameters
 #  $ for variable parameters
 #  > for reference to a parameter in the COMMON block
@@ -48,26 +48,26 @@ script= """
 #-----------------------------------------------------------
 #
         
-COMMON :
+COMMON:
 # common parameters ex.
-# $ gwidth : 1.0, 0.0, none
-$ gratio : 0.1, 0.0, 1.0
+# $ gwidth: 1.0, 0.0, none
+$ gratio: 0.1, 0.0, 1.0
 
-MODEL : LINE_1
-shape : assymvoigtmodel
-    * ampl :  1.0, 0.0, none
-    $ pos :   3620, 3400.0, 3700.0
-    $ ratio : 0.0147, 0.0, 1.0
-    $ assym : 0.1, 0, 1
-    $ width : 200, 0, 1000
+MODEL: LINE_1
+shape: assymvoigtmodel
+    * ampl:  1.0, 0.0, none
+    $ pos:   3620, 3400.0, 3700.0
+    $ ratio: 0.0147, 0.0, 1.0
+    $ assym: 0.1, 0, 1
+    $ width: 200, 0, 1000
 
-MODEL : LINE_2
-shape : assymvoigtmodel
-    $ ampl :  0.2, 0.0, none
-    $ pos :   3520, 3400.0, 3700.0
-    > ratio : gratio
-    $ assym : 0.1, 0, 1
-    $ width : 200, 0, 1000
+MODEL: LINE_2
+shape: assymvoigtmodel
+    $ ampl:  0.2, 0.0, none
+    $ pos:   3520, 3400.0, 3700.0
+    > ratio: gratio
+    $ assym: 0.1, 0, 1
+    $ width: 200, 0, 1000
         
 """
 

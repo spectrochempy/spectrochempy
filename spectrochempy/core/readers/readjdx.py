@@ -44,7 +44,7 @@ def read_jdx(filename='', sortbydate=True):
     --------
 
     >>> import spectrochempy as sa
-    >>> A = sa.loadjdx('C:\Spectra\Ex_spectra.jdx') # doctest : +SKIP
+    >>> A = sa.loadjdx('C:\Spectra\Ex_spectra.jdx') # doctest: +SKIP
 
     """
 

@@ -213,10 +213,10 @@ class SVD(HasTraits):
     
     def __repr__(self):
         if self._compute_uv:
-            return '<svd : U%s, s(%s), VT%s>' % (
+            return '<svd: U%s, s(%s), VT%s>' % (
                 self.U.shape, self.s.size, self.VT.shape)
         else:
-            return '<svd : s(%s), U,VT:not computed>' % (self.s.size,)
+            return '<svd: s(%s), U, VT:not computed>' % (self.s.size,)
     
     # ------------------------------------------------------------------------------------------------------------------
     #  Properties

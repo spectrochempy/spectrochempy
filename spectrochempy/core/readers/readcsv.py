@@ -28,7 +28,7 @@ except:
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.utf8')  # to avoid problems with date format
     except:
-        warnings.warn('Could not set locale : en_US or en_US.utf8')
+        warnings.warn('Could not set locale: en_US or en_US.utf8')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -353,7 +353,7 @@ def _add_omnic_info(dataset, **kwargs):
 
     # Set description and history
     dataset.description = (
-        'Dataset from .csv file : {}\n'.format(desc))
+        'Dataset from .csv file: {}\n'.format(desc))
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 

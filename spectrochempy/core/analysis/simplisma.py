@@ -142,11 +142,11 @@ class SIMPLISMA(HasTraits):
             logs = '*** Automatic SIMPL(I)SMA analysis *** \n'
         else:
             logs = '*** Interative SIMPLISMA analysis *** \n'.format(X.name)
-        logs += 'dataset : {}\n'.format(X.name)
-        logs += '  noise : {:2} %\n'.format(noise)
+        logs += 'dataset: {}\n'.format(X.name)
+        logs += '  noise: {:2} %\n'.format(noise)
         if not interactive:
-            logs += '    tol : {:2} %\n'.format(tol)
-            logs += '   n_pc : {:2}\n'.format(n_pc)
+            logs += '    tol: {:2} %\n'.format(tol)
+            logs += '   n_pc: {:2}\n'.format(n_pc)
         logs += '\n'
         logs += '#iter index_pc  coord_pc   Std(res)   R^2   \n'
         logs += '---------------------------------------------'
@@ -239,7 +239,7 @@ class SIMPLISMA(HasTraits):
 
                     ans = ''
                     while ans.lower() not in ['a', 'c']:
-                        ans = input('   |--> (a) Accept, (c) Change : ')
+                        ans = input('   |--> (a) Accept, (c) Change: ')
 
                     while ans.lower() != 'a':
                         new = input('   |--> enter the new index (int) or variable value (float): ')
@@ -262,7 +262,7 @@ class SIMPLISMA(HasTraits):
                         logs += llog + '\n'
                         info_(llog)
 
-                        ans = input('   |--> (a) Accept, (c) Change : ')
+                        ans = input('   |--> (a) Accept, (c) Change: ')
                     # ans was [a]ccept
                     j += 1
                 if not interactive:
@@ -317,7 +317,7 @@ class SIMPLISMA(HasTraits):
 
                     ans = ''
                     while ans.lower() not in ['a', 'c', 'r', 'f']:
-                        ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and finish : ')
+                        ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and finish: ')
 
                     while ans.lower() == 'c':
                         new = input('   |--> enter the new index (int) or variable value (float): ')
@@ -344,7 +344,7 @@ class SIMPLISMA(HasTraits):
 
                         info_('purest variable #{} set at index = {} ; x = {}'.format(j + 1, maxPIndex[j],
                                                                                       maxPCoordinate[j]))
-                        ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop : ')
+                        ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop: ')
 
                     if ans.lower() == 'r':
                         maxPCoordinate[j] = 0
@@ -442,7 +442,7 @@ class SIMPLISMA(HasTraits):
 
         X_hat = dot(C, St)
         X_hat.description = 'Dataset reconstructed by SIMPLISMA\n' + self._log
-        X_hat.title = 'X_hat : ' + self._X.title
+        X_hat.title = 'X_hat: ' + self._X.title
         return X_hat
 
     def plot(self, **kwargs):
@@ -465,7 +465,7 @@ class SIMPLISMA(HasTraits):
         ax = self._X.plot(label='$X$')
         ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
         ax.plot(res.data.T, color=colRes, label='Residual')
-        ax.set_title('SIMPLISMA plot : ' + self._X.name)
+        ax.set_title('SIMPLISMA plot: ' + self._X.name)
 
         return ax
 

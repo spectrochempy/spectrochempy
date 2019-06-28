@@ -129,7 +129,7 @@ class Fit(HasTraits):
         """
         s = """
         #-----------------------------------------------------------
-        # syntax for parameters definition :
+        # syntax for parameters definition:
         # name: value, low_bound,  high_bound
         #  * for fixed parameters
         #  $ for variable parameters
@@ -255,7 +255,7 @@ class Fit(HasTraits):
             info_(args)
             if not self.silent:
                 display.clear_output(wait=True)
-                print(("Iterations : %d, Calls : %d (chi2 : %.5f)" % (
+                print(("Iterations: %d, Calls: %d (chi2: %.5f)" % (
                     niter, ncalls, chi2)))
                 sys.stdout.flush()
 
@@ -418,7 +418,7 @@ class Fit(HasTraits):
                 try:
                     new_param[key] = eval(str(refpar))
                 except:
-                    raise ValueError('Cannot evaluate the expression : %s : %s'
+                    raise ValueError('Cannot evaluate the expression %s: %s'
                                      % (key, param[refpar]))
 
                 new_param.fixed[key] = True

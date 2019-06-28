@@ -65,7 +65,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     ---------
 
     >>> import os
-    >>> from spectrochempy import * #doctest : +ELLIPSIS
+    >>> from spectrochempy import * #doctest: +ELLIPSIS
     <BLANKLINE>
     ...
     <BLANKLINE>
@@ -73,7 +73,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     >>> A = NDDataset.load(path_A, protocol='omnic')
     >>> ref = A[:,0]  # let's subtrack the first column
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
-    >>> B #doctest : +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> B #doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     NDDataset: [[...]] a.u.
 
     """
@@ -164,6 +164,6 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
         new = new.swapaxes(axis, -1)
 
     new.history = str(
-        new.modified) + ': ' + 'Automatic subtraction of :' + ref.name + '\n'
+        new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'
 
     return new

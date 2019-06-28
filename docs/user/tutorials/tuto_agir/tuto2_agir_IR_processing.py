@@ -114,7 +114,7 @@ _ = multiplot_stack(datasets=datasets, labels=labels,
 
 # %% {"nbpresent": {"id": "4bcb0c3f-b26c-4c4e-b918-a2911e247dd6"}}
 # %%addscript -p proj -o print_info
-print("samples contained in the project are : %s"%proj.projects_names)
+print("samples contained in the project are: %s"%proj.projects_names)
 
 # %% [markdown]
 # Let's check that the scripts are stored in the project:
