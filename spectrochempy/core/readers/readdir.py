@@ -44,6 +44,7 @@ import xlrd
 
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import readfilename, readdirname
 from spectrochempy.utils.qtfiledialogs import opendialog
@@ -303,7 +304,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
         # determine experiment start and end time (thermocouple clock)
         ti = datasets[0].y.labels[0][0] + delta_clocks
-        tf = datasets[-1].y.labels[0][-1] + delta_clocks
+        tf = datasets[-1].y.labels[-1][0] + delta_clocks
 
         # get thermocouple time and T information during the experiment
         t = []
@@ -330,9 +331,10 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
         for ds in datasets:
             # timestamp of spectra for the thermocouple clock
-            tstamp_ds = [(time + delta_clocks).timestamp() for time in ds.y.labels[0]]
+
+            tstamp_ds = [(label[0] + delta_clocks).timestamp() for label in ds.y.labels]
             T_ds = interpolator(tstamp_ds)
-            newlabels = np.vstack((ds.y.labels, T_ds))
+            newlabels = np.hstack((ds.y.labels, T_ds.reshape((50,1))))
             ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
 
     if len(datasets) == 1:

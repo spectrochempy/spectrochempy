@@ -72,7 +72,7 @@ X
 
 # %%
 surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10,5))
-surf.grid('off')
+surf.grid(False)
 
 # %% [markdown]
 # ## Initial guess and MCR ALS optimization
