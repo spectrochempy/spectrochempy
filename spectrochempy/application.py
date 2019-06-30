@@ -26,6 +26,7 @@ import datetime
 import warnings
 import pprint
 import json
+import textwrap
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -748,34 +749,34 @@ class SpectroChemPy(Application):
     @default('long_description')
     def _get_long_description(self):
         desc = """
-Welcome to <strong>SpectroChemPy</strong> Application<br><br>
-<p><strong>SpectroChemPy</strong> is a framework for processing,
-analysing and
-modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry
-with
-<strong>Py</strong>thon. It is a cross platform software, running on
-Linux,
-Windows or OS X.</p><br><br>
-<strong>version:</strong> {version}<br>
-<strong>Authors:</strong> {authors}<br>
-<strong>License:</strong> {license}<br>
-<div class='warning'> SpectroChemPy is still experimental and under active
-development. Its current design and functionalities are subject to major
-changes, reorganizations, bugs and crashes!!!. Please report any issues
-to the
-<a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
-</div><br><br>
-When using <strong>SpectroChemPy</strong> for your own work, you are
-kindly requested to cite it this way:
-<pre>
-Arnaud Travert & Christian Fernandez,
-SpectroChemPy, a framework for processing, analysing and modelling of
-Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
-Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
-Caen/CNRS, 2019
-</pre>
-</p>
-    """.format(version=__release__, authors=__author__, license=__license__)
+        Welcome to <strong>SpectroChemPy</strong> Application<br><br>
+        <p><strong>SpectroChemPy</strong> is a framework for processing,
+        analysing and
+        modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry
+        with
+        <strong>Py</strong>thon. It is a cross platform software, running on
+        Linux,
+        Windows or OS X.</p><br><br>
+        <strong>version:</strong> {version}<br>
+        <strong>Authors:</strong> {authors}<br>
+        <strong>License:</strong> {license}<br>
+        <div class='warning'> SpectroChemPy is still experimental and under active
+        development. Its current design and functionalities are subject to major
+        changes, reorganizations, bugs and crashes!!!. Please report any issues
+        to the
+        <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
+        </div><br><br>
+        When using <strong>SpectroChemPy</strong> for your own work, you are
+        kindly requested to cite it this way:
+        <pre>
+        Arnaud Travert & Christian Fernandez,
+        SpectroChemPy, a framework for processing, analysing and modelling of
+        Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
+        Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
+        Caen/CNRS, 2019
+        </pre>
+        </p>
+        """.format(version=__release__, authors=__author__, license=__license__)
 
         return desc
 

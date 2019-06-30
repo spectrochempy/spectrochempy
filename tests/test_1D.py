@@ -49,7 +49,7 @@ def test_1D():
 
     show()
 
-    # mulitple
+    # multiple
     d = dataset[:,::100]
     datasets = [d[0], d[10], d[20], d[50], d[53]]
     labels = ['sample {}'.format(label) for label in
@@ -63,7 +63,7 @@ def test_1D():
                                       'multiple_IR_dataset_1D_scatter'),
                   savedpi=150)
 
-    # plot mupltiple with  style
+    # plot mupltiple with style
     plot_multiple(method='scatter', style='sans',
                   datasets=datasets, labels=labels, legend='best',
                   output=os.path.join(figures_dir,
