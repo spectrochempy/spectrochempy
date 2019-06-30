@@ -15,7 +15,7 @@ This module implement the NNMF (Non Negative Matrix Factorization) class
 
 __all__ = ['NNMF']
 
-__dataset_methods__ = ['NNMF']
+__dataset_methods__ = []
 
 import numpy as np
 from numpy.linalg import norm

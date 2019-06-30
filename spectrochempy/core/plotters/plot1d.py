@@ -17,8 +17,7 @@ Module containing 1D plotting function(s)
 __all__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar',
            'plot_multiple']
 
-__dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter',
-                       'plot_bar']
+__dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports

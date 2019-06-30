@@ -17,7 +17,7 @@ This module should be able to handle a large set of plot types.
 
 __all__ = ['plot_3D']
 
-__dataset_methods__ = ['plot_3D']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------
 # local imports

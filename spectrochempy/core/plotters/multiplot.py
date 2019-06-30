@@ -16,7 +16,7 @@ __all__ = ['multiplot', 'multiplot_map', 'multiplot_stack',
            'multiplot_image', 'multiplot_lines', 'multiplot_scatter',
            'multiplot_with_transposed', 'plot_with_transposed']
 
-__dataset_methods__ = ['plot_with_transposed']
+__dataset_methods__ = []
 
 import numpy as np
 import matplotlib.pyplot as plt

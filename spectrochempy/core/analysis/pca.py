@@ -13,7 +13,7 @@ This module implement the PCA (Principal Component Analysis) class.
 
 __all__ = ['PCA']
 
-__dataset_methods__ = ['PCA']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------------------------------------------------
 # imports

@@ -14,7 +14,7 @@ This module implement the SIMPLISMA class.
 
 __all__ = ['SIMPLISMA']
 
-__dataset_methods__ = ['SIMPLISMA']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------
 # imports

@@ -13,7 +13,7 @@ This module implements the MCRALS class.
 
 __all__ = ['MCRALS']
 
-__dataset_methods__ = ['MCRALS']
+__dataset_methods__ = []
 
 import numpy as np
 from traitlets import HasTraits, Instance

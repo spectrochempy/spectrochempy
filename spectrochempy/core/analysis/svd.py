@@ -13,7 +13,7 @@ This module implements the Singular Value Decomposition (SVD) class.
 
 __all__ = ['SVD']
 
-__dataset_methods__ = ['SVD']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
