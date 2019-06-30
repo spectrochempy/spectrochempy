@@ -55,4 +55,4 @@ span = ibc.run(*ranges)
 
 print(ibc.corrected)
 
-#show() # uncomment to show plot if needed()
+scp.show() # uncomment to show plot if needed()

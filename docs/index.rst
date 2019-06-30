@@ -74,14 +74,14 @@ Documentation
 
 **API reference**
 
-* :doc:`api/index`
+* :doc:`api/generated/index`
 
 .. toctree::
     :maxdepth: 2
     :hidden:
     :caption: API reference
 
-    api/index
+    api/generated/index
 
 **Developer's Corner**
 

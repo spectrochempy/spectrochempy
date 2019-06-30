@@ -33,7 +33,7 @@ Requirements
 
 .. warning::
 
-	Only the python version 3.6 and 3.7 have been tested so far.
+    Only the python version 3.6 and 3.7 have been tested so far.
 
 
 The following libraries are also required such as :
@@ -149,13 +149,13 @@ Ungzip and untar the source package and execute:
 
 .. sourcecode:: bash
 
-	$ cd <directory>    # replace <directory> by the actual download folder
-	$ pip install .
+    $ cd <directory>    # replace <directory> by the actual download folder
+    $ pip install .
 
 .. tip::
 
-	On most UNIX-like systems, you’ll probably need to run these commands as
-	root or using sudo.
+    On most UNIX-like systems, you’ll probably need to run these commands as
+    root or using sudo.
 
 .. _clone:
 
@@ -196,15 +196,15 @@ Run a IPython session by issuing in the terminal the following command:
 
 .. sourcecode:: bash
 
-	$ ipython
+    $ ipython
 
 Then execute two commands as following:
 
 .. sourcecode:: ipython
 
-	In [1]: from spectrochempy import *
+    In [1]: from spectrochempy import *
 
-	In [2]: NDDataset()
+    In [2]: NDDataset()
 
 If this goes well, the |scpy| application is likely functional.
 

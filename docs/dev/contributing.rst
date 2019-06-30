@@ -135,7 +135,7 @@ Install a developpement version of SpectroChemPy
     You can make it permanent by putting this command in your ``bash_profile``
     (MAC), ``.bashrc`` (LINUX) or using the following batch file (WIN)
 
-    .. sourcecode:: 
+    .. sourcecode:: bat
 
         @REM launch a cmd window in scpy-dev environment (path should be adapted)
         @CALL CD C:\your\favorite\folder
