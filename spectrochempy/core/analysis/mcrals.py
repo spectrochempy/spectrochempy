@@ -148,7 +148,7 @@ class MCRALS(HasTraits):
         if initConc:
             if C.coords is None:
                 C.set_coords(y=X.y, x=C.x)
-            St = NDDataset(np.linalg.lstsq(C.data, X.data)[0])
+            St = NDDataset(np.linalg.lstsq(C.data, X.data, rcond=None)[0])
             St.name = 'Pure spectra profile, mcs-als of ' + X.name
             St.title = X.title
             cy = C.x.copy() if C.x else None
@@ -158,7 +158,7 @@ class MCRALS(HasTraits):
         if initSpec:
             if St.coords is None:
                 St.set_coords(y=St.y, x=X.x)
-            Ct = np.linalg.lstsq(St.data.T, X.data.T)[0]
+            Ct = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0]
             C = NDDataset(Ct.T)
             C.name = 'Pure conc. profile, mcs-als of ' + X.name
             C.title = 'Concentration'
@@ -178,7 +178,7 @@ class MCRALS(HasTraits):
 
         while change >= tol and niter < maxit and ndiv < maxdiv:
 
-            C.data = np.linalg.lstsq(St.data.T, X.data.T)[0].T
+            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=None)[0].T
             niter += 1
 
             # Force non-negative concentration
@@ -236,7 +236,7 @@ class MCRALS(HasTraits):
                         if C.data[curid + 1, s] > C.data[curid, s] * monoDecTol:
                             C.data[curid + 1, s] = C.data[curid, s]
 
-            St.data = np.linalg.lstsq(C.data, X.data)[0]
+            St.data = np.linalg.lstsq(C.data, X.data, rcond=None)[0]
 
             # Force non-negative spectra
             # --------------------------

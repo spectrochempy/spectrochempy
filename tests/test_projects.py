@@ -12,10 +12,13 @@ import os
 from spectrochempy.utils.testing import assert_array_equal
 from spectrochempy import *
 
+import pytest
+
 prefs = general_preferences
 
 # Basic
-# ----------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+
 def test_save_and_load_file_with_nofilename(IR_dataset_2D):
     A = IR_dataset_2D.copy()
     A.save()
@@ -34,7 +37,6 @@ def test_save_and_load_file_with_nofilename(IR_dataset_2D):
     assert B.directory == prefs.datadir
 
     os.remove(path)
-
 
 def test_project(ds1, ds2, dsm):
     myp = Project(name='AGIR processing', method='stack')

@@ -103,4 +103,4 @@ new.plot(method='stack')
 
 scp.plot_stack(new)
 
-#show() # uncomment to show plot if needed()
+scp.show() # uncomment to show plot if needed()

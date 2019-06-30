@@ -141,6 +141,9 @@ def plot_multiple(datasets, method='scatter', pen=True,
     commands = kwargs.get('commands', [])
     kwargs['commands'] = []
     clear = kwargs.pop('clear', True)
+    legend = kwargs.pop('legend', None) # remove 'legend' from kwargs before calling plot
+                                        # else it will generate a conflict
+    
     for s in datasets:  # , colors, markers):
 
         ax = s.plot(method=method,
@@ -155,7 +158,6 @@ def plot_multiple(datasets, method='scatter', pen=True,
         # that we will plot on the same figure
 
     # scale all plots
-    legend = kwargs.get('legend', None)
     if legend is not None:
         leg = ax.legend(ax.lines, labels, shadow=True, loc=legend,
                         frameon=True, facecolor='lightyellow')
