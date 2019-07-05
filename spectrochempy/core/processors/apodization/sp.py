@@ -22,15 +22,18 @@ import numpy as np
 # ======================================================================================================================
 from spectrochempy.core.processors.apodization.apodize import apodize
 from spectrochempy.units.units import Quantity
-
+from spectrochempy.utils import docstrings
 
 # ======================================================================================================================
 # sinm function
 # ======================================================================================================================
+docstrings.delete_params('apodize.parameters',  'method', 'apod')
 
-
-def sp(dataset, *args, **kwargs):
-    r"""Calculate apodization with a Sine window multiplication
+@docstrings.get_sectionsf('sp')
+@docstrings.dedent
+def sp(dataset, ssb=1, pow=1, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
+    r"""
+    Calculate apodization with a Sine window multiplication
 
     Functional form of apodization window (cfBruker TOPSPIN manual):
 
@@ -41,7 +44,7 @@ def sp(dataset, *args, **kwargs):
     :math:`\phi = 0` when :math:`\text{ssb} \lt 2`
         
     :math:`\text{aq}` is an acquisition status parameter and :math:`\text{ssb}` is a processing parameter (see the
-    `ssb` parameter definition below) and :math:`{pow}` is an exponent equal to 1 for a sine bell window
+    `ssb` parameter definition below) and :math:`\text{pow}` is an exponent equal to 1 for a sine bell window
     or 2 for a squared sine bell window.
     
     Parameters
@@ -53,43 +56,23 @@ def sp(dataset, *args, **kwargs):
         Typical values are 1 for a pure sine function and 2 for a pure cosine function.
         Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0,
         have the same effect as :math:`\text{ssb}==1`, namely a pure sine function.
-    pow : enum [1,2], optional, default=1
+    pow : enum [1,2], optional, default=1.
         exponent value - If pow==2 a Squared Sine Bell window multiplication is performed.
-        
-    Other Parameters
-    ----------------
-    inv : bool, optional
-        True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
-        True to reverse the apodization before applying it to the data.
-    apply : `bool`, optional, default=True
-        Should we apply the calculated apodization to the dataset (default)
-        or just return the apodization ndarray.
-    inplace : `bool`, optional, default=True
-        Should we make the transform in place or return a new dataset
-    axis : optional, default is -1
-
+    %(apodize.parameters.no_method|apod)s
+    
     Returns
     -------
-    out : |NDDataset|.
-        The apodized dataset if apply is True, the apodization array if not True.
+    %(apodize.returns)s
 
     """
-    args = list(args)  # important (args is a tuple)
     
     # ssb
-    ssb = kwargs.pop('ssb', None)
-    if ssb is None:
-        # let's try the args if the kwargs was not passed
-        if len(args) > 0:
-            ssb = args.pop(0)
-        else:
-            ssb = 1.
+    ssb = kwargs.pop('ssb', ssb)
     if ssb<1.:
         ssb = 1.
 
     # pow
-    pow = kwargs.pop('pow', 1)
+    pow = kwargs.pop('pow', pow)
     pow = 2 if int(pow)%2 == 0 else 1
     
     # func
@@ -104,31 +87,61 @@ def sp(dataset, *args, **kwargs):
         return np.sin((np.pi-phi)*t+phi ) ** pow
     
     # call the generic apodization function
-    out, apodcurve = apodize(dataset, func, ssb, pow, **kwargs)
+    out, apodcurve = apodize(dataset, func, (ssb, pow), **kwargs)
 
     if kwargs.pop('retfunc', False) :
         return out, apodcurve
     return out
 
 
+@docstrings.dedent
 def sine(dataset, *args, **kwargs):
     """
-    Equivalent to :meth:``sp``.
+    Strictly equivalent to :meth:`sp`.
+    
+    Parameters
+    -----------
+    %(sp.parameters)s
+    
+    Returns
+    -------
+    %(sp.returns)s
     
     """
     return sp(dataset, *args, **kwargs)
 
+docstrings.delete_params('sp.parameters',  'pow')
+
+@docstrings.dedent
 def sinm(dataset, ssb=1, **kwargs):
     """
-    Equivalent to :meth:``sp``., with pow = 1 (sine bell apodization window).
+    Equivalent to :meth:`sp`, with pow = 1 (sine bell apodization window).
 
+    Parameters
+    -----------
+    %(sp.parameters.no_pow)s
+    
+    Returns
+    -------
+    %(sp.returns)s
+    
     """
     return sp(dataset, ssb=ssb, pow=1, **kwargs)
 
 
+
+@docstrings.dedent
 def qsin(dataset, ssb=1, **kwargs):
     """
-    Equivalent to :meth:``sp``., with pow = 2 (squared sine bell apodization window).
+    Equivalent to :meth:`sp`, with pow = 2 (squared sine bell apodization window).
+    
+    Parameters
+    -----------
+    %(sp.parameters.no_pow)s
+    
+    Returns
+    -------
+    %(sp.returns)s
 
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
@@ -138,10 +151,11 @@ def qsin(dataset, ssb=1, **kwargs):
 # ======================================================================================================================
 if __name__ == '__main__': # pragma: no cover
     
-    from spectrochempy import *
+    import spectrochempy as scp
+    import os
     
-    dataset1D = NDDataset()
-    path = os.path.join(general_preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    dataset1D = scp.NDDataset()
+    path = os.path.join(scp.general_preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
     dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     
     dataset1D /= dataset1D.real.data.max()  # normalize
@@ -164,5 +178,5 @@ if __name__ == '__main__': # pragma: no cover
     curve.plot(color='g', clear=False)
     new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='g', clear=False)
 
-    show()
+    scp.show()
     

@@ -23,14 +23,16 @@ import numpy as np
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import epsilon
 from spectrochempy.core import general_preferences, error_
-
-import spectrochempy.extern.nmrglue as ng
+from ....utils import docstrings
 
 # ======================================================================================================================
 # generic apodization function
 # ======================================================================================================================
-def apodize(dataset, method, *apod, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
-    """Calculate an apodization window function
+@docstrings.get_sectionsf('apodize', sections=['Parameters','Returns'])
+@docstrings.dedent
+def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
+    """
+    Calculate an apodization window function
 
     In principle, this function should not be called directly: its purpose is to be used by `em`, `gm`, `sinm`, etc...
     kind of apodization functions.
@@ -39,7 +41,7 @@ def apodize(dataset, method, *apod, inv=False, rev=False, inplace=True, dim=-1, 
     ----------
     method : Callable.
         Apodization function
-    *apod : tuple.
+    apod : tuple.
         Apodization window parameter(s) depending on the actual apodization `method` used.
     inv : bool, optional, default=False.
         True for inverse apodization.
@@ -53,8 +55,8 @@ def apodize(dataset, method, *apod, inv=False, rev=False, inplace=True, dim=-1, 
     
     Returns
     -------
-    object : nd-dataset or nd-array
-        apodized dataset if apply is True, the apodization array if not True.
+    object : |NDDataset|
+        The apodized dataset if apply is True, the apodization array if not True.
 
     """
 

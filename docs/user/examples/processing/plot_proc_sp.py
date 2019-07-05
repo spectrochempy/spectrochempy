@@ -30,7 +30,14 @@ dataset1D = dataset1D[0.:15000.]
 ########################################################################################################################
 # Apply Sine bell window apodization with parameter ssb=2, which correspond to a cosine function
 
-new1, curve1 = dataset1D.sinm(ssb=2, retfunc=True, inplace=False)
+new1, curve1 = scp.sinm(dataset1D, ssb=2, retfunc=True, inplace=False)
+
+# this is equivalent to
+_ = dataset1D.sinm(ssb=2, retfunc=True, inplace=False)
+
+# or also
+_ = scp.sp(dataset1D, ssb=2, pow=1, retfunc=True, inplace=False)
+
 
 ########################################################################################################################
 # Apply Sine bell window apodization with parameter ssb=2, which correspond to a sine function
@@ -40,7 +47,7 @@ new2, curve2 = dataset1D.sinm(ssb=1, retfunc=True, inplace=False)
 ########################################################################################################################
 # Apply Squared Sine bell window apodization with parameter ssb=1 and ssb=2
 
-new3, curve3 = dataset1D.qsin(ssb=2, retfunc=True, inplace=False)
+new3, curve3 = scp.qsin(dataset1D, ssb=2, retfunc=True, inplace=False)
 
 new4, curve4 = dataset1D.qsin(ssb=1, retfunc=True, inplace=False)
 
