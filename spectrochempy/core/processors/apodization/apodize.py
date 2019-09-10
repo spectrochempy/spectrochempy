@@ -23,7 +23,7 @@ import numpy as np
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import epsilon
 from spectrochempy.core import general_preferences, error_
-from ....utils import docstrings
+from spectrochempy.utils import docstrings
 
 # ======================================================================================================================
 # generic apodization function
@@ -39,6 +39,8 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, *
 
     Parameters
     ----------
+    dataset : |NDDataset| or |NDPanel|.
+        Dataset we want to apodize
     method : Callable.
         Apodization function
     apod : tuple.
@@ -55,7 +57,7 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, *
     
     Returns
     -------
-    object : |NDDataset|
+    object : |NDDataset| or |NDPanel|.
         The apodized dataset if apply is True, the apodization array if not True.
 
     """
@@ -78,64 +80,7 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, *
         swaped = True
 
     lastcoord = new.coords[-1]
-    if (lastcoord.unitless or lastcoord.dimensionless or
-            lastcoord.units.dimensionality != '[time]'):
-        error_('apodization functions apply only to dimensions '
-                  'with [time] dimensionality')
-        return dataset
-
-    # # first parameters (apodization in Hz) ?
-    # apod = kwargs.get('apod', kwargs.get('apod1', 0))
-    # if not isinstance(apod, Quantity):
-    #     # we default to Hz units
-    #     apod = apod * ur.Hz
-    #
-    # # second parameters (second apodization parameter in Hz) ?
-    # apod2 = kwargs.get('apod2', 0)
-    # if not isinstance(apod2, Quantity):
-    #     # we default to Hz units
-    #     apod2 = apod2 * ur.Hz
-    #
-    # # if no parameter passed
-    # if np.abs(apod.magnitude) <= epsilon and np.abs(apod2.magnitude) <= epsilon:
-    #     # nothing to do
-    #     return new, np.ones_like(new.data)
-    #
-    # # create the args list
-    # args = []
-    #
-    # # convert (1./apod) to the axis time units
-    # if apod.magnitude > epsilon:
-    #     if not apod.check('[time]'):
-    #         apod = 1./apod
-    #     tc1 = apod.to(lastcoord.units)
-    #     args.append(tc1)
-    # else:
-    #     args.append(0 * ur.us)
-    #
-    # # convert (1./apod2) to the axis time units
-    # if np.abs(apod2.magnitude) > epsilon:
-    #     if not apod2.check('[time]'):
-    #         apod2 = 1./apod2
-    #     tc2 = apod2.to(lastcoord.units)
-    #     args.append(tc2)
-    # else:
-    #     args.append(0 * ur.us)
-    #
-    # # should we shift the time origin? (should be in axis units)
-    # shifted = kwargs.get('shifted', kwargs.get('apod3', 0))
-    # if not isinstance(shifted, Quantity):
-    #     # we default to lastcoord.units
-    #     shifted = shifted * lastcoord.units
-    # else:
-    #     if not shifted.check('[time]'):
-    #         shifted = 1./apod2
-    #     shifted = shifted.to(lastcoord.units)
-    # args.append(shifted)
-    #
-    # pw = kwargs.get('pow', 1.)
-    # args.append(pw)
-    #
+    
     # compute the apodization function
     x = lastcoord
     apod_arr = method(x, *apod)

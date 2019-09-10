@@ -21,19 +21,21 @@ import numpy as np
 # Local imports
 # ======================================================================================================================
 from spectrochempy.core.processors.apodization.apodize import apodize
-from spectrochempy.units.units import Quantity
 from spectrochempy.utils import docstrings
 
 # ======================================================================================================================
 # sinm function
 # ======================================================================================================================
-docstrings.delete_params('apodize.parameters',  'method', 'apod')
+docstrings.delete_params('apodize.parameters',  'dataset', 'method', 'apod')
 
 @docstrings.get_sectionsf('sp')
 @docstrings.dedent
 def sp(dataset, ssb=1, pow=1, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
     r"""
-    Calculate apodization with a Sine window multiplication
+    Calculate apodization with a Sine window multiplication.
+    
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
 
     Functional form of apodization window (cfBruker TOPSPIN manual):
 
@@ -49,16 +51,16 @@ def sp(dataset, ssb=1, pow=1, inv=False, rev=False, inplace=True, dim=-1, **kwar
     
     Parameters
     ----------
-    dataset : |NDDataset|.
+    dataset : |NDDataset| or |NDPanel|.
         Dataset we want to apodize using Sine Bell or Squared Sine Bell window multiplication
     sbb : int or float, optional, default=1.
         This processing parameter mimics the behaviour of the SSB parameter on bruker TOPSPIN software:
         Typical values are 1 for a pure sine function and 2 for a pure cosine function.
         Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0,
-        have the same effect as :math:`\text{ssb}==1`, namely a pure sine function.
+        have the same effect as :math:`\text{ssb}=1`, namely a pure sine function.
     pow : enum [1,2], optional, default=1.
-        exponent value - If pow==2 a Squared Sine Bell window multiplication is performed.
-    %(apodize.parameters.no_method|apod)s
+        exponent value - If pow=2 a Squared Sine Bell window multiplication is performed.
+    %(apodize.parameters.no_dataset|method|apod)s
     
     Returns
     -------
@@ -160,21 +162,31 @@ if __name__ == '__main__': # pragma: no cover
     
     dataset1D /= dataset1D.real.data.max()  # normalize
     
-    p = dataset1D.plot()
     
-    new, curve = dataset1D.sinm(ssb=2, retfunc=True)
+    p = dataset1D.plot()
+
+    dd = dataset1D.copy()
+    new, curve = dd.sinm(ssb=2, retfunc=True)
     curve.plot(color='r', clear=False)
     new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='r', clear=False)
 
-    new, curve = dataset1D.sinm(ssb=1, retfunc=True)
+    dd = dataset1D.copy()
+    new, curve = dd.sinm(ssb=1, retfunc=True)
     curve.plot(color='b', clear=False)
     new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='b', clear=False)
 
-    new, curve = dataset1D.qsin(ssb=2, retfunc=True)
+    dd = dataset1D.copy()
+    new, curve = dd.sinm(ssb=3, retfunc=True)
+    curve.plot(color='k', ls='--', clear=False)
+    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='k', ls='--', clear=False)
+
+    dd = dataset1D.copy()
+    new, curve = dd.qsin(ssb=2, retfunc=True)
     curve.plot(color='m', clear=False)
     new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='m', clear=False)
-    
-    new, curve = dataset1D.qsin(ssb=1, retfunc=True)
+
+    dd = dataset1D.copy()
+    new, curve = dd.qsin(ssb=1, retfunc=True)
     curve.plot(color='g', clear=False)
     new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='g', clear=False)
 

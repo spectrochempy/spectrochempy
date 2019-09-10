@@ -21,86 +21,90 @@ import numpy as np
 # ======================================================================================================================
 from spectrochempy.core.processors.apodization.apodize import apodize
 from spectrochempy.utils import epsilon
-
+from spectrochempy.utils import docstrings
+from spectrochempy.units.units import ur, Quantity
 
 # ======================================================================================================================
 # em function
 # ======================================================================================================================
+docstrings.delete_params('apodize.parameters', 'dataset', 'method', 'apod')
 
-def em(dataset, *args, **kwargs):
-    """Calculate apodization with with an exponential window multiplication
+@docstrings.get_sectionsf('em')
+@docstrings.dedent
+def em(dataset, lb=1*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
+    r"""
+    Calculate exponential apodization.
 
-    The exponential apodization is calculated in the last dimension on NDDatasets.
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
+    
     The data in the last dimension MUST be time-domain,
     or an error is raised.
 
     Functional form of apodization window :
 
     .. math::
-        em(t) = \exp(- R (t-t_0) )
+        em(t) = \exp(- e (t-t_0) )
         
     where
     
     .. math::
-        R = \pi * lb
+        e = \pi * lb
         
 
     Parameters
     ----------
-    dataset : |NDDataset|.
-        Dataset we want to apodize using exponential multiplication
-    lb : float or `quantity`
+    dataset : |NDDataset|  or |NDPanel|.
+        Dataset we want to apodize using an Exponential Multiplication (EM)
+    lb : float or |Quantity|, optional, default=1 Hz.
         Exponential line broadening,
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
-    shifted : float or `quantity`
+    shifted : float or `quantity`, optional, default=0 us
         Shift the data time origin by this amount. If it is not a quantity
         it is assumed to be expressed in the data units of the last
         dimension.
-    inv : bool, optional
-        True for inverse apodization.  False (default) for standard.
-    rev : bool, optional.
-        True to reverse the apodization before applying it to the data.
-    retfunc : `bool`, optional, default=False
-        Should we return the calculated apodization function with the dataset.
-    inplace : `bool`, optional, default=True
-        Should we make the transform in place or return a new dataset
-    axis : optional, default is -1
+    %(apodize.parameters.no_dataset|method|apod)s
 
     Returns
     -------
-    out : |NDDataset|.
-        The apodized dataset if apply is True, the apodization array if not True.
+    %(apodize.returns)s
 
     """
-    args = list(args)  # important (args is a tuple)
-
+    
     # what's the line broadening ?
-    lb = kwargs.pop('lb', 0)
-    if lb == 0 :
-        # let's try the args if the kwargs was not passed.
-        # In this case it should be the first arg
-
-        if len(args) > 0 :
-            lb = args.pop(0)
-
+    if not isinstance(lb, Quantity):
+        # we default to Hz units
+        lb = lb * ur.Hz
+    if lb.magnitude < epsilon:
+        lb = 0. * ur.Hz
+        return new, np.ones_like(new.data)
+    
     # is it a shifted broadening?
-    shifted = kwargs.pop('shifted', 0)
+    if not isinstance(shifted, Quantity):
+        # we default to microsecond units
+        shifted = shifted * ur.us
+    if shifted.magnitude < 0.:
+        shifted = 0. * ur.us
 
-    def func(x, tc1, tc2, shifted, pow) :
-        # tc2 and pow not used here
-        if tc1.magnitude <= epsilon :
-            e = np.ones_like(x)
+    def func(x, lb, shifted) :
+        e = np.ones_like(x)
+        if lb.magnitude <= epsilon :
+            return e
         else :
-            e = np.pi * np.abs(x - shifted) / tc1
-        return np.exp(-e.data)
+            if (x.unitless or x.dimensionless or
+                    x.units.dimensionality != '[time]'):
+                error_('em apply only to dimensions with [time] dimensionality')
+                return e
+            units = x.units
+            tc = 1. / lb
+            tc = tc.to(units)
+            shifted = shifted.to(units)
+            e = np.pi * np.abs(x - shifted) / tc
+            return np.exp(-e.data)
 
-    kwargs['method'] = func
-    kwargs['method_name'] = 'em'
-    kwargs['apod'] = lb
-    kwargs['shifted'] = shifted
-
-    out, apodcurve = apodize(dataset, **kwargs)
+    # call the generic apodization function
+    out, apodcurve = apodize(dataset, func, (lb, shifted), **kwargs)
 
     if kwargs.pop('retfunc', False) :
         return out, apodcurve
@@ -120,7 +124,6 @@ if __name__ == '__main__' : # pragma: no cover
     p = dataset1D.plot()
     
     new, curve = dataset1D.em(lb=100. * ur.Hz, retfunc=True)
-    
     curve.plot(color='r', clear=False)
     new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='r', clear=False)
     
