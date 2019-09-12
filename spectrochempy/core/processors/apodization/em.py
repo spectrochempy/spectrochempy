@@ -108,6 +108,7 @@ def em(dataset, lb=1*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-
 
     if kwargs.pop('retfunc', False) :
         return out, apodcurve
+    
     return out
 
 
