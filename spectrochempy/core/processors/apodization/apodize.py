@@ -71,15 +71,15 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, *
     # On which axis do we want to apodize? (get axis from arguments)
     axis, dim = dataset.get_axis(dim, negative_axis=True)
     
-    # The last dimension if always the dimension on which we apply the apodization window.
-    # If needed, swap the dimensions to be sure to be in this situation
+    # The last dimension is always the dimension on which we apply the apodization window.
+    # If needed, we swap the dimensions to be sure to be in this situation
 
     swaped = False
     if axis != -1:
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    lastcoord = new.coords[-1]
+    lastcoord = new.coords[dim]
     
     # compute the apodization function
     x = lastcoord
@@ -99,13 +99,7 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, *
     encoding = new.meta.encoding[-1]
     # TODO: handle this eventual complexity
 
-    data = new.data
-    if not isquaternion:
-        new._data = data * apod_arr
-    else:
-        data['R'] = data['R'] * apod_arr
-        data['I'] = data['I'] * apod_arr
-        new._data = data
+    new._data *= apod_arr
 
     # restore original data order if it was swaped
     if swaped:
@@ -114,9 +108,7 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, *
     name = method.__module__.split('.')[-1]
     new.history = f'{name} apodization performed on dimension {dim} with parameters:' + str(apod)
 
-    curve = new.copy()
-    curve.data = apod_arr
-    return new, curve
+    return new, apod_arr
 
     # shifted = args.shifted  # float(kargs.get('top', 0.0))
     # k_shifted = args.k_shifted

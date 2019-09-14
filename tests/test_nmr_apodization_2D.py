@@ -26,15 +26,45 @@ from spectrochempy.utils import SpectroChemPyWarning
 
 
 
-@pytest.mark.skip('not yet finish')
-def test_nmr_2D_em_(NMR_dataset_2D):
+#@pytest.mark.skip('not yet finish')
+def test_nmr_2D_em_x(NMR_dataset_2D):
+    
+    dataset = NMR_dataset_2D.copy()
+    assert dataset.shape == (96, 948)
+    dataset.plot_map()  # plot original
+
     dataset = NMR_dataset_2D.copy()
     dataset.plot_map()
+    dataset.em(lb=50. * ur.Hz, axis=-1)
     assert dataset.shape == (96, 948)
-    dataset.em(lb=100. * ur.Hz, axis=-1)
+    dataset.plot_map(cmap='copper', data_only=True, clear=False)  # em on dim=x
+
+    dataset = NMR_dataset_2D.copy()
+    dataset.plot_map()
+    dataset.em(lb=50. * ur.Hz, dim='x')
     assert dataset.shape == (96, 948)
-    dataset.em(lb=50. * ur.Hz, axis=0)
+    dataset.plot_map(cmap='copper', data_only=True, clear=False)  # em on dim=x
+
+    show()
+    pass
+
+def test_nmr_2D_em_y(NMR_dataset_2D):
+    
+    dataset = NMR_dataset_2D.copy()
     assert dataset.shape == (96, 948)
-    dataset.plot_map(cmap='copper', data_only=True, clear=False)
+    dataset.plot_map()  # plot original
+    
+    dataset = NMR_dataset_2D.copy()
+    dataset.plot_map()
+    dataset.em(lb=50. * ur.Hz, dim=0)
+    assert dataset.shape == (96, 948)
+    dataset.plot_map(cmap='copper', data_only=True, clear=False)  # em on dim=x
+    
+    dataset = NMR_dataset_2D.copy()
+    dataset.plot_map()
+    dataset.em(lb=50. * ur.Hz, dim='y')
+    assert dataset.shape == (96, 948)
+    dataset.plot_map(cmap='copper', data_only=True, clear=False)  # em on dim=x
+    
     show()
     pass

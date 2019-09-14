@@ -17,6 +17,7 @@ __all__ = ["assert_equal",
            "assert_array_equal",
            "assert_array_almost_equal",
            "assert_approx_equal",
+           "assert_raises",
            "raises",
            "catch_warnings",
            "RandomSeedContext",
@@ -40,7 +41,7 @@ from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors.execute import CellExecutionError
 from numpy.testing import (assert_equal, assert_array_equal,
-                           assert_array_almost_equal, assert_approx_equal)
+                           assert_array_almost_equal, assert_approx_equal, assert_raises)
 
 
 #  we defer import in order to avoid importing all the spectroscopy namespace

@@ -961,7 +961,7 @@ class NDDataset(
 
         Returns
         -------
-        xarray : a xarray.DataArray object
+        object : a xarray.DataArray object
 
 
         """
@@ -1049,7 +1049,7 @@ class NDDataset(
 
         Returns
         -------
-        obj : A |NDPanel| object
+        object : A |NDPanel| object
         
         """
         import spectrochempy as scp

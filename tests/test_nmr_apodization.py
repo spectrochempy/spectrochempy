@@ -8,16 +8,14 @@
 # ======================================================================================================================
 
 
-
-
-""" Tests for the  module
+""" Tests for the apodization module
 
 """
 import sys
 import functools
 import pytest
 import numpy as np
-from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
+from spectrochempy.utils.testing import (assert_equal, assert_array_equal, assert_raises,
                          assert_array_almost_equal, assert_equal_units,
                          raises)
 
@@ -81,108 +79,65 @@ def test_nmr_1D_show_complex(NMR_dataset_1D):
                 xlim=(0.,30000.), zlim=(-200.,200.))
     show()
 
-def test_nmr_em_nothing_calculated(NMR_dataset_1D):
-    # em without parameters
+def test_nmr_apodization_with_null(NMR_dataset_1D):
+  
     dataset = NMR_dataset_1D.copy()
+    
+    lb = 0
+    arr, apod = dataset.em(lb=lb, inplace=False, retfunc=True)
 
-    arr = dataset.em(apply=False)
-    # we should get an array of ones only , as apply = False mean
-    # that we do not apply the apodization, but just make the
-    # calculation of the apodization function
-    assert_equal(arr.data, np.ones_like(dataset.data))
+    # arr and dataset should be equal as no em was applied
+    assert_equal(dataset.data, arr.data)
+    assert_equal(apod, 1.)
 
-def test_nmr_em_calculated_notapplied(NMR_dataset_1D):
-    # em calculated but not applied
+    lb = 0.
+    gb = 0.
+    arr, apod = dataset.gm(lb=lb, gb=gb, inplace=False, retfunc=True)
+    
+    # arr and dataset should be equal as no em was applied
+    assert_equal(dataset.data, arr.data)
+    assert_equal(apod, 1.)
+
+
+def test_nmr_apodization_(NMR_dataset_1D):
+
     dataset = NMR_dataset_1D.copy()
-
+    
     lb = 100
-    arr = dataset.em(lb=lb, apply=False)
-    assert isinstance(arr, NDDataset)
-
-    # here we assume it is 100 Hz
-    x = dataset.coords[-1]
-    tc = (1./(lb * ur.Hz)).to(x.units)
-    e = np.pi * np.abs(x) / tc
-    arrcalc = np.exp(-e.data)
-
-    assert_equal(arr.real.data, arrcalc)  # note that we have to compare
-    # to the real part data because of the complex nature of the data
-
-def test_nmr_em_calculated_applied(NMR_dataset_1D):
-    # em calculated and applied
-    dataset = NMR_dataset_1D.copy()
-
-    lb = 100
-    arr = dataset.em(lb=lb, apply=False)
-
-    # here we assume it is 100 Hz
-    x = dataset.coords[-1]
-    tc = (1. / (lb * ur.Hz)).to(x.units)
-    e = np.pi * np.abs(x) / tc
-    arrcalc = np.exp(-e.data)
-
-    # check with apply = True (by default)
-    dataset2 = dataset.copy()
-    dataset3 = dataset.em(lb=lb)
-
-    # data should be equal
-    assert_equal(dataset3.data, (arrcalc*dataset2).data)
-
-    # but also the datasets as whole entity
-    dataset4 = arrcalc * dataset2
-
-    assert(dataset3 == dataset4)
-
-def test_nmr_em_calculated_Hz(NMR_dataset_1D):
-    dataset = NMR_dataset_1D.copy()
-
-    lb = 200 * ur.Hz
-    x = dataset.coords[-1]
-    tc = (1. / lb).to(x.units)
-    e = np.pi * np.abs(x) / tc
-    arrcalc = np.exp(-e)
-
-    dataset2 = dataset.copy()
-    dataset3 = dataset.em(lb=lb, inplace=False)
-
-    # the datasets should be equal
-    ddd = arrcalc*dataset2
-    assert np.all(dataset3.data == ddd.data)
-    assert(dataset3 == ddd)
-
-    # and the original untouched
-    assert (dataset != dataset3)
-
-def test_nmr_em_calculated_inplace(NMR_dataset_1D):
+    arr, apod = dataset.em(lb=lb, inplace=False, retfunc=True)
     
-    dataset = NMR_dataset_1D.copy()
+    # arr and dataset should not be equal as inplace=False
+    assert not np.array_equal(dataset.data, arr.data)
+    assert_array_almost_equal(apod[1],0.9987, decimal=4)
 
-    lb = 200 * ur.Hz
-
-    x = dataset.coords[-1]
-    tc = (1. / lb).to(x.units)
+    arr = dataset.em(lb=lb)
+    assert_equal(dataset.data, arr.data)
     
-    e = np.pi * np.abs(x)
-    assert isinstance(e, Coord)
-
-    e /= tc
-    assert isinstance(e, Coord)
     
-    arrcalc = np.exp(-e)
+    lb = 10.
+    gb = 100.
+    arr, apod = dataset.gm(lb=lb, gb=gb, inplace=False, retfunc=True)
+    
+    # arr and dataset should be equal as no em was applied
+    assert not np.array_equal(dataset.data, arr.data)
+    assert_array_almost_equal(apod[2], 1.000077, decimal=6)
 
-    dataset2 = dataset.copy()
-    dataset.em(lb=lb)  # inplace transformation
+    lb = 10.
+    gb = 100.
+    arr, apod = dataset.gm(lb=lb, gb=gb, retfunc=True)
 
-    # the datasets data array should be equal
-    s = arrcalc * dataset2
-    assert(np.all(dataset.data == s.data))
+    # arr and dataset should be equal as no em was applied
+    assert_array_equal(dataset.data, arr.data)
+    assert_array_almost_equal(apod[2], 1.000077, decimal=6)
 
-    # as well as the whole new datasets`
-    ddd = dataset2 * arrcalc
-    assert (dataset == ddd)
+    lb = 10.
+    gb = 0.
+    arr, apod = dataset.gm(lb=lb, gb=gb, retfunc=True)
 
-    ddd = arrcalc * dataset2
-    assert (dataset == ddd)
+    # arr and dataset should be equal as no em was applied
+    assert_array_equal(dataset.data, arr.data)
+    assert_array_almost_equal(apod[2], 1.000080, decimal=6)
+
 
 def test_nmr_1D_em_(NMR_dataset_1D):
 

@@ -89,7 +89,7 @@ def sp(dataset, ssb=1, pow=1, inv=False, rev=False, inplace=True, dim=-1, **kwar
         return np.sin((np.pi-phi)*t+phi ) ** pow
     
     # call the generic apodization function
-    out, apodcurve = apodize(dataset, func, (ssb, pow), **kwargs)
+    out, apodcurve = apodize(dataset, func, (ssb, pow), inv=inv, rev=rev, inplace=inplace, dim=dim, **kwargs)
 
     if kwargs.pop('retfunc', False) :
         return out, apodcurve

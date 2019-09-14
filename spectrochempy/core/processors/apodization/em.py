@@ -31,7 +31,7 @@ docstrings.delete_params('apodize.parameters', 'dataset', 'method', 'apod')
 
 @docstrings.get_sectionsf('em')
 @docstrings.dedent
-def em(dataset, lb=1*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
+def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
     r"""
     Calculate exponential apodization.
 
@@ -77,34 +77,36 @@ def em(dataset, lb=1*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-
         # we default to Hz units
         lb = lb * ur.Hz
     if lb.magnitude < epsilon:
-        lb = 0. * ur.Hz
-        return new, np.ones_like(new.data)
+        out = dataset
+        apodcurve = 1.
+        
+    else:
+     
+     # is it a shifted broadening?
+        if not isinstance(shifted, Quantity):
+            # we default to microsecond units
+            shifted = shifted * ur.us
+        if shifted.magnitude < 0.:
+            shifted = 0. * ur.us
     
-    # is it a shifted broadening?
-    if not isinstance(shifted, Quantity):
-        # we default to microsecond units
-        shifted = shifted * ur.us
-    if shifted.magnitude < 0.:
-        shifted = 0. * ur.us
-
-    def func(x, lb, shifted) :
-        e = np.ones_like(x)
-        if lb.magnitude <= epsilon :
-            return e
-        else :
-            if (x.unitless or x.dimensionless or
-                    x.units.dimensionality != '[time]'):
-                error_('em apply only to dimensions with [time] dimensionality')
+        def func(x, lb, shifted) :
+            e = np.ones_like(x)
+            if lb.magnitude <= epsilon :
                 return e
-            units = x.units
-            tc = 1. / lb
-            tc = tc.to(units)
-            shifted = shifted.to(units)
-            e = np.pi * np.abs(x - shifted) / tc
-            return np.exp(-e.data)
-
-    # call the generic apodization function
-    out, apodcurve = apodize(dataset, func, (lb, shifted), **kwargs)
+            else :
+                if (x.unitless or x.dimensionless or
+                        x.units.dimensionality != '[time]'):
+                    error_('em apply only to dimensions with [time] dimensionality')
+                    return e
+                units = x.units
+                tc = 1. / lb
+                tc = tc.to(units)
+                shifted = shifted.to(units)
+                e = np.pi * np.abs(x - shifted) / tc
+                return np.exp(-e.data)
+    
+        # call the generic apodization function
+        out, apodcurve = apodize(dataset, func, (lb, shifted), inv=inv, rev=rev, inplace=inplace, dim=dim, **kwargs)
 
     if kwargs.pop('retfunc', False) :
         return out, apodcurve

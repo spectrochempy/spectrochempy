@@ -18,9 +18,9 @@ from warnings import warn
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import (is_sequence, docstrings)
+from spectrochempy.utils import is_sequence, docstrings
 
-
+@docstrings.dedent
 def concatenate(*datasets, **kwargs):
     """
     Concatenation of |NDDataset| objects along a given axis (by default
