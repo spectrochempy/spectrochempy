@@ -14,7 +14,7 @@ __all__ = ['IRIS']
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.processors.npy import dot
+from spectrochempy.core.dataset.npy import dot
 
 import numpy as np
 from matplotlib import pyplot as plt

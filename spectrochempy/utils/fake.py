@@ -65,7 +65,7 @@ def _generate_2D_spectra(concentrations, spectra):
     |NDDataset|
 
     """
-    from spectrochempy.core.processors.npy import dot
+    from spectrochempy.core.dataset.npy import dot
 
     return dot(concentrations.T, spectra)
 

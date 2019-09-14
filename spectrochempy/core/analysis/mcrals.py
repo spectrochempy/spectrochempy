@@ -20,7 +20,7 @@ from traitlets import HasTraits, Instance
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
-from spectrochempy.core.processors.npy import dot
+from spectrochempy.core.dataset.npy import dot
 from spectrochempy.core import info_, set_loglevel, INFO
 
 class MCRALS(HasTraits):

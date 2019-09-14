@@ -13,7 +13,7 @@ pytests file for
 
 import numpy as np
 import pytest
-from spectrochempy.core.processors.npy import *
+from spectrochempy.core.dataset.npy import *
 
 
 def test_npy(ds1):
