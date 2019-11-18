@@ -81,6 +81,9 @@ if InteractiveShell.initialized():
 #
 # if we are in a notebook, we will encounter two situation (real interactive job)
 # or execution o notebook in the background using ``nbsphinx``.
+#
+# if we are in the Scientific mode of PyCharm (module://backend_interagg)
+#   -> keep it
 
 NO_DISPLAY = False
 
@@ -108,7 +111,13 @@ if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     if NO_DISPLAY:
         mpl.use('agg', warn=False, force=True)
 
-if not (IN_IPYTHON and kernel and not NO_DISPLAY):
+# Are we running in PyCharm scientific mode?
+if mpl.get_backend() == 'module://backend_interagg':
+    IN_PYCHARM_SCIMODE = True
+else:
+    IN_PYCHARM_SCIMODE = False
+
+if  not (IN_IPYTHON and kernel and not NO_DISPLAY) and not IN_PYCHARM_SCIMODE:
     try:
         import PyQt5
 
@@ -116,6 +125,7 @@ if not (IN_IPYTHON and kernel and not NO_DISPLAY):
         mpl.use('Qt5Agg', warn=False, force=True)
     except:
         mpl.use('tkagg', warn=False, force=True)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Now we can start loading the API

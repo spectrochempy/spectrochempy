@@ -92,6 +92,7 @@ def sp(dataset, ssb=1, pow=1, inv=False, rev=False, inplace=True, dim=-1, **kwar
     out, apodcurve = apodize(dataset, func, (ssb, pow), inv=inv, rev=rev, inplace=inplace, dim=dim, **kwargs)
 
     if kwargs.pop('retfunc', False) :
+        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
     return out
 
@@ -157,7 +158,7 @@ if __name__ == '__main__': # pragma: no cover
     import os
     
     dataset1D = scp.NDDataset()
-    path = os.path.join(scp.general_preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
     dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     
     dataset1D /= dataset1D.real.data.max()  # normalize

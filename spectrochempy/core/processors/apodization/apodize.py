@@ -107,6 +107,7 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, *
 
     name = method.__module__.split('.')[-1]
     new.history = f'{name} apodization performed on dimension {dim} with parameters:' + str(apod)
+    # TODO: improve display of apod parameters
 
     return new, apod_arr
 

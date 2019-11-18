@@ -36,7 +36,7 @@ from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import readfilename
-from ...core import info_, debug_, error_, warning_
+from spectrochempy.core import info_, debug_, error_, warning_
 
 # ======================================================================================================================
 # Public functions

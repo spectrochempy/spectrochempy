@@ -108,7 +108,9 @@ def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-
         # call the generic apodization function
         out, apodcurve = apodize(dataset, func, (lb, shifted), inv=inv, rev=rev, inplace=inplace, dim=dim, **kwargs)
 
+    # Should we return the apodization
     if kwargs.pop('retfunc', False) :
+        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
     
     return out
@@ -119,7 +121,7 @@ if __name__ == '__main__' : # pragma: no cover
     from spectrochempy import *
 
     dataset1D = NDDataset()
-    path = os.path.join(general_preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
     dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 
     dataset1D /= dataset1D.real.data.max()  # normalize

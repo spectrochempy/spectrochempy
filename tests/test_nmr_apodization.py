@@ -113,7 +113,6 @@ def test_nmr_apodization_(NMR_dataset_1D):
     arr = dataset.em(lb=lb)
     assert_equal(dataset.data, arr.data)
     
-    
     lb = 10.
     gb = 100.
     arr, apod = dataset.gm(lb=lb, gb=gb, inplace=False, retfunc=True)

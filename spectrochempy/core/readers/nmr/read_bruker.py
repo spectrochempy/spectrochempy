@@ -27,18 +27,14 @@ import os
 # Third party imports
 # ======================================================================================================================
 import numpy as np
-from spectrochempy.core import app
-
-project_preferences = app.project_preferences
-log = app.log
-preferences = app.general_preferences
-from ....core import project_preferences, general_preferences as preferences
-from ....core import info_, debug_, error_, warning_
 from ....extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
+from ....core import project_preferences, general_preferences as prefs
+from ....core import info_, debug_, error_, warning_
+
 from ....utils.meta import Meta
 from ....core.dataset.nddataset import NDDataset
 from ....core.dataset.ndcoord import Coord
@@ -187,7 +183,6 @@ bruker_dsp_table = {
     }
 }
 
-
 def _remove_digital_filter(dic, data):
     """
     Remove the digital filter from Bruker data.
@@ -301,7 +296,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         path of the Bruker directory. It path is None, at least the parameters
         `data`, `user`, `name`, `expno` must be provided.
     data : str,
-        main strorage directory, optional
+        main storage directory, optional
     user : str, optional
         user name of the dataset
     name : str, optional
@@ -360,7 +355,9 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     # path must be pointing to a valid bruker directory
     if not os.path.exists(path):
-        raise KeyError("This path '{}' doesn't exist".format(path))
+        path = os.path.join(prefs.datadir, path)
+        if not os.path.exists(path):
+            raise KeyError("This path '{}' doesn't exist".format(path))
 
     # path is expected to be a directory
     if os.path.isdir(path) is not True:

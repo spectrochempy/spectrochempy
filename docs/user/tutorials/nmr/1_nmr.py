@@ -93,6 +93,8 @@ dataset2D.RI
 
 # %% [markdown]
 # ### Math on quaternion arrays
+#
+# To be completed ! 
 
 # %%
 dataset2D * 2. - 1.j
@@ -158,7 +160,7 @@ _ = dataset2D.T.plot_map(cmap='magma', data_only=True, clear=False)
 # 2. newdataset = em(dataset, lb=...)
 
 # %%
-# tke the original dataset
+# restore the original dataset
 dataset1D = get_dataset1D()
 
 # plot it
@@ -183,18 +185,23 @@ assert lb_dataset is dataset1D  # note here, that the original data are modified
                                 # when applying apodization function. 
 
 # %% [markdown]
-# We can use the `inplace` keyword to modify this behavior
+# We can use the `inplace` keyword set to *False* to modify this behavior
 
 # %%
+# restore original
 dataset1D = get_dataset1D()
+
+# create a apodized copy of the dataset
 lb_dataset = dataset1D.em(lb=100.*ur.Hz, inplace=False)
-assert not lb_dataset is dataset1D
+
+# this is a new dataset
+assert lb_dataset is not dataset1D
 
 # %% [markdown]
 # We can use of the second syntax.
 
 # %%
-# restore original and plot it
+# restore original
 dataset1D = get_dataset1D() 
 
 # Create the apodized dataset
@@ -207,6 +214,7 @@ assert lb2_dataset == lb_dataset
 # We can also get only the apodization function
 
 # %%
+# restore original
 dataset1D = get_dataset1D()
 
 # create the apodized dataset 

@@ -184,11 +184,9 @@ def readdirname(dirname=None, **kwargs):
     Parameters
     ----------
     dirname : `str`, optional.
-        A directory name. If not provided, a dialog box is opened
-        to select a directory.
+        A directory name. If not provided, a dialog box is opened to select a directory.
     parent_dir : `str`, optional.
-        The parent directory where to look at. If not specified, read in
-        default datadir directory
+        The parent directory where to look at. If not specified, read in default datadir directory
 
     Returns
     --------

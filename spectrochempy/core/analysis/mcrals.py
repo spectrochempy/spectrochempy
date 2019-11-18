@@ -334,25 +334,23 @@ class MCRALS(HasTraits):
         X_hat.title = 'X_hat: ' + self._X.title
         return X_hat
 
-    def plot(self, **kwargs):
+    def plotmerit(self, **kwargs):
         """
         Plots the input dataset, reconstructed dataset and residuals
 
         Returns
         -------
-        ax : subplot
+        axes
 
         """
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
 
         X_hat = self.inverse_transform()
-
         res = self._X - X_hat
 
-        ax = self._X.plot(labbel='$X$')
-        ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
-        ax.plot(res.data.T, color=colRes, label='Residual')
-        ax.set_title('MCR ALS plot: ' + self._X.name)
-
+        ax = self._X.plot()
+        ax.plot(self._X.x.data, X_hat.T.data, color=colXhat)
+        ax.plot(self._X.x.data, res.T.data, color=colRes)
+        ax.set_title('MCR ALS merit plot')
         return ax

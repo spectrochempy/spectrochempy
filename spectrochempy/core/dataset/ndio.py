@@ -260,7 +260,6 @@ class NDIO(HasTraits):
     def _load(cls,
               fid='',
               protocol=None,
-              directory=prefs.datadir,
               **kwargs
               ):
 
@@ -268,7 +267,7 @@ class NDIO(HasTraits):
 
         # case where load was call directly from the API
         # e.g.,  A= scp.load("dataset.scp")
-        # In this cas ewe need to define cls as a NDDataset class
+        # In this case we need to define cls as a NDDataset class
         if isinstance(cls(), NDIO):
             # not run as a class method of NDDataset
             from spectrochempy import NDDataset
@@ -306,8 +305,13 @@ class NDIO(HasTraits):
                     try:
                         # try again
                         fid = open(filename, 'rb')
-                    except IOError:
-                        raise IOError('no valid filename provided')
+                    except:
+                        # try the working directory
+                        filename = os.path.join(os.getcwd(), filename)
+                        try:
+                            fid = open(filename, 'rb')
+                        except IOError:
+                            raise IOError('no valid filename provided')
 
         # get zip file
         obj = NpzFile(fid, allow_pickle=True)
@@ -520,7 +524,7 @@ class NDIO(HasTraits):
 
         if protocol == 'scp':
             # default reader
-            return cls.load(filename, protocol='scp')
+            return cls.load(filename, protocol='scp', **kwargs)
 
             # try:
             # find the adequate reader

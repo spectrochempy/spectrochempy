@@ -126,6 +126,7 @@ def gm(dataset, gb=1*ur.Hz, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace
         out, apodcurve = apodize(dataset, func, (gb, lb, shifted), inv=inv, rev=rev, inplace=inplace, dim=dim, **kwargs)
 
     if kwargs.pop('retfunc', False):
+        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
 
     return out
