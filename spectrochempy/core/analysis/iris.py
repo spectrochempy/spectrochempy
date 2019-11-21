@@ -87,7 +87,10 @@ class IRIS:
                           param['epsRange'][2])
 
         # defines regularization parameter values
-        lambdaRange = param['lambdaRange']
+        if 'lambdaRange' not in param:
+            lambdaRange = None
+        else:
+            lambdaRange=param['lambdaRange']
         if lambdaRange == None:
             regularization = False
             searchLambda = False
