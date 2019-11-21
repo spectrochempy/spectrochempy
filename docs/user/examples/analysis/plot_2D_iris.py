@@ -15,6 +15,7 @@ In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide
 """
 
 import spectrochempy as scp
+import matplotlib.pyplot as plt
 import os
 
 ########################################################################################################################
@@ -30,33 +31,41 @@ X.coords.update(y=scp.Coord(p, title='pressure', units='torr'))
 # Using the `update` method is mandatory because it will preserve the name.
 # Indeed, setting using X.coords[0] = Coord(...) fails unless name is specified : Coord(..., name='y')
 
-########################################################################################################################
-# set the optimization parameters, perform the analysis
-# and plot the results
-
-param = {'epsRange': [-8, -1, 50],
-         'lambdaRange': [-10, 1, 12],
-         'guess':'random',
-         'kernel':'langmuir'}
-
-########################################################################################################################
-# Show the region to analyse
-
+###############################
+# Select and plot the spectral range of interest
 X_ = X[:, 2250.:1950.]
 X_.plot()
 
 ########################################################################################################################
-# Perform the IRIS processing
+# Perform IRIS without regularization and plots results
+param = {'epsRange': [-8, -1, 50],
+         'kernel':'langmuir'}
 
 iris = scp.IRIS(X_, param, verbose=True)
-f = iris.transform()
-X_hat = iris.inverse_transform()
+iris.plotdistribution()
+iris.plotmerit()
 
 ########################################################################################################################
-# Show the results
+# Perform  IRIS with regularization, manual search
+param = {'epsRange': [-8, -1, 50],
+         'lambdaRange': [-10, 1, 12],
+         'kernel':'langmuir'}
 
+iris = scp.IRIS(X_, param, verbose=True)
 iris.plotlcurve()
-f[-5].plot(method='map')
-X_hat[-5].plot()
+iris.plotdistribution(-7)
+iris.plotmerit(-7)
 
-#show() # uncomment to show plot if needed()
+########################################################################################################################
+# Now try an automatic search of the regularization parameter:
+
+param = {'epsRange': [-8, -1, 50],
+         'lambdaRange': [-10, 1],
+         'kernel':'langmuir'}
+
+iris = scp.IRIS(X_, param, verbose=True)
+iris.plotlcurve()
+iris.plotdistribution(-1)
+iris.plotmerit(-1)
+
+#plt.show() # uncomment to show plot if needed()
