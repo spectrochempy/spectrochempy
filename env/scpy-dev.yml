@@ -10,6 +10,7 @@ dependencies:
 - traitlets
 - pint
 - quaternion
+- cvxopt
 # some other useful package
 #- datashader
 #- dask

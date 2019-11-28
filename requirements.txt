@@ -6,7 +6,7 @@ traitlets
 pint
 quaternion
 quadprog
-
+cvxopt
 # some other useful package
 xarray
 datashader

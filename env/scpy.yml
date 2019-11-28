@@ -16,6 +16,7 @@ dependencies:
 - scipy
 - xarray
 - pint
+- cvxopt
 #- datashader
 #- dask
 - pandas
