@@ -133,7 +133,7 @@ class MCRALS(HasTraits):
 
         monoIncTol = param.get('monoIncTol', 1.1)
 
-        ### constraints on concentrations
+        ### constraints on spectra
 
         nonnegSpec = param.get('nonnegSpec', [1] * nspecies)
 

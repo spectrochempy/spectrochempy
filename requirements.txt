@@ -5,6 +5,7 @@ matplotlib
 traitlets
 pint
 quaternion
+quadprog
 
 # some other useful package
 xarray

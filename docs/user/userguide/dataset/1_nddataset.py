@@ -272,7 +272,7 @@ except KeyError:
     error_('not found')
 
 # %% [markdown]
-# In some case it can also be usefull to get a coordinate from its title instead of its name (the militation is that if several coordinates have the same title, then only the first ones that is found in the coordinate list, will be returned - this can be ambiguous) 
+# In some case it can also be usefull to get a coordinate from its title instead of its name (the limitation is that if several coordinates have the same title, then only the first ones that is found in the coordinate list, will be returned - this can be ambiguous) 
 
 # %%
 d2D['time']
@@ -307,7 +307,7 @@ d2D
 d2D.time
 
 # %% [markdown]
-# Sometimes it is not necessary to have different coordinates for the axis. 
+# Sometimes it is not necessary to have different coordinates for the various axes. 
 #
 # For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can refer to the first.
 

@@ -24,7 +24,7 @@ from spectrochempy import *
 #
 # Here we import two dataset, one is 1D and the other is 2D
 #
-# Because , we will sometimes need to recall the original dataset, we create to getting functions
+# Because , we will sometimes need to recall the original dataset, we create two getting functions
 
 # %%
 # 1D dataset getting function 
@@ -218,14 +218,12 @@ assert lb2_dataset == lb_dataset
 dataset1D = get_dataset1D()
 
 # create the apodized dataset 
-# when apply is False, the apodization function is not applied to the dataset, 
-# but returned as a new dataset
-apodfunc = dataset1D.em(lb=100.*ur.Hz, apply=False, inplace=False)*200
-lb_dataset = dataset1D.em(lb=100.*ur.Hz, apply=True, inplace=False)
+# when retfunc is True, the apodization function is also returned together witht he apodized dataset
+lb_dataset, apodfunc = dataset1D.em(lb=100.*ur.Hz, retfunc=True, inplace=False)
 
 # plot the 3 datasets on the same figure 
 dataset1D.plot() 
-apodfunc.plot(color='r', clear=False)
+(apodfunc*200.).plot(color='r', clear=False)
 lb_dataset.plot(data_only=True, xlim=(0,25000), zlim=(-200,200), color='g', clear=False) 
 
 _ = dataset1D.ax.text(12500,180,'Multiple display (original & em apodized fids + apod.function)', ha='center', fontsize=10)
