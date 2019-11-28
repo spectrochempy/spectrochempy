@@ -10,7 +10,6 @@ dependencies:
 - traitlets
 - pint
 - quaternion
-- quadprog
 # some other useful package
 #- datashader
 #- dask
@@ -49,3 +48,5 @@ dependencies:
 - numpydoc=0.8
 #conda recipes
 - conda-build
+-pip:
+  -quadprog

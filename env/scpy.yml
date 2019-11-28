@@ -16,7 +16,6 @@ dependencies:
 - scipy
 - xarray
 - pint
-- quadprog
 #- datashader
 #- dask
 - pandas
@@ -36,4 +35,5 @@ dependencies:
 - widgetsnbextension
 - nodejs
 #
-
+- pip:
+    - quadprog
