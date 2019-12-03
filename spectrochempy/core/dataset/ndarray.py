@@ -98,7 +98,8 @@ class NDArray(HasTraits):
 
     # metadata
     _meta = Instance(Meta, allow_none=True)
-
+    _origin = Unicode()
+    
     # Basic NDArray setting
     _copy = Bool(False)  # by defaults we do not copy the data
     # which means that if the same numpy array
@@ -794,6 +795,19 @@ class NDArray(HasTraits):
         
         if meta is not None:
             self._meta.update(meta)
+            
+    # ..................................................................................................................
+    @property
+    def origin(self):
+        """
+        str - origin of the data
+        """
+        return self._origin
+    
+    # ..................................................................................................................
+    @origin.setter
+    def origin(self, origin):
+        self._origin = origin
 
     # ..................................................................................................................
     @property
