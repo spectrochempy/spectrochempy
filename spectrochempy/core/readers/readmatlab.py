@@ -22,6 +22,7 @@ __dataset_methods__ = __all__
 
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 from ...core import info_, debug_, error_, warning_
@@ -225,4 +226,6 @@ def _read_DSO(f, x):
             ds.history.append(i)
 
         ds.history = (str(datetime.now()) + ': Imported by spectrochempy ')
+        ds.origin = "matlab"
+        
     return ds

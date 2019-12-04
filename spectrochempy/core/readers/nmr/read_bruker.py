@@ -671,7 +671,8 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         dataset.meta.readonly = True
         dataset.set_coords(*tuple(list_coords[0]))    # must be a tuple
         dataset.title = 'intensity'
-
+        dataset.origin = 'bruker'
+        
     else:
         
         # TODO: Check this -
@@ -778,6 +779,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
             # in principle... if not problem above or the experiments
             # are not compatibles
             dataset.coords = [axis] + list_coords[-1]
+            dataset.origin = 'bruker'
 
     return dataset
 

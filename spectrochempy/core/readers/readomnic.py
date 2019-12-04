@@ -121,7 +121,7 @@ def read_omnic(dataset=None, **kwargs):
         else:
             # try another format!
             datasets = dataset.read(filename, protocol=extension[1:], sortbydate=True, **kwargs)
-
+        
     if len(datasets) == 1:
         return datasets[0]  # a single dataset is returned
 
@@ -373,7 +373,8 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
                labels = (allacquisitiondates, alltitles))
     dataset.set_coords(y=_y, x=_x)
 
-    # Set description and history
+    # Set origin, description and history
+    dataset.origin = "omnic"
     dataset.description = (
             'Dataset from spg file : ' + spg_title + ' \n'
             + 'History of the 1st spectrum : ' + allhistories[0])
@@ -387,7 +388,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     # Set the NDDataset date
     dataset._date = datetime.now()
     dataset._modified = dataset.date
-
+    
     debug_("end of reading")
 
     return dataset
@@ -542,7 +543,8 @@ def _read_spa(dataset, filenames, **kwargs):
     _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels = (allacquisitiondates, alltitles))
     dataset.set_coords(y=_y, x=_x)
     
-    # Set description and history
+    # Set origin, description and history
+    dataset.origin = "omnic"
     dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum : {3}".format(
         nspec, ' ... '.join(set([filenames[0], filenames[-1]])), '1st ' if nspec > 1 else '', allhistories[0])
 
