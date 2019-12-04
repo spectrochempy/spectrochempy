@@ -37,7 +37,7 @@ import numpy as np
 # local imports
 # ======================================================================================================================
 
-from ...units import Unit, ur, Quantity
+from ...units import Unit, ur, Quantity, set_nmr_context
 from ...core import info_, debug_, error_, warning_
 from ...utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence, is_number,
                       numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
@@ -232,7 +232,7 @@ class NDArray(HasTraits):
     def __dir__(self):
         # Note: dtype must stay first item in this list. Important for the copy
         # function to work properly
-        return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name']
+        return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name', 'origin']
 
     # ..................................................................................................................
     def __hash__(self):
@@ -1448,7 +1448,7 @@ class NDArray(HasTraits):
             Destination units.
         %(generic_method.parameters.inplace)s
         force : bool, optional, default=False
-            If True the change of units is forced, even for imcompatible units
+            If True the change of units is forced, even for incompatible units
 
  
          Returns
@@ -1505,7 +1505,13 @@ class NDArray(HasTraits):
             units = ur.Unit(other)
         if self.has_units:
             try:
-                q = Quantity(1., self._units).to(units)
+                if new.origin in ['bruker',]:
+                    # its nmr data
+                    set_nmr_context(new.meta.larmor)
+                    with ur.context('nmr'):
+                        q = Quantity(1., self._units).to(units)
+                else:
+                    q = Quantity(1., self._units).to(units)
                 scale = q.magnitude
                 new._data = new._data * scale  # new * scale #
                 new._units = q.units

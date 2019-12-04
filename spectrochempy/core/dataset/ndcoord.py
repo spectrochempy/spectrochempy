@@ -245,7 +245,7 @@ class Coord(NDMath, NDArray):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
         # dtype must stay first item
-        return ['data', 'labels', 'units', 'meta', 'title', 'name']
+        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'origin']
 
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):

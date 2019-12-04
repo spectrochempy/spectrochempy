@@ -25,6 +25,7 @@ import numpy as np
 # Local imports
 # ======================================================================================================================
 from spectrochempy.utils import closer_power_of_two
+from spectrochempy.units import set_nmr_context
 from spectrochempy.core import project_preferences, general_preferences, error_, warning_
 
 
@@ -47,7 +48,7 @@ def ifft(dataset, size=None, inplace=True, **kwargs):
     return fft(dataset, size=size, inv=True, inplace=inplace, **kwargs)
 
 
-def fft(dataset, size=None, tdeff=None, inv=False, inplace=True, dim=-1, **kwargs):
+def fft(dataset, size=None, sizeff=None, inv=False, inplace=True, dim=-1, **kwargs):
     r"""
     Apply a complex fast fourier transform.
 
@@ -64,7 +65,7 @@ def fft(dataset, size=None, tdeff=None, inv=False, inplace=True, dim=-1, **kwarg
     size : int, optional
         size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
         power of two greater than the data size
-    tdeff : int, optional
+    sizeff : int, optional
         The number of effective data point to take into account for the transformation. By default it is equal to the
         data size, but may be smaller.
     inv : bool, optional, default=False
@@ -74,14 +75,21 @@ def fft(dataset, size=None, tdeff=None, inv=False, inplace=True, dim=-1, **kwarg
     dim : str or int, optional, default='x'.
         Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
+    **kwargs : other parameters (see other parameters)
 
-
+    Other Parameters
+    ----------------
+    tdeff : int, optional
+        alias of sizeff (specific to NMR). If both sizeff and tdeff are passed, sizeff has the priority.
+        
     Returns
     -------
     object : nd-dataset or nd-array
         transformed dataset
 
     """
+    # datatype
+    is_nmr = dataset.origin in ["bruker",]
     
     # On which axis do we want to apodize? (get axis from arguments)
     axis, dim = dataset.get_axis(dim, negative_axis=True)
@@ -118,17 +126,28 @@ def fft(dataset, size=None, tdeff=None, inv=False, inplace=True, dim=-1, **kwarg
     else:
         new = dataset
 
-    
+    # Can we use some metadata as for NMR spectra
+    if is_nmr:
+        td = dataset.meta.td[-1]
+    else:
+        td = lastcoord.size
+        
+    # if no size (or si) parameter then use twice the size of the data
     if size is None:
-        size = kwargs.get('si', lastcoord.size)
+        size = kwargs.get('si', td * 2)
 
     # we default to the closest power of two larger than the data size
-    size = closer_power_of_two(size * 2)
+    size = closer_power_of_two(size)
+        
+    # do we have an effective td to apply
+    tdeff = sizeff
+    if tdeff is None:
+        tdeff = kwargs.get("tdeff", td)
     
     if tdeff is None or tdeff<5 or tdeff>size:
         tdeff =  size
         
-    
+    # Eventually apply the effective size
     new[...,tdeff:] = 0.
     
     # should we work on complex data
@@ -137,12 +156,13 @@ def fft(dataset, size=None, tdeff=None, inv=False, inplace=True, dim=-1, **kwarg
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
     encoding = None
-    if new.meta.encoding is not None:
+    if is_nmr:
         encoding = new.meta.encoding[-1]
     
     # perform the fft
     if iscomplex and encoding in ['QSIM', 'DQD']:
         data = np.fft.fft(new.data, size)
+        data = np.fft.fftshift(data, -1)
     else:
         raise NotImplementedError(encoding)
     
@@ -150,11 +170,27 @@ def fft(dataset, size=None, tdeff=None, inv=False, inplace=True, dim=-1, **kwarg
     new._data = data
     new.mask = False # TODO: make a test on mask - should be none before fft!
     
+    # create new coordinates for the transformed data
     
-    newcoord = type(lastcoord)(np.arange(size))
+    if is_nmr:
+        sfo1 = new.meta.sfo1[-1]
+        bf1 = new.meta.bf1[-1]
+        sf = new.meta.sf[-1]
+        sw = new.meta.sw_h[-1]
+    
+    sizem = max(size - 1, 1)
+    delta = -sw / sizem
+    first = sfo1 - sf - delta * sizem / 2.
+    
+    newcoord = type(lastcoord)(np.arange(size)*delta + first)
     newcoord.name = lastcoord.name
     newcoord.title = 'frequency'
-    newcoord.units = 'ppm'
+    newcoord.units = "Hz"
+    
+    if is_nmr:
+        newcoord.meta.larmor = bf1  # needed for ppm transformation
+        newcoord.origin = 'bruker'
+        
     new.coords[-1]=newcoord
     
     
@@ -181,6 +217,9 @@ if __name__ == '__main__':  # pragma: no cover
     
     new = dataset1D.fft(tdeff=8192)
 
+    # change frequency axis to ppm
+    new.frequency.ito('ppm')
+    
     new.plot()
     
     show()
