@@ -293,7 +293,7 @@ def test_nddataset_str():
     info_(arr1d)
     assert '[int64]' in str(arr1d)
     arr2d = NDDataset(np.array([[1, 2], [3, 4]]))
-    assert str(arr2d) == 'NDDataset: [int64] unitless (shape : (y:2, x:2))'
+    assert str(arr2d) == 'NDDataset: [int64] unitless (shape: (y:2, x:2))'
 
 
 def test_nddataset_str_repr(ds1):
@@ -556,7 +556,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     da = ds1
     ref = ref_ds
     y1 = da[2000.]
-    assert str(y1) == 'NDDataset: [float64] a.u. (shape : (z:1, y:100, x:3))'
+    assert str(y1) == 'NDDataset: [float64] a.u. (shape: (z:1, y:100, x:3))'
 
     y2 = da[2000]
     assert y2 is None  # as we are out of limits
@@ -564,7 +564,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     assert caplog.records[-1].message.startswith('Empty array of shape (0, 100, 3) resulted from slicing.')
 
     y3 = da[:, 95:105]
-    assert str(y3) == 'NDDataset: [float64] a.u. (shape : (z:10, y:5, x:3))'
+    assert str(y3) == 'NDDataset: [float64] a.u. (shape: (z:10, y:5, x:3))'
 
     info_(da)
     y4 = da[5000.:4001.]
@@ -573,7 +573,7 @@ def test_nddataset_slicing_out_limits(caplog, ref_ds, ds1):
     assert caplog.records[-1].message.startswith('Empty array of shape (0, 100, 3) resulted from slicing.')
 
     y5 = da[5000.:3000.]
-    assert str(y5) == 'NDDataset: [float64] a.u. (shape : (z:4, y:100, x:3))'
+    assert str(y5) == 'NDDataset: [float64] a.u. (shape: (z:4, y:100, x:3))'
 
 
 @raises(IndexError)
@@ -1352,9 +1352,9 @@ def test_nddataset_transpose_swapaxes(ds1):
 
     # fix a bug with loc indexation
     nd1 = nd[4000.:3000.]
-    assert str(nd1) == 'NDDataset: [float64] a.u. (shape : (z:4, y:100, x:3))'
+    assert str(nd1) == 'NDDataset: [float64] a.u. (shape: (z:4, y:100, x:3))'
     nd2 = ndt[..., 4000.:3000.]
-    assert str(nd2) == 'NDDataset: [float64] a.u. (shape : (x:3, y:100, z:4))'
+    assert str(nd2) == 'NDDataset: [float64] a.u. (shape: (x:3, y:100, z:4))'
     assert nd1 == nd2.T
 
 
