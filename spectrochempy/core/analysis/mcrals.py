@@ -350,7 +350,11 @@ class MCRALS(HasTraits):
         res = self._X - X_hat
 
         ax = self._X.plot()
-        ax.plot(self._X.x.data, X_hat.T.data, color=colXhat)
-        ax.plot(self._X.x.data, res.T.data, color=colRes)
-        ax.set_title('MCR ALS merit plot')
+        if self._X.x is not None: # has x coordinates
+            ax.plot(self._X.x.data, X_hat.T.data, color=colXhat)
+            ax.plot(self._X.x.data, res.T.data, color=colRes)
+        else:
+            ax.plot(X_hat.T.data, color=colXhat)
+            ax.plot(res.T.data, color=colRes)
+        ax.set_title('MCR ALS Figure of Merit plot')
         return ax

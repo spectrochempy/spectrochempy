@@ -44,8 +44,7 @@ def test_MCRALS_no_coords():
     mcr2.plotmerit()
 
     assert 'converged !' in mcr2._log[-15:]
-
-
+    
 def test_MCRALS():
 
     data = NDDataset.read_matlab(os.path.join('matlabdata','als2004dataset.MAT'), transposed=True)
