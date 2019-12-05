@@ -90,6 +90,20 @@ cov/
 scpy.svg
 *.sample
 scp_data/testdata/figures
+1r
+1i
+2rr
+2ri
+2ir
+2ii
+3rrr
+3rri
+3rir
+3rii
+3irr
+3iri
+3iir
+3iii
 
 # Installer logs
 # ----------------------------------------------------------------------------------------------------------------------
