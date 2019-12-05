@@ -88,16 +88,13 @@ def test_nmr_apodization_with_null(NMR_dataset_1D):
 
     # arr and dataset should be equal as no em was applied
     assert_equal(dataset.data, arr.data)
-    assert_equal(apod, 1.)
-
+    
     lb = 0.
     gb = 0.
     arr, apod = dataset.gm(lb=lb, gb=gb, inplace=False, retfunc=True)
     
     # arr and dataset should be equal as no em was applied
     assert_equal(dataset.data, arr.data)
-    assert_equal(apod, 1.)
-
 
 def test_nmr_apodization_(NMR_dataset_1D):
 

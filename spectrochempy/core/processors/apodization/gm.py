@@ -83,47 +83,41 @@ def gm(dataset, gb=1*ur.Hz, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace
     if not isinstance(gb, Quantity):
         # we default to Hz units
         gb = gb * ur.Hz
-    if lb.magnitude < epsilon and gb.magnitude < epsilon:
-        
-        out = dataset
-        apodcurve = 1.
-        
-    else:
 
-        # is it a shifted broadening?
-        if not isinstance(shifted, Quantity):
-            # we default to microsecond units
-            shifted = shifted * ur.us
-        if shifted.magnitude < 0.:
-            shifted = 0. * ur.us
-    
-        def func(x, gb, lb, shifted):
-            
-            g = np.ones_like(x)
-            if (x.unitless or x.dimensionless or
-                    x.units.dimensionality != '[time]'):
-                error_('gm apply only to dimensions with [time] dimensionality')
-                return g
-            units = x.units
-            shifted = shifted.to(units)
-            xs = np.pi * np.abs(x - shifted)
-            if abs(lb.magnitude) > epsilon:
-                tc1 = 1. / lb
-                tc1 = tc1.to(units)
-                e = x / tc1
-            else:
-                e = np.zeros_like(x)
-            if gb.magnitude > epsilon:
-                tc2 = 1. / gb
-                tc2 = tc2.to(units)
-                g = 0.6 * xs / tc2
-            else:
-                g = np.zeros_like(x)
-    
-            return np.exp(e - g ** 2).data
-    
-        # call the generic apodization function
-        out, apodcurve = apodize(dataset, func, (gb, lb, shifted), inv=inv, rev=rev, inplace=inplace, dim=dim, **kwargs)
+    # is it a shifted broadening?
+    if not isinstance(shifted, Quantity):
+        # we default to microsecond units
+        shifted = shifted * ur.us
+    if shifted.magnitude < 0.:
+        shifted = 0. * ur.us
+
+    def func(x, gb, lb, shifted):
+        
+        g = np.ones_like(x)
+        if (x.unitless or x.dimensionless or
+                x.units.dimensionality != '[time]'):
+            error_('gm apply only to dimensions with [time] dimensionality')
+            return g
+        units = x.units
+        shifted = shifted.to(units)
+        xs = np.pi * np.abs(x - shifted)
+        if abs(lb.magnitude) > epsilon:
+            tc1 = 1. / lb
+            tc1 = tc1.to(units)
+            e = x / tc1
+        else:
+            e = np.zeros_like(x)
+        if gb.magnitude > epsilon:
+            tc2 = 1. / gb
+            tc2 = tc2.to(units)
+            g = 0.6 * xs / tc2
+        else:
+            g = np.zeros_like(x)
+
+        return np.exp(e - g ** 2).data
+
+    # call the generic apodization function
+    out, apodcurve = apodize(dataset, func, (gb, lb, shifted), inv=inv, rev=rev, inplace=inplace, dim=dim, **kwargs)
 
     if kwargs.pop('retfunc', False):
         apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
