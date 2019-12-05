@@ -1,10 +1,10 @@
 ##TITLE= Parameter file, TopSpin 4.0.7
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 52	$$ modification sequence number
+##NPOINTS= 53	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= nmr
-$$ 2019-12-04 15:57:21.375 +0100  christian@lcs191n.ensicaen.fr
+$$ 2019-12-05 12:28:16.734 +0100  christian@lcs191n.ensicaen.fr
 $$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/bruker_2d/1/pdata/1/proc
 $$ process /opt/topspin4.0.7/prog/mod/dataserver
 ##$ABSF1= 109.3122
