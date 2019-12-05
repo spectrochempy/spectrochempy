@@ -13,7 +13,7 @@
 
 """
 
-from spectrochempy.utils import Meta, SpectroChemPyWarning
+from spectrochempy.utils import Meta
 from spectrochempy.utils.testing import  raises
 
 def test_init():

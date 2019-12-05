@@ -275,11 +275,8 @@ class Meta(object):  # HasTraits):
 
         """
 
-        if not inplace:
-            newmeta = self.copy()
-        else:
-            newmeta = self
-
+        newmeta = self.copy()
+        
         newmeta.readonly = False
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
@@ -291,6 +288,8 @@ class Meta(object):  # HasTraits):
         newmeta.readonly = self.readonly
         if not inplace:
             return newmeta
+        else:
+            self._data = newmeta._data
 
     def permute(self, *dims, inplace=True):
         """
@@ -305,11 +304,8 @@ class Meta(object):  # HasTraits):
 
         """
 
-        if not inplace:
-            newmeta = self.copy()
-        else:
-            newmeta = self
-
+        newmeta = self.copy()
+        
         newmeta.readonly = False
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
@@ -322,3 +318,6 @@ class Meta(object):  # HasTraits):
         newmeta.readonly = self.readonly
         if not inplace:
             return newmeta
+        else:
+            self._data = newmeta._data
+            
