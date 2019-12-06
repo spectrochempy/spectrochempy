@@ -119,7 +119,7 @@ def test_ndcomplex_init_complex_with_mask():
     assert d3RR._mask.shape == (2, 2)
     info_(d3)
     assert isinstance(d3[1, 1].values, Quantity)
-    assert d3[1, 1].values.magnitude == d[1, 1].data
+    assert d3[1, 1].values.magnitude == d[1, 1]
 
 
 def test_ndcomplex_swapaxes():
