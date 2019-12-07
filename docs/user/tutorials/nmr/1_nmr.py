@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -211,7 +212,7 @@ lb2_dataset = em(dataset1D, lb=100.*ur.Hz, inplace=False)
 assert lb2_dataset == lb_dataset
 
 # %% [markdown]
-# We can also get only the apodization function
+# We can also get the apodization function together with the processed dataset
 
 # %%
 # restore original
@@ -243,8 +244,7 @@ dataset1D /= dataset1D.max()
 
 # apodize
 LB = 100.*ur.Hz
-apodfunc = dataset1D.em(lb=LB, apply=False)
-lb_dataset = dataset1D.em(lb=LB, inplace=False) #  apply=True by default
+lb_dataset, apodfunc = dataset1D.em(lb=LB, retfunc=True, inplace=False) 
 
 # Plot
 dataset1D.plot(lw=1, color='gray') 
@@ -252,21 +252,18 @@ apodfunc.plot(color='r', clear=False)
 lb_dataset.plot(color='r', ls='--', clear=False) 
 
 # shifted
-apodfuncshifted = dataset1D.em(lb=LB, shifted=3000, apply=False)
-apodfuncshifted.plot(color='b', clear=False)
-lbshifted_dataset = dataset1D.em(lb=LB, shifted=3000, inplace=False) #  apply=True by default
-lbshifted_dataset.plot(xlim=(0,10000), ylim=(-1,1), color='b', ls='--', clear=False) 
+lbshifted_dataset, apodfuncshifted = dataset1D.em(lb=LB, shifted=3000, retfunc=True, inplace=False) 
+apodfuncshifted.plot(color='b')
+lbshifted_dataset.plot(ylim=(-1,1), color='b', ls='--', clear=False) 
 
 # rev
-apodfuncrev = dataset1D.em(lb=LB, rev=True, apply=False)
-apodfuncrev.plot(color='g', clear=False)
-lbrev_dataset = dataset1D.em(lb=LB, rev=True, inplace=False) #  apply=True by default
+lbrev_dataset, apodfuncrev = dataset1D.em(lb=LB, rev=True, retfunc=True, inplace=False) 
+apodfuncrev.plot(color='g')
 lbrev_dataset.plot(ylim=(-1,1), color='g', ls='--', clear=False) 
 
 # inv
-apodfuncinv = dataset1D.em(lb=LB, inv=True, apply=False)
-apodfuncinv.plot(color='m', clear=False)
-lbinv_dataset = dataset1D.em(lb=LB, inv=True, inplace=False) #  apply=True by default
+lbinv_dataset, apodfuncinv = dataset1D.em(lb=LB, inv=True, retfunc=True, inplace=False)
+apodfuncinv.plot(color='m')
 _ = lbinv_dataset.plot(ylim=(-1.5,1.5), color='m', ls='--', clear=False) 
 
 # %% [markdown]
@@ -274,56 +271,67 @@ _ = lbinv_dataset.plot(ylim=(-1.5,1.5), color='m', ls='--', clear=False)
 
 # %%
 # restore original
-dataset1D = get_dataset1D() 
+dataset1D = get_dataset1D()[:10000.0]  # take a selection 
 dataset1D /= dataset1D.max()
 
 # apodize
 LB = -100.*ur.Hz
 GB = 300.*ur.Hz
-apodfunc = dataset1D.gm(gb=GB, lb=LB, apply=False)
-gb_dataset = dataset1D.gm(gb=GB, lb=LB, inplace=False) #  apply=True by default
+gb_dataset, apodfunc = dataset1D.gm(gb=GB, lb=LB, retfunc=True, inplace=False)
 
 # plot 
 dataset1D.plot() 
 apodfunc.plot(color='r', clear=False)
-_ = gb_dataset.plot(xlim=(0,25000), zlim=(-1.5,1.5), color='r', ls='--', clear=False) 
+_ = gb_dataset.plot(xlim=(0,10000), zlim=(-1.5,1.5), color='r', ls='--', clear=False) 
 
 # shifted
 LB = 10.*ur.Hz
 GB = 300.*ur.Hz
-apodfuncsh = dataset1D.gm(gb=GB, lb=LB, shifted=2000, apply=False)
-gbsh_dataset = dataset1D.gm(gb=GB, lb=LB, shifted=2000, inplace=False) #  apply=True by default
+gbsh_dataset, apodfuncsh  = dataset1D.gm(gb=GB, lb=LB, shifted=2000, retfunc=True, inplace=False) 
 
 # plot 
 apodfuncsh.plot(color='g', clear=False)
-_ = gbsh_dataset.plot(xlim=(0,25000), zlim=(-1.5,1.5), color='g', ls='--', clear=False) 
+_ = gbsh_dataset.plot(zlim=(-1.5,1.5), color='g', ls='--', clear=False) 
 
 # %% [markdown]
 # #### sp (shifted sine-bell apodization)
 
 # %% [markdown]
-# $\text{sp}(x) = \sin(\frac{\pi * o + \pi * (e - o) * x} {n - 1})^{p}$ where 
-#
-# * $o$ specifies the starting point of the sine-bell in time units (The default value is 0.0).
-# * $e$ specifies the ending point of the sine-bell in time units.
-# * $p$ specifies the exponent of the sine-bell; Non-integer values are allowed. Common values are 1.0 (for ordinary sine-bell) and 2.0 (for squared-bell functions). The default value is 1.0.
+# $\text{sp}(x) = \sin(\frac{(\pi - \phi) t }{\text{aq}} + \phi)^{p}$ where 
+#         
+# where $0 \lt t \lt \text{aq}$ and  $\phi = \pi ⁄ \text{sbb}$ when $\text{ssb} \ge 2$ or $\phi = 0$ when $\text{ssb} \lt 2$.
+#         
+# $\text{aq}$ is an acquisition status parameter and $\text{ssb}$ is a processing parameter (see the `SSB` parameter definition below) and $\text{pow}$ is an exponent equal to 1 for a sine bell window or 2 for a squared sine bell window.
+#     
+# SSB: This processing parameter mimics the behaviour of the SSB parameter on bruker TOPSPIN software: Typical values are 1 for a pure sine function and 2 for a pure cosine function. Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0, have the same effect as $\text{ssb}=1$, namely a pure sine function.
 
 # %%
-# restore original
-dataset1D = get_dataset1D() # restore original
+dataset1D = get_dataset1D()[:10000.0]  # take a selection
 dataset1D /= dataset1D.max()
 
-off = 10.*ur.us
-end = 5000.*ur.us
+ssb = 2.
 pow = 1.
 
-apodfunc = dataset1D.sp(off=off, end=end, pow=pow, apply=False)
-sp_dataset = dataset1D.sp(off=off, end=end, pow=pow, inplace = False)
+sp_dataset, apodfunc = dataset1D.sp(ssb=ssb, pow=pow, retfunc=True, inplace = False)
 
 # plot
 dataset1D.plot() 
 apodfunc.plot(color='r', clear=False)
-_ = sp_dataset.plot(color='r', ls='--', clear=False, xlim=(0,25000), zlim=(-1.5,1.5)) 
+_ = sp_dataset.plot(color='r', ls='--', clear=False, xlim=(0,10000))
+
+# %%
+dataset1D = get_dataset1D()[:10000.0]  # take a selection
+dataset1D /= dataset1D.max()
+
+ssb = 3.
+pow = 2.
+
+sp_dataset, apodfunc = dataset1D.sp(ssb=ssb, pow=pow, retfunc=True, inplace = False)
+
+# plot
+dataset1D.plot() 
+apodfunc.plot(color='r', clear=False)
+_ = sp_dataset.plot(color='r', ls='--', clear=False, xlim=(0,10000))
 
 # %% [markdown]
 # ### Apodization of 2D data
@@ -335,7 +343,7 @@ dataset2D.plot_map(xlim=(0.,25000.))
 LB = 200.*ur.Hz
 dataset2D.em(lb=LB)
 dataset2D.em(lb=LB/2, axis=0)  
-dataset2D.plot_map(data_only=True, cmap='copper', clear=False)
+_ = dataset2D.plot_map(data_only=True, cmap='copper', clear=False)
 
 # %% [markdown]
 # ## Time-frequency transforms : FFT
@@ -344,19 +352,50 @@ dataset2D.plot_map(data_only=True, cmap='copper', clear=False)
 dataset1D = get_dataset1D() # restore original
 LB = 10.*ur.Hz
 dataset1D.em(lb=LB)
-#dataset1D.zf_auto(inplace=True)
-#transf1 = source1D.fft() # by defauut fft create a new dataset
+transf1 = dataset1D.fft(size=32000) 
+_ = transf1.plot(xlim=[30,-30])
+
+# %% [markdown]
+# by default, the frequency axis unit is in ppm when data originate from NMR. Note that the axis is automatically reversed as it is usual for ppm scale in NMR. 
+
+# %% [markdown]
+# To get frequency scale, then set `ppm` flag to False
 
 # %%
 dataset1D = get_dataset1D() # restore original
 LB = 10.*ur.Hz
 GB = 50.*ur.Hz
 dataset1D.gm(gb=GB, lb=LB)
-#dataset1D.zf_auto()
-#transf2 = dataset1D.fft()
+transf1 = dataset1D.fft(size=32000, ppm=False) 
+_ = transf1.plot(xlim=[5000,-5000])
 
 # %% [markdown]
-# As the new dataset is transformed, function that apply to time data such as **em** should not work
+# As the new dataset is transformed, any function that apply only to time data such as apodization (*e.g.*, **em** or **gm**) should not work
 
 # %%
-#_ = transf1.em(lb=10*ur.Hz)
+# This generate an error
+_ = transf1.em(lb=10*ur.Hz)
+
+# %%
+# and also this generate an error
+_ = transf1.fft()
+
+# %% [markdown]
+# One can perform the inverse fourier transform using **fft** with `inv=True` keyword argument, or **ifft**
+
+# %%
+transf2 = transf1.ifft()
+_ = transf2.plot()
+
+# %% [markdown]
+# ## Phasing
+#
+# Our spectra can be phased using 
+
+# %%
+_ = transf1.plot(imag=True)
+
+# %%
+transf1.plot?
+
+# %%

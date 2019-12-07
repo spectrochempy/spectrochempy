@@ -29,7 +29,7 @@ from traitlets import Bool, observe, All, Unicode
 from .ndarray import NDArray
 from .ndmath import NDMath, set_operators
 from ...core import info_, debug_, error_, warning_
-from ...utils import (docstrings, colored_output, NOMASK)
+from ...utils import (docstrings, colored_output, NOMASK, spacing)
 
 
 # ======================================================================================================================
@@ -131,7 +131,7 @@ class Coord(NDMath, NDArray):
         """bool - Whether the axis is reversed (readonly
         property).
         """
-        if "wavenumber" in self.title.lower() or "ppm" in self.title.lower():
+        if self.units in ['1 / centimeter','ppm']:
             return True
         return False
         ## Return a correct result only if the data are sorted
@@ -194,6 +194,13 @@ class Coord(NDMath, NDArray):
         # Coordinates cannot be masked. Set mask always to NOMASK
         self._mask = NOMASK
 
+    # ..................................................................................................................
+    @property
+    def spacing(self):
+        # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
+        # else return an array of the differents spacings
+        return spacing(self.data) * self.units
+        
     # NDmath methods
 
     # ..................................................................................................................

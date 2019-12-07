@@ -20,7 +20,6 @@ __all__ = [
     "HAS_XARRAY",
 
     "make_new_object",
-    "closer_power_of_two",
     "getdocfrom",
     "dict_compare",
     'htmldoc',
@@ -33,7 +32,8 @@ __all__ = [
     "multisort",
     'makestr',
     'srepr',
-    'largest_power_of_2',
+    "spacing",
+    
     #
     'display_info_string',
     
@@ -397,56 +397,32 @@ def primefactors(n):
             return result
 
 
-def largest_power_of_2(value):
+def spacing(arr):
     """
-    Find the largest and nearest power of two of a value
-
+    Return a scalar for the spacing in the one-dimensional input array (if it is uniformly spaced,
+    else return an array of the different spacings
+    
     Parameters
     ----------
-    value : int
+    arr : 1D np.array
 
     Returns
     -------
-    pw : int
-        Power of 2.
-
-    Examples
-    --------
-
-        >>> largest_power_of_2(1020)
-        1024
-        >>> largest_power_of_2(1025)
-        2048
-        >>> largest_power_of_2(0)
-        2
-        >>> largest_power_of_2(1)
-        2
-
-
+    out : float or array
+    
     """
-    value = max(2, value)
-    p = int(pow(2, np.ceil(np.log(value) / np.log(2))))
-    return p
-
-
-def closer_power_of_two(value):
-    """
-    Find the nearest power of two equal to or larger than a value.
-
-    Parameters
-    ----------
-    value : int
-        Value to find nearest power of two equal to or larger than.
-
-    Returns
-    -------
-    pw : int
-        Power of 2.
-
-    """
-    return int(pow(2, np.ceil(np.log(value) / np.log(2))))
-
-
+    spacings = np.diff(arr)
+    # we need to take into account only the significative digits ( but round to some decimals doesn't work
+    # for very small number
+    mantissa, twoexp = np.frexp(spacings)
+    mantissa = mantissa.round(6)
+    spacings = np.ldexp(mantissa, twoexp)
+    spacings = list(set(abs(spacings)))
+    if len(spacings) == 1:
+        # uniform spacing
+        return spacings[0]
+    else:
+        return spacings
 
 
 def display_info_string(**kwargs):

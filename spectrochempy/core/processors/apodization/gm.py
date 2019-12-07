@@ -96,7 +96,8 @@ def gm(dataset, gb=1*ur.Hz, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace
         g = np.ones_like(x)
         if (x.unitless or x.dimensionless or
                 x.units.dimensionality != '[time]'):
-            error_('gm apply only to dimensions with [time] dimensionality')
+            error_('gm apply only to dimensions with [time] dimensionality\n'
+                   'gm processing was thus cancelled')
             return g
         units = x.units
         shifted = shifted.to(units)

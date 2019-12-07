@@ -15,6 +15,7 @@ __dataset_methods__  = __all__
 #======================================================================================================================
 # Standard python imports
 # ======================================================================================================================
+import re
 
 # ======================================================================================================================
 # Third party imports
@@ -24,23 +25,9 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.utils import closer_power_of_two
-from spectrochempy.units import set_nmr_context
-from spectrochempy.core import project_preferences, general_preferences, error_, warning_
+from spectrochempy.extern.nmrglue.process.proc_base import largest_power_of_2, zf_size
 
-
-epsilon = np.finfo(float).eps
-
-
-# ======================================================================================================================
-# interface for the processing class
-# ======================================================================================================================
-
-# ======================================================================================================================
-# generic transform function
-# ======================================================================================================================
-
-def ifft(dataset, size=None, inplace=True, **kwargs):
+def ifft(dataset, size=None, inplace=False, **kwargs):
     r"""
     Apply inverse fast fourier transform.
     (see `fft` documentation.)
@@ -48,7 +35,7 @@ def ifft(dataset, size=None, inplace=True, **kwargs):
     return fft(dataset, size=size, inv=True, inplace=inplace, **kwargs)
 
 
-def fft(dataset, size=None, sizeff=None, inv=False, inplace=True, dim=-1, **kwargs):
+def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=True, **kwargs):
     r"""
     Apply a complex fast fourier transform.
 
@@ -69,12 +56,14 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=True, dim=-1, **kwar
         The number of effective data point to take into account for the transformation. By default it is equal to the
         data size, but may be smaller.
     inv : bool, optional, default=False
-        if True, an inverse Fourier transform is performed
-    inplace : bool, optional, default=True.
+        if True, an inverse Fourier transform is performed - size parameter is not taken into account
+    inplace : bool, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new dataset
     dim : str or int, optional, default='x'.
         Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
+    ppm : bool, optional, default True
+        If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
     **kwargs : other parameters (see other parameters)
 
     Other Parameters
@@ -105,13 +94,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=True, dim=-1, **kwar
     # select the last coordinates
     lastcoord = dataset.coords[dim]
     
-    if (not inv and not lastcoord.unitless and not lastcoord.dimensionless and lastcoord.units.dimensionality != '[time]'):
-        error_('fft apply only to dimensions with [time] dimensionality, unitless or dimensionless data\n'
+    if (not inv and lastcoord.units.dimensionality != '[time]'):
+        error_('fft apply only to dimensions with [time] dimensionality\n'
                'fft processing was thus cancelled')
         return dataset
     
-    elif (inv and not lastcoord.unitless and not lastcoord.dimensionless and lastcoord.units.dimensionality != '[frequency]'):
-        error_('ifft apply only to dimensions with [frequency] dimensionality, unitless or dimensionless data\n'
+    elif (inv and not lastcoord.unitless and not lastcoord.dimensionless and lastcoord.units.dimensionality != '1/[time]'):
+        error_('ifft apply only to dimensions with [frequency] dimensionality\n'
                'ifft processing was thus cancelled')
         return dataset
     
@@ -127,17 +116,17 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=True, dim=-1, **kwar
         new = dataset
 
     # Can we use some metadata as for NMR spectra
-    if is_nmr:
+    if is_nmr and not inv:
         td = dataset.meta.td[-1]
     else:
         td = lastcoord.size
         
-    # if no size (or si) parameter then use twice the size of the data
-    if size is None:
-        size = kwargs.get('si', td * 2)
+    # if no size (or si) parameter then use the size of the data (size not used for inverse transform
+    if size is None or inv:
+        size = kwargs.get('si', td)
 
-    # we default to the closest power of two larger than the data size
-    size = closer_power_of_two(size)
+    # we default to the closest power of two larger of the data size
+    size = largest_power_of_2(size)
         
     # do we have an effective td to apply
     tdeff = sizeff
@@ -145,7 +134,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=True, dim=-1, **kwar
         tdeff = kwargs.get("tdeff", td)
     
     if tdeff is None or tdeff<5 or tdeff>size:
-        tdeff =  size
+        tdeff = size
         
     # Eventually apply the effective size
     new[...,tdeff:] = 0.
@@ -156,13 +145,18 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=True, dim=-1, **kwar
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
     encoding = None
-    if is_nmr:
+    if is_nmr and not inv:
         encoding = new.meta.encoding[-1]
     
     # perform the fft
     if iscomplex and encoding in ['QSIM', 'DQD']:
-        data = np.fft.fft(new.data, size)
+        data = zf_size(new.data, size)
+        data = np.fft.fft(data)
         data = np.fft.fftshift(data, -1)
+    elif inv:
+        # we assume no special encoding for inverse fft transform
+        data = np.fft.ifftshift(new.data, -1)
+        data = np.fft.ifft(data)
     else:
         raise NotImplementedError(encoding)
     
@@ -177,20 +171,53 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=True, dim=-1, **kwar
         bf1 = new.meta.bf1[-1]
         sf = new.meta.sf[-1]
         sw = new.meta.sw_h[-1]
-    
-    sizem = max(size - 1, 1)
-    delta = -sw / sizem
-    first = sfo1 - sf - delta * sizem / 2.
-    
-    newcoord = type(lastcoord)(np.arange(size)*delta + first)
-    newcoord.name = lastcoord.name
-    newcoord.title = 'frequency'
-    newcoord.units = "Hz"
-    
-    if is_nmr:
+        
+    else:
+        sfo1 = 1.0 * ur.Hz
+        bf1 = sfo1
+        sf = 0 * ur.Hz
+        dw = lastcoord.spacing
+        sw = 1. / dw
+        
+    if not inv:
+        # time to frequency
+        sizem = max(size - 1, 1)
+        deltaf = -sw / sizem
+        first = sfo1 - sf - deltaf * sizem / 2.
+        
+        newcoord = type(lastcoord)(np.arange(size)*deltaf + first)
+        newcoord.name = lastcoord.name
+        newcoord.title = 'frequency'
+        newcoord.ito("Hz")
+        
+    else:
+        # frequency or ppm to time
+        sw = abs(lastcoord.data[-1]-lastcoord.data[0])
+        if lastcoord.units == 'ppm':
+            sw = bf1.to("Hz") * sw / 1.0e6
+        deltat = 1. /sw
+        
+        newcoord = type(lastcoord)(np.arange(size)*deltat)
+        newcoord.name = lastcoord.name
+        newcoord.title = 'time'
+        newcoord.ito("s")
+        
+    if is_nmr and not inv:
         newcoord.meta.larmor = bf1  # needed for ppm transformation
         newcoord.origin = 'bruker'
-        
+        if ppm:
+            newcoord.ito('ppm')
+            if new.meta.nuc1 is not None:
+                nuc1 = new.meta.nuc1[-1]
+                regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
+                m = re.match(regex, nuc1)
+                mass = m[1]
+                name = m[2]
+                nucleus = '^{' + mass + '}' + name
+            else:
+                nucleus = ""
+            newcoord.title = fr"$\delta\ {nucleus}$"
+    
     new.coords[-1]=newcoord
     
     
@@ -213,13 +240,14 @@ if __name__ == '__main__':  # pragma: no cover
     
     dataset1D /= dataset1D.real.data.max()  # normalize
     
-    p = dataset1D.plot()
+    dataset1D.x.ito('s')
+    dataset1D.plot()
     
-    new = dataset1D.fft(tdeff=8192)
+    new = dataset1D.fft(tdeff=8192, size=2**15)
+    
+    new2 = new.ifft()
+    (new2-.1).plot(color='r', clear=False)
 
-    # change frequency axis to ppm
-    new.frequency.ito('ppm')
-    
     new.plot()
-    
+
     show()

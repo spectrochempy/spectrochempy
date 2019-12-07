@@ -20,6 +20,7 @@ import numpy as np
 # Local imports
 # ======================================================================================================================
 from spectrochempy.core.processors.apodization.apodize import apodize
+from spectrochempy.core import error_
 from spectrochempy.utils import epsilon
 from spectrochempy.utils import docstrings
 from spectrochempy.units.units import ur, Quantity
@@ -91,7 +92,8 @@ def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-
         else :
             if (x.unitless or x.dimensionless or
                     x.units.dimensionality != '[time]'):
-                error_('em apply only to dimensions with [time] dimensionality')
+                error_('em apply only to dimensions with [time] dimensionality\n'
+                       'em processing was thus cancelled')
                 return e
             units = x.units
             tc = 1. / lb
