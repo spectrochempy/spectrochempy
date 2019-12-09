@@ -232,22 +232,4 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
 # ======================================================================================================================
 if __name__ == '__main__':  # pragma: no cover
-    from spectrochempy import *
-    
-    dataset1D = NDDataset()
-    path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-    
-    dataset1D /= dataset1D.real.data.max()  # normalize
-    
-    dataset1D.x.ito('s')
-    dataset1D.plot()
-    
-    new = dataset1D.fft(tdeff=8192, size=2**15)
-    
-    new2 = new.ifft()
-    (new2-.1).plot(color='r', clear=False)
-
-    new.plot()
-
-    show()
+    pass
