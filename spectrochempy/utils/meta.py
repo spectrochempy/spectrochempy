@@ -22,6 +22,7 @@ elements can be accessed by key, but also by attributes, *e.g.*
 from traitlets import HasTraits, Dict, Bool, default
 import numpy as np
 import sys
+import copy
 
 from . import (is_sequence, SpectroChemPyWarning)
 
@@ -136,7 +137,7 @@ class Meta(object):  # HasTraits):
 
     def __copy__(self):
         ret = self.__class__()
-        ret.update(self._data)
+        ret.update(copy.deepcopy(self._data))
         ret.readonly = self.readonly
         return ret
 
