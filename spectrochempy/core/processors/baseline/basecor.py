@@ -179,7 +179,7 @@ class BaselineCorrection(HasTraits):
 
         ranges = CoordRange(*self.ranges)
 
-        # Extract: Sbase: the matrix of data correponding to ranges
+        # Extract: Sbase: the matrix of data corresponding to ranges
         #          xbase: the xaxis values corresponding to ranges
 
         s = []

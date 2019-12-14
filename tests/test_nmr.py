@@ -171,19 +171,7 @@ def test_nmr_reader_2D():
     ndd = NDDataset()
     ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == "NDDataset: [quaternion] unitless (shape: (y:96, x:948))"
-    assert "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>" \
-           "       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px " \
-           "solid lightgray;  '> <div><font color='blue'>         RR[[ 0.06219   0.1467 ...  0.04565  0.03068]<br/>  " \
-           "          [-0.05969 -0.08752 ... -0.05134 -0.05994]<br/>            ...<br/>            [       0        " \
-           "0 ...        0        0]<br/>            [       0        0 ...        0        0]]<br/>         " \
-           "RI[[  0.2238   0.1985 ...   0.1662 -0.03262]<br/>            [0.006566  -0.0282 ...  0.02949  0.06717]" \
-           "<br/>            ...<br/>            [      -0       -0 ...       -0       -0]<br/>            [      -0" \
-           "       -0 ...       -0       -0]]<br/>         IR[[-0.003312 -0.001535 ...  0.02067 -0.08058]<br/>" \
-           "            [-0.05685   0.1174 ...  0.05831 -0.003414]<br/>            ...<br/>            [       0 " \
-           "       0 ...        0        0]<br/>            [       0        0 ...        0        0]]<br/> " \
-           "        II[[  0.1623   0.0563 ... -0.02654  0.01094]<br/>            [ -0.1344 0.006515 ...  " \
-           "0.08239 -0.00516]<br/>            ...<br/>            [      -0       -0 ...       -0       -0]<br/> " \
-           "           [      -0       -0 ...       -0       -0]]</font></div></td><tr>" in ndd._repr_html_()
+    assert "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px;" in ndd._repr_html_()
 
 
 def test_nmr_2D_imag(NMR_dataset_2D):

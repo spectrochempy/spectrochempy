@@ -20,6 +20,8 @@
 # %%
 from spectrochempy import *
 
+# %%
+
 # %% [markdown]
 # ## Import data
 #
@@ -367,6 +369,7 @@ LB = 10.*ur.Hz
 GB = 50.*ur.Hz
 dataset1D.gm(gb=GB, lb=LB)
 transf1 = dataset1D.fft(size=32000, ppm=False) 
+assert transf1 is not dataset1D
 _ = transf1.plot(xlim=[5000,-5000])
 
 # %% [markdown]
@@ -374,18 +377,18 @@ _ = transf1.plot(xlim=[5000,-5000])
 
 # %%
 # This generate an error
-_ = transf1.em(lb=10*ur.Hz)
+#_ = transf1.em(lb=10*ur.Hz)
 
 # %%
 # and also this generate an error
-_ = transf1.fft()
+#_ = transf1.fft()
 
 # %% [markdown]
 # One can perform the inverse fourier transform using **fft** with `inv=True` keyword argument, or **ifft**
 
 # %%
-transf2 = transf1.ifft()
-_ = transf2.plot()
+#transf2 = transf1.ifft()
+#_ = transf2.plot()
 
 # %% [markdown]
 # ## Phasing
@@ -393,9 +396,23 @@ _ = transf2.plot()
 # Our spectra can be phased using 
 
 # %%
-_ = transf1.plot(imag=True)
+transf1 = dataset1D.fft(size=32000) 
+_ = transf1.plot()
 
 # %%
-transf1.plot?
+pt = transf1.pk()
+_ = pt.plot(xlim=[50,-50])
 
 # %%
+# automatic phasing
+transfph3 = transf1.apk(verbose=True)
+
+pt.plot(xlim=(20,-20))
+transfph3.plot(xlim=(20,-20), clear=False, color='b')
+
+# %%
+# automatic phasing
+transfph3 = transf1.apk(verbose=True, fit_phc1=True, mode='negmin+entropy', ediff=2, gamma=1)
+
+pt.plot(xlim=(20,-20))
+transfph3.plot(xlim=(100,-100), clear=False, color='b')

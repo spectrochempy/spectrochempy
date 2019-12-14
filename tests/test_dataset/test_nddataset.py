@@ -1229,18 +1229,18 @@ def test_nddataset_max_with_2D_quaternion(NMR_dataset_2D):
 def test_nddataset_max_min_with_1D(NMR_dataset_1D):
     # test on a 1D NDDataset
     nd1 = NMR_dataset_1D
-    nd1[1] = MASKED
+    nd1[4] = MASKED
     assert nd1.is_masked
     info_(nd1)
     mx = nd1.max()
     info_(mx)
-    assert (mx.real.data, mx.imag.data) == pytest.approx((821.4872828784091, 80.80955334991164))
+    assert (mx.real.data, mx.imag.data) == pytest.approx((2283.5096153847107, -2200.383064516033))
     # check if it works for real
     mx1 = nd1.real.max()
-    assert mx1.data == pytest.approx(821.4872828784091)
+    assert mx1.data == pytest.approx(2283.5096153847107)
     mi = nd1.min()
     info_(mi)
-    assert (mi.real.data, mi.imag.data) == pytest.approx((-1908.02884615376, -2024.216811414473))
+    assert (mi.real.data, mi.imag.data) == pytest.approx((-408.29714640199626, 261.1864143920416))
 
 
 def test_nddataset_comparison_of_dataset(NMR_dataset_1D):
@@ -1493,7 +1493,7 @@ def test_nddataset_apply_funcs(IR_dataset_1D):
 # Pandas
 # ----------------------------------------------------------------------------------------------------------------------
 
-def test_nddataset_init_pandas(series, dataframe, panel):
+def test_nddataset_init_pandas(series, dataframe):
     
     # init with pandas
     dx = series
@@ -1515,31 +1515,32 @@ def test_nddataset_init_pandas(series, dataframe, panel):
     assert_array_equal(da.data, dx.values)
     info_(da)
     
-    # init with a panel directly (get the coords)
-    dx = panel
-    da = NDDataset(dx)
-    assert isinstance(da, NDDataset)
-    assert_equal(da.dtype, dx.values.dtype)
-    assert_equal(da.shape, dx.shape)
-    assert_array_equal(da.data, dx.values)
-    
-    assert len(da.data) == 7
-    assert da.coords.titles == ['axe2', 'axe1', 'axe0']
-    assert da.dims == ['z', 'y', 'x']
-    
-    # various mode of access to the coordinates
-    assert_array_equal(da.coords[2].data, panel.axes[0].values) # not recommended (except if one know that the coordinates are ordered)
-    assert_equal(da.coords['x'].data, panel.axes[2].values)
-    assert_equal(da.coords(axis=1).data, panel.axes[1].values)
-    assert_equal(da.coords(1).data, panel.axes[1].values)
-    assert_equal(da.coords(axis='z').data, panel.axes[0].values)
-    
-    # selection of the axis
-    assert isinstance(da.coords[1], Coord)
-    assert isinstance(da.coords[1:], CoordSet)
-    assert isinstance(da.coords(0, 2), CoordSet)
-    assert isinstance(da.coords(0, 2)[0], Coord)
-    assert isinstance(da.coords(2), Coord)
+    # Panel was removed from Panda
+    # # init with a panel directly (get the coords)
+    # dx = panel
+    # da = NDDataset(dx)
+    # assert isinstance(da, NDDataset)
+    # assert_equal(da.dtype, dx.values.dtype)
+    # assert_equal(da.shape, dx.shape)
+    # assert_array_equal(da.data, dx.values)
+    #
+    # assert len(da.data) == 7
+    # assert da.coords.titles == ['axe2', 'axe1', 'axe0']
+    # assert da.dims == ['z', 'y', 'x']
+    #
+    # # various mode of access to the coordinates
+    # assert_array_equal(da.coords[2].data, panel.axes[0].values) # not recommended (except if one know that the coordinates are ordered)
+    # assert_equal(da.coords['x'].data, panel.axes[2].values)
+    # assert_equal(da.coords(axis=1).data, panel.axes[1].values)
+    # assert_equal(da.coords(1).data, panel.axes[1].values)
+    # assert_equal(da.coords(axis='z').data, panel.axes[0].values)
+    #
+    # # selection of the axis
+    # assert isinstance(da.coords[1], Coord)
+    # assert isinstance(da.coords[1:], CoordSet)
+    # assert isinstance(da.coords(0, 2), CoordSet)
+    # assert isinstance(da.coords(0, 2)[0], Coord)
+    # assert isinstance(da.coords(2), Coord)
 
 # TODO: write test for to_pandas conversion
 

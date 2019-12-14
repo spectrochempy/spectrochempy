@@ -25,7 +25,9 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.extern.nmrglue.process.proc_base import largest_power_of_2, zf_size
+from ...extern.nmrglue.process.proc_base import largest_power_of_2, zf_size
+from .. import error_
+from ...units import ur
 
 def ifft(dataset, size=None, inplace=False, **kwargs):
     r"""
@@ -99,9 +101,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
                'fft processing was thus cancelled')
         return dataset
     
-    elif (inv and not lastcoord.unitless and not lastcoord.dimensionless and lastcoord.units.dimensionality != '1/[time]'):
-        error_('ifft apply only to dimensions with [frequency] dimensionality\n'
-               'ifft processing was thus cancelled')
+    elif (inv and lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm'):
+        error_('ifft apply only to dimensions with [frequency] dimensionality or with ppm units\n'
+               ' ifft processing was thus cancelled')
         return dataset
     
     elif dataset.is_masked :
@@ -109,11 +111,11 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         
     # TODO: other tests data spacing and so on.
 
-    # output dataset inplace (by default) or not
-    if not inplace:
+    # output dataset inplace or not
+    if not inplace:           # default
         new = dataset.copy()  # copy to be sure not to modify this dataset
     else:
-        new = dataset
+        new = dataset         #
 
     # Can we use some metadata as for NMR spectra
     if is_nmr and not inv:
@@ -219,12 +221,27 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
             newcoord.title = fr"$\delta\ {nucleus}$"
     
     new.coords[-1]=newcoord
+
+    # if some phase related metadata do not exist yet, initialize them
+    new.meta.readonly = False
     
+    if not new.meta.phased:
+        new.meta.phased = [False] * new.ndim
+        
+    if not new.meta.pivot:
+        new.meta.pivot = [float(abs(new).max().coords[i].data) * new.coords[i].units for i in range(new.ndim) ]  # create pivot metadata
+        
+    # applied the stored phases
+    new.pk(inplace=True)
     
+    new.meta.phased[-1] = True
+    
+    new.meta.readonly = True
+
     # restore original data order if it was swaped
     if swaped:
         new.swapaxes(axis, -1, inplace=True)  # must be done inplace
-    
+        
     new.history = f'fft applied on dimension {dim}'
     
     return new
