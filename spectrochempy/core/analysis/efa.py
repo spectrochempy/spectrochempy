@@ -186,7 +186,7 @@ class EFA(HasTraits):
 
         return b
 
-    def get_conc(self, n_pc=None, cutoff=None, order='fifo', plot=True):
+    def get_conc(self, n_pc=None):
         """
         Computes abstract concentration profile (first in - first out)
 
@@ -230,29 +230,8 @@ class EFA(HasTraits):
                 continue
             c[i] = np.min((f.data[i, :n_pc], b.data[i, :n_pc][::-1]), axis=0)
 
-        if plot:
-            self._plot(c, n_pc)
-
         return c
 
-    def _plot(self, c, n_pc, clear=True, legend='best'):
-        """
-
-        Parameters
-        ----------
-        c
-        n_pc
-
-        Returns
-        -------
-
-        """
-        ct = c.T
-        profiles = [ct[j] for j in range(n_pc)]
-
-        labels = ['PC#{}'.format(i + 1) for i in range(n_pc)]
-
-        plot_multiple(profiles, labels=labels, yscale='log', clear=clear, legend=legend)
 
 
 # ======================================================================================================================
