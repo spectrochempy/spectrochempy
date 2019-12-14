@@ -450,6 +450,8 @@ def read_bruker_nmr(dataset, *args, **kwargs):
             else:
                 dic, data = read_lowmem(npath, acqus_files=par_files, read_pulseprogram=False)
 
+            data = data * np.exp(- 1j * np.pi/2.) # -90 phase to be compatible with topspin
+            
             # look the case when the reshaping was not correct
             # for example, this happen when the number
             # of accumulated row was incomplete
@@ -467,7 +469,8 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
                 # reduce to td
                 ntd = dic['acqus']['TD'] // 2
-                data = data[..., :ntd]  # necessary for agreement with bruker data and phase
+                data = data[..., :ntd]
+                # necessary for agreement with bruker data and phase
         else:
 
             debug_(f'Reading processed {idx}:{path}')
@@ -519,15 +522,12 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                         continue
 
                     value = dic[item][key]
-                    units = ur(keys_units[key.lower()]) \
-                        if keys_units[key.lower()] else None
+                    units = ur(keys_units[key.lower()]) if keys_units[key.lower()] else None
 
                     if units is not None:
                         if isinstance(value, (float, int)):
                             value = value * units  # make a quantity
-                        elif isinstance(value, list) and isinstance(value[0],
-                                                                    (float,
-                                                                     int)):
+                        elif isinstance(value, list) and isinstance(value[0],(float,int)):
                             value = np.array(value) * units
 
                     if not item.endswith('s'):  # initial parameter

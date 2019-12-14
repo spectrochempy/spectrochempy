@@ -1,16 +1,16 @@
 ##TITLE= Parameter file, TopSpin 4.0.7
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 8	$$ modification sequence number
+##NPOINTS= 26	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= nmr
-$$ 2019-12-05 12:28:22.083 +0100  christian@lcs191n.ensicaen.fr
+$$ 2019-12-12 15:34:51.852 +0100  christian@cf-macbookpro.home
 $$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/bruker_1d/1/pdata/1/procs
 $$ process /opt/topspin4.0.7/prog/mod/proc1d
-##$ABSF1= 253.0909
-##$ABSF2= -246.8376
-##$ABSG= 5
-##$ABSL= 3
+##$ABSF1= 0
+##$ABSF2= 0
+##$ABSG= 0
+##$ABSL= 0
 ##$ALPHA= 0
 ##$AQORDER= 0
 ##$ASSFAC= 0
@@ -87,8 +87,8 @@ $$ process /opt/topspin4.0.7/prog/mod/proc1d
 ##$NZP= 0
 ##$OFFSET= 253.0909
 ##$PC= 0.2
-##$PHC0= 19.4812
-##$PHC1= 47.65796
+##$PHC0= 52.43836
+##$PHC1= -16.8366
 ##$PH_mod= 1
 ##$PKNL= yes
 ##$PPARMOD= 0
@@ -132,8 +132,8 @@ $$ process /opt/topspin4.0.7/prog/mod/proc1d
 ##$USERP3= <>
 ##$USERP4= <>
 ##$USERP5= <>
-##$WDW= 1
+##$WDW= 0
 ##$XDIM= 0
-##$YMAX_p= 461804005
-##$YMIN_p= -465349
+##$YMAX_p= 462598854
+##$YMIN_p= -484185
 ##END=

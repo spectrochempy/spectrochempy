@@ -264,11 +264,12 @@ class NDDataset(
     # ..................................................................................................................
     def __getattr__(self, item):
         # when the attribute was not found
-        if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction',
+        if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction','__dataclass_fields__',
                     '_ipython_canary_method_should_not_exist_',
                     '_baseclass', '_fill_value',
-                    '_ax_lines', '_axcb', 'clevels', '__wrapped__'] or '_validate' in item or \
-                '_changed' in item:
+                    '_ax_lines', '_axcb', 'clevels', '__wrapped__',
+                    '__await__','__aiter__'] \
+                or '_validate' in item or '_changed' in item:
             # raise an error so that traits, ipython operation and more ... will be handled correctly
             raise AttributeError
         
@@ -279,6 +280,7 @@ class NDDataset(
             # look also properties
             attribute = None
             index = 0
+            #print(item)
             if len(item) > 2 and item[1] == '_':
                 attribute = item[1:]
                 item = item[0]

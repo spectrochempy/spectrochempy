@@ -15,6 +15,7 @@
 
 from spectrochempy.utils import Meta
 from spectrochempy.utils.testing import  raises
+from spectrochempy.units import ur
 
 def test_init():
     meta = Meta()
@@ -83,6 +84,17 @@ def test_copy():
     meta2 = meta.copy()
     assert meta2 is not meta
     assert sorted([val for val in meta2]) == ['ls', 'ns', 'si', 'td']
+
+    # bug with quantity
+    
+    si = 2048 * ur.s
+    meta.si = si
+
+    meta3 = meta.copy()
+    meta3.si = si / 2.
+    
+    assert meta3 is not meta
+    
 
 def test_swap():
     meta = Meta()

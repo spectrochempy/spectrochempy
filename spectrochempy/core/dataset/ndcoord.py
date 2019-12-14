@@ -200,7 +200,8 @@ class Coord(NDMath, NDArray):
         # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
         # else return an array of the differents spacings
         return spacing(self.data) * self.units
-        
+    
+    
     # NDmath methods
 
     # ..................................................................................................................
@@ -231,7 +232,13 @@ class Coord(NDMath, NDArray):
     def swapaxes(self, **kwargs):
         raise NotImplementedError
 
-        
+    
+    # ------------------------------------------------------------------------------------------------------------------
+    # public methods
+    # ------------------------------------------------------------------------------------------------------------------
+    def loc2index(self, loc):
+        return self._loc2index(loc)
+    
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
     # ------------------------------------------------------------------------------------------------------------------

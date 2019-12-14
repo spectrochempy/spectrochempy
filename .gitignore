@@ -159,3 +159,4 @@ var/
 *.spec
 /quaternion/_version.py
 auditp.txt
+thumb.png

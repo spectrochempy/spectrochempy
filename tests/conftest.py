@@ -286,18 +286,17 @@ def dataframe():
         ax.name = name
     return arr.copy()
 
-
-@pytest.fixture(scope="function")
-def panel():
-    shape = (7, 6, 5)
-    with RandomSeedContext(23452):
-        # TODO: WARNING: pd.Panel is deprecated in pandas
-        arr = pd.Panel(np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
-                       major_axis=np.arange(shape[1]) * 10.,
-                       minor_axis=np.arange(shape[2]) * 10.)
-    for ax, name in zip(arr.axes, ['axe0', 'axe1', 'axe2']):
-        ax.name = name
-    return arr.copy()
+# Panel is removed from Panda
+# @pytest.fixture(scope="function")
+# def panel():
+#     shape = (7, 6, 5)
+#     with RandomSeedContext(23452):
+#         arr = pd.Panel(data = np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
+#                        major_axis=np.arange(shape[1]) * 10.,
+#                        minor_axis=np.arange(shape[2]) * 10.)
+#     for ax, name in zip(arr.axes, ['axe0', 'axe1', 'axe2']):
+#         ax.name = name
+#     return arr.copy()
 
 # GUI Fixtures
 # ----------------------------------------------------------------------------------------------------------------------
