@@ -132,8 +132,7 @@ class EFA(HasTraits):
             else:
                 b[i] = MASKED
 
-    def get_forward(self, n_pc=None, cutoff=None, plot=False, clear=True,
-                    legend='best'):
+    def get_forward(self, n_pc=None, cutoff=None):
         """
 
         Parameters
@@ -153,14 +152,9 @@ class EFA(HasTraits):
         f = self.fefa
         if cutoff is not None:
             f.data = np.max((f.data, np.ones_like(f.data) * cutoff), axis=0)
-
-        if plot:
-            self._plot(f, n_pc, clear=clear, legend=legend)
-
         return f
 
-    def get_backward(self, n_pc=None, cutoff=None, plot=False, clear=True,
-                     legend='best'):
+    def get_backward(self, n_pc=None, cutoff=None):
         """
 
         Parameters
@@ -180,13 +174,9 @@ class EFA(HasTraits):
         b = self.befa
         if cutoff is not None:
             b.data = np.max((b.data, np.ones_like(b.data) * cutoff), axis=0)
-
-        if plot:
-            self._plot(b, n_pc, clear=clear, legend=legend)
-
         return b
 
-    def get_conc(self, n_pc=None, cutoff=None, order='fifo', plot=True):
+    def get_conc(self, n_pc=None, cutoff=None):
         """
         Computes abstract concentration profile (first in - first out)
 
@@ -230,29 +220,8 @@ class EFA(HasTraits):
                 continue
             c[i] = np.min((f.data[i, :n_pc], b.data[i, :n_pc][::-1]), axis=0)
 
-        if plot:
-            self._plot(c, n_pc)
-
         return c
 
-    def _plot(self, c, n_pc, clear=True, legend='best'):
-        """
-
-        Parameters
-        ----------
-        c
-        n_pc
-
-        Returns
-        -------
-
-        """
-        ct = c.T
-        profiles = [ct[j] for j in range(n_pc)]
-
-        labels = ['PC#{}'.format(i + 1) for i in range(n_pc)]
-
-        plot_multiple(profiles, labels=labels, yscale='log', clear=clear, legend=legend)
 
 
 # ======================================================================================================================

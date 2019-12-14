@@ -26,6 +26,7 @@ from copy import copy as cpy
 
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from mpl_toolkits.mplot3d import Axes3D
+import sys
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -283,6 +284,9 @@ def plot_2D(dataset, **kwargs):
 
     ax.set_xlim(xlim)
 
+    xscale = kwargs.get("xscale", "linear")
+    ax.set_xscale(xscale, nonposx='mask')
+
     # set the ordinates axis
     # ------------------------------------------------------------------------------------------------------------------
     # the actual dimension name is the second in the new.dims list
@@ -313,6 +317,9 @@ def plot_2D(dataset, **kwargs):
     ylim[-1] = min(ylim[-1], yl[-1])
     ylim[0] = max(ylim[0], yl[0])
 
+    yscale = kwargs.get("yscale", "linear")
+    ax.set_yscale(yscale)
+
     # z intensity (by default we plot real part of the data)
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -338,7 +345,14 @@ def plot_2D(dataset, **kwargs):
 
         # set the limits
         # ---------------
-        ax.set_ylim(zlim)
+
+
+        if yscale=="log" and min(zlim) <= 0:
+            # set the limits wrt smallest and largest strictly positive values
+            ax.set_ylim(10**(int(np.log10(np.amin(np.abs(zdata))))-1)
+                               , 10**(int(np.log10(np.amax(np.abs(zdata))))+1))
+        else:
+            ax.set_ylim(zlim)
 
     else:
 
