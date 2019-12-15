@@ -35,9 +35,8 @@ data[1, 5:11] = [1,3,5,3,1,0.5] #compound 2
 dsc = scp.NDDataset(data=data, coords=[c, t])
 
 ########################################################################################################################
-# 2) Adsorption spectra
+# 2) Absorption spectra
 # **********************
-
 
 spec = np.array([[2.,3.,4.,2.],[3.,4.,2.,1.]])
 w = scp.Coord(np.arange(1,5,1), units='nm', title='wavelength')
@@ -52,7 +51,7 @@ dataset = scp.dot(dsc.T, dss)
 dataset.data = np.random.normal(dataset.data,.2)
 dataset.title = 'intensity'
 
-dataset.plot_stack()
+dataset.plot()
 
 ########################################################################################################################
 # 4) Evolving Factor Analysis
@@ -64,8 +63,11 @@ efa = scp.EFA(dataset)
 # Plots of the log(EV) for the forward and backward analysis
 #
 
-f = efa.get_forward(plot=True)
-b = efa.get_backward(plot=True)
+f = efa.get_forward()
+f.T.plot(yscale="log", label_fmt="#PC{:d}", legend='best')
+scp.show()
+b = efa.get_backward()
+b.T.plot(yscale="log")
 
 ########################################################################################################################
 # Looking at these EFA curves, it is quite obvious that only two components
@@ -77,14 +79,20 @@ b = efa.get_backward(plot=True)
 n_pc = 2
 cut = np.max(f[:, n_pc].data)
 
-efa.get_forward(plot=True, n_pc=2, cutoff=cut, legend='upper right')
-efa.get_backward(plot=True, n_pc=2, cutoff=cut, clear=False, legend='lower right')
-# with clear=False, we will plot the two graphs on the same figure
-# TODO: solve the problem with legends when two plots on the same figures
+f2 = efa.get_forward(n_pc=2, cutoff=cut)
+b2 = efa.get_backward(n_pc=2, cutoff=cut)
+# we concatenate the datasets to plot them in a single figure
+both = scp.concatenate(f2, b2)
+both.T.plot(yscale="log")
+
+# TODO: add "legend" keyword in NDDataset.plot()
 
 
 ########################################################################################################################
 # Get the abstract concentration profile based on the FIFO EFA analysis
 #
 
-c = efa.get_conc(n_pc, cutoff=cut, plot=True)
+c = efa.get_conc(n_pc)
+c.T.plot()
+
+scp.show()

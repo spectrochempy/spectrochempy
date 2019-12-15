@@ -13,6 +13,7 @@ In this example, we perform the Evolving Factor Analysis
 
 """
 import spectrochempy as scp
+import matplotlib.pyplot as plt
 import os
 
 # sphinx_gallery_thumbnail_number = 2
@@ -51,6 +52,7 @@ efa = scp.EFA(dataset)
 # Show results
 
 npc = 4
-c = efa.get_conc(npc, plot=True)
+c = efa.get_conc(npc)
+c.T.plot()
 
-#show() # uncomment to show plot if needed()
+# plt.show() # uncomment to show plot if needed()

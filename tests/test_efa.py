@@ -32,7 +32,8 @@ def test_EFA(IR_dataset_2D):
     efa = EFA(ds)
 
     n_pc = 4
-    c = efa.get_conc(n_pc, plot=True)
+    c = efa.get_conc(n_pc)
+    c.T.plot()
 
     show()
 

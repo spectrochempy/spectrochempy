@@ -37,7 +37,7 @@ def test_MCRALS_no_coords():
     mcr.plotmerit()
 
     print('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
-    guess = EFA(X).get_conc(4, plot=False)
+    guess = EFA(X).get_conc(4)
 
     param = {'normSpec':'euclid', 'maxit':100}
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
@@ -78,7 +78,7 @@ def test_MCRALS():
     mcr.plotmerit()
 
     info_('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
-    guess = EFA(X).get_conc(4, plot=False)
+    guess = EFA(X).get_conc(4)
     guess.plot(title='EFA guess')
 
     param = {'normSpec':'euclid', 'maxit':100}
