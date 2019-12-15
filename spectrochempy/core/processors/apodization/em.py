@@ -32,7 +32,7 @@ docstrings.delete_params('apodize.parameters', 'dataset', 'method', 'apod')
 
 @docstrings.get_sectionsf('em')
 @docstrings.dedent
-def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
+def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=False, dim=-1, **kwargs):
     r"""
     Calculate exponential apodization.
 
@@ -115,19 +115,4 @@ def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-
 
 # ======================================================================================================================
 if __name__ == '__main__' : # pragma: no cover
-    from spectrochempy import *
-
-    dataset1D = NDDataset()
-    path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-
-    dataset1D /= dataset1D.real.data.max()  # normalize
-
-    p = dataset1D.plot()
-    
-    new, curve = dataset1D.em(lb=100. * ur.Hz, retfunc=True)
-    curve.plot(color='r', clear=False)
-    new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='r', clear=False)
-    
-
-    show()
+    pass

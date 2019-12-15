@@ -30,7 +30,7 @@ from spectrochempy.utils import docstrings
 # ======================================================================================================================
 @docstrings.get_sectionsf('apodize', sections=['Parameters','Returns'])
 @docstrings.dedent
-def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
+def apodize(dataset, method, apod, inv=False, rev=False, inplace=False, dim=-1, **kwargs):
     """
     Calculate an apodization window function
 
@@ -49,7 +49,7 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=True, dim=-1, *
         True for inverse apodization.
     rev : bool, optional, default=False.
         True to reverse the apodization before applying it to the data.
-    inplace : bool, optional, default=True.
+    inplace : bool, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new dataset
     dim : str or int, optional, default='x'.
         Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent

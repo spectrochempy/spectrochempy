@@ -30,7 +30,7 @@ docstrings.delete_params('apodize.parameters',  'dataset', 'method', 'apod')
 
 @docstrings.get_sectionsf('sp')
 @docstrings.dedent
-def sp(dataset, ssb=1, pow=1, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
+def sp(dataset, ssb=1, pow=1, inv=False, rev=False, inplace=False, dim=-1, **kwargs):
     r"""
     Calculate apodization with a Sine window multiplication.
     
@@ -153,43 +153,4 @@ def qsin(dataset, ssb=1, **kwargs):
 
 # ======================================================================================================================
 if __name__ == '__main__': # pragma: no cover
-    
-    import spectrochempy as scp
-    import os
-    
-    dataset1D = scp.NDDataset()
-    path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-    
-    dataset1D /= dataset1D.real.data.max()  # normalize
-    
-    
-    p = dataset1D.plot()
-
-    dd = dataset1D.copy()
-    new, curve = dd.sinm(ssb=2, retfunc=True)
-    curve.plot(color='r', clear=False)
-    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='r', clear=False)
-
-    dd = dataset1D.copy()
-    new, curve = dd.sinm(ssb=1, retfunc=True)
-    curve.plot(color='b', clear=False)
-    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='b', clear=False)
-
-    dd = dataset1D.copy()
-    new, curve = dd.sinm(ssb=3, retfunc=True)
-    curve.plot(color='k', ls='--', clear=False)
-    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='k', ls='--', clear=False)
-
-    dd = dataset1D.copy()
-    new, curve = dd.qsin(ssb=2, retfunc=True)
-    curve.plot(color='m', clear=False)
-    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='m', clear=False)
-
-    dd = dataset1D.copy()
-    new, curve = dd.qsin(ssb=1, retfunc=True)
-    curve.plot(color='g', clear=False)
-    new.plot(xlim=(0, 50000), zlim=(-2, 2), data_only=True, color='g', clear=False)
-
-    scp.show()
-    
+    pass
