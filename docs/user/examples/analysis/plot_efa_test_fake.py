@@ -36,9 +36,11 @@ dataset.plot_stack()
 efa = scp.EFA(dataset)
 
 
-f = efa.get_forward(n_pc=7, plot=True)
-b = efa.get_backward(n_pc=7, plot=True)
+f = efa.get_forward(n_pc=7)
+b = efa.get_backward(n_pc=7)
 
+f.T.plot(yscale="log", labels= f.y.labels, legend='best')
+b.T.plot(yscale="log")
 
 ##############################################################################
 # Clearly we can retain 4 components, in agreement with what was used to
@@ -48,10 +50,13 @@ b = efa.get_backward(n_pc=7, plot=True)
 npc = 4
 cut = np.max(f[:, npc].data)
 
-f = efa.get_forward(n_pc=4, cutoff=cut, plot=True)
-b = efa.get_backward(n_pc=4, cutoff=cut, plot=True)
+f = efa.get_forward(n_pc=4, cutoff=cut)
+b = efa.get_backward(n_pc=4, cutoff=cut)
 
+f.T.plot(yscale="log")
+b.T.plot(yscale="log")
 
-c = efa.get_conc(npc, cutoff=cut, plot=True)
+c = efa.get_conc(npc, cutoff=cut)
+c.T.plot(legend='best')
 
-#show() # uncomment to show plot if needed()
+scp.show() # uncomment to show plot if needed()

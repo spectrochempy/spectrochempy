@@ -99,7 +99,10 @@ def concatenate(*datasets, **kwargs):
         axis, dim = datasets[0].get_axis(0)
     else:
         # get axis from arguments
-        axis, dim = datasets[0].get_axis(**kwargs)
+        if kwargs:
+            axis, dim = datasets[0].get_axis(**kwargs)
+        else:
+            axis, dim = datasets[0].get_axis('x')
 
     # check if data shapes are compatible (all dimension must have the same size
     # except the one to be concatenated)
