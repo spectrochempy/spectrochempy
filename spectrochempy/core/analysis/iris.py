@@ -12,6 +12,7 @@ This module implements the IRIS class.
 
 """
 __all__ = ['IRIS']
+__dataset_methods__ = []
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord

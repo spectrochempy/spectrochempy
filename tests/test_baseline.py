@@ -91,13 +91,23 @@ def test_ab_nmr(NMR_dataset_1D):
     
     dataset = NMR_dataset_1D.copy()
     dataset /= dataset.real.data.max()  #nromalize
-
+    
     dataset.em(10.*ur.Hz, inplace=True)
-    transf = dataset.fft(tdeff=8192, size=2**15)
-    transf.plot(xlim=(20,-20), ls=':', color='k')
+    dataset = dataset.fft(tdeff=8192, size=2**15)
+    dataset = dataset[150.0:-150.]+1.
+
+    dataset.plot()
     
-    
-    
+    transf = dataset.copy()
+    transfab = transf.ab(window=.25)
+    transfab.plot(clear=False, color='r')
+
+    transf = dataset.copy()
+    base = transf.ab(mode = "poly", dryrun=True)
+    transfab = transf - base
+    transfab.plot(xlim=(150,-150), clear=False, color='b')
+    base.plot(xlim=(150,-150), ylim=[-2,10], clear=False, color='y')
+
     show()
     
 

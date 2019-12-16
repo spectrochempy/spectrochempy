@@ -39,7 +39,10 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=False, dim=-1, 
     Parameters
     ----------
     dataset : |NDDataset| or |NDPanel|.
-        Dataset we want to apodize
+        Input dataset or panel
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
     method : Callable.
         Apodization function
     apod : tuple.
@@ -50,10 +53,7 @@ def apodize(dataset, method, apod, inv=False, rev=False, inplace=False, dim=-1, 
         True to reverse the apodization before applying it to the data.
     inplace : bool, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new dataset
-    dim : str or int, optional, default='x'.
-        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
-        to the usual `axis` numpy parameter.
-    
+        
     Returns
     -------
     object : |NDDataset| or |NDPanel|.

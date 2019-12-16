@@ -11,8 +11,7 @@
 This module implements the `BaselineCorrection` class for baseline corrections.
 
 """
-__all__ = ['BaselineCorrection']
-
+__all__ = ['BaselineCorrection', 'ab']
 __dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -33,6 +32,7 @@ from ..dataset.ndcoordrange import CoordRange
 from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
 from ...utils import docstrings
+from .smooth import smooth
 from .. import error_, warning_, debug_
 
 class BaselineCorrection(HasTraits):
@@ -72,7 +72,7 @@ class BaselineCorrection(HasTraits):
         dataset : |NDDataset|
             The dataset to be transformed
         *ranges : a variable number of pair-tuples
-            The regions taken into account for the baseline correction.
+            The regions taken into account for the manual baseline correction.
         **kwargs : keywords arguments
             Known keywords are given below
 
@@ -354,10 +354,7 @@ class BaselineCorrection(HasTraits):
 # =======================================================================================================================
 # ab
 #=======================================================================================================================
-def ab(dataset,
-       dim=-1,
-       inplace=False,
-       **kwargs):
+def ab(dataset, dim=-1, **kwargs):
     """
     Automatic baseline correction
 
@@ -417,8 +414,11 @@ def ab(dataset,
 
     debug_('Automatic baseline correction')
 
+    inplace = kwargs.pop('inplace', False)
+    dryrun = kwargs.pop('dryrun', False)
+    
     # output dataset inplace or not
-    if not inplace:           # default
+    if not inplace or dryrun:           # default
         new = dataset.copy()
     else:
         new = dataset
@@ -436,69 +436,53 @@ def ab(dataset,
                'Baseline correction processing was thus cancelled')
         return new
     
-
-    base, w = basecorr(data.values, args, retw=True)
-    par.baseline = pd.DataFrame(base, index=index, columns=columns)
-    par.basepoints = w
+    base = _basecor(new.data.real, **kwargs)
     
-    if not args.dryrun:
-        data = data - base
-        
-        # un-transpose the data if needed
-    if axis == 0:
-        data = data.T
-        par.baseline = par.baseline.T
-    source.data = data
+    if not dryrun:
+        new.data -= base # return the corrected spectra
+    else:
+        new.data = base # return the baseline
 
+    # restore original data order if it was swaped
+    if swaped:
+        new.swapaxes(axis, -1, inplace=True)  # must be done inplace
+
+    return new
 
 # =======================================================================================================================
-# basecorr
+# private functions
 #=======================================================================================================================
-def basecorr(data, args=None, retw=False):
-    """
-    Correct baseline
-
-    see `autobase' for parameters definitions
-
-    """
-    if args:
-        mode = args.mode
-    else:
-        mode = 'linear'
+def _basecor(data, **kwargs):
+    
+    mode = kwargs.pop('mode', 'linear')
     
     if mode == 'linear':
-        return _linearbase(data, args, retw)
+        return _linearbase(data, **kwargs)
     
     if mode == 'svd':
-        return _svdbase(data, args, retw)
+        return _svdbase(data, **kwargs)
     
     if mode == 'poly':
-        return _polybase(data, args, retw)
+        return _polybase(data, **kwargs)
     else:
-        raise ValueError('ab mode not known')
+        raise ValueError(f'`ab` mode = `{mode}`  not known')
 
-
-#####################
-# private functions #
-#####################
 #
 # _linear mode
 #
-def _linearbase(data, args=None, retw=False):
-    """
-    Apply a linear baseline correction
-
-    """
-    if not args:
-        window = 0.05
-    else:
-        window = args.window
+def _linearbase(data, **kwargs):
+    # Apply a linear baseline correction
+    # Very simple and naive procedure that compute a straight baseline from side to the other
+    # (averging on a window given by the window parameters : 5% of the total width on each side by default)
+    
+    window = kwargs.pop('window', 0.05)
     
     if window <= 1.0:
         # percent
         window = int(data.shape[-1] * window)
     
-    # print(window)
+    debug_(f"Linear base correction window : {window}")
+    
     if len(data.shape) == 1:
         npts = float(data.shape[-1])
         a = (data[-window:].mean() - data[:window].mean()) / (npts - 1.)
@@ -510,35 +494,28 @@ def _linearbase(data, args=None, retw=False):
         a = (data[:, -window:].mean(axis=-1) - data[:, :window].mean(axis=-1)) / (npts - 1.)
         b = data[:, :window].mean(axis=-1)
         baseline = (((np.ones_like(data).T * a).T * np.arange(float(npts))).T + b).T
-    
-    if retw:
-        return baseline, None  #TODO: return something
-    
+        
     return baseline
 
-
-#=======================================================================================================================
 def _planeFit(points):
-    """
-    p, n = planeFit(points)  # copied from https://stackoverflow.com/a/18968498
+    # p, n = planeFit(points)  # copied from https://stackoverflow.com/a/18968498
+    #
+    # Fit an multi-dimensional plane to the points.
+    # Return a point on the plane and the normal.
+    #
+    # Parameters
+    # ----------
+    # points :
+    #
+    # Notes
+    # -----
+    #     Replace the nonlinear optimization with an SVD.
+    #     The following creates the moment of inertia tensor, M, and then
+    #     SVD's it to get the normal to the plane.
+    #     This should be a close approximation to the least-squares fit
+    #     and be much faster and more predictable.
+    #     It returns the point-cloud center and the normal.
 
-    Fit an multi-dimensional plane to the points.
-    Return a point on the plane and the normal.
-    
-    Parameters
-    ----------
-    points :
-    
-    Notes
-    -----
-        Replace the nonlinear optimization with an SVD.
-        The following creates the moment of inertia tensor, M, and then
-        SVD's it to get the normal to the plane.
-        This should be a close approximation to the least-squares fit
-        and be much faster and more predictable.
-        It returns the point-cloud center and the normal.
-
-    """
     from numpy.linalg import svd
     
     npts = points.shape[0]
@@ -549,17 +526,9 @@ def _planeFit(points):
     M = np.dot(x, x.T)
     return ctr, svd(M)[0][:, -1]
 
-
-#=======================================================================================================================
 def _svdbase(data, args=None, retw=False):
-    """
-    Apply a planar baseline correction to 2D data
+    #Apply a planar baseline correction to 2D data
     
-    Parameters
-    ----------
-    data : source instance
-    
-    """
     if not args:
         window = 0.05
         step = 5
@@ -591,8 +560,8 @@ def _svdbase(data, args=None, retw=False):
     XYZ = np.array((x, y, z))
     p, n = _planeFit(XYZ)
     d = np.dot(p, n)
-    if DEBUG: print(" origin baseline plane: ", p)
-    if DEBUG: print(" normal vector component:", n)
+    debug_(" origin baseline plane: ", p)
+    debug_(" normal vector component:", n)
     
     col = data.columns
     row = data.index
@@ -604,29 +573,17 @@ def _svdbase(data, args=None, retw=False):
     return Z
 
 
-#=======================================================================================================================
-def _polybase(data, args=None, retw=False):
-    """
-    Automatic baseline correction
-
-    """
-    if isinstance(data, pd.DataFrame):
-        dat = data.values.copy()
-    else:
-        dat = data.copy()
-    if dat.ndim == 1:
-        dat = np.array([dat, ])
+def _polybase(data, **kwargs):
+    # Automatic baseline correction
     
-    if not args:
-        nbzone = 32
-        mult = 4
-        order = 5
-    else:
-        nbzone = args.nbzone
-        mult = args.mult
-        order = args.order
+    if data.ndim == 1:
+        dat = np.array([data, ])
     
-    npts = dat.shape[-1]
+    nbzone = kwargs.pop('nbzone', 64)
+    mult = kwargs.pop('mult', 4)
+    order = kwargs.pop('order', 6)
+    
+    npts = data.shape[-1]
     w = np.arange(npts)
     
     nw = npts / nbzone
@@ -658,7 +615,7 @@ def _polybase(data, args=None, retw=False):
             s3 = dat[:, max(i + 1 - nw2, 0):min(i + 1 + nw2, npts + 1)]
             mi1, mi2, mi3 = s1.min(), s2.min(), s3.min()
             ma1, ma2, ma3 = s1.max(), s2.max(), s3.max()
-            #print s1.shape
+
             if abs(ma1 - mi1) < float(nstd) * sigma and abs(ma2 - mi2) < float(nstd) * sigma and abs(ma3 - mi3) < float(
                     nstd) * sigma:
                 found = True
@@ -667,12 +624,13 @@ def _polybase(data, args=None, retw=False):
         
         # increase nstd
         nstd = nstd * 1.1
-    if DEBUG: print('basf optimized nstd: %.2F mult: %.2f' % (nstd, mult))
+    debug_('basf optimized nstd: %.2F mult: %.2f' % (nstd, mult))
     
-    wm = np.array(zip(*np.argwhere(~baseline[:1].mask))[1])
-    bm = baseline[:, wm]  # [~baseline[0].mask]
-    bm = smooth(bm.T, window_len=max(int(dat.shape[0] / 10), 3)).T
-    bm = smooth(bm, window_len=max(int(dat.shape[-1] / 10), 3))
+    wm = np.array(list(zip(*np.argwhere(~baseline[:1].mask)))[1])
+    bm = baseline[:, wm]
+    if data.ndim>1:
+        bm = smooth(bm.T, length=max(int(dat.shape[0] / 10), 3)).T
+    bm = smooth(bm, length=max(int(dat.shape[-1] / 10), 3))
     
     #if not polynom:
     #    sr = pchip(wm, bm.real)
@@ -685,10 +643,10 @@ def _polybase(data, args=None, retw=False):
     for i, row in enumerate(pf[:]):
         poly = np.poly1d(row)
         baseline[i] = poly(w)
-    
-    if retw:
-        return baseline, wm
-    
+
+    if data.ndim == 1:
+        baseline = baseline[0]
+        
     return baseline
 
 if __name__ == '__main__':

@@ -3,17 +3,14 @@
 # ======================================================================================================================
 # Copyright (©) 2015-2020 Christian Fernandez
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
-#
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["pk", "apk", "autophase", "interact_pk"] #, "autophase"]
-
+__all__ = ["pk", "apk", "autophase", "interact_pk"]
 __dataset_methods__  = __all__
 
 # imports
-#
 import numpy as np
 
 from ipywidgets import FloatSlider, interactive
@@ -30,35 +27,6 @@ from .baseline import BaselineCorrection
 
 from .. import error_, warning_, print_, debug_
 from ...units import ur
-
-# ======================================================================================================================
-# utilities functions
-# ======================================================================================================================
-def _ps(data, p0=0.0, p1=0.0):
-    """
-    Linear phase correction
-
-    Parameters
-    ----------
-    data : ndarray
-        Array of NMR data.
-    p0 : float
-        Zero order phase in degree
-    p1 : float
-        First order phase in degree
-
-    Returns
-    -------
-    out : ndarray
-        Phased NMR data.
-
-    """
-    p0r = p0.copy().to('rad').m
-    p1r = p1.copy().to('rad').m
-    size = data.shape[-1]
-    out = data * np.exp(1.0j * (p0r + p1r * np.arange(size)/ size)).astype(data.dtype)
-    
-    return out
 
 # ======================================================================================================================
 # pk function
@@ -303,14 +271,14 @@ def _acme_score(data):
     return h1s + p
 
 # ----------------------------------------------------------------------------------------------------------------------
-def apk(dataset, dim=-1, inplace=False, algorithm='neg_area', optmode='simplex', **kwargs):
+def apk(dataset, dim=-1, **kwargs):
     """
     Automatic phasing of 1D or 2D spectra
     
     Parameters:
     -----------
     inplace : bool, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new dataset
+        True if we make the transform inplace.  If False, the function return a new object
     dim : str or int, optional, default='x'.
         Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
@@ -349,10 +317,10 @@ def apk(dataset, dim=-1, inplace=False, algorithm='neg_area', optmode='simplex',
     # args = parser.parse_args(options.split())
 
     """
-    debug_(f'AUTOMATIC PHASE MODE : algorithm {algorithm}')
+    debug_(f'AUTOMATIC PHASE MODE')
 
     # output dataset inplace or not
-    if not inplace:
+    if not kwargs.pop('inplace', False):
         # default
         new = dataset.copy()
     else:
@@ -428,7 +396,7 @@ def apk(dataset, dim=-1, inplace=False, algorithm='neg_area', optmode='simplex',
         
     phc0 = new.meta.phc0[-1]
     phc1 = new.meta.phc1[-1]
-    fit_phc1 = kwargs.get('fit_phc1', True)
+    fit_phc1 = kwargs.pop('fit_phc1', True)
     pivot = float(abs(new).max().coords[-1].data)
     ppivot = lastcoord.loc2index(pivot)
     
@@ -445,13 +413,16 @@ def apk(dataset, dim=-1, inplace=False, algorithm='neg_area', optmode='simplex',
     fp['phc1'] = phc1, -bp1, bp1, fixed
 
     # algorithm to compute the cost function
+    algorithm= kwargs.pop('algorithm','neg_area')
     alg = {
         'neg_peak': _neg_peak_score, # Phase correction using simple minima-minimisation around highest peak
         'neg_area': _neg_area_score, # negative area minimization
         'acme': _acme_score,         # entropy minimization
-        
     }
     if not callable(algorithm):
+        if algorithm not in alg.keys():
+            error_("algorithm must be a callable or a string among 'neg_area', 'neg_peak" or 'acme')
+            return new
         algorithm = alg[algorithm]
         
     # cost function
@@ -469,6 +440,7 @@ def apk(dataset, dim=-1, inplace=False, algorithm='neg_area', optmode='simplex',
         return algorithm(scp)
 
     # convergence is not insured depending on the starting values
+    optmode= kwargs.pop('optmode','simplex')
     fp, err = optimize(_cost_function, fp,
                         args=[new.data, ],
                         method=optmode,
@@ -578,9 +550,35 @@ def interact_pk(dataset, dim=-1, **kwargs):
     display(w)
     
     return w
-    
-    # Manual mode ------------------------------
 
+# ======================================================================================================================
+# utilities functions
+# ======================================================================================================================
+def _ps(data, p0=0.0, p1=0.0):
+    """
+    Linear phase correction
+
+    Parameters
+    ----------
+    data : ndarray
+        Array of NMR data.
+    p0 : float
+        Zero order phase in degree
+    p1 : float
+        First order phase in degree
+
+    Returns
+    -------
+    out : ndarray
+        Phased NMR data.
+
+    """
+    p0r = p0.copy().to('rad').m
+    p1r = p1.copy().to('rad').m
+    size = data.shape[-1]
+    out = data * np.exp(1.0j * (p0r + p1r * np.arange(size)/ size)).astype(data.dtype)
+    
+    return out
 
 if __name__ == '__main__':
     pass

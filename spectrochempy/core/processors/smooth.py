@@ -30,8 +30,8 @@ def smooth(dataset, dim =-1, **kwargs):
     
     Parameters
     ----------
-    dataset :  |NDDataset| or |NDPanel|.
-        Input dataset or panel
+    dataset :  |NDDataset|, |NDPanel| or a ndarray-like object
+        Input object
     dim : str or int, optional, default='x'.
         Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
@@ -57,7 +57,14 @@ def smooth(dataset, dim =-1, **kwargs):
     else:
         new = dataset
 
-    axis, dim = new.get_axis(dim, negative_axis=True)
+    is_ndarray = False
+    if hasattr(new, 'get_axis'):
+        axis, dim = new.get_axis(dim, negative_axis=True)
+    else:
+        # for ndarray work only on the last dimension
+        is_ndarray = True
+        axis = -1
+        
     swaped = False
     if axis != -1:
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
@@ -95,13 +102,16 @@ def smooth(dataset, dim =-1, **kwargs):
     data = np.apply_along_axis(np.convolve, -1, dat, w / w.sum(), mode='valid')
     data = data[..., int(length/ 2):-int(length / 2)]
 
-    new.data = data
-    new.history = f'smoothing with a window:{window.__name__} of length {length}'
+    if not is_ndarray:
+        new.data = data
+        new.history = f'smoothing with a window:{window.__name__} of length {length}'
     
-    # restore original data order if it was swaped
-    if swaped:
-        new.swapaxes(axis, -1, inplace=True)  # must be done inplace
-
+        # restore original data order if it was swaped
+        if swaped:
+            new.swapaxes(axis, -1, inplace=True)  # must be done inplace
+    else:
+        new = data
+        
     return new
 
 if __name__ == '__main__':
