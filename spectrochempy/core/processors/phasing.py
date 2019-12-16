@@ -25,10 +25,10 @@ import matplotlib.pyplot as pl
 from ..fitting.parameters import FitParameters
 from ..fitting.optimization import optimize
 
-from .baseline.basecor import BaselineCorrection
+from .baseline import BaselineCorrection
 #from ..analysis.picking import picking
 
-from .. import error_, warning_, print_
+from .. import error_, warning_, print_, debug_
 from ...units import ur
 
 # ======================================================================================================================
@@ -82,10 +82,7 @@ def pk(dataset, phc0=None, phc1=None, pivot='auto',  dim=-1, inplace=False, inte
         to the usual `axis` numpy parameter.
 
     """
-    verbose = kwargs.get('verbose', False)
-    if verbose:
-        print_('')
-        print_('MANUAL PHASING MODE')
+    debug_('MANUAL PHASING MODE')
     
     # output dataset inplace or not
     if not inplace:           # default
@@ -112,8 +109,7 @@ def pk(dataset, phc0=None, phc1=None, pivot='auto',  dim=-1, inplace=False, inte
 
     # get initial absolute phase and pivot
     # get the initial phase setting
-    if verbose:
-        print_(f'Current phases : {new.meta.phc0[-1]}, {new.meta.phc1[-1]}')
+    debug_(f'Current phases : {new.meta.phc0[-1]}, {new.meta.phc1[-1]}')
 
     # make metadata updatable
     readonly = new.meta.readonly
@@ -154,9 +150,8 @@ def pk(dataset, phc0=None, phc1=None, pivot='auto',  dim=-1, inplace=False, inte
 
     pivot_phc0 = phc1 * (poldpivot - ppivot)/lastcoord.size
     
-    if verbose:
-        print_(f'Phases demanded for axis {dim} : {phc0}, {phc1} with pivot: {pivot}' )
-        print_(f'Actual phases to apply for axis {dim} : {rphc0 + pivot_phc0}, {rphc1}' )
+    debug_(f'Phases demanded for axis {dim} : {phc0}, {phc1} with pivot: {pivot}' )
+    debug_(f'Actual phases to apply for axis {dim} : {rphc0 + pivot_phc0}, {rphc1}' )
 
     
     # do processing
@@ -354,10 +349,7 @@ def apk(dataset, dim=-1, inplace=False, algorithm='neg_area', optmode='simplex',
     # args = parser.parse_args(options.split())
 
     """
-    verbose = kwargs.get('verbose', False)
-    if verbose:
-        print_(' ')
-        print_(f'AUTOMATIC PHASE MODE : algorithm {algorithm}')
+    debug_(f'AUTOMATIC PHASE MODE : algorithm {algorithm}')
 
     # output dataset inplace or not
     if not inplace:
@@ -384,8 +376,7 @@ def apk(dataset, dim=-1, inplace=False, algorithm='neg_area', optmode='simplex',
 
     # get initial absolute phase and pivot
     # get the initial phase setting
-    if verbose:
-        print_(f'Current phases : {new.meta.phc0[-1]}, {new.meta.phc1[-1]}')
+    debug_(f'Current phases : {new.meta.phc0[-1]}, {new.meta.phc1[-1]}')
         
     #if args.select == 'cols' and source.is_2d and axis == 0:
     #    ar = picking(source, args.threshold, index=True)
@@ -487,17 +478,14 @@ def apk(dataset, dim=-1, inplace=False, algorithm='neg_area', optmode='simplex',
     phc0 = fp['phc0']
     phc1 = fp['phc1']
 
-    if verbose:
-        print_(f'Calculated phases (cost: {err}):')
+    debug_(f'Calculated phases (cost: {err}):')
 
     if fit_phc1:
-        if verbose:
-            print_(f'phc0: {phc0}')
-            print_(f'phc1: {phc1}')
+        debug_(f'phc0: {phc0}')
+        debug_(f'phc1: {phc1}')
     else:
-        if verbose:
-            print_(f'phc0: {phc0}')
-            print_(f'phc1 (not optimized): {phc1}')
+        debug_(f'phc0: {phc0}')
+        debug_(f'phc1 (not optimized): {phc1}')
 
     # apply to the original data and return
     data = _ps(new.data, phc0, phc1)
@@ -531,10 +519,7 @@ autophase = apk
 # ----------------------------------------------------------------------------------------------------------------------
 def interact_pk(dataset, dim=-1, **kwargs):
     
-    verbose = kwargs.get('verbose', False)
-    if verbose:
-        print_(' ')
-        print_('INTERACTIVE PHASING MODE')
+    debug_('INTERACTIVE PHASING MODE')
     
     new = dataset.copy()
     
@@ -556,8 +541,7 @@ def interact_pk(dataset, dim=-1, **kwargs):
     
     # get initial absolute phase and pivot
     # get the initial phase setting
-    if verbose:
-        print_(f'Current phases : {new.meta.phc0[-1]}, {new.meta.phc1[-1]}')
+    debug_(f'Current phases : {new.meta.phc0[-1]}, {new.meta.phc1[-1]}')
 
     phc0 = new.meta.phc0[-1]
     phc1 = new.meta.phc1[-1]

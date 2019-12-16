@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT 
 # See full LICENSE agreement in the root directory
@@ -59,18 +59,18 @@ def test_ndio_less_basic(coord2, coord2b, dsm):  # dsm is defined in conftest
 
 def test_ndio_save1D_load(IR_dataset_1D):
     dataset = IR_dataset_1D.copy()
-    debug_(dataset)
+    #debug_(dataset)
     dataset.save('essai')
     ir = NDDataset.load("essai")
-    debug_(ir)
+    #debug_(ir)
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
 def test_ndio_save2D_load(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
-    debug_(dataset)
+    #debug_(dataset)
     dataset.save('essai')
     ir = dataset.load("essai")
-    debug_(ir)
+    #debug_(ir)
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
 def test_ndio_save_and_load_mydataset(IR_dataset_2D):

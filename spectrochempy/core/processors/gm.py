@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -20,19 +20,18 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.core.processors.apodization.apodize import apodize
-from spectrochempy.utils import epsilon
-from spectrochempy.utils import docstrings
-from spectrochempy.units.units import ur, Quantity
+from .apodization import apodize
+from ...utils import epsilon, docstrings
+from ...units import ur, Quantity
 
 # ======================================================================================================================
 # gm function
 # ======================================================================================================================
-docstrings.delete_params('apodize.parameters',  'dataset', 'method', 'apod')
+docstrings.delete_params('apodize.parameters', 'dataset', 'method', 'apod')
 
 @docstrings.get_sectionsf('gm')
 @docstrings.dedent
-def gm(dataset, gb=1*ur.Hz, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-1,  **kwargs):
+def gm(dataset, gb=1*ur.Hz, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=False, dim=-1,  **kwargs):
     r"""
     Calculate lorentz-to-gauss apodization.
 

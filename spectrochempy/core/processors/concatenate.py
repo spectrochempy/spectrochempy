@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -15,10 +15,10 @@ import numpy as np
 import datetime as datetime
 from warnings import warn
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import is_sequence, docstrings
+from ..dataset.nddataset import NDDataset
+from ..dataset.ndcoordset import CoordSet
+from ..dataset.ndcoord import Coord
+from ...utils import is_sequence, docstrings
 
 @docstrings.dedent
 def concatenate(*datasets, **kwargs):

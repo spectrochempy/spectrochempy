@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -28,7 +28,7 @@ from numba import jit
 # ----------------------------------------------------------------------------------------------------------------------
 
 import matplotlib.pyplot as plt
-from spectrochempy.core.dataset.ndcoordrange import CoordRange
+from ..dataset.ndcoordrange import CoordRange
 
 
 def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):

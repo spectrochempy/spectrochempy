@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -23,6 +23,7 @@ __DEV__ = False
 if 'develop' in sys.argv:
     __DEV__ = True
 
+
 def path():
     return os.path.dirname(__file__)
 
@@ -43,14 +44,14 @@ def install_styles():
                       '  conda install matplotlib\n'
                       'and then install again.')
         return
-
+    
     # install all plotting styles in the matplotlib stylelib library
-
+    
     cfgdir = mpl.get_configdir()
     stylelib = os.path.join(cfgdir, 'stylelib')
     if not os.path.exists(stylelib):
         os.mkdir(stylelib)
-    styles_path = os.path.join(os.path.dirname(__file__),"scp_data","stylesheets")
+    styles_path = os.path.join(os.path.dirname(__file__), "scp_data", "stylesheets")
     styles = os.listdir(styles_path)
     for style in styles:
         src = os.path.join(styles_path, style)
@@ -77,55 +78,58 @@ def install_styles():
 def install_requires():
     return []
 
+
 class PostDevelopCommand(_develop):
     """Post-installation for development mode."""
-
+    
     def run(self):
         _develop.run(self)
-        for item in ['pre-commit', 'pre-push']:
-            hook = os.path.join(path(), '.git', 'hooks', item)
-            if os.path.exists(hook):
-                os.remove(hook)
-            nhook = os.path.join(path(), 'git_hooks', item)
-            sh.copy(nhook, hook)
-            print(('installation of `.git/hooks/{}` made.'.format(item)))
+        # for item in ['pre-commit', 'pre-push']:
+        #     hook = os.path.join(path(), '.git', 'hooks', item)
+        #     if os.path.exists(hook):
+        #         os.remove(hook)
+        #     nhook = os.path.join(path(), 'git_hooks', item)
+        #     sh.copy(nhook, hook)
+        #     print(('installation of `.git/hooks/{}` made.'.format(item)))
         install_styles()
 
 
 class PostInstallCommand(_install):
     """Post-installation for installation mode."""
-
+    
     def run(self):
         _install.run(self)
         install_styles()
+
 
 def read(fname):
     with open(os.path.join(path(), fname), 'r') as f:
         return f.read()
 
+
 # Data for setuptools
 packages = []
 
 extras_require = {
-        'tests':[
-            "pytest",
-            "pytest-runner",
-            "pytest-console-scripts",
-            "scikit-image",
-        ],
-        }
+    'tests': [
+        "pytest",
+        "pytest-runner",
+        "pytest-console-scripts",
+        "scikit-image",
+    ],
+}
 
 setup_args = dict(
-
+    
     # packages informations
-    name = "spectrochempy",
-    use_scm_version = True,
+    name="spectrochempy",
+    use_scm_version=True,
     license="CeCILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="developpers@spectrochempy.fr",
     maintainer="SpectroChempy Developpers",
     maintainer_email="developpers@spectrochempy.fr",
-    url = 'http:/www.spectrochempy.fr',
+    url='http:/www.spectrochempy.fr',
     description='Processing, analysis and modelling Spectroscopic data for '
                 'Chemistry with Python',
     long_description=read('README.rst'),
@@ -140,37 +144,36 @@ setup_args = dict(
                  "Programming Language :: Python :: 3.6",
                  ],
     platforms=['Windows', 'Mac OS X', 'Linux'],
-
+    
     # packages discovery
     # zip_safe=False,
     packages=find_packages() + packages,
     include_package_data=True,
-
+    
     # requirements
     python_requires=">3.5",  # TODO: check if it works also with 3.5
-    setup_requires = ['setuptools_scm', 'pyyaml'],
-    install_requires= [], # install_requires(dev=__DEV__),
+    setup_requires=['setuptools_scm', 'pyyaml'],
+    install_requires=[],  # install_requires(dev=__DEV__),
     tests_require=extras_require['tests'],
-
+    
     # post-commands
-    cmdclass = {'develop': PostDevelopCommand,
-                'install': PostInstallCommand,
-                },
-
+    cmdclass={'develop': PostDevelopCommand,
+              'install': PostInstallCommand,
+              },
+    
     # entry points for scripts
-    #scripts = {'scripts/launch_api.py'},
-    entry_points = {
+    # scripts = {'scripts/launch_api.py'},
+    entry_points={
         'console_scripts': ['scpy=spectrochempy.scripts.launch_api:main', ],
-                    },
+    },
 
 )
 
 # ======================================================================================================================
 if __name__ == '__main__':
-
     # execute setup
     setup(**setup_args)
-
+    
     # Install quaternion package (#TODO: may be we can make a single setup file)
     # from subprocess import check_output
     # out = check_output("""cd quaternion; python setup.py develop; cd .. """, shell=True)

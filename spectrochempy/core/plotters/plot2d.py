@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -480,7 +480,7 @@ def plot_2D(dataset, **kwargs):
         # but display only a subset of them in order to accelerate the drawing
         maxlines = kwargs.get('maxlines',
                               general_preferences.max_lines_in_stack)
-        debug_('max number of lines %d' % maxlines)
+        # debug_('max number of lines %d' % maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 

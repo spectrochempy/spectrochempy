@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -19,11 +19,10 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.core.processors.apodization.apodize import apodize
-from spectrochempy.core import error_
-from spectrochempy.utils import epsilon
-from spectrochempy.utils import docstrings
-from spectrochempy.units.units import ur, Quantity
+from .apodization import apodize
+from .. import error_
+from ...utils import epsilon, docstrings
+from ...units import ur, Quantity
 
 # ======================================================================================================================
 # em function
@@ -32,7 +31,7 @@ docstrings.delete_params('apodize.parameters', 'dataset', 'method', 'apod')
 
 @docstrings.get_sectionsf('em')
 @docstrings.dedent
-def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-1, **kwargs):
+def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=False, dim=-1, **kwargs):
     r"""
     Calculate exponential apodization.
 
@@ -115,19 +114,4 @@ def em(dataset, lb=0*ur.Hz, shifted=0, inv=False, rev=False, inplace=True, dim=-
 
 # ======================================================================================================================
 if __name__ == '__main__' : # pragma: no cover
-    from spectrochempy import *
-
-    dataset1D = NDDataset()
-    path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-
-    dataset1D /= dataset1D.real.data.max()  # normalize
-
-    p = dataset1D.plot()
-    
-    new, curve = dataset1D.em(lb=100. * ur.Hz, retfunc=True)
-    curve.plot(color='r', clear=False)
-    new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color='r', clear=False)
-    
-
-    show()
+    pass

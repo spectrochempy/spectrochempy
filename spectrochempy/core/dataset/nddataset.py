@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (�) 2015-2019 LCS
+# Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -13,8 +13,6 @@ This module implements the |NDDataset| class.
 """
 
 __all__ = ['NDDataset']
-
-__dataset_methods__ = []
 
 # ======================================================================================================================
 # Standard python imports
@@ -1178,8 +1176,8 @@ class NDDataset(
     def _dims_update(self, change=None):
         # when notified that a coords names have been updated
         _ = self.dims  # fire an update
+        #debug_('dims have been updated')
         
-        debug_('dims have been updated')
     
     # ..................................................................................................................
     @observe(All)

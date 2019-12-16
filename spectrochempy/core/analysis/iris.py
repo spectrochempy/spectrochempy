@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -36,24 +36,6 @@ class IRIS:
         param : dict
             Dict of inversion parameters with the following keys :
 
-<<<<<<< HEAD
-            *   'kernel' : the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional
-                relationship holding between 'p', the experimental variable that was changed in the rows direction of X
-                (e.g. temperature, pressure, time, ...) and the concentration of pure species characterized
-                by the physico-chemical parameter 'eps' (e.g. adsorption/desorption energy, ...).
-                Default : 'langmuir'. If another kernel name is given, the kernel function must be passed in param['ker']
-            *   'ker' : a two-variable lambda function ker(p, eps) where p and eps are the external experimental
-                variable and  the internal physico-chemical parameter, respectively - TODO : implement other kernels : e.g. 'CA', 'TPD'
-            *   'epsRange' : array_like of three values [start, stop, num] defining the interval of eps values.
-                start, stop : the starting and end values of eps, num : number of values.
-            *   'lambdaRange' : array_like of three values [start, stop, num] defining the interval of regularization
-                parameter. Its values are speced evenly on a log scale with 10^start and 10^stop : a the starting and
-                end values and num the number of values.
-            *   'p' : array or coordinate of the external variable. If none is given, p = X.y.values
-            *   'guess' : method to guess the initial distribution function for the current wavelength.
-            *   'previous' : takes the distribution at the previous wavelength, 'zero' takes a null distribution
-                function, 'random'  takes a random distribution function.
-=======
             *   'custom_kernel': a two-variable lambda function ker(p, eps) where p and eps are the external experimental
                 variable and  the internal physico-chemical parameter, respectively. If not given, one of the
                 pre-defined kernel must be defined in param['kernel'], below.
@@ -70,7 +52,6 @@ class IRIS:
                 are spaced evenly on a log scale between 10^start and 10^stop.
             *   'p': array or coordinate of the external variable. If none is given, p = X.y.values
 
->>>>>>> d06201598bf138163b8da982f3cfae343fe228fa
         verbose : bool
             If set to True, prints informations during the 2D IRIS  analysis.
             In a

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -56,7 +56,7 @@ def read_matlab(dataset=None, **kwargs):
     --------
 
     """
-    debug_("reading .mat file")
+    #debug_("reading .mat file")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -92,8 +92,9 @@ def read_matlab(dataset=None, **kwargs):
         content = sio.whosmat(file)
         f = sio.loadmat(file)
         if len(content) > 1:
-            debug_("several elements")
-
+            #debug_("several elements")
+            pass
+        
         for x in content:
             if x[2] in ['double', 'single', 'int8', 'int16',
                         'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64']:
@@ -113,7 +114,7 @@ def read_matlab(dataset=None, **kwargs):
                 ds = _read_DSO(f, x)
                 datasets.append(ds)
             else:
-                debug_('unsupported data type')
+                #debug_('unsupported data type')
                 # TODO: implement DSO reader
                 datasets.append((x[0], f[x[0]]))
 

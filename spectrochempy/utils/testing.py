@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
@@ -261,7 +261,8 @@ def example_run(path):
     try:
         print('env', os.environ['CONDA_DEFAULT_ENV'])
     except:
-        debug_('no conda env')
+        pass
+        #debug_('no conda env')
     pipe = None
     try:
         pipe = subprocess.Popen(

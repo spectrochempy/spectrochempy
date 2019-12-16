@@ -1,7 +1,7 @@
 name: scpy-dev
 channels:
-- conda
 - conda-forge
+- conda
 - spectrocat
 dependencies:
 - numpy

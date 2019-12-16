@@ -2,7 +2,7 @@
 #
 # ======================================================================================================================
 # =============================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -50,7 +50,7 @@ from spectrochempy.utils import readfilename, readdirname
 from spectrochempy.utils.qtfiledialogs import opendialog
 from spectrochempy.core.readers.readomnic import read_omnic
 from spectrochempy.core.readers.readcsv import read_csv
-from ...core import info_, debug_, error_, warning_
+from ...core import info_, debug_, print_, error_, warning_
 
 # function for reading data in a directory
 # ----------------------------------------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     """
 
-    debug_("starting reading in a folder")
+    #debug_("starting reading in a folder")
 
     # check if the first parameter is a dataset
     # because we allow not to pass it
@@ -123,19 +123,19 @@ def read_dir(dataset=None, directory=None, **kwargs):
     if recursive:
         for i, root in enumerate(os.walk(directory)):
             if i == 0:
-                debug_("reading root directory")
+                pass # debug_("reading root directory")
             else:
-                debug_("reading subdirectory")
+                pass # debug_("reading subdirectory")
             datasets += _read_single_dir(root[0])
     else:
-        debug_("reading root directory only")
+        # debug_("reading root directory only")
         datasets += _read_single_dir(directory)
 
     if len(datasets) == 1:
-        debug_("finished read_dir()")
+        #debug_("finished read_dir()")
         return datasets[0]  # a single dataset is returned
 
-    debug_("finished read_dir()")
+    #debug_("finished read_dir()")
     return datasets  # several datasets returned
 
 
@@ -147,7 +147,7 @@ def _read_single_dir(directory):
     datasets = []
 
     if not filenames:
-        debug_("empty directory")
+        #debug_("empty directory")
         return datasets
 
     files = readfilename(filenames, directory=directory)
@@ -228,7 +228,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     """
 
-    debug_("starting reading in a folder")
+    #debug_("starting reading in a folder")
     # check if the first parameter is a dataset
     # because we allow not to pass it
     if not isinstance(dataset, NDDataset):
@@ -294,7 +294,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     Tfile = sorted([f for f in os.listdir(directory)
                     if f[-4:].lower() == '.xls'])
     if len(Tfile) == 0:
-        debug_("no temperature file")
+        print_("no temperature file")
     elif len(Tfile) > 1:
         warnings.warn("several .xls/.csv files. The temperature will not be read")
     else:
@@ -318,10 +318,10 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
                     t.append(time)
                     T.append(sheet.cell(i, 4).value)
             except ValueError:
-                debug_('incorrect date or temperature format in row {}'.format(i))
+                #debug_('incorrect date or temperature format in row {}'.format(i))
                 pass
             except TypeError:
-                debug_('incorrect date or temperature format in row {}'.format(i))
+                #debug_('incorrect date or temperature format in row {}'.format(i))
                 pass
 
         # interpolate T = f(timestamp)
@@ -338,10 +338,10 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
             ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
 
     if len(datasets) == 1:
-        debug_("finished read_dir()")
+        #debug_("finished read_dir()")
         return datasets[0]  # a single dataset is returned
 
-    debug_("finished read_dir()")
+    #debug_("finished read_dir()")
     # several datasets returned, sorted by sample #
     return sorted(datasets, key=lambda ds: int(ds.name.split('_')[0]))
 
