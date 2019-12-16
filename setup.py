@@ -82,13 +82,13 @@ class PostDevelopCommand(_develop):
 
     def run(self):
         _develop.run(self)
-        for item in ['pre-commit', 'pre-push']:
-            hook = os.path.join(path(), '.git', 'hooks', item)
-            if os.path.exists(hook):
-                os.remove(hook)
-            nhook = os.path.join(path(), 'git_hooks', item)
-            sh.copy(nhook, hook)
-            print(('installation of `.git/hooks/{}` made.'.format(item)))
+        # for item in ['pre-commit', 'pre-push']:
+        #     hook = os.path.join(path(), '.git', 'hooks', item)
+        #     if os.path.exists(hook):
+        #         os.remove(hook)
+        #     nhook = os.path.join(path(), 'git_hooks', item)
+        #     sh.copy(nhook, hook)
+        #     print(('installation of `.git/hooks/{}` made.'.format(item)))
         install_styles()
 
 
