@@ -25,7 +25,7 @@ import matplotlib.pyplot as pl
 from ..fitting.parameters import FitParameters
 from ..fitting.optimization import optimize
 
-from .baseline.basecor import BaselineCorrection
+from .baseline import BaselineCorrection
 #from ..analysis.picking import picking
 
 from .. import error_, warning_, print_

@@ -8,7 +8,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["apodize"]
+__all__ = []
 
 __dataset_methods__ = []
 
@@ -20,10 +20,9 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.units.units import ur, Quantity
-from spectrochempy.utils import epsilon
-from spectrochempy.core import general_preferences, error_
-from spectrochempy.utils import docstrings
+from ...units import ur, Quantity
+from ...utils import epsilon, docstrings
+from .. import general_preferences, error_
 
 # ======================================================================================================================
 # generic apodization function

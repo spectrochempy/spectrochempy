@@ -27,9 +27,9 @@ import numpy as np
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.utils import NOMASK, MASKED, UnitsCompatibilityError
-from spectrochempy.extern.orderedset import OrderedSet
-from spectrochempy.core import warning_, error_
+from ...utils import NOMASK, MASKED, UnitsCompatibilityError
+from ...extern.orderedset import OrderedSet
+from .. import warning_, error_
 
 
 # ..................................................................................................................

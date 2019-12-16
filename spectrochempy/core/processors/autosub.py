@@ -28,7 +28,7 @@ from numba import jit
 # ----------------------------------------------------------------------------------------------------------------------
 
 import matplotlib.pyplot as plt
-from spectrochempy.core.dataset.ndcoordrange import CoordRange
+from ..dataset.ndcoordrange import CoordRange
 
 
 def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):

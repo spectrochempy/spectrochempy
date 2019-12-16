@@ -2,12 +2,13 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_json: true
 #     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.2'
-#       jupytext_version: 1.1.6
+#       format_version: '1.3'
+#       jupytext_version: 1.3.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -19,8 +20,6 @@
 
 # %%
 from spectrochempy import *
-
-# %%
 
 # %% [markdown]
 # ## Import data
@@ -170,7 +169,7 @@ dataset1D = get_dataset1D()
 dataset1D.plot() 
 
 # Create the apodized dataset usint exponential multiplication (em)
-lb_dataset = dataset1D.em(lb=100.*ur.Hz)
+lb_dataset = dataset1D.em(lb=100.*ur.Hz, inplace=True)
 
 # plot the apodized dataset on the same figure
 lb_dataset.plot(xlim=(0,25000), zlim=(-100,100), color='r', clear=False)
@@ -416,3 +415,13 @@ transfph3 = transf1.apk(verbose=True, fit_phc1=True, mode='negmin+entropy', edif
 
 pt.plot(xlim=(20,-20))
 transfph3.plot(xlim=(100,-100), clear=False, color='b')
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%

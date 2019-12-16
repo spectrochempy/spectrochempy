@@ -20,15 +20,14 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.core.processors.apodization.apodize import apodize
-from spectrochempy.utils import epsilon
-from spectrochempy.utils import docstrings
-from spectrochempy.units.units import ur, Quantity
+from .apodization import apodize
+from ...utils import epsilon, docstrings
+from ...units import ur, Quantity
 
 # ======================================================================================================================
 # gm function
 # ======================================================================================================================
-docstrings.delete_params('apodize.parameters',  'dataset', 'method', 'apod')
+docstrings.delete_params('apodize.parameters', 'dataset', 'method', 'apod')
 
 @docstrings.get_sectionsf('gm')
 @docstrings.dedent

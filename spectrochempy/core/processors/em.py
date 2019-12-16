@@ -19,11 +19,10 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.core.processors.apodization.apodize import apodize
-from spectrochempy.core import error_
-from spectrochempy.utils import epsilon
-from spectrochempy.utils import docstrings
-from spectrochempy.units.units import ur, Quantity
+from .apodization import apodize
+from .. import error_
+from ...utils import epsilon, docstrings
+from ...units import ur, Quantity
 
 # ======================================================================================================================
 # em function

@@ -20,8 +20,8 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from spectrochempy.core.processors.apodization.apodize import apodize
-from spectrochempy.utils import docstrings
+from .apodization import apodize
+from ...utils import docstrings
 
 # ======================================================================================================================
 # sinm function
