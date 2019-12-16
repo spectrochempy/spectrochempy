@@ -33,7 +33,7 @@ from ..dataset.ndcoordrange import CoordRange
 from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
 from ...utils import docstrings
-
+from .. import error_, warning_, debug_
 
 class BaselineCorrection(HasTraits):
     """
@@ -137,7 +137,6 @@ class BaselineCorrection(HasTraits):
         return self.compute(*ranges, **kwargs)
 
     docstrings.delete_params('BaselineCorrection.parameters', 'dataset')
-
     @docstrings.dedent
     def compute(self, *ranges, **kwargs):
         """
@@ -355,7 +354,10 @@ class BaselineCorrection(HasTraits):
 # =======================================================================================================================
 # ab
 #=======================================================================================================================
-def ab(dataset, options='', axis=-1):
+def ab(dataset,
+       dim=-1,
+       inplace=False,
+       **kwargs):
     """
     Automatic baseline correction
 
@@ -412,24 +414,29 @@ def ab(dataset, options='', axis=-1):
     # args = parser.parse_args(options.split())
     #
     # source.history.append('baseline correction mode:%s' % args.mode)
-    
-    if axis == -1:
-        par = source.par
+
+    debug_('Automatic baseline correction')
+
+    # output dataset inplace or not
+    if not inplace:           # default
+        new = dataset.copy()
     else:
-        par = source.par2
+        new = dataset
+
+    axis, dim = new.get_axis(dim, negative_axis=True)
+    swaped = False
+    if axis != -1:
+        new.swapaxes(axis, -1, inplace=True)  # must be done in  place
+        swaped = True
+
+        # select the last coordinates and check the unit validity
+    lastcoord = new.coords[dim]
+    if (lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm'):
+        error_('`ab` apply only to dimensions with [frequency] dimensionality or with ppm units\n'
+               'Baseline correction processing was thus cancelled')
+        return new
     
-    if not par.isfreq:
-        pass  #todo: fid correction
-    
-    # we will work on the ndarray, not DataFrame
-    data = source.data
-    
-    if axis == 0:
-        # transpose temporarily the data for indirect dimension ft
-        data = data.T
-    index = data.index
-    columns = data.columns
-    
+
     base, w = basecorr(data.values, args, retw=True)
     par.baseline = pd.DataFrame(base, index=index, columns=columns)
     par.basepoints = w

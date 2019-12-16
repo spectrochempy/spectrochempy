@@ -316,7 +316,7 @@ class NDIO(HasTraits):
         # get zip file
         obj = NpzFile(fid, allow_pickle=True)
 
-        debug_(str(obj.files) + '\n')
+        # debug_(str(obj.files) + '\n')
 
         # interpret
         coords = None

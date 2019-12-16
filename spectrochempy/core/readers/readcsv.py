@@ -77,7 +77,7 @@ def read_zip(*args, **kwargs):
       name/id :  ...
 
     """
-    debug_("reading zipped folder of *.csv files")
+    #debug_("reading zipped folder of *.csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -124,7 +124,7 @@ def read_csv(*args, **kwargs):
     """
     # TODO: to allow header and nd-data
 
-    debug_("reading csv files")
+    #debug_("reading csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -227,7 +227,7 @@ def _read_zip(filename, **kwargs):
         if not f.endswith('.csv') or f.startswith('__MACOSX'):
             continue  # bypass non-csv files
 
-        debug_('reading %s ...' % (f))
+        #debug_('reading %s ...' % (f))
 
         datasets.append(_read_csv(filename=f, fid=obj[f], **kwargs))
         if len(datasets) + 1 > only:

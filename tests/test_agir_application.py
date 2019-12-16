@@ -15,7 +15,8 @@ import os
 try:
     print('env', os.environ['CONDA_DEFAULT_ENV'])
 except:
-    debug_('no conda env')
+    pass
+    #debug_('no conda env')
 import pytest
 from spectrochempy import general_preferences as prefs
 

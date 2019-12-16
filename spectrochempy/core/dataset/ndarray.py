@@ -39,7 +39,7 @@ import numpy as np
 # ======================================================================================================================
 
 from ...units import Unit, ur, Quantity, set_nmr_context
-from ...core import info_, debug_, error_, warning_
+from ...core import info_, debug_, error_, warning_, print_
 from ...utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence, is_number,
                       numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
                       SpectroChemPyDeprecationWarning, deprecated,
@@ -280,7 +280,7 @@ class NDArray(HasTraits):
                     oattr = getattr(other, f'_{attr}')
                     eq &= np.all(sattr == oattr)
                     if not eq:
-                        debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                        #debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
                         return False
                 else:
                     return False
@@ -296,7 +296,7 @@ class NDArray(HasTraits):
                         
                     eq &= np.all(sattr == oattr)
                     if not eq:
-                        debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                        #debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
                         return False
                 else:
                     return False
@@ -544,7 +544,7 @@ class NDArray(HasTraits):
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
-            debug_("init data with data from another NDArray object")
+            #debug_("init data with data from another NDArray object")
             for attr in self.__dir__():
                 try:
                     val = getattr(data, f"_{attr}")
@@ -556,22 +556,22 @@ class NDArray(HasTraits):
                     pass
 
         elif HAS_PANDAS and isinstance(data, NDFrame):  # pandas object
-            debug_("init data with data from pandas NDFrame object")
+            #debug_("init data with data from pandas NDFrame object")
             self._data = data.values
 
         elif HAS_PANDAS and isinstance(data, Index):  # pandas index object
-            debug_("init data with data from a pandas Index")
+            #debug_("init data with data from a pandas Index")
             self._data = data.values
             self._title = data.name
 
         elif isinstance(data, Quantity):
-            debug_("init data with data from a Quantity object")
+            #debug_("init data with data from a Quantity object")
             self._data = np.array(data.magnitude, subok=True, copy=self._copy)
             self._units = data.units
 
         elif hasattr(data, 'mask'):
             # an object with data and mask attributes
-            debug_("mask detected - initialize a mask from the passed data")
+            #debug_("mask detected - initialize a mask from the passed data")
             self._data = np.array(data.data, subok=True,
                                   copy=self._copy)
             if isinstance(data.mask, np.ndarray) and \
@@ -581,15 +581,13 @@ class NDArray(HasTraits):
         elif (not hasattr(data, 'shape') or
               not hasattr(data, '__getitem__') or
               not hasattr(data, '__array_struct__')):
-            debug_(
-                "Attempt to initialize data with a numpy-like array object")
+            # debug_("Attempt to initialize data with a numpy-like array object")
             # Data doesn't look like a numpy array, try converting it to
             # one. Non-numerical input are converted to an array of objects.
             self._data = np.array(data, subok=True, copy=False)
 
         else:
-            debug_(
-                "numpy array detected - initialize data with a numpy array")
+            # debug_("numpy array detected - initialize data with a numpy array")
             self._data = np.array(data, subok=True, copy=self._copy)
 
     # ..................................................................................................................
@@ -852,7 +850,8 @@ class NDArray(HasTraits):
         
         if name:
             if self._name:
-                debug_("Overwriting current name")
+                #debug_("Overwriting current name")
+                pass
             self._name = name
 
     # ..................................................................................................................
@@ -1378,7 +1377,7 @@ class NDArray(HasTraits):
             s = np.array(new.shape)
             dims = np.argwhere(s == 1).squeeze().tolist()
         axis = self._get_dims_index(dims)
-        debug_(f"axis:{axis}<-dims:{dims}")
+        #debug_(f"axis:{axis}<-dims:{dims}")
 
         # recompute new dims
         for i in axis[::-1]:
@@ -1791,7 +1790,7 @@ class NDArray(HasTraits):
                 # get the index of a given values
                 error = None
                 if np.all(loc > data.max()) or np.all(loc < data.min()):
-                    debug_(f'This coordinate ({loc}) is outside the axis limits ({data.min()}-{data.max()}).\n'
+                    print_(f'This coordinate ({loc}) is outside the axis limits ({data.min()}-{data.max()}).\n'
                            f'The closest limit index is returned')
                     error = 'out_of_limits'
                 index = (np.abs(data - loc)).argmin()

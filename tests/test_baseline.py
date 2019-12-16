@@ -11,7 +11,8 @@
 # noinspection PyUnresolvedReferences
 from spectrochempy import (     show,
                                 BaselineCorrection,
-                                NDDataset)
+                                NDDataset,
+                                ur)
 
 import pytest
 import os
@@ -86,6 +87,17 @@ def test_notebook_basecor_bug():
 
     basc.corrected.plot_stack()
 
+def test_ab_nmr(NMR_dataset_1D):
+    
+    dataset = NMR_dataset_1D.copy()
+    dataset /= dataset.real.data.max()  #nromalize
 
-
+    dataset.em(10.*ur.Hz, inplace=True)
+    transf = dataset.fft(tdeff=8192, size=2**15)
+    transf.plot(xlim=(20,-20), ls=':', color='k')
+    
+    
+    
+    show()
+    
 

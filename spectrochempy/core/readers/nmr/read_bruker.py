@@ -187,7 +187,7 @@ def _remove_digital_filter(dic, data):
     Remove the digital filter from Bruker data.
     nmrglue modified Digital Filter Processing
     """
-    debug_('Bruker digital filter...')
+    # debug_('Bruker digital filter...')
 
     if 'acqus' not in dic:
         raise KeyError("dictionary does not contain acqus parameters")
@@ -242,7 +242,7 @@ def _remove_digital_filter(dic, data):
     dic['acqus']['TD'] = td * 2
     data = data[..., :td]
 
-    debug_('Bruker digital filter : removed %s points' % rp)
+    #debug_('Bruker digital filter : removed %s points' % rp)
 
     return data
 
@@ -313,7 +313,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     """
 
-    debug_('Bruker imports...')
+    # debug_('Bruker imports...')
 
     # determine if the method was called as a classmethod or not
     # if yes create a dataset
@@ -371,8 +371,8 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     lowmem = kwargs.get('lowmem', False)  # load all in memero by default
     if lowmem:
-        debug_('import with low memory handling (lowmem)')
-
+        #debug_('import with low memory handling (lowmem)')
+        pass
     # ------------------------------------------------------------------------------------------------------------------
     # start reading ....
     # ------------------------------------------------------------------------------------------------------------------
@@ -403,7 +403,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     for idx, path in enumerate(paths):
 
-        debug_('Reading %d:%s' % (idx, path))
+        # debug_('Reading %d:%s' % (idx, path))
 
         # Acquisition parameters
 
@@ -472,7 +472,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 # necessary for agreement with bruker data and phase
         else:
 
-            debug_(f'Reading processed {idx}:{path}')
+            #debug_(f'Reading processed {idx}:{path}')
 
             dic, data = read_pdata(npath, procs_files=par_files, )
 
@@ -618,7 +618,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         list_meta.append(meta)
 
         # make the corresponding axis
-        debug_('Create coords...')
+        #debug_('Create coords...')
         coords = []
         axe_range = list(range(parmode + 1))
         for axis in axe_range:
@@ -653,12 +653,12 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         #     ldates.append(adic.par.DATE)  # and the date
 
         # store temporarily these data
-        debug_('data read finished : type : %s' % datatype)
+        #debug_('data read finished : type : %s' % datatype)
 
         list_data.append(data)
 
     if len(list_data) == 1:
-        debug_('One experiment read. Make it the current dataset')
+        #debug_('One experiment read. Make it the current dataset')
 
         dataset.data = list_data[0]
 

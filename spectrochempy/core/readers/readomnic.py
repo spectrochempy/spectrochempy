@@ -77,7 +77,7 @@ def read_omnic(dataset=None, **kwargs):
 
 
     """
-    debug_("reading omnic files")
+    #debug_("reading omnic files")
 
     # filename will be given by a keyword parameter except if the first parameters is already the filename
     filename = kwargs.get('filename', None)
@@ -112,11 +112,11 @@ def read_omnic(dataset=None, **kwargs):
 
         if extension == '.spg':
             for filename in files[extension]:
-                debug_("reading omnic spg file")
+                #debug_("reading omnic spg file")
                 datasets.append(_read_spg(dataset, filename))
 
         elif extension == '.spa':
-            debug_("reading omnic spa files")
+            #debug_("reading omnic spa files")
             datasets.append(_read_spa(dataset, files[extension], sortbydate=True))
         else:
             # try another format!
@@ -389,7 +389,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     dataset._date = datetime.now()
     dataset._modified = dataset.date
     
-    debug_("end of reading")
+    #debug_("end of reading")
 
     return dataset
 
@@ -558,7 +558,7 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset._date = datetime.now()
     dataset._modified = dataset.date
 
-    debug_("end of reading")
+    #debug_("end of reading")
 
     # return the dataset
     return dataset

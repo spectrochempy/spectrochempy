@@ -328,7 +328,8 @@ class Coord(NDMath, NDArray):
         #   'name': "foo", # The name of the changed trait
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
-        debug_(f'changes in Coord: {change.name}')
+        #debug_(f'changes in Coord: {change.name}')
+        pass
 
 
 # ======================================================================================================================

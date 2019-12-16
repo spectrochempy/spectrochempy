@@ -175,8 +175,7 @@ def test_nmr_auto_1D_phasing():
     path = os.path.join(prefs.datadir, 'nmrdata','bruker', 'tests', 'nmr','bruker_1d')
     ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
-    ndd.em(10.*ur.Hz)           # inplace broadening
-    
+    ndd.em(10.*ur.Hz, inplace=True)
     transf = ndd.fft(tdeff=8192, size=2**15)
     transf.plot(xlim=(20,-20), ls=':', color='k')
     
