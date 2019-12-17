@@ -1,18 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-# ===============================================================================
-# masai.core.process.smooth
-# ===============================================================================
-# Copyright (C) 2015 Christian Fernandez
+# ======================================================================================================================
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
-# christian.fernandez@ensicaen.fr
-# This software is governed by the CeCILL-B license under French law
-# and abiding by the rules of distribution of free software.
-# You can  use, modify and/ or redistribute the software under
-# the terms of the CeCILL-B license as circulated by CEA, CNRS and INRIA
-# at the following URL "http://www.cecill.info".
-# See Licence.txt in the main masai source directory
-# ===============================================================================
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory
+# ======================================================================================================================
 
 __all__ = ["smooth"]
 __dataset_methods__  = __all__
@@ -42,9 +35,11 @@ def smooth(dataset, dim =-1, **kwargs):
     window : str, optional, default='hanning'
         the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
         flat window will produce a moving average smoothing.
+        
     Returns
     -------
     out : same type as input dataset
+        the smoothed object
     
     TODO: the window parameter could be the window itself if an array instead of a string
     NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
