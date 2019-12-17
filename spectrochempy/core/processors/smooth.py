@@ -40,10 +40,7 @@ def smooth(dataset, dim =-1, **kwargs):
     -------
     out : same type as input dataset
         the smoothed object
-    
-    TODO: the window parameter could be the window itself if an array instead of a string
-    NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
-    
+        
     """
     
     if not kwargs.pop('inplace', False):
