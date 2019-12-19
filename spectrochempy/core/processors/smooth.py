@@ -13,18 +13,21 @@ __dataset_methods__  = __all__
 import numpy as np
 from .. import error_, warning_, print_, debug_
 
-def smooth(dataset, dim =-1, **kwargs):
+def smooth(dataset, **kwargs):
     """
     Smooth the data using a window with requested size.
     
     This method is based on the convolution of a scaled window with the signal.
     The signal is prepared by introducing reflected copies of the signal (with the window size) in both ends so that
-    transient parts are minimized in the begining and end part of the output signal.
+    transient parts are minimized in the begining and end part of the output data.
     
     Parameters
     ----------
-    dataset :  |NDDataset|, |NDPanel| or a ndarray-like object
+    dataset :  |NDDataset| or a ndarray-like object
         Input object
+        
+    Other Parameters
+    ----------------
     dim : str or int, optional, default='x'.
         Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
@@ -40,7 +43,8 @@ def smooth(dataset, dim =-1, **kwargs):
     -------
     out : same type as input dataset
         the smoothed object
-        
+    
+    TODO: implement this for NDPanel too
     """
     
     if not kwargs.pop('inplace', False):
@@ -50,12 +54,11 @@ def smooth(dataset, dim =-1, **kwargs):
         new = dataset
 
     is_ndarray = False
+    axis = kwargs.pop('dim', kwargs.pop('axis', -1))
     if hasattr(new, 'get_axis'):
-        axis, dim = new.get_axis(dim, negative_axis=True)
+        axis, dim = new.get_axis(axis, negative_axis=True)
     else:
-        # for ndarray work only on the last dimension
         is_ndarray = True
-        axis = -1
         
     swaped = False
     if axis != -1:
