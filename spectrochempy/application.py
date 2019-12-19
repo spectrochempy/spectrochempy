@@ -53,7 +53,7 @@ from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
 
-from spectrochempy.utils import docstrings, MetaConfigurable, display_info_string
+from spectrochempy.utils import MetaConfigurable, display_info_string
 
 # Log levels
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1073,8 +1073,6 @@ class SpectroChemPy(Application):
     # start the application
     # ------------------------------------------------------------------------------------------------------------------
 
-    @docstrings.get_sectionsf('SpectroChemPy.start')
-    @docstrings.dedent
     def start(self):
         """
         Start the |scpy| API

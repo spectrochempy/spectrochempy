@@ -37,22 +37,22 @@ sys._called_from_sphinx = True
 
 extensions = \
     [
-    'nbsphinx',
-    'sphinx.ext.mathjax',
-    'sphinx_gallery.gen_gallery',
-    'jupyter_sphinx.embed_widgets',
-    'spectrochempy.sphinxext.traitlets_sphinxdoc',
-    'sphinx.ext.autodoc',
-    'spectrochempy.sphinxext.autodocsumm',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.todo',
-    'matplotlib.sphinxext.plot_directive',
-    'IPython.sphinxext.ipython_console_highlighting',
-    'IPython.sphinxext.ipython_directive',
-    'numpydoc', #'spectrochempy.sphinxext.numpydoc',  # pinned to v. 0.8 as 0.9 doesn't work
+        'nbsphinx',
+        'sphinx.ext.mathjax',
+        'sphinx.ext.autodoc',
+        'sphinx.ext.autosummary',
+        'sphinx.ext.doctest',
+        'sphinx.ext.intersphinx',
+        'sphinx.ext.viewcode',
+        'sphinx.ext.todo',
+        'sphinx_gallery.gen_gallery',
+        #'jupyter_sphinx.embed_widgets',
+        'spectrochempy.sphinxext.traitlets_sphinxdoc',
+        'spectrochempy.sphinxext.autodocsumm',
+        'matplotlib.sphinxext.plot_directive',
+        'IPython.sphinxext.ipython_console_highlighting',
+        'IPython.sphinxext.ipython_directive',
+        'numpydoc', #'spectrochempy.sphinxext.numpydoc',  # pinned to v. 0.8 as 0.9 doesn't work
     ]
 
 # Numpy autodoc attributes
