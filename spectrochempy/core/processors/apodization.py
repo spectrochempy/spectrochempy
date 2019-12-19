@@ -36,7 +36,7 @@ def _apodize(dataset, method, apod, **kwargs):
     ----------
     dataset : |NDDataset| or |NDPanel|.
         Input dataset or panel
-    method : string
+    method : str
         The method of apodization
     apod : tuple of float or |Quantity|
         The apodization parameters to be used depending on the apodization method
@@ -71,8 +71,7 @@ def _apodize(dataset, method, apod, **kwargs):
         new = dataset
         
     # On which axis do we want to apodize? (get axis from arguments)
-    dim = kwargs.pop('dim', kwargs.pop('axis', -1))
-    axis, dim = dataset.get_axis(dim, negative_axis=True)
+    axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
     
     # The last dimension is always the dimension on which we apply the apodization window.
     # If needed, we swap the dimensions to be sure to be in this situation
