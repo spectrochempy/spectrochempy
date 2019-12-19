@@ -160,7 +160,7 @@ def _apodize(dataset, method, apod, **kwargs):
 # Public module methods
 # ======================================================================================================================
 @docstrings.dedent
-def em(dataset, lb=0 * ur.Hz, shifted=0, **kwargs):
+def em(dataset, lb=1, shifted=0, **kwargs):
     r"""
     Calculate exponential apodization.
 
@@ -243,7 +243,7 @@ def em(dataset, lb=0 * ur.Hz, shifted=0, **kwargs):
 
 # ======================================================================================================================
 @docstrings.dedent
-def gm(dataset, gb=1 * ur.Hz, lb=0 * ur.Hz, shifted=0, **kwargs):
+def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     r"""
     Calculate lorentz-to-gauss apodization.
 
@@ -267,11 +267,11 @@ def gm(dataset, gb=1 * ur.Hz, lb=0 * ur.Hz, shifted=0, **kwargs):
     ----------
     dataset : |NDDataset|  or |NDPanel|.
         Dataset we want to apodize using an Lorentz Multiplication
-    lb : float or `quantity`
+    lb : float or `quantity`, optional, default=0 Hz.
         inverse exponential width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
-    gb : float or `quantity`
+    gb : float or `quantity`, optional, default=1 Hz.
         Gaussian broadening width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
