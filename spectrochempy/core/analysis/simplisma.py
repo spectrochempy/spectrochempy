@@ -90,7 +90,7 @@ class SIMPLISMA(HasTraits):
         def figures_of_merit(X, maxPIndex, C, St, j):
             # return %explained variance and stdev of residuals when the jth compound is added
             C.data[:, j] = X.data[:, maxPIndex[j]]
-            St.data[0:j + 1, :] = np.linalg.lstsq(C.data[:, 0:j + 1], X.data)[0]
+            St.data[0:j + 1, :] = np.linalg.lstsq(C.data[:, 0:j + 1], X.data, rcond=None)[0]
             Xhat = dot(C[:, 0:j + 1], St[0:j + 1, :])
             res = Xhat - X
             stdev_res = np.std(res.data)
@@ -445,7 +445,7 @@ class SIMPLISMA(HasTraits):
         X_hat.title = 'X_hat: ' + self._X.title
         return X_hat
 
-    def plot(self, **kwargs):
+    def plotmerit(self, **kwargs):
         """
         Plots the input dataset, reconstructed dataset and residuals
 
