@@ -36,8 +36,9 @@ dataset.plot_stack()
 efa = scp.EFA(dataset)
 
 
-f = efa.get_forward(n_pc=7, plot=True)
-b = efa.get_backward(n_pc=7, plot=True)
+f = efa.get_forward(n_pc=7)
+f.plot()
+b = efa.get_backward(n_pc=7)
 
 
 ##############################################################################
@@ -48,10 +49,13 @@ b = efa.get_backward(n_pc=7, plot=True)
 npc = 4
 cut = np.max(f[:, npc].data)
 
-f = efa.get_forward(n_pc=4, cutoff=cut, plot=True)
-b = efa.get_backward(n_pc=4, cutoff=cut, plot=True)
+f = efa.get_forward(n_pc=4, cutoff=cut)
+b = efa.get_backward(n_pc=4, cutoff=cut)
+# we concatenate the datasets to plot them in a single figure
+both = scp.concatenate(f, b)
+both.T.plot(yscale="log")
 
-
-c = efa.get_conc(npc, cutoff=cut, plot=True)
+c = efa.get_conc(npc, cutoff=cut)
+c.T.plot()
 
 #show() # uncomment to show plot if needed()

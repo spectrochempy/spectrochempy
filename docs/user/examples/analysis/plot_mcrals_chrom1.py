@@ -59,7 +59,7 @@ St.plot()
 ###############################################################
 # Finally, plots the reconstructed dataset  (X_hat = C St) vs original dataset (X)
 # an residuals. The fit is good and comparable with the original paper.
-X_hat = mcr.plot()
+X_hat = mcr.plotmerit()
 
 
 #show() # uncomment to show plot if needed()
