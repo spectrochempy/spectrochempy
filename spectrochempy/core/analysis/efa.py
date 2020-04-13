@@ -21,6 +21,7 @@ __dataset_methods__ = ['EFA']
 # ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
+from datetime import datetime
 from traitlets import HasTraits, Instance
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -93,7 +94,8 @@ class EFA(HasTraits):
         self.fefa = f = NDDataset(np.zeros((M, K)),
                                   coords=[X.y, Coord(range(K))],
                                   title='EigenValues',
-                                  description='Forward EFA of ' + X.name)
+                                  description='Forward EFA of ' + X.name,
+                                  history=str(datetime.now()) + ': created by spectrochempy ')
 
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
@@ -118,7 +120,8 @@ class EFA(HasTraits):
         self.befa = b = NDDataset(np.zeros((M, K)),
                                   coords=[X.y, Coord(range(K))],
                                   title='EigenValues',
-                                  name='Backward EFA of ' + X.name)
+                                  name='Backward EFA of ' + X.name,
+                                  history=str(datetime.now()) + ': created by spectrochempy ')
 
         b[masked_rows] = MASKED
 
@@ -183,7 +186,7 @@ class EFA(HasTraits):
         Parameters
         ----------
         n_pc : int, optional, default:3
-            Number of components for which the concentration profile must be
+            Number of pure species for which the concentration profile must be
             computed.
         order : str, [not used]
         plot : bool, optional, default:True
@@ -203,12 +206,13 @@ class EFA(HasTraits):
         f = self.get_forward(n_pc, cutoff)
         b = self.get_backward(n_pc, cutoff)
 
-        xcoord = Coord(range(n_pc), title='PC#')
+        xcoord = Coord(range(n_pc), title='PS#')
         c = NDDataset(np.zeros((M, n_pc)),
                       coords=CoordSet(y=self._X.y, x=xcoord),
                       name='C_EFA[{}]'.format(self._X.name),
                       title='relative concentration',
-                      )
+                      description='Concentration profile from EFA',
+                      history=str(datetime.now()) + ': created by spectrochempy')
         if self._X.is_masked:
             masked_rows = np.all(self._X.mask, axis=-1)
         else:
@@ -219,7 +223,6 @@ class EFA(HasTraits):
                 c[i] = MASKED
                 continue
             c[i] = np.min((f.data[i, :n_pc], b.data[i, :n_pc][::-1]), axis=0)
-
         return c
 
 
