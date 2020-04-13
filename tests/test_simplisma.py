@@ -28,5 +28,5 @@ def test_SIMPLISMA():
     [C, St] = pure.transform()
     C.T.plot()
     St.plot()
-    pure.plot()
+    pure.plotmerit()
     assert '3     29      29.0     0.0072     0.9981' in pure._log
