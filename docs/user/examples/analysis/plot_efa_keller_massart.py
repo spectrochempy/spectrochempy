@@ -66,10 +66,10 @@ efa = scp.EFA(dataset)
 
 f = efa.get_forward()
 f.T.plot(yscale="log", legend=f.y.labels)
-plt.show()
+
 b = efa.get_backward()
 b.T.plot(yscale="log")
-plt.show()
+
 ########################################################################################################################
 # Looking at these EFA curves, it is quite obvious that only two components
 # are really significant, and this correspond to the data that we have in
@@ -85,7 +85,7 @@ b2 = efa.get_backward(n_pc=2, cutoff=cut)
 # we concatenate the datasets to plot them in a single figure
 both = scp.concatenate(f2, b2)
 both.T.plot(yscale="log")
-plt.show()
+
 
 # TODO: add "legend" keyword in NDDataset.plot()
 
@@ -96,4 +96,4 @@ plt.show()
 
 c = efa.get_conc(n_pc)
 c.T.plot()
-plt.show()
+
