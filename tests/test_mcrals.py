@@ -34,14 +34,14 @@ def test_MCRALS_no_coords():
 
     C.T.plot()
     St.plot()
-    mcr.plot()
+    mcr.plotmerit()
 
     print('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
-    guess = EFA(X).get_conc(4, plot=False)
+    guess = EFA(X).get_conc(4)
 
     param = {'normSpec':'euclid', 'maxit':100}
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
-    mcr2.plot()
+    mcr2.plotmerit()
 
     assert 'converged !' in mcr2._log[-15:]
 
@@ -76,15 +76,15 @@ def test_MCRALS():
 
     St.plot(title='spectra')
 
-    mcr.plot()
+    mcr.plotmerit()
 
     info_('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
-    guess = EFA(X).get_conc(4, plot=False)
+    guess = EFA(X).get_conc(4)
     guess.plot(title='EFA guess')
 
     param = {'normSpec':'euclid', 'maxit':100}
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
-    mcr2.plot()
+    mcr.plotmerit()
 
     assert 'converged !' in mcr2._log[-15:]
 
