@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
+# Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -21,8 +21,7 @@ __all__ = ['read_matlab']
 __dataset_methods__ = __all__
 
 from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import readfilename, SpectroChemPyWarning
 from ...core import info_, debug_, error_, warning_
@@ -39,10 +38,10 @@ def read_matlab(dataset=None, **kwargs):
         The dataset (or list of datasets) to store the data and metadata read from the file(s).
         If None, a |NDDataset| is created.
     filename : `None`, `str`, or list of `str`
-        Filename of the file(s) to load. If `None` : opens a dialog box to select
-        ``.mat`` files. If `str` : a single filename. It list of str :
+        Filename of the file(s) to load. If `None`: opens a dialog box to select
+        ``.mat`` files. If `str`: a single filename. It list of str:
         a list of filenames.
-    directory : str, optional, default="".
+    directory: str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
 
@@ -56,7 +55,7 @@ def read_matlab(dataset=None, **kwargs):
     --------
 
     """
-    #debug_("reading .mat file")
+    debug_("reading .mat file")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -92,9 +91,8 @@ def read_matlab(dataset=None, **kwargs):
         content = sio.whosmat(file)
         f = sio.loadmat(file)
         if len(content) > 1:
-            #debug_("several elements")
-            pass
-        
+            debug_("several elements")
+
         for x in content:
             if x[2] in ['double', 'single', 'int8', 'int16',
                         'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64']:
@@ -105,16 +103,18 @@ def read_matlab(dataset=None, **kwargs):
                 ds = NDDataset()
                 ds.data = data
                 ds.name = name
+                ds.history.append(str(datetime.now()) + ':imported from .mat file \n')
                 datasets.append(ds)
                 # TODO: reshape from fortran/Matlab order to C opder
                 # for 3D or higher datasets ?
 
             elif x[2] == 'object':
                 # this is probably a DSO object
+
                 ds = _read_DSO(f, x)
                 datasets.append(ds)
             else:
-                #debug_('unsupported data type')
+                debug_('unsupported data type')
                 # TODO: implement DSO reader
                 datasets.append((x[0], f[x[0]]))
 
@@ -160,18 +160,13 @@ def _read_DSO(f, x):
 
         data = f[dso]['data'][0][0]
 
-        ds = NDDataset(data)
-        ds.author = author
-        ds.name = name
-        ds.date = date
-
-        # add coords and labels
+        # look at coords and labels
         # only the first label and axisscale are taken into account
         # the axisscale title is used as the coordinate title
 
         coords = []
-        for i in range(len(ds.shape)):
-            coord = data = labels = title = None
+        for i in range(len(data.shape)):
+            coord = datac = labels = title = None
             labelsarray = f[dso]['label'][0][0][i][0]
             if len(labelsarray):  # some labels might be present
                 if isinstance(labelsarray[0], np.ndarray):
@@ -190,16 +185,16 @@ def _read_DSO(f, x):
             axisdataarray = f[dso]['axisscale'][0][0][i][0]
             if len(axisdataarray):  # some axiscale might be present
                 if isinstance(axisdataarray[0], np.ndarray):
-                    if len(axisdataarray[0]) == ds.shape[i]:
-                        data = axisdataarray[0]  # take the first axiscale data
-                    elif axisdataarray[0].size == ds.shape[i]:
-                        data = axisdataarray[0][0]
+                    if len(axisdataarray[0]) == data.shape[i]:
+                        datac = axisdataarray[0]  # take the first axiscale data
+                    elif axisdataarray[0].size == data.shape[i]:
+                        datac = axisdataarray[0][0]
 
-                if data is not None:
+                if datac is not None:
                     if isinstance(coord, Coord):
-                        coord.data = data
+                        coord.data = datac
                     else:
-                        coord = Coord(data=data)
+                        coord = Coord(data=datac)
 
                 if len(f[dso]['axisscale'][0][0][i][1]):  # some titles might be present
                     try:
@@ -211,11 +206,20 @@ def _read_DSO(f, x):
                             pass
 
             if not isinstance(coord, Coord):
-                coord = Coord(data=[j for j in range(ds.shape[i])], title='index')
+                coord = Coord(data=[j for j in range(data.shape[i])], title='index')
 
             coords.append(coord)
 
-        ds.coordset = coords
+        ds = NDDataset(data,
+                       author=author,
+                       coords=coords,
+                       name=name,
+                       date=date)
+
+        ds.name = name
+        ds.date = date
+
+
 
         # TODO: reshape from fortran/Matlab order to C order
         #  for 3D or higher datasets ?
@@ -227,6 +231,4 @@ def _read_DSO(f, x):
             ds.history.append(i)
 
         ds.history = (str(datetime.now()) + ': Imported by spectrochempy ')
-        ds.origin = "matlab"
-        
     return ds

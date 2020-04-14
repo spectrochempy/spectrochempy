@@ -64,8 +64,8 @@ efa = scp.EFA(dataset)
 #
 
 f = efa.get_forward()
-f.T.plot(yscale="log", label_fmt="#PC{:d}", legend='best')
-scp.show()
+f.T.plot(yscale="log", legend=f.y.labels)
+
 b = efa.get_backward()
 b.T.plot(yscale="log")
 
@@ -85,6 +85,7 @@ b2 = efa.get_backward(n_pc=2, cutoff=cut)
 both = scp.concatenate(f2, b2)
 both.T.plot(yscale="log")
 
+
 # TODO: add "legend" keyword in NDDataset.plot()
 
 
@@ -95,4 +96,3 @@ both.T.plot(yscale="log")
 c = efa.get_conc(n_pc)
 c.T.plot()
 
-scp.show()
