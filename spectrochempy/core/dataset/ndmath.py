@@ -303,6 +303,8 @@ class NDMath(object):
     """
     
     # copy function properties regarding units from pint.Quantity
+    # This works only for pint 0.9
+    
     __handled = Quantity._Quantity__handled
     __copy_units = Quantity._Quantity__copy_units
     __require_units = Quantity._Quantity__require_units
