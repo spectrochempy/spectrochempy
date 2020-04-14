@@ -3,7 +3,7 @@
 numpy
 matplotlib
 traitlets
-pint
+pint==0.9
 quaternion
 quadprog
 cvxopt

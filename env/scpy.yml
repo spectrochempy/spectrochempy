@@ -7,7 +7,7 @@ dependencies:
 - numpy
 - matplotlib
 - traitlets
-- pint
+- pint=0.9
 - quaternion
 - cvxopt
 - pandas
