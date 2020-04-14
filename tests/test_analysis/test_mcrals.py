@@ -83,7 +83,7 @@ def test_MCRALS():
 
     param = {'normSpec':'euclid', 'maxit':100}
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
-    mcr2.plotmerit()
+    mcr.plotmerit()
 
     assert 'converged !' in mcr2._log[-15:]
 
