@@ -37,6 +37,7 @@ efa = scp.EFA(dataset)
 
 
 f = efa.get_forward(n_pc=7)
+f.plot()
 b = efa.get_backward(n_pc=7)
 
 f.T.plot(yscale="log", labels= f.y.labels, legend='best')
@@ -52,11 +53,11 @@ cut = np.max(f[:, npc].data)
 
 f = efa.get_forward(n_pc=4, cutoff=cut)
 b = efa.get_backward(n_pc=4, cutoff=cut)
-
-f.T.plot(yscale="log")
-b.T.plot(yscale="log")
+# we concatenate the datasets to plot them in a single figure
+both = scp.concatenate(f, b)
+both.T.plot(yscale="log")
 
 c = efa.get_conc(npc, cutoff=cut)
-c.T.plot(legend='best')
+c.T.plot()
 
-scp.show() # uncomment to show plot if needed()
+#show() # uncomment to show plot if needed()
