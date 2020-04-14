@@ -1228,18 +1228,17 @@ class NDArray(HasTraits):
             
         Returns
         -------
-        axis, dim : int and str
-            A tuple with the axis indexes and the axis name
+        axis : int
+            The axis indexes
+        dim : str
+            The axis name
 
         """
         # handle the various syntax to pass the axis
         dims = self._get_dims_from_args(*args, **kwargs)
         axis = self._get_dims_index(dims)
-        axis = axis[0] if axis else None
-        if axis is not None:
-            dim = self.dims[axis]
-        else:
-            dim = None
+        axis = axis[0] if axis else -1 # None
+        dim = self.dims[axis]
         if axis is not None and kwargs.get('negative_axis', False):
             if axis>=0:
                 axis = axis - self.ndim
@@ -1836,8 +1835,6 @@ class NDArray(HasTraits):
 
         # Check if keyword dims (or synonym axis) exists
         axis = kwargs.pop('axis', None)
-        # if axis is not None:
-        #    warnings.warn('keyword `axis` is deprecated. Use `dims` instead.', SpectroChemPyDeprecationWarning)
 
         kdims = kwargs.pop('dims', kwargs.pop('dim', axis))  # dim or dims keyword
         if kdims is not None:

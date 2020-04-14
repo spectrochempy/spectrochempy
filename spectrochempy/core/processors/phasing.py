@@ -7,7 +7,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["pk", "apk", "autophase", "interact_pk"]
+__all__ = ["pk", "apk", "autophase", "interact_pk", "pc", "mc"]
 __dataset_methods__  = __all__
 
 # imports
@@ -550,6 +550,99 @@ def interact_pk(dataset, dim=-1, **kwargs):
     display(w)
     
     return w
+
+# ======================================================================================================================
+# pc : power calculation
+# ======================================================================================================================
+def pc(dataset, dim=-1, **kwargs):
+    """
+    Power calculation
+
+    Parameters
+    ----------
+    dataset : |NDDataset| or |NDPanel|.
+        Input dataset or panel
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+        
+    Returns
+    -------
+    out : same type as input dataset
+        the modified object
+        
+    """
+
+    # output dataset inplace or not
+    if not kwargs.pop('inplace', False):
+        new = dataset.copy()  # copy to be sure not to modify this dataset
+    else:
+        new = dataset
+
+    # On which axis do we want to apply the calculation ?
+    axis, dim = dataset.get_axis(dim, negative_axis=True)
+
+    # The last dimension is always the dimension on which we apply the apodization window.
+    # If needed, we swap the dimensions to be sure to be in this situation
+
+    swaped = False
+    if axis != -1:
+        new.swapaxes(axis, -1, inplace=True)  # must be done in  place
+        swaped = True
+
+    # select the last coordinates and check the unit validity
+    lastcoord = new.coords[dim]
+    if (lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm'):
+        error_('`ab` apply only to dimensions with [frequency] dimensionality or with ppm units\n'
+               'Baseline correction processing was thus cancelled')
+        return new
+
+
+    # data on which we apply pc
+    
+    datv = source.data.values
+    if axis == 0:
+        # transpose temporarily the data for indirect dimension ft
+        datv = datv.T
+    
+    npc = args.npc
+    datv = np.abs(datv) ** npc
+    
+    # un-transpose the data if needed
+    if axis == 0:
+        datv = datv.T
+    
+    # change the current data with the transformed data
+    source.data = datv  # scale will be calculated here
+    
+    new.history = 'Power spectrum calculation'
+    
+    return new
+
+# ======================================================================================================================
+# mc : magnitude calculation
+# ======================================================================================================================
+def mc(dataset, dim=-1, **kwargs):
+    """
+    Magnitude calculation
+
+    Parameters
+    ----------
+    dataset : |NDDataset| or |NDPanel|.
+        Input dataset or panel
+    dim : str or int, optional, default='x'.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
+        
+    Returns
+    -------
+    out : same type as input dataset
+        the modified object
+        
+    """
+
+    return np.sqrt(pc(dataset, dim=dim, **kwargs))
+
 
 # ======================================================================================================================
 # utilities functions

@@ -5,8 +5,8 @@
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.2'
-#       jupytext_version: 1.1.6
+#       format_version: '1.3'
+#       jupytext_version: 1.3.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -650,7 +650,7 @@ dataset[1290.:890.] = MASKED
 # Now the max function return the  correct position 
 
 # %%
-dataset.max().x
+dataset.max()
 
 # %% [markdown]
 # Here is a display the figure with the new mask

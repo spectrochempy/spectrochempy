@@ -33,7 +33,7 @@ from ..plotters.multiplot import multiplot
 from ..dataset.nddataset import NDDataset
 from ...utils import docstrings
 from .smooth import smooth
-from .. import error_, warning_, debug_
+from .. import error_, debug_
 
 class BaselineCorrection(HasTraits):
     """
@@ -60,7 +60,7 @@ class BaselineCorrection(HasTraits):
     zoompreview = Float(1.)
     figsize = Tuple((8, 6))
 
-    @docstrings.get_sectionsf('BaselineCorrection')
+    @docstrings.get_sectionsf('BaselineCorrection', sections=['Parameters', 'Other Parameters'])
     @docstrings.dedent
     def __init__(self,
                  dataset,
@@ -73,15 +73,25 @@ class BaselineCorrection(HasTraits):
             The dataset to be transformed
         *ranges : a variable number of pair-tuples
             The regions taken into account for the manual baseline correction.
-        **kwargs : keywords arguments
-            Known keywords are given below
-
-            * dim : the dimension along which to apply the baseline correction usually 'x', *i.e.*, along .
-            * method : ``multivariate`` or ``sequential``
-            * interpolation : ``polynomial`` or ``pchip``
-            * order : polynomial order, default=6
-            * npc : number of components for the ``multivariate`` method
-
+        
+        Other Parameters
+        ----------------
+        dim : str or int, keyword parameter, optional, default='x'.
+            Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
+            to the usual `axis` numpy parameter.
+        method : str, keyword parameter, optional, default='multivariate'
+            Correction method among ['multivariate','sequential']
+        interpolation : string, keyword parameter, optional, default='polynomial'
+            Interpolation method for the computation of the baseline, among ['polynomial','pchip']
+        order : int, keyword parameter, optional, default=6
+            If the correction method polynomial, this give the polynomial order to use.
+        npc : int, keyword parameter, optional, default=5
+            Number of components to keep for the ``multivariate`` method
+        zoompreview : float, keyword parameter, optional, default=1.0
+            The zoom factor for the preview in interactive mode
+        figsize : tuple, keyword parameter, optional, default=(8, 6)
+            Size of the figure to display in inch
+            
         Examples
         --------
 
@@ -115,6 +125,7 @@ class BaselineCorrection(HasTraits):
         if ranges:
             self.ranges.extend(ranges)
 
+    # ..................................................................................................................
     def _setup(self, **kwargs):
         
         if 'axis' in kwargs.keys() or 'dim' in kwargs.keys():
@@ -132,11 +143,13 @@ class BaselineCorrection(HasTraits):
         self.zoompreview = kwargs.get('zoompreview', self.zoompreview)
         self.figsize = kwargs.get('figsize', self.figsize)
 
+    # ..................................................................................................................
     def __call__(self, *ranges, **kwargs):
 
         return self.compute(*ranges, **kwargs)
 
-    docstrings.delete_params('BaselineCorrection.parameters', 'dataset')
+    # ..................................................................................................................
+    docstrings.delete_params('BaselineCorrection.other_parameters', 'dataset')
     @docstrings.dedent
     def compute(self, *ranges, **kwargs):
         """
@@ -145,8 +158,10 @@ class BaselineCorrection(HasTraits):
         Parameters
         ----------
         %(BaselineCorrection.parameters.no_dataset)s
-        zoompreview : the zoom factor for the preview in interactive mode
-        figsize : Size of the figure to display
+        
+        Other Parameters
+        ----------------
+        %(BaselineCorrection.other_parameters)s
 
         """
 
@@ -155,8 +170,7 @@ class BaselineCorrection(HasTraits):
         # output dataset
         new = self.dataset.copy()
 
-        # we assume that the first dimension if always the dimension to which
-        # we want to subtract the baseline.
+        # we assume that the first dimension if always the dimension to which we want to subtract the baseline.
         # Swap the axes to be sure to be in this situation
 
         swaped = False
@@ -429,7 +443,7 @@ def ab(dataset, dim=-1, **kwargs):
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-        # select the last coordinates and check the unit validity
+    # select the last coordinates and check the unit validity
     lastcoord = new.coords[dim]
     if (lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm'):
         error_('`ab` apply only to dimensions with [frequency] dimensionality or with ppm units\n'
