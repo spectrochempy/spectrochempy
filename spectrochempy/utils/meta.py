@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -22,6 +22,7 @@ elements can be accessed by key, but also by attributes, *e.g.*
 from traitlets import HasTraits, Dict, Bool, default
 import numpy as np
 import sys
+import copy
 
 from . import (is_sequence, SpectroChemPyWarning)
 
@@ -64,7 +65,7 @@ class Meta(object):  # HasTraits):
     >>> m.chaine = "a modified string"
     Traceback (most recent call last):
      ...
-    ValueError: 'the metadata `chaine` is read only'
+    ValueError : 'the metadata `chaine` is read only'
     >>> print(m.chaine)
     a string
 
@@ -136,7 +137,7 @@ class Meta(object):  # HasTraits):
 
     def __copy__(self):
         ret = self.__class__()
-        ret.update(self._data)
+        ret.update(copy.deepcopy(self._data))
         ret.readonly = self.readonly
         return ret
 
@@ -231,7 +232,7 @@ class Meta(object):  # HasTraits):
         >>> m = Meta()
         >>> m.td = 10
         >>> m.si = 20
-        >>> for key in m:
+        >>> for key in m :
         ...     print(key)
         si
         td
@@ -275,11 +276,8 @@ class Meta(object):  # HasTraits):
 
         """
 
-        if not inplace:
-            newmeta = self.copy()
-        else:
-            newmeta = self
-
+        newmeta = self.copy()
+        
         newmeta.readonly = False
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
@@ -291,6 +289,8 @@ class Meta(object):  # HasTraits):
         newmeta.readonly = self.readonly
         if not inplace:
             return newmeta
+        else:
+            self._data = newmeta._data
 
     def permute(self, *dims, inplace=True):
         """
@@ -305,18 +305,20 @@ class Meta(object):  # HasTraits):
 
         """
 
-        if not inplace:
-            newmeta = self.copy()
-        else:
-            newmeta = self
-
+        newmeta = self.copy()
+        
         newmeta.readonly = False
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
-                newmeta[key] = list(np.take(newmeta[key], dims))
+                newmeta[key] = type(self[key])()
+                for dim in dims:
+                    newmeta[key].append(self[key][dim])
             else:
                 newmeta[key] = self[key]
 
         newmeta.readonly = self.readonly
         if not inplace:
             return newmeta
+        else:
+            self._data = newmeta._data
+            

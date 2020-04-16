@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (�) 2015-2019 LCS
+# Copyright (©) 2015-2019 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -13,8 +13,6 @@ This module implements the |NDDataset| class.
 """
 
 __all__ = ['NDDataset']
-
-__dataset_methods__ = []
 
 # ======================================================================================================================
 # Standard python imports
@@ -137,12 +135,12 @@ class NDDataset(
 
         Examples
         --------
-        Usage by an end-user:
+        Usage by an end-user :
 
         >>> from spectrochempy import *
 
         >>> x = NDDataset([1,2,3])
-        >>> print(x.data) # doctest : +NORMALIZE_WHITESPACE
+        >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
         [       1        2        3]
 
 
@@ -211,7 +209,7 @@ class NDDataset(
     def __dir__(self):
         return ['data', 'dims', 'mask', 'units',
                 'meta', 'plotmeta', 'name', 'title', 'coords', 'description',
-                'history', 'date', 'modified', 'modeldata'] + NDIO().__dir__()
+                'history', 'date', 'modified', 'modeldata', 'origin'] + NDIO().__dir__()
     
     # ..................................................................................................................
     def __getitem__(self, items):
@@ -264,11 +262,12 @@ class NDDataset(
     # ..................................................................................................................
     def __getattr__(self, item):
         # when the attribute was not found
-        if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction',
+        if item in ["__numpy_ufunc__", "interface", '_pytestfixturefunction','__dataclass_fields__',
                     '_ipython_canary_method_should_not_exist_',
                     '_baseclass', '_fill_value',
-                    '_ax_lines', '_axcb', 'clevels', '__wrapped__'] or '_validate' in item or \
-                '_changed' in item:
+                    '_ax_lines', '_axcb', 'clevels', '__wrapped__',
+                    '__await__','__aiter__'] \
+                or '_validate' in item or '_changed' in item:
             # raise an error so that traits, ipython operation and more ... will be handled correctly
             raise AttributeError
         
@@ -279,6 +278,7 @@ class NDDataset(
             # look also properties
             attribute = None
             index = 0
+            #print(item)
             if len(item) > 2 and item[1] == '_':
                 attribute = item[1:]
                 item = item[0]
@@ -749,19 +749,19 @@ class NDDataset(
     def sort(self, **kwargs):
         """
         Returns the dataset sorted along a given dimension
-        (by default, the first dimension [axis=0]) using the numeric or label values
+        (by default, the last dimension [axis=-1]) using the numeric or label values
 
         Parameters
         ----------
-        dim : str or int, optional, default = 0
+        dim : str or int, optional, default=-1
             dimension index or name along which to sort.
-        pos: int , optional
+        pos : int , optional
             If labels are multidimensional  - allow to sort on a define
-            row of labels: labels[pos]. Experimental: Not yet checked
-        by : str among ['value', 'label'], optional, default = ``value``.
+            row of labels : labels[pos]. Experimental : Not yet checked
+        by : str among ['value', 'label'], optional, default=``value``.
             Indicate if the sorting is following the order of labels or
             numeric coord values.
-        descend : `bool`, optional, default = `False`.
+        descend : `bool`, optional, default=`False`.
             If true the dataset is sorted in a descending direction. Default is False  except if coordinates
             are reversed.
         %(generic_method.parameters.inplace)s
@@ -961,7 +961,7 @@ class NDDataset(
 
         Returns
         -------
-        xarray : a xarray.DataArray object
+        object : a xarray.DataArray object
 
 
         """
@@ -969,43 +969,43 @@ class NDDataset(
         #
         # Attributes
         # ----------
-        # dims : tuple
+        # dims: tuple
         #     Dimension names associated with this array.
-        # values : np.ndarray
+        # values: np.ndarray
         #     Access or modify DataArray values as a numpy array.
-        # coords : dict-like
+        # coords: dict-like
         #     Dictionary of DataArray objects that label values along each dimension.
-        # name : str or None
+        # name: str or None
         #     Name of this array.
-        # attrs : OrderedDict
+        # attrs: OrderedDict
         #     Dictionary for holding arbitrary metadata.
         # Init docstring:
         # Parameters
         # ----------
-        # data : array_like
+        # data: array_like
         #     Values for this array. Must be an ``numpy.ndarray``, ndarray like,
         #     or castable to an ``ndarray``. If a self-described xarray or pandas
         #     object, attempts are made to use this array's metadata to fill in
         #     other unspecified arguments. A view of the array's data is used
         #     instead of a copy if possible.
-        # coords : sequence or dict of array_like objects, optional
+        # coords: sequence or dict of array_like objects, optional
         #     Coordinates (tick labels) to use for indexing along each dimension.
         #     If dict-like, should be a mapping from dimension names to the
         #     corresponding coordinates. If sequence-like, should be a sequence
         #     of tuples where the first element is the dimension name and the
         #     second element is the corresponding coordinate array_like object.
-        # dims : str or sequence of str, optional
+        # dims: str or sequence of str, optional
         #     Name(s) of the data dimension(s). Must be either a string (only
         #     for 1D data) or a sequence of strings with length equal to the
         #     number of dimensions. If this argument is omitted, dimension names
         #     are taken from ``coords`` (if possible) and otherwise default to
         #     ``['dim_0', ... 'dim_n']``.
-        # name : str or None, optional
+        # name: str or None, optional
         #     Name of this array.
-        # attrs : dict_like or None, optional
+        # attrs: dict_like or None, optional
         #     Attributes to assign to the new instance. By default, an empty
         #     attribute dictionary is initialized.
-        # encoding : dict_like or None, optional
+        # encoding: dict_like or None, optional
         #     Dictionary specifying how to encode this array's data into a
         #     serialized format like netCDF4. Currently used keys (for netCDF)
         #     include '_FillValue', 'scale_factor', 'add_offset', 'dtype',
@@ -1034,8 +1034,27 @@ class NDDataset(
                               )
             da.attrs['units'] = (x.units, self.units)
         
+        da.attrs['title'] = self.title
+        
         return da
-    
+
+    # ..................................................................................................................
+    def to_panel(self, **kwargs):
+        """
+        Transform the current |NDDataset| to a new |NDPanel| object
+        
+        Parameters
+        ----------
+        **kwargs : additional keyword arguments
+
+        Returns
+        -------
+        object : A |NDPanel| object
+        
+        """
+        import spectrochempy as scp
+        return scp.NDPanel(self, **kwargs)
+        
     # ..................................................................................................................
     @docstrings.dedent
     def transpose(self, *dims, inplace=False):
@@ -1142,7 +1161,7 @@ class NDDataset(
         if not self._coords or len(self._coords) < 1:
             return ''
         
-        self._coords._html_output = self._html_output  # transfert the html flag if necessary : false by default
+        self._coords._html_output = self._html_output  # transfert the html flag if necessary: false by default
         
         txt = self._coords._cstr()
         txt = txt.rstrip()  # remove the trailing '\n'
@@ -1157,8 +1176,8 @@ class NDDataset(
     def _dims_update(self, change=None):
         # when notified that a coords names have been updated
         _ = self.dims  # fire an update
+        #debug_('dims have been updated')
         
-        debug_('dims have been updated')
     
     # ..................................................................................................................
     @observe(All)

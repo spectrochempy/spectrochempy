@@ -1,11 +1,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.2'
-#       jupytext_version: 1.0.5
+#       format_version: '1.3'
+#       jupytext_version: 1.4.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -31,6 +32,16 @@
 
 # %%
 from spectrochempy import *
+
+# %%
+# # %matplotlib inline  
+
+# %% [markdown]
+# <div class='alert-info'>
+#
+# **Note**: the above  line is not necessary when running Jupyter Notebook or Jupyter lab version < 2.0 and can be commented
+#
+# </div>
 
 # %% [markdown]
 # Multidimensional array are defined in Spectrochempy using the ``NDDataset`` object.
@@ -62,10 +73,13 @@ print_(d1D)
 # %% [markdown]
 # <div class='alert-info'>
 #
-# **Note** : In the above code, we use of `print_` (with an underscore) not the usual `print` function. 
+# **Note**: In the above code, we use of `print_` (with an underscore) not the usual `print` function. 
 # The `print` output only a short line of information
 #
 # </div>
+
+# %%
+d1D.plot()
 
 # %%
 print(d1D)
@@ -91,18 +105,18 @@ d1D + d1D / 2.
 # %% [markdown]
 # As seen above, there is some metadata taht are automatically added to the dataset:
 #
-# * **`id`**      : This is a unique identifier for the object
-# * **`author`**  : author determined from the computer name
-# * **`created`** : date/time of creation
+# * **`id`**     : This is a unique identifier for the object
+# * **`author`** : author determined from the computer name
+# * **`created`**: date/time of creation
 # * **`modified`**: date/time of modification
 #
 # additionaly, dataset can have a **`name`** (equal to the `id` if it is not provided)
 #
 # Some other metadata are defined:
 #
-# * **`history`** : history of operation achieved on the object since the object creation
-# * **`description`** : A user friendly description of the objects purpose or contents.
-# * **`title`** : A title that will be used in plots or in some other operation on the objects.
+# * **`history`**: history of operation achieved on the object since the object creation
+# * **`description`**: A user friendly description of the objects purpose or contents.
+# * **`title`**: A title that will be used in plots or in some other operation on the objects.
 #
 #
 # All this metadata (except, the `id`, `created`, `modified`) can be changed by the user.
@@ -131,7 +145,7 @@ d1D.ndim # the number of dimensions
 d1D.dims # the name of the dimension (it has been automatically attributed)
 
 # %% [markdown]
-# **Note** : The names of the dimensions are set automatically. But they can be changed, with the limitation that the name must be a single letter.
+# **Note**: The names of the dimensions are set automatically. But they can be changed, with the limitation that the name must be a single letter.
 
 # %%
 d1D.dims = ['q']  # change the list of dim names.
@@ -146,7 +160,7 @@ d1D.dims
 # To create a nD NDDataset, we have to provide a nD-array like object to the NDDataset instance constructor
 
 # %%
-a = np.random.rand(2,4,6) # note here that np (for numpy space has been automatically 
+a = np.random.rand(2,4,6)   # note here that np (for numpy space has been automatically
                             # imported with spectrochempy, thus no need to use the 
                             # classical `import numpy as np`)
 a
@@ -169,7 +183,7 @@ d2D = NDDataset(a, dims = ['v','u','t'], title = 'Energy', name = '3D_dataset',
 d2D
 
 # %% [markdown]
-# Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are : 'z','y','x' automatically attributed)
+# Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are: 'z','y','x' automatically attributed)
 
 # %%
 d2D.dims 
@@ -270,7 +284,7 @@ except KeyError:
     error_('not found')
 
 # %% [markdown]
-# In some case it can also be usefull to get a coordinate from its title instead of its name (the militation is that if several coordinates have the same title, then only the first ones that is found in the coordinate list, will be returned - this can be ambiguous) 
+# In some case it can also be usefull to get a coordinate from its title instead of its name (the limitation is that if several coordinates have the same title, then only the first ones that is found in the coordinate list, will be returned - this can be ambiguous) 
 
 # %%
 d2D['time']
@@ -299,13 +313,13 @@ d2D.t.labels = tags
 d2D
 
 # %% [markdown]
-# In this case, getting a coordinate that doesn't possess numerical data but labels, will return the labelq
+# In this case, getting a coordinate that doesn't possess numerical data but labels, will return the labels
 
 # %%
 d2D.time
 
 # %% [markdown]
-# Sometimes it is not necessary to have different coordinates for the axis. 
+# Sometimes it is not necessary to have different coordinates for the various axes. 
 #
 # For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can refer to the first.
 
@@ -315,7 +329,7 @@ nd = NDDataset(a, coords=CoordSet(x=np.arange(3), y='x'))
 nd
 
 # %% [markdown]
-# ## Create a NDDataset : full example
+# ## Create a NDDataset: full example
 #
 # There are many ways to create `NDDataset` objects.
 #
@@ -420,7 +434,7 @@ d3D
 d3D.set_coords(x=CoordSet(coord2,coord2b), y=coord1, z=coord0)
 d3D.set_coords(x=[coord2,coord2b], y=coord1, z=coord0) # equivalent
 
-# B. second syntax in the order of the dimensions : z,y,x (if no swap or transpopse has been performed)
+# B. second syntax in the order of the dimensions: z,y,x (if no swap or transpopse has been performed)
 d3D.set_coords(coord0, coord1, [coord2,coord2b])
 d3D.set_coords((coord0, coord1, [coord2,coord2b]))  # equivalent
    
@@ -648,7 +662,7 @@ dataset[1290.:890.] = MASKED
 # Now the max function return the  correct position 
 
 # %%
-dataset.max().x
+dataset.max()
 
 # %% [markdown]
 # Here is a display the figure with the new mask
@@ -678,101 +692,6 @@ _ = datasetT.plot()
 
 # %%
 dataset[:, 4000.:3000.], datasetT[4000.:3000.]
-
-# %% [markdown]
-# ## Units
-#
-#
-# Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform operation on data with units.
-#
-# ### Create quantities
-#
-# * to create quantity, use for instance, one of the following expression:
-
-# %%
-Quantity('10.0 cm^-1')
-
-# %%
-Quantity(1.0, 'cm^-1/hour')
-
-# %%
-Quantity(10.0, ur.cm / ur.km)
-
-# %% [markdown]
-# or may be (?) simpler,
-
-# %%
-10.0 * ur.meter / ur.gram / ur.volt
-
-# %% [markdown]
-# `ur` stands for **unit registry**, which handle many type of units
-# (and conversion between them)
-
-# %% [markdown]
-# ### Do arithmetics with units
-
-# %%
-a = 900 * ur.km
-b = 4.5 * ur.hours
-a / b
-
-# %% [markdown]
-# Such calculations can also be done using the following syntax, using a string expression
-
-# %%
-Quantity("900 km / (8 hours)")
-
-# %% [markdown]
-# ### Convert between units
-
-# %%
-c = a / b
-c.to('cm/s')
-
-# %% [markdown]
-# We can make the conversion *inplace* using *ito* instead of *to*
-
-# %%
-c.ito('m/s')
-c
-
-# %% [markdown]
-# ### Do math operations with consistent units
-
-# %%
-x = 10 * ur.radians
-np.sin(x)
-
-# %% [markdown]
-# Consistency of the units are checked!
-
-# %%
-x = 10 * ur.meters
-np.sqrt(x)
-
-# %% [markdown]
-# but this is wrong...
-
-# %%
-x = 10 * ur.meters
-try:
-    np.cos(x)
-except DimensionalityError as e:
-    error_(e)
-
-# %% [markdown]
-# Units can be set for NDDataset data and/or Coordinates
-
-# %%
-ds = NDDataset([1., 2., 3.], units='g/cm^3', title='concentration')
-ds
-
-# %%
-ds.to('kg/m^3')
-
-
-# %%
-Quantity(10.0, 'cm').plus_minus(.2)
 
 # %% [markdown]
 # ## Numpy universal functions (ufunc's)
@@ -847,5 +766,7 @@ dac
 daq = da.set_quaternion()   # equivalently one can use the set_hypercomplex method
 daq
 
-# %%
+# %% pycharm={"name": "#%%\n"}
 daq.dtype
+
+

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -203,9 +203,9 @@ class NDComplexArray(NDArray):
             return None
 
         ma = new._masked_data
-        if ma.dtype == np.float:
+        if ma.dtype in TYPE_FLOAT:
             new._data = np.zeros_like(ma.data)
-        elif ma.dtype == np.complex:
+        elif ma.dtype in TYPE_COMPLEX:
             new._data = ma.imag.data
         elif ma.dtype == typequaternion:
             # this is a more complex situation than for real part
@@ -283,9 +283,10 @@ class NDComplexArray(NDArray):
         ----------
         %(generic_method.parameters.dims|inplace)s
 
-         Returns
+        Returns
         -------
         %(generic_method.returns.object)s
+        
         See Also
         --------
         conj, real, imag, RR, RI, IR, II, part, set_complex, is_complex
@@ -322,7 +323,7 @@ class NDComplexArray(NDArray):
             that we take the real component in each dimension except the last
             one, for which imaginary component is preferred.
 
-         Returns
+        Returns
         -------
         %(generic_method.returns.object)s
         """
@@ -430,7 +431,7 @@ class NDComplexArray(NDArray):
         ----------
         %(generic_method.parameters.inplace)s
 
-         Returns
+        Returns
         -------
         %(generic_method.returns)s
 

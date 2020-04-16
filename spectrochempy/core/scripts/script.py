@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -72,7 +72,7 @@ class Script(HasTraits):
         p = re.compile("^([^\W0-9]?[a-zA-Z_]+[\w]*)")
         if p.match(pv) and p.match(pv).group() == pv:
             return pv
-        raise TraitError('Not a valid script name: only _ letters and numbers '
+        raise TraitError('Not a valid script name : only _ letters and numbers '
                          'are valids. For the fist character, numbers are '
                          'not allowed')
 
@@ -147,7 +147,7 @@ def run_script(script, localvars=None):
     ----------
     script : script instance
         The script to execute
-    localvars: dict, optional
+    localvars : dict, optional
         If provided it will be used for evaluating the script. In general,
         it can be `localvrs`=``locals()``.
 

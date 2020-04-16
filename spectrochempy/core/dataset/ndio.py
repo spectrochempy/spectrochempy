@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -104,7 +104,7 @@ class NDIO(HasTraits):
 
     def save(self, filename='', **kwargs):
         """
-        Save the current |NDDataset| (default extension: ``.scp`` ).
+        Save the current |NDDataset| (default extension : ``.scp`` ).
 
         Parameters
         ----------
@@ -274,7 +274,7 @@ class NDIO(HasTraits):
             cls = NDDataset
 
         if protocol is not None and protocol not in ['scp']:
-            # TODO : case where fp is a file object
+            # TODO: case where fp is a file object
             filename = fid
             return cls.read(filename, protocol=protocol)
 
@@ -316,7 +316,7 @@ class NDIO(HasTraits):
         # get zip file
         obj = NpzFile(fid, allow_pickle=True)
 
-        debug_(str(obj.files) + '\n')
+        # debug_(str(obj.files) + '\n')
 
         # interpret
         coords = None
@@ -453,7 +453,7 @@ class NDIO(HasTraits):
         ...
 
         by default, directory for saving is the `data`.
-        So the same thing can be done simply by:
+        So the same thing can be done simply by :
 
         >>> mydataset = NDDataset.load('mydataset.scp')
         >>> print(mydataset)

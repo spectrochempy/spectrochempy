@@ -1,11 +1,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.0.5
+#       jupytext_version: 1.1.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -31,7 +32,7 @@ dataset = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
 dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
 dataset.y.title = 'Time'
 _ = dataset.plot_map(colormap='viridis', colorbar=True)
-dataset.shape
+print('shape:',dataset.shape)
 
 # %%
 nd1 = dataset[0:30, 0:4000]
@@ -146,3 +147,5 @@ _ = multiplot_map(datasets=[dataset, ndadd],  colormap='viridis', sharex=0, shar
 
 # %%
 
+
+# %%

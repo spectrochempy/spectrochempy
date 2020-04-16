@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -16,7 +16,7 @@ __all__ = ['multiplot', 'multiplot_map', 'multiplot_stack',
            'multiplot_image', 'multiplot_lines', 'multiplot_scatter',
            'multiplot_with_transposed', 'plot_with_transposed']
 
-__dataset_methods__ = ['plot_with_transposed']
+__dataset_methods__ = []
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -131,27 +131,27 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
         Type of plot to draw in all axes (`lines` , `scatter` , `stack` , `map`
         ,`image` or `with_transposed`).
 
-    nrows, ncols : int, default: 1
+    nrows, ncols : int, default=1
 
         Number of rows/cols of the subplot grid. ncol*nrow must be equal
         to the number of datasets to plot
 
-    sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default: False
+    sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default=False
 
         Controls sharing of properties among x (`sharex`) or y (`sharey`)
         axes::
 
-        - True or 'all': x- or y-axis will be shared among all subplots.
-        - False or 'none': each subplot x- or y-axis will be independent.
-        - 'row': each subplot row will share an x- or y-axis.
-        - 'col': each subplot column will share an x- or y-axis.
+        - True or 'all' : x- or y-axis will be shared among all subplots.
+        - False or 'none' : each subplot x- or y-axis will be independent.
+        - 'row' : each subplot row will share an x- or y-axis.
+        - 'col' : each subplot column will share an x- or y-axis.
 
         When subplots have a shared x-axis along a column, only the x tick
         labels of the bottom subplot are visible.  Similarly, when
         subplots have a shared y-axis along a row, only the y tick labels
         of the first column subplot are visible.
 
-    sharez: bool or {'none', 'all', 'row', 'col'}, default: False
+    sharez : bool or {'none', 'all', 'row', 'col'}, default=False
         equivalent to sharey for 1D plot.
         for 2D plot, z is the intensity axis (i.e., contour levels for maps or
         the vertical axis for stack plot), y is the third axis.
@@ -213,7 +213,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
     suptitle_color : color
 
     """
-
+    
     # some basic checking
     # ------------------------------------------------------------------------------------------------------------------
 

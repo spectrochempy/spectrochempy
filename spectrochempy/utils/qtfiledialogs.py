@@ -2,7 +2,7 @@
 
 __all__ = []
 
-# TODO : put a tk versio to avoid dependencies to PyQT
+# TODO: put a tk versio to avoid dependencies to PyQT
 
 HAS_QT = False
 try:
@@ -102,13 +102,13 @@ def opendialog(single=True,
 
     Parameters
     ----------
-    single : Bool, optional, default: True
+    single : Bool, optional, default=True
         Open single or multiple files
     directory : str, optional
         Folder where to start selection of files or folder
     caption : str, optional
         Caption for the dialog window, optional
-    filters : str or list of str, optional, default : ["All Files (*)", "Text Files (*.txt)"]
+    filters : str or list of str, optional, default=["All Files (*)", "Text Files (*.txt)"]
         Type of files to select. if filters='directory', then the dialog is to select
         an existing directory
 

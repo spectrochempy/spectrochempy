@@ -297,10 +297,10 @@ def lp2d(data, pred, P, M, mirror='0', fix_points=True, method='svd'):
     """
     Perform a forward 2D linear prediction extrapolation on data.
 
-    Use the 2D linear prediction algorithm presented in:
+    Use the 2D linear prediction algorithm presented in :
     G. Zhu and A. Bax, Journal of Magnetic Resonance, 1992, 98, 192-199.
     to extend the last (1) axis by `pred` points. A PxM prediction matrix, C,
-    is formed by solving the modified linear prediction equation given by:
+    is formed by solving the modified linear prediction equation given by :
 
     data[n,m] = /sigma_{l=0}^{P-1} /sigma_{k=1}^M C_{l,k}*data[n-l,m-k]
 
@@ -472,7 +472,7 @@ def cadzow(data, M, K, niter, min_var=False):
     Perform a (row wise) Cadzow-like signal enhancement on 1D or 2D data.
 
     Performs a Cadzow-like signal enhancement with optional adjustment
-    of singular values using the minimum variance method as desribed in:
+    of singular values using the minimum variance method as desribed in :
     Chen, VanHuffel, Decanniere, VanHecke, JMR, 1994, 109A, 46-55.
 
     For 2D data performs independant enhancement on each row of data array.
@@ -748,13 +748,13 @@ def make_mirror(x, mode):
     """
     Make a mirror image trace.
 
-    Reflects trace over zero as described in:
+    Reflects trace over zero as described in :
     G. Zhu and A. Bax, Journal of Magnetic Resonance, 1990, 90, 405
 
-    When mode is "0" (no initial delay) form the an array with length 2N-1:
+    When mode is "0" (no initial delay) form the an array with length 2N-1 :
         x_n-1 ... x_1 x_0 x_1 ... x_n-1
 
-    When mode is "180" (half point delay) form an array with length 2N:
+    When mode is "180" (half point delay) form an array with length 2N :
         x_n-1 .. x_1 x_0 x_0 x_1 ... x_n-1
 
 
@@ -880,7 +880,7 @@ def find_lpc_fb(x, order, bad_roots, fix_mode, method):
 
     Averages LP coefficients generated from solving the forward and backward
     linear prediction equations after reversing the roots of characteristic
-    polynomial of the backward solution.  Method is described in:
+    polynomial of the backward solution.  Method is described in :
     G. Zhu and A. Bax, Journal of Magnetic Resonance, 1992, 100, 202-207.
 
     Description of parameters can be found in :py:func:`lp`.
@@ -921,7 +921,7 @@ def find_lpc_bf(x, order, bad_roots, fix_mode, method):
 
     Averages LP coefficients generated from solving the forward and backward
     linear prediction equations after reversing the roots of characteristic
-    polynomial of the forward solution.  Similar to method described in:
+    polynomial of the forward solution.  Similar to method described in :
     G. Zhu and A. Bax, Journal of Magnetic Resonance, 1992, 100, 202-207.
 
     Description of parameters can be found in :py:func:`lp` function.
@@ -966,7 +966,7 @@ def find_lproots_hsvd(x, M, K, mode, zmethod='sm'):
     Find LP roots (poles) using the HSVD method
 
     Perform a HSVD linear prediction to determind signal roots (poles) as
-    described in:
+    described in :
     Barkhuijsen, DeBeer, and Van Ormondt, JMR, 1987, 73, 553
 
     Parameters x, M and K are the same as those described in the above article.

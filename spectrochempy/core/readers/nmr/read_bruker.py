@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2016 Christian Fernandez
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
-#
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
@@ -27,18 +26,14 @@ import os
 # Third party imports
 # ======================================================================================================================
 import numpy as np
-from spectrochempy.core import app
-
-project_preferences = app.project_preferences
-log = app.log
-preferences = app.general_preferences
-from ....core import project_preferences, general_preferences as preferences
-from ....core import info_, debug_, error_, warning_
 from ....extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
+from ....core import project_preferences, general_preferences as prefs
+from ....core import info_, debug_, error_, warning_
+
 from ....utils.meta import Meta
 from ....core.dataset.nddataset import NDDataset
 from ....core.dataset.ndcoord import Coord
@@ -95,9 +90,9 @@ def _get_par_files(_dir, _procno, _processed=False):
 # http://sbtools.uchc.edu/help/nmr/nmr_toolkit/bruker_dsp_table.asp
 
 # The rounding in the above tables appear to be based on k / (2*DECIM)
-# for example 2 : 44.75   = 44 + 3/4
-#             4 : 66.625  = 66 + 5/8
-#             8 : 68.563 ~= 68 + 9/16 = 68.5625
+# for example 2: 44.75   = 44 + 3/4
+#             4: 66.625  = 66 + 5/8
+#             8: 68.563 ~= 68 + 9/16 = 68.5625
 # Using this the un-rounded table was created by checking possible unrounded
 # fracions which would round to those in the original table.
 
@@ -187,13 +182,12 @@ bruker_dsp_table = {
     }
 }
 
-
 def _remove_digital_filter(dic, data):
     """
     Remove the digital filter from Bruker data.
     nmrglue modified Digital Filter Processing
     """
-    debug_('Bruker digital filter...')
+    # debug_('Bruker digital filter...')
 
     if 'acqus' not in dic:
         raise KeyError("dictionary does not contain acqus parameters")
@@ -248,7 +242,7 @@ def _remove_digital_filter(dic, data):
     dic['acqus']['TD'] = td * 2
     data = data[..., :td]
 
-    debug_('Bruker digital filter: removed %s points' % rp)
+    #debug_('Bruker digital filter : removed %s points' % rp)
 
     return data
 
@@ -297,29 +291,29 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     Parameters
     ----------
-    path: str, optional
+    path : str, optional
         path of the Bruker directory. It path is None, at least the parameters
         `data`, `user`, `name`, `expno` must be provided.
-    data: str,
-        main strorage directory, optional
-    user: str, optional
+    data : str,
+        main storage directory, optional
+    user : str, optional
         user name of the dataset
-    name: str, optional
+    name : str, optional
         name of the dataset
-    expno: int, optional
+    expno : int, optional
         experiment number
-    expnos: list, optional
+    expnos : list, optional
         A list of expno
-    processed: bool, optioanl, default is False
+    processed : bool, optioanl, default is False
         should we load already bruker processed files
-    procno: int
+    procno : int
         processing number
-    silent: bool
+    silent : bool
         should we output details
 
     """
 
-    debug_('Bruker imports...')
+    # debug_('Bruker imports...')
 
     # determine if the method was called as a classmethod or not
     # if yes create a dataset
@@ -360,7 +354,9 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     # path must be pointing to a valid bruker directory
     if not os.path.exists(path):
-        raise KeyError("This path '{}' doesn't exist".format(path))
+        path = os.path.join(prefs.datadir, path)
+        if not os.path.exists(path):
+            raise KeyError("This path '{}' doesn't exist".format(path))
 
     # path is expected to be a directory
     if os.path.isdir(path) is not True:
@@ -375,8 +371,8 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     lowmem = kwargs.get('lowmem', False)  # load all in memero by default
     if lowmem:
-        debug_('import with low memory handling (lowmem)')
-
+        #debug_('import with low memory handling (lowmem)')
+        pass
     # ------------------------------------------------------------------------------------------------------------------
     # start reading ....
     # ------------------------------------------------------------------------------------------------------------------
@@ -407,7 +403,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     for idx, path in enumerate(paths):
 
-        debug_('Reading %d:%s' % (idx, path))
+        # debug_('Reading %d:%s' % (idx, path))
 
         # Acquisition parameters
 
@@ -453,6 +449,8 @@ def read_bruker_nmr(dataset, *args, **kwargs):
             else:
                 dic, data = read_lowmem(npath, acqus_files=par_files, read_pulseprogram=False)
 
+            data = data * np.exp(- 1j * np.pi/2.) # -90 phase to be compatible with topspin
+            
             # look the case when the reshaping was not correct
             # for example, this happen when the number
             # of accumulated row was incomplete
@@ -470,10 +468,11 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
                 # reduce to td
                 ntd = dic['acqus']['TD'] // 2
-                data = data[..., :ntd]  # necessary for agreement with bruker data and phase
+                data = data[..., :ntd]
+                # necessary for agreement with bruker data and phase
         else:
 
-            debug_(f'Reading processed {idx}:{path}')
+            #debug_(f'Reading processed {idx}:{path}')
 
             dic, data = read_pdata(npath, procs_files=par_files, )
 
@@ -522,15 +521,12 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                         continue
 
                     value = dic[item][key]
-                    units = ur(keys_units[key.lower()]) \
-                        if keys_units[key.lower()] else None
+                    units = ur(keys_units[key.lower()]) if keys_units[key.lower()] else None
 
                     if units is not None:
                         if isinstance(value, (float, int)):
                             value = value * units  # make a quantity
-                        elif isinstance(value, list) and isinstance(value[0],
-                                                                    (float,
-                                                                     int)):
+                        elif isinstance(value, list) and isinstance(value[0],(float,int)):
                             value = np.array(value) * units
 
                     if not item.endswith('s'):  # initial parameter
@@ -622,7 +618,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         list_meta.append(meta)
 
         # make the corresponding axis
-        debug_('Create coords...')
+        #debug_('Create coords...')
         coords = []
         axe_range = list(range(parmode + 1))
         for axis in axe_range:
@@ -657,12 +653,12 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         #     ldates.append(adic.par.DATE)  # and the date
 
         # store temporarily these data
-        debug_('data read finished: type: %s' % datatype)
+        #debug_('data read finished : type : %s' % datatype)
 
         list_data.append(data)
 
     if len(list_data) == 1:
-        debug_('One experiment read. Make it the current dataset')
+        #debug_('One experiment read. Make it the current dataset')
 
         dataset.data = list_data[0]
 
@@ -674,10 +670,11 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         dataset.meta.readonly = True
         dataset.set_coords(*tuple(list_coords[0]))    # must be a tuple
         dataset.title = 'intensity'
-
+        dataset.origin = 'bruker'
+        
     else:
         
-        # TODO : Check this -
+        # TODO: Check this -
         # case of multiple experiments to merge
 
         # find difference in data.shape
@@ -715,7 +712,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
         # some keys should not vary for homogeneous data but lets the
         # user decide
-        info_("keys which have varied: %s" % mkeys)
+        info_("keys which have varied : %s" % mkeys)
 
         mkeys = list(mkeys)
         meta_diffs = {}
@@ -781,6 +778,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
             # in principle... if not problem above or the experiments
             # are not compatibles
             dataset.coords = [axis] + list_coords[-1]
+            dataset.origin = 'bruker'
 
     return dataset
 

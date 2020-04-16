@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -52,7 +52,7 @@ class Range(List):
     >>> c.r = [1, 3, 5]
     Traceback (most recent call last):
      ...
-    traitlets.traitlets.TraitError: The 'r' trait of a type instance must be of length 2 exactly, but a value of [1, 3, 5] was specified.
+    traitlets.traitlets.TraitError : The 'r' trait of a type instance must be of length 2 exactly, but a value of [1, 3, 5] was specified.
 
     """
     klass = list

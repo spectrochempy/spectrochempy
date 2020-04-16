@@ -21,7 +21,7 @@ def sim_gauss_sigma(x, x0, sigma):
     with unit height at the center.  Sigma (the standard deviation of the
     distribution) is used as the distribution scale parameter.
 
-    Functional form:
+    Functional form :
 
         f(x; x0, sigma) = exp( -(x - x0) ^ 2  / (2 * sigma ^ 2))
 
@@ -51,7 +51,7 @@ def sim_gauss_fwhm(x, x0, fwhm):
     with unit height at the center.  FWHM (full-width at half-maximum ) is
     used as the distribution scale parameter.
 
-    Functional form:
+    Functional form :
 
         f(x; x0, fwhm) = exp( -(x - x0)^2 * 4 * ln(2)  / (fwhm ^ 2))
 
@@ -82,7 +82,7 @@ def sim_lorentz_gamma(x, x0, gamma):
     distribution with unit height at the center.  Gamma (the half-width at
     half-maximum, HWHM) is used as the scale parameter.
 
-    Functional form:
+    Functional form :
 
         f(x; x0, gamma) = g ^ 2 / ((x-x0) ^ 2 + g ^ 2)
 
@@ -112,7 +112,7 @@ def sim_lorentz_fwhm(x, x0, fwhm):
     distribution with unit height at the center.  FWHM (full-width at
     half-maximum) is used as the scale parameter.
 
-    Functional form:
+    Functional form :
 
         f(x; x0, fwhm) = (0.5 * fwhm)^2 / ((x-x0)^2 + (0.5 * fwhm)^2)
 
@@ -143,11 +143,11 @@ def sim_voigt_fwhm(x, x0, fwhm_g, fwhm_l):
     at the center.  Full-width at half-maximum (FWHM) of each component are
     used as the scale parameters for the Gaussian and Lorentzian distribution.
 
-    Functional Form:
+    Functional Form :
 
         f(x; x0, fwhm_g, fwhm_l) = Re[w(z)] / Re[(w(z0)]
 
-    Where:
+    Where :
 
         z = sqrt(ln(2)) * (2 * (x - x0) + 1j * fwhm_l) / fwhm_g
         z0 = sqrt(ln(2)) * 1j * fwhm_l / fwhm_g
@@ -183,11 +183,11 @@ def sim_voigt_sigmagamma(x, x0, sigma, gamma):
     at the center.  Sigma and gamma are used as the Gaussian and Lorentzian
     scaler parameters.
 
-    Functional Form:
+    Functional Form :
 
         f(x; x0, sigma, gamma) = Re[w(z)] / Re[(w(z0)]
 
-    Where:
+    Where :
 
         z = ((x - x0) + 1j * gamma) / (sigma * sqrt(2))
         z0 = (1j * gamma) / (sigma * sqrt(2))
@@ -227,11 +227,11 @@ def sim_pvoigt_fwhm(x, x0, fwhm, eta):
     Lorentzian distribution are used as the scale parameter as well as eta, the
     mixing factor.
 
-    Functional Form:
+    Functional Form :
 
         f(x; x0, fwhm, eta) = (1-eta) * G(x; x0, fwhm) + eta * L(x; x0, fwhm)
 
-    Where:
+    Where :
 
         G(x; x0, fwhm) = exp( -(x-x0)^2 * 4 * ln(2)  / (fwhm^2))
         L(x; x0, fwhm) = (0.5 * fwhm)^2 / ((x-x0)^2 + (0.5 * fwhm)^2)
@@ -482,7 +482,7 @@ class scale():
     """
     Scale lineshape class
 
-    Simulates a lineshape with functional form: 1.0, a0, a1, a2, ....
+    Simulates a lineshape with functional form : 1.0, a0, a1, a2, ....
     Where a0, a1, ... are the parameters provided.
 
     """

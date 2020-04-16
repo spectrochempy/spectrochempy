@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -35,10 +35,10 @@ from traitlets import HasTraits, Unicode, List
 def read_jdx(filename='', sortbydate=True):
     """Open a .jdx file and return the correspondant dataset
 
-    :param filename: filename of file to load
-    :type filename: str
-    :return: a  dataset object with spectra and metadata
-    :rtype: sappy.Dataset
+    :param filename : filename of file to load
+    :type filename : str
+    :return : a  dataset object with spectra and metadata
+    :rtype : sappy.Dataset
 
     Examples
     --------
@@ -92,7 +92,7 @@ def read_jdx(filename='', sortbydate=True):
     if keyword != 'EOF':
         jdx_title = text
     else:
-        print('Error: no ##TITLE LR in outer block header')
+        print('Error : no ##TITLE LR in outer block header')
         return
     # Unuse for the moment...
     #    while keyword !='##JCAMP-DX':
@@ -108,7 +108,7 @@ def read_jdx(filename='', sortbydate=True):
     if keyword != 'EOF':
         jdx_data_type = text
     else:
-        print('Error: no ##DATA TYPE LR in outer block header')
+        print('Error : no ##DATA TYPE LR in outer block header')
         return
 
     if jdx_data_type == 'LINK':
@@ -118,7 +118,7 @@ def read_jdx(filename='', sortbydate=True):
     elif jdx_data_type == 'INFRARED SPECTRUM':
         nspec = 1
     else:
-        print('Error: DATA TYPE must be LINK or INFRARED SPECTRUM')
+        print('Error : DATA TYPE must be LINK or INFRARED SPECTRUM')
         return
 
     # Create variables ********************************************************
@@ -193,19 +193,19 @@ def read_jdx(filename='', sortbydate=True):
             else:  # Check the consistency of xaxis
                 if nx[i] - nx[i - 1] != 0:
                     raise ValueError(
-                        'Error: Inconsistant data set - number of wavenumber per spectrum should be identical')
+                        'Error : Inconsistant data set - number of wavenumber per spectrum should be identical')
                     return
                 elif firstx[i] - firstx[i - 1] != 0:
                     raise ValueError(
-                        'Error: Inconsistant data set - the x axis should start at same value')
+                        'Error : Inconsistant data set - the x axis should start at same value')
                     return
                 elif lastx[i] - lastx[i - 1] != 0:
                     raise ValueError(
-                        'Error: Inconsistant data set - the x axis should end at same value')
+                        'Error : Inconsistant data set - the x axis should end at same value')
                     return
         else:
             raise ValueError(
-                'Error: ##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°',
+                'Error : ##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°',
                 i + 1)
             return
 
@@ -222,12 +222,12 @@ def read_jdx(filename='', sortbydate=True):
         if i > 0:
             if yunits[i] != yunits[i - 1]:
                 print((
-                    'Error: ##YUNITS sould be the same for all spectra (check spectrum n°',
+                    'Error : ##YUNITS sould be the same for all spectra (check spectrum n°',
                     i + 1, ')'))
                 return
             elif xunits[i] != xunits[i - 1]:
                 print((
-                    'Error: ##XUNITS sould be the same for all spectra (check spectrum n°',
+                    'Error : ##XUNITS sould be the same for all spectra (check spectrum n°',
                     i + 1, ')'))
                 return
 
@@ -260,7 +260,7 @@ def read_jdx(filename='', sortbydate=True):
     out.description = (
             'dataset "' + out.name + '" : imported from jdx file. \n')
     out.history = (
-            str(out.date) + " : Created by jdxload('" + filename + "') \n")
+            str(out.date) + ": Created by jdxload('" + filename + "') \n")
 
     # make sure that the lowest( index correspond to th largest wavenember*
     # for compatibility with dataset creacted by spgload:

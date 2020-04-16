@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -87,18 +87,18 @@ class NDPanel(
         ----------
         *datasets : |NDARRAY| or subclass of |NDARRAY| objects
             NDArray, NDComplexArray, NDDataset and/or Coord objects
-            can be provided as arguments: Casting if possible to a NDArray
+            can be provided as arguments : Casting if possible to a NDArray
             or NDComplexArray type object will provide the underlining data,
             and if present the data coordinates.
             Units for data and coordinates will also be extracted.
             Compatibilities between the data is expected.
-        merge : bool, optional, default : True
+        merge : bool, optional, default=True
             if set to True, dimensions are merged automatically when they are compatible
-        align : str among [False, ‘outer’, ‘inner’, ‘first’, ‘last’, 'interpolate'], optional, default : False.
+        align : str among [False, ‘outer’, ‘inner’, ‘first’, ‘last’, 'interpolate'], optional, default=False.
             by default there is no alignment of the dimensions, if they can not be merged, a new dimension name and
             eventually the associated coordinates are created for each different dimensions.
      
-            If align is defined:
+            If align is defined :
             
             * 'outer' means that a union of the different coordinates is achieved (missing values are masked)
             * 'inner' means that the intersection of the coordinates is used
@@ -208,7 +208,7 @@ class NDPanel(
         
         Returns
         -------
-        out: list
+        out : list
             A list with the current dimension names
             
         """
@@ -226,7 +226,7 @@ class NDPanel(
         
         Returns
         -------
-        out: list
+        out : list
             A list with the current dataset names
             
         """
@@ -260,7 +260,7 @@ class NDPanel(
         
         Returns
         -------
-        out: dict
+        out : dict
             Dictionary of NDDataset
             
         """
@@ -437,10 +437,10 @@ class NDPanel(
             The array must be any object that can be transformed into a NDDataset
         name : str, optional
             If not provided, a name will be created automatically
-        merge : bool, optional, default: True
+        merge : bool, optional, default=True
             Whether or not ot merge the dataset dimensions and eventually the corresponding coordinates
             with the existing one in the NDPanel
-        align : bool, optional, default: False
+        align : bool, optional, default=False
             Whether or not to align compatible coordinates (compatible units and coordinates values)
         
         """
@@ -464,7 +464,7 @@ class NDPanel(
             
             if merge and self._do_merge_or_align(self._dataset_to_be_added, dim, merge, align):
                 # merge allowed
-                # if can merge or do alignement :  use the same dimension
+                # if can merge or do alignement:  use the same dimension
                 # nothing else to do as dim and coords are already set for this dimension
                 # either naturally or inside the '_do_merge_or_align' function
                 continue

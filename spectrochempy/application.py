@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -26,6 +26,7 @@ import datetime
 import warnings
 import pprint
 import json
+import textwrap
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -52,7 +53,7 @@ from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
 
-from spectrochempy.utils import docstrings, MetaConfigurable, display_info_string
+from spectrochempy.utils import MetaConfigurable, display_info_string
 
 # Log levels
 # ----------------------------------------------------------------------------------------------------------------------
@@ -69,14 +70,14 @@ CRITICAL = logging.CRITICAL
 try:
     __release__ = get_distribution('spectrochempy').version
     "Release version string of this package"
-except DistributionNotFound:
+except DistributionNotFound:  # pragma: no cover
     # package is not installed
     __release__ = '0.1a'
 
 try:
     __version__ = get_version(root='..', relative_to=__file__)
     "Version string of this package"
-except:
+except: # pragma: no cover
     __version__ = __release__
 
 
@@ -97,7 +98,7 @@ def _get_release_date():
     try:
         return subprocess.getoutput(
             "git log -1 --tags --date='short' --format='%ad'")
-    except:
+    except: # pragma: no cover
         pass
 
 
@@ -168,7 +169,7 @@ def available_styles():
                 styles.append(style)
     styles = list(set(styles))  # in order to remove possible duplicates
 
-    if 'scpy' not in styles:
+    if 'scpy' not in styles:  # pragma: no cover
         styles.append('scpy')  # the standard style of spectrochempy
 
     return styles
@@ -208,7 +209,7 @@ class SpectroChemPyMagics(Magics):
 
             -p <string>         Name of the project where the script will be stored.
                                 If not provided, a project with a standard
-                                name: `proj` is searched.
+                                name : `proj` is searched.
             -o <string>         script name
             -s <symbols>        Specify function or classes to load from python
                                 source.
@@ -227,7 +228,6 @@ class SpectroChemPyMagics(Magics):
            In[2]: %addscript 7-27
 
            In[3]: %addscript -s MyClass,myfunction myscript.py
-
            In[4]: %addscript MyClass
 
            In[5]: %addscript mymodule.myfunction
@@ -240,7 +240,7 @@ class SpectroChemPyMagics(Magics):
         mode = 'a' if append else 'w'
         search_ns = 'n' in opts
 
-        if not args and not cell and not search_ns:
+        if not args and not cell and not search_ns: # pragma: no cover
             raise UsageError('Missing filename, input history range, '
                              'or element in the user namespace.\n '
                              'If no argument are given then the cell content '
@@ -253,7 +253,7 @@ class SpectroChemPyMagics(Magics):
         proj = 'proj'
         if 'p' in opts:
             proj = opts['p']
-        if proj not in self.shell.user_ns:
+        if proj not in self.shell.user_ns: # pragma: no cover
             raise ValueError('Cannot find any project with name `{}` in the '
                              'namespace.'.format(proj))
         # get the proj object
@@ -269,7 +269,7 @@ class SpectroChemPyMagics(Magics):
             contents += "\n" + self.shell.find_user_code(args,
                                                          search_ns=search_ns) + "\n"
 
-        if 's' in opts:
+        if 's' in opts: # pragma: no cover
             try:
                 blocks, not_found = extract_symbols(contents, opts['s'])
             except SyntaxError:
@@ -312,7 +312,7 @@ def _get_pkg_datadir_path(data_name, package=None):
     path = os.path.dirname(import_item(package).__file__)
     path = os.path.join(path, data_name)
 
-    if not os.path.isdir(path):
+    if not os.path.isdir(path): # pragma: no cover
         return os.path.dirname(path)
 
     return path
@@ -749,36 +749,34 @@ class SpectroChemPy(Application):
     @default('long_description')
     def _get_long_description(self):
         desc = """
-    Welcome to <strong>SpectroChemPy</strong> Application<br><br>
-    <p><strong>SpectroChemPy</strong> is a framework for processing, 
-    analysing and 
-    modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry 
-    with 
-    <strong>Py</strong>thon. It is a cross platform software, running on 
-    Linux, 
-    Windows or OS X.</p><br><br>
-    <strong>version:</strong> {version}<br>
-    <strong>Authors:</strong> {authors}<br>
-    <strong>License:</strong> {license}<br>
-    <div class='warning'> SpectroChemPy is still experimental and under active 
-    development. Its current design and functionalities are subject to major 
-    changes, reorganizations, bugs and crashes!!!. Please report any issues 
-    to the 
-    <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
-    </div><br><br>
-    When using <strong>SpectroChemPy</strong> for your own work, you are 
-    kindly 
-    requested to cite it this way:
-    <pre>
-    Arnaud Travert & Christian Fernandez,
-    SpectroChemPy, a framework for processing, analysing and modelling of 
-    Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
-    Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
-    Caen/CNRS, 2019
-    </pre>
-    </p>
-
-    """.format(version=__release__, authors=__author__, license=__license__)
+        Welcome to <strong>SpectroChemPy</strong> Application<br><br>
+        <p><strong>SpectroChemPy</strong> is a framework for processing,
+        analysing and
+        modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry
+        with
+        <strong>Py</strong>thon. It is a cross platform software, running on
+        Linux,
+        Windows or OS X.</p><br><br>
+        <strong>version:</strong> {version}<br>
+        <strong>Authors:</strong> {authors}<br>
+        <strong>License:</strong> {license}<br>
+        <div class='warning'> SpectroChemPy is still experimental and under active
+        development. Its current design and functionalities are subject to major
+        changes, reorganizations, bugs and crashes!!!. Please report any issues
+        to the
+        <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
+        </div><br><br>
+        When using <strong>SpectroChemPy</strong> for your own work, you are
+        kindly requested to cite it this way:
+        <pre>
+        Arnaud Travert & Christian Fernandez,
+        SpectroChemPy, a framework for processing, analysing and modelling of
+        Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
+        Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
+        Caen/CNRS, 2019
+        </pre>
+        </p>
+        """.format(version=__release__, authors=__author__, license=__license__)
 
         return desc
 
@@ -792,7 +790,7 @@ class SpectroChemPy(Application):
 
     reset_config = Bool(False, help='Should we restore a default '
                                     'configuration ?').tag(config=True)
-    """Flag: True if one wants to reset settings to the original config 
+    """Flag: True if one wants to reset settings to the original config
     defaults"""
 
     config_file_name = Unicode(None, help="Configuration file name").tag(
@@ -821,7 +819,7 @@ class SpectroChemPy(Application):
     # Logger at startup
     # ------------------------------------------------------------------------------------------------------------------
 
-    debug = Bool(False, help='Set DEBUG mode, with full outputs').tag(
+    debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(
         config=True)
     """Flag to set debugging mode"""
     info = Bool(False, help='Set INFO mode, with msg outputs').tag(
@@ -1075,8 +1073,6 @@ class SpectroChemPy(Application):
     # start the application
     # ------------------------------------------------------------------------------------------------------------------
 
-    @docstrings.get_sectionsf('SpectroChemPy.start')
-    @docstrings.dedent
     def start(self):
         """
         Start the |scpy| API
@@ -1093,7 +1089,7 @@ class SpectroChemPy(Application):
             debug('API already started. Nothing done!')
             return
 
-        self.log.debug("show info on laoding %s" % self.general_preferences.show_info_on_loading)
+        self.log.debug("show info on loading %s" % self.general_preferences.show_info_on_loading)
         if self.general_preferences.show_info_on_loading:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)

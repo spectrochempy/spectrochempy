@@ -54,15 +54,15 @@ buffers as allowed by the current messaging protocol.
 ## Installation
 
 
-Using `pip`:
+Using `pip` :
 
-Make sure you have [pip installed](https://pip.readthedocs.org/en/stable/installing/) and run:
+Make sure you have [pip installed](https://pip.readthedocs.org/en/stable/installing/) and run :
 
 ```
 pip install traittypes
 ```
 
-Using `conda`:
+Using `conda` :
 
 ```
 conda install -c conda-forge traittypes
@@ -84,9 +84,9 @@ from traittypes import Array
 
 def shape(*dimensions):
     def validator(trait, value):
-        if value.shape != dimensions:
+        if value.shape != dimensions :
             raise TraitError('Expected an of shape %s and got and array with shape %s' % (dimensions, value.shape))
-        else:
+        else :
             return value
     return validator
 
@@ -108,7 +108,7 @@ class _DelayedImportError(object):
 
     def __getattribute__(self, name):
         package_name = super(_DelayedImportError, self).__getattribute__('package_name')
-        raise RuntimeError('Missing dependency: %s' % package_name)
+        raise RuntimeError('Missing dependency : %s' % package_name)
 
 
 try:
@@ -146,9 +146,9 @@ class SciType(TraitType):
             # Test with a shape constraint
             def shape(*dimensions):
                 def validator(trait, value):
-                    if value.shape != dimensions:
+                    if value.shape != dimensions :
                         raise TraitError('Expected an of shape %s and got and array with shape %s' % (dimensions, value.shape))
-                    else:
+                    else :
                         return value
                 return validator
 

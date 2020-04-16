@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -29,7 +29,7 @@ p = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
 
 X.coords.update(y=scp.Coord(p, title='pressure', units='torr'))
 # Using the `update` method is mandatory because it will preserve the name.
-# Indeed, setting using X.coords[0] = Coord(...) fails unless name is specified : Coord(..., name='y')
+# Indeed, setting using X.coords[0] = Coord(...) fails unless name is specified: Coord(..., name='y')
 
 ###############################
 # Select and plot the spectral range of interest

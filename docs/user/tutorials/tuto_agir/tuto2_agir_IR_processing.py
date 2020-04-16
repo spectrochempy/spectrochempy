@@ -1,11 +1,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.0.5
+#       jupytext_version: 1.1.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -48,7 +49,7 @@ proj
 #
 # * `proj.P350.IR[:, 3000.0:3100.0]` will select all columns from wavenumbers 3000 to 3100. 
 #
-# <div class='alert alert-info'>**IMPORTANT** : 
+# <div class='alert alert-info'>**IMPORTANT**:
 #
 # * When doing such slicing, the wavenumbers must be expressed as **floating numbers** (with the decimal separator present) or it will fail!.
 #

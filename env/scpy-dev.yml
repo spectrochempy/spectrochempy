@@ -4,31 +4,22 @@ channels:
 - conda
 - spectrocat
 dependencies:
-# for the core package
 - numpy
 - matplotlib
 - traitlets
-- pint
+- pint=0.9
 - quaternion
-# some other useful package
-- xarray
-- bokeh
-- holoviews
-- datashader
-- param
-- dask
-- intake
-- intake-parquet
-- s3fs
+- cvxopt
 - pandas
+- xarray
+- datashader
+- scikit-learn
 - xlrd
 - requests
 - numba
 - scipy
 - colorama
-# mainly for install and a bit more...
 - setuptools_scm
-# need this, because the API is mainly designed to run in Jupyter notebook
 - ipython
 - jupyterlab
 - ipykernel
@@ -38,20 +29,20 @@ dependencies:
 - widgetsnbextension
 - nodejs
 - jupytext
-# for testing
 - pytest
 - pytest-runner
 - pytest-cov
 - pytest-xdist
 - pytest-console-scripts
 - scikit-image
-# for docs
-- sphinx
+- sphinx=1.8.5
 - sphinx_rtd_theme
 - sphinx-gallery
-- numpydoc
 - nbsphinx
 - jupyter_sphinx
 - nbconvert
-#conda recipes
+- numpydoc=0.8
 - conda-build
+- pip
+- pip:
+  - quadprog

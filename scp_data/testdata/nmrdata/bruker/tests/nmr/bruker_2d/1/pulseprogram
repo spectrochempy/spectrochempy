@@ -43,7 +43,7 @@
 ;$id: $
 # 3 "/home/nmr/prog/pp/HMQC2md" 2
 # 4 "/home/nmr/prog/pp/HMQC2md"
-;cnst11 : to adjust t=0 for acquisition, if digmod = baseopt
+;cnst11: to adjust t=0 for acquisition, if digmod = baseopt
 "acqt0=1u*cnst11"
 
 
@@ -103,7 +103,7 @@ ph12 = 0 2
 
 ph31 = 0 2 2 0
 # 41 "/home/nmr/prog/pp/HMQC2md"
-;pl1 : f1 channel - power level for pulse (default)
-;p1 : f1 channel -  high power pulse
-;d1 : relaxation delay; 1-5 * T1
-;d0 : 2u min
+;pl1: f1 channel - power level for pulse (default)
+;p1: f1 channel -  high power pulse
+;d1: relaxation delay; 1-5 * T1
+;d0: 2u min

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT 
 # See full LICENSE agreement in the root directory
@@ -119,7 +119,7 @@ def test_ndcomplex_init_complex_with_mask():
     assert d3RR._mask.shape == (2, 2)
     info_(d3)
     assert isinstance(d3[1, 1].values, Quantity)
-    assert d3[1, 1].values.magnitude == d[1, 1].data
+    assert d3[1, 1].values.magnitude == d[1, 1]
 
 
 def test_ndcomplex_swapaxes():

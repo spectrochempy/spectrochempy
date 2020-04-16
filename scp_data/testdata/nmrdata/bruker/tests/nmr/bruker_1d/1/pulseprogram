@@ -69,7 +69,7 @@ define pulse p90_X
 
 # 144 "/home/nmr/prog/pp/def.lcs.incl"
 ;------------------------------------------------------------------------------------acqt0
-;cnst11 : to adjust t=0 for acquisition, if digmod = baseopt. 
+;cnst11: to adjust t=0 for acquisition, if digmod = baseopt.
 
   "cnst11 = -(2u*p1*cnst1/PI)/90"
 
@@ -174,13 +174,13 @@ ph31= 0 2 1 3
 ;cpd3: CW, TPPM, SPINAL...
 
 ;p1: pulse length for a 90 deg flip-angle
-;p2 : =p1*2, 180 degree pulse
-;p3 : 90 deg (used to calculate the magic pulse)
+;p2: =p1*2, 180 degree pulse
+;p3: 90 deg (used to calculate the magic pulse)
 ;sp10: power of the shaped preparation pulse
 ;p10: shape pulse length
 
 ;d1: relaxation delay; 1-5 * T1
-;d6 : echo delay (calculated)
+;d6: echo delay (calculated)
 ;d10: delay after shaped pulse (ca. 20u)
 ;d7: acquisition delay (neg)
 ;d8: acquisition delay (pos)

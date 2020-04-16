@@ -8,11 +8,11 @@ from __future__ import print_function, division
 __developer_doc__ = """
 Agilent/Varian file format information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Both the Agilent/Varian binary and parameter formats are documented in:
+Both the Agilent/Varian binary and parameter formats are documented in :
 
 * Varian MR News 2005-04-18 Importing Binary VnmrJ / VNMR FIDs into Third
     Party Software and VnmrJ / VNMR FID Data Format
-* VnmrJ User Programming - Chapter 5: Parameters and Data
+* VnmrJ User Programming - Chapter 5 : Parameters and Data
 
 These are available (as of 04/2011) online from
 `Agilent <http://agilent.com>`_.
@@ -237,7 +237,7 @@ def read(dir=".", fid_file="fid", procpar_file="procpar", read_blockhead=False,
     re-organized to form the NMR data matrix.  In most cases this can be
     determined automatically by examining the order of phase parameters in the
     procpar file.  This is done if torder is set to None.  In some cases
-    it must be explicitly provided.  Three common cases are:
+    it must be explicitly provided.  Three common cases are :
 
     ======== ======================  ================= =======================
     Name     Ordering of arrays      torder            Notes
@@ -249,8 +249,8 @@ def read(dir=".", fid_file="fid", procpar_file="procpar", read_blockhead=False,
 
     In addition a function which maps indirect dimension index tuples to/from
     trace numbers as stored on disk can be provided.  For reading this
-    function should take 2 arguments: shape, index_tuple and return an integer
-    trace number.  For writing this function should again take 2 arguments:
+    function should take 2 arguments : shape, index_tuple and return an integer
+    trace number.  For writing this function should again take 2 arguments :
     shape,trace_number and return the indirect dimension index tuple for the
     given trace.
 
@@ -720,7 +720,7 @@ def read_fid(filename, shape=None, torder='flat', as_2d=False,
             return dic, reorder_data(data, shape, torder)
         except:
             warn("data cannot be re-ordered, returning raw 2D data\n" +
-                 "Provided shape: " + str(shape) + " torder: " + str(torder))
+                 "Provided shape : " + str(shape) + " torder : " + str(torder))
             return dic, data
 
     try:
@@ -1256,7 +1256,7 @@ def get_fileheader(f):
     Reads the 32-byte file header from file and unpacks into a list.  Endiness
     is corrected as needed.
 
-    Returned list contents:
+    Returned list contents :
 
     =   =========   ======================================
     N   Variable    Description
@@ -1284,7 +1284,7 @@ def get_blockheader(f):
     Reads the 28-byte block header from f and unpacks into a list.  Endiness
     is corrected as needed.
 
-    Returned list contents:
+    Returned list contents :
 
     =   ========    ========================
     N   Variable    Description
@@ -1322,7 +1322,7 @@ def get_hyperheader(file):
     Reads the 28-bytes block header from file and unpacks into a list. Endiness
     is corrected as needed.
 
-    Returned list contents:
+    Returned list contents :
 
     =   ========    ================
     N   Variable    Description

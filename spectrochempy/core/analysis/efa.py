@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -14,7 +14,7 @@ This module implement the EFA (Evolving Factor Analysis) class.
 
 __all__ = ['EFA']
 
-__dataset_methods__ = ['EFA']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports

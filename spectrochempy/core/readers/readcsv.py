@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -59,9 +59,9 @@ def read_zip(*args, **kwargs):
 
     Parameters
     ----------
-    filename: str
+    filename : str
         filename of the file to load
-    directory: str, optional, default="".
+    directory : str, optional, default="".
         From where to read the specified filename. If not sperfied, read in
         the current directory.
 
@@ -74,10 +74,10 @@ def read_zip(*args, **kwargs):
     >>> A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip', origin='omnic')
     >>> print(A)
     <BLANKLINE>
-      name/id:  ...
+      name/id :  ...
 
     """
-    debug_("reading zipped folder of *.csv files")
+    #debug_("reading zipped folder of *.csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -99,22 +99,22 @@ def read_csv(*args, **kwargs):
 
     Parameters
     ----------
-    filename: str
+    filename : str
         filename of the file to load
-    directory: str, optional, default="".
+    directory : str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the current directory then it the test directory.
 
     Returns
     -------
-    dataset: |NDDataset|
+    dataset : |NDDataset|
 
     Examples
     --------
     >>> A = NDDataset.read_csv('agirdata/A350/TGA/tg.csv')
     >>> print(A)
     <BLANKLINE>
-      name/id: ...
+      name/id : ...
 
     Notes
     -----
@@ -124,7 +124,7 @@ def read_csv(*args, **kwargs):
     """
     # TODO: to allow header and nd-data
 
-    debug_("reading csv files")
+    #debug_("reading csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -227,7 +227,7 @@ def _read_zip(filename, **kwargs):
         if not f.endswith('.csv') or f.startswith('__MACOSX'):
             continue  # bypass non-csv files
 
-        debug_('reading %s ...' % (f))
+        #debug_('reading %s ...' % (f))
 
         datasets.append(_read_csv(filename=f, fid=obj[f], **kwargs))
         if len(datasets) + 1 > only:
@@ -353,7 +353,7 @@ def _add_omnic_info(dataset, **kwargs):
 
     # Set description and history
     dataset.description = (
-        'Dataset from .csv file : {}\n'.format(desc))
+        'Dataset from .csv file: {}\n'.format(desc))
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -21,9 +21,15 @@ where optional parameters idincates which job to perfom.
 import shutil
 import subprocess
 
-from sphinx.application import Sphinx
+from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
 from spectrochempy import *
 from docs import apigen
+
+import warnings
+warnings.filterwarnings( action='ignore', category=DeprecationWarning)
+warnings.filterwarnings( action='ignore', category=RemovedInSphinx30Warning)
+warnings.filterwarnings( action='ignore', category=RemovedInSphinx40Warning)
+warnings.filterwarnings( action='ignore', module='matplotlib', category=UserWarning)
 
 preferences = general_preferences
 set_loglevel(WARNING)
@@ -31,11 +37,10 @@ set_loglevel(WARNING)
 SERVER = os.environ.get('SERVER_FOR_LCS', None)
 
 PROJECT = "spectrochempy"
-
-DOCDIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs")
-API = os.path.join(DOCDIR, 'api', 'generated')
-DEVAPI = os.path.join(DOCDIR, 'dev', 'generated')
+PROJECTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
+DOCDIR = os.path.join(PROJECTDIR, "docs")
+API = os.path.join(DOCDIR, 'api','generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees')
 
@@ -72,31 +77,34 @@ def gitcommands():
         pass
 
 
-def api_gen():
-    # generate DEVAPI reference
-    apigen.main(PROJECT,
-                tocdepth=1,
-                includeprivate=True,
-                destdir=DEVAPI,
-                exclude_patterns=['api.py', 'test_*', 'tests'],
-                exclude_dirs=['extern', 'sphinxext', '~misc', 'gui',
-                              'tests', '*/tests', '*/*/tests'],
-                )
-
+def api_gen(force=False):
     # generate API reference
-    apigen.main(PROJECT,
+    apigen.main(SOURCESDIR,
                 tocdepth=1,
+                force=force,
                 includeprivate=True,
                 destdir=API,
-                genapi=True,
+                exclude_patterns=[
+                    'NDArray',
+                    'NDComplexArray',
+                    'NDIO',
+                    'NDPlot',
+                ],
                 )
 
 def make_docs(*args):
     """Make the html and pdf documentation
 
+    Parameters
+    ----------
+    *args : tuple(any,...)
+        Arguments among:
+        
+        * html
     """
     args = list(args)
-
+    regenerate_api = False
+    
     nocommit = True
     if 'commit' in args:
         nocommit = False
@@ -117,17 +125,19 @@ def make_docs(*args):
 
     if 'clean' in args:
         clean()
-        args.remove('clean')
+        regenerate_api = True
         info_('\nOld documentation now erased.\n')
-
-    if builders and 'no_apigen' not in args:
+        
+    if builders:
+        info_('\nDocumentation directory are created.\n')
         make_dirs()
-        api_gen()
+
+    if  regenerate_api or not os.path.exists(API):
+        api_gen(force=regenerate_api)
 
     for builder in builders:
 
-        print('building %s documentation (version: %s)' % (builder,
-                                                           version))
+        print('building %s documentation (version : %s)' % (builder, version))
         srcdir = confdir = DOCDIR
         outdir = "{0}/{1}".format(BUILDDIR, builder)
         doctreedir = "{0}/~doctrees".format(BUILDDIR)
@@ -192,7 +202,7 @@ def do_release():
         info_('\n' + cmd + "Finished")
 
     else:
-        error_('Cannot find the upload server: {}!'.format(SERVER))
+        error_('Cannot find the upload server : {}!'.format(SERVER))
 
 
 def clean():
@@ -204,10 +214,9 @@ def clean():
     shutil.rmtree(BUILDDIR + '/latex', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
     shutil.rmtree(BUILDDIR, ignore_errors=True)
-    shutil.rmtree(DOCDIR   + '/gen_modules', ignore_errors=True)
-    shutil.rmtree(DOCDIR   + '/gallery', ignore_errors=True)
-    shutil.rmtree(DEVAPI,   ignore_errors=True)
-    shutil.rmtree(API,      ignore_errors=True)
+    #shutil.rmtree(DOCDIR   + '/gen_modules', ignore_errors=True)
+    #shutil.rmtree(DOCDIR   + '/gallery', ignore_errors=True)
+    shutil.rmtree(API,   ignore_errors=True)
 
 
 def make_dirs():
@@ -220,15 +229,10 @@ def make_dirs():
                   os.path.join(BUILDDIR, 'latex'),
                   os.path.join(BUILDDIR, 'pdf'),
                   os.path.join(DOCDIR, '_static'),
-                  os.path.join(DOCDIR, 'dev', 'generated'),
-                  os.path.join(DOCDIR, 'api', 'generated')
                   ]
     for d in build_dirs:
-        try:
-            os.makedirs(d)
-        except OSError:
-            pass
-
+        os.makedirs(d, exist_ok=True)
+        
 
 if __name__ == '__main__':
 

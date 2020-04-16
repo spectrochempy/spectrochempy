@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -17,8 +17,7 @@ Module containing 1D plotting function(s)
 __all__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar',
            'plot_multiple']
 
-__dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter',
-                       'plot_bar']
+__dataset_methods__ = ['plot_1D', 'plot_lines', 'plot_pen', 'plot_scatter', 'plot_bar']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -141,6 +140,9 @@ def plot_multiple(datasets, method='scatter', pen=True,
     commands = kwargs.get('commands', [])
     kwargs['commands'] = []
     clear = kwargs.pop('clear', True)
+    legend = kwargs.pop('legend', None) # remove 'legend' from kwargs before calling plot
+                                        # else it will generate a conflict
+    
     for s in datasets:  # , colors, markers):
 
         ax = s.plot(method=method,
@@ -155,7 +157,6 @@ def plot_multiple(datasets, method='scatter', pen=True,
         # that we will plot on the same figure
 
     # scale all plots
-    legend = kwargs.get('legend', None)
     if legend is not None:
         leg = ax.legend(ax.lines, labels, shadow=True, loc=legend,
                         frameon=True, facecolor='lightyellow')
@@ -185,71 +186,72 @@ def plot_1D(dataset, **kwargs):
     method : str, optional, default:pen
         The method can be one among ``pen``, ``bar``,  or ``scatter``
         Default values is ``pen``, i.e., solid lines are drawn.
-        To draw a Bar graph, use method: ``bar``.
-        For a Scatter plot, use method: ``scatter``.
+        To draw a Bar graph, use method : ``bar``.
+        For a Scatter plot, use method : ``scatter``.
     twinx : :class:`~matplotlib.Axes` instance, optional, default:None
         If this is not None, then a twin axes will be created with a
         common x dimension.
-    title: str
+    title : str
         Title of the plot (or subplot) axe.
-    style : str, optional, default = 'notebook'
+    style : str, optional, default='notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
-    reverse: bool or None [optional, default= None/False
+    reverse : bool or None [optional, default=None/False
         In principle, coordinates run from left to right, except for wavenumbers
         (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
         will try to guess. But if reverse is set, then this is the
         setting which will be taken into account.
-    clear: bool, optional, default:True
+    clear : bool, optional, default:True
         If false, hold the current figure and ax until a new plot is performed.
-    data_only: bool, optional, default:False
+    data_only : bool, optional, default:False
         Only the plot is done. No addition of axes or label specifications
-    imag: bool, optional, default:False
+    imag : bool, optional, default:False
         Show imaginary part. By default only the real part is displayed.
-    show_complex: bool, optional, default:False
+    show_complex : bool, optional, default:False
         Show both real and imaginary part.
         By default only the real part is displayed.
-    dpi: int, optional
+    dpi : int, optional
         the number of pixel per inches
-    figsize: tuple, optional, default is (3.4, 1.7)
+    figsize : tuple, optional, default is (3.4, 1.7)
         figure size
-    fontsize: int, optional
+    fontsize : int, optional
         font size in pixels, default is 10
-    imag: bool, optional, default False
+    imag : bool, optional, default False
         By default real part is shown. Set to True to display the imaginary part
-    xlim: tuple, optional
+    xlim : tuple, optional
         limit on the horizontal axis
-    zlim or ylim: tuple, optional
+    zlim or ylim : tuple, optional
         limit on the vertical axis
-    color or c: matplotlib valid color, optional
-        color of the line #TODO: a list if several line
-    linewidth or lw: float, optional
+    color or c : matplotlib valid color, optional
+        color of the line #TODO : a list if several line
+    linewidth or lw : float, optional
         line width
-    linestyle or ls: str, optional
+    linestyle or ls : str, optional
         line style definition
-    xlabel: str, optional
+    xlabel : str, optional
         label on the horizontal axis
-    zlabel or ylabel: str, optional
+    zlabel or ylabel : str, optional
         label on the vertical axis
-    showz: bool, optional, default=True
+    showz : bool, optional, default=True
         should we show the vertical axis
     plot_model:Bool,
         plot model data if available
-    modellinestyle or modls: str,
+    modellinestyle or modls : str,
         line style of the model
-    offset: float,
+    offset : float,
         offset of the model individual lines
-    commands: str,
+    commands : str,
         matplotlib commands to be executed
-    show_zero: boolean, optional
+    show_zero : boolean, optional
         show the zero basis
-    output: str,
+    output : str,
         name of the file to save the figure
-    vshift: float, optional
+    vshift : float, optional
         vertically shift the line from its baseline
     kwargs : additional keywords
 
     """
+
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -385,6 +387,7 @@ def plot_1D(dataset, **kwargs):
 
     # plot_lines
     # ------------------------------------------------------------------------------------------------------------------
+    label = kwargs.get('label',None)
     if scatterpen:
         # pen + scatter
         line, = ax.plot(xdata, zdata.T,
@@ -393,7 +396,8 @@ def plot_1D(dataset, **kwargs):
                         markevery=markevery,
                         markeredgewidth=1.,
                         # markerfacecolor = markerfacecolor,
-                        markeredgecolor=markeredgecolor)
+                        markeredgecolor=markeredgecolor,
+                        label=label)
     elif scatter:
         # scatter only
         line, = ax.plot(xdata, zdata.T,
@@ -403,15 +407,16 @@ def plot_1D(dataset, **kwargs):
                         markeredgewidth=1.,
                         markevery=markevery,
                         markerfacecolor=markerfacecolor,
-                        markeredgecolor=markeredgecolor)
+                        markeredgecolor=markeredgecolor,
+                        label=label)
     elif pen:
         # pen only
-        line, = ax.plot(xdata, zdata.T, marker="")
+        line, = ax.plot(xdata, zdata.T, marker="", label=label)
 
     elif bar:
         # bar only
         line = ax.bar(xdata, zdata.squeeze(), color=color,
-                      edgecolor='k', align='center')
+                      edgecolor='k', align='center', label=label)
         barwidth = line[0].get_width()
 
     if show_complex and pen:
@@ -421,7 +426,7 @@ def plot_1D(dataset, **kwargs):
 
     if kwargs.get('plot_model', False):
         modeldata = new.modeldata  # TODO: what's about mask?
-        ax.plot(xdata, modeldata.T, ls=':', lw='2')  # TODO: improve this!!!
+        ax.plot(xdata, modeldata.T, ls=':', lw='2', label=label)  # TODO: improve this!!!
 
     # line attributes
     if (pen or scatterpen) and color != 'AUTO':

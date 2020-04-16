@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -40,6 +40,8 @@ f = efa.get_forward(n_pc=7)
 f.plot()
 b = efa.get_backward(n_pc=7)
 
+f.T.plot(yscale="log", labels= f.y.labels, legend='best')
+b.T.plot(yscale="log")
 
 ##############################################################################
 # Clearly we can retain 4 components, in agreement with what was used to

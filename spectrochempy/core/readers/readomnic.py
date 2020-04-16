@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -35,9 +35,8 @@ import numpy as np
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core import general_preferences as prefs
-from spectrochempy.utils import readfilename, SpectroChemPyWarning
-from ...core import info_, debug_, error_, warning_
+from spectrochempy.utils import readfilename
+from spectrochempy.core import info_, debug_, error_, warning_
 
 # ======================================================================================================================
 # Public functions
@@ -54,13 +53,13 @@ def read_omnic(dataset=None, **kwargs):
         The dataset to store the data and metadata read from the OMNIC file(s).
         If None, a |NDDataset| is created.
     filename : `None`, `str`, or list of `str`
-        Filename of the file(s) to load. If `None`: opens a dialog box to select
-        ``.spa`` or ``.spg`` files. If `str`: a single filename. It list of str:
+        Filename of the file(s) to load. If `None` : opens a dialog box to select
+        ``.spa`` or ``.spg`` files. If `str` : a single filename. It list of str :
         a list of filenames.
-    directory: str, optional, default="".
+    directory : str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
-    sortbydate: bool, optional, default : True.
+    sortbydate : bool, optional, default=True.
         Sort spectra by acquisition date
 
     Returns
@@ -74,11 +73,11 @@ def read_omnic(dataset=None, **kwargs):
     >>> A = NDDataset.read_omnic('irdata/nh4y-activation.spg')
     >>> print(A)
     <BLANKLINE>
-      id: NH4Y-activation.SPG ...
+      id : NH4Y-activation.SPG ...
 
 
     """
-    debug_("reading omnic files")
+    #debug_("reading omnic files")
 
     # filename will be given by a keyword parameter except if the first parameters is already the filename
     filename = kwargs.get('filename', None)
@@ -113,16 +112,16 @@ def read_omnic(dataset=None, **kwargs):
 
         if extension == '.spg':
             for filename in files[extension]:
-                debug_("reading omnic spg file")
+                #debug_("reading omnic spg file")
                 datasets.append(_read_spg(dataset, filename))
 
         elif extension == '.spa':
-            debug_("reading omnic spa files")
+            #debug_("reading omnic spa files")
             datasets.append(_read_spa(dataset, files[extension], sortbydate=True))
         else:
             # try another format!
             datasets = dataset.read(filename, protocol=extension[1:], sortbydate=True, **kwargs)
-
+        
     if len(datasets) == 1:
         return datasets[0]  # a single dataset is returned
 
@@ -189,17 +188,17 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
         # Each of theses lines provides positions of data and metadata in the file:
         #
-        #     key: hex 02, dec  02 : position of spectral header (=> nx,
+        #     key: hex 02, dec  02: position of spectral header (=> nx,
         #                                 firstx, lastx, nscans, nbkgscans)
-        #     key: hex 03, dec  03 : intensity position
-        #     key: hex 04, dec  04 : user text position
-        #     key: hex 1B, dec  27 : position of History text
-        #     key: hex 69, dec 105 : ?
-        #     key: hex 6a, dec 106 : ?
-        #     key: hex 6b, dec 107 : position of spectrum title, the acquisition
+        #     key: hex 03, dec  03: intensity position
+        #     key: hex 04, dec  04: user text position
+        #     key: hex 1B, dec  27: position of History text
+        #     key: hex 69, dec 105: ?
+        #     key: hex 6a, dec 106: ?
+        #     key: hex 6b, dec 107: position of spectrum title, the acquisition
         #                                 date follows at +256(dec)
-        #     key: hex 80, dec 128 : ?
-        #     key: hex 82, dec 130 : ?
+        #     key: hex 80, dec 128: ?
+        #     key: hex 82, dec 130: ?
         #
         # the number of line per block may change from one omnic version to another,
         # but the total number of lines is given at hex 294, hence allowing counting
@@ -223,7 +222,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
         nspec = np.count_nonzero((keys == 2))
 
         if nspec == 0:
-            raise IOError('Error: File format not recognized'
+            raise IOError('Error : File format not recognized'
                           ' - information markers not found')
 
         ##Get xaxis (e.g. wavenumbers)
@@ -374,10 +373,11 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
                labels = (allacquisitiondates, alltitles))
     dataset.set_coords(y=_y, x=_x)
 
-    # Set description and history
+    # Set origin, description and history
+    dataset.origin = "omnic"
     dataset.description = (
             'Dataset from spg file : ' + spg_title + ' \n'
-            + 'History of the 1st spectrum: ' + allhistories[0])
+            + 'History of the 1st spectrum : ' + allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 
@@ -388,8 +388,8 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
     # Set the NDDataset date
     dataset._date = datetime.now()
     dataset._modified = dataset.date
-
-    debug_("end of reading")
+    
+    #debug_("end of reading")
 
     return dataset
 
@@ -443,15 +443,15 @@ def _read_spa(dataset, filenames, **kwargs):
             # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
             # Each of theses lines provides positions of data and metadata in the file:
             #
-            #     key: hex 02, dec  02 : position of spectral header (=> nx,
+            #     key: hex 02, dec  02: position of spectral header (=> nx,
             #                                 firstx, lastx, nscans, nbkgscans)
-            #     key: hex 03, dec  03 : intensity position
-            #     key: hex 04, dec  04 : user text position
-            #     key: hex 1B, dec  27 : position of History text
-            #     key: hex 69, dec 105 : ?
-            #     key: hex 6a, dec 106 : ?
-            #     key: hex 80, dec 128 : ?
-            #     key: hex 82, dec 130 : ?
+            #     key: hex 03, dec  03: intensity position
+            #     key: hex 04, dec  04: user text position
+            #     key: hex 1B, dec  27: position of History text
+            #     key: hex 69, dec 105: ?
+            #     key: hex 6a, dec 106: ?
+            #     key: hex 80, dec 128: ?
+            #     key: hex 82, dec 130: ?
             #
 
             gotinfos = [False, False,
@@ -518,15 +518,15 @@ def _read_spa(dataset, filenames, **kwargs):
     # check the consistency of xaxis
     if np.ptp(nx) != 0:
         raise ValueError(
-            'Error: Inconsistent data set - number of wavenumber per spectrum should be identical')
+            'Error : Inconsistent data set - number of wavenumber per spectrum should be identical')
         return
     elif np.ptp(firstx) != 0:
         raise ValueError(
-            'Error: Inconsistent data set - the x axis should start at same value')
+            'Error : Inconsistent data set - the x axis should start at same value')
         return
     elif np.ptp(lastx) != 0:
         raise ValueError(
-            'Error: Inconsistent data set - the x axis should end at same value')
+            'Error : Inconsistent data set - the x axis should end at same value')
         return
 
     # load into the  NDDataset Object of spectral content
@@ -543,8 +543,9 @@ def _read_spa(dataset, filenames, **kwargs):
     _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels = (allacquisitiondates, alltitles))
     dataset.set_coords(y=_y, x=_x)
     
-    # Set description and history
-    dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum: {3}".format(
+    # Set origin, description and history
+    dataset.origin = "omnic"
+    dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum : {3}".format(
         nspec, ' ... '.join(set([filenames[0], filenames[-1]])), '1st ' if nspec > 1 else '', allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'
@@ -557,7 +558,7 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset._date = datetime.now()
     dataset._modified = dataset.date
 
-    debug_("end of reading")
+    #debug_("end of reading")
 
     # return the dataset
     return dataset

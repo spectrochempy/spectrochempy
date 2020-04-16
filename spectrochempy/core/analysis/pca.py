@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -13,7 +13,7 @@ This module implement the PCA (Principal Component Analysis) class.
 
 __all__ = ['PCA']
 
-__dataset_methods__ = ['PCA']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------------------------------------------------
 # imports
@@ -32,7 +32,7 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from spectrochempy.core.dataset.nddataset import NDDataset, CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.analysis.svd import SVD
-from spectrochempy.core.processors.npy import diag, dot
+from spectrochempy.core.dataset.npy import diag, dot
 from spectrochempy.core import project_preferences
 from spectrochempy.utils import docstrings, NRed, NBlue
 
@@ -51,7 +51,7 @@ class PCA(HasTraits):
     of the data to perform its projection to a lower dimensional space.
 
     The reduction of a dataset :math:`X` with shape (`M`,`N`) is achieved
-    using the decomposition: :math:`X = S.L^T`, where
+    using the decomposition : :math:`X = S.L^T`, where
     :math:`S` is the score's matrix with shape (`M`, `n_pc`) and :math:`L^T` is
     the transposed loading's matrix with shape (`n_pc`, `N`).
 
@@ -85,13 +85,13 @@ class PCA(HasTraits):
         ----------
         %(SVD.parameters.dataset)s
         centered : bool, optional, default:True
-            If True the data are centered around the mean values:
+            If True the data are centered around the mean values :
             :math:`X' = X - mean(X)`.
         standardized : bool, optional, default:False
-            If True the data are scaled to unit standard deviation:
+            If True the data are scaled to unit standard deviation :
             :math:`X' = X / \sigma`.
         scaled : bool, optional, default:False
-            If True the data are scaled in the interval [0-1]:
+            If True the data are scaled in the interval [0-1] :
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
 
         Examples
@@ -255,8 +255,8 @@ class PCA(HasTraits):
 
         Notes
         -----
-        This implements the method of Thomas P. Minka:
-        Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604.
+        This implements the method of Thomas P. Minka :
+        Automatic Choice of Dimensionality for PCA. NIPS 2000 : 598-604.
         Copied and modified from scikit-learn.decomposition.pca (BSD-3 license)
 
         """
@@ -322,7 +322,7 @@ class PCA(HasTraits):
 
         Loadings `L` with shape [``n_pc``, `N`] and scores `S`
         with shape [`M`, `n_pc`] are obtained using the following
-        decomposition: :math:`X = S.L^T`.
+        decomposition : :math:`X = S.L^T`.
 
         Parameters
         ----------
@@ -357,7 +357,7 @@ class PCA(HasTraits):
         Transform data back to the original space using the given number of
         PC's.
 
-        The following matrice operation is performed: :math:`X' = S'.L'^T`
+        The following matrice operation is performed : :math:`X' = S'.L'^T`
         where S'=S[:, n_pc] and L=L[:, n_pc].
 
         Parameters
@@ -365,8 +365,8 @@ class PCA(HasTraits):
         n_pc : int, optional
             The number of PC to use for the reconstruction.
 
-        Return
-        ------
+        Returns
+        -------
         X_reconstructed : |NDDataset|
             The reconstructed dataset based on n_pc principal components.
 
@@ -396,7 +396,7 @@ class PCA(HasTraits):
         return X
 
     def printev(self, n_pc=None):
-        """prints figures of merit: eigenvalues and explained variance
+        """prints figures of merit : eigenvalues and explained variance
         for the first n_pc PS's.
 
         Parameters
@@ -416,7 +416,7 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        n_pc: int
+        n_pc : int
             Number of components to plot.
 
         """
@@ -451,7 +451,7 @@ class PCA(HasTraits):
 
         Parameters
         ----------
-        *pcs: a series of int argument or a list/tuple
+        *pcs : a series of int argument or a list/tuple
             Must contain 2 or 3 elements.
         colormap : str
             A matplotlib colormap.

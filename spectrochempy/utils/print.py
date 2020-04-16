@@ -265,7 +265,7 @@ def insert_masked_print(ds, mask_string='--'):
     Parameters
     -----------
     ds : |NDDataset| instance
-    mask_string: str
+    mask_string : str
 
     """
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT 
 # See full LICENSE agreement in the root directory
@@ -107,7 +107,7 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
             # assert isinstance(r, NDDataset)
         
         except DimensionalityError as e:
-            error_(f"{name} : ", e)
+            error_(f"{name}: ", e)
     
     # NDPanel
     # -----------------
@@ -194,7 +194,7 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, pnl, name, comment):
     if name not in ['logaddexp', 'logaddexp2', 'true_divide', 'floor_divide', ]:
         assert r.units == nd1.units
 
-
+@pytest.mark.skip()
 def test():
     
     # TODO: some ufunc suppress the units! see pint.
@@ -229,7 +229,7 @@ def test():
             # assert isinstance(r, NDDataset)
         
         except DimensionalityError as e:
-            error_(f"{name} : ", e)
+            error_(f"{name}: ", e)
     
     # NDPanel
     # -----------------
@@ -366,7 +366,7 @@ def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs
     
     dsy = runop(ds2, args, kwargs)
     info_(ds2)
-    info_("result operation {}: {}".format(operation, str(dsy)))
+    info_("result operation {} : {}".format(operation, str(dsy)))
     
     assert isinstance(dsy, restype[1])
     if isinstance(dsy, NDDataset):
@@ -395,7 +395,7 @@ def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs
     dsy = runop(ds1, args, kwargs)
     
     info_(str(ds1))
-    info_("result operation {}: {}".format(operation, str(dsy)))
+    info_("result operation {} : {}".format(operation, str(dsy)))
     
     assert isinstance(dsy, restype[0])
     if isinstance(dsy, NDDataset):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -13,7 +13,7 @@ This module implements the Singular Value Decomposition (SVD) class.
 
 __all__ = ['SVD']
 
-__dataset_methods__ = ['SVD']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -41,7 +41,7 @@ class SVD(HasTraits):
 
     The SVD is commonly written as :math:`X = U \Sigma V^{T}`.
 
-    This class has the attributes: U, s = diag(S) and VT=V:math:`^T`.
+    This class has the attributes : U, s = diag(S) and VT=V:math:`^T`.
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
@@ -68,7 +68,7 @@ class SVD(HasTraits):
             observations (for examples a series of IR spectra) while N
             is the number of features (for example the wavenumbers measured
             in each IR spectrum).
-        full_matrices : bool, optional, default: False.
+        full_matrices : bool, optional, default=False.
             If False , U and VT have the shapes (M,  k) and
             (k, N), respectively, where k = min(M, N).
             Otherwise the shapes will be (M, M) and (N, N),
@@ -216,7 +216,7 @@ class SVD(HasTraits):
             return '<svd: U%s, s(%s), VT%s>' % (
                 self.U.shape, self.s.size, self.VT.shape)
         else:
-            return '<svd: s(%s), U,VT:not computed>' % (self.s.size,)
+            return '<svd: s(%s), U, VT:not computed>' % (self.s.size,)
     
     # ------------------------------------------------------------------------------------------------------------------
     #  Properties

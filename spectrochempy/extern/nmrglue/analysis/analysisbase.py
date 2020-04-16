@@ -71,9 +71,9 @@ def find_limits(pts):
     Returns
     -------
     min : ndarray
-        Array of minimum indices: array([zmin, ymin, xmin]
+        Array of minimum indices : array([zmin, ymin, xmin]
     max : ndarray
-        Array of maximum indices: array([zmin, ymin, xmin]
+        Array of maximum indices : array([zmin, ymin, xmin]
 
     See Also
     --------
@@ -90,7 +90,7 @@ def limits2slice(limits):
 
     Parameters
     ----------
-    limits: tuple, (ndarray, ndarray)
+    limits : tuple, (ndarray, ndarray)
         Two tuple consisting of array of the minimum and maximum indices.
 
     Returns
@@ -119,7 +119,7 @@ def slice2limits(slices):
 
     Returns
     -------
-    limits: tuple, (ndarray, ndarray)
+    limits : tuple, (ndarray, ndarray)
         Two tuple consisting of array of the minimum and maximum indices.
 
     See Also
@@ -253,14 +253,14 @@ class ndwindow_index(object):
     center and a :py:class:`ndwindow` slice array.  See :py:class:`ndwindow`
     for additional documentation.
 
-    This class is equivalent to:
+    This class is equivalent to :
 
     for slices, index in zip(np.ndindex(shape), ndwindow(shape,wshape)):
         return (index, slice)
 
     See Also
     --------
-    ndwindow: Iterator over only the window slices.
+    ndwindow : Iterator over only the window slices.
     ndwindow_inside : Iterator over equal sized windows in the array.
 
     """

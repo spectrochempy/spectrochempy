@@ -4,7 +4,7 @@ NMRPipe like processing functions for use with the
 
 These functions attempt to mimic NMRPipe's processing functions but small
 differences exist between to two implementations.  In particular when using
-this module:
+this module :
 
     * hdr=True overrides all values in the calling function.
     * A di flag is not used, rather the :py:func:`di` function should be used
@@ -18,7 +18,7 @@ Additional differences from NMRPipe's functions are documented in the
 individual processing functions.
 
 The following functions have not been implemented and will raise a
-NotImplemented exception:
+NotImplemented exception :
 
     * ann      Fourier Analysis by Neural Net
     * ebs      EBS Reconstruction
@@ -1797,7 +1797,7 @@ def sol(dic, data, mode="low", fl=16, fs=1, head=0):
     fl : int
         Length of filter in points.
     fs : {1, 2, 3}
-        Shape of lowpass filter 1 : boxcar, 2: sine 3 : sine squared.
+        Shape of lowpass filter 1 : boxcar, 2 : sine 3 : sine squared.
     head :
         Number of points to skip when applying filter.
 
@@ -2432,7 +2432,7 @@ def shuf(dic, data, mode=None):
     implemented.  All modes correctly update minimum and maximum values.  This
     behavor may differ from NMRPipe's SHUF function.
 
-    Valid modes are:
+    Valid modes are :
 
     ======= ===================================
     string  Description
@@ -2685,7 +2685,7 @@ def img(dic, data, filter, dx=1.0, dy=1.0, kern=[1], conv=False, thres=None):
     This function wraps when regions extend past the edges (NMRPipe doesn't).
     The filter is applied to both the real and imaginary channels
 
-    Supported filters are:
+    Supported filters are :
 
     ======  ==================
     Name    Description
@@ -3024,7 +3024,7 @@ def lp(dic, data, pred="default", x1="default", xn="default", ord=8, mode='f',
         Type of roots which are will be marked as bad and stabilized. Choices
         are 'incr' for increasing roots, 'decr' for decreasing roots, or None
         for not root stabilization. The default 'auto' will set this parameter
-        based upon the LP `mode` parameter: 'f' and 'fb' will results in an
+        based upon the LP `mode` parameter : 'f' and 'fb' will results in an
         'incr' parameter. 'b' in 'decr'.
     mirror : {'90-180', '0-0', None}
         Mirror mode, option are '90-180' for a one point shifted mirror image,
@@ -3146,7 +3146,7 @@ def lp2d(dic, data, xOrd=8, yOrd=8, xSize="default", ySize="default",
 
     Notes
     -----
-    This function applies the LP2D procedure as described in:
+    This function applies the LP2D procedure as described in :
     G. Zhu and A. Bax, Journal of Magnetic Resonance, 1992, 98, 192-199.
     to the data matrix. The parameters and algorith used in NMRPipe's LP2D
     function are not well documented and are not replicated here.

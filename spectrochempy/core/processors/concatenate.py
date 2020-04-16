@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -15,19 +15,19 @@ import numpy as np
 import datetime as datetime
 from warnings import warn
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import (is_sequence, docstrings)
+from ..dataset.nddataset import NDDataset
+from ..dataset.ndcoordset import CoordSet
+from ..dataset.ndcoord import Coord
+from ...utils import is_sequence, docstrings
 
-
+@docstrings.dedent
 def concatenate(*datasets, **kwargs):
     """
     Concatenation of |NDDataset| objects along a given axis (by default
     the first)
 
     Any number of |NDDataset| objects can be concatenated. For this operation
-    to be defined the following must be true:
+    to be defined the following must be true :
 
         #. all inputs must be valid |NDDataset| objects;
         #. units of data and axis must be compatible (rescaling is applied
@@ -42,9 +42,9 @@ def concatenate(*datasets, **kwargs):
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
         (the last, by default).
-    dims : str, optional, default = 'x'
+    dims : str, optional, default='x'
         The dimension along which the operation is applied
-    axis : int, optional, default = None
+    axis : int, optional, default=None
         Alternative to the the dim keyword. Direct specification of the axis index to use for concatenation.
 
     Returns
@@ -227,7 +227,7 @@ def concatenate(*datasets, **kwargs):
 
     thist = 'Stack' if axis == 0 else 'Concatenation'
 
-    out.description = '{} of {}  datasets :\n'.format(thist, len(datasets))
+    out.description = '{} of {}  datasets:\n'.format(thist, len(datasets))
     out.description += '( {}'.format(datasets[0].name)
     out.title = datasets[0].title
     authortuple = (datasets[0].author,)
@@ -255,7 +255,7 @@ def stack(*datasets):
     Stack of |NDDataset| objects along the last dimension
 
     Any number of |NDDataset| objects can be stacked. For this operation
-    to be defined the following must be true:
+    to be defined the following must be true :
 
     #. all inputs must be valid dataset objects,
     #. units of data and axis must be compatible (rescaling is applied
@@ -281,7 +281,7 @@ def stack(*datasets):
     >>> B = NDDataset.load('mydataset.scp')
     >>> C = NDDataset.stack( A, B)
     >>> print(C) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-          name/id: NDDataset...
+          name/id : NDDataset...
 
     """
 

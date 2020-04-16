@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -37,16 +37,16 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
     """
     Optimization procedure
 
-    :param func:
-    :param x0:
-    :param args:
-    :param method:
-    :param maxfun:
-    :param maxiter:
-    :param ftol:
-    :param xtol:
-    :param callback:
-    :return:
+    :param func :
+    :param x0 :
+    :param args :
+    :param method :
+    :param maxfun :
+    :param maxiter :
+    :param ftol :
+    :param xtol :
+    :param callback :
+    :return :
 
     """
 

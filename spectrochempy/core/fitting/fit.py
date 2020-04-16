@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -14,7 +14,7 @@ Module to perform fitting of 1D or n-D spectral data.
 """
 __all__ = ['Fit']
 
-__dataset_methods__ = ['Fit']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
@@ -47,7 +47,7 @@ from spectrochempy.core import general_preferences, info_
 
 
 # ======================================================================================================================
-#  Fit : main object to handle a fit
+#  Fit: main object to handle a fit
 # ======================================================================================================================
 
 class Fit(HasTraits):
@@ -418,7 +418,7 @@ class Fit(HasTraits):
                 try:
                     new_param[key] = eval(str(refpar))
                 except:
-                    raise ValueError('Cannot evaluate the expression: %s: %s'
+                    raise ValueError('Cannot evaluate the expression %s: %s'
                                      % (key, param[refpar]))
 
                 new_param.fixed[key] = True

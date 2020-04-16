@@ -368,7 +368,7 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
     Notes
     -----
 
-    The lineshape parameter:
+    The lineshape parameter :
 
     Elements of the lineshape parameter list can be string indicating the
     lineshape of given dimension or an instance of a lineshape class
@@ -376,7 +376,7 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
     length of the lineshape the second being a list of lineshape parameters,
     and returns a simulated lineshape as well as a nparam method which when
     given the length of lineshape returns the number of parameters needed to
-    describe the lineshape. Currently the following strings are allowed:
+    describe the lineshape. Currently the following strings are allowed :
 
     * 'g' or 'gauss'    Gaussian (normal) lineshape.
     * 'l' or 'lorentz'  Lorentzian lineshape.
@@ -387,7 +387,7 @@ def fit_NDregion(region, lineshapes, params, amps, bounds=None,
     The first four lineshapes (Gaussian, Lorentzian, Voigt and Pseudo Voigt)
     all take a FWHM scale parameter.
 
-    The following are all valid lineshapes parameters for a 2D Gaussian peak:
+    The following are all valid lineshapes parameters for a 2D Gaussian peak :
 
     * ['g','g']
     * ['gauss','gauss']

@@ -144,7 +144,7 @@ def med(data, mw=24, sf=16, sigma=5.0):
     """
     Median baseline correction.
 
-    Algorith described in: Friedrichs, M.S. JBNMR 1995 5 147-153.
+    Algorith described in : Friedrichs, M.S. JBNMR 1995 5 147-153.
 
     Parameters
     ----------
@@ -175,7 +175,7 @@ def calc_bl_med(x, mw, sf, sigma):
     """
     Calculate a baseline using median baseline correction.
 
-    Algorithm described in: Friedrichs, M.S. JBNMR 1995 5 147-153
+    Algorithm described in : Friedrichs, M.S. JBNMR 1995 5 147-153
 
     Parameters
     ----------
@@ -217,7 +217,7 @@ def baseline_corrector(data, wd=20):
     """
     Calculate a baseline using a distribution based classification method.
 
-    Algorithm described in: Wang et al. Anal. Chem. 2013, 85, 1231-1239
+    Algorithm described in : Wang et al. Anal. Chem. 2013, 85, 1231-1239
 
     Parameters
     ----------
@@ -305,7 +305,7 @@ def sol_general(data, filter, w=16, mode='same'):
     """
     Solvent filter with generic filter.
 
-    Algorithm described in: Marion et al. JMR 1989 84 425-430
+    Algorithm described in : Marion et al. JMR 1989 84 425-430
 
     Parameters
     ----------

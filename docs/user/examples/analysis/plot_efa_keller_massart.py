@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -15,7 +15,6 @@ In this example, we perform the Evolving Factor Analysis of a TEST dataset
 
 """
 import spectrochempy as scp
-import matplotlib.pyplot as plt
 import numpy as np
 
 # sphinx_gallery_thumbnail_number = 5

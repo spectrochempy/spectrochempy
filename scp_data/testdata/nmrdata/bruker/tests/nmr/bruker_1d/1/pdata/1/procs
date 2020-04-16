@@ -1,12 +1,12 @@
-##TITLE= Parameter file, TOPSPIN		Version 3.2
+##TITLE= Parameter file, TopSpin 4.0.7
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 4	$$ modification sequence number
+##NPOINTS= 26	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= nmr
-$$ 2015-12-03 10:23:08.017 +0100  nmr@lcs185n
-$$ /home/nmr/data/Eddy/nmr/151202/10/pdata/1/procs
-$$ process /opt/topspin3.2/prog/mod/proc1d
+$$ 2019-12-12 15:34:51.852 +0100  christian@cf-macbookpro.home
+$$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/bruker_1d/1/pdata/1/procs
+$$ process /opt/topspin4.0.7/prog/mod/proc1d
 ##$ABSF1= 0
 ##$ABSF2= 0
 ##$ABSG= 0
@@ -38,7 +38,7 @@ $$ process /opt/topspin3.2/prog/mod/proc1d
 ##$ERETIC= no
 ##$F1P= 20.0055075434788
 ##$F2P= -12.1400943212564
-##$FCOR= 0
+##$FCOR= 1
 ##$FTSIZE= 16384
 ##$FT_mod= 6
 ##$GAMMA= 0
@@ -70,7 +70,12 @@ $$ process /opt/topspin3.2/prog/mod/proc1d
 ##$Mdd_CsLAMBDA= 0
 ##$Mdd_CsNITER= 0
 ##$Mdd_CsNORM= 0
+##$Mdd_CsVE= no
 ##$Mdd_CsZF= 0
+##$Mdd_LrLAMBDA= 0
+##$Mdd_LrNITER= 0
+##$Mdd_LrRANK= 0
+##$Mdd_LrZF= 0
 ##$Mdd_mod= 0
 ##$NCOEF= 0
 ##$NC_proc= -5
@@ -82,8 +87,8 @@ $$ process /opt/topspin3.2/prog/mod/proc1d
 ##$NZP= 0
 ##$OFFSET= 253.0909
 ##$PC= 0.2
-##$PHC0= 19.4812
-##$PHC1= 47.65796
+##$PHC0= 52.43836
+##$PHC1= -16.8366
 ##$PH_mod= 1
 ##$PKNL= yes
 ##$PPARMOD= 0
@@ -94,6 +99,11 @@ $$ process /opt/topspin3.2/prog/mod/proc1d
 ##$PSCAL= 0
 ##$PSIGN= 0
 ##$PYNMP= <proc.py>
+##$RDF1= 0
+##$RDF2= 0
+##$RDFWHM= 0
+##$RDINT= 0
+##$RDPOS= 0
 ##$REVERSE= no
 ##$SF= 500.071553859985
 ##$SI= 16384
@@ -102,13 +112,14 @@ $$ process /opt/topspin3.2/prog/mod/proc1d
 ##$SINO= 579.7538
 ##$SIOLD= 4096
 ##$SPECTYP= <>
+##$SREF_mod= 1
 ##$SREGLST= <>
 ##$SSB= 0
 ##$STSI= 16384
 ##$STSR= 0
 ##$SW_p= 250000
 ##$SYMM= 0
-##$S_DEV= 49238
+##$S_DEV= 0
 ##$TDeff= 24974
 ##$TDoff= 0
 ##$TI= <shearing done>
@@ -121,8 +132,8 @@ $$ process /opt/topspin3.2/prog/mod/proc1d
 ##$USERP3= <>
 ##$USERP4= <>
 ##$USERP5= <>
-##$WDW= 1
-##$XDIM= 4096
-##$YMAX_p= 462211545
-##$YMIN_p= -69087
+##$WDW= 0
+##$XDIM= 0
+##$YMAX_p= 462598854
+##$YMIN_p= -484185
 ##END=

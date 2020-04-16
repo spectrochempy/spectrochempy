@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -22,11 +22,10 @@
 import sys
 import os
 
+import matplotlib as mpl
 from IPython.core.interactiveshell import InteractiveShell
-from IPython.core.magic import UsageError
 from IPython import get_ipython
 
-import matplotlib as mpl
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Check the environment for plotting
@@ -80,8 +79,8 @@ if InteractiveShell.initialized():
 #
 # if we are not running in a jupyter notebook or lab
 #
-# if we are in a notebook, we will encounter two situztion (real interactive job)
-# or execution o notebook in the background uning ``nbspinx``.
+# if we are in a notebook, we will encounter two situation (real interactive job)
+# or execution o notebook in the background using ``nbsphinx``.
 #
 # if we are in the Scientific mode of PyCharm (module://backend_interagg)
 #   -> keep it
@@ -154,18 +153,28 @@ if not IN_IPYTHON:
 
     initcolor()
 
-if IN_IPYTHON and kernel and not NO_DISPLAY:
-    try:
-        if 'ipykernel_launcher' in sys.argv[0] and \
-                "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
-            # We are running from NBSphinx - the plot must be inline to show up.
-            ip.magic('matplotlib inline')
-        else:
-            # here its a normal magic function that works in both
-            # jupyter notebook and jupyter lab
-            ip.magic('matplotlib widget')
-    except:
-        ip.magic('matplotlib tk')
+def set_backend():
+    if IN_IPYTHON and kernel and not NO_DISPLAY:
+        try:
+            if 'ipykernel_launcher' in sys.argv[0] and \
+                    "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv:
+                # We are running from NBSphinx - the plot must be inline to show up.
+                ip.magic('matplotlib inline')
+            else:
+                # here its a normal magic function that works in both
+                # jupyter notebook and jupyter lab  -
+                #TODO: unfortunatelly, right after the loading of the API the backend come back from `widget` to `inline`
+                # (but I didn't find the reason for now)
+                ip.magic('matplotlib widget')
+        except:
+            ip.magic('matplotlib tk')
+
+set_backend()
+
+__all__ += ['set_backend']
+
+import warnings
+warnings.filterwarnings( action='ignore', module='matplotlib', category=UserWarning)
 
 # ==============================================================================
 if __name__ == '__main__':

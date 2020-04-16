@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -36,13 +36,13 @@ def readfilename(filename=None, **kwargs):
 
     Parameters
     ----------
-    filename: `str`, `list` of strings, optional.
+    filename : `str`, `list` of strings, optional.
         A filename or a list of filenames. If not provided, a dialog box is opened
         to select files.
-    directory: `str`, optional.
+    directory : `str`, optional.
         The directory where to look at. If not specified, read in
         default dirdata directory
-    filetypes: `list`, optional, default=['all files, '.*)'].
+    filetypes : `list`, optional, default=['all files, '.*)'].
 
     Returns
     --------
@@ -53,7 +53,7 @@ def readfilename(filename=None, **kwargs):
     from spectrochempy.core import general_preferences as prefs
     from spectrochempy.utils import SpectroChemPyWarning
     from spectrochempy.api import NO_DISPLAY
-
+    
     # if the directory is not specified we look in the prefs.datadir
     directory = kwargs.get("directory", None)
 
@@ -139,12 +139,12 @@ def readfilename(filename=None, **kwargs):
 
         # We can not do this during full pytest run without blocking the process
         # TODO: use the pytest-qt to solve this problem
+        
         if not NO_DISPLAY:
             filename = opendialog(single=False,
                                   directory=directory,
                                   caption=caption,
                                   filters=filetypes)
-
         if not filename:
             # if the dialog has been cancelled or return nothing
             return None
@@ -183,12 +183,10 @@ def readdirname(dirname=None, **kwargs):
 
     Parameters
     ----------
-    dirname: `str`, optional.
-        A directory name. If not provided, a dialog box is opened
-        to select a directory.
-    parent_dir: `str`, optional.
-        The parent directory where to look at. If not specified, read in
-        default datadir directory
+    dirname : `str`, optional.
+        A directory name. If not provided, a dialog box is opened to select a directory.
+    parent_dir : `str`, optional.
+        The parent directory where to look at. If not specified, read in default datadir directory
 
     Returns
     --------

@@ -13,10 +13,10 @@ from . import fileiobase
 __developer_info__ = """
 JCAMP-DX file format information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The format reference publications are available at:
+The format reference publications are available at :
 <http://www.jcamp-dx.org/protocols.html>
 
-Notes:
+Notes :
 - Writing NMR data in JCAMP-DX format is not currently supported
 - Multi-dimensional JCAMP-files are not currently supported
   (see <http://www.jcamp-dx.org/ndnmr-index.html#2dnmr%20testfiles>)
@@ -27,7 +27,7 @@ Notes:
 def _getkey(keystr):
     '''
     Format key strings.
-    From JCAMP-DX specs:
+    From JCAMP-DX specs :
     "When LABELS are parsed, alphabetic
     characters are converted to upper case, and all spaces,
     dashes, slashes, and underlines are discarded. (XUNITS,
@@ -140,7 +140,7 @@ _DUP_DIGITS = {"S": "1", "T": "2", "U": "3", "V": "4", "W": "5",
 
 def _detect_format(dataline):
     '''
-    Detects and returns digit format:
+    Detects and returns digit format :
     0  Normal
     1  Pseudodigits
     -1 Error
@@ -199,7 +199,7 @@ def _parse_affn_pac(datalines):
 
 def _append_value(data, value_to_append, isdif):
     '''
-    Helper function for _finish_value: actual data push happens
+    Helper function for _finish_value : actual data push happens
     here based on isdif flag (direct value or difference from prev)
     '''
     if isdif:
@@ -210,7 +210,7 @@ def _append_value(data, value_to_append, isdif):
 
 def _finish_value(valuestr, currentmode, prev_value_to_append, data):
     '''
-    Helper for _parse_pseudo:
+    Helper for _parse_pseudo :
     -Processes value in prev_value_to_append based on currentmode
     -Parses and returns next value_to_append for next round
     '''
@@ -231,7 +231,7 @@ def _finish_value(valuestr, currentmode, prev_value_to_append, data):
         # duplicate format: push previous number (or diff) n times
         elif currentmode == 3:
             if prev_value_to_append is None:
-                warn("Parse error: DUP entry without preceding value")
+                warn("Parse error : DUP entry without preceding value")
                 return None, False
             dupcount = int(valuestr)
             for _i in range(dupcount):
@@ -292,8 +292,8 @@ def _parse_pseudo(datalines):
                         valuechar = _DUP_DIGITS[char]
                         newmode = 3
                     except KeyError:
-                        warn("Unknown pseudo-digit: " +
-                             char + " at line: " + dataline)
+                        warn("Unknown pseudo-digit : " +
+                             char + " at line : " + dataline)
                         return None
 
             # finish previous number
@@ -373,7 +373,7 @@ def _parse_data(datastring):
 
 def get_is_ntuples(dic):
     '''
-    Determine data class from dic: XYDATA or NTUPLES
+    Determine data class from dic : XYDATA or NTUPLES
     '''
     is_ntuples = False  # default is XYDATA
     try:
@@ -444,9 +444,9 @@ def _getdataarray(dic):
                 else:
                     rdatalist.append(data)
             if len(rdatalist) > 1:
-                warn("NTUPLES: multiple real arrays, returning first one only")
+                warn("NTUPLES : multiple real arrays, returning first one only")
             if len(idatalist) > 1:
-                warn("NTUPLES: multiple imaginary arrays, \
+                warn("NTUPLES : multiple imaginary arrays, \
                      returning first one only")
             if rdatalist:
                 if idatalist:
@@ -472,7 +472,7 @@ def _getdataarray(dic):
     if is_ntuples:
         yfactor_r, yfactor_i = find_yfactors(dic)
         if yfactor_r is None or yfactor_r is None:
-            warn("NTUPLES: YFACTORs not applied, parsing failed")
+            warn("NTUPLES : YFACTORs not applied, parsing failed")
         else:
             data[0] = data[0] * yfactor_r
             data[1] = data[1] * yfactor_i
@@ -535,7 +535,7 @@ def read(filename):
 
 def _find_firstx_lastx(dic):
     '''
-    Helper for guess_udic: seeks firstx and lastx for
+    Helper for guess_udic : seeks firstx and lastx for
     sweep calculation. Also returns True/False if the
     data was in ppm.
     '''

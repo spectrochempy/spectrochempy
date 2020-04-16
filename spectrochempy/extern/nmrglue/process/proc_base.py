@@ -23,7 +23,7 @@ def em(data, lb=0.0, inv=False, rev=False):
     """
     Exponential apodization
 
-    Functional form of apodization window:
+    Functional form of apodization window :
 
     .. math::
         em(x_i) = \\exp(-pi * i * lb)
@@ -61,12 +61,12 @@ def gm(data, g1=0.0, g2=0.0, g3=0.0, inv=False, rev=False):
     """
     Lorentz-to-Gauss apodization
 
-    Functional form of apodization window:
+    Functional form of apodization window :
 
     .. math::
         gm(x_i) = \\exp(e - g^2)
 
-    Where:
+    Where :
 
     .. math::
         e = pi * i * g1 \\\\
@@ -108,7 +108,7 @@ def gmb(data, a=0.0, b=0.0, inv=False, rev=False):
     """
     Modified gaussian apodization
 
-    Functional form of apodization window:
+    Functional form of apodization window :
 
     .. math::
         gmb(x_i) = \\exp(-a * i - b * i^2)
@@ -146,7 +146,7 @@ def jmod(data, e=0.0, off=0.0, end=0.0, inv=False, rev=False):
     """
     Exponentially damped J-modulation apodization
 
-    Functional form of apodization window:
+    Functional form of apodization window :
 
     .. math::
         jmod(x_i) = \\exp(-e) * \\sin(\\frac{pi * off + pi * (end - off) * i}
@@ -188,7 +188,7 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
     """
     Shifted sine-bell apodization
 
-    Functional form of apodization window:
+    Functional form of apodization window :
 
     .. math::
         sp(x_i) = \\sin(\\frac{pi * off + pi * (end - off) * i}
@@ -232,14 +232,14 @@ def tm(data, t1=0.0, t2=0.0, inv=False, rev=False):
     """
     Trapezoid Apodization
 
-    Functional form of apodization:
+    Functional form of apodization :
 
     ============ ================================
     Range        Description
     ============ ================================
     0:t1         Linear increases from 0.0 to 1.0
     t1:size - t2 Flat with value of 1.0
-    -t2:         Linear descrease from 1.0 to 0.0
+    -t2 :         Linear descrease from 1.0 to 0.0
     ============ ================================
 
     Parameters
@@ -281,7 +281,7 @@ def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
     Range        Description
     ============ ========================================
     0:loc        Linear increase/decrease from lHi to 1.0
-    loc:         Linear increase/decrease from 1.0 to rHi
+    loc :         Linear increase/decrease from 1.0 to rHi
     ============ ========================================
 
     Parameters
@@ -2347,7 +2347,7 @@ def qart(data, a=0.0, f=0.0):
 
     Returns
     -------
-    ndata: ndarray
+    ndata : ndarray
         Array of NMR data with quadrature artifacts scaled.
 
     """

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -29,7 +29,7 @@ from traitlets import Bool, observe, All, Unicode
 from .ndarray import NDArray
 from .ndmath import NDMath, set_operators
 from ...core import info_, debug_, error_, warning_
-from ...utils import (docstrings, colored_output, NOMASK)
+from ...utils import (docstrings, colored_output, NOMASK, spacing)
 
 
 # ======================================================================================================================
@@ -76,25 +76,30 @@ class Coord(NDMath, NDArray):
 
         Examples
         --------
-        We first import the object from the api:
+        We first import the object from the api :
         >>> from spectrochempy import *
+        
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
         >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
         >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [   1.000,    3.000,    5.000,    7.000,    9.000,   11.000] Hz
+        
         We can take a series of str to create a non numerical but labelled
-        axis:
+        axis :
         >>> tarr = list('abcdef')
         >>> tarr
         ['a', 'b', 'c', 'd', 'e', 'f']
+        
         >>> c1 = Coord(labels=tarr, title='mylabels')
         >>> c1   # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [a, b, c, d, e, f]
+        
         >>> print(c1) # doctest: +NORMALIZE_WHITESPACE
-        title: Mylabels
-        labels: [a b c d e f]
+        title : Mylabels
+        labels : [a b c d e f]
+        
         Some other examples will found in the |userguide|_.
         """
         super(Coord, self).__init__(data, **kwargs)
@@ -126,7 +131,7 @@ class Coord(NDMath, NDArray):
         """bool - Whether the axis is reversed (readonly
         property).
         """
-        if "wavenumber" in self.title.lower() or "ppm" in self.title.lower():
+        if self.units in ['1 / centimeter','ppm']:
             return True
         return False
         ## Return a correct result only if the data are sorted
@@ -189,6 +194,14 @@ class Coord(NDMath, NDArray):
         # Coordinates cannot be masked. Set mask always to NOMASK
         self._mask = NOMASK
 
+    # ..................................................................................................................
+    @property
+    def spacing(self):
+        # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
+        # else return an array of the differents spacings
+        return spacing(self.data) * self.units
+    
+    
     # NDmath methods
 
     # ..................................................................................................................
@@ -219,7 +232,13 @@ class Coord(NDMath, NDArray):
     def swapaxes(self, **kwargs):
         raise NotImplementedError
 
-        
+    
+    # ------------------------------------------------------------------------------------------------------------------
+    # public methods
+    # ------------------------------------------------------------------------------------------------------------------
+    def loc2index(self, loc):
+        return self._loc2index(loc)
+    
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -240,7 +259,7 @@ class Coord(NDMath, NDArray):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
         # dtype must stay first item
-        return ['data', 'labels', 'units', 'meta', 'title', 'name']
+        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'origin']
 
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):
@@ -309,7 +328,8 @@ class Coord(NDMath, NDArray):
         #   'name': "foo", # The name of the changed trait
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
-        debug_(f'changes in Coord: {change.name}')
+        #debug_(f'changes in Coord: {change.name}')
+        pass
 
 
 # ======================================================================================================================

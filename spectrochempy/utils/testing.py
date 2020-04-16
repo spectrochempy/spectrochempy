@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
 # See full LICENSE agreement in the root directory
@@ -17,6 +17,7 @@ __all__ = ["assert_equal",
            "assert_array_equal",
            "assert_array_almost_equal",
            "assert_approx_equal",
+           "assert_raises",
            "raises",
            "catch_warnings",
            "RandomSeedContext",
@@ -40,7 +41,7 @@ from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors.execute import CellExecutionError
 from numpy.testing import (assert_equal, assert_array_equal,
-                           assert_array_almost_equal, assert_approx_equal)
+                           assert_array_almost_equal, assert_approx_equal, assert_raises)
 
 
 #  we defer import in order to avoid importing all the spectroscopy namespace
@@ -186,7 +187,7 @@ class catch_warnings(warnings.catch_warnings):
 
     Use as follows::
 
-        with catch_warnings(MyCustomWarning) as w:
+        with catch_warnings(MyCustomWarning) as w :
             do.something.bad()
         assert len(w) > 0
 
@@ -260,7 +261,8 @@ def example_run(path):
     try:
         print('env', os.environ['CONDA_DEFAULT_ENV'])
     except:
-        debug_('no conda env')
+        pass
+        #debug_('no conda env')
     pipe = None
     try:
         pipe = subprocess.Popen(
@@ -286,7 +288,7 @@ def _compute_rms(x, y):
 def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
     # compare two images saved in files imgpath1 and imgpath2
 
-    from scipy.misc import imread
+    from matplotlib.pyplot import imread
     from skimage.measure import compare_ssim as ssim
 
     # read image
@@ -312,7 +314,7 @@ def _image_compare(imgpath1, imgpath2, REDO_ON_TYPEERROR):
         # this happen sometimes and erratically during testing using
         # pytest-xdist (parallele testing). This is work-around the problem
         if e.args[0] == "unsupported operand type(s) " \
-                        "for -: 'PngImageFile' and 'int'" and not REDO_ON_TYPEERROR:
+                        "for - : 'PngImageFile' and 'int'" and not REDO_ON_TYPEERROR:
             REDO_ON_TYPEERROR = True
             rms = sim = -1
         else:
@@ -329,10 +331,10 @@ def compare_images(imgpath1, imgpath2,
 
     CHECKSIM = (min_similarity is not None)
     SIM = min_similarity if CHECKSIM else 100. - EPSILON
-    MESSSIM = mess = "(similarity: {:.2f}%)".format(sim)
+    MESSSIM = mess = "(similarity : {:.2f}%)".format(sim)
     CHECKRMS = (max_rms is not None and not CHECKSIM)
     RMS = max_rms if CHECKRMS else EPSILON
-    MESSRMS = "(rms: {:.2f})".format(rms)
+    MESSRMS = "(rms : {:.2f})".format(rms)
 
     if sim < 0 or rms < 0:
         message = "Sizes of the images are different"
@@ -403,10 +405,6 @@ def image_comparison(reference=None,
     savedpi : int, optional, default=150
 
         dot per inch of the generated figures
-
-
-    Returns
-    -------
 
     """
 
@@ -498,10 +496,10 @@ def image_comparison(reference=None,
 
                     CHECKSIM = (min_similarity is not None)
                     SIM = min_similarity if CHECKSIM else 100. - EPSILON
-                    MESSSIM = mess = "(similarity: {:.2f}%)".format(sim)
+                    MESSSIM = mess = "(similarity : {:.2f}%)".format(sim)
                     CHECKRMS = (max_rms is not None and not CHECKSIM)
                     RMS = max_rms if CHECKRMS else EPSILON
-                    MESSRMS = "(rms: {:.2f})".format(rms)
+                    MESSRMS = "(rms : {:.2f})".format(rms)
 
                     if sim < 0 or rms < 0:
                         message = "Sizes of the images are different"
@@ -512,9 +510,9 @@ def image_comparison(reference=None,
                     else:
                         message = "different images {}".format(MESSSIM)
 
-                    message += "\n\t reference: {}".format(
+                    message += "\n\t reference : {}".format(
                         os.path.basename(referfile))
-                    message += "\n\t generated: {}\n".format(
+                    message += "\n\t generated : {}\n".format(
                         tmpfile)
 
                     if not message.startswith("identical"):

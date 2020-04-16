@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -12,10 +12,11 @@ This module implements the IRIS class.
 
 """
 __all__ = ['IRIS']
+__dataset_methods__ = []
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.processors.npy import dot
+from spectrochempy.core.dataset.npy import dot
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -34,7 +35,7 @@ class IRIS:
         X : |NDDataset|
             The dataset on which to perform the 2D-IRIS analysis
         param : dict
-            Dict of inversion parameters with the following keys:
+            Dict of inversion parameters with the following keys :
 
             *   'custom_kernel': a two-variable lambda function ker(p, eps) where p and eps are the external experimental
                 variable and  the internal physico-chemical parameter, respectively. If not given, one of the
@@ -329,14 +330,14 @@ class IRIS:
         Apply the inversion of the X dataset (m x n) and returns
         the 2D distribution functions `f[i]` obtained for a given
         regularization parameter :math:`\lambda_i` using the following
-        factorization: :math:`X = K.f[i]`.
+        factorization : :math:`X = K.f[i]`.
         :math:`K` is a (m x q) matrix holding the values of the kernel
         function for the m values of the external variable (`p`) and the
         q values of the internal variable (`epsilon`).
-        :math: `f[i]` is the (q x n) matrix holding the values of the
+        :math : `f[i]` is the (q x n) matrix holding the values of the
         2D-distribution function
 
-        Return
+        Returns
         -------
         f : |NDDataset|
             object (l x m x n) containing the l 2D-distribution
@@ -350,11 +351,11 @@ class IRIS:
         """
         Transform data back to the original space
 
-        The following matrix operation is performed: :math:`\hat{X} = K.f[i]`
+        The following matrix operation is performed : :math:`\hat{X} = K.f[i]`
         for each value of the regularization parameter.
 
-        Return
-        ------
+        Returns
+        -------
         X_hat : |NDDataset|
             The reconstructed dataset.
 
@@ -374,7 +375,7 @@ class IRIS:
 
         Parameters
         ----------
-        scale : str, optional, default: 'll'
+        scale : str, optional, default='ll'
             2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
             axes should be log scales.
 

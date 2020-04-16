@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -27,9 +27,9 @@ import numpy as np
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.utils import NOMASK, MASKED, UnitsCompatibilityError
-from spectrochempy.extern.orderedset import OrderedSet
-from spectrochempy.core import warning_, error_
+from ...utils import NOMASK, MASKED, UnitsCompatibilityError
+from ...extern.orderedset import OrderedSet
+from .. import warning_, error_
 
 
 # ..................................................................................................................
@@ -70,66 +70,70 @@ def can_merge_or_align(coord1, coord2):
     return can_merge, can_align
     
 # ............................................................................
-def align(dataset, *datasets, **kwargs):
+def align(dataset, *others, **kwargs):
     """
-    Align individual |NDDataset| or |NDPanel| along given dimensions using various methods
+    Align individual |NDDataset| or |NDPanel| along given dimensions using various methods.
 
     Parameters
     -----------
-    *datasets : |NDDataset| or |NDPanel|.
-        NDDataset or NDPanel objects to align.
+    dataset : |NDDataset|.
+        Dataset on which we want to salign other objects
+    *others : |NDDataset| or |NDPanel|.
+        Objects to align.
         If NDPanel objects are provided, internal datasets will be aligned along the given dimension.
         Aligning more than one panel is not implemented.
-    dim : str. Optional, default: 'x'.
+    dim : str. Optional, default='x'.
         Along which axis to perform the alignment.
-    dims : list of str, optional, default : None
+    dims : list of str, optional, default=None
         Align along all dims defined in dims (if dim or axis is also defined, then dims have higher priority).
-    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'], optional, default: 'outer'
+    method : enum ['outer', 'inner', 'first', 'last', 'interpolate'], optional, default='outer'
         Which method to use for the alignment.
         
-        If align is defined:
+        If align is defined :
         
         * 'outer' means that a union of the different coordinates is achieved (missing values are masked)
         * 'inner' means that the intersection of the coordinates is used
         * 'first' means that the first dataset is used as reference
         * 'last' means that the last dataset is used as reference
         * 'interpolate' means that interpolation is performed relative to the first dataset.
-    interpolate_method : enum ['linear','pchip']. Optional, default:'linear'.
+    interpolate_method : enum ['linear','pchip']. Optional, default='linear'.
         Method of interpolation to performs for the alignment.
-    interpolate_sampling : `auto`, int or float. Optional, default: `auto`.
-        
-        * `auto`: sampling is determined automatically from the existing data.
-        * int:  if an integer values is specified, then the
+    interpolate_sampling : 'auto', int or float. Optional, default='auto'.
+    
+        * 'auto' : sampling is determined automatically from the existing data.
+        * int :  if an integer values is specified, then the
           sampling interval for the interpolated data will be splitted in this number of points.
         * float : If a float value is provided, it determines the interval between the interpolated data
-    coord = |Coord|, optional, default : None
+    coord : |Coord|, optional, default=None
         coordinates to use for alignment. Ignore those corresponding to the dimensions to align
-    copy : bool, optional, default: True
-        If False then the returned objects will share memory with the original objects, whenever it is possible:
+    copy : bool, optional, default=True
+        If False then the returned objects will share memory with the original objects, whenever it is possible :
         in principle only if reindexing is not necessary.
     
     Returns
     --------
-    aligned_datasets : tuple of |NDDataset|s or a |NDPanel|s.
+    aligned_datasets : tuple of |NDDataset| or a |NDPanel|.
         Same objects as datasets with dimensions aligned
 
-    Exceptions
-    ----------
-    ValueError: issued when the dimensions given in `dim` or `dims` argument are not compatibles (units, titles, etc...)
+    Raises
+    ------
+    ValueError
+        issued when the dimensions given in `dim` or `dims` argument are not compatibles (units, titles, etc...)
     
     """
     # TODO: Perform an alignment along numeric labels
+    # TODO: add example in docs
     
     # copy objects?
     copy = kwargs.pop('copy', True)
    
     # make a single list with dataset and the remaining object
-    objects = [dataset] + list(datasets)
+    objects = [dataset] + list(others)
     
     # should we align on given external coordinates
     extern_coord = kwargs.pop('coord', None)
     
-    # what's the method to use (by default: 'outer')
+    # what's the method to use (by default='outer')
     method = kwargs.pop('method','outer')
     
     # trivial cases where alignment is not possible or unecessary

@@ -20,14 +20,14 @@ On Mac OSX system you access to this file by typing in the terminal:
 
 .. sourcecode:: bash
 
-	$ cd ~/.spectrochempy
-	$ open spectrochempy.ini
+    $ cd ~/.spectrochempy
+    $ open spectrochempy.ini
 
 On Linux system, the second command can be replaced by:
 
 .. sourcecode:: bash
 
-	$ vim spectrochempy.ini
+    $ vim spectrochempy.ini
 
 or whatever you prefer to read and edit a text file.
 

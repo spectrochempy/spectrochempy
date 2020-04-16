@@ -364,7 +364,7 @@ def uc_from_freqscale(scale, obs, unit='ppm'):
         array of spectrum axis
     obs : float
         Observation frequency in MHz.
-    unit: {'ppm', 'hz', 'khz'}
+    unit : {'ppm', 'hz', 'khz'}
         The unit of the scale axis.
 
     Returns
@@ -568,7 +568,7 @@ def trace2index_reg(shape, ntrace):
 class data_nd(object):
     """
     Base class for building objects which emulate ndarray objects without
-    loading data into memory.  These object have the following properties:
+    loading data into memory.  These object have the following properties :
 
     * slicing operations return ndarray objects
     * can iterate over with expected results
@@ -580,9 +580,9 @@ class data_nd(object):
     -----
 
     Classes which are use this class as a base should define the following
-    methods:
+    methods :
 
-    __init__ which must set up the object and defines at minimum:
+    __init__ which must set up the object and defines at minimum :
 
         self.fshape : tuple
             Shape of the data on disk, the shape when order = (0, 1, 2, ..)
@@ -709,12 +709,12 @@ class data_nd(object):
         Parameters
         ----------
         axes : None, tuple or ints, or `n` ints
-            * None or no arguments: reverse order of the axes
+            * None or no arguments : reverse order of the axes
 
-            * tuple of ints: `i` in the `j`-th place in the tuples means the
+            * tuple of ints : `i` in the `j`-th place in the tuples means the
             'i'-th axis becomes the new objects `j`-th axis.
 
-            * `n` ints: same as an n-tuple.
+            * `n` ints : same as an n-tuple.
 
         Returns
         -------

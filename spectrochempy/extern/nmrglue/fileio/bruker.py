@@ -62,7 +62,7 @@ def guess_udic(dic, data, strip_fake=False):
         Dictionary of Bruker parameters.
     data : ndarray
         Array of NMR data.
-    strip_fake: bool
+    strip_fake : bool
         If data is proceed (i.e. read using `bruker.read_pdata`) and the Bruker
         processing parameters STSI and/or STSR are set, the returned sweep
         width and carrier frequencies is changed to values that are incorrect
@@ -88,7 +88,7 @@ def guess_udic(dic, data, strip_fake=False):
         try:
             add_axis_to_udic(udic, dic, b_dim, strip_fake)
         except:
-            warn("Failed to determine udic parameters for dim: %i" % (b_dim))
+            warn("Failed to determine udic parameters for dim : %i" % (b_dim))
     return udic
 
 
@@ -104,7 +104,7 @@ def add_axis_to_udic(udic, dic, udim, strip_fake):
         Bruker dictionary used to determine axes parameters.
     dim : int
         Universal dictionary dimension to update.
-    strip_fake: bool
+    strip_fake : bool
         See `bruker.guess_udic`
 
     """
@@ -1534,7 +1534,7 @@ def read_binary_lowmem(filename, shape=(1), cplex=True, big=True,
 
     See Also
     --------
-    read_binary: Read Bruker binary file.
+    read_binary : Read Bruker binary file.
 
     """
     # create dictionary
@@ -1831,95 +1831,95 @@ def uncomplexify_data(data_in, isfloat):
 # http://sbtools.uchc.edu/help/nmr/nmr_toolkit/bruker_dsp_table.asp
 
 # The rounding in the above tables appear to be based on k / (2*DECIM)
-# for example 2 : 44.75   = 44 + 3/4
-#             4 : 66.625  = 66 + 5/8
-#             8 : 68.563 ~= 68 + 9/16 = 68.5625
+# for example 2: 44.75   = 44 + 3/4
+#             4: 66.625  = 66 + 5/8
+#             8: 68.563 ~= 68 + 9/16 = 68.5625
 # Using this the un-rounded table was created by checking possible unrounded
 # fracions which would round to those in the original table.
 
 bruker_dsp_table = {
     10: {
-        2    : 44.75,
-        3    : 33.5,
-        4    : 66.625,
-        6    : 59.083333333333333,
-        8    : 68.5625,
-        12   : 60.375,
-        16   : 69.53125,
-        24   : 61.020833333333333,
-        32   : 70.015625,
-        48   : 61.34375,
-        64   : 70.2578125,
-        96   : 61.505208333333333,
-        128  : 70.37890625,
-        192  : 61.5859375,
-        256  : 70.439453125,
-        384  : 61.626302083333333,
-        512  : 70.4697265625,
-        768  : 61.646484375,
-        1024 : 70.48486328125,
-        1536 : 61.656575520833333,
-        2048 : 70.492431640625,
+        2   : 44.75,
+        3   : 33.5,
+        4   : 66.625,
+        6   : 59.083333333333333,
+        8   : 68.5625,
+        12  : 60.375,
+        16  : 69.53125,
+        24  : 61.020833333333333,
+        32  : 70.015625,
+        48  : 61.34375,
+        64  : 70.2578125,
+        96  : 61.505208333333333,
+        128 : 70.37890625,
+        192 : 61.5859375,
+        256 : 70.439453125,
+        384 : 61.626302083333333,
+        512 : 70.4697265625,
+        768 : 61.646484375,
+        1024: 70.48486328125,
+        1536: 61.656575520833333,
+        2048: 70.492431640625,
     },
     11: {
-        2    : 46.,
-        3    : 36.5,
-        4    : 48.,
-        6    : 50.166666666666667,
-        8    : 53.25,
-        12   : 69.5,
-        16   : 72.25,
-        24   : 70.166666666666667,
-        32   : 72.75,
-        48   : 70.5,
-        64   : 73.,
-        96   : 70.666666666666667,
-        128  : 72.5,
-        192  : 71.333333333333333,
-        256  : 72.25,
-        384  : 71.666666666666667,
-        512  : 72.125,
-        768  : 71.833333333333333,
-        1024 : 72.0625,
-        1536 : 71.916666666666667,
-        2048 : 72.03125
+        2   : 46.,
+        3   : 36.5,
+        4   : 48.,
+        6   : 50.166666666666667,
+        8   : 53.25,
+        12  : 69.5,
+        16  : 72.25,
+        24  : 70.166666666666667,
+        32  : 72.75,
+        48  : 70.5,
+        64  : 73.,
+        96  : 70.666666666666667,
+        128 : 72.5,
+        192 : 71.333333333333333,
+        256 : 72.25,
+        384 : 71.666666666666667,
+        512 : 72.125,
+        768 : 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125
     },
     12: {
-        2    : 46.,
-        3    : 36.5,
-        4    : 48.,
-        6    : 50.166666666666667,
-        8    : 53.25,
-        12   : 69.5,
-        16   : 71.625,
-        24   : 70.166666666666667,
-        32   : 72.125,
-        48   : 70.5,
-        64   : 72.375,
-        96   : 70.666666666666667,
-        128  : 72.5,
-        192  : 71.333333333333333,
-        256  : 72.25,
-        384  : 71.666666666666667,
-        512  : 72.125,
-        768  : 71.833333333333333,
-        1024 : 72.0625,
-        1536 : 71.916666666666667,
-        2048 : 72.03125
+        2   : 46.,
+        3   : 36.5,
+        4   : 48.,
+        6   : 50.166666666666667,
+        8   : 53.25,
+        12  : 69.5,
+        16  : 71.625,
+        24  : 70.166666666666667,
+        32  : 72.125,
+        48  : 70.5,
+        64  : 72.375,
+        96  : 70.666666666666667,
+        128 : 72.5,
+        192 : 71.333333333333333,
+        256 : 72.25,
+        384 : 71.666666666666667,
+        512 : 72.125,
+        768 : 71.833333333333333,
+        1024: 72.0625,
+        1536: 71.916666666666667,
+        2048: 72.03125
     },
     13: {
-        2    : 2.75,
-        3    : 2.8333333333333333,
-        4    : 2.875,
-        6    : 2.9166666666666667,
-        8    : 2.9375,
-        12   : 2.9583333333333333,
-        16   : 2.96875,
-        24   : 2.9791666666666667,
-        32   : 2.984375,
-        48   : 2.9895833333333333,
-        64   : 2.9921875,
-        96   : 2.9947916666666667
+        2   : 2.75,
+        3   : 2.8333333333333333,
+        4   : 2.875,
+        6   : 2.9166666666666667,
+        8   : 2.9375,
+        12  : 2.9583333333333333,
+        16  : 2.96875,
+        24  : 2.9791666666666667,
+        32  : 2.984375,
+        48  : 2.9895833333333333,
+        64  : 2.9921875,
+        96  : 2.9947916666666667
     }
 }
 
@@ -2035,7 +2035,7 @@ def rm_dig_filter(
     #    alone.
     # -----------------------------------------------------------------------
 
-    # Case II : post_proc flag is True
+    # Case II: post_proc flag is True
     # 1. In this case, it is assumed that the data is already fourier
     #    transformed
     # 2. A first order phase correction equal to 2*PI*GRPDLY is applied to the
@@ -2213,7 +2213,7 @@ def write_jcamp(dic, filename, overwrite=False):
     within JCAMP-DX specification.  Finally long floating point values
     may loose precision when writing.
 
-    For example:
+    For example :
 
         ##$QS= (0..7)83 83 83 83 83 83 83 22
 
@@ -2336,7 +2336,7 @@ def read_pprog(filename):
     """
     Read a Bruker pulse program (pulseprogram) file.
 
-    Resultsing dictionary contains the following keys:
+    Resultsing dictionary contains the following keys :
 
     ========    ===========================================================
     key         description

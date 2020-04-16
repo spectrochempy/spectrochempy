@@ -40,7 +40,7 @@ def read_table(filename):
     -------
     pcomments : list
         List of NMRPipe comment lines
-    pformat: list
+    pformat : list
         List of NMRPipe table column format strings.
     rec : recarray
         Records array with named fields.
@@ -94,13 +94,13 @@ def write_table(filename, pcomments, pformats, rec, overwrite=False):
     ----------
     filename : str
         Filename of file to write to.
-    pcomments: list
+    pcomments : list
         List of NMRPipe comment lines.
     pformats :
         List of NMRPipe table column formats strings.
     rec : recarray
         Records array of table.
-    overwrite: bool, optional
+    overwrite : bool, optional
         True to overwrite file if it exists, False will raise a Warning if the
         file exists.
 
@@ -537,7 +537,7 @@ def read(filename):
         return read_3D(filemask)
     if order == 4:
         return read_4D(filemask)
-    raise ValueError('unknown dimensionality: %s' % order)
+    raise ValueError('unknown dimensionality : %s' % order)
 
 
 def read_lowmem(filename):
@@ -585,7 +585,7 @@ def read_lowmem(filename):
     if order == 4:
         return read_lowmem_4D(filemask)
 
-    raise ValueError('unknown dimentionality: %s' % order)
+    raise ValueError('unknown dimentionality : %s' % order)
 
 
 # dimension specific reading
@@ -890,7 +890,7 @@ def write_lowmem(filename, dic, data, overwrite=False):
         else:
             return write_lowmem_4Ds(filename, dic, data, overwrite)
 
-    raise ValueError('unknown dimensionality: %s' % data.ndim)
+    raise ValueError('unknown dimensionality : %s' % data.ndim)
 
 
 def write_lowmem_2D(filename, dic, data, overwrite=False):
@@ -1079,7 +1079,7 @@ def write_slice_3D(filemask, dic, data, shape, slices):
         3D array of NMR data.
     shape : tuple
         Tuple of 3 integers indicating the overall matrix shape.
-    (sz, sy, sx) : slices
+    (sz, sy, sx): slices
         Slice objects which specify the location of the to be written data.
 
     Notes
@@ -1242,7 +1242,7 @@ class iter3D(object):
 
     When processing 3D files with iter3D object(s) the following dictionary
     parameters may not have the same values as NMRPipe processing scripts
-    return:
+    return :
 
     * FDSLICECOUNT
     * FDMAX,FDDISMAX,FDMIN,FDDISPMIN when FDSCALEFLAG == 0
@@ -1251,11 +1251,11 @@ class iter3D(object):
 
         #3D data processing
         xiter = iter3D("data/test%03d.fid","x","x")
-        for dic,YXplane in xiter:
+        for dic,YXplane in xiter :
             # process X and Y axis
             xiter.write("ft/test%03d.ft2",YXplane,dic)
         ziter = iter3D("ft/test%03d.ft2","z","z")
-        for dic,XZplane in ziter:
+        for dic,XZplane in ziter :
             # process Z axis
             ziter.write("ft/test%03d.ft3",XZplane,dic)
 
@@ -1815,7 +1815,7 @@ class pipe_3d(fileiobase.data_nd):
         if fcheck:
             for i in range(1, lenZ + 1):
                 if os.path.exists(filemask % i) is False:
-                    raise IOError("File not found: " + str(filemask % i))
+                    raise IOError("File not found : " + str(filemask % i))
 
         # check last axis quadrature
         fn = "FDF" + str(int(dic["FDDIMORDER1"]))
@@ -2033,7 +2033,7 @@ class pipe_4d(fileiobase.data_nd):
                     else:
                         fname = filemask % (ai + 1, zi + 1)
                     if os.path.exists(fname) is False:
-                        raise IOError("File not found: " + str(fname))
+                        raise IOError("File not found : " + str(fname))
 
         # check last axis quadrature
         fn = "FDF" + str(int(dic["FDDIMORDER1"]))

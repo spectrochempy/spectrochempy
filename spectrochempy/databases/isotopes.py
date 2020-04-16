@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -68,12 +68,12 @@ class Isotopes(HasTraits):
 
     How to use it?
 
-    after the |scpy| has been loaded:
+    after the |scpy| has been loaded :
 
     >>> from spectrochempy import *
 
 
-    one can use:
+    one can use :
 
     >>> isotope = Isotopes('129Xe')
     >>> isotope.name

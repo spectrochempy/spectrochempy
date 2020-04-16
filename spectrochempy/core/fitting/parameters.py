@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -139,7 +139,7 @@ class FitParameters(UserDict):
 
             keystring = key.split('_')[0]
             if self.reference[key]:
-                return "\t> %s: %s \n" % (keystring, self.data[key])
+                return "\t> %s:%s \n" % (keystring, self.data[key])
             else:
                 if self.fixed[key]:
                     keystring = "\t* %s" % keystring
@@ -194,7 +194,7 @@ class FitParameters(UserDict):
 
         Parameters
         ----------
-        strg: string
+        strg : string
             A string to evaluate containing multiplier,
             e.g., '10 k' evaluate to 10 000.
 
@@ -389,7 +389,7 @@ class ParameterScript(HasTraits):
             s = line.split(':')
             if len(s) != 2:
                 raise ValueError(
-                    'Cannot interpret line %d : A semi-column is missing?' % lc)
+                    'Cannot interpret line %d: A semi-column is missing?' % lc)
 
             key, values = s
             key = key.strip().lower()

@@ -24,7 +24,7 @@ def autops(data, fn, p0=0.0, p1=0.0):
         Array of NMR data.
     fn : str or function
         Algorithm to use for phase scoring. Built in functions can be
-        specified by one of the following strings: "acme", "peak_minima"
+        specified by one of the following strings : "acme", "peak_minima"
     p0 : float
         Initial zero order phase in degrees.
     p1 : float

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -15,7 +15,7 @@ This module implement the NNMF (Non Negative Matrix Factorization) class
 
 __all__ = ['NNMF']
 
-__dataset_methods__ = ['NNMF']
+__dataset_methods__ = []
 
 import numpy as np
 from numpy.linalg import norm
@@ -29,21 +29,21 @@ class NNMF(HasTraits):
     """
     Performs a Non Negative Matrix Factorization of a |NDDataset|.
 
-    Algorithm based on:
+    Algorithm based on :
 
     NMF by alternative non-negative least squares using projected gradients
-    Author: Chih-Jen Lin, National Taiwan University
-    Python/numpy translation: Anthony Di Franco (Licence ???)
+    Author : Chih-Jen Lin, National Taiwan University
+    Python/numpy translation : Anthony Di Franco (Licence ???)
 
     """
 
     def __init__(self, X, Ci, Sti, **kwargs):
         """
         self.C, self.St = nnmf(X, Ci, Sti,**kwargs)
-        C,St: output solution
-        Ci,Sti: initial solution
-        kwargs['tol']: tolerance for a relative stopping condition
-        kwargs['maxtime'], kwargs['maxit']: limit of time and iterations
+        C,St : output solution
+        Ci,Sti : initial solution
+        kwargs['tol'] : tolerance for a relative stopping condition
+        kwargs['maxtime'], kwargs['maxit'] : limit of time and iterations
         """
         tol = kwargs.get('tol', 0.1)
 
@@ -67,20 +67,20 @@ class NNMF(HasTraits):
     def nmf(V, Winit, Hinit, tol, timelimit, maxiter):
         """
         (W,H) = nmf(V,Winit,Hinit,tol,timelimit,maxiter)
-        W,H: output solution
-        Winit,Hinit: initial solution
-        tol: tolerance for a relative stopping condition
-        timelimit, maxiter: limit of time and iterations
+        W,H : output solution
+        Winit,Hinit : initial solution
+        tol : tolerance for a relative stopping condition
+        timelimit, maxiter : limit of time and iterations
         """
 
         def nlssubprob(V, W, Hinit, tol, maxiter):
             """
-            H, grad: output solution and gradient
-            iter: #iterations used
-            V, W: constant matrices
-            Hinit: initial solution
-            tol: stopping tolerance
-            maxiter: limit of iterations
+            H, grad : output solution and gradient
+            iter : #iterations used
+            V, W : constant matrices
+            Hinit : initial solution
+            tol : stopping tolerance
+            maxiter : limit of iterations
             """
 
             H = Hinit

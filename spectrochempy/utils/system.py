@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -13,7 +13,7 @@
 __all__ = ['get_user_and_node',
            'get_user',
            'get_node',
-           'is_kernel'
+           'is_kernel',
            ]
 
 import getpass
@@ -47,3 +47,4 @@ def is_kernel():
     from IPython import get_ipython
     # check for `kernel` attribute on the IPython instance
     return getattr(get_ipython(), 'kernel', None) is not None
+

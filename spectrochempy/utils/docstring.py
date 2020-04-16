@@ -2,13 +2,13 @@
 
 We use the docrep_ package for managing our docstrings
 
-.. _docrep: http://docrep.readthedocs.io/en/latest/
+.. _docrep : http://docrep.readthedocs.io/en/latest/
 
 (this module is copied from psyplot)
 
 """
 
-from spectrochempy.extern.docrep import DocstringProcessor, dedents, safe_modulo
+from spectrochempy.extern.docrep import DocstringProcessor, dedents
 
 __all__ = ['docstrings', 'dedent', 'dedents', 'indent', 'append_original_doc']
 
@@ -19,7 +19,7 @@ def dedent(func):
 
     Parameters
     ----------
-    func: function
+    func : function
         function with the documentation to dedent"""
     func.__doc__ = func.__doc__ and dedents(func.__doc__)
     return func
@@ -97,10 +97,10 @@ docstrings.get_sections(docstrings.dedents(
     dim : int or str, optional, default=0
         Dimension name or index along which the method should be applied.
     dims : int, str or tuple of int or str, optional, default=(0,)
-        Dimension names or indexes along which the method should be applied.    
-    axis : int, optional, default: -1
+        Dimension names or indexes along which the method should be applied.
+    axis : int, optional, default=-1
         Dimension index along which the method should be applied.
-    inplace : bool, optional, default= `False`
+    inplace : bool, optional, default=`False`
         Flag to say that the method return a new object (default)
         or not (inplace=True)
     
@@ -109,7 +109,7 @@ docstrings.get_sections(docstrings.dedents(
     
     Returns
     -------
-    object 
+    object
         Same object or a copy depending on the `inplace` flag.
     
     """

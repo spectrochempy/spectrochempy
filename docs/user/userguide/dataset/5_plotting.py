@@ -1,11 +1,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.2'
-#       jupytext_version: 1.0.5
+#       format_version: '1.3'
+#       jupytext_version: 1.4.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -18,7 +19,7 @@
 # %% [markdown]
 # <div class='alert alert-info'>
 #
-# **NOTE** : By default, all matplolib figures will be plotted **inline** in this notebook. 
+# **NOTE**: By default, all matplolib figures will be plotted **inline** in this notebook. 
 # to change this behaviour, uncomment (which means: remove the #) the next line (which must be placed before importing the  ``spectrochempy.api`` library!
 #
 # </div>

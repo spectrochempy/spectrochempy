@@ -3,20 +3,14 @@
 numpy
 matplotlib
 traitlets
-pint
+pint==0.9
 quaternion
 quadprog
-
+cvxopt
 # some other useful package
 xarray
-bokeh
-holoviews
 datashader
-param
 dask
-intake
-intake-parquet
-s3fs
 pandas
 xlrd
 requests
@@ -46,13 +40,13 @@ pytest-console-scripts
 scikit-image
 
 # for docs
-sphinx
+sphinx==1.8.5
 sphinx_rtd_theme
 sphinx-gallery
-numpydoc
 nbsphinx
 jupyter_sphinx
 nbconvert
+numpydoc==0.8
 
 # conda recipes
 conda-build

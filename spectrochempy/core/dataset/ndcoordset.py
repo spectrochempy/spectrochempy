@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -75,13 +75,13 @@ class CoordSet(HasTraits):
             It is assumed that the coordinates are passed in the order of the
             dimensions of a nD numpy array (
             `row-major <https://docs.scipy.org/doc/numpy-1.14.1/glossary.html#term-row-major>`_
-            order), i.e., for a 3d object: 'z', 'y', 'x'.
+            order), i.e., for a 3d object : 'z', 'y', 'x'.
         x : |NDarray|, |NDArray| subclass or |CoordSet|
             A single coordinate associated to the 'x'-dimension.
             If a coord was already passed in the argument, this will overwrite
             the previous. It is thus not recommended to simultaneously use
             both way to initialize the coordinates to avoid such conflicts.
-        y, z, u, ...: |NDarray|, |NDArray| subclass or |CoordSet|
+        y, z, u, ... : |NDarray|, |NDArray| subclass or |CoordSet|
             Same as `x` for the others dimensions.
         is_same_dim : bool, optional, default:False
             if true, all elements of coords describes a single dimension.
@@ -186,7 +186,7 @@ class CoordSet(HasTraits):
                 
                 else:
                     raise KeyError(f'Probably an invalid key (`{key}`) for coordinates has been passed. '
-                                   f'Valid keys are among :{DEFAULT_DIM_NAME}')
+                                   f'Valid keys are among:{DEFAULT_DIM_NAME}')
                 
             else:
                 raise ValueError(f'Probably an invalid type of coordinates has been passed: {key}:{coord} ')
@@ -507,7 +507,7 @@ class CoordSet(HasTraits):
         
         Notes
         -----
-        If the args are not named, then the attributions are made in coordinate's  name alhabetical order:
+        If the args are not named, then the attributions are made in coordinate's  name alhabetical order :
         e.g, the first title will be for the `x` coordinates, the second for the `y`, etc.
         
         Parameters
@@ -519,7 +519,7 @@ class CoordSet(HasTraits):
             keyword attribution of the titles. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set titles as this will be less prone to errors.
             
-        Exemples
+        Examples
         --------
 
         """
@@ -544,7 +544,7 @@ class CoordSet(HasTraits):
         
         Notes
         -----
-        If the args are not named, then the attributions are made in coordinate's name alhabetical order:
+        If the args are not named, then the attributions are made in coordinate's name alhabetical order :
         e.g, the first units will be for the `x` coordinates, the second for the `y`, etc.
         
         Parameters
@@ -555,7 +555,7 @@ class CoordSet(HasTraits):
         kwargs : str
             keyword attribution of the units. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set units as this will be less prone to errors.
-        force: bool, optional, default=False
+        force : bool, optional, default=False
             whether or not the new units must be compatible with the current units. See the `Coord`.`to` method.
             
         Examples
@@ -589,7 +589,7 @@ class CoordSet(HasTraits):
         
         Returns
         -------
-        out: dict
+        out : dict
             A dictionary where keys are the names of the coordinates, and the values the coordinates themselves
             
         """
@@ -1021,7 +1021,7 @@ class CoordSet(HasTraits):
         #   'name': "foo", # The name of the changed trait
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
-        debug_('changes in CoordSet: %s to %s' % (change.name, change.new))
+        #debug_('changes in CoordSet: %s to %s' % (change.name, change.new))
         if change.name == '_updated' and change.new:
             self._updated = False  # reset
 

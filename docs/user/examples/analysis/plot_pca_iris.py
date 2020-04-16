@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -47,4 +47,4 @@ _ = pca.scoreplot(1, 2, color_mapping='labels')
 # or in 3D for 3 PC's
 _ = pca.scoreplot(1, 2, 3, color_mapping='labels')
 
-#show() # uncomment to show plot if needed()
+scp.show() # uncomment to show plot if needed()

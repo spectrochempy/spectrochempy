@@ -44,18 +44,18 @@ def safe_modulo(s, meta, checked='', print_warning=True, stacklevel=2):
 
     Parameters
     ----------
-    s: str
+    s : str
         string to apply the modulo operation with
-    meta: dict or tuple
+    meta : dict or tuple
         meta informations to insert (usually via ``s % meta``)
-    checked: {'KEY', 'VALUE'}, optional
+    checked : {'KEY', 'VALUE'}, optional
         Security parameter for the recursive structure of this function. It can
         be set to 'VALUE' if an error shall be raised when facing a TypeError
         or ValueError or to 'KEY' if an error shall be raised when facing a
         KeyError. This parameter is mainly for internal processes.
-    print_warning: bool
+    print_warning : bool
         If True and a key is not existent in `s`, a warning is raised
-    stacklevel: int
+    stacklevel : int
         The stacklevel for the :func:`warnings.warn` function
 
 
@@ -65,15 +65,15 @@ def safe_modulo(s, meta, checked='', print_warning=True, stacklevel=2):
 
         >>> from docrep import safe_modulo
         >>> s = "That's %(one)s string %(with)s missing 'with' and %s key"
-        >>> s % {'one': 1}          # raises KeyError because of missing 'with'
+        >>> s % {'one' : 1}          # raises KeyError because of missing 'with'
         Traceback (most recent call last):
           File "<stdin>", line 1, in <module>
-        KeyError: 'with'
-        >>> s % {'one': 1, 'with': 2}        # raises TypeError because of '%s'
+        KeyError : 'with'
+        >>> s % {'one' : 1, 'with' : 2}        # raises TypeError because of '%s'
         Traceback (most recent call last):
           File "<stdin>", line 1, in <module>
-        TypeError: not enough arguments for format string
-        >>> safe_modulo(s, {'one': 1})
+        TypeError : not enough arguments for format string
+        >>> safe_modulo(s, {'one' : 1})
         "That's 1 string %(with)s missing 'with' and %s key"
     """
     try:
@@ -138,9 +138,9 @@ class DocstringProcessor(object):
         ...
         ...     Parameters
         ...     ----------
-        ...     a: int, optional
+        ...     a : int, optional
         ...         A dummy parameter description
-        ...     b: int, optional
+        ...     b : int, optional
         ...         A second dummy parameter
         ...
         ...     Examples
@@ -169,9 +169,9 @@ class DocstringProcessor(object):
         <BLANKLINE>
         Parameters
         ----------
-        a: int, optional
+        a : int, optional
             A dummy parameter description
-        b: int, optional
+        b : int, optional
             A second dummy parameter
         <BLANKLINE>
 
@@ -187,7 +187,7 @@ class DocstringProcessor(object):
         ...
         ...     Parameters
         ...     ----------
-        ...     a: int, optional
+        ...     a : int, optional
         ...         A dummy parameter description'''
         ...     print(a)
 
@@ -272,14 +272,14 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        func: function
+        func : function
             function with the documentation whose sections
             shall be inserted from the :attr:`params` attribute
 
         See Also
         --------
-        dedent: also dedents the doc
-        with_indent: also indents the doc"""
+        dedent : also dedents the doc
+        with_indent : also indents the doc"""
         doc = func.__doc__ and safe_modulo(func.__doc__, self.params,
                                            stacklevel=3)
         return self._set_object_doc(func, doc)
@@ -294,11 +294,11 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             Docstring to split
-        base: str
+        base : str
             base to use in the :attr:`sections` attribute
-        sections: list of str
+        sections : list of str
             sections to look for. Each section must be followed by a newline
             character ('\\n') and a bar of '-' (following the numpy (napoleon)
             docstring conventions).
@@ -314,9 +314,9 @@ class DocstringProcessor(object):
 
         See Also
         --------
-        delete_params, keep_params, delete_types, keep_types, delete_kwargs:
+        delete_params, keep_params, delete_types, keep_types, delete_kwargs :
             For manipulating the docstring sections
-        save_docstring:
+        save_docstring :
             for saving an entire docstring
         """
         params = self.params
@@ -391,7 +391,7 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        func: function
+        func : function
             function with the documentation to dedent and whose sections
             shall be inserted from the :attr:`params` attribute"""
         doc = func.__doc__ and self.dedents(func.__doc__, stacklevel=4)
@@ -403,10 +403,10 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             string to dedent and insert the sections of the :attr:`params`
             attribute
-        stacklevel: int
+        stacklevel : int
             The stacklevel for the warning raised in :func:`safe_module` when
             encountering an invalid key in the string"""
         s = dedents(s)
@@ -418,7 +418,7 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        indent: int
+        indent : int
             The number of spaces that the substitution should be indented
 
         Returns
@@ -444,11 +444,11 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The string in which to substitute
-        indent: int
+        indent : int
             The number of spaces that the substitution should be indented
-        stacklevel: int
+        stacklevel : int
             The stacklevel for the warning raised in :func:`safe_module` when
             encountering an invalid key in the string
 
@@ -483,7 +483,7 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        base_key: str
+        base_key : str
             key in the :attr:`params` dictionary
         ``*params``
             str. Parameter identifier of which the documentations shall be
@@ -506,9 +506,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The string of the parameters section
-        params: list of str
+        params : list of str
             The names of the parameters to delete
 
         Returns
@@ -536,11 +536,11 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        base_key: str
+        base_key : str
             The key in the :attr:`params` attribute to use
-        args: None or str
+        args : None or str
             The string for the args to delete
-        kwargs: None or str
+        kwargs : None or str
             The string for the kwargs to delete
 
         Notes
@@ -566,11 +566,11 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The string to delete the args and kwargs from
-        args: None or str
+        args : None or str
             The string for the args to delete
-        kwargs: None or str
+        kwargs : None or str
             The string for the kwargs to delete
 
         Notes
@@ -602,9 +602,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        base_key: str
+        base_key : str
             key in the :attr:`params` dictionary
-        out_key: str
+        out_key : str
             Extension for the base key (the final key will be like
             ``'%s.%s' % (base_key, out_key)``
         ``*types``
@@ -626,9 +626,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The string of the returns like section
-        types: list of str
+        types : list of str
             The type identifiers to delete
 
         Returns
@@ -655,7 +655,7 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        base_key: str
+        base_key : str
             key in the :attr:`params` dictionary
         ``*params``
             str. Parameter identifier of which the documentations shall be
@@ -679,11 +679,11 @@ class DocstringProcessor(object):
             ...
             ...     Parameters
             ...     ----------
-            ...     a: int, optional
+            ...     a : int, optional
             ...         A dummy parameter description
-            ...     b: int, optional
+            ...     b : int, optional
             ...         A second dummy parameter that will be excluded
-            ...     c: float, optional
+            ...     c : float, optional
             ...         A third parameter'''
             ...     print(a)
 
@@ -704,9 +704,9 @@ class DocstringProcessor(object):
             <BLANKLINE>
             Parameters
             ----------
-            a: int, optional
+            a : int, optional
                 A dummy parameter description
-            c: float, optional
+            c : float, optional
                 A third parameter
 
         Equivalently, you can use the :meth:`delete_params` method to remove
@@ -738,9 +738,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The string of the parameters like section
-        params: list of str
+        params : list of str
             The parameter names to keep
 
         Returns
@@ -763,9 +763,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        base_key: str
+        base_key : str
             key in the :attr:`params` dictionary
-        out_key: str
+        out_key : str
             Extension for the base key (the final key will be like
             ``'%s.%s' % (base_key, out_key)``
         ``*types``
@@ -845,9 +845,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The string of the returns like section
-        types: list of str
+        types : list of str
             The type identifiers to keep
 
         Returns
@@ -880,9 +880,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The docstring to use
-        base: str or None
+        base : str or None
             A key under which the summary shall be stored in the :attr:`params`
             attribute. If not None, the summary will be stored in
             ``base + '.summary'``. Otherwise, it will not be stored at all
@@ -926,9 +926,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The docstring to use
-        base: str or None
+        base : str or None
             A key under which the summary shall be stored in the :attr:`params`
             attribute. If not None, the summary will be stored in
             ``base + '.summary_ext'``. Otherwise, it will not be stored at
@@ -983,9 +983,9 @@ class DocstringProcessor(object):
 
         Parameters
         ----------
-        s: str
+        s : str
             The docstring to use
-        base: str or None
+        base : str or None
             A key under which the description shall be stored in the
             :attr:`params` attribute. If not None, the summary will be stored
             in ``base + '.full_desc'``. Otherwise, it will not be stored

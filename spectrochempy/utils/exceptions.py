@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -61,14 +61,14 @@ def deprecated(message):
 
     Parameters
     ----------
-    message: str,
+    message : str,
         the deprecation message
 
     """
 
     def deprecation_decorator(func):
         def wrapper(*args, **kwargs):
-            warnings.warn("The function `{} is deprecated: {}".format(
+            warnings.warn("The function `{} is deprecated : {}".format(
                 func.__name__, message),
                 SpectroChemPyDeprecationWarning)
             return func(*args, **kwargs)

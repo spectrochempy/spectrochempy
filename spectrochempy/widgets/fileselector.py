@@ -102,10 +102,10 @@ class FileSelector(Base):
         """
         Parameters
         ----------
-        done_callback: function
+        done_callback : function
             Called when the tick or cross buttons are clicked. Expects
             signature func(path, ok=True|False).
-        filters: list of str or None
+        filters : list of str or None
             Only show files ending in one of these strings. Normally used for
             picking file extensions. None is an alias for [''], passes all
             files.

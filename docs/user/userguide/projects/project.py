@@ -2,11 +2,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.0.5
+#       jupytext_version: 1.1.1
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -28,7 +29,7 @@ import os
 proj = Project()
 
 # %% [markdown]
-# As we did not specify a name, a name has been attributed automatically : 
+# As we did not specify a name, a name has been attributed automatically: 
 
 # %%
 proj.name

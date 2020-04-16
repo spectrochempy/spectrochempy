@@ -8,7 +8,7 @@ What's new
 beta version 
 
 * NDDataset with masks, units, labels and metadata
-* Chemometric methods implemented : PCA, EFA, MCR-ALS, SIMPLISMA
+* Chemometric methods implemented: PCA, EFA, MCR-ALS, SIMPLISMA
 * Imports from OMNIC, MATLAB, BRUKER(NMR only)
 
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -17,13 +17,13 @@ import numpy as np
 
 
 def readXlCellRange(xlFileName, cellRange, sheetNumber=0):
-    """ reads data in a cellrange: A23:AD23 ''"""
+    """ reads data in a cellrange : A23:AD23 ''"""
 
     def colNameToColNumber(L):
         """converts the column alphabetical character designator
         to number, e.g. A -> 0; AD -> 29
 
-        L: str, alphabetical character designator"""
+        L : str, alphabetical character designator"""
 
         number = 0
         for i, l in enumerate(L[::-1]):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -32,15 +32,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, default
-
-try:
-    # if holoview is installed
-    #    import holoviews as hv
-    #    from holoviews import opts
-    HAS_HOLOVIEWS = False
-#    hv.extension('bokeh')
-except:
-    HAS_HOLOVIEWS = False
 
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
@@ -106,12 +97,12 @@ class NDPlot(HasTraits):
             The figure size
         fontsize : int, optional
             The font size in pixels, default is 10 (or read from preferences)
-        clear : `bool`, optional, default = `True`.
+        clear : `bool`, optional, default=`True`.
             Should we plot on the ax previously used or create a new figure?
         style : str
         autolayout : `bool`, optional, default=True
             if True, layout will be set automatically
-        output: str
+        output : str
             A string containing a path to a filename. The output format is deduced
             from the extension of the filename. If the filename has no extension,
             the value of the rc parameter savefig.format is used.
@@ -139,7 +130,7 @@ class NDPlot(HasTraits):
                           SpectroChemPyDeprecationWarning)
 
         method = kwargs.pop('method', method)
-        debug_('Call to plot_{}'.format(method))
+        # debug_('Call to plot_{}'.format(method))
 
         # Find or guess the adequate plotter
         # -----------------------------------
@@ -207,7 +198,7 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     def _figure_setup(self, ndim=1, **kwargs):
 
-        debug_('figure setup')
+        # debug_('figure setup')
 
         # by default we use the matplotlib librairy especially for plotting
         # in the jupyter notebook
@@ -378,7 +369,7 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     def _plot_resume(self, origin, **kwargs):
 
-        debug_('resume plot')
+        # debug_('resume plot')
 
         # put back the axes in the original dataset
         # (we have worked on a copy in plot)
@@ -401,6 +392,11 @@ class NDPlot(HasTraits):
 
         origin._fig = self._fig
 
+        loc = kwargs.get("legend", None)
+        if loc:
+            origin.ndaxes['main'].legend(loc=loc)
+        
+        
         # Additional matplotlib commands on the current plot
         # ---------------------------------------------------------------------
 
@@ -426,7 +422,7 @@ class NDPlot(HasTraits):
         if savename is not None:
             # we save the figure with options found in kwargs
             # starting with `save`
-            debug_('save plot to {}'.format(savename))
+            # debug_('save plot to {}'.format(savename))
             kw = {}
             for key, value in kwargs.items():
                 if key.startswith('save'):
@@ -500,7 +496,7 @@ class NDPlot(HasTraits):
         if isinstance(axes, list):
             # a list a axes have been passed
             for ax in axes:
-                debug_('add axe: {}'.format(ax.name))
+                # debug_('add axe: {}'.format(ax.name))
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)
@@ -576,7 +572,7 @@ class NDPlot(HasTraits):
 def _set_figure_style(**kwargs):
     # set temporarily a new style if any
 
-    debug_('set style')
+    # debug_('set style')
 
     # first, reset to default
     plt.style.use('classic')

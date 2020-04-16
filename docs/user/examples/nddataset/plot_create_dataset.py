@@ -60,7 +60,7 @@ mydataset = scp.NDDataset(nd_data, coords=[coord0, coord1, coord2],
                           title='Absorbance', units='absorbance')
 
 mydataset.description = """Dataset example created for this tutorial. 
-It's a 3-D dataset (with dimensionless intensity : absorbance )"""
+It's a 3-D dataset (with dimensionless intensity: absorbance )"""
 
 mydataset.name = 'An example from scratch'
 
@@ -103,4 +103,4 @@ new.plot(method='stack')
 
 scp.plot_stack(new)
 
-#show() # uncomment to show plot if needed()
+scp.show() # uncomment to show plot if needed()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -17,7 +17,7 @@ This module should be able to handle a large set of plot types.
 
 __all__ = ['plot_3D']
 
-__dataset_methods__ = ['plot_3D']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------
 # local imports
@@ -51,19 +51,19 @@ def plot_3D(dataset, **kwargs):
     #
     # method: str [optional among ``surface``, ... (other to be implemented)..., default=``surface``]
     #
-    # style : str, optional, default = 'notebook'
+    # style: str, optional, default='notebook'
     #     Matplotlib stylesheet (use `available_style` to get a list of available
     #     styles for plotting
     #
-    # reverse: `bool` or None [optional, default = None
+    # reverse: `bool` or None [optional, default=None
     #     In principle, coordinates run from left to right, except for wavenumbers
     #     (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
     #     will try to guess. But if reverse is set, then this is the
     #     setting which will be taken into account.
     #
-    # x_reverse: `bool` or None [optional, default= None
+    # x_reverse: `bool` or None [optional, default=None
     #
-    # kwargs : additional keywords
+    # kwargs: additional keywords
     #
     # {}
     #

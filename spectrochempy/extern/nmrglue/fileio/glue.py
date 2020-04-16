@@ -6,7 +6,7 @@ glue files are HDF5 files with the spectral data stored in a dataset names
 'spectrum' and any parameters stored in the dataset attributes.  At minimum
 the parameter dictionary must contain a ndim key with the dimentionality of
 the data and a dictionry for each axis numbered (0,1,2...) with the following
-keys:
+keys :
 
 ========    =====================================================
 Key         Description

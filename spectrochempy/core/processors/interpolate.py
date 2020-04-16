@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -27,7 +27,7 @@ import numpy as np
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.utils import NOMASK, MASKED, UnitsCompatibilityError
+from ...utils import NOMASK, MASKED, UnitsCompatibilityError
 from spectrochempy.extern.orderedset import OrderedSet
 from spectrochempy.core import warning_, error_
 

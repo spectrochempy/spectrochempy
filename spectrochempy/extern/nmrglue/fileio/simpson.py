@@ -21,7 +21,7 @@ def read(filename, ftype=None, ndim=None, NP=None, NI=None, spe=None):
     filename : str
         Name of SIMPSON file to read data from.
     ftype : {None, 'TEXT', 'BINARY', 'XREIM', 'XYREIM', 'RAWBIN'}, optional
-        A string indicating the type of SIMPSON file:
+        A string indicating the type of SIMPSON file :
 
         ``TEXT`` : SIMPSON text format, no fsave arguments.
 
@@ -150,7 +150,7 @@ def read_text(filename):
             key, value = line.split("=")
             dic[key] = value
         else:
-            warn("Warning, skipping line: %s" % (line))
+            warn("Warning, skipping line : %s" % (line))
 
     # convert float and int keys
     for key in ['SW1', 'SW']:    # convert keys to floats
@@ -322,7 +322,7 @@ def read_binary(filename):
             key, value = line.split("=")
             dic[key] = value
         else:
-            warn("Warning, skipping line: %s" % (line))
+            warn("Warning, skipping line : %s" % (line))
 
     # convert float and int keys
     for key in ['SW1', 'SW']:    # convert keys to floats

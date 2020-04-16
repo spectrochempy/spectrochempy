@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -13,7 +13,7 @@ This module implements the MCRALS class.
 
 __all__ = ['MCRALS']
 
-__dataset_methods__ = ['MCRALS']
+__dataset_methods__ = []
 
 import numpy as np
 from traitlets import HasTraits, Instance
@@ -22,7 +22,7 @@ from collections.abc import Iterable
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
-from spectrochempy.core.processors.npy import dot
+from spectrochempy.core.dataset.npy import dot
 from spectrochempy.core import info_, set_loglevel, INFO
 
 class MCRALS(HasTraits):
@@ -49,11 +49,11 @@ class MCRALS(HasTraits):
         guess : |NDDataset|
             Initial concentration or spectra
         param : dict
-            Dict of optimization parameters with the following keys:
+            Dict of optimization parameters with the following keys :
 
-            *   'tol': float, optional, convergence criterion on the change of resisuals.
+            *   'tol' : float, optional, convergence criterion on the change of resisuals.
                 (percent change of standard deviation of residuals). default=0.1
-            *   'maxit' : maximum number of ALS minimizations. default = 50
+            *   'maxit' : maximum number of ALS minimizations. default=50
             *   'maxdiv' : maximum number of successive non-converging iterations. default=5
             *   'nonnegConc' : array or tuple of index of species having non-negative concentration profiles. For instance
                 [0, 2] indicates that species #0 and #2 have non-negative conc profiles while species #1
@@ -395,10 +395,10 @@ class MCRALS(HasTraits):
         """
         Transform data back to the original space.
 
-        The following matrice operation is performed: :math:`X'_{hat} = C'.S'^t`
+        The following matrice operation is performed : :math:`X'_{hat} = C'.S'^t`
 
-        Return
-        ------
+        Returns
+        -------
         X_hat : |NDDataset|
             The reconstructed dataset based on the MCS-ALS optimization.
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -55,4 +55,4 @@ span = ibc.run(*ranges)
 
 print(ibc.corrected)
 
-#show() # uncomment to show plot if needed()
+scp.show() # uncomment to show plot if needed()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -28,7 +28,7 @@ from numba import jit
 # ----------------------------------------------------------------------------------------------------------------------
 
 import matplotlib.pyplot as plt
-from spectrochempy.core.dataset.ndcoordrange import CoordRange
+from ..dataset.ndcoordrange import CoordRange
 
 
 def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
@@ -46,14 +46,14 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     xrange : pair(s) of values. Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized
 
-    inplace : `bool`, optional, default = False.
+    inplace : `bool`, optional, default=False.
         True if the subtraction is done in place.
         In this case we do not need to catch the function output
 
-    dim : str or int [optional, default = 'x].
+    dim : str or int [optional, default='x].
         Tells on which dimension to perform the subtraction. If dim is an integer it refers to the axis index.
 
-    method  : str [optional, default = 'vardiff'].
+    method : str [optional, default='vardiff'].
 
 
     Returns
@@ -164,6 +164,6 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
         new = new.swapaxes(axis, -1)
 
     new.history = str(
-        new.modified) + ': ' + 'Automatic subtraction of :' + ref.name + '\n'
+        new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'
 
     return new

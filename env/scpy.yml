@@ -1,35 +1,24 @@
 name: scpy
 channels:
+- conda-forge
 - conda
 - spectrocat
 dependencies:
-#
-# setup dependency
-#
-- setuptools_scm
-- pyyaml
-#
-# core
-#
-- matplotlib
 - numpy
-- scipy
-- xarray
-- pint
-- uncertainties
-- bokeh
-- holoviews
-- datashader
-- param
-- dask
+- matplotlib
+- traitlets
+- pint=0.9
+- quaternion
+- cvxopt
 - pandas
+- xarray
+- datashader
 - xlrd
 - requests
 - numba
-#
-# need the following packages because the API is mainly designed
-# to run in Jupyter notebook
-#
+- scipy
+- colorama
+- setuptools_scm
 - ipython
 - jupyterlab
 - ipykernel
@@ -38,5 +27,21 @@ dependencies:
 - ipympl
 - widgetsnbextension
 - nodejs
-#
-
+- jupytext
+- pytest
+- pytest-runner
+- pytest-cov
+- pytest-xdist
+- pytest-console-scripts
+- scikit-image
+- sphinx=1.8.5
+- sphinx_rtd_theme
+- sphinx-gallery
+- nbsphinx
+- jupyter_sphinx
+- nbconvert
+- numpydoc=0.8
+- conda-build
+- pip
+- pip:
+  - quadprog

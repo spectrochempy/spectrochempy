@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -90,7 +90,7 @@ class polynomialbaseline(object):
 # ======================================================================================================================
 class gaussianmodel(object):
     """
-    Normalized 1D gaussian function:
+    Normalized 1D gaussian function :
 
     .. math::
         f(x) = \\frac{ampl}{\\sqrt{2 \\pi \\sigma^2} } \\exp({\\frac{-(x-pos)^2}{2 \\sigma^2}})
@@ -237,7 +237,7 @@ def getmodel(x, y=None, modelname=None, par=None, **kargs):
         name of the model class to use.
     par : :class:`Parameters` instance
         parameter to pass to the f function
-    kargs: any
+    kargs : any
         Keywords arguments to pass the the f function
 
     Returns

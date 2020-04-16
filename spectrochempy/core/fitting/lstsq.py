@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -138,12 +138,12 @@ def NNLS(C, d, x0=None, tol=None, itmax_factor=3):
     subject to x >= 0, C and d must be real
 
     # python implementation of NNLS algorithm
-    # References: Lawson, C.L. and R.J. Hanson, Solving Least-Squares Problems,
+    # References : Lawson, C.L. and R.J. Hanson, Solving Least-Squares Problems,
     #             Prentice-Hall, Chapter 23, p. 161, 1974.
     # Contributed by Klaus Schuch (schuch@igi.tugraz.at)
     # based on MATLAB's lsqnonneg function
     #
-    # AT: if C and d are datasets, x will be a dataset with relevant dims
+    # AT : if C and d are datasets, x will be a dataset with relevant dims
     #     else return np array
 
     """

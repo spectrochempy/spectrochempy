@@ -8,7 +8,7 @@ __developer_info__ = """
 Sparky file format information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Information on the Sparky file format can be found online at:
+Information on the Sparky file format can be found online at :
 `http://www.cgl.ucsf.edu/home/sparky/manual/files.html`_
 and in the Sparky source file ucsffile.cc.
 
@@ -274,7 +274,7 @@ def read(filename):
     if n == 3:
         return read_3D(filename)
 
-    raise ValueError("unknown dimentionality: %s" % n)
+    raise ValueError("unknown dimentionality : %s" % n)
 
 
 def read_lowmem(filename):
@@ -311,7 +311,7 @@ def read_lowmem(filename):
     if n == 3:
         return read_lowmem_3D(filename)
 
-    raise ValueError("unknown dimentionality: %s" % n)
+    raise ValueError("unknown dimentionality : %s" % n)
 
 
 def write(filename, dic, data, overwrite=False):
@@ -343,7 +343,7 @@ def write(filename, dic, data, overwrite=False):
     if n == 3:
         return write_3D(filename, dic, data, overwrite=overwrite)
 
-    raise ValueError("unknown dimentionality: %s" % n)
+    raise ValueError("unknown dimentionality : %s" % n)
 
 
 def write_lowmem(filename, dic, data, overwrite=False):
@@ -924,7 +924,7 @@ def find_tilen_2d(data, ntile, tile_size):
         NMR data, untiled/standard format.
     ntile : int
         Tile number to extract.
-    (lentY, lentX) : tuple of ints
+    (lentY, lentX): tuple of ints
         Tile size (w1, w2).
 
     Returns
@@ -972,7 +972,7 @@ def tile_data2d(data, tile_size):
     ----------
     data : 2D ndarray
         NMR data, untiled/standard format.
-    (lentY, lentX) : tuple of ints
+    (lentY, lentX): tuple of ints
         Tile size.
 
     Returns
@@ -1008,9 +1008,9 @@ def untile_data2D(data, tile_size, data_size):
     ----------
     data : 1D ndarray
         Tiled/Sparky formatted 2D NMR data.
-    (lentY, lenX) : tuple of ints
+    (lentY, lenX): tuple of ints
         Size of tile.
-    (lenY, lenX) : tuple of ints
+    (lenY, lenX): tuple of ints
         Size of NMR data.
 
     Returns
@@ -1069,7 +1069,7 @@ def find_tilen_3d(data, ntile, tile_size):
         NMR data, untiled/standard format.
     ntile : int
         Tile number to extract.
-    (lentZ, lentY, lentX) : tuple of ints
+    (lentZ, lentY, lentX): tuple of ints
         Tile size (w1, w2, w3).
 
     Returns
@@ -1122,7 +1122,7 @@ def tile_data3d(data, tile_size):
     ----------
     data : 3D ndarray
         NMR data, untiled/standard format.
-    (lentZ, lentY, lentX) : tuple of ints
+    (lentZ, lentY, lentX): tuple of ints
         Tile size (w1, w2, w3).
 
     Returns
@@ -1159,9 +1159,9 @@ def untile_data3D(data, tile_size, data_size):
     ----------
     data : 1D ndarray
         Tiled/Sparky formatted 2D NMR data.
-    (lentZ, lentY, lentX) : tuple of ints
+    (lentZ, lentY, lentX): tuple of ints
         Size of tile
-    (lenZ, lenY, lenX) : tuple of ints
+    (lenZ, lenY, lenX): tuple of ints
         Size of NMR data.
 
     Returns

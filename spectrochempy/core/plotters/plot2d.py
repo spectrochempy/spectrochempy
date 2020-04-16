@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -19,6 +19,7 @@ __dataset_methods__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 from copy import copy as cpy
+import sys
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -107,28 +108,28 @@ def plot_2D(dataset, **kwargs):
 
     Parameters
     ----------
-    dataset: :class:`~spectrochempy.ddataset.nddataset.NDDataset` to plot
+    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset` to plot
 
-    data_only: `bool` [optional, default=`False`]
+    data_only : `bool` [optional, default=`False`]
 
         Only the plot is done. No addition of axes or label specifications
         (current if any or automatic settings are kept.
 
-    projections: `bool` [optional, default=False]
+    projections : `bool` [optional, default=False]
 
-    method: str [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
+    method : str [optional among ``map``, ``stack`` or ``image`` , default=``stack``]
 
-    style : str, optional, default = 'notebook'
+    style : str, optional, default='notebook'
         Matplotlib stylesheet (use `available_style` to get a list of available
         styles for plotting
 
-    reverse: `bool` or None [optional, default = None
+    reverse : `bool` or None [optional, default=None
         In principle, coordinates run from left to right, except for wavenumbers
         (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
         will try to guess. But if reverse is set, then this is the
         setting which will be taken into account.
 
-    x_reverse: `bool` or None [optional, default= None
+    x_reverse : `bool` or None [optional, default=None
 
     kwargs : additional keywords
 
@@ -142,7 +143,7 @@ def plot_2D(dataset, **kwargs):
     # method of plot
     # ------------------------------------------------------------------------------------------------------------------
     method = kwargs.get('method', None)
-
+    
     if not prefs.style:
         # not yet set, initialize with default project preferences
         prefs.update(project_preferences.to_dict())
@@ -469,7 +470,8 @@ def plot_2D(dataset, **kwargs):
             l.set_ydata(zdata[i])
             lines.append(l)
             l.set_color(scalarMap.to_rgba(ydata[i]))
-            l.set_label("{:.5f}".format(ydata[i]))
+            fmt = kwargs.get('label_fmt', "{:.5f}")
+            l.set_label(fmt.format(ydata[i]))
             l.set_zorder(zdata.shape[0] + 1 - i)
 
         # store the full set of lines
@@ -478,7 +480,7 @@ def plot_2D(dataset, **kwargs):
         # but display only a subset of them in order to accelerate the drawing
         maxlines = kwargs.get('maxlines',
                               general_preferences.max_lines_in_stack)
-        debug_('max number of lines %d' % maxlines)
+        # debug_('max number of lines %d' % maxlines)
         setpy = max(len(new._ax_lines) // maxlines, 1)
         ax.lines = new._ax_lines[::setpy]  # displayed ax lines
 
@@ -546,7 +548,7 @@ def plot_2D(dataset, **kwargs):
         if not hasattr(new, '_axcb') or not new._axcb:
             axec = new.ndaxes['colorbar']
             axec.name = axec.name + nameadd
-            new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=cmap, norm=norm)
+            new._axcb = mpl.colorbar.ColorbarBase(axec, cmap=plt.get_cmap(cmap), norm=norm)
             new._axcb.set_label(zlabel)
             # new._axcb.ax.yaxis.set_major_formatter(y_formatter)
             # #this doesn't work

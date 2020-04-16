@@ -172,7 +172,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                      with diagonal elements of nonincreasing
                      magnitude. Column j of p is column ipvt(j)
                      of the identity matrix.
-            - 'qtf'  : the vector (transpose(q) * fvec).
+            - 'qtf' : the vector (transpose(q) * fvec).
 
     mesg : str
         A string message giving information about the cause of failure.
@@ -201,7 +201,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     Contraints on the parameters are enforced using an internal parameter list
     with appropiate transformations such that these internal parameters can be
     optimized without constraints. The transfomation between a given internal
-    parameter, p_i, and a external parameter, p_e, are as follows:
+    parameter, p_i, and a external parameter, p_e, are as follows :
 
     With ``min`` and ``max`` bounds defined ::
 
@@ -252,7 +252,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         args = (args,)
     m = _check_func('leastsq', 'func', func, x0, args, n)[0][0]
     if n > m:
-        raise TypeError('Improper input: N=%s must not exceed M=%s' % (n, m))
+        raise TypeError('Improper input : N=%s must not exceed M=%s' % (n, m))
 
     # define a wrapped func which accept internal parameters, converts them
     # to external parameters and calls func

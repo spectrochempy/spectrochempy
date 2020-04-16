@@ -1,6 +1,6 @@
 """Machinery for documenting traitlets config options with Sphinx.
 
-This includes:
+This includes :
 
 - A Sphinx extension defining directives and roles for config options.
 - A function to generate an rst file given an Application instance.
@@ -30,7 +30,7 @@ The generated rST syntax looks like this::
 
         Description goes here.
 
-    Cross reference like this: :configtrait:`Application.log_datefmt`.
+    Cross reference like this : :configtrait:`Application.log_datefmt`.
 """
 __all__ = []
 

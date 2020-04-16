@@ -2,11 +2,12 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.2'
-#       jupytext_version: 1.0.5
+#       jupytext_version: 1.1.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -197,7 +198,7 @@ p = proj.P350.IR.plot_image()
 # ### Multiplot of the raw IR data 
 
 # %% [markdown]
-# In our project, the data have the same structure : three 2D IR spectra. We can plot them using the `multiplot_stack` function.
+# In our project, the data have the same structure: three 2D IR spectra. We can plot them using the `multiplot_stack` function.
 
 # %% [markdown] {"nbpresent": {"id": "6de1226b-7b75-4e03-b1ce-82c9b7df624e"}}
 # We need to select the datasets we want to plot and the correspondings labels

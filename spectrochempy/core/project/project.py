@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -55,7 +55,7 @@ class Project(AbstractProject):
         """
         Parameters
         ----------
-        args: series of objects, optional.
+        args : series of objects, optional.
             argument type will be interpreted correctly if they are of type
             |NDDataset|, |Project|, or other objects such as |Script|.
             This is optional, as they can be added later.
@@ -448,7 +448,7 @@ class Project(AbstractProject):
         Examples
         --------
 
-        Assuming that ds1, ds2 and ds3 are already defined datasets:
+        Assuming that ds1, ds2 and ds3 are already defined datasets :
 
         >>> proj = Project()
         >>> proj.add_datasets(ds1, ds2, ds3) # doctest: +SKIP
@@ -474,7 +474,7 @@ class Project(AbstractProject):
         Examples
         --------
 
-        Assuming that ds1 is an already defined dataset:
+        Assuming that ds1 is an already defined dataset :
 
         >>> proj = Project()
         >>> proj.add_dataset(ds1, name='Toto') # doctest: +SKIP
@@ -618,7 +618,7 @@ class Project(AbstractProject):
              **kwargs):
         """
         Save the current project
-        (default extension: ``.pscp`` ).
+        (default extension : ``.pscp`` ).
 
         Parameters
         ----------
@@ -765,7 +765,7 @@ class Project(AbstractProject):
 
     @classmethod
     def load(cls, filename='', directory=None, **kwargs):
-        """Load a project file ( extension: ``.pscp``).
+        """Load a project file ( extension : ``.pscp``).
 
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.

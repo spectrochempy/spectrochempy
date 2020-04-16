@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # =============================================================================
-# Copyright (©) 2015-2019 LCS
+# Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
@@ -14,7 +14,7 @@ This module implement the SIMPLISMA class.
 
 __all__ = ['SIMPLISMA']
 
-__dataset_methods__ = ['SIMPLISMA']
+__dataset_methods__ = []
 
 # ----------------------------------------------------------------------------
 # imports
@@ -28,7 +28,7 @@ from traitlets import HasTraits, Instance
 # local imports
 # ----------------------------------------------------------------------------
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.processors.npy import dot
+from spectrochempy.core.dataset.npy import dot
 from spectrochempy.core import info_, set_loglevel, INFO
 
 
@@ -43,7 +43,7 @@ class SIMPLISMA(HasTraits):
     This class performs a SIMPLISMA analysis of a 2D |NDDataset|. The algorithm is adapted from Windig's paper,
     Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16.
 
-    TODO: adapt to 3DDataset ?
+    TODO : adapt to 3DDataset ?
 
     """
 
@@ -57,14 +57,14 @@ class SIMPLISMA(HasTraits):
         ----------
         X : |NDDataset|
             A 2D dataset containing the data matrix (spectra in rows).
-        interactive : bool, optional, default: False
+        interactive : bool, optional, default=False
             If True, the determination of purest variables is carried out interactively
-        n_pc : int, optional, default: 2 in non-interactive mode; 100 in interactive mode
+        n_pc : int, optional, default=2 in non-interactive mode; 100 in interactive mode
             The maximum number of pure compounds. Used only for non interactive analysis
             (the default in interative mode (100) will never be reached in practice)
-        tol : float, optional, default: 0.1
+        tol : float, optional, default=0.1
             The convergence criterion on the percent of unexplained variance.
-        noise : float or int, optional, default: 5
+        noise : float or int, optional, default=5
             A correction factor (%) for low intensity variables (0 - no offset, 15 - large offset).
         verbose : bool, optional, default=True
             If true some information is given during the analysis
@@ -72,9 +72,9 @@ class SIMPLISMA(HasTraits):
         Attributes
         ----------
         _X : the original dataset
-        _St: spectra of pure compounds
+        _St : spectra of pure compounds
         _C : intensities ('concentrations') of pure compounds in spectra
-        _Pt: purity spectra
+        _Pt : purity spectra
         _s : standard deviation spectra
 
         Examples
@@ -239,7 +239,7 @@ class SIMPLISMA(HasTraits):
 
                     ans = ''
                     while ans.lower() not in ['a', 'c']:
-                        ans = input('   |--> (a) Accept, (c) Change : ')
+                        ans = input('   |--> (a) Accept, (c) Change: ')
 
                     while ans.lower() != 'a':
                         new = input('   |--> enter the new index (int) or variable value (float): ')
@@ -262,7 +262,7 @@ class SIMPLISMA(HasTraits):
                         logs += llog + '\n'
                         info_(llog)
 
-                        ans = input('   |--> (a) Accept, (c) Change : ')
+                        ans = input('   |--> (a) Accept, (c) Change: ')
                     # ans was [a]ccept
                     j += 1
                 if not interactive:
@@ -411,7 +411,7 @@ class SIMPLISMA(HasTraits):
         """
         Return the concentration and spectra matrix determined by SIMPLISMA
 
-        TODO: allow normalization of spectra
+        TODO : allow normalization of spectra
 
         Returns
         -------
@@ -427,10 +427,14 @@ class SIMPLISMA(HasTraits):
         """
         Transform data back to the original space.
 
+<<<<<<< HEAD
+        The following matrice operation is performed : :math:`X'_{hat} = C'.S'^t`
+=======
         The following matrix operation is performed: :math:`X'_{hat} = C'.S'^t`
+>>>>>>> d06201598bf138163b8da982f3cfae343fe228fa
 
-        Return
-        ------
+        Returns
+        -------
         X_hat : |NDDataset|
             The reconstructed dataset based on the SIMPLISMA Analysis.
 

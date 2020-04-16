@@ -1,12 +1,12 @@
-##TITLE= Parameter file, TOPSPIN		Version 3.2
+##TITLE= Parameter file, TopSpin 4.0.7
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 56	$$ modification sequence number
+##NPOINTS= 58	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= nmr
-$$ 2014-05-02 11:07:16.762 +0200  christian@macbookcf.local
-$$ /Users/christian/Documents/data_storage/bruker/Data/PST5_HMQC/31/pdata/1/procs
-$$ process /opt/topspin3.2/prog/mod/proc2d
+$$ 2019-12-05 12:28:16.733 +0100  christian@lcs191n.ensicaen.fr
+$$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/bruker_2d/1/pdata/1/procs
+$$ process /opt/topspin4.0.7/prog/mod/dataserver
 ##$ABSF1= 0
 ##$ABSF2= 0
 ##$ABSG= 0
@@ -101,7 +101,7 @@ $$ process /opt/topspin3.2/prog/mod/proc2d
 ##$SIGF2= 0
 ##$SINO= 58.55999
 ##$SIOLD= 2048
-##$SPECTYP= <>
+##$SPECTYP= <UNDEFINED>
 ##$SREGLST= <>
 ##$SSB= 0
 ##$STSI= 2048
