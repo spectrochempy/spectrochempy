@@ -552,25 +552,113 @@ class NDMath(object):
     around = round_ = round
     
     # ..................................................................................................................
-    @getdocfrom(np.amin)
     def amin(self, *args, **kwargs):
-        """minimum of data along axis"""
+        """
+        Return the maximum of the dataset or maxima along given dimensions.
+        
+        Parameters
+        ----------
+        dim : None or int or dimension name or tuple of int or dimensions, optional
+            dimension or dimensions along which to operate.  By default, flattened input is used.
+            If this is a tuple, the minimum is selected over multiple dimensions,
+            instead of a single dimension or all the dimensions as before.
+        axis : alias for dim
+            Compatibility with Numpy syntax
+        out : nddataset, optional
+            Alternative output dataset in which to place the result.  Must
+            be of the same shape and buffer length as the expected output.
+            See `ufuncs-output-type` for more details.
+        keepdims : bool, optional
+            If this is set to True, the dimensions which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+        initial : scalar, optional
+            The minimum value of an output element. Must be present to allow
+            computation on empty slice.
+        where : array_like of bool, optional
+            Elements to compare for the minimum.
+
+        Returns
+        -------
+        amin : ndarray or scalar
+            Minimum of the data. If `dim` is None, the result is a scalar value.
+            If `dim` is given, the result is an array of dimension ``ndim - 1``.
+        
+        See Also
+        --------
+        amax :
+            The maximum value of a dataset along a given dimension, propagating any NaNs.
+        nanmax :
+            The maximum value of a dataset along a given dimension, ignoring any NaNs.
+        maximum :
+            Element-wise maximum of two datasets, propagating any NaNs.
+        fmax :
+            Element-wise maximum of two datasets, ignoring any NaNs.
+        argmax :
+            Return the indices or coordinates of the maximum values.
+        nanmin, minimum, fmin
+
+        """
         
         return self._extrema('amin', *args, **kwargs)
     
     min = amin
     
     # ..................................................................................................................
-    @getdocfrom(np.amax)
     def amax(self, *args, **kwargs):
-        """maximum of data along axis"""
+        """
+        Return the maximum of the dataset or maxima along given dimensions.
         
+        Parameters
+        ----------
+        dim : None or int or dimension name or tuple of int or dimensions, optional
+            dimension or dimensions along which to operate.  By default, flattened input is used.
+            If this is a tuple, the maximum is selected over multiple dimensions,
+            instead of a single dimension or all the dimensions as before.
+        axis : alias for dim
+            Compatibility with Numpy syntax
+        out : nddataset, optional
+            Alternative output dataset in which to place the result.  Must
+            be of the same shape and buffer length as the expected output.
+            See `ufuncs-output-type` for more details.
+        keepdims : bool, optional
+            If this is set to True, the axes which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input array.
+        initial : scalar, optional
+            The minimum value of an output element. Must be present to allow
+            computation on empty slice.
+        where : array_like of bool, optional
+            Elements to compare for the maximum. See `~numpy.ufunc.reduce`
+            for details.
+
+        Returns
+        -------
+        amax : ndarray or scalar
+            Maximum of the data. If `dim` is None, the result is a scalar value.
+            If `dim` is given, the result is an array of dimension ``ndim - 1``.
+        
+        See Also
+        --------
+        amin :
+            The minimum value of a dataset along a given dimension, propagating any NaNs.
+        nanmin :
+            The minimum value of a dataset along a given dimension, ignoring any NaNs.
+        minimum :
+            Element-wise minimum of two datasets, propagating any NaNs.
+        fmin :
+            Element-wise minimum of two datasets, ignoring any NaNs.
+        argmin :
+            Return the indices or coordinates of the minimum values.
+        nanmax, maximum, fmax
+        
+        """
+
         return self._extrema('amax', *args, **kwargs)
     
     max = amax
     
     # ..................................................................................................................
-    @getdocfrom(np.argmin)
     def argmin(self, *args, **kwargs):
         """indexes of minimum of data along axis"""
         
@@ -588,7 +676,7 @@ class NDMath(object):
     # ------------------------------------------------------------------------------------------------------------------
     
     # Find extrema
-    def _extrema(self, op, *args, only_index=False, **kwargs):
+    def _extrema(self, op, *args, only_index=False, only_coords=False, **kwargs):
         
         # as data can be complex or quaternion, it is worth to note that min and
         # max refer to the real part of the object. If one wants an extremum for
@@ -598,11 +686,15 @@ class NDMath(object):
         # by defaut we do return a dataset
         # but if keepdims is False,  then a scalar value will be returned for
         # 1D array and a squeezed NDDataset for multidimensional arrays
-        keepdims = kwargs.pop('keepdims', True)
+    
+        keepdims = kwargs.pop('keepdims', False)
         keepunits = kwargs.pop('keepunits', True)
         
         # handle the various syntax to pass the axis
-        axis, dim = self.get_axis(*args, **kwargs)
+        # to be compatible with numpy we need to check the axis or dim keyword.
+        # if they are None, they the maximum is taken on a flattened array
+        
+        axis, dim = self.get_axis(*args, **kwargs, allows_none=True)
         kwargs['axis'] = axis
         
         # dim or dims keyword not accepted by the np function, so remove it
@@ -613,16 +705,19 @@ class NDMath(object):
         if op.startswith('a'):  # deal with the amax, amin name
             op = op[1:]
         idx = getattr(self.real.masked_data, f"arg{op}")(**kwargs)
+        
         if axis is None:
             # unravel only when axis=None
             # (as the search was done on the flatten array)
             idx = np.unravel_index(idx, self.shape)
         
-        # if we wants only the indexes of the extremum, return it now
+        # if we wants only the indexes of the extremum (argmax, argmin) , return it now
         if only_index:
             if self.ndim == 1:
                 idx = idx[0]
             return idx
+        # or the coordinates
+        #elif only_coords:
         
         # now slice the array according to this indexes
         if axis is None:
@@ -630,7 +725,7 @@ class NDMath(object):
         else:
             # a little more complicated
             if self.ndim > 2:
-                # TODO: for now I did not find a way to use the idx
+                #TODO: for now I did not find a way to use the idx
                 #      for fancy indexing of the NDDataset with ndim > 2
                 raise NotImplementedError
             new = self.take(idx, dim=axis)
@@ -641,7 +736,8 @@ class NDMath(object):
             new.squeeze(inplace=True)
             arr = new.data
             if new.ndim == 0:
-                arr = arr.data[()]  # keep only value
+                # a single element, return only the values
+                arr = arr[()]  # keep only value
             if new.has_units and keepunits:
                 new = arr * new._units
             else:

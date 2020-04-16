@@ -749,11 +749,11 @@ class NDDataset(
     def sort(self, **kwargs):
         """
         Returns the dataset sorted along a given dimension
-        (by default, the first dimension [axis=0]) using the numeric or label values
+        (by default, the last dimension [axis=-1]) using the numeric or label values
 
         Parameters
         ----------
-        dim : str or int, optional, default=0
+        dim : str or int, optional, default=-1
             dimension index or name along which to sort.
         pos : int , optional
             If labels are multidimensional  - allow to sort on a define

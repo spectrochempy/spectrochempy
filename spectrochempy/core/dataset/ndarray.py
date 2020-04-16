@@ -677,6 +677,18 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     @property
+    def itemsize(self):
+        """
+        numpy itemsize - data type size
+
+        """
+        if self.data is None:
+            return None
+    
+        return self.data.dtype.itemsize
+    
+    # ..................................................................................................................
+    @property
     def labels(self):
         """
         |ndarray| (str) - An array of labels for `data`.
@@ -1237,6 +1249,9 @@ class NDArray(HasTraits):
         # handle the various syntax to pass the axis
         dims = self._get_dims_from_args(*args, **kwargs)
         axis = self._get_dims_index(dims)
+        allows_none = kwargs.get('allows_none', False)
+        if axis is None and dims is None and allows_none:
+            return None, None
         axis = axis[0] if axis else -1 # None
         dim = self.dims[axis]
         if axis is not None and kwargs.get('negative_axis', False):

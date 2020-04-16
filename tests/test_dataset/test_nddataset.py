@@ -819,21 +819,21 @@ def test_nddataset_sorting(ds1):  # ds1 is defined in conftest
 
     dataset = ds1[:3, :3, 0].copy()
     info_(dataset)
-    dataset.sort(inplace=True)
+    dataset.sort(inplace=True, dim='z')
     labels = np.array(list('abc'))
     assert_array_equal(dataset.coords['z'].labels, labels)
     # nochange because the  axis is naturally iversed to force it
     # we need to specify descend
     
-    dataset.sort(inplace=True, descend=False)  # order value in increasing order
+    dataset.sort(inplace=True, descend=False, dim='z')  # order value in increasing order
     info_(dataset)
     labels = np.array(list('cba'))
     assert_array_equal(dataset.coords['z'].labels, labels)
 
-    dataset.sort(inplace=True)
+    dataset.sort(inplace=True, dim='z')
     info_(dataset)
     new = dataset.copy()
-    new = new.sort(descend=False, inplace=False)
+    new = new.sort(descend=False, inplace=False, dim='z')
     info_(new)
     assert_array_equal(new.data, dataset.data[::-1])
     assert (new[0, 0] == dataset[-1, 0])
@@ -1015,14 +1015,21 @@ def test_nddataset_fancy_indexing():
 def test_nddataset_min_max():
     with RandomSeedContext(1234):
         a = np.random.random((3, 5)).round(1)
-    c = (np.arange(3), np.arange(5))
-    nd = NDDataset(a, coords=c)
+    c = (np.arange(3)*10.0, np.arange(5)*7.0)
+    nd = NDDataset(a, coords=c, units='m')
     info_(nd)
+    
     mi = nd.min()
+    assert mi== Quantity(0.2, 'meter')
     ma = nd.max()
-    info_(mi)
-    info_(ma)
-    mi1 = nd.min(dims=1)
+    assert ma== Quantity(1.0, 'meter')
+    ma = np.max(nd, keepdims=True)
+    assert isinstance(ma, NDDataset)
+    assert ma.shape == (1,1)
+    assert ma.x.data == np.array([21])
+    assert ma.y.data == np.array([10])
+    
+    mi1 = nd.min(dim='y')
     info_('minimum', mi1)
     ma1 = nd.max('x')
     info_('X :', ma1)
