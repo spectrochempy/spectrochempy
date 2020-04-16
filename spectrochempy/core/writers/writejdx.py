@@ -11,7 +11,7 @@
 # Author(s): Arnaud Travert (LCS)
 # Contributor(s): Christian Fernandez (LCS)
 
-"""Plugin module to extend NDDataset with the import methods method.
+"""Plugin module to extend NDDataset with export methods method.
 
 """
 import os as os
@@ -20,30 +20,58 @@ from datetime import datetime, timezone, timedelta
 
 from traitlets import HasTraits, Unicode, List
 
-__all__ = []
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoord import Coord
+from ...core import info_, debug_, error_, warning_
+
+__all__ = ['write_jdx']
 
 
-def write_jdx(X, filename=''):
-    """ Exports dataset to jcampdx format"""
+def write_jdx(dataset=None, **kwargs):
+    """Writes a the dataset X in jdx format
 
-    # if no filename is provided, open a dialog box to create jdx file
-    if filename == '':
-        root = tk.Tk()
-        root.withdraw()
-        root.overrideredirect(True)
-        root.geometry('0x0+0+0')
-        root.deiconify()
-        root.lift()
-        root.focus_force()
-        f = filedialog.asksaveasfile(mode='w', initialfile='dataset',
-                                     defaultextension=".jdx",
-                                     filetypes=(("JCAMPDX", "*.jdx"),
-                                                ("All Files", "*.*")))
-        if f is None:  # asksaveasile return `None` if dialog closed with "cancel".
-            return
-        root.destroy()
-    else:
-        f = open(filename,
+    Parameters
+    ----------
+    dataset : |NDDataset|
+        The dataset to store the data and metadata read from the OMNIC file(s).
+        If None, a |NDDataset| is created.
+    filename : `None`, `str`
+        Filename of the file to write. If `None`: opens a dialog box to safe files.
+    directory: str, optional, default="".
+        Where to save the file. If not specified, write in
+        the current directory.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> A = NDDataset.write_jdx('myfile.jdx')
+
+
+    """
+    debug_("writing jdx file")
+
+    # filename will be given by a keyword parameter except if the first parameters is already the filename
+    filename = kwargs.get('filename', None)
+
+    # check if the first parameter is a dataset because we allow not to pass it
+    if not isinstance(dataset, NDDataset):
+        # probably did not specify a dataset
+        # so the first parameters must be the filename
+        if isinstance(dataset, (str, list)) and dataset != '':
+            filename = dataset
+
+    # check if directory was specified
+    directory = kwargs.get("directory", None)
+    if not directory:
+        directory = os.getcwd()
+    # check if a valid filename is given
+
+
+
+    f = open(filename,
                  'w')  # if filename is provided,directly create jdx file
 
     # writes first lines
