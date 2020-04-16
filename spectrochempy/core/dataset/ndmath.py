@@ -711,14 +711,23 @@ class NDMath(object):
             # (as the search was done on the flatten array)
             idx = np.unravel_index(idx, self.shape)
         
-        # if we wants only the indexes of the extremum (argmax, argmin) , return it now
+        # argmax, argmin
+        # --------------
+        # if we wants only the indexes of the extremum, return it now
         if only_index:
             if self.ndim == 1:
                 idx = idx[0]
             return idx
-        # or the coordinates
-        #elif only_coords:
         
+        # idxmax, idxmin
+        # --------------
+        # or the coordinates
+        elif only_coords:
+            pass #TODO : return coordinates of the maxima
+            raise NotImplementedError('Not yet implemented!')
+        
+        # max, min, amax, amin
+        #---------------------
         # now slice the array according to this indexes
         if axis is None:
             new = self[idx]

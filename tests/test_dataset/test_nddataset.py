@@ -957,8 +957,10 @@ def test_nddataset_max_min_with_1D_real(IR_dataset_1D):
     info_(nd1)
     assert "[float32]" in str(nd1)
     mx = nd1.max()
-    info_(mx)
-    assert mx.data == pytest.approx(6.0)
+    assert mx == Quantity(6.0, 'absorbance')
+    mx = nd1.max('keepdims')
+    assert isinstance
+    #assert mx.data == pytest.approx(6.0)
 
 
 def test_nddataset_max_with_2D_real(IR_dataset_2D):
@@ -1012,7 +1014,7 @@ def test_nddataset_fancy_indexing():
     info_(a)
 
 
-def test_nddataset_min_max():
+def test_nddataset_extrema():
     with RandomSeedContext(1234):
         a = np.random.random((3, 5)).round(1)
     c = (np.arange(3)*10.0, np.arange(5)*7.0)
