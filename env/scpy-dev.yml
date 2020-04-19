@@ -5,11 +5,10 @@ channels:
 - spectrocat
 dependencies:
 - numpy
-- matplotlib
+- matplotlib=3.0.3
 - traitlets
 - pint=0.9
 - quaternion
-- cvxopt
 - pandas
 - xarray
 - datashader

@@ -21,7 +21,7 @@ from spectrochempy.core.dataset.npy import dot
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import optimize
-import quadprog, cvxopt
+import quadprog
 
 class IRIS:
     """
