@@ -388,7 +388,7 @@ will be interpreted by spectrochempy and then produce errors.
 To add arguments/options to pytest, use the ``pytest.ini`` file in the ``tests`` folder.
 
 
-Compiling the docs
+Building the docs
 -------------------
 
 To build the doc, we need the following packages:
@@ -432,3 +432,5 @@ Commit and push to the Bitbucket repository
 
 to do
 
+Building a the conda package
+----------------------------
