@@ -110,14 +110,14 @@ def read(fname):
 # Data for setuptools
 packages = []
 
-extras_require = {
-    'tests': [
-        "pytest",
-        "pytest-runner",
-        "pytest-console-scripts",
-        "scikit-image",
-    ],
-}
+# extras_require = {
+#     'tests': [
+#         "pytest",
+#         "pytest-runner",
+#         "pytest-console-scripts",
+#         "scikit-image",
+#     ],
+# }
 
 setup_args = dict(
     
@@ -152,9 +152,9 @@ setup_args = dict(
     
     # requirements
     python_requires=">3.5",  # TODO: check if it works also with 3.5
-    setup_requires=['setuptools_scm', 'pyyaml'],
+    # setup_requires=['setuptools_scm', 'pyyaml'],
     install_requires=[],  # install_requires(dev=__DEV__),
-    tests_require=extras_require['tests'],
+    #tests_require=extras_require['tests'],
     
     # post-commands
     cmdclass={'develop': PostDevelopCommand,
