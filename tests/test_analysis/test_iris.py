@@ -42,8 +42,8 @@ def test_IRIS():
 
     iris = IRIS(X_, param, verbose=True)
 
-    f = iris.transform()
-    X_hat = iris.inverse_transform()
+    f = iris.f
+    X_hat = iris.reconstruct()
 
     iris.plotlcurve(scale='ln')
     f[0].plot(method='map', plottitle=True)
