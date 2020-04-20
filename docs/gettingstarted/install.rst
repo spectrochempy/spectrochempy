@@ -109,11 +109,45 @@ WINDOWS
 
         (base) C:\<yourInstallDirectory>\spectrochempy> conda activate scpy
 
+    Note:
+
+        You can make the scipy environment permanent by creating and using the following batch file (.bat)
+
+        .. sourcecode:: bat
+
+            @REM launch a cmd window in scpy environment (path should be adapted)
+            @CALL CD C:\<yourWorkingFolder>
+            @CALL CMD /K C:\<yourAnacondaFolder>\Scripts\activate.bat scpy
+
+        This script, where `<yourAnacondaFolder>` is the installation directory of your Miniconda/Anaconda distribution
+        will open a command prompt  in  C:\\<yourWorkingFolder> with the `scpy` environment activated.
+
+        Save the .bat file, for instance in `C:\\<yourAnacondaFolder>\Scripts\activate-scpy.bat,
+        create a shortcut, name it, for instance, `Anaconda prompt (scpy)` and place it in an easily accessible
+        place (e.g. the Windows Startmenu Folder).
+
 #.  At this point, `(scpy)` should appear before the prompt. Then install the spectrochempy package in this environment:
 
     .. sourcecode:: bat
 
         (scpy) C:/<your installdir>/spectrochempy> pip install .
+
+#. Check the Installation by running a IPython session by issuing in the (scpy) command prompt
+   the following command:
+
+.. sourcecode:: bat
+
+    (scpy) C:/<youWorkingFolder>> ipython
+
+Then execute two commands as following:
+
+.. sourcecode:: ipython
+
+    In [1]: from spectrochempy import *
+
+    In [2]: NDDataset()
+
+If this goes well, the |scpy| application is likely functional.
 
 
 MAC OS, LINUX
@@ -159,12 +193,7 @@ MAC OS, LINUX
 
         (scpy) $ pip install .
 
-
-
-Check the Installation
-======================
-
-Run a IPython session by issuing in the terminal the following command:
+#. Check the Installation: Run a IPython session by issuing in the terminal the following command:
 
 .. sourcecode:: bash
 
