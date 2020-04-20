@@ -87,6 +87,7 @@ def test_notebook_basecor_bug():
 
     basc.corrected.plot_stack()
 
+@pytest.mark.skip()
 def test_ab_nmr(NMR_dataset_1D):
     
     dataset = NMR_dataset_1D.copy()

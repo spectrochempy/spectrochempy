@@ -15,7 +15,7 @@ import pytest
 
 # from spectrochempy import *
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndmath import unary_ufuncs, binary_ufuncs
+from spectrochempy.core.dataset.ndmath import unary_ufuncs, binary_ufuncs, comp_ufuncs
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units.units import ur, Quantity
@@ -146,6 +146,32 @@ def test_bug_lost_dimensionless_units():
 @pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
 def test_ndmath_binary_ufuncs_two_datasets(nd2d, pnl, name, comment):
     nd1 = nd2d.copy()
+    nd2 = nd1.copy() * np.ones_like(nd1)*.01
+    
+    info_(f"\n{name}   # {comment}")
+    
+    # simple NDDataset
+    # -----------------
+    f = getattr(np, name)
+    r = f(nd1, nd2)
+    info_(r)
+    assert isinstance(r, NDDataset)
+
+    # NDDataset with units
+    # -----------------------
+    nd1.units = ur.m
+    nd2.units = ur.km
+    f = getattr(np, name)
+    r = f(nd1, nd2)
+    info_(r)
+    assert isinstance(r, NDDataset)
+    if name not in ['logaddexp', 'logaddexp2', 'true_divide', 'floor_divide', 'multiply', 'divide']:
+        assert r.units == nd1.units
+
+# COMP Methods
+@pytest.mark.parametrize(('name', 'comment'), comp_ufuncs().items())
+def test_ndmath_comp_ufuncs_two_datasets(nd2d, pnl, name, comment):
+    nd1 = nd2d.copy()
     nd2 = nd1.copy() + np.ones_like(nd1)*.001
     
     info_(f"\n{name}   # {comment}")
@@ -157,17 +183,15 @@ def test_ndmath_binary_ufuncs_two_datasets(nd2d, pnl, name, comment):
     r = f(nd1, nd2)
     info_(r)
     assert isinstance(r, NDDataset)
-
+    
     # NDDataset with units
     # -----------------------
     nd1.units = ur.absorbance
+    nd2.units = ur.absorbance
     f = getattr(np, name)
     r = f(nd1, nd2)
     info_(r)
     assert isinstance(r, NDDataset)
-    if name not in ['logaddexp', 'logaddexp2', 'true_divide', 'floor_divide', ]:
-        assert r.units == nd1.units
-
 
 @pytest.mark.parametrize(('name', 'comment'), binary_ufuncs().items())
 def test_ndmath_binary_ufuncs_scalar(nd2d, pnl, name, comment):
@@ -193,6 +217,7 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, pnl, name, comment):
     assert isinstance(r, NDDataset)
     if name not in ['logaddexp', 'logaddexp2', 'true_divide', 'floor_divide', ]:
         assert r.units == nd1.units
+        
 
 @pytest.mark.skip()
 def test():
@@ -298,112 +323,125 @@ def test_ndmath_classmethod_implementation(nd2d, name):
         else:
             raise TypeError(*e.args)
 
-
+def test_ndmath_max(IR_dataset_2D):
+    # full test of max with various arguments
+    ds = IR_dataset_2D.copy()
+    ds2 = ds.copy()
+    ds2._units = None
+    
+    # by default, this should return a single value or quantity
+    ma = ds.max()
+    assert isinstance(ma, Quantity)
+    ma2 = ds2.max()
+    assert isinstance(ma2, ds2.data.dtype.type)
+    
+    # with keepdims True, a NDDataset is returned
+    ma = ds.max(keepdims=True)
+    assert isinstance(ma, NDDataset)
+    
+# Test for the return type of dataset fonctions
 @pytest.mark.parametrize(('operation', 'restype', 'args', 'kwargs'),
-                         [('amax', NDDataset, None, {}),
-                          ('amin', NDDataset, None, {}),
-                          ('max', NDDataset, None, {}),
-                          ('min', NDDataset, None, {}),
-                          ('sum', (TYPE_FLOAT, Quantity), None, {}),
-                          ('cumsum', NDDataset, None, {}),
-                          ('cumsum', NDDataset, None, {'dim': 1}),
-                          ('ptp', (TYPE_FLOAT, Quantity), None, {}),
-                          ('all', np.bool_, None, {}),
-                          ('any', np.bool_, None, {}),
-                          ('mean', (TYPE_FLOAT, Quantity), None, {}),
-                          ('std', (TYPE_FLOAT, Quantity), None, {}),
-                          ('argmax', (TYPE_INTEGER, tuple), None, {}),
-                          ('argmin', (TYPE_INTEGER, tuple), None, {}),
-                          ('clip', NDDataset, (2., 5.), {}),
-                          ('around', NDDataset, (-1,), {}),
-                          ('round', NDDataset, (-1,), {}),
-
-                          ('max', (TYPE_FLOAT, Quantity), None, {'keepdims': False}),
+                         [ #(name, (type res 1D, type res 2D), args, kwargs, type),
+                             
+                             ('np.amax', (TYPE_FLOAT, Quantity), None, {} ),
+                             ('np.amin', (TYPE_FLOAT, Quantity), None, {} ),
+                             ('np.max', (TYPE_FLOAT, Quantity), None, {} ),
+                             ('np.min', (TYPE_FLOAT, Quantity), None, {}),
+                             ('np.sum', (TYPE_FLOAT, Quantity), None, {}),
+                             ('np.mean', (TYPE_FLOAT, Quantity), None, {}),
+                             ('np.var', (TYPE_FLOAT, Quantity), None, {}),
+                             ('np.std', (TYPE_FLOAT, Quantity), None, {}),
+                             ('np.argmax', (TYPE_INTEGER, tuple), None, {}),
+                             ('np.argmin', (TYPE_INTEGER, tuple), None, {}),
+                             
+                             ('np.max', NDDataset, None, {'keepdims': True}),
+                             ('np.sum', NDDataset, None, {'keepdims': True}),
+                             ('np.mean', (NDDataset), None,{'keepdims': True}),
+                             ('np.std', (NDDataset), None, {'keepdims': True}),
+                             ('np.var', (NDDataset), None, {'keepdims': True}),
+                             
+                             ('np.max', (TYPE_FLOAT, NDDataset), None, {'axis': 0}),
+                             ('max', (TYPE_FLOAT, NDDataset), None, {'dim': 'x'}),
+                             ('np.sum', (TYPE_FLOAT, NDDataset), None, {'axis': 0}),
+                             ('sum', (TYPE_FLOAT, NDDataset), None, {'dim': 'x'}),
+                             
+                             ('np.max', (NDDataset), None, {'axis': 0, 'keepdims':True}),
+                             ('max', (NDDataset), None, {'dim': 'x', 'keepdims':True}),
+                             ('np.mean', (NDDataset), None, {'axis': 0, 'keepdims':True}),
+                             ('mean', (NDDataset), None, {'dim': 'x', 'keepdims':True}),
+                             
+                             ('np.cumsum', NDDataset, None, {}),
+                             ('cumsum', NDDataset, None, {}),
+                             ('np.cumsum', NDDataset, None, {'axis': 0}),
+                             ('cumsum', NDDataset, None, {'axis': 0}),
+                             
+                             ('np.ptp', (TYPE_FLOAT, NDDataset), None, {}),
+                             ('np.ptp', (TYPE_FLOAT, NDDataset), None, {'axis':0}),
+                             ('ptp', (TYPE_FLOAT, NDDataset), None, {'dim':'x'}),
+                             
+                             ('np.all', np.bool_, None, {}),
+                             ('np.any', np.bool_, None, {}),
+                             
+                             ('np.clip', NDDataset, (2., 5.), {}),
+                             
+                             ('np.around', NDDataset, (-1,), {}),
+                             ('np.round', NDDataset, (-1,), {}),
 
                           ])
-def test_ndmath_non_ufunc_functions_with_masked(operation, restype, args, kwargs):
-    def runop(a, args, kwargs):
-        
-        if not isinstance(a, NDDataset) and 'dim' in kwargs:  # dim not accepted by np
-            kwargs['axis'] = kwargs.pop('dim')
-        elif isinstance(a, NDDataset) and 'axis' in kwargs and operation != 'cumsum':
-            kwargs['dim'] = kwargs.pop('axis')
-        
+def test_ndmath_non_ufunc_functions(operation, restype, args, kwargs):
+    
+    def runop(a, args=(), kwargs={}):
+    
+        method = not operation.startswith('np.')
         if args:
-            if kwargs:
-                res = op(a, *args, **kwargs)
-            else:
-                res = op(a, *args)
+            res = getattr(a, operation)(*args, **kwargs) if method else getattr(np, operation[3:])(a, *args, **kwargs)
         else:
-            if kwargs:
-                res = op(a, **kwargs)
-            else:
-                res = op(a)
+            res = getattr(a, operation)(**kwargs) if method else getattr(np, operation[3:])(a, **kwargs)
         return res
     
+    # duplicate the result type
     if not isinstance(restype, tuple):
         restype = (restype, restype)
+        
+    # with 1D
+    # -------
+    d1D = np.ma.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                      mask=[0, 0, 0, 0, 0, 0, 0, 0, 1, 0])
     
-    op = getattr(np, operation)
-    # info_(op.__doc__)
-    
+    ds1 = NDDataset(d1D, dtype='float64')
+    coord0 = Coord(np.arange(10) * .1)
+    ds1.set_coords(coord0, )
+    info_('\n\n1D'+'-'*50)
+    info_(str(ds1))
+    info_('-'*50)
+    dsy = runop(ds1, args, kwargs)
+    assert isinstance(dsy, restype[0])
+    info_(dsy)
+    info_("result operation {} : {}".format(operation, str(dsy)))
+    info_('-'*50)
+
     # with 2D
+    # -------
     d2D = np.ma.array([[3, -1., 2, 4, 10],
                        [5, 60, 8, -7.7, 0],
                        [3.1, -1.5, 2.5, 4.3, 10.],
                        [1, 6., 8.5, 77., -200.]])
+    
     d2D[3, 3] = np.ma.masked
-    
-    result = runop(d2D, args, kwargs)
-    if 'arg' in operation:
-        result = np.unravel_index(result, d2D.shape)
-    
     ds2 = NDDataset(d2D, dtype='float64')
     coord0 = Coord(np.arange(4) * .1)
     coord1 = Coord(np.arange(5) * .2)
     ds2.set_coords(coord0, coord1)
     ds2.units = ur.m
-    
+    info_('\n\n2D'+'-'*50)
+    info_(str(ds2))
+    info_('-'*50)
     dsy = runop(ds2, args, kwargs)
-    info_(ds2)
-    info_("result operation {} : {}".format(operation, str(dsy)))
-    
     assert isinstance(dsy, restype[1])
-    if isinstance(dsy, NDDataset):
-        assert_array_almost_equal(dsy.data, result)
-        assert dsy.units == ds2.units
-    elif isinstance(dsy, Quantity):
-        assert_array_almost_equal(np.array(dsy.m), np.array(result))
-        assert dsy.units == ds2.units
-    else:
-        assert_array_almost_equal(np.array(dsy), np.array(result))
-    
-    # with 1D
-    
-    d1D = np.ma.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                      mask=[0, 0, 0, 0, 0, 0, 0, 0, 1, 0])
-    
-    kwargs.pop('dim', None)
-    kwargs.pop('dims', None)
-    kwargs.pop('axis', None)
-    
-    result = runop(d1D, args, kwargs)
-    
-    ds1 = NDDataset(d1D, dtype='float64')
-    coord0 = Coord(np.arange(10) * .1)
-    ds1.set_coords(coord0, )
-    dsy = runop(ds1, args, kwargs)
-    
-    info_(str(ds1))
+    info_(dsy)
     info_("result operation {} : {}".format(operation, str(dsy)))
+    info_('-'*50)
     
-    assert isinstance(dsy, restype[0])
-    if isinstance(dsy, NDDataset):
-        assert_array_almost_equal(dsy.data, result)
-    else:
-        assert_approx_equal(dsy, result)
-
-
 def test_ndmath_reduce_quantity(IR_dataset_2D):
     # must keep units
     ds = IR_dataset_2D.copy()
@@ -654,8 +692,7 @@ def test_ndmath_unit_conversion_operators(operation, result_units):
     (None, None, '__add__', None),
     (None, None, '__mul__', None),
     (None, ur.m, '__mul__', ur.m),
-    (ur.dimensionless, None, '__mul__',
-     ur.dimensionless),
+    (ur.dimensionless, None, '__mul__', ur.dimensionless),
     (ur.eV, ur.eV, '__add__', ur.eV),
     (ur.eV, ur.eV, '__sub__', ur.eV),
     (ur.eV, ur.eV, '__truediv__', ur.dimensionless),
@@ -666,7 +703,10 @@ def test_arithmetic_unit_calculation(unit1, unit2, op, result_units):
     ndd2 = NDDataset(np.array([1]), units=unit2)
     ndd1_method = ndd1.__getattribute__(op)
     result = ndd1_method(ndd2)
-    assert result.units == result_units
+    try:
+        assert result.units == result_units
+    except:
+        assert_equal_units(ndd1_method(ndd2).units, result_units)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

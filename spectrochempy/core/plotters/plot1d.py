@@ -455,7 +455,7 @@ def plot_1D(dataset, **kwargs):
     xl = [xdata[0], xdata[-1]]
     xl.sort()
 
-    if bar or x.size < number_x_labels + 1:
+    if bar or len(xdata) < number_x_labels + 1:
         # extend the axis so that the labels are not too close to the limits
         inc = (xdata[1] - xdata[0]) * .5
         xl = [xl[0] - inc, xl[1] + inc]

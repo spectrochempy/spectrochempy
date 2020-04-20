@@ -36,7 +36,7 @@ from warnings import catch_warnings
 from ...units.units import ur, Quantity, DimensionalityError
 from .ndarray import NDArray
 from .ndcomplex import NDComplexArray
-from ...utils import getdocfrom, docstrings, MaskedArray, NOMASK
+from ...utils import docstrings, MaskedArray, NOMASK
 from ...core import warning_, error_
 from ...extern.orderedset import OrderedSet
 
@@ -204,13 +204,18 @@ binary_str = """
 
 # Binary Math operations
 
-add(x1, x2, [, out, where, casting, order, …])    Add arguments element-wise.
-subtract(x1, x2, [, out, where, casting, …])    Subtract arguments, element-wise.
 multiply(x1, x2, [, out, where, casting, …])    Multiply arguments element-wise.
 divide(x1, x2, [, out, where, casting, …])    Returns a true division of the inputs, element-wise.
 
-copysign(x1, x2, [, out, where, casting, …])    Change the sign of x1 to that of x2, element-wise.
+maximum(x1, x2, [, out, where, casting, …])    Element-wise maximum of array elements.
+minimum(x1, x2, [, out, where, casting, …])    Element-wise minimum of array elements.
+fmax(x1, x2, [, out, where, casting, …])    Element-wise maximum of array elements.
+fmin(x1, x2, [, out, where, casting, …])    Element-wise minimum of array elements.
 
+add(x1, x2, [, out, where, casting, order, …])    Add arguments element-wise.
+subtract(x1, x2, [, out, where, casting, …])    Subtract arguments, element-wise.
+
+copysign(x1, x2, [, out, where, casting, …])    Change the sign of x1 to that of x2, element-wise.
 """
 
 
@@ -237,10 +242,6 @@ less(x1, x2, [, out, where, casting, …])    Return the truth value of (x1 < x2
 less_equal(x1, x2, [, out, where, casting, …])    Return the truth value of (x1 =< x2) element-wise.
 not_equal(x1, x2, [, out, where, casting, …])    Return (x1 != x2) element-wise.
 equal(x1, x2, [, out, where, casting, …])    Return (x1 == x2) element-wise.
-maximum(x1, x2, [, out, where, casting, …])    Element-wise maximum of array elements.
-minimum(x1, x2, [, out, where, casting, …])    Element-wise minimum of array elements.
-fmax(x1, x2, [, out, where, casting, …])    Element-wise maximum of array elements.
-fmin(x1, x2, [, out, where, casting, …])    Element-wise minimum of array elements.
 
 """
 
@@ -316,7 +317,7 @@ class NDMath(object):
                     'add', 'subtract']
     __remove_title = ['multiply', 'divide', 'true_divide', 'floor_divide', 'mod', 'fmod', 'remainder',
                       'logaddexp', 'logaddexp2']
-    _compatible_units = ['lt', 'le', 'ge', 'gt', 'add', 'sub', 'iadd', 'isub']
+    _compatible_units = ['lt', 'le', 'ge', 'gt', 'add', 'sub', 'iadd', 'isub', 'maximum', 'minimum', 'fmin', 'fmax']
     __complex_funcs = ['real', 'imag', 'conjugate', 'absolute', 'conj', 'abs']
     
     # the following methods are to give NDArray based class
@@ -376,16 +377,6 @@ class NDMath(object):
                 else:
                     new.title = f"{fname}(data)"
             return new
-    
-    #    def __array_finalize__(self):
-    #        print('__array_finalize__')
-    
-    #    def __array__(self):
-    #        print('__array__')
-    
-    #    def __array_wrap__(self, *args):
-    #        # not sure we still need this
-    #        raise NotImplementedError()
     
     # ------------------------------------------------------------------------------------------------------------------
     # public methods
@@ -457,64 +448,89 @@ class NDMath(object):
         return func(self, *args, **kwargs)
     
     # ..................................................................................................................
-    @getdocfrom(np.sum)
     def sum(self, *args, **kwargs):
         """sum along axis"""
         
-        return self._funcs_reduce('sum', *args, **kwargs)
+        return self._reduce_method('sum', *args, **kwargs)
+
+    def prod(self, *args, **kwargs):
+        """product along axis"""
+
+        return self._reduce_method('prod', *args, **kwargs)
     
-    @getdocfrom(np.cumsum)
+    product = prod
+    
     def cumsum(self, *args, **kwargs):
         """cumsum along axis"""
         
-        return self._funcs_reduce('cumsum', *args, **kwargs)
+        return self._method('cumsum', *args, **kwargs)
+
+    def cumprod(self, *args, **kwargs):
+        """cumprod along axis"""
+    
+        return self._method('cumprod', *args, **kwargs)
+    
+    cumproduct = cumprod
     
     # ..................................................................................................................
-    @getdocfrom(np.mean)
     def mean(self, *args, **kwargs):
         """mean values along axis"""
         
-        return self._funcs_reduce('mean', *args, keepdims=False, **kwargs)
+        return self._reduce_method('mean', *args, **kwargs)
     
     # ..................................................................................................................
-    @getdocfrom(np.var)
     def var(self, *args, **kwargs):
         """variance values along axis"""
         
-        return self._funcs_reduce('var', *args, **kwargs)
+        return self._reduce_method('var', *args, **kwargs)
     
     # ..................................................................................................................
-    @getdocfrom(np.std)
     def std(self, *args, **kwargs):
         """Standard deviation values along axis"""
         
-        return self._funcs_reduce('std', *args, **kwargs)
+        return self._reduce_method('std', *args, **kwargs)
     
     # ..................................................................................................................
-    @getdocfrom(np.ptp)
     def ptp(self, *args, **kwargs):
-        """amplitude of data along axis"""
+        """
+        Range of values (maximum - minimum) along a dimension.
         
-        return self._funcs_reduce('ptp', *args, **kwargs)
+        The name of the function comes from the acronym for 'peak to peak'.
+        
+        Parameters
+        ----------
+        axis : None or int, optional
+            Dimension along which to find the peaks.
+            If None, the operation is made on the first dimension
+        keepdims : bool, optional
+            If this is set to True, the dimensions which are reduced are left
+            in the result as dimensions with size one. With this option,
+            the result will broadcast correctly against the input dataset.
+        
+        Returns
+        -------
+        ptp : nddataset
+            A new dataset holding the result.
+        
+        """
+        
+        return self._reduce_method('ptp', *args, **kwargs)
     
     # ..................................................................................................................
-    @getdocfrom(np.all)
     def all(self, *args, **kwargs):
         """Test whether all array elements along a given axis evaluate to True."""
         
-        return self._funcs_reduce('all', *args, keepunits=False, **kwargs)
+        return self._reduce_method('all', *args, keepunits=False, **kwargs)
     
     # ..................................................................................................................
-    @getdocfrom(np.any)
     def any(self, *args, **kwargs):
         """Test whether any array elements along a given axis evaluate to True."""
         
-        return self._funcs_reduce('any', *args, keepunits=False, **kwargs)
+        return self._reduce_method('any', *args, keepunits=False, **kwargs)
     
     sometrue = any
     
     # ..................................................................................................................
-    @getdocfrom(np.diag)
     def diag(self, **kwargs):
         """take diagonal of a 2D array"""
         # As we reduce a 2D to a 1D we must specified which is the dimension for the coordinates to keep!
@@ -522,32 +538,58 @@ class NDMath(object):
         if not kwargs.get("axis", kwargs.get("dims", kwargs.get("dim", None))):
             warning_('dimensions to remove for coordinates must be specified. By default the fist is kept. ')
         
-        return self._funcs_reduce('diag', **kwargs)
+        return self._reduce_method('diag', **kwargs)
     
     # ..................................................................................................................
-    @getdocfrom(np.clip)
     def clip(self, *args, **kwargs):
-        """Clip (limit) the values in an array."""
-        # TODO: account for units
+        """
+        Clip (limit) the values in a dataset.
+        
+        Given an interval, values outside the interval are clipped to
+        the interval edges.  For example, if an interval of ``[0, 1]``
+        is specified, values smaller than 0 become 0, and values larger
+        than 1 become 1.
+        
+        No check is performed to ensure ``a_min < a_max``.
+        
+        Parameters
+        ----------
+        a_min : scalar or array_like or None
+            Minimum value. If None, clipping is not performed on lower
+            interval edge. Not more than one of `a_min` and `a_max` may be
+            None.
+        a_max : scalar or array_like or None
+            Maximum value. If None, clipping is not performed on upper
+            interval edge. Not more than one of `a_min` and `a_max` may be
+            None. If `a_min` or `a_max` are array_like, then the three
+            arrays will be broadcasted to match their shapes.
+
+        Returns
+        -------
+        clipped_array : ndarray
+            An array with the elements of `a`, but where values
+            < `a_min` are replaced with `a_min`, and those > `a_max`
+            with `a_max`.
+        """
         if len(args) > 2 or len(args) == 0:
-            raise ValueError('Clip requires at least one or two arguments at most')
-        elif len(args) == 1:
-            kwargs['a_max'] = args[0]
-            kwargs['a_min'] = np.min(self.data)
-        else:
-            kwargs['a_min'], kwargs['a_max'] = args
-        args = ()  # reset args
-        amin, amax = kwargs['a_min'], kwargs['a_max']
-        res = self._funcs_reduce('clip', *args, **kwargs)
-        res.history = f'Clip applied with limits between {amin} and {amax}'
+            raise ValueError('Clip requires at least one argument or at most two arguments')
+        amax = kwargs.pop('a_max', args[0] if len(args) == 1 else args[1])
+        amin = kwargs.pop('a_min', self.min() if len(args) == 1 else args[0])
+        amin, amax = np.minimum(amin, amax), max(amin, amax)
+        if self.has_units:
+            if not isinstance(amin, Quantity) :
+                amin = amin  * self.units
+            if not isinstance(amax, Quantity) :
+                amax = amax * self.units
+        res = self._method('clip', a_min=amin, a_max=amax, **kwargs)
+        res.history = f'Clipped with limits between {amin} and {amax}'
         return res
-    
+
     # ..................................................................................................................
-    @getdocfrom(np.round)
     def round(self, *args, **kwargs):
         """Round an array to the given number of decimals.."""
         
-        return self._funcs_reduce('round', *args, **kwargs)
+        return self._method('round', *args, **kwargs)
     
     around = round_ = round
     
@@ -599,13 +641,12 @@ class NDMath(object):
         nanmin, minimum, fmin
 
         """
-        
-        return self._extrema('amin', *args, **kwargs)
+        return self._reduce_method('amin', *args, **kwargs)
     
     min = amin
     
     # ..................................................................................................................
-    def amax(self, *args, **kwargs):
+    def max(self, *args, **kwargs):
         """
         Return the maximum of the dataset or maxima along given dimensions.
         
@@ -654,127 +695,61 @@ class NDMath(object):
         
         """
 
-        return self._extrema('amax', *args, **kwargs)
+        return self._reduce_method('max', *args, **kwargs)
     
-    max = amax
+    amax = max
     
     # ..................................................................................................................
     def argmin(self, *args, **kwargs):
         """indexes of minimum of data along axis"""
-        
-        return self._extrema('min', *args, only_index=True, **kwargs)
+
+        return self._reduce_method('argmin', *args, **kwargs)
     
     # ..................................................................................................................
-    @getdocfrom(np.argmax)
     def argmax(self, *args, **kwargs):
         """indexes of maximum of data along axis"""
-        
-        return self._extrema('max', *args, only_index=True, **kwargs)
+
+        return self._reduce_method('argmax', *args, **kwargs)
+
+    # ..................................................................................................................
+    def coordmin(self, *args, **kwargs):
+        """Coordinates of minimum of data along axis"""
     
+        mi = self.min(keepdims=True)
+        return mi.coords
+    
+    # ..................................................................................................................
+    def coordmax(self, *args, **kwargs):
+        """Coordinates of maximum of data along axis"""
+
+        ma = self.max(keepdims=True)
+        return ma.coords
+        
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------------------------------------------------
+
+    # Methods without dataset reduction
+    def _method(self, op, *args, **kwargs):
     
-    # Find extrema
-    def _extrema(self, op, *args, only_index=False, only_coords=False, **kwargs):
-        
-        # as data can be complex or quaternion, it is worth to note that min and
-        # max refer to the real part of the object. If one wants an extremum for
-        # the absolute or the imaginary part, the input data must have been
-        # prepared for this.
-        
-        # by defaut we do return a dataset
-        # but if keepdims is False,  then a scalar value will be returned for
-        # 1D array and a squeezed NDDataset for multidimensional arrays
-    
-        keepdims = kwargs.pop('keepdims', False)
-        keepunits = kwargs.pop('keepunits', True)
-        
-        # handle the various syntax to pass the axis
-        # to be compatible with numpy we need to check the axis or dim keyword.
-        # if they are None, they the maximum is taken on a flattened array
-        
-        axis, dim = self.get_axis(*args, **kwargs, allows_none=True)
-        kwargs['axis'] = axis
-        
-        # dim or dims keyword not accepted by the np function, so remove it
-        kwargs.pop('dims', None)
-        kwargs.pop('dim', None)
-        
-        # get the location of the extremum
-        if op.startswith('a'):  # deal with the amax, amin name
-            op = op[1:]
-        idx = getattr(self.real.masked_data, f"arg{op}")(**kwargs)
-        
-        if axis is None:
-            # unravel only when axis=None
-            # (as the search was done on the flatten array)
-            idx = np.unravel_index(idx, self.shape)
-        
-        # argmax, argmin
-        # --------------
-        # if we wants only the indexes of the extremum, return it now
-        if only_index:
-            if self.ndim == 1:
-                idx = idx[0]
-            return idx
-        
-        # idxmax, idxmin
-        # --------------
-        # or the coordinates
-        elif only_coords:
-            pass #TODO : return coordinates of the maxima
-            raise NotImplementedError('Not yet implemented!')
-        
-        # max, min, amax, amin
-        #---------------------
-        # now slice the array according to this indexes
-        if axis is None:
-            new = self[idx]
-        else:
-            # a little more complicated
-            if self.ndim > 2:
-                #TODO: for now I did not find a way to use the idx
-                #      for fancy indexing of the NDDataset with ndim > 2
-                raise NotImplementedError
-            new = self.take(idx, dim=axis)
-            new = new.diag(dim=axis)
-        
-        # return the results according to the keepdims and keepunits parameter
-        if not keepdims:
-            new.squeeze(inplace=True)
-            arr = new.data
-            if new.ndim == 0:
-                # a single element, return only the values
-                arr = arr[()]  # keep only value
-            if new.has_units and keepunits:
-                new = arr * new._units
-            else:
-                new = arr
-        
-        return new  #
-    
-    # Non ufunc reduce functions
-    def _funcs_reduce(self, op, *args, **kwargs):
-        
         new = self.copy()
-        
-        keepdims = kwargs.pop('keepdims', True)
-        keepunits = kwargs.pop('keepunits', True)
-        
+
+        if args:
+            kwargs['dim']=args[0]
+            args = []
+    
         # handle the various syntax to pass the axis
         dims = self._get_dims_from_args(*args, **kwargs)
         axis = self._get_dims_index(dims)
-        axis = axis[0] if axis else None
-        kwargs['axis'] = axis
-        
+        axis = axis[0] if axis and not self.is_1d else None
+        if axis is not None:
+            kwargs['axis'] = axis
+
         # dim and dims keyword not accepted by the np function, so remove it
         kwargs.pop('dims', None)
         kwargs.pop('dim', None)
-        if op in ['diag', 'round', 'clip']:
-            # also remove axis
-            kwargs.pop('axis', None)
         
+        # apply the numpy operator on the masked data
         arr = getattr(np, op)(self.masked_data, *args, **kwargs)
         
         if isinstance(arr, MaskedArray):
@@ -785,25 +760,108 @@ class NDMath(object):
             new._data = arr
             new._mask = NOMASK
         
-        else:
-            if new.has_units and keepunits:
-                new = arr * new._units
-            else:
-                new = arr
+        # particular case of functions that returns Dataset with no coordinates
+        if axis is None and op in ['cumsum', 'cumprod']:
+                # delete all coordinates
+                new._coords.data = None
         
-        # particular case of functions that returns flatten array
-        if self.ndim > 1 and axis is None and op in ['cumsum', ]:
-            # delete all coordinates
-            new._coords = None
-        
-        # we must reduce the corresponding coordinates
-        if axis is not None and (not keepdims or op == 'diag'):
+        # Here we must reduce the corresponding coordinates
+        elif axis is not None:
             dim = new._dims[axis]
-            del new._dims[axis]
+            if op not in ['cumsum', 'cumprod']:
+                del new._dims[axis]
             if new.implements('NDDataset') and new._coords and (dim in new._coords.names):
                 idx = new._coords.names.index(dim)
-                del new._coords[idx]
+                del new._coords.coords[idx]
+    
+        new.history = f'Dataset resulting from application of `{op}` method'
+        return new
+    
+    
+    # Methods with dataset reduction
+    def _reduce_method(self, op, *args, **kwargs):
+        # TODO: make change to handle complex and quaternion
+        new = self.copy()
         
+        keepdims = kwargs.get('keepdims', False)
+        keepunits = kwargs.pop('keepunits', True)
+        
+        if args:
+            kwargs['dim']=args[0]
+            args = []
+            
+        # handle the various syntax to pass the axis
+        dims = self._get_dims_from_args(*args, **kwargs)
+        axis = self._get_dims_index(dims)
+        axis = axis[0] if axis and not self.is_1d else None
+        kwargs['axis'] = axis
+        
+        # dim and dims keyword not accepted by the np function, so remove it
+        kwargs.pop('dims', None)
+        kwargs.pop('dim', None)
+        if op in ['diag']:
+            # also remove axis
+            kwargs.pop('axis', None)
+        
+        # particular case of ptp
+        if axis is None and not self.is_1d and op in ['ptp']:
+            kwargs['axis'] = axis = -1
+            
+        # particular case of argmax and argmin that only return indexes
+        if op in ['argmin', 'argmax']:
+            kwargs.pop('keepdims', None)
+            idx =  getattr(np, op)(self.real.masked_data, **kwargs)
+            idx = np.unravel_index(idx, self.shape)
+            if self.ndim==1:
+                idx = idx[0]
+            return idx
+           
+        # particular case of max and min
+        if axis is None and keepdims and op in ['max', 'amax', 'min', 'amin']:
+            if op.startswith('a'):
+                op = op[1:]
+            idx =  getattr(np, "arg"+op)(self.real.masked_data)
+            idx = np.unravel_index(idx, self.shape)
+            new = self[idx]
+        
+        else:
+            # apply the numpy operator on the masked data
+            arr = getattr(np, op)(self.real.masked_data, *args, **kwargs)
+    
+            # simpler case where we return a scalar value or a quantity
+    
+            if isinstance(arr, MaskedArray):
+                new._data = arr.data
+                new._mask = arr.mask
+            
+            elif isinstance(arr, np.ndarray):
+                new._data = arr
+                new._mask = NOMASK
+                
+            else:
+                # simpler case for a returned scalar or quantity
+                if new.has_units and keepunits:
+                    new = arr * new._units
+                else:
+                    new = arr
+                if not keepdims:
+                    return new
+                    
+            # particular case of functions that returns Dataset with no coordinates
+            if axis is None and op in ['sum', 'prod', 'mean', 'var', 'std']:
+                # delete all coordinates
+                new._coords = None
+            
+            # Here we must reduce the corresponding coordinates
+            elif axis is not None:
+                dim = new._dims[axis]
+                if not keepdims:
+                    del new._dims[axis]
+                if new.implements('NDDataset') and new._coords and (dim in new._coords.names):
+                    idx = new._coords.names.index(dim)
+                    del new._coords.coords[idx]
+
+        new.history = f'Reduced dataset resulting from application of `{op}` method'
         return new
 
     # ..................................................................................................................
@@ -1000,20 +1058,21 @@ class NDMath(object):
             return _units
         
         # define an arbitrary quantity `q` on which to perform the units calculation
+        factor = 1.
         if units is not None:
-            q = .999 * check_require_units(fname, units)
+            q = 0.999 * check_require_units(fname, units)
         else:
-            q = .999
+            q = 0.999
         
         for i, argunit in enumerate(argunits[:]):
             if argunit is not None:
-                argunits[i] = 0.999 * check_require_units(fname, argunit)
+                argunits[i] = 0.998 * check_require_units(fname, argunit)
             else:
                 # here we want to change the behavior a pint regarding the addition of scalar to quantity
                 # in principle it is only possible with dimensionless quantity, else a dimensionerror is raised.
-                argunits[i] = 0.999
+                argunits[i] = 0.998
                 if fname in ['add', 'sub', 'iadd', 'isub', 'and', 'xor', 'or'] and units is not None:
-                    argunits[i] = 0.999 * check_require_units(fname, units)  # take the unit of the first obj
+                    argunits[i] = 0.998 * check_require_units(fname, units)  # take the unit of the first obj
         
         if fname in ['fabs']:
             # units is lost for these operations: attempt to correct this behavior
@@ -1027,6 +1086,8 @@ class NDMath(object):
         else:
             if fname == 'cbrt':  # ufunc missing in pint
                 q = q ** (1. / 3.)
+            elif fname in ['maximum', 'minimum', 'fmax', 'fmin']:
+                q = q
             else:
                 if fname.startswith('log'):
                     f = np.log  # all similar regardings units
@@ -1035,9 +1096,17 @@ class NDMath(object):
                 
                 # print(f, q, *argunits)
                 q = f(q, *argunits)
-            
+                
             if hasattr(q, 'units'):
-                units = q.units
+                if not np.isfinite(q):
+                    q = 1. * q.units
+                if q==0.0:
+                    q=(q.m+.1) * q.units
+                qr = q.to_base_units()
+                factor = np.abs(qr.m)/np.abs(q.m)
+                if not np.isfinite(factor):
+                    raise ZeroDivisionError
+                units = qr.units
             else:
                 units = UNITLESS
         
@@ -1097,7 +1166,7 @@ class NDMath(object):
             mask = np.zeros_like(data, dtype=bool)
         
         # return calculated data, units and mask
-        return data, units, mask, returntype
+        return data * factor, units, mask, returntype
     
     # ..................................................................................................................
     @staticmethod
