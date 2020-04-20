@@ -5,7 +5,7 @@ channels:
 - spectrocat
 dependencies:
 - numpy
-- matplotlib=3.0.3
+- matplotlib
 - traitlets
 - pint=0.9
 - quaternion
