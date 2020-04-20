@@ -188,7 +188,7 @@ _ = pca.screeplot(n_pc=8)
 
 # %%
 S, LT = pca.transform(n_pc=8)
-_ = S[:8].T.plot()
+_ = S.T.plot()
 _ = LT.plot()
 
 # %% [markdown]
