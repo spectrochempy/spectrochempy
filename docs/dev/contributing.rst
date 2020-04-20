@@ -65,35 +65,152 @@ from others.
 Contributing to the code
 =========================
 
-Installing a developper version
+Installing a developer version
 ********************************
 
-The best to proceed with development is that the developers have a similar
-python environment.
+Spectrochempy in the development version requires ~ 380 Mo (among which ~300 Mo for the
+.git folder). The best to proceed with development
+is also to include a specific python environment (scipy-dev) which will add up ~ in
+the Anaconda/Miniconda Env folder.
 
-The official master repository has been tested on the 3.6 or 3.7 python version.
-It may work with earlier
-version of python, *e.g.*, <3.6 but this has not yet been tested.
-
-For sure, it will not work for python 2.7.x and no attempt to get such
+The master repository is tested on the 3.6 or 3.7 python version.
+It may work with earlier version of python, *e.g.*, < 3.6 but this has not been tested. For sure, it will NOT work for python 2.7.x and no attempt to get such
 compatibility will be made.
 
 Install Anaconda
 ----------------
 
-#.  To install Anaconda (or Miniconda)
+#.  To install Anaconda or Miniconda:
 
-    Go to `Anaconda download website <https://www.anaconda.com/download/>`_ the
-    and choose your platform. Download one of the available graphical
-    installer, *e.g.*, the 3.6 or + version.
+    Miniconda is much lighter while Anaconda is more complete if you intend using
+    python beyond Spectrochempy.
 
+    Go to `Anaconda download page <https://www.anaconda.com/distribution/>`_ or
+    `Miniconda download page <https://docs.conda.io/en/latest/miniconda.html>`_.
+    Choose your platform and download one of the available installer, *e.g.*, the 3.6 or + version.
 
-#.  Install the version of Anaconda which you just downloaded, following
-    the instructions on the download page.
+#.  Install the version which you just downloaded, following the instructions on the download page.
 
 .. _clonescpy:
 
-Install a developpement version of SpectroChemPy
+Install a development version of SpectroChemPy on WINDOWS
+-----------------------------------------------------------
+
+#.  Open a command prompt (Select the Start button and type cmd), or preferably open the Anaconda Prompt /
+    Powershell Prompt in the Anaconda start Menu.
+
+#.  Update conda (yes, even if you have just installed the distribution...):
+
+    .. sourcecode:: bat
+
+        (base) C:\<yourDefaultPath>> conda update conda
+
+    where `<yourDefaultPath>` is you default workspace directory (e.g. `C:\\Users\\<user>`)
+
+#.  Add channels to get specific packages:
+
+    .. sourcecode:: bat
+
+        C:\<yourDefaultPath>> conda config --add channels conda-forge
+        C:\<yourDefaultPath>> conda config --add channels spectrocat
+
+#.  Check whether `git` is installed :
+
+        (base) C:\<yourDefaultPath>> git --version
+
+    if not, install the `command line version <https://git-scm.com/download/win>`_ of git or the  `command line version + GUI <https://desktop.github.com/>`_
+
+
+#.  If necessary create your installation directory and go to it.
+
+    We recommend NOT to name it `spectrochempy` because two nested folders `spectrochempy` will also be created at
+    the install... you would have then 3 nested `spectrochempy` folders...
+
+    .. sourcecode:: bat
+
+        (base) C:\<yourDefaultPath>> mkdir <yourInstallDirectory>
+        (base) C:\<yourDefaultPath>> cd <yourInstallDirectory>
+
+#.  clone spectrochempy in your installation directory:
+
+        (base) C:\<yourInstallDirectory>> git clone https://bitbucket.org/spectrocat/spectrochempy.git
+
+    This may take a while, go and get your favorite drink or whatever else pleases you...
+
+#.  Go in the `spectrochempy` directory and create the scpy-dev environment
+
+    .. sourcecode:: bat
+
+        (base) C:\<yourInstallDirectory>\spectrochempy> cd spectrochempy
+        (base) C:\<yourInstallDirectory>\spectrochempy> conda env create -f env/scpy-dev.yml
+
+    This also takes time. Go and get second favorite drink, etc... while the package download and
+    extraction proceeds...
+
+#.  Switch to this environment:
+
+    .. sourcecode:: bat
+
+        (base) C:\<yourInstallDirectory>\spectrochempy> activate scpy-dev
+
+#.  At this point, `(scpy-dev)` should appear before the prompt. Then install the spectrochempy package in this environment:
+
+    .. sourcecode:: bat
+
+        (scpy-dev) C:/<your installdir>/spectrochempy> pip install -e .
+
+    Note that you can make the scipy-dev it permanent by creating and using the following batch file (.bat)
+
+    .. sourcecode:: bat
+
+        @REM launch a cmd window in scpy-dev environment (path should be adapted)
+        @CALL CD C:<yourWorkingFolder>
+        @CALL CMD /K C:<yourAnacondaFolder>\Scripts\activate.bat scpy-dev
+
+    where `<yourWorkingFolder>` is the folder where the prompt window will open (e.g. `users\<username` and
+    `<yourAnacondaFolder>` is the Anaconda or Miniconda folder (often `C:\Anaconda3` or `C:\Miniconda3`).
+    Save the batch file in e.g. `<yourAnacondaFolder>`, create a shortcut and put it in your desktop or in the
+    start menu
+
+#.  If during set up or runtime, some packages with name <pkgname> appear to
+    be missing, just install them using
+
+    .. sourcecode:: bat
+
+       (scpy-dev) C:/<your installdir>/spectrochempy> conda install <pkgname>
+
+    or
+
+    .. sourcecode:: bat
+
+       (scpy-dev) C:/<your installdir>/spectrochempy> pip install <pkgname>
+
+#.  Launch python from any working directory:
+
+    .. sourcecode:: bat
+
+        (scpy-dev)  C:\<your workspace>>python
+
+    .. sourcecode:: python
+
+        >>> from spectrochempy import *
+
+    you should then see the following output after few seconds
+
+    ``SpectroChemPy's API - v.0.1a14.dev18+g86dfb85``
+
+    ``(c) Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS``
+
+    and then be able to issue a scpy command:
+
+    .. sourcecode:: python
+
+        >>> NDDataset()
+
+    If this goes well, your install should be fucntional, but not bug-free yet :-(...
+
+
+Install a development version of SpectroChemPy on MAC OS
 ------------------------------------------------
 
 #.  Git clone the |scpy| `Bitbucket repository <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_
@@ -167,7 +284,7 @@ Install a developpement version of SpectroChemPy
 .. _forkscpy:
 
 Create a SpectroChemPy fork repository
-------------------------------------------------------
+---------------------------------------
 
 The problem with the above procedure is that you can commit change
 made to the application locally, but you won't be able to push any changes to the
