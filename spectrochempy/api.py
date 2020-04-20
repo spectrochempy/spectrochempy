@@ -154,6 +154,7 @@ if not IN_IPYTHON:
     initcolor()
 
 def set_backend():
+    
     if IN_IPYTHON and kernel and not NO_DISPLAY:
         try:
             if 'ipykernel_launcher' in sys.argv[0] and \
@@ -162,10 +163,12 @@ def set_backend():
                 ip.magic('matplotlib inline')
             else:
                 # here its a normal magic function that works in both
-                # jupyter notebook and jupyter lab  -
-                #TODO: unfortunatelly, right after the loading of the API the backend come back from `widget` to `inline`
-                # (but I didn't find the reason for now)
-                ip.magic('matplotlib widget')
+                # jupyter notebook and jupyter lab < 2.1.0 -
+                import jupyterlab
+                if jupyterlab.__version__.split('.')[0] == '2':
+                    ip.magic('matplotlib inline')
+                else:
+                    ip.magic('matplotlib widget')
         except:
             ip.magic('matplotlib tk')
 
