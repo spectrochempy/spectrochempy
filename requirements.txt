@@ -1,12 +1,11 @@
 # dependencies:
 # for the core package
 numpy
-matplotlib
+matplotlib===3.0.3
 traitlets
 pint==0.9
 quaternion
 quadprog
-cvxopt
 # some other useful package
 xarray
 datashader

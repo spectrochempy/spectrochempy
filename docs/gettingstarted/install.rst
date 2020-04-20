@@ -8,185 +8,157 @@ Installation Guide
 .. contents::
    :local:
 
-
-Where to Get |scpy|
-====================
-
-To get a working installation of |scpy|, on any platform (windows, mac OS X, Linux ... ),
-several solutions are (*or will be soon*) available.
-
-* :ref:`pypi`
-
-* :ref:`conda`
-
-* :ref:`dev`
-
-* :ref:`clone`
-
-
 Requirements
 ============
 
-|scpy| requires a working python installation.
+|scpy| requires a working python installation (version 3.6 or higher), C/C++ compiler for some modules, Git to get the
+last version of the code.
 
 * `Python <http://www.python.org/>`_
+    We highly recommend to install **Miniconda** or **Anaconda** python framework (a much straightforward
+    solution!) which is available for most platforms and  the rest of this guide will mainly
+    use commands for this distribution.
 
-.. warning::
+    Miniconda is much lighter while Anaconda is more complete if you intend using
+    python beyond Spectrochempy.
 
-    Only the python version 3.6 and 3.7 have been tested so far.
+    Go to `Anaconda download page <https://www.anaconda.com/distribution/>`_ or
+    `Miniconda download page <https://docs.conda.io/en/latest/miniconda.html>`_.
+    Choose your platform and download one of the available installer, *e.g.*, the 3.6 or + version.
 
+    Install the version which you just downloaded, following the instructions on the download page.
 
-The following libraries are also required such as :
+* C/C++ Tools
 
-* `Numpy <http://numpy.scipy.org>`_
+  Some modules need a C/C++ compilation. They are present by default in Mac OS and Linux platforms. For
+  windows, download and install `Build Tools for Visual Studio <https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16>`_
 
-* `Scipy <http://www.scipy.org/>`_
+* git
 
-* `Matplotlib <http://matplotlib.sourceforge.net/index.html>`_
+  Check whether git is installed.
 
+    * WIN: open a command prompt (Select the Start button and type cmd), or preferably open the Anaconda Prompt or
+      Powershell Prompt in the Anaconda start Menu) and type the command:
 
-Follow the instructions to install these packages on those sites, or, far easier,
-install them as packages from your operating system
-(e.g. apt-get or the synaptic GUI on Ubuntu,`Macports <http://www.macports.org/>`_ on OS X, etc.).
+    .. sourcecode:: bat
 
-Regarding the installation of all these above packages,
-we highy recommend to install **anaconda** or **canopy** python framework (a much straitforward
-solution!) which is available for most platforms.
+        C:\<yourDefaultPath>> git --version
 
-We prefer the **anaconda distribution**, so that the rest of this guide will mainly
-use commands for this distribution.
+    if this returns an error, install the `command line version <https://git-scm.com/download/win>`_ of git.
 
-* install the **Anaconda Scientific Python Distribution** :
-  Go to `http://continuum.io/downloads <http://continuum.io/downloads>`_ and follow the instructions for your platform
-
-  Finally, see :ref:`conda` for installing the |scpy| conda package.
-
-If you prefer **Canopy** here it is:
-
-* install the **Canopy Enthought Distribution** :Go to `https://store.enthought.com/downloads/ <https://store.enthought.com/downloads/>`_ (it's a commercial distribution, but you have a free version Canopy Express.
-
-  If you register with your academic email, you can get the full academic version).
-
-  Finally, see :ref:`pypi` for installing |scpy| .
-
+    * MAC/OS, LINUX: by default Git is installed on Linux and macOS computers as a command line option.
 
 Installation
 =============
 
 .. _conda:
 
-Standard installation using Conda
+Installation using Conda and git
 *********************************
 
-Very simple, use the following command in a terminal:
+WINDOWS
+-------
+
+#.  Open a command prompt (Select the Start button and type cmd), or preferably open the Anaconda Prompt or
+    Powershell Prompt in the Anaconda start Menu.
+
+#.  Update conda (yes, even if you have just installed the distribution...):
+
+    .. sourcecode:: bat
+
+        (base) C:\<yourDefaultPath>> conda update conda
+
+    where `<yourDefaultPath>` is you default workspace directory (e.g. `C:\\Users\\<user>`)
+
+#.  Add channels to get specific packages:
+
+    .. sourcecode:: bat
+
+        C:\<yourDefaultPath>> conda config --add channels conda-forge
+
+#.  If necessary create your installation directory or go to it.
+
+    We recommend NOT to name it `spectrochempy` because two nested folders `spectrochempy` will also be created at
+    the install. You would have then 3 nested `spectrochempy` folders...
+
+    .. sourcecode:: bat
+
+        (base) C:\<yourDefaultPath>> mkdir <yourInstallDirectory>
+        (base) C:\<yourDefaultPath>> cd <yourInstallDirectory>
+
+#.  Clone spectrochempy in your installation directory:
+
+        (base) C:\<yourInstallDirectory>> git clone --depth 1 https://bitbucket.org/spectrocat/spectrochempy.git
+
+    This may take few minutes, go and get your favorite drink or whatever else pleases you...
+
+#.  For compatibility issues we STRONGLY recommend using a specific conda environment to use |scpy|.
+    To do so go in the `spectrochempy` directory and create the scpy environment:
+
+    .. sourcecode:: bat
+
+        (base) C:\<yourInstallDirectory>\spectrochempy> cd spectrochempy
+        (base) C:\<yourInstallDirectory>\spectrochempy> conda env create -f env/scpy.yml
+
+    This also takes time. Go and get second favorite drink, etc... while the package download and
+    extraction proceeds...
+
+#.  Switch to this environment:
+
+    .. sourcecode:: bat
+
+        (base) C:\<yourInstallDirectory>\spectrochempy> conda activate scpy
+
+#.  At this point, `(scpy)` should appear before the prompt. Then install the spectrochempy package in this environment:
+
+    .. sourcecode:: bat
+
+        (scpy) C:/<your installdir>/spectrochempy> pip install .
+
+
+MAC OS, LINUX
+-------------
+#. Open a terminal and update conda:
 
 .. sourcecode:: bash
 
    $ conda update -n base conda
-   $ conda config –add channels conda-forge
-   $ conda config –add channels spectrocat
 
-This will add the necessary channels where to find the various libraries used by |scpy| .
+#.  Add channels to get specific packages:
 
-Next we recommend to use a dedicated environment for |scpy|, called
-for example ``scpy``
+.. sourcecode:: bash
+
+   $ conda config --add channels conda-forge
+
+#.  If necessary create your installation directory or go to it.
+
+    We recommend NOT to name it `spectrochempy` because two nested folders `spectrochempy` will also be created at
+    the install. You would have then 3 nested `spectrochempy` folders...
+
+    .. sourcecode:: bash
+
+        $ mkdir <yourInstallDirectory>
+        $ cd <yourInstallDirectory>
+
+#.  For compatibility issues we STRONGLY recommend using a specific conda environment to use |scpy|.
+    To do so go in the `spectrochempy` directory and create the scpy environment:
 
 .. sourcecode:: bash
 
    $ conda env create -f=env/scpy.yml
-   $ conda activate scpy
 
-Next one can install |scpy|:
+#.  Switch to this environment:
 
-.. sourcecode:: bash
+    .. sourcecode:: bash
 
-   $ conda install spectrochempy
+        $ conda activate scpy
 
-.. note::
+#.  At this point, `(scpy)` should appear before the prompt. Then install the spectrochempy package in this environment:
 
-   the conda installer doesn't exist right now. It will be present for version
-   relase 0.1.b0
+    .. sourcecode:: bash
 
-   For now, use the method described for developper, here: :ref:`develguide`
+        (scpy) $ pip install .
 
-
-.. _pypi:
-
-Standard Installation from PyPi using pip
-*****************************************
-
-Again very simple, use the following command in a terminal:
-
-.. sourcecode:: bash
-
-   $ pip install spectrochempy
-
-or to update a previous installation with the latest stable release:
-
-.. sourcecode:: bash
-
-   $ pip install -U spectrochempy
-
-.. note::
-
-   the Pypi installer doesn't exist right now. It will be present for version
-   release 0.1.b0
-
-.. _dev:
-
-Installation from zip archives
-*******************************
-
-Downloads of zip source archives working for all platforms are available, on Bitbucket
-
-* `Development sources <https://bitbucket.org/spectrocat/spectrochempy/downloads/?tab=tags>`_
-
-or on PyPi:
-
-* `Download tar.gz archives from PyPi <http://pypi.python.org/pypi/spectrochempy>`_
-
-Ungzip and untar the source package and execute:
-
-.. sourcecode:: bash
-
-    $ cd <directory>    # replace <directory> by the actual download folder
-    $ pip install .
-
-.. tip::
-
-    On most UNIX-like systems, you’ll probably need to run these commands as
-    root or using sudo.
-
-.. _clone:
-
-Clone or Fork of the Bitbucket Repository
-*****************************************
-
-Alternatively, you can make a clone/fork of the github sources at:
-
-* `https://bitbucket.org/spectrocat/spectrochempy  <https://bitbucket.org/spectrocat/spectrochempy>`_
-
-This is the recommended solution for developpers and those who would like to
-contribute (see :ref:`develguide`).
-
-But it is also a simple way to stay up-to-date with the lastest version of |scpy|.
-
-In short, if you have already installed |scpy| using one of the above solutions,
-remove it with the following command,
-else go to the next step :
-
-.. sourcecode:: bash
-
-   $ conda remove --force spectrochempy
-
-then:
-
-.. sourcecode:: bash
-
-   $ git clone https://bitbucket.org/spectrocat/spectrochempy.git
-   $ cd spectrochempy
-   $ conda env create -f=env/scpy-dev.yml
-   $ pip install -e .
 
 
 Check the Installation
