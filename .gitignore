@@ -37,6 +37,7 @@
 *.ipynb_checkpoints/
 Untitled.ipynb
 essai.ipynb
+*.ipynb
 
 # VS
 # ----------------------------------------------------------------------------------------------------------------------
@@ -160,3 +161,4 @@ var/
 /quaternion/_version.py
 auditp.txt
 thumb.png
+
