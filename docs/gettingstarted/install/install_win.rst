@@ -83,7 +83,7 @@ To do so follows the following steps, depending on your operating system.
         (base) C:\<yourDefaultPath>> conda activate scpy
         (scpy) C:\<yourDefaultPath>>
 
-    Note:
+    .. Note::
 
         You can make the scipy environment permanent by creating and using the following batch file (.bat)
 
@@ -96,7 +96,7 @@ To do so follows the following steps, depending on your operating system.
         This script, where `<yourAnacondaFolder>` is the installation directory of your Miniconda/Anaconda distribution
         will open a command prompt  in  C:\\<yourWorkingFolder> with the `scpy` environment activated.
 
-        Save the .bat file, for instance in `C:\\<yourAnacondaFolder>\Scripts\activate-scpy.bat,
+        Save the .bat file, for instance in `C:\\<yourAnacondaFolder>\Scripts\activate-scpy.bat`,
         create a shortcut, name it, for instance, `Anaconda prompt (scpy)` and place it in an easily accessible
         place (e.g. the Windows Startmenu Folder).
 
