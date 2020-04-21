@@ -211,7 +211,7 @@ Install a development version of SpectroChemPy on WINDOWS
 
 
 Install a development version of SpectroChemPy on MAC OS
-------------------------------------------------
+---------------------------------------------------------
 
 #.  Git clone the |scpy| `Bitbucket repository <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_
 

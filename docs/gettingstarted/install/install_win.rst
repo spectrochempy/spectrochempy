@@ -48,8 +48,6 @@ Create a new conda environment
 For compatibility issues we STRONGLY recommend using a specific conda environment to use |scpy|.
 To do so follows the following steps, depending on your operating system.
 
-
-
 #.  Open a command prompt (Select the Start button and type cmd), or preferably open the Anaconda Prompt
     in the Anaconda start Menu.
 
@@ -69,10 +67,11 @@ To do so follows the following steps, depending on your operating system.
 
 #.  Now we can create the `scpy` environment with all the required python packages.
 
+    Download the following configuration file: `scpy.yml <https://bitbucket.org/spectrocat/spectrochempy/downloads/scpy.yml>`_
+
     .. sourcecode:: bat
 
-        (base) C:\<yourDefaultPath>> cd spectrochempy
-        (base) C:\<yourDefaultPath>> conda env create -f env/scpy.yml
+        (base) C:\<yourDefaultPath>> conda env create -f <DownloadsFolderPath>/scpy.yml
 
     This also takes time. Go and get second favorite drink, etc... while several python packages are download and
     extraction proceeds...
@@ -84,7 +83,7 @@ To do so follows the following steps, depending on your operating system.
         (base) C:\<yourDefaultPath>> conda activate scpy
         (scpy) C:\<yourDefaultPath>>
 
-    Note:
+    .. Note::
 
         You can make the scipy environment permanent by creating and using the following batch file (.bat)
 
@@ -97,7 +96,7 @@ To do so follows the following steps, depending on your operating system.
         This script, where `<yourAnacondaFolder>` is the installation directory of your Miniconda/Anaconda distribution
         will open a command prompt  in  C:\\<yourWorkingFolder> with the `scpy` environment activated.
 
-        Save the .bat file, for instance in `C:\\<yourAnacondaFolder>\Scripts\activate-scpy.bat,
+        Save the .bat file, for instance in `C:\\<yourAnacondaFolder>\Scripts\activate-scpy.bat`,
         create a shortcut, name it, for instance, `Anaconda prompt (scpy)` and place it in an easily accessible
         place (e.g. the Windows Startmenu Folder).
 

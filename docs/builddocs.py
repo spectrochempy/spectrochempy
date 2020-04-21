@@ -40,6 +40,7 @@ PROJECT = "spectrochempy"
 PROJECTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
 DOCDIR = os.path.join(PROJECTDIR, "docs")
+USERDIR = os.path.join(PROJECTDIR, "docs", "user")
 API = os.path.join(DOCDIR, 'api','generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees')
@@ -104,6 +105,11 @@ def make_docs(*args):
     """
     args = list(args)
     regenerate_api = False
+    
+    # we need to use jupytext to sync py and ipynb files in userguide and tutorials
+    cmd = f" cd {USERDIR} ; jupytext --sync userguide/*/*.py ; jupytext --sync tutorials/*/*.py"
+    res = subprocess.call([cmd], shell=True, executable='/bin/bash')
+    info_(res)
     
     nocommit = True
     if 'commit' in args:
