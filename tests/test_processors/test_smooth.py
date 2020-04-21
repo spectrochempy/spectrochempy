@@ -8,6 +8,9 @@
 # ======================================================================================================================
 
 from spectrochempy import *
+import pytest
+
+pytestmark = pytest.mark.skip("WIP with NMR data")
 
 def test_smooth(NMR_dataset_1D):
     

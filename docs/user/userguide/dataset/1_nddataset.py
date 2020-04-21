@@ -33,16 +33,6 @@
 # %%
 from spectrochempy import *
 
-# %%
-# # %matplotlib inline  
-
-# %% [markdown]
-# <div class='alert-info'>
-#
-# **Note**: the above  line is not necessary when running Jupyter Notebook or Jupyter lab version < 2.0 and can be commented
-#
-# </div>
-
 # %% [markdown]
 # Multidimensional array are defined in Spectrochempy using the ``NDDataset`` object.
 #
@@ -267,6 +257,12 @@ d2D.u
 
 # %%
 d2D.v
+
+# %% [markdown]
+# When the dataset is printed, only the information for the existing coordinates is given.
+
+# %%
+d2D
 
 # %% [markdown]
 # Programatically, we can use the attribute `is_empty` or `has_data` to check this

@@ -25,6 +25,7 @@ from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import show
 from spectrochempy.units import ur
 
+pytestmark = pytest.mark.skip("all tests still WIP")
 
 # 1D
 
@@ -64,7 +65,6 @@ def test_nmr_1D_show_complex(NMR_dataset_1D):
     show()
 
 ## apodization
-
 def test_nmr_1D_apodization(NMR_dataset_1D):
   
     dataset = NMR_dataset_1D.copy()

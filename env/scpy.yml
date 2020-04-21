@@ -2,6 +2,7 @@ name: scpy
 channels:
 - conda-forge
 - conda
+- cantera
 dependencies:
 - numpy
 - matplotlib
@@ -13,12 +14,15 @@ dependencies:
 - setuptools_scm
 - ipython
 - jupyterlab
+- ipympl
+- nodejs
 - ipykernel
 - ipywidgets
 - widgetsnbextension
 - xlrd
 - numba
 - pandas
+- cantera
 - pip
 - pip:
   - quadprog

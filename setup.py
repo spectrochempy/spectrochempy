@@ -123,7 +123,8 @@ setup_args = dict(
     
     # packages informations
     name="spectrochempy",
-    use_scm_version=True,
+    #use_scm_version=True,
+    version = '1.14dev', #TODO: read a version number automzatically when git is not present
     license="CeCILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="developpers@spectrochempy.fr",
@@ -146,15 +147,11 @@ setup_args = dict(
     platforms=['Windows', 'Mac OS X', 'Linux'],
     
     # packages discovery
-    # zip_safe=False,
     packages=find_packages() + packages,
     include_package_data=True,
     
     # requirements
     python_requires=">3.5",  # TODO: check if it works also with 3.5
-    setup_requires=['setuptools_scm', 'pyyaml'],
-    install_requires=[],  # install_requires(dev=__DEV__),
-    tests_require=extras_require['tests'],
     
     # post-commands
     cmdclass={'develop': PostDevelopCommand,
