@@ -209,15 +209,6 @@ Then execute two commands as following:
 
 If this goes well, the |scpy| application is likely functional.
 
-Jupyter notebook
-================
-
-After the installation above, to be able to use spectrochempy in notebooks
-with the full plotting capabilities we need to execute the  following command:
-
-.. sourcecode:: bash
-
-    $ conda install -c conda-forge widgetsnbextension
 
 Jupyter lab
 ===========
@@ -229,7 +220,7 @@ As for notebooks we need these additional steps:
     $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
     $ jupyter labextension install jupyter-matplotlib
 
-If jupyter lab ask you for building, do it!
+If jupyter lab asks you for building, do it!
 
 
 Getting started
