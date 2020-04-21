@@ -318,36 +318,15 @@ class IRIS:
         ycoord = Coord(data=eps, title='epsilon')
         zcoord = Coord(data=lamb, title='lambda')
         f.set_coords(z=zcoord, y=ycoord, x=xcoord)
-        self._f = f
-        self._K = K
-        self._X = X
-        self._lambda = lamb
-        self._RSS = RSS
-        self._SM = SM
+        self.f = f
+        self.K = K
+        self.X = X
+        self.lamda = lamb
+        self.RSS = RSS
+        self.SM = SM
 
-    def transform(self):
-        """
-        Apply the inversion of the X dataset (m x n) and returns
-        the 2D distribution functions `f[i]` obtained for a given
-        regularization parameter :math:`\lambda_i` using the following
-        factorization : :math:`X = K.f[i]`.
-        :math:`K` is a (m x q) matrix holding the values of the kernel
-        function for the m values of the external variable (`p`) and the
-        q values of the internal variable (`epsilon`).
-        :math : `f[i]` is the (q x n) matrix holding the values of the
-        2D-distribution function
 
-        Returns
-        -------
-        f : |NDDataset|
-            object (l x m x n) containing the l 2D-distribution
-            functions f[i] obtained for each value of the regularization
-            parameter.
-
-        """
-        return self._f
-
-    def inverse_transform(self):
+    def reconstruct(self):
         """
         Transform data back to the original space
 
@@ -360,13 +339,13 @@ class IRIS:
             The reconstructed dataset.
 
         """
-        X_hat = NDDataset(np.zeros((self._f.z.size, self._X.y.size, self._X.x.size)),
-                          title=self._X.title, units=self._X.units)
+        X_hat = NDDataset(np.zeros((self.f.z.size, self.X.y.size, self.X.x.size)),
+                          title=self.X.title, units=self.X.units)
 
         X_hat.name = '2D-IRIS Reconstructed datasets'
-        X_hat.set_coords(z=self._f.z, y=self._X.y, x=self._X.x)
+        X_hat.set_coords(z=self.f.z, y=self.X.y, x=self.X.x)
         for i in range(X_hat.z.size):
-            X_hat[i] = np.dot(self._K.data, self._f[i].data.squeeze())
+            X_hat[i] = np.dot(self.K.data, self.f[i].data.squeeze())
         return X_hat
 
     def plotlcurve(self, **kwargs):
@@ -389,7 +368,7 @@ class IRIS:
         ax = fig.add_subplot(111)
         ax.set_title('L curve')
         scale = kwargs.get('scale', 'll').lower()
-        plt.plot(self._RSS, self._SM, 'o')
+        plt.plot(self.RSS, self.SM, 'o')
         ax.set_xlabel('Residuals')
         ax.set_ylabel('Curvature')
         if scale[1] == 'l':
@@ -414,18 +393,18 @@ class IRIS:
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
 
-        X_hats = self.inverse_transform()
+        X_hats = self.reconstruct()
         axeslist = []
         if index is None:
-            index = range(len(self._lambda))
+            index = range(len(self.lamda))
         if type(index) is int:
             index = [index]
         for i in index:
-            res = self._X - X_hats[i].squeeze()
-            ax = self._X.plot()
-            ax.plot(self._X.x.data, X_hats[i].squeeze().T.data, color=colXhat)
-            ax.plot(self._X.x.data, res.T.data, color=colRes)
-            ax.set_title('2D IRIS merit plot, $\lambda$ = ' + str(self._lambda[i]))
+            res = self.X - X_hats[i].squeeze()
+            ax = self.X.plot()
+            ax.plot(self.X.x.data, X_hats[i].squeeze().T.data, color=colXhat)
+            ax.plot(self.X.x.data, res.T.data, color=colRes)
+            ax.set_title('2D IRIS merit plot, $\lambda$ = ' + str(self.lamda[i]))
             axeslist.append(ax)
         return axeslist
 
@@ -443,14 +422,13 @@ class IRIS:
         list of axes
         """
 
-        f = self.transform()
         axeslist = []
         if index is None:
-            index = range(len(self._lambda))
+            index = range(len(self.lamda))
         if type(index) is int:
             index = [index]
         for i in index:
-            f[i].plot(method='map', **kwargs)
+            self.f[i].plot(method='map', **kwargs)
         return axeslist
 
 # --------------------------------------------
