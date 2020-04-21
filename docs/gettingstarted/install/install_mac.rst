@@ -71,7 +71,7 @@ To do so follows the following steps:
         (base)  ~ $ conda activate scpy
         (scpy)  ~ $
 
-    ..Note::
+    .. Note::
 
         You can chose to make the `scpy` environment as a default
 
