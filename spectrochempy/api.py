@@ -122,9 +122,9 @@ if  not (IN_IPYTHON and kernel and not NO_DISPLAY) and not IN_PYCHARM_SCIMODE:
         import PyQt5
 
         backend = 'Qt5Agg'
-        mpl.use('Qt5Agg', warn=False, force=True)
+        mpl.use('Qt5Agg', force=True)
     except:
-        mpl.use('tkagg', warn=False, force=True)
+        mpl.use('tkagg',  force=True)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -108,7 +108,7 @@ def make_docs(*args):
     
     # we need to use jupytext to sync py and ipynb files in userguide and tutorials
     cmd = f" cd {USERDIR} ; jupytext --sync userguide/*/*.py ; jupytext --sync tutorials/*/*.py"
-    res = subprocess.call([cmd], shell=True, executable='/bin/bash')
+    res = subprocess.call([cmd], shell=True)#, executable='/bin/bash')
     info_(res)
     
     nocommit = True
@@ -160,7 +160,7 @@ def make_docs(*args):
             cmd = "cd {BUILDDIR}/latex; " \
                   "make; mv {PROJECT}.pdf " \
                   " ../pdf/{PROJECT}.pdf".format(BUILDDIR=BUILDDIR, PROJECT=PROJECT)
-            res = subprocess.call([cmd], shell=True, executable='/bin/bash')
+            res = subprocess.call([cmd], shell=True) #, executable='/bin/bash')
             info_(res)
 
         if not nocommit:
@@ -201,9 +201,9 @@ def do_release():
             SERVER=SERVER)
 
         print(cmd)
-        debug_(subprocess.call(['pwd'], shell=True, executable='/bin/bash'))
+        debug_(subprocess.call(['pwd'], shell=True) )#, executable='/bin/bash'))
 
-        res = subprocess.call([cmd], shell=True, executable='/bin/bash')
+        res = subprocess.call([cmd], shell=True) #, executable='/bin/bash')
         info_(res)
         info_('\n' + cmd + "Finished")
 
