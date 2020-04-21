@@ -47,9 +47,9 @@ class SIMPLISMA(HasTraits):
 
     """
 
-    _St = Instance(NDDataset)
-    _C = Instance(NDDataset)
-    _X = Instance(NDDataset)
+    St = Instance(NDDataset)
+    C = Instance(NDDataset)
+    X = Instance(NDDataset)
 
     def __init__(self, X, **kwargs):
         """
@@ -71,19 +71,16 @@ class SIMPLISMA(HasTraits):
 
         Attributes
         ----------
-        _X : the original dataset
-        _St : spectra of pure compounds
-        _C : intensities ('concentrations') of pure compounds in spectra
-        _Pt : purity spectra
-        _s : standard deviation spectra
+        X : the original dataset
+        St : spectra of pure compounds
+        C : intensities ('concentrations') of pure compounds in spectra
+        Pt : purity spectra
+        s : standard deviation spectra
 
         Examples
         --------
 
         """
-        #TODO: in the above doctrings the attributes are private members.
-        # so either we provide public members or create some property (or getting functions) to access them
-
         # ------------------------------------------------------------------------
         # Utility functions
         # ------------------------------------------------------------------------
@@ -393,12 +390,12 @@ class SIMPLISMA(HasTraits):
         C.description = 'Concentration/contribution matrix from SIMPLISMA:\n' + logs
         St.description = 'Pure compound spectra matrix from SIMPLISMA:\n' + logs
         s.description = 'Standard deviation spectra matrix from SIMPLISMA:\n' + logs
-        self._log = logs
-        self._X = X
-        self._Pt = Pt
-        self._C = C
-        self._St = St
-        self._s = s
+        self.log = logs
+        self.X = X
+        self.Pt = Pt
+        self.C = C
+        self.St = St
+        self.s = s
 
     # ------------------------------------------------------------------------
     # Special methods
@@ -407,23 +404,8 @@ class SIMPLISMA(HasTraits):
     # ------------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------------
-    def transform(self):
-        """
-        Return the concentration and spectra matrix determined by SIMPLISMA
 
-        TODO : allow normalization of spectra
-
-        Returns
-        -------
-        C : |NDDataset|
-            The concentration/contribution matrix
-        St : |NDDataset|
-            The pure compound spectra matrix
-
-        """
-        return self._C, self._St
-
-    def inverse_transform(self):
+    def reconstruct(self):
         """
         Transform data back to the original space.
 
@@ -441,12 +423,10 @@ class SIMPLISMA(HasTraits):
         """
 
         # reconstruct from concentration and spectra profiles
-        C = self._C
-        St = self._St
 
-        X_hat = dot(C, St)
-        X_hat.description = 'Dataset reconstructed by SIMPLISMA\n' + self._log
-        X_hat.title = 'X_hat: ' + self._X.title
+        X_hat = dot(self.C, self.St)
+        X_hat.description = 'Dataset reconstructed by SIMPLISMA\n' + self.log
+        X_hat.title = 'X_hat: ' + self.X.title
         return X_hat
 
     def plotmerit(self, **kwargs):
@@ -462,14 +442,14 @@ class SIMPLISMA(HasTraits):
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
 
-        X_hat = self.inverse_transform()
+        X_hat = self.reconstruct()
 
-        res = self._X - X_hat
+        res = self.X - X_hat
 
-        ax = self._X.plot(label='$X$')
+        ax = self.X.plot(label='$X$')
         ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
         ax.plot(res.data.T, color=colRes, label='Residual')
-        ax.set_title('SIMPLISMA plot: ' + self._X.name)
+        ax.set_title('SIMPLISMA plot: ' + self.X.name)
 
         return ax
 

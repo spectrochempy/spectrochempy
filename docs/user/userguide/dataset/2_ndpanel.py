@@ -159,7 +159,10 @@ sqrt(ndp)
 # For addition and subtraction, if the units of scalar is not given, it is assumed compatible : that's why the above operation worked. But below it does'nt work because the dataset have `eV` units, not `cm`.
 
 # %%
-2*ndp+10*ur.cm
+try:
+    2*ndp+10*ur.cm
+except:
+    error_("DimensionalityError: Cannot convert from '[length]' to '[length] ** 2 * [mass] / [time] ** 2', Units must be compatible for the `add` operator")
 
 # %%
 2*ndp+10*ur.eV

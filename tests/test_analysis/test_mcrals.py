@@ -29,11 +29,9 @@ def test_MCRALS_no_coords():
     X = data[0]
     guess = data[1]
     mcr  = MCRALS(X, guess, verbose=True)
-    [C, St] = mcr.transform()
 
-
-    C.T.plot()
-    St.plot()
+    mcr.C.T.plot()
+    mcr.St.plot()
     mcr.plotmerit()
 
     print('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
@@ -43,7 +41,7 @@ def test_MCRALS_no_coords():
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr2.plotmerit()
 
-    assert 'converged !' in mcr2._log[-15:]
+    assert 'converged !' in mcr2.log[-15:]
     
 def test_MCRALS():
 
@@ -69,11 +67,10 @@ def test_MCRALS():
     guess.plot(title='spure')
 
     mcr  = MCRALS(X, guess, verbose=True)
-    [C, St] = mcr.transform()
 
-    C.T.plot(title= 'Concentration')
+    mcr.C.T.plot(title= 'Concentration')
 
-    St.plot(title='spectra')
+    mcr.St.plot(title='spectra')
 
     mcr.plotmerit()
 
@@ -85,7 +82,7 @@ def test_MCRALS():
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr.plotmerit()
 
-    assert 'converged !' in mcr2._log[-15:]
+    assert 'converged !' in mcr2.log[-15:]
 
     show()
 

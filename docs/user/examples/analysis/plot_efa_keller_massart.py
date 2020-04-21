@@ -63,11 +63,9 @@ efa = scp.EFA(dataset)
 # Plots of the log(EV) for the forward and backward analysis
 #
 
-f = efa.get_forward()
-f.T.plot(yscale="log", legend=f.y.labels)
+efa.f.T.plot(yscale="log", legend=efa.f.y.labels)
 
-b = efa.get_backward()
-b.T.plot(yscale="log")
+efa.b.T.plot(yscale="log")
 
 ########################################################################################################################
 # Looking at these EFA curves, it is quite obvious that only two components
@@ -77,10 +75,10 @@ b.T.plot(yscale="log")
 # and so we can use it to set a cut of values
 
 n_pc = 2
-cut = np.max(f[:, n_pc].data)
+cut = np.max(efa.f[:, n_pc].data)
 
-f2 = efa.get_forward(n_pc=2, cutoff=cut)
-b2 = efa.get_backward(n_pc=2, cutoff=cut)
+f2 = efa.cut_f(n_pc=2, cutoff=cut)
+b2 = efa.cut_b(n_pc=2, cutoff=cut)
 # we concatenate the datasets to plot them in a single figure
 both = scp.concatenate(f2, b2)
 both.T.plot(yscale="log")

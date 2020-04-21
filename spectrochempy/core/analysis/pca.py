@@ -59,9 +59,9 @@ class PCA(HasTraits):
     ignored in the calculation.
 
     """
-    _LT = Instance(NDDataset)
-    _S = Instance(NDDataset)
-    _X = Instance(NDDataset)
+    LT = Instance(NDDataset)
+    S = Instance(NDDataset)
+    X = Instance(NDDataset)
 
     ev = Instance(NDDataset)
     """|NDDataset| - Explained variances (The eigenvalues of the covariance matrix)."""
@@ -110,7 +110,7 @@ class PCA(HasTraits):
 
         """
 
-        self._X = X = dataset
+        self.X = X = dataset
 
         Xsc = X.copy()
 
@@ -168,8 +168,8 @@ class PCA(HasTraits):
         S.description = 'scores (S) of ' + X.name
         S.history = 'Created by PCA'
 
-        self._LT = LT
-        self._S = S
+        self.LT = LT
+        self.S = S
 
         # other attributes
         # ----------------
@@ -221,7 +221,7 @@ class PCA(HasTraits):
             n_pc = min(n_pc, max_n_pc)
             return n_pc
         elif n_pc == 'auto':
-            M, N = self._X.shape
+            M, N = self.X.shape
             if M >= N:
                 n_pc = self._infer_pc_()
                 return n_pc
@@ -261,7 +261,7 @@ class PCA(HasTraits):
 
         """
         spectrum = self.ev.data
-        M, N = self._X.shape
+        M, N = self.X.shape
 
         if rank > len(spectrum):
             raise ValueError("The tested rank cannot exceed the rank of the"
@@ -318,7 +318,7 @@ class PCA(HasTraits):
 
     def transform(self, n_pc=None):
         """
-        Apply the dimensionality reduction to the X dataset of shape [M, N].
+        Apply a dimensionality reduction to the X dataset of shape [M, N].
 
         Loadings `L` with shape [``n_pc``, `N`] and scores `S`
         with shape [`M`, `n_pc`] are obtained using the following
@@ -339,7 +339,7 @@ class PCA(HasTraits):
 
         """
 
-        X = self._X
+        X = self.X
 
         # get n_pc (automatic or determined by the n_pc arguments)
         n_pc = self._get_n_pc(n_pc)
@@ -347,12 +347,12 @@ class PCA(HasTraits):
         # scores (S) and loading (L^T) matrices
         # ------------------------------------
 
-        S = self._S[:, :n_pc]
-        LT = self._LT[:n_pc]
+        S = self.S[:, :n_pc]
+        LT = self.LT[:n_pc]
 
         return S, LT
 
-    def inverse_transform(self, n_pc=None):
+    def reconstruct(self, n_pc=None):
         """
         Transform data back to the original space using the given number of
         PC's.
@@ -376,8 +376,8 @@ class PCA(HasTraits):
         n_pc = self._get_n_pc(n_pc)
 
         # reconstruct from scores and loadings using n_pc components
-        S = self._S[:, :n_pc]
-        LT = self._LT[:n_pc]
+        S = self.S[:, :n_pc]
+        LT = self.LT[:n_pc]
 
         X = dot(S, LT)
 
@@ -392,7 +392,7 @@ class PCA(HasTraits):
 
         X.history = 'PCA reconstructed Dataset with {} principal ' \
                     'components'.format(n_pc)
-        X.title = self._X.title
+        X.title = self.X.title
         return X
 
     def printev(self, n_pc=None):
@@ -471,15 +471,15 @@ class PCA(HasTraits):
         # colors
         if color_mapping == 'index':
 
-            if np.any(self._S.y.data):
-                colors = self._S.y.data
+            if np.any(self.S.y.data):
+                colors = self.S.y.data
             else:
-                colors = np.array(range(self._S.shape[0]))
+                colors = np.array(range(self.S.shape[0]))
 
         elif color_mapping == 'labels':
 
-            labels = list(set(self._S.y.labels))
-            colors = [labels.index(l) for l in self._S.y.labels]
+            labels = list(set(self.S.y.labels))
+            colors = [labels.index(l) for l in self.S.y.labels]
 
         if len(pcs) == 2:
             # bidimentional score plot
@@ -492,8 +492,8 @@ class PCA(HasTraits):
                 pcs[0] + 1, self.ev_ratio.data[pcs[0]]))
             ax.set_ylabel('PC# {} ({:.3f}%)'.format(
                 pcs[1] + 1, self.ev_ratio.data[pcs[1]]))
-            axsc = ax.scatter(self._S.masked_data[:, pcs[0]],
-                              self._S.masked_data[:, pcs[1]],
+            axsc = ax.scatter(self.S.masked_data[:, pcs[0]],
+                              self.S.masked_data[:, pcs[1]],
                               s=30,
                               c=colors,
                               cmap=colormap)
@@ -523,9 +523,9 @@ class PCA(HasTraits):
             ax.set_zlabel(
                 'PC# {} ({:.3f}%)'.format(pcs[2] + 1, self.ev_ratio.data[pcs[
                     2]]))
-            axsc = ax.scatter(self._S.masked_data[:, pcs[0]],
-                              self._S.masked_data[:, pcs[1]],
-                              self._S.masked_data[:, pcs[2]],
+            axsc = ax.scatter(self.S.masked_data[:, pcs[0]],
+                              self.S.masked_data[:, pcs[1]],
+                              self.S.masked_data[:, pcs[2]],
                               zdir='z',
                               s=30,
                               c=colors,
