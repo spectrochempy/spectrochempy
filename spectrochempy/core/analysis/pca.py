@@ -316,7 +316,7 @@ class PCA(HasTraits):
     # Public methods
     # ------------------------------------------------------------------------------------------------------------------
 
-    def transform(self, n_pc=None):
+    def reduce(self, n_pc=None):
         """
         Apply a dimensionality reduction to the X dataset of shape [M, N].
 

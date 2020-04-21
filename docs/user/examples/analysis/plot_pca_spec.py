@@ -31,7 +31,7 @@ pca = scp.PCA(dataset, centered=False)
 # Reduce the dataset to a lower dimensionality (number of
 # components is automatically determined)
 
-S, LT = pca.transform(n_pc=.99)
+S, LT = pca.reduce(n_pc=.99)
 
 print(LT)
 

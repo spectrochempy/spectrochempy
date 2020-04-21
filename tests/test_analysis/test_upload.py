@@ -22,7 +22,7 @@ def test_upload():
     ds.plot_stack()
 
     pca = PCA(ds, centered=True)
-    L, S = pca.transform()
+    L, S = pca.reduce()
     L.plot_stack()
     pca.screeplot()
     pca.scoreplot(1,2, color_mapping='labels')

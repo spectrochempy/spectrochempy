@@ -187,7 +187,7 @@ _ = pca.screeplot(n_pc=8)
 #
 
 # %%
-S, LT = pca.transform(n_pc=8)
+S, LT = pca.reduce(n_pc=8)
 _ = S.T.plot()
 _ = LT.plot()
 
@@ -199,7 +199,7 @@ _ = LT.plot()
 # 32 in the present case:
 
 # %%
-S3, LT3 = pca.transform(n_pc='auto')
+S3, LT3 = pca.reduce(n_pc='auto')
 S3.shape
 
 # %% [markdown]
