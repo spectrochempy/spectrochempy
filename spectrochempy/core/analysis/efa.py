@@ -46,10 +46,10 @@ class EFA(HasTraits):
 
     """
 
-    fefa = Instance(NDDataset)
+    f = Instance(NDDataset)
     """|NDDataset| - Eigenvalues for the forward analysis"""
 
-    befa = Instance(NDDataset)
+    b = Instance(NDDataset)
     """|NDDataset| - Eigenvalues for the backward analysis"""
 
     docstrings.keep_params('SVD.parameters', 'dataset')
@@ -91,11 +91,11 @@ class EFA(HasTraits):
         # forward analysis
         # --------------------------------------------------------------------
 
-        self.fefa = f = NDDataset(np.zeros((M, K)),
-                                  coords=[X.y, Coord(range(K))],
-                                  title='EigenValues',
-                                  description='Forward EFA of ' + X.name,
-                                  history=str(datetime.now()) + ': created by spectrochempy ')
+        f = NDDataset(np.zeros((M, K)),
+                               coords=[X.y, Coord(range(K))],
+                               title='EigenValues',
+                               description='Forward EFA of ' + X.name,
+                               history=str(datetime.now()) + ': created by spectrochempy ')
 
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
@@ -117,7 +117,7 @@ class EFA(HasTraits):
         # backward analysis
         # --------------------------------------------------------------------
 
-        self.befa = b = NDDataset(np.zeros((M, K)),
+        b = NDDataset(np.zeros((M, K)),
                                   coords=[X.y, Coord(range(K))],
                                   title='EigenValues',
                                   name='Backward EFA of ' + X.name,
@@ -135,46 +135,50 @@ class EFA(HasTraits):
             else:
                 b[i] = MASKED
 
-    def get_forward(self, n_pc=None, cutoff=None):
+        self.f = f
+        self.b = b
+
+
+    def cut_f(self, n_pc=None, cutoff=None):
         """
 
         Parameters
         ----------
         n_pc
-        plot
+        cutoff
 
         Returns
         -------
 
         """
-        M, K = self.fefa.shape
+        M, K = self.f.shape
         if n_pc is None:
             n_pc = K
         n_pc = min(K, n_pc)
 
-        f = self.fefa
+        f = self.f
         if cutoff is not None:
             f.data = np.max((f.data, np.ones_like(f.data) * cutoff), axis=0)
         return f
 
-    def get_backward(self, n_pc=None, cutoff=None):
+    def cut_b(self, n_pc=None, cutoff=None):
         """
 
         Parameters
         ----------
         n_pc
-        plot
+        cutoff
 
         Returns
         -------
 
         """
-        M, K = self.befa.shape
+        M, K = self.b.shape
         if n_pc is None:
             n_pc = K
         n_pc = min(K, n_pc)
 
-        b = self.befa
+        b = self.b
         if cutoff is not None:
             b.data = np.max((b.data, np.ones_like(b.data) * cutoff), axis=0)
         return b
@@ -198,13 +202,13 @@ class EFA(HasTraits):
             Concentration profile
 
         """
-        M, K = self.fefa.shape
+        M, K = self.f.shape
         if n_pc is None:
             n_pc = K
         n_pc = min(K, n_pc)
 
-        f = self.get_forward(n_pc, cutoff)
-        b = self.get_backward(n_pc, cutoff)
+        f = self.cut_f(n_pc, cutoff)
+        b = self.cut_b(n_pc, cutoff)
 
         xcoord = Coord(range(n_pc), title='PS#')
         c = NDDataset(np.zeros((M, n_pc)),

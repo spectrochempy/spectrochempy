@@ -31,13 +31,13 @@ class MCRALS(HasTraits):
 
     """
 
-    _C = Instance(NDDataset)
+    C = Instance(NDDataset)
     """|NDDataset| - Concentration profile of pure species"""
-    _St = Instance(NDDataset)
+    St = Instance(NDDataset)
     """|NDDataset| - Spectra profile of pure species"""
-    _param = Instance(dict)
+    param = Instance(dict)
     """dict - Parameters of the MCS-ALS optimization"""
-    _log = Instance(str)
+    log = Instance(str)
     """str - Log of the MCS-ALS iterations"""
 
     def __init__(self, X, guess, **kwargs):
@@ -128,7 +128,7 @@ class MCRALS(HasTraits):
         ny, nx = X.shape
 
         # makes a PCA with same number of species
-        Xpca = PCA(X).inverse_transform(n_pc = nspecies)
+        Xpca = PCA(X).reconstruct(n_pc = nspecies)
 
         # Get optional parameters in kwargs or set them to their default
         # ------------------------------------------------------------------------
@@ -349,49 +349,21 @@ class MCRALS(HasTraits):
                 logs += logline + '\n'
                 info_(logline)
 
-        self._X = X
-        self._param = param
-        self._Chard = Chard
-        self._C = C
+        self.X = X
+        self.param = param
+        self.Chard = Chard
+        self.C = C
         if externalConc is not None:
             self._extOutput = extOutput
         else:
-            self._extC = None
-            self._extOutput = None
-        self._Stsoft = Stsoft
-        self._St = St
-        self._log = logs
+            self.extC = None
+            self.extOutput = None
+        self.Stsoft = Stsoft
+        self.St = St
+        self.log = logs
 
-    @property
-    def extOutput(self):
-        """
-        Return the last output of the external function used to get external concentration profiles
-        (None if no external concentration profile is used)
-        """
-        return self._extOutput
 
-    @property
-    def Chard(self):
-        """
-        Returns the last concentration dataset including constraints
-        """
-        return self.Chard
-
-    def transform(self):
-        """
-        Return the concentration and spectra matrix determined by MCRALS
-
-        Returns
-        -------
-        C : |NDDataset|
-            The concentration matrix
-        St : |NDDataset|
-            The spectra matrix
-
-        """
-        return self._C, self._St
-
-    def inverse_transform(self):
+    def reconstruct(self):
         """
         Transform data back to the original space.
 
@@ -405,13 +377,13 @@ class MCRALS(HasTraits):
         """
 
         # reconstruct from concentration and spectra profiles
-        C = self._C
-        St = self._St
+        C = self.C
+        St = self.St
 
         X_hat = dot(C, St)
 
         X_hat.history = 'Dataset reconstructed by MCS ALS optimization'
-        X_hat.title = 'X_hat: ' + self._X.title
+        X_hat.title = 'X_hat: ' + self.X.title
         return X_hat
 
     def plotmerit(self, **kwargs):
@@ -425,12 +397,12 @@ class MCRALS(HasTraits):
         """
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
 
-        X_hat = self.inverse_transform()
-        res = self._X - X_hat
-        ax = self._X.plot()
-        if self._X.x is not None:
-            ax.plot(self._X.x.data, X_hat.T.data, color=colXhat)
-            ax.plot(self._X.x.data, res.T.data, color=colRes)
+        X_hat = self.reconstruct()
+        res = self.X - X_hat
+        ax = self.X.plot()
+        if self.X.x is not None:
+            ax.plot(self.X.x.data, X_hat.T.data, color=colXhat)
+            ax.plot(self.X.x.data, res.T.data, color=colRes)
         else:
             ax.plot(X_hat.T.data, color=colXhat)
             ax.plot(res.T.data, color=colRes)

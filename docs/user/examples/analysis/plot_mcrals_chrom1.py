@@ -51,9 +51,9 @@ mcr = scp.MCRALS(X, guess, verbose=True)
 # The optimization has converged. We can get the concentration (C) and pure spectra profiles (St)
 # and plot them
 
-C, St = mcr.transform()
-C.T.plot()
-St.plot()
+
+mcr.C.T.plot()
+mcr.St.plot()
 
 
 ###############################################################
