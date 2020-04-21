@@ -56,12 +56,13 @@ To do so follows the following steps:
 
         (base)  ~ $ conda config --add channels conda-forge
 
-#.  For compatibility issues we STRONGLY recommend using a specific conda environment to use |scpy|.
-    To do so go in the `spectrochempy` directory and create the scpy environment:
+#.   Now we can create the `scpy` environment with all the required python packages.
+
+    Download the following configuration file: `scpy.yml <https://bitbucket.org/spectrocat/spectrochempy/downloads/scpy.yml>`_
 
     .. sourcecode:: bash
 
-        (base)  ~ $ conda env create -f=env/scpy.yml
+        (base)  ~ $ conda env create -f=<DonwloadsFolderPath>>/scpy.yml
 
 #.  Switch to this environment. At this point, `(scpy)` should appear before the prompt instead of `(base)`.
 
@@ -74,7 +75,7 @@ To do so follows the following steps:
 
         You can chose to make the `scpy` environment as a default
 
-        Edit teh startup profile so that the last line is source activate environment_name.
+        Edit the startup profile so that the last line is source activate environment_name.
         In Mac OSX this is ~/.bash_profile, in other environments this may be ~/.bashrc.
         If you use Mac OSX Catalina, it may be ~/.zshrc.
 
