@@ -71,7 +71,7 @@ def test_nddataset_init_simple_list():
 
     nd1[1] = MASKED
     assert nd1.is_masked
-    assert "[int64]" in str(nd1)
+    assert "[int64]" in str(nd1) or "[int32]" in str(nd1)
     info_(nd1)
 
 
@@ -291,9 +291,9 @@ def test_nddataset_str():
     arr1d = NDDataset([1, 2, 3])
     print(arr1d)
     info_(arr1d)
-    assert '[int64]' in str(arr1d)
+    assert '[int64]' in str(arr1d) or '[int32]' in str(arr1d)
     arr2d = NDDataset(np.array([[1, 2], [3, 4]]))
-    assert str(arr2d) == 'NDDataset: [int64] unitless (shape: (y:2, x:2))'
+    assert str(arr2d) == 'NDDataset: [int64] unitless (shape: (y:2, x:2))' or str(arr2d) == 'NDDataset: [int32] unitless (shape: (y:2, x:2))'
 
 
 def test_nddataset_str_repr(ds1):
