@@ -20,7 +20,7 @@
 # As usual we start by importing the SpectroChemPy API
 
 # %%
-from spectrochempy import *
+from spectrochempy import * 
 
 # %% [markdown]
 # ## Data directory
@@ -42,7 +42,13 @@ from spectrochempy import *
 import os
 datadir = general_preferences.datadir
 if os.path.exists(datadir):
-    assert datadir.endswith("/spectrochempy/scp_data/testdata")
+    print(datadir)
+
+# %%
+# !cd C:\Users\christian\anaconda3\envs\scpy\lib\site-packages\scp_data\testdata
+
+# %%
+# !dir
 
 # %% [markdown]
 # ## File selector widget

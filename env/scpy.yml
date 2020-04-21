@@ -5,7 +5,7 @@ channels:
 - cantera
 dependencies:
 - numpy
-- matplotlib=3.0.3
+- matplotlib
 - traitlets
 - pint=0.9
 - quaternion
@@ -14,6 +14,8 @@ dependencies:
 - setuptools_scm
 - ipython
 - jupyterlab
+- ipympl
+- nodejs
 - ipykernel
 - ipywidgets
 - widgetsnbextension

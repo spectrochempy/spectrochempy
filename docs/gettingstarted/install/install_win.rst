@@ -12,9 +12,6 @@ Installation Guide for Windows
 Prerequisites
 =============
 
-All platforms
-*************
-
 |scpy| requires a working python installation (version 3.6 or higher), C/C++ compiler for some modules, Git to get the
 last version of the code.
 
@@ -87,36 +84,41 @@ To do so follows the following steps, depending on your operating system.
         (base) C:\<yourDefaultPath>> conda activate scpy
         (scpy) C:\<yourDefaultPath>>
 
+    Note:
+
+        You can make the scipy environment permanent by creating and using the following batch file (.bat)
+
+        .. sourcecode:: bat
+
+            @REM launch a cmd window in scpy environment (path should be adapted)
+            @CALL CD C:\<yourWorkingFolder>
+            @CALL CMD /K C:\<yourAnacondaFolder>\Scripts\activate.bat scpy
+
+        This script, where `<yourAnacondaFolder>` is the installation directory of your Miniconda/Anaconda distribution
+        will open a command prompt  in  C:\\<yourWorkingFolder> with the `scpy` environment activated.
+
+        Save the .bat file, for instance in `C:\\<yourAnacondaFolder>\Scripts\activate-scpy.bat,
+        create a shortcut, name it, for instance, `Anaconda prompt (scpy)` and place it in an easily accessible
+        place (e.g. the Windows Startmenu Folder).
+
 Install of the |scpy| package
 *****************************
 
-#.  If necessary create your python working directory or go to it.
+install the |scpy| package in this environment using one of the following method.
 
-    We recommend NOT to name it `spectrochempy` because two nested folders `spectrochempy` will also be created at
-    the install. You would have then 3 nested `spectrochempy` folders...
-    You can use for instance, something like `workspace` or whatever you prefer.
-
-    Then you go to this directory for the final installation of |scpy|.
-
-    .. sourcecode:: bash
-
-        (scpy)  C:\<yourDefaultPath>> mkdir <yourInstallDirectory>
-        (scpy)  C:\<yourDefaultPath>> cd <yourInstallDirectory>
-        (scpy)  C:\<yourInstallDirectory>>
-
-#.  install the |scpy| package in this environment using one of the following method.
-
-**Conda install**
+Conda install
+-------------
 
 Todo
 
-**Install from the Bitbucket source repository**
+Install from the Bitbucket source repository
+--------------------------------------------
 
 Using this method you can install the latest stable version (`MASTER <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_)
 
 .. sourcecode:: bat
 
-    (scpy) C:\<yourInstallDirectory>> pip install https://bitbucket.org/spectrocat/spectrochempy/get/master.zip
+    (scpy) C:\<yourDefaultPath>> pip install https://bitbucket.org/spectrocat/spectrochempy/get/master.zip
 
 or the latest development version (`DEVELOP <https://bitbucket.org/spectrocat/spectrochempy/src/develop/>`_).
 
@@ -126,21 +128,22 @@ It is recommended to use a different conda environnement in this case
 
 .. sourcecode:: bat
 
-    (scpy) C:\<yourInstallDirectory>> pip install https://bitbucket.org/spectrocat/spectrochempy/get/develop.zip
+    (scpy) C:\<yourDefaultPath>> pip install https://bitbucket.org/spectrocat/spectrochempy/get/develop.zip
 
-**Install a developper version (Advanced usage)**
+Install a developper version (Advanced usage)
+---------------------------------------------
 
 Installation of the developper version is described here:  :ref:`develguide`.
 
 
 Check the Installation
-======================
+----------------------
 
 Run a IPython session by issuing in the terminal the following command:
 
 .. sourcecode:: bash
 
-    (scpy) C:\<yourInstallDirectory>> ipython
+    (scpy) C:\<yourDefaultPath>> ipython
 
 Then execute two commands as following:
 
@@ -152,25 +155,26 @@ Then execute two commands as following:
 
 If this goes well, the |scpy| application is likely functional.
 
-Jupyter notebook
-================
+Jupyter notebook extensions
+===========================
 
 After the installation above, to be able to use spectrochempy in notebooks
 with the full plotting capabilities we need to execute the  following command:
 
 .. sourcecode:: bash
 
-    (scpy) C:\<yourInstallDirectory>> conda install -c conda-forge widgetsnbextension
+    (scpy) C:\<yourDefaultPath>> conda install -c conda-forge widgetsnbextension
 
-Jupyter lab
-===========
+Jupyter lab extensions
+======================
 
-As for notebooks we need these additional steps:
+As for notebooks we need these additional steps (jupytext, jupyterlab-manager and jupyter-matplotlib extensions
 
-.. sourcecode:: bash
+.. sourcecode:: bat
 
-    (scpy) C:\<yourInstallDirectory>> jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    (scpy) C:\<yourInstallDirectory>> jupyter labextension install jupyter-matplotlib
+    (scpy) C:\<yourDefaultPath>> jupyter nbextension install --py jupytext --user
+    (scpy) C:\<yourDefaultPath>> jupyter nbextension enable --py jupytext --user
+    (scpy) C:\<yourDefaultPath>> jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
 
 If jupyter lab ask you for building, do it!
 

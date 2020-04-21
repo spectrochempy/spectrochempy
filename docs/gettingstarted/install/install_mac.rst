@@ -70,36 +70,49 @@ To do so follows the following steps:
         (base)  ~ $ conda activate scpy
         (scpy)  ~ $
 
+    Note:
+
+        You can chose to make the `scpy` environment as a default
+
+        Edit teh startup profile so that the last line is source activate environment_name.
+        In Mac OSX this is ~/.bash_profile, in other environments this may be ~/.bashrc.
+        If you use Mac OSX Catalina, it may be ~/.zshrc.
+
+        .. sourcecode:: bash
+
+            $ open ~/.bash_profile
+
+        Go to end of file and type the following:
+
+            source activate scpy
+
+        Save and exit File. Start a new terminal window.
+        Type the following to see what environment is active
+
+        .. sourcecode:: bash
+
+            $ conda info -e
+
+        The result shows that your are using your environment by default.
+
 Install of the |scpy| package
 *****************************
 
-#.  If necessary create your python working directory or go to it.
+install the |scpy| package in this environment using one of the following method.
 
-    We recommend NOT to name it `spectrochempy` because two nested folders `spectrochempy` will also be created at
-    the install. You would have then 3 nested `spectrochempy` folders...
-    You can use for instance, something like `workspace` or whatever you prefer.
-
-    Then you go to this directory for the final installation of |scpy|.
-
-    .. sourcecode:: bash
-
-        (scpy)  ~ $ mkdir <yourInstallDirectory>
-        (scpy)  ~ $ cd <yourInstallDirectory>
-        (scpy)  <yourInstallDirectory> $
-
-#.  install the |scpy| package in this environment using one of the following method.
-
-**Conda install**
+Conda install
+-------------
 
 Todo
 
-**Install from the Bitbucket source repository**
+Install from the Bitbucket source repository
+--------------------------------------------
 
 Using this method you can install the latest stable version (`MASTER <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_)
 
 .. sourcecode:: bash
 
-    (scpy) $ pip install https://bitbucket.org/spectrocat/spectrochempy/get/master.zip
+    (scpy) ~ $ pip install https://bitbucket.org/spectrocat/spectrochempy/get/master.zip
 
 or the latest development version (`DEVELOP <https://bitbucket.org/spectrocat/spectrochempy/src/develop/>`_).
 
@@ -109,21 +122,22 @@ It is recommended to use a different conda environnement in this case
 
 .. sourcecode:: bash
 
-    (scpy) $ pip install https://bitbucket.org/spectrocat/spectrochempy/get/develop.zip
+    (scpy) ~ $ pip install https://bitbucket.org/spectrocat/spectrochempy/get/develop.zip
 
-**Install a developper version (Advanced usage)**
+Install a developper version (Advanced usage)
+---------------------------------------------
 
 Installation of the developper version is described here:  :ref:`develguide`.
 
 
 Check the Installation
-======================
+----------------------
 
 Run a IPython session by issuing in the terminal the following command:
 
 .. sourcecode:: bash
 
-    $ ipython
+    (scpy) ~ $ ipython
 
 Then execute two commands as following:
 
@@ -135,25 +149,26 @@ Then execute two commands as following:
 
 If this goes well, the |scpy| application is likely functional.
 
-Jupyter notebook
-================
+Jupyter notebook extensions
+===========================
 
 After the installation above, to be able to use spectrochempy in notebooks
 with the full plotting capabilities we need to execute the  following command:
 
 .. sourcecode:: bash
 
-    $ conda install -c conda-forge widgetsnbextension
+    (scpy) ~ $ conda install -c conda-forge widgetsnbextension
 
-Jupyter lab
-===========
+Jupyter lab extensions
+=======================
 
-As for notebooks we need these additional steps:
+As for notebooks we need these additional steps (jupytext, jupyterlab-manager and jupyter-matplotlib extensions
 
-.. sourcecode:: bash
+.. sourcecode:: bat
 
-    $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    $ jupyter labextension install jupyter-matplotlib
+    (scpy) ~ $ jupyter nbextension install --py jupytext --user
+    (scpy) ~ $ jupyter nbextension enable --py jupytext --user
+    (scpy) ~ $ jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
 
 If jupyter lab ask you for building, do it!
 
