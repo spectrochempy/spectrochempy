@@ -10,12 +10,14 @@
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
+from subprocess import call, STDOUT
 
 import os
 import sys
 import subprocess
 import shutil as sh
 import warnings
+import version
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -23,7 +25,14 @@ __DEV__ = False
 if 'develop' in sys.argv:
     __DEV__ = True
 
-
+__GIT__ = False
+try:
+    if call(["git", "branch"], stderr=STDOUT, stdout=open(os.devnull, 'w')) == 0:
+        __GIT__ = True
+except:
+    pass
+    
+    
 def path():
     return os.path.dirname(__file__)
 
@@ -123,8 +132,7 @@ setup_args = dict(
     
     # packages informations
     name="spectrochempy",
-    #use_scm_version=True,
-    version = '0.1.14', #TODO: read a version number automzatically when git is not present
+    version = version.version,
     license="CeCILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="developpers@spectrochempy.fr",
@@ -142,7 +150,6 @@ setup_args = dict(
                  "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
                  "Operating System :: OS Independent",
                  "Programming Language :: Python :: 3.7",
-                 "Programming Language :: Python :: 3.6",
                  ],
     platforms=['Windows', 'Mac OS X', 'Linux'],
     
@@ -151,7 +158,7 @@ setup_args = dict(
     include_package_data=True,
     
     # requirements
-    python_requires=">3.5",  # TODO: check if it works also with 3.5
+    python_requires=">3.6",
     
     # post-commands
     cmdclass={'develop': PostDevelopCommand,

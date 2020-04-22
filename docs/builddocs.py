@@ -25,10 +25,11 @@ from spectrochempy import *
 from docs import apigen
 
 import warnings
-warnings.filterwarnings( action='ignore', category=DeprecationWarning)
-warnings.filterwarnings( action='ignore', category=RemovedInSphinx30Warning)
-warnings.filterwarnings( action='ignore', category=RemovedInSphinx40Warning)
-warnings.filterwarnings( action='ignore', module='matplotlib', category=UserWarning)
+
+warnings.filterwarnings(action='ignore', category=DeprecationWarning)
+warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
+warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
+warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 
 preferences = general_preferences
 set_loglevel(WARNING)
@@ -40,9 +41,9 @@ PROJECTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
 DOCDIR = os.path.join(PROJECTDIR, "docs")
 USERDIR = os.path.join(PROJECTDIR, "docs", "user")
-TUTORIALS = os.path.join(USERDIR, "tutorials","*", "*.py")
-USERGUIDE = os.path.join(USERDIR, "userguide","*", "*.py")
-API = os.path.join(DOCDIR, 'api','generated')
+TUTORIALS = os.path.join(USERDIR, "tutorials", "*", "*.py")
+USERGUIDE = os.path.join(USERDIR, "userguide", "*", "*.py")
+API = os.path.join(DOCDIR, 'api', 'generated')
 BUILDDIR = os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT)
 DOCTREES = os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees')
 
@@ -76,6 +77,7 @@ def gitcommands():
             stdout=subprocess.PIPE)
         (so, serr) = pipe.communicate()
 
+
 def api_gen(force=False):
     # generate API reference
     apigen.main(SOURCESDIR,
@@ -91,6 +93,7 @@ def api_gen(force=False):
                 ],
                 )
 
+
 def make_docs(*args):
     """Make the html and pdf documentation
 
@@ -105,12 +108,10 @@ def make_docs(*args):
     regenerate_api = False
     
     # we need to use jupytext to sync py and ipynb files in userguide and tutorials
-    # we need to use jupytext to sync py and ipynb files in userguide and tutorials
-    cmds = (f"jupytext --sync {USERGUIDE}",f"jupytext --sync {TUTORIALS}")
+    cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
     for cmd in cmds:
-        res = subprocess.Popen(cmd, shell=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output,error = res.communicate()
+        res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = res.communicate()
         if not error:
             print(output.decode("utf-8"))
         else:
@@ -143,7 +144,7 @@ def make_docs(*args):
         info_('\nDocumentation directory are created.\n')
         make_dirs()
     
-    if  regenerate_api or not os.path.exists(API):
+    if regenerate_api or not os.path.exists(API):
         api_gen(force=regenerate_api)
     
     for builder in builders:
@@ -200,16 +201,12 @@ def do_release():
         while not path.endswith(PROJECT):
             path, _ = os.path.split(path)
         path, _ = os.path.split(path)
-        cmd = 'rsync -e ssh -avz  --exclude="~*" ' \
-              '{FROM} {SERVER}:{PROJECT}/html/'.format(
-            PROJECT=PROJECT,
-            FROM=os.path.join(path, '%s_doc/html' % PROJECT, '*'),
-            SERVER=SERVER)
-        
+        FROM = os.path.join(path, '%s_doc/html' % PROJECT, '*')
+        cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{PROJECT}/html/'
         print(cmd)
-        debug_(subprocess.call(['pwd'], shell=True) )#, executable='/bin/bash'))
+        debug_(subprocess.call(['pwd'], shell=True))  # , executable='/bin/bash'))
         
-        res = subprocess.call([cmd], shell=True) #, executable='/bin/bash')
+        res = subprocess.call([cmd], shell=True)  # , executable='/bin/bash')
         info_(res)
         info_('\n' + cmd + "Finished")
     
@@ -226,9 +223,9 @@ def clean():
     shutil.rmtree(BUILDDIR + '/latex', ignore_errors=True)
     shutil.rmtree(BUILDDIR + '/~doctrees', ignore_errors=True)
     shutil.rmtree(BUILDDIR, ignore_errors=True)
-    #shutil.rmtree(DOCDIR   + '/gen_modules', ignore_errors=True)
-    #shutil.rmtree(DOCDIR   + '/gallery', ignore_errors=True)
-    shutil.rmtree(API,   ignore_errors=True)
+    # shutil.rmtree(DOCDIR   + '/gen_modules', ignore_errors=True)
+    # shutil.rmtree(DOCDIR   + '/gallery', ignore_errors=True)
+    shutil.rmtree(API, ignore_errors=True)
 
 
 def make_dirs():
@@ -244,6 +241,7 @@ def make_dirs():
                   ]
     for d in build_dirs:
         os.makedirs(d, exist_ok=True)
+
 
 if __name__ == '__main__':
     

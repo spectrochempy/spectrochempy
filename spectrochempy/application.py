@@ -73,13 +73,12 @@ try:
 except DistributionNotFound:  # pragma: no cover
     # package is not installed
     __release__ = '0.1a'
-
+    
 try:
-    __version__ = get_version(root='..', relative_to=__file__)
+    __version__ = get_version(root='..', relative_to=__file__, write_to='version.py')
     "Version string of this package"
 except: # pragma: no cover
     __version__ = __release__
-
 
 # ............................................................................
 def _get_copyright():
