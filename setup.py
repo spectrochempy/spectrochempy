@@ -10,7 +10,6 @@
 from setuptools import setup, find_packages
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
-from subprocess import call, STDOUT
 
 import os
 import sys
@@ -24,13 +23,6 @@ import version
 __DEV__ = False
 if 'develop' in sys.argv:
     __DEV__ = True
-
-__GIT__ = False
-try:
-    if call(["git", "branch"], stderr=STDOUT, stdout=open(os.devnull, 'w')) == 0:
-        __GIT__ = True
-except:
-    pass
     
     
 def path():
