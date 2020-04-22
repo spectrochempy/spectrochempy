@@ -124,7 +124,7 @@ setup_args = dict(
     # packages informations
     name="spectrochempy",
     #use_scm_version=True,
-    version = '1.14dev', #TODO: read a version number automzatically when git is not present
+    version = '0.1.14', #TODO: read a version number automzatically when git is not present
     license="CeCILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="developpers@spectrochempy.fr",
