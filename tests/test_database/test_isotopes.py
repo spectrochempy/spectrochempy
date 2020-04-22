@@ -8,10 +8,6 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-
-
-
-
 from spectrochempy import Isotopes
 import numpy as np
 
