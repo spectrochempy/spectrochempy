@@ -130,7 +130,7 @@ setup_args = dict(
     author_email="developpers@spectrochempy.fr",
     maintainer="SpectroChempy Developpers",
     maintainer_email="developpers@spectrochempy.fr",
-    url='http:/www.spectrochempy.fr',
+    url='https:/www.spectrochempy.fr',
     description='Processing, analysis and modelling Spectroscopic data for '
                 'Chemistry with Python',
     long_description=read('README.rst'),
