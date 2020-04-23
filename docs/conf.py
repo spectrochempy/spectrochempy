@@ -73,8 +73,6 @@ source_encoding = 'utf-8'
 master_doc = 'index'
 
 # General information about the project.
-project = "spectrochempy"
-copyright = spectrochempy.application.__copyright__
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -82,6 +80,9 @@ copyright = spectrochempy.application.__copyright__
 
 version = spectrochempy.application.__version__.split('+')[0]
 release = spectrochempy.application.__release__.split('+')[0]
+project = f"SpectroChemPy v{version}"
+copyright = spectrochempy.application.__copyright__
+
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -130,15 +131,20 @@ from spectrochempy.utils.rstutils import rst_epilog
 # a list of builtin themes.
 
 html_theme = 'sphinx_rtd_theme'
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    'logo_only': True,
+    'display_version': True,
+    'collapse_navigation': True,
+    'navigation_depth': 2,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = ['_static']
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -186,7 +192,7 @@ html_use_smartypants = True
 html_split_index = True
 
 # If true, links to the reST sources are added to the pages.
-# html_show_sourcelink = True
+html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False

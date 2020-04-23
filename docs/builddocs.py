@@ -19,6 +19,7 @@ where optional parameters idincates which job to perfom.
 """
 import shutil
 import subprocess
+import re
 
 from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
 from spectrochempy import *
@@ -153,9 +154,11 @@ def make_docs(*args):
     for builder in builders:
         
         print('building %s documentation (version : %s)' % (builder, version))
+        doc_version,sep = ('latest','/') if 'dev' in version else ('stable','/')
+        
         srcdir = confdir = DOCDIR
-        outdir = "{0}/{1}".format(BUILDDIR, builder)
-        doctreedir = "{0}/~doctrees".format(BUILDDIR)
+        outdir = f"{BUILDDIR}/{builder}{sep}{doc_version}"
+        doctreedir = f"{BUILDDIR}/~{doc_version}_doctrees"
         
         # with patch_docutils(), docutils_namespace():
         sp = Sphinx(srcdir, confdir, outdir, doctreedir, builder)
@@ -193,7 +196,68 @@ def make_docs(*args):
         info_('Jupyter notebooks were not regenrated')
         info_('if they are missing in the final documentation: use `notebooks` parameter! ')
         
+    updateindexpage(outdir, doc_version)
+    
     return True
+
+def updateindexpage(outdir, doc_version):
+    """
+
+    """
+
+    replace=f"""
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book">SpectroChemPy</span>
+      v: {doc_version}
+      <span class="fa fa-caret-down"></span>
+    </span>
+
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Versions</dt>
+            <dd><a href="https://spectrochempy.fr/html/latest/">latest</a></dd>
+            <dd><a href="https://spectrochempy.fr/html/stable/">stable</a></dd>
+        </dl>
+
+        <dl>
+            <dt>Downloads</dt>
+            <dd><a href="https://spectrochempy.fr/pdf/stable/">pdf</a></dd>
+            <dd><a href="https://spectrochempy.fr/htmlzip/stable/">htmlzip</a></dd>
+            <dd><a href="https://spectrochempy.fr/epub/stable/">epub</a></dd>
+            <dd><a href="https://spectrochempy.fr/tutorials/">tutorials</a></dd>
+        </dl>
+
+        <dl>
+            <dt>Sources on bitBucket</dt>
+            <dd><a href="https://bitbucket.org/spectrocat/spectrochempy/src/master/">master</a></dd>
+            <dd><a href="https://bitbucket.org/spectrocat/spectrochempy/src/develop/">develop</a></dd>
+        </dl>
+
+        <hr/>
+        
+    </div>
+</div>
+
+"""+"""
+<script type="text/javascript">
+    jQuery(function () {
+        SphinxRtdTheme.Navigation.enable(true);
+    });
+</script>
+    """
+    
+    with open(os.path.join(outdir, 'index.html'), "r") as f:
+        txt = f.read()
+        
+    regex = r"(<script type=\"text\/javascript\">.*SphinxRtdTheme.*script>)"
+    result = re.sub(regex, replace, txt, 0, re.MULTILINE | re.DOTALL)
+    
+    if result:
+
+        with open(os.path.join(outdir, 'index.html'), "w") as f:
+            f.write(result)
 
 
 def do_release():
