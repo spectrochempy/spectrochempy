@@ -131,7 +131,7 @@ class Build(object):
             pipe = Popen(["git", "log", "-1", "--pretty=%B"], stdout=PIPE, stderr=PIPE)
             (so, serr) = pipe.communicate()
             output = so.decode("ascii")
-            print('last message', output)
+            print('new message', output)
 
             #Automatically Tag?
         
