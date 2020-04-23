@@ -50,7 +50,7 @@ def test_align(ds1, ds2):
     info_(ds6)     # ( z:9,  y:50, x:6)
     
     # align another dim
-    dss3 = align(ds1, ds2) # by default it will be the first dim
+    dss3 = align(ds1, ds2, dim='z') # by default it would be the 'x' dim
     ds7, ds8 = dss3
     assert ds7.shape == (17, 100, 3)
     info_()
