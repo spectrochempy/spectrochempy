@@ -127,7 +127,11 @@ class Build(object):
             (so, serr) = pipe.communicate()
             output = so.decode("ascii")
             print(output)
-            print('\nCommit last changes done')
+
+            pipe = Popen(["git", "log", "-1", "--pretty=%B"], stdout=PIPE, stderr=PIPE)
+            (so, serr) = pipe.communicate()
+            output = so.decode("ascii")
+            print('last message', output)
 
             #Automatically Tag?
         
