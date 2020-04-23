@@ -22,7 +22,7 @@
 #
 # ## Using `Jupyter Notebook`
 #
-# Assuming `Jupyter` is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../../gettingstarted/install.rst)), go to your favorite user document folder (*e.g.,* `$HOME/workspace/) or any other folder you want to use to store your development).
+# Assuming `Jupyter` is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../../gettingstarted/install/index.rst)), go to your favorite user document folder (*e.g.,* `$HOME/workspace/) or any other folder you want to use to store your development).
 #
 #     $ cd ~/workspace
 #

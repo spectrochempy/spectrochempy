@@ -142,10 +142,10 @@ def make_docs(*args):
     if 'clean' in args:
         clean()
         regenerate_api = True
-        info_('\nOld documentation now erased.\n')
+        print('\nOld documentation now erased.\n')
     
     if builders:
-        info_('\nDocumentation directory are created.\n')
+        print('\nDocumentation directory are created.\n')
         make_dirs()
     
     if regenerate_api or not os.path.exists(API):
@@ -174,35 +174,36 @@ def make_docs(*args):
                     f"mv {PROJECT}.pdf ../pdf/{PROJECT}.pdf")
             for cmd in cmds:
                 res = subprocess.call(cmd, shell=True)
-                info_(res)
+                print(res)
         
         if not nocommit:
             gitcommands()  # update repository
         
-        info_(
-            "\n\nBuild finished. The {0} pages are in {1}/{2}.".format(
-                builder.upper(), BUILDDIR, builder))
+        print(f"\n{'-'*130}\nBuild finished. The {builder.upper()} pages are in {os.path.normpath(outdir)}.")
         
         # do some cleaning
         shutil.rmtree('auto_examples', ignore_errors=True)
     
     released = 'FALSE'
     if 'release' in args:
-        released = 'TRUE'
+        update_html_page(outdir, doc_version)
         do_release()
-    
-    info_(f'Released on Spectrochempy.fr : {released}')
-    if not notebooks:
-        info_('Jupyter notebooks were not regenrated')
-        info_('if they are missing in the final documentation: use `notebooks` parameter! ')
+        released = 'TRUE'
         
-    updateindexpage(outdir, doc_version)
+    
+    print(f'\n\nReleased on spectrochempy.fr : {released}')
+    if not notebooks:
+        print('\nWARNING: Jupyter notebooks were not regenerated')
+        print('if they are missing in the final documentation: use `notebooks` parameter! \n')
+        
+    print('-'*130)
     
     return True
 
-def updateindexpage(outdir, doc_version):
+def update_html_page(outdir, doc_version):
     """
-
+    Modify page generated with sphinx (TODO: There is porbably a better method using sphinx templates to override
+    the themes)
     """
 
     replace=f"""
@@ -270,7 +271,7 @@ def do_release():
     # upload docs to the remote web server
     if SERVER:
         
-        info_("uploads to the server of the html/pdf files")
+        print("uploads to the server of the html/pdf files")
         path = sys.argv[0]
         while not path.endswith(PROJECT):
             path, _ = os.path.split(path)
@@ -281,12 +282,14 @@ def do_release():
         debug_(subprocess.call(['pwd'], shell=True))  # , executable='/bin/bash'))
         
         res = subprocess.call([cmd], shell=True)  # , executable='/bin/bash')
-        info_(res)
-        info_('\n' + cmd + "Finished")
+        print(res)
+        print('\n' + cmd + "Finished")
     
     else:
         error_('Cannot find the upload server : {}!'.format(SERVER))
 
+
+    
 
 def clean():
     """Clean/remove the built documentation.
