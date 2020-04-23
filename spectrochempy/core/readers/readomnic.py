@@ -93,6 +93,7 @@ def read_omnic(dataset=None, **kwargs):
 
     # check if directory was specified
     directory = kwargs.get("directory", None)
+    sortbydate = kwargs.get("sortbydate", True)
 
     # returns a list of files to read
     files = readfilename(filename,
@@ -113,14 +114,14 @@ def read_omnic(dataset=None, **kwargs):
         if extension == '.spg':
             for filename in files[extension]:
                 #debug_("reading omnic spg file")
-                datasets.append(_read_spg(dataset, filename))
+                datasets.append(_read_spg(dataset, filename, sortbydate=sortbydate))
 
         elif extension == '.spa':
             #debug_("reading omnic spa files")
-            datasets.append(_read_spa(dataset, files[extension], sortbydate=True))
+            datasets.append(_read_spa(dataset, files[extension], sortbydate=sortbydate))
         else:
             # try another format!
-            datasets = dataset.read(filename, protocol=extension[1:], sortbydate=True, **kwargs)
+            datasets = dataset.read(filename, protocol=extension[1:], sortbydate=sortbydate, **kwargs)
         
     if len(datasets) == 1:
         return datasets[0]  # a single dataset is returned
@@ -164,8 +165,10 @@ def _readbtext(f, pos):
 
 
 # .............................................................................
-def _read_spg(dataset, filename, sortbydate=True, **kwargs):
+def _read_spg(dataset, filename, **kwargs):
     # read spg file
+
+    sortbydate = kwargs.get('sortbydate', True)
     with open(filename, 'rb') as f:
 
         # Read title:
@@ -381,7 +384,7 @@ def _read_spg(dataset, filename, sortbydate=True, **kwargs):
 
     dataset.history = str(datetime.now()) + ':read from spg file \n'
 
-    if kwargs.get('sortbydate', 'True'):
+    if sortbydate:
         dataset.sort(dim='y', inplace=True)
         dataset.history = 'Sorted'
 
@@ -550,7 +553,7 @@ def _read_spa(dataset, filenames, **kwargs):
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'
 
-    if kwargs.get('sortbydate', 'True'):
+    if kwargs.get('sortbydate', True):
         dataset.sort(dim=0, inplace=True)
         dataset.history = 'Sorted'
 

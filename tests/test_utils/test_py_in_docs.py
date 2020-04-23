@@ -28,7 +28,10 @@ def test_example(example):
     # SKIP THEM
     if (name in ['tuto2_agir_IR_processing.py',
                  'tuto3_agir_tg_processing.py',
-                 'agir_setup_figure.py'] ):
+                 'agir_setup_figure.py',
+                 '1_nmr.py',
+                 '1_nmr-Copy1.py',
+                 'fft.py',] ):
         print(example, ' ---> test skipped - DO IT MANUALLY')
         return
 

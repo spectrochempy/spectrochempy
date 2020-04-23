@@ -17,14 +17,14 @@ import pytest
 def test_read_zunimplemented():
 
     with pytest.raises(NotImplementedError):
-        A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
+        A = NDDataset.read_zip('agirdata/P350/FTIR/FTIR.zip')
 
 def test_read_zip():
 
     #with pytest.raises(NotImplementedError):
     #    A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
 
-    A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip',
+    A = NDDataset.read_zip('agirdata/P350/FTIR/FTIR.zip',
                            origin='omnic_export',
                            only=10,
                            delimiter = ';')
@@ -33,14 +33,14 @@ def test_read_zip():
     show()
 
     print(A)
-    assert A.shape == (10, 3736)
+    assert A.shape == (10, 2843)
 
 
 def test_read_csv_tg():
-    B = NDDataset.read_csv('agirdata/A350/TGA/tg.csv',
+    B = NDDataset.read_csv('agirdata/P350/TGA/tg.csv',
                            directory=prefs.datadir,
                            origin='tga')
-    assert B.shape == (3446,)
+    assert B.shape == (3247,)
     print(B)
     B.plot()
     show()

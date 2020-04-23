@@ -16,20 +16,15 @@ import pytest
 
 # comment the next line to test it manually
 #@pytest.mark.skip('interactive so cannot be used with full testing')
-def test_read_dir():
-    A = NDDataset.read_dir(os.path.join('irdata','subdir'))
-    assert len(A) == 9
 
-    # in case we do not specify a directory:
-    #  - open a dialog but handle the case we clik cancel
-    B = NDDataset.read_dir()
+def test_readomnic_writejdx_readjdx():
+    X = NDDataset.read_omnic(os.path.join('irdata','nh4y-activation.spg'))
+    X.write_jdx('nh4y-activation.jdx')
+    Y = NDDataset.read_jdx('nh4y-activation.jdx')
+    os.remove('nh4y-activation.jdx')
+    maxdiff = (X[:,1:-1] - Y[:,1:-1]).abs().max()
+    assert maxdiff < 1e-8
 
-    C = NDDataset.read_dir(os.path.join('matlabdata'))
-    print('Matrixes in .mat files:')
-    for x in C:
-        print(C)
-    assert len(C)== 6
-    assert C[3].shape == (204, 96)
 
 
 
