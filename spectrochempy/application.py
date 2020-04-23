@@ -85,7 +85,7 @@ except: # pragma: no cover
 def _get_copyright():
     current_year = datetime.date.today().year
     copyright = '2014-{}'.format(current_year)
-    copyright += ' - A.Travert & C.Fernandez @ LCS'
+    copyright += ' - LCS'
     return copyright
 
 
