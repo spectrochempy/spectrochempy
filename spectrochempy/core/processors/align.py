@@ -178,7 +178,7 @@ def align(dataset, *others, **kwargs):
     
     # get the relevant dimension names
     ref_dims = ref_obj.dims
-    axis = kwargs.pop('axis', 0)
+    axis = kwargs.pop('axis', -1)
     dim = kwargs.pop('dim', ref_dims[axis])
     dims = kwargs.pop('dims', [dim])
     
