@@ -47,7 +47,7 @@ def test_read_csv_tg():
 
 
 def test_read_csv_IR():
-    B = NDDataset.read_csv('irdata/ir.csv', directory=prefs.datadir,
+    B = NDDataset.read_csv('irdata/IR.CSV', directory=prefs.datadir,
                            origin='ir', csv_delimiter=',')
     assert B.shape == (3736,)
     print(B)
@@ -55,7 +55,7 @@ def test_read_csv_IR():
     show()
 
 def test_read_without_directory():
-    B = NDDataset.read_csv('irdata/ir.csv')
+    B = NDDataset.read_csv('irdata/IR.CSV')
     print(B)
 
 def test_read_without_filename():
