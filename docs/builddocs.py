@@ -107,15 +107,18 @@ def make_docs(*args):
     args = list(args)
     regenerate_api = False
     
-    # we need to use jupytext to sync py and ipynb files in userguide and tutorials
-    cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
-    for cmd in cmds:
-        res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output, error = res.communicate()
-        if not error:
-            print(output.decode("utf-8"))
-        else:
-            print(error.decode("utf-8"))
+    notebooks = False
+    if 'notebooks' in args:
+        notebooks = True
+        # we need to use jupytext to sync py and ipynb files in userguide and tutorials
+        cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
+        for cmd in cmds:
+            res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            output, error = res.communicate()
+            if not error:
+                print(output.decode("utf-8"))
+            else:
+                print(error.decode("utf-8"))
     
     nocommit = True
     if 'commit' in args:
@@ -180,9 +183,16 @@ def make_docs(*args):
         # do some cleaning
         shutil.rmtree('auto_examples', ignore_errors=True)
     
+    released = 'FALSE'
     if 'release' in args:
+        released = 'TRUE'
         do_release()
     
+    info_(f'Released on Spectrochempy.fr : {released}')
+    if not notebooks:
+        info_('Jupyter notebooks were not regenrated')
+        info_('if they are missing in the final documentation: use `notebooks` parameter! ')
+        
     return True
 
 
