@@ -1007,14 +1007,7 @@ class NDMath(object):
                 elif other._squeeze_ndim > 1 and obj.coords and other.coords and \
                         not (obj._coords[0].is_empty and obj._coords[0].is_empty) and \
                         not np.all(obj._coords[0]._data == other._coords[0]._data):
-                    if not np.all(obj._coords[0]._data == other._coords[0]._data):
-                        # raise a warning and set other coords to that of obj
-                        maxdiff = max(np.abs(obj._coords[0]._data - other._coords[0]._data))
-                        warning_("Coordinates do not match (maximum difference: {})\n".format(maxdiff) +
-                                 "You might consider using align() on one of the operands...\n" +
-                                 "Here coordinates of the result are fixed to those of the first operand")
-                    else:
-                        raise ValueError(
+                    raise ValueError(
                             "coordinate's values do not match")
             
             if othertype in ['NDDataset', 'Coord']:
