@@ -17,9 +17,9 @@ from numpy.compat import asstr
 from traitlets import import_item
 import warnings
 
-from .qtfiledialogs import opendialog
+from .qtfiledialogs import opendialog, SaveFileName
 
-__all__ = ['readfilename', 'readdirname',
+__all__ = ['readfilename', 'readdirname', 'savefilename',
            'list_packages', 'generate_api',
            'make_zipfile', 'ScpFile',
            'unzip'  # tempo
@@ -244,6 +244,50 @@ def readdirname(dirname=None, **kwargs):
                                    filters='directory')
 
             return directory
+
+
+def savefilename(filename:None, directory:None, filters:None):
+    """returns a valid filename to save a file
+
+    Parameters
+    ----------
+    filename : `str`, optional.
+        A filename. If not provided, a dialog box is opened to select a file.
+    directoryr: `str`, optional.
+        The directory where to save the file. If not specified, usez the current working directory
+
+    Returns
+    --------
+        a valid filename to save a file
+    """
+    from spectrochempy.api import NO_DISPLAY
+
+    # check if directory is specified
+    if directory and not os.path.exists(directory):
+        raise IOError('Error : Invalid directory given')
+
+    if not directory:
+        directory = os.getcwd()
+
+    if filename:
+        filename = os.path.join(directory, filename)
+    else:
+        # no filename was given then open a dialog box
+        # currently Scpy use QT (needed for next GUI features)
+
+        # We can not do this during full pytest run without blocking the process
+        # TODO: use the pytest-qt to solve this problem
+
+        if not filters:
+            filters = "All files (*)"
+        if not NO_DISPLAY:
+            filename = SaveFileName(parent=None, filters=filters)
+        if not filename:
+            # if the dialog has been cancelled or return nothing
+            return None
+
+    return filename
+
 
 
 # ======================================================================================================================
