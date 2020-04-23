@@ -110,6 +110,16 @@ Conda install
 
 Todo
 
+Install from PyPi repository
+----------------------------
+
+Using this method you can install the latest stable version present on the PyPi repository:
+
+.. sourcecode:: bat
+
+    (scpy) C:\<yourDefaultPath>> pip install --upgrade spectrochempy
+
+
 Install from the Bitbucket source repository
 --------------------------------------------
 
