@@ -92,7 +92,7 @@ if 'builddocs.py' in sys.argv[0]:
     # if we are building the documentation, in principle it should be done
     # using the builddocs.py located in the scripts folder.
     NO_DISPLAY = True
-    mpl.use('agg', warn=False, force=True)
+    mpl.use('agg', force=True)
 
 # Are we running pytest ?
 
@@ -109,7 +109,7 @@ if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
         NO_DISPLAY = False
 
     if NO_DISPLAY:
-        mpl.use('agg', warn=False, force=True)
+        mpl.use('agg', force=True)
 
 # Are we running in PyCharm scientific mode?
 if mpl.get_backend() == 'module://backend_interagg':

@@ -77,7 +77,7 @@ def version_scheme(version):
     next = '.'.join(next)
     dev = ''
     if branch != 'master':
-        dev = f'-dev.{dist}' if dist>0 else ''
+        dev = f'-dev.{dist}'
         tag = next
     dev = dev
     dirty = '+dirty' if dirty else ''
