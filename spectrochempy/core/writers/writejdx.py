@@ -8,6 +8,9 @@
 # ======================================================================================================================
 
 
+# Author(s): Arnaud Travert (LCS)
+# Contributor(s): Christian Fernandez (LCS)
+
 """Plugin module to extend NDDataset with export methods method.
 
 """
@@ -18,21 +21,20 @@ from datetime import datetime, timezone, timedelta
 from traitlets import HasTraits, Unicode, List
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from ...utils import savefilename
+from spectrochempy.core.dataset.ndcoord import Coord
 from ...core import info_, debug_, error_, warning_
 
 __all__ = ['write_jdx']
 
-__dataset_methods__ = __all__
 
-
-def write_jdx(*args, **kwargs):
-    """Writes a dataset in JCAMP-DX format
+def write_jdx(dataset=None, **kwargs):
+    """Writes a the dataset X in jdx format
 
     Parameters
     ----------
     dataset : |NDDataset|
-        The dataset
+        The dataset to store the data and metadata read from the OMNIC file(s).
+        If None, a |NDDataset| is created.
     filename : `None`, `str`
         Filename of the file to write. If `None`: opens a dialog box to safe files.
     directory: str, optional, default="".
@@ -45,7 +47,9 @@ def write_jdx(*args, **kwargs):
 
     Examples
     --------
-    >>> X.write_jdx('myfile.jdx')
+    >>> A = NDDataset.write_jdx('myfile.jdx')
+
+
     """
     debug_("writing jdx file")
 
@@ -53,74 +57,57 @@ def write_jdx(*args, **kwargs):
     filename = kwargs.get('filename', None)
 
     # check if the first parameter is a dataset because we allow not to pass it
-    if not isinstance(args[0], NDDataset):
+    if not isinstance(dataset, NDDataset):
         # probably did not specify a dataset
         # so the first parameters must be the filename
-        if isinstance(args[0], str) and args[0] != '':
-            filename = args[0]
-    else: #then the dataset is the first and the filename might be the second parameter:
-        dataset = args[0]
-        if isinstance(args[1], str) and args[0] != '':
-            filename = args[1]
+        if isinstance(dataset, (str, list)) and dataset != '':
+            filename = dataset
 
-    directory = kwargs.get('directory', None)
+    # check if directory was specified
+    directory = kwargs.get("directory", None)
+    if not directory:
+        directory = os.getcwd()
+    # check if a valid filename is given
 
-    filename = savefilename(filename=filename,
-                            directory=directory,
-                            filters="JCAMP-DX (*.JDX) ;; All files (*)")
-    if filename is None:
-        # no filename from the dialogbox
-        return
 
-    f = open(filename, 'w')  # if filename is provided,directly create jdx file
+
+    f = open(filename,
+                 'w')  # if filename is provided,directly create jdx file
 
     # writes first lines
-    f.write('##TITLE=' + dataset.name + '\n')
+    f.write('##TITLE=' + X.name + '\n')
     f.write('##JCAMP-DX=5.01' + '\n')
     # if several spectra => Data Type = LINK
-    if dataset.shape[0] > 1:
+    if X.shape[0] > 1:
         f.write('##DATA TYPE=LINK' + '\n')
-        f.write('##BLOCKS=' + str(dataset.shape[
+        f.write('##BLOCKS=' + str(X.shape[
                                       0]) + '\n')  # number of spectra (size of 1st dimension )
     else:
         f.write('##DATA TYPE=INFRARED SPECTRUM' + '\n')
 
-    # determine whether the spectra have a title and a datetime field in the labels,
-    # by default, the title if any will be is the first string; the timestamp will
-    # be the fist datetime.datetime
-    title_index = None
-    timestamp_index  = None
-    if dataset.y.labels is not None:
-        for i, label in enumerate(dataset.y.labels[0]):
-            if not title_index and type(label) is str:
-                title_index = i
-            if not timestamp_index and type(label) is datetime:
-                timestamp_index = i
-
-    if timestamp_index is None:
-        timestamp = datetime.now()
-
-    for i in range(dataset.shape[0]):
-        if dataset.shape[0] > 1:
-            if title_index:
-                f.write('##TITLE=' + dataset.y.labels[i][title_index] + '\n')
+    for i in range(X.shape[0]):
+        if X.shape[0] > 1:
+            if len(X.dims[0].labels):
+                f.write('##TITLE=' + X.dims[0].labels[0][i] + '\n')
             else:
                 f.write('##TITLE= spectrum #' + str(i) + '\n')
             f.write('##JCAMP-DX=5.01' + '\n')
-        f.write('##ORIGIN=' + dataset.origin  + '\n')
-        f.write('##OWNER=' + dataset.author + '\n')
-
-        if timestamp_index is not None:
-            timestamp = dataset.y.labels[i][timestamp_index]
-        f.write('##LONGDATE=' +
-                    timestamp.strftime("%Y/%m/%d") + '\n')
-        f.write('##TIME=' +
-                    timestamp.strftime("%H:%M:%S") + '\n')
+        f.write('##ORIGIN=' + X.author + '\n')
+        f.write('##OWNER=LCS' + '\n')
+        if len(X.dims[0].labels):
+            f.write('##LONGDATE=' + X.dims[0].labels[1][i].strftime(
+                "%Y/%m/%d") + '\n')
+            f.write(
+                '##TIME=' + X.dims[0].labels[1][i].strftime("%H:%M:%S") + '\n')
         f.write('##XUNITS=1/CM' + '\n')
         f.write('##YUNITS=' + 'ABSORBANCE' + '\n')
-
-        firstx, lastx = dataset.x.data[0], dataset.x.data[-1]
-        firsty, lasty = dataset.data[0,0], dataset.data[0,-1]
+        nx = X.shape[1]
+        firstx, lastx = X.dims[1].axes[0][0], X.dims[1].axes[0][nx - 1]
+        firsty, lasty = X.data[0, 0], X.data[0, nx - 1]
+        if firstx > lastx:
+            maxx, minx = firstx, lastx
+        else:
+            maxx, minx = lastx, firstx
 
         f.write('##FIRSTX=' + str(firstx) + '\n')
         f.write('##LASTX=' + str(lastx) + '\n')
@@ -130,10 +117,10 @@ def write_jdx(*args, **kwargs):
             maxx, minx = firstx, lastx
         else:
             maxx, minx = lastx, firstx
-        nx = dataset.shape[1]
+        nx = X.shape[1]
         f.write('##MAXX=' + str(maxx) + '\n')
         f.write('##MINX=' + str(minx) + '\n')
-        maxy, miny = np.nanmax(dataset.data), np.nanmin(dataset.data)
+        maxy, miny = np.nanmax(X.data), np.nanmin(X.data)
         f.write('##MAXY=' + str(maxy) + '\n')
         f.write('##MINY=' + str(miny) + '\n')
         f.write('##XFACTOR=1.000000' + '\n')
@@ -141,20 +128,20 @@ def write_jdx(*args, **kwargs):
         f.write('##NPOINTS=' + str(nx) + '\n')
         yfactor = 1e-8
         f.write('##XYDATA=(X++(Y..Y))' + '\n')
-        x = str(firstx)  # first x
+        x = str(X.dims[1].axes[0][0])  # first x
         f.write(x + ' ')  # Write the first x
-        y = str(int(firsty / yfactor))  # first y
+        y = str(int(X.data[i, 0] / yfactor))  # first y
         f.write(y + ' ')  # write first y
         llen = len(x) + len(y) + 2  # length of current line
         for j in np.arange(1, nx):
-            if np.isnan(dataset.data[i, j]):
+            if np.isnan(X.data[i, j]):
                 y = '?'
             else:
-                y = str(int(dataset.data[i, j] / yfactor))
+                y = str(int(X.data[i, j] / yfactor))
             f.write(y + ' ')
             llen = llen + len(y) + 1
             if llen > 75:
-                x = str(dataset.x.data[j])
+                x = str(X.dims[1].axes[0][j])
                 f.write('\n' + x + ' ')
                 llen = len(x) + 1
         f.write('\n' + '##END' + '\n')
