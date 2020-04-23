@@ -16,14 +16,15 @@ import sys
 import subprocess
 import shutil as sh
 import warnings
+import version
 
 # ----------------------------------------------------------------------------------------------------------------------
 
 __DEV__ = False
 if 'develop' in sys.argv:
     __DEV__ = True
-
-
+    
+    
 def path():
     return os.path.dirname(__file__)
 
@@ -123,14 +124,13 @@ setup_args = dict(
     
     # packages informations
     name="spectrochempy",
-    #use_scm_version=True,
-    version = '1.14dev', #TODO: read a version number automzatically when git is not present
+    version = version.version,
     license="CeCILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="developpers@spectrochempy.fr",
     maintainer="SpectroChempy Developpers",
     maintainer_email="developpers@spectrochempy.fr",
-    url='http:/www.spectrochempy.fr',
+    url='https:/www.spectrochempy.fr',
     description='Processing, analysis and modelling Spectroscopic data for '
                 'Chemistry with Python',
     long_description=read('README.rst'),
@@ -142,7 +142,6 @@ setup_args = dict(
                  "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
                  "Operating System :: OS Independent",
                  "Programming Language :: Python :: 3.7",
-                 "Programming Language :: Python :: 3.6",
                  ],
     platforms=['Windows', 'Mac OS X', 'Linux'],
     
@@ -151,7 +150,7 @@ setup_args = dict(
     include_package_data=True,
     
     # requirements
-    python_requires=">3.5",  # TODO: check if it works also with 3.5
+    python_requires=">3.6",
     
     # post-commands
     cmdclass={'develop': PostDevelopCommand,

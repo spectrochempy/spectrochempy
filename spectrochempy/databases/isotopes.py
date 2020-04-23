@@ -124,7 +124,7 @@ class Isotopes(HasTraits):
     @property
     def spin(self):
         """Spin quantum number of the current nucleus"""
-        return Fraction(self.isotopes.ix[self.nucleus]['spin'])
+        return Fraction(self.isotopes.loc[self.nucleus]['spin'])
 
     # ===========================================================================
     # Z
@@ -132,7 +132,7 @@ class Isotopes(HasTraits):
     @property
     def Z(self):
         """Atomic number  of the current nucleus"""
-        return self.isotopes.ix[self.nucleus]['Z']
+        return self.isotopes.loc[self.nucleus]['Z']
 
     # ===========================================================================
     # A
@@ -140,7 +140,7 @@ class Isotopes(HasTraits):
     @property
     def A(self):
         """Atomic mass  of the current nucleus"""
-        return self.isotopes.ix[self.nucleus]['A']
+        return self.isotopes.loc[self.nucleus]['A']
 
     # ===========================================================================
     # full name
@@ -148,7 +148,7 @@ class Isotopes(HasTraits):
     @property
     def name(self):
         """the name of the nucleus"""
-        return self.isotopes.ix[self.nucleus]['name'].strip()
+        return self.isotopes.loc[self.nucleus]['name'].strip()
 
     # ===========================================================================
     # gamma
@@ -157,7 +157,7 @@ class Isotopes(HasTraits):
     def gamma(self):
         """gyromagnetic ratio of the current nucleus"""
         muN = ur.elementary_charge / ur.proton_mass / 2. / (2. * np.pi)
-        return (self.isotopes.ix[self.nucleus]['gn'] * muN).to('MHz/T')
+        return (self.isotopes.loc[self.nucleus]['gn'] * muN).to('MHz/T')
 
     # ===========================================================================
     # _get_abundance
@@ -165,7 +165,7 @@ class Isotopes(HasTraits):
     @property
     def abundance(self):
         """natural abundance in percent of the current nucleus"""
-        return self.isotopes.ix[self.nucleus]['abundance']
+        return self.isotopes.loc[self.nucleus]['abundance']
 
     # ===========================================================================
     # _get_Q
@@ -179,7 +179,7 @@ class Isotopes(HasTraits):
 
         """
         try:
-            return float(self.isotopes.ix[self.nucleus][
+            return float(self.isotopes.loc[self.nucleus][
                              'quadrupole']) * 1000. * ur.mbarn
         except:
             return 0. * ur.barn
@@ -190,7 +190,7 @@ class Isotopes(HasTraits):
     @property
     def symbol(self):
         """Symbol of the current nucleus"""
-        return self.isotopes.ix[self._nucleus].symbol.strip()
+        return self.isotopes.loc[self._nucleus].symbol.strip()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Stability
@@ -201,7 +201,7 @@ class Isotopes(HasTraits):
         The stability of the current nucleus
 
         """
-        return self.isotopes.ix[self.nucleus].stability.strip()
+        return self.isotopes.loc[self.nucleus].stability.strip()
 
     # ------------------------------------------------------------------------------------------------------------------
     # initializer
@@ -225,12 +225,15 @@ class Isotopes(HasTraits):
 
     def __getattr__(self, item):
         """
-        when an attribute is not found, try to interpret or retrun an informative message
+        when an attribute is not found, try to interpret or return an informative message
         """
+
         # it may be a nucleus but in a inverted format
         # try:
         p = re.compile(r'^([A-Z,a-z]+)[_-]*([0-9]+$)')
         m = re.match(p, item).groups()
+
+        
         nucleus = m[1] + m[0]  # transform "e.g., Al27->27Al, ou AL-27 to 27Al"
         if nucleus in self.isotopes.index.values:
             self.nucleus = nucleus

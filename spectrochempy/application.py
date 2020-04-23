@@ -67,19 +67,42 @@ CRITICAL = logging.CRITICAL
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
 
+def version_scheme(version):
+    branch = version.branch
+    dist = version.distance
+    tag = next = version.tag.public
+    dirty = version.dirty
+    next = next.split('.')
+    next[-1]=str(int(next[-1])+1)
+    next = '.'.join(next)
+    dev = ''
+    if branch != 'master':
+        dev = f'-dev.{dist}' if dist>0 else ''
+        tag = next
+    dev = dev
+    dirty = '+dirty' if dirty else ''
+    version_scheme = f'{tag}{dev}{dirty}'
+    if not dev and not dirty:
+        # write it only for stable TAG
+        # This means, always tab the latest master version
+        with open(os.path.join('..','..',os.path.dirname(os.path.relpath(__file__)), 'version.py'), 'w') as f:
+            f.write(f"version = '{version_scheme}' # Do not delete. Automatically set when needed\n\n")
+    return version_scheme
+
 try:
     __release__ = get_distribution('spectrochempy').version
     "Release version string of this package"
 except DistributionNotFound:  # pragma: no cover
     # package is not installed
     __release__ = '0.1a'
-
+    
 try:
-    __version__ = get_version(root='..', relative_to=__file__)
+    __version__ = get_version(root='..',
+                              relative_to=__file__,
+                              version_scheme = version_scheme)
     "Version string of this package"
 except: # pragma: no cover
     __version__ = __release__
-
 
 # ............................................................................
 def _get_copyright():
