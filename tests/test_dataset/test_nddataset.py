@@ -766,7 +766,7 @@ def test_nddataset_comparison():
 
 
 def test_nddataset_repr_html():
-    nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+    nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
     x = nd.T._repr_html_()
 
     dx = np.random.random((10, 100, 3))

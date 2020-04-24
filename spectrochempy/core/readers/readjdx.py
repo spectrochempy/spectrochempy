@@ -263,9 +263,6 @@ def read_jdx(dataset=None, **kwargs):
 
         dataset = NDDataset(data)
         dataset.name = jdx_title
-        dataset.author = (os.environ['USERNAME'] + '@' + os.environ[
-            'COMPUTERNAME'])  # dataset author string
-
         dataset.units = 'absorbance'
         dataset.title = 'Absorbance'
         dataset.name = ' ... '.join(set([alltitles[0], alltitles[-1]]))

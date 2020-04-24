@@ -128,7 +128,7 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
 def test_bug_lost_dimensionless_units():
     from spectrochempy import print_
     import os
-    dataset = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+    dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
     assert dataset.units == 'absorbance'
     dataset = dataset - 2.  # artificially make negative some of the values
     assert dataset.units == 'absorbance'
