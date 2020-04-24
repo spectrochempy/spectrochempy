@@ -2,8 +2,8 @@
 
 :version: |version| (|today|)
 
-|scpy|: Processing, analysing and modelling spectroscopic data
-##############################################################
+SpectroChemPy: Processing, analysing and modelling spectroscopic data
+#####################################################################
 
 |scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic data for **Chem**\ istry with **Py**\ thon.
 It is a cross platform software, running on Linux, Windows or OS X.
