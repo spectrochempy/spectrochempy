@@ -32,7 +32,7 @@ from spectrochempy import *
 
 # %%
 import os
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 print(dataset.description)
 
 # %% [markdown]

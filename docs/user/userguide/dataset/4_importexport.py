@@ -80,7 +80,7 @@ fs.value, fs.path, fs.fullpath
 #
 
 # %%
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 dataset
 
 # %%

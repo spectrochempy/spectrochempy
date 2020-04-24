@@ -28,7 +28,7 @@ from spectrochempy import *
 # For sake of demonstration, let's take an experimental dataset that we will arbitrary split into four unaligned datasets. Then will realign them and appy some binary mathematical operation such as addition or subtration that required aligned coordinates.
 
 # %%
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
 dataset.y.title = 'Time'
 _ = dataset.plot_map(colormap='viridis', colorbar=True)
