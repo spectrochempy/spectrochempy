@@ -355,8 +355,8 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     .. math::
         sp(t) = \sin(\frac{(\pi - \phi) t }{\text{aq}} + \phi)^{pow}
         
-    where :math:`0 \lt t \lt \text{aq}` and  :math:`\phi = \pi ⁄ \text{sbb}` when :math:`\text{ssb} \ge 2` or
-    :math:`\phi = 0` when :math:`\text{ssb} \lt 2`
+    where :math:`0 < t < \text{aq}` and  :math:`\phi = \pi ⁄ \text{sbb}` when :math:`\text{ssb} \ge 2` or
+    :math:`\phi = 0` when :math:`\text{ssb} < 2`
     
     :math:`\text{aq}` is an acquisition status parameter and :math:`\text{ssb}` is a processing parameter (see the
     `ssb` parameter definition below) and :math:`\text{pow}` is an exponent equal to 1 for a sine bell window

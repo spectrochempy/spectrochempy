@@ -113,7 +113,7 @@ class Build(object):
             
         """
         doc_version = self.doc_version
-        print(f'building {builder.upper()} documentation ({doc_version.capitalize()}version : {version})')
+        print(f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})')
         
         if builder == 'pdf':
             pdfdir = f"{BUILDDIR}/{builder}/{doc_version}"
@@ -141,14 +141,13 @@ class Build(object):
         # do some cleaning
         shutil.rmtree(os.path.join('docs','auto_examples'), ignore_errors=True)
 
-        if builder == 'pdf':
-            cmds = (f"cd {outdir}",
-                    "make",
-                    f"mv {PROJECT}.pdf {pdfdir}/{PROJECT}.pdf")
-            #TODO: check if this work on windows
+        if builder == 'latex':
+            output = cmd_exec(os.path.join(outdir, "make"), shell=True)
+            print (output)
             
-            for cmd in cmds:
-                cmd_exec(cmd)
+            #"mv {PROJECT}.pdf {pdfdir}/{PROJECT}.pdf")
+            #TODO: check if this work on windows
+
 
         if builder=='html':
             self.update_html_page(outdir)
@@ -251,17 +250,17 @@ class Build(object):
                     <div class="rst-other-versions">
                         <dl>
                             <dt>Versions</dt>
-                            <dd><a href="https://www.spectrochempy.fr/latest/">latest</a></dd>
-                            <dd><a href="https://www.spectrochempy.fr/stable/">stable</a></dd>
+                            <dd><a href="/latest/index.html">latest</a></dd>
+                            <dd><a href="/stable/index.html">stable</a></dd>
                         </dl>
                 
-                    <!--    <dl>
+                        <dl>
                             <dt>Downloads</dt>
                             <dd><a href="https://www.spectrochempy.fr/pdf/stable/">pdf</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/htmlzip/stable/">htmlzip</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/epub/stable/">epub</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/tutorials/">tutorials</a></dd>
-                        </dl> -->
+                        </dl>
                 
                         <dl>
                             <dt>Sources on bitBucket</dt>

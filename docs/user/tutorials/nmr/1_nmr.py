@@ -300,7 +300,7 @@ _ = gbsh_dataset.plot(zlim=(-1.5,1.5), color='g', ls='--', clear=False)
 # %% [markdown]
 # $\text{sp}(x) = \sin(\frac{(\pi - \phi) t }{\text{aq}} + \phi)^{p}$ where 
 #         
-# where $0 \lt t \lt \text{aq}$ and  $\phi = \pi ⁄ \text{sbb}$ when $\text{ssb} \ge 2$ or $\phi = 0$ when $\text{ssb} \lt 2$.
+# where $0 < t < \text{aq}$ and  $\phi = \pi ⁄ \text{sbb}$ when $\text{ssb} \ge 2$ or $\phi = 0$ when $\text{ssb} < 2$.
 #         
 # $\text{aq}$ is an acquisition status parameter and $\text{ssb}$ is a processing parameter (see the `SSB` parameter definition below) and $\text{pow}$ is an exponent equal to 1 for a sine bell window or 2 for a squared sine bell window.
 #     

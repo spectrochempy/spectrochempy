@@ -123,10 +123,10 @@ _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 # Functional form of apodization window (cfBruker TOPSPIN manual): $sp(t) = \sin(\frac{(\pi - \phi) t }{\text{aq}} + \phi)^{pow}$
 #
 # where 
-# * $0 \lt t \lt \text{aq}$ and  $\phi = \pi ⁄ \text{sbb}$ when $\text{ssb} \ge 2$ 
+# * $0 < t < \text{aq}$ and  $\phi = \pi ⁄ \text{sbb}$ when $\text{ssb} \ge 2$ 
 #
 # or
-# *    $\phi = 0$ when $\text{ssb} \lt 2$
+# *    $\phi = 0$ when $\text{ssb} < 2$
 #         
 # $\text{aq}$ is an acquisition status parameter and $\text{ssb}$ is a processing parameter (see below) and $\text{pow}$ is an exponent equal to 1 for a sine bell window or 2 for a squared sine bell window.
 #
