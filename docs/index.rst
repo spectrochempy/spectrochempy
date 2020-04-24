@@ -30,8 +30,6 @@ Among its major features:
     bugs and crashes!!! Please report any issues to the
     `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
-    |scpy|-0.1 is expected to be first released around june or july 2019.
-
 Documentation
 =============
 

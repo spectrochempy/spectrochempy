@@ -47,9 +47,12 @@ BUILDDIR = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT)
 DOCTREES = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees'))
 
 # ----------------------------------------------------------------------------------------------------------------------
-def cmd_exec(cmd):
+def cmd_exec(cmd, shell=None):
     """To execute system command"""
-    res = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    if shell is not None:
+        res = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
+    else:
+        res = Popen(cmd, stdout=PIPE, stderr=PIPE)
     output, error = res.communicate()
     if not error:
         v =output.decode("utf-8")
@@ -149,7 +152,7 @@ class Build(object):
 
         if builder=='html':
             self.update_html_page(outdir)
-            
+            self.make_redirection_page()
 
     # ..................................................................................................................
     def sync_notebooks(self):
@@ -214,7 +217,7 @@ class Build(object):
             #TODO: Automate Tagging?
         
     # ..................................................................................................................
-    def make_redirection_page(self):
+    def make_redirection_page(self,):
 
         html = """
         <html>
@@ -225,6 +228,9 @@ class Build(object):
         <body></body>
         </html>
         """
+        with open(os.path.join(BUILDDIR, 'html', 'index.html'), 'w') as f:
+            f.write(html)
+        
 
     # ..................................................................................................................
     def update_html_page(self, outdir):
@@ -245,17 +251,17 @@ class Build(object):
                     <div class="rst-other-versions">
                         <dl>
                             <dt>Versions</dt>
-                            <dd><a href="https://www.spectrochempy.fr/html/latest/">latest</a></dd>
-                            <dd><a href="https://www.spectrochempy.fr/html/stable/">stable</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/latest/">latest</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/stable/">stable</a></dd>
                         </dl>
                 
-                        <dl>
+                    <!--    <dl>
                             <dt>Downloads</dt>
                             <dd><a href="https://www.spectrochempy.fr/pdf/stable/">pdf</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/htmlzip/stable/">htmlzip</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/epub/stable/">epub</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/tutorials/">tutorials</a></dd>
-                        </dl>
+                        </dl> -->
                 
                         <dl>
                             <dt>Sources on bitBucket</dt>
@@ -297,12 +303,10 @@ class Build(object):
             print("uploads to the server of the html/pdf/epub files")
             
             for item in ['html','pdf','epub']:
-                FROM = os.path.join(BUILDDIR, item, doc_version, '*')
-                TO = os.path.join(PROJECT, item, doc_version)
-                cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'.split()
-                pipe = Popen(*cmd, stdout=PIPE, stderr=PIPE)
-                (so, serr) = pipe.communicate()
-                output = so.decode("ascii")
+                FROM = os.path.join(BUILDDIR, item, '*')
+                TO = os.path.join(PROJECT, item)
+                cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
+                output = cmd_exec(cmd, shell=True)
                 print(output)
             
         else:
