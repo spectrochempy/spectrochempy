@@ -13,9 +13,9 @@
 
 usage::
 
-    python build_docs.py [clean notebooks html epub pdf release]
+    python make.py [options]
 
-where optional parameters idincates which job to perfom.
+where optional parameters indincates which job to perform.
 
 """
 import shutil
@@ -45,6 +45,9 @@ USERGUIDE = os.path.join(USERDIR, "userguide", "*", "*.py")
 API = os.path.join(DOCDIR, 'api', 'generated')
 BUILDDIR = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT))
 DOCTREES = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees'))
+HTML = os.path.join(BUILDDIR, 'html')
+LATEX = os.path.join(BUILDDIR, 'latex')
+DOWNLOADS = os.path.join(HTML, 'downloads')
 
 # ----------------------------------------------------------------------------------------------------------------------
 def cmd_exec(cmd, shell=None):
@@ -55,10 +58,13 @@ def cmd_exec(cmd, shell=None):
         res = Popen(cmd, stdout=PIPE, stderr=PIPE)
     output, error = res.communicate()
     if not error:
-        v =output.decode("utf-8")
+        v = output.decode("utf-8")
         return v
     else:
-        raise RuntimeError(f"{cmd} failed!\n{error.decode('utf-8')}")
+        v = error.decode('utf-8')
+        if "makeindex" in v:
+            return v # This is not an error! (#TODO: why Popen retrun an error)
+        raise RuntimeError(f"{cmd} [FAILED]\n{v}")
  
 # ======================================================================================================================
 class Build(object):
@@ -76,8 +82,8 @@ class Build(object):
 
         parser.add_argument("-w", "--html", help="create html pages", action="store_true")
         parser.add_argument("-p", "--pdf", help="create pdf pages", action="store_true")
-        parser.add_argument("-e", "--epub", help="create epub pages", action="store_true")
         parser.add_argument("-c", "--clean", help="clean/delete output", action="store_true")
+        parser.add_argument("-d", "--deepclean", help="full clean/delete output (reset)", action="store_true")
         parser.add_argument("-s", "--sync", help="sync doc ipynb", action="store_true")
         parser.add_argument("-g", "--git", help="git commit last changes", action="store_true")
         parser.add_argument("-m", "--message", default='DOCS: updated', help='optional commit message')
@@ -93,12 +99,13 @@ class Build(object):
             self.gitcommit(args.message)
         if args.clean:
             self.clean()
+        if args.deepclean:
+            self.deepclean()
         if args.html:
             self.make_docs('html')
         if args.pdf:
-            self.make_docs('pdf')
-        if args.epub:
-            self.make_docs('epub')
+            self.make_docs('latex')
+            self.make_pdf()
         if args.release:
             self.release()
     
@@ -113,14 +120,11 @@ class Build(object):
             
         """
         doc_version = self.doc_version
+        
         print(f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})')
         
-        if builder == 'pdf':
-            pdfdir = f"{BUILDDIR}/{builder}/{doc_version}"
-            # switch to latex
-            builder = 'latex'
-            
         # recreate dir if needed
+        self.clean()
         self.make_dirs()
         srcdir = confdir = DOCDIR
         outdir = f"{BUILDDIR}/{builder}/{doc_version}"
@@ -140,24 +144,36 @@ class Build(object):
 
         # do some cleaning
         shutil.rmtree(os.path.join('docs','auto_examples'), ignore_errors=True)
-
-        if builder == 'latex':
-            print('Started to build pdf from latex using make.... Wait until a new message appear (it is a long! compilation) ')
-            output = cmd_exec(f'cd {os.path.normpath(outdir)}; '
-                              f'lualatex -synctex=1 -interaction=nonstopmode "spectrochempy".tex '
-                              f'makeindex "spectrochempy".idx; '
-                              f'lualatex -synctex=1 -interaction=nonstopmode "spectrochempy".tex ',
-                              shell=True)
-            print (output)
-            #output = cmd_exec(f'pdflatex -synctex=1 -interaction=nonstopmode "spectrochempy".tex', shell=True)
-            #"mv {PROJECT}.pdf {pdfdir}/{PROJECT}.pdf")
-            #TODO: check if this work on windows
-
-
+            
         if builder=='html':
             self.update_html_page(outdir)
             self.make_redirection_page()
 
+    # ..................................................................................................................
+    def make_pdf(self):
+        doc_version = self.doc_version
+        latexdir = f"{BUILDDIR}/latex/{doc_version}"
+        print('Started to build pdf from latex using make.... Wait until a new message appear (it is a long! compilation) ')
+        
+        output = cmd_exec(f'cd {os.path.normpath(latexdir)};'
+                      f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
+                      shell=True)
+        print ('FIRST COMPILTATION:', output)
+
+        output = cmd_exec(f'cd {os.path.normpath(latexdir)};'
+                          f'makeindex spectrochempy.idx',
+                          shell=True)
+        print ('MAKEINDEX', output)
+    
+        output = cmd_exec(f'cd {os.path.normpath(latexdir)};'
+                          f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
+                          shell=True)
+        print ('SECONF COMPILTATION:', output)
+        
+        output = cmd_exec(f'cd {os.path.normpath(latexdir)}; '
+                      f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
+        print (output)
+    
     # ..................................................................................................................
     def sync_notebooks(self):
         # we need to use jupytext to sync py and ipynb files in userguide and tutorials
@@ -232,7 +248,7 @@ class Build(object):
         <body></body>
         </html>
         """
-        with open(os.path.join(BUILDDIR, 'html', 'index.html'), 'w') as f:
+        with open(os.path.join(HTML, 'index.html'), 'w') as f:
             f.write(html)
         
 
@@ -261,10 +277,9 @@ class Build(object):
                 
                         <dl>
                             <dt>Downloads</dt>
-                            <dd><a href="https://www.spectrochempy.fr/pdf/stable/">pdf</a></dd>
-                            <dd><a href="https://www.spectrochempy.fr/htmlzip/stable/">htmlzip</a></dd>
-                            <dd><a href="https://www.spectrochempy.fr/epub/stable/">epub</a></dd>
-                            <dd><a href="https://www.spectrochempy.fr/tutorials/">tutorials</a></dd>
+                            <dd><a href="/downloads/scpy.pdf">pdf</a></dd>
+                            <!--<dd><a href="/downloads/scpy_doc.zip">htmlzip</a></dd>-->
+                            <!--<dd><a href="/tutorials/">tutorials</a></dd>-->
                         </dl>
                 
                         <dl>
@@ -304,14 +319,13 @@ class Build(object):
         # upload docs to the remote web server
         if SERVER:
             
-            print("uploads to the server of the html/pdf/epub files")
+            print("uploads to the server of the html/pdf files")
             
-            for item in ['html','pdf','epub']:
-                FROM = os.path.join(BUILDDIR, item, '*')
-                TO = os.path.join(PROJECT, item)
-                cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
-                output = cmd_exec(cmd, shell=True)
-                print(output)
+            FROM = os.path.join(HTML, '*')
+            TO = os.path.join(PROJECT, 'html')
+            cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
+            output = cmd_exec(cmd, shell=True)
+            print(output)
             
         else:
             
@@ -322,15 +336,19 @@ class Build(object):
         """
         Clean/remove the built documentation.
         """
+        
         doc_version = self.doc_version
         
-        shutil.rmtree(os.path.join(BUILDDIR,'html', doc_version), ignore_errors=True)
-        shutil.rmtree(os.path.join(BUILDDIR,'pdf', doc_version), ignore_errors=True)
-        shutil.rmtree(os.path.join(BUILDDIR,'latex', doc_version), ignore_errors=True)
-        shutil.rmtree(os.path.join(BUILDDIR,'epub', doc_version), ignore_errors=True)
+        shutil.rmtree(os.path.join(HTML, doc_version), ignore_errors=True)
+        shutil.rmtree(os.path.join(LATEX, doc_version), ignore_errors=True)
+        
+    def deepclean(self):
+        
+        doc_version = self.doc_version
+        
         shutil.rmtree(os.path.join(DOCTREES, doc_version), ignore_errors=True)
         shutil.rmtree(API, ignore_errors=True)
-    
+
     # ..................................................................................................................
     def make_dirs(self):
         """
@@ -339,11 +357,10 @@ class Build(object):
         doc_version = self.doc_version
         
         # Create regular directories.
-        build_dirs = [os.path.join(BUILDDIR, '~doctrees', doc_version),
-                      os.path.join(BUILDDIR, 'html', doc_version),
-                      os.path.join(BUILDDIR, 'latex', doc_version),
-                      os.path.join(BUILDDIR, 'pdf', doc_version),
-                      os.path.join(BUILDDIR, 'epub', doc_version),
+        build_dirs = [os.path.join(DOCTREES, doc_version),
+                      os.path.join(HTML, doc_version),
+                      os.path.join(LATEX, doc_version),
+                      DOWNLOADS,
                       os.path.join(DOCDIR, '_static'),
                       ]
         for d in build_dirs:
