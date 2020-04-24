@@ -170,7 +170,7 @@ p.set_color('red')
 # As an example of `NDDataset`, in the following we read data from a series of FTIR experiments, provided by the OMNIC software:
 
 # %%
-nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 
 # %% [markdown]
 # Note that for this example, we use data stored in a ``test`` directory. For your own usage, you probably have to give the full pathname (see ... for the way to overcome this using `preferences` setting)

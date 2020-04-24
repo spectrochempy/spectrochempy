@@ -149,7 +149,7 @@ sqrt(dx)
 
 # %%
 # import a dataset to check the ufuncs
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 dataset
 
 # %% [markdown]
