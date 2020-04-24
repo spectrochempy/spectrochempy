@@ -94,20 +94,6 @@ class PCA(HasTraits):
             If True the data are scaled in the interval [0-1] :
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
 
-        Examples
-        --------
-
-        .. plot::
-            :include-source:
-
-            from spectrochempy import *
-            dataset = upload_IRIS()
-            pca = PCA(dataset, centered=True)
-            S, LT = pca.transform(n_pc='auto')
-            _ = pca.screeplot()
-            _ = pca.scoreplot(1,2, color_mapping='labels')
-            show()
-
         """
 
         self.X = X = dataset
