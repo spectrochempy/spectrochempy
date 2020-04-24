@@ -47,30 +47,33 @@ BUILDDIR = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT)
 DOCTREES = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees'))
 
 # ----------------------------------------------------------------------------------------------------------------------
-def cmd_exec(cmd):
+def cmd_exec(cmd, shell=None):
     """To execute system command"""
-    res = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    if shell is not None:
+        res = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
+    else:
+        res = Popen(cmd, stdout=PIPE, stderr=PIPE)
     output, error = res.communicate()
     if not error:
         v =output.decode("utf-8")
         return v
     else:
         raise RuntimeError(f"{cmd} failed!\n{error.decode('utf-8')}")
- 
+
 # ======================================================================================================================
 class Build(object):
     
     # ..................................................................................................................
     def __init__(self):
-    
+        
         # determine if we are in the developement branch (latest) or master (stable)
         self.doc_version = 'latest' if 'dev' in version else 'stable'
-
+    
     # ..................................................................................................................
     def __call__(self):
         
         parser = argparse.ArgumentParser()
-
+        
         parser.add_argument("-w", "--html", help="create html pages", action="store_true")
         parser.add_argument("-p", "--pdf", help="create pdf pages", action="store_true")
         parser.add_argument("-e", "--epub", help="create epub pages", action="store_true")
@@ -81,7 +84,7 @@ class Build(object):
         parser.add_argument("-a", "--api", help="full regeneration of the api", action="store_true")
         parser.add_argument("-r", "--release", help="release documentation on website", action="store_true")
         args = parser.parse_args()
-
+        
         self.regenerate_api = args.api
         
         if args.sync:
@@ -116,7 +119,7 @@ class Build(object):
             pdfdir = f"{BUILDDIR}/{builder}/{doc_version}"
             # switch to latex
             builder = 'latex'
-            
+        
         # recreate dir if needed
         self.make_dirs()
         srcdir = confdir = DOCDIR
@@ -126,18 +129,18 @@ class Build(object):
         # regenate api documentation
         if (self.regenerate_api or not os.path.exists(API)):
             self.api_gen()
-    
+        
         # run sphinx
         sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
         sp.verbosity = 1
         sp.build()
         res = sp.statuscode
-
+        
         print(f"\n{'-'*130}\nBuild finished. The {builder.upper()} pages are in {os.path.normpath(outdir)}.")
-
+        
         # do some cleaning
         shutil.rmtree(os.path.join('docs','auto_examples'), ignore_errors=True)
-
+        
         if builder == 'pdf':
             cmds = (f"cd {outdir}",
                     "make",
@@ -146,11 +149,11 @@ class Build(object):
             
             for cmd in cmds:
                 cmd_exec(cmd)
-
+        
         if builder=='html':
             self.update_html_page(outdir)
-            
-
+            self.make_redirection_page()
+    
     # ..................................................................................................................
     def sync_notebooks(self):
         # we need to use jupytext to sync py and ipynb files in userguide and tutorials
@@ -158,11 +161,11 @@ class Build(object):
         for cmd in cmds:
             cmd = cmd.split()
             print(cmd_exec(cmd))
-            
+    
     # ..................................................................................................................
     def api_gen(self):
         from docs import apigen
-
+        
         # generate API reference
         apigen.main(SOURCESDIR,
                     tocdepth=1,
@@ -175,7 +178,7 @@ class Build(object):
                         'NDIO',
                         'NDPlot',
                     ],)
-        
+    
     # ..................................................................................................................
     def gitstatus(self):
         pipe = Popen(["git", "status"], stdout=PIPE, stderr=PIPE)
@@ -183,39 +186,39 @@ class Build(object):
         if "nothing to commit" in so.decode("ascii"):
             return True
         return False
-        
+    
     # ..................................................................................................................
     def gitcommit(self, message):
-            clean = self.gitstatus()
-            if clean:
-                return
-            
-            cmd = "git add -A".split()
-            output = cmd_exec(cmd)
-            print(output)
-            
-            cmd = "git log -1 --pretty=%B".split()
-            output = cmd_exec(cmd)
-            print('last message: ', output)
-            if output.strip() == message:
-                v = "--amend"
-            else:
-                v = "--no-verify"
-            
-            cmd = f"git commit {v} -m".split()
-            cmd.append(message)
-            output = cmd_exec(cmd)
-            print(output)
-
-            cmd = "git log -1 --pretty=%B".split()
-            output = cmd_exec(cmd)
-            print('new message: ', output)
-            
-            #TODO: Automate Tagging?
+        clean = self.gitstatus()
+        if clean:
+            return
         
+        cmd = "git add -A".split()
+        output = cmd_exec(cmd)
+        print(output)
+        
+        cmd = "git log -1 --pretty=%B".split()
+        output = cmd_exec(cmd)
+        print('last message: ', output)
+        if output.strip() == message:
+            v = "--amend"
+        else:
+            v = "--no-verify"
+        
+        cmd = f"git commit {v} -m".split()
+        cmd.append(message)
+        output = cmd_exec(cmd)
+        print(output)
+        
+        cmd = "git log -1 --pretty=%B".split()
+        output = cmd_exec(cmd)
+        print('new message: ', output)
+        
+        #TODO: Automate Tagging?
+    
     # ..................................................................................................................
-    def make_redirection_page(self):
-
+    def make_redirection_page(self,):
+        
         html = """
         <html>
         <head>
@@ -225,7 +228,10 @@ class Build(object):
         <body></body>
         </html>
         """
-
+        with open(os.path.join(BUILDDIR, 'html', 'index.html'), 'w') as f:
+            f.write(html)
+    
+    
     # ..................................................................................................................
     def update_html_page(self, outdir):
         """
@@ -245,17 +251,17 @@ class Build(object):
                     <div class="rst-other-versions">
                         <dl>
                             <dt>Versions</dt>
-                            <dd><a href="https://www.spectrochempy.fr/html/latest/">latest</a></dd>
-                            <dd><a href="https://www.spectrochempy.fr/html/stable/">stable</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/latest/">latest</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/stable/">stable</a></dd>
                         </dl>
                 
-                        <dl>
+                    <!--    <dl>
                             <dt>Downloads</dt>
                             <dd><a href="https://www.spectrochempy.fr/pdf/stable/">pdf</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/htmlzip/stable/">htmlzip</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/epub/stable/">epub</a></dd>
                             <dd><a href="https://www.spectrochempy.fr/tutorials/">tutorials</a></dd>
-                        </dl>
+                        </dl> -->
                 
                         <dl>
                             <dt>Sources on bitBucket</dt>
@@ -282,7 +288,7 @@ class Build(object):
             regex = r"(<script type=\"text\/javascript\">.*SphinxRtdTheme.*script>)"
             result = re.sub(regex, replace % doc_version, txt, 0, re.MULTILINE | re.DOTALL)
             with open(filename, "w") as f:
-                    f.write(result)
+                f.write(result)
     
     # ..................................................................................................................
     def release(self):
@@ -297,14 +303,12 @@ class Build(object):
             print("uploads to the server of the html/pdf/epub files")
             
             for item in ['html','pdf','epub']:
-                FROM = os.path.join(BUILDDIR, item, doc_version, '*')
-                TO = os.path.join(PROJECT, item, doc_version)
-                cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'.split()
-                pipe = Popen(*cmd, stdout=PIPE, stderr=PIPE)
-                (so, serr) = pipe.communicate()
-                output = so.decode("ascii")
+                FROM = os.path.join(BUILDDIR, item, '*')
+                TO = os.path.join(PROJECT, item)
+                cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
+                output = cmd_exec(cmd, shell=True)
                 print(output)
-            
+        
         else:
             
             print('Cannot find the upload server : {}!'.format(SERVER))
