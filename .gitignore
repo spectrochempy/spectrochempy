@@ -163,3 +163,5 @@ auditp.txt
 thumb.png
 
 *.pdf
+/extdata/
+*.zip

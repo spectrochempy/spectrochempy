@@ -37,7 +37,7 @@ dependencies:
 - scikit-image
 - sphinx=1.8.5
 - sphinx_rtd_theme
-- sphinx-gallery
+- sphinx-gallery=0.5.0
 - nbsphinx
 - jupyter_sphinx
 - nbconvert

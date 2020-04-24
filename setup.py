@@ -107,6 +107,8 @@ def read(fname):
     with open(os.path.join(path(), fname), 'r') as f:
         return f.read()
 
+def get_version():
+    pass
 
 # Data for setuptools
 packages = []
@@ -130,7 +132,7 @@ setup_args = dict(
     author_email="developpers@spectrochempy.fr",
     maintainer="SpectroChempy Developpers",
     maintainer_email="developpers@spectrochempy.fr",
-    url='https:/www.spectrochempy.fr',
+    url='https://www.spectrochempy.fr',
     description='Processing, analysis and modelling Spectroscopic data for '
                 'Chemistry with Python',
     long_description=read('README.rst'),

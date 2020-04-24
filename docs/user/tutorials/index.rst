@@ -6,12 +6,6 @@ Tutorial
 A full example
 --------------
 
-.. toctree::
-   :glob:
-   :maxdepth: 3
-
-   tuto_agir/*
-
 
 Chemometrics
 ------------
