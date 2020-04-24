@@ -2,8 +2,8 @@
 
 :version: |version| (|today|)
 
-|scpy|: Processing, analysing and modelling data for spectrochemistry
-######################################################################
+|scpy|: Processing, analysing and modelling spectroscopic data
+##############################################################
 
 |scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic data for **Chem**\ istry with **Py**\ thon.
 It is a cross platform software, running on Linux, Windows or OS X.
@@ -29,8 +29,6 @@ Among its major features:
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!! Please report any issues to the
     `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
-
-    |scpy|-0.1 is expected to be first released around june or july 2019.
 
 Documentation
 =============

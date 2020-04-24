@@ -537,7 +537,7 @@ if os.path.exists(datadir):
 # Even if we do not specify the **datadir**, the application first look in tht directory by default.
 
 # %%
-dataset = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 dataset
 
 # %% [markdown]

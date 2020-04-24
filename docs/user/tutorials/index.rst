@@ -3,10 +3,6 @@
 Tutorial
 ========
 
-A full example
---------------
-
-
 Chemometrics
 ------------
 
