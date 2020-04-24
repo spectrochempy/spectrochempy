@@ -141,11 +141,15 @@ class Build(object):
         # do some cleaning
         shutil.rmtree(os.path.join('docs','auto_examples'), ignore_errors=True)
 
-        #if builder == 'latex':
-            #print('Started to build pdf from latex using pdflatex.... Wait until a new message appear (it is a long! compilation) ')
-            #output = cmd_exec(f'cd {os.path.normpath(outdir)} ;pdflatex -synctex=1 -interaction=nonstopmode "spectrochempy".tex', shell=True)
-            #print (output)
-            
+        if builder == 'latex':
+            print('Started to build pdf from latex using make.... Wait until a new message appear (it is a long! compilation) ')
+            output = cmd_exec(f'cd {os.path.normpath(outdir)}; '
+                              f'lualatex -synctex=1 -interaction=nonstopmode "spectrochempy".tex '
+                              f'makeindex "spectrochempy".idx; '
+                              f'lualatex -synctex=1 -interaction=nonstopmode "spectrochempy".tex ',
+                              shell=True)
+            print (output)
+            #output = cmd_exec(f'pdflatex -synctex=1 -interaction=nonstopmode "spectrochempy".tex', shell=True)
             #"mv {PROJECT}.pdf {pdfdir}/{PROJECT}.pdf")
             #TODO: check if this work on windows
 
