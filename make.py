@@ -22,7 +22,7 @@ import shutil
 from subprocess import Popen, PIPE
 import re
 import os
-
+from glob import iglob
 import argparse
 
 from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
@@ -46,6 +46,7 @@ API = os.path.join(DOCDIR, 'api', 'generated')
 BUILDDIR = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT))
 DOCTREES = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees'))
 
+# ----------------------------------------------------------------------------------------------------------------------
 def cmd_exec(cmd):
     """To execute system command"""
     res = Popen(cmd, stdout=PIPE, stderr=PIPE)
@@ -55,36 +56,50 @@ def cmd_exec(cmd):
         return v
     else:
         raise RuntimeError(f"{cmd} failed!\n{error.decode('utf-8')}")
-    
+ 
+# ======================================================================================================================
 class Build(object):
     
     # ..................................................................................................................
+    def __init__(self):
+    
+        # determine if we are in the developement branch (latest) or master (stable)
+        self.doc_version = 'latest' if 'dev' in version else 'stable'
+
+    # ..................................................................................................................
     def __call__(self):
+        
         parser = argparse.ArgumentParser()
 
         parser.add_argument("-w", "--html", help="create html pages", action="store_true")
         parser.add_argument("-p", "--pdf", help="create pdf pages", action="store_true")
         parser.add_argument("-e", "--epub", help="create epub pages", action="store_true")
-        parser.add_argument("-d", "--delete", help="clean/delete output", action="store_true")
+        parser.add_argument("-c", "--clean", help="clean/delete output", action="store_true")
         parser.add_argument("-s", "--sync", help="sync doc ipynb", action="store_true")
-        parser.add_argument("-c", "--commit", help="commit last changes", action="store_true")
+        parser.add_argument("-g", "--git", help="git commit last changes", action="store_true")
         parser.add_argument("-m", "--message", default='DOCS: updated', help='optional commit message')
         parser.add_argument("-a", "--api", help="full regeneration of the api", action="store_true")
+        parser.add_argument("-r", "--release", help="release documentation on website", action="store_true")
         args = parser.parse_args()
 
         self.regenerate_api = args.api
         
         if args.sync:
             self.sync_notebooks()
-        if args.commit:
+        if args.git:
             self.gitcommit(args.message)
+        if args.clean:
+            self.clean()
         if args.html:
             self.make_docs('html')
         if args.pdf:
             self.make_docs('pdf')
         if args.epub:
             self.make_docs('epub')
-
+        if args.release:
+            self.release()
+    
+    # ..................................................................................................................
     def make_docs(self, builder):
         """Make the documentation
     
@@ -94,59 +109,47 @@ class Build(object):
             Type of builder
             
         """
-        if builder != 'latex':
-            print(f'building {builder.upper()} documentation (version : {version}')
-        doc_version = 'latest' if 'dev' in version else 'stable'
-
-        self.make_dirs(builder, doc_version)
-    
-        if (self.regenerate_api or not os.path.exists(API)):
-            self.api_gen()
-    
+        doc_version = self.doc_version
+        print(f'building {builder.upper()} documentation ({doc_version.capitalize()}version : {version})')
+        
+        if builder == 'pdf':
+            pdfdir = f"{BUILDDIR}/{builder}/{doc_version}"
+            # switch to latex
+            builder = 'latex'
+            
+        # recreate dir if needed
+        self.make_dirs()
         srcdir = confdir = DOCDIR
         outdir = f"{BUILDDIR}/{builder}/{doc_version}"
         doctreesdir = f"{BUILDDIR}/~doctrees/{doc_version}"
         
+        # regenate api documentation
+        if (self.regenerate_api or not os.path.exists(API)):
+            self.api_gen()
+    
+        # run sphinx
         sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
         sp.verbosity = 1
-        
         sp.build()
         res = sp.statuscode
-        
-        if builder == 'pdf':
-            # first make the latex building
-            self.make_docs('latex')
-            cmds = (f"cd {BUILDDIR}/latex",
-                        "make",
-                        f"mv {PROJECT}.pdf ../pdf/{PROJECT}.pdf")
-                for cmd in cmds:
-                    res = subprocess.call(cmd, shell=True)
-                    print(res)
-        
-            if not nocommit:
-                gitcommands()  # update repository
-        
-            print(f"\n{'-'*130}\nBuild finished. The {builder.upper()} pages are in {os.path.normpath(outdir)}.")
-        
-            # do some cleaning
-            shutil.rmtree('auto_examples', ignore_errors=True)
-    
-        released = 'FALSE'
-        if 'release' in args:
-            update_html_page(outdir, doc_version)
-            do_release()
-            released = 'TRUE'
-    
-    
-        print(f'\n\nReleased on spectrochempy.fr : {released}')
-        if not notebooks:
-            print('\nWARNING: Jupyter notebooks were not regenerated')
-            print('if they are missing in the final documentation: use `notebooks` parameter! \n')
-    
-        print('-'*130)
-    
-        return True
 
+        print(f"\n{'-'*130}\nBuild finished. The {builder.upper()} pages are in {os.path.normpath(outdir)}.")
+
+        # do some cleaning
+        shutil.rmtree(os.path.join('docs','auto_examples'), ignore_errors=True)
+
+        if builder == 'pdf':
+            cmds = (f"cd {outdir}",
+                    "make",
+                    f"mv {PROJECT}.pdf {pdfdir}/{PROJECT}.pdf")
+            #TODO: check if this work on windows
+            
+            for cmd in cmds:
+                cmd_exec(cmd)
+
+        if builder=='html':
+            self.update_html_page(outdir)
+            
 
     # ..................................................................................................................
     def sync_notebooks(self):
@@ -154,9 +157,8 @@ class Build(object):
         cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
         for cmd in cmds:
             cmd = cmd.split()
-            if not cmd_exec(cmd):
-                raise("Script make.py was stopped on an error")
-    
+            print(cmd_exec(cmd))
+            
     # ..................................................................................................................
     def api_gen(self):
         from docs import apigen
@@ -188,31 +190,27 @@ class Build(object):
             if clean:
                 return
             
-            pipe = Popen(["git", "add", "-A"], stdout=PIPE, stderr=PIPE)
-            (so, serr) = pipe.communicate()
-            output = so.decode("ascii")
+            cmd = "git add -A".split()
+            output = cmd_exec(cmd)
             print(output)
             
-            pipe = Popen(["git", "log", "-1", "--pretty=%B"], stdout=PIPE, stderr=PIPE)
-            (so, serr) = pipe.communicate()
-            output = so.decode("ascii")
+            cmd = "git log -1 --pretty=%B".split()
+            output = cmd_exec(cmd)
             print('last message: ', output)
             if output.strip() == message:
                 v = "--amend"
             else:
                 v = "--no-verify"
-            message = f"-m {message}"
-            pipe = Popen(["git", "commit", v , message],
-                         stdout=PIPE, stderr=PIPE)
-            (so, serr) = pipe.communicate()
-            output = so.decode("ascii")
+            
+            cmd = f"git commit {v} -m".split()
+            cmd.append(message)
+            output = cmd_exec(cmd)
             print(output)
 
-            pipe = Popen(["git", "log", "-1", "--pretty=%B"], stdout=PIPE, stderr=PIPE)
-            (so, serr) = pipe.communicate()
-            output = so.decode("ascii")
-            print('new message', output)
-
+            cmd = "git log -1 --pretty=%B".split()
+            output = cmd_exec(cmd)
+            print('new message: ', output)
+            
             #TODO: Automate Tagging?
         
     # ..................................................................................................................
@@ -229,7 +227,7 @@ class Build(object):
         """
 
     # ..................................................................................................................
-    def update_html_page(outdir, doc_version):
+    def update_html_page(self, outdir):
         """
         Modify page generated with sphinx (TODO: There is porbably a better method using sphinx templates to override
         the themes)
@@ -247,16 +245,16 @@ class Build(object):
                     <div class="rst-other-versions">
                         <dl>
                             <dt>Versions</dt>
-                            <dd><a href="https://spectrochempy.fr/html/latest/">latest</a></dd>
-                            <dd><a href="https://spectrochempy.fr/html/stable/">stable</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/html/latest/">latest</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/html/stable/">stable</a></dd>
                         </dl>
                 
                         <dl>
                             <dt>Downloads</dt>
-                            <dd><a href="https://spectrochempy.fr/pdf/stable/">pdf</a></dd>
-                            <dd><a href="https://spectrochempy.fr/htmlzip/stable/">htmlzip</a></dd>
-                            <dd><a href="https://spectrochempy.fr/epub/stable/">epub</a></dd>
-                            <dd><a href="https://spectrochempy.fr/tutorials/">tutorials</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/pdf/stable/">pdf</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/htmlzip/stable/">htmlzip</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/epub/stable/">epub</a></dd>
+                            <dd><a href="https://www.spectrochempy.fr/tutorials/">tutorials</a></dd>
                         </dl>
                 
                         <dl>
@@ -270,32 +268,28 @@ class Build(object):
                     </div>
                 </div>
             
-                <script type="text/javascript">
+                <script type="text/javascript" id="already-corrected">
                     jQuery(function () {
                         SphinxRtdTheme.Navigation.enable(true);
                     });
                 </script>
                 """
-        
-        with open(os.path.join(outdir, 'index.html'), "r") as f:
-            txt = f.read()
-        
-        regex = r"(<script type=\"text\/javascript\">.*SphinxRtdTheme.*script>)"
-        result = re.sub(regex, replace % doc_version, txt, 0, re.MULTILINE | re.DOTALL)
-        
-        if result:
-            
-            with open(os.path.join(outdir, 'index.html'), "w") as f:
-                f.write(result)
+        # modify all html files
+        for filename in iglob(os.path.join(outdir, '**', '*.html'), recursive=True):
+            with open(filename, "r") as f:
+                txt = f.read()
+            doc_version = self.doc_version
+            regex = r"(<script type=\"text\/javascript\">.*SphinxRtdTheme.*script>)"
+            result = re.sub(regex, replace % doc_version, txt, 0, re.MULTILINE | re.DOTALL)
+            with open(filename, "w") as f:
+                    f.write(result)
     
     # ..................................................................................................................
-    def do_release(self, doc_version):
+    def release(self):
         """
         Release/publish the documentation to the webpage.
         """
-        
-        # make the doc
-        # make_docs(*args)
+        doc_version = self.doc_version
         
         # upload docs to the remote web server
         if SERVER:
@@ -316,10 +310,12 @@ class Build(object):
             print('Cannot find the upload server : {}!'.format(SERVER))
     
     # ..................................................................................................................
-    def clean(self, doc_version):
+    def clean(self):
         """
         Clean/remove the built documentation.
         """
+        doc_version = self.doc_version
+        
         shutil.rmtree(os.path.join(BUILDDIR,'html', doc_version), ignore_errors=True)
         shutil.rmtree(os.path.join(BUILDDIR,'pdf', doc_version), ignore_errors=True)
         shutil.rmtree(os.path.join(BUILDDIR,'latex', doc_version), ignore_errors=True)
@@ -328,10 +324,11 @@ class Build(object):
         shutil.rmtree(API, ignore_errors=True)
     
     # ..................................................................................................................
-    def make_dirs(self, doc_version):
+    def make_dirs(self):
         """
         Create the directories required to build the documentation.
         """
+        doc_version = self.doc_version
         
         # Create regular directories.
         build_dirs = [os.path.join(BUILDDIR, '~doctrees', doc_version),
