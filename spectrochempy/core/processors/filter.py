@@ -16,6 +16,12 @@ import scipy.signal
 
 """wrappers od scipy.signal filters"""
 
+#Todo: detrend(data[, axis, type, bp]) 	Remove linear trend along axis from data.
+#find_peaks_cwt(vector, widths[, wavelet, ...]) 	Attempt to find the peaks in a 1-D array.
+#argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
+#argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
+#argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
+
 def savgol_filter(dataset, window_length, polyorder, deriv=0, delta=1.0, axis=-2, mode='interp', cval=0.0):
     """Apply a Savitzky-Golay filter to an array.
 
@@ -59,6 +65,11 @@ def savgol_filter(dataset, window_length, polyorder, deriv=0, delta=1.0, axis=-2
 
     NDDataset: same shape as x. data units are removed when deriv > 1
         The filtered data.
+
+    Note
+    ----
+    Even spacing of the axis coordinates is NOT checked. Be aware that Savitzky-Golay algorithm
+    is based on indexes, not on coordinates.
     """
     if type(axis) == str:
         if axis=='x':
