@@ -15,7 +15,11 @@ import scipy.signal
 
 """wrappers of scipy.signal filters, """
 
-
+#Todo:
+#find_peaks_cwt(vector, widths[, wavelet, ...]) 	Attempt to find the peaks in a 1-D array.
+#argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
+#argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
+#argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
 def savgol_filter(dataset, window_length, polyorder, deriv=0, delta=1.0, dim='x', mode='interp', cval=0.0):
     """Apply a Savitzky-Golay filter to an array.

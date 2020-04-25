@@ -382,7 +382,7 @@ def _read_spg(dataset, filename, **kwargs):
             'Dataset from spg file : ' + spg_title + ' \n'
             + 'History of the 1st spectrum : ' + allhistories[0])
 
-    dataset.history = str(datetime.now()) + ':read from spg file'
+    dataset.history = str(datetime.now()) + ':read from spg file \n'
 
     if sortbydate:
         dataset.sort(dim='y', inplace=True)
