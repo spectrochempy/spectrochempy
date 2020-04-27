@@ -97,7 +97,7 @@ try:
     "Release version string of this package"
 except DistributionNotFound:  # pragma: no cover
     # package is not installed
-    __release__ = '0.1a'
+    __release__ = '--not set--'
     
 try:
     __version__ = get_version(root='..',
