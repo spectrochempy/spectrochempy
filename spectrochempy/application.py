@@ -83,7 +83,7 @@ def version_scheme(version, local=False):
     if not dev:
         # write it only for stable TAG
         # This means, always tab the latest master version
-        with open(os.path.join('..','..',os.path.dirname(os.path.relpath(__file__)), 'version.py'), 'w') as f:
+        with open(os.path.join('..',os.path.dirname(os.path.relpath(__file__)), 'version.py'), 'w') as f:
             f.write(f"version = '{version_scheme}' # Do not delete. Automatically set when needed\n\n")
     return version_scheme
 
