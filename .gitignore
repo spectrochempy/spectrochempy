@@ -166,3 +166,5 @@ thumb.png
 /extdata/
 *.zip
 scpy-exp.yml
+
+/installed.txt
