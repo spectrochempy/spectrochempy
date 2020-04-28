@@ -10,12 +10,12 @@ Instructions to release a new version
 Versioning scheme
 -----------------
 
-versioning scheme follows the rule described here : `Semantic versioning<https://semver.org>`_.
+versioning scheme follows the rule described here : [Semantic versioning](https://semver.org).
 
 Given a version number MAJOR.MINOR.PATCH, increment the:
 
 * MAJOR version when a new version make incompatible API changes,
-cdwwww
+
 * MINOR version when new functionalities are added in a backwards compatible manner
 
 * PATCH version when backwards compatible bug fixes are made.
@@ -31,19 +31,19 @@ Releasing a new version
 
 * This require a clean working directory. A new version is always based on the master branch.
 
-  # commit the last changes on master.
+  1. commit the last changes on master.
 
-  # push on origin/master
+  2. push on origin/master
 
-  # Tag the last commit on master with the new version number
+  3. Tag the last commit on master with the new version number
 
-  # test this version
+  4. test this version
 
-  # install it in development mode:
+  5. install it in development mode:
+     
+     pip install -e .  (this is necessary to update the development version number in the eggs)
 
-    pip install -e .  (this is necessary to update the development version number in the eggs)
-
-  # checkout on Master - make documentation for stable version
+  6. checkout on Master - make documentation for stable version
 
 * update PyPi
 
@@ -57,7 +57,7 @@ Releasing a new version
 
     On both mac and on window:
 
-    conda upgrade pip setuptools wheel twiney
+    conda upgrade pip setuptools wheel twine
     python setup.py sdist bdist_wheel
 
     TODO add linux

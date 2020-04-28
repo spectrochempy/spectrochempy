@@ -1,0 +1,58 @@
+# https://docs.conda.io/projects/conda-build/en/latest/user-guide/tutorials/build-pkgs.html
+package:
+  name: spectrochempy
+  version: {{ environ.get('GIT_DESCRIBE_TAG', '') }}
+
+source:
+  path: ../../
+
+build:
+  number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - python
+    - setuptools
+    - setuptools_scm
+
+  run:
+    - python        3.7.*
+    - matplotlib
+    - traitlets
+    - numpy         1.15
+    - scipy
+    - pandas
+    - xlrd
+    - ipython
+    - ipykernel
+    - nb_conda
+    - setuptools_scm
+    - pytest
+    - sip
+    - pyqt
+
+#test:
+  # Python imports
+#  imports:
+#    - spectrochempy
+#    - spectrochempy.api
+
+  # commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+about:
+  home: https://www.spectrochempy.fr
+  license: CeCILL-B Free Software License Agreement (CECILL-B)
+  summary: 'SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for Chemistry with Python'
+  license_family: OTHER
+
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml

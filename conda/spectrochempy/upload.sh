@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+anaconda upload --user spectrocat ~/anaconda3/conda-bld/osx-64/spectrochempy-$1.tar.bz2 --force
+
+conda convert --platform linux-64 ~/anaconda3/conda-bld/osx-64/spectrochempy-$1.tar.bz2
+
+anaconda upload --user spectrocat linux-64/spectrochempy-$1.tar.bz2 --force
+
+conda convert --platform linux-32 ~/anaconda3/conda-bld/osx-64/spectrochempy-$1.tar.bz2
+
+anaconda upload --user spectrocat linux-32/spectrochempy-$1.tar.bz2 --force
+
+conda convert --platform win-64 ~/anaconda3/conda-bld/osx-64/spectrochempy-$1.tar.bz2
+
+anaconda upload --user spectrocat win-64/spectrochempy-$1.tar.bz2 --force
+
+conda convert --platform win-32 ~/anaconda3/conda-bld/osx-64/spectrochempy-$1.tar.bz2
+
+anaconda upload --user spectrocat win-32/spectrochempy-$1.tar.bz2 --force
