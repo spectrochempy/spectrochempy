@@ -98,9 +98,8 @@ def read_omnic(dataset=None, **kwargs):
     # returns a list of files to read
     files = readfilename(filename,
                          directory=directory,
-                         filetypes=['OMNIC spa files (*.spa)',
-                                    'OMNIC spg files (*.spg)',
-                                    'all OMNIC files (*.sp*)'])
+                         filetypes=['OMNIC files (*.spa, *.spg)',
+                                    'all files (*)'])
 
     if not files:
         # there is no files, return nothing
