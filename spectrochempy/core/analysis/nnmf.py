@@ -30,10 +30,12 @@ class NNMF(HasTraits):
     Performs a Non Negative Matrix Factorization of a |NDDataset|.
 
     Algorithm based on :
-
-    NMF by alternative non-negative least squares using projected gradients
+    C.-J. Lin. Projected gradient methods for non-negative matrix factorization. Neural Computation, 19(2007), 2756-2779.
+    If you find this tool useful, please cite the above work.
     Author : Chih-Jen Lin, National Taiwan University
-    Python/numpy translation : Anthony Di Franco (Licence ???)
+    Copyright (c) 2005-2008 Chih-Jen Lin
+    All rights reserved.
+    Python/numpy translation : Anthony Di Franco ;
 
     """
 
