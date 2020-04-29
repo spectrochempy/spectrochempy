@@ -3,6 +3,15 @@
 Tutorial
 ========
 
+Import data
+-----------
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+
+   IO/*
+
 Chemometrics
 ------------
 

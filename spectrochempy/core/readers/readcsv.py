@@ -134,7 +134,7 @@ def read_csv(*args, **kwargs):
         filename = None
     filename = kwargs.pop('filename', filename)
 
-    nd = _read(filename=filename, filter='csv file (*.csv)', **kwargs)
+    nd = _read(filename=filename, filters=['csv files (*.csv)', 'All files (*)'])
 
     return nd
 
@@ -149,10 +149,10 @@ def _read(filename, **kwargs):
     directory = kwargs.get("directory", None)
 
     # returns a list of files to read
-    filter = kwargs.get('filter', ['All files (*)'])
+    filters = kwargs.get('filters', ['All files (*)'])
     files = readfilename(filename,
                          directory=directory,
-                         filter=filter)
+                         filters=filters)
 
     if not files:
         # there is no files, return nothing
