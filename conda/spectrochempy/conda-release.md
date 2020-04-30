@@ -17,7 +17,7 @@ file in you $HOME directory:
 Generate the yaml configutation file
 ------------------------------------
 
-the meta.yaml was first generated from pypi
+the meta.yaml was first generated from pypi (we do not need to redo it now because it has been modified since this time)
 
 On windows, install git and patch which are required:
 
