@@ -35,19 +35,16 @@ except:
 # ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
-from numpy.lib.npyio import zipfile_factory, NpzFile
+from numpy.lib.npyio import NpzFile
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Local imports
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.processors.concatenate import stack
 from spectrochempy.core import general_preferences as prefs
-from spectrochempy.utils import (readfilename, is_sequence,
-                                 SpectroChemPyWarning)
-from ...core import info_, debug_, error_, warning_
+from spectrochempy.utils import (readfilename, is_sequence)
 
 # ======================================================================================================================
 # Public functions
@@ -124,7 +121,7 @@ def read_csv(*args, **kwargs):
     """
     # TODO: to allow header and nd-data
 
-    #debug_("reading csv files")
+    # debug_("reading csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -134,7 +131,7 @@ def read_csv(*args, **kwargs):
         filename = None
     filename = kwargs.pop('filename', filename)
 
-    nd = _read(filename=filename, filter='csv file (*.csv)', **kwargs)
+    nd = _read(filename=filename, filters=['csv files (*.csv)', 'All files (*)'])
 
     return nd
 
@@ -149,10 +146,10 @@ def _read(filename, **kwargs):
     directory = kwargs.get("directory", None)
 
     # returns a list of files to read
-    filter = kwargs.get('filter', ['All files (*)'])
+    filters = kwargs.get('filters', ['All files (*)'])
     files = readfilename(filename,
                          directory=directory,
-                         filter=filter)
+                         filters=filters)
 
     if not files:
         # there is no files, return nothing

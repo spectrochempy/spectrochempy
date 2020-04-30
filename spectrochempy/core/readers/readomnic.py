@@ -19,24 +19,23 @@ __dataset_methods__ = __all__
 # ----------------------------------------------------------------------------------------------------------------------
 
 import os
-import warnings
 from datetime import datetime, timezone, timedelta
+
+import numpy as np
+
+from spectrochempy.core import debug_
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndio import NDIO
+from spectrochempy.utils import readfilename
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
-
-import numpy as np
-
 # ----------------------------------------------------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------------------------------------------------
-
-from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import readfilename
-from spectrochempy.core import info_, debug_, error_, warning_
 
 # ======================================================================================================================
 # Public functions
@@ -49,9 +48,6 @@ def read_omnic(dataset=None, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
-        The dataset to store the data and metadata read from the OMNIC file(s).
-        If None, a |NDDataset| is created.
     filename : `None`, `str`, or list of `str`
         Filename of the file(s) to load. If `None` : opens a dialog box to select
         ``.spa`` or ``.spg`` files. If `str` : a single filename. It list of str :
@@ -77,7 +73,7 @@ def read_omnic(dataset=None, **kwargs):
 
 
     """
-    #debug_("reading omnic files")
+    debug_("reading omnic files")
 
     # filename will be given by a keyword parameter except if the first parameters is already the filename
     filename = kwargs.get('filename', None)
@@ -98,9 +94,8 @@ def read_omnic(dataset=None, **kwargs):
     # returns a list of files to read
     files = readfilename(filename,
                          directory=directory,
-                         filetypes=['OMNIC spa files (*.spa)',
-                                    'OMNIC spg files (*.spg)',
-                                    'all OMNIC files (*.sp*)'])
+                         filetypes=['OMNIC files (*.spa, *.spg)',
+                                    'all files (*)'])
 
     if not files:
         # there is no files, return nothing
@@ -113,16 +108,16 @@ def read_omnic(dataset=None, **kwargs):
 
         if extension == '.spg':
             for filename in files[extension]:
-                #debug_("reading omnic spg file")
+                # debug_("reading omnic spg file")
                 datasets.append(_read_spg(dataset, filename, sortbydate=sortbydate))
 
         elif extension == '.spa':
-            #debug_("reading omnic spa files")
+            # debug_("reading omnic spa files")
             datasets.append(_read_spa(dataset, files[extension], sortbydate=sortbydate))
         else:
             # try another format!
             datasets = dataset.read(filename, protocol=extension[1:], sortbydate=sortbydate, **kwargs)
-        
+
     if len(datasets) == 1:
         return datasets[0]  # a single dataset is returned
 
@@ -159,7 +154,7 @@ def _readbtext(f, pos):
     except UnicodeDecodeError:
         try:
             text = btext.decode(encoding='latin_1')
-        except:
+        except UnicodeDecodeError:
             text = btext.decode(encoding='utf-8', errors='ignore')
     return text
 
@@ -228,8 +223,7 @@ def _read_spg(dataset, filename, **kwargs):
             raise IOError('Error : File format not recognized'
                           ' - information markers not found')
 
-        ##Get xaxis (e.g. wavenumbers)
-
+        # Get xaxis (e.g. wavenumbers)
         # container to hold values
         nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec, 'float'), np.zeros(nspec, 'float')
 
@@ -271,11 +265,10 @@ def _read_spg(dataset, filename, **kwargs):
 
         xaxis = np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3)
 
-        ##now the intensity data
+        # now the intensity data
 
         # container to hold values
         intensity_pos, intensity_size = np.zeros(nspec, 'int'), np.zeros(nspec, 'int')
-
 
         # Extracts positions of '02' keys
         key_is_03 = (keys == 3)
@@ -302,7 +295,6 @@ def _read_spg(dataset, filename, **kwargs):
             raise ValueError('Inconsistent file'
                              ' - number of wavenumber per spectrum should be equal to number of intensities')
 
-
         # Read spectral intensities
         # ..............................................................................................................
         data = np.zeros((nspec, nintensities), dtype='float32')
@@ -311,7 +303,7 @@ def _read_spg(dataset, filename, **kwargs):
             data[i, :] = np.fromfile(f, 'float32', int(nintensities))
         # ..............................................................................................................
 
-        ## Get spectra titles & acquisition dates & history text
+        # Get spectra titles & acquisition dates & history text
         # container to hold values
         alltitles, allacquisitiondates = [], []
         alltimestamps, allhistories = [], []
@@ -367,13 +359,13 @@ def _read_spg(dataset, filename, **kwargs):
     dataset.title = 'Absorbance'
     dataset.name = spg_title
     dataset.filename = os.path.basename(filename).split('.')[0]
-    
+
     # now add coordinates
     _x = Coord(xaxis, title='Wavenumbers', units='cm^-1')
     _y = Coord(alltimestamps,
                title='Acquisition timestamp (GMT)',
                units='s',
-               labels = (allacquisitiondates, alltitles))
+               labels=(allacquisitiondates, alltitles))
     dataset.set_coords(y=_y, x=_x)
 
     # Set origin, description and history
@@ -391,8 +383,8 @@ def _read_spg(dataset, filename, **kwargs):
     # Set the NDDataset date
     dataset._date = datetime.now()
     dataset._modified = dataset.date
-    
-    #debug_("end of reading")
+
+    # debug_("end of reading")
 
     return dataset
 
@@ -491,7 +483,6 @@ def _read_spa(dataset, filenames, **kwargs):
                         np.linspace(firstx[0], lastx[0], nx[0]), 3)
                     gotinfos[0] = True
 
-
                 elif key == 3:
                     f.seek(pos + 2)  # skip 2 bytes
                     intensity_pos = np.fromfile(f, 'uint32', 1)[0]
@@ -522,34 +513,30 @@ def _read_spa(dataset, filenames, **kwargs):
     if np.ptp(nx) != 0:
         raise ValueError(
             'Error : Inconsistent data set - number of wavenumber per spectrum should be identical')
-        return
     elif np.ptp(firstx) != 0:
         raise ValueError(
             'Error : Inconsistent data set - the x axis should start at same value')
-        return
     elif np.ptp(lastx) != 0:
         raise ValueError(
             'Error : Inconsistent data set - the x axis should end at same value')
-        return
 
     # load into the  NDDataset Object of spectral content
     dataset.data = np.array(allintensities)
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
-    dataset.name = ' ... '.join(set([alltitles[0], alltitles[-1]]))
-    dataset._date = datetime.now()
-    dataset._modified = dataset._date
+    dataset.name = ' ... '.join({alltitles[0], alltitles[-1]})
+    dataset._date = dataset._modified = datetime.now()
 
     # Create Dataset Object of spectral content
     # now add coordinates
     _x = Coord(xaxis, title='Wavenumbers', units='cm^-1')
-    _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels = (allacquisitiondates, alltitles))
+    _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels=(allacquisitiondates, alltitles))
     dataset.set_coords(y=_y, x=_x)
-    
+
     # Set origin, description and history
     dataset.origin = "omnic"
     dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum : {3}".format(
-        nspec, ' ... '.join(set([filenames[0], filenames[-1]])), '1st ' if nspec > 1 else '', allhistories[0])
+        nspec, ' ... '.join({filenames[0], filenames[-1]}), '1st ' if nspec > 1 else '', allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'
 
@@ -561,7 +548,7 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset._date = datetime.now()
     dataset._modified = dataset.date
 
-    #debug_("end of reading")
+    # debug_("end of reading")
 
     # return the dataset
     return dataset

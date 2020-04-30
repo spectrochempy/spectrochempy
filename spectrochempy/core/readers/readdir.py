@@ -23,7 +23,6 @@ import os
 import warnings
 import datetime
 import scipy.interpolate
-import glob
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -42,15 +41,10 @@ import xlrd
 # local imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import readfilename, readdirname
-from spectrochempy.utils.qtfiledialogs import opendialog
-from spectrochempy.core.readers.readomnic import read_omnic
-from spectrochempy.core.readers.readcsv import read_csv
-from ...core import info_, debug_, print_, error_, warning_
+from ...core import info_, print_
 
 # function for reading data in a directory
 # ----------------------------------------------------------------------------------------------------------------------
@@ -228,7 +222,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     """
 
-    #debug_("starting reading in a folder")
+    # debug_("starting reading in a folder")
     # check if the first parameter is a dataset
     # because we allow not to pass it
     if not isinstance(dataset, NDDataset):
@@ -302,46 +296,46 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         if Tfile[-4:].lower() == '.xls':
             book = xlrd.open_workbook(os.path.join(directory, Tfile))
 
-        # determine experiment start and end time (thermocouple clock)
-        ti = datasets[0].y.labels[0][0] + delta_clocks
-        tf = datasets[-1].y.labels[-1][0] + delta_clocks
+            # determine experiment start and end time (thermocouple clock)
+            ti = datasets[0].y.labels[0][0] + delta_clocks
+            tf = datasets[-1].y.labels[-1][0] + delta_clocks
 
-        # get thermocouple time and T information during the experiment
-        t = []
-        T = []
-        sheet = book.sheet_by_index(0)
-        for i in range(9, sheet.nrows):
-            try:
-                time = datetime.datetime.strptime(sheet.cell(i, 0).value, '%d/%m/%y %H:%M:%S').replace(
-                    tzinfo=datetime.timezone.utc)
-                if ti <= time <= tf:
-                    t.append(time)
-                    T.append(sheet.cell(i, 4).value)
-            except ValueError:
-                #debug_('incorrect date or temperature format in row {}'.format(i))
-                pass
-            except TypeError:
-                #debug_('incorrect date or temperature format in row {}'.format(i))
-                pass
+            # get thermocouple time and T information during the experiment
+            t = []
+            T = []
+            sheet = book.sheet_by_index(0)
+            for i in range(9, sheet.nrows):
+                try:
+                    time = datetime.datetime.strptime(sheet.cell(i, 0).value, '%d/%m/%y %H:%M:%S').replace(
+                        tzinfo=datetime.timezone.utc)
+                    if ti <= time <= tf:
+                        t.append(time)
+                        T.append(sheet.cell(i, 4).value)
+                except ValueError:
+                    # debug_('incorrect date or temperature format in row {}'.format(i))
+                    pass
+                except TypeError:
+                    # debug_('incorrect date or temperature format in row {}'.format(i))
+                    pass
 
-        # interpolate T = f(timestamp)
-        tstamp = [time.timestamp() for time in t]
-        # interpolate, except for the first and last points that are extrapolated
-        interpolator = scipy.interpolate.interp1d(tstamp, T, fill_value='extrapolate', assume_sorted=True)
+            # interpolate T = f(timestamp)
+            tstamp = [time.timestamp() for time in t]
+            # interpolate, except for the first and last points that are extrapolated
+            interpolator = scipy.interpolate.interp1d(tstamp, T, fill_value='extrapolate', assume_sorted=True)
 
-        for ds in datasets:
-            # timestamp of spectra for the thermocouple clock
+            for ds in datasets:
+                # timestamp of spectra for the thermocouple clock
 
-            tstamp_ds = [(label[0] + delta_clocks).timestamp() for label in ds.y.labels]
-            T_ds = interpolator(tstamp_ds)
-            newlabels = np.hstack((ds.y.labels, T_ds.reshape((50,1))))
-            ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
+                tstamp_ds = [(label[0] + delta_clocks).timestamp() for label in ds.y.labels]
+                T_ds = interpolator(tstamp_ds)
+                newlabels = np.hstack((ds.y.labels, T_ds.reshape((50,1))))
+                ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
 
     if len(datasets) == 1:
-        #debug_("finished read_dir()")
+        # debug_("finished read_dir()")
         return datasets[0]  # a single dataset is returned
 
-    #debug_("finished read_dir()")
+    # debug_("finished read_dir()")
     # several datasets returned, sorted by sample #
     return sorted(datasets, key=lambda ds: int(ds.name.split('_')[0]))
 

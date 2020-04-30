@@ -20,9 +20,8 @@ __dataset_methods__ = __all__
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import os as os
 import numpy as np
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 
 # ----------------------------------------------------------------------------------------------------------------------
 # local imports
@@ -31,7 +30,7 @@ from datetime import datetime, timezone, timedelta
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import readfilename
-from spectrochempy.core import info_, debug_, error_, warning_
+
 
 # ............................................................................
 def read_jdx(dataset=None, **kwargs):
@@ -61,7 +60,7 @@ def read_jdx(dataset=None, **kwargs):
     #todo: add example
     """
 
-    #debug_("reading jdx file")
+    # debug_("reading jdx file")
     sortbydate = kwargs.get('sortbydate', True)
     # filename will be given by a keyword parameter except if the first parameters is already the filename
     filename = kwargs.get('filename', None)
@@ -80,14 +79,13 @@ def read_jdx(dataset=None, **kwargs):
 
     # returns a list of files to read
     files = readfilename(filename,
-                             directory=directory,
-                             filetypes=['JCAMP-DX files (*.jdx)',
-                                        'All files (*)'])
+                         directory=directory,
+                         filetypes=['JCAMP-DX files (*.jdx)',
+                                    'All files (*)'])
 
     if not files:
         # there is no files, return nothing
         return None
-
 
     datasets = []
     for filename in files['.jdx']:
@@ -102,14 +100,6 @@ def read_jdx(dataset=None, **kwargs):
         else:
             print('Error : no ##TITLE LR in outer block header')
             return
-    # Unuse for the moment...
-    #    while keyword !='##JCAMP-DX':
-    #        keyword, text = readl(f)
-    #    if keyword != 'EOF':
-    #        jdx_jcamp_dx = text
-    #    else:
-    #        print('Error: no ##JCAMP-DX LR in outer block header')
-    #        return
 
         while (keyword != '##DATA TYPE') and (keyword != '##DATATYPE'):
             keyword, text = _readl(f)
@@ -130,7 +120,7 @@ def read_jdx(dataset=None, **kwargs):
             return
 
         # Create variables ********************************************************
-        xaxis  = np.array([])
+        xaxis = np.array([])
         data = np.array([])
         alltitles, alltimestamps, alldates, xunits, yunits = [], [], [], [], []
         nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec,
@@ -149,37 +139,34 @@ def read_jdx(dataset=None, **kwargs):
             while keyword != '##END':
                 keyword, text = _readl(f)
                 if keyword == '##TITLE':
-                    alltitles.append(
-                        text)  # Add the title of the spectrum in the liste alltitles
-                if keyword == '##LONGDATE':
+                    # Add the title of the spectrum in the list alltitles
+                    alltitles.append(text)
+                elif keyword == '##LONGDATE':
                     [year, month, day] = text.split('/')
-                if keyword == '##TIME':
+                elif keyword == '##TIME':
                     [hour, minute, second] = text.split(':')
-                if keyword == '##XUNITS':
+                elif keyword == '##XUNITS':
                     xunits.append(text)
-                if keyword == '##YUNITS':
+                elif keyword == '##YUNITS':
                     yunits.append(text)
-                if keyword == '##FIRSTX':
+                elif keyword == '##FIRSTX':
                     firstx[i] = float(text)
-                if keyword == '##LASTX':
+                elif keyword == '##LASTX':
                     lastx[i] = float(text)
-                # Unuse for the moment...
-                #                if keyword =='##FIRSTY':
-                #                firsty = float(text)
-
-                if keyword == '##XFACTOR':
+                elif keyword == '##XFACTOR':
                     xfactor = float(text)
-                if keyword == '##YFACTOR':
+                elif keyword == '##YFACTOR':
                     yfactor = float(text)
-                if keyword == '##NPOINTS':
+                elif keyword == '##NPOINTS':
                     nx[i] = float(text)
-                if keyword == '##XYDATA':
+                elif keyword == '##XYDATA':
                     # Read all the intensities
                     allintensities = []
                     while keyword != '##END':
                         keyword, text = _readl(f)
-                        intensities = text.split(' ')[
-                                      1:]  # for each line, get all the values exept the first one (first value = wavenumber)
+                        # for each line, get all the values exept the first one (first value = wavenumber)
+                        intensities = text.split(' ')[1:]
+
                         allintensities = allintensities + intensities
                     spectra = np.array([allintensities])  # convert allintensities into an array
                     spectra[spectra == '?'] = 'nan'  # deals with missing or out of range intensity values
@@ -200,33 +187,29 @@ def read_jdx(dataset=None, **kwargs):
                 else:  # Check the consistency of xaxis
                     if nx[i] - nx[i - 1] != 0:
                         raise ValueError(
-                            'Error : Inconsistant data set - number of wavenumber per spectrum should be identical')
-                        return
+                            'Error : Inconsistent data set - number of wavenumber per spectrum should be identical')
                     elif firstx[i] - firstx[i - 1] != 0:
                         raise ValueError(
-                            'Error : Inconsistant data set - the x axis should start at same value')
-                        return
+                            'Error : Inconsistent data set - the x axis should start at same value')
                     elif lastx[i] - lastx[i - 1] != 0:
                         raise ValueError(
-                            'Error : Inconsistant data set - the x axis should end at same value')
-                        return
+                            'Error : Inconsistent data set - the x axis should end at same value')
             else:
                 raise ValueError(
                     'Error : ##FIRST, ##LASTX or ##NPOINTS are unusuable in the spectrum n°',
                     i + 1)
-                return
 
                 # Creation of the acquisition date
             if (year != '' and month != '' and day != '' and hour != '' and minute != '' and second != ''):
                 date = datetime(int(year), int(month), int(day),
-                                            int(hour), int(minute), int(second))
+                                int(hour), int(minute), int(second))
                 timestamp = date.timestamp()
                 # Transform back to timestamp for storage in the Coord object
                 # use datetime.fromtimestamp(d, timezone.utc))
                 # to transform back to datetime object
             else:
-                timestamp = None
-                #Todo: cases where incomplete date and/or time info
+                timestamp = date = None
+                # Todo: cases where incomplete date and/or time info
             alltimestamps.append(timestamp)
             alldates.append(date)
 
@@ -259,15 +242,17 @@ def read_jdx(dataset=None, **kwargs):
         elif xunits[0] == 'ARBITRARY UNITS':
             axisname = 'Arbitrary unit'
             axisunit = '-'
+        else:
+            axisname = ''
+            axisunit = ''
         f.close()
 
         dataset = NDDataset(data)
         dataset.name = jdx_title
         dataset.units = 'absorbance'
         dataset.title = 'Absorbance'
-        dataset.name = ' ... '.join(set([alltitles[0], alltitles[-1]]))
-        dataset._date = datetime.now()
-        dataset._modified = dataset._date
+        dataset.name = ' ... '.join({alltitles[0], alltitles[-1]})
+        dataset._date = dataset._modified =datetime.now()
 
         # now add coordinates
         _x = Coord(xaxis, title=axisname, units=axisunit)
@@ -277,8 +262,8 @@ def read_jdx(dataset=None, **kwargs):
 
         # Set origin, description and history
         dataset.origin = "JCAMP-DX"
-        dataset.description = "Dataset from jdx: '{0}'"\
-            .format( ' ... '.join(set([alltitles[0], alltitles[0]])))
+        dataset.description = "Dataset from jdx: '{0}'" \
+            .format(' ... '.join({alltitles[0], alltitles[0]}))
 
         dataset.history = str(datetime.now()) + ':imported from jdx files \n'
 
@@ -292,16 +277,11 @@ def read_jdx(dataset=None, **kwargs):
         dataset._date = datetime.now()
         dataset._modified = dataset.date
 
-
-
         return dataset
-
-
 
 # ======================================================================================================================
 # private functions
 # ======================================================================================================================
-
 
 def _readl(f):
     line = f.readline()
@@ -311,12 +291,11 @@ def _readl(f):
     if line[0:2] == '##':  # if line starts with "##"
         if line[0:5] == '##END':  # END KEYWORD, no text
             keyword = '##END'
-            text=''
-        else: # keyword + text
+            text = ''
+        else:  # keyword + text
             keyword = line.split('=')[0]
             text = line.split('=')[1]
     else:
         keyword = ''
         text = line
     return keyword, text
-

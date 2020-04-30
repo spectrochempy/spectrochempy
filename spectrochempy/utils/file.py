@@ -15,7 +15,6 @@ from pkgutil import walk_packages
 from numpy.lib.format import read_array
 from numpy.compat import asstr
 from traitlets import import_item
-import warnings
 
 from .qtfiledialogs import opendialog, SaveFileName
 
@@ -38,11 +37,13 @@ def readfilename(filename=None, **kwargs):
     ----------
     filename : `str`, `list` of strings, optional.
         A filename or a list of filenames. If not provided, a dialog box is opened
-        to select files.
+        to select files in the specified directory or in
+        the current directory if not specified.
     directory : `str`, optional.
         The directory where to look at. If not specified, read in
-        default dirdata directory
-    filetypes : `list`, optional, default=['all files, '.*)'].
+        current directory, or in the datadir if unsuccessful
+
+    filetypes : `list`, optional filter, default=['all files, '.*)'].
 
     Returns
     --------
@@ -51,51 +52,35 @@ def readfilename(filename=None, **kwargs):
     """
 
     from spectrochempy.core import general_preferences as prefs
-    from spectrochempy.utils import SpectroChemPyWarning
     from spectrochempy.api import NO_DISPLAY
     
-    # if the directory is not specified we look in the prefs.datadir
+
     directory = kwargs.get("directory", None)
+    # if the directory is not specified we will first look in the current working directory
+    # and then in the prefs.datadir
+
+    # check passed directory
+    if directory:
+        if os.path.exists(directory):
+            # a valid absolute pathname has been given
+            pass
+        else:
+            # see if it is inside one of the default dirs:
+            _directory = os.path.join(os.getcwd(), directory)
+            if not os.path.exists(_directory):
+                # the directory isn't in the current dir, now try datadir:
+                _directory = os.path.join(prefs.datadir, directory)
+                if not os.path.exists(_directory):
+                    # the directory is definitely not valid... raise an error
+                    raise IOError("directory %s doesn't exists!" % directory)
+            else:
+                directory = _directory
 
     # filters and filetype will be alias (as filters is sometimes used)
     filetypes = kwargs.get("filetypes",
-                           kwargs.get("filters", ["all files (*)"]))
+                             kwargs.get("filters", ["all files (*)"]))
 
-    if filename:
-        # if a filename or a list of filename was provided
-        # first look if it really a filename and not a directory
-        if isinstance(filename, str) and os.path.isdir(filename):
-            warnings.warn('a directory has been provided instead of a filename!\n',
-                          SpectroChemPyWarning)
-            # we use it instead of the eventually passed directory
-            if directory:
-                warnings.warn('a directory has also been provided!'
-                              ' we will use it instead of this one\n',
-                              SpectroChemPyWarning)
-            else:
-                directory = filename
-            filename = None
-
-    if directory and not os.path.exists(directory):
-        # the directory may be located in our default datadir
-        # or be the default datadir
-        if directory == os.path.basename(prefs.datadir):
-            return prefs.datadir
-
-        _directory = os.path.join(prefs.datadir, directory)
-
-        if not os.path.exists(_directory):
-
-            # well the directory doesn't exist - we cannot go further without
-            # correcting this error
-            raise IOError("directory %s doesn't exists!" % directory)
-        else:
-            directory = _directory
-            # if the only thing we need is a valid directory, we are all set!
-            if filetypes == 'directory':
-                return directory
-
-    # now proceed with the filenames or directory
+    # now proceed with the filenames
     if filename:
         _filenames = []
         # make a list, even for a single file name
@@ -106,22 +91,20 @@ def readfilename(filename=None, **kwargs):
             filenames = list(filenames)
 
         # look if all the filename exists either in the specified directory,
-        # else in the current directory, and finaly in the default preference data directory
+        # else in the current directory, and finally in the default preference data directory
         for i, filename in enumerate(filenames):
-
             if directory:
                 _f = os.path.expanduser(os.path.join(directory, filename))
             else:
                 _f = filename
                 if not os.path.exists(_f):
                     # the filename provided doesn't exists in the specified directory
-                    # or the current directory
-                    # let's try in the default data directory
+                    # or the current directory let's try in the default data directory
                     _f = os.path.join(prefs.datadir, filename)
                     if not os.path.exists(_f):
                         raise IOError("Can't find  this filename %s in the specified directory "
-                                      "(or the current one if it was not specified, "
-                                      "nor in the default data directory %s" % (filename, prefs.datadir))
+                                      "(or in the current one, or in the default data directory %s" 
+                                      "if directory was not specified "% (filename, prefs.datadir))
             _filenames.append(_f)
 
         # now we have all the filename with their correct location
@@ -130,11 +113,8 @@ def readfilename(filename=None, **kwargs):
     if not filename:
         # open a file dialog
         # currently Scpy use QT (needed for next GUI features)
-
         if not directory:
-            # if no directory was eventually specified
-            directory = prefs.datadir
-
+            directory = os.getcwd()
         caption = kwargs.get('caption', 'Select folder')
 
         # We can not do this during full pytest run without blocking the process
@@ -149,7 +129,7 @@ def readfilename(filename=None, **kwargs):
             # if the dialog has been cancelled or return nothing
             return None
 
-        # else we have a list of the selected files or a directory
+    # now we have a list of the selected files or a directory
         # to read in
 
     if isinstance(filename, list):
@@ -157,7 +137,6 @@ def readfilename(filename=None, **kwargs):
             raise IOError('one of the list elements is not a filename!')
         else:
             filenames = filename
-        #    filenames = [os.path.join(directory, elem) for elem in filename]   "already the full path
 
     if isinstance(filename, str):
         filenames = [filename]
@@ -166,7 +145,7 @@ def readfilename(filename=None, **kwargs):
     files = {}
     for filename in filenames:
         if filename.endswith('.DS_Store'):
-            # avoid storing bullshit some time present in the directory (MacOSX)
+            # avoid storing bullshit sometime present in the directory (MacOSX)
             continue
         _, extension = os.path.splitext(filename)
         extension = extension.lower()
@@ -186,7 +165,7 @@ def readdirname(dirname=None, **kwargs):
     dirname : `str`, optional.
         A directory name. If not provided, a dialog box is opened to select a directory.
     parent_dir : `str`, optional.
-        The parent directory where to look at. If not specified, read in default datadir directory
+        The parent directory where to look at. If not specified, read in the current working directory
 
     Returns
     --------
@@ -221,9 +200,13 @@ def readdirname(dirname=None, **kwargs):
         if parent_dir is not None:
             if os.path.isdir(os.path.join(parent_dir, dirname)):
                 return os.path.join(parent_dir, dirname)
-        # if no parent directory: look at datadir
+        # if no parent directory: look at current working dir
+        elif os.path.isdir(os.path.join(os.getcwd(), dirname)):
+            return os.path.join(os.getcwd(), dirname)
+        # if no current directory: look at data dir
         elif os.path.isdir(os.path.join(prefs.datadir, dirname)):
             return os.path.join(prefs.datadir, dirname)
+
         else:
             raise ValueError("\"%s\" is not a valid directory" % dirname)
 
@@ -233,7 +216,7 @@ def readdirname(dirname=None, **kwargs):
 
         if not parent_dir:
             # if no parent directory was specified
-            parent_dir = prefs.datadir
+            parent_dir = os.getcwd()
 
         caption = kwargs.get('caption', 'Select folder')
 
@@ -254,7 +237,7 @@ def savefilename(filename:None, directory:None, filters:None):
     filename : `str`, optional.
         A filename. If not provided, a dialog box is opened to select a file.
     directoryr: `str`, optional.
-        The directory where to save the file. If not specified, usez the current working directory
+        The directory where to save the file. If not specified, use the current working directory
 
     Returns
     --------
