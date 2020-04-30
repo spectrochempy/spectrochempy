@@ -13,6 +13,7 @@
 """
 
 from datetime import datetime
+
 import numpy as np
 import scipy.io as sio
 
@@ -20,11 +21,10 @@ __all__ = ['read_matlab']
 
 __dataset_methods__ = __all__
 
-from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.core import general_preferences as prefs
-from spectrochempy.utils import readfilename, SpectroChemPyWarning
-from ...core import info_, debug_, error_, warning_
+from spectrochempy.utils import readfilename
+from ...core import debug_
+
 
 def read_matlab(dataset=None, **kwargs):
     """Open a matlab file with extension ``.mat`` and returns its content as a list.
@@ -90,8 +90,6 @@ def read_matlab(dataset=None, **kwargs):
     for file in files:
         content = sio.whosmat(file)
         f = sio.loadmat(file)
-        if len(content) > 1:
-            debug_("several elements")
 
         for x in content:
             if x[2] in ['double', 'single', 'int8', 'int16',
@@ -119,7 +117,7 @@ def read_matlab(dataset=None, **kwargs):
                 datasets.append((x[0], f[x[0]]))
 
     if len(datasets) == 1:
-        return (datasets[0])
+        return datasets[0]
     else:
         return datasets
 
@@ -218,8 +216,6 @@ def _read_DSO(f, x):
 
         ds.name = name
         ds.date = date
-
-
 
         # TODO: reshape from fortran/Matlab order to C order
         #  for 3D or higher datasets ?
