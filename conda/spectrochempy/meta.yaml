@@ -1,58 +1,85 @@
-# https://docs.conda.io/projects/conda-build/en/latest/user-guide/tutorials/build-pkgs.html
+{% set name = "spectrochempy" %}
+{% set version = "0.1.16" %}
+
+# see this  for a description of the sections
+# https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
+
 package:
-  name: spectrochempy
-  version: {{ environ.get('GIT_DESCRIBE_TAG', '') }}
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
 
 source:
-  path: ../../
+  git_url: ../../
+  git_rev: "{{ version }}"
 
 build:
-  number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
+  number: 0
+  entry_points:
+    - scpy=spectrochempy.scripts.launch_api:main
+  script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
-  build:
-    - {{ compiler('c') }}
+  host:
+    - pip
     - python
+  build:
+    - python           3.7
     - setuptools
     - setuptools_scm
-
   run:
-    - python        3.7.*
+    - numpy
     - matplotlib
     - traitlets
-    - numpy         1.15
+    - pint             0.9
+    - quaternion
     - scipy
-    - pandas
-    - xlrd
-    - ipython
-    - ipykernel
-    - nb_conda
+    - colorama
     - setuptools_scm
-    - pytest
-    - sip
-    - pyqt
+    - ipython
+    - jupyterlab
+    - ipympl
+    - nodejs
+    - ipykernel
+    - ipywidgets
+    - widgetsnbextension
+    - xlrd
+    - numba
+    - pandas
+    - cantera
+    - quadprog
 
-#test:
-  # Python imports
-#  imports:
-#    - spectrochempy
-#    - spectrochempy.api
-
-  # commands:
-    # You can put test commands to be run here.  Use this to test that the
-    # entry points work.
-
-
-  # You can also put a file called run_test.py in the recipe that will be run
-  # at test time.
+test:
+  imports:
+    - scp_data
+    - spectrochempy
+    - spectrochempy.core
+    - spectrochempy.core.analysis
+    - spectrochempy.core.dataset
+    - spectrochempy.core.fitting
+    - spectrochempy.core.plotters
+    - spectrochempy.core.processors
+    - spectrochempy.core.project
+    - spectrochempy.core.readers
+    - spectrochempy.core.readers.nmr
+    - spectrochempy.core.scripts
+    - spectrochempy.core.writers
+    - spectrochempy.databases
+    - spectrochempy.scripts
+    - spectrochempy.units
+    - spectrochempy.utils
+    - spectrochempy.widgets
+  commands:
+    - scpy --help
 
 about:
-  home: https://www.spectrochempy.fr
-  license: CeCILL-B Free Software License Agreement (CECILL-B)
-  summary: 'SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for Chemistry with Python'
+  home: "https://redmine.spectrochempy.fr"
+  license: CeCILL-B
   license_family: OTHER
+  license_file: 
+  summary: "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
+  doc_url: "https://www.spectrochempy.fr"
+  dev_url: "https://bitbucket.org/spectrocat/spectrochempy"
 
-
-# See
-# http://docs.continuum.io/conda/build.html for
-# more information about meta.yaml
+extra:
+  recipe-maintainers:
+    - fernandezc

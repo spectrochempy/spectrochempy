@@ -78,3 +78,5 @@ or for mac:
 From now quadprog can be obtained for the spectrocat channel:
 
     conda install -c spectrocat quadprog
+    
+    

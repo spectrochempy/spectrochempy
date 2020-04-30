@@ -1,7 +1,7 @@
 name: scpy
 channels:
 - conda-forge
-- conda
+- spectrocat
 - cantera
 dependencies:
 - numpy
@@ -23,6 +23,4 @@ dependencies:
 - numba
 - pandas
 - cantera
-- pip
-- pip:
-  - quadprog
+- quadprog

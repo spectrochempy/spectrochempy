@@ -1,9 +1,9 @@
 name: scpy-dev
 channels:
 - conda-forge
-- conda
 - cantera
 - spectrocat
+- conda
 dependencies:
 - numpy
 - matplotlib
@@ -44,6 +44,4 @@ dependencies:
 - numpydoc=0.8
 - conda-build
 - cantera
-- pip
-- pip:
-  - quadprog
+- quadprog
