@@ -62,7 +62,7 @@ class MCRALS(HasTraits):
             *   'unimodConc' : array or tuple of index of species having unimodal concentrationsprofiles.
                 Default [0, 1, ...]  (only unimodal concentration profiles)
             *   'closureConc' : array or tuple of the index of species subjected to a closure constraint.
-            Default None  (no closure)
+                Default None  (no closure)
             *   'extConc': array or tuple indicating the index of species for which a concentration profile
                 is provided by an external function.
                 Default None (no external concentration).
@@ -81,6 +81,7 @@ class MCRALS(HasTraits):
                 Default [1, ..., 1]  (only non-negative spectra)
             *   'unimodSpec' : array or tuple indicating species having unimodal spectra
                 Default [0, ..., 0]  (no unimodal concentration profiles)
+                
         verbose : bool
             If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
             In any case, the same information is returned in self._log

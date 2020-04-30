@@ -6,7 +6,7 @@ traitlets
 pint==0.9
 quaternion
 quadprog
-canteraconda
+cantera
 pandas
 xlrd
 scipy
