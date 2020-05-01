@@ -38,17 +38,18 @@ def ifft(dataset, size=None, inplace=False, **kwargs):
 
 
 def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=True, **kwargs):
-    r"""
+    """
     Apply a complex fast fourier transform.
-
+    
     For multidimensional NDDataset or NDPanels,
     the apodization is by default performed on the last dimension.
-
+    
     The data in the last dimension MUST be in time-domain (or without dimension)
     or an error is raised.
-
-    To make reverse Fourier transform, i.e., from frequency to time domain, use the `ifft` transform (or equivalently, the `ìnv`=True parameters.
-
+    
+    To make reverse Fourier transform, i.e., from frequency to time domain, use the `ifft` transform
+    (or equivalently, the `inv=True` parameters.
+    
     Parameters
     ----------
     size : int, optional
@@ -64,10 +65,11 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
     dim : str or int, optional, default='x'.
         Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
-    ppm : bool, optional, default True
+    ppm : bool, optional, default=True
         If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
-    **kwargs : other parameters (see other parameters)
-
+    \*\*kwargs :
+        other parameters (see other parameters)
+    
     Other Parameters
     ----------------
     tdeff : int, optional

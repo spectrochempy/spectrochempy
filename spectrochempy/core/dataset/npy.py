@@ -462,6 +462,8 @@ def diag(dataset, k=0):
     whether it returns a copy or a view depends on what version of numpy you
     are using.
 
+    Copied from numpy (licence #TO ADD)
+    
     Parameters
     ----------
     v : array_like
@@ -478,7 +480,8 @@ def diag(dataset, k=0):
     out : ndarray
         The extracted diagonal or constructed diagonal array.
 
-    copied from numpy (licence
+    
+    
     """
 
     # check if we have the correct input

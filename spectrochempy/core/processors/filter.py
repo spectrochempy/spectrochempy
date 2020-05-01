@@ -118,31 +118,28 @@ def savgol_filter(dataset, window_length, polyorder, deriv=0, delta=1.0, dim='x'
 def detrend(dataset, dim='x', type='linear', bp=0, overwrite_data=False):
     """
     Wrapper of scpy.signal.detrend(). Remove linear trend along dim from dataset.
+    
     Parameters
     ----------
     dataset :  |NDDataset|
         The input data
-    dim : str, optional
-        The dimensio, along which to detrend the data. By default this is the
-        'x' dimension.
-    type : {'linear', 'constant'}, optional
+    dim : str, optional, default='x'
+        The dimension, along which to detrend the data. By default this is the 'x' dimension.
+    type : str among ['linear', 'constant'}, optional, default='linear'
         The type of detrending. If ``type == 'linear'`` (default),
-        the result of a linear least-squares fit to `data` is subtracted
-        from `data`.
+        the result of a linear least-squares fit to `data` is subtracted from `data`.
         If ``type == 'constant'``, only the mean of `data` is subtracted.
     bp : array_like of ints, optional
         A sequence of break points. If given, an individual linear fit is
         performed for each part of `data` between two break points.
         Break points are specified as indices into `data`.
-    overwrite_data : bool, optional
-        If True, perform in place detrending and avoid a copy. Default is False
+    overwrite_data : bool, optional, Default=False
+        If True, perform in place detrending and avoid a copy.
+    
     Returns
     -------
     ret : NDDataset
         The detrended input data.
-    Examples
-    --------
-    #Todo: add example + tutorial
     """
     if dim == 'x':
         axis = -1
