@@ -50,53 +50,64 @@ class MCRALS(HasTraits):
             Initial concentration or spectra
         param : dict
             Dict of optimization parameters with the following keys :
-
-            *   'tol' : float, optional, convergence criterion on the change of resisuals.
-                (percent change of standard deviation of residuals). default=0.1
-            *   'maxit' : maximum number of ALS minimizations. default=50
-            *   'maxdiv' : maximum number of successive non-converging iterations. default=5
-            *   'nonnegConc' : array or tuple of index of species having non-negative concentration profiles. For instance
-                [0, 2] indicates that species #0 and #2 have non-negative conc profiles while species #1
-                can have negative concentrations.
-                Default [0, 1, ...]  (only non-negative concentrations)
-            *   'unimodConc' : array or tuple of index of species having unimodal concentrationsprofiles.
-                Default [0, 1, ...]  (only unimodal concentration profiles)
-            *   'closureConc' : array or tuple of the index of species subjected to a closure constraint.
-                Default None  (no closure)
-            *   'extConc': array or tuple indicating the index of species for which a concentration profile
-                is provided by an external function.
-                Default None (no external concentration).
-            *   'getExtlConc': callable, an external function that will provide `n_ext` concentration profiles
-                    getExtConc(C, extConc, ext_to_C_idx, *args) -> extC
-                    or
-                    getExtConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
-                where C is the current concentration matrix, *args are the parameters needed to completely
+        
+            * tol : float, optional,  default=0.1
+                convergence criterion on the change of resisuals.
+                (percent change of standard deviation of residuals).
+            * maxit : int, optional, default=50
+                maximum number of ALS minimizations.
+            * maxdiv : int, optional, default=5.
+                maximum number of successive non-converging iterations.
+            * nonnegConc : list or tuple, default=Default [0, 1, ...] (only non-negative concentrations)
+                index of species having non-negative concentration profiles. For instance [0, 2] indicates that species
+                #0 and #2 have non-negative conc profiles while species #1 can have negative concentrations.
+            * unimodConc : list or tuple, Default=[0, 1, ...] (only unimodal concentration profiles)
+                index of species having unimodal concentrationsprofiles.
+            * closureConc : list or tuple, Default=None  (no closure)
+                index of species subjected to a closure constraint.
+            * extConc: list or tuple, Default None (no external concentration).
+                index of species for which a concentration profile is provided by an external function.
+            *  getExtlConc : callable
+                an external function that will provide `n_ext` concentration profiles:
+                    getExtConc(C, extConc, ext_to_C_idx, \*args) -> extC
+                
+                or
+                    getExtConc(C, extConc, ext_to_C_idx, \*args) -> (extC, out2, out3, ...)
+                
+                where C is the current concentration matrix, \*args are the parameters needed to completely
                 specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, ... are
                 supplementary outputs returned by the function (e.g. optimized rate parameters)
-            * 'args': tuple, optional. Extra arguments passed to tthe external function
-            *   'external_to_C_idx': array or tuple indicating the correspondence between the indexes of external chemical
-             profiles and the columns of the C matrix. [1, None, 0] indicates that the first external profile is the
-             second pure species (index 1). Default: np.arange(next)
-            *   'nonnegSpec' : array or tuple indicating species having non-negative spectra
-                Default [1, ..., 1]  (only non-negative spectra)
-            *   'unimodSpec' : array or tuple indicating species having unimodal spectra
-                Default [0, ..., 0]  (no unimodal concentration profiles)
-                
+            * args : tuple, optional.
+                Extra arguments passed to tthe external function
+            * external_to_C_idx : array or tuple, Default=np.arange(next)
+                indicates the correspondence between the indexes of external chemical
+                profiles and the columns of the C matrix. [1, None, 0] indicates that the first external profile is the
+                second pure species (index 1).
+            * nonnegSpec : list or tuple, Default [1, ..., 1]  (only non-negative spectra)
+                indicates species having non-negative spectra
+            * unimodSpec : list or tuple, Default [0, ..., 0]  (no unimodal concentration profiles)
+                indicates species having unimodal spectra
         verbose : bool
             If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
             In any case, the same information is returned in self._log
-
-         Attributes
-        -----------
-         self._X : the original dataset
-         self._param : the parameters used to perform the MCR als
-         self._extC : the last concentration profiles including external profiles
-         self._extOutput : the last output of the external function used to get
-         self._C : the final concentration profiles
-         self._St : the final spectral profiles
-         self._log = logs
+        
+        Attributes
+        ----------
+        self._X :
+            the original dataset
+        self._param :
+            the parameters used to perform the MCR als
+        self._extC :
+            the last concentration profiles including external profiles
+        self._extOutput :
+            the last output of the external function used to get
+        self._C :
+            the final concentration profiles
+        self._St :
+            the final spectral profiles
+        self._log :
+            logs
         """
-        # TODO: add example
 
         verbose = kwargs.get('verbose', False)
         if verbose:
