@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     sphinx.apidoc (https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py)
-    ~~~~~~~~~~~~~
+    
 
     Parses a directory tree looking for Python modules and packages and creates
     ReST files appropriately to create code documentation with Sphinx.  It also
