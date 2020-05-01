@@ -38,7 +38,7 @@ def ifft(dataset, size=None, inplace=False, **kwargs):
 
 
 def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=True, **kwargs):
-   r"""
+    r"""
     Apply a complex fast fourier transform.
     
     For multidimensional NDDataset or NDPanels,
