@@ -34,30 +34,28 @@ from spectrochempy.utils import readfilename
 
 # ............................................................................
 def read_jdx(dataset=None, **kwargs):
-    """Open a JCAMP-DX file with extension ``.jdx``
-
+    """
+    Open a JCAMP-DX file with extension ``.jdx``
+    
     Parameters
     ----------
     dataset : |NDDataset|
         The dataset to store the data and metadata read from a JCAMP-DX file.
         If None, a |NDDataset| is created.
-    filename : `None`, `str`, or list of `str`
-        Filename of the file(s) to load. If `None` : opens a dialog box to select
+    filename : None, str, or list of str
+        Filename of the file(s) to load. If None : opens a dialog box to select
         filename.
     directory : str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
     sortbydate : bool, optional, default=True.
         Sort spectra by acquisition date
-
+    
     Returns
     -------
     dataset : |NDDataset|
-        A dataset corresponding to the ``.jdx``file.
+        A dataset corresponding to the ``.jdx`` file.
 
-    Example
-    --------
-    #todo: add example
     """
 
     # debug_("reading jdx file")

@@ -138,8 +138,8 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     r"""
     Function fitting rate parameters and concentrations to a given concentration profile.
     
-    parameters:
-    ----------
+    Parameters
+    ------------
     
     C: NDDataset
         experimental concentration profiles on which to fit the model. C can contain more concentration
@@ -158,7 +158,7 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     **kwargs:
         parameters for the optimization (see scipy.optimize.minimize)
     
-    Returns:
+    Returns
     ----------
     a dictionary
     
