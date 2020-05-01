@@ -30,10 +30,8 @@ Among its major features:
     bugs and crashes!!! Please report any issues to the
     `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
 
-Documentation
-=============
-
-**Getting Started**
+Getting Started
+****************
 
 * :doc:`gettingstarted/whyscpy`
 * :doc:`gettingstarted/install/index`
@@ -53,7 +51,8 @@ Documentation
     gettingstarted/changelog
 
 
-**User Guide** 
+User Guide
+***********
 
 * :doc:`user/userguide/index`
 * :doc:`user/tutorials/index`
@@ -70,7 +69,8 @@ Documentation
     gallery/auto_examples/index
     main/faq
 
-**API reference**
+API reference
+***************
 
 * :doc:`api/generated/index`
 
@@ -81,7 +81,8 @@ Documentation
 
     api/generated/index
 
-**Developer's Corner**
+Developer's Corner
+********************
 
 * :doc:`dev/contributing`
 
@@ -92,7 +93,8 @@ Documentation
 
     dev/contributing
 
-**Credits**
+Credits
+*********
 
 * :doc:`main/credits`
 * :doc:`main/citing`

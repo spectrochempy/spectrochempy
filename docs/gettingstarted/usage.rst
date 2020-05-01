@@ -1,7 +1,7 @@
 .. _usage:
 
 Usage 
-#####
+=====
 
 |scpy| is an open-source framework for processing, analyzing and modeling **Spectro**\ scopic data
 for **Chem**\istry with **Py**\thon and runs on Linux, Windows or OS X.

@@ -1,12 +1,12 @@
 .. _faq:
 
 Frequently Asked Questions (FAQ)
-#################################
+=================================
 
 .. _faq_preference_file:
 
 Where are the Preference Files Saved?
-=====================================
+--------------------------------------
 Typically, the main application preference file is saved in a hidden directory
 located in your home user directory: ``$HOME/.spectrochempy/config``. but if the
 ``SCP_CONFIG_HOME`` environment variable is set and the
@@ -34,7 +34,7 @@ or whatever you prefer to read and edit a text file.
 .. _terminal_not_sourcing_profile:
 
 in PyCharm on OSX, the terminal is not sourcing .bash_profile
-==============================================================
+--------------------------------------------------------------
 
 Change the following in Pycherm/preferences/terminal:
 
@@ -47,7 +47,7 @@ Change the following in Pycherm/preferences/terminal:
 
 
 in Pycharm on OSX, latex is not found from the terminal
-=======================================================
+--------------------------------------------------------
 
 While it is found on a shell terminal, it doesn't work in pycharm.
 

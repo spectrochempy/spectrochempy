@@ -1,7 +1,7 @@
 .. _tutorials:
 
-Tutorial
-========
+Tutorials
+==========
 
 Import data
 -----------

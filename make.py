@@ -124,7 +124,7 @@ class Build(object):
         print(f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})')
         
         # recreate dir if needed
-        self.clean()
+        self.clean(builder)
         self.make_dirs()
         srcdir = confdir = DOCDIR
         outdir = f"{BUILDDIR}/{builder}/{doc_version}"
@@ -332,15 +332,17 @@ class Build(object):
             print('Cannot find the upload server : {}!'.format(SERVER))
     
     # ..................................................................................................................
-    def clean(self):
+    def clean(self, builder):
         """
         Clean/remove the built documentation.
         """
         
         doc_version = self.doc_version
         
-        shutil.rmtree(os.path.join(HTML, doc_version), ignore_errors=True)
-        shutil.rmtree(os.path.join(LATEX, doc_version), ignore_errors=True)
+        if builder == 'html':
+            shutil.rmtree(os.path.join(HTML, doc_version), ignore_errors=True)
+        if builder == 'latex':
+            shutil.rmtree(os.path.join(LATEX, doc_version), ignore_errors=True)
         
     def deepclean(self):
         

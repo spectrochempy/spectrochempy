@@ -192,7 +192,7 @@ html_use_smartypants = True
 html_split_index = True
 
 # If true, links to the reST sources are added to the pages.
-html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False
@@ -221,25 +221,13 @@ trim_doctests_flags = True
 
 # -- Options for LaTeX output --------------------------------------------------
 
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    'papersize': 'a4paper',  # ''letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    # 'preamble': r"""\usepackage[utf8]{inputenc}
-    #             \usepackage[T1]{fontenc}
-    #          """,
-}
-
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass  [
 # howto/manual]).
 latex_documents = [(
-'index', 'spectrochempy.tex', 'SpectroChemPy Documentation', 'Spectrocat',
-'manual'), ]
+'index', 'spectrochempy.tex', u'SpectroChemPy Documentation', u'Spectrocat',
+'manual', False),
+]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -247,7 +235,28 @@ latex_logo = "_static/scpy.png"
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-# latex_use_parts = False
+latex_use_parts = False
+
+latex_elements = {
+# The paper size ('letterpaper' or 'a4paper').
+'papersize': 'a4paper',  # ''letterpaper',
+
+# The font size ('10pt', '11pt' or '12pt').
+'pointsize': '10pt',
+
+# remove blank pages (between the title page and the TOC, etc.)
+'classoptions': ',openany,oneside',
+'babel' : '\\usepackage[english]{babel}',
+
+# Additional stuff for the LaTeX preamble.
+'preamble': r'''
+\usepackage{hyperref}
+\setcounter{tocdepth}{3}
+'''
+}
+
+# If false, no module index is generated.
+latex_use_modindex = True
 
 # If true, show page references after internal links.
 # latex_show_pagerefs = False
@@ -260,6 +269,38 @@ latex_logo = "_static/scpy.png"
 
 # If false, no module index is generated.
 # latex_domain_indices = True
+
+
+# -- Options for PDF output ---------------------------------------
+
+# Grouping the document tree into PDF files. List of tuples
+# (source start file, target name, title, author).
+pdf_documents = [
+    ('index', u'SpectroChempy', u'Spectrochempy Documentation', u'Spectrocat'),
+]
+
+# A comma-separated list of custom stylesheets. Example:
+pdf_stylesheets = ['sphinx','kerning','a4']
+
+# Create a compressed PDF
+# Use True/False or 1/0
+# Example: compressed=True
+#pdf_compressed=False
+
+# A colon-separated list of folders to search for fonts. Example:
+# pdf_font_path=['/usr/share/fonts', '/usr/share/texmf-dist/fonts/']
+
+# Language to be used for hyphenation support
+#pdf_language="en_EN"
+
+# If false, no index is generated.
+#pdf_use_index = True
+
+# If false, no modindex is generated.
+#pdf_use_modindex = True
+
+# If false, no coverpage is generated.
+#pdf_use_coverpage = True
 
 # Autosummary ------------------------------------------------------------------
 

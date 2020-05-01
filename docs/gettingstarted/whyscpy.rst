@@ -1,7 +1,7 @@
 .. _whyscpy:
 
 Why spectrochempy  ?
-######################
+====================
 
 **Table of contents**
 
@@ -13,7 +13,7 @@ spectroscopic data, initially for internal needs in the `LCS <https://www.lcs.en
 reasons:
 
 Designed for Open Science
-=========================
+-------------------------
 
 While commercial softwares generally provide powerful and easy-to-use Graphical User Interfaces (GUIs), core algorithms
 such as baseline correction schemes, automatic subtractions, peak detection, curve fitting etc.. are generally not
@@ -42,7 +42,7 @@ In particular, spectrochempy:
     backtracking such errors.
 
 A free software on a free platform
-===================================
+----------------------------------
 If powerful and popular tools have been developed by instrument manufacturers, software companies, or academic research
 groups, most of them are proprietary or require proprietary computing environments (e.g. MATLAB).
 The license cost can be problematic in dome instances: 'isolated' research groups, developing countries, PhD or
@@ -56,7 +56,7 @@ Spectrochempy is free of charge and under a free software license (`CeCILL versi
 the GNU General Public License (GPL) and adapted to both international and French legal matters.
 
 Powered by Python
-=================
+-----------------
 Python is probably the most popular, open-source language used by Data Scientists. It is extensible and is
 cross-platform hence allowing using spectrochempy in a fully free software environment. Sspectrochempy makes use of
 state-of-the-art libraries for numerical calculations (`numpy <https://numpy.org/>`_ , `scipy <https://www.scipy.org/>`_)
@@ -70,7 +70,7 @@ spectrochempy through  bug reports and enhancement requests (:ref:`contributing.
 or contributions to the code (:ref:`develguide`)
 
 Why NOT spectrochempy ?
-=========================
+-----------------------
 You might NOT want to use spectrochempy if:
 
 - you are refractory to (Pyhton) code command-line or scripting. As spectrochempy is essentially an

@@ -1,11 +1,11 @@
 .. _see_also:
 
 See Also
-#########
+========
 
- If you are looking for intuitive GUI for spectroscopic data, `Orange <https://orange.biolab.si/>`_,
- together with the `Orange-Spectroscopy Add-on <https://orange-spectroscopy.readthedocs.io/en/latest/>`_
- could be a good choice.
+If you are looking for intuitive GUI for spectroscopic data, `Orange <https://orange.biolab.si/>`_,
+together with the `Orange-Spectroscopy Add-on <https://orange-spectroscopy.readthedocs.io/en/latest/>`_
+could be a good choice.
 
 If you are looking for librairies allowing the manipulation of dataset with
 coordinates, we advise to look at `pandas <https://pandas.pydata.org>`_ and
