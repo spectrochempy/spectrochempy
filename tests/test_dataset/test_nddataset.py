@@ -1577,4 +1577,3 @@ def test_nddataset_xarray_export_w_spa():
     da = na.to_xarray()
     info_(da)
 
-

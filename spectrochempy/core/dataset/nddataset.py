@@ -249,10 +249,9 @@ class NDDataset(
                         for c in self._coords[idx]:
                             newc.append(c[item])
                         new_coords[idx] = CoordSet(*newc, name=name)
-                
-                
+                 
                 elif isinstance(item, (np.ndarray, list)):
-                    new_coords[idx] = Coord(item, name=self._coords[idx].name)
+                    new_coords[idx] = self._coords[idx][item] # Coord(item, name=self._coords[idx].name) (fixes issue #20)
             
             new.set_coords(*new_coords, keepnames=True)
         
