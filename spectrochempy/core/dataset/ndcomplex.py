@@ -388,21 +388,21 @@ class NDComplexArray(NDArray):
     def set_complex(self, inplace=False):
         """
         Set the object data as complex.
-
+        
         When nD-dimensional array are set to complex, we assume that it is along the first dimension. Two succesives rows
         are merged to form a complex rows. This means that the number of row must be even.
-
+        
         If the complexity is to be applied in other dimension, either transpose/swapaxes your data before applying this
         function in order that the complex dimension is the first in the array.
-
+        
         Parameters
         ----------
         %(generic_method.parameters.inplace)s
-
+        
         Returns
         -------
         %(generic_method.returns)s
-
+        
         See Also
         --------
         set_quaternion, has_complex_dims, is_complex, is_quaternion

@@ -38,7 +38,7 @@ def ifft(dataset, size=None, inplace=False, **kwargs):
 
 
 def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=True, **kwargs):
-    """
+   r"""
     Apply a complex fast fourier transform.
     
     For multidimensional NDDataset or NDPanels,
@@ -67,7 +67,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         to the usual `axis` numpy parameter.
     ppm : bool, optional, default=True
         If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
-    \*\*kwargs :
+    **kwargs :
         other parameters (see other parameters)
     
     Other Parameters

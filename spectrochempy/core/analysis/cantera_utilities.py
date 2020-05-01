@@ -135,23 +135,34 @@ def modify_reactive_phase(reactive_phase, param_to_change, param_value):
 
 
 def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, param_to_optimize, guess_param, **kwargs):
-    """ function fitting rate parameters and concentrations to a given concentration profile.
-      parameters:
-      ----------
-      C: NDDataset, experimental concentration profiles on which to fit the model. C can contain more concentration
-      profiles than those to fit.
-      externalConc: indexes of experimental concentration profiles on which the model will be fitted
-      external_to_C_idx: correspondence between optimized (external) concentration profile and experimental
-      concentration profile
-      reactivePhase: canatera active phase. Currently implemented for surface only
-      param_to_optimize: list of reactive phase parameters to optomize
-      guess_param: initial guess for the parameters to fit
-      **kwargs: parameters for the optimization (see scipy.optimize.minimize)
-
-      Returns:
-      ----------
-      a dictionary
-      """
+    r"""
+    Function fitting rate parameters and concentrations to a given concentration profile.
+    
+    parameters:
+    ----------
+    
+    C: NDDataset
+        experimental concentration profiles on which to fit the model. C can contain more concentration
+        profiles than those to fit.
+    externalConc:
+        indexes of experimental concentration profiles on which the model will be fitted
+    external_to_C_idx:
+        correspondence between optimized (external) concentration profile and experimental
+        concentration profile
+    reactivePhase:
+        cantera active phase. Currently implemented for surface only
+    param_to_optimize: list
+        list of reactive phase parameters to optomize
+    guess_param:
+        initial guess for the parameters to fit
+    **kwargs:
+        parameters for the optimization (see scipy.optimize.minimize)
+    
+    Returns:
+    ----------
+    a dictionary
+    
+    """
 
     def objective(param_value, param_to_optimize, C, externalConc, external_to_C_idx, surface):
         modify_reactive_phase(surface, param_to_optimize, param_value)

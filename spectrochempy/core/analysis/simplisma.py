@@ -409,11 +409,7 @@ class SIMPLISMA(HasTraits):
         """
         Transform data back to the original space.
 
-<<<<<<< HEAD
-        The following matrice operation is performed : :math:`X'_{hat} = C'.S'^t`
-=======
         The following matrix operation is performed: :math:`X'_{hat} = C'.S'^t`
->>>>>>> d06201598bf138163b8da982f3cfae343fe228fa
 
         Returns
         -------
