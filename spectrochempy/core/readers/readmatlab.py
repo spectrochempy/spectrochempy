@@ -27,11 +27,12 @@ from ...core import debug_
 
 
 def read_matlab(dataset=None, **kwargs):
-    """Open a matlab file with extension ``.mat`` and returns its content as a list.
+    """
+    Open a matlab file with extension ``.mat`` and returns its content as a list.
     The array of numbers (i.e. matlab matrices) and Eigenvector's DataSet Object (DSO, see
     https://www.eigenvector.com/software/dataset.htm) are returned as NDDatasets.  The
     content not recognized by SCpy  is returned as a tuple (name, object)
-
+    
     Parameters
     ----------
     dataset : |NDDataset|
@@ -44,15 +45,12 @@ def read_matlab(dataset=None, **kwargs):
     directory: str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
-
+    
     Returns
     -------
     dataset : list or |NDDataset|
         A dataset or a list of datasets or tuples (name, object) if some content
         is not recognized in the .mat file.
-
-    Examples
-    --------
 
     """
     debug_("reading .mat file")
