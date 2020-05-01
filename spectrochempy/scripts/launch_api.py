@@ -16,7 +16,8 @@ import os
 
 
 def main():
-    """Main call
+    """
+    Main call
     """
 
     import spectrochempy as scp
@@ -29,13 +30,13 @@ def main():
         return
 
     try:
-        info_("Loading filename : '%s'" % fname)
+        info_(f"Loading filename : '{fname}'")
         ds = scp.NDDataset.read(fname)
         ds.plot()
         scp.show()
 
     except:
-        print("Sorry, but the '%s' file couldn't be read." % fname)
+        print(f"Sorry, but the '{fname}' file couldn't be read.")
         print()
         app.print_help()
 

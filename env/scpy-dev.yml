@@ -33,7 +33,6 @@ dependencies:
 - pytest-runner
 - pytest-cov
 - pytest-xdist
-- pytest-console-scripts
 - scikit-image
 - sphinx=1.8.5
 - sphinx_rtd_theme

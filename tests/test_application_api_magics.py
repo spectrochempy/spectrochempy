@@ -6,7 +6,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
-
+import pytest
+from subprocess import Popen, PIPE
 
 from spectrochempy import *
 set_loglevel('WARNING')
@@ -57,10 +58,12 @@ def test_magic_addscript(ip):
     print('result\n',x.result)
     assert x.result.strip() == 'Script essai created.'
 
-def test_console(script_runner):
+def test_console_subprocess():
     # to test this, the scripts must be installed so the spectrochempy
     # package must be installed: use pip install -e .
 
-    ret = script_runner.run('scpy')
-    assert ret.success
-
+    res = Popen(['scpy'], stdout=PIPE, stderr=PIPE)
+    output, error = res.communicate()
+    assert "nh4y-activation.spg'" in error.decode("utf-8")
+    assert 'A.Travert & C.Fernandez @ LCS' in output.decode("utf-8")
+    

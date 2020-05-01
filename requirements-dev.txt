@@ -35,7 +35,6 @@ pytest
 pytest-runner
 pytest-cov
 pytest-xdist
-pytest-console-scripts
 scikit-image
 
 # for docs
