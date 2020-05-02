@@ -462,7 +462,7 @@ def diag(dataset, k=0):
     whether it returns a copy or a view depends on what version of numpy you
     are using.
 
-    Copied from numpy (licence #TO ADD)
+    Adapted from numpy (licence #TO ADD)
     
     Parameters
     ----------
@@ -508,7 +508,8 @@ def diag(dataset, k=0):
         if dataset.coords is not None:
             coords = [dataset.coords[0]] * 2
         history = 'Diagonal array build from the 1D dataset'
-
+        units = dataset.units
+        
     elif len(s) == 2:
         # extract a diagonal
         # ------------------
@@ -531,6 +532,8 @@ def diag(dataset, k=0):
     new._data = data
     new._mask = mask
     new.history = history
+    new;units = units
+    
     if coords:
         new.set_coords(coords)
 
