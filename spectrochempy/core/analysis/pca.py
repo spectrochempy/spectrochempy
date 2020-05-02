@@ -374,7 +374,7 @@ class PCA(HasTraits):
         if self._standardized:
             X *= self._std
         if self._centered:
-            X += self._center #.data
+            X += self._center
 
         X.history = 'PCA reconstructed Dataset with {} principal ' \
                     'components'.format(n_pc)
