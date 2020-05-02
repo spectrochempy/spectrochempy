@@ -26,6 +26,7 @@ import os
 import sys
 import time
 import warnings
+
 warnings.filterwarnings("ignore")
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -44,9 +45,9 @@ import scipy
 __all__ = [
     # Useful librairies alias for the end user avoiding to load them
     # --------------------------------------------------------------
-
+    
     'np', 'plt', 'scipy', 'os', 'sys', 'mpl',
-
+    
     ### methods and objects from other packages will be added
     ### later on this module (see below)
 
@@ -60,7 +61,7 @@ __all__ = [
 from spectrochempy.application import SpectroChemPy
 
 app = SpectroChemPy()
-#__all__ += ['app']
+# __all__ += ['app']
 
 # ======================================================================================================================
 # logging functions
@@ -68,21 +69,23 @@ app = SpectroChemPy()
 
 from spectrochempy.utils import pstr
 
+
 def print_(*args, **kwargs):
     """
     Formatted printing
     """
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)+' '
+        s += pstr(a, **kwargs) + ' '
     s = s.replace('\0', '').strip()
     print(s)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 def info_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)+' '
+        s += pstr(a, **kwargs) + ' '
     s = s.replace('\0', '').strip()
     app.log.info(s)
 
@@ -91,7 +94,7 @@ def info_(*args, **kwargs):
 def debug_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)+' '
+        s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()
     app.log.debug(s)
 
@@ -100,7 +103,7 @@ def debug_(*args, **kwargs):
 def error_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)+' '
+        s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()
     app.log.error(s)
 
@@ -109,9 +112,10 @@ def error_(*args, **kwargs):
 def warning_(*args, **kwargs):
     s = ""
     for a in args:
-        s += pstr(a, **kwargs)+' '
+        s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()
     app.log.warning(s)
+
 
 __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
 
@@ -125,6 +129,7 @@ def _update(i, text):
         time.sleep(.15)  # intentionally limit the speed.
     else:
         info_(text)
+
 
 _update(1, 'Load API ...')
 
@@ -152,13 +157,16 @@ long_description = app.long_description
 config_manager = app.config_manager
 config_dir = app.config_dir
 
+
 # datadir = app.datadir
 
 def set_loglevel(level=WARNING):
     general_preferences.log_level = level
 
+
 def get_loglevel():
     return general_preferences.log_level
+
 
 __all__ += [
     ### Helpers
@@ -174,7 +182,7 @@ __all__ += [
     'available_styles',
     'set_loglevel',
     'get_loglevel',
-
+    
     ### Info
     'copyright',
     'version',
@@ -191,7 +199,7 @@ __all__ += [
 # load the default style
 # print("mpl_config_dir", mpl.get_configdir(), plt.style.available)
 try:
-    #print('styles', project_preferences.style)
+    # print('styles', project_preferences.style)
     plt.style.use(project_preferences.style)
 except:
     pass  # if the scp styles are not yet installed, ignore it
@@ -228,6 +236,7 @@ __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 
 try:
     import sympy as sym
+    
     HAS_SYMPY__ = True
     __all__.append('sym')
 except ImportError:
@@ -247,6 +256,7 @@ __all__.append('HAS_SCIKITLEARN')
 
 try:
     import xarray as xr
+    
     HAS_XARRAY = True
     __all__.append('xr')
 except:
@@ -256,6 +266,7 @@ __all__.append('HAS_XARRAY')
 
 try:
     import pandas as pd
+    
     HAS_PANDAS = True
     __all__.append('pd')
 except:
@@ -387,7 +398,7 @@ if _started else "API was not started!")
 _update(20, '')  # make the last message visible (empirical solution...
 # don't know why this work, at least on Mac OSX.
 
-warnings.filterwarnings( action='ignore', module='matplotlib', category=UserWarning)
+warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 
 # ======================================================================================================================
 if __name__ == '__main__':

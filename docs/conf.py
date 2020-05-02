@@ -225,7 +225,7 @@ trim_doctests_flags = True
 # (source start file, target name, title, author, documentclass  [
 # howto/manual]).
 latex_documents = [(
-'index', 'spectrochempy.tex', u'SpectroChemPy Documentation', u'Spectrocat',
+'index', 'spectrochempy.tex', u'SpectroChemPy Documentation', u'A. Travert & C. Fernandez',
 'manual', False),
 ]
 
@@ -276,7 +276,7 @@ latex_use_modindex = True
 # Grouping the document tree into PDF files. List of tuples
 # (source start file, target name, title, author).
 pdf_documents = [
-    ('index', u'SpectroChempy', u'Spectrochempy Documentation', u'Spectrocat'),
+    ('index', u'SpectroChempy', u'Spectrochempy Documentation', u'A. Travert & C. Fernandez'),
 ]
 
 # A comma-separated list of custom stylesheets. Example:

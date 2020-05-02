@@ -12,7 +12,7 @@ SpectroChemPy: Processing, analysing and modelling spectroscopic data
 
 .. toctree::
     :hidden:
-    :caption:
+    :caption: Summary
 
 
 |scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic data for **Chem**\ istry with **Py**\ thon.
@@ -30,6 +30,12 @@ Among its major features:
 #.  Preprocessing functions such as baseline correction, automatic subtraction and many more ...
 #.  Fitting capabilities for single or multiple datasets ...
 #.  Exploratory analysis such as ``SVD``, ``PCA``, ``MCR_ALS``, ``EFA`` ...
+
+.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/installer/conda.svg   :target: https://conda.anaconda.org/spectrocat
+.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/version.svg   :target: https://anaconda.org/spectrocat/spectrochempy
+.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/platforms.svg   :target: https://anaconda.org/spectrocat/spectrochempy
+.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/latest_release_date.svg   :target: https://anaconda.org/spectrocat/spectrochempy
+.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/license.svg   :target: https://anaconda.org/spectrocat/spectrochempy
 
 .. warning::
 
