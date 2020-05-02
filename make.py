@@ -15,7 +15,7 @@ usage::
 
     python make.py [options]
 
-where optional parameters indincates which job to perform.
+where optional parameters indicates which job(s) is(are) to perform.
 
 """
 import shutil
@@ -29,6 +29,7 @@ from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx
 from spectrochempy import version
 
 import warnings
+
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
@@ -49,9 +50,12 @@ HTML = os.path.join(BUILDDIR, 'html')
 LATEX = os.path.join(BUILDDIR, 'latex')
 DOWNLOADS = os.path.join(HTML, 'downloads')
 
+__all__ = ['Build']
+
 # ----------------------------------------------------------------------------------------------------------------------
-def cmd_exec(cmd, shell=None):
-    """To execute system command"""
+def _cmd_exec(cmd, shell=None):
+    # Private function to execute system command
+    
     if shell is not None:
         res = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
     else:
@@ -63,23 +67,24 @@ def cmd_exec(cmd, shell=None):
     else:
         v = error.decode('utf-8')
         if "makeindex" in v:
-            return v # This is not an error! (#TODO: why Popen retrun an error)
+            return v  # This is not an error! (#TODO: why Popen retrun an error)
         raise RuntimeError(f"{cmd} [FAILED]\n{v}")
- 
+
+
 # ======================================================================================================================
 class Build(object):
     
     # ..................................................................................................................
     def __init__(self):
-    
+        
         # determine if we are in the developement branch (latest) or master (stable)
         self.doc_version = 'latest' if 'dev' in version else 'stable'
-
+    
     # ..................................................................................................................
     def __call__(self):
         
         parser = argparse.ArgumentParser()
-
+        
         parser.add_argument("-w", "--html", help="create html pages", action="store_true")
         parser.add_argument("-p", "--pdf", help="create pdf pages", action="store_true")
         parser.add_argument("-c", "--clean", help="clean/delete output", action="store_true")
@@ -90,7 +95,7 @@ class Build(object):
         parser.add_argument("-a", "--api", help="full regeneration of the api", action="store_true")
         parser.add_argument("-r", "--release", help="release documentation on website", action="store_true")
         args = parser.parse_args()
-
+        
         self.regenerate_api = args.api
         
         if args.sync:
@@ -133,46 +138,47 @@ class Build(object):
         # regenate api documentation
         if (self.regenerate_api or not os.path.exists(API)):
             self.api_gen()
-    
+        
         # run sphinx
         sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
         sp.verbosity = 1
         sp.build()
         res = sp.statuscode
-
-        print(f"\n{'-'*130}\nBuild finished. The {builder.upper()} pages are in {os.path.normpath(outdir)}.")
-
+        
+        print(f"\n{'-' * 130}\nBuild finished. The {builder.upper()} pages are in {os.path.normpath(outdir)}.")
+        
         # do some cleaning
-        shutil.rmtree(os.path.join('docs','auto_examples'), ignore_errors=True)
-            
-        if builder=='html':
+        shutil.rmtree(os.path.join('docs', 'auto_examples'), ignore_errors=True)
+        
+        if builder == 'html':
             self.update_html_page(outdir)
             self.make_redirection_page()
-
+    
     # ..................................................................................................................
     def make_pdf(self):
         doc_version = self.doc_version
         latexdir = f"{BUILDDIR}/latex/{doc_version}"
-        print('Started to build pdf from latex using make.... Wait until a new message appear (it is a long! compilation) ')
+        print(
+            'Started to build pdf from latex using make.... Wait until a new message appear (it is a long! compilation) ')
         
-        output = cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                      f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
-                      shell=True)
-        print ('FIRST COMPILTATION:', output)
-
-        output = cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                          f'makeindex spectrochempy.idx',
-                          shell=True)
-        print ('MAKEINDEX', output)
-    
-        output = cmd_exec(f'cd {os.path.normpath(latexdir)};'
+        output = _cmd_exec(f'cd {os.path.normpath(latexdir)};'
                           f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
-                          shell=True)
-        print ('SECONF COMPILTATION:', output)
+                           shell=True)
+        print('FIRST COMPILTATION:', output)
         
-        output = cmd_exec(f'cd {os.path.normpath(latexdir)}; '
-                      f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
-        print (output)
+        output = _cmd_exec(f'cd {os.path.normpath(latexdir)};'
+                          f'makeindex spectrochempy.idx',
+                           shell=True)
+        print('MAKEINDEX', output)
+        
+        output = _cmd_exec(f'cd {os.path.normpath(latexdir)};'
+                          f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
+                           shell=True)
+        print('SECONF COMPILTATION:', output)
+        
+        output = _cmd_exec(f'cd {os.path.normpath(latexdir)}; '
+                          f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
+        print(output)
     
     # ..................................................................................................................
     def sync_notebooks(self):
@@ -180,12 +186,12 @@ class Build(object):
         cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
         for cmd in cmds:
             cmd = cmd.split()
-            print(cmd_exec(cmd))
-            
+            print(_cmd_exec(cmd))
+    
     # ..................................................................................................................
     def api_gen(self):
         from docs import apigen
-
+        
         # generate API reference
         apigen.main(SOURCESDIR,
                     tocdepth=1,
@@ -197,8 +203,8 @@ class Build(object):
                         'NDComplexArray',
                         'NDIO',
                         'NDPlot',
-                    ],)
-        
+                    ], )
+    
     # ..................................................................................................................
     def gitstatus(self):
         pipe = Popen(["git", "status"], stdout=PIPE, stderr=PIPE)
@@ -206,39 +212,39 @@ class Build(object):
         if "nothing to commit" in so.decode("ascii"):
             return True
         return False
-        
+    
     # ..................................................................................................................
     def gitcommit(self, message):
-            clean = self.gitstatus()
-            if clean:
-                return
-            
-            cmd = "git add -A".split()
-            output = cmd_exec(cmd)
-            print(output)
-            
-            cmd = "git log -1 --pretty=%B".split()
-            output = cmd_exec(cmd)
-            print('last message: ', output)
-            if output.strip() == message:
-                v = "--amend"
-            else:
-                v = "--no-verify"
-            
-            cmd = f"git commit {v} -m".split()
-            cmd.append(message)
-            output = cmd_exec(cmd)
-            print(output)
-
-            cmd = "git log -1 --pretty=%B".split()
-            output = cmd_exec(cmd)
-            print('new message: ', output)
-            
-            #TODO: Automate Tagging?
+        clean = self.gitstatus()
+        if clean:
+            return
         
+        cmd = "git add -A".split()
+        output = _cmd_exec(cmd)
+        print(output)
+        
+        cmd = "git log -1 --pretty=%B".split()
+        output = _cmd_exec(cmd)
+        print('last message: ', output)
+        if output.strip() == message:
+            v = "--amend"
+        else:
+            v = "--no-verify"
+        
+        cmd = f"git commit {v} -m".split()
+        cmd.append(message)
+        output = _cmd_exec(cmd)
+        print(output)
+        
+        cmd = "git log -1 --pretty=%B".split()
+        output = _cmd_exec(cmd)
+        print('new message: ', output)
+        
+        # TODO: Automate Tagging?
+    
     # ..................................................................................................................
-    def make_redirection_page(self,):
-
+    def make_redirection_page(self, ):
+        
         html = """
         <html>
         <head>
@@ -250,8 +256,7 @@ class Build(object):
         """
         with open(os.path.join(HTML, 'index.html'), 'w') as f:
             f.write(html)
-        
-
+    
     # ..................................................................................................................
     def update_html_page(self, outdir):
         """
@@ -259,7 +264,7 @@ class Build(object):
         the themes)
         """
         
-        replace="""
+        replace = """
                 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
                 
                     <span class="rst-current-version" data-toggle="rst-current-version">
@@ -307,7 +312,7 @@ class Build(object):
             regex = r"(<script type=\"text\/javascript\">.*SphinxRtdTheme.*script>)"
             result = re.sub(regex, replace % doc_version, txt, 0, re.MULTILINE | re.DOTALL)
             with open(filename, "w") as f:
-                    f.write(result)
+                f.write(result)
     
     # ..................................................................................................................
     def release(self):
@@ -324,9 +329,9 @@ class Build(object):
             FROM = os.path.join(HTML, '*')
             TO = os.path.join(PROJECT, 'html')
             cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
-            output = cmd_exec(cmd, shell=True)
+            output = _cmd_exec(cmd, shell=True)
             print(output)
-            
+        
         else:
             
             print('Cannot find the upload server : {}!'.format(SERVER))
@@ -343,14 +348,14 @@ class Build(object):
             shutil.rmtree(os.path.join(HTML, doc_version), ignore_errors=True)
         if builder == 'latex':
             shutil.rmtree(os.path.join(LATEX, doc_version), ignore_errors=True)
-        
+    
     def deepclean(self):
         
         doc_version = self.doc_version
         
         shutil.rmtree(os.path.join(DOCTREES, doc_version), ignore_errors=True)
         shutil.rmtree(API, ignore_errors=True)
-
+    
     # ..................................................................................................................
     def make_dirs(self):
         """
@@ -372,5 +377,4 @@ class Build(object):
 Build = Build()
 
 if __name__ == '__main__':
-    
     Build()
