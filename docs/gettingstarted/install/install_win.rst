@@ -12,16 +12,17 @@ Installation Guide for Windows
 Prerequisites
 =============
 
-|scpy| requires a working python installation (version 3.6 or higher), C/C++ compiler for some modules, Git to get the
-last version of the code.
+|scpy| requires a working python installation (version 3.6 or higher).
 
 * `Python <http://www.python.org/>`_
-    We highly recommend to install **Miniconda** or **Anaconda** python framework (a much straightforward
-    solution!) which is available for most platforms and  the rest of this guide will mainly
-    use commands for this distribution.
+    We highly recommend to install  **Anaconda** or **Miniconda** distributions which are available for most
+    platforms and  the rest of this guide will mainly use commands for this distribution.
 
-    Miniconda is much lighter while Anaconda is more complete if you intend using
-    python beyond Spectrochempy.
+    Miniconda is lighter (400 MB disk space) while Anaconda (3 GB minimum disk space to download and install)
+    is much more complete for scientific applications if you intend using python beyond Spectrochempy. Important
+    package in Anaconda are also required for spectrochempy (e.g. Matplotib, Numpy, Scipy, Jupyter, …) They are not
+    included in Miniconda and will be installed anyway. So overall, the difference in installation time/disc space
+    won’t be that big whether you choose Miniconda or Anaconda…
 
     Go to `Anaconda download page <https://www.anaconda.com/distribution/>`_ or
     `Miniconda download page <https://docs.conda.io/en/latest/miniconda.html>`_.
@@ -29,27 +30,24 @@ last version of the code.
 
     Install the version which you just downloaded, following the instructions on the download page.
 
-* C/C++ Tools
+    This can take time, go and get your favorite drink...
 
-  Some modules need a C/C++ compilation. They are present by default in Mac OS and Linux platforms. For
-  windows, download and install `Build Tools for Visual Studio <https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16>`_
-
-  This step is rather long depending on your internet connection speed. Go and get your favorite drink!
-
-Installation
-=============
-(The following steps has been checked only with windows 10)
-
+Installation od spectrochempy
+=============================
 .. _conda_win:
 
-Create a new conda environment
-******************************
+The following steps have been checked only with windows 10 but should work with previous versions as well.
 
-For compatibility issues we STRONGLY recommend using a specific conda environment to use |scpy|.
-To do so follows the following steps, depending on your operating system.
+We highly recommend that all new users install Spectrochempy interface via Conda. You can install Spectrochempy
+in a dedicated environment (recommended, steps 4. and 5. below). You can also use your base environment or an
+existing environment (then skip steps 4. and 5.)
 
 #.  Open a command prompt (Select the Start button and type cmd), or preferably open the Anaconda Prompt
     in the Anaconda start Menu.
+
+    .. image:: ../../img/Aprompt.png
+       :width: 200
+       :alt: Anaconda Prompt
 
 #.  Update conda (yes, even if you have just installed the distribution...):
 
@@ -57,26 +55,25 @@ To do so follows the following steps, depending on your operating system.
 
         (base) C:\<yourDefaultPath>> conda update conda
 
-    where `<yourDefaultPath>` is you default workspace directory (e.g. `C:\\Users\\<user>`)
+    where `<yourDefaultPath>` is you default workspace directory (often: `C:\\Users\\<user>`)
 
 #.  Add channels to get specific packages:
 
     .. sourcecode:: bat
 
         (base) C:\<yourDefaultPath>> conda config --add channels conda-forge
+        (base) C:\<yourDefaultPath>> conda config --add channels cantera
+        (base) C:\<yourDefaultPath>> conda config --add channels spectrocat
 
-#.  Now we can create the `scpy` environment with all the required python packages.
-
-    Download the following configuration file: `scpy.yml <https://bitbucket.org/spectrocat/spectrochempy/downloads/scpy.yml>`_
+#.  Recommended: you can create a dedicated environment. We will name it `scpy` in this
+    example
 
     .. sourcecode:: bat
 
-        (base) C:\<yourDefaultPath>> conda env create -f <DownloadsFolderPath>/scpy.yml
+        (base) C:\<yourDefaultPath>> conda env create --name scpy
 
-    This also takes time. Go and get second favorite drink, etc... while several python packages are download and
-    extraction proceeds...
-
-#.  Switch to this environment. At this point, `(scpy)` should appear before the prompt instead of `(base)`.
+#.  Recommended: switch to this environment. At this point, `(scpy)` should appear before
+    the prompt instead of `(base)`.
 
     .. sourcecode:: bat
 
@@ -100,69 +97,35 @@ To do so follows the following steps, depending on your operating system.
         create a shortcut, name it, for instance, `Anaconda prompt (scpy)` and place it in an easily accessible
         place (e.g. the Windows Startmenu Folder).
 
-Install of the |scpy| package
-*****************************
+#. Install Spectrochempy
 
-install the |scpy| package in this environment using one of the following method.
+    .. sourcecode:: bat
 
-Conda install
--------------
+        (scpy) C:\<yourDefaultPath>> conda install spectrochempy
 
-Todo
+    This can take time, depending on your python installation and the number of missing packages. Go and get your
+    favorite drink as they are are downloaded and extracted…
 
-Install from PyPi repository
-----------------------------
+#. Check the installation by running a IPython session by issuing in the terminal
+   the following command:
 
-Using this method you can install the latest stable version present on the PyPi repository:
+    .. sourcecode:: bash
 
-.. sourcecode:: bat
+        (base) C:\<yourDefaultPath>> ipython
 
-    (scpy) C:\<yourDefaultPath>> pip install --upgrade spectrochempy
+    Then execute the following command:
 
+    .. sourcecode:: ipython
 
-Install from the Bitbucket source repository
---------------------------------------------
+        In [1]: from spectrochempy import *
 
-Using this method you can install the latest stable version (`MASTER <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_)
+    If this goes well, you should see the following output, indicating that Spectrochempy
+    is likely functional !
 
-.. sourcecode:: bat
+    .. sourcecode:: ipython
 
-    (scpy) C:\<yourDefaultPath>> pip install https://bitbucket.org/spectrocat/spectrochempy/get/master.zip
-
-or the latest development version (`DEVELOP <https://bitbucket.org/spectrocat/spectrochempy/src/develop/>`_).
-
-This must be done with caution because in this case instabilities are more likely to occurs than
-with the (`MASTER <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_).
-It is recommended to use a different conda environnement in this case
-
-.. sourcecode:: bat
-
-    (scpy) C:\<yourDefaultPath>> pip install https://bitbucket.org/spectrocat/spectrochempy/get/develop.zip
-
-Install a developper version (Advanced usage)
----------------------------------------------
-
-Installation of the developper version is described here:  :ref:`develguide`.
-
-
-Check the Installation
-----------------------
-
-Run a IPython session by issuing in the terminal the following command:
-
-.. sourcecode:: bash
-
-    (scpy) C:\<yourDefaultPath>> ipython
-
-Then execute two commands as following:
-
-.. sourcecode:: ipython
-
-    In [1]: from spectrochempy import *
-
-    In [2]: NDDataset()
-
-If this goes well, the |scpy| application is likely functional.
+        SpectroChemPy's API - v.0.1.17
+        © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
 Jupyter notebook extensions
 ===========================
