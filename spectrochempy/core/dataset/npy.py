@@ -381,8 +381,7 @@ def dot(a, b, strict=True, out=None):
     """
     Return the dot product of two NDDatasets.
 
-    This function is the equivalent of `numpy.dot` that takes NDDataset for
-    input.
+    This function is the equivalent of `numpy.dot` that takes NDDataset as input
 
     .. note::
       Works only with 2-D arrays at the moment.
@@ -411,21 +410,33 @@ def dot(a, b, strict=True, out=None):
     numpy.ma.dot : Equivalent function for masked ndarrays
 
     """
-    if not a.implements('NDDataset'):
-        raise TypeError('A dataset of type NDDataset is  '
-                        'expected as a source of data, but an object'
-                        ' of type {} has been provided'.format(
-            type(a).__name__))
-
-    if not b.implements('NDDataset'):
-        raise TypeError('A dataset of type NDDataset is  '
-                        'expected as a source of data, but an object'
-                        ' of type {} has been provided'.format(
-            type(b).__name__))
+    # if not a.implements('NDDataset'):
+    #     raise TypeError('A dataset of type NDDataset is  '
+    #                     'expected as a source of data, but an object'
+    #                     ' of type {} has been provided'.format(
+    #         type(a).__name__))
+    #
+    # if not b.implements('NDDataset'):
+    #     raise TypeError('A dataset of type NDDataset is  '
+    #                     'expected as a source of data, but an object'
+    #                     ' of type {} has been provided'.format(
+    #         type(b).__name__))
 
     #TODO: may be we can be less strict, and allow dot products with
-    # different kind of objects, as far they are numpy-like arrays
+    #      different kind of objects, as far they are numpy-like arrays
+    
+    if not isinstance(a, NDDataset) and not isinstance(a, NDDataset):
+        # must be between numpy object or something non valid. Let numpy deal with this
+        return np.dot(a, b)
 
+    if not isinstance(a, NDDataset):
+        # try to cast to NDDataset
+        a = NDDataset(a)
+
+    if not isinstance(b, NDDataset):
+        # try to cast to NDDataset
+        b = NDDataset(b)
+        
     data = np.ma.dot(a.masked_data, b.masked_data)
     mask = data.mask
     data = data.data
@@ -448,7 +459,13 @@ def dot(a, b, strict=True, out=None):
     new._mask = mask
     new.set_coords(y=coordy, x=coordx)
     new.history = history
-
+    if a.unitless:
+        new.units = b.units
+    elif b.unitless:
+        new.units = a.units
+    else:
+        new.units = a.units * b.units
+    
     return new
 
 
@@ -470,10 +487,6 @@ def diag(dataset, k=0):
         If `v` is a 2-D array, return a copy of its `k`-th diagonal.
         If `v` is a 1-D array, return a 2-D array with `v` on the `k`-th
         diagonal.
-    k : int, optional
-        Diagonal in question. The default is 0. Use `k>0` for diagonals
-        above the main diagonal, and `k<0` for diagonals below the main
-        diagonal.
 
     Returns
     -------
@@ -483,15 +496,18 @@ def diag(dataset, k=0):
     
     
     """
+    # TODO: fix this - other diagonals
+    # k : int, optional
+    # Diagonal in question. The default is 0. Use `k>0` for diagonals
+    # above the main diagonal, and `k<0` for diagonals below the main
+    # diagonal.
 
     # check if we have the correct input
     # ------------------------------------------------------------------------------------------------------------------
 
-    if not dataset.implements('NDDataset'):
-        raise TypeError('A dataset of type NDDataset is  '
-                        'expected as a source of data, but an object'
-                        ' of type {} has been provided'.format(
-            type(dataset).__name__))
+    if not isinstance(dataset, NDDataset) :
+    # must be anumpy object or something non valid. Let numpy deal with this
+        return np.diag(dataset)
 
     s = dataset.data.shape
 
@@ -506,15 +522,16 @@ def diag(dataset, k=0):
             mask = m | m.T
         coords = None
         if dataset.coords is not None:
-            coords = [dataset.coords[0]] * 2
+            coords = dataset.coords # [dataset.coords[0]] * 2
         history = 'Diagonal array build from the 1D dataset'
         units = dataset.units
+        dims = dataset.dims * 2
         
     elif len(s) == 2:
         # extract a diagonal
         # ------------------
         data = np.diagonal(dataset.data, k).copy()
-        mask = None
+        mask = NOMASK
         if dataset.is_masked:
             mask = np.diagonal(dataset.mask, k).copy()
         coords = None
@@ -522,7 +539,9 @@ def diag(dataset, k=0):
             coords = [dataset.coords[0]]  # TODO: this is likely not
             #       correct for k != 0
         history = 'Diagonal of rank %d extracted from original dataset' % k
-
+        units = dataset.units
+        dims = dataset.dims[-1]
+        
     else:
         raise ValueError("Input must be 1- or 2-d.")
 
@@ -532,7 +551,8 @@ def diag(dataset, k=0):
     new._data = data
     new._mask = mask
     new.history = history
-    new;units = units
+    new.units = units
+    new.dims = dims
     
     if coords:
         new.set_coords(coords)
