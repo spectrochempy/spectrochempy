@@ -1,9 +1,19 @@
-.. _main:
+:orphan:
 
-:version: |version| (|today|)
+.. _home:
 
 SpectroChemPy: Processing, analysing and modelling spectroscopic data
 #####################################################################
+
+.. toctree::
+    :hidden:
+    :caption: Table of Content
+
+
+.. toctree::
+    :hidden:
+    :caption:
+
 
 |scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic data for **Chem**\ istry with **Py**\ thon.
 It is a cross platform software, running on Linux, Windows or OS X.
@@ -29,6 +39,8 @@ Among its major features:
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!! Please report any issues to the
     `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
+
+
 
 Getting Started
 ****************
