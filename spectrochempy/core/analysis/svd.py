@@ -104,7 +104,8 @@ class SVD(HasTraits):
             # data, not complex or hypercomplex.
             data = X._data
             M, N = X._data.shape
-        
+            units = X.units
+            
         else:
             raise TypeError(f'A dataset of type NDDataset is expected as a dataset of data, but an object of type'
                             f' {type(X).__name__} has been provided')
@@ -200,6 +201,8 @@ class SVD(HasTraits):
             VT.description = (
                     'Loadings obtained by singular value decomposition of ' + X.name)
             VT.history = (str(VT.modified) + ': Created by SVD \n')
+            # loadings keep the units of the original data
+            VT.units = units
             
             self.U = U
             self.VT = VT
