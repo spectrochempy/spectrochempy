@@ -187,7 +187,7 @@ class Build(object):
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
                            f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
                            shell=True)
-        print('SECONF COMPILTATION:', output)
+        print('SECOND COMPILTATION:', output)
         
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)}; '
                            f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
