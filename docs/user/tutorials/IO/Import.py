@@ -33,7 +33,8 @@ from spectrochempy import *
 #
 # will open a dialog box such as shown in this this image:
 #
-# <img src="figures\OpenDialog.png" alt="Drawing" style="width: 600px;"/>
+# ![Drawing](figures/OpenDialog.png)
+#
 #
 # The dialog Box allows selecting the file which data will be loaded in the variable `X`. Try for instance to run the cell below, and select an omnic spg datafile (select the .spg extension), which you can find in the `irdata` directory. 
 #
