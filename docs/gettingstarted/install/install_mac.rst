@@ -167,5 +167,4 @@ Run a IPython session by issuing in the terminal the following command:
 The recommended next step is to proceed to the |userguide|_ or the |tutorials|_
 
 
-.. _`easy_install`: http://pypi.python.org/pypi/setuptools
 .. _`pip`: http://pypi.python.org/pypi/pip
