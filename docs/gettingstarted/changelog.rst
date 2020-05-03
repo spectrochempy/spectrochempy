@@ -3,6 +3,7 @@
 What's new
 ===========
 
+<<<<<<< HEAD
 ..  DO NOT MANUALLY CHANGE THE FOLLOWING CONTENT
 ..  IT WILL BE REPLACED BY THE CONTENT OF "CHANGELOG" IN THE ROOT DIRECTORY
 ..  DURING DOC BUILDING
@@ -12,6 +13,11 @@ What's new
 0.1.17
 ------
 
+=======
+0.1.17
+------
+
+>>>>>>> DEV: behaviour of make.py (added some confirmation step)
 Fixed:
 
 * Bug #15: pca reconstruction for an omnic dataset
