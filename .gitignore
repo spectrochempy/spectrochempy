@@ -171,3 +171,5 @@ scpy-exp.yml
 /git_hooks/
 *_LOCAL_*.rst
 *_REMOTE_*.rst
+/.ipynb_checkpoints/
+
