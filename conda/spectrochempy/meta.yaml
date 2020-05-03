@@ -47,6 +47,7 @@ requirements:
     - pandas
     - cantera
     - quadprog
+    - pyqt
 
 test:
   imports:
