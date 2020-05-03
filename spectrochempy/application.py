@@ -793,7 +793,7 @@ class SpectroChemPy(Application):
         development. Its current design and functionalities are subject to major
         changes, reorganizations, bugs and crashes!!!. Please report any issues
         to the
-        <a url='https://bitbucket.org/spectrocat/spectrochempy'>Issue Tracker<a>
+        <a url='https://redmine.spectrochempy.fr/projects/spectrochempy/issues'>Issue Tracker<a>
         </div><br><br>
         When using <strong>SpectroChemPy</strong> for your own work, you are
         kindly requested to cite it this way:
