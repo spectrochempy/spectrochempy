@@ -111,15 +111,15 @@ def readfilename(filename=None, **kwargs):
         filename = _filenames
 
     if not filename:
+        # test if we are running nbsphinx with this default filename
+        filename = os.environ.get('TUTORIAL_FILENAME')
+        
+    if not filename:
         # open a file dialog
         # currently Scpy use QT (needed for next GUI features)
         if not directory:
             directory = os.getcwd()
         caption = kwargs.get('caption', 'Select folder')
-
-        # We can not do this during full pytest run without blocking the process
-        # TODO: use the pytest-qt to solve this problem
-        
         if not NO_DISPLAY:
             filename = opendialog(single=False,
                                   directory=directory,

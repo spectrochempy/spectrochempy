@@ -12,7 +12,7 @@ SpectroChemPy documentation build configuration file
 
 """
 
-import sys
+import sys, os
 import sphinx_rtd_theme
 import spectrochempy
 
@@ -371,10 +371,13 @@ nbsphinx_execute_arguments = [
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = 'always'
 nbsphinx_allow_errors = True
-nbsphinx_timeout = 600
+nbsphinx_timeout = 180
 
 # Use this kernel instead of the one stored in the notebook metadata:
 nbsphinx_kernel_name = 'python3'
+
+# set a filename by default for notebook which have file dialogs
+os.environ['TUTORIAL_FILENAME']='wodger.spg'
 
 # configuration for intersphinx ------------------------------------------------
 

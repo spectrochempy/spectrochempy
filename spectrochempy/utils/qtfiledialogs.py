@@ -2,7 +2,7 @@
 
 __all__ = []
 
-# TODO: put a tk versio to avoid dependencies to PyQT
+# TODO: put a tk version to avoid dependencies to PyQT
 
 HAS_QT = False
 try:
@@ -15,7 +15,8 @@ except ImportError:
 
 def _noqt():
     from spectrochempy.core import error_
-    error_('QT is necessary for this function, but QT is not installed.' )
+    error_('PyQT is necessary for this function, but PyQT is not installed. \n'
+           'Run "conda install pyqt -y" to solve this issue. ' )
     return None
 
 def OpenExistingDirectory(parent=None,
