@@ -76,8 +76,8 @@ To do so follows the following steps:
         You can chose to make the `scpy` environment as a default
 
         Edit the startup profile so that the last line is source activate environment_name.
-        In Mac OSX this is ~/.bash_profile, in other environments this may be ~/.bashrc.
-        If you use Mac OSX Catalina, it may be ~/.zshrc.
+        In Mac OSX this is ~/.bash_profile. If you use Mac OSX Catalina, it may be ~/.zshrc.
+        In linux: this may be ~/.bashrc
 
         .. sourcecode:: bash
 
@@ -150,44 +150,21 @@ Run a IPython session by issuing in the terminal the following command:
 
     (scpy) ~ $ ipython
 
-Then execute two commands as following:
+   Then execute the following command:
 
-.. sourcecode:: ipython
+    .. sourcecode:: ipython
 
-    In [1]: from spectrochempy import *
+        In [1]: from spectrochempy import *
 
-    In [2]: NDDataset()
+    If this goes well, you should see the following output, indicating that Spectrochempy
+    is likely functional !
 
-If this goes well, the |scpy| application is likely functional.
+    .. sourcecode:: ipython
 
-Jupyter notebook extensions
-===========================
+        SpectroChemPy's API - v.0.1.17
+        © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
-After the installation above, to be able to use spectrochempy in notebooks
-with the full plotting capabilities we need to execute the  following command:
-
-.. sourcecode:: bash
-
-    (scpy) ~ $ conda install -c conda-forge widgetsnbextension
-
-Jupyter lab extensions
-=======================
-
-As for notebooks we need these additional steps (jupytext, jupyterlab-manager and jupyter-matplotlib extensions
-
-.. sourcecode:: bat
-
-    (scpy) ~ $ jupyter nbextension install --py jupytext --user
-    (scpy) ~ $ jupyter nbextension enable --py jupytext --user
-    (scpy) ~ $ jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
-
-If jupyter lab ask you for building, do it!
-
-
-Getting started
-===============
-
-The recommended next step is to proceed to the |userguide|_
+The recommended next step is to proceed to the |userguide|_ or the |tutorials|_
 
 
 .. _`easy_install`: http://pypi.python.org/pypi/setuptools

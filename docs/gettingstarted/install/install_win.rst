@@ -127,34 +127,9 @@ existing environment (then skip steps 4. and 5.)
         SpectroChemPy's API - v.0.1.17
         © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
-Jupyter notebook extensions
-===========================
-
-After the installation above, to be able to use spectrochempy in notebooks
-with the full plotting capabilities we need to execute the  following command:
-
-.. sourcecode:: bash
-
-    (scpy) C:\<yourDefaultPath>> conda install -c conda-forge widgetsnbextension
-
-Jupyter lab extensions
-======================
-
-As for notebooks we need these additional steps (jupytext, jupyterlab-manager and jupyter-matplotlib extensions
-
-.. sourcecode:: bat
-
-    (scpy) C:\<yourDefaultPath>> jupyter nbextension install --py jupytext --user
-    (scpy) C:\<yourDefaultPath>> jupyter nbextension enable --py jupytext --user
-    (scpy) C:\<yourDefaultPath>> jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
-
-If jupyter lab ask you for building, do it!
 
 
-Getting started
-===============
-
-The recommended next step is to proceed to the |userguide|_
+The recommended next step is to proceed to the |userguide|_ or the |tutorials|_
 
 
 .. _`easy_install`: http://pypi.python.org/pypi/setuptools
