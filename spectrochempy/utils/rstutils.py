@@ -54,6 +54,7 @@ rst_epilog = """
 
 .. _userguide :  ../../user/userguide/index.html
 
+.. _tutorials :  ../../user/tutorials/index.html
 
 """
 
