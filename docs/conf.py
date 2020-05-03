@@ -46,13 +46,12 @@ extensions = \
         'sphinx.ext.viewcode',
         'sphinx.ext.todo',
         'sphinx_gallery.gen_gallery',
-        #'jupyter_sphinx.embed_widgets',
         'spectrochempy.sphinxext.traitlets_sphinxdoc',
         'spectrochempy.sphinxext.autodocsumm',
         'matplotlib.sphinxext.plot_directive',
         'IPython.sphinxext.ipython_console_highlighting',
         'IPython.sphinxext.ipython_directive',
-        'numpydoc', #'spectrochempy.sphinxext.numpydoc',  # pinned to v. 0.8 as 0.9 doesn't work
+        'numpydoc',
     ]
 
 # Numpy autodoc attributes
