@@ -31,8 +31,10 @@ import matplotlib.pyplot as plt
 from ..dataset.ndcoordrange import CoordRange
 
 
-def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
-    """Automatic subtraction of ref to the dataset to minimise peaks due to ref
+def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False, inplace=False):
+    """Automatic subtraction of ref to the dataset. The subtraction coefficient are adjusted to either
+     minimise the variance of the subtraction (method = 'vardiff') which will minimize peaks due to ref;
+     or minimize the sum of squares of the subtraction (method = 'ssdiff').
 
     Parameters
     -----------
@@ -43,23 +45,30 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
          1D reference data, with a size maching the axis to subtract
          (axis parameter) #TODO : optionally use title of axis
 
-    xrange : pair(s) of values. Any number of pairs is allowed.
+    ranges : pair(s) of values. Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized
 
-    inplace : `bool`, optional, default=False.
-        True if the subtraction is done in place.
-        In this case we do not need to catch the function output
-
-    dim : str or int [optional, default='x].
+    dim : str or int [optional, default='x'].
         Tells on which dimension to perform the subtraction. If dim is an integer it refers to the axis index.
 
     method : str [optional, default='vardiff'].
+        'vardiff': minimize the difference of the variance
+        'ssdiff': minimize the sum of sqares difference of sum of squares
 
+    return_coefs : `bool` [optional, defaulf='False']
+         returns the table of coefficients
+
+    inplace : `bool` [optional, default=`False`].
+        True if the subtraction is done in place.
+        In this case we do not need to catch the function output
 
     Returns
     --------
     out : |NDDataset|.
         The subtracted dataset
+
+    coefs: `ndarray`.
+        The table of subtraction coeffcients (only if `return_coefs` is set to `True`)
 
     Examples
     ---------
@@ -85,7 +94,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     else:
         new = dataset
 
-    # we assume that the last dimension ('x' for o transpopsed array) is always the dimension to which we want
+    # we assume that the last dimension ('x' for transposed array) is always the dimension to which we want
     # to subtract.
 
     # Swap the axes to be sure to be in this situation
@@ -135,10 +144,12 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     # two methods
     # @jit
     def f_(alpha, p):
-        if method == 'chi2':
+        if method == 'ssdiff':
             return np.sum((p - alpha * ref_r) ** 2)
-        else:
+        elif method == 'vardiff':
             return np.var(np.diff(p - alpha * ref_r))
+        else:
+            raise ValueError('Not implemented for method={}'.format(method))
 
     @jit(cache=True)
     def minim():
@@ -166,4 +177,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='chi2', inplace=False):
     new.history = str(
         new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'
 
-    return new
+    if return_coefs:
+        return new, x
+    else:
+        return new
