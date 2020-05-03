@@ -29,6 +29,7 @@ ipympl
 widgetsnbextension
 nodejs
 jupytext
+pyqt
 
 # for testing
 pytest
