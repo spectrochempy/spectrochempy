@@ -18,17 +18,17 @@ usage::
 where optional parameters indicates which job(s) is(are) to perform.
 
 """
-import shutil
-from subprocess import Popen, PIPE
-import re
-import os
-from glob import iglob
 import argparse
+import os
+import re
+import shutil
+import warnings
+from glob import iglob
+from subprocess import Popen, PIPE
 
 from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
-from spectrochempy import version
 
-import warnings
+from spectrochempy import version
 
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
@@ -50,25 +50,7 @@ HTML = os.path.join(BUILDDIR, 'html')
 LATEX = os.path.join(BUILDDIR, 'latex')
 DOWNLOADS = os.path.join(HTML, 'downloads')
 
-__all__ = ['Build']
-
-# ----------------------------------------------------------------------------------------------------------------------
-def _cmd_exec(cmd, shell=None):
-    # Private function to execute system command
-    
-    if shell is not None:
-        res = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
-    else:
-        res = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    output, error = res.communicate()
-    if not error:
-        v = output.decode("utf-8")
-        return v
-    else:
-        v = error.decode('utf-8')
-        if "makeindex" in v:
-            return v  # This is not an error! (#TODO: why Popen retrun an error)
-        raise RuntimeError(f"{cmd} [FAILED]\n{v}")
+__all__ = []
 
 
 # ======================================================================================================================
@@ -101,11 +83,15 @@ class Build(object):
         if args.sync:
             self.sync_notebooks()
         if args.git:
-            self.gitcommit(args.message)
-        if args.clean:
-            self.clean()
+            if self._confirm('COMMIT lAST CHANGES'):
+                self.gitcommit(args.message)
+        if args.clean and args.html:
+            self.clean('html')
+        if args.clean and args.pdf:
+            self.clean('latex')
         if args.deepclean:
-            self.deepclean()
+            if self._confirm('DEEP CLEAN'):
+                self.deepclean()
         if args.html:
             self.make_docs('html')
         if args.pdf:
@@ -113,10 +99,37 @@ class Build(object):
             self.make_pdf()
         if args.release:
             self.release()
+            
+    @staticmethod
+    def _cmd_exec(cmd, shell=None):
+        # Private function to execute system command
+    
+        if shell is not None:
+            res = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
+        else:
+            res = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        output, error = res.communicate()
+        if not error:
+            v = output.decode("utf-8")
+            return v
+        else:
+            v = error.decode('utf-8')
+            if "makeindex" in v:
+                return v  # This is not an error! (#TODO: why Popen retrun an error)
+            raise RuntimeError(f"{cmd} [FAILED]\n{v}")
+
+    @staticmethod
+    def _confirm(action):
+        # Ask user to enter Y or N (case-insensitive).
+        answer = ""
+        while answer not in ["y", "n"]:
+            answer = input(f"OK to continue `{action}` [Y/N]? ", ).lower()
+        return answer == "y"
     
     # ..................................................................................................................
     def make_docs(self, builder):
-        """Make the documentation
+        """
+        Make the documentation
     
         Parameters
         ----------
@@ -161,23 +174,23 @@ class Build(object):
         print(
             'Started to build pdf from latex using make.... Wait until a new message appear (it is a long! compilation) ')
         
-        output = _cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                          f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
+        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
+                           f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
                            shell=True)
         print('FIRST COMPILTATION:', output)
         
-        output = _cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                          f'makeindex spectrochempy.idx',
+        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
+                           f'makeindex spectrochempy.idx',
                            shell=True)
         print('MAKEINDEX', output)
         
-        output = _cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                          f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
+        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
+                           f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
                            shell=True)
         print('SECONF COMPILTATION:', output)
         
-        output = _cmd_exec(f'cd {os.path.normpath(latexdir)}; '
-                          f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
+        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)}; '
+                           f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
         print(output)
     
     # ..................................................................................................................
@@ -186,7 +199,7 @@ class Build(object):
         cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
         for cmd in cmds:
             cmd = cmd.split()
-            print(_cmd_exec(cmd))
+            print(self._cmd_exec(cmd))
     
     # ..................................................................................................................
     def api_gen(self):
@@ -220,11 +233,11 @@ class Build(object):
             return
         
         cmd = "git add -A".split()
-        output = _cmd_exec(cmd)
+        output = self._cmd_exec(cmd)
         print(output)
         
         cmd = "git log -1 --pretty=%B".split()
-        output = _cmd_exec(cmd)
+        output = self._cmd_exec(cmd)
         print('last message: ', output)
         if output.strip() == message:
             v = "--amend"
@@ -233,11 +246,11 @@ class Build(object):
         
         cmd = f"git commit {v} -m".split()
         cmd.append(message)
-        output = _cmd_exec(cmd)
+        output = self._cmd_exec(cmd)
         print(output)
         
         cmd = "git log -1 --pretty=%B".split()
-        output = _cmd_exec(cmd)
+        output = self._cmd_exec(cmd)
         print('new message: ', output)
         
         # TODO: Automate Tagging?
@@ -329,7 +342,7 @@ class Build(object):
             FROM = os.path.join(HTML, '*')
             TO = os.path.join(PROJECT, 'html')
             cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
-            output = _cmd_exec(cmd, shell=True)
+            output = self._cmd_exec(cmd, shell=True)
             print(output)
         
         else:
