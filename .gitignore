@@ -169,3 +169,5 @@ scpy-exp.yml
 
 /installed.txt
 /git_hooks/
+*_LOCAL_*.rst
+*_REMOTE_*.rst
