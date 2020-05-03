@@ -150,19 +150,19 @@ Run a IPython session by issuing in the terminal the following command:
 
     (scpy) ~ $ ipython
 
-   Then execute the following command:
+Then execute the following command:
 
-    .. sourcecode:: ipython
+.. sourcecode:: ipython
 
-        In [1]: from spectrochempy import *
+    In [1]: from spectrochempy import *
 
-    If this goes well, you should see the following output, indicating that Spectrochempy
-    is likely functional !
+If this goes well, you should see the following output, indicating that Spectrochempy
+is likely functional !
 
-    .. sourcecode:: ipython
+.. sourcecode:: ipython
 
-        SpectroChemPy's API - v.0.1.17
-        © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
+    SpectroChemPy's API - v.0.1.17
+    © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
 The recommended next step is to proceed to the |userguide|_ or the |tutorials|_
 

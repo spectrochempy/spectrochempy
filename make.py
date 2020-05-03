@@ -25,6 +25,10 @@ import shutil
 import warnings
 from glob import iglob
 from subprocess import Popen, PIPE
+from skimage.transform import resize
+from skimage.data import load
+from skimage.io import imread, imsave
+import numpy as np
 
 from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
 
@@ -163,10 +167,32 @@ class Build(object):
         # do some cleaning
         shutil.rmtree(os.path.join('docs', 'auto_examples'), ignore_errors=True)
         
+        self.resize_img(os.path.join(DOCDIR,"gallery" ))
+        
         if builder == 'html':
             self.update_html_page(outdir)
             self.make_redirection_page()
-    
+        
+    # ..................................................................................................................
+    @staticmethod
+    def resize_img(folder):
+        for img in iglob(os.path.join(folder, '**', '*.png'), recursive=True):
+            if not img.endswith('.png'):
+                continue
+            filename = os.path.join(folder, img)
+            image = imread(filename)
+            h, l, c = image.shape
+            ratio = 1.
+            if float(l)>640.:
+                ratio = 640./float(l)
+            if ratio < 1:
+                # reduce size
+                image_resized = resize(image, (int(image.shape[0]*ratio), int(image.shape[1]*ratio)),
+                                       anti_aliasing=True)
+                print (img, 'original:', image.shape, 'ratio:', ratio, " -> ", image_resized.shape)
+                imsave(filename, (image_resized*255.).astype(np.uint8))
+                
+                
     # ..................................................................................................................
     def make_pdf(self):
         doc_version = self.doc_version
@@ -177,7 +203,7 @@ class Build(object):
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
                            f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
                            shell=True)
-        print('FIRST COMPILTATION:', output)
+        print('FIRST COMPILATION:', output)
         
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
                            f'makeindex spectrochempy.idx',
