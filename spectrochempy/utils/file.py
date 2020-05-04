@@ -31,7 +31,7 @@ __all__ = ['readfilename', 'readdirname', 'savefilename',
 
 def readfilename(filename=None, **kwargs):
     """
-    returns a list of the filenames of existing files, filtered by extensions
+    returns a list or dictionary of the filenames of existing files, filtered by extensions
 
     Parameters
     ----------
@@ -45,6 +45,9 @@ def readfilename(filename=None, **kwargs):
 
     filetypes : `list`, optional filter, default=['all files, '.*)'].
 
+    dictionary: `bool`, default=True
+        Whether a dictionary or a list should be returns
+
     Returns
     --------
         list of filenames
@@ -53,11 +56,13 @@ def readfilename(filename=None, **kwargs):
 
     from spectrochempy.core import general_preferences as prefs
     from spectrochempy.api import NO_DISPLAY
-    
 
+    # read input parameters
     directory = kwargs.get("directory", None)
-    # if the directory is not specified we will first look in the current working directory
-    # and then in the prefs.datadir
+    # alias filetypes and filters as both can be used
+    filetypes = kwargs.get("filetypes",
+                           kwargs.get("filters", ["all files (*)"]))
+    dictionary = kwargs.get("dictionary", True)
 
     # check passed directory
     if directory:
@@ -65,7 +70,8 @@ def readfilename(filename=None, **kwargs):
             # a valid absolute pathname has been given
             pass
         else:
-            # see if it is inside one of the default dirs:
+            # if the directory is not specified we will first look in the current working directory
+            # and then in the prefs.datadir
             _directory = os.path.join(os.getcwd(), directory)
             if not os.path.exists(_directory):
                 # the directory isn't in the current dir, now try datadir:
@@ -75,10 +81,6 @@ def readfilename(filename=None, **kwargs):
                     raise IOError("directory %s doesn't exists!" % directory)
             else:
                 directory = _directory
-
-    # filters and filetype will be alias (as filters is sometimes used)
-    filetypes = kwargs.get("filetypes",
-                             kwargs.get("filters", ["all files (*)"]))
 
     # now proceed with the filenames
     if filename:
@@ -103,57 +105,57 @@ def readfilename(filename=None, **kwargs):
                     _f = os.path.join(prefs.datadir, filename)
                     if not os.path.exists(_f):
                         raise IOError("Can't find  this filename %s in the specified directory "
-                                      "(or in the current one, or in the default data directory %s" 
-                                      "if directory was not specified "% (filename, prefs.datadir))
+                                      "(or in the current one, or in the default data directory %s"
+                                      "if directory was not specified " % (filename, prefs.datadir))
             _filenames.append(_f)
 
         # now we have all the filename with their correct location
-        filename = _filenames
+        filenames = _filenames
 
     if not filename:
         # open a file dialog
         # currently Scpy use QT (needed for next GUI features)
+        filenames = None
         if not directory:
             directory = os.getcwd()
-        caption = kwargs.get('caption', 'Select folder')
 
         # We can not do this during full pytest run without blocking the process
         # TODO: use the pytest-qt to solve this problem
-        
         if not NO_DISPLAY:
-            filename = opendialog(single=False,
-                                  directory=directory,
-                                  caption=caption,
-                                  filters=filetypes)
-        if not filename:
-            # if the dialog has been cancelled or return nothing
+            filenames = opendialog(single=False,
+                                   directory=directory,
+                                   caption='select files',
+                                   filters=filetypes)
+        if not filenames:
+            # the dialog has been cancelled or return nothing
             return None
 
-    # now we have a list of the selected files or a directory
-        # to read in
-
-    if isinstance(filename, list):
-        if not all(isinstance(elem, str) for elem in filename):
+    # now we have either a list of the selected files
+    if isinstance(filenames, list):
+        if not all(isinstance(elem, str) for elem in filenames):
             raise IOError('one of the list elements is not a filename!')
-        else:
-            filenames = filename
 
-    if isinstance(filename, str):
-        filenames = [filename]
+    # or a single filename
+    if isinstance(filenames, str):
+        filenames = [filenames]
 
-    # filenames passed
-    files = {}
-    for filename in filenames:
-        if filename.endswith('.DS_Store'):
-            # avoid storing bullshit sometime present in the directory (MacOSX)
-            continue
-        _, extension = os.path.splitext(filename)
-        extension = extension.lower()
-        if extension in files.keys():
-            files[extension].append(filename)
-        else:
-            files[extension] = [filename]
-    return files
+    # make and return a dictionary
+    if dictionary:
+        filenames_dict = {}
+        for filename in filenames:
+            if filename.endswith('.DS_Store'):
+                # avoid storing bullshit sometime present in the directory (MacOSX)
+                continue
+            _, extension = os.path.splitext(filename)
+            extension = extension.lower()
+            if extension in filenames_dict.keys():
+                filenames_dict[extension].append(filename)
+            else:
+                filenames_dict[extension] = [filename]
+        return filenames_dict
+    # or just a list
+    else:
+        return filenames
 
 
 def readdirname(dirname=None, **kwargs):
@@ -229,7 +231,7 @@ def readdirname(dirname=None, **kwargs):
             return directory
 
 
-def savefilename(filename:None, directory:None, filters:None):
+def savefilename(filename: None, directory: None, filters: None):
     """returns a valid filename to save a file
 
     Parameters
@@ -270,7 +272,6 @@ def savefilename(filename:None, directory:None, filters:None):
             return None
 
     return filename
-
 
 
 # ======================================================================================================================

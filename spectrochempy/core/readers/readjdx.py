@@ -21,6 +21,7 @@ __dataset_methods__ = __all__
 # ----------------------------------------------------------------------------------------------------------------------
 
 import numpy as np
+import re
 from datetime import datetime
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -33,9 +34,12 @@ from spectrochempy.utils import readfilename
 
 
 # ............................................................................
-def read_jdx(dataset=None, **kwargs):
+def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
     """
-    Open a JCAMP-DX file with extension ``.jdx``
+    Open Infrared JCAMP-DX files with extension ``.jdx`` or ``.dx``.
+    Limited to AFFN encoding (see R. S. McDonald and Paul A. Wilks,
+    JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form,
+    Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734.)
     
     Parameters
     ----------
@@ -58,10 +62,7 @@ def read_jdx(dataset=None, **kwargs):
 
     """
 
-    # debug_("reading jdx file")
-    sortbydate = kwargs.get('sortbydate', True)
     # filename will be given by a keyword parameter except if the first parameters is already the filename
-    filename = kwargs.get('filename', None)
 
     # check if the first parameter is a dataset because we allow not to pass it
     if not isinstance(dataset, NDDataset):
@@ -72,21 +73,16 @@ def read_jdx(dataset=None, **kwargs):
 
         dataset = NDDataset()  # create an instance of NDDataset
 
-    # check if directory was specified
-    directory = kwargs.get("directory", None)
-
-    # returns a list of files to read
-    files = readfilename(filename,
+    # returns a list of filenames
+    filenames = readfilename(filename,
                          directory=directory,
-                         filetypes=['JCAMP-DX files (*.jdx)',
-                                    'All files (*)'])
+                         filetypes=['JCAMP-DX files (*.jdx, *.dx)',
+                                    'All files (*)'], dictionary=False)
 
-    if not files:
-        # there is no files, return nothing
+    if not filenames:
         return None
 
-    datasets = []
-    for filename in files['.jdx']:
+    for filename in filenames:
         f = open(filename, 'r')
         # Read header of outer Block **********************************************
         keyword = ''
@@ -111,7 +107,7 @@ def read_jdx(dataset=None, **kwargs):
             while keyword != '##BLOCKS':
                 keyword, text = _readl(f)
             nspec = int(text)
-        elif jdx_data_type == 'INFRARED SPECTRUM':
+        elif jdx_data_type.replace(' ', '') == 'INFRAREDSPECTRUM':
             nspec = 1
         else:
             print('Error : DATA TYPE must be LINK or INFRARED SPECTRUM')
@@ -142,7 +138,7 @@ def read_jdx(dataset=None, **kwargs):
                 elif keyword == '##LONGDATE':
                     [year, month, day] = text.split('/')
                 elif keyword == '##TIME':
-                    [hour, minute, second] = text.split(':')
+                    [hour, minute, second] = re.split(':|\.', text)
                 elif keyword == '##XUNITS':
                     xunits.append(text)
                 elif keyword == '##YUNITS':
@@ -163,7 +159,7 @@ def read_jdx(dataset=None, **kwargs):
                     while keyword != '##END':
                         keyword, text = _readl(f)
                         # for each line, get all the values exept the first one (first value = wavenumber)
-                        intensities = text.split(' ')[1:]
+                        intensities = list(filter(None, text.split(' ')[1:]))
 
                         allintensities = allintensities + intensities
                     spectra = np.array([allintensities])  # convert allintensities into an array
@@ -224,20 +220,21 @@ def read_jdx(dataset=None, **kwargs):
                         i + 1, ')'))
                     return
 
+
         # Determine xaxis name ****************************************************
-        if xunits[0] == '1/CM':
+        if xunits[0].strip() == '1/CM':
             axisname = 'Wavenumbers'
             axisunit = 'cm^-1'
-        elif xunits[0] == 'MICROMETERS':
+        elif xunits[0].strip() == 'MICROMETERS':
             axisname = 'Wavelength'
             axisunit = 'um'
-        elif xunits[0] == 'NANOMETERS':
+        elif xunits[0].strip() == 'NANOMETERS':
             axisname = 'Wavelength'
             axisunit = 'nm'
-        elif xunits[0] == 'SECONDS':
+        elif xunits[0].strip() == 'SECONDS':
             axisname = 'Time'
             axisunit = 's'
-        elif xunits[0] == 'ARBITRARY UNITS':
+        elif xunits[0].strip() == 'ARBITRARY UNITS':
             axisname = 'Arbitrary unit'
             axisunit = '-'
         else:
@@ -247,26 +244,33 @@ def read_jdx(dataset=None, **kwargs):
 
         dataset = NDDataset(data)
         dataset.name = jdx_title
-        dataset.units = 'absorbance'
-        dataset.title = 'Absorbance'
-        dataset.name = ' ... '.join({alltitles[0], alltitles[-1]})
+        if yunits[0].strip()=='ABSORBANCE':
+            dataset.units = 'absorbance'
+            dataset.title = 'Absorbance'
+        elif yunits[0].strip()=='TRANSMITTANCE':
+            dataset.title = 'Transmittance'
+        dataset.name = jdx_title
         dataset._date = dataset._modified =datetime.now()
 
         # now add coordinates
         _x = Coord(xaxis, title=axisname, units=axisunit)
-        _y = Coord(alltimestamps, title='Timestamp', units='s',
+        if jdx_data_type == 'LINK':
+            _y = Coord(alltimestamps, title='Timestamp', units='s',
                    labels=(alldates, alltitles))
+            dataset.set_coords(y=_y, x=_x)
+        else:
+            _y = Coord()
         dataset.set_coords(y=_y, x=_x)
+
 
         # Set origin, description and history
         dataset.origin = "JCAMP-DX"
-        dataset.description = "Dataset from jdx: '{0}'" \
-            .format(' ... '.join({alltitles[0], alltitles[0]}))
+        dataset.description = "Dataset from jdx: '{0}'".format(jdx_title)
 
-        dataset.history = str(datetime.now()) + ':imported from jdx files \n'
+        dataset.history = str(datetime.now()) + ':imported from jdx file \n'
 
         if sortbydate:
-            dataset.sort(dim=0, inplace=True)
+            dataset.sort(dim='x', inplace=True)
             dataset.history = str(datetime.now()) + ':sorted by date\n'
         # Todo: make sure that the lowest index correspond to the largest wavenumber
         #  for compatibility with dataset created by spgload:
@@ -295,5 +299,5 @@ def _readl(f):
             text = line.split('=')[1]
     else:
         keyword = ''
-        text = line
+        text = line.strip()
     return keyword, text
