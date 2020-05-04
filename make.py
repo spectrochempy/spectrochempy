@@ -410,6 +410,7 @@ class Build(object):
         if builder == 'latex':
             shutil.rmtree(os.path.join(LATEX, doc_version), ignore_errors=True)
     
+    # ..................................................................................................................
     def deepclean(self):
         
         doc_version = self.doc_version
@@ -433,7 +434,6 @@ class Build(object):
                       ]
         for d in build_dirs:
             os.makedirs(d, exist_ok=True)
-
 
 Build = Build()
 

@@ -59,7 +59,6 @@ Getting Started
 
 * :doc:`gettingstarted/whyscpy`
 * :doc:`gettingstarted/install/index`
-* :doc:`gettingstarted/usage`
 * :doc:`gettingstarted/license`
 * :doc:`gettingstarted/changelog`
 
@@ -70,7 +69,6 @@ Getting Started
 
     gettingstarted/whyscpy
     gettingstarted/install/index
-    gettingstarted/usage
     gettingstarted/license
     gettingstarted/changelog
 
@@ -128,7 +126,7 @@ Credits
     :maxdepth: 1
     :hidden:
     :caption: Credits
-   
+
     main/credits
     main/citing
     main/seealso

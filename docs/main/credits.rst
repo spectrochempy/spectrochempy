@@ -3,6 +3,6 @@
 Acknowledgments
 ================
 
-todo
+.. todo
 
 
