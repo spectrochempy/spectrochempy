@@ -128,10 +128,5 @@ existing environment (then skip steps 4. and 5.)
         © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
 
-
 The recommended next step is to proceed to the |userguide|_ or the |tutorials|_
-
-
-.. _`easy_install`: http://pypi.python.org/pypi/setuptools
-.. _`pip`: http://pypi.python.org/pypi/pip
 

@@ -1,5 +1,8 @@
 .. _faq:
 
+..
+    todo we could just make a link to redmine FAQ forum?
+
 Frequently Asked Questions (FAQ)
 =================================
 

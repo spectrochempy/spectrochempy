@@ -32,7 +32,7 @@
 #
 # Your default Web explorer is now launched.
 #
-# ![launched](../images/jupyter_home.png)
+# <img src="../images/jupyter_home.png" alt="launched" width="690"/>
 #
 # Here you can create a new notebook and follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst).
 
@@ -52,8 +52,10 @@
 #
 # The home window should looks similar to this:
 #
-# ![launch](../images/jupyter_lab_home.png)
+# <img src="../images/jupyter_lab_home.png" alt="launch" width="690"/>
 #
 # From there, it is quite easy to create new notebooks or to navigate to already existing ones.
 #
 # Then follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst) to get strated with **SpectroChemPy**
+
+# %%

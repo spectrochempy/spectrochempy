@@ -44,3 +44,4 @@ dependencies:
 - conda-build
 - cantera
 - quadprog
+- pyqt

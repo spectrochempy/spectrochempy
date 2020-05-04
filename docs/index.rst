@@ -31,11 +31,17 @@ Among its major features:
 #.  Fitting capabilities for single or multiple datasets ...
 #.  Exploratory analysis such as ``SVD``, ``PCA``, ``MCR_ALS``, ``EFA`` ...
 
-.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/installer/conda.svg   :target: https://conda.anaconda.org/spectrocat
-.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/version.svg   :target: https://anaconda.org/spectrocat/spectrochempy
-.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/platforms.svg   :target: https://anaconda.org/spectrocat/spectrochempy
-.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/latest_release_date.svg   :target: https://anaconda.org/spectrocat/spectrochempy
-.. image:: https://anaconda.org/spectrocat/spectrochempy/badges/license.svg   :target: https://anaconda.org/spectrocat/spectrochempy
+.. only:: html
+
+    .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/version.svg
+        :target: https://anaconda.org/spectrocat/spectrochempy
+
+    .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/platforms.svg
+        :target: https://anaconda.org/spectrocat/spectrochempy
+
+    .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/latest_release_date.svg
+        :target: https://anaconda.org/spectrocat/spectrochempy
+
 
 .. warning::
 
@@ -53,7 +59,6 @@ Getting Started
 
 * :doc:`gettingstarted/whyscpy`
 * :doc:`gettingstarted/install/index`
-* :doc:`gettingstarted/usage`
 * :doc:`gettingstarted/license`
 * :doc:`gettingstarted/changelog`
 
@@ -64,7 +69,6 @@ Getting Started
 
     gettingstarted/whyscpy
     gettingstarted/install/index
-    gettingstarted/usage
     gettingstarted/license
     gettingstarted/changelog
 
@@ -122,7 +126,7 @@ Credits
     :maxdepth: 1
     :hidden:
     :caption: Credits
-   
+
     main/credits
     main/citing
     main/seealso

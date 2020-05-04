@@ -9,7 +9,7 @@ axes.grid: False
 image.cmap: viridis
 
 figure.figsize         : 6.8, 4.4
-figure.dpi             : 100
+figure.dpi             : 96
 figure.facecolor       : white
 figure.edgecolor       : white
 figure.autolayout      : True
@@ -20,7 +20,7 @@ figure.subplot.bottom  : 0.12
 figure.subplot.left    : 0.15
 figure.subplot.right   : .95
 
-savefig.dpi      : 600
+# savefig.dpi      : 600
 savefig.facecolor: white
 savefig.edgecolor: white
 

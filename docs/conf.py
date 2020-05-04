@@ -12,7 +12,7 @@ SpectroChemPy documentation build configuration file
 
 """
 
-import sys
+import sys, os
 import sphinx_rtd_theme
 import spectrochempy
 
@@ -46,13 +46,12 @@ extensions = \
         'sphinx.ext.viewcode',
         'sphinx.ext.todo',
         'sphinx_gallery.gen_gallery',
-        #'jupyter_sphinx.embed_widgets',
         'spectrochempy.sphinxext.traitlets_sphinxdoc',
         'spectrochempy.sphinxext.autodocsumm',
         'matplotlib.sphinxext.plot_directive',
         'IPython.sphinxext.ipython_console_highlighting',
         'IPython.sphinxext.ipython_directive',
-        'numpydoc', #'spectrochempy.sphinxext.numpydoc',  # pinned to v. 0.8 as 0.9 doesn't work
+        'numpydoc',
     ]
 
 # Numpy autodoc attributes
@@ -372,10 +371,13 @@ nbsphinx_execute_arguments = [
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = 'always'
 nbsphinx_allow_errors = True
-nbsphinx_timeout = 600
+nbsphinx_timeout = 180
 
 # Use this kernel instead of the one stored in the notebook metadata:
 nbsphinx_kernel_name = 'python3'
+
+# set a filename by default for notebook which have file dialogs
+os.environ['TUTORIAL_FILENAME']='wodger.spg'
 
 # configuration for intersphinx ------------------------------------------------
 

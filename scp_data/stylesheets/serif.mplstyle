@@ -8,10 +8,10 @@ axes.titlesize: 14
 figure.facecolor: white
 figure.edgecolor: white
 figure.figsize: 6.8, 4.4
-figure.dpi: 100
+figure.dpi: 96
 figure.autolayout: True
 
-savefig.dpi      : 600
+# savefig.dpi      : 600
 savefig.facecolor: white
 savefig.edgecolor: white
 
