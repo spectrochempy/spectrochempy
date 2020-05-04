@@ -21,11 +21,11 @@ Chemometrics
 
    chemometrics/*
 
-NMR
-----
+.. NMR
+.. ----
 
-.. toctree::
+.. .. toctree::
    :glob:
    :maxdepth: 3
 
-   nmr/*
+..   nmr/*

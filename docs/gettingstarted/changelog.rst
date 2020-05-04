@@ -28,7 +28,7 @@ New features:
 
 Improved:
 
-* Documentation on spectrochempy.fr completed
+* Documentation on spectrochempy.fr updated
 * New tutorials added
 * PDF documentation
 * New Redmine website for the project at redmine.spectrochempy.fr

@@ -18,7 +18,7 @@ existing environment (then skip steps 4. and 5.)
 #.  Open a command prompt (Select the Start button and type cmd), or preferably open the Anaconda Prompt
     in the Anaconda start Menu.
 
-    .. image:: ../../img/Aprompt.png
+    .. image:: images/Aprompt.png
        :width: 200
        :alt: Anaconda Prompt
 
