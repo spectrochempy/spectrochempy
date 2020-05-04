@@ -34,9 +34,9 @@ from .file import *
 from .misc import *
 from .print import *
 from .system import *
-from .utilities import *
+from .excel import *
 from .matplolib_utils import *
-from .arrayutils import *
+from .arrays import *
 from .docstring import *
 from .meta import *
 from .configurable import MetaConfigurable

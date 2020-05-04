@@ -77,10 +77,12 @@ class Coord(NDMath, NDArray):
         Examples
         --------
         We first import the object from the api :
+        
         >>> from spectrochempy import *
         
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
+        
         >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
         >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -88,6 +90,7 @@ class Coord(NDMath, NDArray):
         
         We can take a series of str to create a non numerical but labelled
         axis :
+        
         >>> tarr = list('abcdef')
         >>> tarr
         ['a', 'b', 'c', 'd', 'e', 'f']
@@ -100,7 +103,6 @@ class Coord(NDMath, NDArray):
         title : Mylabels
         labels : [a b c d e f]
         
-        Some other examples will found in the |userguide|_.
         """
         super(Coord, self).__init__(data, **kwargs)
 

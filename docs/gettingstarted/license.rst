@@ -1,7 +1,7 @@
 .. _license:
 
-License
-=======
+CECILL-B License
+=================
 
 .. raw:: html
    :file: ../_static/license_CeCILL.html

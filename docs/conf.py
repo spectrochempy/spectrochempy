@@ -13,7 +13,8 @@ SpectroChemPy documentation build configuration file
 """
 
 import sys, os
-import sphinx_rtd_theme
+import sphinx_rtd_theme # Theme for the website
+
 import spectrochempy
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -122,7 +123,51 @@ pygments_style = 'sphinx'
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
 
-from spectrochempy.utils.rstutils import rst_epilog
+rst_epilog = """
+
+.. |ndarray| replace:: :class:`~numpy.ndarray`
+
+.. |ma.ndarray| replace:: :class:`~numpy.ma.array`
+
+.. |scpy| replace:: **SpectroChemPy**
+
+.. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
+
+.. |Script| replace:: :class:`~spectrochempy.core.dataset.scripts.Script`
+
+.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
+
+.. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+
+.. |NDPanel| replace:: :class:`~spectrochempy.core.dataset.ndpanel.NDPanel`
+
+.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
+
+.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoordrange.CoordRange`
+
+.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`
+
+.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
+
+.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDMath`
+
+.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta`
+
+.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
+
+.. |Unit| replace:: :class:`~spectrochempy.units.units.Unit`
+
+.. |Quantity| replace:: :class:`~spectrochempy.units.units.Quantity`
+
+.. |Measurement| replace:: :class:`~spectrochempy.units.units.Measurement`
+
+.. |Axes| replace:: :class:`~matplotlib.Axes`
+
+.. |userguide| replace:: :ref:`userguide`
+
+"""
+
+
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -191,7 +236,7 @@ html_use_smartypants = True
 html_split_index = True
 
 # If true, links to the reST sources are added to the pages.
-html_show_sourcelink = False
+html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False
@@ -387,7 +432,7 @@ intersphinx_mapping = {
     'ipython': ('https://ipython.readthedocs.io/en/stable/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'matplotlib': ('https://matplotlib.org/', None),
-    'sklearn': ('https://scikit-learn.org/stable', None),
+    'sklearn': ('https://scikit-learn.org/stable/', None),
 }
 
 # linkcode ---------------------------------------------------------------------
