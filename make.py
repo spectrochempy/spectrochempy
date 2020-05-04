@@ -53,6 +53,7 @@ DOCTREES = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT,
 HTML = os.path.join(BUILDDIR, 'html')
 LATEX = os.path.join(BUILDDIR, 'latex')
 DOWNLOADS = os.path.join(HTML, 'downloads')
+GALLERYDIR = os.path.join(DOCDIR,"gallery")
 
 __all__ = []
 
@@ -124,58 +125,69 @@ class Build(object):
 
     @staticmethod
     def _confirm(action):
-        # Ask user to enter Y or N (case-insensitive).
+        # private method to ask user to enter Y or N (case-insensitive).
         answer = ""
         while answer not in ["y", "n"]:
-            answer = input(f"OK to continue `{action}` [Y/N]? ", ).lower()
-        return answer == "y"
+            answer = input(f"OK to continue `{action}` Y[es]/[N[o] ? ", ).lower()
+        return answer[:1] == "y"
     
     # ..................................................................................................................
-    def make_docs(self, builder):
+    def make_docs(self, builder='html'):
         """
-        Make the documentation
+        Make the html or latex documentation
     
         Parameters
         ----------
-        builder: str,
+        builder: str, optional, default='html'
             Type of builder
             
         """
         doc_version = self.doc_version
         
+        if builder not in ['html', 'latex']:
+            raise ValueError('Not a supported builder: Must be "html" or "latex"')
+            
         print(f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})')
         
         # recreate dir if needed
         self.clean(builder)
         self.make_dirs()
-        srcdir = confdir = DOCDIR
-        outdir = f"{BUILDDIR}/{builder}/{doc_version}"
-        doctreesdir = f"{BUILDDIR}/~doctrees/{doc_version}"
         
         # regenate api documentation
         if (self.regenerate_api or not os.path.exists(API)):
             self.api_gen()
         
         # run sphinx
+        srcdir = confdir = DOCDIR
+        outdir = f"{BUILDDIR}/{builder}/{doc_version}"
+        doctreesdir = f"{BUILDDIR}/~doctrees/{doc_version}"
         sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
         sp.verbosity = 1
         sp.build()
         res = sp.statuscode
         
-        print(f"\n{'-' * 130}\nBuild finished. The {builder.upper()} pages are in {os.path.normpath(outdir)}.")
+        print(f"\n{'-' * 130}\nBuild finished. The {builder.upper()} pages "
+              f"are in {os.path.normpath(outdir)}.")
         
         # do some cleaning
         shutil.rmtree(os.path.join('docs', 'auto_examples'), ignore_errors=True)
         
-        self.resize_img(os.path.join(DOCDIR,"gallery" ))
-        
+        # add version selection block to each pages
+        # TODO: v.0.2 may be done with template?
         if builder == 'html':
             self.update_html_page(outdir)
             self.make_redirection_page()
+    
+        # a workaround to reduce the size of the image in the pdf document
+        # TODO: v.0.2 probably better solution exists?
+        if builder =='latex':
+            self.resize_img(GALLERYDIR, size=580.)
+        
+
         
     # ..................................................................................................................
     @staticmethod
-    def resize_img(folder):
+    def resize_img(folder, size):
         for img in iglob(os.path.join(folder, '**', '*.png'), recursive=True):
             if not img.endswith('.png'):
                 continue
@@ -183,8 +195,8 @@ class Build(object):
             image = imread(filename)
             h, l, c = image.shape
             ratio = 1.
-            if float(l)>640.:
-                ratio = 640./float(l)
+            if l>size:
+                ratio = size/l
             if ratio < 1:
                 # reduce size
                 image_resized = resize(image, (int(image.shape[0]*ratio), int(image.shape[1]*ratio)),
@@ -195,14 +207,19 @@ class Build(object):
                 
     # ..................................................................................................................
     def make_pdf(self):
+        """
+        Generate the PDF documentation
+        
+        """
         doc_version = self.doc_version
         latexdir = f"{BUILDDIR}/latex/{doc_version}"
-        print(
-            'Started to build pdf from latex using make.... Wait until a new message appear (it is a long! compilation) ')
+        print('Started to build pdf from latex using make.... '
+              'Wait until a new message appear (it is a long! compilation) ')
         
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
                            f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
                            shell=True)
+        
         print('FIRST COMPILATION:', output)
         
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
@@ -213,7 +230,7 @@ class Build(object):
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
                            f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
                            shell=True)
-        print('SECOND COMPILTATION:', output)
+        print('SECOND COMPILATION:', output)
         
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)}; '
                            f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
@@ -221,7 +238,10 @@ class Build(object):
     
     # ..................................................................................................................
     def sync_notebooks(self):
-        # we need to use jupytext to sync py and ipynb files in userguide and tutorials
+        """
+        Use  jupytext to sync py and ipynb files in userguide and tutorials
+        
+        """
         cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
         for cmd in cmds:
             cmd = cmd.split()
@@ -229,9 +249,11 @@ class Build(object):
     
     # ..................................................................................................................
     def api_gen(self):
+        """
+        Generate the API reference rst files
+        """
         from docs import apigen
         
-        # generate API reference
         apigen.main(SOURCESDIR,
                     tocdepth=1,
                     force=self.regenerate_api,
