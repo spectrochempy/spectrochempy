@@ -113,6 +113,10 @@ def readfilename(filename=None, **kwargs):
         filenames = _filenames
 
     if not filename:
+        # test if we are running nbsphinx with this default filename
+        filename = os.environ.get('TUTORIAL_FILENAME')
+        
+    if not filename:
         # open a file dialog
         # currently Scpy use QT (needed for next GUI features)
         filenames = None
