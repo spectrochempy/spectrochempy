@@ -47,28 +47,28 @@ def test_autosub(IR_dataset_2D):
 
     s2 = dataset.copy()
 
-    s3 = s2.autosub(ref, *ranges, dim=-1, method='varfit', inplace=False)
+    s3 = s2.autosub(ref, *ranges, dim=-1, method='vardiff', inplace=False)
     s3.plot()
 
     # inplace = False
     assert np.round(s2.data[-1,0],4) != 0.0000
     assert np.round(s3.data[-1,0],4) == 0.0000
-    s3.name="varfit"
+    s3.name="vardiff"
 
     s3.plot_stack()
 
     s4 = dataset.copy()
-    s4.autosub(ref, *ranges, method='chi2', inplace=True)
-    s4.name = "chi2, inplace"
+    s4.autosub(ref, *ranges, method='ssdiff', inplace=True)
+    s4.name = "ssdiff, inplace"
     assert np.round(s4.data[-1,0],4) == 0.0000
 
     s4.plot_stack()  #true avoid blocking due to graphs
 
     s4 = dataset.copy()
-    s = autosub(s4, ref, *ranges, method='chi2')
+    s = autosub(s4, ref, *ranges, method='ssdiff')
     assert np.round(s4.data[-1, 0], 4) != 0.0000
     assert np.round(s.data[-1, 0], 4) == 0.0000
-    s.name = 'chi2 direct call'
+    s.name = 'ssdiff direct call'
 
     s.plot_stack()
 
