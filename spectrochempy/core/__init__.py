@@ -55,12 +55,21 @@ __all__ = [
 # ======================================================================================================================
 # Progress bar
 # ======================================================================================================================
-pbar = tqdm(total=1211)
-pbar.set_description('Loading SpectroChemPy API')
-val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
-def _pbar_update(i):
-    time.sleep(.1)
-    pbar.update(val_tqdm[i])
+if os.environ.get('USE_TQDM','Yes') == 'Yes':
+    pbar = tqdm(total=1211)
+    pbar.set_description('Loading SpectroChemPy API')
+    val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
+    def _pbar_update(i):
+        if i == 'CLOSE':
+            pbar.clear()
+            pbar.close()
+        else:
+            time.sleep(.1)
+            pbar.update(val_tqdm[i])
+else:
+    def _pbar_update(i):
+        pass
+    
     
 # ======================================================================================================================
 # loading module libraries
@@ -389,8 +398,9 @@ __all__.append('APIref')
 # START THE app
 
 _pbar_update(14)
-pbar.clear()
-pbar.close()
+
+_pbar_update('CLOSE')
+
 
 _started = app.start()
 

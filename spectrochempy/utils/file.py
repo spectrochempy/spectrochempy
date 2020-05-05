@@ -114,7 +114,7 @@ def readfilename(filename=None, **kwargs):
 
     if not filename:
         # test if we are running nbsphinx with this default filename
-        filename = os.environ.get('TUTORIAL_FILENAME')
+        filename = os.environ.get('TUTORIAL_FILENAME', None)
         
     if not filename:
         # open a file dialog

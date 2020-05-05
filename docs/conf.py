@@ -14,6 +14,7 @@ SpectroChemPy documentation build configuration file
 
 import sys, os
 import sphinx_rtd_theme # Theme for the website
+import warnings
 
 import spectrochempy
 
@@ -263,6 +264,19 @@ html4_writer = True
 
 trim_doctests_flags = True
 
+# Remove matplotlib agg warnings from generated doc when using plt.show
+warnings.filterwarnings("ignore", category=UserWarning,
+                        message='Matplotlib is currently using agg, which is a'
+                                ' non-GUI backend, so cannot show the figure.')
+
+html_context = {
+    'current_version': 'dev' if 'dev' in version else 'stable',
+    'versions': (
+        ('dev', '/dev/index.html"'),
+        ('stable', '/stable/index.html'),
+    )
+}
+
 # -- Options for LaTeX output --------------------------------------------------
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -376,7 +390,7 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
-    app.add_stylesheet("theme.css")  # also can be a full URL
+    app.add_stylesheet("theme_override.css")  # also can be a full URL
     # app.add_stylesheet("ANOTHER.css")
     # app.add_stylesheet("AND_ANOTHER.css")
 
@@ -391,7 +405,7 @@ sphinx_gallery_conf = {
     'doc_module': ('spectrochempy', ),
                    'reference_url': {
                         'spectrochempy': None,
-                        #'matplotlib': 'https://matplotlib.org',   #<-- do not work
+                        'matplotlib': 'https://matplotlib.org',   #<-- do not work
                         'numpy': 'https://docs.scipy.org/doc/numpy',
                         'sklearn': 'https://scikit-learn.org/stable',
                         'ipython': 'https://ipython.readthedocs.org/en/stable/',
@@ -423,6 +437,9 @@ nbsphinx_kernel_name = 'python3'
 
 # set a filename by default for notebook which have file dialogs
 os.environ['TUTORIAL_FILENAME']='wodger.spg'
+
+# set a flag to deactivate TQDM
+os.environ['USE_TQDM']='No'
 
 # configuration for intersphinx ------------------------------------------------
 

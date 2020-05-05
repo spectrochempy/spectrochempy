@@ -64,8 +64,8 @@ class Build(object):
     # ..................................................................................................................
     def __init__(self):
         
-        # determine if we are in the developement branch (latest) or master (stable)
-        self.doc_version = 'latest' if 'dev' in version else 'stable'
+        # determine if we are in the developement branch (dev) or master (stable)
+        self.doc_version = 'dev' if 'dev' in version else 'stable'
     
     # ..................................................................................................................
     def __call__(self):
@@ -172,10 +172,7 @@ class Build(object):
         # do some cleaning
         shutil.rmtree(os.path.join('docs', 'auto_examples'), ignore_errors=True)
         
-        # add version selection block to each pages
-        # TODO: v.0.2 may be done with template?
         if builder == 'html':
-            self.update_html_page(outdir)
             self.make_redirection_page()
     
         # a workaround to reduce the size of the image in the pdf document
@@ -309,8 +306,8 @@ class Build(object):
         html = """
         <html>
         <head>
-        <title>redirect to the stable version of the documentation</title>
-        <meta http-equiv="refresh" content="0; URL=https://www.spectrochempy.fr/stable">
+        <title>redirect to the dev version of the documentation</title>
+        <meta http-equiv="refresh" content="0; URL=https://www.spectrochempy.fr/dev">
         </head>
         <body></body>
         </html>
@@ -426,15 +423,23 @@ class Build(object):
         doc_version = self.doc_version
         
         # Create regular directories.
-        build_dirs = [os.path.join(DOCTREES, doc_version),
-                      os.path.join(HTML, doc_version),
-                      os.path.join(LATEX, doc_version),
-                      DOWNLOADS,
-                      os.path.join(DOCDIR, '_static'),
+        build_dirs = [
+                          os.path.join(DOCTREES, doc_version),
+                          os.path.join(HTML, doc_version),
+                          os.path.join(LATEX, doc_version),
+                          DOWNLOADS,
+                          os.path.join(DOCDIR, '_static'),
                       ]
         for d in build_dirs:
             os.makedirs(d, exist_ok=True)
 
+    # ..................................................................................................................
+    def changelogs(self):
+        """
+        Utility to update change logs
+        """
+        
+        
 Build = Build()
 
 if __name__ == '__main__':
