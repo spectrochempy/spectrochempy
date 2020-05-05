@@ -79,8 +79,8 @@ master_doc = 'index'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-version = spectrochempy.application.__version__.split('+')[0]
-release = spectrochempy.application.__release__.split('+')[0]
+version = spectrochempy.application.__version__ #.split('+')[0]
+release = spectrochempy.application.__release__ #.split('+')[0]
 project = f"SpectroChemPy v{version}"
 copyright = spectrochempy.application.__copyright__
 
@@ -167,8 +167,6 @@ rst_epilog = """
 .. |userguide| replace:: :ref:`userguide`
 
 """
-
-
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -405,7 +403,7 @@ sphinx_gallery_conf = {
     'doc_module': ('spectrochempy', ),
                    'reference_url': {
                         'spectrochempy': None,
-                        'matplotlib': 'https://matplotlib.org',   #<-- do not work
+                        #'matplotlib': 'https://matplotlib.org',   #<-- do not work
                         'numpy': 'https://docs.scipy.org/doc/numpy',
                         'sklearn': 'https://scikit-learn.org/stable',
                         'ipython': 'https://ipython.readthedocs.org/en/stable/',

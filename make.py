@@ -230,7 +230,7 @@ class Build(object):
         print('SECOND COMPILATION:', output)
         
         output = self._cmd_exec(f'cd {os.path.normpath(latexdir)}; '
-                           f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
+                           f'cp {PROJECT}.pdf {DOWNLOADS}/{doc_version}-{PROJECT}.pdf', shell=True)
         print(output)
     
     # ..................................................................................................................
@@ -244,6 +244,17 @@ class Build(object):
             cmd = cmd.split()
             print(self._cmd_exec(cmd))
     
+    def make_tutorials(self):
+        """
+        
+        Returns
+        -------
+
+        """
+        for ipynb in iglob(os.path.join(USERDIR, '**', '*.png'), recursive=True):
+            
+            pass
+        
     # ..................................................................................................................
     def api_gen(self):
         """
@@ -314,63 +325,6 @@ class Build(object):
         """
         with open(os.path.join(HTML, 'index.html'), 'w') as f:
             f.write(html)
-    
-    # ..................................................................................................................
-    def update_html_page(self, outdir):
-        """
-        Modify page generated with sphinx (TODO: There is porbably a better method using sphinx templates to override
-        the themes)
-        """
-        
-        replace = """
-                <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
-                
-                    <span class="rst-current-version" data-toggle="rst-current-version">
-                      <span class="fa fa-book">SpectroChemPy</span>
-                      v: %s
-                      <span class="fa fa-caret-down"></span>
-                    </span>
-                
-                    <div class="rst-other-versions">
-                        <dl>
-                            <dt>Versions</dt>
-                            <dd><a href="/latest/index.html">latest</a></dd>
-                            <dd><a href="/stable/index.html">stable</a></dd>
-                        </dl>
-                
-                        <dl>
-                            <dt>Downloads</dt>
-                            <dd><a href="/downloads/scpy.pdf">pdf</a></dd>
-                            <!--<dd><a href="/downloads/scpy_doc.zip">htmlzip</a></dd>-->
-                            <!--<dd><a href="/tutorials/">tutorials</a></dd>-->
-                        </dl>
-                
-                        <dl>
-                            <dt>Sources on bitBucket</dt>
-                            <dd><a href="https://bitbucket.org/spectrocat/spectrochempy/src/master/">master</a></dd>
-                            <dd><a href="https://bitbucket.org/spectrocat/spectrochempy/src/develop/">develop</a></dd>
-                        </dl>
-                
-                        <hr/>
-                        
-                    </div>
-                </div>
-            
-                <script type="text/javascript" id="already-corrected">
-                    jQuery(function () {
-                        SphinxRtdTheme.Navigation.enable(true);
-                    });
-                </script>
-                """
-        # modify all html files
-        for filename in iglob(os.path.join(outdir, '**', '*.html'), recursive=True):
-            with open(filename, "r") as f:
-                txt = f.read()
-            doc_version = self.doc_version
-            regex = r"(<script type=\"text\/javascript\">.*SphinxRtdTheme.*script>)"
-            result = re.sub(regex, replace % doc_version, txt, 0, re.MULTILINE | re.DOTALL)
-            with open(filename, "w") as f:
-                f.write(result)
     
     # ..................................................................................................................
     def release(self):
