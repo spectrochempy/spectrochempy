@@ -16,7 +16,9 @@ build:
   number: 0
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
-  script: "{{ PYTHON }} -m pip install . -vv"
+  script:
+    - {{ PYTHON }} -m pip install . -vv
+    - jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
 
 requirements:
   host:
@@ -48,6 +50,7 @@ requirements:
     - cantera
     - quadprog
     - pyqt
+    - tqdm
 
 test:
   imports:
@@ -76,7 +79,6 @@ about:
   home: "https://redmine.spectrochempy.fr"
   license: CeCILL-B
   license_family: OTHER
-  license_file: 
   summary: "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
   doc_url: "https://www.spectrochempy.fr"
   dev_url: "https://bitbucket.org/spectrocat/spectrochempy"

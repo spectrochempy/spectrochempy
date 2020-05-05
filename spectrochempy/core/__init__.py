@@ -17,8 +17,6 @@ processing, analysis, etc...
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import warnings
-
 # warnings.simplefilter('ignore', (DeprecationWarning,
 #                                 FutureWarning, UserWarning))
 
@@ -37,6 +35,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import scipy
+from tqdm.autonotebook import tqdm
 
 # ======================================================================================================================
 # Tells here the methods or object we allow to import from this library
@@ -54,10 +53,21 @@ __all__ = [
 ]
 
 # ======================================================================================================================
+# Progress bar
+# ======================================================================================================================
+pbar = tqdm(total=1211)
+pbar.set_description('Loading SpectroChemPy API')
+val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
+def _pbar_update(i):
+    time.sleep(.1)
+    pbar.update(val_tqdm[i])
+    
+# ======================================================================================================================
 # loading module libraries
 # here we also construct the __all__ list automatically
 # ======================================================================================================================
 
+_pbar_update(0)
 from spectrochempy.application import SpectroChemPy
 
 app = SpectroChemPy()
@@ -119,20 +129,6 @@ def warning_(*args, **kwargs):
 
 __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
 
-
-# check for sys.gui_splash flag which exist only if application is lauched
-# in the GUI mode.
-# (See comment on `sys.gui_splash` in launch_gui)
-def _update(i, text):
-    if hasattr(sys, 'gui_splash'):
-        sys.gui_splash(i, text)
-        time.sleep(.15)  # intentionally limit the speed.
-    else:
-        info_(text)
-
-
-_update(1, 'Load API ...')
-
 from spectrochempy.application import (
     __version__ as version,
     __release__ as release,
@@ -148,6 +144,7 @@ from spectrochempy.application import (
     CRITICAL,
     INFO,
     available_styles,
+    check_for_update,
 )
 
 general_preferences = app.general_preferences
@@ -208,8 +205,7 @@ except:
 # ----------------------------------------------------------------------------------------------------------------------
 # we put them before so that we can eventually overwrite them
 
-_update(3, 'IPython loading ...')
-
+_pbar_update(1)
 from IPython.core.display import *
 from IPython.core import display
 
@@ -276,7 +272,7 @@ __all__.append('HAS_PANDAS')
 
 # dataset
 # ----------------------------------------------------------------------------------------------------------------------
-_update(4, 'Load NDDataset ...')
+_pbar_update(2)
 from spectrochempy.core.dataset.api import *
 from spectrochempy.core.dataset import api
 
@@ -284,23 +280,25 @@ __all__ += api.__all__
 
 # plotters
 # ----------------------------------------------------------------------------------------------------------------------
-_update(5, 'Load plotters ...')
+_pbar_update(3)
 from spectrochempy.core.plotters.api import *
 from spectrochempy.core.plotters import api
 
 __all__ += api.__all__
 
+
 # processors
 # ----------------------------------------------------------------------------------------------------------------------
-_update(6, 'Load processors ...')
+_pbar_update(4)
 from spectrochempy.core.processors.api import *
 from spectrochempy.core.processors import api
 
 __all__ += api.__all__
 
+
 # readers
 # ----------------------------------------------------------------------------------------------------------------------
-_update(7, 'Load readers ...')
+_pbar_update(5)
 from spectrochempy.core.readers.api import *
 from spectrochempy.core.readers import api
 
@@ -308,7 +306,7 @@ __all__ += api.__all__
 
 # writers
 # ----------------------------------------------------------------------------------------------------------------------
-_update(8, 'Load writers ...')
+_pbar_update(6)
 from spectrochempy.core.writers.api import *
 from spectrochempy.core.writers import api
 
@@ -316,7 +314,7 @@ __all__ += api.__all__
 
 # units
 # ----------------------------------------------------------------------------------------------------------------------
-_update(9, 'Load units ...')
+_pbar_update(7)
 from spectrochempy.units.units import *
 from spectrochempy.units import units
 
@@ -324,7 +322,7 @@ __all__ += units.__all__
 
 # databases
 # ----------------------------------------------------------------------------------------------------------------------
-_update(10, 'Load database ...')
+_pbar_update(8)
 from spectrochempy.databases.api import *
 from spectrochempy.databases import api
 
@@ -332,7 +330,7 @@ __all__ += api.__all__
 
 # analysis
 # ----------------------------------------------------------------------------------------------------------------------
-_update(11, 'Load analysis ...')
+_pbar_update(9)
 from spectrochempy.core.analysis.api import *
 from spectrochempy.core.analysis import api
 
@@ -340,7 +338,7 @@ __all__ += api.__all__
 
 # fitting
 # ----------------------------------------------------------------------------------------------------------------------
-_update(12, 'Load fitting ...')
+_pbar_update(10)
 from spectrochempy.core.fitting.api import *
 from spectrochempy.core.fitting import api
 
@@ -348,7 +346,7 @@ __all__ += api.__all__
 
 # project
 # ----------------------------------------------------------------------------------------------------------------------
-_update(13, 'Load project ...')
+_pbar_update(11)
 from spectrochempy.core.project.api import *
 from spectrochempy.core.project import api
 
@@ -356,15 +354,15 @@ __all__ += api.__all__
 
 # script
 # ----------------------------------------------------------------------------------------------------------------------
-_update(14, 'Load scripts ...')
+_pbar_update(12)
 from spectrochempy.core.scripts.api import *
 from spectrochempy.core.scripts import api
 
 __all__ += api.__all__
 
-# script
+# widgets
 # ----------------------------------------------------------------------------------------------------------------------
-_update(15, 'Load widgets ...')
+_pbar_update(13)
 from spectrochempy.widgets.api import *
 from spectrochempy.widgets import api
 
@@ -389,14 +387,12 @@ APIref = APIref()
 __all__.append('APIref')
 
 # START THE app
-_update(18, 'Start API ...')
+
+_pbar_update(14)
+pbar.clear()
+pbar.close()
+
 _started = app.start()
-
-_update(19, "API activated "
-if _started else "API was not started!")
-
-_update(20, '')  # make the last message visible (empirical solution...
-# don't know why this work, at least on Mac OSX.
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 
