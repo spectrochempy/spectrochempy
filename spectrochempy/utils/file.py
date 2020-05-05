@@ -83,6 +83,11 @@ def readfilename(filename=None, **kwargs):
                 directory = _directory
 
     # now proceed with the filenames
+    
+    if not filename:
+        # test if we are running nbsphinx with this default filename
+        filename = os.environ.get('TUTORIAL_FILENAME', None)
+        
     if filename:
         _filenames = []
         # make a list, even for a single file name
@@ -111,10 +116,6 @@ def readfilename(filename=None, **kwargs):
 
         # now we have all the filename with their correct location
         filenames = _filenames
-
-    if not filename:
-        # test if we are running nbsphinx with this default filename
-        filename = os.environ.get('TUTORIAL_FILENAME', None)
         
     if not filename:
         # open a file dialog
