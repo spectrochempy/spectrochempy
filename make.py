@@ -485,6 +485,9 @@ class Build(object):
 
         with open(os.path.join(DOCDIR, 'gettingstarted', 'changelog.rst'), 'w') as f:
             f.write(out)
+            
+        return
+    
         
     def make_conda(self, tag):
         """
