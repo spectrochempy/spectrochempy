@@ -18,11 +18,13 @@ usage::
 where optional parameters indicates which job(s) is(are) to perform.
 
 """
+
 import argparse
 import os
 import re
 import shutil
 import warnings
+import zipfile
 from glob import iglob
 from subprocess import Popen, PIPE
 from skimage.transform import resize
@@ -74,6 +76,7 @@ class Build(object):
         
         parser.add_argument("-w", "--html", help="create html pages", action="store_true")
         parser.add_argument("-p", "--pdf", help="create pdf pages", action="store_true")
+        parser.add_argument("-t", "--tutorials", help="zip notebook tutorials ", action="store_true")
         parser.add_argument("-c", "--clean", help="clean/delete output", action="store_true")
         parser.add_argument("-d", "--deepclean", help="full clean/delete output (reset)", action="store_true")
         parser.add_argument("-s", "--sync", help="sync doc ipynb", action="store_true")
@@ -104,6 +107,8 @@ class Build(object):
             self.make_pdf()
         if args.release:
             self.release()
+        if args.tutorials:
+            self.make_tutorials()
             
     @staticmethod
     def _cmd_exec(cmd, shell=None):
@@ -119,8 +124,8 @@ class Build(object):
             return v
         else:
             v = error.decode('utf-8')
-            if "makeindex" in v:
-                return v  # This is not an error! (#TODO: why Popen retrun an error)
+            if "makeindex" in v or "NbConvertApp" in v:
+                return v  # This is not an error!
             raise RuntimeError(f"{cmd} [FAILED]\n{v}")
 
     @staticmethod
@@ -174,13 +179,14 @@ class Build(object):
         
         if builder == 'html':
             self.make_redirection_page()
-    
+            self.make_tutorials()
+            
         # a workaround to reduce the size of the image in the pdf document
         # TODO: v.0.2 probably better solution exists?
         if builder =='latex':
             self.resize_img(GALLERYDIR, size=580.)
         
-
+        
         
     # ..................................................................................................................
     @staticmethod
@@ -251,10 +257,22 @@ class Build(object):
         -------
 
         """
-        for ipynb in iglob(os.path.join(USERDIR, '**', '*.png'), recursive=True):
-            
-            pass
-        
+
+        def zipdir(path, dest, ziph):
+            # ziph is zipfile handle
+            for nb in iglob(os.path.join(path, '**', '*.ipynb'), recursive=True):
+                arcnb = nb.replace(path, dest)
+                ziph.write(nb, arcname=arcnb)
+
+        zipf = zipfile.ZipFile('~notebooks.zip', 'w', zipfile.ZIP_STORED)
+        zipdir(USERDIR, 'notebooks', zipf)
+        zipdir(os.path.join(GALLERYDIR, 'auto_examples'), os.path.join('notebooks', 'examples'), zipf)
+        zipf.close()
+
+        output = self._cmd_exec(f'mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECT}-notebooks.zip', shell=True)
+        print(output)
+
+
     # ..................................................................................................................
     def api_gen(self):
         """
@@ -368,6 +386,14 @@ class Build(object):
         
         shutil.rmtree(os.path.join(DOCTREES, doc_version), ignore_errors=True)
         shutil.rmtree(API, ignore_errors=True)
+
+        # clean notebooks output
+        for nb in iglob(os.path.join(DOCDIR, '**', '*.ipynb'), recursive=True):
+            # This will erase all notebook output
+            output = self._cmd_exec(
+                f'jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {nb}',
+                shell=True)
+            print(output)
     
     # ..................................................................................................................
     def make_dirs(self):
@@ -388,7 +414,7 @@ class Build(object):
             os.makedirs(d, exist_ok=True)
 
     # ..................................................................................................................
-    def changelogs(self):
+    def create_changelogs(self):
         """
         Utility to update change logs
         """

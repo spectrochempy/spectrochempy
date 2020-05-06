@@ -80,7 +80,7 @@ master_doc = 'index'
 # built documents.
 
 version = spectrochempy.application.__version__ #.split('+')[0]
-release = spectrochempy.application.__release__ #.split('+')[0]
+release = version # spectrochempy.application.__release__ #.split('+')[0]
 project = f"SpectroChemPy v{version}"
 copyright = spectrochempy.application.__copyright__
 
@@ -347,7 +347,7 @@ pdf_stylesheets = ['sphinx','kerning','a4']
 # pdf_font_path=['/usr/share/fonts', '/usr/share/texmf-dist/fonts/']
 
 # Language to be used for hyphenation support
-#pdf_language="en_EN"
+pdf_language="en_EN"
 
 # If false, no index is generated.
 #pdf_use_index = True
