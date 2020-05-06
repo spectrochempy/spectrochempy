@@ -80,7 +80,7 @@ master_doc = 'index'
 # built documents.
 
 version = spectrochempy.application.__version__ #.split('+')[0]
-release = version # spectrochempy.application.__release__ #.split('+')[0]
+release = version.split('+')[0]
 project = f"SpectroChemPy v{version}"
 copyright = spectrochempy.application.__copyright__
 

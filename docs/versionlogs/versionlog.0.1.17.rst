@@ -1,16 +1,3 @@
-.. _change_log:
-
-What's new
-===========
-
-Go to the `project website <https://redmine.spectrochempy.fr/projects/spectrochempy/>`_
-to learn more about the status of the program
-and have a look to the `roadmap <https://redmine.spectrochempy.fr/projects/spectrochempy/roadmap>`_.
-
-.. START CHANGELOG
-
-
-
 .. _version_0.1.17:
 
 Version 0.1.17
@@ -45,19 +32,4 @@ Tasks terminated
 * #18 - Notebook Tutorials: import data: tutorial, examples, tests
 * #22 - Deployment: PyPi, Conda, ...: Conda Recipe
 * #33 - Redmine website: Redmine website configuration
-
-.. _version_0.1.16:
-
-Version 0.1.16
----------------
-
-*  Initial version released as pypi and conda package
-
-.. _version_0.1.0:
-
-Versions 0.1.0
----------------
-
-* initial Development version
-
 

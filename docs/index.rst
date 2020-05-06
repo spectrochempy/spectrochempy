@@ -47,7 +47,7 @@ Among its major features:
     |scpy| is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!! Please report any issues to the
-    `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
+    `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
 
 
 

@@ -20,7 +20,7 @@ where optional parameters indicates which job(s) is(are) to perform.
 """
 
 import argparse
-import os
+import os, sys
 import re
 import shutil
 import warnings
@@ -28,13 +28,14 @@ import zipfile
 from glob import iglob
 from subprocess import Popen, PIPE
 from skimage.transform import resize
-from skimage.data import load
 from skimage.io import imread, imsave
 import numpy as np
+from jinja2 import Template
+import pandas as pd
 
 from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
 
-from spectrochempy import version
+from spectrochempy import version, release
 
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
@@ -47,6 +48,7 @@ PROJECTDIR = os.path.dirname(os.path.abspath(__file__))
 SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
 DOCDIR = os.path.join(PROJECTDIR, "docs")
 USERDIR = os.path.join(PROJECTDIR, "docs", "user")
+TEMPLATES = os.path.join(DOCDIR, '_templates')
 TUTORIALS = os.path.join(USERDIR, "tutorials", "*", "*.py")
 USERGUIDE = os.path.join(USERDIR, "userguide", "*", "*.py")
 API = os.path.join(DOCDIR, 'api', 'generated')
@@ -66,8 +68,17 @@ class Build(object):
     # ..................................................................................................................
     def __init__(self):
         
-        # determine if we are in the developement branch (dev) or master (stable)
-        self.doc_version = 'dev' if 'dev' in version else 'stable'
+        self._doc_version = None
+    
+    # ..................................................................................................................
+    @property
+    def doc_version(self):
+        
+        if self._doc_version is None:
+            # determine if we are in the developement branch (dev) or master (stable)
+            self._doc_version = 'dev' if 'dev' in version else 'stable'
+        
+        return self._doc_version
     
     # ..................................................................................................................
     def __call__(self):
@@ -75,16 +86,22 @@ class Build(object):
         parser = argparse.ArgumentParser()
         
         parser.add_argument("-w", "--html", help="create html pages", action="store_true")
-        parser.add_argument("-p", "--pdf", help="create pdf pages", action="store_true")
-        parser.add_argument("-t", "--tutorials", help="zip notebook tutorials ", action="store_true")
-        parser.add_argument("-c", "--clean", help="clean/delete output", action="store_true")
-        parser.add_argument("-d", "--deepclean", help="full clean/delete output (reset)", action="store_true")
-        parser.add_argument("-s", "--sync", help="sync doc ipynb", action="store_true")
+        parser.add_argument("-p", "--pdf", help="create pdf manual", action="store_true")
+        parser.add_argument("-t", "--tutorials", help="zip notebook tutorials for downloads", action="store_true")
+        parser.add_argument("-c", "--clean", help="clean/delete html or latex output", action="store_true")
+        parser.add_argument("-d", "--deepclean", help="full clean/delete output (reset fro a full regenration of the documentation)", action="store_true")
+        parser.add_argument("-s", "--sync", help="sync doc ipynb using jupytext", action="store_true")
         parser.add_argument("-g", "--git", help="git commit last changes", action="store_true")
-        parser.add_argument("-m", "--message", default='DOCS: updated', help='optional commit message')
-        parser.add_argument("-a", "--api", help="full regeneration of the api", action="store_true")
-        parser.add_argument("-r", "--release", help="release documentation on website", action="store_true")
+        parser.add_argument("-m", "--message", default='DOCS: updated', help='optional git commit message')
+        parser.add_argument("-a", "--api", help="execute a full regeneration of the api", action="store_true")
+        parser.add_argument("-r", "--release", help="release the current version documentation on website", action="store_true")
+        parser.add_argument("-l", "--changelogs", help="update changelogs using the redmine roadmap", action="store_true")
+
         args = parser.parse_args()
+        
+        if len(sys.argv)==1:
+            parser.print_help(sys.stderr)
+            return
         
         self.regenerate_api = args.api
         
@@ -109,6 +126,8 @@ class Build(object):
             self.release()
         if args.tutorials:
             self.make_tutorials()
+        if args.changelogs:
+            self.make_changelog()
             
     @staticmethod
     def _cmd_exec(cmd, shell=None):
@@ -137,7 +156,7 @@ class Build(object):
         return answer[:1] == "y"
     
     # ..................................................................................................................
-    def make_docs(self, builder='html'):
+    def make_docs(self, builder='html', clean=False):
         """
         Make the html or latex documentation
     
@@ -155,7 +174,8 @@ class Build(object):
         print(f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})')
         
         # recreate dir if needed
-        self.clean(builder)
+        if clean:
+            self.clean(builder)
         self.make_dirs()
         
         # regenate api documentation
@@ -349,8 +369,7 @@ class Build(object):
         """
         Release/publish the documentation to the webpage.
         """
-        doc_version = self.doc_version
-        
+    
         # upload docs to the remote web server
         if SERVER:
             
@@ -414,12 +433,81 @@ class Build(object):
             os.makedirs(d, exist_ok=True)
 
     # ..................................................................................................................
-    def create_changelogs(self):
+    def make_changelog(self):
         """
-        Utility to update change logs
+        Utility to update changelog
+        """
+        csv = "https://redmine.spectrochempy.fr/projects/spectrochempy/issues.csv?" \
+              "c%5B%5D=tracker" \
+              "&c%5B%5D=status" \
+              "&c%5B%5D=category" \
+              "&c%5B%5D=priority" \
+              "&c%5B%5D=subject" \
+              "&c%5B%5D=fixed_version" \
+              "&f%5B%5D=status_id" \
+              "&f%5B%5D=" \
+              "&group_by=" \
+              "&op%5Bstatus_id%5D=%2A" \
+              "&set_filter=1" \
+              "&sort=id%3Adesc"
+        
+        issues = pd.read_csv(csv, encoding = "ISO-8859-1")
+        doc_version = self.doc_version
+        target = version.split('-')[0] if doc_version == 'dev' else release
+        changes = issues[issues['Target version']==target]
+        
+        # Create a versionlog file for the current target
+        bugs = changes[changes['Tracker']=='Bug']
+        features = changes[changes['Tracker']=='Feature']
+        tasks = changes[changes['Tracker']=='Task']
+        
+        with open(os.path.join(TEMPLATES, 'versionlog.rst'), 'r') as f:
+            template = Template(f.read())
+        out = template.render(target=target, bugs=bugs, features=features, tasks=tasks)
+        
+        with open(os.path.join(DOCDIR, 'versionlogs', f'versionlog.{target}.rst'), 'w') as f:
+            f.write(out)
+            
+        # make the full version history
+        
+        lhist = sorted(iglob(os.path.join(DOCDIR, 'versionlogs', '*.rst')))
+        lhist.reverse()
+        history = ""
+        for filename in lhist:
+            with open(filename, 'r') as f:
+                history +="\n\n"
+                history += f.read().strip()
+        history += '\n'
+
+        with open(os.path.join(TEMPLATES, 'changelog.rst'), 'r') as f:
+            template = Template(f.read())
+        out = template.render(history=history)
+
+        with open(os.path.join(DOCDIR, 'gettingstarted', 'changelog.rst'), 'w') as f:
+            f.write(out)
+        
+    def make_conda(self, tag):
         """
         
+        Parameters
+        ----------
+        tag
+
+        Returns
+        -------
+
+        """
         
+        # anaconda upload --user spectrocat ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2 --force
+        #
+        # conda convert --platform linux-64 ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2
+        # anaconda upload --user spectrocat linux-64/spectrochempy-$1.tar.bz2 --force
+        #
+        # conda convert --platform win-64 ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2
+        # anaconda upload --user spectrocat win-64/spectrochempy-$1.tar.bz2 --force
+
+
+
 Build = Build()
 
 if __name__ == '__main__':
