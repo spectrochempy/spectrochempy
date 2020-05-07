@@ -1,29 +1,31 @@
-{% set name = "spectrochempy" %}
-{% set version = "0.1.16" %}
+{% set name = "SpectroChemPy" %}
 
 # see this  for a description of the sections
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
 
 package:
   name: "{{ name|lower }}"
-  version: "{{ version }}"
+  version: "{{ GIT_DESCRIBE_TAG }}"
 
 source:
   git_url: ../../
-  git_rev: "{{ version }}"
-
-python:
-  - 3.6
-  - 3.7
-  - 3.8
+  #git_rev: "{{ GIT_DESCRIBE_TAG }}"
 
 build:
-  number: 0
-  noarch: generic
+  number: {{ GIT_DESCRIBE_NUMBER }}
+  noarch: python
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
+
+  # If the installation is complex, or different between Unix and Windows,
+  # use separate bld.bat and build.sh files instead of this key. By default,
+  # the package will be built for the Python versions supported by conda-forge
+  # and for all major OSs. Add the line "skip: True  # [py<35]" (for example)
+  # to limit to Python 3.5 and newer, or "skip: True  # [not win]" to limit
+  # to Windows.
+
   script:
-    - python -m pip install . -vv
+    - {{ PYTHON }} -m pip install . -vv
     - jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
 
 requirements:
@@ -31,7 +33,7 @@ requirements:
     - pip
     - python
   build:
-    - python           {{ python }}
+    - python           {{ python }}.*
     - setuptools
     - setuptools_scm
   run:
@@ -39,7 +41,7 @@ requirements:
     - numpy
     - matplotlib
     - traitlets
-    - pint             0.9
+    - pint             {{ pint }}.*
     - quaternion
     - scipy
     - colorama
@@ -58,31 +60,23 @@ requirements:
     - quadprog
     - pyqt
     - tqdm
-    - twine
-
+    
 test:
   imports:
-    - scp_data
     - spectrochempy
-    - spectrochempy.core
-    - spectrochempy.core.analysis
-    - spectrochempy.core.dataset
-    - spectrochempy.core.fitting
-    - spectrochempy.core.plotters
-    - spectrochempy.core.processors
-    - spectrochempy.core.project
-    - spectrochempy.core.readers
-    - spectrochempy.core.readers.nmr
-    - spectrochempy.core.scripts
-    - spectrochempy.core.writers
-    - spectrochempy.databases
-    - spectrochempy.scripts
-    - spectrochempy.units
-    - spectrochempy.utils
-    - spectrochempy.widgets
 
   commands:
     - scpy --help
+    - pytest
+
+  # test-only requirements
+  requires:
+      - pytest
+      - scikit-image
+
+  # needed test files
+  source_files:
+      - tests/
 
 about:
   home: "https://redmine.spectrochempy.fr"

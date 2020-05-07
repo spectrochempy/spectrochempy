@@ -11,7 +11,7 @@ file in you $HOME directory should be something like this before starting:
       - conda-forge
       - spectrocat
       - cantera
-      - default
+      - defaults
     
     ssl_verify: true
     anaconda_upload: false

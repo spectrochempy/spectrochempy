@@ -3,7 +3,7 @@ channels:
 - conda-forge
 - cantera
 - spectrocat
-- conda
+- defaults
 dependencies:
 - numpy
 - matplotlib
@@ -42,6 +42,8 @@ dependencies:
 - nbconvert
 - numpydoc=0.8
 - conda-build
+- conda-smithy
 - cantera
 - quadprog
 - pyqt
+- twine

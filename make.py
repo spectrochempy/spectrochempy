@@ -549,13 +549,13 @@ class Build(object):
         print('BUILDING THE PACKAGE...')
         CMD ='conda config --set anaconda_upload no'
         self._cmd_exec(CMD, shell=True)
-        CMD = 'conda build conda/spectrochempy'
+        CMD = 'conda build recipe/spectrochempy'
         self._cmd_exec(CMD, shell=True)
         CMD = 'conda build purge'
         self._cmd_exec(CMD, shell=True)
 
         print('The Conda package is here:')
-        CMD  ='conda build conda/spectrochempy --output'
+        CMD  ='conda build recipe/spectrochempy --output'
         self._cmd_exec(CMD, shell=True)
         
         # anaconda upload --user spectrocat ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2 --force

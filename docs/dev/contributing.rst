@@ -22,12 +22,6 @@ There is several way depending of your knowledge of programming:
 * ...
 
 
-.. note::
-
-  Parts of this document come from the `Contributing to xarray
-  guide <http://http://xarray.pydata.org/en/stable/contributing.html>`_.
-
-
 .. _contributing.bug_reports:
 
 Bug reports and enhancement requests
@@ -68,17 +62,18 @@ Contributing to the code
 Installing a developer version
 ********************************
 
-Spectrochempy in the development version requires ~ 380 Mo (among which ~300 Mo for the
-.git folder). The best to proceed with development
-is also to include a specific python environment (scipy-dev) which will add up ~ in
+Spectrochempy in the development version requires ~ 500 Mb of disk space.
+
+The best to proceed with development
+is also to include a specific python environment (scipy-dev) which will add up ~2.8 Gb in
 the Anaconda/Miniconda Env folder.
 
-The master repository is tested on the 3.6 or 3.7 python version.
-It may work with earlier version of python, *e.g.*, < 3.6 but this has not been tested. For sure, it will NOT work for python 2.7.x and no attempt to get such
-compatibility will be made.
+The master repository was tested on the 3.6 or 3.7 python version.
 
-Install Anaconda
-----------------
+It will not work with earlier version of python, *i.e.*, < 3.6. No attempt to get such compatibility will be made.
+
+Install Miniconda
+-----------------
 
 #.  To install Anaconda or Miniconda:
 
