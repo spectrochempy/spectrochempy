@@ -1,18 +1,20 @@
 {% set name = "SpectroChemPy" %}
+{% set version = "0.1.17" %}
+{% set number = 0 %}
 
 # see this  for a description of the sections
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
 
 package:
   name: "{{ name|lower }}"
-  version: "{{ GIT_DESCRIBE_TAG }}"
+  version: "{{ version }}"
 
 source:
   git_url: ../../
-  #git_rev: "{{ GIT_DESCRIBE_TAG }}"
+  git_rev: "{{ version }}"
 
 build:
-  number: {{ GIT_DESCRIBE_NUMBER }}
+  number: {{ number }}
   noarch: python
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
