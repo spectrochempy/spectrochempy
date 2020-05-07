@@ -12,12 +12,18 @@ source:
   git_url: ../../
   git_rev: "{{ version }}"
 
+python:
+  - 3.6
+  - 3.7
+  - 3.8
+
 build:
   number: 0
+  noarch: generic
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
   script:
-    - {{ PYTHON }} -m pip install . -vv
+    - python -m pip install . -vv
     - jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
 
 requirements:
@@ -25,10 +31,11 @@ requirements:
     - pip
     - python
   build:
-    - python           3.7
+    - python           {{ python }}
     - setuptools
     - setuptools_scm
   run:
+    - python
     - numpy
     - matplotlib
     - traitlets
@@ -51,7 +58,7 @@ requirements:
     - quadprog
     - pyqt
     - tqdm
-    -twine
+    - twine
 
 test:
   imports:
@@ -73,6 +80,7 @@ test:
     - spectrochempy.units
     - spectrochempy.utils
     - spectrochempy.widgets
+
   commands:
     - scpy --help
 

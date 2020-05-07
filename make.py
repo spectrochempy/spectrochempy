@@ -35,8 +35,6 @@ import pandas as pd
 
 from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
 
-from spectrochempy import version, release
-
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
@@ -73,7 +71,8 @@ class Build(object):
     # ..................................................................................................................
     @property
     def doc_version(self):
-        
+        from spectrochempy import version, release
+    
         if self._doc_version is None:
             # determine if we are in the developement branch (dev) or master (stable)
             self._doc_version = 'dev' if 'dev' in version else 'stable'
@@ -179,6 +178,8 @@ class Build(object):
             Type of builder
             
         """
+        from spectrochempy import version, release
+
         doc_version = self.doc_version
         
         if builder not in ['html', 'latex']:
@@ -455,7 +456,9 @@ class Build(object):
               "&op%5Bstatus_id%5D=%2A" \
               "&set_filter=1" \
               "&sort=id%3Adesc"
-        
+
+        from spectrochempy import version, release
+
         issues = pd.read_csv(csv, encoding = "ISO-8859-1")
         doc_version = self.doc_version
         target = version.split('-')[0] if doc_version == 'dev' else release
@@ -504,7 +507,12 @@ class Build(object):
         CMD = 'conda update -n base conda'
         self._cmd_exec(CMD, shell=True)
         CMD = 'conda update pip setuptools wheel twine'
-        self._cmd_exec(CMD, shell=True)
+        try:
+            self._cmd_exec(CMD, shell=True)
+        except RuntimeError:
+            CMD = 'conda install pip setuptools wheel twine -y'
+            self._cmd_exec(CMD, shell=True)
+    
         print('CREATING DISTRIBUTION PACKAGE....')
         CMD = 'python setup.py sdist bdist_wheel'
         self._cmd_exec(CMD, shell=True)
@@ -519,7 +527,7 @@ class Build(object):
         self._cmd_exec(CMD, shell=True)
         
     # ..................................................................................................................
-    def make_conda(self, tag):
+    def make_conda(self):
         """
         
         Parameters
@@ -530,6 +538,25 @@ class Build(object):
         -------
 
         """
+        print('UPDATE THE CONDA TOOLS')
+        CMD = "conda update conda-build conda-verify"
+        try:
+            self._cmd_exec(CMD, shell=True)
+        except RuntimeError:
+            CMD = 'conda install conda-build conda-verify -y'
+            self._cmd_exec(CMD, shell=True)
+        
+        print('BUILDING THE PACKAGE...')
+        CMD ='conda config --set anaconda_upload no'
+        self._cmd_exec(CMD, shell=True)
+        CMD = 'conda build conda/spectrochempy'
+        self._cmd_exec(CMD, shell=True)
+        CMD = 'conda build purge'
+        self._cmd_exec(CMD, shell=True)
+
+        print('The Conda package is here:')
+        CMD  ='conda build conda/spectrochempy --output'
+        self._cmd_exec(CMD, shell=True)
         
         # anaconda upload --user spectrocat ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2 --force
         #
