@@ -8,8 +8,8 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-
-"""Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
+"""
+Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 
 usage::
 
@@ -85,18 +85,22 @@ class Build(object):
         
         parser = argparse.ArgumentParser()
         
-        parser.add_argument("-w", "--html", help="create html pages", action="store_true")
-        parser.add_argument("-p", "--pdf", help="create pdf manual", action="store_true")
-        parser.add_argument("-t", "--tutorials", help="zip notebook tutorials for downloads", action="store_true")
-        parser.add_argument("-c", "--clean", help="clean/delete html or latex output", action="store_true")
-        parser.add_argument("-d", "--deepclean", help="full clean/delete output (reset fro a full regenration of the documentation)", action="store_true")
-        parser.add_argument("-s", "--sync", help="sync doc ipynb using jupytext", action="store_true")
-        parser.add_argument("-g", "--git", help="git commit last changes", action="store_true")
+        parser.add_argument("-H", "--html", help="create html pages", action="store_true")
+        parser.add_argument("-P", "--pdf", help="create pdf manual", action="store_true")
+        parser.add_argument("--tutorials", help="zip notebook tutorials for downloads", action="store_true")
+        parser.add_argument("--clean", help="clean/delete html or latex output", action="store_true")
+        parser.add_argument("--deepclean", help="full clean/delete output (reset fro a full regenration of the documentation)", action="store_true")
+        parser.add_argument("--sync", help="sync doc ipynb using jupytext", action="store_true")
+        parser.add_argument("--git", help="git commit last changes", action="store_true")
         parser.add_argument("-m", "--message", default='DOCS: updated', help='optional git commit message')
-        parser.add_argument("-a", "--api", help="execute a full regeneration of the api", action="store_true")
-        parser.add_argument("-r", "--release", help="release the current version documentation on website", action="store_true")
-        parser.add_argument("-l", "--changelogs", help="update changelogs using the redmine roadmap", action="store_true")
-
+        parser.add_argument("--api", help="execute a full regeneration of the api", action="store_true")
+        parser.add_argument("-R", "--release", help="release the current version documentation on website", action="store_true")
+        parser.add_argument("--changelogs", help="update changelogs using the redmine issues status", action="store_true")
+        parser.add_argument("--conda", help="make a conda package", action="store_true")
+        parser.add_argument("--pypi", help="make a pypi package", action="store_true")
+        parser.add_argument("--uploadconda", help="make a conda package", action="store_true")
+        parser.add_argument("--uploadpypi", help="make a pypi package", action="store_true")
+        
         args = parser.parse_args()
         
         if len(sys.argv)==1:
@@ -128,11 +132,19 @@ class Build(object):
             self.make_tutorials()
         if args.changelogs:
             self.make_changelog()
+        if args.pypi:
+            self.make_pypi()
+        if args.conda:
+            self.make_conda()
+        if args.uploadpypi:
+            self.upload_pypi()
+        if args.uploadconda:
+            self.upload_conda()
             
     @staticmethod
     def _cmd_exec(cmd, shell=None):
         # Private function to execute system command
-    
+        print(cmd)
         if shell is not None:
             res = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
         else:
@@ -140,12 +152,13 @@ class Build(object):
         output, error = res.communicate()
         if not error:
             v = output.decode("utf-8")
-            return v
+            print(v)
         else:
             v = error.decode('utf-8')
-            if "makeindex" in v or "NbConvertApp" in v:
-                return v  # This is not an error!
-            raise RuntimeError(f"{cmd} [FAILED]\n{v}")
+            if "makeindex" not in v and "NbConvertApp" not in v:
+                raise RuntimeError(f"{cmd} [FAILED]\n{v}")
+            print(v)
+        return v
 
     @staticmethod
     def _confirm(action):
@@ -238,26 +251,21 @@ class Build(object):
         latexdir = f"{BUILDDIR}/latex/{doc_version}"
         print('Started to build pdf from latex using make.... '
               'Wait until a new message appear (it is a long! compilation) ')
+
+        print('FIRST COMPILATION:')
+        CMD = f'cd {os.path.normpath(latexdir)};lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex'
+        self._cmd_exec(CMD,shell=True)
         
-        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                           f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
-                           shell=True)
+        print('MAKEINDEX:')
+        CMD = f'cd {os.path.normpath(latexdir)}; makeindex spectrochempy.idx'
+        self._cmd_exec(CMD, shell=True)
+
+        print('SECOND COMPILATION:')
+        CMD = f'cd {os.path.normpath(latexdir)};lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex'
+        self._cmd_exec(CMD, shell=True)
         
-        print('FIRST COMPILATION:', output)
-        
-        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                           f'makeindex spectrochempy.idx',
-                           shell=True)
-        print('MAKEINDEX', output)
-        
-        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                           f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
-                           shell=True)
-        print('SECOND COMPILATION:', output)
-        
-        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)}; '
-                           f'cp {PROJECT}.pdf {DOWNLOADS}/{doc_version}-{PROJECT}.pdf', shell=True)
-        print(output)
+        CMD = f'cd {os.path.normpath(latexdir)}; cp {PROJECT}.pdf {DOWNLOADS}/{doc_version}-{PROJECT}.pdf'
+        self._cmd_exec(CMD, shell=True)
     
     # ..................................................................................................................
     def sync_notebooks(self):
@@ -268,8 +276,9 @@ class Build(object):
         cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
         for cmd in cmds:
             cmd = cmd.split()
-            print(self._cmd_exec(cmd))
+            self._cmd_exec(cmd)
     
+    # ..................................................................................................................
     def make_tutorials(self):
         """
         
@@ -289,8 +298,8 @@ class Build(object):
         zipdir(os.path.join(GALLERYDIR, 'auto_examples'), os.path.join('notebooks', 'examples'), zipf)
         zipf.close()
 
-        output = self._cmd_exec(f'mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECT}-notebooks.zip', shell=True)
-        print(output)
+        CMD = f'mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECT}-notebooks.zip'
+        self._cmd_exec(CMD, shell=True)
 
 
     # ..................................................................................................................
@@ -327,12 +336,10 @@ class Build(object):
             return
         
         cmd = "git add -A".split()
-        output = self._cmd_exec(cmd)
-        print(output)
+        self._cmd_exec(cmd)
         
         cmd = "git log -1 --pretty=%B".split()
         output = self._cmd_exec(cmd)
-        print('last message: ', output)
         if output.strip() == message:
             v = "--amend"
         else:
@@ -340,12 +347,10 @@ class Build(object):
         
         cmd = f"git commit {v} -m".split()
         cmd.append(message)
-        output = self._cmd_exec(cmd)
-        print(output)
+        self._cmd_exec(cmd)
         
         cmd = "git log -1 --pretty=%B".split()
-        output = self._cmd_exec(cmd)
-        print('new message: ', output)
+        self._cmd_exec(cmd)
         
         # TODO: Automate Tagging?
     
@@ -378,8 +383,8 @@ class Build(object):
             FROM = os.path.join(HTML, '*')
             TO = os.path.join(PROJECT, 'html')
             cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
-            output = self._cmd_exec(cmd, shell=True)
-            print(output)
+            self._cmd_exec(cmd, shell=True)
+            
         
         else:
             
@@ -409,10 +414,10 @@ class Build(object):
         # clean notebooks output
         for nb in iglob(os.path.join(DOCDIR, '**', '*.ipynb'), recursive=True):
             # This will erase all notebook output
-            output = self._cmd_exec(
+            self._cmd_exec(
                 f'jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {nb}',
                 shell=True)
-            print(output)
+            
     
     # ..................................................................................................................
     def make_dirs(self):
@@ -488,7 +493,29 @@ class Build(object):
             
         return
     
+    # ..................................................................................................................
+    def make_pypi(self):
+    
+        # update pypi packages
+        print('CONDA PACKAGE UPDATING.... (please wait!)')
+        CMD = 'conda update -n base conda'
+        self._cmd_exec(CMD, shell=True)
+        CMD = 'conda update pip setuptools wheel twine'
+        self._cmd_exec(CMD, shell=True)
+        print('CREATING DISTRIBUTION PACKAGE....')
+        CMD = 'python setup.py sdist bdist_wheel'
+        self._cmd_exec(CMD, shell=True)
+        print('CHECKING THE DIST...')
+        CMD='twine check dist/*'
+        self._cmd_exec(CMD, shell=True)
         
+    # ..................................................................................................................
+    def uploadpypi(self):
+        print('UPLOADING TO PYPI')
+        CMD ='twine upload --repository pypi dist/*'
+        self._cmd_exec(CMD, shell=True)
+        
+    # ..................................................................................................................
     def make_conda(self, tag):
         """
         

@@ -51,6 +51,7 @@ requirements:
     - quadprog
     - pyqt
     - tqdm
+    -twine
 
 test:
   imports:

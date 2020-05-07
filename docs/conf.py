@@ -403,10 +403,6 @@ sphinx_gallery_conf = {
     'doc_module': ('spectrochempy', ),
                    'reference_url': {
                         'spectrochempy': None,
-                        #'matplotlib': 'https://matplotlib.org',   #<-- do not work
-                        'numpy': 'https://docs.scipy.org/doc/numpy',
-                        'sklearn': 'https://scikit-learn.org/stable',
-                        'ipython': 'https://ipython.readthedocs.org/en/stable/',
                         },
     # path to the examples scripts
     'examples_dirs': 'user/examples',
