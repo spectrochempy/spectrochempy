@@ -269,6 +269,7 @@ warnings.filterwarnings("ignore", category=UserWarning,
 
 html_context = {
     'current_version': 'dev' if 'dev' in version else 'stable',
+    'release': spectrochempy.application.__release__,
     'versions': (
         ('dev', '/dev/index.html"'),
         ('stable', '/stable/index.html'),

@@ -481,7 +481,10 @@ class Build(object):
         for filename in lhist:
             with open(filename, 'r') as f:
                 history +="\n\n"
-                history += f.read().strip()
+                nh = f.read().strip()
+                vc = ".".join(filename.split('.')[1:4])
+                nh = nh.replace(':orphan:',f".. _version_{vc}:")
+                history += nh
         history += '\n'
 
         with open(os.path.join(TEMPLATES, 'changelog.rst'), 'r') as f:
