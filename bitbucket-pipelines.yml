@@ -1,0 +1,14 @@
+image: python:3.7.6
+
+pipelines:
+  default:
+    - step:
+        script:
+          - echo "This script runs on all branches that don't have any specific pipeline assigned in 'branches'."
+  branches:
+    master:
+      - step:
+          script:
+            - echo "This script runs only on commit to the master branch."
+            - pip install -r requirements.txt -e .
+            - pytest ./tests/
