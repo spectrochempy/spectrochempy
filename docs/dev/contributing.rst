@@ -11,54 +11,60 @@ Contributing to |scpy|
 How to help ?
 =============
 
-Every  user of |scpy| can make useful contributions.
+Every |scpy| user can make a useful contribution.
 
-There is several way depending of your knowledge of programming:
+There are several ways to do this, depending on your programming knowledge:
 
-* reporting bugs
-* request for enhancement or new features
-* contributing to the documentation
+* report bugs
+* request for improvement or new features
+* contribute to the documentation
 * writing tutorials
-* making pull request to the |scpy| repository
+* pull request to the |scpy| repository.
 * ...
 
+In order to post on the project website, it is better to be registered, as without registration as a member,
+your interaction with the project may be very limited.
 
 .. _contributing.bug_reports:
 
 Bug reports and enhancement requests
 ====================================
 
-Bug reports are an important part of making |scpy| more stable.
+Bug reports are an important part of making |scpy| more stable and reliable.
 
 Please report Bug issues you discover to the
 `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
 
 Before creating a new issue, it is worth searching for existing bug reports and
-pull requests to see if the issue has already been reported and/or fixed.
+pull requests to see if the problem has already been reported and/or fixed.
 
 Bug reports should :
 
-#. Include a short, self-contained Python snippet reproducing the problem.
-   You can format the code nicely by using `GitHub Flavored Markdown
-   <http://github.github.com/github-flavored-markdown/>`_::
+#.  Include a short stand-alone Python snippet reproducing the problem.
 
-      ```python
-      >>> from spectrochempy import *
-      >>> nd = NDDataset(...)
-      ...
-      ```
+    You can format the code using `GitHub Flavored Markdown
+    <http://github.github.com/github-flavored-markdown/>`_
 
-#. Include the full version string of |scpy|. You can use the
-   built in property::
+    .. sourcecode:: ipython
 
-      >>> import spectrochempy as scp
-      >>> scp.version
+        >>> import spectrochempy as scp
+        >>> nd = scp.NDDataset(...)
+        ...
+
+#.  Include the full version string of |scpy|. You can use the
+    built in property
+
+    .. sourcecode:: ipython
+
+        >>> import spectrochempy as scp
+        >>> scp.version
 
 #. Explain why the current behavior is wrong/not desired and what you expect instead.
 
 The issue will then show up to the |scpy| community and be open to comments/ideas
 from others.
 
+C
 
 Contributing to the code
 =========================
