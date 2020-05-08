@@ -18,6 +18,7 @@ There is several way depending of your knowledge of programming:
 * reporting bugs
 * request for enhancement or new features
 * contributing to the documentation
+* writing tutorials
 * making pull request to the |scpy| repository
 * ...
 
@@ -29,10 +30,13 @@ Bug reports and enhancement requests
 
 Bug reports are an important part of making |scpy| more stable.
 
+Please report Bug issues you discover to the
+`Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
+
 Before creating a new issue, it is worth searching for existing bug reports and
 pull requests to see if the issue has already been reported and/or fixed.
 
-Bug reports must:
+Bug reports should :
 
 #. Include a short, self-contained Python snippet reproducing the problem.
    You can format the code nicely by using `GitHub Flavored Markdown
@@ -44,15 +48,15 @@ Bug reports must:
       ...
       ```
 
-#. Include the full version string of |scpy| and its dependencies. You can use the
-   built in function::
+#. Include the full version string of |scpy|. You can use the
+   built in property::
 
-      >>> import xarray as xr
-      >>> xr.show_versions()
+      >>> import spectrochempy as scp
+      >>> scp.version
 
 #. Explain why the current behavior is wrong/not desired and what you expect instead.
 
-The issue will then show up to the *xarray* community and be open to comments/ideas
+The issue will then show up to the |scpy| community and be open to comments/ideas
 from others.
 
 

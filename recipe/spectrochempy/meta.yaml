@@ -38,6 +38,8 @@ requirements:
     - python           {{ python }}.*
     - setuptools
     - setuptools_scm
+    - nodejs
+    - jupyterlab
   run:
     - python
     - numpy
