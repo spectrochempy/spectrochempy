@@ -582,10 +582,18 @@ class GeneralPreferences(MetaConfigurable):
                                ' standard location').tag(config=True,
                                                          type="folder")
     
+    databases = Unicode(help='Directory where to look for database files '
+                            'such as csv').tag(config=True, type="folder")
+
     @default('stylesheets')
     def _get_stylesheets_default(self):
         # the spectra path in package data
         return _get_pkg_datadir_path('stylesheets', 'scp_data')
+
+    @default('databases')
+    def _get_stylesheets_default(self):
+        # the spectra path in package data
+        return _get_pkg_datadir_path('databases', 'scp_data')
     
     @default('datadir')
     def _get_default_datadir(self):

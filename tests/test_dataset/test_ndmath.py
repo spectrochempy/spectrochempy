@@ -678,8 +678,7 @@ def test_nddataset_divide_with_numpy_array():
     ('__mul__', ur.km * ur.m),
     ('__truediv__', ur.km / ur.m)])
 def test_ndmath_unit_conversion_operators(operation, result_units):
-    in_km = NDDataset(np.array([1, 1]), units=ur.km,
-                      uncertainty=np.array([.1, .1]))
+    in_km = NDDataset(np.array([1, 1]), units=ur.km)
     in_m = NDDataset(in_km.data * 1000, units=ur.m)
     operator_km = in_km.__getattribute__(operation)
     combined = operator_km(in_m)
