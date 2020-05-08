@@ -1,0 +1,28 @@
+name: scpy
+channels:
+- conda-forge
+- spectrocat
+- cantera
+- defaults
+dependencies:
+- numpy
+- matplotlib
+- traitlets
+- pint=0.9
+- quaternion
+- scipy
+- colorama
+- setuptools_scm
+- ipython
+- jupyterlab
+- ipympl
+- nodejs
+- ipykernel
+- ipywidgets
+- widgetsnbextension
+- xlrd
+- numba
+- pandas
+- cantera
+- quadprog
+- pyqt
