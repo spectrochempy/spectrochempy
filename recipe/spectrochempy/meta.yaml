@@ -14,7 +14,7 @@ source:
   git_rev: "{{ version }}"
 
 build:
-  number: {{ number }}
+  number: 0
   noarch: python
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
