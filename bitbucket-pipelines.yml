@@ -13,4 +13,5 @@ pipelines:
             - conda env create --file env/scpy.yml
             - conda activate scpy
             - pip install -e .
+            - conda install pytest
             - pytest
