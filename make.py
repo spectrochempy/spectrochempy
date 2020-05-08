@@ -523,8 +523,8 @@ class Build(object):
         #CMDS += ['conda init zsh']    # normally to adapt depending on shell present in your OS
         #CMDS += ["conda deactivate"]  # # Prefer to work in a clean base environment to better detect incompatibilities
         CMDS += ['conda update conda']
-        CMDS += ['conda install pip setuptools wheel twine conda-build conda-verify -y']
-        CMDS += ['conda update pip setuptools wheel twine conda-build conda-verify']
+        CMDS += ['conda install pip setuptools wheel twine conda-build conda-verify anaconda-client-y']
+        CMDS += ['conda update pip setuptools wheel twine conda-build conda-verify anaconda-client']
         
         CMDS += ['print:CREATING PYPI DISTRIBUTION PACKAGE....']
         CMDS += ['python setup.py sdist bdist_wheel']
