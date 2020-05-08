@@ -10,10 +10,7 @@ pipelines:
       - step:
           script:
             - echo "This script runs only on commit to the develop branch."
-            - conda config --add channels cantera
-            - conda config --add channels spectrocat
-            - conda config --add channels conda-forge
-            - conda config --set channel_priority strict
-            - conda env update -n root --file env/bitbucket-env.yml
+            - conda env create --yes --quiet --file scpy.yml
+            - conda activate scpy
             - pip install -e .
             - pytest
