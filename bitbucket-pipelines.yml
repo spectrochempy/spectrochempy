@@ -8,10 +8,17 @@ pipelines:
   branches:
     develop:
       - step:
+          caches:
+            - pip
+            - conda
           script:
             - echo "This script runs only on commit to the develop branch."
-            - conda env create --file env/scpy.yml
+            - conda env update -n scpy --file env/scpy.yml
             - conda activate scpy
             - pip install -e .
             - conda install pytest
             - pytest
+            -
+definitions:
+  caches:
+    conda:  ~/.conda/envs/scpy
