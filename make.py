@@ -96,9 +96,7 @@ class Build(object):
         parser.add_argument("-R", "--release", help="release the current version documentation on website", action="store_true")
         parser.add_argument("--changelogs", help="update changelogs using the redmine issues status", action="store_true")
         parser.add_argument("--conda", help="make a conda package", action="store_true")
-        parser.add_argument("--pypi", help="make a pypi package", action="store_true")
-        parser.add_argument("--uploadconda", help="make a conda package", action="store_true")
-        parser.add_argument("--uploadpypi", help="make a pypi package", action="store_true")
+        parser.add_argument("--upload", help="upload conda and pypi package to the corresponding repositories", action="store_true")
         
         args = parser.parse_args()
         
@@ -131,14 +129,10 @@ class Build(object):
             self.make_tutorials()
         if args.changelogs:
             self.make_changelog()
-        if args.pypi:
-            self.make_pypi()
         if args.conda:
-            self.make_conda()
-        if args.uploadpypi:
-            self.upload_pypi()
-        if args.uploadconda:
-            self.upload_conda()
+            self.make_conda_and_pypi()
+        if args.upload:
+            self.upload()
             
     @staticmethod
     def _cmd_exec(cmd, shell=None):
@@ -500,34 +494,13 @@ class Build(object):
         return
     
     # ..................................................................................................................
-    def make_pypi(self):
-    
-        # update pypi packages
-        print('CONDA PACKAGE UPDATING.... (please wait!)')
-        CMD = 'conda update -n base conda'
-        self._cmd_exec(CMD, shell=True)
-        CMD = 'conda update pip setuptools wheel twine'
-        try:
-            self._cmd_exec(CMD, shell=True)
-        except RuntimeError:
-            CMD = 'conda install pip setuptools wheel twine -y'
-            self._cmd_exec(CMD, shell=True)
-    
-        print('CREATING DISTRIBUTION PACKAGE....')
-        CMD = 'python setup.py sdist bdist_wheel'
-        self._cmd_exec(CMD, shell=True)
-        print('CHECKING THE DIST...')
-        CMD='twine check dist/*'
-        self._cmd_exec(CMD, shell=True)
-        
-    # ..................................................................................................................
     def uploadpypi(self):
         print('UPLOADING TO PYPI')
         CMD ='twine upload --repository pypi dist/*'
         self._cmd_exec(CMD, shell=True)
         
     # ..................................................................................................................
-    def make_conda(self):
+    def make_conda_and_pypi(self):
         """
         
         Parameters
@@ -538,26 +511,46 @@ class Build(object):
         -------
 
         """
-        print('UPDATE THE CONDA TOOLS')
-        CMD = "conda update conda-build conda-verify"
-        try:
-            self._cmd_exec(CMD, shell=True)
-        except RuntimeError:
-            CMD = 'conda install conda-build conda-verify -y'
-            self._cmd_exec(CMD, shell=True)
         
-        print('BUILDING THE PACKAGE...')
-        CMD ='conda config --set anaconda_upload no'
-        self._cmd_exec(CMD, shell=True)
-        CMD = 'conda build recipe/spectrochempy'
-        self._cmd_exec(CMD, shell=True)
-        CMD = 'conda build purge'
-        self._cmd_exec(CMD, shell=True)
+        CMDS =  ['print:CONDA PACKAGE UPDATING.... (please wait!)']
+        
+        CMDS += ["conda config --add channels cantera"]
+        CMDS += ["conda config --add channels spectrocat"]
+        CMDS += ["conda config --add channels conda-forge"]
+        CMDS += ["conda config --set channel_priority strict"]
+        CMDS += ['conda config --set anaconda_upload no']
+        
+        #CMDS += ['conda init zsh']    # normally to adapt depending on shell present in your OS
+        #CMDS += ["conda deactivate"]  # # Prefer to work in a clean base environment to better detect incompatibilities
+        CMDS += ['conda update conda']
+        CMDS += ['conda install pip setuptools wheel twine conda-build conda-verify -y']
+        CMDS += ['conda update pip setuptools wheel twine conda-build conda-verify']
+        
+        CMDS += ['print:CREATING PYPI DISTRIBUTION PACKAGE....']
+        CMDS += ['python setup.py sdist bdist_wheel']
+        CMDS += ['twine check dist/*']
+        
+        CMDS += ['print:BUILDING THE CONDA PACKAGE...']
+        CMDS += ['conda build recipe/spectrochempy']
+        
 
-        print('The Conda package is here:')
-        CMD  ='conda build recipe/spectrochempy --output'
-        self._cmd_exec(CMD, shell=True)
-        
+        #CMDS += ['print:The Conda package is here -> ']
+        #CMDS += ['conda build recipe/spectrochempy --output']
+
+        CMDS += ['conda build purge']
+        for CMD in CMDS:
+            if CMD.startswith('print:'):
+                print(CMD[6:])
+            else:
+                try:
+                    self._cmd_exec(CMD, shell=True)
+                except RuntimeError as e:
+                    if "Your shell has not been properly configured to use 'conda activate'" in e.args[0]:
+                        raise e
+                    else:
+                        print(e.args[0])
+
+
         # anaconda upload --user spectrocat ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2 --force
         #
         # conda convert --platform linux-64 ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2
