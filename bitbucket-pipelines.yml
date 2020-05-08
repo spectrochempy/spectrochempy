@@ -14,6 +14,6 @@ pipelines:
             - conda config --add channels spectrocat
             - conda config --add channels conda-forge
             - conda config --set channel_priority strict
-            - conda env update -n root -f env/scpy.yml
+            - conda env update -n root --file env/bitbucket-env.yml
             - pip install -e .
             - pytest
