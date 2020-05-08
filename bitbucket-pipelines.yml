@@ -4,7 +4,7 @@ pipelines:
   default:
     - step:
         script:
-          - echo "This script runs on all branches that don't have any specific pipeline assigned in 'branches'."
+          - echo "Runs on all branches that don't have any specific pipeline assigned in 'branches'."
   branches:
     develop:
       - step:
@@ -12,7 +12,7 @@ pipelines:
             - pip
             - conda
           script:
-            - echo "This script runs only on commit to the develop branch."
+            - echo "Runs only on commit to the develop branch."
             - conda env update -n scpy --file env/scpy.yml
             - conda activate scpy
             - pip install -e .
