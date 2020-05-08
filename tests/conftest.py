@@ -7,7 +7,6 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-
 import sys
 import os
 import numpy as np
@@ -22,7 +21,10 @@ from IPython.testing.globalipapp import start_ipython
 
 @pytest.fixture(scope='session')
 def session_ip():
-    return start_ipython()
+    try:
+        return start_ipython()
+    except:
+        return None
 
 
 @pytest.fixture(scope='module')

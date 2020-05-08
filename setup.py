@@ -16,7 +16,7 @@ import sys
 import subprocess
 import shutil as sh
 import warnings
-# import version
+#import version
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -127,6 +127,7 @@ setup_args = dict(
     # packages informations
     name="spectrochempy",
     use_scm_version=True,
+    #version = version.version,
     license="CeCILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="developpers@spectrochempy.fr",

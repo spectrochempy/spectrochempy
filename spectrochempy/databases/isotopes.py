@@ -14,17 +14,15 @@ necessary features of NMR nuclei, such as their spin, larmor frequency and so on
 """
 __all__ = ['Isotopes']
 
-import re
-from fractions import Fraction
 
 # ======================================================================================================================
 # Standard imports
 # ======================================================================================================================
+import os
+import re
+from fractions import Fraction
 import numpy as np
 import pandas as pd
-from pkg_resources import resource_filename
-
-from spectrochempy.core import info_, warning_
 
 # ======================================================================================================================
 # Third-party imports
@@ -36,9 +34,7 @@ from traitlets import (HasTraits,
 # Local imports
 # ======================================================================================================================
 from spectrochempy.units import ur
-
-# This module's package.
-PKG = 'spectrochempy.databases.isotopes'
+from spectrochempy.core import info_, warning_, general_preferences as prefs
 
 
 # ======================================================================================================================
@@ -207,7 +203,9 @@ class Isotopes(HasTraits):
     # initializer
     # ------------------------------------------------------------------------------------------------------------------
     def __init__(self, nucleus='1H'):
-        filename = resource_filename(PKG, 'isotopes.csv')
+        #filename = resource_filename(PKG, 'isotopes.csv')
+        DATABASES = prefs.databases
+        filename = os.path.join(DATABASES, 'isotopes.csv')
         self.isotopes = pd.read_csv(filename, index_col=0)
         self._nucleus = nucleus
 

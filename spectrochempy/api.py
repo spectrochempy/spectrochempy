@@ -212,7 +212,8 @@ def check_for_update():
 
 
 if check_for_update():
-    from spectrochempy.utils import display_info_string
+    
+    from spectrochempy.application import display_info_string
     
     display_info_string(message='A new release version is available on the anaconda `Spectrocat` Channel (or Pypi). '
                                 '\nPlease consider updating for bug fixes and new features !', logo=False)
@@ -222,6 +223,7 @@ __all__.append('check_for_update')
 import warnings
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
+#warnings.filterwarnings(action="error", category=DeprecationWarning)
 
 # ==============================================================================
 if __name__ == '__main__':
