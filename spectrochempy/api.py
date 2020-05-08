@@ -223,6 +223,7 @@ __all__.append('check_for_update')
 import warnings
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
+#warnings.filterwarnings(action="error", category=DeprecationWarning)
 
 # ==============================================================================
 if __name__ == '__main__':
