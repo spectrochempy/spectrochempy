@@ -17,8 +17,7 @@ pipelines:
             - conda activate scpy
             - pip install -e .
             - conda install pytest
-            - pytest
-            -
+            - pytest --nodisplay
 definitions:
   caches:
     conda:  ~/.conda/envs/scpy
