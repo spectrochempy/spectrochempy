@@ -65,7 +65,7 @@ def pytest_cmdline_preparse(config, args):
         for k in list(app.aliases.keys()):
             if item.startswith("-" + k) or k in ['h', ]:
                 args.remove.append(item)
-
+        
 
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------

@@ -9,16 +9,15 @@ pipelines:
     develop:
       - step:
           caches:
-            - pip
             - conda
           script:
             - echo "Runs only on commit to the develop branch."
-            - conda env update -n scpy --file env/scpy.yml
+            - conda update -n base conda
+            - conda env update -n scpy --quiet --file env/scpy.yml
             - conda activate scpy
             - pip install -e .
             - conda install pytest
-            - pytest
-            -
+            - pytest --nodisplay
 definitions:
   caches:
-    conda:  ~/.conda/envs/scpy
+    conda:  ~/.conda/envs/scpy/bin
