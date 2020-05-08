@@ -137,7 +137,7 @@ setup_args = dict(
     description='Processing, analysis and modelling Spectroscopic data for '
                 'Chemistry with Python',
     long_description=read('README.rst'),
-    long_description_content_type='text/rst',
+    long_description_content_type='text/x-rst',
     classifiers=["Development Status :: 3 - Alpha",
                  "Topic :: Utilities",
                  "Topic :: Scientific/Engineering",
