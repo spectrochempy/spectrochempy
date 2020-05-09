@@ -8,5 +8,6 @@ RUN conda env update -n scpy -f /tmp/scpy.yml
 
 # activate this environment
 ENV PATH /opt/conda/envs/scpy/bin:$PATH
-RUN echo "/opt/conda/bin/activate scpy" > ~/.bashrc
+RUN echo "source activate scpy" > ~/.bashrc
+
 

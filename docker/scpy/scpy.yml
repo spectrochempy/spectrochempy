@@ -26,5 +26,8 @@ dependencies:
 - cantera
 - quadprog
 - pyqt
-- tdqm
+- tqdm
+# test
+- pytest
+- scikit-image
 
