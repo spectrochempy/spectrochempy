@@ -31,6 +31,7 @@ as without registration as a member your interaction with the project may be ver
     issues
     forums
     code
+    ide
     testing
     docs
     pypi

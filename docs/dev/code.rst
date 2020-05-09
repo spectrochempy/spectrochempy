@@ -1,6 +1,9 @@
 .. _contributing_code:
 
-..warning::
+Contributing to the code
+=========================
+
+.. warning::
 
     UNDER WORK. THIS MAY BE OUTDATED OR WRONG
 
@@ -8,14 +11,15 @@
 .. contents:: Table of Contents
    :local:
 
-Contributing to the code
-=========================
+
+Summary
+---------
 
 To contribute to the development of the source code, you will need to
 
 * to install a working version of python,
-* to install the GIT version system if it is not already present in your operating system (e.g., Windows),
-* clone scpy sources from the remote repository on bitbucket,
+* to install the GIT version system if it is not already present in your operating system (*e.g.,* Windows),
+* clone |scpy| sources from the remote repository on bitbucket,
 * install an IDE, such as PyCharm or Spider, allowing you to code more easily.
 
 Here below are our recommendations for these different steps
@@ -65,8 +69,20 @@ Optional: install a GUI git client
 Once your installation of **git** is complete, it may be useful (and we recommend it) to install a GUI client for the git
 version system.
 
-Because we use the Bitbucket repository provider for the scpy project, we use the `SourceTree client <https://www.sourcetreeapp.com>`_
-(which can be installed Windows or Mac).
+Because we use the Bitbucket repository provider for the scpy project,
+we use the `SourceTree client <https://www.sourcetreeapp.com>`_
+(which can be installed on both Windows and Mac operating systems).
+
+To configure and learn how to use the sourcetree GUI application, you can consult
+this `tutorial <https://confluence.atlassian.com/bitbucket/tutorial-learn-bitbucket-with-sourcetree-760120235.html>`_
+
+Clone the Bitbucket repository
+------------------------------
+
+Now that you have git installed, you will be able to clone the Bitbucket repository where the spectrochempy sources
+are stored and versioned.
+
+First, it is a good idea to register on the `bitbucket website <https://bitbucket.org/>`_.
 
 
 Creating a conda environment for development
@@ -80,7 +96,7 @@ TODO
 Required disk space for the development source directory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Sources for |spcy| in its development version requires ~ 500 Mb of disk space.
+Sources for |scpy| in its development version requires ~ 500 Mb of disk space.
 
 If you include a specific python environment (scpy-dev), this will add up ~2.8 Gb in
 the miniconda/envs folder.
