@@ -11,6 +11,7 @@ pandas
 xlrd
 scipy
 numba
+brukeropusreader
 
 # mainly for install and a bit more...
 setuptools_scm
