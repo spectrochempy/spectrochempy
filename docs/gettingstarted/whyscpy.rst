@@ -1,6 +1,6 @@
 .. _whyscpy:
 
-Why spectrochempy  ?
+Why |scpy|  ?
 ====================
 
 **Table of contents**
