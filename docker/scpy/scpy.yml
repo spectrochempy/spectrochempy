@@ -26,3 +26,5 @@ dependencies:
 - cantera
 - quadprog
 - pyqt
+- tdqm
+
