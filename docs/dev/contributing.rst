@@ -1,7 +1,7 @@
 .. _develguide:
 
-Contributing to |scpy| 
-#######################
+How can I contribute  to |scpy|?
+###############################################
 
 
 .. contents:: Table of Contents
@@ -22,7 +22,7 @@ There are several ways to do this, depending on your programming knowledge:
 * pull request to the |scpy| repository.
 * ...
 
-In order to post on the project website, it is better to be registered, as without registration as a member,
+In order to post on the project website, it is better to be registered, as without registration as a member
 your interaction with the project may be very limited.
 
 .. _contributing.bug_reports:
@@ -30,7 +30,8 @@ your interaction with the project may be very limited.
 Bug reports and enhancement requests
 ====================================
 
-Bug reports are an important part of making |scpy| more stable and reliable.
+Bug reports are a very important part of any sofware project. Helping us to discover issues or proposing enhancements
+should allow making |scpy| more stable, reliable and adapted to more scientific activities.
 
 Please report Bug issues you discover to the
 `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
@@ -64,7 +65,9 @@ Bug reports should :
 The issue will then show up to the |scpy| community and be open to comments/ideas
 from others.
 
-C
+Contributing in the Forum
+===========================
+
 
 Contributing to the code
 =========================
