@@ -28,7 +28,7 @@ This is the case, for example, with advanced integration or basic editing in man
 Some of them do not always hold monitoring of data history, which is also problematic for the verification of data
 integrity and reproducibility.
 
-The use of the |scpy| is consistent with the three pillars of open science:
+The use of the |scpy| is consistent with three pillars of open science:
 open source, open methodology and replicability.
 
 In particular, |scpy| :
@@ -85,15 +85,16 @@ You might **NOT** want to use spectrochempy if:
   Application Programming Interface (API), it requires writing commands and small scripts. Still, Python
   and spectrochempy have a smooth learning curve.The spectrochempy documentation and resources contain fully documented
   examples and tutorials (see :ref:`tutorials` and :ref:`sphx_glr_gallery_auto_examples`), which should be   straightforward to transpose to your
-  own data. In particular, Jupyter notebooks, mixing texts, blocks of codes and figures, so that the basic procedures
+  own data. In particular, the use of Jupyter notebooks mixing texts, blocks of codes and figures, so that the basic procedures
   (data import, basic processing and analyses, etc...) do not require much knowledge in programming.
 
 - you work on spectroscopic data not easily treated which spectrochempy (currently mostly focused on optical
-  spectroscopies and NMR) because some components or tools (e.g., import of your raw data, ...) are lacking: do not
-  to suggest new features that should be added (:ref:`contributing.bug_reports`). We will consider all
+  spectroscopies and NMR) because some components or tools (e.g., import of your raw data, ...) are lacking: please
+  suggest new features that should be added (:ref:`contributing.bug_reports`). We will consider all
   suggestions to make spectrochempy more broadly and more easily usable.
 
-- you work on very sensitive data (health, chemical safety, plant production, ...) and cannot afford the risk using software under development and subject to bugs and changes before 'maturity'. We do not challenge that !
+- you work on very sensitive data (health, chemical safety, plant production, ...) and cannot afford the risk using
+  software under development and subject to bugs and changes before 'maturity'. We do not challenge that !
 
 - you are fully satisfied by your current tools. "The heart has its reasons, of which reason knows nothing." We do not
   challenge that either, but open to hear your opinion and suggestions (:ref:`contributing.bug_reports`) !
