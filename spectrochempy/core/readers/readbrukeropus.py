@@ -65,7 +65,7 @@ def read_bruker_opus(dataset=None, **kwargs):
     --------
     >>> A = NDDataset.read_bruker_opus('irdata\\spectrum.0001')
     >>> print(A)
-
+    NDDataset: [float64] a.u. (shape: (y:1, x:2568))
     """
     debug_("reading bruker opus files")
 
@@ -99,6 +99,8 @@ def read_bruker_opus(dataset=None, **kwargs):
     xaxis = None
     intensities = []
     names = []
+    acquisitiondates = []
+    timestamps = []
     for file in files:
         opus_data = read_file(file)
         if not xaxis:
@@ -111,28 +113,39 @@ def read_bruker_opus(dataset=None, **kwargs):
         names.append(opus_data["Sample"]['SNM'])
         acqdate = opus_data["AB Data Parameter"]["DAT"]
         acqtime = opus_data["AB Data Parameter"]["TIM"]
-        dtdate = datetime.strptime(acqdate, '%d/%m/%Y')
-        dttime = datetime.strptime(acqtime.split()[0], '%H:%M:%S.%f')
-        #dttimezone = datetime.strptime(acqtime.split()[1], '(%Z)')
+        GMT_offset_hour = float(acqtime.split('GMT')[1].split(')')[0])
+        date_time = datetime.strptime(acqdate + '_' + acqtime.split()[0],
+                                      '%d/%m/%Y_%H:%M:%S.%f')
+        UTC_date_time = date_time - timedelta(hours=GMT_offset_hour)
+        UTC_date_time = UTC_date_time.replace(tzinfo=timezone.utc)
+        # Transform to timestamp for storage in the Coord object
+        # use datetime.fromtimestamp(d, timezone.utc)) to transform back to datetime
+        timestamp = UTC_date_time.timestamp()
+        acquisitiondates.append(UTC_date_time)
+        timestamps.append(timestamp)
+
+    yaxis = Coord(timestamps,
+                  title='Acquisition timestamp (GMT)',
+                  units='s',
+                  labels=(acquisitiondates, names))
+
     dataset = NDDataset(intensities)
+    dataset.set_coords(y=yaxis, x=xaxis)
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
-    dataset.set_coords(x=xaxis)
 
     # Set origin, description and history
     dataset.origin = "opus"
     dataset.description = ('Dataset from opus files. \n')
 
-    dataset.history = str(datetime.now()) + ':import from opus files \n'
+    if sortbydate:
+        dataset.sort(dim='y', inplace=True)
 
-#    if sortbydate:
-#        dataset.sort(dim='y', inplace=True)
-#        dataset.history.append(str(datetime.now()) + ':Sorted')
+    dataset.history = str(datetime.now()) + ':import from opus files \n'
 
     # Set the NDDataset date
     dataset._date = datetime.now()
     dataset._modified = dataset.date
-
     # debug_("end of reading")
 
     return dataset
