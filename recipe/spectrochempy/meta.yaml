@@ -63,8 +63,13 @@ requirements:
     - cantera
     - quadprog
     - pyqt
+<<<<<<< HEAD:recipe/spectrochempy/meta.yaml
     - tqdm
     
+=======
+    - brukeropusreader
+
+>>>>>>> WIP Bruker opus:conda/spectrochempy/meta.yaml
 test:
   imports:
     - spectrochempy
