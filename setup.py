@@ -126,6 +126,7 @@ setup_args = dict(
     
     # packages informations
     name="spectrochempy",
+    #use_scm_version=True,
     version = version.version,
     license="CeCILL-B",
     author="Arnaud Travert & Christian Fernandez",
@@ -136,6 +137,7 @@ setup_args = dict(
     description='Processing, analysis and modelling Spectroscopic data for '
                 'Chemistry with Python',
     long_description=read('README.rst'),
+    long_description_content_type='text/x-rst',
     classifiers=["Development Status :: 3 - Alpha",
                  "Topic :: Utilities",
                  "Topic :: Scientific/Engineering",

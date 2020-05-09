@@ -7,12 +7,11 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
+# TODO: 0.1.18 - Do we need this?
 
 __all__ = ['readXlCellRange']
 
 import xlrd
-import os
-import zipfile
 import numpy as np
 
 

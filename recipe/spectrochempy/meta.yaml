@@ -1,5 +1,6 @@
-{% set name = "spectrochempy" %}
-{% set version = "0.1.16" %}
+{% set name = "SpectroChemPy" %}
+{% set version = "0.1.17" %}
+{% set number = 0 %}
 
 # see this  for a description of the sections
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
@@ -14,23 +15,37 @@ source:
 
 build:
   number: 0
+  noarch: python
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
-  script: "{{ PYTHON }} -m pip install . -vv"
+
+  # If the installation is complex, or different between Unix and Windows,
+  # use separate bld.bat and build.sh files instead of this key. By default,
+  # the package will be built for the Python versions supported by conda-forge
+  # and for all major OSs. Add the line "skip: True  # [py<35]" (for example)
+  # to limit to Python 3.5 and newer, or "skip: True  # [not win]" to limit
+  # to Windows.
+
+  script:
+    - {{ PYTHON }} -m pip install . -vv
+    - jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
 
 requirements:
   host:
     - pip
     - python
   build:
-    - python           3.7
+    - python           {{ python }}.*
     - setuptools
     - setuptools_scm
+    - nodejs
+    - jupyterlab
   run:
+    - python
     - numpy
     - matplotlib
     - traitlets
-    - pint             0.9
+    - pint             {{ pint }}.*
     - quaternion
     - scipy
     - colorama
@@ -48,36 +63,29 @@ requirements:
     - cantera
     - quadprog
     - pyqt
-    - brukeropusreader
-
+    - tqdm
+    
 test:
   imports:
-    - scp_data
     - spectrochempy
-    - spectrochempy.core
-    - spectrochempy.core.analysis
-    - spectrochempy.core.dataset
-    - spectrochempy.core.fitting
-    - spectrochempy.core.plotters
-    - spectrochempy.core.processors
-    - spectrochempy.core.project
-    - spectrochempy.core.readers
-    - spectrochempy.core.readers.nmr
-    - spectrochempy.core.scripts
-    - spectrochempy.core.writers
-    - spectrochempy.databases
-    - spectrochempy.scripts
-    - spectrochempy.units
-    - spectrochempy.utils
-    - spectrochempy.widgets
+
   commands:
     - scpy --help
+    - pytest
+
+  # test-only requirements
+  requires:
+      - pytest
+      - scikit-image
+
+  # needed test files
+  source_files:
+      - tests/
 
 about:
   home: "https://redmine.spectrochempy.fr"
   license: CeCILL-B
   license_family: OTHER
-  license_file: 
   summary: "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
   doc_url: "https://www.spectrochempy.fr"
   dev_url: "https://bitbucket.org/spectrocat/spectrochempy"

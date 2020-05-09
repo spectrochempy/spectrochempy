@@ -515,9 +515,6 @@ class NDArray(HasTraits):
 
         If there is no data but labels, then the labels are returned instead of data.
 
-        .. note::
-            See the |userguide|_ for more information
-
         """
 
         return self._data

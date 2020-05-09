@@ -1,0 +1,23 @@
+image: continuumio/miniconda3:latest
+
+pipelines:
+  default:
+    - step:
+        script:
+          - echo "Runs on all branches that don't have any specific pipeline assigned in 'branches'."
+  branches:
+    develop:
+      - step:
+          caches:
+            - pip
+            - conda
+          script:
+            - echo "Runs only on commit to the develop branch."
+            - conda env update -n scpy --file env/scpy.yml
+            - conda activate scpy
+            - pip install -e .
+            - conda install pytest
+            - pytest --nodisplay
+definitions:
+  caches:
+    conda:  ~/.conda/envs/scpy

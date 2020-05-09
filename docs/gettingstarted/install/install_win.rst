@@ -1,51 +1,24 @@
 .. _install_win:
 
 Installation Guide for Windows
-##############################
-
-**Table of contents**
-
-.. contents::
-   :local:
+===============================
 
 
-Prerequisites
-=============
+Installation
+-------------
 
-|scpy| requires a working python installation (version 3.6 or higher).
-
-* `Python <http://www.python.org/>`_
-    We highly recommend to install  **Anaconda** or **Miniconda** distributions which are available for most
-    platforms and  the rest of this guide will mainly use commands for this distribution.
-
-    Miniconda is lighter (400 MB disk space) while Anaconda (3 GB minimum disk space to download and install)
-    is much more complete for scientific applications if you intend using python beyond Spectrochempy. Important
-    package in Anaconda are also required for spectrochempy (e.g. Matplotib, Numpy, Scipy, Jupyter, …) They are not
-    included in Miniconda and will be installed anyway. So overall, the difference in installation time/disc space
-    won’t be that big whether you choose Miniconda or Anaconda…
-
-    Go to `Anaconda download page <https://www.anaconda.com/distribution/>`_ or
-    `Miniconda download page <https://docs.conda.io/en/latest/miniconda.html>`_.
-    Choose your platform and download one of the available installer, *e.g.*, the 3.6 or + version.
-
-    Install the version which you just downloaded, following the instructions on the download page.
-
-    This can take time, go and get your favorite drink...
-
-Installation od spectrochempy
-=============================
 .. _conda_win:
 
 The following steps have been checked only with windows 10 but should work with previous versions as well.
 
-We highly recommend that all new users install Spectrochempy interface via Conda. You can install Spectrochempy
+We highly recommend that all new users install |scpy| interface via Conda. You can install Spectrochempy
 in a dedicated environment (recommended, steps 4. and 5. below). You can also use your base environment or an
 existing environment (then skip steps 4. and 5.)
 
 #.  Open a command prompt (Select the Start button and type cmd), or preferably open the Anaconda Prompt
     in the Anaconda start Menu.
 
-    .. image:: ../../img/Aprompt.png
+    .. image:: images/Aprompt.png
        :width: 200
        :alt: Anaconda Prompt
 
@@ -97,36 +70,43 @@ existing environment (then skip steps 4. and 5.)
         create a shortcut, name it, for instance, `Anaconda prompt (scpy)` and place it in an easily accessible
         place (e.g. the Windows Startmenu Folder).
 
-#. Install Spectrochempy
+#. Install |scpy|
 
     .. sourcecode:: bat
 
         (scpy) C:\<yourDefaultPath>> conda install spectrochempy
 
-    This can take time, depending on your python installation and the number of missing packages. Go and get your
-    favorite drink as they are are downloaded and extracted…
+    This can take time, depending on your python installation and the number of missing packages.
 
-#. Check the installation by running a IPython session by issuing in the terminal
-   the following command:
+Install a developper version (Advanced usage)
+----------------------------------------------
 
-    .. sourcecode:: bash
+Installation of the developper version is described here:  :ref:`develguide`.
 
-        (base) C:\<yourDefaultPath>> ipython
+Check the Installation
+------------------------
 
-    Then execute the following command:
+Check the installation by running a `IPython <https://ipython.readthedocs.io/en/stable/>`_ session by issuing in the terminal
+the following command:
 
-    .. sourcecode:: ipython
+.. sourcecode:: bat
 
-        In [1]: from spectrochempy import *
+    (scpy) C:\<yourDefaultPath>> ipython
 
-    If this goes well, you should see the following output, indicating that Spectrochempy
-    is likely functional !
+Then execute the following command:
 
-    .. sourcecode:: ipython
+.. sourcecode:: ipython
 
-        SpectroChemPy's API - v.0.1.17
-        © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
+    In [1]: from spectrochempy import *
+
+If this goes well, you should see the following output, indicating that Spectrochempy
+is likely functional !
+
+.. sourcecode:: ipython
+
+    SpectroChemPy's API - v.0.1.17
+    © Copyright 2014-2020 - A.Travert & C.Fernandez @ LCS
 
 
-The recommended next step is to proceed to the |userguide|_ or the |tutorials|_
+The recommended next step is to proceed to the :ref:`userguide` or the :ref:`tutorials`
 

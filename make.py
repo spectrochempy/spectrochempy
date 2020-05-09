@@ -8,8 +8,8 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-
-"""Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
+"""
+Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 
 usage::
 
@@ -18,21 +18,22 @@ usage::
 where optional parameters indicates which job(s) is(are) to perform.
 
 """
+
 import argparse
-import os
+import os, sys
 import re
 import shutil
 import warnings
+import zipfile
 from glob import iglob
 from subprocess import Popen, PIPE
 from skimage.transform import resize
-from skimage.data import load
 from skimage.io import imread, imsave
 import numpy as np
+from jinja2 import Template
+import pandas as pd
 
 from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
-
-from spectrochempy import version
 
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
@@ -45,6 +46,7 @@ PROJECTDIR = os.path.dirname(os.path.abspath(__file__))
 SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
 DOCDIR = os.path.join(PROJECTDIR, "docs")
 USERDIR = os.path.join(PROJECTDIR, "docs", "user")
+TEMPLATES = os.path.join(DOCDIR, '_templates')
 TUTORIALS = os.path.join(USERDIR, "tutorials", "*", "*.py")
 USERGUIDE = os.path.join(USERDIR, "userguide", "*", "*.py")
 API = os.path.join(DOCDIR, 'api', 'generated')
@@ -64,24 +66,43 @@ class Build(object):
     # ..................................................................................................................
     def __init__(self):
         
-        # determine if we are in the developement branch (latest) or master (stable)
-        self.doc_version = 'latest' if 'dev' in version else 'stable'
+        self._doc_version = None
+    
+    # ..................................................................................................................
+    @property
+    def doc_version(self):
+        from spectrochempy import version, release
+    
+        if self._doc_version is None:
+            # determine if we are in the developement branch (dev) or master (stable)
+            self._doc_version = 'dev' if 'dev' in version else 'stable'
+        
+        return self._doc_version
     
     # ..................................................................................................................
     def __call__(self):
         
         parser = argparse.ArgumentParser()
         
-        parser.add_argument("-w", "--html", help="create html pages", action="store_true")
-        parser.add_argument("-p", "--pdf", help="create pdf pages", action="store_true")
-        parser.add_argument("-c", "--clean", help="clean/delete output", action="store_true")
-        parser.add_argument("-d", "--deepclean", help="full clean/delete output (reset)", action="store_true")
-        parser.add_argument("-s", "--sync", help="sync doc ipynb", action="store_true")
-        parser.add_argument("-g", "--git", help="git commit last changes", action="store_true")
-        parser.add_argument("-m", "--message", default='DOCS: updated', help='optional commit message')
-        parser.add_argument("-a", "--api", help="full regeneration of the api", action="store_true")
-        parser.add_argument("-r", "--release", help="release documentation on website", action="store_true")
+        parser.add_argument("-H", "--html", help="create html pages", action="store_true")
+        parser.add_argument("-P", "--pdf", help="create pdf manual", action="store_true")
+        parser.add_argument("--tutorials", help="zip notebook tutorials for downloads", action="store_true")
+        parser.add_argument("--clean", help="clean/delete html or latex output", action="store_true")
+        parser.add_argument("--deepclean", help="full clean/delete output (reset fro a full regenration of the documentation)", action="store_true")
+        parser.add_argument("--sync", help="sync doc ipynb using jupytext", action="store_true")
+        parser.add_argument("--git", help="git commit last changes", action="store_true")
+        parser.add_argument("-m", "--message", default='DOCS: updated', help='optional git commit message')
+        parser.add_argument("--api", help="execute a full regeneration of the api", action="store_true")
+        parser.add_argument("-R", "--release", help="release the current version documentation on website", action="store_true")
+        parser.add_argument("--changelogs", help="update changelogs using the redmine issues status", action="store_true")
+        parser.add_argument("--conda", help="make a conda package", action="store_true")
+        parser.add_argument("--upload", help="upload conda and pypi package to the corresponding repositories", action="store_true")
+        
         args = parser.parse_args()
+        
+        if len(sys.argv)==1:
+            parser.print_help(sys.stderr)
+            return
         
         self.regenerate_api = args.api
         
@@ -104,11 +125,19 @@ class Build(object):
             self.make_pdf()
         if args.release:
             self.release()
+        if args.tutorials:
+            self.make_tutorials()
+        if args.changelogs:
+            self.make_changelog()
+        if args.conda:
+            self.make_conda_and_pypi()
+        if args.upload:
+            self.upload()
             
     @staticmethod
     def _cmd_exec(cmd, shell=None):
         # Private function to execute system command
-    
+        print(cmd)
         if shell is not None:
             res = Popen(cmd, shell=shell, stdout=PIPE, stderr=PIPE)
         else:
@@ -116,12 +145,13 @@ class Build(object):
         output, error = res.communicate()
         if not error:
             v = output.decode("utf-8")
-            return v
+            print(v)
         else:
             v = error.decode('utf-8')
-            if "makeindex" in v:
-                return v  # This is not an error! (#TODO: why Popen retrun an error)
-            raise RuntimeError(f"{cmd} [FAILED]\n{v}")
+            if "makeindex" not in v and "NbConvertApp" not in v:
+                raise RuntimeError(f"{cmd} [FAILED]\n{v}")
+            print(v)
+        return v
 
     @staticmethod
     def _confirm(action):
@@ -132,7 +162,7 @@ class Build(object):
         return answer[:1] == "y"
     
     # ..................................................................................................................
-    def make_docs(self, builder='html'):
+    def make_docs(self, builder='html', clean=False):
         """
         Make the html or latex documentation
     
@@ -142,6 +172,8 @@ class Build(object):
             Type of builder
             
         """
+        from spectrochempy import version, release
+
         doc_version = self.doc_version
         
         if builder not in ['html', 'latex']:
@@ -150,7 +182,8 @@ class Build(object):
         print(f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})')
         
         # recreate dir if needed
-        self.clean(builder)
+        if clean:
+            self.clean(builder)
         self.make_dirs()
         
         # regenate api documentation
@@ -172,18 +205,16 @@ class Build(object):
         # do some cleaning
         shutil.rmtree(os.path.join('docs', 'auto_examples'), ignore_errors=True)
         
-        # add version selection block to each pages
-        # TODO: v.0.2 may be done with template?
         if builder == 'html':
-            self.update_html_page(outdir)
             self.make_redirection_page()
-    
+            self.make_tutorials()
+            
         # a workaround to reduce the size of the image in the pdf document
         # TODO: v.0.2 probably better solution exists?
         if builder =='latex':
             self.resize_img(GALLERYDIR, size=580.)
         
-
+        
         
     # ..................................................................................................................
     @staticmethod
@@ -215,26 +246,21 @@ class Build(object):
         latexdir = f"{BUILDDIR}/latex/{doc_version}"
         print('Started to build pdf from latex using make.... '
               'Wait until a new message appear (it is a long! compilation) ')
+
+        print('FIRST COMPILATION:')
+        CMD = f'cd {os.path.normpath(latexdir)};lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex'
+        self._cmd_exec(CMD,shell=True)
         
-        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                           f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
-                           shell=True)
+        print('MAKEINDEX:')
+        CMD = f'cd {os.path.normpath(latexdir)}; makeindex spectrochempy.idx'
+        self._cmd_exec(CMD, shell=True)
+
+        print('SECOND COMPILATION:')
+        CMD = f'cd {os.path.normpath(latexdir)};lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex'
+        self._cmd_exec(CMD, shell=True)
         
-        print('FIRST COMPILATION:', output)
-        
-        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                           f'makeindex spectrochempy.idx',
-                           shell=True)
-        print('MAKEINDEX', output)
-        
-        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)};'
-                           f'lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex',
-                           shell=True)
-        print('SECOND COMPILATION:', output)
-        
-        output = self._cmd_exec(f'cd {os.path.normpath(latexdir)}; '
-                           f'cp {PROJECT}.pdf {DOWNLOADS}/scpy.pdf', shell=True)
-        print(output)
+        CMD = f'cd {os.path.normpath(latexdir)}; cp {PROJECT}.pdf {DOWNLOADS}/{doc_version}-{PROJECT}.pdf'
+        self._cmd_exec(CMD, shell=True)
     
     # ..................................................................................................................
     def sync_notebooks(self):
@@ -245,8 +271,32 @@ class Build(object):
         cmds = (f"jupytext --sync {USERGUIDE}", f"jupytext --sync {TUTORIALS}")
         for cmd in cmds:
             cmd = cmd.split()
-            print(self._cmd_exec(cmd))
+            self._cmd_exec(cmd)
     
+    # ..................................................................................................................
+    def make_tutorials(self):
+        """
+        
+        Returns
+        -------
+
+        """
+
+        def zipdir(path, dest, ziph):
+            # ziph is zipfile handle
+            for nb in iglob(os.path.join(path, '**', '*.ipynb'), recursive=True):
+                arcnb = nb.replace(path, dest)
+                ziph.write(nb, arcname=arcnb)
+
+        zipf = zipfile.ZipFile('~notebooks.zip', 'w', zipfile.ZIP_STORED)
+        zipdir(USERDIR, 'notebooks', zipf)
+        zipdir(os.path.join(GALLERYDIR, 'auto_examples'), os.path.join('notebooks', 'examples'), zipf)
+        zipf.close()
+
+        CMD = f'mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECT}-notebooks.zip'
+        self._cmd_exec(CMD, shell=True)
+
+
     # ..................................................................................................................
     def api_gen(self):
         """
@@ -281,12 +331,10 @@ class Build(object):
             return
         
         cmd = "git add -A".split()
-        output = self._cmd_exec(cmd)
-        print(output)
+        self._cmd_exec(cmd)
         
         cmd = "git log -1 --pretty=%B".split()
         output = self._cmd_exec(cmd)
-        print('last message: ', output)
         if output.strip() == message:
             v = "--amend"
         else:
@@ -294,12 +342,10 @@ class Build(object):
         
         cmd = f"git commit {v} -m".split()
         cmd.append(message)
-        output = self._cmd_exec(cmd)
-        print(output)
+        self._cmd_exec(cmd)
         
         cmd = "git log -1 --pretty=%B".split()
-        output = self._cmd_exec(cmd)
-        print('new message: ', output)
+        self._cmd_exec(cmd)
         
         # TODO: Automate Tagging?
     
@@ -309,8 +355,8 @@ class Build(object):
         html = """
         <html>
         <head>
-        <title>redirect to the stable version of the documentation</title>
-        <meta http-equiv="refresh" content="0; URL=https://www.spectrochempy.fr/stable">
+        <title>redirect to the dev version of the documentation</title>
+        <meta http-equiv="refresh" content="0; URL=https://www.spectrochempy.fr/dev">
         </head>
         <body></body>
         </html>
@@ -319,69 +365,11 @@ class Build(object):
             f.write(html)
     
     # ..................................................................................................................
-    def update_html_page(self, outdir):
-        """
-        Modify page generated with sphinx (TODO: There is porbably a better method using sphinx templates to override
-        the themes)
-        """
-        
-        replace = """
-                <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
-                
-                    <span class="rst-current-version" data-toggle="rst-current-version">
-                      <span class="fa fa-book">SpectroChemPy</span>
-                      v: %s
-                      <span class="fa fa-caret-down"></span>
-                    </span>
-                
-                    <div class="rst-other-versions">
-                        <dl>
-                            <dt>Versions</dt>
-                            <dd><a href="/latest/index.html">latest</a></dd>
-                            <dd><a href="/stable/index.html">stable</a></dd>
-                        </dl>
-                
-                        <dl>
-                            <dt>Downloads</dt>
-                            <dd><a href="/downloads/scpy.pdf">pdf</a></dd>
-                            <!--<dd><a href="/downloads/scpy_doc.zip">htmlzip</a></dd>-->
-                            <!--<dd><a href="/tutorials/">tutorials</a></dd>-->
-                        </dl>
-                
-                        <dl>
-                            <dt>Sources on bitBucket</dt>
-                            <dd><a href="https://bitbucket.org/spectrocat/spectrochempy/src/master/">master</a></dd>
-                            <dd><a href="https://bitbucket.org/spectrocat/spectrochempy/src/develop/">develop</a></dd>
-                        </dl>
-                
-                        <hr/>
-                        
-                    </div>
-                </div>
-            
-                <script type="text/javascript" id="already-corrected">
-                    jQuery(function () {
-                        SphinxRtdTheme.Navigation.enable(true);
-                    });
-                </script>
-                """
-        # modify all html files
-        for filename in iglob(os.path.join(outdir, '**', '*.html'), recursive=True):
-            with open(filename, "r") as f:
-                txt = f.read()
-            doc_version = self.doc_version
-            regex = r"(<script type=\"text\/javascript\">.*SphinxRtdTheme.*script>)"
-            result = re.sub(regex, replace % doc_version, txt, 0, re.MULTILINE | re.DOTALL)
-            with open(filename, "w") as f:
-                f.write(result)
-    
-    # ..................................................................................................................
     def release(self):
         """
         Release/publish the documentation to the webpage.
         """
-        doc_version = self.doc_version
-        
+    
         # upload docs to the remote web server
         if SERVER:
             
@@ -390,8 +378,8 @@ class Build(object):
             FROM = os.path.join(HTML, '*')
             TO = os.path.join(PROJECT, 'html')
             cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
-            output = self._cmd_exec(cmd, shell=True)
-            print(output)
+            self._cmd_exec(cmd, shell=True)
+            
         
         else:
             
@@ -417,6 +405,14 @@ class Build(object):
         
         shutil.rmtree(os.path.join(DOCTREES, doc_version), ignore_errors=True)
         shutil.rmtree(API, ignore_errors=True)
+
+        # clean notebooks output
+        for nb in iglob(os.path.join(DOCDIR, '**', '*.ipynb'), recursive=True):
+            # This will erase all notebook output
+            self._cmd_exec(
+                f'jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {nb}',
+                shell=True)
+            
     
     # ..................................................................................................................
     def make_dirs(self):
@@ -426,14 +422,144 @@ class Build(object):
         doc_version = self.doc_version
         
         # Create regular directories.
-        build_dirs = [os.path.join(DOCTREES, doc_version),
-                      os.path.join(HTML, doc_version),
-                      os.path.join(LATEX, doc_version),
-                      DOWNLOADS,
-                      os.path.join(DOCDIR, '_static'),
+        build_dirs = [
+                          os.path.join(DOCTREES, doc_version),
+                          os.path.join(HTML, doc_version),
+                          os.path.join(LATEX, doc_version),
+                          DOWNLOADS,
+                          os.path.join(DOCDIR, '_static'),
                       ]
         for d in build_dirs:
             os.makedirs(d, exist_ok=True)
+
+    # ..................................................................................................................
+    def make_changelog(self):
+        """
+        Utility to update changelog
+        """
+        csv = "https://redmine.spectrochempy.fr/projects/spectrochempy/issues.csv?" \
+              "c%5B%5D=tracker" \
+              "&c%5B%5D=status" \
+              "&c%5B%5D=category" \
+              "&c%5B%5D=priority" \
+              "&c%5B%5D=subject" \
+              "&c%5B%5D=fixed_version" \
+              "&f%5B%5D=status_id" \
+              "&f%5B%5D=" \
+              "&group_by=" \
+              "&op%5Bstatus_id%5D=%2A" \
+              "&set_filter=1" \
+              "&sort=id%3Adesc"
+
+        from spectrochempy import version, release
+
+        issues = pd.read_csv(csv, encoding = "ISO-8859-1")
+        doc_version = self.doc_version
+        target = version.split('-')[0] if doc_version == 'dev' else release
+        changes = issues[issues['Target version']==target]
+        
+        # Create a versionlog file for the current target
+        bugs = changes[changes['Tracker']=='Bug']
+        features = changes[changes['Tracker']=='Feature']
+        tasks = changes[changes['Tracker']=='Task']
+        
+        with open(os.path.join(TEMPLATES, 'versionlog.rst'), 'r') as f:
+            template = Template(f.read())
+        out = template.render(target=target, bugs=bugs, features=features, tasks=tasks)
+        
+        with open(os.path.join(DOCDIR, 'versionlogs', f'versionlog.{target}.rst'), 'w') as f:
+            f.write(out)
+            
+        # make the full version history
+        
+        lhist = sorted(iglob(os.path.join(DOCDIR, 'versionlogs', '*.rst')))
+        lhist.reverse()
+        history = ""
+        for filename in lhist:
+            with open(filename, 'r') as f:
+                history +="\n\n"
+                nh = f.read().strip()
+                vc = ".".join(filename.split('.')[1:4])
+                nh = nh.replace(':orphan:',f".. _version_{vc}:")
+                history += nh
+        history += '\n'
+
+        with open(os.path.join(TEMPLATES, 'changelog.rst'), 'r') as f:
+            template = Template(f.read())
+        out = template.render(history=history)
+
+        with open(os.path.join(DOCDIR, 'gettingstarted', 'changelog.rst'), 'w') as f:
+            f.write(out)
+            
+        return
+    
+    # ..................................................................................................................
+    def uploadpypi(self):
+        print('UPLOADING TO PYPI')
+        CMD ='twine upload --repository pypi dist/*'
+        self._cmd_exec(CMD, shell=True)
+        
+    # ..................................................................................................................
+    def make_conda_and_pypi(self):
+        """
+        
+        Parameters
+        ----------
+        tag
+
+        Returns
+        -------
+
+        """
+        
+        CMDS =  ['print:CONDA PACKAGE UPDATING.... (please wait!)']
+        
+        CMDS += ["conda config --add channels cantera"]
+        CMDS += ["conda config --add channels spectrocat"]
+        CMDS += ["conda config --add channels conda-forge"]
+        CMDS += ["conda config --set channel_priority strict"]
+        CMDS += ['conda config --set anaconda_upload no']
+        
+        #CMDS += ['conda init zsh']    # normally to adapt depending on shell present in your OS
+        #CMDS += ["conda deactivate"]  # # Prefer to work in a clean base environment to better detect incompatibilities
+        CMDS += ['conda update conda']
+        CMDS += ['conda install pip setuptools wheel twine conda-build conda-verify anaconda-client-y']
+        CMDS += ['conda update pip setuptools wheel twine conda-build conda-verify anaconda-client']
+        
+        CMDS += ['print:CREATING PYPI DISTRIBUTION PACKAGE....']
+        CMDS += ['python setup.py sdist bdist_wheel']
+        CMDS += ['twine check dist/*']
+        
+        CMDS += ['print:BUILDING THE CONDA PACKAGE...']
+        CMDS += ['conda build recipe/spectrochempy']
+        
+
+        #CMDS += ['print:The Conda package is here -> ']
+        #CMDS += ['conda build recipe/spectrochempy --output']
+
+        CMDS += ['conda build purge']
+        for CMD in CMDS:
+            if CMD.startswith('print:'):
+                print(CMD[6:])
+            else:
+                try:
+                    self._cmd_exec(CMD, shell=True)
+                except RuntimeError as e:
+                    if "Your shell has not been properly configured to use 'conda activate'" in e.args[0]:
+                        raise e
+                    else:
+                        print(e.args[0])
+
+
+        # anaconda upload --user spectrocat ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2 --force
+        #
+        # conda convert --platform linux-64 ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2
+        # anaconda upload --user spectrocat linux-64/spectrochempy-$1.tar.bz2 --force
+        #
+        # conda convert --platform win-64 ~/opt/anaconda3/envs/scpy-dev/conda-bld/osx-64/spectrochempy-$1.tar.bz2
+        # anaconda upload --user spectrocat win-64/spectrochempy-$1.tar.bz2 --force
+
+
 
 Build = Build()
 

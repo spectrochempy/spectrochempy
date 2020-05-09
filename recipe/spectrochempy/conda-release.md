@@ -1,20 +1,23 @@
-Conda package for spectrochempy.
+    Conda package for spectrochempy.
 ================================
 
 .condarc
 --------
 
-this content must be added in the `.condarc` configuration 
-file in you $HOME directory:
+the content in the `.condarc` configuration 
+file in you $HOME directory should be something like this before starting:
 
     channels:
       - conda-forge
       - spectrocat
       - cantera
-      - default
-    anaconda_upload: false
+      - defaults
     
-Generate the yaml configutation file
+    ssl_verify: true
+    anaconda_upload: false
+    channel_priority: strict
+    
+Generate the yaml configuration file
 ------------------------------------
 
 the meta.yaml was first generated from pypi (we do not need to redo it now because it has been modified since this time)

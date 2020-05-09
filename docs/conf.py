@@ -13,7 +13,9 @@ SpectroChemPy documentation build configuration file
 """
 
 import sys, os
-import sphinx_rtd_theme
+import sphinx_rtd_theme # Theme for the website
+import warnings
+
 import spectrochempy
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -77,8 +79,8 @@ master_doc = 'index'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-version = spectrochempy.application.__version__.split('+')[0]
-release = spectrochempy.application.__release__.split('+')[0]
+version = spectrochempy.application.__version__ #.split('+')[0]
+release = version.split('+')[0]
 project = f"SpectroChemPy v{version}"
 copyright = spectrochempy.application.__copyright__
 
@@ -122,7 +124,49 @@ pygments_style = 'sphinx'
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
 
-from spectrochempy.utils.rstutils import rst_epilog
+rst_epilog = """
+
+.. |ndarray| replace:: :class:`~numpy.ndarray`
+
+.. |ma.ndarray| replace:: :class:`~numpy.ma.array`
+
+.. |scpy| replace:: **SpectroChemPy**
+
+.. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
+
+.. |Script| replace:: :class:`~spectrochempy.core.dataset.scripts.Script`
+
+.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
+
+.. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+
+.. |NDPanel| replace:: :class:`~spectrochempy.core.dataset.ndpanel.NDPanel`
+
+.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
+
+.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoordrange.CoordRange`
+
+.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`
+
+.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
+
+.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDMath`
+
+.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta`
+
+.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
+
+.. |Unit| replace:: :class:`~spectrochempy.units.units.Unit`
+
+.. |Quantity| replace:: :class:`~spectrochempy.units.units.Quantity`
+
+.. |Measurement| replace:: :class:`~spectrochempy.units.units.Measurement`
+
+.. |Axes| replace:: :class:`~matplotlib.Axes`
+
+.. |userguide| replace:: :ref:`userguide`
+
+"""
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -191,7 +235,7 @@ html_use_smartypants = True
 html_split_index = True
 
 # If true, links to the reST sources are added to the pages.
-html_show_sourcelink = False
+html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False
@@ -217,6 +261,20 @@ htmlhelp_basename = 'spectrochempydoc'
 html4_writer = True
 
 trim_doctests_flags = True
+
+# Remove matplotlib agg warnings from generated doc when using plt.show
+warnings.filterwarnings("ignore", category=UserWarning,
+                        message='Matplotlib is currently using agg, which is a'
+                                ' non-GUI backend, so cannot show the figure.')
+
+html_context = {
+    'current_version': 'dev' if 'dev' in version else 'stable',
+    'release': spectrochempy.application.__release__,
+    'versions': (
+        ('dev', '/dev/index.html"'),
+        ('stable', '/stable/index.html'),
+    )
+}
 
 # -- Options for LaTeX output --------------------------------------------------
 
@@ -290,7 +348,7 @@ pdf_stylesheets = ['sphinx','kerning','a4']
 # pdf_font_path=['/usr/share/fonts', '/usr/share/texmf-dist/fonts/']
 
 # Language to be used for hyphenation support
-#pdf_language="en_EN"
+pdf_language="en_EN"
 
 # If false, no index is generated.
 #pdf_use_index = True
@@ -331,7 +389,7 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
-    app.add_stylesheet("theme.css")  # also can be a full URL
+    app.add_stylesheet("theme_override.css")  # also can be a full URL
     # app.add_stylesheet("ANOTHER.css")
     # app.add_stylesheet("AND_ANOTHER.css")
 
@@ -346,10 +404,6 @@ sphinx_gallery_conf = {
     'doc_module': ('spectrochempy', ),
                    'reference_url': {
                         'spectrochempy': None,
-                        #'matplotlib': 'https://matplotlib.org',   #<-- do not work
-                        'numpy': 'https://docs.scipy.org/doc/numpy',
-                        'sklearn': 'https://scikit-learn.org/stable',
-                        'ipython': 'https://ipython.readthedocs.org/en/stable/',
                         },
     # path to the examples scripts
     'examples_dirs': 'user/examples',
@@ -379,6 +433,9 @@ nbsphinx_kernel_name = 'python3'
 # set a filename by default for notebook which have file dialogs
 os.environ['TUTORIAL_FILENAME']='wodger.spg'
 
+# set a flag to deactivate TQDM
+os.environ['USE_TQDM']='No'
+
 # configuration for intersphinx ------------------------------------------------
 
 intersphinx_mapping = {
@@ -387,7 +444,7 @@ intersphinx_mapping = {
     'ipython': ('https://ipython.readthedocs.io/en/stable/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'matplotlib': ('https://matplotlib.org/', None),
-    'sklearn': ('https://scikit-learn.org/stable', None),
+    'sklearn': ('https://scikit-learn.org/stable/', None),
 }
 
 # linkcode ---------------------------------------------------------------------

@@ -53,19 +53,12 @@ scpy-dev             *   /Users/username/miniconda3/envs/scpy-dev
 
 The star showing which environment is active.
 
-# Jupyter lab 
+## Jupyter lab 
 
 To be able to use matplotlib in jupyter lab`` we need to run these two command`:
 
 ```bash
 $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
 $ jupyter labextension install jupyter-matplotlib
-$ jupyter labextension install @pyviz/jupyterlab_pyviz
 
-```
-
-```plantuml
-digraph Test {
-A -> B
-}
 ```

@@ -1,0 +1,59 @@
+{% extends "!layout.html" %}
+
+{% block menu %}
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: {{ current_version }}
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                {% for slug, url in versions %}
+                    {%  if slug != current_version  %}
+                        <dd><a href="{{ url }}">{{ slug.upper() }}</a></dd>
+                    {%  endif %}
+                {% endfor %}
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Downloads</dt>
+                <dd><a href="/downloads/{{ current_version }}-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="/downloads/{{ current_version }}-spectrochempy-notebooks.zip">Notebooks</a></dd>
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on Bitbucket</dt>
+                {% for slug, url in versions %}
+                    {% if slug == 'stable' %}
+                        <dd><a href="https://bitbucket.org/spectrocat/spectrochempy/src/master/">Master</a></dd>
+                    {% endif %}
+                    {% if slug == 'dev' %}
+                        <dd><a href="https://bitbucket.org/spectrocat/spectrochempy/src/develop/">Develop</a></dd>
+                    {% endif %}
+                {% endfor %}
+            </dl>
+
+        </div>
+    </div>
+
+    {{ super() }}
+
+{% endblock %}
+
+{% block versions %}{% endblock %}
+
+{% block document %}
+    {% if current_version == 'dev' %}
+        <div class="admonition warning">
+            <p class="first admonition-title">Note</p>
+            <p class="last"> You are reading the documentation related to the current development version.
+                <a href="/stable/index.html">Go here</a> if you are looking for the documentation of the latest
+                released version: <a href="/stable/index.html">{{ release }}</a>.
+            </p>
+        </div>
+    {% endif %}
+    {{ super() }}
+{% endblock %}

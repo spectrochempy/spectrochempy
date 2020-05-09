@@ -57,7 +57,7 @@ Releasing a new version
 
     On both mac and on window:
 
-    conda upgrade pip setuptools wheel twine
+    conda update pip setuptools wheel twine
     python setup.py sdist bdist_wheel
 
     TODO add linux

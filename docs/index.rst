@@ -20,16 +20,13 @@ It is a cross platform software, running on Linux, Windows or OS X.
 
 Among its major features:
 
-#.  A ``NDDataset`` object embedding array of data with labeled axes and metadata.
-#.  A ``Project`` manager to work on multiple ``NDDataset`` simultaneously.
-#.  Physical ``Units`` for ``NDDataset``.
-#.  Mathematical operations over ``NDDataset`` such addition, multiplication and many more ...
-#.  Import functions to read data from experiments or modeling programs ...
-#.  Display functions such as ``plot`` for 1D or nD datasets ...
-#.  Export functions to *csv*, *xls* formats ...
-#.  Preprocessing functions such as baseline correction, automatic subtraction and many more ...
-#.  Fitting capabilities for single or multiple datasets ...
-#.  Exploratory analysis such as ``SVD``, ``PCA``, ``MCR_ALS``, ``EFA`` ...
+#.  Import data from experiments or modeling programs with their *metatdata* (title, units, coordinates, ...)
+#.  Preprocess these data: baseline correction, (automatic) subtraction, smoothing, apodization...
+#.  Manipulate single or multiple datasets: concatenation, splitting, alignment along given dimensions, ...
+#.  Explore data with exploratory analyses methods such as `SVD`, `PCA`, `EFA` and visualization capabilities ...
+#.  Modelling single or multiple datasets with curve fitting / curve modelling (`MCR-ALS`) methods...
+#.  Export data and analyses to various formats: `csv`, `xls`, `JCAMP-DX`,  ...
+#.  Embed the complete workflow from raw data import to final analyses in a Project Manager
 
 .. only:: html
 
@@ -50,7 +47,7 @@ Among its major features:
     |scpy| is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!! Please report any issues to the
-    `Issue Tracker  <https://bitbucket.org/spectrocat/spectrochempy/issues>`_
+    `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
 
 
 
@@ -72,6 +69,7 @@ Getting Started
     gettingstarted/license
     gettingstarted/changelog
 
+.. usage was removed for now
 
 User Guide
 ***********
