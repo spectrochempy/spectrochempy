@@ -27,4 +27,7 @@ dependencies:
 - quadprog
 - pyqt
 - tqdm
+# test
+- pytest
+- scikit-image
 
