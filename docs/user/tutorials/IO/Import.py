@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -72,7 +73,7 @@ print(X)
 #
 # While the use of Dialog Box seems at first 'user-friendly', you will probably experience, that it is often NOT efficient because you will have to select the file *each time* the notebook (or the script) is run... Hence, the above commands can be used with the indication of the path to a directory, and/or to a filename. 
 #
-# If only a directory is indicated, the dialog box will open in this directory. For instance, on a WINDOWS system, the following command:
+# If only a directory is indicated, the dialog box will open in this directory. For instance, on a WIN system, the following command:
 #
 # ```
 # X = read_omnic(directory='C:\\')
@@ -149,13 +150,18 @@ print(X)
 # X = read_omnic('wodger.spg', directory='Life')
 # X = read_omnic(filename='wodger.spg', directory='Life')
 # ```
-# # 5. Good practice: use `os` module
+# # 5. Good practice: use `os` or `pathlib` modules
 #
-# In python, working with relative paths is classically done with the `os` pyhton module. This module is automatically imported with Scpy (but can also be imported by, e.g. `import os as os`.  The following methods re particularly useful:
+# In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules. As `os`is automatically imported with Scpy, we mention the following methods that can be particularely useful:
 #
-#     - `os.getcwd()`: returns the absolute path of the current working directory (i.e. the directory of the script) 
-#     - `os.path.expanduser("~")` : returns the home directory of the user (e.g. the `C:\users\<username>` path on WIN platforms or `/home/<username>` on linux)
-#     - `os.path.join()`: concatenates intelligently path components.
+# - `os.getcwd()`: returns the absolute path of the current working directory (i.e. the directory of the script) 
+# - `os.path.expanduser("~")` : returns the home directory of the user (e.g. the `C:\users\<username>` path on WIN platforms or `/home/<username>` on linux)
+# - `os.path.join()`: concatenates intelligently path components.
+#     
+# The interested readers will find more details on te use of these modules here: 
+#
+# - [os - Miscellaneous operating system interfaces](https://docs.python.org/3/library/os.html)
+# - [pathlib — Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
 #
 # # 5. Another default search directory: `datadir`
 #
