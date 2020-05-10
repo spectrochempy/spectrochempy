@@ -3,7 +3,7 @@
 Tutorials
 ==========
 
-Basis
+Basics
 -----------
 
 .. toctree::
