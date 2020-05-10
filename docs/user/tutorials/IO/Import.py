@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -48,7 +49,7 @@ print(X)
 # If successful, the output of the above cell should read something like 
 #
 # ```
-# Out[2] NDDataset: [float32] a.u. (shape: (y:19, x:3112))
+# Out[2] NDDataset: [float32] a.u. (shape: (y:2, x:5549))
 # ```
 #
 # The size of the `y` and `x` dimension will depend, of course, of the file that you have selected ! If you did not select any file (e.g. by pressing 'cancel' in th Dialog Box, the result will be `None`, as nothing has been loaded in `X`.
@@ -56,7 +57,8 @@ print(X)
 # > Note: By default the Dialog Box opens in the current directory, i.e. the directory in which this notebook is run. See below for more information 
 #
 #
-# - At the time of writing this tutorial (Scpy v.0.1.16), the following commands will behave similarly:
+# - At the time of writing this tutorial (Scpy v.0.1.18), the following commands will behave similarly:
+#     - `read_bruker_opus()` to open Opus (*.0, ...) files
 #     - `read_csv()` to open csv files
 #     - `read_dir()` to open readable files in a directory
 #     - `read_jdx()` to open an IR JCAMP-DX datafile
@@ -71,7 +73,7 @@ print(X)
 #
 # While the use of Dialog Box seems at first 'user-friendly', you will probably experience, that it is often NOT efficient because you will have to select the file *each time* the notebook (or the script) is run... Hence, the above commands can be used with the indication of the path to a directory, and/or to a filename. 
 #
-# If only a directory is indicated, the dialog box will open in this directory. For instance, on a WINDOWS system, the following command:
+# If only a directory is indicated, the dialog box will open in this directory. For instance, on a WIN system, the following command:
 #
 # ```
 # X = read_omnic(directory='C:\\')
@@ -136,34 +138,34 @@ print(X)
 # OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
 # ``` 
 #
-# In this respect, a good practice consists in using relative pathnames in scripts/notebooks. This is classically done with the `os` pyhton module which is atomatically imported with Scpy and the two methods: 
-#  - `os.getcwd()` which returns the current working directory of a process
-#  - `os.path.join()` which concatenate intelligently path components 
-#  
-# Then opening the spg file from `welease.ipynb` can be made by the command: 
+# In this respect, a good practice consists in using relative pathnames in scripts/notebooks and fortunately, Spectrochempy readers use relative paths. If the given path is not absolute, then spectrochempy will search in the current directory. Hence the openening of the spg file from scripts in `welease.ipynb` can be made by the command: 
 #
 # ```
-# X = read_omnic(filename=os.path.join(os.getcwd(), 'Life\\wodger.spg'))
+# X = read_omnic('Life\\wodger.spg'))
 # ```
 #
-# Or, for more clarity, the following lines will do exactly the same:
+# or other variants such as:
 #
 # ```
-# working_dir = os.getcwd()  
-# life_dir = os.path.join(working_dir, 'Life') 
-# X = read_omnic(directory=life_dir, filename='wodger.spg')
+# X = read_omnic('wodger.spg', directory='Life')
+# X = read_omnic(filename='wodger.spg', directory='Life')
 # ```
-# Using pathnames that are relative to the script/notebook will then allow running if after moving of the project folder in any environment (if John, of course, did not rename or moved files and directories within the project folder).    
+# # 5. Good practice: use `os` or `pathlib` modules
 #
-# # 5. The default search directories: current directory and `datadir`
+# In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules. As `os`is automatically imported with Scpy, we mention the following methods that can be particularely useful:
 #
-# Spectrochempy comes also with the definition of default directory paths where to look at the data:
+# - `os.getcwd()`: returns the absolute path of the current working directory (i.e. the directory of the script) 
+# - `os.path.expanduser("~")` : returns the home directory of the user (e.g. the `C:\users\<username>` path on WIN platforms or `/home/<username>` on linux)
+# - `os.path.join()`: concatenates intelligently path components.
 #     
-#    - the current directory (i.e. the same as that returned by `os.getcwd()`)
-#     
-#    - the `datadir` directory
+# The interested readers will find more details on te use of these modules here: 
 #
-# The later is defined in the variable `general_preferences.datadir` which is impotrted at the same time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of spectrochempy:
+# - [os - Miscellaneous operating system interfaces](https://docs.python.org/3/library/os.html)
+# - [pathlib — Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
+#
+# # 5. Another default search directory: `datadir`
+#
+# Spectrochempy comes also with the definition of a second default directory path where to look at the data: the `datadir` directory. It is defined in the variable `general_preferences.datadir` which is impotrted at the same time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of spectrochempy:
 
 # %%
 print(general_preferences.datadir)
@@ -177,14 +179,16 @@ print(general_preferences.datadir)
 #
 # This will change the default value in the spectrochempy preference file located in the hidden folder `.spectrochempy/` at the root of the user home directory.
 #
-# By default, the import functions used in Sepctrochempy will search the datafiles using this order of precedence:
+# Finally, by default, the import functions used in Sepctrochempy will search the datafiles using this order of precedence:
 #
 #    1. try absolute path
 #    2. try in current working directory
 #    3. try in `datadir`
 #    4. if none of these works: generate an OSError (file or directory not found)
+#    
 #     
 
 # %% [markdown]
 # --- This is the end of the tutorial ---
+#
 #

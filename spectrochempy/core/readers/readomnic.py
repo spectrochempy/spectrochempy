@@ -303,10 +303,9 @@ def _read_spg(dataset, filename, **kwargs):
             data[i, :] = np.fromfile(f, 'float32', int(nintensities))
         # ..............................................................................................................
 
-        # Get spectra titles & acquisition dates & history text
+        # Get spectra titles & acquisition dates:
         # container to hold values
-        alltitles, allacquisitiondates = [], []
-        alltimestamps, allhistories = [], []
+        alltitles, allacquisitiondates, alltimestamps = [], [], []
 
         # extract positions of '6B' keys (spectra titles & acquisition dates)
         key_is_6B = (keys == 107)
@@ -342,16 +341,16 @@ def _read_spg(dataset, filename, **kwargs):
             indices1B = np.nonzero(key_is_1B)
             position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
 
-            if len(position1B) != 0:
-                # read history texts
-                for j in range(nspec):
-                    # determine the position of information
-                    f.seek(position1B[j] + 2)
-                    history_pos = np.fromfile(f, 'uint32', 1)
-
-                    # read history
-                    history = _readbtext(f, history_pos[0])
-                    allhistories.append(history)
+            # not used at present
+            # if len(position1B) != 0:
+            #    # read history texts
+            #    for j in range(nspec):
+            #        # determine the position of information
+            #        f.seek(position1B[j] + 2)
+            #        history_pos = np.fromfile(f, 'uint32', 1)
+            #        # read history
+            #        history = _readbtext(f, history_pos[0])
+            #        allhistories.append(history)
 
     # Create Dataset Object of spectral content
     dataset.data = data
@@ -371,10 +370,9 @@ def _read_spg(dataset, filename, **kwargs):
     # Set origin, description and history
     dataset.origin = "omnic"
     dataset.description = (
-            'Dataset from spg file : ' + spg_title + ' \n'
-            + 'History of the 1st spectrum : ' + allhistories[0])
+            'Dataset from spg file {} : '.format(filename))
 
-    dataset.history = str(datetime.now()) + ':read from spg file \n'
+    dataset.history = str(datetime.now()) + ':import from spg file {}\n'.format(filename)
 
     if sortbydate:
         dataset.sort(dim='y', inplace=True)
@@ -535,7 +533,7 @@ def _read_spa(dataset, filenames, **kwargs):
 
     # Set origin, description and history
     dataset.origin = "omnic"
-    dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2}spectrum : {3}".format(
+    dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2} spectrum : {3}".format(
         nspec, ' ... '.join({filenames[0], filenames[-1]}), '1st ' if nspec > 1 else '', allhistories[0])
 
     dataset.history = str(datetime.now()) + ':read from spa files \n'
