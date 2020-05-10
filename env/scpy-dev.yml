@@ -48,4 +48,6 @@ dependencies:
 - pyqt
 - twine
 - tqdm
+- brukeropusreader
+
 

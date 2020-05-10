@@ -27,6 +27,7 @@ dependencies:
 - quadprog
 - pyqt
 - tqdm
+- brukeropusreader
 # test
 - pytest
 - scikit-image
