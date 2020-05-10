@@ -254,8 +254,19 @@ nd3
 # %%
 path = scp.general_preferences.datadir      # this is a path provided that point on a example set of data. 
                                             # It can be replaced by any other path you like
+
+# %% nbsphinx="hidden" hidden="true"
+# THESE LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION (THEY SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
+path = '/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata'
+
+# %%
 fs = scp.FileSelector(path = path, filters=['spg','spa'])
 fs
+
+# %% nbsphinx="hidden"
+# THESE TWO LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION (THEY SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
+fs.fullpath ='/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/CO@Mo_Al2O3.SPG'
+fs.value = 'CO@Mo_Al2O3.SPG'
 
 # %%
 fs.fullpath        # retrieve the path selected in the previous step
