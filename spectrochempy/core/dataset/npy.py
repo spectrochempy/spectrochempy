@@ -12,7 +12,7 @@ In this module, we define basic functions adapted from numpy but able to handle
 our NDDataset objects
 
 """
-__all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'zeros_like', 'ones',
+__all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'eye', 'identity', 'zeros_like', 'ones',
            'ones_like', 'full', 'full_like']
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -185,6 +185,79 @@ def ones(shape, dtype=None, **kwargs):
 
     """
     return NDDataset(np.ones(shape, dtype=np.dtype(dtype)), **kwargs)
+
+def identity(N, dtype=None, **kwargs):
+    """
+    Return the identity array.
+    
+    The identity array is a square array with ones on
+    the main diagonal.
+    
+    Parameters
+    ----------
+    N : int
+        Number of rows (and columns) in `n` x `n` output.
+    dtype : data-type, optional
+        Data-type of the output.  Defaults to ``float``.
+        
+    Returns
+    -------
+    out : nddataset
+        `n` x `n` array with its main diagonal set to one,
+        and all other elements 0.
+        
+    Examples
+    --------
+    >>> scp.identity(3).data
+    array([[1.,  0.,  0.],
+           [0.,  1.,  0.],
+           [0.,  0.,  1.]])
+
+    """
+    return eye(N, dtype=dtype, **kwargs)
+
+def eye(N, M=None, k=0, dtype=float, order='C', **kwargs):
+    """
+    Return a 2-D array with ones on the diagonal and zeros elsewhere.
+    Parameters
+    ----------
+    N : int
+      Number of rows in the output.
+    M : int, optional
+      Number of columns in the output. If None, defaults to `N`.
+    k : int, optional
+      Index of the diagonal: 0 (the default) refers to the main diagonal,
+      a positive value refers to an upper diagonal, and a negative value
+      to a lower diagonal.
+    dtype : data-type, optional
+      Data-type of the returned array.
+    order : {'C', 'F'}, optional
+        Whether the output should be stored in row-major (C-style) or
+        column-major (Fortran-style) order in memory.
+        
+    Returns
+    -------
+    I : NDDataset of shape (N,M)
+      An array where all elements are equal to zero, except for the `k`-th
+      diagonal, whose values are equal to one.
+      
+    See Also
+    --------
+    identity : equivalent function with k=0.
+    diag : diagonal 2-D NDDataset from a 1-D array specified by the user.
+    
+    Examples
+    --------
+    >>> np.eye(2, dtype=int)
+    array([[1, 0],
+           [0, 1]])
+    >>> np.eye(3, k=1)
+    array([[0.,  1.,  0.],
+           [0.,  0.,  1.],
+           [0.,  0.,  0.]])
+           
+    """
+    return NDDataset(np.eye(N, M, k, dtype, order), **kwargs)
 
 
 def zeros_like(a, dtype=None, ):
