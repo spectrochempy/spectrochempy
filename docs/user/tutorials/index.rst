@@ -10,7 +10,7 @@ Basis
    :glob:
    :maxdepth: 2
 
-   basis/*
+   basics/*
 
 Import data
 -----------
