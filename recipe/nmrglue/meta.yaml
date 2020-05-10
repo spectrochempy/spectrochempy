@@ -1,0 +1,49 @@
+{% set name = "nmrglue" %}
+{% set version = "0.7" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: 24e0b88de46046a55315673bcaa6d13c854155e43ddb3742aa2af680890cf323
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - numpy
+    - pip
+    - python
+    - scipy
+  run:
+    - numpy
+    - python
+    - scipy
+
+test:
+  imports:
+    - nmrglue
+    - nmrglue.analysis
+    - nmrglue.analysis.tests
+    - nmrglue.fileio
+    - nmrglue.fileio.tests
+    - nmrglue.process
+    - nmrglue.process.nmrtxt
+    - nmrglue.util
+
+about:
+  home: "http://www.nmrglue.com"
+  license: BSD
+  license_family: BSD
+  license_file: 
+  summary: "A module for working with NMR data in Python"
+  doc_url: 
+  dev_url: 
+
+extra:
+  recipe-maintainers:
+    - fernandezc
