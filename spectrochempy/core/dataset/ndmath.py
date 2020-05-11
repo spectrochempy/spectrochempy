@@ -1106,14 +1106,20 @@ class NDMath(object):
 
                 # when the dimensionality is the same as the original data we wants to keep same units  see issues #58.
                 # so first we check this:
-                
-                if q.units.dimensionality != obj.units.dimensionality:
+                try:
+                    checkdimensionality = q.units.dimensionality != obj.units.dimensionality
+                except AttributeError:
+                    checkdimensionality = False
+                    
+                if checkdimensionality:
                     # then reduce to the base unit
                     qr = q.to_base_units()
                     factor = np.abs(qr.m)/np.abs(q.m)
                     if not np.isfinite(factor):
                         raise ZeroDivisionError
                     units = qr.units
+                else:
+                    units = q.units
                     
             else:
                 units = UNITLESS
