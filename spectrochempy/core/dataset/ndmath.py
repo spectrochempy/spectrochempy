@@ -105,7 +105,7 @@ def change_first_func_args(func, new_arg):
 
 def make_func_from(func, first=None):
     """
-    Create a new func with its arguments from another func ansd a new signature
+    Create a new func with its arguments from another func and a new signature
 
     """
     code_obj = func.__code__
@@ -1103,11 +1103,18 @@ class NDMath(object):
                     q = 1. * q.units
                 if q==0.0:
                     q=(q.m+.1) * q.units
-                qr = q.to_base_units()
-                factor = np.abs(qr.m)/np.abs(q.m)
-                if not np.isfinite(factor):
-                    raise ZeroDivisionError
-                units = qr.units
+
+                # when the dimensionality is the same as the original data we wants to keep same units  see issues #58.
+                # so first we check this:
+                
+                if q.units.dimensionality != obj.units.dimensionality:
+                    # then reduce to the base unit
+                    qr = q.to_base_units()
+                    factor = np.abs(qr.m)/np.abs(q.m)
+                    if not np.isfinite(factor):
+                        raise ZeroDivisionError
+                    units = qr.units
+                    
             else:
                 units = UNITLESS
         
