@@ -1,6 +1,5 @@
 {% set name = "SpectroChemPy" %}
 {% set version = "0.1.17" %}
-{% set number = 0 %}
 
 # see this  for a description of the sections
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
@@ -64,7 +63,8 @@ requirements:
     - quadprog
     - pyqt
     - tqdm
-    
+    - brukeropusreader
+
 test:
   imports:
     - spectrochempy
