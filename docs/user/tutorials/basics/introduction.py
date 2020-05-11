@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Arrays and NDDataset
+# # Arrays and NDDatasets
 
 # %% [markdown]
 # In this tutorial we will go into the specifics of the numpy library to manipulate single
@@ -198,8 +198,15 @@ e
 f = np.random.random((2,2))  # Create an array filled with random values
 f
 
+# %%
+np.arange(1,21,3)             # create a rank-1 numpy array with successive elements 
+                              # from 1 to 20, by step of 3 (21 not being ingluded)
+
+# %%
+np.linspace( -5,5,50)         # create un array with 50 values regularly spaced betwwen -5 and 5
+
 # %% [markdown]
-# The same is possible with dataset
+# The same is possible with dataset for some of the above functions (zeros, ones, full, eye (in 0.1.18-dev) 
 
 # %%
 scp.full((2,3,4), 100.)
@@ -311,14 +318,25 @@ ndfid = scp.NDDataset(y, dims=['x'], coords=[timecoord], title='signal')
 ndfid.plot()
 
 # %% [markdown]
-# ## Slicing
+# ## Basic operations on arrays and NDDatasets
 #
-#
-#
-# Next tutorial on selection 
+# An essential property of numpy arrays is the ability to perform mathematical operations on and between them.  
 
 # %%
+a = np.full((5,3), 10.)        # A 2D array with 5 rows and 3 columns
+b = np.array([[1,2,3,4,5]])    # A 2D array with & row and 5 columns
 
-# %%
+# %% [markdown]
+# Clearly, the addition of a and b which is perfomed elementwise can not be used in this cas because the shapes mismatch. 
+
+# %% [markdown]
+# the addition of the two array `a+b` gives an error :  
+#
+#     ValueError: operands could not be broadcast together with shapes (5,2) (1,5) 
+#     
+# because the shape mismacth. 
+#
+# However, there is one case where such operation can be perfomred, this is when the array have shape differing only  
+#
 
 # %%
