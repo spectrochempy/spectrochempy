@@ -25,7 +25,6 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import NOMASK, make_new_object
 
-
 def empty(shape, dtype=None, **kwargs):
     """
     Return a new |NDDataset| of given shape and type,  without initializing
