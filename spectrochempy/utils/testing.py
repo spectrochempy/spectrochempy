@@ -266,7 +266,7 @@ def example_run(path):
     pipe = None
     try:
         pipe = subprocess.Popen(
-            ["python", path, ],
+            ["python", path, '--nodisplay'],
             stdout=subprocess.PIPE)
         (so, serr) = pipe.communicate()
     except:
