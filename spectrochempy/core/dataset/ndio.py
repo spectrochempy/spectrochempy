@@ -437,7 +437,7 @@ class NDIO(HasTraits):
         fid : list of `str` or `file` objects
             The names of the files to read (or the file objects).
         protocol : str, optional, default:'scp'
-            The default type for saving.
+            The default type for loading.
         directory : str, optional, default:`prefs.datadir`
             The directory from where to load the file.
         kwargs : optional keyword parameters.
@@ -497,10 +497,12 @@ class NDIO(HasTraits):
         Parameters
         ----------
         filename : str
-            The path to the file to be read
+            The path to the file to be read. If it is not provided,
+            at least a protocol must be given.
         protocol : str
             Protocol used for reading. If not provided, the correct protocol
             is evaluated from the file name extension.
+            Existing protocol: 'scp', 'omnic', 'opus', 'matlab', 'jdx', 'csv', ...
         kwargs : optional keyword parameters
             Any additional keyword to pass to the actual reader
 
@@ -510,18 +512,19 @@ class NDIO(HasTraits):
 
         """
 
-        if filename is None:
-            raise ValueError('read method require a parameter ``filename``!')
-
         protocol = kwargs.pop('protocol', None)
         sortbydate = kwargs.pop('sortbydate', True)
 
-        if protocol is None:
+        if filename is None and protocol is None:
+            raise ValueError('read method require a parameter ``filename`` '
+                             'or at least a protocol such as `scp`, `omnic`, ... !')
+
+        if filename is not None and protocol is None:
             # try to estimate the protocol from the file name extension
             _, extension = os.path.splitext(filename)
             if len(extension) > 0:
                 protocol = extension[1:].lower()
-
+   
         if protocol == 'scp':
             # default reader
             return cls.load(filename, protocol='scp', **kwargs)
