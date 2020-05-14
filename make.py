@@ -285,6 +285,19 @@ class Build(object):
         def zipdir(path, dest, ziph):
             # ziph is zipfile handle
             for nb in iglob(os.path.join(path, '**', '*.ipynb'), recursive=True):
+                # # remove outputs
+                if '.ipynb_checkpoints' in nb:
+                    continue
+                    
+                CMD = f'jupyter nbconvert {nb} ' \
+                      f'--to notebook ' \
+                      f'--ClearOutputPreprocessor.enabled=True ' \
+                      f'--stdout > out.ipynb'
+                self._cmd_exec(CMD, shell=True)
+                CMD = f'rm {nb}'
+                self._cmd_exec(CMD, shell=True)
+                CMD = f"mv out.ipynb {nb}"
+                self._cmd_exec(CMD, shell=True)
                 arcnb = nb.replace(path, dest)
                 ziph.write(nb, arcname=arcnb)
 
@@ -375,9 +388,14 @@ class Build(object):
             
             print("uploads to the server of the html/pdf files")
             
+            # clean
+            
+            
+            
             FROM = os.path.join(HTML, '*')
             TO = os.path.join(PROJECT, 'html')
-            cmd = f'rsync -e ssh -avz  --exclude="~*" {FROM} {SERVER}:{TO}'
+            cmd = f'rsync -e ssh -avz ' \
+                  f'--delete --exclude="~*" {FROM} {SERVER}:{TO}'
             self._cmd_exec(cmd, shell=True)
             
         

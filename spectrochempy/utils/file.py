@@ -87,7 +87,10 @@ def readfilename(filename=None, **kwargs):
     if not filename:
         # test if we are running nbsphinx with this default filename
         filename = os.environ.get('TUTORIAL_FILENAME', None)
-        
+    
+        if not filename and "--nodisplay" in sys.argv:
+            return None   # or we can set a filename here
+    
     if filename:
         _filenames = []
         # make a list, even for a single file name

@@ -83,3 +83,5 @@ def test_ndio_save_and_load_mydataset(IR_dataset_2D):
     assert (dl.meta == ds.meta)
     assert (dl.plotmeta == ds.plotmeta)
 
+def test_issue_60():
+    NDDataset.read()
