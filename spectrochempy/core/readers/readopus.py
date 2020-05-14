@@ -42,7 +42,7 @@ from spectrochempy.utils import readfilename
 # ======================================================================================================================
 
 # .............................................................................
-def read_bruker_opus(dataset=None, **kwargs):
+def read_opus(dataset=None, **kwargs):
     """Open Bruker Opus file(s) and group them in a single dataset. Only the spectrum is
     extracted ("AB" field). Returns an error if dimensions are incompatibles.
 
@@ -63,7 +63,7 @@ def read_bruker_opus(dataset=None, **kwargs):
 
     Examples
     --------
-    >>> A = NDDataset.read_bruker_opus('irdata\\spectrum.0001')
+    >>> A = NDDataset.read_opus('irdata\\spectrum.0001')
     >>> print(A)
     NDDataset: [float64] a.u. (shape: (y:1, x:2568))
     """

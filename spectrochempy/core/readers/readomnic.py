@@ -372,7 +372,7 @@ def _read_spg(dataset, filename, **kwargs):
     dataset.description = (
             'Dataset from spg file {} : '.format(filename))
 
-    dataset.history = str(datetime.now()) + ':import from spg file {}\n'.format(filename)
+    dataset.history = str(datetime.now()) + ':import from spg file {} ; '.format(filename)
 
     if sortbydate:
         dataset.sort(dim='y', inplace=True)
@@ -536,9 +536,9 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2} spectrum : {3}".format(
         nspec, ' ... '.join({filenames[0], filenames[-1]}), '1st ' if nspec > 1 else '', allhistories[0])
 
-    dataset.history = str(datetime.now()) + ':read from spa files \n'
+    dataset.history = str(datetime.now()) + ':read from spa files ; '
 
-    if kwargs.get('sortbydate', True):
+    if kwargs.get('sortbydate', True) and nspec > 1:
         dataset.sort(dim=0, inplace=True)
         dataset.history = 'Sorted'
 
