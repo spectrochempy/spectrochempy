@@ -43,7 +43,7 @@ existing environment (then skip steps 4. and 5.)
 
     .. sourcecode:: bat
 
-        (base) C:\<yourDefaultPath>> conda env create --name scpy
+        (base) C:\<yourDefaultPath>> conda create --name scpy
 
 #.  Recommended: switch to this environment. At this point, `(scpy)` should appear before
     the prompt instead of `(base)`.

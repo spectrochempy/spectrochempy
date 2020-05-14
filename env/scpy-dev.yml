@@ -47,3 +47,7 @@ dependencies:
 - quadprog
 - pyqt
 - twine
+- tqdm
+- brukeropusreader
+
+

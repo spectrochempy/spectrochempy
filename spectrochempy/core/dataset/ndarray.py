@@ -1626,6 +1626,19 @@ class NDArray(HasTraits):
 
         return new
 
+    def astype(self, dtype=None,  **kwargs):
+        """
+        Cast the data to a specified type.
+    
+        Parameters
+        ----------
+        dtype : str or dtype
+    T       typecode or data-type to which the array is cast.
+        
+        """
+        self.data = self.data.astype(dtype, **kwargs)
+        return self
+    
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------------------------------------------------

@@ -259,6 +259,7 @@ except ImportError:
 
 __all__.append('HAS_SCIKITLEARN')
 
+
 try:
     import xarray as xr
     
@@ -277,7 +278,7 @@ try:
 except:
     HAS_PANDAS = False
 
-__all__.append('HAS_PANDAS')
+__all__.append('HAS_AS')
 
 # dataset
 # ----------------------------------------------------------------------------------------------------------------------

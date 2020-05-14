@@ -121,7 +121,13 @@ if not (IN_IPYTHON and kernel and not NO_DISPLAY) and not IN_PYCHARM_SCIMODE:
         backend = 'Qt5Agg'
         mpl.use('Qt5Agg', force=True)
     except:
-        mpl.use('tkagg', force=True)
+        
+        try:
+            mpl.use('tkagg', force=True)
+            
+        except:
+            # case of test in the pipeline
+            mpl.use('tkagg', force=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Now we can start loading the API

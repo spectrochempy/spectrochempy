@@ -3,6 +3,15 @@
 Tutorials
 ==========
 
+Basics
+-----------
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+
+   basics/*
+
 Import data
 -----------
 

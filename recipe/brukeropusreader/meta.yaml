@@ -1,0 +1,42 @@
+{% set name = "brukeropusreader" %}
+{% set version = "1.3.4" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: c1309d7f40d710ab3ef702b732959697387a8faec1807d7d26d0a4ef60f4a0e0
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - numpy >=1.13.3
+    - pip
+    - python
+    - scipy >=0.19.1
+  run:
+    - numpy >=1.13.3
+    - python
+    - scipy >=0.19.1
+
+test:
+  imports:
+    - brukeropusreader
+
+about:
+  home: "https://github.com/qedsoftware/brukeropusreader"
+  license: GPLv3
+  license_family: GPL3
+  license_file: 
+  summary: "Bruker OPUS File Reader"
+  doc_url: 
+  dev_url: 
+
+extra:
+  recipe-maintainers:
+    - fernandezc

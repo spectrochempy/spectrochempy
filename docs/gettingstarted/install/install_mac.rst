@@ -35,7 +35,7 @@ existing environment (then skip steps 4. and 5.)
 
     .. sourcecode:: bash
 
-        (base)  ~ $ conda env create -n scpy
+        (base)  ~ $ conda create -n scpy
 
 #.  Recommended: switch to this environment. At this point, `(scpy)` should appear before
     the prompt instead of `(base)`.

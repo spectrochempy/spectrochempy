@@ -52,7 +52,7 @@ You can ask for help `here <https://redmine.spectrochempy.fr/projects/spectroche
 Examples, tutorials
 ====================
 
-The notebooks corresponding to the documentation are `located here. <https://redmine.spectrochempy.fr/projects/spectrochempy/files>`_
+The notebooks corresponding to the documentation are `located here. <https://www.spectrochempy.fr>`_
 
 Issue Tracker
 ===============
@@ -73,20 +73,14 @@ Citing |scpy|
 
 When using |scpy| for your own work, you are kindly requested to cite it this way::
 
-     Arnaud Travert & Christian Fernandez,
-     SpectroChemPy, a framework for processing, analyzing and modeling
-     of Spectroscopic data for Chemistry with Python
-     https://bitbucket.org/spectrocat/spectrochempy, (version 0.1)
-     Laboratoire Catalyse and Spectrochemistry,
-     ENSICAEN/Universit\'e de Caen/CNRS, 2020
-
+     Arnaud Travert & Christian Fernandez, (2020) SpectroChemPy (Version 0.1). Zenodo. http://doi.org/10.5281/zenodo.3823841
 
 .. |scpy| replace:: **SpectroChemPy**
 
 Source repository
 ===================
 
-The source are versioned using the git system and hosted on the `Bitbucket platform <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_
+The source are versioned using the git system and hosted on the `GitHub platform <https://github.com/spectrochempy/spectrochempy>`_
 
 License
 =========
