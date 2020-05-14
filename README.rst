@@ -82,7 +82,7 @@ When using |scpy| for your own work, you are kindly requested to cite it this wa
 Source repository
 ===================
 
-The source are versioned using the git system and hosted on the `Bitbucket platform <https://bitbucket.org/spectrocat/spectrochempy/src/master/>`_
+The source are versioned using the git system and hosted on the `GitHub platform <https://github.com/spectrochempy/spectrochempy>`_
 
 License
 =========
