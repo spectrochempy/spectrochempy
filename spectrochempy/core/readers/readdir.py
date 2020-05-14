@@ -61,7 +61,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     Notes
     ------
-    Only implemented for OMNIC files (\*.spa, \*.spg), \*.csv, \*.mat and the
+    Only implemented for OMNIC files (\*.spa, \*.spg), Bruker Opus files (\*.[0-9]\*), \*.csv, \*.mat and the
     native format for spectrochempy : \*.scp).
 
     Parameters
