@@ -10,7 +10,7 @@
 """This module to extend NDDataset with the import methods method.
 
 """
-__all__ = ['read_bruker_opus']
+__all__ = ['read_opus']
 
 __dataset_methods__ = __all__
 
