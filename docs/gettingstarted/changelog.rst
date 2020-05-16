@@ -10,6 +10,22 @@ and have a look to the `roadmap <https://redmine.spectrochempy.fr/projects/spect
 .. START CHANGELOG
 
 
+.. _version_0.1.19:
+
+Version 0.1.19
+---------------------
+
+Bugs fixed
+~~~~~~~~~~~
+
+
+Features added
+~~~~~~~~~~~~~~~~
+
+
+Tasks terminated
+~~~~~~~~~~~~~~~~~
+
 .. _version_0.1.18:
 
 Version 0.1.18
