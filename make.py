@@ -503,6 +503,8 @@ class Build(object):
         lhist.reverse()
         history = ""
         for filename in lhist:
+            if '.'.join(filename.split('.')[-4:-1]) > target:
+                continue # do not take into account future version for change log - obviously!
             with open(filename, 'r') as f:
                 history +="\n\n"
                 nh = f.read().strip()
