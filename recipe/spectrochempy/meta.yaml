@@ -13,7 +13,7 @@ source:
   git_rev: "{{ version }}"
 
 build:
-  number: 0
+  number: 1
   noarch: python
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
@@ -26,8 +26,8 @@ build:
   # to Windows.
 
   script:
-    - {{ PYTHON }} -m pip install . -vv
     - jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
+    - {{ PYTHON }} -m pip install . -vv
 
 requirements:
   host:

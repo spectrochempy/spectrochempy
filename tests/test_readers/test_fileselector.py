@@ -23,3 +23,9 @@ def test_fileselector():
     if fs.value is not None:
         assert fs.value.endswith('')
 
+def test_issues_61():
+    
+    path = general_preferences.datadir
+    fs = FileSelector(path = path, filters='spg')
+    
+    assert fs.path.endswith('testdata/')

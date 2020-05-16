@@ -582,10 +582,13 @@ def _set_figure_style(**kwargs):
     except OSError:
         # scpy not found! may be due to a failing installation
         # make a basic style here
-        # get the local version:
-        plt.style.use(os.path.join(prefs.stylesheets, 'scpy.mplstyle'))
+        # get the local version if it exists:
+        try:
+            plt.style.use(os.path.join(prefs.stylesheets, 'scpy.mplstyle'))
+        except OSError:
+            pass
 
-    # now get the required style form args
+    # now get the required style from args
     style = kwargs.get('style', None)
 
     if style:
