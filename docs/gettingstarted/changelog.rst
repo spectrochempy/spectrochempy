@@ -10,6 +10,62 @@ and have a look to the `roadmap <https://redmine.spectrochempy.fr/projects/spect
 .. START CHANGELOG
 
 
+.. _version_0.1.19:
+
+Version 0.1.19
+---------------------
+
+Bugs fixed
+~~~~~~~~~~~
+
+* FIX `#61 <https://redmine.spectrochempy.fr/issues/61>`_ - Core code: The file selector does not work when the path has a final slash.
+* FIX `#57 <https://redmine.spectrochempy.fr/issues/57>`_ - Deployment: PyPi, Conda, ...: Conda install is not working on linux (sometimes!)
+* FIX `#44 <https://redmine.spectrochempy.fr/issues/44>`_ - Core code: Deprecation warning with numpy elementwise == comparison 
+
+Features added
+~~~~~~~~~~~~~~~~
+
+* `#54 <https://redmine.spectrochempy.fr/issues/54>`_ - Core code: Implementing random generator for creation of NDDataset
+* `#52 <https://redmine.spectrochempy.fr/issues/52>`_ - Core code: implement a reshape method 
+* `#42 <https://redmine.spectrochempy.fr/issues/42>`_ - Notebook Tutorials: Tutorial on IR data import
+* `#36 <https://redmine.spectrochempy.fr/issues/36>`_ - Deployment: PyPi, Conda, ...: Automate building and deployment of new releases
+
+Tasks terminated
+~~~~~~~~~~~~~~~~~
+
+* `#49 <https://redmine.spectrochempy.fr/issues/49>`_ - Notebook Tutorials: Tutorial on numpy and NDDatasets
+* `#46 <https://redmine.spectrochempy.fr/issues/46>`_ - Deployment: PyPi, Conda, ...: Pipeline for the master branch on GitHub
+* `#39 <https://redmine.spectrochempy.fr/issues/39>`_ - Documentation: Correct and update developper guide pages
+* `#37 <https://redmine.spectrochempy.fr/issues/37>`_ - Core code: Clean the code for all unused functions (put them in a temporary folder for possible  future usage)
+* `#30 <https://redmine.spectrochempy.fr/issues/30>`_ - Documentation: Documentation improvement
+
+.. _version_0.1.18:
+
+Version 0.1.18
+---------------------
+
+Bugs fixed
+~~~~~~~~~~~
+
+* FIX `#62 <https://redmine.spectrochempy.fr/issues/62>`_ - Bug, issues: Install of the matplotlib styles doesn't work during setup
+* FIX `#60 <https://redmine.spectrochempy.fr/issues/60>`_ - Core code: Generic read function do not open a dialog when called without argument
+* FIX `#56 <https://redmine.spectrochempy.fr/issues/56>`_ - Documentation: Wrong instruction in install guides (MAC and WIN
+
+Features added
+~~~~~~~~~~~~~~~~
+
+* `#51 <https://redmine.spectrochempy.fr/issues/51>`_ - Core code: implement the numpy equivalent method `astype`
+* `#50 <https://redmine.spectrochempy.fr/issues/50>`_ - Core code: Add new numpy equivalent functions such as np.eyes, np.identity.
+* `#41 <https://redmine.spectrochempy.fr/issues/41>`_ - nan: Bruker Opus Import
+
+Tasks terminated
+~~~~~~~~~~~~~~~~~
+
+* `#59 <https://redmine.spectrochempy.fr/issues/59>`_ - Deployment: PyPi, Conda, ...: Make a repository on github. Get a DOI number for it. 
+* `#53 <https://redmine.spectrochempy.fr/issues/53>`_ - Deployment: PyPi, Conda, ...: Add nmrglue to our conda channel - and remove it from extern
+* `#48 <https://redmine.spectrochempy.fr/issues/48>`_ - Deployment: PyPi, Conda, ...: Add  brukeropusreader to our conda channel
+* `#47 <https://redmine.spectrochempy.fr/issues/47>`_ - Deployment: PyPi, Conda, ...: Add a linux quadprog version into our conda channel
+
 .. _version_0.1.17:
 
 Version 0.1.17

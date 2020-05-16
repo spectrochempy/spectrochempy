@@ -15,12 +15,12 @@
 #     name: python3
 # ---
 
-# %% [markdown] {"pycharm": {"name": "#%% md\n", "is_executing": false}}
+# %% [markdown] {"pycharm": {"is_executing": false, "name": "#%% md\n"}}
 # # Import Data
 #
 # This tutorial shows how to import data in Spectrochempy. First, let's import spectrochempy in the current namespace.
 
-# %% {"pycharm": {"name": "#%%\n", "is_executing": false}, "jupyter": {"outputs_hidden": false}}
+# %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"is_executing": false, "name": "#%%\n"}}
 from spectrochempy import *
 
 # %% [markdown]
@@ -58,7 +58,7 @@ print(X)
 #
 #
 # - At the time of writing this tutorial (Scpy v.0.1.18), the following commands will behave similarly:
-#     - `read_opus()` to open Opus (*.0, ...) files
+#     - `read_bruker_opus()` to open Opus (*.0, ...) files
 #     - `read_csv()` to open csv files
 #     - `read_dir()` to open readable files in a directory
 #     - `read_jdx()` to open an IR JCAMP-DX datafile

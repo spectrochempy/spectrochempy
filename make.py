@@ -86,7 +86,7 @@ class Build(object):
         
         parser.add_argument("-H", "--html", help="create html pages", action="store_true")
         parser.add_argument("-P", "--pdf", help="create pdf manual", action="store_true")
-        parser.add_argument("--tutorials", help="zip notebook tutorials for downloads", action="store_true")
+        parser.add_argument("-T", "--tutorials", help="zip notebook tutorials for downloads", action="store_true")
         parser.add_argument("--clean", help="clean/delete html or latex output", action="store_true")
         parser.add_argument("--deepclean", help="full clean/delete output (reset fro a full regenration of the documentation)", action="store_true")
         parser.add_argument("--sync", help="sync doc ipynb using jupytext", action="store_true")
@@ -94,9 +94,10 @@ class Build(object):
         parser.add_argument("-m", "--message", default='DOCS: updated', help='optional git commit message')
         parser.add_argument("--api", help="execute a full regeneration of the api", action="store_true")
         parser.add_argument("-R", "--release", help="release the current version documentation on website", action="store_true")
-        parser.add_argument("--changelogs", help="update changelogs using the redmine issues status", action="store_true")
+        parser.add_argument("-C", "--changelogs", help="update changelogs using the redmine issues status", action="store_true")
         parser.add_argument("--conda", help="make a conda package", action="store_true")
         parser.add_argument("--upload", help="upload conda and pypi package to the corresponding repositories", action="store_true")
+        parser.add_argument("--all", help="Build all docs and release", action="store_true")
         
         args = parser.parse_args()
         
@@ -133,6 +134,15 @@ class Build(object):
             self.make_conda_and_pypi()
         if args.upload:
             self.upload()
+        if args.all:
+            self.clean('html')
+            self.clean('latex')
+            self.make_changelog()
+            self.make_docs('html')
+            self.make_docs('latex')
+            self.make_pdf()
+            self.make_tutorials()
+            self.release()
             
     @staticmethod
     def _cmd_exec(cmd, shell=None):
@@ -288,19 +298,19 @@ class Build(object):
                 # # remove outputs
                 if '.ipynb_checkpoints' in nb:
                     continue
-                    
+                basename = os.path.basename(nb).split(".ipynb")[0]
                 CMD = f'jupyter nbconvert {nb} ' \
                       f'--to notebook ' \
                       f'--ClearOutputPreprocessor.enabled=True ' \
-                      f'--stdout > out.ipynb'
+                      f'--stdout > out_{basename}.ipynb'
                 self._cmd_exec(CMD, shell=True)
                 CMD = f'rm {nb}'
                 self._cmd_exec(CMD, shell=True)
-                CMD = f"mv out.ipynb {nb}"
+                CMD = f'mv out_{basename}.ipynb {nb}'
                 self._cmd_exec(CMD, shell=True)
                 arcnb = nb.replace(path, dest)
                 ziph.write(nb, arcname=arcnb)
-
+                
         zipf = zipfile.ZipFile('~notebooks.zip', 'w', zipfile.ZIP_STORED)
         zipdir(USERDIR, 'notebooks', zipf)
         zipdir(os.path.join(GALLERYDIR, 'auto_examples'), os.path.join('notebooks', 'examples'), zipf)
@@ -308,8 +318,7 @@ class Build(object):
 
         CMD = f'mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECT}-notebooks.zip'
         self._cmd_exec(CMD, shell=True)
-
-
+        
     # ..................................................................................................................
     def api_gen(self):
         """

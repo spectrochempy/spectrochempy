@@ -262,7 +262,7 @@ nd3
 path = scp.general_preferences.datadir      # this is a path provided that point on a example set of data. 
                                             # It can be replaced by any other path you like
 
-# %% nbsphinx="hidden" hidden="true" jupyter={"source_hidden": true}
+# %% hidden="true" jupyter={"source_hidden": true} nbsphinx="hidden"
 # THESE LINE IS JUST HERE FOR BUILDING THE DOCUMENTATION (IT SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
 path = '/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata'
 
