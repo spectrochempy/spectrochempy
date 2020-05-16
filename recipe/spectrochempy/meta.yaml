@@ -1,5 +1,5 @@
 {% set name = "SpectroChemPy" %}
-{% set version = "0.1.17" %}
+{% set version = "0.1.18" %}
 
 # see this  for a description of the sections
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
@@ -64,7 +64,9 @@ requirements:
     - pyqt
     - tqdm
     - brukeropusreader
-
+    - git
+    - m2-patch # [win]
+    - patch    # [osx]
 test:
   imports:
     - spectrochempy
