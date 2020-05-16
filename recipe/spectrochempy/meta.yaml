@@ -13,7 +13,7 @@ source:
   git_rev: "{{ version }}"
 
 build:
-  number: 1
+  number: 0
   noarch: python
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
@@ -25,9 +25,7 @@ build:
   # to limit to Python 3.5 and newer, or "skip: True  # [not win]" to limit
   # to Windows.
 
-  script:
-    - jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
-    - {{ PYTHON }} -m pip install . -vv
+  script: {{ PYTHON }} -m pip install . -vv
 
 requirements:
   host:
@@ -65,8 +63,7 @@ requirements:
     - tqdm
     - brukeropusreader
     - git
-    - m2-patch # [win]
-    - patch    # [osx]
+
 test:
   imports:
     - spectrochempy
