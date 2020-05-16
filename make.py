@@ -486,9 +486,9 @@ class Build(object):
         changes = issues[issues['Target version']==target]
         
         # Create a versionlog file for the current target
-        bugs = changes[changes['Tracker']=='Bug']
-        features = changes[changes['Tracker']=='Feature']
-        tasks = changes[changes['Tracker']=='Task']
+        bugs = changes.loc[(changes['Tracker']=='Bug') & (changes['Status'] !='New') & (changes['Status'] !='In Progress')]
+        features = changes.loc[(changes['Tracker']=='Feature') & (changes['Status'] !='New') & (changes['Status'] !='In Progress')]
+        tasks = changes.loc[(changes['Tracker']=='Task') & (changes['Status'] !='New') & (changes['Status'] !='In Progress')]
         
         with open(os.path.join(TEMPLATES, 'versionlog.rst'), 'r') as f:
             template = Template(f.read())

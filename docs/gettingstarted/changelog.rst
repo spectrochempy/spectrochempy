@@ -27,7 +27,7 @@ Features added
 
 * `#51 <https://redmine.spectrochempy.fr/issues/51>`_ - Core code: implement the numpy equivalent method `astype`
 * `#50 <https://redmine.spectrochempy.fr/issues/50>`_ - Core code: Add new numpy equivalent functions such as np.eyes, np.identity.
-* `#41 <https://redmine.spectrochempy.fr/issues/41>`_ - nan: Bruker Opus Import
+* `#41 <https://redmine.spectrochempy.fr/issues/41>`_ - Core code: Bruker Opus Import
 
 Tasks terminated
 ~~~~~~~~~~~~~~~~~
