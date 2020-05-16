@@ -16,7 +16,10 @@ import os, sys
 
 from spectrochempy.utils.testing import example_run
 
-@pytest.mark.parametrize('example', glob("../docs/user/**/*.py", recursive=True))
+path = os.getcwd()
+path = path[:path.find('/tests')]
+
+@pytest.mark.parametrize('example', glob(os.path.join(path,'docs','user','**','*.py'), recursive=True))
 def test_example(example):
 
     name = os.path.basename(example)

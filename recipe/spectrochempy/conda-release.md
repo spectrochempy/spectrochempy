@@ -1,4 +1,4 @@
-    Conda package for spectrochempy.
+Conda package for spectrochempy.
 ================================
 
 .condarc
@@ -32,8 +32,9 @@ On windows, install git and patch which are required:
 
 then the recipes was built both for Windows (win64) and OSX (osx64)
 
-    conda update conda-build
-    conda update conda-verify
+    conda update conda-build -y
+    conda update conda-verify -y
+    
     conda config --set anaconda_upload no
     conda build spectrochempy
     conda build purge

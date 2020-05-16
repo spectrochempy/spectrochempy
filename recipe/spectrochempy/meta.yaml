@@ -1,5 +1,5 @@
 {% set name = "SpectroChemPy" %}
-{% set version = "0.1.17" %}
+{% set version = "0.1.18" %}
 
 # see this  for a description of the sections
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
@@ -25,9 +25,7 @@ build:
   # to limit to Python 3.5 and newer, or "skip: True  # [not win]" to limit
   # to Windows.
 
-  script:
-    - {{ PYTHON }} -m pip install . -vv
-    - jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib
+  script: {{ PYTHON }} -m pip install . -vv
 
 requirements:
   host:
@@ -64,6 +62,7 @@ requirements:
     - pyqt
     - tqdm
     - brukeropusreader
+    - git
 
 test:
   imports:

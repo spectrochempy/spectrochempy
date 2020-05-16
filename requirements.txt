@@ -16,6 +16,7 @@ tqdm
 
 # mainly for install and a bit more...
 setuptools_scm
+git
 
 # need this, because the API is mainly designed to run in Jupyter notebook
 ipython
