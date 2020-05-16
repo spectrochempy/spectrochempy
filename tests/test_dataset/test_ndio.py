@@ -86,4 +86,4 @@ def test_ndio_save_and_load_mydataset(IR_dataset_2D):
 def test_issue_60():
     with pytest.raises(ValueError):
         NDDataset.read()
-    NDDataset.read(         )
+    NDDataset.read(protocol='omnic')
