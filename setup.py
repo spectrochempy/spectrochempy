@@ -84,7 +84,6 @@ class PostDevelopCommand(_develop):
     """Post-installation for development mode."""
     
     def run(self):
-        _develop.run(self)
         # for item in ['pre-commit', 'pre-push']:
         #     hook = os.path.join(path(), '.git', 'hooks', item)
         #     if os.path.exists(hook):
@@ -93,15 +92,15 @@ class PostDevelopCommand(_develop):
         #     sh.copy(nhook, hook)
         #     print(('installation of `.git/hooks/{}` made.'.format(item)))
         install_styles()
+        _develop.run(self)
 
 
 class PostInstallCommand(_install):
     """Post-installation for installation mode."""
     
     def run(self):
-        _install.run(self)
         install_styles()
-
+        _install.run(self)
 
 def read(fname):
     with open(os.path.join(path(), fname), 'r') as f:
