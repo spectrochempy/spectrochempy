@@ -78,7 +78,7 @@ class MCRALS(HasTraits):
                 specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, ... are
                 supplementary outputs returned by the function (e.g. optimized rate parameters)
             * args : tuple, optional.
-                Extra arguments passed to tthe external function
+                Extra arguments passed to the external function
             * external_to_C_idx : array or tuple, Default=np.arange(next)
                 indicates the correspondence between the indexes of external chemical
                 profiles and the columns of the C matrix. [1, None, 0] indicates that the first external profile is the
@@ -93,19 +93,19 @@ class MCRALS(HasTraits):
         
         Attributes
         ----------
-        self._X :
+        self.X :
             the original dataset
-        self._param :
+        self.param :
             the parameters used to perform the MCR als
-        self._extC :
+        self.extC :
             the last concentration profiles including external profiles
-        self._extOutput :
+        self.extOutput :
             the last output of the external function used to get
-        self._C :
+        self.C :
             the final concentration profiles
-        self._St :
+        self.St :
             the final spectral profiles
-        self._log :
+        self.log :
             logs
         """
 
@@ -366,7 +366,8 @@ class MCRALS(HasTraits):
         self.Chard = Chard
         self.C = C
         if externalConc is not None:
-            self._extOutput = extOutput
+            self.extC = extC
+            self.extOutput = extOutput
         else:
             self.extC = None
             self.extOutput = None
