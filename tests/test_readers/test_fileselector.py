@@ -25,7 +25,7 @@ def test_fileselector():
 
 def test_issues_61():
     
-    path = general_preferences.datadir
+    path = general_preferences.datadir+"/"
     fs = FileSelector(path = path, filters='spg')
     
     assert fs.path.endswith('testdata/')
