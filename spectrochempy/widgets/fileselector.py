@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 """
-Widgets for the Jupyter noteboobk and Jupyter lab
+Widgets for the Jupyter notebook and Jupyter lab
 
 """
 from IPython.core.interactiveshell import InteractiveShell
@@ -110,6 +110,7 @@ class FileSelector(Base):
             picking file extensions. None is an alias for [''], passes all
             files.
         """
+        path = path.rstrip('/').rstrip("\\")
         self.done_callback = done_callback
         if filters:
             if not isinstance(filters, (list, tuple)):
