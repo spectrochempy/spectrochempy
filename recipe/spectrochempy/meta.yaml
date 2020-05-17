@@ -1,5 +1,5 @@
 {% set name = "SpectroChemPy" %}
-{% set version = "0.1.18" %}
+{% set version = "0.1.19" %}
 
 # see this  for a description of the sections
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
@@ -13,7 +13,7 @@ source:
   git_rev: "{{ version }}"
 
 build:
-  number: 0
+  number: 1
   noarch: python
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
@@ -79,7 +79,7 @@ test:
 
   # needed test files
   source_files:
-      - tests/
+      - tests
 
 about:
   home: "https://redmine.spectrochempy.fr"

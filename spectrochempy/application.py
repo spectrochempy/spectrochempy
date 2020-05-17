@@ -9,7 +9,9 @@
 
 """
 This module define the `application` on which the API rely. It also define
-the default application preferences and IPython magic functions."""
+the default application preferences and IPython magic functions.
+
+"""
 
 __all__ = []
 
@@ -26,7 +28,7 @@ import datetime
 import warnings
 import pprint
 import json
-import textwrap
+import shutil as sh
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -55,10 +57,16 @@ from IPython.utils.text import get_text_list
 from IPython.display import HTML, publish_display_data, clear_output
 from jinja2 import Template
 
+# ----------------------------------------------------------------------------------------------------------------------
+# local import
+# ----------------------------------------------------------------------------------------------------------------------
+
 from spectrochempy.utils import MetaConfigurable
 
+# ----------------------------------------------------------------------------------------------------------------------
 # Log levels
 # ----------------------------------------------------------------------------------------------------------------------
+
 DEBUG = logging.DEBUG
 INFO = logging.INFO
 WARNING = logging.WARNING
@@ -68,6 +76,7 @@ CRITICAL = logging.CRITICAL
 # ----------------------------------------------------------------------------------------------------------------------
 # logo / copyright display
 # ----------------------------------------------------------------------------------------------------------------------
+
 def display_info_string(**kwargs):
     _template = """
     {{widgetcss}}
@@ -127,6 +136,7 @@ def display_info_string(**kwargs):
 # ----------------------------------------------------------------------------------------------------------------------
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
+
 def version_scheme(version, local=False):
     branch = version.branch
     dist = version.distance
@@ -249,7 +259,10 @@ linestyles.remove('')
 linestyles.remove(' ')
 
 
-# ............................................................................
+# ----------------------------------------------------------------------------------------------------------------------
+# available matplotlib styles (equivalent of plt.style.available)
+# ----------------------------------------------------------------------------------------------------------------------
+
 def available_styles():
     """
     All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
@@ -266,21 +279,16 @@ def available_styles():
     
     stylelib = os.path.join(cfgdir, 'stylelib')
     
-    # AT: checks if stylelib exists and adds matplotlib pre-defined styles
     styles = plt.style.available
     if os.path.isdir(stylelib):
         listdir = os.listdir(stylelib)
         for style in listdir:
             if style.endswith('.mplstyle'):
-                styles.append(style)
+                styles.append(style[:-9])
     styles = list(set(styles))  # in order to remove possible duplicates
     
-    if 'scpy' not in styles:  # pragma: no cover
-        styles.append('scpy')  # the standard style of spectrochempy
-    
     return styles
-
-
+    
 # ======================================================================================================================
 # Magic ipython function
 # ======================================================================================================================
@@ -591,7 +599,7 @@ class GeneralPreferences(MetaConfigurable):
         return _get_pkg_datadir_path('stylesheets', 'scp_data')
 
     @default('databases')
-    def _get_stylesheets_default(self):
+    def _get_databases_default(self):
         # the spectra path in package data
         return _get_pkg_datadir_path('databases', 'scp_data')
     
@@ -685,10 +693,11 @@ class ProjectPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------------------------------------------------
     
     # ..................................................................................................................
-    style = Enum(available_styles(), default_value='scpy',
-                 help='Basic matplotlib style to use').tag(config=True,
-                                                           type='list')
-    
+    _styles = available_styles()
+    if 'scpy' not in _styles:
+       _styles.append('scpy')
+    style = Enum(_styles, default_value='scpy', help='Basic matplotlib style to use').tag(config=True, type='list')
+
     @observe('style')
     def _style_changed(self, change):
         plt.style.use(change.new)
@@ -1134,6 +1143,11 @@ class SpectroChemPy(Application):
         self.datadir = DataDir(config=self.config)
         self.general_preferences = GeneralPreferences(config=self.config,
                                                       parent=self)
+
+        # Before setting default preference for project, check if the installation of some styles was already done
+        # if not do it now.
+        self._install_styles()
+    
         self.project_preferences = ProjectPreferences(config=self.config,
                                                       parent=self)
         
@@ -1182,7 +1196,31 @@ class SpectroChemPy(Application):
         
         # now run the actual start function
         return self._start()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # matplotlib style installation
+    # ------------------------------------------------------------------------------------------------------------------
     
+    def _install_styles(self):
+        # install all plotting styles in the matplotlib stylelib library if they are not yet present
+        
+        cfgdir = mpl.get_configdir()
+        stylelib = os.path.join(cfgdir, 'stylelib')
+        if not os.path.exists(stylelib):
+            # create it so we can install our styles
+            os.mkdir(stylelib)
+        else:
+            # are the styles already installed?
+            if os.path.exists(os.path.join(stylelib,'scpy.mplstyle')):
+                return True
+
+        styles_path = self.general_preferences.stylesheets
+        styles = os.listdir(styles_path)
+        for style in styles:
+            src = os.path.join(styles_path, style)
+            dest = os.path.join(stylelib, style)
+            sh.copy(src, dest)
+            
     # ------------------------------------------------------------------------------------------------------------------
     # start the application
     # ------------------------------------------------------------------------------------------------------------------
