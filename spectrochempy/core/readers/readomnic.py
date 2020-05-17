@@ -89,13 +89,12 @@ def read_omnic(dataset=None, **kwargs):
 
         dataset = NDDataset()  # create an instance of NDDataset
 
-    # check if directory was specified
-    directory = kwargs.get("directory", None)
+
     sortbydate = kwargs.get("sortbydate", True)
 
     # returns a list of files to read
     files = readfilename(filename,
-                         directory=directory,
+                         directory=kwargs.get("directory", None),
                          filetypes=['OMNIC files (*.spa, *.spg)',
                                     'all files (*)'])
 
