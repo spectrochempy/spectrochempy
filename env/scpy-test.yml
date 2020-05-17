@@ -28,3 +28,9 @@ dependencies:
 - widgetsnbextension
 - pyqt
 - tqdm
+- # testing required
+- pytest
+- pytest-runner
+- pytest-cov
+- pytest-xdist
+- scikit-image
