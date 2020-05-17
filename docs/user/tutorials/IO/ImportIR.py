@@ -16,179 +16,194 @@
 # ---
 
 # %% [markdown] {"pycharm": {"is_executing": false, "name": "#%% md\n"}}
-# # Import Data
+# # Import IR Data
 #
-# This tutorial shows how to import data in Spectrochempy. First, let's import spectrochempy in the current namespace.
+# This tutorial shows the specifics related to infrared data import in Spectrochempy. As prerequisite, the user is
+# expected to have read the [Import Tutorial](Import.ipynb).
+#
+# Let's first import spectrochempy:
 
-# %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"is_executing": false, "name": "#%%\n"}}
-from spectrochempy import *
+# %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"name": "#%%\n"}}
+import spectrochempy as scp
+import os as os
 
 # %% [markdown]
-# # 1. Dialog boxes
+# # 1. Supported fileformats
 #
-# Retrieving Files and Directories, in day-to-day work is often made through Dialog Boxes. While we do not recommand this procedure for adanced usage (see below), it is quite easy to do that with **Scpy**. For instance, to import IR spectra in the Omnic format (.spa or .spg), the command:
+# At the time of writing of this tutorial (Scpy v.0.1.18), spectrochempy has the following readers which are specific to IR
+# data:
 #
-# ```
-# X = read_omnic()
-# ```
+# - `read_omnic()` to open omnic (spa and spg) files
+# - `read_bruker_opus()` to open Opus (*.0, ...) files
+# - `read_jdx()` to open an IR JCAMP-DX datafile
 #
-# will open a dialog box such as shown in this this image:
+# General purpose data exchange formats such as  \*.csv or \*.mat can also be read using:
 #
-# ![Drawing](figures/OpenDialog.png)
+# - `read_csv()` to open csv files
+# - `read_matlab()` to open .mat files
 #
+# # 1.1. Import of OMNIC files
 #
-# The dialog Box allows selecting the file which data will be loaded in the variable `X`. Try for instance to run the cell below, and select an omnic spg datafile (select the .spg extension), which you can find in the `irdata` directory. 
+# [Thermo Scientific OMNIC](https://www.thermofisher.com/search/browse/category/us/fr/602580/FTIR%2C+NIR+%26amp%3B+Raman+Software+%26amp%3B+Libraries)
+# software have two proprietary binary file formats:
+# - .spa files that handle single spectra
+# - .spg files which contain a group of spectra
 #
-# > Note: the dialog box does not necessarily pops up in the foreground: check your task bar ! 
+# Both have been reverse engineered, hence allowing extracting key data. The Omnic reader of
+#  Spectrochempy (`read_omnic()`) has been developed based on posts in open forums on the .spa
+#  file format and extended to .spg file formats.
+#  
+# ## a) import spg file
+#
+# Let's import an .spg file from the `datadir` (see [Import Tutorial](Import.ipynb)) and display
+# its main attributes:
+
+# %% {"pycharm": {"name": "#%%\n"}}
+X = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG')
+X
+
+# %% [markdown]
+# The displayed attibutes are detailed in the following.
+#
+# - `name` is the name of the group of spectra as it appears in the .spg file. OMNIC sets this name to the .spg filename used at the creation of the group. In this example, the name ("Group sust Mo_Al2O3_base line.SPG") differs from the filemane ("CO@Mo_Al2O3.SPG") because the latter has been changed from outside OMNIC (directly in th OS).
+#
+# - `author` is that of the creator of the NDDataset (not of the .spg file, which, to our knowledge, does not have thus type of attribute). The string is composed of the username and of the machine name as given by the OS: usermane@machinename.
+#
+# - "created" is the creation date of the NDDataset (again not that of the .spg file). The actual name of the attribute is `date` and can be accessed (or even changed) using `X.date`  
+#
+# - `description` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below), it can be a good practice to give a self explaining description of the group, for instance:  
 
 # %%
-X = read_omnic()
+X.description= 'CO adsorption on CoMo/Al2O3, difference spectra'
+
+# %% [markdown]
+# - `history` records changes made to the dataset. Here, right after its creation, it has been sorted by date (see below). 
+#
+# Then come the attributes related to the data themselves:
+#
+# - `title` (not to be confused with the `name` of the dataset) describes the nature of data (here absorbance)
+#
+# - "values" shows a sample of the first and last data and their units when they exist (here a.u. for absorbance units). The numerical values ar accessed through the`data` attibute and the units throut `units` attribute.
+
+# %%
+print(X.data)
+print(X.units)
+
+# %% [markdown]
+# - `shape` is the same as the ndarray `shape` attribute and gives the shape of the data array, here 19 x 3112.
+#
+# Then come the attributes related to the dimensions of the dataset.  
+#
+# - the `x` dimension has one coordinate made of the 3112 the wavenumbers.  
+#
+# - the `y` dimension contains:
+#
+#     - one coordinate mede of the 19 acquisition timestamps 
+#     
+#     - two labels
+#     
+#         - the acquision date (UTC) of each spectrum
+#         
+#         - the name of each spectrum.
+#         
+# Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,j]` will return the absorbance of the ith spetrum at the jth  wavenumber.
+#
+# ### Note: acquisition dates and `y` axis
+#
+# The acquisition timestamps are the *Unix times* of the acquisition, i.e. the time elapsed in seconds since the reference date of Jan 1st 1970, 00:00:00 UTC. In OMNIC, the acquisition time is that of the start of the acquisison. As such these may be not convenient to use directly (they are currently in the order of 1.5 billion...) With this respect, it can be convenient to shift the origin of time coordinate to that of the 1st spectrum, which has the index `0`: 
+
+# %%
+X.y = X.y - X[0].y     
+X.y
+
+# %% [markdown]
+# It is also possible tu use the ability of Scpy to handle utnit changes:
+
+# %%
+X.y = X.y.to("minute")   
+X.y
+
+# %% [markdown]
+# Note that the valued that are displayed are rounded, not the values stored internally. Hence, the relative time in minutes of the last spectrum is: 
+
+# %%
+X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
+                 # the values of the Coord object are accessed through the `data` attribute 
+                 # whiche is a ndarray, hence the final [0] to have the value:
+
+# %% [markdown]
+# which gives the exact time in seconds:
+
+# %%
+_ * 60            # the underscore _ recalls the last output.
+
+# %% [markdown]
+# Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
+
+# %%
+X.y = X.y + 2
+X.y
+
+# %% [markdown]
+# ### Note: The order of spectra
+#
+# The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the original OMNIC order can be kept using the `order=True` at the function call. For instance:
+
+# %%
+X2 = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG', order=False)
+
+# %% [markdown]
+# In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by increasing data. 
+#
+# Finally, it is worth mentioning that the NDDatasets can generally be manipulated as numpy ndarray. Hence, for instance, the following will inverse the order of the first dimension:  
+
+# %%
+X = X[::-1,:]  # reorders the NDDataset along the first dimension going backward
+X.y            # displays the `y` dimension
+
+# %% [markdown]
+# ### Note: Case of groups with different wavenumbers
+#
+# An OMNIC .spg file can contain spectra having different wavenumber axes (e.g. different spacings or wavenumber ranges). In its current implementation, the spg reader will purposedly return an error because such spectra *cannot* be included in a single NDdataset which, by definition, contains items that share common axes or dimensions ! Future releases might include an option to deal with such a case and return a list of NDDasets. Let us know if you are interested in such a feature, see [Bug reports and enhancement requests](https://www.spectrochempy.fr/dev/dev/issues.html). 
+#
+
+# %% [markdown]
+# ### b) Import of .spa files
+#
+# The import of a single follows exactly the same rules as that of the import of a group, except that the history of the spectrum is also put in the description, and of course, the length of the `y` dimension is one:
+
+# %%
+Y = scp.read_omnic('irdata//subdir//7_CZ0-100 Pd_101.spa')
+Y
+
+# %% [markdown]
+# The omnic reader can also import several spa files together, providing that they share a common axis for the wavenumbers. Tis is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.spa", ..., "7_CZ0-100 Pd_104.spa". It is possible to import them in a single NDDataset by using the list of filenames in the function call:
+
+# %%
+list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.spa", "7_CZ0-100 Pd_103.spa", "7_CZ0-100 Pd_104.spa"]
+directory = os.path.join(scp.general_preferences.datadir, "irdata\\subdir")
+X = scp.read_omnic(list_files, directory=directory)
 print(X)
 
 # %% [markdown]
-# If successful, the output of the above cell should read something like 
-#
-# ```
-# Out[2] NDDataset: [float32] a.u. (shape: (y:2, x:5549))
-# ```
-#
-# The size of the `y` and `x` dimension will depend, of course, of the file that you have selected ! If you did not select any file (e.g. by pressing 'cancel' in th Dialog Box, the result will be `None`, as nothing has been loaded in `X`.
-#
-# > Note: By default the Dialog Box opens in the current directory, i.e. the directory in which this notebook is run. See below for more information 
-#
-#
-# - At the time of writing this tutorial (Scpy v.0.1.18), the following commands will behave similarly:
-#     - `read_bruker_opus()` to open Opus (*.0, ...) files
-#     - `read_csv()` to open csv files
-#     - `read_dir()` to open readable files in a directory
-#     - `read_jdx()` to open an IR JCAMP-DX datafile
-#     - `read_matlab()` to open MATLAB (.mat) files including Eingenvector's Dataset objects
-#     - `read_omnic()` to open omnic (spa and spg) files
-#  
-#  
-# - The list of readers available will hopefully increase in future **Scpy** releases:-) 
-
-# %% [markdown]
-# # 2. Import with explicit directory or file pathnames
-#
-# While the use of Dialog Box seems at first 'user-friendly', you will probably experience, that it is often NOT efficient because you will have to select the file *each time* the notebook (or the script) is run... Hence, the above commands can be used with the indication of the path to a directory, and/or to a filename. 
-#
-# If only a directory is indicated, the dialog box will open in this directory. For instance, on a WIN system, the following command:
-#
-# ```
-# X = read_omnic(directory='C:\\')
-# ```
-#
-# will open the dialog box at the root directory of the `C:` drive. 
-#
-# > Note that in this command, the backslash (`\`) is repeated twice. This is a specificity of python (and a handful of other languages): `\` is the escape character, so if you type `X = read_omnic(directory='C:\')`, a `SyntaxError` will be raised because python expects a character after the first `\`.
-#
-# On the other hand if a `filename` is passed, like here: 
-#
-# ```
-# X = read_omnic(directory='C:\\', filename='wodger.spg')
-# ```
-#
-# then Scpy will attempt opening a file named `wodger.spg` supposedly located in `C:\`. 
-#
-# Imagine now that the file of interest is actually located in `C:\users\Brian\s\Life`. The following 
-# commands are all equivalent and will allow opening the file: 
-#
-# - using only the full pathname of the file (note once again, the double backslashes):
-#
-#     ```
-#     X = read_omnic(filename='C:\\users\\Brian\\s\\Life\\wodger.spg')
-#     ```
-#
-#
-# - more simply, without the `filename=` keyword: 
-#
-#     ```
-#     X = read_omnic('C:\\users\\Brian\\s\\Life\\wodger.spg')
-#     ```
-#
-#
-# - or using a combination of directory and file pathnames:
-#
-#     ```
-#     X = read_omnic(directory='C:\\users\\Brian\\s\\Life', filename='wodger.spg')
-#     X = read_omnic(directory='C:\\users\\Brian\\s', filename='Life\\wodger.spg')
-#     ```
-#  
-#  
-# - etc...
-#
-#
-# # 4. A good practice: use relative paths
-#
-# The above directives require explicitly writing the absolute pathnames, which are virtually always computer specific. If, for instance, Brian has a project organized in a folder (`s`) with a directory dedicated to input data (`Life`) and a notebook for preprocessing (`welease.ipynb`) as illustrate below:
-#
-# ```
-# C:\users
-# |    +-- Brian                   
-# |    |    +-- s                 
-# |    |    |   +-- Life          
-# |    |    |   |   +-- wodger.spg
-# |    |    |   +-- welease.ipynb 
-# ```
-#
-# Then running this project in John's Linux computer (e.g. in `\home\john\s_copy`) will certainly result in execution errors if absolute paths are used in the notebook:  
-#
-# ```
-# OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
-# ``` 
-#
-# In this respect, a good practice consists in using relative pathnames in scripts/notebooks and fortunately, Spectrochempy readers use relative paths. If the given path is not absolute, then spectrochempy will search in the current directory. Hence the openening of the spg file from scripts in `welease.ipynb` can be made by the command: 
-#
-# ```
-# X = read_omnic('Life\\wodger.spg'))
-# ```
-#
-# or other variants such as:
-#
-# ```
-# X = read_omnic('wodger.spg', directory='Life')
-# X = read_omnic(filename='wodger.spg', directory='Life')
-# ```
-# # 5. Good practice: use `os` or `pathlib` modules
-#
-# In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules. As `os`is automatically imported with Scpy, we mention the following methods that can be particularely useful:
-#
-# - `os.getcwd()`: returns the absolute path of the current working directory (i.e. the directory of the script) 
-# - `os.path.expanduser("~")` : returns the home directory of the user (e.g. the `C:\users\<username>` path on WIN platforms or `/home/<username>` on linux)
-# - `os.path.join()`: concatenates intelligently path components.
-#     
-# The interested readers will find more details on te use of these modules here: 
-#
-# - [os - Miscellaneous operating system interfaces](https://docs.python.org/3/library/os.html)
-# - [pathlib — Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
-#
-# # 5. Another default search directory: `datadir`
-#
-# Spectrochempy comes also with the definition of a second default directory path where to look at the data: the `datadir` directory. It is defined in the variable `general_preferences.datadir` which is impotrted at the same time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of spectrochempy:
+# In such a case ase these .spa files are alone in the directory, a very convenient is the read_dir() method that will gather the .spa files together:
 
 # %%
-print(general_preferences.datadir)
+X = scp.read_dir(directory, recursive=False)
+print(X)
+
+# %% [markdown] {"pycharm": {"name": "#%% md\n"}}
+# # 1.2. Import of Bruker OPUS files
+#
+# [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_bruker_opus()`) of spectrochempy is essentially a wrapper of the python module  and
+# [brukeropusreader](https://github.com/qedsoftware/brukeropusreader) developed by QED.
+#
+#  
+# (to be completed...)
 
 # %% [markdown]
-# It can be set to another pathname *permanently* (i.e. even after computer restart) by a new assignment:
+# # 1.3. Import of JCAMP-DX files
 #
-# ```
-# general_preferences.datadir = 'C:\\Brian\\s\\Life'`
-# ```
+# [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734) fo details.  
 #
-# This will change the default value in the spectrochempy preference file located in the hidden folder `.spectrochempy/` at the root of the user home directory.
-#
-# Finally, by default, the import functions used in Sepctrochempy will search the datafiles using this order of precedence:
-#
-#    1. try absolute path
-#    2. try in current working directory
-#    3. try in `datadir`
-#    4. if none of these works: generate an OSError (file or directory not found)
-#    
-#     
-
-# %% [markdown]
-# --- This is the end of the tutorial ---
-#
-#
+# (to be completed...)
