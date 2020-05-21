@@ -222,7 +222,7 @@ except:
     # probably no connection
     upd= False
     
-if upd():
+if upd:
     
     from spectrochempy.application import display_info_string
     
