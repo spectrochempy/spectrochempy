@@ -1,0 +1,8 @@
+# python variants for the various packages
+python:
+  - 3.7
+  - 3.6
+
+numpy:
+  - 1.15
+

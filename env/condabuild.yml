@@ -1,0 +1,17 @@
+name: condabuild
+channels:
+- conda-forge
+- spectrocat
+- cantera
+- defaults
+dependencies:
+- pip
+- setuptools
+- wheel
+- twine
+- conda-build
+- conda-verify
+- anaconda-client
+- setuptools_scm
+- numpy
+- pytest
