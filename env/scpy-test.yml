@@ -1,4 +1,4 @@
-name: scpy
+name: scpy-test
 channels:
 - conda-forge
 - spectrocat
@@ -28,12 +28,7 @@ dependencies:
 - widgetsnbextension
 - pyqt
 - tqdm
-# conda build
-- conda-build
--
+
 # testing required
 - pytest
-- pytest-runner
-- pytest-cov
-- pytest-xdist
 - scikit-image

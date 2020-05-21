@@ -1,7 +1,9 @@
 language: python
 
 python:
+  - "3.6"
   - "3.7"
+  - "3.8"
 
 install:
   - sudo apt-get update
@@ -11,16 +13,14 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  # Useful for debugging any issues with conda
   - conda info -a
   - conda config --add channels conda-forge
   - conda config --add channels cantera
   - conda config --add channels spectrocat
   - conda config --set channel_priority strict
   - conda env create -q -f env/scpy.yml python=$TRAVIS_PYTHON_VERSION
-  - conda activate scpy
-  - conda install conda-build
-  - conda install conda-verify
+  - conda activate scpy-test
+  - pip install .
 
 script:
-  - conda build recipe/spectrochempy
+  - pytest
