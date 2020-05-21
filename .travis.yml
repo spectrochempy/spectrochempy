@@ -18,7 +18,7 @@ install:
   - conda config --add channels cantera
   - conda config --add channels spectrocat
   - conda config --set channel_priority strict
-  - conda env create -q -f env/scpy.yml python=$TRAVIS_PYTHON_VERSION
+  - conda env create -q -f env/scpy-test.yml python=$TRAVIS_PYTHON_VERSION
   - conda activate scpy-test
   - pip install .
 
