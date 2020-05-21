@@ -28,7 +28,10 @@ dependencies:
 - widgetsnbextension
 - pyqt
 - tqdm
-- # testing required
+# conda build
+- conda-build
+-
+# testing required
 - pytest
 - pytest-runner
 - pytest-cov

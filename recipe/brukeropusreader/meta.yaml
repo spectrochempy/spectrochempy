@@ -14,14 +14,17 @@ build:
   script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - python                  {{ python }}.*
   host:
-    - numpy >=1.13.3
-    - pip
     - python
+    - numpy
+    - pip
     - scipy >=0.19.1
   run:
-    - numpy >=1.13.3
     - python
+    - numpy                  {{ numpy }}.*
     - scipy >=0.19.1
 
 test:
@@ -32,10 +35,7 @@ about:
   home: "https://github.com/qedsoftware/brukeropusreader"
   license: GPLv3
   license_family: GPL3
-  license_file: 
   summary: "Bruker OPUS File Reader"
-  doc_url: 
-  dev_url: 
 
 extra:
   recipe-maintainers:

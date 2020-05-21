@@ -10,24 +10,29 @@ source:
   sha256: f308b9a4f0368c956fd48e480dfadad7a9497ed7c1bb3059a2777b7deb4fbff9
 
 build:
-  number: 0
+  number: 1
   script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - python                    {{ python }}.*
+    - cython
   host:
-    - cython
-    - pip
     - python
+    - cython
   run:
-    - cython
     - python
+    - numpy                     {{ numpy }}.*
+    - cython
+
+test:
+  imports:
+    - quadprog
 
 about:
   home: "https://github.com/rmcgibbo/quadprog"
   license: GPLv2+
   license_family: GPL2
-  license_file: 
   summary: "Quadratic Programming Solver"
-  doc_url: 
-  dev_url: 
 
