@@ -5,7 +5,14 @@ python:
   - "3.7"
   - "3.8"
 
+addons:
+  apt:
+    packages:
+      - xvfb
+
 install:
+  - export DISPLAY=':99.0'
+  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
@@ -18,6 +25,8 @@ install:
   - conda config --add channels cantera
   - conda config --add channels spectrocat
   - conda config --set channel_priority strict
+  # - git clone https://github.com/fernandezc/spectrochempy.git
+  # - cd spectrochempy
   - conda env create -q -f env/scpy-test.yml python=$TRAVIS_PYTHON_VERSION
   - conda activate scpy-test
   - conda update pytest
