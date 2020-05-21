@@ -216,8 +216,13 @@ def check_for_update():
         else:
             return False
 
-
-if check_for_update():
+try:
+    upd = check_for_update()
+except:
+    # probably no connection
+    upd= False
+    
+if upd():
     
     from spectrochempy.application import display_info_string
     
