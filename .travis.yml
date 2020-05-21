@@ -25,8 +25,6 @@ install:
   - conda config --add channels cantera
   - conda config --add channels spectrocat
   - conda config --set channel_priority strict
-  # - git clone https://github.com/fernandezc/spectrochempy.git
-  # - cd spectrochempy
   - conda env create -q -f env/scpy-test.yml python=$TRAVIS_PYTHON_VERSION
   - conda activate scpy-test
   - conda update pytest
@@ -34,4 +32,4 @@ install:
 
 script:
   - cd tests
-  - pytest
+  - pytest -k "not test_example"
