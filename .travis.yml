@@ -20,6 +20,7 @@ install:
   - conda config --set channel_priority strict
   - conda env create -q -f env/scpy-test.yml python=$TRAVIS_PYTHON_VERSION
   - conda activate scpy-test
+  - conda update pytest
   - pip install .
 
 script:
