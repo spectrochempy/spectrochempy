@@ -162,23 +162,23 @@ def local_scheme(version):
     dirty = '+dirty' if version.dirty else ''
     return dirty
 
-def check_for_update(self):
-
-    import requests
-
-    # Gets version
-    conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
-    response = requests.get(conda_url)
-
-    import re
-
-    regex = r"\<a.*\>(.*)-64\/spectrochempy-(\d{1})\.(\d{1,2})\.(\d{1,2})-(\d{1})\.tar\.bz2\</a\>"
-
-    matches = re.finditer(regex, response.text, re.MULTILINE)
-    version_availables = {}
-    for matchNum, match in enumerate(matches, start=1):
-        version_availables[match[1]] = (match[2], match[3], match[4])
-    current_version = self.version
+# def check_for_update(self):
+#
+#     import requests
+#
+#     # Gets version
+#     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
+#     response = requests.get(conda_url)
+#
+#     import re
+#
+#     regex = r"\<a.*\>(.*)-64\/spectrochempy-(\d{1})\.(\d{1,2})\.(\d{1,2})-(\d{1})\.tar\.bz2\</a\>"
+#
+#     matches = re.finditer(regex, response.text, re.MULTILINE)
+#     version_availables = {}
+#     for matchNum, match in enumerate(matches, start=1):
+#         version_availables[match[1]] = (match[2], match[3], match[4])
+#     current_version = self.version
     
 try:
     __release__ = get_distribution('spectrochempy').version
