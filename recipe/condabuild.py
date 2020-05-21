@@ -17,7 +17,7 @@ current_platform = platforms[platform.system()]
 def conda_exec(commands, perror=True):
     commandlist = commands.strip().split(" ")
     isjson = False
-    if commandlist[1] not in ['build', 'update', 'upload', 'convert']:
+    if commandlist[1] not in ['build', 'install', 'update', 'upload', 'convert']:
         commandlist.append('--json')
         isjson = True
         
