@@ -50,7 +50,6 @@ Among its major features:
     `Issue Tracker  <https://redmine.spectrochempy.fr/projects/spectrochempy/issues>`_
 
 
-
 Getting Started
 ****************
 
@@ -101,16 +100,22 @@ API reference
 
     api/generated/index
 
-Developer's Corner
-********************
+Contributing
+*************
 
+* :doc:`dev/signin`
+* :doc:`dev/issues`
+* :doc:`dev/forums`
 * :doc:`dev/contributing`
 
 .. toctree::
     :maxdepth: 1
     :hidden:
-    :caption: Developper's Corner
+    :caption: Contributing
 
+    dev/signin
+    dev/issues
+    dev/forums
     dev/contributing
 
 Credits
