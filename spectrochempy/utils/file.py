@@ -66,24 +66,9 @@ def readfilename(filename=None, **kwargs):
 
     # check passed directory
     if directory:
-        if os.path.exists(directory):
-            # a valid absolute pathname has been given
-            pass
-        else:
-            # if the directory is not specified we will first look in the current working directory
-            # and then in the prefs.datadir
-            _directory = os.path.join(os.getcwd(), directory)
-            if not os.path.exists(_directory):
-                # the directory isn't in the current dir, now try datadir:
-                _directory = os.path.join(prefs.datadir, directory)
-                if not os.path.exists(_directory):
-                    # the directory is definitely not valid... raise an error
-                    raise IOError("directory %s doesn't exists!" % directory)
-            else:
-                directory = _directory
+        directory = readdirname(directory)
 
     # now proceed with the filenames
-    
     if not filename:
         # test if we are running nbsphinx with this default filename
         filename = os.environ.get('TUTORIAL_FILENAME', None)
@@ -175,7 +160,8 @@ def readdirname(dirname=None, **kwargs):
     dirname : `str`, optional.
         A directory name. If not provided, a dialog box is opened to select a directory.
     parent_dir : `str`, optional.
-        The parent directory where to look at. If not specified, read in the current working directory
+        The parent directory where to look at. If not specified, read in the current
+        working directory or the datadir
 
     Returns
     --------
