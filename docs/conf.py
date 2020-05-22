@@ -282,8 +282,8 @@ html_context = {
 # (source start file, target name, title, author, documentclass  [
 # howto/manual]).
 latex_documents = [(
-'index', 'spectrochempy.tex', u'SpectroChemPy Documentation', u'A. Travert & C. Fernandez',
-'manual', False),
+'index', 'spectrochempy.tex', u'SpectroChemPy Documentation',
+ u'A. Travert & C. Fernandez', 'manual', False),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

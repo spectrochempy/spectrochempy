@@ -42,6 +42,7 @@ warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarni
 
 SERVER = os.environ.get('SERVER_FOR_LCS', None)
 PROJECT = "spectrochempy"
+URL_SCPY= "spectrochempy.github.io"
 PROJECTDIR = os.path.dirname(os.path.abspath(__file__))
 SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
 DOCDIR = os.path.join(PROJECTDIR, "docs")
@@ -377,11 +378,11 @@ class Build(object):
     # ..................................................................................................................
     def make_redirection_page(self, ):
         
-        html = """
+        html = f"""
         <html>
         <head>
         <title>redirect to the dev version of the documentation</title>
-        <meta http-equiv="refresh" content="0; URL=https://spectrochempy.github.io/dev">
+        <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/dev">
         </head>
         <body></body>
         </html>
