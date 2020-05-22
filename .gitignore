@@ -174,3 +174,6 @@ var/
 
 build_artifacts
 # conda smithy ci-skeleton end
+recipe/pkg_folder
+ci.sh
+/docker/travisci/

@@ -63,7 +63,7 @@ def test_magic_addscript(ip):
     print('result\n', x.result)
     assert x.result.strip() == 'Script essai created.'
 
-
+@pytest.mark.skip()
 def test_console_subprocess():
     # to test this, the scripts must be installed so the spectrochempy
     # package must be installed: use pip install -e .

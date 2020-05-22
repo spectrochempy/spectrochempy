@@ -10,13 +10,6 @@ dependencies:
 - traitlets
 - pint=0.9
 - quaternion
-- pandas
-- xarray
-- datashader
-- scikit-learn
-- xlrd
-- requests
-- numba
 - scipy
 - colorama
 - setuptools_scm
@@ -27,6 +20,8 @@ dependencies:
 - jupyter_nbextensions_configurator
 - ipympl
 - widgetsnbextension
+- xlrd
+- numba
 - nodejs
 - jupytext
 - pytest
@@ -49,5 +44,9 @@ dependencies:
 - twine
 - tqdm
 - brukeropusreader
-
+- pandas
+- xarray
+- datashader
+- scikit-learn
+- requests
 

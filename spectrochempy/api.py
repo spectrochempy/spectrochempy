@@ -97,7 +97,7 @@ if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
     
-    # ok but if we are doing individual module or function testing in PyCharm
+    # OK, but if we are doing individual module or function testing in PyCharm
     # it is interesting to see the plots!
     if len(sys.argv) > 1 \
             and not any([argv.endswith("tests") for argv in sys.argv[1:]]) \
@@ -216,8 +216,13 @@ def check_for_update():
         else:
             return False
 
-
-if check_for_update():
+try:
+    upd = check_for_update()
+except:
+    # probably no connection
+    upd= False
+    
+if upd:
     
     from spectrochempy.application import display_info_string
     

@@ -153,7 +153,6 @@ from spectrochempy.application import (
     CRITICAL,
     INFO,
     available_styles,
-    check_for_update,
 )
 
 general_preferences = app.general_preferences

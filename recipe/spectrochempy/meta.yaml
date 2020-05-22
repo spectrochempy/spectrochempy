@@ -1,48 +1,34 @@
 {% set name = "SpectroChemPy" %}
-{% set version = "0.1.19" %}
-
-# see this  for a description of the sections
-# https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html
+{% set version = environ.get('GIT_DESCRIBE_TAG', '0.1')|string|replace('-','_') %}
 
 package:
   name: "{{ name|lower }}"
   version: "{{ version }}"
 
 source:
-  git_url: ../../
-  git_rev: "{{ version }}"
+  path: ../../
 
 build:
-  number: 1
-  noarch: python
+  number:
+    - {{ environ.get('GIT_DESCRIBE_NUMBER', '0') }}
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
-
-  # If the installation is complex, or different between Unix and Windows,
-  # use separate bld.bat and build.sh files instead of this key. By default,
-  # the package will be built for the Python versions supported by conda-forge
-  # and for all major OSs. Add the line "skip: True  # [py<35]" (for example)
-  # to limit to Python 3.5 and newer, or "skip: True  # [not win]" to limit
-  # to Windows.
-
-  script: {{ PYTHON }} -m pip install . -vv
+  script:  "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
   host:
-    - pip
     - python
   build:
-    - python           {{ python }}.*
+    - python                    {{ python }}.*
     - setuptools
     - setuptools_scm
     - nodejs
     - jupyterlab
   run:
-    - python
-    - numpy
+    - numpy                     {{ numpy }}.*
     - matplotlib
     - traitlets
-    - pint             {{ pint }}.*
+    - pint                      {{ pint }}.*
     - quaternion
     - scipy
     - colorama
@@ -63,23 +49,13 @@ requirements:
     - tqdm
     - brukeropusreader
     - git
+    - pandas
 
 test:
   imports:
     - spectrochempy
-
   commands:
-    - scpy --help
-    - pytest
-
-  # test-only requirements
-  requires:
-      - pytest
-      - scikit-image
-
-  # needed test files
-  source_files:
-      - tests
+    - scpy
 
 about:
   home: "https://redmine.spectrochempy.fr"

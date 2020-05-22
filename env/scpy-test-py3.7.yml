@@ -1,10 +1,11 @@
-name: scpy
+name: scpy-test-py3.7
 channels:
 - conda-forge
 - spectrocat
 - cantera
 - defaults
 dependencies:
+- python=3.7
 - numpy
 - matplotlib
 - traitlets
@@ -28,3 +29,7 @@ dependencies:
 - widgetsnbextension
 - pyqt
 - tqdm
+
+# testing required
+- pytest
+- scikit-image
