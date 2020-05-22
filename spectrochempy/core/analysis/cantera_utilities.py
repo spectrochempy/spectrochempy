@@ -44,7 +44,8 @@ def coverages_vs_time(surface, t, returnNDDataset=False):
         coverages.x.labels = surface.species_names
     return coverages
 
-def concentrations_vs_time(reactive_phase, t, reactorNet = None, returnNDDataset=False):
+
+def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=False):
     ''' Returns the  concentrations at time(s) t
     params:
     ------
@@ -79,7 +80,6 @@ def concentrations_vs_time(reactive_phase, t, reactorNet = None, returnNDDataset
         #     concentrations.x.labels = reactive_phase.species_names
 
 
-
 def modify_rate(reactive_phase, i_reaction, rate):
     """ Changes one of the rates  of a cantera reactive phase.
         """
@@ -106,8 +106,9 @@ def modify_reactive_phase(reactive_phase, param_to_change, param_value):
         # check that  param_to_change exists
         try:
             eval('reactive_phase.' + param)
-        except:
-            ValueError('class {} has no \'{}\' attribute'.format(type(reactive_phase), param))
+        except ValueError:
+            print('class {} has no \'{}\' attribute'.format(type(reactive_phase), param))
+            raise
 
         # if exists => sets its new value
         # if the attribute is writable:
@@ -116,7 +117,7 @@ def modify_reactive_phase(reactive_phase, param_to_change, param_value):
         # else use Cantera methods (or derived from cantera)
         elif param.split('.')[-1] == 'pre_exponential_factor':
             str_rate = 'reactive_phase.' + '.'.join(param.split('.')[-3:-1])
-            b, E = eval(str_rate + '.temperature_exponent,' + str_rate + '.activation_energy ' )
+            b, E = eval(str_rate + '.temperature_exponent,' + str_rate + '.activation_energy ')
             rxn = int(param.split('.')[0].split('[')[-1].split(']')[0])
             modify_rate(reactive_phase, rxn, ct.Arrhenius(param_value[i], b, E))
 
@@ -167,7 +168,7 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     def objective(param_value, param_to_optimize, C, externalConc, external_to_C_idx, surface):
         modify_reactive_phase(surface, param_to_optimize, param_value)
         Chat = concentrations_vs_time(surface, C.y)
-        return np.sum(np.square(C.data[:,externalConc] - Chat[:,external_to_C_idx]))
+        return np.sum(np.square(C.data[:, externalConc] - Chat[:, external_to_C_idx]))
 
     method = kwargs.get("method", "Nelder-Mead")
     bounds = kwargs.get("bounds", None)
@@ -177,10 +178,10 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
         print('Optimization of the parameters.')
         print('         Initial parameters: {}'.format(guess_param))
         print('         Initial function value: {}'.format(objective(guess_param, param_to_optimize, C, externalConc,
-                                                                     external_to_C_idx,reactive_phase)))
+                                                                     external_to_C_idx, reactive_phase)))
     tic = datetime.datetime.now()
-    res = minimize(objective, guess_param, args=(param_to_optimize, C,  externalConc, external_to_C_idx, reactive_phase),
-                   method=method,  bounds=bounds, tol=tol, options=options)
+    res = minimize(objective, guess_param, args=(param_to_optimize, C, externalConc, external_to_C_idx, reactive_phase),
+                   method=method, bounds=bounds, tol=tol, options=options)
     toc = datetime.datetime.now()
     guess_param = res.x
     if options['disp']:

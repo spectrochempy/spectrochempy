@@ -1048,7 +1048,7 @@ class NDMath(object):
         
         # Calculate the resulting units (and their compatibility for such operation)
         # --------------------------------------------------------------------------------------------------------------
-        # Do the calculation with the units to found the final one
+        # Do the calculation with the units to find the final one
         
         def check_require_units(fname, _units):
             if fname in self.__require_units:
@@ -1087,9 +1087,7 @@ class NDMath(object):
         else:
             if fname == 'cbrt':  # ufunc missing in pint
                 q = q ** (1. / 3.)
-            elif fname in ['maximum', 'minimum', 'fmax', 'fmin']:
-                q = q
-            else:
+            elif fname not in ['maximum', 'minimum', 'fmax', 'fmin']:
                 if fname.startswith('log'):
                     f = np.log  # all similar regardings units
                 elif fname.startswith('exp'):

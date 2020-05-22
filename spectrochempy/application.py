@@ -148,7 +148,7 @@ def version_scheme(version, local=False):
     if branch != 'master':
         dev = f'-dev.{dist}'
         tag = next
-    dev = dev
+
     version_scheme = f'{tag}{dev}'
     if not dev:
         # write it only for stable TAG
