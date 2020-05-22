@@ -43,15 +43,6 @@
 # We intentionnaly DO NOT SET DOCSTRING, HERE... due to the way doc is
 # builded.
 
-# """
-# Main package
-#
-# During the initialization of this package, a `matplotlib` backend is set
-# and some `IPython` configurations are made.
-#
-#
-# """
-
 # import the main api
 from spectrochempy.api import *
 from spectrochempy import api

@@ -31,5 +31,4 @@ install:
   - pip install .
 
 script:
-  - cd tests
-  - pytest -k "not test_example"
+  - pytest -k "not test_example" --nodisplay
