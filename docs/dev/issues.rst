@@ -91,7 +91,8 @@ You can use the following template when repporting a problem with |scpy|.
 
     **Attachments**
 
-    <!-- If applicable, attach scripts and/or input files to help explain your problem. Please do *not* attach screenshots of code or terminal output. -->
+    <!-- If applicable, attach scripts and/or input files to help explain your problem.
+         Please do *not* attach screenshots of code or terminal output. -->
 
     **Additional context**
 
