@@ -1,0 +1,35 @@
+name: scpy-test-py3.7
+channels:
+- conda-forge
+- spectrocat
+- cantera
+- defaults
+dependencies:
+- python=3.7
+- numpy
+- matplotlib
+- traitlets
+- pint=0.9
+- quaternion
+- scipy
+- colorama
+- setuptools_scm
+- xlrd
+- numba
+- pandas
+- cantera
+- quadprog
+- brukeropusreader
+- ipython
+- jupyterlab
+- ipympl
+- nodejs
+- ipykernel
+- ipywidgets
+- widgetsnbextension
+- pyqt
+- tqdm
+
+# testing required
+- pytest
+- scikit-image
