@@ -20,13 +20,14 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda info -a
   - conda config --add channels conda-forge
   - conda config --add channels cantera
   - conda config --add channels spectrocat
   - conda config --set channel_priority strict
-  - conda env create -q -f env/scpy-test.yml python=$TRAVIS_PYTHON_VERSION
+  - conda env create -q -f env/scpy-test.yml
   - conda activate scpy-test
+  - conda install python=$TRAVIS_PYTHON_VERSION
+  - conda info -a
   - conda update pytest
   - pip install .
 
