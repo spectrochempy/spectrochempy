@@ -120,10 +120,10 @@ def read_dir(dataset=None, directory=None, **kwargs):
                 pass # debug_("reading root directory")
             else:
                 pass # debug_("reading subdirectory")
-            datasets += _read_single_dir(root[0])
+            datasets += _read_single_dir(root[0], **kwargs)
     else:
         # debug_("reading root directory only")
-        datasets += _read_single_dir(directory)
+        datasets += _read_single_dir(directory, **kwargs)
 
     if len(datasets) == 1:
         #debug_("finished read_dir()")
@@ -133,7 +133,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
     return datasets  # several datasets returned
 
 
-def _read_single_dir(directory):
+def _read_single_dir(directory, **kwargs):
     # lists all filenames of readable files in directory:
     filenames = [os.path.join(directory, f) for f in os.listdir(directory)
                  if os.path.isfile(os.path.join(directory, f))]
@@ -150,15 +150,15 @@ def _read_single_dir(directory):
         if extension == '.spg':
             for filename in files[extension]:
                 datasets.append(NDDataset.read_omnic(filename,
-                                                     sortbydate=True))
+                                                     **kwargs))
 
         elif extension == '.spa':
             datasets.append(NDDataset.read_omnic(files[extension],
-                                                 sortbydate=True))
+                                                 **kwargs))
 
         elif extension == '.csv':
             datasets.append(NDDataset.read_csv(filename=files[extension],
-                                               sortbydate=True))
+                                               **kwargs))
 
         elif extension == '.scp':
             datasets.append(NDDataset.read(files[extension], protocol='scp'))

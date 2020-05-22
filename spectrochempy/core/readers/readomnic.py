@@ -57,6 +57,8 @@ def read_omnic(dataset=None, **kwargs):
         the defaults datadir.
     sortbydate : bool, optional, default=True.
         Sort spectra by acquisition date
+    description: string, default=None
+        Custom description
 
     Returns
     -------
@@ -87,13 +89,12 @@ def read_omnic(dataset=None, **kwargs):
 
         dataset = NDDataset()  # create an instance of NDDataset
 
-    # check if directory was specified
-    directory = kwargs.get("directory", None)
+
     sortbydate = kwargs.get("sortbydate", True)
 
     # returns a list of files to read
     files = readfilename(filename,
-                         directory=directory,
+                         directory=kwargs.get("directory", None),
                          filetypes=['OMNIC files (*.spa, *.spg)',
                                     'all files (*)'])
 
@@ -109,11 +110,11 @@ def read_omnic(dataset=None, **kwargs):
         if extension == '.spg':
             for filename in files[extension]:
                 # debug_("reading omnic spg file")
-                datasets.append(_read_spg(dataset, filename, sortbydate=sortbydate))
+                datasets.append(_read_spg(dataset, filename, sortbydate=sortbydate, **kwargs))
 
         elif extension == '.spa':
             # debug_("reading omnic spa files")
-            datasets.append(_read_spa(dataset, files[extension], sortbydate=sortbydate))
+            datasets.append(_read_spa(dataset, files[extension], sortbydate=sortbydate, **kwargs))
         else:
             # try another format!
             datasets = dataset.read(filename, protocol=extension[1:], sortbydate=sortbydate, **kwargs)
@@ -369,14 +370,14 @@ def _read_spg(dataset, filename, **kwargs):
 
     # Set origin, description and history
     dataset.origin = "omnic"
-    dataset.description = (
-            'Dataset from spg file {} : '.format(filename))
+    dataset.description = kwargs.get('description',
+                                     'Dataset from spg file {} : '.format(filename))
 
-    dataset.history = str(datetime.now()) + ':import from spg file {} ; '.format(filename)
+    dataset.history = str(datetime.now()) + ':imported from spg file {} ; '.format(filename)
 
     if sortbydate:
         dataset.sort(dim='y', inplace=True)
-        dataset.history = 'Sorted'
+        dataset.history = str(datetime.now()) + ':sorted by date'
 
     # Set the NDDataset date
     dataset._date = datetime.now()
@@ -533,8 +534,10 @@ def _read_spa(dataset, filenames, **kwargs):
 
     # Set origin, description and history
     dataset.origin = "omnic"
-    dataset.description = "Dataset from {0} spa files : '{1}'\nHistory of the {2} spectrum : {3}".format(
-        nspec, ' ... '.join({filenames[0], filenames[-1]}), '1st ' if nspec > 1 else '', allhistories[0])
+    dataset.description = kwargs.get('description',
+                                     "Dataset from {0} spa files : {1}".format(
+        nspec, ' ... '.join({filenames[0], filenames[-1]}))
+                                     )
 
     dataset.history = str(datetime.now()) + ':read from spa files ; '
 
