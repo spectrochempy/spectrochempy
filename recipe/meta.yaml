@@ -1,16 +1,19 @@
 {% set name = "SpectroChemPy" %}
-{% set version = environ.get('GIT_DESCRIBE_TAG', '0.1')|string|replace('-','_') %}
+{% set version = environ['VERSION'] %}
 
 package:
   name: "{{ name|lower }}"
   version: "{{ version }}"
 
 source:
-  path: ../../
+  path: ../
 
 build:
-  number:
-    - {{ environ.get('GIT_DESCRIBE_NUMBER', '0') }}
+  script_env:
+    - VERSION
+    - CONDA_BLD_PATH
+  string: {{ environ['DEVSTRING'] }}
+  noarch: python
   entry_points:
     - scpy=spectrochempy.scripts.launch_api:main
   script:  "{{ PYTHON }} -m pip install . -vv"
@@ -19,17 +22,17 @@ requirements:
   host:
     - python
   build:
-    - python                    {{ python }}.*
+    - python
     - setuptools
     - setuptools_scm
     - nodejs
     - jupyterlab
   run:
-    - numpy                     {{ numpy }}.*
+    - numpy
     - scipy
     - matplotlib
     - traitlets
-    - pint                      {{ pint }}.*
+    - pint=0.9
     - cantera
     - quadprog
     - brukeropusreader
@@ -48,12 +51,12 @@ requirements:
     - ipywidgets
     - widgetsnbextension
     - quaternion
+  test:
+    - python                {{ python }}
 
 test:
   imports:
     - spectrochempy
-  commands:
-    - scpy
 
 about:
   home: "https://redmine.spectrochempy.fr"
@@ -61,7 +64,7 @@ about:
   license_family: OTHER
   summary: "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
   doc_url: "https://www.spectrochempy.fr"
-  dev_url: "https://bitbucket.org/spectrocat/spectrochempy"
+  dev_url: "https://github.com/spectrochempy/spectrochempy"
 
 extra:
   recipe-maintainers:

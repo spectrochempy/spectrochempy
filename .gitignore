@@ -177,3 +177,4 @@ build_artifacts
 recipe/pkg_folder
 ci.sh
 /docker/travisci/
+!/recipe/spectrochempy/conda-bld/
