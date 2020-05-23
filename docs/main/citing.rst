@@ -1,17 +1,10 @@
 .. _citing:
 
 Citing  |scpy|
-==============
+==========================================
 
 When using |scpy| for your own work, you are kindly requested to cite it this
 way::
 
-     Arnaud Travert & Christian Fernandez,
-     SpectroChemPy, a framework for processing, analysing and modelling of
-     Spectroscopic data for Chemistry with Python
-     https://www.spectrochempy.fr, (version 0.1)
-     Laboratoire Catalyse and Spectrochemistry,
-     ENSICAEN/Université de Caen/CNRS, 2020
-
-
+     Arnaud Travert & Christian Fernandez, (2020) SpectroChemPy (Version 0.1). Zenodo. http://doi.org/10.5281/zenodo.3823841
 
