@@ -2,7 +2,7 @@ language: python
 
 python:
   - "3.7"
-  - "3.6"
+#  - "3.6"
 #  - "3.8"  Not all package up to date
 
 # safelist (run only on these branches:  master, develop, release and when tagging)
@@ -49,3 +49,8 @@ install:
 
 script:
   - pytest -k "not test_example" --nodisplay
+
+after_success:
+  - conda activate scpy-test-py37
+  - conda install conda-build anaconda-client
+  - bash recipe/conda_upload.sh
