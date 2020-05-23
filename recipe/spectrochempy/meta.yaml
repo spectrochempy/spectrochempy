@@ -26,13 +26,20 @@ requirements:
     - jupyterlab
   run:
     - numpy                     {{ numpy }}.*
+    - scipy
     - matplotlib
     - traitlets
     - pint                      {{ pint }}.*
-    - quaternion
-    - scipy
+    - cantera
+    - quadprog
+    - brukeropusreader
+    - xlrd
+    - numba
+    - pandas
+    - tqdm
     - colorama
     - setuptools_scm
+    - git
     - ipython
     - jupyterlab
     - ipympl
@@ -40,16 +47,7 @@ requirements:
     - ipykernel
     - ipywidgets
     - widgetsnbextension
-    - xlrd
-    - numba
-    - pandas
-    - cantera
-    - quadprog
-    - pyqt
-    - tqdm
-    - brukeropusreader
-    - git
-    - pandas
+    - quaternion
 
 test:
   imports:

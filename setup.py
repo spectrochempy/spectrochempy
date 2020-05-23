@@ -10,7 +10,6 @@
 from setuptools import setup, find_packages
 
 import os
-import version
 
 def path():
     return os.path.dirname(__file__)
@@ -19,13 +18,9 @@ def read(fname):
     with open(os.path.join(path(), fname), 'r') as f:
         return f.read()
 
-def get_version():
-    pass
-
 setup_args = dict(
     name="spectrochempy",
-    #use_scm_version=True,
-    version = version.version,
+    use_scm_version=True,
     license="CeCILL-B",
     author="Arnaud Travert & Christian Fernandez",
     author_email="contact@spectrochempy.fr",
@@ -47,7 +42,8 @@ setup_args = dict(
     platforms=['Windows', 'Mac OS X', 'Linux'],
     packages=find_packages(),
     include_package_data=True,
-    python_requires=">3.6",
+    zip_safe=False,
+    python_requires=">=3.7",
     entry_points={
         'console_scripts': ['scpy=spectrochempy.scripts.launch_api:main', ],
     },
