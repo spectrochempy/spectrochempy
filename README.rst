@@ -2,6 +2,8 @@
 Spectrochempy
 ###############
 
+.. image:: https://travis-ci.com/fernandezc/spectrochempy.svg?branch=master
+    :target: https://travis-ci.com/fernandezc/spectrochempy
 
 What is |scpy|?
 =================
