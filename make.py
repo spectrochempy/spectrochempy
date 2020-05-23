@@ -45,17 +45,20 @@ PROJECT = "spectrochempy"
 PROJECTDIR = os.path.dirname(os.path.abspath(__file__))
 SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
 DOCDIR = os.path.join(PROJECTDIR, "docs")
+
 USERDIR = os.path.join(PROJECTDIR, "docs", "user")
 TEMPLATES = os.path.join(DOCDIR, '_templates')
 TUTORIALS = os.path.join(USERDIR, "tutorials", "*", "*.py")
 USERGUIDE = os.path.join(USERDIR, "userguide", "*", "*.py")
 API = os.path.join(DOCDIR, 'api', 'generated')
-BUILDDIR = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT))
-DOCTREES = os.path.normpath(os.path.join(DOCDIR, '..', '..', '%s_doc' % PROJECT, '~doctrees'))
-HTML = os.path.join(BUILDDIR, 'html')
-LATEX = os.path.join(BUILDDIR, 'latex')
-DOWNLOADS = os.path.join(HTML, 'downloads')
 GALLERYDIR = os.path.join(DOCDIR,"gallery")
+
+BUILDDIR = os.path.normpath(os.path.join(DOCDIR, '..', '..', 'spectrochempy.github.io'))
+DOCTREES = os.path.normpath(os.path.join(BUILDDIR, '~doctrees'))
+LATEX = os.path.join(BUILDDIR, 'latex')
+HTML = BUILDDIR
+DOWNLOADS = os.path.join(BUILDDIR, 'downloads')
+
 
 __all__ = []
 
@@ -202,7 +205,7 @@ class Build(object):
         
         # run sphinx
         srcdir = confdir = DOCDIR
-        outdir = f"{BUILDDIR}/{builder}/{doc_version}"
+        outdir = f"{BUILDDIR}/{doc_version}"
         doctreesdir = f"{BUILDDIR}/~doctrees/{doc_version}"
         sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
         sp.verbosity = 1
@@ -378,7 +381,7 @@ class Build(object):
         <html>
         <head>
         <title>redirect to the dev version of the documentation</title>
-        <meta http-equiv="refresh" content="0; URL=https://www.spectrochempy.fr/dev">
+        <meta http-equiv="refresh" content="0; URL=https://spectrochempy.github.io/dev">
         </head>
         <body></body>
         </html>
