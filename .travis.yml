@@ -5,11 +5,25 @@ python:
 #  - "3.6"     Need to fix conflicting packages .... on linux (works on mac)
 #  - "3.8"
 
+# safelist (run only on these branches:  master, develop, release and when tagging)
+branches:
+  only:
+    - master
+    - develop
+    - /^release/.*$/
+    - /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+
+# required for capturing display
 addons:
   apt:
     packages:
       - xvfb
 
+# limit got clone depth to 10 commits
+git:
+  depth: 10
+
+# install miniconda and spectrochempy from sources
 install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
