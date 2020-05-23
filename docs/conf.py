@@ -450,13 +450,25 @@ intersphinx_mapping = {
 # linkcode ---------------------------------------------------------------------
 
 def linkcode_resolve(domain, info):
-    if domain != 'py':
-        return None
-    if not info['module']:
-        return None
-    filename = info['module'].replace('.', '/')
-    return \
-    "https://bitbucket.org/spectrocat/spectrochempy/src/spectrochempy/%s.py" \
-    % filename
+    # Resolve function for the linkcode extension.
+    def find_source():
+        # try to find the file and line number, based on code from numpy:
+        # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
+        obj = sys.modules[info['module']]
+        for part in info['fullname'].split('.'):
+            obj = getattr(obj, part)
+        import inspect
+        import os
+        fn = inspect.getsourcefile(obj)
+        fn = os.path.relpath(fn, start=os.path.dirname(spectrochempy.__file__))
+        source, lineno = inspect.getsourcelines(obj)
+        return fn, lineno, lineno + len(source) - 1
 
-
+    if domain != 'py' or not info['module']:
+        return None
+    try:
+        filename = 'spectrochempy/%s#L%d-L%d' % find_source()
+    except Exception:
+        filename = info['module'].replace('.', '/') + '.py'
+    tag = 'develop' if 'dev' in version else 'master'
+    return f"https://github.com/spectrochempy/spectrochempy/blob/{tag}/{filename}"
