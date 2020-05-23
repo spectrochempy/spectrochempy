@@ -13,6 +13,7 @@ dependencies:
 - scipy
 - colorama
 - setuptools_scm
+- git
 - ipython
 - jupyterlab
 - ipykernel

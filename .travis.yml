@@ -2,8 +2,8 @@ language: python
 
 python:
   - "3.7"
-#  - "3.6"     Need to fix conflicting packages .... on linux (works on mac)
-#  - "3.8"
+  - "3.6"
+#  - "3.8"  Not all package up to date
 
 # safelist (run only on these branches:  master, develop, release and when tagging)
 branches:
@@ -13,20 +13,23 @@ branches:
     - /^release/.*$/
     - /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
 
-# required for capturing display
-addons:
-  apt:
-    packages:
-      - xvfb
 
 # limit got clone depth to 10 commits
 git:
   depth: 10
 
-# install miniconda and spectrochempy from sources
-install:
+# display setup
+addons:
+  apt:
+    packages:
+      - xvfb
+
+before_install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
+# install miniconda and spectrochempy from sources
+install:
   - sudo apt-get update
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda

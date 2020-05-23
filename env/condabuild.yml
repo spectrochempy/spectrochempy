@@ -13,5 +13,6 @@ dependencies:
 - conda-verify
 - anaconda-client
 - setuptools_scm
+- git
 - numpy
 - pytest

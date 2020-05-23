@@ -43,7 +43,7 @@ setup_args = dict(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    python_requires=">=3.7",
+    python_requires=">=3.6",
     entry_points={
         'console_scripts': ['scpy=spectrochempy.scripts.launch_api:main', ],
     },
