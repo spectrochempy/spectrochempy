@@ -2,8 +2,11 @@
 Spectrochempy
 ###############
 
-.. image:: https://travis-ci.com/fernandezc/spectrochempy.svg?branch=master
-    :target: https://travis-ci.com/fernandezc/spectrochempy
++----------------------------+-------------------+
+| Version STABLE (master)    |   |travis_master| |
++----------------------------+-------------------+
+| Version DEV (develop)      |   |travis_develop||
++----------------------------+-------------------+
 
 What is |scpy|?
 =================
@@ -90,4 +93,8 @@ License
 `CeCILL-B FREE SOFTWARE LICENSE AGREEMENT <(https://cecill.info/licences/Licence_CeCILL-B_V1-en.html)>`_
 
 
+.. |travis_master|  image:: https://travis-ci.com/spectrochempy/spectrochempy.svg?branch=master
+   :target: https://travis-ci.com/spectrochempy/spectrochempy
 
+.. |travis_develop|  image:: https://travis-ci.com/spectrochempy/spectrochempy.svg?branch=develop
+   :target: https://travis-ci.com/spectrochempy/spectrochempy
