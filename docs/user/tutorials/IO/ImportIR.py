@@ -25,7 +25,6 @@
 
 # %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"name": "#%%\n"}}
 import spectrochempy as scp
-import os as os
 
 # %% [markdown]
 # # 1. Supported fileformats
@@ -181,29 +180,57 @@ Y
 
 # %%
 list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.spa", "7_CZ0-100 Pd_103.spa", "7_CZ0-100 Pd_104.spa"]
-directory = os.path.join(scp.general_preferences.datadir, "irdata\\subdir")
-X = scp.read_omnic(list_files, directory=directory)
+X = scp.read_omnic(list_files, directory="irdata\\subdir")
 print(X)
 
 # %% [markdown]
 # In such a case ase these .spa files are alone in the directory, a very convenient is the read_dir() method that will gather the .spa files together:
 
 # %%
-X = scp.read_dir(directory, recursive=False)
+X = scp.read_dir("irdata\\subdir")
 print(X)
 
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
 # # 1.2. Import of Bruker OPUS files
 #
-# [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_bruker_opus()`) of spectrochempy is essentially a wrapper of the python module  and
-# [brukeropusreader](https://github.com/qedsoftware/brukeropusreader) developed by QED.
+# [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_opus()`) of spectrochempy is essentially a wrapper of the python module
+# [brukeropusreader](https://github.com/qedsoftware/brukeropusreader) developed by QED. It imports absorbance spectra (the AB block), acquisition times and name of spectra. 
 #
-#  
-# (to be completed...)
+# The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence, one can open sample Opus files contained in the `datadir` using:
+
+# %%
+Y = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata\\OPUS')
+print(Y)
+
+# %% [markdown]
+# or:
+
+# %%
+Y2 = scp.read_dir('irdata\\OPUS')
+print(Y2)
+
+# %% [markdown]
+# Note that supplementary informations as to the imported spectra can be obtained by the direct use of `brukeropusreader`. For instance: 
+
+# %%
+from brukeropusreader import read_file
+import os
+
+opusfile = os.path.join(scp.general_preferences.datadir, "irdata\\OPUS\\test.0000")  # the full pathname of the file
+Y3 = read_file(opusfile)   # returns a dictionary of the data and metadata extracted 
+Y3.keys()   # returns the key of the dictionary
+
+# %%
+X['Optik']  # looks what is the Optik block:
 
 # %% [markdown]
 # # 1.3. Import of JCAMP-DX files
 #
-# [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734) fo details.  
+# [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details), because it has been developed to read again the jcamp-dx files exported by spectrochempy write_jdx() writer.
 #
-# (to be completed...)
+# Hence, the lmast dataset :
+
+# %%
+Y2.write_jdx("opus_import.jdx")
+
+# %%
