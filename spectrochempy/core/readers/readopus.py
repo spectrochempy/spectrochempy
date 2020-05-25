@@ -18,11 +18,11 @@ __dataset_methods__ = __all__
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import os
+
 from brukeropusreader import read_file
+from warnings import warn
 from datetime import datetime, timezone, timedelta
 
-import numpy as np
 
 
 
@@ -103,9 +103,15 @@ def read_opus(dataset=None, **kwargs):
     timestamps = []
     for file in files:
         opus_data = read_file(file)
+        try:
+            opus_data["AB"]
+        except KeyError:  # not an absorbance spectrum
+            warn("opus file {} could not be read".format(file))
+            continue
+
         if not xaxis:
-            xaxis = Coord(opus_data.get_range("AB"),
-                      title='Wavenumbers', units='cm^-1')
+            xaxis = Coord(opus_data.get_range("AB"), title='Wavenumbers', units='cm^-1')
+
         elif (opus_data.get_range("AB") != xaxis.data).any():
             raise ValueError("spectra have incompatible dimensions (xaxis)")
 
@@ -123,6 +129,10 @@ def read_opus(dataset=None, **kwargs):
         timestamp = UTC_date_time.timestamp()
         acquisitiondates.append(UTC_date_time)
         timestamps.append(timestamp)
+
+    # return if none of the files could be read:
+    if not xaxis:
+        return
 
     yaxis = Coord(timestamps,
                   title='Acquisition timestamp (GMT)',

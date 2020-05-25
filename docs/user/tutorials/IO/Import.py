@@ -18,18 +18,18 @@
 # %% [markdown] {"pycharm": {"is_executing": false, "name": "#%% md\n"}}
 # # Import Data
 #
-# This tutorial shows how to import data in Spectrochempy. First, let's import spectrochempy in the current namespace.
+# This tutorial shows how to import data in Spectrochempy. First, let's import spectrochempy as scp in the current namespace, so that all spectrochempy commands will be called as ```scp.method(<method parameters>)```.
 
 # %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"is_executing": false, "name": "#%%\n"}}
-from spectrochempy import *
+import spectrochempy as scp
 
 # %% [markdown]
 # # 1. Dialog boxes
 #
-# Retrieving Files and Directories, in day-to-day work is often made through Dialog Boxes. While we do not recommand this procedure for adanced usage (see below), it is quite easy to do that with **Scpy**. For instance, to import IR spectra in the Omnic format (.spa or .spg), the command:
+# Retrieving Files and Directories, in day-to-day work is often made through Dialog Boxes. While we do not recommand this procedure for adanced usage (see below), it is quite easy to do that with **Scpy**. For instance, to import IR spectra in the Omnic format (.spa or .spg), the `read_omnic()` command passed without any argument:
 #
 # ```
-# X = read_omnic()
+# X = scp.read_omnic()
 # ```
 #
 # will open a dialog box such as shown in this this image:
@@ -42,7 +42,7 @@ from spectrochempy import *
 # > Note: the dialog box does not necessarily pops up in the foreground: check your task bar ! 
 
 # %%
-X = read_omnic()
+X = scp.read_omnic()
 print(X)
 
 # %% [markdown]
@@ -100,13 +100,11 @@ print(X)
 #     X = read_omnic(filename='C:\\users\\Brian\\s\\Life\\wodger.spg')
 #     ```
 #
-#
 # - more simply, without the `filename=` keyword: 
 #
 #     ```
 #     X = read_omnic('C:\\users\\Brian\\s\\Life\\wodger.spg')
 #     ```
-#
 #
 # - or using a combination of directory and file pathnames:
 #
@@ -114,10 +112,8 @@ print(X)
 #     X = read_omnic(directory='C:\\users\\Brian\\s\\Life', filename='wodger.spg')
 #     X = read_omnic(directory='C:\\users\\Brian\\s', filename='Life\\wodger.spg')
 #     ```
-#  
-#  
+#   
 # - etc...
-#
 #
 # # 4. A good practice: use relative paths
 #
@@ -166,6 +162,9 @@ print(X)
 # # 5. Another default search directory: `datadir`
 #
 # Spectrochempy comes also with the definition of a second default directory path where to look at the data: the `datadir` directory. It is defined in the variable `general_preferences.datadir` which is impotrted at the same time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of spectrochempy:
+
+# %%
+X = scp.read_omnic(filename='wodger.spg', directory='C:\\')
 
 # %%
 print(general_preferences.datadir)
