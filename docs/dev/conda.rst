@@ -58,6 +58,14 @@ or in the local ``conda_bld`` channel.
     For the moment, there is no script allowing to build using Windows ``cmd`` script. This still must be done if necessary.
     However it is alway possible to use the conventional method susing ``conda-build`` directly.
 
+To build locally, one has to run the following from the main |scpy| directory:
+
+.. sourcecode:: bash
+
+    $ cd recipe
+    $ bash conda_upload.sh
+
+The build will be performed and stor locally in the conda_bld local channel.
 
 
 
