@@ -65,16 +65,17 @@ if [ ! $NUMBER ]
 then
    NUMBER="0"
 fi
+
 if [[ $TRAVIS_BRANCH == "develop" ]]; then
   ## we build the current develop repository (for testing purpose)
-  export DEVSTRING="dev"
+  export DEVSTRING="test$NUMBER"
   export VERSION="$NEXT_TAG"
   echo "***************************************************************************************************************"
   echo "--> BUILDING $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
   echo "***************************************************************************************************************"
   conda build .
   echo "***************************************************************************************************************"
-  echo "--> UPLOADING $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2 to <dev> anaconda repository"
+  echo "--> UPLOADING $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2 to <test> anaconda repository"
   echo "***************************************************************************************************************"
   anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER -l test "$CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
   exit $?
