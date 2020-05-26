@@ -833,7 +833,6 @@ def ha(data):
     zdata = zf(data, pad)
 
     # Multiple each vector by the hadamard matrix
-    nat = np.zeros(zdata.shape, dtype=zdata.dtype)
     H = scipy.linalg.hadamard(max)
     nat = np.dot(zdata, H)
     nat = np.array(nat, dtype=data.dtype)
