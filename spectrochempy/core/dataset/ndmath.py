@@ -35,7 +35,6 @@ from warnings import catch_warnings
 # ======================================================================================================================
 from ...units.units import ur, Quantity, DimensionalityError
 from .ndarray import NDArray
-from .ndcomplex import NDComplexArray
 from ...utils import docstrings, MaskedArray, NOMASK
 from ...core import warning_, error_
 from ...extern.orderedset import OrderedSet
@@ -988,8 +987,7 @@ class NDMath(object):
         
         if other is not None:
             
-            otherunits = UNITLESS
-            
+
             # If inputs are all datasets
             if isdataset and (othertype == 'NDDataset') and (other._coords != obj._coords):
                 # here it can be several situations:
