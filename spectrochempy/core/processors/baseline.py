@@ -600,9 +600,8 @@ def _polybase(data, **kwargs):
     npts = data.shape[-1]
     w = np.arange(npts)
     
-    nw = npts / nbzone
+
     baseline = np.ma.masked_array(dat, mask=True)
-    
     sigma = 1.e6
     nw = int(npts / nbzone)
     
