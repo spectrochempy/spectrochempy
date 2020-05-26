@@ -164,10 +164,10 @@ print(X)
 # Spectrochempy comes also with the definition of a second default directory path where to look at the data: the `datadir` directory. It is defined in the variable `general_preferences.datadir` which is impotrted at the same time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of spectrochempy:
 
 # %%
-X = scp.read_omnic(filename='wodger.spg', directory='C:\\')
+X = scp.read_omnic('wodger.spg', directory='C:\\')
 
 # %%
-print(general_preferences.datadir)
+print(scp.general_preferences.datadir)
 
 # %% [markdown]
 # It can be set to another pathname *permanently* (i.e. even after computer restart) by a new assignment:
