@@ -51,6 +51,6 @@ script:
   - pytest -k "not test_example" --nodisplay
 
 after_success:
-  - conda activate scpy-test-py37
+  - conda activate scpy-test-py$TRAVIS_PYTHON_VERSION
   - conda install conda-build anaconda-client
   - bash recipe/conda_upload.sh
