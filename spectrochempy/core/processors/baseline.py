@@ -288,7 +288,7 @@ class BaselineCorrection(HasTraits):
         self._setup(**kwargs)
 
         datasets = [self.dataset, self.dataset]
-        labels = ['\nClick & span with left mouse button to set a baseline region.'
+        labels = ['\nClick & span with left mouse button to set a baseline region.',
                   '\nClick on right button on a region to remove it.',
                   'Baseline corrected dataset preview']
         axes = multiplot(datasets, labels,
