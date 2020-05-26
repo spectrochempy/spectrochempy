@@ -14,9 +14,9 @@ branches:
     - /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
 
 
-# limit got clone depth to 10 commits
+# limit got clone depth to 50 commits
 git:
-  depth: 10
+  depth: 50
 
 # display setup
 addons:
@@ -27,7 +27,8 @@ addons:
 before_install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-
+  - git fetch --tags
+  
 # install miniconda and spectrochempy from sources
 install:
   - sudo apt-get update
