@@ -433,7 +433,7 @@ def make_lp2d_Dd(x, P, M, mode='f'):
         # this can be done with the same code
         # after reversing x,
         # x = x[::-1,::-1]
-        raise NotImplemented
+        raise NotImplementedError
 
     # Build D and d' row by row by flattening a PxM region of the x matrix
     # starting at 0, 0 and moving down to the bottom of the matrix, then moving
