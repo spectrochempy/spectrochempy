@@ -76,7 +76,7 @@ print(X)
 # If only a directory is indicated, the dialog box will open in this directory. For instance, on a WIN system, the following command:
 #
 # ```
-# X = read_omnic(directory='C:\\')
+# X = scp.read_omnic(directory='C:\\')
 # ```
 #
 # will open the dialog box at the root directory of the `C:` drive. 
@@ -86,7 +86,7 @@ print(X)
 # On the other hand if a `filename` is passed, like here: 
 #
 # ```
-# X = read_omnic(directory='C:\\', filename='wodger.spg')
+# X = scp.read_omnic('wodger.spg', directory='C:\\')
 # ```
 #
 # then Scpy will attempt opening a file named `wodger.spg` supposedly located in `C:\`. 
@@ -97,20 +97,14 @@ print(X)
 # - using only the full pathname of the file (note once again, the double backslashes):
 #
 #     ```
-#     X = read_omnic(filename='C:\\users\\Brian\\s\\Life\\wodger.spg')
-#     ```
-#
-# - more simply, without the `filename=` keyword: 
-#
-#     ```
-#     X = read_omnic('C:\\users\\Brian\\s\\Life\\wodger.spg')
+#     X = scp.read_omnic('C:\\users\\Brian\\s\\Life\\wodger.spg')
 #     ```
 #
 # - or using a combination of directory and file pathnames:
 #
 #     ```
-#     X = read_omnic(directory='C:\\users\\Brian\\s\\Life', filename='wodger.spg')
-#     X = read_omnic(directory='C:\\users\\Brian\\s', filename='Life\\wodger.spg')
+#     X = scp.read_omnic('wodger.spg', directory='C:\\users\\Brian\\s\\Life'
+#     X = scp.read_omnic('Life\\wodger.spg', directory='C:\\users\\Brian\\s')
 #     ```
 #   
 # - etc...
@@ -137,14 +131,13 @@ print(X)
 # In this respect, a good practice consists in using relative pathnames in scripts/notebooks and fortunately, Spectrochempy readers use relative paths. If the given path is not absolute, then spectrochempy will search in the current directory. Hence the openening of the spg file from scripts in `welease.ipynb` can be made by the command: 
 #
 # ```
-# X = read_omnic('Life\\wodger.spg'))
+# X = scp.read_omnic('Life\\wodger.spg'))
 # ```
 #
-# or other variants such as:
+# or:
 #
 # ```
-# X = read_omnic('wodger.spg', directory='Life')
-# X = read_omnic(filename='wodger.spg', directory='Life')
+# X = scp.read_omnic('wodger.spg', directory='Life')
 # ```
 # # 5. Good practice: use `os` or `pathlib` modules
 #

@@ -220,16 +220,16 @@ print(Z2)
 # %% [markdown]
 # Note that supplementary informations as to the imported spectra can be obtained by the direct use of `brukeropusreader`. For instance: 
 
-# %% [raw]
-# from brukeropusreader import read_file
-# import os
-#
-# opusfile = os.path.join(scp.general_preferences.datadir, "irdata\\OPUS\\test.0000")  # the full pathname of the file
-# Z3 = read_file(opusfile)   # returns a dictionary of the data and metadata extracted 
-# Z3.keys()   # returns the key of the dictionary
+# %%
+from brukeropusreader import read_file
+import os
+
+opusfile = os.path.join(scp.general_preferences.datadir, "irdata\\OPUS\\test.0000")  # the full pathname of the file
+Z3 = read_file(opusfile)   # returns a dictionary of the data and metadata extracted 
+Z3.keys()   # returns the key of the dictionary
 
 # %%
-Y3['Optik']  # looks what is the Optik block:
+Z3['Optik']  # looks what is the Optik block:
 
 # %% [markdown]
 # # 1.3. Import/Export of JCAMP-DX files
@@ -248,6 +248,7 @@ X.write_jdx('CO@Mo_Al2O3.jdx')
 
 # %%
 newX = scp.read_jdx('CO@Mo_Al2O3.jdx')
+os.remove('CO@Mo_Al2O3.jdx')
 print(newX)
 
 # %% [markdown]
@@ -264,7 +265,7 @@ print('Mean change in wavenumber: {}'.format((X.x.data - newX.x.data).mean()))
 X - newX
 
 # %% [markdown]
-# returns an error because of the small shift of coordinates. We will see in another tutorial how to re-alignn datasets and deal with these small problems. It is worth noticing that similar minor distorsions arise in commercial softwares,... except that the user is not notified.   
+# returns an error because of the small shift of coordinates. We will see in another tutorial how to re-align datasets and deal with these small problems. It is worth noticing that similar distorsions arise in commercial softwares,... except that the user is not notified.   
 
 # %% [markdown]
 # -- this is the end of this tutorial --
