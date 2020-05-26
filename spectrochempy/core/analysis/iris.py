@@ -280,7 +280,6 @@ class IRIS:
                             C2 = menger(Rx[1:4], Sy[1:4])
                             print('new curvature: C2 = {}'.format(C2))
                         if C1 > C2:
-                            xx = x[1]
                             x[3] = x[2]; Rx[3] = Rx[2]; Sy[3] = Sy[2]
                             x[2] = x[1]; Rx[2] = Rx[1]; Sy[2] = Sy[1]
                             x[1] = (x[3] + phi * x[0]) / (1 + phi)
@@ -292,8 +291,6 @@ class IRIS:
                             RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                             SM = np.concatenate((SM, np.array(Sy[1:2])))
                         else:
-                            xx = x[2]
-
                             x[0] = x[1]; Rx[0] = Rx[1]; Sy[0] = Sy[1]
                             x[1] = x[2]; Rx[1] = Rx[2]; Sy[1] = Sy[2]
                             x[2] = x[0] - (x[1] - x[3])
