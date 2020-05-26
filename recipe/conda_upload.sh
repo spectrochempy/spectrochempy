@@ -61,6 +61,10 @@ if [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   exit $?
 fi
 
+if [ ! $NUMBER ]
+then
+   NUMBER="0"
+fi
 if [[ $TRAVIS_BRANCH == "develop" ]]; then
   ## we build the current develop repository (for testing purpose)
   export DEVSTRING="dev"
@@ -77,7 +81,7 @@ if [[ $TRAVIS_BRANCH == "develop" ]]; then
 fi
 
 ## this is a local "dev" release not yet merged with develop (will not be uploaded)
-export DEVSTRING="dev$NUMBER"
+export DEVSTRING="test$NUMBER"
 export VERSION="$NEXT_TAG"
 echo "***************************************************************************************************************"
 echo "--> BUILDING $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
