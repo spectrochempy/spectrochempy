@@ -74,6 +74,14 @@ X
 
 # %%
 X.description= 'CO adsorption on CoMo/Al2O3, difference spectra'
+print(X.description)
+
+# %% [markdown]
+# or directly at the import:
+
+# %%
+X = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG', description='CO@CoMo/Al2O3, diff spectra')
+print(X.description)
 
 # %% [markdown]
 # - `history` records changes made to the dataset. Here, right after its creation, it has been sorted by date (see below). 
@@ -146,10 +154,10 @@ X.y
 # %% [markdown]
 # ### Note: The order of spectra
 #
-# The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the original OMNIC order can be kept using the `order=True` at the function call. For instance:
+# The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
-X2 = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG', order=False)
+X2 = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG', sortbydate=False)
 
 # %% [markdown]
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by increasing data. 
@@ -169,7 +177,7 @@ X.y            # displays the `y` dimension
 # %% [markdown]
 # ### b) Import of .spa files
 #
-# The import of a single follows exactly the same rules as that of the import of a group, except that the history of the spectrum is also put in the description, and of course, the length of the `y` dimension is one:
+# The import of a single follows exactly the same rules as that of the import of a group:
 
 # %%
 Y = scp.read_omnic('irdata//subdir//7_CZ0-100 Pd_101.spa')
@@ -199,38 +207,66 @@ print(X)
 # The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence, one can open sample Opus files contained in the `datadir` using:
 
 # %%
-Y = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata\\OPUS')
-print(Y)
+Z = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata\\OPUS')
+print(Z)
 
 # %% [markdown]
 # or:
 
 # %%
-Y2 = scp.read_dir('irdata\\OPUS')
-print(Y2)
+Z2 = scp.read_dir('irdata\\OPUS')
+print(Z2)
 
 # %% [markdown]
 # Note that supplementary informations as to the imported spectra can be obtained by the direct use of `brukeropusreader`. For instance: 
 
-# %%
-from brukeropusreader import read_file
-import os
+# %% [raw]
+# from brukeropusreader import read_file
+# import os
+#
+# opusfile = os.path.join(scp.general_preferences.datadir, "irdata\\OPUS\\test.0000")  # the full pathname of the file
+# Z3 = read_file(opusfile)   # returns a dictionary of the data and metadata extracted 
+# Z3.keys()   # returns the key of the dictionary
 
-opusfile = os.path.join(scp.general_preferences.datadir, "irdata\\OPUS\\test.0000")  # the full pathname of the file
-Y3 = read_file(opusfile)   # returns a dictionary of the data and metadata extracted 
-Y3.keys()   # returns the key of the dictionary
-
 # %%
-X['Optik']  # looks what is the Optik block:
+Y3['Optik']  # looks what is the Optik block:
 
 # %% [markdown]
-# # 1.3. Import of JCAMP-DX files
+# # 1.3. Import/Export of JCAMP-DX files
 #
-# [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details), because it has been developed to read again the jcamp-dx files exported by spectrochempy write_jdx() writer.
+# [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details).
 #
-# Hence, the lmast dataset :
+# The reader hase been essentially developed to read again the jcamp-dx files exported by spectrochempy `write_jdx()` writer.
+#
+# Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 
 # %%
-Y2.write_jdx("opus_import.jdx")
+X.write_jdx('CO@Mo_Al2O3.jdx')
+
+# %% [markdown]
+# then used (and maybe changed) by a 3rd party software, and re-imported in spectrochempy:
+
+# %%
+newX = scp.read_jdx('CO@Mo_Al2O3.jdx')
+print(newX)
+
+# %% [markdown]
+# It is important to note here that the conversion to JCAMP-DX changes the ast digits of absorbances and wavenumbers:  
+
+# %%
+print('Mean change in absorbance: {}'.format((X.data - newX.data).mean()))  
+print('Mean change in wavenumber: {}'.format((X.x.data - newX.x.data).mean())) 
+
+# %% [markdown]
+# This is much beyond the experimental accuracy but can lead to undesirable effects. For instance:
+
+# %%
+X - newX
+
+# %% [markdown]
+# returns an error because of the small shift of coordinates. We will see in another tutorial how to re-alignn datasets and deal with these small problems. It is worth noticing that similar minor distorsions arise in commercial softwares,... except that the user is not notified.   
+
+# %% [markdown]
+# -- this is the end of this tutorial --
 
 # %%
