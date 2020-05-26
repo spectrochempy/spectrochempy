@@ -622,7 +622,7 @@ class NDComplexArray(NDArray):
             super().__setitem__(items, value)
         except:
             if self.ndim > 1 and self.is_quaternion:  # TODO: why not?
-                raise NotImplemented("Sorry but setting values for hypercomplex array is not yet possible")
+                raise NotImplementedError("Sorry but setting values for hypercomplex array is not yet possible")
 
 
 # ======================================================================================================================
