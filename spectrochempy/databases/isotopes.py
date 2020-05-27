@@ -91,7 +91,7 @@ class Isotopes(HasTraits):
 
     isotopes = Instance(pd.DataFrame)
 
-    _nucleus = Unicode
+    _nucleus = Unicode()
 
     # ------------------------------------------------------------------------------------------------------------------
     # nucleus (has an alias isotope, for the getter property only)

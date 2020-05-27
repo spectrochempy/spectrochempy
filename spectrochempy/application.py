@@ -851,7 +851,7 @@ class SpectroChemPy(Application):
                           'Chemistry with Python.')
     "Short description of the |scpy| application"
 
-    long_description = Unicode
+    long_description = Unicode()
     "Long description of the |scpy| application"
 
     @default('long_description')
@@ -1125,7 +1125,7 @@ class SpectroChemPy(Application):
         # add other preferences
         # ---------------------------------------------------------------------
 
-        self.datadir = DataDir(config=self.config)
+        self.datadir = DataDir() #config=self.config)
         self.general_preferences = GeneralPreferences(config=self.config,
                                                       parent=self)
 
