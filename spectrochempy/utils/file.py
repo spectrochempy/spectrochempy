@@ -141,6 +141,9 @@ def readfilename(filename=None, **kwargs):
                 continue
             _, extension = os.path.splitext(filename)
             extension = extension.lower()
+            if extension[1:].isdigit():
+                # probably an opus file
+                extension = 'opus'
             if extension in filenames_dict.keys():
                 filenames_dict[extension].append(filename)
             else:

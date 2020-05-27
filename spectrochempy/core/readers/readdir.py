@@ -75,7 +75,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
         The parent directory where to look at
     sortbydate : bool, optional,  default:True.
         Sort spectra by acquisition date
-    recursive : bool, optional,  default=True.
+    recursive : bool, optional,  default=False.
         Read also subfolders
 
     Returns
@@ -113,7 +113,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     datasets = []
 
-    recursive = kwargs.get('recursive', True)
+    recursive = kwargs.get('recursive', False)
     if recursive:
         for i, root in enumerate(os.walk(directory)):
             if i == 0:
@@ -149,16 +149,13 @@ def _read_single_dir(directory, **kwargs):
     for extension in files.keys():
         if extension == '.spg':
             for filename in files[extension]:
-                datasets.append(NDDataset.read_omnic(filename,
-                                                     **kwargs))
+                datasets.append(NDDataset.read_omnic(filename, **kwargs))
 
         elif extension == '.spa':
-            datasets.append(NDDataset.read_omnic(files[extension],
-                                                 **kwargs))
+            datasets.append(NDDataset.read_omnic(files[extension], **kwargs))
 
         elif extension == '.csv':
-            datasets.append(NDDataset.read_csv(filename=files[extension],
-                                               **kwargs))
+            datasets.append(NDDataset.read_csv(filename=files[extension], **kwargs))
 
         elif extension == '.scp':
             datasets.append(NDDataset.read(files[extension], protocol='scp'))
@@ -168,6 +165,10 @@ def _read_single_dir(directory, **kwargs):
                 matlist = NDDataset.read_matlab(filename)
                 for mat in matlist:
                     datasets.append(mat)
+
+        elif extension == 'opus':
+            datasets.append(NDDataset.read_opus(files[extension], **kwargs))
+
         # else the files are not (yet) readable
         else:
             pass

@@ -21,9 +21,9 @@ import scipy.signal
 #argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 #argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
-def savgol_filter(dataset, window_length, polyorder, deriv=0, delta=1.0, dim='x', mode='interp', cval=0.0):
+def savgol_filter(dataset, window_length=5, polyorder=3, deriv=0, delta=1.0, dim='x', mode='interp', cval=0.0):
     """
-    Apply a Savitzky-Golay filter to an array.
+    Apply a Savitzky-Golay filter to a NDDataset()
 
     Wrapper of scpy.signal.savgol(). If dataset has dimension greater than 1, dim determines the axis along which the filter is applied.
     

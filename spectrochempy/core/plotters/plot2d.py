@@ -165,12 +165,12 @@ def plot_2D(dataset, **kwargs):
             # let's go to a particular treament for the pyqtgraph plots
             kwargs['usempl'] = usempl = False
             # we try to have a commmon interface for both plot library
-            kwargs['ax'] = ax = widget  # return qt_plot_1D(dataset, **kwargs)
+            kwargs['ax'] = widget  # return qt_plot_1D(dataset, **kwargs)
         else:
             # this must be a matplotlibwidget
             kwargs['usempl'] = usempl = True
             fig = widget.fig
-            kwargs['ax'] = ax = fig.gca()
+            kwargs['ax'] = fig.gca()
 
     data_only = kwargs.get('data_only', False)
 
@@ -207,16 +207,16 @@ def plot_2D(dataset, **kwargs):
     if styles and not "grayscale" in styles and cmap == "viridis":
 
         if method in ['map', 'image']:
-            cmap = colormap = kwargs.get('colormap',
+            cmap = kwargs.get('colormap',
                                          kwargs.get('cmap', prefs.colormap))
         elif data_transposed:
-            cmap = colormap = kwargs.get('colormap',
+            cmap = kwargs.get('colormap',
                                          kwargs.get('cmap', prefs.colormap_transposed))
         elif method in ['surface']:
-            cmap = colormap = kwargs.get('colormap',
+            cmap = kwargs.get('colormap',
                                          kwargs.get('cmap', prefs.colormap_surface))
         else:
-            cmap = colormap = kwargs.get('colormap',
+            cmap = kwargs.get('colormap',
                                          kwargs.get('cmap', prefs.colormap_stack))
 
     lw = kwargs.get('linewidth', kwargs.get('lw',

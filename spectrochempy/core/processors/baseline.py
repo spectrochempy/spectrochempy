@@ -288,7 +288,7 @@ class BaselineCorrection(HasTraits):
         self._setup(**kwargs)
 
         datasets = [self.dataset, self.dataset]
-        labels = ['\nClick & span with left mouse button to set a baseline region.'
+        labels = ['\nClick & span with left mouse button to set a baseline region.',
                   '\nClick on right button on a region to remove it.',
                   'Baseline corrected dataset preview']
         axes = multiplot(datasets, labels,
@@ -600,9 +600,8 @@ def _polybase(data, **kwargs):
     npts = data.shape[-1]
     w = np.arange(npts)
     
-    nw = npts / nbzone
+
     baseline = np.ma.masked_array(dat, mask=True)
-    
     sigma = 1.e6
     nw = int(npts / nbzone)
     

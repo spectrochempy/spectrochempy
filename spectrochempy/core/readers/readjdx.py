@@ -71,14 +71,11 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
         if isinstance(dataset, (str, list)) and dataset != '':
             filename = dataset
 
-        dataset = NDDataset()  # create an instance of NDDataset
-
     # returns a list of filenames
     filenames = readfilename(filename,
                          directory=directory,
                          filetypes=['JCAMP-DX files (*.jdx, *.dx)',
                                     'All files (*)'], dictionary=False)
-
     if not filenames:
         return None
 

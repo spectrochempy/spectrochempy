@@ -2384,10 +2384,8 @@ def read_pprog(filename):
 
         # split line into comment and text and strip leading/trailing spaces
         if ";" in line:
-            comment = line[line.index(";"):]
             text = line[:line.index(";")].strip()
         else:
-            comment = ""
             text = line.strip()
 
         # remove label from text when first word is all digits or
