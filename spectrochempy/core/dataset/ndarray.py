@@ -278,15 +278,14 @@ class NDArray(HasTraits):
                 sattr = getattr(self, f'_{attr}')
                 if hasattr(other, f'_{attr}'):
                     oattr = getattr(other, f'_{attr}')
-                    if attr == 'data':
-                        if (sattr is None and oattr is not None):
-                            return False
-                        if (oattr is None and sattr is not None):
-                            return False
-                        if hasattr(oattr, 'size') and hasattr(sattr, 'size') \
-                                and oattr.size != sattr.size:
-                            return False
-                        # to avoid deprecation warning issue for unequal array
+                    # to avoid deprecation warning issue for unequal array
+                    if (sattr is None and oattr is not None):
+                        return False
+                    if (oattr is None and sattr is not None):
+                        return False
+                    if hasattr(oattr, 'size') and hasattr(sattr, 'size') \
+                            and oattr.size != sattr.size:
+                        return False
                     eq &= np.all(sattr == oattr)
                     if not eq:
                         return False
