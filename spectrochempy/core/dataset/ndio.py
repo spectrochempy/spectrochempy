@@ -63,7 +63,7 @@ class NDIO(HasTraits):
 
     """
 
-    _filename = Unicode
+    _filename = Unicode()
 
     @property
     def filename(self):
@@ -427,7 +427,7 @@ class NDIO(HasTraits):
              **kwargs
              ):
         """
-        Load a list of dataset objects saved as a pickle files ( e.g., '\*.scp' file).
+        Load a list of dataset objects saved as a pickle files ( e.g., '*.scp' file).
 
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.

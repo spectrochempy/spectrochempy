@@ -74,7 +74,7 @@ class NDDataset(
     
     # private metadata in addition to those of the base NDArray class
     _modified = Instance(datetime)
-    _description = Unicode
+    _description = Unicode()
     _history = List(Unicode())
     
     # coordinates

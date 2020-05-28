@@ -17,7 +17,7 @@ import pytest
 # comment the next line to test it manually
 #@pytest.mark.skip('interactive so cannot be used with full testing')
 def test_read_dir():
-    A = NDDataset.read_dir(os.path.join('irdata','subdir'))
+    A = NDDataset.read_dir(os.path.join('irdata','subdir'), recursive=True)
     assert len(A) == 9
 
     # in case we do not specify a directory:

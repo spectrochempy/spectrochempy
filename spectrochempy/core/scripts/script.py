@@ -23,8 +23,8 @@ class Script(HasTraits):
     Executable script associated to a project
 
     """
-    _name = Unicode
-    _content = Unicode
+    _name = Unicode()
+    _content = Unicode()
     _priority = Float(min=0., max=100.)
     _parent = Instance(AbstractProject, allow_none=True)
 

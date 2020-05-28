@@ -77,7 +77,7 @@ class Fit(HasTraits):
 
     silent = Bool(True)
 
-    _ = Any
+    _ = Any()
 
     datasets = List(Instance('spectrochempy.core.dataset.nddataset.NDDataset'))
 

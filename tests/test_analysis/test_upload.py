@@ -14,7 +14,6 @@ from spectrochempy.core import show
 from spectrochempy.core import info_
 
 def test_upload():
-
     ds = upload_IRIS()
     info_(ds)
     assert ds.shape == (150,4)
