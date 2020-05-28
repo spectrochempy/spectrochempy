@@ -25,9 +25,9 @@ from spectrochempy import general_preferences as prefs
 @pytest.fixture(scope="module")
 def test_samples():
     def _make_samples(force_original=False):
-        _samples = {'P350': {'label': '$\mathrm{M_P}\,(623\,K)$'},
-                    #'A350': {'label': '$\mathrm{M_A}\,(623\,K)$'},
-                    #'B350': {'label': '$\mathrm{M_B}\,(623\,K)$'}
+        _samples = {'P350': {'label': r'$\mathrm{M_P}\,(623\,K)$'},
+                    #'A350': {'label': r'$\mathrm{M_A}\,(623\,K)$'},
+                    #'B350': {'label': r'$\mathrm{M_B}\,(623\,K)$'}
                     }
 
         for key, sample in _samples.items():

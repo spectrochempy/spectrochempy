@@ -184,7 +184,7 @@ def readdirname(dirname=None, **kwargs):
         elif os.path.isdir(os.path.join(prefs.datadir, parent_dir)):
             parent_dir = os.path.join(prefs.datadir, parent_dir)
         else:
-            raise ValueError("\"%s\" is not a valid parent directory " % parent_dir)
+            raise ValueError(f'"{parent_dir}" is not a valid parent directory ')
 
     if dirname:
         # if a directory name was provided
@@ -192,7 +192,7 @@ def readdirname(dirname=None, **kwargs):
         if not isinstance(dirname, str):
             # well the directory doesn't exist - we cannot go further without
             # correcting this error
-            raise TypeError("directory %s should be a string!" % dirname)
+            raise TypeError(f'"{dirname}" should be a string!')
 
         # if a valid parent directory has been provided,
         # checks that parent_dir\\dirname is OK
@@ -207,7 +207,7 @@ def readdirname(dirname=None, **kwargs):
             return os.path.join(prefs.datadir, dirname)
 
         else:
-            raise ValueError("\"%s\" is not a valid directory" % dirname)
+            raise ValueError(f'"{dirname}" is not a valid directory')
 
     if not dirname:
         # open a file dialog

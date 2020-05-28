@@ -49,7 +49,8 @@ install:
   - pip install .
 
 script:
-  - pytest -k "not test_example" --nodisplay
+  - pytest --nodisplay
+# -k "not test_example"
 
 after_success:
   - conda activate scpy-test-py$TRAVIS_PYTHON_VERSION
