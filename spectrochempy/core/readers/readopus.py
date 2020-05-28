@@ -22,10 +22,7 @@ __dataset_methods__ = __all__
 from brukeropusreader import read_file
 from warnings import warn
 from datetime import datetime, timezone, timedelta
-
-
-
-
+from numpy import linspace
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -37,6 +34,8 @@ from spectrochempy.core import debug_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import readfilename
+
+
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
@@ -90,7 +89,7 @@ def read_opus(dataset=None, **kwargs):
                          filetypes=['Bruker files (*.*)',
                                     'all files (*)'],
                          dictionary=False)
-    #todo: see how to use regular expression in Qt filters
+    # todo: see how to use regular expression in Qt filters
 
     if not files:
         # there is no files, return nothing
@@ -109,13 +108,18 @@ def read_opus(dataset=None, **kwargs):
             warn("opus file {} could not be read".format(file))
             continue
 
-        if not xaxis:
-            xaxis = Coord(opus_data.get_range("AB"), title='Wavenumbers', units='cm^-1')
+        npt = opus_data['AB Data Parameter']['NPT']
+        fxv = opus_data['AB Data Parameter']['FXV']
+        lxv = opus_data['AB Data Parameter']['LXV']
+        xdata = linspace(fxv, lxv, npt)
 
-        elif (opus_data.get_range("AB") != xaxis.data).any():
+        if not xaxis:
+            xaxis = Coord(x=xdata, title='Wavenumbers', units='cm^-1')
+
+        elif (xdata != xaxis.data).any():
             raise ValueError("spectra have incompatible dimensions (xaxis)")
 
-        intensities.append(opus_data["AB"])
+        intensities.append(opus_data["AB"][:npt])
         names.append(opus_data["Sample"]['SNM'])
         acqdate = opus_data["AB Data Parameter"]["DAT"]
         acqtime = opus_data["AB Data Parameter"]["TIM"]
