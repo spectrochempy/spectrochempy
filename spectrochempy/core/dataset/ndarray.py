@@ -201,7 +201,7 @@ class NDArray(HasTraits):
         self.name = kwargs.pop('name', None)
 
         # process eventual kwargs, adressing HasTrait class
-        super().__init__(**kwargs)
+        # super().__init__(**kwargs)   <-- cause problem of deprecation warning.
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -278,9 +278,14 @@ class NDArray(HasTraits):
                 sattr = getattr(self, f'_{attr}')
                 if hasattr(other, f'_{attr}'):
                     oattr = getattr(other, f'_{attr}')
+                    if attr == 'data':
+                        if (sattr is None and oattr is not None):
+                            return False
+                        if (oattr is None and sattr is not None):
+                            return False
+                        # to avoid deprecation warning issue for unequal array
                     eq &= np.all(sattr == oattr)
                     if not eq:
-                        #debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
                         return False
                 else:
                     return False
@@ -1978,10 +1983,12 @@ class NDArray(HasTraits):
         def ellipsisinkeys(keys):
             try:
                 # Ellipsis
+                if isinstance(keys[0], np.ndarray):
+                    return False
                 test = Ellipsis in keys
             except ValueError as e:
                 if e.args[0].startswith('The truth '):
-                    # probably an array of index (Fancy indexing)
+                    # probably an array of index (Fancy indexing)  # should not happen any more with the test above
                     test = False
             return test
 

@@ -90,6 +90,8 @@ def read_omnic(dataset=None, **kwargs):
         dataset = NDDataset()  # create an instance of NDDataset
 
 
+    sortbydate = kwargs.pop("sortbydate", True)
+
     # returns a list of files to read
     files = readfilename(filename,
                          directory=kwargs.get("directory", None),
