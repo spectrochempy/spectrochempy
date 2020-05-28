@@ -25,6 +25,7 @@
 
 # %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"name": "#%%\n"}}
 import spectrochempy as scp
+import os as os
 
 # %% [markdown]
 # # 1. Supported fileformats
@@ -58,7 +59,7 @@ import spectrochempy as scp
 # its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
-X = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG')
+X = scp.read_omnic(os.path.join('irdata','CO@Mo_Al2O3.SPG'))
 X
 
 # %% [markdown]
@@ -134,7 +135,7 @@ X.y
 # Note that the valued that are displayed are rounded, not the values stored internally. Hence, the relative time in minutes of the last spectrum is: 
 
 # %%
-X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
+_ = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
                  # the values of the Coord object are accessed through the `data` attribute 
                  # whiche is a ndarray, hence the final [0] to have the value:
 
@@ -157,7 +158,7 @@ X.y
 # The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
-X2 = scp.read_omnic('irdata//CO@Mo_Al2O3.SPG', sortbydate=False)
+X2 = scp.read_omnic(os.path.join('irdata','CO@Mo_Al2O3.SPG'), order=False)
 
 # %% [markdown]
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by increasing data. 
@@ -180,7 +181,7 @@ X.y            # displays the `y` dimension
 # The import of a single follows exactly the same rules as that of the import of a group:
 
 # %%
-Y = scp.read_omnic('irdata//subdir//7_CZ0-100 Pd_101.spa')
+Y = scp.read_omnic(os.path.join('irdata','subdir','7_CZ0-100 Pd_101.spa'))
 Y
 
 # %% [markdown]
@@ -188,14 +189,15 @@ Y
 
 # %%
 list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.spa", "7_CZ0-100 Pd_103.spa", "7_CZ0-100 Pd_104.spa"]
-X = scp.read_omnic(list_files, directory="irdata\\subdir")
+directory = os.path.join(scp.general_preferences.datadir, "irdata","subdir")
+X = scp.read_omnic(list_files, directory=directory)
 print(X)
 
 # %% [markdown]
 # In such a case ase these .spa files are alone in the directory, a very convenient is the read_dir() method that will gather the .spa files together:
 
 # %%
-X = scp.read_dir("irdata\\subdir")
+X = scp.read_dir(directory, recursive=False)
 print(X)
 
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
