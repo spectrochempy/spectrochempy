@@ -39,16 +39,16 @@ class Project(AbstractProject):
 
     """
 
-    _id = Unicode
+    _id = Unicode()
     _name = Unicode(allow_none=True)
 
-    _parent = This
+    _parent = This()
     _projects = Dict(This)
     _datasets = Dict(Instance(NDDataset))
     _scripts = Dict(Instance(Script))
     _others = Dict()
     _meta = Instance(Meta)
-    _filename = Unicode
+    _filename = Unicode()
 
     # ..................................................................................................................
     def __init__(self, *args, argnames=None, name=None, **meta):

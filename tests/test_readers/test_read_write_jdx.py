@@ -7,13 +7,10 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
+import pytest
 import os
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.processors.align import align
-
-
-# comment the next line to test it manually
-#@pytest.mark.skip('interactive so cannot be used with full testing')
 
 def test_readomnic_writejdx_readjdx():
     X = NDDataset.read_omnic(os.path.join('irdata','nh4y-activation.spg'))

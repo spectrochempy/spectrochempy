@@ -100,8 +100,8 @@ class CoordRange(HasTraits):
     e.g. [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
     """
     # TODO: May use also units ???
-    ranges = List(Range)
-    reversed = Bool
+    ranges = List(Range())
+    reversed = Bool()
 
     # ..................................................................................................................
     def __call__(self, *ranges, **kwargs):

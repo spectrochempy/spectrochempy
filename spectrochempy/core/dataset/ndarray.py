@@ -65,10 +65,10 @@ DEFAULT_DIM_NAME = list('xyzuvwpqrstijklmnoabcdefgh')[::-1]
 
 numpyprintoptions()
 
-
 # ======================================================================================================================
 # The basic NDArray class
 # ======================================================================================================================
+
 
 class NDArray(HasTraits):
     """
@@ -242,7 +242,7 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def __eq__(self, other, attrs=None):
-        
+
         eq = True
         
         if not isinstance(other, NDArray):
@@ -272,7 +272,7 @@ class NDArray(HasTraits):
         
         if 'name' in attrs:
             attrs.remove('name')
-            
+
         for attr in attrs:
             if attr != 'units':
                 sattr = getattr(self, f'_{attr}')
@@ -282,6 +282,9 @@ class NDArray(HasTraits):
                         if (sattr is None and oattr is not None):
                             return False
                         if (oattr is None and sattr is not None):
+                            return False
+                        if hasattr(oattr, 'size') and hasattr(sattr, 'size') \
+                                and oattr.size != sattr.size:
                             return False
                         # to avoid deprecation warning issue for unequal array
                     eq &= np.all(sattr == oattr)

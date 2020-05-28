@@ -45,7 +45,7 @@ class Coord(NDMath, NDArray):
     but labels can be multiple.
 
     """
-    _copy = Bool
+    _copy = Bool()
 
     _html_output = False
     _parent_dim = Unicode(allow_none=True)
