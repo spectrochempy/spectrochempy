@@ -62,7 +62,7 @@ import os
 # its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
-X = scp.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
+X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')
 X
 
 # %% [markdown]
@@ -159,15 +159,15 @@ X.y
 # minutes of the last spectrum is:
 
 # %%
-_ = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
-# the values of the Coord object are accessed through the `data` attribute
-# whiche is a ndarray, hence the final [0] to have the value:
+tf = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
+                      # the values of the Coord object are accessed through the `data` attribute 
+                      # which is a ndarray, hence the final [0] to have the value:
 
 # %% [markdown]
 # which gives the exact time in seconds:
 
 # %%
-_ * 60  # the underscore _ recalls the last output.
+tf * 60           
 
 # %% [markdown]
 # Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
@@ -184,7 +184,7 @@ X.y
 # original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
-X2 = scp.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'), order=False)
+X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', order=False)
 
 # %% [markdown]
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by
@@ -194,7 +194,7 @@ X2 = scp.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'), order=False)
 # instance, the following will inverse the order of the first dimension:
 
 # %%
-X = X[::-1, :]  # reorders the NDDataset along the first dimension going backward
+X = X[::-1,:]  # reorders the NDDataset along the first dimension going backward
 X.y  # displays the `y` dimension
 
 # %% [markdown]
@@ -211,10 +211,10 @@ X.y  # displays the `y` dimension
 # %% [markdown]
 # ### b) Import of .spa files
 #
-# The import of a single follows exactly the same rules as that of the import of a group:
+# The import of a single spectrum follows exactly the same rules as that of the import of a group:
 
 # %%
-Y = scp.read_omnic(os.path.join('irdata', 'subdir', '7_CZ0-100 Pd_101.spa'))
+Y = scp.read_omnic('irdata/subdir/7_CZ0-100 Pd_101.spa')
 Y
 
 # %% [markdown]
@@ -225,8 +225,7 @@ Y
 
 # %%
 list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.spa", "7_CZ0-100 Pd_103.spa", "7_CZ0-100 Pd_104.spa"]
-directory = os.path.join(scp.general_preferences.datadir, "irdata", "subdir")
-X = scp.read_omnic(list_files, directory=directory)
+X = scp.read_omnic(list_files, directory='irdata/subdir')
 print(X)
 
 # %% [markdown]
@@ -234,7 +233,7 @@ print(X)
 # that will gather the .spa files together:
 
 # %%
-X = scp.read_dir(directory, recursive=False)
+X = scp.read_dir('irdata/subdir')
 print(X)
 
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
