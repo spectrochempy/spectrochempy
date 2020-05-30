@@ -312,7 +312,7 @@ def generate_api(api_path):
         if pkg.endswith('api') or "test" in pkg:
             continue
         try:
-            #print(pkg)
+            print(pkg)
             pkg = import_item(pkg)
         except:
             #pkg = import_item(pkg)

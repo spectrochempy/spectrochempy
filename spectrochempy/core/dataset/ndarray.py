@@ -1334,7 +1334,7 @@ class NDArray(HasTraits):
         """
         try:
             other.to(self.units, inplace=False)
-        except ValueError:
+        except DimensionalityError:
             return False
         return True
 

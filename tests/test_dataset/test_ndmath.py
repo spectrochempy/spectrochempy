@@ -79,8 +79,11 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, pnl, name, comment):
     skip = False
     try:
         expected_units = f(Quantity(1., nd1.units)).units
+    except TypeError as e:
+        error_(f"{name} :", e)
+        skip = True
     except AttributeError:
-        if name in ['positive', 'fabs', 'cbrt', 'sign', 'spacing',
+        if name in ['positive', 'fabs', 'cbrt', 'spacing',
                     'signbit', 'isnan', 'isinf', 'isfinite', 'logical_not',
                     'log2', 'log10', 'log1p', 'exp2', 'expm1']:
             pass  # already solved

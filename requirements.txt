@@ -3,7 +3,7 @@
 numpy
 matplotlib
 traitlets
-pint==0.9
+pint
 quaternion
 quadprog
 cantera

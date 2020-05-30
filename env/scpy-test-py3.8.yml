@@ -9,7 +9,7 @@ dependencies:
 - numpy
 - matplotlib
 - traitlets
-- pint=0.9
+- pint
 - quaternion
 - scipy
 - colorama
