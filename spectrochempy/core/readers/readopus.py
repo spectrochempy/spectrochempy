@@ -65,7 +65,10 @@ def read_opus(dataset=None, **kwargs):
     >>> A = NDDataset.read_opus('irdata\\spectrum.0001')
     >>> print(A)
     NDDataset: [float64] a.u. (shape: (y:1, x:2568))
+
+
     """
+
     debug_("reading bruker opus files")
 
     # filename will be given by a keyword parameter except if the first parameters is already
@@ -114,7 +117,7 @@ def read_opus(dataset=None, **kwargs):
         xdata = linspace(fxv, lxv, npt)
 
         if not xaxis:
-            xaxis = Coord(x=xdata, title='Wavenumbers', units='cm^-1')
+            xaxis = Coord(xdata, title='Wavenumbers', units='cm^-1')
 
         elif (xdata != xaxis.data).any():
             raise ValueError("spectra have incompatible dimensions (xaxis)")
@@ -150,16 +153,13 @@ def read_opus(dataset=None, **kwargs):
 
     # Set origin, description and history
     dataset.origin = "opus"
-    dataset.description = ('Dataset from opus files. \n')
+    dataset.description = 'Dataset from opus files. \n'
 
     if sortbydate:
         dataset.sort(dim='y', inplace=True)
 
-    dataset.history = str(datetime.now()) + ':import from opus files \n'
-
-    # Set the NDDataset date
+    dataset.history = str(datetime.now()) + ': import from opus files \n'
     dataset._date = datetime.now()
     dataset._modified = dataset.date
-    # debug_("end of reading")
 
     return dataset
