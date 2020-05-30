@@ -36,7 +36,6 @@ import spectrochempy as scp
 #
 # ![Drawing](figures/OpenDialog.png)
 #
-#
 # The dialog Box allows selecting the file which data will be loaded in the variable `X`. Try for instance to run the cell below, and select an omnic spg datafile (select the .spg extension), which you can find in the `irdata` directory. 
 #
 # > Note: the dialog box does not necessarily pops up in the foreground: check your task bar ! 
@@ -76,35 +75,33 @@ print(X)
 # If only a directory is indicated, the dialog box will open in this directory. For instance, on a WIN system, the following command:
 #
 # ```
-# X = scp.read_omnic(directory='C:\\')
+# X = scp.read_omnic(directory='C:/')
 # ```
 #
 # will open the dialog box at the root directory of the `C:` drive. 
 #
-# > Note that in this command, the backslash (`\`) is repeated twice. This is a specificity of python (and a handful of other languages): `\` is the escape character, so if you type `X = read_omnic(directory='C:\')`, a `SyntaxError` will be raised because python expects a character after the first `\`.
-#
 # On the other hand if a `filename` is passed, like here: 
 #
 # ```
-# X = scp.read_omnic('wodger.spg', directory='C:\\')
+# X = scp.read_omnic('wodger.spg', directory='C:/')
 # ```
 #
 # then Scpy will attempt opening a file named `wodger.spg` supposedly located in `C:\`. 
 #
-# Imagine now that the file of interest is actually located in `C:\users\Brian\s\Life`. The following 
+# Imagine now that the file of interest is actually located in `C:/users/Brian/s/Life`. The following 
 # commands are all equivalent and will allow opening the file: 
 #
-# - using only the full pathname of the file (note once again, the double backslashes):
+# - using only the full pathname of the file:
 #
 #     ```
-#     X = scp.read_omnic('C:\\users\\Brian\\s\\Life\\wodger.spg')
+#     X = scp.read_omnic('C:/users/Brian/s/Life/wodger.spg')
 #     ```
 #
 # - or using a combination of directory and file pathnames:
 #
 #     ```
-#     X = scp.read_omnic('wodger.spg', directory='C:\\users\\Brian\\s\\Life'
-#     X = scp.read_omnic('Life\\wodger.spg', directory='C:\\users\\Brian\\s')
+#     X = scp.read_omnic('wodger.spg', directory='C:/users/Brian/s/Life'
+#     X = scp.read_omnic('Life/wodger.spg', directory='C:/users/Brian/s')
 #     ```
 #   
 # - etc...
@@ -131,7 +128,7 @@ print(X)
 # In this respect, a good practice consists in using relative pathnames in scripts/notebooks and fortunately, Spectrochempy readers use relative paths. If the given path is not absolute, then spectrochempy will search in the current directory. Hence the openening of the spg file from scripts in `welease.ipynb` can be made by the command: 
 #
 # ```
-# X = scp.read_omnic('Life\\wodger.spg'))
+# X = scp.read_omnic('Life/wodger.spg'))
 # ```
 #
 # or:
@@ -141,7 +138,7 @@ print(X)
 # ```
 # # 5. Good practice: use `os` or `pathlib` modules
 #
-# In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules. As `os`is automatically imported with Scpy, we mention the following methods that can be particularely useful:
+# In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules. As `os`is automatically imported with Scpy, we mention the following methods that can be particularly useful:
 #
 # - `os.getcwd()`: returns the absolute path of the current working directory (i.e. the directory of the script) 
 # - `os.path.expanduser("~")` : returns the home directory of the user (e.g. the `C:\users\<username>` path on WIN platforms or `/home/<username>` on linux)
@@ -151,13 +148,11 @@ print(X)
 #
 # - [os - Miscellaneous operating system interfaces](https://docs.python.org/3/library/os.html)
 # - [pathlib — Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
-#
+
+# %% [markdown]
 # # 5. Another default search directory: `datadir`
 #
 # Spectrochempy comes also with the definition of a second default directory path where to look at the data: the `datadir` directory. It is defined in the variable `general_preferences.datadir` which is impotrted at the same time as spectrochempy. By default, `datadir` points in the 'scp_data\testdata' folder of spectrochempy:
-
-# %%
-X = scp.read_omnic('wodger.spg', directory='C:\\')
 
 # %%
 print(scp.general_preferences.datadir)
@@ -166,7 +161,7 @@ print(scp.general_preferences.datadir)
 # It can be set to another pathname *permanently* (i.e. even after computer restart) by a new assignment:
 #
 # ```
-# general_preferences.datadir = 'C:\\Brian\\s\\Life'`
+# general_preferences.datadir = 'C:/Brian/s/Life'`
 # ```
 #
 # This will change the default value in the spectrochempy preference file located in the hidden folder `.spectrochempy/` at the root of the user home directory.

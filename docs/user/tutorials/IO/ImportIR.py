@@ -21,11 +21,10 @@
 # This tutorial shows the specifics related to infrared data import in Spectrochempy. As prerequisite, the user is
 # expected to have read the [Import Tutorial](Import.ipynb).
 #
-# Let's first import spectrochempy:
+# Let's first import spectrochempy.
 
 # %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"name": "#%%\n"}}
 import spectrochempy as scp
-import os as os
 
 # %% [markdown]
 # # 1. Supported fileformats
@@ -59,7 +58,7 @@ import os as os
 # its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
-X = scp.read_omnic(os.path.join('irdata','CO@Mo_Al2O3.SPG'))
+X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')
 X
 
 # %% [markdown]
@@ -135,7 +134,7 @@ X.y
 # Note that the valued that are displayed are rounded, not the values stored internally. Hence, the relative time in minutes of the last spectrum is: 
 
 # %%
-_ = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
+tf = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
                  # the values of the Coord object are accessed through the `data` attribute 
                  # whiche is a ndarray, hence the final [0] to have the value:
 
@@ -143,7 +142,7 @@ _ = X[-1].y.data[0]  # the last items of a table can be refered by negative inde
 # which gives the exact time in seconds:
 
 # %%
-_ * 60            # the underscore _ recalls the last output.
+tf * 60           
 
 # %% [markdown]
 # Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
@@ -158,12 +157,12 @@ X.y
 # The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
-X2 = scp.read_omnic(os.path.join('irdata','CO@Mo_Al2O3.SPG'), order=False)
+X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', sortbydate=False)
 
 # %% [markdown]
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by increasing data. 
 #
-# Finally, it is worth mentioning that the NDDatasets can generally be manipulated as numpy ndarray. Hence, for instance, the following will inverse the order of the first dimension:  
+# Finally, it is worth mentioning that the NDDatasets can generally be manipulated as numpy ndarray (see the [slicing tutorial](../processing/slicing.ipynb) for more details). Hence, for instance, the following will inverse the order of the first dimension:  
 
 # %%
 X = X[::-1,:]  # reorders the NDDataset along the first dimension going backward
@@ -178,45 +177,44 @@ X.y            # displays the `y` dimension
 # %% [markdown]
 # ### b) Import of .spa files
 #
-# The import of a single follows exactly the same rules as that of the import of a group:
+# The import of a single spectra follows exactly the same rules as that of the import of a group:
 
 # %%
-Y = scp.read_omnic(os.path.join('irdata','subdir','7_CZ0-100 Pd_101.spa'))
+Y = scp.read_omnic('irdata/subdir/7_CZ0-100 Pd_101.spa')
 Y
 
 # %% [markdown]
-# The omnic reader can also import several spa files together, providing that they share a common axis for the wavenumbers. Tis is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.spa", ..., "7_CZ0-100 Pd_104.spa". It is possible to import them in a single NDDataset by using the list of filenames in the function call:
+# The omnic reader can also import several spa files together, providing that they share a common axis for the wavenumbers. This is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.spa", ..., "7_CZ0-100 Pd_104.spa". It is possible to import them in a single NDDataset by using the list of filenames in the function call:
 
 # %%
 list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.spa", "7_CZ0-100 Pd_103.spa", "7_CZ0-100 Pd_104.spa"]
-directory = os.path.join(scp.general_preferences.datadir, "irdata","subdir")
-X = scp.read_omnic(list_files, directory=directory)
+X = scp.read_omnic(list_files, directory='irdata/subdir')
 print(X)
 
 # %% [markdown]
 # In such a case ase these .spa files are alone in the directory, a very convenient is the read_dir() method that will gather the .spa files together:
 
 # %%
-X = scp.read_dir(directory, recursive=False)
+X = scp.read_dir('irdata/subdir')
 print(X)
 
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
 # # 1.2. Import of Bruker OPUS files
 #
 # [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_opus()`) of spectrochempy is essentially a wrapper of the python module
-# [brukeropusreader](https://github.com/qedsoftware/brukeropusreader) developed by QED. It imports absorbance spectra (the AB block), acquisition times and name of spectra. 
+# [brukeropusreader](https://github.com/spectrochempy/brukeropusreader) initially developed by QED. It imports absorbance spectra (the AB block), acquisition times and name of spectra. 
 #
 # The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence, one can open sample Opus files contained in the `datadir` using:
 
 # %%
-Z = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata\\OPUS')
+Z = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
 print(Z)
 
 # %% [markdown]
 # or:
 
 # %%
-Z2 = scp.read_dir('irdata\\OPUS')
+Z2 = scp.read_dir('irdata/OPUS')
 print(Z2)
 
 # %% [markdown]
@@ -254,7 +252,7 @@ os.remove('CO@Mo_Al2O3.jdx')
 print(newX)
 
 # %% [markdown]
-# It is important to note here that the conversion to JCAMP-DX changes the ast digits of absorbances and wavenumbers:  
+# It is important to note here that the conversion to JCAMP-DX changes the last digits of absorbances and wavenumbers:  
 
 # %%
 print('Mean change in absorbance: {}'.format((X.data - newX.data).mean()))  
@@ -271,5 +269,3 @@ X - newX
 
 # %% [markdown]
 # -- this is the end of this tutorial --
-
-# %%
