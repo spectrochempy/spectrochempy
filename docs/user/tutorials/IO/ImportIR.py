@@ -31,8 +31,7 @@ import os
 # # 1. Supported fileformats
 #
 # At the time of writing of this tutorial (Scpy v.0.1.18), spectrochempy has the following readers which are specific
-# to IR
-# data:
+# to IR data:
 #
 # - `read_omnic()` to open omnic (spa and spg) files
 # - `read_bruker_opus()` to open Opus (*.0, ...) files
