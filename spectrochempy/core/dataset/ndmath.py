@@ -194,8 +194,9 @@ def unary_ufuncs():
         ufuncs[item[0]] = item[1]
     return ufuncs
 
-
+print(unary_ufuncs())
 for func in unary_ufuncs():
+    print(func)
     setattr(thismodule, func, getattr(np, func))
     __all__ += [func]
 
@@ -301,17 +302,18 @@ class NDMath(object):
 
 
     """
-    
-    # copy function properties regarding units from pint.Quantity
-    # This works only for pint 0.9
-    
-    __handled = Quantity._Quantity__handled
-    __copy_units = Quantity._Quantity__copy_units
-    __require_units = Quantity._Quantity__require_units
-    __same_units = Quantity._Quantity__same_units
-    __set_units = Quantity._Quantity__set_units
-    __prod_units = Quantity._Quantity__prod_units
-    __skip_other_args = Quantity._Quantity__skip_other_args
+
+    __radian = 'radian'
+    __require_units = {'cumprod': '',
+                   'arccos': '', 'arcsin': '', 'arctan': '',
+                   'arccosh': '', 'arcsinh': '', 'arctanh': '',
+                   'exp': '', 'expm1': '', 'exp2': '',
+                   'log': '', 'log10': '', 'log1p': '', 'log2': '',
+                   'sin': __radian, 'cos': __radian, 'tan': __radian,
+                   'sinh': __radian, 'cosh': __radian, 'tanh': __radian,
+                   'radians': 'degree', 'degrees': __radian,
+                   'deg2rad': 'degree', 'rad2deg': __radian,
+                   'logaddexp': '', 'logaddexp2': ''}
     __keep_title = ['negative', 'absolute', 'abs', 'fabs', 'rint', 'floor', 'ceil', 'trunc',
                     'add', 'subtract']
     __remove_title = ['multiply', 'divide', 'true_divide', 'floor_divide', 'mod', 'fmod', 'remainder',
@@ -747,7 +749,12 @@ class NDMath(object):
         # dim and dims keyword not accepted by the np function, so remove it
         kwargs.pop('dims', None)
         kwargs.pop('dim', None)
-        
+
+        # they may be a problem if some kwargs have units
+        for k,v in kwargs.items():
+            if hasattr(v, 'units'):
+                kwargs[k]=v.m
+
         # apply the numpy operator on the masked data
         arr = getattr(np, op)(self.masked_data, *args, **kwargs)
         
@@ -758,7 +765,7 @@ class NDMath(object):
         elif isinstance(arr, np.ndarray):
             new._data = arr
             new._mask = NOMASK
-        
+
         # particular case of functions that returns Dataset with no coordinates
         if axis is None and op in ['cumsum', 'cumprod']:
                 # delete all coordinates

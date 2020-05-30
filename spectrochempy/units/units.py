@@ -48,36 +48,8 @@ def _pretty_fmt_exponent(num):
 
 
 formats = {
-
-    'K': {  # spectrochempy Compact format.
-        'as_ratio': False,
-        'single_denominator': False,
-        'product_fmt': '.',  # TODO: Should this just be ''?
-        'division_fmt': '/',
-        'power_fmt': '{0}^{1}',
-        'parentheses_fmt': r'({0})',
-    },
-
-    'H': {  # spectrochempy HTML format.
-        'as_ratio': False,
-        'single_denominator': False,
-        'product_fmt': r'.',
-        'division_fmt': r'{0}/{1}',
-        'power_fmt': '{0}<sup>{1}</sup>',
-        'parentheses_fmt': r'{0}',
-    },
-
-    'L': {  # Latex format.
-        'as_ratio': False,
-        'single_denominator': True,
-        'product_fmt': r' \cdot ',
-        'division_fmt': r'\frac[{0}][{1}]',
-        'power_fmt': '{0}^[{1}]',
-        'parentheses_fmt': r'\left({0}\right)',
-    },
-
     'P': {  # Pretty format.
-        'as_ratio': False,
+        'as_ratio': False,  #True in pint
         'single_denominator': False,
         'product_fmt': '·',
         'division_fmt': '/',
@@ -85,6 +57,34 @@ formats = {
         'parentheses_fmt': '({})',
         'exp_call': _pretty_fmt_exponent,
     },
+    'L': {  # spectrochempy Latex format.
+        'as_ratio': False,   #True in pint
+        'single_denominator': True,
+        'product_fmt': r' \cdot ',
+        'division_fmt': r'\frac[{}][{}]',
+        'power_fmt': '{}^[{}]',
+        'parentheses_fmt': r'\left({}\right)',
+    },
+    'H': {  # spectrochempy HTML format.
+        'as_ratio': False,  #True in pint
+        'single_denominator': False,
+        'product_fmt': r'.',
+        'division_fmt': r'{}/{}',
+        'power_fmt': '{}<sup>{}</sup>',
+        'parentheses_fmt': r'{}',
+    },
+    'K': {  # spectrochempy Compact format.
+        'as_ratio': False,
+        'single_denominator': False,
+        'product_fmt': '.',
+        'division_fmt': '/',
+        'power_fmt': '{}^{}',
+        'parentheses_fmt': r'({})',
+    },
+
+
+
+
 
 }
 
@@ -101,19 +101,16 @@ setattr(Unit, 'scaling', property(lambda u: u._REGISTRY.Quantity(1., u._units).t
 
 # ----------------------------------------------------------------------------------------------------------------------
 def __format__(self, spec):
+    # modify Pint unit __format__
+
     spec = spec or self.default_format
 
     # special cases
-    if 'Lx' in spec:  # the LaTeX siunitx code
-
-        opts = ''
-        ustr = siunitx_format_unit(self)
-        ret = r'\si[%s]{%s}' % (opts, ustr)
-        return ret
+    if "Lx" in spec:  # the LaTeX siunitx code
+        return r"\si[]{%s}" % siunitx_format_unit(self)
 
     if '~' in spec or 'K' in spec or 'T' in spec or 'L' in spec:  # spectrochempy modified
         if self.dimensionless and 'absorbance' not in self._units:
-
             if self._units == 'ppm':
                 units = UnitsContainer({'ppm': 1})
             elif self._units == 'percent':
@@ -137,6 +134,10 @@ def __format__(self, spec):
         spec = spec.replace('~', '')
     else:
         units = self._units
+
+    if "H" in spec:
+        # HTML / Jupyter Notebook
+        return r"\[" + format(units, spec).replace(" ", r"\ ") + r"\]"
 
     return '%s' % (format(units, spec))
 
