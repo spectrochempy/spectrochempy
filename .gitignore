@@ -87,17 +87,6 @@ docs/_templates_old
 tests/figures
 /tests_extern_packages/
 
-# Unit test / coverage reports
-# ----------------------------------------------------------------------------------------------------------------------
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-coverage.xml
-*,cover
-cov/
-.coverage*
-
 # latex
 # ----------------------------------------------------------------------------------------------------------------------
 *.fdb_latexmk
@@ -178,3 +167,4 @@ recipe/pkg_folder
 ci.sh
 /docker/travisci/
 !/recipe/spectrochempy/conda-bld/
+.coverage
