@@ -1,0 +1,29 @@
+[run]
+branch = True
+omit =
+    # omit anything in
+    tests/*
+    spectrochempy/extern/*
+    docs/*
+    # omit this single file
+    setup.py
+    make.py
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    if self.debug:
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:
+
+ignore_errors = True

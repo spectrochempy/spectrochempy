@@ -64,7 +64,7 @@ test:
     - spectrochempy
 
 about:
-  home: "https://redmine.spectrochempy.fr"
+  home: "https://github.com/spectrochempy/spectrochempy"
   license: CeCILL-B
   license_family: OTHER
   summary: "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"

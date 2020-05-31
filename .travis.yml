@@ -45,11 +45,12 @@ install:
   - conda env create -q -f env/scpy-test-py$TRAVIS_PYTHON_VERSION.yml
   - conda activate scpy-test-py$TRAVIS_PYTHON_VERSION
   - conda info -a
+  - conda install coverage
   - conda update pytest
   - pip install .
 
 script:
-  - pytest --nodisplay
+  - coverage run -m pytest --nodisplay
 # -k "not test_example"
 
 after_success:
