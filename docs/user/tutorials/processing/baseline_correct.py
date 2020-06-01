@@ -25,7 +25,7 @@ import spectrochempy as scp
 import matplotlib.pyplot as plt  # will be used for some plots
 
 # %% [markdown]
-# Now let's import and plot a typical IR dataset:
+# Now let's import and plot a typical IR dataset which wase recorded during the removal of amonia from a NH4-Y zeolite:
 
 # %%
 X = scp.read_omnic("irdata//nh4y-activation.SPG")
@@ -43,32 +43,32 @@ subplot2 = Xdiff.plot()
 # %% [markdown]
 # ## 2. detrend
 #
-# Other simple baseline corrections - often use in preprocessing prior chemometric analysis - constist in shifting the spectra or removing a linear trend. This is done using the detrend() method, which is a wrapper of of the [detrend() method](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.detrend.html) from the [scipy.signal](https://docs.scipy.org/doc/scipy/reference/signal.html) module to which we refer the interested reader.
+# Other simple baseline corrections - often use in preprocessing prior chemometric analysis - constist in shifting the spectra or removing a linear trend. This is done using the detrend() method, which is a wrapper of the [detrend() method](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.detrend.html) from the [scipy.signal](https://docs.scipy.org/doc/scipy/reference/signal.html) module to which we refer the interested reader.
 
 # %%
-subplot3 = X.detrend().plot()                  # subtract linear trend of each spectrum (type='linear', default)
-subplot4 = X.detrend(type='constant').plot()   # subtract a constant to each spectrum
+subplot3 = X.detrend().plot()                  # subtract the linear trend of each spectrum (type='linear', default)
+subplot4 = X.detrend(type='constant').plot()   # subtract the average absorbance to each spectrum
 
 # %% [markdown]
 # ## 3. "Advanced" baseline correction
 #
 # 'Advanced' baseline correction basically consists for the user to choose:
 #
-# - spectral ranges which he/she considers as belonging to the base line
-# - the type of polynomial(s) used to intepolate the baseline in and between these regions (keyword: `interpolation`)
+# - spectral ranges which s/he considers as belonging to the base line
+# - the type of polynomial(s) used to model the baseline in and between these regions (keyword: `interpolation`)
 # - the method used to apply the correction to spectra: sequentially to each spectrum, or using a multivariate approach (keyword: `method`).
 #
 # ### 3.1. Range selection
 #
-# Each spectral range is defined by an array indicating the limits of the spectral ranges, e.g. `[4500., 3500.]` to select the 4500-3500 cm$^{-1}$ range. Note that the ordering  as no importance and using `[3500.0, 4500.]` would lead to exactly the same result. At present it is not possible to formally pick a signle wavenumber. For instance using `[3750.]` would lead to an error. A workaround is to repeat the wavenumber, for instance: `[3750.,3750.]`. 
+# Each spectral range is defined by an array indicating the limits of the spectral ranges, e.g. `[4500., 3500.]` to select the 4500-3500 cm$^{-1}$ range. Note that the ordering has no importance and using `[3500.0, 4500.]` would lead to exactly the same result. At present it is not possible to formally pick a single wavenumber. For instance using `[3750.]` would lead to an error. A workaround is to repeat the wavenumber, for instance: `[3750.,3750.]`. 
 #
-# After selection of the baseline ranges, the baseline correction can be made using this sequence of 2 commands (the 3rd onre is just used to plot the result): 
+# After selection of the baseline ranges, the baseline correction can be made using this sequence of 2 commands (the 3rd one will plot the result): 
 #
 
 # %%
-blc = scp.BaselineCorrection(X)  # initialize an instance od BaselineCorrection
+blc = scp.BaselineCorrection(X)  # initialize an instance of BaselineCorrection
 Xcorr = blc.compute([5900.0,5400.0], [4500.,4000.], [2100.,2000.0], [1550.,1555.])    # compute the corrected NDDataset 
-subplot5 = Xcorr.plot()
+subplot5 = Xcorr.plot()  # blc.corrected.plot() would lead to the same result
 
 # %% [markdown]
 # ### 3.2. Interpolation method
@@ -90,9 +90,9 @@ subplot6 = blc.corrected.plot()  # the 'corrected' attribute contains the correc
 #
 # The `method` option defines whether the selected baseline regions of the spectra should be taken 'as is' (this is the default `method='sequential'`), or modeled using a multivariate approach (`method='multivariate'`).
 #
-# The `'multivariate'` option is useful when the signal‐to‐noise ratio is low and/or when the baseline changes in various regions of the spectrum are correlated. It constist in (i) modeling the baseline regions by a principal component analysis (PCA), (ii) interpolate the loadings of the first principal components over the whole spectral and (iii) modeling the spectra baselines from the product of the PCA scores and the interpolated loadings. (for detail: see [Vilmin et al. Analytica Chimica Acta 891 (2015)](dx.doi.org/10.1016/j.aca.2015.06.006) and [Gemperline et al. J. Chemometrics, 13, 153–164 (1999)](https://doi.org/10.1002/(SICI)1099-128X(199903/04)13:2<153::AID-CEM534>3.0.CO;2-7)
+# The `'multivariate'` option is useful when the signal‐to‐noise ratio is low and/or when the baseline changes in various regions of the spectrum are correlated. It constist in (i) modeling the baseline regions by a principal component analysis (PCA), (ii) interpolate the loadings of the first principal components over the whole spectral and (iii) modeling the spectra baselines from the product of the PCA scores and the interpolated loadings. (for detail: see [Vilmin et al. Analytica Chimica Acta 891 (2015)](dx.doi.org/10.1016/j.aca.2015.06.006).
 #
-# If this option is selected, the user should also choose `npc`, the number of principal components used to model the baseline:
+# If this option is selected, the user should also choose `npc`, the number of principal components used to model the baseline. In a sense, this parameter has the same role as the `order` parameter, except tha it will affect how well the baseline fits the selected regions, but on *both dimensions: wavelength and acquision time*. In particular a large value of `npc` will lead to an overfit of baseline variation with time and will lead to the same result as the `sequential` method while a too small `value` would miss important pricipal component underlying the baseline change over time. Typical optimum values are `npc=2` or `npc=3` (see Exercises below).       
 
 # %%
 blc.compute(*ranges, interpolation='pchip', method='multivariate', npc=2)    # the use of * will unpack the elements of the list
@@ -100,7 +100,7 @@ subplot8 = blc.corrected.plot()  # the 'corrected' attribute contains the correc
 
 # %% [markdown]
 # ### 3.4 Code snippet for 'advanced' baseline correction
-# It can be useful in some instances to visualize the selected ranges to correct the baseline 'almost-interactively' (a truely interactive widget is under development !). This can be done using the [axvspan()](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.axvspan.html) method of the standard matplotlib library and the following code in uwhiche the user can change any of the parameters and look at the changes after re-running the cell:
+# It can be useful in some instances to visualize the selected ranges to correct the baseline 'almost-interactively' (a truely interactive widget is under development !). This can be done using the [axvspan()](https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.axvspan.html) method of the standard matplotlib library and the following code in which the user can change any of the parameters and look at the changes after re-running the cell:
 
 # %%
 # user defined parameters ------------------------

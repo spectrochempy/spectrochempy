@@ -38,7 +38,7 @@ import os
 # - `read_bruker_opus()` to open Opus (*.0, ...) files
 # - `read_jdx()` to open an IR JCAMP-DX datafile
 #
-# General purpose data exchange formats such as  \*.csv or \*.mat can also be read using:
+# General purpose data exchange formats such as  \*.csv or \*.mat will be treated in another tutorial (yet to come...) can also be read using:
 #
 # - `read_csv()` to open csv files
 # - `read_matlab()` to open .mat files
@@ -51,7 +51,7 @@ import os
 # - .spa files that handle single spectra
 # - .spg files which contain a group of spectra
 #
-# Both have been reverse engineered, hence allowing extracting key data. The Omnic reader of
+# Both have been reverse engineered, hence allowing extracting their key data. The Omnic reader of
 #  Spectrochempy (`read_omnic()`) has been developed based on posts in open forums on the .spa
 #  file format and extended to .spg file formats.
 #
@@ -119,7 +119,7 @@ print(X.units)
 #
 # - the `y` dimension contains:
 #
-#     - one coordinate mede of the 19 acquisition timestamps
+#     - one coordinate made of the 19 acquisition timestamps
 
 #
 
@@ -159,7 +159,7 @@ X.y
 # minutes of the last spectrum is:
 
 # %%
-tf = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
+tf = X[-1].y.data[0]  # the last items of an array can be refered by negative indexes
                       # the values of the Coord object are accessed through the `data` attribute 
                       # which is a ndarray, hence the final [0] to have the value:
 
@@ -242,7 +242,7 @@ print(X)
 # [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/
 # opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_opus()`)
 # of spectrochempy is essentially a wrapper of the python module
-# [brukeropusreader](https://github.com/qedsoftware/brukeropusreader) developed by QED. It imports absorbance
+# [brukeropusreader](https://github.com/spectrochempy/brukeropusreader) developed by QED. It imports absorbance
 # spectra (the AB block), acquisition times and name of spectra.
 #
 # The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence, one can open sample
