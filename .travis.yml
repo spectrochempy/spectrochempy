@@ -13,7 +13,6 @@ branches:
     - /^release/.*$/
     - /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
 
-
 # limit got clone depth to 50 commits
 git:
   depth: 50
@@ -23,6 +22,10 @@ addons:
   apt:
     packages:
       - xvfb
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=$CODECLIMATE_TEST_REPORTER_ID
 
 before_install:
   - export DISPLAY=':99.0'
@@ -49,9 +52,18 @@ install:
   - conda update pytest
   - pip install .
 
+# command to install dependencies
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
 script:
-  - coverage run -m pytest --nodisplay
-# -k "not test_example"
+  - coverage run -m pytest -k "not test_example" --nodisplay
+
+after_script:
+  - coverage xml
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
 
 after_success:
   - conda activate scpy-test-py$TRAVIS_PYTHON_VERSION
