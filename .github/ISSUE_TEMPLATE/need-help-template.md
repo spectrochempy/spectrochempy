@@ -1,6 +1,6 @@
 ---
-name: Need help template
-about: 'Ask for help '
+name: Need help
+about: 'Ask for help / Questions'
 title: ''
 labels: ''
 assignees: ''
