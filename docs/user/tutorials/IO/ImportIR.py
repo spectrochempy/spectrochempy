@@ -183,7 +183,7 @@ X.y
 # original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
-X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', order=False)
+X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', sortbydate=False)
 
 # %% [markdown]
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by
@@ -280,8 +280,7 @@ Z3['Optik']  # looks what is the Optik block:
 # AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in
 # Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details).
 #
-# The reader hase been essentially developed to read again the jcamp-dx files exported by spectrochempy
-# `write_jdx()` writer.
+# The JCAMP-DX reader of spectrochempy has been essentially written to read again the jcamp-dx files exported by spectrochempy `write_jdx()` writer.
 #
 # Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 
