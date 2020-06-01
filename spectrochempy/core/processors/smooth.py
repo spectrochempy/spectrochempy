@@ -36,7 +36,7 @@ def smooth(dataset, **kwargs):
         True if we make the transform inplace.  If False, the function return a new object
     len:  int, optional, default=11
         the dimension of the smoothing window; should be an odd integer
-    window : str, optional, default='hanning'
+    window_length : str, optional, default='hanning'
         the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
         flat window will produce a moving average smoothing.
 

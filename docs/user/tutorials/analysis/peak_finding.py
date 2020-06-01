@@ -19,7 +19,7 @@
 # This tutorial shows how to find peaks and determine peak maxima with spectrochempy. As prerequisite, the user is
 # expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),  [slicing](../process/slicing.ipynb) tutorials. 
 #
-# First lets import the modules that will be used in this tutorial
+# First lets import the modules that will be used in this tutorial .
 
 # %%
 import spectrochempy as scp           
