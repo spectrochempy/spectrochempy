@@ -11,6 +11,7 @@ NMRPipe file structure is described in the NMRPipe man pages and fdatap.h
 import struct
 import datetime
 import os
+
 try:
     from StringIO import StringIO
 except ImportError:
@@ -21,6 +22,7 @@ import numpy as np
 
 from . import fileiobase
 from .table import pipe2glue, glue2pipe, guess_pformat
+
 
 #########################
 # table reading/writing #
@@ -137,6 +139,7 @@ def write_table(filename, pcomments, pformats, rec, overwrite=False):
     f.close()
     return
 
+
 ###################
 # unit conversion #
 ###################
@@ -163,7 +166,7 @@ def make_uc(dic, data, dim=-1):
 
     """
     if dim == -1:
-        dim = data.ndim - 1     # last dimention
+        dim = data.ndim - 1  # last dimention
 
     fn = "FDF" + str(int(dic["FDDIMORDER"][data.ndim - 1 - dim]))
     size = float(data.shape[dim])
@@ -190,6 +193,7 @@ def make_uc(dic, data, dim=-1):
     car = orig + sw / 2. - sw / size
     return fileiobase.unit_conversion(size, cplx, sw, obs, car)
 
+
 ############################
 # dictionary/data creation #
 ############################
@@ -201,10 +205,11 @@ def create_data(data):
     """
     Create a NMRPipe data array (recast into float32 or complex64)
     """
-    if np.iscomplexobj(data):   # check quadrature
+    if np.iscomplexobj(data):  # check quadrature
         return np.array(data, dtype="complex64")
     else:
         return np.array(data, dtype="float32")
+
 
 ########################
 # universal dictionary #
@@ -233,7 +238,7 @@ def guess_udic(dic, data):
 
     # update default values
     for i in range(data.ndim):
-        udic[i]["size"] = data.shape[i]     # size from data shape
+        udic[i]["size"] = data.shape[i]  # size from data shape
 
         # determind NMRPipe axis name
         fn = "FDF" + str(int(dic["FDDIMORDER"][data.ndim - 1 - i]))
@@ -244,12 +249,12 @@ def guess_udic(dic, data):
         udic[i]["car"] = dic[fn + "CAR"] * dic[fn + "OBS"]  # ppm->hz
         udic[i]["label"] = dic[fn + "LABEL"]
 
-        if dic[fn + "QUADFLAG"] == 1:   # real data
+        if dic[fn + "QUADFLAG"] == 1:  # real data
             udic[i]["complex"] = False
         else:
             udic[i]["complex"] = True
 
-        if dic[fn + "FTFLAG"] == 0:     # time domain
+        if dic[fn + "FTFLAG"] == 0:  # time domain
             udic[i]["time"] = True
             udic[i]["freq"] = False
         else:
@@ -294,7 +299,7 @@ def create_dic(udic, datetimeobj=datetime.datetime.now()):
 
     """
     # create the blank dictionary
-    dic = create_empty_dic()    # create the empty dictionary
+    dic = create_empty_dic()  # create the empty dictionary
     dic = datetime2dic(datetimeobj, dic)  # add the datetime to the dictionary
 
     # fill global dictionary parameters
@@ -320,7 +325,7 @@ def create_dic(udic, datetimeobj=datetime.datetime.now()):
 
     if ((dic["FDF1QUADFLAG"] == dic["FDF2QUADFLAG"] == dic["FDF3QUADFLAG"]) and
             (dic["FDF1QUADFLAG"] == dic["FDF4QUADFLAG"] == 1)):
-                dic["FDQUADFLAG"] = 1.0
+        dic["FDQUADFLAG"] = 1.0
 
     return dic
 
@@ -365,7 +370,7 @@ def add_axis_to_dic(dic, adic, n):
 
     if n == 0 or dic["FD2DPHASE"] != 1:
         dic[fn + "CENTER"] = int(psize / 2.) + 1.
-    else:   # TPPI requires division by 4
+    else:  # TPPI requires division by 4
         dic[fn + "CENTER"] = int(psize / 4.) + 1
         osize = psize / 2.
 
@@ -476,6 +481,7 @@ def dic2datetime(dic):
     second = int(dic["FDSECS"])
     return datetime.datetime(year, month, day, hour, minute, second)
 
+
 ################
 # file reading #
 ################
@@ -531,7 +537,7 @@ def read(filename):
         return read_2D(filename)
     if dic["FDPIPEFLAG"] != 0:  # open streams
         return read_stream(filename)
-    if filemask is None:     # if no filemask open as 2D
+    if filemask is None:  # if no filemask open as 2D
         return read_2D(filename)
     if order == 3:
         return read_3D(filemask)
@@ -573,12 +579,12 @@ def read_lowmem(filename):
     order = dic["FDDIMCOUNT"]
 
     if order == 1:
-        return read_1D(filename)    # there is no 1D low memory option
+        return read_1D(filename)  # there is no 1D low memory option
     if order == 2:
         return read_lowmem_2D(filename)
     if dic["FDPIPEFLAG"] != 0:  # open streams
         return read_lowmem_stream(filename)
-    if filemask is None:    # if no filemask open as 2D
+    if filemask is None:  # if no filemask open as 2D
         return read_lowmem_2D(filename)
     if order == 3:
         return read_lowmem_3D(filemask)
@@ -596,9 +602,9 @@ def read_1D(filename):
     See :py:func:`read` for documentation.
 
     """
-    fdata, data = get_fdata_data(filename)   # get the fdata and data arrays
+    fdata, data = get_fdata_data(filename)  # get the fdata and data arrays
     dic = fdata2dic(fdata)  # convert the fdata block to a python dictionary
-    data = reshape_data(data, find_shape(dic))    # reshape data
+    data = reshape_data(data, find_shape(dic))  # reshape data
 
     # unappend imaginary data if needed
     if dic["FDF2QUADFLAG"] != 1:
@@ -614,9 +620,9 @@ def read_2D(filename):
     See :py:func:`read` for documentation.
 
     """
-    fdata, data = get_fdata_data(filename)   # get the fdata and data arrays
+    fdata, data = get_fdata_data(filename)  # get the fdata and data arrays
     dic = fdata2dic(fdata)  # convert the fdata block to a python dictionary
-    data = reshape_data(data, find_shape(dic))    # reshape data
+    data = reshape_data(data, find_shape(dic))  # reshape data
 
     # unappend imaginary data if needed
     if dic["FDTRANSPOSED"] == 1 and dic["FDF1QUADFLAG"] != 1:
@@ -685,7 +691,7 @@ def read_lowmem_3D(filemask):
     """
     if '%' not in filemask:  # data streams should be read with read_stream
         return read_lowmem_stream(filemask)
-    data = pipe_3d(filemask)    # create a new pipe_3d object
+    data = pipe_3d(filemask)  # create a new pipe_3d object
     dic = fdata2dic(get_fdata(filemask % (1)))
     return dic, data
 
@@ -724,12 +730,13 @@ def read_lowmem_4D(filemask):
     if '%' not in filemask:  # data streams should be read with read_stream
         return read_lowmem_stream(filemask)
 
-    data = pipe_4d(filemask)    # create a new pipe_3d object
+    data = pipe_4d(filemask)  # create a new pipe_3d object
     if data.singleindex:
         dic = fdata2dic(get_fdata(filemask % (1)))
     else:
         dic = fdata2dic(get_fdata(filemask % (1, 1)))
     return (dic, data)
+
 
 #####################
 # writing functions #
@@ -1111,7 +1118,7 @@ def write_slice_3D(filemask, dic, data, shape, slices):
             # file doesn't exist, create a empty one
             ndata = np.zeros((dy, dx), dtype=data.dtype)
             write_single(f, dic, data, False)
-            del(ndata)
+            del (ndata)
 
         # mmap the [new] file
         mdata = np.memmap(f, dtype='float32', offset=512 * 4, mode='r+')
@@ -1132,11 +1139,12 @@ def write_slice_3D(filemask, dic, data, shape, slices):
         if data.dtype == 'complex64':
             idata[sy, sx] = data.imag[i]
             idata.flush()
-            del(idata)
+            del (idata)
 
         # clean up
-        del(rdata)
-        del(mdata)
+        del (rdata)
+        del (mdata)
+
 
 # iter3D tools (xyz2pipe and pipe2xyz replacements)
 # Notes for iter3D implementation
@@ -1204,15 +1212,15 @@ def transpose_3D(dic, data, axes=(2, 1, 0)):
     Transpose pipe_3d object and dictionary
     """
     a1, a2, a3 = axes
-    rdic = dict(dic)    # create a copy of the dictionary
+    rdic = dict(dic)  # create a copy of the dictionary
 
     # transpose the data
     data = data.transpose((a1, a2, a3))
 
     # transpose the dictionary
-    s3 = "FDDIMORDER" + str(int(3 - a1))    # 3rd axis is 0th axis in data_nd
-    s2 = "FDDIMORDER" + str(int(3 - a2))    # 2nd axis is 1st axis in data_nd
-    s1 = "FDDIMORDER" + str(int(3 - a3))    # 1st axis is 3nd axis in data_nd
+    s3 = "FDDIMORDER" + str(int(3 - a1))  # 3rd axis is 0th axis in data_nd
+    s2 = "FDDIMORDER" + str(int(3 - a2))  # 2nd axis is 1st axis in data_nd
+    s1 = "FDDIMORDER" + str(int(3 - a3))  # 1st axis is 3nd axis in data_nd
 
     rdic["FDDIMORDER1"] = dic[s1]
     rdic["FDDIMORDER2"] = dic[s2]
@@ -1223,9 +1231,9 @@ def transpose_3D(dic, data, axes=(2, 1, 0)):
 
     # set the shape dictionary parameters
     fn = "FDF" + str(int(rdic["FDDIMORDER1"]))
-    if rdic[fn + "QUADFLAG"] != 1.0:   # last axis is complex
+    if rdic[fn + "QUADFLAG"] != 1.0:  # last axis is complex
         rdic["FDSIZE"] = data.shape[2] / 2.
-    else:   # last axis is singular
+    else:  # last axis is singular
         rdic["FDSIZE"] = data.shape[2]
 
     rdic["FDSLICECOUNT"] = data.shape[1]
@@ -1260,6 +1268,7 @@ class iter3D(object):
             ziter.write("ft/test%03d.ft3",XZplane,dic)
 
     """
+
     def __init__(self, filemask, in_lead="x", out_lead="DEFAULT"):
         """
         Create a iter3D object
@@ -1333,7 +1342,7 @@ class iter3D(object):
             self.idic, self.pipe_3d = transpose_3D(self.dic, self.pipe_3d,
                                                    (1, 2, 0))
             fn = "FDF" + str(int(self.idic["FDDIMORDER1"]))
-            if self.idic[fn + "QUADFLAG"] != 1.0:   # z axis is complex
+            if self.idic[fn + "QUADFLAG"] != 1.0:  # z axis is complex
                 self.needs_pack_complex = True
             else:
                 self.needs_pack_complex = False
@@ -1414,6 +1423,7 @@ class iter3D(object):
         # print("sx,sy,sz",sx,sy,sz)
         # print(dic["FDFILECOUNT"])
         write_slice_3D(filemask, dic, plane, shape, (sz, sy, sx))
+
 
 #####################
 # Shaping functions #
@@ -1506,6 +1516,7 @@ def append_data(data):
     """
     return np.concatenate((data.real, data.imag), axis=-1)
 
+
 ###################
 # fdata functions #
 ###################
@@ -1584,6 +1595,7 @@ def dic2fdata(dic):
 
     return fdata
 
+
 #################################
 # raw reading of data from file #
 #################################
@@ -1594,7 +1606,7 @@ def get_fdata(filename):
     Get an array of length 512-bytes holding NMRPipe header.
     """
     fdata = np.fromfile(filename, 'float32', 512)
-    if fdata[2] - 2.345 > 1e-6:    # fdata[2] should be 2.345
+    if fdata[2] - 2.345 > 1e-6:  # fdata[2] should be 2.345
         fdata = fdata.byteswap()
     return fdata
 
@@ -1617,6 +1629,7 @@ def get_fdata_data(filename):
     if data[2] - 2.345 > 1e-6:  # check for byteswap
         data = data.byteswap()
     return data[:512], data[512:]
+
 
 ##############################################
 # low memory numpy.ndarray emulating objects #
@@ -1707,7 +1720,7 @@ class pipe_2d(fileiobase.data_nd):
 
         # finalize
         self.fshape = tuple(fshape)
-        self.__setdimandshape__()   # set ndim and shape attributes
+        self.__setdimandshape__()  # set ndim and shape attributes
 
     def __fcopy__(self, order):
         """
@@ -1740,6 +1753,7 @@ class pipe_2d(fileiobase.data_nd):
             out[yi] = trace[sX]
         f.close()
         return out
+
 
 # There are two types of NMRPipe 3D files:
 # 1) streams which are single file data sets made with xyz2pipe.
@@ -1792,10 +1806,10 @@ class pipe_3d(fileiobase.data_nd):
         # find the length of the third dimension
         f3 = "FDF" + str(int(dic["FDDIMORDER3"]))
         quadrature_factor = [2, 1][int(dic[f3 + 'QUADFLAG'])]
-        
-        #Checking whether "nmrPipe -fn EXT ..." has been applied to z-dim or not.
-        #If EXT has been applied, FDF*XN is not zero.
-        #If z-dim is in time-domain, data-size given by FDF*X1 and FDF*XN has to be doubled.
+
+        # Checking whether "nmrPipe -fn EXT ..." has been applied to z-dim or not.
+        # If EXT has been applied, FDF*XN is not zero.
+        # If z-dim is in time-domain, data-size given by FDF*X1 and FDF*XN has to be doubled.
         if dic[f3 + 'FTFLAG']:
 
             if int(dic[f3 + 'XN']) == 0:
@@ -1807,9 +1821,9 @@ class pipe_3d(fileiobase.data_nd):
             if int(dic[f3 + 'XN']) == 0:
                 lenZ = int(dic[f3 + 'TDSIZE'] * quadrature_factor)
             else:
-                lenZ = 2*(int(dic[f3 + 'XN']) - int(dic[f3 + 'X1']) + 1)
-                
-        fshape.insert(0, lenZ)   # insert as leading size of fshape
+                lenZ = 2 * (int(dic[f3 + 'XN']) - int(dic[f3 + 'X1']) + 1)
+
+        fshape.insert(0, lenZ)  # insert as leading size of fshape
 
         # check that all files exist if fcheck is set
         if fcheck:
@@ -1887,6 +1901,7 @@ class pipestream_3d(fileiobase.data_nd):
         Ordering of axes against file.
 
     """
+
     def __init__(self, filename, order=(0, 1, 2)):
         """
         Create and set up object
@@ -1915,7 +1930,7 @@ class pipestream_3d(fileiobase.data_nd):
         self.filename = filename
         self.order = order
         self.fshape = tuple(fshape)
-        self.__setdimandshape__()   # set ndim and shape attributes
+        self.__setdimandshape__()  # set ndim and shape attributes
 
     def __fcopy__(self, order):
         """
@@ -1951,6 +1966,7 @@ class pipestream_3d(fileiobase.data_nd):
         f.close()
         return out
 
+
 # There are three types of NMRPipe 4D files:
 # 1) streams which are single file data sets made with xyz2pipe.
 # 2) single index multiple file data sets, named test%03d.ft4, etc.
@@ -1982,6 +1998,7 @@ class pipe_4d(fileiobase.data_nd):
         set exist.  Raises a IOError if files are missing. Default is False.
 
     """
+
     def __init__(self, filemask, order=(0, 1, 2, 3), fcheck=False):
         """
         Create and set up object, check that files exist if fcheck is True
@@ -2013,7 +2030,7 @@ class pipe_4d(fileiobase.data_nd):
             lenZ = int(dic[f3 + 'FTSIZE'] * quadrature_factor)
         else:
             lenZ = int(dic[f3 + 'TDSIZE'] * quadrature_factor)
-        fshape.insert(0, lenZ)   # insert as leading size of fshape
+        fshape.insert(0, lenZ)  # insert as leading size of fshape
 
         # find the length of the fourth dimension
         f4 = "FDF" + str(int(dic["FDDIMORDER4"]))
@@ -2022,7 +2039,7 @@ class pipe_4d(fileiobase.data_nd):
             lenA = int(dic[f4 + 'FTSIZE'] * quadrature_factor)
         else:
             lenA = int(dic[f4 + 'TDSIZE'] * quadrature_factor)
-        fshape.insert(0, lenA)   # insert as leading size of fshape
+        fshape.insert(0, lenA)  # insert as leading size of fshape
 
         # check that all files exist if fcheck is set
         if fcheck:
@@ -2049,7 +2066,7 @@ class pipe_4d(fileiobase.data_nd):
         self.filemask = filemask
         self.order = order
         self.fshape = fshape
-        self.__setdimandshape__()   # set ndim and shape attributes
+        self.__setdimandshape__()  # set ndim and shape attributes
 
     def __fcopy__(self, order):
         """
@@ -2080,9 +2097,9 @@ class pipe_4d(fileiobase.data_nd):
         # read in the data file by file, trace by trace
         for ai, a in enumerate(ach):
             for zi, z in enumerate(zch):
-                if self.singleindex:   # single index
+                if self.singleindex:  # single index
                     f = open(self.filemask % (a * lenZ + z + 1), 'rb')
-                else:   # two index
+                else:  # two index
                     f = open(self.filemask % (a + 1, z + 1), 'rb')
                 for yi, y in enumerate(ych):
                     ntrace = y
@@ -2142,7 +2159,7 @@ class pipestream_4d(fileiobase.data_nd):
 
         # finalize
         self.fshape = tuple(fshape)
-        self.__setdimandshape__()   # set ndim and shape attributes
+        self.__setdimandshape__()  # set ndim and shape attributes
 
     def __fcopy__(self, order):
         """
@@ -2181,6 +2198,7 @@ class pipestream_4d(fileiobase.data_nd):
                     out[ai, zi, yi] = trace[sX]
         f.close()
         return out
+
 
 # data, see fdata.h
 fdata_nums = {

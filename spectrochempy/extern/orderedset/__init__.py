@@ -33,9 +33,9 @@ def is_iterable(obj):
     have an `__iter__` attribute anyway.
     """
     return (
-        hasattr(obj, "__iter__")
-        and not isinstance(obj, str)
-        and not isinstance(obj, tuple)
+            hasattr(obj, "__iter__")
+            and not isinstance(obj, str)
+            and not isinstance(obj, tuple)
     )
 
 

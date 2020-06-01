@@ -9,20 +9,15 @@
 
 from spectrochempy import *
 
-def test_script():
 
-    x = Script('name','print(2)')
+def test_script():
+    x = Script('name', 'print(2)')
     print(x.name)
 
     try:
         x = Script('0name', 'print(3)')
     except:
         print('name not valid')
-
-
-
-
-
 
 
 # ======================================================================================================================

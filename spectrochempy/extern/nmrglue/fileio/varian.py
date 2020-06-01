@@ -29,6 +29,7 @@ import numpy as np
 
 from . import fileiobase
 
+
 ############################
 # dictionary/data creation #
 ############################
@@ -39,6 +40,7 @@ def create_data(data):
     Create a Agilent/Varian data array (recast into complex64 array)
     """
     return np.array(data, dtype="complex64")
+
 
 ########################
 # universal dictionary #
@@ -86,7 +88,7 @@ def create_dic(udic):
     dic : dict
         Dictionary of Agilent/Varian parameters
     """
-    ddic = udic[udic["ndim"] - 1]   # direct dimension dictionary
+    ddic = udic[udic["ndim"] - 1]  # direct dimension dictionary
 
     # number of points in direct dimension is R+I
     if ddic["complex"]:
@@ -125,7 +127,7 @@ def create_dic(udic):
     dic["tbytes"] = 4 * num_points
     dic["bbytes"] = dic["tbytes"] + 28
     dic["vers_id"] = 0
-    dic["status"] = 201     # 6th bit set
+    dic["status"] = 201  # 6th bit set
     dic["nbheaders"] = 1
 
     # fake procpar dictionary
@@ -181,7 +183,7 @@ def create_pdic_param(name, values):
     dic["basictype"] = '1'
     dic["enumerable"] = '0'
     dic["intptr"] = '64'
-    dic["maxvalue"] = '32767'   # 2^15-1
+    dic["maxvalue"] = '32767'  # 2^15-1
     dic["minvalue"] = '0'
     dic["name"] = name
     dic["protection"] = '0'
@@ -189,6 +191,7 @@ def create_pdic_param(name, values):
     dic["subtype"] = '7'
     dic["values"] = values
     return dic
+
 
 ########################
 # file reading/writing #
@@ -331,7 +334,7 @@ def read_lowmem(dir=".", fid_file="fid", procpar_file="procpar",
     if shape is None:
         shape = find_shape(pdic)
 
-    if torder is None:    # always try to find trace order
+    if torder is None:  # always try to find trace order
         torder = find_torder(pdic, shape)
 
     # read in the fid file
@@ -440,6 +443,7 @@ def write_lowmem(dir, dic, data, fid_file="fid", procpar_file="procpar",
     write_procpar(os.path.join(dir, procpar_file), dic["procpar"], overwrite)
 
     return
+
 
 ############
 # ordering #
@@ -941,7 +945,7 @@ def write_fid(filename, dic, data, torder='flat', repack=False, correct=True,
             trace = np.array(interleave_data(data[i]), dtype=dt)
             put_block(f, trace, dic["nbheaders"], bh)
 
-    else:   # create a generic blockheader
+    else:  # create a generic blockheader
         bh = dic2blockheader(make_blockheader(dic, 1))
         for i in range(data.shape[0]):
             bh[2] = int(i + 1)
@@ -1027,7 +1031,7 @@ def write_fid_lowmem(filename, dic, data, torder='f', repack=False,
             trace = np.array(interleave_data(data[tup]), dtype=dt)
             put_block(f, trace, dic["nbheaders"], bh)
 
-    else:   # create a generic blockheader
+    else:  # create a generic blockheader
         bh = dic2blockheader(make_blockheader(dic, 1))
         for ntrace in range(nblocks):
             bh[2] = int(ntrace + 1)
@@ -1122,7 +1126,7 @@ def get_block(f, pts, nbheaders, dt, read_blockhead=False):
         trace = get_trace(f, pts, dt)
         return trace
 
-    else:   # read the block headers
+    else:  # read the block headers
         dic = dict()
         if nbheaders >= 1:
             dic.update(blockheader2dic(get_blockheader(f)))
@@ -1224,7 +1228,7 @@ def get_block_ntraces(f, ntraces, pts, nbheaders, dt, read_blockhead=False):
             skip_blockheader(f)
         trace = get_trace(f, pts * ntraces, dt)
         return trace.reshape(ntraces, pts)
-    else:   # read the blockheaders
+    else:  # read the blockheaders
         dic = dict()
         # read the headers
         if nbheaders >= 1:
@@ -1713,6 +1717,7 @@ def dic2fileheader(dic):
 
     return head
 
+
 ##################
 # misc functions #
 ##################
@@ -1749,7 +1754,7 @@ def find_shape(pdic):
     # this edge case to the user.
     if "array" in pdic:
         array_name = pdic['array']['values'][0]
-        array_name = array_name.split(',')[-1]   # keep only innermost array
+        array_name = array_name.split(',')[-1]  # keep only innermost array
         if array_name.startswith('phase') is False and array_name in pdic:
             shape.insert(0, len(pdic[array_name]["values"]))
 
@@ -1772,7 +1777,7 @@ def find_shape(pdic):
 
     # assume we have NMR data
     if "ni" in pdic:
-        multi = 2       # assume R+I in cases where no phase parameter.
+        multi = 2  # assume R+I in cases where no phase parameter.
         if "phase" in pdic:
             multi = len(pdic["phase"]["values"])
         s = max(int(pdic["ni"]["values"][0]), 1)
@@ -1860,6 +1865,7 @@ def interleave_data(data_in):
     data_out[..., 1::2] = data_in.imag
     return data_out
 
+
 ###########################
 # procpar reading/writing #
 ###########################
@@ -1911,9 +1917,9 @@ def get_parameter(f):
     num = int(line.split()[0])
     values = []
 
-    if dic["basictype"] == "1":     # real values, only one line
+    if dic["basictype"] == "1":  # real values, only one line
         values = line.split()[1:]
-    elif dic["basictype"] == "2":   # strings, may have multiple lines
+    elif dic["basictype"] == "2":  # strings, may have multiple lines
         values.append(line.split("\"")[1])  # split on "s
         for i in range(num - 1):
             values.append(f.readline().decode().split("\"")[1])
@@ -1925,9 +1931,9 @@ def get_parameter(f):
     dic["enumerable"] = line.split()[0]
 
     if dic["enumerable"] != "0":
-        if dic["basictype"] == "1":     # reals
+        if dic["basictype"] == "1":  # reals
             dic["enumerables"] = line.split()[1:]
-        elif dic["basictype"] == "2":   # strings
+        elif dic["basictype"] == "2":  # strings
             dic["enumerables"] = line.split("\"")[1::2]
 
     return dic
@@ -1950,13 +1956,13 @@ def write_procpar(filename, dic, overwrite=False):
               d["active"], d["intptr"], file=f)
 
         # print out the next line(s) (and more if strings)
-        if d["basictype"] == "1":   # real values, one line
+        if d["basictype"] == "1":  # real values, one line
             print(len(d["values"]), end=' ', file=f)  # don't end the line
             for value in d["values"]:
-                print(value, end=' ', file=f)    # still not yet
-            print("", file=f)   # now end the line
+                print(value, end=' ', file=f)  # still not yet
+            print("", file=f)  # now end the line
 
-        elif d["basictype"] == "2":     # strings, may have multiple lines
+        elif d["basictype"] == "2":  # strings, may have multiple lines
             print(len(d["values"]), end=' ', file=f)  # don't end the line
             for value in d["values"]:
                 # now end the line (for each string)
@@ -1971,16 +1977,18 @@ def write_procpar(filename, dic, overwrite=False):
                     print(e, end=' ', file=f)
                 elif d["basictype"] == "2":  # strings
                     print('"' + e + '"', end=' ', file=f)
-        print("", file=f)   # end the enumerable line
+        print("", file=f)  # end the enumerable line
 
     f.close()
 
     return
 
+
 subtypes = ["undefined", "real", "string", "delay", "flag", "frequency",
             "pulse", "integer"]
 
 basictypes = ["undefined", "real", "string"]
+
 
 ############################################
 # low memory numpy.ndarray emulating class #
@@ -2011,6 +2019,7 @@ class fid_nd(fileiobase.data_nd):
         ordering.
 
     """
+
     def __init__(self, filename, i2t_func, fshape=None, order=None):
         """
         Create and set up object.
@@ -2048,7 +2057,7 @@ class fid_nd(fileiobase.data_nd):
         self.i2t = i2t_func
         self.fshape = fshape
         self.order = order
-        self.__setdimandshape__()   # set ndim and shape attributes
+        self.__setdimandshape__()  # set ndim and shape attributes
 
     def __fcopy__(self, order):
         """
@@ -2079,10 +2088,8 @@ class fid_nd(fileiobase.data_nd):
         out = np.empty(tuple(osize), dtype=self.dtype)
 
         with open(self.filename, 'rb') as f:
-
             # read in the data trace by trace
             for out_index, in_index in nd_iter:
-
                 # determine the trace number from the index
                 ntrace = self.i2t(ffshape, in_index)
 

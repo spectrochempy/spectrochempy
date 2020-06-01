@@ -30,7 +30,7 @@ from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
 def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     # initialisation with null array
 
-    d0 = NDArray(description = 'testing ndarray')
+    d0 = NDArray(description='testing ndarray')
 
     assert d0.implements('NDArray')
     assert d0.implements() == 'NDArray'
@@ -112,7 +112,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d3.ndim == 2
     assert d3.dims == ['y', 'x']
     assert d3.units == 'tesla'
-    info_('\n',d3)
+    info_('\n', d3)
 
     # initialisation with a sequence
 
@@ -139,15 +139,15 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert_array_equal(d6.data, refarray)
     assert d6.data is ndarraymask.data  # by default we do not copy
     assert d6.is_masked
-    assert_array_equal(d6.mask,refmask)
-    assert d6.mask is ndarraymask.mask # no copy by default
+    assert_array_equal(d6.mask, refmask)
+    assert d6.mask is ndarraymask.mask  # no copy by default
 
     # initialization with an NDArray object with copy
     d7 = NDArray(ndarraymask, copy=True)
     assert_array_equal(d7.data, refarray)
     assert d7.data is not ndarraymask.data  # by default we do not copy
-    assert_array_equal(d7.mask,refmask)
-    assert d7.mask is not ndarraymask.mask # no copy by default
+    assert_array_equal(d7.mask, refmask)
+    assert d7.mask is not ndarraymask.mask  # no copy by default
 
     # initialisation with a sequence and a mask
 
@@ -156,7 +156,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d0mask.is_masked
     assert d0mask.mask.shape == d0mask.shape
     info_('\n', d0mask)
-    info_('\n',repr(d0mask))
+    info_('\n', repr(d0mask))
 
     # initialisation with a sequence and a mask
 
@@ -180,16 +180,16 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     d9 = NDArray(labels='a b c d e f g h i j'.split(), title='labeled')
     assert d9.is_labeled
     info_('\n', d9)
-    
+
     # fortran order
     x = ndarraymask.copy()
     x.asfortranarray()
     d10 = NDArray(x)
     assert d10 == x
     assert d10.data.flags['F_CONTIGUOUS']
-    
-def test_ndarray_copy():
 
+
+def test_ndarray_copy():
     d0 = NDArray(np.linspace(4000, 1000, 10),
                  labels='a  b  c  d  e  f  g  h  i  j'.split(),
                  units='s',
@@ -225,11 +225,12 @@ def test_ndarray_copy():
     d3 = deepcopy(d0)
     assert d3 == d0
 
+
 def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion):
     # test comparison
 
     nd1 = ndarray.copy()
-    
+
     assert nd1 == ndarray
     assert nd1 is not ndarray
 
@@ -246,30 +247,32 @@ def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion
     assert nd4 == ndarrayquaternion
 
     assert nd1 != 'xxxx'
-    
+
     nd2n = nd2.to(None, force=True)
     assert nd2n != nd2
 
+
 def test_ndarray_to_pandas(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion):
     import pandas as pd
-    
+
     nd = ndarray[0].squeeze()
     p = nd.to_pandas()
     info_(p)
     assert isinstance(p, pd.Index)
-    
+
     nd.units = 'km'
     p = nd.to_pandas()
     info_(p)
     assert isinstance(p, pd.MultiIndex)
-    
+
     nd = ndarray.copy()
-    with pytest.raises(NotImplementedError):  #TODO: implement this
+    with pytest.raises(NotImplementedError):  # TODO: implement this
         p = nd.to_pandas()
-    
+
     with pytest.raises(ValueError):
         nd = NDArray()
         nd.to_pandas()
+
 
 def test_ndarray_sort():
     # labels and sort
@@ -319,14 +322,13 @@ def test_ndarray_sort():
 
 
 def test_ndarray_methods(refarray, ndarray, ndarrayunit):
-
     ref = refarray
     nd = ndarray.copy()
     assert nd.data.size == ref.size
     assert nd.shape == ref.shape
     assert nd.size == ref.size
     assert nd.ndim == 2
-    assert nd.data[1, 1] == ref[1,1]
+    assert nd.data[1, 1] == ref[1, 1]
     assert nd.dims == ['y', 'x']
     assert nd.unitless  # no units
     assert not nd.dimensionless  # no unit so dimensionless has no sense
@@ -462,19 +464,18 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     # test iter
     for i, item in enumerate(ndd):
         assert item == ndd[i]
-        
+
     ndz = NDArray()
     assert not list(item for item in ndz)
-    
+
     assert str(ndz) == repr(ndz) == 'NDArray: empty (size: 0)'
-    
-    
+
+
 ################
 # TEST SLICING #
 ################
 
 def test_ndarray_slicing(refarray, ndarray):
-
     ref = refarray
     nd = ndarray.copy()
     assert not nd.is_masked
@@ -493,9 +494,9 @@ def test_ndarray_slicing(refarray, ndarray):
     assert isinstance(nd1.data, np.ndarray)
     assert isinstance(nd1.values, TYPE_FLOAT)
 
-    nd1b, id = nd.__getitem__((0,0), return_index=True)
+    nd1b, id = nd.__getitem__((0, 0), return_index=True)
     assert nd1b == nd1
-    
+
     nd1a = nd[0, 0:2]
     assert_equal(nd1a.data, nd.data[0:1, 0:2])
     assert nd1a is not nd[0, 0:2]
@@ -506,7 +507,7 @@ def test_ndarray_slicing(refarray, ndarray):
     assert nd1a.dims == ['y', 'x']
 
     # returning none if empty when slicing
-    nd1b = nd[11:,11:]
+    nd1b = nd[11:, 11:]
     assert nd1b is None
 
     # nd has been changed, restore it before continuing
@@ -563,14 +564,13 @@ def test_ndarray_slicing(refarray, ndarray):
 
 
 def test_dim_names_specified(refarray, ndarray):
-
     ref = refarray
     nd = ndarray.copy()
     assert not nd.is_masked
     assert nd.dims == ['y', 'x']
 
-    #set dim names
-    nd.dims = ['t','y']
+    # set dim names
+    nd.dims = ['t', 'y']
 
     info_(nd)
     assert nd.dims == ['t', 'y']
@@ -585,7 +585,7 @@ def test_ndarray_slice_labels():
     d0 = NDArray(labels='a b c d e f g h i j'.split(),
                  title='labelled')
     assert d0.is_labeled
-    info_('\n',repr(d0))
+    info_('\n', repr(d0))
     info_("\n", d0)
 
     assert d0.ndim == 1
@@ -649,4 +649,3 @@ def test_ndarray_bug_13(ndarrayunit):
 
     with pytest.raises(DimensionalityError):
         nd[0] = Quantity('10 cm')
-

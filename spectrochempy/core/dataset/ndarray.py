@@ -65,6 +65,7 @@ DEFAULT_DIM_NAME = list('xyzuvwpqrstijklmnoabcdefgh')[::-1]
 
 numpyprintoptions()
 
+
 # ======================================================================================================================
 # The basic NDArray class
 # ======================================================================================================================
@@ -93,14 +94,14 @@ class NDArray(HasTraits):
     _data = Array(allow_none=True)
     _dtype = Instance(np.dtype, allow_none=True)
     _dims = List(Unicode())
-    _mask = Union((Bool(), Array(Bool()), Instance(MaskedConstant) ))
+    _mask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
     _labels = Array(allow_none=True)
     _units = Instance(Unit, allow_none=True)
 
     # metadata
     _meta = Instance(Meta, allow_none=True)
     _origin = Unicode()
-    
+
     # Basic NDArray setting
     _copy = Bool(False)  # by defaults we do not copy the data
     # which means that if the same numpy array
@@ -244,7 +245,7 @@ class NDArray(HasTraits):
     def __eq__(self, other, attrs=None):
 
         eq = True
-        
+
         if not isinstance(other, NDArray):
             # try to make some assumption to make useful comparison.
             if isinstance(other, Quantity):
@@ -263,13 +264,13 @@ class NDArray(HasTraits):
             else:
                 return False
             return eq
-        
+
         if attrs is None:
             attrs = self.__dir__()
-        
-        #if 'title' in attrs:
+
+        # if 'title' in attrs:
         #    attrs.remove('title')  #TODO: should we use title for comparison?
-        
+
         if 'name' in attrs:
             attrs.remove('name')
 
@@ -300,10 +301,10 @@ class NDArray(HasTraits):
                     oattr = other._units
                     if oattr is None:
                         oattr = ur.dimensionless
-                        
+
                     eq &= np.all(sattr == oattr)
                     if not eq:
-                        #debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                        # debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
                         return False
                 else:
                     return False
@@ -463,7 +464,7 @@ class NDArray(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
     # Default setting
     # ------------------------------------------------------------------------------------------------------------------
-    
+
     # ..................................................................................................................
     @default('_data')
     def _data_default(self):
@@ -548,7 +549,7 @@ class NDArray(HasTraits):
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
-            #debug_("init data with data from another NDArray object")
+            # debug_("init data with data from another NDArray object")
             for attr in self.__dir__():
                 try:
                     val = getattr(data, f"_{attr}")
@@ -560,22 +561,22 @@ class NDArray(HasTraits):
                     pass
 
         elif HAS_PANDAS and isinstance(data, NDFrame):  # pandas object
-            #debug_("init data with data from pandas NDFrame object")
+            # debug_("init data with data from pandas NDFrame object")
             self._data = data.values
 
         elif HAS_PANDAS and isinstance(data, Index):  # pandas index object
-            #debug_("init data with data from a pandas Index")
+            # debug_("init data with data from a pandas Index")
             self._data = data.values
             self._title = data.name
 
         elif isinstance(data, Quantity):
-            #debug_("init data with data from a Quantity object")
+            # debug_("init data with data from a Quantity object")
             self._data = np.array(data.magnitude, subok=True, copy=self._copy)
             self._units = data.units
 
         elif hasattr(data, 'mask'):
             # an object with data and mask attributes
-            #debug_("mask detected - initialize a mask from the passed data")
+            # debug_("mask detected - initialize a mask from the passed data")
             self._data = np.array(data.data, subok=True,
                                   copy=self._copy)
             if isinstance(data.mask, np.ndarray) and \
@@ -623,7 +624,7 @@ class NDArray(HasTraits):
         
         The name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension.
         """
-        
+
         ndim = self.ndim
         if ndim > 0:
             # if len(self._dims)< ndim:
@@ -637,9 +638,9 @@ class NDArray(HasTraits):
     @dims.setter
     def dims(self, values):
 
-        if isinstance(values, str) and len(values)==1:
+        if isinstance(values, str) and len(values) == 1:
             values = [values]
-            
+
         if not is_sequence(values) or len(values) != self.ndim:
             raise ValueError(f'a sequence of chars with a length of {self.ndim} is expected, but `{values}` '
                              f'has been provided')
@@ -650,7 +651,6 @@ class NDArray(HasTraits):
                                  f"{DEFAULT_DIM_NAME[::-1]}.")
 
         self._dims = tuple(values)
-
 
     # ..................................................................................................................
     @property
@@ -688,9 +688,9 @@ class NDArray(HasTraits):
         """
         if self.data is None:
             return None
-    
+
         return self.data.dtype.itemsize
-    
+
     # ..................................................................................................................
     @property
     def labels(self):
@@ -707,7 +707,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @labels.setter
     def labels(self, labels):
-        
+
         if labels is None:
             return
 
@@ -762,7 +762,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @mask.setter
     def mask(self, mask):
-        
+
         if mask is NOMASK or mask is MASKED:
             pass
         elif isinstance(mask, (np.bool_, bool)):
@@ -807,10 +807,10 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @meta.setter
     def meta(self, meta):
-        
+
         if meta is not None:
             self._meta.update(meta)
-            
+
     # ..................................................................................................................
     @property
     def origin(self):
@@ -818,7 +818,7 @@ class NDArray(HasTraits):
         str - origin of the data
         """
         return self._origin
-    
+
     # ..................................................................................................................
     @origin.setter
     def origin(self, origin):
@@ -842,7 +842,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @title.setter
     def title(self, title):
-        
+
         if title:
             self._title = title
 
@@ -863,10 +863,10 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @name.setter
     def name(self, name):
-        
+
         if name:
             if self._name:
-                #debug_("Overwriting current name")
+                # debug_("Overwriting current name")
                 pass
             self._name = name
 
@@ -882,7 +882,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @units.setter
     def units(self, units):
-        
+
         if units is None:
             return
         if isinstance(units, str):
@@ -945,7 +945,7 @@ class NDArray(HasTraits):
         bool - True is the name has been defined
 
         """
-        return not(self.name == self.id)
+        return not (self.name == self.id)
 
     # ..................................................................................................................
     @property
@@ -979,13 +979,13 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     @property
-    def  is_1d(self):
+    def is_1d(self):
         """
         bool - True if the `data` array has only one dimension
 
         """
         return self.ndim == 1
-    
+
     # ..................................................................................................................
     @property
     def is_empty(self):
@@ -1171,7 +1171,7 @@ class NDArray(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------------------------------------------------------
-    
+
     # ..................................................................................................................
     def asfortranarray(self):
 
@@ -1265,10 +1265,10 @@ class NDArray(HasTraits):
         allows_none = kwargs.get('allows_none', False)
         if axis is None and dims is None and allows_none:
             return None, None
-        axis = axis[0] if axis else -1 # None
+        axis = axis[0] if axis else -1  # None
         dim = self.dims[axis]
         if axis is not None and kwargs.get('negative_axis', False):
-            if axis>=0:
+            if axis >= 0:
                 axis = axis - self.ndim
         return axis, dim
 
@@ -1404,7 +1404,7 @@ class NDArray(HasTraits):
             s = np.array(new.shape)
             dims = np.argwhere(s == 1).squeeze().tolist()
         axis = self._get_dims_index(dims)
-        #debug_(f"axis:{axis}<-dims:{dims}")
+        # debug_(f"axis:{axis}<-dims:{dims}")
 
         # recompute new dims
         for i in axis[::-1]:
@@ -1532,7 +1532,7 @@ class NDArray(HasTraits):
             units = ur.Unit(other)
         if self.has_units:
             try:
-                if new.origin in ['bruker',]:
+                if new.origin in ['bruker', ]:
                     # its nmr data
                     set_nmr_context(new.meta.larmor)
                     with ur.context('nmr'):
@@ -1575,18 +1575,18 @@ class NDArray(HasTraits):
             import pandas as pd
         else:
             raise ImportError('Cannot perform this conversion as Pandas is not installed.')
-    
+
         if self.is_empty and not self.is_labeled:
             raise ValueError('no valid index for a 0-dimensional object.')
-    
-        if self.ndim==1:
+
+        if self.ndim == 1:
             if self.has_units:
-                out = pd.MultiIndex.from_product([[str(self.units)],self.data], names=['units', self.title])
+                out = pd.MultiIndex.from_product([[str(self.units)], self.data], names=['units', self.title])
             else:
                 out = pd.Index(self.data, name=self.title)
         else:
             raise NotImplementedError('Not yet implemented')
-        
+
         return out
 
     # ..................................................................................................................
@@ -1633,7 +1633,7 @@ class NDArray(HasTraits):
 
         return new
 
-    def astype(self, dtype=None,  **kwargs):
+    def astype(self, dtype=None, **kwargs):
         """
         Cast the data to a specified type.
     
@@ -1645,7 +1645,7 @@ class NDArray(HasTraits):
         """
         self.data = self.data.astype(dtype, **kwargs)
         return self
-    
+
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -1819,13 +1819,13 @@ class NDArray(HasTraits):
                                  f'(current ndim:{self.ndim})')
 
         if self.is_empty and not self.is_labeled:
-                
-                raise IndexError(f'Could not find this location: {loc} on an empty array')
-        
+
+            raise IndexError(f'Could not find this location: {loc} on an empty array')
+
         else:
-            
+
             data = self._data
-    
+
             if is_number(loc):
                 # get the index of a given values
                 error = None
@@ -1839,7 +1839,7 @@ class NDArray(HasTraits):
                     return index
                 else:
                     return index, error
-            
+
             elif is_sequence(loc):
                 # TODO: is there a simpler way to do this with numpy functions
                 index = []
@@ -1847,7 +1847,7 @@ class NDArray(HasTraits):
                     index.append((np.abs(data - l)).argmin())
                     # TODO: add some precison to this result
                 return index
-    
+
             elif isinstance(loc, datetime):
                 # not implemented yet
                 raise NotImplementedError("datetime as location is not yet impemented")  # TODO: date!

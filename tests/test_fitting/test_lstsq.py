@@ -18,12 +18,11 @@ import matplotlib.pyplot as plt
 
 # ............................................................................
 def test_lstsq_from_scratch():
-
-    t = sc.NDDataset(data = [0, 1, 2, 3],
+    t = sc.NDDataset(data=[0, 1, 2, 3],
                      title='time',
                      units='hour')
 
-    d = sc.NDDataset(data = [-1, 0.2, 0.9, 2.1],
+    d = sc.NDDataset(data=[-1, 0.2, 0.9, 2.1],
                      title='distance',
                      units='kilometer')
 
@@ -34,8 +33,8 @@ def test_lstsq_from_scratch():
     v, d0 = lstsq.transform()
 
     assert np.around(v.magnitude) == 1
-    assert np.around(d0.magnitude,2) == -0.95
-    assert v.units == d.units/t.units
+    assert np.around(d0.magnitude, 2) == -0.95
+    assert v.units == d.units / t.units
 
     plt.plot(t.data, d.data, 'o', label='Original data', markersize=5)
 
@@ -47,12 +46,11 @@ def test_lstsq_from_scratch():
 
 # ............................................................................
 def test_implicit_lstsq():
-
-    t = sc.Coord(data = [0, 1, 2, 3],
+    t = sc.Coord(data=[0, 1, 2, 3],
                  units='hour',
                  title='time')
 
-    d = sc.NDDataset(data = [-1, 0.2, 0.9, 2.1],
+    d = sc.NDDataset(data=[-1, 0.2, 0.9, 2.1],
                      coords=[t],
                      units='kilometer',
                      title='distance')
@@ -62,7 +60,7 @@ def test_implicit_lstsq():
     # We would like v and d0 such as
     #    d = v.t + d0
 
-    lstsq= sc.LSTSQ(d)  #
+    lstsq = sc.LSTSQ(d)  #
     v, d0 = lstsq.transform()
 
     print(v, d0)
@@ -73,15 +71,14 @@ def test_implicit_lstsq():
 
     sc.show()
 
+
 def test_lstq_2D():
     pass
+
 
 #    St_i = np.linalg.lstsq(C_i, X.data)[0]
 
 
-
-
 # ======================================================================================================================
 if __name__ == '__main__':
-
     pass

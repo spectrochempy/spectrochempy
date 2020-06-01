@@ -96,7 +96,7 @@ if 'make.py' in sys.argv[0]:
 if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
-    
+
     # OK, but if we are doing individual module or function testing in PyCharm
     # it is interesting to see the plots!
     if len(sys.argv) > 1 \
@@ -104,7 +104,7 @@ if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
             and '--nodisplay' not in sys.argv:
         # individual module testing
         NO_DISPLAY = False
-    
+
     if NO_DISPLAY:
         mpl.use('agg', force=True)
 
@@ -117,14 +117,14 @@ else:
 if not (IN_IPYTHON and kernel and not NO_DISPLAY) and not IN_PYCHARM_SCIMODE:
     try:
         import PyQt5
-        
+
         backend = 'Qt5Agg'
         mpl.use('Qt5Agg', force=True)
     except:
-        
+
         try:
             mpl.use('tkagg', force=True)
-            
+
         except:
             # case of test in the pipeline
             mpl.use('tkagg', force=True)
@@ -143,7 +143,7 @@ __all__ += ['HAS_QT', 'IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
 HAS_QT = False
 try:
     from PyQt5 import QtWidgets
-    
+
     GUI = QtWidgets.QApplication(sys.argv)
     HAS_QT = True
 except ImportError:
@@ -152,7 +152,7 @@ except ImportError:
 if not IN_IPYTHON:
     # needed in windows terminal - but must not be inited in Jupyter notebook
     from colorama import init as initcolor
-    
+
     initcolor()
 
 
@@ -188,21 +188,21 @@ def _nbit():
 def check_for_update():
     import requests
     import re
-    
+
     # Gets version
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
     response = requests.get(conda_url)
-    
+
     regex = r"\<a.*\>(.*-\d{2})\/spectrochempy-(\d{1,2})\.(\d{1,2})\.(\d{1,2})-(\d{1})\.tar\.bz2\</a\>"
-    
+
     matches = re.finditer(regex, response.text, re.MULTILINE)
     vavailables = {}
     for matchNum, match in enumerate(matches, start=1):
         vavailables[match[1]] = (match[2], match[3], match[4])
-    
+
     key = {'darwin': 'osx', 'win32': 'win', 'linux': 'linux', 'linux2': 'linux'}
     OS = f'{key[sys.platform]}-{_nbit()}'
-    
+
     if OS in vavailables.keys():
         new_major, new_minor, new_patch = map(int, vavailables[OS])
         major, minor, patch = map(int, release.split('.'))
@@ -216,16 +216,16 @@ def check_for_update():
         else:
             return False
 
+
 try:
     upd = check_for_update()
 except:
     # probably no connection
-    upd= False
-    
+    upd = False
+
 if upd:
-    
     from spectrochempy.application import display_info_string
-    
+
     display_info_string(message='A new release version is available on the anaconda `Spectrocat` Channel (or Pypi). '
                                 '\nPlease consider updating for bug fixes and new features !', logo=False)
 
@@ -234,7 +234,7 @@ __all__.append('check_for_update')
 import warnings
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
-#warnings.filterwarnings(action="error", category=DeprecationWarning)
+# warnings.filterwarnings(action="error", category=DeprecationWarning)
 
 # ==============================================================================
 if __name__ == '__main__':

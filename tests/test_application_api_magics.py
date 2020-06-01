@@ -21,9 +21,11 @@ def test_api():
     assert 'NDDataset' in APIref
     assert 'abs' in APIref
 
+
 def test_version():
     # test version
-    assert len(version.split('.'))>=3
+    assert len(version.split('.')) >= 3
+
 
 def test_log():
     # test log
@@ -35,16 +37,15 @@ def test_log():
 
 
 def test_magic_addscript(ip):
-    
     if ip is None:
         warning_('ip is None - pss this test ')
         return
-    
+
     from spectrochempy.application import SpectroChemPyMagics
     ip.register_magics(SpectroChemPyMagics)
-    
+
     ip.run_cell("from spectrochempy import *")
-    
+
     assert "available_styles" in ip.user_ns.keys()
     print(ip.user_ns.keys())
     ip.run_cell("print(available_styles())", store_history=True)
@@ -52,22 +53,23 @@ def test_magic_addscript(ip):
     x = ip.run_line_magic('addscript', '-p project -o style -n available_styles 2')
     # script with the definition of the function
     # `available_styles` content of cell 2
-    
+
     print("x", x)
     assert x.strip() == 'Script style created.'
-    
+
     # with cell contents
     x = ip.run_cell('%%addscript -p project -o essai -n available_styles\n'
                     'print(available_styles())')
-    
+
     print('result\n', x.result)
     assert x.result.strip() == 'Script essai created.'
+
 
 @pytest.mark.skip()
 def test_console_subprocess():
     # to test this, the scripts must be installed so the spectrochempy
     # package must be installed: use pip install -e .
-    
+
     res = Popen(['scpy'], stdout=PIPE, stderr=PIPE)
     output, error = res.communicate()
     assert "nh4y-activation.spg'" in error.decode("utf-8")

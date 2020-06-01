@@ -46,6 +46,7 @@ from spectrochempy.core.processors.concatenate import stack
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import (readfilename, is_sequence)
 
+
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
@@ -74,7 +75,7 @@ def read_zip(*args, **kwargs):
       name/id :  ...
 
     """
-    #debug_("reading zipped folder of *.csv files")
+    # debug_("reading zipped folder of *.csv files")
 
     # filename will be given by a keyword parameter except the first parameters
     # is already the filename
@@ -224,7 +225,7 @@ def _read_zip(filename, **kwargs):
         if not f.endswith('.csv') or f.startswith('__MACOSX'):
             continue  # bypass non-csv files
 
-        #debug_('reading %s ...' % (f))
+        # debug_('reading %s ...' % (f))
 
         datasets.append(_read_csv(filename=f, fid=obj[f], **kwargs))
         if len(datasets) + 1 > only:

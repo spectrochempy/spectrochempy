@@ -15,7 +15,7 @@ from spectrochempy.core.analysis.simplisma import SIMPLISMA
 
 def test_SIMPLISMA():
     print('')
-    data = NDDataset.read_matlab(os.path.join('matlabdata','als2004dataset.MAT'))
+    data = NDDataset.read_matlab(os.path.join('matlabdata', 'als2004dataset.MAT'))
     print('Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110)):')
     print('')
     for mat in data:
@@ -23,7 +23,7 @@ def test_SIMPLISMA():
 
     X = data[0]
     print('\n test simplisma on {}\n'.format(X.name))
-    pure = SIMPLISMA(X, n_pc=20, tol=0.2,  noise=3, verbose=True)
+    pure = SIMPLISMA(X, n_pc=20, tol=0.2, noise=3, verbose=True)
 
     pure.C.T.plot()
     pure.St.plot()

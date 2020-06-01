@@ -25,6 +25,7 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import NOMASK, make_new_object
 
+
 def empty(shape, dtype=None, **kwargs):
     """
     Return a new |NDDataset| of given shape and type,  without initializing
@@ -185,6 +186,7 @@ def ones(shape, dtype=None, **kwargs):
     """
     return NDDataset(np.ones(shape, dtype=np.dtype(dtype)), **kwargs)
 
+
 def identity(N, dtype=None, **kwargs):
     """
     Return the identity array.
@@ -214,6 +216,7 @@ def identity(N, dtype=None, **kwargs):
 
     """
     return eye(N, dtype=dtype, **kwargs)
+
 
 def eye(N, M=None, k=0, dtype=float, order='C', **kwargs):
     """
@@ -494,9 +497,9 @@ def dot(a, b, strict=True, out=None):
     #                     ' of type {} has been provided'.format(
     #         type(b).__name__))
 
-    #TODO: may be we can be less strict, and allow dot products with
+    # TODO: may be we can be less strict, and allow dot products with
     #      different kind of objects, as far they are numpy-like arrays
-    
+
     if not isinstance(a, NDDataset) and not isinstance(a, NDDataset):
         # must be between numpy object or something non valid. Let numpy deal with this
         return np.dot(a, b)
@@ -508,7 +511,7 @@ def dot(a, b, strict=True, out=None):
     if not isinstance(b, NDDataset):
         # try to cast to NDDataset
         b = NDDataset(b)
-        
+
     data = np.ma.dot(a.masked_data, b.masked_data)
     mask = data.mask
     data = data.data
@@ -521,7 +524,7 @@ def dot(a, b, strict=True, out=None):
         coordx = getattr(b, b.dims[1])
     else:
         coordx = None
-    
+
     history = 'Dot product between %s and %s' % (a.name, b.name)
 
     # make the output
@@ -537,7 +540,7 @@ def dot(a, b, strict=True, out=None):
         new.units = a.units
     else:
         new.units = a.units * b.units
-    
+
     return new
 
 
@@ -577,8 +580,8 @@ def diag(dataset, k=0):
     # check if we have the correct input
     # ------------------------------------------------------------------------------------------------------------------
 
-    if not isinstance(dataset, NDDataset) :
-    # must be anumpy object or something non valid. Let numpy deal with this
+    if not isinstance(dataset, NDDataset):
+        # must be anumpy object or something non valid. Let numpy deal with this
         return np.diag(dataset)
 
     s = dataset.data.shape
@@ -594,11 +597,11 @@ def diag(dataset, k=0):
             mask = m | m.T
         coords = None
         if dataset.coords is not None:
-            coords = dataset.coords # [dataset.coords[0]] * 2
+            coords = dataset.coords  # [dataset.coords[0]] * 2
         history = 'Diagonal array build from the 1D dataset'
         units = dataset.units
         dims = dataset.dims * 2
-        
+
     elif len(s) == 2:
         # extract a diagonal
         # ------------------
@@ -613,7 +616,7 @@ def diag(dataset, k=0):
         history = 'Diagonal of rank %d extracted from original dataset' % k
         units = dataset.units
         dims = dataset.dims[-1]
-        
+
     else:
         raise ValueError("Input must be 1- or 2-d.")
 
@@ -625,7 +628,7 @@ def diag(dataset, k=0):
     new.history = history
     new.units = units
     new.dims = dims
-    
+
     if coords:
         new.set_coords(coords)
 

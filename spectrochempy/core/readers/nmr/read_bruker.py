@@ -182,6 +182,7 @@ bruker_dsp_table = {
     }
 }
 
+
 def _remove_digital_filter(dic, data):
     """
     Remove the digital filter from Bruker data.
@@ -242,7 +243,7 @@ def _remove_digital_filter(dic, data):
     dic['acqus']['TD'] = td * 2
     data = data[..., :td]
 
-    #debug_('Bruker digital filter : removed %s points' % rp)
+    # debug_('Bruker digital filter : removed %s points' % rp)
 
     return data
 
@@ -371,7 +372,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
     lowmem = kwargs.get('lowmem', False)  # load all in memero by default
     if lowmem:
-        #debug_('import with low memory handling (lowmem)')
+        # debug_('import with low memory handling (lowmem)')
         pass
     # ------------------------------------------------------------------------------------------------------------------
     # start reading ....
@@ -421,7 +422,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         else:
             if not processed:
                 warning_('No binary fid or ser found in %s.\n'
-                            'Try processed files...' % path)
+                         'Try processed files...' % path)
                 processed = True
 
         if os.path.isfile(os.path.join(path, 'pdata', procno, '1r')):
@@ -449,8 +450,8 @@ def read_bruker_nmr(dataset, *args, **kwargs):
             else:
                 dic, data = read_lowmem(npath, acqus_files=par_files, read_pulseprogram=False)
 
-            data = data * np.exp(- 1j * np.pi/2.) # -90 phase to be compatible with topspin
-            
+            data = data * np.exp(- 1j * np.pi / 2.)  # -90 phase to be compatible with topspin
+
             # look the case when the reshaping was not correct
             # for example, this happen when the number
             # of accumulated row was incomplete
@@ -472,7 +473,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 # necessary for agreement with bruker data and phase
         else:
 
-            #debug_(f'Reading processed {idx}:{path}')
+            # debug_(f'Reading processed {idx}:{path}')
 
             dic, data = read_pdata(npath, procs_files=par_files, )
 
@@ -526,7 +527,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                     if units is not None:
                         if isinstance(value, (float, int)):
                             value = value * units  # make a quantity
-                        elif isinstance(value, list) and isinstance(value[0],(float,int)):
+                        elif isinstance(value, list) and isinstance(value[0], (float, int)):
                             value = np.array(value) * units
 
                     if not item.endswith('s'):  # initial parameter
@@ -618,7 +619,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         list_meta.append(meta)
 
         # make the corresponding axis
-        #debug_('Create coords...')
+        # debug_('Create coords...')
         coords = []
         axe_range = list(range(parmode + 1))
         for axis in axe_range:
@@ -627,7 +628,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                 dw = (1. / meta.sw_h[axis]).to('us')
                 coordpoints = np.arange(meta.td[axis])
                 coord = Coord(coordpoints * dw,
-                              title=f"F{axis+1} acquisition time")    #TODO: use AQSEQ for >2D data
+                              title=f"F{axis + 1} acquisition time")  # TODO: use AQSEQ for >2D data
                 coords.append(coord)
             else:
                 raise NotImplementedError('Not yet implemented')
@@ -653,12 +654,12 @@ def read_bruker_nmr(dataset, *args, **kwargs):
         #     ldates.append(adic.par.DATE)  # and the date
 
         # store temporarily these data
-        #debug_('data read finished : type : %s' % datatype)
+        # debug_('data read finished : type : %s' % datatype)
 
         list_data.append(data)
 
     if len(list_data) == 1:
-        #debug_('One experiment read. Make it the current dataset')
+        # debug_('One experiment read. Make it the current dataset')
 
         dataset.data = list_data[0]
 
@@ -668,12 +669,12 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
         dataset.meta.update(list_meta[0])
         dataset.meta.readonly = True
-        dataset.set_coords(*tuple(list_coords[0]))    # must be a tuple
+        dataset.set_coords(*tuple(list_coords[0]))  # must be a tuple
         dataset.title = 'intensity'
         dataset.origin = 'bruker'
-        
+
     else:
-        
+
         # TODO: Check this -
         # case of multiple experiments to merge
 
@@ -694,7 +695,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
 
         if not diff:
             info_('the experiments look perfectly compatibles'
-                     ' regarding the shape and the axis!')
+                  ' regarding the shape and the axis!')
 
         # find what are the differences in meta
         meta = list_meta[0]

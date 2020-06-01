@@ -34,7 +34,6 @@ __all__ = [
     'srepr',
     "spacing",
 
-    
     #
 ]
 
@@ -49,7 +48,6 @@ import functools
 from datetime import datetime
 import uuid
 import warnings
-
 
 #
 # constants
@@ -71,6 +69,7 @@ try:
     HAS_XARRAY = True
 except ImportError:
     HAS_XARRAY = False
+
 
 def make_new_object(obj):
     """
@@ -420,6 +419,3 @@ def spacing(arr):
         return spacings[0]
     else:
         return spacings
-
-
-

@@ -28,4 +28,4 @@ ndd = scp.NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 
 scp.plot(ndd, style='paper')
 
-#show() # uncomment to show plot if needed()
+# show() # uncomment to show plot if needed()

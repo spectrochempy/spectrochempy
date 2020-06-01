@@ -58,7 +58,7 @@ def write_jdx(*args, **kwargs):
         # so the first parameters must be the filename
         if isinstance(args[0], str) and args[0] != '':
             filename = args[0]
-    else: #then the dataset is the first and the filename might be the second parameter:
+    else:  # then the dataset is the first and the filename might be the second parameter:
         dataset = args[0]
         if isinstance(args[1], str) and args[0] != '':
             filename = args[1]
@@ -89,7 +89,7 @@ def write_jdx(*args, **kwargs):
     # by default, the title if any will be is the first string; the timestamp will
     # be the fist datetime.datetime
     title_index = None
-    timestamp_index  = None
+    timestamp_index = None
     if dataset.y.labels is not None:
         for i, label in enumerate(dataset.y.labels[0]):
             if not title_index and type(label) is str:
@@ -107,20 +107,20 @@ def write_jdx(*args, **kwargs):
             else:
                 f.write('##TITLE= spectrum #' + str(i) + '\n')
             f.write('##JCAMP-DX=5.01' + '\n')
-        f.write('##ORIGIN=' + dataset.origin  + '\n')
+        f.write('##ORIGIN=' + dataset.origin + '\n')
         f.write('##OWNER=' + dataset.author + '\n')
 
         if timestamp_index is not None:
             timestamp = dataset.y.labels[i][timestamp_index]
         f.write('##LONGDATE=' +
-                    timestamp.strftime("%Y/%m/%d") + '\n')
+                timestamp.strftime("%Y/%m/%d") + '\n')
         f.write('##TIME=' +
-                    timestamp.strftime("%H:%M:%S") + '\n')
+                timestamp.strftime("%H:%M:%S") + '\n')
         f.write('##XUNITS=1/CM' + '\n')
         f.write('##YUNITS=' + 'ABSORBANCE' + '\n')
 
         firstx, lastx = dataset.x.data[0], dataset.x.data[-1]
-        firsty, lasty = dataset.data[0,0], dataset.data[0,-1]
+        firsty, lasty = dataset.data[0, 0], dataset.data[0, -1]
 
         f.write('##FIRSTX=' + str(firstx) + '\n')
         f.write('##LASTX=' + str(lastx) + '\n')

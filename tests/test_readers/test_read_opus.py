@@ -18,6 +18,3 @@ def test_read_with_filename():
     B = NDDataset.read_opus(['test.0000', 'test.0001', 'test.0002'],
                             directory=os.path.join('irdata', 'OPUS', ))
     assert len(B) == 3
-
-
-

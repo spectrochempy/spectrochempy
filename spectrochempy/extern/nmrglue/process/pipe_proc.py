@@ -53,6 +53,7 @@ class unit_conversion(fileiobase.unit_conversion):
     Unit converter class that returns NMRPipe like index values.  Useful
     when calling pipe_proc functions
     """
+
     # NMRPipe indexes from 1 to MAX instead on 0 to MAX-1
     # we need to modify two method to account for this off by one problem
     def __unit2pnt(self, val, units):
@@ -104,6 +105,7 @@ def make_uc(dic, data, dim=-1):
     car = dic[fn + "CAR"] * obs
     return unit_conversion(size, cplx, sw, obs, car)
 
+
 ########################
 # Dictionary functions #
 ########################
@@ -151,7 +153,7 @@ def update_minmax(dic, data):
     dic["FDDISPMAX"] = dic["FDMAX"]
     dic["FDMIN"] = float(data.min().real)
     dic["FDDISPMIN"] = dic["FDMIN"]
-    dic["FDSCALEFLAG"] = 1.0    # FDMIN/MAX are valid
+    dic["FDSCALEFLAG"] = 1.0  # FDMIN/MAX are valid
     return dic
 
 
@@ -164,7 +166,7 @@ def clean_minmax(dic):
     dic["FDDISPMAX"] = 0.0
     dic["FDMIN"] = 0.0
     dic["FDDISPMIN"] = 0.0
-    dic["FDSCALEFLAG"] = 0.0    # FDMIN/MAX not valid
+    dic["FDSCALEFLAG"] = 0.0  # FDMIN/MAX not valid
     return dic
 
 
@@ -295,7 +297,7 @@ def em(dic, data, lb=0.0, c=1.0, start=1, size='default', inv=False, one=False,
         Array of NMR data with exponential apodization applied.
 
     """
-    start = start - 1   # arrays should start at 0
+    start = start - 1  # arrays should start at 0
 
     # update dictionary
     fn = "FDF" + str(int(dic["FDDIMORDER"][0]))  # F1, F2, etc
@@ -317,7 +319,7 @@ def em(dic, data, lb=0.0, c=1.0, start=1, size='default', inv=False, one=False,
     # apply apodization to data
     if start == 0 and size == 'default':
         data = p.em(data, lb=flb, inv=inv)
-    else:   # only part of the data window is apodized
+    else:  # only part of the data window is apodized
         if size == 'default':
             stop = data.shape[-1]
         else:
@@ -404,7 +406,7 @@ def gm(dic, data, g1=0.0, g2=0.0, g3=0.0, c=1.0, start=1, size='default',
     # apply apodization to data
     if start == 0 and size == 'default':
         data = p.gm(data, g1p, g2p, g3p, inv=inv)
-    else:   # only part of the data window is apodized
+    else:  # only part of the data window is apodized
         if size == 'default':
             stop = data.shape[-1]
         else:
@@ -493,7 +495,7 @@ def gmb(dic, data, lb=0.0, gb=0.0, c=1.0, start=1, size='default', inv=False,
     # apply apodization to data
     if start == 0 and size == 'default':
         data = p.gmb(data, a, b, inv=inv)
-    else:   # only part of the data window is apodized
+    else:  # only part of the data window is apodized
         if size == 'default':
             stop = data.shape[-1]
         else:
@@ -590,7 +592,7 @@ def jmod(dic, data, off=0.0, j=0.0, lb=0.0, sin=False, cos=False, c=1.0,
     # apply apodization to data
     if start == 0 and size == 'default':
         data = p.jmod(data, e, off, end, inv=inv)
-    else:   # only part of the data window is apodized
+    else:  # only part of the data window is apodized
         if size == 'default':
             stop = data.shape[-1]
         else:
@@ -673,7 +675,7 @@ def sp(dic, data, off=0.0, end=1.0, pow=1.0, c=1.0, start=1, size='default',
     # apply apodization to data
     if start == 0 and size == 'default':
         data = p.sp(data, off, end, pow, inv=inv)
-    else:   # only part of the data window is apodized
+    else:  # only part of the data window is apodized
         if size == 'default':
             stop = data.shape[-1]
         else:
@@ -694,7 +696,7 @@ def sp(dic, data, off=0.0, end=1.0, pow=1.0, c=1.0, start=1, size='default',
     return dic, data
 
 
-sine = sp   # wrapper for sine functions
+sine = sp  # wrapper for sine functions
 
 
 def tm(dic, data, t1=0.0, t2=0.0, c=1.0, start=1, size='default', inv=False,
@@ -755,7 +757,7 @@ def tm(dic, data, t1=0.0, t2=0.0, c=1.0, start=1, size='default', inv=False,
     # apply apodization to data
     if start == 0 and size == 'default':
         data = p.tm(data, t1=t1, t2=t2, inv=inv)
-    else:   # only part of the data window is apodized
+    else:  # only part of the data window is apodized
         if size == 'default':
             stop = data.shape[-1]
         else:
@@ -851,7 +853,7 @@ def tri(dic, data, loc="auto", lHi=0.0, rHi=0.0, c=1.0, start=1,
     # apply apodization to data
     if start == 0 and size == 'default':
         data = p.tri(data, loc=loc, lHi=lHi, rHi=rHi, inv=inv)
-    else:   # only part of the data window is apodized
+    else:  # only part of the data window is apodized
         if size == 'default':
             stop = data.shape[-1]
         else:
@@ -946,11 +948,11 @@ def ls(dic, data, ls=0.0, sw=False):
 
     if sw:
         fn = "FDF" + str(int(dic["FDDIMORDER"][0]))  # F1, F2, etc
-        if dic[fn + "FTFLAG"] == 1:   # freq domain
+        if dic[fn + "FTFLAG"] == 1:  # freq domain
             # update NDORIG and NDCENTER
             dic[fn + "CENTER"] = dic[fn + "CENTER"] - ls
             dic = recalc_orig(dic, data, fn)
-        else:   # time domain
+        else:  # time domain
             dic[fn + "APOD"] = data.shape[-1] - ls
             dic[fn + "TDSIZE"] = data.shape[-1] - ls
 
@@ -1043,7 +1045,7 @@ def fsh(dic, data, dir, pts, sw=True):
     if np.iscomplexobj(data) is False:  # real data
         null, data = _ht(dict(dic), data, zf=True)
         del_imag = True
-    else:   # imaginary data
+    else:  # imaginary data
         del_imag = False
         # NMRPipe always performs a hilbert transform
         # uncommenting the next two lines will match NMRPipe's fsh real
@@ -1128,14 +1130,14 @@ def ft(dic, data, auto=False, real=False, inv=False, alt=False, neg=False,
         bruk = False
 
         fn = "FDF" + str(int(dic["FDDIMORDER"][0]))  # F1, F2, etc
-        if dic[fn + "FTFLAG"] == 1.0:   # freq domain
+        if dic[fn + "FTFLAG"] == 1.0:  # freq domain
             inv = True
         else:  # freq domain
             # Real, TPPI and Sequential data is real transform
             if dic["FDDIMCOUNT"] >= 2.:
                 if ((dic["FD2DPHASE"] == 0 or dic["FD2DPHASE"] == 1) and
                         fn != "FDF2"):
-                            real = True
+                    real = True
 
             # sign and negation in AQSIGN
             if dic[fn + "AQSIGN"] == 1 or dic[fn + "AQSIGN"] == 2:
@@ -1143,8 +1145,8 @@ def ft(dic, data, auto=False, real=False, inv=False, alt=False, neg=False,
 
             if (dic[fn + "AQSIGN"] == 16 or dic[fn + "AQSIGN"] == 17 or
                     dic[fn + "AQSIGN"] == 18):
-                        alt = True
-                        neg = True
+                alt = True
+                neg = True
 
     if debug:
         print("real:", real)
@@ -1158,12 +1160,12 @@ def ft(dic, data, auto=False, real=False, inv=False, alt=False, neg=False,
         real = True
         alt = True
 
-    if real:    # keep real data
+    if real:  # keep real data
         if np.iscomplexobj(data):
             data.imag = 0.0
 
     if alt:  # sign alternate
-        if inv is False:    # inv with alt, alternates the inverse
+        if inv is False:  # inv with alt, alternates the inverse
             data[..., 1::2] = data[..., 1::2] * -1.
 
     if neg:  # negate the imaginary
@@ -1174,7 +1176,7 @@ def ft(dic, data, auto=False, real=False, inv=False, alt=False, neg=False,
     fn = "FDF" + str(int(dic["FDDIMORDER"][0]))  # F1, F2, etc
     # we don't need sign alternation or negation anymore
     dic[fn + "AQSIGN"] = 0.0
-    dic[fn + "FTFLAG"] = (dic[fn + "FTFLAG"] + 1) % 2   # toggle FT flag
+    dic[fn + "FTFLAG"] = (dic[fn + "FTFLAG"] + 1) % 2  # toggle FT flag
     if dic[fn + "FTFLAG"] == 1:
         dic[fn + "FTSIZE"] = data.shape[-1]
 
@@ -1251,9 +1253,9 @@ def rft(dic, data, inv=False):
         data = p.rft(data.real)
 
     # update the dictionary
-    dic[fn + "FTFLAG"] = (dic[fn + "FTFLAG"] + 1) % 2   # troggle FT flag
+    dic[fn + "FTFLAG"] = (dic[fn + "FTFLAG"] + 1) % 2  # troggle FT flag
     dic[fn + "QUADFLAG"] = 1.0  # real data
-    dic["FDQUADFLAG"] = 1.0    # real data
+    dic["FDQUADFLAG"] = 1.0  # real data
     dic = update_minmax(dic, data)
     return dic, data
 
@@ -1291,7 +1293,7 @@ def ha(dic, data, inv=False):
 
     dic = update_minmax(dic, data)
     fn = "FDF" + str(int(dic["FDDIMORDER"][0]))  # F1, F2, etc
-    dic[fn + "FTFLAG"] = (dic[fn + "FTFLAG"] + 1) % 2   # troggle FT flag
+    dic[fn + "FTFLAG"] = (dic[fn + "FTFLAG"] + 1) % 2  # troggle FT flag
 
     # calculation for dictionary updates
     s = data.shape[-1]
@@ -1367,7 +1369,7 @@ def ht(dic, data, mode="ps0-0", zf=False, td=False, auto=False):
     return dic, z
 
 
-_ht = ht    # private function so ps can call the ht function
+_ht = ht  # private function so ps can call the ht function
 
 
 ##########################
@@ -1523,7 +1525,7 @@ def tp(dic, data, hyper=False, nohyper=False, auto=False, nohdr=False):
         else:
             hyper = False
 
-    if hyper:   # Hypercomplex transpose need type recast
+    if hyper:  # Hypercomplex transpose need type recast
         data = np.array(p.tp_hyper(data), dtype="complex64")
     else:
         data = p.tp(data)
@@ -1558,8 +1560,7 @@ def tp(dic, data, hyper=False, nohyper=False, auto=False, nohdr=False):
     return dic, data
 
 
-ytp = tp    # alias for tp
-
+ytp = tp  # alias for tp
 
 xy2yx = tp  # alias for tp
 
@@ -1618,7 +1619,7 @@ def zf(dic, data, zf=1, pad="auto", size="auto", mid=False, inter=False,
         dic["FDSIZE"] = s
         return dic, data[..., :int(s)]
 
-    if inter:   # zero filling between points done first
+    if inter:  # zero filling between points done first
         data = p.zf_inter(data, zf)
         dic[fn + "SW"] = dic[fn + "SW"] * (zf + 1)
         zf = 0
@@ -1650,7 +1651,7 @@ def zf(dic, data, zf=1, pad="auto", size="auto", mid=False, inter=False,
     # update the dictionary
     dic[fn + "ZF"] = -1. * s
     dic[fn + "CENTER"] = s2
-    if dic["FD2DPHASE"] == 1 and fn != "FDF2":   # TPPI data
+    if dic["FD2DPHASE"] == 1 and fn != "FDF2":  # TPPI data
         dic[fn + "CENTER"] = np.round(s2 / 2. + 0.001)
     dic = recalc_orig(dic, data, fn)
     dic["FDSIZE"] = s
@@ -1996,7 +1997,7 @@ def ext(dic, data, x1="default", xn="default", y1="default", yn="default",
 
     # round size to be multiple of r_x when axis is cut
     if x1 != "default" or xn != "default":
-        remain_x = (x_min - x_max) % r_x     # -len_x%r_x
+        remain_x = (x_min - x_max) % r_x  # -len_x%r_x
         x_min = x_min - np.floor(remain_x / 2)
         x_max = x_max + remain_x - np.floor(remain_x / 2)
 
@@ -2047,7 +2048,7 @@ def ext(dic, data, x1="default", xn="default", y1="default", yn="default",
             dic["FDSPECNUM"] = y_max - y_min
         dic["FDSIZE"] = x_max - x_min
 
-    else:       # 1D Array
+    else:  # 1D Array
         data = data[int(x_min):int(x_max)]
         dic["FDSIZE"] = x_max - x_min
 
@@ -2056,12 +2057,12 @@ def ext(dic, data, x1="default", xn="default", y1="default", yn="default",
         fn = "FDF" + str(int(dic["FDDIMORDER"][0]))  # F1, F2, etc
         s = data.shape[-1]
 
-        if dic[fn + "FTFLAG"] == 0:   # time domain
+        if dic[fn + "FTFLAG"] == 0:  # time domain
             dic[fn + "CENTER"] = float(int(s / 2. + 1))
             dic[fn + "APOD"] = s
             dic[fn + "TDSIZE"] = s
             dic = recalc_orig(dic, data, fn)
-        else:   # freq domain
+        else:  # freq domain
             dic[fn + "X1"] = x_min + 1
             dic[fn + "XN"] = x_max
             dic[fn + "APOD"] = np.floor(dic[fn + "APOD"] * s / old_x)
@@ -2080,7 +2081,7 @@ def ext(dic, data, x1="default", xn="default", y1="default", yn="default",
                 dic[fn + "APOD"] = s
                 dic[fn + "TDSIZE"] = s
                 dic = recalc_orig(dic, data, fn, -2)
-            else:   # freq domain
+            else:  # freq domain
                 if y_min != 0:
                     dic[fn + "X1"] = y_min + 1
                 if y_max != data.shape[0]:
@@ -2471,7 +2472,7 @@ def shuf(dic, data, mode=None):
         dic["FDSIZE"] = data.shape[-1]
         dic["FDREALSIZE"] = data.shape[-1]
     elif mode == "ri2rr":
-        data = p.ri2rr(data)    # appended imaginary data
+        data = p.ri2rr(data)  # appended imaginary data
         # update the dictionary
         if data.ndim == 2:
             dic["FDSLICECOUNT"] = data.shape[0] / 2.0
@@ -2623,7 +2624,7 @@ def coadd(dic, data, cList=[1, 1], axis='x', time=False):
     return dic, data
 
 
-coad = coadd    # macro for coadd
+coad = coadd  # macro for coadd
 
 
 def dev(dic, data):
@@ -2707,7 +2708,7 @@ def img(dic, data, filter, dx=1.0, dy=1.0, kern=[1], conv=False, thres=None):
             thres = 0.0  # default value of 0.0
         data = p.thres(data, thres)
 
-    if conv:    # convolution with kernal
+    if conv:  # convolution with kernal
         data = p.conv(data, kern, m="wrap")
         dic = update_minmax(dic, data)
         return dic, data
@@ -2962,10 +2963,10 @@ def zd(dic, data, wide=1.0, x0=1.0, slope=0, func=0, g=1):
         Array of NMR data with a diagonal band zero-ed.
 
     """
-    if x0 == 0:      # pipe takes x0=0 to be x0=1
+    if x0 == 0:  # pipe takes x0=0 to be x0=1
         x0 = 1.0
 
-    if slope == 0:    # Auto Mode
+    if slope == 0:  # Auto Mode
         fn = "FDF" + str(int(dic["FDDIMORDER"][0]))  # F1, F2, etc
         fn2 = "FDF" + str(int(dic["FDDIMORDER"][1]))  # F1, F2, etc
         sw1 = dic[fn + "SW"]
@@ -3056,9 +3057,9 @@ def lp(dic, data, pred="default", x1="default", xn="default", ord=8, mode='f',
     # pred default values
     if pred == "default":
         if mode == "after":
-            pred = data.shape[-1]   # double the number of points
+            pred = data.shape[-1]  # double the number of points
         else:
-            pred = 1    # predict 1 point before the data
+            pred = 1  # predict 1 point before the data
 
     # remove first pred points if appending before data
     if append == "before":
@@ -3093,7 +3094,7 @@ def lp(dic, data, pred="default", x1="default", xn="default", ord=8, mode='f',
 
     # update the dictionary
     dic[fn + "CENTER"] = s2
-    if dic["FD2DPHASE"] == 1 and fn != "FDF2":   # TPPI data
+    if dic["FD2DPHASE"] == 1 and fn != "FDF2":  # TPPI data
         dic[fn + "CENTER"] = np.round(s2 / 2. + 0.001)
     dic = recalc_orig(dic, data, fn)
     dic["FDSIZE"] = s
@@ -3104,7 +3105,7 @@ def lp(dic, data, pred="default", x1="default", xn="default", ord=8, mode='f',
     return dic, data
 
 
-lpc = lp        # macro to lp
+lpc = lp  # macro to lp
 
 
 def lp2d(dic, data, xOrd=8, yOrd=8, xSize="default", ySize="default",
@@ -3178,7 +3179,7 @@ def lp2d(dic, data, xOrd=8, yOrd=8, xSize="default", ySize="default",
 
     # update the dictionary
     dic[fn + "CENTER"] = s2
-    if dic["FD2DPHASE"] == 1 and fn != "FDF2":   # TPPI data
+    if dic["FD2DPHASE"] == 1 and fn != "FDF2":  # TPPI data
         dic[fn + "CENTER"] = np.round(s2 / 2. + 0.001)
     dic = recalc_orig(dic, data, fn)
     dic["FDSIZE"] = s
@@ -3192,7 +3193,7 @@ def lp2d(dic, data, xOrd=8, yOrd=8, xSize="default", ySize="default",
 
     # update the dictionary
     dic[fn + "CENTER"] = s2
-    if dic["FD2DPHASE"] == 1 and fn != "FDF2":   # TPPI data
+    if dic["FD2DPHASE"] == 1 and fn != "FDF2":  # TPPI data
         dic[fn + "CENTER"] = np.round(s2 / 2. + 0.001)
     dic = recalc_orig(dic, data, fn)
     dic[fn + "APOD"] = s

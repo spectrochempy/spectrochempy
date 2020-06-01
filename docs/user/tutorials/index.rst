@@ -34,7 +34,7 @@ Chemometrics
 .. ----
 
 .. .. toctree::
-   :glob:
-   :maxdepth: 3
+:glob:
+:maxdepth: 3
 
 ..   nmr/*

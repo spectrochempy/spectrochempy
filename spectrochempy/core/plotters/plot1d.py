@@ -140,9 +140,9 @@ def plot_multiple(datasets, method='scatter', pen=True,
     commands = kwargs.get('commands', [])
     kwargs['commands'] = []
     clear = kwargs.pop('clear', True)
-    legend = kwargs.pop('legend', None) # remove 'legend' from kwargs before calling plot
-                                        # else it will generate a conflict
-    
+    legend = kwargs.pop('legend', None)  # remove 'legend' from kwargs before calling plot
+    # else it will generate a conflict
+
     for s in datasets:  # , colors, markers):
 
         ax = s.plot(method=method,
@@ -265,7 +265,7 @@ def plot_1D(dataset, **kwargs):
     # make a copy
     # ------------------------------------------------------------------------------------------------------------------
     new = dataset.copy()  # Do we need a copy?
-    new = new.squeeze()   # and squeeze it
+    new = new.squeeze()  # and squeeze it
 
     # If we are in the GUI, we will plot on a widget: but which one?
     # ------------------------------------------------------------------------------------------------------------------
@@ -387,7 +387,7 @@ def plot_1D(dataset, **kwargs):
 
     # plot_lines
     # ------------------------------------------------------------------------------------------------------------------
-    label = kwargs.get('label',None)
+    label = kwargs.get('label', None)
     if scatterpen:
         # pen + scatter
         line, = ax.plot(xdata, zdata.T,

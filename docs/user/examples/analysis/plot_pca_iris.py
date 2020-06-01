@@ -47,4 +47,4 @@ _ = pca.scoreplot(1, 2, color_mapping='labels')
 # or in 3D for 3 PC's
 _ = pca.scoreplot(1, 2, 3, color_mapping='labels')
 
-scp.show() # uncomment to show plot if needed()
+scp.show()  # uncomment to show plot if needed()

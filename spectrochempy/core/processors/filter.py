@@ -9,17 +9,18 @@
 
 __all__ = ['savgol_filter', 'detrend']
 
-__dataset_methods__  = __all__
+__dataset_methods__ = __all__
 
 import scipy.signal
 
 """wrappers of scipy.signal filters, """
 
-#Todo:
-#find_peaks_cwt(vector, widths[, wavelet, ...]) 	Attempt to find the peaks in a 1-D array.
-#argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
-#argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
-#argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
+
+# Todo:
+# find_peaks_cwt(vector, widths[, wavelet, ...]) 	Attempt to find the peaks in a 1-D array.
+# argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
+# argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
+# argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
 def savgol_filter(dataset, window_length=5, polyorder=3, deriv=0, delta=1.0, dim='x', mode='interp', cval=0.0):
     """
@@ -52,13 +53,13 @@ def savgol_filter(dataset, window_length=5, polyorder=3, deriv=0, delta=1.0, dim
         window_length values of the edges, and this polynomial is used to evaluate the last window_length // 2 output values.
     cval : scalar, optional
         Value to fill past the edges of the input if mode is ‘constant’. Default is 0.0.
-    
+
     Returns
     -------
-    
+
     NDDataset: same shape as x. data units are removed when deriv > 1
         The filtered data.
-    
+
     Notes
     -----
     Even spacing of the axis coordinates is NOT checked. Be aware that Savitzky-Golay algorithm
@@ -78,14 +79,13 @@ def savgol_filter(dataset, window_length=5, polyorder=3, deriv=0, delta=1.0, dim
     For example, if the input is [1, 2, 3, 4, 5, 6, 7, 8], and
     `window_length` is 7, the following shows the extended data for
     the various `mode` options (assuming `cval` is 0)::
-    
-        mode       |   Ext   |         Input          |   Ext
-        -----------+---------+------------------------+---------
-        'mirror'   | 4  3  2 | 1  2  3  4  5  6  7  8 | 7  6  5
-        'nearest'  | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8
-        'constant' | 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0
-        'wrap'     | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3
-    
+
+    mode       |   Ext   |         Input          |   Ext
+    -----------+---------+------------------------+---------
+    'mirror'   | 4  3  2 | 1  2  3  4  5  6  7  8 | 7  6  5
+    'nearest'  | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8
+    'constant' | 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0
+    'wrap'     | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3
 
     """
 
@@ -97,7 +97,7 @@ def savgol_filter(dataset, window_length=5, polyorder=3, deriv=0, delta=1.0, dim
         axis = -3
 
     data = scipy.signal.savgol_filter(dataset.data, window_length, polyorder,
-                                          deriv, delta, axis, mode, cval)
+                                      deriv, delta, axis, mode, cval)
 
     out = dataset.copy()
     if deriv == 0:
@@ -105,7 +105,7 @@ def savgol_filter(dataset, window_length=5, polyorder=3, deriv=0, delta=1.0, dim
     else:
         out.data = data
         if dataset.coord([dim]).reversed:
-            out.data = out.data * (-1)**deriv
+            out.data = out.data * (-1) ** deriv
     return out
 
 

@@ -39,7 +39,6 @@ if sphinx.__version__ >= '2.0':
 else:
     from sphinx.ext.autodoc import force_decode
 
-
 try:
     from cyordereddict import OrderedDict
 except ImportError:
@@ -54,7 +53,6 @@ if six.PY2:
 __version__ = '0.1.10'
 
 __author__ = "Philipp Sommer"
-
 
 sphinx_version = list(map(float, re.findall(r'\d+', sphinx.__version__)[:3]))
 
@@ -131,7 +129,7 @@ class AutosummaryDocumenter(object):
             self.env.temp_data['autodoc:class'] = self.objpath[0]
 
         want_all = all_members or self.options.inherited_members or \
-            self.options.members is ALL
+                   self.options.members is ALL
         # find out which members are documentable
         members_check_module, members = self.get_object_members(want_all)
 
@@ -157,7 +155,7 @@ class AutosummaryDocumenter(object):
             # give explicitly separated module name, so that members
             # of inner classes can be documented
             full_mname = self.modname + '::' + \
-                '.'.join(self.objpath + [mname])
+                         '.'.join(self.objpath + [mname])
 
             documenter = classes[-1](self.directive, full_mname, self.indent)
             memberdocumenters.append((documenter,
@@ -199,7 +197,7 @@ class AutoSummModuleDocumenter(ModuleDocumenter, AutosummaryDocumenter):
         (ad.ExceptionDocumenter.member_order, 'Exceptions'),
         (ad.FunctionDocumenter.member_order, 'Functions'),
         (ad.DataDocumenter.member_order, 'Data'),
-        ])
+    ])
     """:class:`~collections.OrderedDict` that includes the autosummary sections
 
     This dictionary defines the sections for the autosummmary option. The
@@ -228,7 +226,7 @@ class AutoSummClassDocumenter(ClassDocumenter, AutosummaryDocumenter):
     member_sections = OrderedDict([
         (ad.MethodDocumenter.member_order, 'Methods'),
         (ad.AttributeDocumenter.member_order, 'Attributes'),
-        ])
+    ])
     """:class:`~collections.OrderedDict` that includes the autosummary sections
 
     This dictionary defines the sections for the autosummmary option. The
@@ -508,6 +506,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
         Notes
         -----
         `doc_nodes` are modified in place and not copied!"""
+
         def inject_summary(node):
             if isinstance(node, nodes.section):
                 for sub in node:
@@ -522,6 +521,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
                     return
                 for summ_node in node_summ_nodes[::-1]:
                     self._insert_after_paragraphs(node, summ_node)
+
         for node in doc_nodes:
             inject_summary(node)
         return doc_nodes
@@ -569,7 +569,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
                     if hasattr(mdocumenter, 'get_grouped_documenters'):
                         summ_nodes.update(self.autosumm_nodes(
                             mdocumenter, mdocumenter.get_grouped_documenters())
-                            )
+                        )
         summ_nodes[documenter.fullname] = this_nodes
         return summ_nodes
 
@@ -595,7 +595,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
         base_documenter = self.autosummary_documenter
         try:
             base_documenter.analyzer = ModuleAnalyzer.for_module(
-                    base_documenter.real_modname)
+                base_documenter.real_modname)
             attr_docs = base_documenter.analyzer.find_attr_docs()
         except PycodeError as err:
             logger.debug('[autodocsumm] module analyzer failed : %s', err)
@@ -630,7 +630,7 @@ class AutoSummDirective(AutodocDirective, Autosummary):
             else:
                 max_chars = max(10, max_item_chars - len(display_name))
                 sig = mangle_signature(sig, max_chars=max_chars)
-#                sig = sig.replace('*', r'\*')
+            #                sig = sig.replace('*', r'\*')
 
             # -- Grab the documentation
 
@@ -698,7 +698,7 @@ def dont_document_data(config, fullname):
     else:
         not_document_data = config.not_document_data
     return (
-            # data should not be documented
+        # data should not be documented
             (any(re.match(p, fullname) for p in not_document_data)) or
             # or data is not included in what should be documented
             (not any(re.match(p, fullname) for p in document_data)))

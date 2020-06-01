@@ -107,7 +107,7 @@ class Meta(object):  # HasTraits):
             return 'Meta'
         else:
             return name == 'Meta'
-    
+
     def __setattr__(self, key, value):
         if key not in ['readonly', '_data', '_trait_values', '_trait_notifiers',
                        '_trait_validators', '_cross_validation_lock']:
@@ -277,7 +277,7 @@ class Meta(object):  # HasTraits):
         """
 
         newmeta = self.copy()
-        
+
         newmeta.readonly = False
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
@@ -306,7 +306,7 @@ class Meta(object):  # HasTraits):
         """
 
         newmeta = self.copy()
-        
+
         newmeta.readonly = False
         for key in self:
             if is_sequence(self[key]) and len(self[key]) > 1:
@@ -321,4 +321,3 @@ class Meta(object):  # HasTraits):
             return newmeta
         else:
             self._data = newmeta._data
-            

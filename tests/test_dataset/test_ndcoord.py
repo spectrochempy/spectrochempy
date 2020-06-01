@@ -33,7 +33,6 @@ from spectrochempy.core import info_, debug_, print_
 # ======================================================================================================================
 
 def test_coord():
-
     # simple coords
 
     a = Coord([1, 2, 3], name='x')
@@ -80,14 +79,14 @@ def test_coord():
     a = Coord(labels=y, title='processors')
     assert a.title == 'processors'
     assert isinstance(a.labels, np.ndarray)
-    assert_array_equal(a.values,a.labels)
+    assert_array_equal(a.values, a.labels)
     # any kind of object can be a label
     assert a.labels.dtype == 'O'
     # even an array
     a._labels[3] = range(10)
     assert a._labels[3][2] == 2
-    info_('\n'+str(a))
-    info_('\n'+repr(a))
+    info_('\n' + str(a))
+    info_('\n' + repr(a))
 
     # coords with datetime
 
@@ -100,8 +99,7 @@ def test_coord():
     assert isinstance(a.data, np.ndarray)
     assert isinstance(a.labels, np.ndarray)
     b = a._sort(by='label', descend=True)
-    info_('\n'+str(b))
-
+    info_('\n' + str(b))
 
     # but coordinates must be 1D
 
@@ -112,7 +110,7 @@ def test_coord():
     # unitless coordinates
 
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   labels= list('abcdefghij'),
+                   labels=list('abcdefghij'),
                    mask=None,
                    units=None,
                    title='wavelength')
@@ -120,7 +118,7 @@ def test_coord():
     assert coord0.data[0] == 4000.
     assert repr(coord0) == "Coord: [float64] unitless"
 
-    info_('\n'+str(coord0))
+    info_('\n' + str(coord0))
 
     # dimensionless coordinates
 
@@ -154,7 +152,7 @@ def test_coord():
     assert coord0.units.dimensionless
     assert coord0.data[0] == 4000.  # <- displayed data to be multiplied by the scale factor
     assert repr(coord0) == "Coord: [float64] scaled-dimensionless (0.001)"
-    info_('\n'+str(coord0))
+    info_('\n' + str(coord0))
 
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    labels=list('abcdefghij'),
@@ -247,7 +245,6 @@ def test_coord():
     assert_array_equal(coord2.labels, coord0.labels)
     assert coord2.units == coord0.units
 
-
     # automatic reversing for wavenumbers
 
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
@@ -265,8 +262,8 @@ def test_coord():
     with pytest.raises(AttributeError):
         c = coord0.real
 
-def test_coord_slicing():
 
+def test_coord_slicing():
     # slicing by index
 
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
@@ -283,7 +280,6 @@ def test_coord_slicing():
     assert isinstance(c1.values, Quantity)
     assert coord1[0].values == 4000.0 * (1. / ur.cm)
 
-
     # slicing with labels
 
     labs = list('abcdefghij')
@@ -298,7 +294,7 @@ def test_coord_slicing():
     assert isinstance(coord0[0].values, Quantity)
 
     assert coord0[2] == coord0['c']
-    assert coord0['c':'d'] == coord0[2:4]   # label included
+    assert coord0['c':'d'] == coord0[2:4]  # label included
 
     # slicing only-labels coordinates
 
@@ -313,13 +309,13 @@ def test_coord_slicing():
 # ----------------------------------------------------------------------------------------------------------------------
 
 # first operand has units km, second is a scalar with units m
-@pytest.mark.parametrize( ('operation', 'result_units'),
-                          [
-                            ('__add__', ur.km),
-                            ('__sub__', ur.km),
-                            ('__mul__', ur.km * ur.m),
-                            ('__truediv__', ur.km / ur.m)
-                            ]
+@pytest.mark.parametrize(('operation', 'result_units'),
+                         [
+                             ('__add__', ur.km),
+                             ('__sub__', ur.km),
+                             ('__mul__', ur.km * ur.m),
+                             ('__truediv__', ur.km / ur.m)
+                         ]
                          )
 def test_coord_unit_conversion_operators_a(operation, result_units):
     print(operation, result_units)
@@ -386,4 +382,3 @@ def test_coord_not_implemented(name):
                    title='wavelength')
     with pytest.raises(NotImplementedError):
         f = getattr(coord0, name)()
-

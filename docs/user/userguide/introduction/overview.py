@@ -32,16 +32,16 @@ dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
 dataset.y.title = 'Time'
 _ = dataset.plot_map(colormap='viridis', colorbar=True)
-print('shape:',dataset.shape)
+print('shape:', dataset.shape)
 
 # %%
 nd1 = dataset[0:30, 0:4000]
 nd2 = dataset[0:30, 2000:5549]
 nd3 = dataset[10:55, 0:4000]
 nd4 = dataset[10:55, 2000:5549]
-_ = multiplot_map(datasets=[nd1, nd2, nd3, nd4],  colormap='viridis',
-                nrow=2, ncol=2, sharex=True, sharey=True, 
-                figsize=(6,6), dpi=100)
+_ = multiplot_map(datasets=[nd1, nd2, nd3, nd4], colormap='viridis',
+                  nrow=2, ncol=2, sharex=True, sharey=True,
+                  figsize=(6, 6), dpi=100)
 
 # %% [markdown]
 # The four datasets `nd1` to `nd4` have some overlapping in both dimensions. But it we want for example to add `nd2` with `nd4`. This will fail because the dimension are not aligned. 
@@ -77,8 +77,8 @@ ndadd.shape
 # Let's plot both individual aligned arrays, and their sum. Note, that only the common region appears in the result array, as the mathematical operation are aware of the masks.
 
 # %%
-_ = multiplot_map(datasets=[nd2a, nd4a, ndadd],  colormap='viridis', sharey=True,
-                nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
+                  nrow=1, ncol=3, figsize=(8, 3), dpi=100)
 
 # %% [markdown]
 # ## Methods for alignments
@@ -98,11 +98,11 @@ _ = multiplot_map(datasets=[nd2a, nd4a, ndadd],  colormap='viridis', sharey=True
 # `inner` method => intersection of the coordinates
 nd2a, nd4a = align(nd2, nd4, dim='y', method='inner')
 ndadd = nd2a + nd4a
-ndadd.shape   # note the difference with the outer method above (the shape correspond to the intersection)
+ndadd.shape  # note the difference with the outer method above (the shape correspond to the intersection)
 
 # %%
-_ = multiplot_map(datasets=[nd2a, nd4a, ndadd],  colormap='viridis', sharey=True,
-                nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
+                  nrow=1, ncol=3, figsize=(8, 3), dpi=100)
 
 # %% [markdown]
 # ### `first` method
@@ -111,11 +111,11 @@ _ = multiplot_map(datasets=[nd2a, nd4a, ndadd],  colormap='viridis', sharey=True
 # `inner` method => align on the first dataset
 nd2a, nd4a = align(nd2, nd4, dim='y', method='first')
 ndadd = nd2a + nd4a
-ndadd.shape   # note the difference with the outer method above
+ndadd.shape  # note the difference with the outer method above
 
 # %%
-_ = multiplot_map(datasets=[nd2a, nd4a, ndadd],  colormap='viridis', sharey=True,
-                nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
+                  nrow=1, ncol=3, figsize=(8, 3), dpi=100)
 
 # %% [markdown]
 # ### `last` method
@@ -124,17 +124,17 @@ _ = multiplot_map(datasets=[nd2a, nd4a, ndadd],  colormap='viridis', sharey=True
 # `last` method => align on the last dataset
 nd2a, nd4a = align(nd2, nd4, dim='y', method='last')
 ndadd = nd2a + nd4a
-ndadd.shape   # note the difference with the outer method above
+ndadd.shape  # note the difference with the outer method above
 
 # %%
-_ = multiplot_map(datasets=[nd2a, nd4a, ndadd],  colormap='viridis', sharey=True,
-                nrow=1, ncol=3, figsize=(8, 3), dpi=100)
+_ = multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
+                  nrow=1, ncol=3, figsize=(8, 3), dpi=100)
 
 # %% [markdown]
 # ## Alignment along several dimensions 
 
 # %%
-nd1a, nd2a, nd3a, nd4a = align(nd1, nd2, nd3, nd4, dims=['x','y'])   # by default the outer method is used
+nd1a, nd2a, nd3a, nd4a = align(nd1, nd2, nd3, nd4, dims=['x', 'y'])  # by default the outer method is used
 nd1a.shape
 
 # %%
@@ -142,8 +142,8 @@ ndadd = nd1a + nd2a + nd3a + nd4a
 
 # %%
 # Comparison of the result array with the original (only the common region is visible, due to the masks)
-_ = multiplot_map(datasets=[dataset, ndadd],  colormap='viridis', sharex=0, sharey=True,
-                nrow=1, ncol=2, figsize=(8, 3), dpi=100)
+_ = multiplot_map(datasets=[dataset, ndadd], colormap='viridis', sharex=0, sharey=True,
+                  nrow=1, ncol=2, figsize=(8, 3), dpi=100)
 
 # %%
 

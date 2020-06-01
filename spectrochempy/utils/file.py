@@ -72,10 +72,10 @@ def readfilename(filename=None, **kwargs):
     if not filename:
         # test if we are running nbsphinx with this default filename
         filename = os.environ.get('TUTORIAL_FILENAME', None)
-    
+
         if not filename and "--nodisplay" in sys.argv:
-            return None   # or we can set a filename here
-    
+            return None  # or we can set a filename here
+
     if filename:
         _filenames = []
         # make a list, even for a single file name
@@ -104,7 +104,7 @@ def readfilename(filename=None, **kwargs):
 
         # now we have all the filename with their correct location
         filenames = _filenames
-        
+
     if not filename:
         # open a file dialog
         # currently Scpy use QT (needed for next GUI features)
@@ -312,10 +312,10 @@ def generate_api(api_path):
         if pkg.endswith('api') or "test" in pkg:
             continue
         try:
-            print(pkg)
+            # print(pkg)
             pkg = import_item(pkg)
         except:
-            #pkg = import_item(pkg)
+            # pkg = import_item(pkg)
             raise ImportError(pkg)
         if not hasattr(pkg, '__all__'):
             continue

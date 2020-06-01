@@ -11,12 +11,15 @@ from setuptools import setup, find_packages
 
 import os
 
+
 def path():
     return os.path.dirname(__file__)
+
 
 def read(fname):
     with open(os.path.join(path(), fname), 'r') as f:
         return f.read()
+
 
 setup_args = dict(
     name="spectrochempy",

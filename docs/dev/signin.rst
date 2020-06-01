@@ -1,4 +1,3 @@
-
 |scpy| project website
 ========================
 

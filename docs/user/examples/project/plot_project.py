@@ -13,7 +13,7 @@ Project creation
 In this example, we create a Project from scratch
 
 """
-import  spectrochempy as scp
+import spectrochempy as scp
 
 ##############################################################################
 # Let's assume we have three subproject to group in a single project
@@ -65,7 +65,6 @@ print(newproj)
 assert str(newproj) == str(proj)
 assert newproj.A350.label == proj.A350.label
 
-
 ##############################################################################
 # Now we add a script to the original proj
 
@@ -109,5 +108,4 @@ proj['tgscatter'] = scp.Script('tgscatter', script_source_2)
 
 proj.tgscatter()
 
-#show() # uncomment to show plot if needed()
-
+# show() # uncomment to show plot if needed()

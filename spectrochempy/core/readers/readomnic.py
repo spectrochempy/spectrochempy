@@ -89,7 +89,6 @@ def read_omnic(dataset=None, **kwargs):
 
         dataset = NDDataset()  # create an instance of NDDataset
 
-
     sortbydate = kwargs.pop("sortbydate", True)
 
     # returns a list of files to read
@@ -110,7 +109,7 @@ def read_omnic(dataset=None, **kwargs):
         if extension == '.spg':
             for filename in files[extension]:
                 # debug_("reading omnic spg file")
-                datasets.append(_read_spg(dataset, filename,  **kwargs))
+                datasets.append(_read_spg(dataset, filename, **kwargs))
 
         elif extension == '.spa':
             # debug_("reading omnic spa files")
@@ -536,7 +535,7 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset.origin = "omnic"
     dataset.description = kwargs.get('description',
                                      "Dataset from {0} spa files : {1}".format(
-        nspec, ' ... '.join({filenames[0], filenames[-1]}))
+                                         nspec, ' ... '.join({filenames[0], filenames[-1]}))
                                      )
 
     dataset.history = str(datetime.now()) + ':read from spa files ; '

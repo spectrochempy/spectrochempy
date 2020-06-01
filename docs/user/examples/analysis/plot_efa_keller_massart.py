@@ -26,11 +26,11 @@ import numpy as np
 # *************************
 
 t = scp.Coord(np.arange(15), units='minutes', title='time')  # time coordinates
-c = scp.Coord(range(2), title = 'components')                                      # component coordinates
+c = scp.Coord(range(2), title='components')  # component coordinates
 
-data = np.zeros((2,15), dtype=np.float64)
-data[0, 3:8] = [1,3,6,3,1] # compound 1
-data[1, 5:11] = [1,3,5,3,1,0.5] #compound 2
+data = np.zeros((2, 15), dtype=np.float64)
+data[0, 3:8] = [1, 3, 6, 3, 1]  # compound 1
+data[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
 
 dsc = scp.NDDataset(data=data, coords=[c, t])
 
@@ -38,8 +38,8 @@ dsc = scp.NDDataset(data=data, coords=[c, t])
 # 2) Absorption spectra
 # **********************
 
-spec = np.array([[2.,3.,4.,2.],[3.,4.,2.,1.]])
-w = scp.Coord(np.arange(1,5,1), units='nm', title='wavelength')
+spec = np.array([[2., 3., 4., 2.], [3., 4., 2., 1.]])
+w = scp.Coord(np.arange(1, 5, 1), units='nm', title='wavelength')
 
 dss = scp.NDDataset(data=spec, coords=[c, w])
 
@@ -48,7 +48,7 @@ dss = scp.NDDataset(data=spec, coords=[c, w])
 # ************************
 
 dataset = scp.dot(dsc.T, dss)
-dataset.data = np.random.normal(dataset.data,.2)
+dataset.data = np.random.normal(dataset.data, .2)
 dataset.title = 'intensity'
 
 dataset.plot()
@@ -83,7 +83,6 @@ b2 = efa.cut_b(n_pc=2, cutoff=cut)
 both = scp.concatenate(f2, b2)
 both.T.plot(yscale="log")
 
-
 # TODO: add "legend" keyword in NDDataset.plot()
 
 
@@ -93,4 +92,3 @@ both.T.plot(yscale="log")
 
 c = efa.get_conc(n_pc)
 c.T.plot()
-

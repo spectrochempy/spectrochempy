@@ -11,8 +11,8 @@ from spectrochempy import *
 from spectrochempy.utils import show
 from spectrochempy.core import set_loglevel
 
-def test_plot_generic_1D(IR_dataset_1D):
 
+def test_plot_generic_1D(IR_dataset_1D):
     for method in ['scatter', 'lines']:
         dataset = IR_dataset_1D.copy()
         dataset.plot(method=method)

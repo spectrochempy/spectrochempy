@@ -6,8 +6,8 @@ $$ /home/nmr/data/aurelie/nmr/HMQCcalib/31/audita.txt
 ##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
 (   1,<2014-04-25 09:09:39.257 +0200>,<nmr>,<lcs175n>,<go>,<TOPSPIN 3.2>,
       <created by zg
-	started at 2014-04-24 10:30:10.454 +0200,
-	POWCHK disabled, PULCHK disabled,
+    started at 2014-04-24 10:30:10.454 +0200,
+    POWCHK disabled, PULCHK disabled,
        terminated by command 'stop'
        configuration hash MD5:
        91 F0 E4 5C 7B 4A 45 8F 63 07 7B B3 F4 A3 71 1C

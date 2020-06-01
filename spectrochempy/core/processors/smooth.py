@@ -8,10 +8,11 @@
 # ======================================================================================================================
 
 __all__ = ["smooth"]
-__dataset_methods__  = __all__
+__dataset_methods__ = __all__
 
 import numpy as np
 from .. import error_, warning_, print_, debug_
+
 
 def smooth(dataset, **kwargs):
     """
@@ -46,7 +47,7 @@ def smooth(dataset, **kwargs):
     
     TODO: implement this for NDPanel too
     """
-    
+
     if not kwargs.pop('inplace', False):
         # default
         new = dataset.copy()
@@ -59,7 +60,7 @@ def smooth(dataset, **kwargs):
         axis, dim = new.get_axis(axis, negative_axis=True)
     else:
         is_ndarray = True
-        
+
     swaped = False
     if axis != -1:
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
@@ -76,7 +77,7 @@ def smooth(dataset, **kwargs):
         return new
 
     window = kwargs.pop('window', 'hanning')
-    
+
     wind = {
         'flat': np.ones,
         'hanning': np.hanning,
@@ -89,25 +90,26 @@ def smooth(dataset, **kwargs):
             error_("Window must be a callable or a string among 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
             return new
         window = wind[window]
-    
+
     # extend on both side to limit side effects
-    dat = np.r_['-1', new.data[...,length - 1:0:-1], new.data, new.data[..., -1:-length:-1]]
+    dat = np.r_['-1', new.data[..., length - 1:0:-1], new.data, new.data[..., -1:-length:-1]]
 
     w = window(length)
     data = np.apply_along_axis(np.convolve, -1, dat, w / w.sum(), mode='valid')
-    data = data[..., int(length/ 2):-int(length / 2)]
+    data = data[..., int(length / 2):-int(length / 2)]
 
     if not is_ndarray:
         new.data = data
         new.history = f'smoothing with a window:{window.__name__} of length {length}'
-    
+
         # restore original data order if it was swaped
         if swaped:
             new.swapaxes(axis, -1, inplace=True)  # must be done inplace
     else:
         new = data
-        
+
     return new
+
 
 if __name__ == '__main__':
     pass

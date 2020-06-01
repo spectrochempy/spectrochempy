@@ -31,9 +31,9 @@ from ...utils import NOMASK, MASKED, UnitsCompatibilityError
 from spectrochempy.extern.orderedset import OrderedSet
 from spectrochempy.core import warning_, error_
 
+
 # ............................................................................
 def interpolate(dataset, axis=0, size=None):
-    #TODO: a simple interpolator of the data (either to reduce
+    # TODO: a simple interpolator of the data (either to reduce
     #      or increase number of points in every dimension)
     raise NotImplementedError('Not yet implemented')
-

@@ -10,7 +10,7 @@
 
 from copy import copy, deepcopy
 from datetime import datetime
-from quaternion import as_quat_array, as_float_array,  quaternion
+from quaternion import as_quat_array, as_float_array, quaternion
 import numpy as np
 import pytest
 
@@ -30,7 +30,6 @@ typequaternion = np.dtype(np.quaternion)
 
 
 def test_ndcomplex_init_quaternion_witharray():
-
     d = np.arange(24).reshape(3, 2, 4)
     info_('\n', d)
     d = as_quat_array(d)
@@ -175,7 +174,7 @@ def test_ndcomplex_quaternion_fixture(ndarrayquaternion):
     # some checking
     assert nd.size == 20
     assert nd.data.size == 20
-    assert nd.shape == (5,4)
+    assert nd.shape == (5, 4)
     assert nd.has_complex_dims
     assert nd.is_quaternion
     assert nd.data.dtype == typequaternion
@@ -197,7 +196,7 @@ def test_ndcomplex_real_imag():
 def test_ndcomplex_set_with_complex(ndarraycplx):
     nd = ndarraycplx.copy()
     nd.units = 'meter/hour'
-    assert nd.units == ur.meter/ur.hour
+    assert nd.units == ur.meter / ur.hour
 
 
 def test_ndcomplex_copy_of_ndarray(ndarraycplx):
@@ -260,6 +259,7 @@ def test_ndcomplex_str_representation_for_complex():
     assert "NDComplexArray: [complex128] unitless" in repr(nd1)
     info_(nd1)
 
+
 def test_ndcomplex_quaternion_str_representation():
     np.random.seed(12345)
     d = np.random.random((4, 2)) * np.exp(.1j)
@@ -291,7 +291,7 @@ def test_ndcomplex_swapaxes_quaternion():
     assert d3.has_complex_dims
     assert d3.is_quaternion
 
-    w,x,y,z = as_float_array(d3.data).T
+    w, x, y, z = as_float_array(d3.data).T
 
     d4 = d3.swapaxes(0, 1)
 
@@ -300,7 +300,7 @@ def test_ndcomplex_swapaxes_quaternion():
     assert d4.has_complex_dims
     assert d4.is_quaternion
 
-    wt,xt,yt,zt = as_float_array(d4.data).T
+    wt, xt, yt, zt = as_float_array(d4.data).T
     assert_array_equal(xt, z.T)
     assert_array_equal(zt, x.T)
     assert_array_equal(wt, w.T)
@@ -309,8 +309,7 @@ def test_ndcomplex_swapaxes_quaternion():
     info_(d4)
 
 
-def test_ndcomplex_squeeze(ndarrayunit):  
-
+def test_ndcomplex_squeeze(ndarrayunit):
     nd = NDComplexArray(ndarrayunit)
     assert nd.shape == (10, 8)
 

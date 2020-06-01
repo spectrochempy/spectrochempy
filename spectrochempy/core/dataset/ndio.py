@@ -185,10 +185,10 @@ class NDIO(HasTraits):
                         write_array(fid, np.asanyarray(val), allow_pickle=True)
 
                     zipf.write(tmpfile, arcname=level + key + '.npy')
-                    
+
 
                 elif isinstance(val, CoordSet):
-                    
+
                     for v in val._coords:
                         _objnames = dir(v)
                         if isinstance(v, Coord):
@@ -337,13 +337,13 @@ class NDIO(HasTraits):
                     coords = {}
                 els = key.split('_')
                 dim = els[1]
-                idx = "_"+els[3]
+                idx = "_" + els[3]
                 if dim not in coords.keys():
-                    coords[dim] = CoordSet({idx:Coord()})
+                    coords[dim] = CoordSet({idx: Coord()})
                 if idx not in coords[dim].names:
-                    coords[dim].set(**{idx:Coord()})
+                    coords[dim].set(**{idx: Coord()})
                 setattr(coords[dim][idx], "_%s" % els[4], val)
-            
+
             elif key == "pars.json":
                 pars = json.loads(asstr(val))
             else:
@@ -405,7 +405,7 @@ class NDIO(HasTraits):
                 elif key.endswith("references"):
                     setattributes(coords[dim], "references", val)
                 else:
-                    idx = "_"+els[3]
+                    idx = "_" + els[3]
                     setattributes(coords[dim][idx], els[4], val)
             else:
 
@@ -524,7 +524,7 @@ class NDIO(HasTraits):
             _, extension = os.path.splitext(filename)
             if len(extension) > 0:
                 protocol = extension[1:].lower()
-   
+
         if protocol == 'scp':
             # default reader
             return cls.load(filename, protocol='scp', **kwargs)

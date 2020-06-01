@@ -1,4 +1,6 @@
-div.contentinfo {font-size: 9px}
+div.contentinfo {
+    font-size: 9px
+}
 
 /* sphinx_rtd_theme version 0.4.3 | MIT license */
 /* Built 20190212 16:02 */
@@ -15,8 +17,8 @@ nav, section {
 
 audio, canvas, video {
     display: inline-block;
-    * display: inline;
-    * zoom: 1
+    *display: inline;
+    *zoom: 1
 }
 
 audio:not([controls]) {
@@ -160,7 +162,7 @@ label {
 
 legend {
     border: 0;
-    * margin-left: -7px;
+    *margin-left: -7px;
     padding: 0;
     white-space: normal
 }
@@ -169,7 +171,7 @@ button, input, select, textarea {
     font-size: 100%;
     margin: 0;
     vertical-align: baseline;
-    * vertical-align: middle
+    *vertical-align: middle
 }
 
 button, input {
@@ -179,7 +181,7 @@ button, input {
 button, input[type="button"], input[type="reset"], input[type="submit"] {
     cursor: pointer;
     -webkit-appearance: button;
-    * overflow: visible
+    *overflow: visible
 }
 
 button[disabled], input[disabled] {
@@ -189,8 +191,8 @@ button[disabled], input[disabled] {
 input[type="checkbox"], input[type="radio"] {
     box-sizing: border-box;
     padding: 0;
-    * width: 13px;
-    * height: 13px
+    *width: 13px;
+    *height: 13px
 }
 
 input[type="search"] {
@@ -240,7 +242,7 @@ td {
     background-repeat: no-repeat;
     text-align: left;
     direction: ltr;
-    * line-height: 0
+    *line-height: 0
 }
 
 .ir br {
@@ -360,7 +362,7 @@ input[type="tel"], input[type="color"], select, textarea, .wy-menu-vertical li.o
 }
 
 .clearfix {
-    * zoom: 1
+    *zoom: 1
 }
 
 .clearfix:before, .clearfix:after {
@@ -3762,11 +3764,11 @@ button {
     font-size: 100%;
     margin: 0;
     vertical-align: baseline;
-    * vertical-align: middle;
+    *vertical-align: middle;
     cursor: pointer;
     line-height: normal;
     -webkit-appearance: button;
-    * overflow: visible
+    *overflow: visible
 }
 
 button::-moz-focus-inner, input::-moz-focus-inner {
@@ -3796,7 +3798,7 @@ button[disabled] {
     box-shadow: 0px 1px 2px -1px rgba(255, 255, 255, 0.5) inset, 0px -2px 0px 0px rgba(0, 0, 0, 0.1) inset;
     outline-none: false;
     vertical-align: middle;
-    * display: inline;
+    *display: inline;
     zoom: 1;
     -webkit-user-drag: none;
     -webkit-user-select: none;
@@ -3924,7 +3926,7 @@ button[disabled] {
 
 .wy-btn-group {
     margin-bottom: 24px;
-    * zoom: 1
+    *zoom: 1
 }
 
 .wy-btn-group:before, .wy-btn-group:after {
@@ -4052,8 +4054,8 @@ button[disabled] {
 .wy-form-aligned input, .wy-form-aligned textarea, .wy-form-aligned select,
 .wy-form-aligned .wy-help-inline, .wy-form-aligned label {
     display: inline-block;
-    * display: inline;
-    * zoom: 1;
+    *display: inline;
+    *zoom: 1;
     vertical-align: middle
 }
 
@@ -4091,7 +4093,7 @@ legend {
     white-space: normal;
     margin-bottom: 24px;
     font-size: 150%;
-    * margin-left: -7px
+    *margin-left: -7px
 }
 
 label {
@@ -4105,16 +4107,16 @@ input, select, textarea {
     font-size: 100%;
     margin: 0;
     vertical-align: baseline;
-    * vertical-align: middle
+    *vertical-align: middle
 }
 
 .wy-control-group {
     margin-bottom: 24px;
-    * zoom: 1;
+    *zoom: 1;
     max-width: 68em;
     margin-left: auto;
     margin-right: auto;
-    * zoom: 1
+    *zoom: 1
 }
 
 .wy-control-group:before, .wy-control-group:after {
@@ -4280,7 +4282,7 @@ input[type="button"], input[type="reset"], input[type="submit"] {
     -webkit-appearance: button;
     cursor: pointer;
     font-family: "Lato", "proxima-nova", "Helvetica Neue", Arial, sans-serif;
-    * overflow: visible
+    *overflow: visible
 }
 
 input[type="text"], input[type="password"], input[type="email"],
@@ -4314,8 +4316,8 @@ input[type="checkbox"], input[type="radio"] {
     box-sizing: border-box;
     padding: 0;
     margin-right: .3125em;
-    * height: 13px;
-    * width: 13px
+    *height: 13px;
+    *width: 13px
 }
 
 input[type="search"] {
@@ -4429,8 +4431,8 @@ input[type="radio"][disabled], input[type="checkbox"][disabled] {
 
 .wy-form-message-inline {
     display: inline-block;
-    * display: inline;
-    * zoom: 1;
+    *display: inline;
+    *zoom: 1;
     vertical-align: middle
 }
 
@@ -4780,7 +4782,8 @@ input[type="radio"][disabled], input[type="checkbox"][disabled] {
 .wy-table-bordered-all td, .rst-content table.docutils td {
     border-bottom: 1px solid #e1e4e5;
     border-left: 1px solid #e1e4e5;
-    padding-top: 12px;}
+    padding-top: 12px;
+}
 
 .wy-table-bordered-all tbody > tr:last-child td, .rst-content table.docutils tbody > tr:last-child td {
     border-bottom-width: 0
@@ -5050,7 +5053,7 @@ article ol li ul li {
 }
 
 .wy-breadcrumbs {
-    * zoom: 1
+    *zoom: 1
 }
 
 .wy-breadcrumbs:before, .wy-breadcrumbs:after {
@@ -5127,7 +5130,7 @@ html {
 }
 
 .wy-menu-horiz {
-    * zoom: 1
+    *zoom: 1
 }
 
 .wy-menu-horiz:before, .wy-menu-horiz:after {
@@ -5455,7 +5458,8 @@ html {
 }
 
 .wy-body-for-nav {
-    /* background: #fcfcfc; *//* border-top: 2px red; */}
+    /* background: #fcfcfc; *//* border-top: 2px red; */
+}
 
 .wy-grid-for-nav {
     position: absolute;
@@ -5495,7 +5499,7 @@ html {
     line-height: 50px;
     text-align: center;
     font-size: 100%;
-    * zoom: 1
+    *zoom: 1
 }
 
 .wy-nav-top:before, .wy-nav-top:after {
@@ -5572,7 +5576,7 @@ footer span.commit code, footer span.commit .rst-content tt, .rst-content footer
 }
 
 .rst-footer-buttons {
-    * zoom: 1
+    *zoom: 1
 }
 
 .rst-footer-buttons:before, .rst-footer-buttons:after {
@@ -5590,7 +5594,7 @@ footer span.commit code, footer span.commit .rst-content tt, .rst-content footer
 
 .rst-breadcrumbs-buttons {
     margin-top: 12px;
-    * zoom: 1
+    *zoom: 1
 }
 
 .rst-breadcrumbs-buttons:before, .rst-breadcrumbs-buttons:after {
@@ -5725,7 +5729,7 @@ footer span.commit code, footer span.commit .rst-content tt, .rst-content footer
     font-size: 90%;
     cursor: pointer;
     color: #27AE60;
-    * zoom: 1
+    *zoom: 1
 }
 
 .rst-versions .rst-current-version:before, .rst-versions .rst-current-version:after {
@@ -6200,7 +6204,8 @@ footer span.commit code, footer span.commit .rst-content tt, .rst-content footer
     padding-right: 10px;
     text-align: left;
     white-space: nowrap;
-    background-color: rgb(241, 254, 243);}
+    background-color: rgb(241, 254, 243);
+}
 
 .rst-content table.field-list .field-body {
     text-align: left
@@ -6256,7 +6261,8 @@ a .rst-content tt, a .rst-content code {
 
 .rst-content dl:not(.docutils) {
     margin-bottom: 24px;
-    border-top: 3px solid lightgray;}
+    border-top: 3px solid lightgray;
+}
 
 .rst-content dl:not(.docutils) dt {
     display: table;
@@ -6294,7 +6300,8 @@ a .rst-content tt, a .rst-content code {
 
 .rst-content dl:not(.docutils) dt:first-child {
     margin-top: 0;
-    width: 100%;}
+    width: 100%;
+}
 
 .rst-content dl:not(.docutils) tt, .rst-content dl:not(.docutils) tt,
 .rst-content dl:not(.docutils) code {
@@ -6313,7 +6320,8 @@ a .rst-content tt, a .rst-content code {
 .rst-content dl:not(.docutils) tt.descname, .rst-content dl:not(.docutils) tt.descname,
 .rst-content dl:not(.docutils) code.descname {
     font-weight: bold;
-    /* border-top: 2px solid #000022; *//* width: 100%; */}
+    /* border-top: 2px solid #000022; *//* width: 100%; */
+}
 
 .rst-content dl:not(.docutils) .optional {
     display: inline-block;

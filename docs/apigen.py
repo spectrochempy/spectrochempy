@@ -51,11 +51,10 @@ def write_file(name, text, opts):
     if opts.dryrun:
         print('Would create file %s.' % fname)
         return
-    
+
     with FileAvoidWrite(fname) as f:
         f.write(text)
         print('Writing file %s.' % fname)
-
 
 
 def main(rootpath, **kwargs):
@@ -92,7 +91,7 @@ def main(rootpath, **kwargs):
 
     # default options
     opts = Options({
-        'destdir':None,
+        'destdir': None,
         'exclude_patterns': [],
         'force': False,
         'dryrun': False,
@@ -105,12 +104,12 @@ def main(rootpath, **kwargs):
 
     if opts.force:
         shutil.rmtree(destdir, ignore_errors=True)
-        
+
     if not opts.dryrun or opts.force:
         os.makedirs(destdir, exist_ok=True)
-        
+
     create_api_files(rootpath, opts)
-    
+
     return
 
 
@@ -198,7 +197,7 @@ def create_api_files(rootpath, opts):
        <div style='clear:both'></div>
     
     """)
-    
+
     functemplate = textwrap.dedent("""
     
     {project}.{func}
@@ -263,22 +262,21 @@ def write_prefs():
 
 
 if __name__ == "__main__":
-    
     PROJECT = "spectrochempy"
     PROJECTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
     DOCDIR = os.path.join(PROJECTDIR, "docs")
-    API = os.path.join(DOCDIR, 'api','generated')
+    API = os.path.join(DOCDIR, 'api', 'generated')
 
     main(SOURCESDIR,
-            tocdepth=1,
-            force=False,
-            includeprivate=True,
-            destdir=API,
-            exclude_patterns=[
-                'NDArray',
-                'NDComplexArray',
-                'NDIO',
-                'NDPlot',
-            ],
+         tocdepth=1,
+         force=False,
+         includeprivate=True,
+         destdir=API,
+         exclude_patterns=[
+             'NDArray',
+             'NDComplexArray',
+             'NDIO',
+             'NDPlot',
+         ],
          )

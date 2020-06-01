@@ -10,8 +10,8 @@
 import logging
 from spectrochempy import WARNING, INFO, error_, debug_, info_, warning_, set_loglevel
 
-def test_logger(caplog):
 
+def test_logger(caplog):
     logger = logging.getLogger('SpectroChemPy')
     logger.propagate = True
     caplog.set_level(logging.DEBUG)
@@ -23,7 +23,7 @@ def test_logger(caplog):
     set_loglevel(WARNING)
     assert logger.level == logging.WARNING
 
-    error_('\n'+'*' * 80+'\n')
+    error_('\n' + '*' * 80 + '\n')
     debug_('debug in WARNING level - should not appear')
     info_('info in WARNING level - should not appear')
     warning_('OK this is a Warning')
@@ -54,4 +54,3 @@ def test_logger(caplog):
     error_('OK This is an Error')
     assert caplog.records[-1].levelname == 'ERROR'
     assert caplog.records[-1].message == 'OK This is an Error'
-

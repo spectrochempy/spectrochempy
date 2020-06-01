@@ -10,8 +10,9 @@
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.core.dataset.ndcoordrange import CoordRange
 from spectrochempy.units import ur
-from spectrochempy.utils import  MASKED, show
+from spectrochempy.utils import MASKED, show
 from spectrochempy.core import info_
+
 
 def test_concatenate(IR_dataset_2D):
     dataset = IR_dataset_2D
@@ -56,13 +57,12 @@ def test_concatenate(IR_dataset_2D):
 
 
 def test_concatenate_1D_along_axis1(IR_dataset_2D):
-
     # equivalent to stack
 
     dataset = IR_dataset_2D
 
     # make these data with a mask
-    dataset[:,1] = MASKED
+    dataset[:, 1] = MASKED
     info_(dataset)
 
     # split all rows
@@ -91,14 +91,13 @@ def test_concatenate_1D_along_axis1(IR_dataset_2D):
 
 
 def test_concatenate_along_dim_x(IR_dataset_2D):
-
     dim = 'x'
     dataset = IR_dataset_2D
     axis, dim = dataset.get_axis(dim)
     coord = dataset.coord(dim=dim)
 
     # test along dim x
-    ranges = ( [1500., 1800.], [3500., 6000.])
+    ranges = ([1500., 1800.], [3500., 6000.])
 
     ranges = CoordRange(*ranges, reversed=coord.reversed)
     assert ranges == [[6000.0, 3500.0], [1800.0, 1500.0]]  # rearranged according the reversed flag

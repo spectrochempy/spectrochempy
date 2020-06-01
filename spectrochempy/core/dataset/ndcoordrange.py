@@ -12,7 +12,6 @@ This module implements the class |CoordRange|.
 
 __all__ = ['CoordRange']
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
@@ -57,23 +56,23 @@ class Range(List):
     """
     klass = list
     _cast_types = (tuple,)
-    
+
     # Describe the trait type
     info_text = 'an ordered interval trait'
     allow_none = True
-    
+
     def __init__(self, default_value=None, **kwargs):
-        
+
         super(Range, self).__init__(trait=None, default_value=default_value,
                                     **kwargs)
         pass
-    
+
     def length_error(self, obj, value):
         e = "The '%s' trait of %s instance must be of length 2 exactly," \
             " but a value of %s was specified." \
             % (self.name, class_of(obj), value)
         raise TraitError(e)
-    
+
     def validate_elements(self, obj, value):
         if value is None or len(value) == 0:
             return
@@ -83,12 +82,12 @@ class Range(List):
         value.sort()
         value = super(Range, self).validate_elements(obj, value)
         return value
-    
+
     def validate(self, obj, value):
-        
+
         value = super(Range, self).validate(object, value)
         value = self.validate_elements(obj, value)
-        
+
         return value
 
 

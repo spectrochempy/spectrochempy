@@ -14,20 +14,20 @@ from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_approx_equal
 import pytest
 
-def test_read_zunimplemented():
 
+def test_read_zunimplemented():
     with pytest.raises(NotImplementedError):
         A = NDDataset.read_zip('agirdata/P350/FTIR/FTIR.zip')
 
-def test_read_zip():
 
-    #with pytest.raises(NotImplementedError):
+def test_read_zip():
+    # with pytest.raises(NotImplementedError):
     #    A = NDDataset.read_zip('agirdata/A350/FTIR/FTIR.zip')
 
     A = NDDataset.read_zip('agirdata/P350/FTIR/FTIR.zip',
                            origin='omnic_export',
                            only=10,
-                           delimiter = ';')
+                           delimiter=';')
 
     A.plot_stack()
     show()
@@ -54,9 +54,11 @@ def test_read_csv_IR():
     B.plot()
     show()
 
+
 def test_read_without_directory():
     B = NDDataset.read_csv('irdata/IR.CSV')
     print(B)
+
 
 def test_read_without_filename():
     B = NDDataset.read_csv()

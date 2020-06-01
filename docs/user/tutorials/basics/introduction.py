@@ -30,7 +30,7 @@
 import numpy as np
 import spectrochempy as scp
 import matplotlib.pyplot as plt
-import sys, os 
+import sys, os
 
 # %% [markdown]
 # ## Numpy array
@@ -43,7 +43,7 @@ import sys, os
 #  
 
 # %%
-a = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])   # Create a rank 1 array
+a = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])  # Create a rank 1 array
 a
 
 # %% [markdown]
@@ -61,7 +61,7 @@ a
 # For example, its type:
 
 # %%
-type(a)          # Prints the type of data
+type(a)  # Prints the type of data
 
 # %% [markdown]
 # which can be used in some test, as in the following kind of test.
@@ -69,20 +69,19 @@ type(a)          # Prints the type of data
 # %%
 isinstance(a, np.ndarray)
 
-
 # %% [markdown]
 # ## Numpy array attributes
 #
 # Another important feature of arrays is that they have several "builtin" attributes:
 
 # %%
-a.shape            #  the shape is a tuple with the size of all dimensions
+a.shape  # the shape is a tuple with the size of all dimensions
 
 # %%
-a.size             #  the size is the total number of elements
+a.size  # the size is the total number of elements
 
 # %%
-a.dtype            # the dtype 
+a.dtype  # the dtype
 
 # %% [markdown]
 # The data type (dtype) of the numpy array was automatically set at the array creation from the type of the elements.
@@ -96,7 +95,7 @@ a.dtype            # the dtype
 # dependending of you operating system. To have for instance real number whe must write *5.*:
 
 # %%
-type(5), type(5.)    # prints "(int, float)"
+type(5), type(5.)  # prints "(int, float)"
 
 # %% [markdown]
 # Note that we can change the dtype easily using the method `astype`:
@@ -112,11 +111,11 @@ a.dtype
 # But you can also force your data to be in a given type at the  creation step
 
 # %%
-b = np.array([ [1,2], [2,1]], dtype='complex128')    # create a rank-2 array of type complex128
+b = np.array([[1, 2], [2, 1]], dtype='complex128')  # create a rank-2 array of type complex128
 b.dtype
 
 # %%
-b.real.dtype, b.imag.dtype   # the real and imaginary part are of type float64
+b.real.dtype, b.imag.dtype  # the real and imaginary part are of type float64
 
 # %% [markdown]
 # ## NDDataset
@@ -153,10 +152,10 @@ nd.data
 # We can use the python assert method to check that the two object are indeed related (same attributes)
 
 # %%
-assert a.size == nd.size                   # assert return an AssertionError if the condition is False
+assert a.size == nd.size  # assert return an AssertionError if the condition is False
 assert a.shape == nd.shape
 assert a.dtype == nd.dtype
-assert np.all(a == nd.data)                # here we use np.all to allow comparison between two arrays
+assert np.all(a == nd.data)  # here we use np.all to allow comparison between two arrays
 
 # %% [markdown]
 # Some of the other dataset attributes are displayed when the dataset is displayed:
@@ -179,37 +178,37 @@ dir(nd)
 # There are many ways to create numpy arrays - it is worth to know some of them.
 
 # %%
-b = np.zeros((2,2))   # Create an array of all zeros
+b = np.zeros((2, 2))  # Create an array of all zeros
 b
 
 # %%
-c = np.ones((1,2))    # Create an array of all ones
+c = np.ones((1, 2))  # Create an array of all ones
 c
 
 # %%
-d = np.full((2,2,3), 7)  # Create an array filled with a given value
+d = np.full((2, 2, 3), 7)  # Create an array filled with a given value
 d
 
 # %%
-e = np.eye(3)            # Create a 3x3 identity matrix
+e = np.eye(3)  # Create a 3x3 identity matrix
 e
 
 # %%
-f = np.random.random((2,2))  # Create an array filled with random values
+f = np.random.random((2, 2))  # Create an array filled with random values
 f
 
 # %%
-np.arange(1,21,3)             # create a rank-1 numpy array with successive elements 
-                              # from 1 to 20, by step of 3 (21 not being ingluded)
+np.arange(1, 21, 3)  # create a rank-1 numpy array with successive elements
+# from 1 to 20, by step of 3 (21 not being ingluded)
 
 # %%
-np.linspace( -5,5,50)         # create un array with 50 values regularly spaced betwwen -5 and 5
+np.linspace(-5, 5, 50)  # create un array with 50 values regularly spaced betwwen -5 and 5
 
 # %% [markdown]
 # The same is possible with dataset for some of the above functions (zeros, ones, full, eye (in 0.1.18-dev) 
 
 # %%
-scp.full((2,3,4), 100.)
+scp.full((2, 3, 4), 100.)
 
 # %%
 # WARNING: scp.eyes and scp.random not yet implemented (will be done for v.0.1.18)
@@ -218,19 +217,19 @@ scp.full((2,3,4), 100.)
 # One interesting trick you can use when creating arrays is `reshaping`. Let's take an example
 
 # %%
-a = np.arange(8)     # the method arange create an rank-1 array with the an integer series of 8 element in the present case
+a = np.arange(8)  # the method arange create an rank-1 array with the an integer series of 8 element in the present case
 a
 
 # %%
-a = a.reshape((2,4))      # transform the array with shape (8,)  to a rank-2 array with shape (2,4)
+a = a.reshape((2, 4))  # transform the array with shape (8,)  to a rank-2 array with shape (2,4)
 a
 
 # %%
-a = a.reshape((4,2))      # transform the array with shape (2,4)  to a rank-2 array with shape (4,2)
+a = a.reshape((4, 2))  # transform the array with shape (2,4)  to a rank-2 array with shape (4,2)
 a
 
 # %%
-a = a.reshape((2,2,2))      # transform the array with shape (4,2)  to a rank-3 array with shape (2,2,2)
+a = a.reshape((2, 2, 2))  # transform the array with shape (4,2)  to a rank-3 array with shape (2,2,2)
 a
 
 # %% [markdown]
@@ -242,7 +241,7 @@ nd3
 
 # %%
 # warning: nd3.reshape(8) DOES NOT WORK ! # for now no similar function as reshape has been implemented in SpectroChemPy 
-                                          # (it could be in future roadmap)
+# (it could be in future roadmap)
 
 # %% [markdown]
 # ## Creating an array from files or from functions 
@@ -259,32 +258,32 @@ nd3
 # Here I will just give an example, using some data from OMNIC.
 
 # %%
-path = scp.general_preferences.datadir      # this is a path provided that point on a example set of data. 
-                                            # It can be replaced by any other path you like
+path = scp.general_preferences.datadir  # this is a path provided that point on a example set of data.
+# It can be replaced by any other path you like
 
 # %% hidden="true" jupyter={"source_hidden": true} nbsphinx="hidden"
 # THESE LINE IS JUST HERE FOR BUILDING THE DOCUMENTATION (IT SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
 path = '/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata'
 
 # %%
-fs = scp.FileSelector(path = path, filters=['spg','spa'])
+fs = scp.FileSelector(path=path, filters=['spg', 'spa'])
 fs
 
 # %% nbsphinx="hidden"
 # THESE TWO LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION (THEY SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
-fs.fullpath ='/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/CO@Mo_Al2O3.SPG'
+fs.fullpath = '/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/CO@Mo_Al2O3.SPG'
 fs.value = 'CO@Mo_Al2O3.SPG'
 
 # %%
-fs.fullpath        # retrieve the path selected in the previous step
+fs.fullpath  # retrieve the path selected in the previous step
 
 # %%
-data = scp.read(fs.fullpath)             #now import it
+data = scp.read(fs.fullpath)  # now import it
 data
 
 # %%
-ax = data.plot()                                     # now plot it
-_ = ax.set_title(fs.value)                           # add a title
+ax = data.plot()  # now plot it
+_ = ax.set_title(fs.value)  # add a title
 
 # %% [markdown]
 # ### Create array from functions and plot it
@@ -296,14 +295,14 @@ _ = ax.set_title(fs.value)                           # add a title
 # But a simple and fast methods is to use `lambda` function.
 
 # %%
-fid = lambda t, w, T2 :  (np.cos(2. * np.pi * w * t) + 1j* np.sin(2. * np.pi * w * t)) * np.exp(-t/T2)
+fid = lambda t, w, T2: (np.cos(2. * np.pi * w * t) + 1j * np.sin(2. * np.pi * w * t)) * np.exp(-t / T2)
 # in this model function we generate a sinusoidal time (t) evolution with an angular frequency w, and a relaxation T2.  
 
 # %%
 # example
-t = np.linspace(0, 100., 1000.)            # t in second
-y = fid(t, 200., 10.)                      # we get a complex array   w in MHz, T2 in s
-y .dtype
+t = np.linspace(0, 100., 1000.)  # t in second
+y = fid(t, 200., 10.)  # we get a complex array   w in MHz, T2 in s
+y.dtype
 
 # %%
 # plot it
@@ -313,7 +312,7 @@ plt.plot(t, y)
 # We can use Spectrochempy to create an dataset:
 
 # %%
-timecoord = scp.Coord(t, title='time', units='second') 
+timecoord = scp.Coord(t, title='time', units='second')
 ndfid = scp.NDDataset(y, dims=['x'], coords=[timecoord], title='signal')
 ndfid.plot()
 
@@ -323,8 +322,8 @@ ndfid.plot()
 # An essential property of numpy arrays is the ability to perform mathematical operations on and between them.  
 
 # %%
-a = np.full((5,3), 10.)        # A 2D array with 5 rows and 3 columns
-b = np.array([[1,2,3,4,5]])    # A 2D array with & row and 5 columns
+a = np.full((5, 3), 10.)  # A 2D array with 5 rows and 3 columns
+b = np.array([[1, 2, 3, 4, 5]])  # A 2D array with & row and 5 columns
 
 # %% [markdown]
 # Clearly, the addition of a and b which is perfomed elementwise can not be used in this cas because the shapes mismatch. 

@@ -44,9 +44,9 @@ from tqdm.autonotebook import tqdm
 __all__ = [
     # Useful librairies alias for the end user avoiding to load them
     # --------------------------------------------------------------
-    
+
     'np', 'plt', 'scipy', 'os', 'sys', 'mpl',
-    
+
     ### methods and objects from other packages will be added
     ### later on this module (see below)
 
@@ -55,10 +55,12 @@ __all__ = [
 # ======================================================================================================================
 # Progress bar
 # ======================================================================================================================
-if os.environ.get('USE_TQDM','Yes') == 'Yes':
+if os.environ.get('USE_TQDM', 'Yes') == 'Yes':
     pbar = tqdm(total=1211)
     pbar.set_description('Loading SpectroChemPy API')
     val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
+
+
     def _pbar_update(i):
         if i == 'CLOSE':
             pbar.clear()
@@ -69,8 +71,7 @@ if os.environ.get('USE_TQDM','Yes') == 'Yes':
 else:
     def _pbar_update(i):
         pass
-    
-    
+
 # ======================================================================================================================
 # loading module libraries
 # here we also construct the __all__ list automatically
@@ -187,7 +188,7 @@ __all__ += [
     'available_styles',
     'set_loglevel',
     'get_loglevel',
-    
+
     ### Info
     'copyright',
     'version',
@@ -240,7 +241,7 @@ __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 
 try:
     import sympy as sym
-    
+
     HAS_SYMPY__ = True
     __all__.append('sym')
 except ImportError:
@@ -250,7 +251,7 @@ __all__.append('HAS_SYMPY')
 
 try:
     import sklearn as skl
-    
+
     HAS_SCIKITLEARN = True
     __all__.append('skl')
 except ImportError:
@@ -258,10 +259,9 @@ except ImportError:
 
 __all__.append('HAS_SCIKITLEARN')
 
-
 try:
     import xarray as xr
-    
+
     HAS_XARRAY = True
     __all__.append('xr')
 except:
@@ -271,7 +271,7 @@ __all__.append('HAS_XARRAY')
 
 try:
     import pandas as pd
-    
+
     HAS_PANDAS = True
     __all__.append('pd')
 except:
@@ -295,7 +295,6 @@ from spectrochempy.core.plotters import api
 
 __all__ += api.__all__
 
-
 # processors
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(4)
@@ -303,7 +302,6 @@ from spectrochempy.core.processors.api import *
 from spectrochempy.core.processors import api
 
 __all__ += api.__all__
-
 
 # readers
 # ----------------------------------------------------------------------------------------------------------------------
@@ -400,7 +398,6 @@ __all__.append('APIref')
 _pbar_update(14)
 
 _pbar_update('CLOSE')
-
 
 _started = app.start()
 

@@ -14,7 +14,6 @@ from spectrochempy.core import info_
 
 
 def test_EFA(IR_dataset_2D):
-
     ds = IR_dataset_2D.copy()
 
     info_(ds)
@@ -36,8 +35,6 @@ def test_EFA(IR_dataset_2D):
     c.T.plot()
 
     show()
-
-
 
 
 # ======================================================================================================================

@@ -47,4 +47,3 @@ def is_kernel():
     from IPython import get_ipython
     # check for `kernel` attribute on the IPython instance
     return getattr(get_ipython(), 'kernel', None) is not None
-

@@ -15,11 +15,11 @@ from spectrochempy.utils import MASKED
 from spectrochempy.core import info_
 from numpy.testing import assert_allclose
 
+
 # test svd
-#-----------
+# -----------
 
 def test_svd(IR_dataset_2D):
-
     dataset = IR_dataset_2D.copy()
     info_(dataset)
 
@@ -33,10 +33,9 @@ def test_svd(IR_dataset_2D):
     info_((svd.ev_cum))
     info_((svd.ev_ratio))
 
-    assert_allclose( svd.ev_ratio[0].data, 94.539, rtol=1e-5, atol=0.0001)
+    assert_allclose(svd.ev_ratio[0].data, 94.539, rtol=1e-5, atol=0.0001)
 
-    #TODO: add round function to NDDataset
-
+    # TODO: add round function to NDDataset
 
     # with masks
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
@@ -62,7 +61,7 @@ def test_svd(IR_dataset_2D):
 
     ax = dataset.plot_stack()
 
-    svd = SVD(dataset, full_matrices = True)
+    svd = SVD(dataset, full_matrices=True)
 
     info_()
     info_((svd.U))

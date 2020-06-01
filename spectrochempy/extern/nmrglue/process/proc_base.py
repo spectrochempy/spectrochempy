@@ -53,7 +53,7 @@ def em(data, lb=0.0, inv=False, rev=False):
     if rev:
         apod = apod[::-1]
     if inv:
-        apod = 1 / apod   # invert apodization
+        apod = 1 / apod  # invert apodization
     return apod * data
 
 
@@ -217,7 +217,7 @@ def sp(data, off=0, end=1.0, pow=1.0, inv=False, rev=False):
     """
     size = data.shape[-1]
     apod = np.power(np.sin(pi * off + pi * (end - off) * np.arange(size) /
-                    (size - 1)).astype(data.dtype), pow).astype(data.dtype)
+                           (size - 1)).astype(data.dtype), pow).astype(data.dtype)
     if rev:
         apod = apod[::-1]
     if inv:
@@ -310,7 +310,7 @@ def tri(data, loc="auto", lHi=0.0, rHi=0.0, inv=False, rev=False):
     if loc == "auto":
         loc = int(size / 2.)
     apod = np.concatenate((np.linspace(lHi, 1., loc), np.linspace(1., rHi,
-                          size - loc + 1)[1:])).astype(data.dtype)
+                                                                  size - loc + 1)[1:])).astype(data.dtype)
     if rev:
         apod = apod[::-1]
     if inv:
@@ -477,7 +477,7 @@ def fsh2(data, pts):
     """
     s = float(data.shape[-1])
     return fft_positive(np.exp(2.j * pi * pts * np.arange(s) /
-                        s).astype(data.dtype) * ifft_positive(data))
+                               s).astype(data.dtype) * ifft_positive(data))
 
 
 ##############
@@ -545,7 +545,7 @@ def irft(xp):
     """
     # XXX figure out what exactly this is doing
     s = xp.shape[-1]
-    xp = np.fft.ifft(nmr_reorder(xp))   # re-order, inverse FT
+    xp = np.fft.ifft(nmr_reorder(xp))  # re-order, inverse FT
 
     # output results
     x = np.zeros(xp.shape, dtype="float32")
@@ -792,7 +792,7 @@ def gray(n):
     """
     g = [0, 1]
     for i in range(1, int(n)):
-        mg = g + g[::-1]   # mirror the current code
+        mg = g + g[::-1]  # mirror the current code
         # first bit 0/2**u for mirror
         first = [0] * 2 ** (i) + [2 ** (i)] * 2 ** (i)
         g = [mg[j] + first[j] for j in range(2 ** (i + 1))]
@@ -993,7 +993,6 @@ def tp(data, hyper=False):
 
 
 ytp = tp
-
 
 xy2yx = tp
 
@@ -1230,7 +1229,7 @@ def dx(data):
 
     """
     z = np.empty_like(data)
-    z[..., 0] = data[..., 1] - data[..., 0]    # first point
+    z[..., 0] = data[..., 1] - data[..., 0]  # first point
     z[..., -1] = data[..., -1] - data[..., -2]  # last point
     z[..., 1:-1] = data[..., 2:] - data[..., :-2]  # interior
     return z
@@ -1317,7 +1316,7 @@ def ext_mid(data):
 
     """
     return data[..., int(data.shape[-1] * 1. / 4.):
-                int(data.shape[-1] * 3. / 4.)]
+                     int(data.shape[-1] * 3. / 4.)]
 
 
 # Integrate
@@ -1579,7 +1578,7 @@ def c2ri(data):
     s = list(data.shape)
     s[-1] = int(s[-1] / 2)
     n = np.empty(s, temp.dtype)
-    del(temp)
+    del (temp)
     n.real = data.real[..., ::2]
     n.imag = data.real[..., 1::2]
     return n
@@ -1632,7 +1631,7 @@ def rr2ri(data):
     half = int(s[-1] / 2.0)
     s[-1] = half
     n = np.empty(s, temp.dtype)
-    del(temp)
+    del (temp)
     n.real = data[..., :half]
     n.imag = data[..., half:]
     return n
@@ -1824,16 +1823,16 @@ def coadd(data, clist, axis=-1):
     # algorith creates a empty array, then fills it element wise
     # with each factor from clist times the blocks selected
 
-    s = list(data.shape)    # data shape
-    k = len(clist)          # length of coefficient list
+    s = list(data.shape)  # data shape
+    k = len(clist)  # length of coefficient list
 
-    if axis == 1 or axis == -1:   # 'x' axis
+    if axis == 1 or axis == -1:  # 'x' axis
         s[-1] = int(np.floor(float(s[-1]) / k))
         n = np.zeros(s, dtype=data.dtype)
-        m = s[-1] * k   # last element read
+        m = s[-1] * k  # last element read
         for i in range(k):
             n = n + clist[i] * data[..., i:m:k]
-    else:   # 'y' axis
+    else:  # 'y' axis
         s[0] = int(np.floor(float(s[0]) / k))
         n = np.zeros(s, dtype=data.dtype)
         m = s[0] * k
@@ -2384,7 +2383,7 @@ def gram_schmidt(data):
     # therefore:
     # imag(data'') = R/S*imag(data) - R*C/(S*R) * real(data)
     # so A = R/S, B=-C/(S)
-    return(R / S, -C / S)
+    return (R / S, -C / S)
 
 
 # Complex Mixing
@@ -2508,19 +2507,19 @@ def zd(data, window, x0=0.0, slope=1.0):
 
 
     """
-    width = len(window)             # full width
-    wide = int((width - 1.) / 2)    # half width
-    rows = data.shape[0]            # rows in data
-    cols = data.shape[-1]           # columns in data
-    c_start = x0 + slope            # start of center diagonal band
+    width = len(window)  # full width
+    wide = int((width - 1.) / 2)  # half width
+    rows = data.shape[0]  # rows in data
+    cols = data.shape[-1]  # columns in data
+    c_start = x0 + slope  # start of center diagonal band
 
     # last row to apply window to is last row or where we run off the grid
     max_r = int(min(rows, np.floor((cols - c_start + wide) / slope) + 1))
 
     # apply window to band row by row
     for r in range(max_r):  # r from 0 to max_r-1
-        w_min = 0           # window min
-        w_max = width       # window max
+        w_min = 0  # window min
+        w_max = width  # window max
 
         c_mid = int(r * slope + (c_start))  # middle of diagonal band
         c_min = c_mid - wide

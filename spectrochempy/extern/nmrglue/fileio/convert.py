@@ -39,6 +39,7 @@ class converter(object):
     parameters are guessed from the file format's dictionary of parameters.
 
     """
+
     def __init__(self):
         """
         Create a converter object
@@ -68,10 +69,10 @@ class converter(object):
             warn("Incompatible dtypes, conversion not recommended")
 
         # Return data
-        if isinstance(self._data, np.ndarray):   # in memory data
+        if isinstance(self._data, np.ndarray):  # in memory data
             return self.__procdata()
 
-        else:   # return emulated data
+        else:  # return emulated data
             iproc = self._iproc
             oproc = self._oproc
             odtype = self._odtype
@@ -156,7 +157,7 @@ class converter(object):
         self._data = data
         if udic is not None and udic[0]['encoding'].lower() == "tppi":
             self._iproc = {"imagfactor": -1.0}
-        else:   # states, etc needs sign alt. of indirect dim.
+        else:  # states, etc needs sign alt. of indirect dim.
             self._iproc = {"alt_id_sign": True, "imagfactor": -1.0}
 
         # set the universal dictionary
@@ -483,16 +484,16 @@ class udata_nd(fileiobase.data_nd):
         create and set up
         """
         # set converter attributes
-        self._iproc = iproc         # input processing dictionary
-        self._oproc = oproc         # output processing dictionary
-        self._odtype = odtype       # output dtype
-        self.edata = edata          # file
+        self._iproc = iproc  # input processing dictionary
+        self._oproc = oproc  # output processing dictionary
+        self._odtype = odtype  # output dtype
+        self.edata = edata  # file
 
         # required data_nd attributes
         self.order = order
         self.fshape = edata.fshape
         self.dtype = odtype
-        self.__setdimandshape__()   # set ndim and shape attributes
+        self.__setdimandshape__()  # set ndim and shape attributes
 
     def __fcopy__(self, order):
         """
@@ -510,8 +511,8 @@ class udata_nd(fileiobase.data_nd):
         data = self.edata.__fgetitem__(slices)
 
         # input processing
-        if "alt_id_sign" in self._iproc:    # sign alt. indirect dimension
-            if "alt_id_sign" not in self._oproc:    # skip if in both
+        if "alt_id_sign" in self._iproc:  # sign alt. indirect dimension
+            if "alt_id_sign" not in self._oproc:  # skip if in both
                 fslice = slices[:-1]
                 ffshape = self.fshape[:-1]
                 nd_iter = fileiobase.ndtofrom_iter(ffshape, fslice)

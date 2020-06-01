@@ -295,10 +295,10 @@ class NDComplexArray(NDArray):
             new = self.copy()
         else:
             new = self  # work inplace
-    
+
         dims = self._get_dims_from_args()
         axis = self._get_dims_index(dims)
-    
+
         if new.is_quaternion:
             # TODO:
             new.swapaxes(axis, -1, inplace=True)

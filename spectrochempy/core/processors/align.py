@@ -52,10 +52,10 @@ def can_merge_or_align(coord1, coord2):
         # same coordinates
         can_merge = True  # merge is obvious
         can_align = True  # of course as it is the same coordinate
-    
+
     else:
         # no the same coordinates
-        can_merge = False # we need to do alignment to merge
+        can_merge = False  # we need to do alignment to merge
         # can align only if data exists, units compatibles, and title are the same
         can_align = True
         can_align &= not coord1.is_empty
@@ -66,9 +66,10 @@ def can_merge_or_align(coord1, coord2):
                 can_align &= coord1.is_units_compatible(coord2)
             else:
                 can_align &= coord2.is_units_compatible(coord1)
-    
+
     return can_merge, can_align
-    
+
+
 # ............................................................................
 def align(dataset, *others, **kwargs):
     """
@@ -123,98 +124,98 @@ def align(dataset, *others, **kwargs):
     """
     # TODO: Perform an alignment along numeric labels
     # TODO: add example in docs
-    
+
     # copy objects?
     copy = kwargs.pop('copy', True)
-   
+
     # make a single list with dataset and the remaining object
     objects = [dataset] + list(others)
-    
+
     # should we align on given external coordinates
     extern_coord = kwargs.pop('coord', None)
-    
+
     # what's the method to use (by default='outer')
-    method = kwargs.pop('method','outer')
-    
+    method = kwargs.pop('method', 'outer')
+
     # trivial cases where alignment is not possible or unecessary
     if not objects:
         warning_('No object provided for alignment!')
         return None
 
-    if len(objects)==1 and objects[0].implements('NDDataset') and extern_coord is None:
+    if len(objects) == 1 and objects[0].implements('NDDataset') and extern_coord is None:
         # no necessary alignment
         return objects
-    
+
     # get all objets to align
     _objects = {}
     _nobj = 0
-    
+
     for idx, object in enumerate(objects):
-        
+
         if not object.implements('NDDataset') and not object.implements('NDPanel'):
             error_(f'Bad object(s) found: {object}. Note that only NDDataset or NDPanel objects are accepted '
                    f'for alignment')
             return None
-        
+
         if object.implements('NDPanel'):
-            
-            for k,v in object.datasets.items():
+
+            for k, v in object.datasets.items():
                 # set the coordset into the NDDataset object (temporary: this will be unset at the end)
                 v.coords = object.coords
-                _objects[_nobj]={'obj':v, 'idx':idx, 'is_panel':True, 'key':k}
+                _objects[_nobj] = {'obj': v, 'idx': idx, 'is_panel': True, 'key': k}
                 _nobj += 1
 
         else:
-            _objects[_nobj]={'obj':object, 'idx':idx, 'is_panel':False}
+            _objects[_nobj] = {'obj': object, 'idx': idx, 'is_panel': False}
             _nobj += 1
-    
-    _last = _nobj-1
-    
+
+    _last = _nobj - 1
+
     # get the reference object (by default the fist, except if method if set  to 'last'
     ref_obj_index = 0
     if method == 'last':
         ref_obj_index = _last
     ref_obj = _objects[ref_obj_index]['obj']
-    
+
     # get the relevant dimension names
     ref_dims = ref_obj.dims
     axis = kwargs.pop('axis', -1)
     dim = kwargs.pop('dim', ref_dims[axis])
     dims = kwargs.pop('dims', [dim])
-    
+
     # check compatibility of the dims and prepare the dimension for alignment
     for dim in dims:
-        
+
         # as we will sort their coordinates at some point, we need to know if the coordinates need to be reversed at
         # the end of the alignment process
         reversed = ref_obj.coords[dim].reversed
         if reversed:
-            ref_obj.sort(descend = False, dim=dim, inplace=True)
-            
+            ref_obj.sort(descend=False, dim=dim, inplace=True)
+
         # get the coordset corresponding to the reference object
         ref_obj_coords = ref_obj.coords
-        
+
         # get the coordinate for the reference dimension
         ref_coord = ref_obj_coords[dim]
 
         # as we will sort their coordinates at some point, we need to know if the coordinates need to be reversed at
         # the end of the alignment process
         reversed = ref_coord.reversed
-        
+
         # prepare a new Coord object to store the final new dimenson
         new_coord = ref_coord.copy()
-        
+
         # loop on all object
         for index, object in _objects.items():
-            
+
             obj = object['obj']
-            
+
             if obj is ref_obj:
                 # not necessary to compare with itself!
                 continue
 
             if reversed:
-                obj.sort(descend = False, dim=dim, inplace=True)
+                obj.sort(descend=False, dim=dim, inplace=True)
 
             # get the current objet coordinates and check compatibility
             coord = obj.coords[dim]
@@ -229,60 +230,60 @@ def align(dataset, *others, **kwargs):
             # adjust the new_cord depending on the method of alignement
             new_coord_data = set(new_coord.data)
             coord_data = set(coord.data)
-            
-            if method in ['outer','interpolate']:
+
+            if method in ['outer', 'interpolate']:
                 # in this case we do a union of the coords (masking the missing values)
                 # For method=`interpolate`, the interpolation will be performed in a second step
                 new_coord._data = sorted(coord_data | new_coord_data)
-                
+
             elif method == 'inner':
                 # take only intersection of the coordinates
                 # and generate a warning if it result something null or
                 new_coord._data = sorted(coord_data & new_coord_data)
-            
-            elif method in ['first','last'] :
+
+            elif method in ['first', 'last']:
                 # we take the reference coordinates already determined as basis (masking the missing values)
                 continue
-                
+
             else:
                 raise NotImplementedError(f'The method {method} is unknown!')
-        
+
         # Now perform alignment of all objects on the new coordinates
         for index, object in _objects.items():
-            
+
             obj = object['obj']
-            
+
             # get the dim index for the given object
             dim_index = obj.dims.index(dim)
-            
+
             # prepare slicing keys ; set slice(None) for the untouched dimensions preceeding the dimension of interest
-            prepend_keys = [slice(None)]*dim_index
+            prepend_keys = [slice(None)] * dim_index
 
             # New objects for obj must be created with the new coordinates
-            
+
             # change the data shape
             new_obj_shape = list(obj.shape)
             new_obj_shape[dim_index] = len(new_coord)
             new_obj_data = np.full(new_obj_shape, np.NaN)
-        
+
             # create new dataset for obj and ref_objects
             if copy:
                 new_obj = obj.copy()
             else:
                 new_obj = obj
-            
+
             # update the data and mask
             coord = obj.coords[dim]
             coord_data = set(coord.data)
-            
+
             dim_loc = new_coord._loc2index(sorted(coord_data))
-            loc = tuple(prepend_keys+[dim_loc])
-            
+            loc = tuple(prepend_keys + [dim_loc])
+
             new_obj.data = new_obj_data
-            #new_obj.mask = MASKED  # mask all the data -we will unmask later the relevant data in the next step
-            #new_obj[loc] = False   # remove the mask for the selected part of the array
+            # new_obj.mask = MASKED  # mask all the data -we will unmask later the relevant data in the next step
+            # new_obj[loc] = False   # remove the mask for the selected part of the array
             new_obj.data[loc] = obj.data
-        
+
             # update the coordinates
             new_coords = obj.coords.copy()
             if coord.is_labeled:
@@ -293,27 +294,26 @@ def align(dataset, *others, **kwargs):
                 new_coord._labels[dim_loc] = coord.labels
             setattr(new_coords, dim, new_coord)
             new_obj._coords = new_coords
-            
-            
+
             # reversed?
             if reversed:
                 # we must reverse the given coordinates
-                new_obj.sort(descend = reversed, dim=dim, inplace=True)
-                
+                new_obj.sort(descend=reversed, dim=dim, inplace=True)
+
             # update the _objects
             _objects[index]['obj'] = new_obj
-            
+
             if method == 'interpolate':
                 warning_('Interpolation not yet implemented - for now equivalent to `outer`')
-          
+
     # now return the new transformed object in the same order as the passed objects
     # and mask the missing values (for the moment they are defined to NaN
-    
+
     for index, object in _objects.items():
         is_panel = object['is_panel']
         obj = object['obj']
-        obj[np.where(np.isnan(obj))]=MASKED  # mask NaN values
-        obj[np.where(np.isnan(obj))]=99999999999999.  # replace NaN values (to simplify comparisons)
+        obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
+        obj[np.where(np.isnan(obj))] = 99999999999999.  # replace NaN values (to simplify comparisons)
         idx = int(object['idx'])
         if not is_panel:
             objects[idx] = obj
@@ -321,13 +321,11 @@ def align(dataset, *others, **kwargs):
             key = object['key']
             coords = obj.coords
             obj.delete_coords()  # NDDataset in NDPanel are stored without coords
-            objects[idx].datasets[key] =  obj
+            objects[idx].datasets[key] = obj
             for dim in obj.dims:
                 setattr(objects[idx], dim, getattr(coords, dim))
-    
+
     return tuple(objects)
-                    
-                    
 
     # if method == 'interpolate':
     #

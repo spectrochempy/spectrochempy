@@ -8,10 +8,9 @@
 # ======================================================================================================================
 
 
-
 import matplotlib.pyplot as mpl
 
-from spectrochempy.utils.testing import  image_comparison
+from spectrochempy.utils.testing import image_comparison
 
 from spectrochempy import *
 
@@ -19,6 +18,7 @@ set_loglevel(INFO)
 
 # To regenerate the reference figures, set FORCE to True
 FORCE = True
+
 
 # for this regeneration it is advised to set non parallel testing.
 # (remove option -nauto in pytest.ini)
@@ -40,6 +40,7 @@ def test_plot_generic_1D(IR_dataset_1D):
     dataset.plot(style='sans')
     assert mpl.rcParams['font.family'] == ['sans-serif']
 
+
 @image_comparison(reference=['IR_dataset_2D_stack'])
 def test_plot_stack(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
@@ -54,11 +55,12 @@ def test_plot_map(IR_dataset_2D):
 
 @image_comparison(reference=['IR_dataset_2D_image',
                              'IR_dataset_2D_image_sanspaper'],
-                             force_creation=FORCE)
+                  force_creation=FORCE)
 def test_plot_image(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
     dataset.plot_image()  # plot_image is an alias of plot(method='image')
     dataset.plot_image(style=['sans', 'paper'], fontsize=9)
+
 
 @image_comparison(reference=['IR_dataset_2D_image',
                              'IR_dataset_2D_image_sanspaper'],
@@ -66,14 +68,13 @@ def test_plot_image(IR_dataset_2D):
 def test_plot_image_offset(IR_dataset_2D):
     dataset = IR_dataset_2D.copy() + .0001
     dataset.plot_image()  # plot_image with offset
-    dataset.plot_image(style=['sans','paper'])
+    dataset.plot_image(style=['sans', 'paper'])
 
 
 @image_comparison(reference=['IR_dataset_2D_stack'])
 def test_plot_stack_generic(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
     dataset.plot()  # generic plot default to stack
-
 
 
 def test_plot_stack_masked(IR_dataset_2D):
@@ -83,6 +84,7 @@ def test_plot_stack_masked(IR_dataset_2D):
     dataset.plot_stack(colorbar=False)
     dataset.plot_map(colorbar=False)
     show()
+
 
 def test_plot_stack_multiple(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
@@ -94,6 +96,7 @@ def test_plot_stack_multiple(IR_dataset_2D):
     s1.plot_stack()
     s2.plot_stack(data_only=True, clear=False)
     show()
+
 
 # BUG FIXES IN PLOTS
 
@@ -115,20 +118,21 @@ def test_successive_plot_bug_with_colorbars(IR_dataset_2D):
     dataset.plot(method='map')  # bug: no colorbar
     show()
 
-@image_comparison(reference=['multiplot1','multiplot2'], force_creation=FORCE)
-def test_multiplot(IR_dataset_2D):
 
+@image_comparison(reference=['multiplot1', 'multiplot2'], force_creation=FORCE)
+def test_multiplot(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
 
-    datasets=[dataset, dataset*1.1, dataset*1.2, dataset*1.3]
+    datasets = [dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
     labels = ['sample {}'.format(label) for label in
               ["1", "2", "3", "4"]]
 
     multiplot(datasets=datasets, method='stack', labels=labels, nrow=2, ncol=2,
-                    figsize=(9, 5), sharex=True, sharey=True)
+              figsize=(9, 5), sharex=True, sharey=True)
 
     multiplot(datasets=datasets, method='map', labels=labels, nrow=2, ncol=2,
-                    figsize=(9, 5), sharex=True, sharey=True)
+              figsize=(9, 5), sharex=True, sharey=True)
+
 
 @image_comparison(reference=['IR_dataset_1D',
                              'IR_dataset_1D_sans',
@@ -137,8 +141,7 @@ def test_multiplot(IR_dataset_2D):
                              'multiple_IR_dataset_1D_scatter_sans',
                              'multiple_IR_dataset_1D_scatter',
                              ], force_creation=FORCE)
-def tests_multipleplots_and_styles(IR_dataset_1D,IR_dataset_2D):
-
+def tests_multipleplots_and_styles(IR_dataset_1D, IR_dataset_2D):
     dataset = IR_dataset_1D
 
     # plot generic
@@ -157,7 +160,7 @@ def tests_multipleplots_and_styles(IR_dataset_1D,IR_dataset_2D):
               ["S1", "S10", "S20", "S50", "S53"]]
 
     # plot multiple
-    plot_multiple(method = 'scatter',
+    plot_multiple(method='scatter',
                   datasets=datasets, labels=labels, legend='best')
 
     # plot mupltiple with  style
@@ -169,18 +172,15 @@ def tests_multipleplots_and_styles(IR_dataset_1D,IR_dataset_2D):
                   datasets=datasets, labels=labels, legend='best')
 
 
-
 ##### debugging ####
 
 #### deprecation #
 
 def test_kind_deprecated(IR_dataset_2D):
-
     dataset = IR_dataset_2D.copy()
 
     # should raise a deprecation warning
     dataset.plot(kind='stack', style='sans', colorbar=False)
 
+
 set_loglevel(WARNING)
-
-
