@@ -36,7 +36,7 @@ import spectrochempy as scp
 # - `read_bruker_opus()` to open Opus (*.0, ...) files
 # - `read_jdx()` to open an IR JCAMP-DX datafile
 #
-# General purpose data exchange formats such as  \*.csv or \*.mat can also be read using:
+# General purpose data exchange formats such as  \*.csv or \*.mat will be treated in another tutorial (yet to come...) can also be read using:
 #
 # - `read_csv()` to open csv files
 # - `read_matlab()` to open .mat files
@@ -48,7 +48,7 @@ import spectrochempy as scp
 # - .spa files that handle single spectra
 # - .spg files which contain a group of spectra
 #
-# Both have been reverse engineered, hence allowing extracting key data. The Omnic reader of
+# Both have been reverse engineered, hence allowing extracting their key data. The Omnic reader of
 #  Spectrochempy (`read_omnic()`) has been developed based on posts in open forums on the .spa
 #  file format and extended to .spg file formats.
 #  
@@ -90,7 +90,7 @@ print(X.description)
 #
 # - `title` (not to be confused with the `name` of the dataset) describes the nature of data (here absorbance)
 #
-# - "values" shows a sample of the first and last data and their units when they exist (here a.u. for absorbance units). The numerical values ar accessed through the`data` attibute and the units throut `units` attribute.
+# - "values" shows a sample of the first and last data and their units when they exist (here a.u. for absorbance units). The numerical values ar accessed through the`data` attibute and the units through `units` attribute.
 
 # %%
 print(X.data)
@@ -101,11 +101,11 @@ print(X.units)
 #
 # Then come the attributes related to the dimensions of the dataset.  
 #
-# - the `x` dimension has one coordinate made of the 3112 the wavenumbers.  
+# - the `x` dimension has one coordinate made of the 3112 wavenumbers.  
 #
 # - the `y` dimension contains:
 #
-#     - one coordinate mede of the 19 acquisition timestamps 
+#     - one coordinate made of the 19 acquisition timestamps 
 #     
 #     - two labels
 #     
@@ -117,7 +117,7 @@ print(X.units)
 #
 # ### Note: acquisition dates and `y` axis
 #
-# The acquisition timestamps are the *Unix times* of the acquisition, i.e. the time elapsed in seconds since the reference date of Jan 1st 1970, 00:00:00 UTC. In OMNIC, the acquisition time is that of the start of the acquisison. As such these may be not convenient to use directly (they are currently in the order of 1.5 billion...) With this respect, it can be convenient to shift the origin of time coordinate to that of the 1st spectrum, which has the index `0`: 
+# The acquisition timestamps are the *Unix times* of the acquisitions, i.e. the times elapsed in seconds since the reference date of Jan 1st 1970, 00:00:00 UTC. In OMNIC, the acquisition time is that of the start of the acquisison. As such these timestamps may be not convenient to use directly (they are currently in the order of 1.5 billion...) With this respect, it can be convenient to shift the origin of time coordinate to that of the 1st spectrum, which has the index `0`: 
 
 # %%
 X.y = X.y - X[0].y     
@@ -134,9 +134,9 @@ X.y
 # Note that the valued that are displayed are rounded, not the values stored internally. Hence, the relative time in minutes of the last spectrum is: 
 
 # %%
-tf = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
+tf = X[-1].y.data[0]  # the last items of an array can be refered by negative indexes
                  # the values of the Coord object are accessed through the `data` attribute 
-                 # whiche is a ndarray, hence the final [0] to have the value:
+                 # which is a ndarray, hence the final [0] to have the actual value.
 
 # %% [markdown]
 # which gives the exact time in seconds:
@@ -201,7 +201,7 @@ print(X)
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
 # # 1.2. Import of Bruker OPUS files
 #
-# [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_opus()`) of spectrochempy is essentially a wrapper of the python module
+# [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/opus-spectroscopy-software.html) files have also a proprietary binary file format. The Opus reader (`read_opus()`) of spectrochempy is essentially a wrapper of the python module
 # [brukeropusreader](https://github.com/spectrochempy/brukeropusreader) initially developed by QED. It imports absorbance spectra (the AB block), acquisition times and name of spectra. 
 #
 # The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence, one can open sample Opus files contained in the `datadir` using:
@@ -236,7 +236,7 @@ Z3['Optik']  # looks what is the Optik block:
 #
 # [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details).
 #
-# The reader hase been essentially developed to read again the jcamp-dx files exported by spectrochempy `write_jdx()` writer.
+# The JCAMP-DX reader of spectrochempy has been essentially written to read again the jcamp-dx files exported by spectrochempy `write_jdx()` writer.
 #
 # Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 
