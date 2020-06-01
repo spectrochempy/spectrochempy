@@ -71,7 +71,7 @@ X
 # From now on, these names will be taken into account by Scpy in the plottings as well as in the analysis treatments (PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:
 
 # %%
-surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10,5))
+surf = X.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
 
 # %% [markdown]
 # ## 3 Initial guess and MCR ALS optimization
@@ -111,19 +111,19 @@ mcr = MCRALS(X, St0, verbose='True')
 # The default is to stop when this %change between two iteration is negative (so that the solution is improving), but with an absolute value lower than 0.1% (so that the improvement is considered negligible). This parameter - as well as several other parameters affecting the ALS optimization can be changed by the setting the 'tol' value in a python dictionary using the key 'tol'. For instance: 
 
 # %%
-mcr = MCRALS(X, St0, param={'tol':0.01}, verbose='True')
+mcr = MCRALS(X, St0, param={'tol': 0.01}, verbose='True')
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter convergence criterion.  The other convergence criterion that can be fixed by the user is 'maxdiv', the maximum number of successive diverging iterations. It is set to 5 by default and allows for stopping the ALS algorithm when it is no converging. If for instance the 'tol' is set very low, the optimization will be stopped when either the maximum number of iterations is reached (maxit, 50 by default) or when no improvement is during 5 successive iterations (maxdiv).   
 
 # %%
-mcr = MCRALS(X, St0, param={'tol':0.001}, verbose='True')
+mcr = MCRALS(X, St0, param={'tol': 0.001}, verbose='True')
 
 # %% [markdown]
 # Now if 'maxit' is set to 10:  
 
 # %%
-mcr = MCRALS(X, St0, param={'tol':0.001, 'maxit':10}, verbose='True')
+mcr = MCRALS(X, St0, param={'tol': 0.001, 'maxit': 10}, verbose='True')
 
 # %% [markdown]
 # #### 3.1.2 Solutions
@@ -217,7 +217,7 @@ _ = C0.T.plot()
 # The MCR ALS can then be launched using this new guess:
 
 # %%
-mcr4 = MCRALS(X, guess=C0, param={'maxit':100, 'normSpec':'euclid'}, verbose=True) 
+mcr4 = MCRALS(X, guess=C0, param={'maxit': 100, 'normSpec': 'euclid'}, verbose=True)
 
 # %%
 _ = mcr4.C.T.plot()
@@ -241,11 +241,9 @@ X2.title = 'absorbance'
 X2.set_coords(None, None)
 X2.set_coordtitles(y='elution time', x='wavelength')
 
-surf = X2.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10,5))
+surf = X2.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))
 
 _ = X2.plot(method='map')
-
-
 
 # %%
 mcr5 = MCRALS(X2, guess=St0, param={'unimodConc': [0] * 4}, verbose=True)

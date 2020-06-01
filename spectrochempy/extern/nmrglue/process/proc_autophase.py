@@ -43,7 +43,7 @@ def autops(data, fn, p0=0.0, p1=0.0):
         }[fn]
 
     opt = [p0, p1]
-    opt = scipy.optimize.fmin(fn, x0=opt, args=(data, ))
+    opt = scipy.optimize.fmin(fn, x0=opt, args=(data,))
 
     phasedspc = ps(data, p0=opt[0], p1=opt[1])
 
@@ -76,7 +76,7 @@ def _ps_acme_score(ph, data):
     data = np.real(s0)
 
     # Calculation of first derivatives
-    ds1 = np.abs((data[1:]-data[:-1]) / (stepsize*2))
+    ds1 = np.abs((data[1:] - data[:-1]) / (stepsize * 2))
     p1 = ds1 / np.sum(ds1)
 
     # Calculation of entropy
@@ -91,7 +91,7 @@ def _ps_acme_score(ph, data):
     sumas = np.sum(as_)
 
     if sumas < 0:
-        pfun = pfun + np.sum((as_/2) ** 2)
+        pfun = pfun + np.sum((as_ / 2) ** 2)
 
     p = 1000 * pfun
 
@@ -126,8 +126,8 @@ def _ps_peak_minima_score(ph, data):
     data = np.real(s0)
 
     i = np.argmax(data)
-    mina = np.min(data[i-100:i])
-    minb = np.min(data[i:i+100])
+    mina = np.min(data[i - 100:i])
+    minb = np.min(data[i:i + 100])
 
     return np.abs(mina - minb)
 
@@ -190,16 +190,16 @@ def manual_ps(data, notebook=False):
             fig, ax = plt.subplots(figsize=(10, 7))
             phaseddata = dataset * np.exp(
                 1j * (phcorr0 + phcorr1 * (
-                    np.arange(-pivot, -pivot+dataset.size)/dataset.size)))
+                        np.arange(-pivot, -pivot + dataset.size) / dataset.size)))
 
             ax.plot(np.real(phaseddata))
-            ax.set(ylim=(np.min(np.real(data))*2, np.max(np.real(data))*2))
+            ax.set(ylim=(np.min(np.real(data)) * 2, np.max(np.real(data)) * 2))
             ax.axvline(pivot, color='r', alpha=0.5)
             plt.show()
 
             p0 = np.round(
-                (phcorr0 - phcorr1 * pivot/dataset.size) * 360 / 2 / np.pi, 3)
-            p1 = np.round(phcorr1*360/2/np.pi, 3)
+                (phcorr0 - phcorr1 * pivot / dataset.size) * 360 / 2 / np.pi, 3)
+            p1 = np.round(phcorr1 * 360 / 2 / np.pi, 3)
 
             print('p0 =', p0, 'p1 =', p1)
 
@@ -207,7 +207,7 @@ def manual_ps(data, notebook=False):
             phasecorr,
             dataset=fixed(data),
             phcorr0=(-np.pi, np.pi, 0.01),
-            phcorr1=(-10*np.pi, 10*np.pi, 0.01),
+            phcorr1=(-10 * np.pi, 10 * np.pi, 0.01),
             pivot=(0, data.size, 1))
 
     else:
@@ -236,11 +236,11 @@ def manual_ps(data, notebook=False):
             pivot = spiv.val
             interactive.set_ydata((data * np.exp(
                 1.0j * (pc0 + (pc1 * np.arange(-pivot, -pivot + data.size) /
-                        data.size))).astype(data.dtype)).real)
+                               data.size))).astype(data.dtype)).real)
             plt.draw()
 
         def setphase(val):
-            p0 = spc0.val-spc1.val*spiv.val/data.size
+            p0 = spc0.val - spc1.val * spiv.val / data.size
             p1 = spc1.val
             print(p0, p1)
 
@@ -251,6 +251,6 @@ def manual_ps(data, notebook=False):
 
         plt.show(block=True)
 
-        p0 = spc0.val-spc1.val*spiv.val/data.size
+        p0 = spc0.val - spc1.val * spiv.val / data.size
         p1 = spc1.val
         return p0, p1

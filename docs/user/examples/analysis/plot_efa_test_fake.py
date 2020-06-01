@@ -20,13 +20,12 @@ import numpy as np
 
 dataset = scp.load("irdata/nh4y-activation.spg")
 
-
 # columns masking
-#dataset[:, 1230.0:920.0] = scp.masked  # do not forget to use float in slicing
-#dataset[:, 5997.0:5993.0] = scp.masked
+# dataset[:, 1230.0:920.0] = scp.masked  # do not forget to use float in slicing
+# dataset[:, 5997.0:5993.0] = scp.masked
 
 # row masking (just for an example
-#dataset[10:16] = scp.masked
+# dataset[10:16] = scp.masked
 
 dataset.plot_stack()
 
@@ -35,12 +34,11 @@ dataset.plot_stack()
 
 efa = scp.EFA(dataset)
 
-
 f = efa.cut_f(n_pc=7)
 f.plot()
 b = efa.cut_b(n_pc=7)
 
-f.T.plot(yscale="log", labels= f.y.labels, legend='best')
+f.T.plot(yscale="log", labels=f.y.labels, legend='best')
 b.T.plot(yscale="log")
 
 ##############################################################################
@@ -60,4 +58,4 @@ both.T.plot(yscale="log")
 c = efa.get_conc(npc, cutoff=cut)
 c.T.plot()
 
-#show() # uncomment to show plot if needed()
+# show() # uncomment to show plot if needed()

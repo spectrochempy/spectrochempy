@@ -9,7 +9,6 @@
 # ======================================================================================================================
 
 
-
 import pytest
 from glob import glob
 import os, sys
@@ -19,13 +18,13 @@ from spectrochempy.utils.testing import example_run
 path = os.getcwd()
 path = path[:path.find('/tests')]
 
-@pytest.mark.parametrize('example', glob(os.path.join(path,'docs','user','**','*.py'), recursive=True))
-def test_example(example):
 
+@pytest.mark.parametrize('example', glob(os.path.join(path, 'docs', 'user', '**', '*.py'), recursive=True))
+def test_example(example):
     name = os.path.basename(example)
-    if (name in [__name__+'.py','conf.py','builddocs.py','apigen.py'] or
-        'auto_examples' in example) :
-            return
+    if (name in [__name__ + '.py', 'conf.py', 'builddocs.py', 'apigen.py'] or
+            'auto_examples' in example):
+        return
 
     # some test will failed due to the magic commands or for other known reasons
     # SKIP THEM
@@ -34,15 +33,12 @@ def test_example(example):
                  'agir_setup_figure.py',
                  '1_nmr.py',
                  '1_nmr-Copy1.py',
-                 'fft.py',] ):
+                 'fft.py', ]):
         print(example, ' ---> test skipped - DO IT MANUALLY')
         return
 
     print("testing", example)
     if os.path.exists(example) and os.path.splitext(example)[-1] == '.py':
         e, message, err = example_run(example)
-        print(e, message.decode('utf8'), err )
+        print(e, message.decode('utf8'), err)
         assert not e, message.decode('utf8')
-
-    
-    

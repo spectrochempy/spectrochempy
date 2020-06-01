@@ -14,18 +14,18 @@ This module is for testing fileselector.py
 from spectrochempy.widgets.fileselector import FileSelector
 from spectrochempy.core import general_preferences
 
-def test_fileselector():
 
+def test_fileselector():
     path = general_preferences.datadir
-    fs = FileSelector(path = path, filters='spg')
+    fs = FileSelector(path=path, filters='spg')
 
     assert fs.path.endswith('testdata/')
     if fs.value is not None:
         assert fs.value.endswith('')
 
+
 def test_issues_61():
-    
-    path = general_preferences.datadir+"/"
-    fs = FileSelector(path = path, filters='spg')
-    
+    path = general_preferences.datadir + "/"
+    fs = FileSelector(path=path, filters='spg')
+
     assert fs.path.endswith('testdata/')

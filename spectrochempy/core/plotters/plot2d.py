@@ -40,6 +40,7 @@ from ...core.plotters.utils import make_label
 from ...core import project_preferences, general_preferences
 from ...core import info_, debug_, error_, warning_
 
+
 # ======================================================================================================================
 # nddataset plot2D functions
 # ======================================================================================================================
@@ -134,7 +135,7 @@ def plot_2D(dataset, **kwargs):
     kwargs : additional keywords
 
     """
-    
+
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -143,7 +144,7 @@ def plot_2D(dataset, **kwargs):
     # method of plot
     # ------------------------------------------------------------------------------------------------------------------
     method = kwargs.get('method', None)
-    
+
     if not prefs.style:
         # not yet set, initialize with default project preferences
         prefs.update(project_preferences.to_dict())
@@ -208,16 +209,16 @@ def plot_2D(dataset, **kwargs):
 
         if method in ['map', 'image']:
             cmap = kwargs.get('colormap',
-                                         kwargs.get('cmap', prefs.colormap))
+                              kwargs.get('cmap', prefs.colormap))
         elif data_transposed:
             cmap = kwargs.get('colormap',
-                                         kwargs.get('cmap', prefs.colormap_transposed))
+                              kwargs.get('cmap', prefs.colormap_transposed))
         elif method in ['surface']:
             cmap = kwargs.get('colormap',
-                                         kwargs.get('cmap', prefs.colormap_surface))
+                              kwargs.get('cmap', prefs.colormap_surface))
         else:
             cmap = kwargs.get('colormap',
-                                         kwargs.get('cmap', prefs.colormap_stack))
+                              kwargs.get('cmap', prefs.colormap_stack))
 
     lw = kwargs.get('linewidth', kwargs.get('lw',
                                             prefs.pen_linewidth))
@@ -347,11 +348,10 @@ def plot_2D(dataset, **kwargs):
         # set the limits
         # ---------------
 
-
-        if yscale=="log" and min(zlim) <= 0:
+        if yscale == "log" and min(zlim) <= 0:
             # set the limits wrt smallest and largest strictly positive values
-            ax.set_ylim(10**(int(np.log10(np.amin(np.abs(zdata))))-1)
-                               , 10**(int(np.log10(np.amax(np.abs(zdata))))+1))
+            ax.set_ylim(10 ** (int(np.log10(np.amin(np.abs(zdata)))) - 1)
+                        , 10 ** (int(np.log10(np.amax(np.abs(zdata)))) + 1))
         else:
             ax.set_ylim(zlim)
 

@@ -36,7 +36,7 @@ ndOH.plot()
 #  Fit parameters are defined in a script (a single text as below)
 
 
-script= """
+script = """
 #-----------------------------------------------------------
 # syntax for parameters definition:
 # name: value, low_bound,  high_bound
@@ -71,7 +71,6 @@ shape: assymvoigtmodel
         
 """
 
-
 ##############################################################################
 # create a fit object
 
@@ -92,4 +91,4 @@ f1.run(maxiter=1000)
 
 ndOH.plot(plot_model=True)
 
-#show() # uncomment to show plot if needed()
+# show() # uncomment to show plot if needed()

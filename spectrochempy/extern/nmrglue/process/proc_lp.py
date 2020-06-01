@@ -252,7 +252,7 @@ def lp_1d(trace, pred=1, slice=slice(None), order=8, mode="f", append="after",
         else:
             bad_roots = "decr"
 
-    x = trace[slice]    # extract region to use for finding LP coefficients
+    x = trace[slice]  # extract region to use for finding LP coefficients
 
     if mirror is not None:  # make mirror image if selected
         x = make_mirror(x, mirror)
@@ -269,7 +269,7 @@ def lp_1d(trace, pred=1, slice=slice(None), order=8, mode="f", append="after",
         a = find_lpc(D, d, method)  # determind the LP prediction filter
 
     # stablize roots if needed
-    if bad_roots is not None:           # stablize roots if needed
+    if bad_roots is not None:  # stablize roots if needed
         poles = find_roots(a, mode)  # find roots (poles)
         poles = fix_roots(poles, bad_roots, fix_mode)  # fix roots
         # reverse filter when calculated filter is in wrong direction
@@ -386,12 +386,12 @@ def extrapolate_2d(x, C, pred, fix_points, mirror):
     # create a empty matrix
     if mirror == "0":
         new = np.empty((2 * N_0 - 1, N_1 + pred), dtype=x.dtype)
-        plane = N_0 - 1   # index of first non-mirrored point
+        plane = N_0 - 1  # index of first non-mirrored point
     else:
         new = np.empty((2 * N_0, N_1 + pred), dtype=x.dtype)
-        plane = N_0     # index of first non-mirrored plane
+        plane = N_0  # index of first non-mirrored plane
 
-    last = new.shape[0]     # number of rows in new matrix
+    last = new.shape[0]  # number of rows in new matrix
 
     # fill the matrix with the mirrored version of each column
     for i in range(N_1):
@@ -443,7 +443,7 @@ def make_lp2d_Dd(x, P, M, mode='f'):
 
     N_0, N_1 = x.shape  # length of the matrix
 
-    count_P = N_0 - P + 1   # number of valid starting position vertically
+    count_P = N_0 - P + 1  # number of valid starting position vertically
     # number of valid starting position horizontally
     # taking into account the element next to the
     # bottom right corner is the predicted value.
@@ -530,7 +530,7 @@ def cadzow_single(x, M, K, min_var=False):
 
     # correct the singular values and truncate the rank K
     Ul = np.mat(U[:, :K])
-    Vlh = np.mat(Vh[:K, :])     # first K columns of V are first K rows of Vh
+    Vlh = np.mat(Vh[:K, :])  # first K columns of V are first K rows of Vh
     sl = s[:K]
 
     if min_var:  # adjust singular values using minimum variance method
@@ -614,16 +614,16 @@ def lp_model(trace, slice=slice(None), order=8, mode="f", mirror=None,
     if trace.ndim != 1:
         raise ValueError("trace must be a 1D array")
 
-    x = trace[slice]    # extract region to use for finding LP coefficients
+    x = trace[slice]  # extract region to use for finding LP coefficients
 
     if mirror is not None:  # make mirror image if requested
         x = make_mirror(x, mirror)
 
     # calculate LP coefficient and factor to find poles
     if method in ['svd', 'qr', 'cholseky', 'tls']:
-        D, d = make_Dd(x, order, mode)   # form the LP equation elements
-        a = find_lpc(D, d, method)      # find LP coefficients
-        poles = find_roots(a, mode)     # find roots
+        D, d = make_Dd(x, order, mode)  # form the LP equation elements
+        a = find_lpc(D, d, method)  # find LP coefficients
+        poles = find_roots(a, mode)  # find roots
 
     elif method == "hsvd":
         poles = find_lproots_hsvd(x, M=order, K=order, mode=mode, zmethod='sm')
@@ -804,9 +804,10 @@ def find_lpc_svd(D, d):
     L = D.shape[0]
     m = D.shape[1]
     U, s, Vh = scipy.linalg.svd(D)  # SVD decomposition
-    U, Vh = np.mat(U), np.mat(Vh)   # make U and Vh matrices
-    Si = pinv_diagsvd(s, m, L)      # construct the pseudo-inverse sigma matrix
+    U, Vh = np.mat(U), np.mat(Vh)  # make U and Vh matrices
+    Si = pinv_diagsvd(s, m, L)  # construct the pseudo-inverse sigma matrix
     return np.array(Vh.H * Si * U.H * d)
+
 
 # the next 3 lines and the pinv_diagsvd function were adapted from the
 # scipy.linalg.pinv2 function - jjh
@@ -859,7 +860,7 @@ def find_lpc_cholesky(D, d):
     DhD = np.mat(np.dot(D.H, D))
     Dhd = np.mat(np.dot(D.H, d))
 
-    c, lower = scipy.linalg.cho_factor(DhD)     # Compute Cholesky decomp.
+    c, lower = scipy.linalg.cho_factor(DhD)  # Compute Cholesky decomp.
     return scipy.linalg.cho_solve((c, lower), Dhd)  # solve normal equation
 
 
@@ -868,9 +869,9 @@ def find_lpc_tls(D, d):
     Find linear prediction filter using the Total Least Squares method
     """
     m = D.shape[1]  # the order of the prediction
-    E = np.append(D, d, axis=1)     # form the augmented data matrix
+    E = np.append(D, d, axis=1)  # form the augmented data matrix
     U, s, Vh = scipy.linalg.svd(E)  # SVD decompositon of augmented matrix
-    V = np.conj(Vh.T)               # Hermetian transpose
+    V = np.conj(Vh.T)  # Hermetian transpose
     return (-1. / V[m, m] * V[:m, m]).reshape((m, 1))
 
 
@@ -1021,9 +1022,9 @@ def find_lproots_hsvd(x, M, K, mode, zmethod='sm'):
 
     # SVD of data matrix and truncation of U to form Uk
     U, s, Vh = scipy.linalg.svd(X)
-    Uk = np.mat(U[:, :K])   # trucated U matrix of rank K
-    Ub = Uk[:-1]            # Uk with bottom row removed
-    Ut = Uk[1:]             # Uk with top row removed
+    Uk = np.mat(U[:, :K])  # trucated U matrix of rank K
+    Ub = Uk[:-1]  # Uk with bottom row removed
+    Ut = Uk[1:]  # Uk with top row removed
 
     # calculate the Z' matrix
     if zmethod == 'lstsq':  # solve Ub*Z' = Ut using least-squares
@@ -1073,9 +1074,9 @@ def find_roots(a, mode="f"):
     p = np.empty(len(a) + 1, dtype=a.dtype)
     p[0] = (1.0 + 0.0j)
 
-    if mode == "f":      # reverse for forward LP
+    if mode == "f":  # reverse for forward LP
         p[1:] = -a.flat[::-1]
-    else:   # backward LP
+    else:  # backward LP
         p[1:] = -a.flat[:]
     return np.roots(p)
 
@@ -1107,7 +1108,7 @@ def find_coeff(poles, mode="f"):
 
     if mode == 'f':  # reverse resulting coefficients
         return np.squeeze(-np.poly(poles)[:0:-1])
-    else:   # keep coefficients as is
+    else:  # keep coefficients as is
         return np.squeeze(-np.poly(poles)[1:])
 
 
@@ -1146,7 +1147,7 @@ def fix_roots(poles, fix_roots="incr", fix_mode="reflect"):
     if fix_mode not in ["on", "reflect"]:
         raise ValueError("fix_mode must be 'on' or 'reflect'")
 
-    if fix_roots == "incr":     # remove increasing signals
+    if fix_roots == "incr":  # remove increasing signals
         for i, pole in enumerate(poles):
             if np.abs(pole) > 1:
                 # print("Fixing root:",i)
@@ -1154,7 +1155,7 @@ def fix_roots(poles, fix_roots="incr", fix_mode="reflect"):
                     poles[i] = pole / np.abs(pole)
                 else:
                     poles[i] = 1 / np.conj(pole)
-    else:   # remove decreasing signals
+    else:  # remove decreasing signals
         for i, pole in enumerate(poles):
             if np.abs(pole) < 1:
                 # print("Fixing root:",i)
@@ -1193,21 +1194,21 @@ def extrapolate(trace, a, pred, append):
         1D array with extrapolated points appended
 
     """
-    m = len(a)      # LP order
-    M = len(trace)   # number of points in original trace
+    m = len(a)  # LP order
+    M = len(trace)  # number of points in original trace
     ntrace = np.empty((M + pred), dtype=trace.dtype)
 
     if append not in ["after", "before"]:
         raise ValueError("append must be 'a' or 'b'")
 
-    if append == "after":   # append after trace
+    if append == "after":  # append after trace
         ntrace[:M] = trace
         for i in range(pred):
             ntrace[M + i] = np.sum(np.multiply(ntrace[M - m + i:M + i],
-                                   a.flat))
+                                               a.flat))
         return ntrace
 
-    if append == "before":   # append before trace
+    if append == "before":  # append before trace
         ntrace[-M:] = trace
         for i in range(pred):
             ntrace[pred - i - 1] = np.sum(np.multiply(

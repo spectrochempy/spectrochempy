@@ -13,9 +13,9 @@ from spectrochempy.utils.testing import figures_dir, same_images
 
 prefs = general_preferences
 
+
 # @pytest.mark.skip
 def test_1D():
-
     dataset = NDDataset.read_omnic(
         os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))
 
@@ -24,12 +24,12 @@ def test_1D():
 
     # plot generic
     ax = nd0.plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
-                         savedpi=150)
+                  savedpi=150)
 
     # plot generic style
     ax = nd0.plot(style='poster',
-                         output=os.path.join(figures_dir, 'IR_dataset_1D_poster'),
-                         savedpi=150)
+                  output=os.path.join(figures_dir, 'IR_dataset_1D_poster'),
+                  savedpi=150)
 
     # check that style reinit to default
     ax = nd0.plot(output='IR_dataset_1D', savedpi=150)
@@ -43,18 +43,17 @@ def test_1D():
 
     # try other type of plots
     ax = nd0.plot_pen()
-    ax = nd0[:,::100].plot_scatter()
+    ax = nd0[:, ::100].plot_scatter()
     ax = nd0.plot_lines()
-    ax = nd0[:,::100].plot_bar()
+    ax = nd0[:, ::100].plot_bar()
 
     show()
 
     # multiple
-    d = dataset[:,::100]
+    d = dataset[:, ::100]
     datasets = [d[0], d[10], d[20], d[50], d[53]]
     labels = ['sample {}'.format(label) for label in
               ["S1", "S10", "S20", "S50", "S53"]]
-
 
     # plot multiple
     plot_multiple(method='scatter',

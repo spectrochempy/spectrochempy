@@ -9,8 +9,8 @@
 
 from spectrochempy.utils import docstrings
 
-def test_docstrings():
 
+def test_docstrings():
     @docstrings.get_sectionsf('do_something')
     @docstrings.dedent
     def do_something(a, b, c, d):
@@ -36,9 +36,7 @@ def test_docstrings():
         """
         return a + b + c + d
 
-
     docstrings.delete_params('do_something.parameters', 'c', 'd')
-
 
     @docstrings.dedent
     def do_more(*args, **kwargs):
@@ -58,13 +56,7 @@ def test_docstrings():
 
         return do_something(*args[:1]) * 2
 
-
     print(do_more.__doc__)
-
-
-
-
-
 
 
 # ======================================================================================================================

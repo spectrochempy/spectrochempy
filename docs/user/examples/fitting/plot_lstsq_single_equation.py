@@ -19,7 +19,6 @@ import os
 import spectrochempy as scp
 from spectrochempy import show
 
-
 ##############################################################################
 # Let's take a similar example to the one given in the `numpy.linalg`
 # documentation
@@ -32,7 +31,7 @@ t = scp.NDDataset(data=[0, 1, 2, 3],
                   units='hour')
 
 d = scp.NDDataset(data=[-1, 0.2, 0.9, 2.1],
-                  coords =[t],
+                  coords=[t],
                   title='distance',
                   units='kilometer')
 
@@ -58,18 +57,16 @@ lst = scp.LSTSQ(t, d)
 v, d0 = lst.transform()
 print('speed : {:.3fK},  d0 : {:.3fK}'.format(v, d0))
 
-
 ##############################################################################
 # Final plot
 
 d.plot_scatter(markersize=10,
                mfc='red', mec='black',
                label='Original data', suptitle='Least-square fitting '
-                                                 'example')
+                                               'example')
 dfit = lst.inverse_transform()
 
 dfit.plot_pen(clear=False, color='g', label='Fitted line', legend=True)
-
 
 ##############################################################################
 # Note: The same result can be obtained directly using `d` as a single

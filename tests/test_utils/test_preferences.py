@@ -9,7 +9,7 @@
 # ======================================================================================================================
 
 
-#TODO: make a working version
+# TODO: make a working version
 # from spectrochempy.gui.preferences import (DialogPreferences,
 #                                           GeneralPreferencePageWidget,
 #                                           ProjectPreferencePageWidget,)

@@ -16,6 +16,7 @@ import pytest
 
 prefs = general_preferences
 
+
 # Basic
 # --------------------------------------------------------------------------------------------------------
 
@@ -24,7 +25,7 @@ def test_save_and_load_file_with_nofilename(IR_dataset_2D):
     A.save()
 
     # no directory for saving passed ... it must be in data
-    path = os.path.join(prefs.datadir, A.filename )
+    path = os.path.join(prefs.datadir, A.filename)
     assert os.path.exists(path)
     assert A.directory == prefs.datadir
 
@@ -37,6 +38,7 @@ def test_save_and_load_file_with_nofilename(IR_dataset_2D):
     assert B.directory == prefs.datadir
 
     os.remove(path)
+
 
 def test_project(ds1, ds2, dsm):
     myp = Project(name='AGIR processing', method='stack')
@@ -86,15 +88,13 @@ def test_project(ds1, ds2, dsm):
     print(myp2)
 
 
-
 def test_empty_project():
-
     proj = Project(name="XXX")
     assert proj.name == "XXX"
     assert str(proj).strip() == "Project XXX:\n    (empty project)"
 
-def test_project_with_script():
 
+def test_project_with_script():
     # Example from tutorial agir notebook
     proj = Project(
         Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
@@ -126,11 +126,9 @@ def test_project_with_script():
     # proj = Project.load('HIZECOKE')
     # assert proj.projects_names == ['A350', 'B350', 'P350']
 
-
     script_source = 'set_loglevel(INFO)\n' \
                     'info_("samples contained in the project are : ' \
-                              '%s"%proj.projects_names)'
-
+                    '%s"%proj.projects_names)'
 
     proj['print_info'] = Script('print_info', script_source)
 
@@ -145,7 +143,6 @@ def test_project_with_script():
     run_script(newproj.print_info, locals())
     newproj.print_info.execute(locals())
 
-
     newproj.print_info(locals())
 
     # attemps to resolve locals
@@ -156,7 +153,6 @@ def test_project_with_script():
 
 
 def test_save_and_load_project(ds1, ds2):
-
     myp = Project(name='process')
 
     ds1.name = 'toto'
@@ -166,8 +162,8 @@ def test_save_and_load_project(ds1, ds2):
 
     myp.save('PROCESS')
 
-def test_save_and_load_nmr_project():
 
+def test_save_and_load_nmr_project():
     myp = Project(name='process')
 
     path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr',

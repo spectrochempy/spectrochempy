@@ -26,13 +26,13 @@ def bruk_ranceY(dic, data, rotate_phase=True, **kwargs):
     shuffled_data = np.empty(data.shape, data.dtype)
 
     for i in range(0, data.shape[0], 2):
-        shuffled_data[i] = (1.*(data[i].real - data[i+1].real) +
-                            1.*(data[i].imag - data[i+1].imag)*1j)
+        shuffled_data[i] = (1. * (data[i].real - data[i + 1].real) +
+                            1. * (data[i].imag - data[i + 1].imag) * 1j)
         if rotate_phase is True:
-            shuffled_data[i+1] = (-1.*(data[i].imag + data[i+1].imag) +
-                                  1.*(data[i].real + data[i+1].real)*1j)
+            shuffled_data[i + 1] = (-1. * (data[i].imag + data[i + 1].imag) +
+                                    1. * (data[i].real + data[i + 1].real) * 1j)
         else:
-            shuffled_data[i+1] = (1.*(data[i].real + data[i+1].real) +
-                                  1.*(data[i].imag + data[i+1].imag)*1j)
+            shuffled_data[i + 1] = (1. * (data[i].real + data[i + 1].real) +
+                                    1. * (data[i].imag + data[i + 1].imag) * 1j)
 
     return dic, shuffled_data

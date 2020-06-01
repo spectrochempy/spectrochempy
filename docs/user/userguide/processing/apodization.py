@@ -29,7 +29,7 @@ from spectrochempy import *
 # reead an experimental spectra
 path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
 dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-dataset = dataset/dataset.max()     # normalization
+dataset = dataset / dataset.max()  # normalization
 # store original data
 nd = dataset.copy()
 
@@ -40,14 +40,14 @@ nd
 # ### Plot of the Real and Imaginary original data
 
 # %%
-_ = nd.plot(xlim=(0.,15000.))
+_ = nd.plot(xlim=(0., 15000.))
 _ = nd.plot(imag=True, data_only=True, clear=False, color='r')
 
 # %% [markdown]
 # ### Exponential multiplication
 
 # %%
-_ = nd.plot(xlim=(0.,15000.))
+_ = nd.plot(xlim=(0., 15000.))
 _ = nd.em(lb=300. * ur.Hz)
 _ = nd.plot(data_only=True, clear=False, color='g')
 
@@ -56,8 +56,8 @@ _ = nd.plot(data_only=True, clear=False, color='g')
 
 # %%
 nd = dataset.copy()  # to go back to the original data
-_ = nd.plot(xlim=(0.,5000.))
-ndlb = nd.em(lb=300. * ur.Hz, inplace=False) # ndlb contain the processed data
+_ = nd.plot(xlim=(0., 5000.))
+ndlb = nd.em(lb=300. * ur.Hz, inplace=False)  # ndlb contain the processed data
 _ = nd.plot(data_only=True, clear=False, color='g')  # nd dataset remain unchanged 
 _ = ndlb.plot(data_only=True, clear=False, color='b')
 
@@ -73,8 +73,9 @@ _ = ndlb.plot(imag=True, data_only=True, clear=False, color='b')
 
 # %%
 nd = dataset.copy()
-_ = nd.plot(xlim=(0.,5000.))
-ndlb, apod = nd.em(lb=300. * ur.Hz, inplace=False, retfunc=True) # ndlb contain the processed data and apod the apodization function
+_ = nd.plot(xlim=(0., 5000.))
+ndlb, apod = nd.em(lb=300. * ur.Hz, inplace=False,
+                   retfunc=True)  # ndlb contain the processed data and apod the apodization function
 _ = ndlb.plot(data_only=True, clear=False, color='b')
 _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 
@@ -83,8 +84,9 @@ _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 
 # %%
 nd = dataset.copy()
-_ = nd.plot(xlim=(0.,5000.))
-ndlb, apod = nd.em(lb=300. * ur.Hz, shifted=1000*ur.us, inplace=False, retfunc=True) # ndlb contain the processed data and apod the apodization function
+_ = nd.plot(xlim=(0., 5000.))
+ndlb, apod = nd.em(lb=300. * ur.Hz, shifted=1000 * ur.us, inplace=False,
+                   retfunc=True)  # ndlb contain the processed data and apod the apodization function
 _ = ndlb.plot(data_only=True, clear=False, color='b')
 _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 
@@ -99,7 +101,7 @@ nd = dataset.copy()
 lb = 10.
 gb = 200.
 ndlg, apod = nd.gm(lb=lb, gb=gb, inplace=False, retfunc=True)
-_ = nd.plot(xlim=(0.,5000.))
+_ = nd.plot(xlim=(0., 5000.))
 _ = ndlg.plot(data_only=True, clear=False, color='b')
 _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 
@@ -110,8 +112,8 @@ _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 nd = dataset.copy()
 lb = 10.
 gb = 200.
-ndlg, apod = nd.gm(lb=lb, gb=gb, shifted=2000*ur.us, inplace=False, retfunc=True)
-_ = nd.plot(xlim=(0.,5000.))
+ndlg, apod = nd.gm(lb=lb, gb=gb, shifted=2000 * ur.us, inplace=False, retfunc=True)
+_ = nd.plot(xlim=(0., 5000.))
 _ = ndlg.plot(data_only=True, clear=False, color='b')
 _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 

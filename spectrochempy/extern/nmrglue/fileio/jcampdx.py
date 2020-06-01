@@ -135,6 +135,8 @@ _DIF_DIGITS = {"%": "0",
                "o": "-6", "p": "-7", "q": "-8", "r": "-9"}
 _DUP_DIGITS = {"S": "1", "T": "2", "U": "3", "V": "4", "W": "5",
                "X": "6", "Y": "7", "Z": "8", "s": "9"}
+
+
 ###############################################################################
 
 
@@ -155,7 +157,7 @@ def _detect_format(dataline):
     if index is None:
         return -1
     try:
-        firstchar = dataline[index:index+1]
+        firstchar = dataline[index:index + 1]
     except IndexError:
         return -1
     # detect the format from the first character of the second value in line

@@ -8,14 +8,7 @@
 # ======================================================================================================================
 
 import os
-from spectrochempy import *
-
-import os
-
-try:
-    print('env', os.environ['CONDA_DEFAULT_ENV'])
-except:
-    pass
+from spectrochempy import NDDataset
 
 import pytest
 from spectrochempy import general_preferences as prefs
@@ -26,8 +19,8 @@ from spectrochempy import general_preferences as prefs
 def test_samples():
     def _make_samples(force_original=False):
         _samples = {'P350': {'label': r'$\mathrm{M_P}\,(623\,K)$'},
-                    #'A350': {'label': r'$\mathrm{M_A}\,(623\,K)$'},
-                    #'B350': {'label': r'$\mathrm{M_B}\,(623\,K)$'}
+                    # 'A350': {'label': r'$\mathrm{M_A}\,(623\,K)$'},
+                    # 'B350': {'label': r'$\mathrm{M_B}\,(623\,K)$'}
                     }
 
         for key, sample in _samples.items():
@@ -57,7 +50,7 @@ def test_samples():
                 # lets keep only data from something close to 0.
                 s = sample['TGA'] = ss[-0.5:35.0]
                 # save
-                sample['TGA'].save(basename + '.scp')
+                s.save(basename + '.scp')
 
         return _samples
 

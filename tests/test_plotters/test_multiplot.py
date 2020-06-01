@@ -15,12 +15,12 @@ from spectrochempy.core.plotters.multiplot import multiplot, multiplot_map, mult
 
 prefs = general_preferences
 
+
 def test_multiplot():
-
     dataset = NDDataset.read_omnic(
-         os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))[:, 0:20]
+        os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))[:, 0:20]
 
-    datasets=[dataset, dataset*1.1, dataset*1.2, dataset*1.3]
+    datasets = [dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
     labels = ['sample {}'.format(label) for label in
               ["1", "2", "3", "4"]]
     multiplot(datasets=datasets, method='stack', labels=labels, nrow=2, ncol=2,
@@ -28,17 +28,17 @@ def test_multiplot():
               sharex=True, sharey=True, sharez=True)
 
     multiplot(datasets=datasets, method='image', labels=labels, nrow=2, ncol=2,
-                    figsize=(9, 5), sharex=True, sharey=True, sharez=True)
+              figsize=(9, 5), sharex=True, sharey=True, sharez=True)
 
     datasets = [dataset * 1.2, dataset * 1.3,
-               dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
+                dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
     labels = ['sample {}'.format(label) for label in
-                                 ["1", "2", "3", "4", "5", "6"]]
+              ["1", "2", "3", "4", "5", "6"]]
     multiplot_map(datasets=datasets, labels=labels, nrow=2, ncol=3,
-              figsize=(9, 5), sharex=False, sharey=False, sharez=True)
+                  figsize=(9, 5), sharex=False, sharey=False, sharez=True)
 
     multiplot_map(datasets=datasets, labels=labels, nrow=2, ncol=3,
-              figsize=(9, 5), sharex=True, sharey=True, sharez=True)
+                  figsize=(9, 5), sharex=True, sharey=True, sharez=True)
 
     datasets = [dataset * 1.2, dataset * 1.3, dataset, ]
     labels = ['sample {}'.format(label) for label in
@@ -51,17 +51,12 @@ def test_multiplot():
                     figsize=(9, 5), sharex=True,
                     sharey=True, sharez=True)
 
-    multiplot(method='pen', datasets=[dataset[0], dataset[10]*1.1,
-                                     dataset[19]*1.2, dataset[15]*1.3],
+    multiplot(method='pen', datasets=[dataset[0], dataset[10] * 1.1,
+                                      dataset[19] * 1.2, dataset[15] * 1.3],
               nrow=2, ncol=2, figsize=(9, 5),
               labels=labels, sharex=True)
 
     show()
-
-
-
-
-
 
 
 # ======================================================================================================================

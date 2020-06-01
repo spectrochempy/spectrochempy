@@ -39,7 +39,7 @@ X_.plot()
 ########################################################################################################################
 # Perform IRIS without regularization and plots results
 param = {'epsRange': [-8, -1, 50],
-         'kernel':'langmuir'}
+         'kernel': 'langmuir'}
 
 iris = scp.IRIS(X_, param, verbose=True)
 iris.plotdistribution()
@@ -49,7 +49,7 @@ iris.plotmerit()
 # Perform  IRIS with regularization, manual search
 param = {'epsRange': [-8, -1, 50],
          'lambdaRange': [-10, 1, 12],
-         'kernel':'langmuir'}
+         'kernel': 'langmuir'}
 
 iris = scp.IRIS(X_, param, verbose=True)
 iris.plotlcurve()
@@ -61,11 +61,11 @@ iris.plotmerit(-7)
 
 param = {'epsRange': [-8, -1, 50],
          'lambdaRange': [-10, 1],
-         'kernel':'langmuir'}
+         'kernel': 'langmuir'}
 
 iris = scp.IRIS(X_, param, verbose=True)
 iris.plotlcurve()
 iris.plotdistribution(-1)
 iris.plotmerit(-1)
 
-#plt.show() # uncomment to show plot if needed()
+# plt.show() # uncomment to show plot if needed()

@@ -17,5 +17,3 @@ def interleaved2complex(data):
 
     """
     return data[..., ::2] + 1j * data[..., 1::2]
-
-

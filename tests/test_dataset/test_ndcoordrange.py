@@ -52,12 +52,11 @@ def test_coordrange():
 # ======================================================================================================================
 
 def test_range():
-
     class MyClass(HasTraits):
         r = Range()  # Initialized with some default values
 
     c = MyClass()
     c.r = [10, 5]
-    assert c.r == [5,10]
+    assert c.r == [5, 10]
     with raises(TraitError):
         c.r = [10, 5, 1]

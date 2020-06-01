@@ -9,18 +9,19 @@
 
 __all__ = ['find_peaks']
 
-__dataset_methods__  = __all__
+__dataset_methods__ = __all__
 
 import scipy.signal
 from datetime import datetime
 
 """wrappers of scipy.signal peak finding functions"""
 
-#Todo:
-#find_peaks_cwt(vector, widths[, wavelet, ...]) 	Attempt to find the peaks in a 1-D array.
-#argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
-#argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
-#argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
+
+# Todo:
+# find_peaks_cwt(vector, widths[, wavelet, ...]) 	Attempt to find the peaks in a 1-D array.
+# argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
+# argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
+# argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
 
 def find_peaks(X, height=None, threshold=None, distance=None,
                prominence=None, width=None, wlen=None, rel_height=0.5,
@@ -168,10 +169,9 @@ def find_peaks(X, height=None, threshold=None, distance=None,
     if X.ndim == 2:
         out = X[:, peaks]
 
-    #Todo: check why slicing by indexes removes the x coord
+    # Todo: check why slicing by indexes removes the x coord
     out.x = X.x[peaks]
     out.name = 'peaks of ' + X.name
     out.history[-1] = str(datetime.now()) + f': find_peaks(): {len(peaks)} peak(s) found'
 
     return out, properties
-

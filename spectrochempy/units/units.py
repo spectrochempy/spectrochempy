@@ -49,7 +49,7 @@ def _pretty_fmt_exponent(num):
 
 formats = {
     'P': {  # Pretty format.
-        'as_ratio': False,  #True in pint
+        'as_ratio': False,  # True in pint
         'single_denominator': False,
         'product_fmt': '·',
         'division_fmt': '/',
@@ -58,7 +58,7 @@ formats = {
         'exp_call': _pretty_fmt_exponent,
     },
     'L': {  # spectrochempy Latex format.
-        'as_ratio': False,   #True in pint
+        'as_ratio': False,  # True in pint
         'single_denominator': True,
         'product_fmt': r' \cdot ',
         'division_fmt': r'\frac[{}][{}]',
@@ -66,7 +66,7 @@ formats = {
         'parentheses_fmt': r'\left({}\right)',
     },
     'H': {  # spectrochempy HTML format.
-        'as_ratio': False,  #True in pint
+        'as_ratio': False,  # True in pint
         'single_denominator': False,
         'product_fmt': r'.',
         'division_fmt': r'{}/{}',
@@ -81,10 +81,6 @@ formats = {
         'power_fmt': '{}^{}',
         'parentheses_fmt': r'({})',
     },
-
-
-
-
 
 }
 
@@ -121,7 +117,7 @@ def __format__(self, spec):
                 units = UnitsContainer({'rad': 1})
             elif self._units == 'degree':
                 units = UnitsContainer({'deg': 1})
-            #elif self._units == 'absorbance':
+            # elif self._units == 'absorbance':
             #    units = UnitsContainer({'a.u.': 1})
             elif abs(self.scaling - 1.) < 1.e-10:
                 units = UnitsContainer({'': 1})

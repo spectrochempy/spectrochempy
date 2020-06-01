@@ -10,14 +10,11 @@ __all__ = ['numpyprintoptions', 'insert_masked_print',
 
 
 def pstr(object, **kwargs):
-    
     if hasattr(object, 'implements') \
-            and object.implements() in ['NDArray', 'NDDataset', 'NDPanel', 'Coord', 'CoordSet'] :
+            and object.implements() in ['NDArray', 'NDDataset', 'NDPanel', 'Coord', 'CoordSet']:
         return object._cstr(**kwargs).strip()
     else:
         return str(object).strip()
-
-
 
 
 # ======================================================================================================================
@@ -34,6 +31,7 @@ TYellow = lambda text: Fore.YELLOW + str(text) + Fore.RESET
 TCyan = lambda text: Fore.CYAN + str(text) + Fore.RESET
 TBlack = lambda text: Fore.BLACK + str(text) + Fore.RESET
 
+
 def colored(text, color):
     c = getattr(Fore, color)
     return c + str(text) + Fore.RESET
@@ -49,7 +47,7 @@ def colored_output(out):
     regex = r"^(\W{10}\(_\d{1}\))"
     subst = TBold(r"\1")
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
-    
+
     regex = r'\0{3}([\w\W]*?)\0{3}'
     subst = TBlack(r"\1")
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
@@ -76,25 +74,25 @@ def colored_output(out):
 def html_output(out):
     return out
 
+
 def convert_to_html(obj):
-    
     tr = "<tr>" \
          "<td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'>{0}</td>" \
          "<td style='text-align:left; padding-bottom:0px; padding-top:0px; {2} '>{1}</td><tr>\n"
-    
+
     obj._html_output = True
-    
+
     out = obj._cstr()
-    
+
     regex = r'\0{3}[\w\W]*?\0{3}'
     # noinspection PyPep8
     subst = lambda match: "<div>{}</div>".format(match.group(0).replace('\n', '<br/>').replace('\0', ''))
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
-    
-    regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)" #r"^(\W*\w+\W?\w+)(:.*$)"
+
+    regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"  # r"^(\W*\w+\W?\w+)(:.*$)"
     subst = r"<font color='green'>\1</font> \2"
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
-    
+
     regex = r"^(.*(DIMENSION|DATA).*)$"
     subst = r"<strong>\1</strong>"
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
@@ -108,16 +106,16 @@ def convert_to_html(obj):
     subst = lambda match: "<div><font color='darkcyan'>{}</font></div>".format(
         match.group(0).replace('\n', '<br/>').replace('\0', ''))
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
-    
+
     regex = r'\0{1}[\w\W]*?\0{1}'
     # noinspection PyPep8
     subst = lambda match: "<div><font color='blue'>{}</font></div>".format(
         match.group(0).replace('\n', '<br/>').replace('\0', ''))
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
-    
+
     regex = r'\.{3}\s+\n'
     out = re.sub(regex, '', out, 0, re.MULTILINE)
-    
+
     html = "<table style='background:transparent'>\n"
     for line in out.splitlines():
         if '</font> :' in line:
@@ -127,10 +125,12 @@ def convert_to_html(obj):
         elif '<strong>' in line:
             html += tr.format(line, '<hr/>', 'padding-top:10px;')
     html += "</table>"
-    
+
     obj._html_output = False
-    
+
     return html
+
+
 # ======================================================================================================================
 #  Printing options
 #  copied from numpy.ma.core to avoid using
@@ -339,7 +339,7 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
         elif isinstance(x, TYPE_FLOAT):
             fmt = '{:{l}.0{prec}g}'.format(
                 x,
-                prec=precision, # - 1,
+                prec=precision,  # - 1,
                 l=precision + spc)
 
         elif isinstance(x, TYPE_COMPLEX):

@@ -9,10 +9,10 @@
 
 
 # noinspection PyUnresolvedReferences
-from spectrochempy import (     show,
-                                BaselineCorrection,
-                                NDDataset,
-                                ur)
+from spectrochempy import (show,
+                           BaselineCorrection,
+                           NDDataset,
+                           ur)
 
 import pytest
 import os
@@ -21,28 +21,26 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 
 def test_basecor_sequential(IR_dataset_2D):
-
     dataset = IR_dataset_2D[5]
 
     basc = BaselineCorrection(dataset)
-    s = basc([6000.,3500.],[2200.,1500.], method='sequential', interpolation='pchip')
+    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='pchip')
     s.plot()
-    s = basc([6000.,3500.],[2200.,1500.], method='sequential', interpolation='polynomial')
+    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='polynomial')
     s.plot(clear=False, color='red')
 
     dataset = IR_dataset_2D[:15]
 
     basc = BaselineCorrection(dataset)
-    s = basc([6000.,3500.],[2200.,1500.], method='sequential', interpolation='pchip')
+    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='pchip')
     s.plot()
-    s = basc([6000.,3500.],[2200.,1500.], method='sequential', interpolation='polynomial')
+    s = basc([6000., 3500.], [2200., 1500.], method='sequential', interpolation='polynomial')
     s.plot(cmap='copper')
 
     show()
 
 
 def test_basecor_multivariate(IR_dataset_2D):
-
     dataset = IR_dataset_2D[5]
 
     basc = BaselineCorrection(dataset)
@@ -59,6 +57,7 @@ def test_basecor_multivariate(IR_dataset_2D):
     s = basc([6000., 3500.], [1800., 1500.], method='multivariate', interpolation='polynomial')
     s.plot(cmap='copper')
     show()
+
 
 def test_notebook_basecor_bug():
     # coding: utf-8
@@ -87,28 +86,26 @@ def test_notebook_basecor_bug():
 
     basc.corrected.plot_stack()
 
+
 @pytest.mark.skip()
 def test_ab_nmr(NMR_dataset_1D):
-    
     dataset = NMR_dataset_1D.copy()
-    dataset /= dataset.real.data.max()  #nromalize
-    
-    dataset.em(10.*ur.Hz, inplace=True)
-    dataset = dataset.fft(tdeff=8192, size=2**15)
-    dataset = dataset[150.0:-150.]+1.
+    dataset /= dataset.real.data.max()  # nromalize
+
+    dataset.em(10. * ur.Hz, inplace=True)
+    dataset = dataset.fft(tdeff=8192, size=2 ** 15)
+    dataset = dataset[150.0:-150.] + 1.
 
     dataset.plot()
-    
+
     transf = dataset.copy()
     transfab = transf.ab(window=.25)
     transfab.plot(clear=False, color='r')
 
     transf = dataset.copy()
-    base = transf.ab(mode = "poly", dryrun=True)
+    base = transf.ab(mode="poly", dryrun=True)
     transfab = transf - base
-    transfab.plot(xlim=(150,-150), clear=False, color='b')
-    base.plot(xlim=(150,-150), ylim=[-2,10], clear=False, color='y')
+    transfab.plot(xlim=(150, -150), clear=False, color='b')
+    base.plot(xlim=(150, -150), ylim=[-2, 10], clear=False, color='y')
 
     show()
-    
-

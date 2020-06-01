@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 #
 # ======================================================================================================================
@@ -22,6 +21,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy import optimize
 import quadprog
+
 
 class IRIS:
     """
@@ -91,13 +91,13 @@ class IRIS:
         if 'lambdaRange' not in param:
             lambdaRange = None
         else:
-            lambdaRange=param['lambdaRange']
+            lambdaRange = param['lambdaRange']
         if lambdaRange == None:
             regularization = False
             searchLambda = False
             lamb = [0]
         elif len(lambdaRange) == 2:
-            regularization =True
+            regularization = True
             searchLambda = True
         elif len(param['lambdaRange']) == 3:
             regularization = True
@@ -172,7 +172,7 @@ class IRIS:
                       .format(X.shape[1], X.shape[0]))
             # une scipy.nnls() to solve the linear problem: X = K f
             for j, freq in enumerate(X.x.data):
-                f[0, :, j] = optimize.nnls(K.data, X[:,j].data.squeeze())[0]
+                f[0, :, j] = optimize.nnls(K.data, X[:, j].data.squeeze())[0]
             res = X.data - np.dot(K.data, f[0].data)
             RSS[0] = np.sum(res ** 2)
             SM[0] = np.linalg.norm(np.dot(np.dot(np.transpose(f[0]), S), f[0]))
@@ -204,7 +204,7 @@ class IRIS:
                 returns: f, RSS and SM for a given regularization parameter
                 ------- '''
                 fi = np.zeros((len(eps), len(X.x.data)))
-                if verbose :
+                if verbose:
                     print('... Solving for lambda = {} ...'.format(lamda))
                 G = nearestPD(G0 + 2 * lamda * S)
                 for j, freq in enumerate(X.x.data):
@@ -221,28 +221,28 @@ class IRIS:
                 '''returns the Menger curvature of a triplet of
                 points. x, y = sets of 3 cartesian coordinates '''
 
-                numerator = 2 * (x[0]*y[1] + x[1]*y[2] + x[2]*y[0]
-                                 - x[0]*y[2] - x[1]*y[0] - x[2]*y[1])
+                numerator = 2 * (x[0] * y[1] + x[1] * y[2] + x[2] * y[0]
+                                 - x[0] * y[2] - x[1] * y[0] - x[2] * y[1])
                 # euclidian distances
-                r01 = (x[1] - x[0])**2 + (y[1] - y[0])**2
-                r12 = (x[2] - x[1])**2 + (y[2] - y[1])**2
-                r02 = (x[2] - x[0])**2 + (y[2] - y[0])**2
+                r01 = (x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2
+                r12 = (x[2] - x[1]) ** 2 + (y[2] - y[1]) ** 2
+                r02 = (x[2] - x[0]) ** 2 + (y[2] - y[0]) ** 2
 
                 denominator = np.sqrt(r01 * r12 * r02)
-                return numerator/denominator
+                return numerator / denominator
 
-            if not searchLambda :
+            if not searchLambda:
                 if verbose:
                     print('Solving for {} wavenumbers, {} spectra and {} regularization parameters \n'
-                        .format(X.shape[1], X.shape[0], len(lamb)))
+                          .format(X.shape[1], X.shape[0], len(lamb)))
 
                     for i, lamda in enumerate(lamb):
-                        f[i], RSS [i], SM[i] = solve_lambda(X, K, G0, lamda, S, verbose)
+                        f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, lamda, S, verbose)
 
             else:
                 if verbose:
                     print('Solving for {} wavenumbers and {} spectra, search regularization parameter '
-                      'in [10**{}, 10**{}]\n'
+                          'in [10**{}, 10**{}]\n'
                           .format(X.shape[1], X.shape[0], str(min(lambdaRange)), str(max(lambdaRange))))
 
                     x = lamda = np.ndarray((4))
@@ -251,13 +251,13 @@ class IRIS:
 
                     x[0] = min(lambdaRange)
                     x[3] = max(lambdaRange)
-                    x[1] = (x[3] + phi * x[0])/ (1 + phi)
+                    x[1] = (x[3] + phi * x[0]) / (1 + phi)
                     x[2] = x[0] + x[3] - x[1]
-                    lamb = 10**x
+                    lamb = 10 ** x
                     if verbose:
                         print('Log lambda= ' + str(x))
                     for i, xi in enumerate(x):
-                        f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, 10**xi, S, verbose)
+                        f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, 10 ** xi, S, verbose)
 
                     Rx = RSS
                     Sy = SM
@@ -267,41 +267,53 @@ class IRIS:
                         if verbose:
                             print('Curvatures: C1 = {} ; C2 = {}'.format(C1, C2))
                         while C2 < 0:
-                            x[3] = x[2]; Rx[3] = Rx[2]; Sy[3] = Sy[2]
-                            x[2] = x[1]; Rx[2] = Rx[1]; Sy[2] = Sy[1]
+                            x[3] = x[2];
+                            Rx[3] = Rx[2];
+                            Sy[3] = Sy[2]
+                            x[2] = x[1];
+                            Rx[2] = Rx[1];
+                            Sy[2] = Sy[1]
                             x[1] = (x[3] + phi * x[0]) / (1 + phi)
                             if verbose:
                                 print('Log lambda= ' + str(x))
-                            f_, Rx[1], S[1] = solve_lambda(X, K, G0, 10**x[1], S, verbose)
-                            lamb = np.append(lamb, np.array(10**x[1]))
+                            f_, Rx[1], S[1] = solve_lambda(X, K, G0, 10 ** x[1], S, verbose)
+                            lamb = np.append(lamb, np.array(10 ** x[1]))
                             f = np.concatenate((f, np.atleast_3d(f_.T).T))
                             RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                             SM = np.concatenate((SM, np.array(Sy[1:2])))
                             C2 = menger(Rx[1:4], Sy[1:4])
                             print('new curvature: C2 = {}'.format(C2))
                         if C1 > C2:
-                            x[3] = x[2]; Rx[3] = Rx[2]; Sy[3] = Sy[2]
-                            x[2] = x[1]; Rx[2] = Rx[1]; Sy[2] = Sy[1]
+                            x[3] = x[2];
+                            Rx[3] = Rx[2];
+                            Sy[3] = Sy[2]
+                            x[2] = x[1];
+                            Rx[2] = Rx[1];
+                            Sy[2] = Sy[1]
                             x[1] = (x[3] + phi * x[0]) / (1 + phi)
                             if verbose:
                                 print('Log lambda= ' + str(x))
-                            f_, Rx[1], S[1] = solve_lambda(X, K, G0, 10**x[1], S, verbose)
+                            f_, Rx[1], S[1] = solve_lambda(X, K, G0, 10 ** x[1], S, verbose)
                             f = np.concatenate((f, np.atleast_3d(f_.T).T))
-                            lamb = np.append(lamb, np.array(10**x[1]))
+                            lamb = np.append(lamb, np.array(10 ** x[1]))
                             RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                             SM = np.concatenate((SM, np.array(Sy[1:2])))
                         else:
-                            x[0] = x[1]; Rx[0] = Rx[1]; Sy[0] = Sy[1]
-                            x[1] = x[2]; Rx[1] = Rx[2]; Sy[1] = Sy[2]
+                            x[0] = x[1];
+                            Rx[0] = Rx[1];
+                            Sy[0] = Sy[1]
+                            x[1] = x[2];
+                            Rx[1] = Rx[2];
+                            Sy[1] = Sy[2]
                             x[2] = x[0] - (x[1] - x[3])
                             if verbose:
                                 print('Log lambda= ' + str(x))
-                            f_, Rx[2], S[2] = solve_lambda(X, K, G0, 10**x[2], S, verbose)
+                            f_, Rx[2], S[2] = solve_lambda(X, K, G0, 10 ** x[2], S, verbose)
                             f = np.concatenate((f, np.atleast_3d(f_.T).T))
-                            lamb = np.append(lamb, np.array(10**x[2]))
+                            lamb = np.append(lamb, np.array(10 ** x[2]))
                             RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                             SM = np.concatenate((SM, np.array(Sy[1:2])))
-                        if (10**x[3] - 10**x[0])/10**x[3] < epsilon:
+                        if (10 ** x[3] - 10 ** x[0]) / 10 ** x[3] < epsilon:
                             break
                     if verbose:
                         print('\n optimum found !')
@@ -321,7 +333,6 @@ class IRIS:
         self.lamda = lamb
         self.RSS = RSS
         self.SM = SM
-
 
     def reconstruct(self):
         """
@@ -428,6 +439,7 @@ class IRIS:
             self.f[i].plot(method='map', **kwargs)
         return axeslist
 
+
 # --------------------------------------------
 # Utility functions
 
@@ -501,10 +513,11 @@ def nearestPD(A):
     k = 1
     while not isPD(A3):
         mineig = np.min(np.real(np.linalg.eigvals(A3)))
-        A3 += I * (-mineig * k**2 + spacing)
+        A3 += I * (-mineig * k ** 2 + spacing)
         k += 1
         print('makes PD matrix')
     return A3
+
 
 def isPD(B):
     """Returns true when input is positive-definite, via Cholesky
@@ -515,6 +528,3 @@ def isPD(B):
         return True
     except np.linalg.LinAlgError:
         return False
-
-
-

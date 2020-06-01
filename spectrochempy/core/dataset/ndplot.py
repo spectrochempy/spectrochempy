@@ -42,7 +42,6 @@ from ...core import info_, debug_, error_, warning_
 
 prefs = general_preferences
 
-
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
@@ -139,7 +138,7 @@ class NDPlot(HasTraits):
         if _plotter is None:
             # no plotter found
             error_('The specified plotter for method '
-                      '`{}` was not found!'.format(method))
+                   '`{}` was not found!'.format(method))
             raise IOError
 
         # Execute the plotter
@@ -395,8 +394,7 @@ class NDPlot(HasTraits):
         loc = kwargs.get("legend", None)
         if loc:
             origin.ndaxes['main'].legend(loc=loc)
-        
-        
+
         # Additional matplotlib commands on the current plot
         # ---------------------------------------------------------------------
 

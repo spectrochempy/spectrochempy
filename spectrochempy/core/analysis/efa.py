@@ -92,10 +92,10 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         f = NDDataset(np.zeros((M, K)),
-                               coords=[X.y, Coord(range(K))],
-                               title='EigenValues',
-                               description='Forward EFA of ' + X.name,
-                               history=str(datetime.now()) + ': created by spectrochempy ')
+                      coords=[X.y, Coord(range(K))],
+                      title='EigenValues',
+                      description='Forward EFA of ' + X.name,
+                      history=str(datetime.now()) + ': created by spectrochempy ')
 
         # in case some row are masked, take this into account, by masking
         # the corresponding rows of f
@@ -118,10 +118,10 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         b = NDDataset(np.zeros((M, K)),
-                                  coords=[X.y, Coord(range(K))],
-                                  title='EigenValues',
-                                  name='Backward EFA of ' + X.name,
-                                  history=str(datetime.now()) + ': created by spectrochempy ')
+                      coords=[X.y, Coord(range(K))],
+                      title='EigenValues',
+                      name='Backward EFA of ' + X.name,
+                      history=str(datetime.now()) + ': created by spectrochempy ')
 
         b[masked_rows] = MASKED
 
@@ -137,7 +137,6 @@ class EFA(HasTraits):
 
         self.f = f
         self.b = b
-
 
     def cut_f(self, n_pc=None, cutoff=None):
         """
@@ -228,7 +227,6 @@ class EFA(HasTraits):
                 continue
             c[i] = np.min((f.data[i, :n_pc], b.data[i, :n_pc][::-1]), axis=0)
         return c
-
 
 
 # ======================================================================================================================

@@ -8,6 +8,7 @@ import scipy.ndimage as ndimage
 
 from .analysisbase import neighbors
 
+
 # Connected segmenting method:
 # The connected segmentation method finds all nodes which are above a given
 # threshold and connected to the initial point.  For finding all segments
@@ -65,6 +66,7 @@ def find_all_connected(data, thres, find_segs=False, diag=False):
     else:
         return locations
 
+
 # nconnected method:
 # The nconnected method is identical to the connected method except nodes must
 # be below the threshold and local minimum are reported.  This is useful for
@@ -114,13 +116,14 @@ def find_all_nconnected(data, thres, find_segs=False, diag=False):
 
     # determine locations of segment maxima
     locations = ndimage.minimum_position(data, labels, range(1,
-                                         num_features + 1))
+                                                             num_features + 1))
     # find segment slices if requested and return
     if find_segs is True:
         seg_slices = ndimage.find_objects(labels)
         return locations, seg_slices
     else:
         return locations
+
 
 # downward segmentation method:
 # The downward segmenting method uses the flood fill algorithm to find
@@ -241,7 +244,7 @@ def find_all_downward(data, thres, find_segs=False, diag=False):
 
     # determine locations of segment maxima
     locations = ndimage.maximum_position(data, labels, range(1,
-                                         num_features + 1))
+                                                             num_features + 1))
 
     # find segment slices if requested and return
     if find_segs is True:
@@ -404,18 +407,18 @@ def find_downward(data, pt, thres, diag=False):
         structure = ndimage.generate_binary_structure(ndim, 1)
 
     if isinstance(pt, int):
-        pt = (pt, )
+        pt = (pt,)
     pt = tuple(pt)
     shape = data.shape
 
-    if data[pt] < thres:    # check that the initial point is above threshold.
+    if data[pt] < thres:  # check that the initial point is above threshold.
         return []
-    Q = [pt]    # queue
+    Q = [pt]  # queue
     segment = [pt]
 
-    while Q:    # loop until Q is empty
-        pt = Q.pop(0)   # remove first element of queue
-        v = data[pt]    # value at current node
+    while Q:  # loop until Q is empty
+        pt = Q.pop(0)  # remove first element of queue
+        v = data[pt]  # value at current node
         for new_pt in neighbors(pt, shape, structure):  # check all neightbors
             if thres < data[new_pt] < v and new_pt not in segment:
                 Q.append(new_pt)
@@ -452,17 +455,17 @@ def find_connected(data, pt, thres, diag=False):
         structure = ndimage.generate_binary_structure(ndim, 1)
 
     if isinstance(pt, int):
-        pt = (pt, )
+        pt = (pt,)
     pt = tuple(pt)
     shape = data.shape
 
-    if data[pt] < thres:    # check that the initial point is above threshold.
+    if data[pt] < thres:  # check that the initial point is above threshold.
         return []
-    Q = [pt]    # queue
+    Q = [pt]  # queue
     segment = [pt]
 
-    while Q:    # loop until Q is empty
-        pt = Q.pop(0)   # remove first element of queue
+    while Q:  # loop until Q is empty
+        pt = Q.pop(0)  # remove first element of queue
         for new_pt in neighbors(pt, shape, structure):  # check all neightbors
             if data[new_pt] > thres and new_pt not in segment:
                 Q.append(new_pt)
@@ -499,17 +502,17 @@ def find_nconnected(data, pt, thres, diag=False):
         structure = ndimage.generate_binary_structure(ndim, 1)
 
     if isinstance(pt, int):
-        pt = (pt, )
+        pt = (pt,)
     pt = tuple(pt)
     shape = data.shape
 
-    if data[pt] > thres:    # check that the initial point is above threshold.
+    if data[pt] > thres:  # check that the initial point is above threshold.
         return []
-    Q = [pt]    # queue
+    Q = [pt]  # queue
     segment = [pt]
 
-    while Q:    # loop until Q is empty
-        pt = Q.pop(0)   # remove first element of queue
+    while Q:  # loop until Q is empty
+        pt = Q.pop(0)  # remove first element of queue
         for new_pt in neighbors(pt, shape, structure):  # check all neightbors
             if data[new_pt] < thres and new_pt not in segment:
                 Q.append(new_pt)
@@ -546,18 +549,18 @@ def find_upward(data, pt, thres, diag=False):
         structure = ndimage.generate_binary_structure(ndim, 1)
 
     if isinstance(pt, int):
-        pt = (pt, )
+        pt = (pt,)
     pt = tuple(pt)
     shape = data.shape
 
-    if data[pt] > thres:    # check that the initial point is below threshold.
+    if data[pt] > thres:  # check that the initial point is below threshold.
         return []
-    Q = [pt]    # queue
+    Q = [pt]  # queue
     segment = [pt]
 
-    while Q:    # loop until Q is empty
-        pt = Q.pop(0)   # remove first element of queue
-        v = data[pt]    # value at current node
+    while Q:  # loop until Q is empty
+        pt = Q.pop(0)  # remove first element of queue
+        v = data[pt]  # value at current node
         for new_pt in neighbors(pt, shape, structure):  # check all neightbors
             if thres > data[new_pt] > v and new_pt not in segment:
                 Q.append(new_pt)

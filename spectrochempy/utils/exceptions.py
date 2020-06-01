@@ -15,7 +15,7 @@ __all__ = ['SpectroChemPyWarning',
            'SpectroChemPyException',
            'UnitsCompatibilityError',
            'deprecated',
-          ]
+           ]
 
 
 # ======================================================================================================================
@@ -45,13 +45,13 @@ class SpectroChemPyException(Exception):
     
     """
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 class UnitsCompatibilityError(SpectroChemPyException):
     """
     Exception raised when units are not compatible, preventing some mathematical operations
     
     """
-    
 
 
 # ----------------------------------------------------------------------------------------------------------------------

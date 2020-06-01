@@ -9,11 +9,12 @@
 
 __all__ = ['trapz']
 
-__dataset_methods__  = __all__
+__dataset_methods__ = __all__
 
 import scipy.signal
 
 """wrapper of scipy.signal integration function"""
+
 
 def trapz(dataset, dim='x'):
     '''
@@ -43,5 +44,3 @@ def trapz(dataset, dim='x'):
     if dataset.coord([dim]).reversed:
         res *= -1
     return res
-
-

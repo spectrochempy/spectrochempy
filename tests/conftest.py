@@ -7,7 +7,6 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-import sys
 import os
 import numpy as np
 import pandas as pd
@@ -23,7 +22,8 @@ from IPython.testing.globalipapp import start_ipython
 def session_ip():
     try:
         return start_ipython()
-    except:
+    except Exception as e:
+        print('start ipython', e)
         return None
 
 
@@ -31,7 +31,9 @@ def session_ip():
 def ip(session_ip):
     yield session_ip
 
+
 from spectrochempy.core import app
+
 try:
     # work only if spectrochempy is installed
     from spectrochempy.core import app
@@ -130,40 +132,61 @@ def ndarrayquaternion():
 # ----------------------------------------------------------------------------------------------------------------------
 
 coord0_ = Coord(data=np.linspace(4000., 1000., 10), labels=list('abcdefghij'), units="cm^-1", title='wavenumber')
+
+
 @pytest.fixture(scope="function")
 def coord0():
     return coord0_.copy()
 
+
 coord1_ = Coord(data=np.linspace(0., 60., 100), units="s", title='time-on-stream')
+
+
 @pytest.fixture(scope="function")
 def coord1():
     return coord1_.copy()
 
+
 coord2_ = Coord(data=np.linspace(200., 300., 3), labels=['cold', 'normal', 'hot'], units="K", title='temperature')
+
+
 @pytest.fixture(scope="function")
 def coord2():
     return coord2_.copy()
 
+
 coord2b_ = Coord(data=np.linspace(1., 20., 3), labels=['low', 'medium', 'high'], units="tesla", title='magnetic field')
+
+
 @pytest.fixture(scope="function")
 def coord2b():
     return coord2b_.copy()
 
+
 coord0_2_ = Coord(data=np.linspace(4000., 1000., 9), labels=list('abcdefghi'), units="cm^-1", title='wavenumber')
+
+
 @pytest.fixture(scope="function")
 def coord0_2():
     return coord0_2_.copy()
 
+
 coord1_2_ = Coord(data=np.linspace(0., 60., 50), units="s", title='time-on-stream')
+
+
 @pytest.fixture(scope="function")
 def coord1_2():
     return coord1_2_.copy()
 
+
 coord2_2_ = Coord(data=np.linspace(200., 1000., 4), labels=['cold', 'normal', 'hot', 'veryhot'], units="K",
-                 title='temperature')
+                  title='temperature')
+
+
 @pytest.fixture(scope="function")
 def coord2_2():
     return coord2_2_.copy()
+
 
 @pytest.fixture(scope="function")
 def nd1d():
@@ -192,7 +215,8 @@ def ds1():
 @pytest.fixture(scope="function")
 def ds2():
     # another dataset
-    return NDDataset(ref3d_2_data, coords=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance', units='absorbance').copy()
+    return NDDataset(ref3d_2_data, coords=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance',
+                     units='absorbance').copy()
 
 
 @pytest.fixture(scope="function")
@@ -203,12 +227,13 @@ def dsm():
     return NDDataset(ref3d_data, coords=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
                      units='absorbance').copy()
 
+
 # NDPanel
 @pytest.fixture(scope="function")
 def pnl():
     with RandomSeedContext(12345):
-        arr1 = np.random.rand(10,20)
-        arr2 = np.random.rand(20,12)
+        arr1 = np.random.rand(10, 20)
+        arr2 = np.random.rand(20, 12)
     cy1 = Coord(np.arange(10), title='ty', units='s')
     cy2 = Coord(np.arange(12), title='ty', units='s')
     cx = Coord(np.arange(20), title='tx', units='km')
@@ -217,6 +242,7 @@ def pnl():
     pnl = NDPanel(nd1, nd2)
     assert pnl.dims == ['x', 'y']
     return pnl.copy()
+
 
 # Fixtures:  IR spectra (SPG)
 # ----------------------------------------------------------------------------------------------------------------------

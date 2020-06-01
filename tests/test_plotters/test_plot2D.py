@@ -9,12 +9,10 @@
 # ======================================================================================================================
 
 
-
 from spectrochempy import NDDataset, show, general_preferences as prefs
 
 
 def test_plot2D():
-
     A = NDDataset.read_omnic('irdata/nh4y-activation.spg',
                              directory=prefs.datadir)
     A.y -= A.y[0]
@@ -34,10 +32,6 @@ def test_plot2D():
     show()
 
     pass
-
-
-
-
 
 
 # ======================================================================================================================

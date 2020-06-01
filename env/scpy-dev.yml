@@ -1,53 +1,53 @@
 name: scpy-dev
 channels:
-- conda-forge
-- cantera
-- spectrocat
-- defaults
+  - conda-forge
+  - cantera
+  - spectrocat
+  - defaults
 dependencies:
-- numpy
-- matplotlib
-- traitlets
-- pint
-- quaternion
-- scipy
-- colorama
-- setuptools_scm
-- git
-- ipython
-- jupyterlab
-- ipykernel
-- ipywidgets
-- jupyter_nbextensions_configurator
-- ipympl
-- widgetsnbextension
-- xlrd
-- numba
-- nodejs
-- jupytext
-- pytest
-- pytest-runner
-- pytest-cov
-- pytest-xdist
-- scikit-image
-- sphinx=1.8.5
-- sphinx_rtd_theme
-- sphinx-gallery=0.5.0
-- nbsphinx
-- jupyter_sphinx
-- nbconvert
-- numpydoc=0.8
-- conda-build
-- conda-smithy
-- cantera
-- quadprog
-- pyqt
-- twine
-- tqdm
-- brukeropusreader
-- pandas
-- xarray
-- datashader
-- scikit-learn
-- requests
+  - numpy
+  - matplotlib
+  - traitlets
+  - pint
+  - quaternion
+  - scipy
+  - colorama
+  - setuptools_scm
+  - git
+  - ipython
+  - jupyterlab
+  - ipykernel
+  - ipywidgets
+  - jupyter_nbextensions_configurator
+  - ipympl
+  - widgetsnbextension
+  - xlrd
+  - numba
+  - nodejs
+  - jupytext
+  - pytest
+  - pytest-runner
+  - pytest-cov
+  - pytest-xdist
+  - scikit-image
+  - sphinx=1.8.5
+  - sphinx_rtd_theme
+  - sphinx-gallery=0.5.0
+  - nbsphinx
+  - jupyter_sphinx
+  - nbconvert
+  - numpydoc=0.8
+  - conda-build
+  - conda-smithy
+  - cantera
+  - quadprog
+  - pyqt
+  - twine
+  - tqdm
+  - brukeropusreader
+  - pandas
+  - xarray
+  - datashader
+  - scikit-learn
+  - requests
 

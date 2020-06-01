@@ -164,6 +164,7 @@ def local_scheme(version):
     dirty = '+dirty' if version.dirty else ''
     return dirty
 
+
 try:
     __release__ = get_distribution('spectrochempy').version
     "Release version string of this package"
@@ -1125,7 +1126,7 @@ class SpectroChemPy(Application):
         # add other preferences
         # ---------------------------------------------------------------------
 
-        self.datadir = DataDir() #config=self.config)
+        self.datadir = DataDir()  # config=self.config)
         self.general_preferences = GeneralPreferences(config=self.config,
                                                       parent=self)
 

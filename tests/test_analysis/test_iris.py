@@ -16,6 +16,7 @@ from spectrochempy.core.analysis.iris import IRIS
 from spectrochempy.utils import show
 from spectrochempy.core import info_
 
+
 def test_IRIS():
     print('start test IRIS')
 

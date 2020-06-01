@@ -14,15 +14,14 @@ from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_approx_equal
 import pytest
 
+
 # comment the next line to test it manually
-#@pytest.mark.skip('interactive so cannot be used with full testing')
+# @pytest.mark.skip('interactive so cannot be used with full testing')
 def test_read_without_filename():
     A = NDDataset.read_omnic()
     print(A)
 
+
 def test_read_with_filename():
-    A = NDDataset.read_omnic(os.path.join('irdata','nh4y-activation.spg'))
+    A = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
     print(A)
-
-
-

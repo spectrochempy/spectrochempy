@@ -16,7 +16,7 @@ import os
 datadir = scp.general_preferences.datadir
 
 dataset = scp.NDDataset.read_omnic(os.path.join(datadir,
-                                              'irdata', 'nh4y-activation.spg'))
+                                                'irdata', 'nh4y-activation.spg'))
 
 dataset.plot_stack(style='paper')
 
@@ -29,4 +29,4 @@ dataset.y.title = 'acquisition time'
 
 dataset.plot_stack()
 
-#show() # uncomment to show plot if needed()
+# show() # uncomment to show plot if needed()

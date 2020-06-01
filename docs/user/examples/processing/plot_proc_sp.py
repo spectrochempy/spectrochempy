@@ -38,7 +38,6 @@ _ = dataset1D.sinm(ssb=2, retfunc=True, inplace=False)
 # or also
 _ = scp.sp(dataset1D, ssb=2, pow=1, retfunc=True, inplace=False)
 
-
 ########################################################################################################################
 # Apply Sine bell window apodization with parameter ssb=2, which correspond to a sine function
 
@@ -56,7 +55,6 @@ new4, curve4 = dataset1D.qsin(ssb=1, retfunc=True, inplace=False)
 
 new5, curve5 = dataset1D.sinm(ssb=8, retfunc=True, inplace=False)
 
-
 ########################################################################################################################
 # Plotting
 
@@ -65,20 +63,16 @@ p = dataset1D.plot(zlim=(-2, 2), color='k')
 curve1.plot(color='r', clear=False)
 new1.plot(data_only=True, color='r', clear=False, label=' sinm with ssb= 2 (cosine window)')
 
-
 curve2.plot(color='b', clear=False)
-new2.plot(data_only=True, color='b', clear=False, label=' sinm with ssb= 1 (sine window)' )
-
+new2.plot(data_only=True, color='b', clear=False, label=' sinm with ssb= 1 (sine window)')
 
 curve3.plot(color='m', clear=False)
 new3.plot(data_only=True, color='m', clear=False, label=' qsin with ssb= 2')
-
 
 curve4.plot(color='g', clear=False)
 new4.plot(data_only=True, color='g', clear=False, label=' qsin with ssb= 1')
 
 curve5.plot(color='c', ls='--', clear=False)
 new5.plot(data_only=True, color='c', ls='--', clear=False, label=' sinm with ssb= 8', legend='best')
-
 
 scp.show()

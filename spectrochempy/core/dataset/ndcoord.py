@@ -50,7 +50,7 @@ class Coord(NDMath, NDArray):
     _html_output = False
     _parent_dim = Unicode(allow_none=True)
 
-# ------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     # initialization
     # ------------------------------------------------------------------------------------------------------------------
     docstrings.delete_params('NDArray.parameters', 'data', 'mask')
@@ -118,7 +118,7 @@ class Coord(NDMath, NDArray):
         This is useful to check type without importing the module
         
         """
-    
+
         if name is None:
             return 'Coord'
         else:
@@ -133,7 +133,7 @@ class Coord(NDMath, NDArray):
         """bool - Whether the axis is reversed (readonly
         property).
         """
-        if self.units in ['1 / centimeter','ppm']:
+        if self.units in ['1 / centimeter', 'ppm']:
             return True
         return False
         ## Return a correct result only if the data are sorted
@@ -202,8 +202,7 @@ class Coord(NDMath, NDArray):
         # return a scalar for the spacing of the coordinates (if they are uniformly spaced,
         # else return an array of the differents spacings
         return spacing(self.data) * self.units
-    
-    
+
     # NDmath methods
 
     # ..................................................................................................................
@@ -234,13 +233,12 @@ class Coord(NDMath, NDArray):
     def swapaxes(self, **kwargs):
         raise NotImplementedError
 
-    
     # ------------------------------------------------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
     def loc2index(self, loc):
         return self._loc2index(loc)
-    
+
     # ------------------------------------------------------------------------------------------------------------------
     # special methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -276,9 +274,9 @@ class Coord(NDMath, NDArray):
 
     # ..................................................................................................................
     def _cstr(self, header='  coordinates: ... \n', print_size=True, **kwargs):
-    
-        indent = kwargs.get('indent',0)
-        
+
+        indent = kwargs.get('indent', 0)
+
         out = ''
         if not self.is_empty and print_size:
             out += f'{self._str_shape().rstrip()}\n'
@@ -302,11 +300,11 @@ class Coord(NDMath, NDArray):
 
         if indent:
             out = "{}".format(textwrap.indent(out, ' ' * indent))
-        
-        first_indent=kwargs.get("first_indent",0)
+
+        first_indent = kwargs.get("first_indent", 0)
         if first_indent < indent:
-            out = out[indent-first_indent:]
-            
+            out = out[indent - first_indent:]
+
         if not self._html_output:
             return colored_output(out)
         else:
@@ -330,7 +328,7 @@ class Coord(NDMath, NDArray):
         #   'name': "foo", # The name of the changed trait
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
-        #debug_(f'changes in Coord: {change.name}')
+        # debug_(f'changes in Coord: {change.name}')
         pass
 
 
@@ -338,7 +336,6 @@ class Coord(NDMath, NDArray):
 # Set the operators
 # ======================================================================================================================
 set_operators(Coord, priority=50)
-
 
 # ======================================================================================================================
 if __name__ == '__main__':

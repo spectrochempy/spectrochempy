@@ -14,10 +14,11 @@ from spectrochempy.utils import show
 from spectrochempy.utils.testing import assert_approx_equal
 import pytest
 
+
 # comment the next line to test it manually
-#@pytest.mark.skip('interactive so cannot be used with full testing')
+# @pytest.mark.skip('interactive so cannot be used with full testing')
 def test_read_dir():
-    A = NDDataset.read_dir(os.path.join('irdata','subdir'), recursive=True)
+    A = NDDataset.read_dir(os.path.join('irdata', 'subdir'), recursive=True)
     assert len(A) == 9
 
     # in case we do not specify a directory:
@@ -28,9 +29,5 @@ def test_read_dir():
     print('Matrixes in .mat files:')
     for x in C:
         print(C)
-    assert len(C)== 6
+    assert len(C) == 6
     assert C[3].shape == (204, 96)
-
-
-
-

@@ -41,37 +41,41 @@ def test_ndio_basic():
     dl = NDDataset.load('essai')
     assert_array_equal(dl.data, ir.data)
 
+
 def test_ndio_less_basic(coord2, coord2b, dsm):  # dsm is defined in conftest
-    
+
     coordm = CoordSet(coord2, coord2b)
-    
+
     # for multiple coordinates
     assert dsm.coords['x'] == coordm
 
     info_(dsm)
-    
+
     dsm.save('essai')
     da = NDDataset.load('essai')
-    
+
     info_(da)
-    
+
     assert da == dsm
+
 
 def test_ndio_save1D_load(IR_dataset_1D):
     dataset = IR_dataset_1D.copy()
-    #debug_(dataset)
+    # debug_(dataset)
     dataset.save('essai')
     ir = NDDataset.load("essai")
-    #debug_(ir)
+    # debug_(ir)
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
+
 
 def test_ndio_save2D_load(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
-    #debug_(dataset)
+    # debug_(dataset)
     dataset.save('essai')
     ir = dataset.load("essai")
-    #debug_(ir)
+    # debug_(ir)
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
+
 
 def test_ndio_save_and_load_mydataset(IR_dataset_2D):
     ds = IR_dataset_2D.copy()
@@ -82,6 +86,7 @@ def test_ndio_save_and_load_mydataset(IR_dataset_2D):
     assert (dl == ds)
     assert (dl.meta == ds.meta)
     assert (dl.plotmeta == ds.plotmeta)
+
 
 def test_issue_60():
     with pytest.raises(ValueError):

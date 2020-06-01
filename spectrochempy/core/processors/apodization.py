@@ -22,10 +22,11 @@ from ...units import ur, Quantity
 from ...utils import epsilon, docstrings
 from .. import general_preferences, error_
 
+
 # ======================================================================================================================
 # Private module methods
 # ======================================================================================================================
-@docstrings.get_sectionsf('apodize', sections=['Other Parameters','Returns'])
+@docstrings.get_sectionsf('apodize', sections=['Other Parameters', 'Returns'])
 @docstrings.dedent
 def _apodize(dataset, method, apod, **kwargs):
     """
@@ -69,18 +70,18 @@ def _apodize(dataset, method, apod, **kwargs):
         new = dataset.copy()  # copy to be sure not to modify this dataset
     else:
         new = dataset
-        
+
     # On which axis do we want to apodize? (get axis from arguments)
     axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
-    
+
     # The last dimension is always the dimension on which we apply the apodization window.
     # If needed, we swap the dimensions to be sure to be in this situation
-    
+
     swaped = False
     if axis != -1:
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
-    
+
     x = new.coords[dim]
     if (x.unitless or x.dimensionless or
             x.units.dimensionality != '[time]'):
@@ -92,13 +93,13 @@ def _apodize(dataset, method, apod, **kwargs):
         name = method.__module__.split('.')[-1]
         new.history = f'{name} apodization performed on dimension {dim} with parameters:' + str(apod)
         apod_arr = method(x, *apod)
-    
+
         if kwargs.pop('rev', False):
             apod_arr = apod_arr[::-1]  # reverse apodization
-        
+
         if kwargs.pop('inv', False):
             apod_arr = 1. / apod_arr  # invert apodization
-    
+
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
     # TODO: CHECK IF THIS WORK WITH 2D DATA - IMPORTANT - CHECK IN PARTICULAR IF SWAPING ALSO SWAP METADATA (NOT SURE FOR NOW)
@@ -106,19 +107,17 @@ def _apodize(dataset, method, apod, **kwargs):
     isquaternion = new.is_quaternion
     encoding = new.meta.encoding[-1]
     # TODO: handle this eventual complexity
-    
+
     new._data *= apod_arr
-    
+
     # restore original data order if it was swaped
     if swaped:
         new.swapaxes(axis, -1, inplace=True)  # must be done inplace
-    
-   
-    
+
     # TODO: improve display of apod parameters
-    
+
     return new, apod_arr
-    
+
     # shifted = args.shifted  # float(kargs.get('top', 0.0))
     # k_shifted = args.k_shifted
     #
@@ -145,7 +144,7 @@ def _apodize(dataset, method, apod, **kwargs):
     # kargs['shifted'] = shifted
     # kargs['states'] = True if 'STATES' in par.encoding else False
     #
-    
+
     #
     # if axis == 0:
     #     # transpose temporarily the data for indirect dimension ft
@@ -205,19 +204,19 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     gm, sp, sine, sinm, qsin
     
     """
-    
+
     # what's the line broadening ?
     if not isinstance(lb, Quantity):
         # we default to Hz units
         lb = lb * ur.Hz
-    
+
     # is it a shifted broadening?
     if not isinstance(shifted, Quantity):
         # we default to microsecond units
         shifted = shifted * ur.us
     if shifted.magnitude < epsilon:
         shifted = 0. * ur.us
-    
+
     def func(x, lb, shifted):
         e = np.ones_like(x)
         if lb.magnitude <= epsilon:
@@ -229,16 +228,17 @@ def em(dataset, lb=1, shifted=0, **kwargs):
             shifted = shifted.to(units)
             e = np.pi * np.abs(x - shifted) / tc
             return np.exp(-e.data)
-    
+
     # Call the generic apodization function
     out, apodcurve = _apodize(dataset, func, (lb, shifted), **kwargs)
-    
+
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
         apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
-    
+
     return out
+
 
 # ======================================================================================================================
 @docstrings.dedent
@@ -292,7 +292,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     em, sp, sine, sinm, qsin
     
     """
-    
+
     # what's the line broadening ?
     if not isinstance(lb, Quantity):
         # we default to Hz units
@@ -300,14 +300,14 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     if not isinstance(gb, Quantity):
         # we default to Hz units
         gb = gb * ur.Hz
-        
+
     # is it a shifted broadening?
     if not isinstance(shifted, Quantity):
         # we default to microsecond units
         shifted = shifted * ur.us
     if shifted.magnitude < 0.:
         shifted = 0. * ur.us
-    
+
     def func(x, gb, lb, shifted):
         g = np.ones_like(x)
         if abs(lb.magnitude) and abs(gb.magnitude) <= epsilon:
@@ -328,16 +328,16 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
                 g = 0.6 * xs / tc2
             else:
                 g = np.zeros_like(x)
-            
+
             return np.exp(e - g ** 2).data
-    
+
     # call the generic apodization function
     out, apodcurve = _apodize(dataset, func, (gb, lb, shifted), **kwargs)
-    
+
     if kwargs.pop('retfunc', False):
         apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
-    
+
     return out
 
 
@@ -387,18 +387,18 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     em, gm, sine, sinm, qsin
 
     """
-    
+
     # ssb
     ssb = kwargs.pop('ssb', ssb)
     if ssb < 1.:
         ssb = 1.
-    
+
     # pow
     pow = kwargs.pop('pow', pow)
     pow = 2 if int(pow) % 2 == 0 else 1
-    
+
     # func
-    
+
     def func(x, ssb, pow):
         aq = (x.data[-1] - x.data[0])
         t = x.data / aq
@@ -407,10 +407,10 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
         else:
             phi = np.pi / ssb
         return np.sin((np.pi - phi) * t + phi) ** pow
-    
+
     # call the generic apodization function
     out, apodcurve = _apodize(dataset, func, (ssb, pow), **kwargs)
-    
+
     if kwargs.pop('retfunc', False):
         apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
@@ -454,4 +454,3 @@ def qsin(dataset, ssb=1, **kwargs):
 
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
-

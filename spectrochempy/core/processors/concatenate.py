@@ -20,6 +20,7 @@ from ..dataset.ndcoordset import CoordSet
 from ..dataset.ndcoord import Coord
 from ...utils import is_sequence, docstrings
 
+
 @docstrings.dedent
 def concatenate(*datasets, **kwargs):
     """
@@ -210,7 +211,6 @@ def concatenate(*datasets, **kwargs):
                 # at least one of the coord is labeled
                 is_labeled = True
                 break
-                
 
         if is_labeled:
             labels = []
@@ -242,7 +242,7 @@ def concatenate(*datasets, **kwargs):
             out.author = out.author + ' & ' + dataset.author
 
         out.description += ', {}'.format(dataset.name)
-        
+
     out.description += ' )'
     out._date = out._modified = datetime.datetime.now()
     out._history = [str(out.date) + ': Created by %s' % thist]

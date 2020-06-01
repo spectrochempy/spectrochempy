@@ -41,6 +41,7 @@ from .docstring import *
 from .meta import *
 from .configurable import MetaConfigurable
 
+
 # internal utilities
 # ----------------------------------------------------------------------------------------------------------------------
 class _TempBool(object):
@@ -53,7 +54,7 @@ class _TempBool(object):
     class descriptor"""
 
     #: default boolean value for the :attr:`value` attribute
-    default=False
+    default = False
 
     #: boolean value indicating whether there shall be a validation or not
     value = False
@@ -64,7 +65,7 @@ class _TempBool(object):
         ----------
         default=bool
             value of the object"""
-        self.default=default
+        self.default = default
         self.value = default
         self._entered = []
 

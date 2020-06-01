@@ -56,10 +56,10 @@ proj
 
 # %%
 datadir = general_preferences.datadir
-path = os.path.join(datadir, 'nmrdata','bruker', 'tests', 'nmr','bruker_1d')
-nd1 = NDDataset(name = 'NMR_1D').read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-path = os.path.join(datadir, 'nmrdata','bruker', 'tests', 'nmr','bruker_2d')
-nd2 = NDDataset(name = 'NMR_2D').read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+nd1 = NDDataset(name='NMR_1D').read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
+nd2 = NDDataset(name='NMR_2D').read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 
 # %% [markdown]
 # To add it to the project, we use the `add_dataset` function for a single dataset:
@@ -77,7 +77,7 @@ proj.add_datasets(nd1, nd2)
 # Display its structure
 
 # %%
-proj   
+proj
 
 # %% [markdown]
 # It is also possible to add other projects as sub-project (using the `add_project`)
@@ -136,4 +136,4 @@ proj2 = Project.load('NMR')
 proj2
 
 # %%
-proj2.NMR_2D    #TODO: something wrong there!
+proj2.NMR_2D  # TODO: something wrong there!

@@ -136,7 +136,7 @@ class Script(HasTraits):
             exec(code, globals(), localvars)
         except NameError as e:
             error_(e + '. pass the variable `locals()` : this may solve '
-                          'this problem! ')
+                       'this problem! ')
 
 
 def run_script(script, localvars=None):

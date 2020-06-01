@@ -59,7 +59,7 @@ import os as os
 # its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
-X = scp.read_omnic(os.path.join('irdata','CO@Mo_Al2O3.SPG'))
+X = scp.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
 X
 
 # %% [markdown]
@@ -74,7 +74,7 @@ X
 # - `description` indicates the complete pathname of the .spg file. As the pathname is also given in the history (below), it can be a good practice to give a self explaining description of the group, for instance:  
 
 # %%
-X.description= 'CO adsorption on CoMo/Al2O3, difference spectra'
+X.description = 'CO adsorption on CoMo/Al2O3, difference spectra'
 print(X.description)
 
 # %% [markdown]
@@ -121,14 +121,14 @@ print(X.units)
 # The acquisition timestamps are the *Unix times* of the acquisition, i.e. the time elapsed in seconds since the reference date of Jan 1st 1970, 00:00:00 UTC. In OMNIC, the acquisition time is that of the start of the acquisison. As such these may be not convenient to use directly (they are currently in the order of 1.5 billion...) With this respect, it can be convenient to shift the origin of time coordinate to that of the 1st spectrum, which has the index `0`: 
 
 # %%
-X.y = X.y - X[0].y     
+X.y = X.y - X[0].y
 X.y
 
 # %% [markdown]
 # It is also possible tu use the ability of Scpy to handle utnit changes:
 
 # %%
-X.y = X.y.to("minute")   
+X.y = X.y.to("minute")
 X.y
 
 # %% [markdown]
@@ -136,14 +136,14 @@ X.y
 
 # %%
 _ = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
-                 # the values of the Coord object are accessed through the `data` attribute 
-                 # whiche is a ndarray, hence the final [0] to have the value:
+# the values of the Coord object are accessed through the `data` attribute
+# whiche is a ndarray, hence the final [0] to have the value:
 
 # %% [markdown]
 # which gives the exact time in seconds:
 
 # %%
-_ * 60            # the underscore _ recalls the last output.
+_ * 60  # the underscore _ recalls the last output.
 
 # %% [markdown]
 # Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
@@ -158,7 +158,7 @@ X.y
 # The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
-X2 = scp.read_omnic(os.path.join('irdata','CO@Mo_Al2O3.SPG'), order=False)
+X2 = scp.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'), order=False)
 
 # %% [markdown]
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by increasing data. 
@@ -166,8 +166,8 @@ X2 = scp.read_omnic(os.path.join('irdata','CO@Mo_Al2O3.SPG'), order=False)
 # Finally, it is worth mentioning that the NDDatasets can generally be manipulated as numpy ndarray. Hence, for instance, the following will inverse the order of the first dimension:  
 
 # %%
-X = X[::-1,:]  # reorders the NDDataset along the first dimension going backward
-X.y            # displays the `y` dimension
+X = X[::-1, :]  # reorders the NDDataset along the first dimension going backward
+X.y  # displays the `y` dimension
 
 # %% [markdown]
 # ### Note: Case of groups with different wavenumbers
@@ -181,7 +181,7 @@ X.y            # displays the `y` dimension
 # The import of a single follows exactly the same rules as that of the import of a group:
 
 # %%
-Y = scp.read_omnic(os.path.join('irdata','subdir','7_CZ0-100 Pd_101.spa'))
+Y = scp.read_omnic(os.path.join('irdata', 'subdir', '7_CZ0-100 Pd_101.spa'))
 Y
 
 # %% [markdown]
@@ -189,7 +189,7 @@ Y
 
 # %%
 list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.spa", "7_CZ0-100 Pd_103.spa", "7_CZ0-100 Pd_104.spa"]
-directory = os.path.join(scp.general_preferences.datadir, "irdata","subdir")
+directory = os.path.join(scp.general_preferences.datadir, "irdata", "subdir")
 X = scp.read_omnic(list_files, directory=directory)
 print(X)
 
@@ -227,8 +227,8 @@ from brukeropusreader import read_file
 import os
 
 opusfile = os.path.join(scp.general_preferences.datadir, "irdata\\OPUS\\test.0000")  # the full pathname of the file
-Z3 = read_file(opusfile)   # returns a dictionary of the data and metadata extracted 
-Z3.keys()   # returns the key of the dictionary
+Z3 = read_file(opusfile)  # returns a dictionary of the data and metadata extracted
+Z3.keys()  # returns the key of the dictionary
 
 # %%
 Z3['Optik']  # looks what is the Optik block:
@@ -257,8 +257,8 @@ print(newX)
 # It is important to note here that the conversion to JCAMP-DX changes the ast digits of absorbances and wavenumbers:  
 
 # %%
-print('Mean change in absorbance: {}'.format((X.data - newX.data).mean()))  
-print('Mean change in wavenumber: {}'.format((X.x.data - newX.x.data).mean())) 
+print('Mean change in absorbance: {}'.format((X.data - newX.data).mean()))
+print('Mean change in wavenumber: {}'.format((X.x.data - newX.x.data).mean()))
 
 # %% [markdown]
 # This is much beyond the experimental accuracy but can lead to undesirable effects. For instance:

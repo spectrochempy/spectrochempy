@@ -8,14 +8,14 @@
 # ======================================================================================================================
 
 
-
 """
 
 """
 
 from spectrochempy.utils import Meta
-from spectrochempy.utils.testing import  raises
+from spectrochempy.utils.testing import raises
 from spectrochempy.units import ur
+
 
 def test_init():
     meta = Meta()
@@ -26,14 +26,17 @@ def test_init():
     assert isinstance(meta.si, str)
     assert meta.si.startswith('a')
 
+
 def test_instance():
     meta = Meta()
     assert isinstance(meta, Meta)
+
 
 def test_equal():
     meta1 = Meta()
     meta2 = Meta()
     assert meta1 == meta2
+
 
 def test_readonly():
     meta = Meta()
@@ -44,17 +47,20 @@ def test_readonly():
         meta.chaine = "a modified string"
     assert meta.chaine != "a modified string"
 
+
 def test_invalid_key():
     meta = Meta()
-    meta.readonly = False   # this is accepted`
+    meta.readonly = False  # this is accepted`
     with raises(KeyError):
-        meta['readonly'] = True # this not because readonly is reserved
+        meta['readonly'] = True  # this not because readonly is reserved
     with raises(KeyError):
-        meta['_data'] = True # this not because _xxx type attributes are private
+        meta['_data'] = True  # this not because _xxx type attributes are private
+
 
 def test_get_inexistent():
     meta = Meta()
     assert meta.existepas is None
+
 
 def test_get_keys_items():
     meta = Meta()
@@ -63,6 +69,7 @@ def test_get_keys_items():
     assert list(meta.keys()) == ['si', 'td']
     assert list(meta.items()) == [('si', 1024), ('td', [200, 400])]
 
+
 def test_iterator():
     meta = Meta()
     meta.td = [200, 400]
@@ -70,6 +77,7 @@ def test_iterator():
     meta.ls = 3
     meta.ns = 1024
     assert sorted([val for val in meta]) == ['ls', 'ns', 'si', 'td']
+
 
 def test_copy():
     meta = Meta()
@@ -86,23 +94,23 @@ def test_copy():
     assert sorted([val for val in meta2]) == ['ls', 'ns', 'si', 'td']
 
     # bug with quantity
-    
+
     si = 2048 * ur.s
     meta.si = si
 
     meta3 = meta.copy()
     meta3.si = si / 2.
-    
+
     assert meta3 is not meta
-    
+
 
 def test_swap():
     meta = Meta()
     meta.td = [200, 400, 500]
     meta.xe = [30, 40, 80]
     meta.si = 2048
-    meta.swap(1,2)
-    assert meta.td == [200,500,400]
+    meta.swap(1, 2)
+    assert meta.td == [200, 500, 400]
     assert meta.xe == [30, 80, 40]
     assert meta.si == 2048
 
@@ -113,12 +121,8 @@ def test_permute():
     meta.xe = [30, 40, 80]
     meta.si = 2048
 
-    p = (2,0,1)
+    p = (2, 0, 1)
     meta.permute(*p)
-    assert meta.td == [500,200,400]
+    assert meta.td == [500, 200, 400]
     assert meta.xe == [80, 30, 40]
     assert meta.si == 2048
-
-
-
-

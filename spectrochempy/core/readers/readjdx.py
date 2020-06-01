@@ -73,9 +73,9 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
 
     # returns a list of filenames
     filenames = readfilename(filename,
-                         directory=directory,
-                         filetypes=['JCAMP-DX files (*.jdx, *.dx)',
-                                    'All files (*)'], dictionary=False)
+                             directory=directory,
+                             filetypes=['JCAMP-DX files (*.jdx, *.dx)',
+                                        'All files (*)'], dictionary=False)
     if not filenames:
         return None
 
@@ -217,7 +217,6 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
                         i + 1, ')'))
                     return
 
-
         # Determine xaxis name ****************************************************
         if xunits[0].strip() == '1/CM':
             axisname = 'Wavenumbers'
@@ -241,24 +240,23 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
 
         dataset = NDDataset(data)
         dataset.name = jdx_title
-        if yunits[0].strip()=='ABSORBANCE':
+        if yunits[0].strip() == 'ABSORBANCE':
             dataset.units = 'absorbance'
             dataset.title = 'Absorbance'
-        elif yunits[0].strip()=='TRANSMITTANCE':
+        elif yunits[0].strip() == 'TRANSMITTANCE':
             dataset.title = 'Transmittance'
         dataset.name = jdx_title
-        dataset._date = dataset._modified =datetime.now()
+        dataset._date = dataset._modified = datetime.now()
 
         # now add coordinates
         _x = Coord(xaxis, title=axisname, units=axisunit)
         if jdx_data_type == 'LINK':
             _y = Coord(alltimestamps, title='Timestamp', units='s',
-                   labels=(alldates, alltitles))
+                       labels=(alldates, alltitles))
             dataset.set_coords(y=_y, x=_x)
         else:
             _y = Coord()
         dataset.set_coords(y=_y, x=_x)
-
 
         # Set origin, description and history
         dataset.origin = "JCAMP-DX"
@@ -277,6 +275,7 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
         dataset._modified = dataset.date
 
         return dataset
+
 
 # ======================================================================================================================
 # private functions

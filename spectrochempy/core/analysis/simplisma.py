@@ -81,6 +81,7 @@ class SIMPLISMA(HasTraits):
         --------
 
         """
+
         # ------------------------------------------------------------------------
         # Utility functions
         # ------------------------------------------------------------------------
@@ -120,7 +121,7 @@ class SIMPLISMA(HasTraits):
         verbose = kwargs.get('verbose', True)
         if verbose:
             set_loglevel(INFO)
-            
+
         interactive = kwargs.get('interactive', False)
         tol = kwargs.get('tol', 0.1)
         noise = kwargs.get('noise', 3)

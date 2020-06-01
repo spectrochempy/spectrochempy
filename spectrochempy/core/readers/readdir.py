@@ -46,6 +46,7 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import readfilename, readdirname
 from ...core import info_, print_
 
+
 # function for reading data in a directory
 # ----------------------------------------------------------------------------------------------------------------------
 def read_dir(dataset=None, directory=None, **kwargs):
@@ -92,7 +93,7 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     """
 
-    #debug_("starting reading in a folder")
+    # debug_("starting reading in a folder")
 
     # check if the first parameter is a dataset
     # because we allow not to pass it
@@ -117,19 +118,19 @@ def read_dir(dataset=None, directory=None, **kwargs):
     if recursive:
         for i, root in enumerate(os.walk(directory)):
             if i == 0:
-                pass # debug_("reading root directory")
+                pass  # debug_("reading root directory")
             else:
-                pass # debug_("reading subdirectory")
+                pass  # debug_("reading subdirectory")
             datasets += _read_single_dir(root[0], **kwargs)
     else:
         # debug_("reading root directory only")
         datasets += _read_single_dir(directory, **kwargs)
 
     if len(datasets) == 1:
-        #debug_("finished read_dir()")
+        # debug_("finished read_dir()")
         return datasets[0]  # a single dataset is returned
 
-    #debug_("finished read_dir()")
+    # debug_("finished read_dir()")
     return datasets  # several datasets returned
 
 
@@ -141,7 +142,7 @@ def _read_single_dir(directory, **kwargs):
     datasets = []
 
     if not filenames:
-        #debug_("empty directory")
+        # debug_("empty directory")
         return datasets
 
     files = readfilename(filenames, directory=directory)
@@ -329,7 +330,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
                 tstamp_ds = [(label[0] + delta_clocks).timestamp() for label in ds.y.labels]
                 T_ds = interpolator(tstamp_ds)
-                newlabels = np.hstack((ds.y.labels, T_ds.reshape((50,1))))
+                newlabels = np.hstack((ds.y.labels, T_ds.reshape((50, 1))))
                 ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
 
     if len(datasets) == 1:

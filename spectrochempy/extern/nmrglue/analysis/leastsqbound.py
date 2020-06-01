@@ -18,11 +18,11 @@ def _internal2external_grad(xi, bounds):
         lower, upper = bound
         if lower is None and upper is None:  # No constraints
             grad[i] = 1.0
-        elif upper is None:     # only lower bound
+        elif upper is None:  # only lower bound
             grad[i] = v / sqrt(v * v + 1.)
-        elif lower is None:     # only upper bound
+        elif lower is None:  # only upper bound
             grad[i] = -v / sqrt(v * v + 1.)
-        else:   # lower and upper bounds
+        else:  # lower and upper bounds
             grad[i] = (upper - lower) * cos(v) / 2.
     return grad
 
@@ -51,9 +51,9 @@ def _internal2external_lambda(bound):
 
     if lower is None and upper is None:  # no constraints
         return lambda x: x
-    elif upper is None:     # only lower bound
+    elif upper is None:  # only lower bound
         return lambda x: lower - 1. + sqrt(x * x + 1.)
-    elif lower is None:     # only upper bound
+    elif lower is None:  # only upper bound
         return lambda x: upper + 1. - sqrt(x * x + 1.)
     else:
         return lambda x: lower + ((upper - lower) / 2.) * (sin(x) + 1.)
@@ -83,9 +83,9 @@ def _external2internal_lambda(bound):
 
     if lower is None and upper is None:  # no constraints
         return lambda x: x
-    elif upper is None:     # only lower bound
+    elif upper is None:  # only lower bound
         return lambda x: sqrt((x - lower + 1.) ** 2 - 1)
-    elif lower is None:     # only upper bound
+    elif lower is None:  # only upper bound
         return lambda x: sqrt((upper - x + 1.) ** 2 - 1)
     else:
         return lambda x: arcsin((2. * (x - lower) / (upper - lower)) - 1.)
@@ -302,7 +302,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                   "precision." % gtol, ValueError],
               'unknown': ["Unknown error.", TypeError]}
 
-    info = retval[-1]    # The FORTRAN return value
+    info = retval[-1]  # The FORTRAN return value
 
     if (info not in [1, 2, 3, 4] and not full_output):
         if info in [5, 6, 7, 8]:
@@ -320,7 +320,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         # convert fjac from internal params to external
         grad = _internal2external_grad(retval[0], bounds)
         retval[1]['fjac'] = (retval[1]['fjac'].T / take(grad,
-                             retval[1]['ipvt'] - 1)).T
+                                                        retval[1]['ipvt'] - 1)).T
         cov_x = None
         if info in [1, 2, 3, 4]:
             from numpy.dual import inv

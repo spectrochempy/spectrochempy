@@ -19,11 +19,11 @@ import numpy as np
 from traitlets import HasTraits, Instance
 from collections.abc import Iterable
 
-
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.core.dataset.npy import dot
 from spectrochempy.core import info_, set_loglevel, INFO
+
 
 class MCRALS(HasTraits):
     """
@@ -120,7 +120,7 @@ class MCRALS(HasTraits):
 
         if type(guess) is np.ndarray:
             guess = NDDataset(guess)
-            
+
         if X.shape[0] == guess.shape[0]:
             initConc = True
             C = guess.copy()
@@ -140,7 +140,7 @@ class MCRALS(HasTraits):
         ny, nx = X.shape
 
         # makes a PCA with same number of species
-        Xpca = PCA(X).reconstruct(n_pc = nspecies)
+        Xpca = PCA(X).reconstruct(n_pc=nspecies)
 
         # Get optional parameters in kwargs or set them to their default
         # ------------------------------------------------------------------------
@@ -285,13 +285,13 @@ class MCRALS(HasTraits):
                     Q = np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]
                     C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(Q))
                 elif closureMethod == 'constantSum':
-                    totalConc = np.sum(C.data[:,closureConc], axis=1)
-                    C.data[:, closureConc] = C.data[:, closureConc] * closureTarget[:,None] / totalConc[:,None]
+                    totalConc = np.sum(C.data[:, closureConc], axis=1)
+                    C.data[:, closureConc] = C.data[:, closureConc] * closureTarget[:, None] / totalConc[:, None]
 
             # external concentration profiles
             # ------------------------------------------
             if externalConc is not None:
-                extOutput  = getExternalConc(*((C, externalConc, external_to_C_idx,) + args))
+                extOutput = getExternalConc(*((C, externalConc, external_to_C_idx,) + args))
                 if isinstance(extOutput, dict):
                     extC = extOutput['concentrations']
                     args = extOutput['new_args']
@@ -374,7 +374,6 @@ class MCRALS(HasTraits):
         self.Stsoft = Stsoft
         self.St = St
         self.log = logs
-
 
     def reconstruct(self):
         """

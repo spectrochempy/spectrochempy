@@ -14,7 +14,6 @@ necessary features of NMR nuclei, such as their spin, larmor frequency and so on
 """
 __all__ = ['Isotopes']
 
-
 # ======================================================================================================================
 # Standard imports
 # ======================================================================================================================
@@ -203,7 +202,7 @@ class Isotopes(HasTraits):
     # initializer
     # ------------------------------------------------------------------------------------------------------------------
     def __init__(self, nucleus='1H'):
-        #filename = resource_filename(PKG, 'isotopes.csv')
+        # filename = resource_filename(PKG, 'isotopes.csv')
         DATABASES = prefs.databases
         filename = os.path.join(DATABASES, 'isotopes.csv')
         self.isotopes = pd.read_csv(filename, index_col=0)
@@ -231,7 +230,6 @@ class Isotopes(HasTraits):
         p = re.compile(r'^([A-Z,a-z]+)[_-]*([0-9]+$)')
         m = re.match(p, item).groups()
 
-        
         nucleus = m[1] + m[0]  # transform "e.g., Al27->27Al, ou AL-27 to 27Al"
         if nucleus in self.isotopes.index.values:
             self.nucleus = nucleus

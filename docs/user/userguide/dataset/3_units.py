@@ -34,13 +34,13 @@ Quantity('10.0 cm^-1')
 Quantity(1.0, 'cm^-1/hour')
 
 # %%
-Quantity(10.0, ur.cm/ur.km)
+Quantity(10.0, ur.cm / ur.km)
 
 # %% [markdown]
 # or may be (?) simpler,
 
 # %%
-10.0 * ur.meter/ur.gram/ur.volt
+10.0 * ur.meter / ur.gram / ur.volt
 
 # %% [markdown]
 # `ur` stands for **unit registry**, which handle many type of units
@@ -52,7 +52,7 @@ Quantity(10.0, ur.cm/ur.km)
 # %%
 a = 900 * ur.km
 b = 4.5 * ur.hours
-a/b
+a / b
 
 # %% [markdown]
 # Such calculations can also be done using the following syntax, using a string expression
@@ -64,7 +64,7 @@ Quantity("900 km / (8 hours)")
 # ## Convert between units
 
 # %%
-c = a/b
+c = a / b
 c.to('cm/s')
 
 # %% [markdown]
@@ -117,4 +117,4 @@ ds1 = ds * volume
 ds1
 
 # %%
-ds1/ds
+ds1 / ds

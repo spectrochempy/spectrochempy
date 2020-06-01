@@ -1,31 +1,31 @@
 name: scpy
 channels:
-- conda-forge
-- spectrocat
-- cantera
-- defaults
+  - conda-forge
+  - spectrocat
+  - cantera
+  - defaults
 dependencies:
-- numpy
-- matplotlib
-- traitlets
-- pint
-- quaternion
-- scipy
-- colorama
-- setuptools_scm
-- git
-- xlrd
-- numba
-- pandas
-- cantera
-- quadprog
-- brukeropusreader
-- ipython
-- jupyterlab
-- ipympl
-- nodejs
-- ipykernel
-- ipywidgets
-- widgetsnbextension
-- pyqt
-- tqdm
+  - numpy
+  - matplotlib
+  - traitlets
+  - pint
+  - quaternion
+  - scipy
+  - colorama
+  - setuptools_scm
+  - git
+  - xlrd
+  - numba
+  - pandas
+  - cantera
+  - quadprog
+  - brukeropusreader
+  - ipython
+  - jupyterlab
+  - ipympl
+  - nodejs
+  - ipykernel
+  - ipywidgets
+  - widgetsnbextension
+  - pyqt
+  - tqdm
