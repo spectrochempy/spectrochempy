@@ -116,3 +116,4 @@ _ = X.savgol_filter(window_length = 11, polyorder=1).plot()
 # intermediate:
 # - what would be the parameters to use in the 'savogol_filter()' methof to mimic 'smooth()' ? Write a code to check your answer
 # - examine the impacts of `window_length` and `polyorder` on the extent of smoothing with a Svitzky-Golay filter.
+
