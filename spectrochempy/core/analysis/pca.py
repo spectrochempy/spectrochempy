@@ -23,13 +23,13 @@ import warnings
 from scipy.special import gammaln
 from traitlets import HasTraits, Instance
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.core.dataset.nddataset import NDDataset, CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.core.dataset.npy import diag, dot
@@ -89,7 +89,7 @@ class PCA(HasTraits):
             :math:`X' = X - mean(X)`.
         standardized : bool, optional, default:False
             If True the data are scaled to unit standard deviation :
-            :math:`X' = X / \sigma`.
+            :math:`X' = X / \\sigma`.
         scaled : bool, optional, default:False
             If True the data are scaled in the interval [0-1] :
             :math:`X' = (X - min(X)) / (max(X)-min(X))`
@@ -325,8 +325,6 @@ class PCA(HasTraits):
 
         """
 
-        X = self.X
-
         # get n_pc (automatic or determined by the n_pc arguments)
         n_pc = self._get_n_pc(n_pc)
 
@@ -376,8 +374,7 @@ class PCA(HasTraits):
         if self._centered:
             X += self._center
 
-        X.history = 'PCA reconstructed Dataset with {} principal ' \
-                    'components'.format(n_pc)
+        X.history = f'PCA reconstructed Dataset with {n_pc} principal components'
         X.title = self.X.title
         return X
 
@@ -398,7 +395,7 @@ class PCA(HasTraits):
 
     def screeplot(self, n_pc=None, **kwargs):
         """
-        Scree plot of explained variance \+ cumulative variance by PCA.
+        Scree plot of explained variance + cumulative variance by PCA.
 
         Parameters
         ----------
@@ -410,7 +407,7 @@ class PCA(HasTraits):
         n_pc = max(self._get_n_pc(n_pc), 3)
 
         color1, color2 = kwargs.get('colors', [NBlue, NRed])
-        pen = kwargs.get('pen', True)
+        # pen = kwargs.get('pen', True)
         ylim1, ylim2 = kwargs.get('ylims', [(0, 100), 'auto'])
 
         if ylim2 == 'auto':
@@ -465,7 +462,7 @@ class PCA(HasTraits):
         elif color_mapping == 'labels':
 
             labels = list(set(self.S.y.labels))
-            colors = [labels.index(l) for l in self.S.y.labels]
+            colors = [labels.index(lab) for lab in self.S.y.labels]
 
         if len(pcs) == 2:
             # bidimentional score plot
@@ -522,11 +519,11 @@ class PCA(HasTraits):
             import matplotlib.patches as mpatches
 
             leg = []
-            for l in labels:
-                i = labels.index(l)
+            for lab in labels:
+                i = labels.index(lab)
                 c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
                 leg.append(mpatches.Patch(color=c,
-                                          label=l))
+                                          label=lab))
 
             ax.legend(handles=leg, loc='best')
 

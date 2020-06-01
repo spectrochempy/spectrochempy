@@ -20,16 +20,16 @@ import textwrap
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
-import numpy as np
+# import numpy as np
 from traitlets import Bool, observe, All, Unicode
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-from .ndarray import NDArray
-from .ndmath import NDMath, set_operators
-from ...core import info_, debug_, error_, warning_
-from ...utils import (docstrings, colored_output, NOMASK, spacing)
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndmath import NDMath, set_operators
+# from spectrochempy.core import info_, debug_, error_, warning_
+from spectrochempy.utils import (docstrings, colored_output, NOMASK, spacing)
 
 
 # ======================================================================================================================
@@ -77,32 +77,32 @@ class Coord(NDMath, NDArray):
         Examples
         --------
         We first import the object from the api :
-        
+
         >>> from spectrochempy import *
-        
+
         We then create a numpy |ndarray| and use it as the numerical `data`
         axis of our new |Coord| object.
-        
+
         >>> arr = np.arange(1.,12.,2.)
         >>> c0 = Coord(data=arr, title='frequency', units='Hz')
         >>> c0     # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [   1.000,    3.000,    5.000,    7.000,    9.000,   11.000] Hz
-        
+
         We can take a series of str to create a non numerical but labelled
         axis :
-        
+
         >>> tarr = list('abcdef')
         >>> tarr
         ['a', 'b', 'c', 'd', 'e', 'f']
-        
+
         >>> c1 = Coord(labels=tarr, title='mylabels')
         >>> c1   # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Coord: [a, b, c, d, e, f]
-        
+
         >>> print(c1) # doctest: +NORMALIZE_WHITESPACE
         title : Mylabels
         labels : [a b c d e f]
-        
+
         """
         super(Coord, self).__init__(data, **kwargs)
 
@@ -112,11 +112,11 @@ class Coord(NDMath, NDArray):
     def implements(self, name=None):
         """
         Utility to check if the current object implement `Coord`.
-        
+
         Rather than isinstance(obj, Coord) use object.implements('Coord').
-        
+
         This is useful to check type without importing the module
-        
+
         """
 
         if name is None:
@@ -132,11 +132,13 @@ class Coord(NDMath, NDArray):
     def reversed(self):
         """bool - Whether the axis is reversed (readonly
         property).
+
         """
         if self.units in ['1 / centimeter', 'ppm']:
             return True
         return False
-        ## Return a correct result only if the data are sorted
+
+        # Return a correct result only if the data are sorted
         # return bool(self.data[0] > self.data[-1])
 
     # ------------------------------------------------------------------------------------------------------------------

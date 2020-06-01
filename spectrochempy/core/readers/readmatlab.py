@@ -29,11 +29,11 @@ from ...core import debug_
 def read_matlab(dataset=None, **kwargs):
     """
     Open a matlab file with extension ``.mat`` and returns its content as a list
-    
+
     The array of numbers (i.e. matlab matrices) and Eigenvector's DataSet Object (DSO, see
     `DSO <https://www.eigenvector.com/software/dataset.htm>`_ ) are returned as NDDatasets.  The
     content not recognized by SCpy  is returned as a tuple (name, object)
-    
+
     Parameters
     ----------
     dataset : |NDDataset|
@@ -46,7 +46,7 @@ def read_matlab(dataset=None, **kwargs):
     directory : str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
-    
+
     Returns
     -------
     dataset : list or |NDDataset|
@@ -163,7 +163,7 @@ def _read_DSO(f, x):
 
         coords = []
         for i in range(len(data.shape)):
-            coord = datac = labels = title = None
+            coord = datac = None  # labels = title = None
             labelsarray = f[dso]['label'][0][0][i][0]
             if len(labelsarray):  # some labels might be present
                 if isinstance(labelsarray[0], np.ndarray):
@@ -196,10 +196,10 @@ def _read_DSO(f, x):
                 if len(f[dso]['axisscale'][0][0][i][1]):  # some titles might be present
                     try:
                         coord.title = f[dso]['axisscale'][0][0][i][1][0]
-                    except:
+                    except Exception:
                         try:
                             coord.title = f[dso]['axisscale'][0][0][i][1][0][0]
-                        except:
+                        except Exception:
                             pass
 
             if not isinstance(coord, Coord):

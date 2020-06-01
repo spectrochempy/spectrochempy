@@ -335,13 +335,13 @@ def _read_spg(dataset, filename, **kwargs):
 
             alltimestamps.append(timestamp)
 
+            # Not used at present
+            # -------------------
             # extract positions of '1B' codes (history text
             #  -- sometimes absent, e.g. peakresolve)
-            key_is_1B = (keys == 27)
-            indices1B = np.nonzero(key_is_1B)
-            position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
-
-            # not used at present
+            # key_is_1B = (keys == 27)
+            # indices1B = np.nonzero(key_is_1B)
+            # position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
             # if len(position1B) != 0:
             #    # read history texts
             #    for j in range(nspec):
@@ -421,8 +421,7 @@ def _read_spa(dataset, filenames, **kwargs):
 
             # days since 31/12/1899, 00:00
             timestamp = np.fromfile(f, dtype=np.uint32, count=1)[0]
-            acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + \
-                      timedelta(seconds=int(timestamp))
+            acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
             allacquisitiondates.append(acqdate)
             timestamp = acqdate.timestamp()
             # Transform back to timestamp for storage in the Coord object

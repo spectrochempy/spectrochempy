@@ -158,8 +158,8 @@ def plot_multiple(datasets, method='scatter', pen=True,
 
     # scale all plots
     if legend is not None:
-        leg = ax.legend(ax.lines, labels, shadow=True, loc=legend,
-                        frameon=True, facecolor='lightyellow')
+        _ = ax.legend(ax.lines, labels, shadow=True, loc=legend,
+                      frameon=True, facecolor='lightyellow')
 
     # now we can output the final figure
     kw = {'output': output, 'commands': commands}
@@ -360,10 +360,10 @@ def plot_1D(dataset, **kwargs):
     xsize = new.size
     if x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
-        discrete_data = False
+        # discrete_data = False
         if not np.any(xdata):
             if x.is_labeled:
-                discrete_data = True
+                # discrete_data = True
                 # take into account the fact that sometimes axis have just labels
                 xdata = range(1, len(x.labels) + 1)
     else:
@@ -417,7 +417,7 @@ def plot_1D(dataset, **kwargs):
         # bar only
         line = ax.bar(xdata, zdata.squeeze(), color=color,
                       edgecolor='k', align='center', label=label)
-        barwidth = line[0].get_width()
+        # barwidth = line[0].get_width()
 
     if show_complex and pen:
         # add the imaginaly part for pen only plot

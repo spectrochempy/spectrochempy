@@ -44,7 +44,7 @@ import xlrd
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import readfilename, readdirname
-from ...core import info_, print_
+from spectrochempy.core import info_, print_
 
 
 # function for reading data in a directory
@@ -54,16 +54,16 @@ def read_dir(dataset=None, directory=None, **kwargs):
     Open readable files in a directory and store data/metadata in a dataset or
     a list of datasets according to the following rules :
 
-    * 2D spectroscopic data (e.g. valid \*.spg files or matlab arrays, etc...) from
+    * 2D spectroscopic data (e.g. valid *.spg files or matlab arrays, etc...) from
       distinct files are stored in distinct NDdatasets.
-    * 1D spectroscopic data (e.g., \*.spa files) in a given directory are grouped
+    * 1D spectroscopic data (e.g., *.spa files) in a given directory are grouped
       into single NDDataset, providing their unique dimension are compatible. If not,
       an error is generated.
 
     Notes
     ------
-    Only implemented for OMNIC files (\*.spa, \*.spg), Bruker Opus files (\*.[0-9]\*), \*.csv, \*.mat and the
-    native format for spectrochempy : \*.scp).
+    Only implemented for OMNIC files (*.spa, *.spg), Bruker Opus files (*.[0-9]*), *.csv, *.mat and the
+    native format for spectrochempy : *.scp).
 
     Parameters
     ----------

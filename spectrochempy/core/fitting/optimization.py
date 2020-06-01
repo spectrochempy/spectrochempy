@@ -16,8 +16,7 @@ __all__ = ["optimize", ]
 
 import scipy.optimize
 
-from spectrochempy.core import project_preferences, general_preferences
-from spectrochempy.core import info_, warning_
+from spectrochempy.core import warning_
 from spectrochempy.core.fitting.parameters import FitParameters
 
 
@@ -67,7 +66,7 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
                 if len(ps) > 0:
                     fp.to_external(key, ps)
             else:
-                if not key in keys:
+                if key not in keys:
                     continue
                 k = keys.index(key)
                 fp.to_external(key, p[k])
@@ -133,7 +132,6 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
         # fmin(func, par, args=args, maxfun=maxfun, maxiter=maxiter, ftol=ftol, xtol=xtol,
         #                                                full_output=True, disp=False, callback=callback)
         res, fopt, warnmess = result.x, result.fun, result.message
-
 
     elif method == "XXXX":
         raise NotImplementedError("method: %s" % method)

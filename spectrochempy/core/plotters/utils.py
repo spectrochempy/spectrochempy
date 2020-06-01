@@ -9,9 +9,7 @@
 
 __all__ = []
 
-import numpy as np
-
-from spectrochempy.utils import NGreen, NRed, NBlue, NBlack
+from spectrochempy.utils import NRed, NBlue, NBlack
 
 
 # ............................................................................

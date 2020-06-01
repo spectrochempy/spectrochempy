@@ -7,15 +7,10 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
+from matplotlib import pyplot as plt
+
 __all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen',
            'figure', 'show', 'get_figure']
-
-import os
-import shutil as sh
-from pkg_resources import resource_filename
-
-from matplotlib import pyplot as plt
-import matplotlib as mpl
 
 
 # ............................................................................

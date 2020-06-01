@@ -32,8 +32,8 @@ import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.compat import asbytes, asstr
-from numpy.lib.format import write_array, MAGIC_PREFIX
+from numpy.compat import asstr
+from numpy.lib.format import write_array
 from numpy.lib.npyio import zipfile_factory, NpzFile
 from traitlets import HasTraits, Unicode
 
@@ -41,14 +41,14 @@ from traitlets import HasTraits, Unicode
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
 
-from .ndarray import NDArray
-from .ndcoord import Coord
-from .ndcoordset import CoordSet
-from ...utils import SpectroChemPyWarning
-from ...utils.meta import Meta
-from ...units import Unit, Quantity
-from ...core import general_preferences as prefs
-from ...core import info_, debug_, error_, warning_
+# from .ndarray import NDArray
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.utils import SpectroChemPyWarning
+from spectrochempy.utils.meta import Meta
+from spectrochempy.units import Unit, Quantity
+from spectrochempy.core import general_preferences as prefs
+# from spectrochempy.core import info_, debug_, error_, warning_
 
 
 # ==============================================================================
@@ -186,7 +186,6 @@ class NDIO(HasTraits):
 
                     zipf.write(tmpfile, arcname=level + key + '.npy')
 
-
                 elif isinstance(val, CoordSet):
 
                     for v in val._coords:
@@ -282,7 +281,7 @@ class NDIO(HasTraits):
             filename, ext = os.path.splitext(fid)
             try:
                 return cls.read(fid, protocol=ext[1:])
-            except:
+            except Exception:
                 pass
 
         if isinstance(fid, str):
@@ -299,13 +298,13 @@ class NDIO(HasTraits):
                     # cast to file in the testdata directory
                     # TODO: add possibility to search in several directory
                     fid = open(filename, 'rb')
-                except:
+                except Exception:
                     if not filename.endswith('.scp'):
                         filename = filename + '.scp'
                     try:
                         # try again
                         fid = open(filename, 'rb')
-                    except:
+                    except Exception:
                         # try the working directory
                         filename = os.path.join(os.getcwd(), filename)
                         try:
@@ -577,11 +576,9 @@ class NDIO(HasTraits):
             _writer = getattr(self, 'write_{}'.format(protocol))
             return _writer(filename, **kwargs)
 
-        except:
+        except Exception:
 
-            raise AttributeError('The specified writter '
-                                 'for protocol `{}` was not found!'.format(
-                protocol))
+            raise AttributeError(f'The specified writter for protocol `{protocol}` was not found!')
 
 
 # make some methods accessible from the main scp API

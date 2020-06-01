@@ -8,7 +8,7 @@
 # ======================================================================================================================
 
 import warnings
-from .print import pstr
+# from .print import pstr
 
 __all__ = ['SpectroChemPyWarning',
            'SpectroChemPyDeprecationWarning',
@@ -26,7 +26,7 @@ __all__ = ['SpectroChemPyWarning',
 class SpectroChemPyWarning(Warning):
     """
     The base warning class for SpectroChemPy warnings.
-    
+
     """
 
 
@@ -34,7 +34,7 @@ class SpectroChemPyWarning(Warning):
 class SpectroChemPyDeprecationWarning(SpectroChemPyWarning):
     """
     A warning class to indicate that something is deprecated.
-    
+
     """
 
 
@@ -42,7 +42,7 @@ class SpectroChemPyDeprecationWarning(SpectroChemPyWarning):
 class SpectroChemPyException(Exception):
     """
     The base exception class for SpectroChemPy
-    
+
     """
 
 
@@ -50,7 +50,7 @@ class SpectroChemPyException(Exception):
 class UnitsCompatibilityError(SpectroChemPyException):
     """
     Exception raised when units are not compatible, preventing some mathematical operations
-    
+
     """
 
 

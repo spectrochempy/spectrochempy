@@ -20,40 +20,32 @@ __dataset_methods__ = []
 # Standard python imports
 # ======================================================================================================================
 
-import itertools
+# import itertools
 import textwrap
-from datetime import datetime
-import warnings
-import uuid
+# from datetime import datetime
+# import warnings
+# import uuid
 
 # ======================================================================================================================
 # third-party imports
 # ======================================================================================================================
-import numpy as np
-from traitlets import (HasTraits, Dict, Set, List, Union, Any,
-                       Unicode, Instance, Bool, All,
-                       Float, validate, observe, default, )
-
-try:
-    import xarray as xr
-
-    HAS_XARRAY = True
-except:
-    HAS_XARRAY = False
+# import numpy as np
+from traitlets import Any, validate, default
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
 
 from ...extern.orderedset import OrderedSet
-from ..processors.align import can_merge_or_align
-from .ndarray import DEFAULT_DIM_NAME
-from .nddataset import NDDataset
-from .ndcoord import Coord
-from .ndcoordset import CoordSet
-from .ndio import NDIO
+from spectrochempy.core.processors.align import can_merge_or_align
+from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndio import NDIO
 
-from ...utils import colored_output
+# from spectrochempy.core import HAS_XARRAY
+# from spectrochempy.utils import colored_output
 
 
 # ======================================================================================================================
@@ -98,9 +90,9 @@ class NDPanel(
         align : str among [False, ‘outer’, ‘inner’, ‘first’, ‘last’, 'interpolate'], optional, default=False.
             by default there is no alignment of the dimensions, if they can not be merged, a new dimension name and
             eventually the associated coordinates are created for each different dimensions.
-     
+
             If align is defined :
-            
+
             * 'outer' means that a union of the different coordinates is achieved (missing values are masked)
             * 'inner' means that the intersection of the coordinates is used
             * 'first' means that the first dataset is used as reference
@@ -111,11 +103,6 @@ class NDPanel(
         Warnings
         --------
         The dimension can be aligned only if they have compatible units and the same title.
-        
-        Examples
-        --------
-
-        
 
         """
 
@@ -149,7 +136,7 @@ class NDPanel(
                     dataset.set_coords(c)
                 return dataset
 
-            except:
+            except Exception:
                 pass
 
         return super().__getitem__(item)
@@ -196,7 +183,7 @@ class NDPanel(
     def ndim(self):
         """
         int - The number of dimensions present in the panel.
-        
+
         """
         return len(self.dims)
 
@@ -205,12 +192,12 @@ class NDPanel(
     def dims(self):
         """
         Dimension names
-        
+
         Returns
         -------
         out : list
             A list with the current dimension names
-            
+
         """
         dims = []
         for dataset in self._datasets.values():
@@ -223,12 +210,12 @@ class NDPanel(
     def names(self):
         """
         dataset names
-        
+
         Returns
         -------
         out : list
             A list with the current dataset names
-            
+
         """
         return sorted(list(self._datasets.keys()))
 
@@ -257,12 +244,12 @@ class NDPanel(
     def datasets(self):
         """
         Dictionary of NDDatasets contained in the current NDPanel
-        
+
         Returns
         -------
         out : dict
             Dictionary of NDDataset
-            
+
         """
 
         return self._datasets
@@ -278,6 +265,7 @@ class NDPanel(
         """
         bool - True if the `datasets` array is empty
         (Readonly property).
+
         """
         if len(self.datasets.items()) == 0:
             return True
@@ -290,7 +278,7 @@ class NDPanel(
 
     # ..................................................................................................................
     def _str_value(self):
-        prefix = ['']
+        # prefix = ['']
 
         if self.is_empty:
             return '{}'.format(textwrap.indent('empty', ' ' * 9))
@@ -430,7 +418,7 @@ class NDPanel(
     def add_dataset(self, dataset, name=None, merge=True, align=False):
         """
         Add a single dataset (or coordinates) to the NDPanel
-        
+
         Parameters
         ----------
         dataset : ndarray-like object
@@ -442,7 +430,7 @@ class NDPanel(
             with the existing one in the NDPanel
         align : bool, optional, default=False
             Whether or not to align compatible coordinates (compatible units and coordinates values)
-        
+
         """
         self._dataset_to_be_added = dataset.copy(keepname=True)
 
@@ -484,11 +472,11 @@ class NDPanel(
     def implements(self, name=None):
         """
         Utility to check if the current object implement `NDPanel`.
-        
+
         Rather than isinstance(obj, NDPanel) use object.implements('NDPanel').
-        
+
         This is useful to check type without importing the module
-        
+
         """
         if name is None:
             return 'NDPanel'

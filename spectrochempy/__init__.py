@@ -44,7 +44,7 @@
 # builded.
 
 # import the main api
-from spectrochempy.api import *
+from spectrochempy.api import *    # noqa: F403,F401
 from spectrochempy import api
 
 __all__ = api.__all__

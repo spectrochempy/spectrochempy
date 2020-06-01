@@ -13,6 +13,7 @@ scipy
 numba
 brukeropusreader
 tqdm
+colorama
 
 # mainly for install and a bit more...
 setuptools_scm

@@ -48,7 +48,7 @@ class BaselineCorrection(HasTraits):
       and calculation of the modelled baseline spectra.
 
     Interactive mode is proposed using the interactive function : :meth:`run`.
-    
+
     """
     dataset = Instance(NDDataset)
     corrected = Instance(NDDataset)
@@ -74,12 +74,12 @@ class BaselineCorrection(HasTraits):
             The dataset to be transformed
         *ranges : a variable number of pair-tuples
             The regions taken into account for the manual baseline correction.
-        
+
         Other Parameters
         ----------------
         dim : str or int, keyword parameter, optional, default='x'.
-            Specify on which dimension to apply the apodization method. If `dim` is specified as an integer it is equivalent
-            to the usual `axis` numpy parameter.
+            Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
+            it is equivalent  to the usual `axis` numpy parameter.
         method : str, keyword parameter, optional, default='multivariate'
             Correction method among ['multivariate','sequential']
         interpolation : string, keyword parameter, optional, default='polynomial'
@@ -92,7 +92,7 @@ class BaselineCorrection(HasTraits):
             The zoom factor for the preview in interactive mode
         figsize : tuple, keyword parameter, optional, default=(8, 6)
             Size of the figure to display in inch
-            
+
         Examples
         --------
 
@@ -160,7 +160,7 @@ class BaselineCorrection(HasTraits):
         Parameters
         ----------
         %(BaselineCorrection.parameters.no_dataset)s
-        
+
         Other Parameters
         ----------------
         %(BaselineCorrection.other_parameters)s
@@ -257,8 +257,7 @@ class BaselineCorrection(HasTraits):
         if is_sorted:
             new.sort(axis=-1, inplace=True, descend=True)
 
-        new.history = str(new.modified) + \
-                      ': ' + 'Baseline correction.' + ' Method: '
+        new.history = str(new.modified) + ': ' + 'Baseline correction.' + ' Method: '
         if self.method == 'Multivariate':
             new.history = 'Multivariate (' + str(self.npc) + ' PCs).'
         else:
@@ -316,7 +315,7 @@ class BaselineCorrection(HasTraits):
 
         for x in self.ranges:
             x.sort()
-            y = list(ax1.get_ylim())
+            # y = list(ax1.get_ylim())
             sp = ax1.axvspan(x[0], x[1], facecolor='#2ca02c', alpha=0.5)
             sps.append(sp)
 
@@ -357,20 +356,20 @@ class BaselineCorrection(HasTraits):
                         show_basecor(ax2)
                         fig.canvas.draw_idle()
 
-        cid = fig.canvas.mpl_connect('button_press_event', onclick)
+        _ = fig.canvas.mpl_connect('button_press_event', onclick)
 
-        span = SpanSelector(ax1, onselect, 'horizontal', minspan=5,
-                            button=[1], useblit=True,
-                            rectprops=dict(alpha=0.5, facecolor='blue'))
+        _ = SpanSelector(ax1, onselect, 'horizontal', minspan=5,
+                         button=[1], useblit=True,
+                         rectprops=dict(alpha=0.5, facecolor='blue'))
 
         fig.canvas.draw()
 
         return
 
 
-# =======================================================================================================================
+# ======================================================================================================================
 # ab
-# =======================================================================================================================
+# ======================================================================================================================
 def ab(dataset, dim=-1, **kwargs):
     """
     Automatic baseline correction
@@ -415,7 +414,8 @@ def ab(dataset, dim=-1, **kwargs):
     #                        [--mult MULT] [--order ORDER] [--verbose]
     # """)
     # # positional arguments
-    # parser.add_argument('--mode', '-mo', default='linear', choices=['linear', 'poly', 'svd'], help="mode of correction")
+    # parser.add_argument('--mode', '-mo', default='linear',
+    #                      choices=['linear', 'poly', 'svd'], help="mode of correction")
     # parser.add_argument('--dryrun', action='store_true', help='dry flag')
     #
     # parser.add_argument('--window', '-wi', default=0.05, type=float, help='selected window for linear and svd bc')
@@ -548,6 +548,7 @@ def _planeFit(points):
 
 def _svdbase(data, args=None, retw=False):
     # Apply a planar baseline correction to 2D data
+    import pandas as pd
 
     if not args:
         window = 0.05

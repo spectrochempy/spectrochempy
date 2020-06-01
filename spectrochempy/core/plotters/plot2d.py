@@ -19,15 +19,14 @@ __dataset_methods__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 from copy import copy as cpy
-import sys
+# import sys
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
 
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
-from mpl_toolkits.mplot3d import Axes3D
-import sys
+# from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -36,9 +35,9 @@ import numpy as np
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from ...core.plotters.utils import make_label
-from ...core import project_preferences, general_preferences
-from ...core import info_, debug_, error_, warning_
+from spectrochempy.core.plotters.utils import make_label
+from spectrochempy.core import project_preferences, general_preferences
+# from spectrochempy.core import info_, debug_, error_, warning_
 
 
 # ======================================================================================================================
@@ -164,12 +163,12 @@ def plot_2D(dataset, **kwargs):
     if widget is not None:
         if hasattr(widget, 'implements') and widget.implements('PyQtGraphWidget'):
             # let's go to a particular treament for the pyqtgraph plots
-            kwargs['usempl'] = usempl = False
+            kwargs['usempl'] = False
             # we try to have a commmon interface for both plot library
             kwargs['ax'] = widget  # return qt_plot_1D(dataset, **kwargs)
         else:
             # this must be a matplotlibwidget
-            kwargs['usempl'] = usempl = True
+            kwargs['usempl'] = True
             fig = widget.fig
             kwargs['ax'] = fig.gca()
 
@@ -205,7 +204,7 @@ def plot_2D(dataset, **kwargs):
     # except if style is grayscale which is a particular case.
     styles = kwargs.get('style', prefs.style)
 
-    if styles and not "grayscale" in styles and cmap == "viridis":
+    if styles and "grayscale" not in styles and cmap == "viridis":
 
         if method in ['map', 'image']:
             cmap = kwargs.get('colormap',
@@ -350,8 +349,8 @@ def plot_2D(dataset, **kwargs):
 
         if yscale == "log" and min(zlim) <= 0:
             # set the limits wrt smallest and largest strictly positive values
-            ax.set_ylim(10 ** (int(np.log10(np.amin(np.abs(zdata)))) - 1)
-                        , 10 ** (int(np.log10(np.amax(np.abs(zdata)))) + 1))
+            ax.set_ylim(10 ** (int(np.log10(np.amin(np.abs(zdata)))) - 1),
+                        10 ** (int(np.log10(np.amax(np.abs(zdata)))) + 1))
         else:
             ax.set_ylim(zlim)
 
@@ -412,18 +411,17 @@ def plot_2D(dataset, **kwargs):
     elif method in ['map']:
         if discrete_data:
 
-            _colormap = cm = plt.get_cmap(cmap)
+            _colormap = plt.get_cmap(cmap)
             scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
-            marker = kwargs.get('marker', kwargs.get('m', None))
+            # marker = kwargs.get('marker', kwargs.get('m', None))
             markersize = kwargs.get('markersize', kwargs.get('ms', 5.))
-            markevery = kwargs.get('markevery', kwargs.get('me', 1))
+            # markevery = kwargs.get('markevery', kwargs.get('me', 1))
 
             for i in ydata:
                 for j in xdata:
-                    l, = ax.plot(j, i, lw=lw, marker='o',
-                                 markersize=markersize)
-                    l.set_color(scalarMap.to_rgba(zdata[i - 1, j - 1]))
+                    li, = ax.plot(j, i, lw=lw, marker='o', markersize=markersize)
+                    li.set_color(scalarMap.to_rgba(zdata[i - 1, j - 1]))
 
         else:
             # contour plot
@@ -435,7 +433,6 @@ def plot_2D(dataset, **kwargs):
                            new.clevels, linewidths=lw, alpha=alpha)
             c.set_cmap(cmap)
             c.set_norm(norm)
-
 
     elif method in ['stack']:
 
@@ -452,7 +449,7 @@ def plot_2D(dataset, **kwargs):
         if normalize is not None:
             norm.vmax = normalize
 
-        _colormap = cm = plt.get_cmap(cmap)
+        _colormap = plt.get_cmap(cmap)
         scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
         # we display the line in the reverse order, so that the last
@@ -466,13 +463,13 @@ def plot_2D(dataset, **kwargs):
         line0, = ax.plot(xdata, zdata[0], lw=lw, picker=True)
 
         for i in range(zdata.shape[0]):
-            l = cpy(line0)
-            l.set_ydata(zdata[i])
-            lines.append(l)
-            l.set_color(scalarMap.to_rgba(ydata[i]))
+            li = cpy(line0)
+            li.set_ydata(zdata[i])
+            lines.append(li)
+            li.set_color(scalarMap.to_rgba(ydata[i]))
             fmt = kwargs.get('label_fmt', "{:.5f}")
-            l.set_label(fmt.format(ydata[i]))
-            l.set_zorder(zdata.shape[0] + 1 - i)
+            li.set_label(fmt.format(ydata[i]))
+            li.set_zorder(zdata.shape[0] + 1 - i)
 
         # store the full set of lines
         new._ax_lines = lines[:]
@@ -582,7 +579,7 @@ def clevels(data, **kwargs):
 
     # contours
     maximum = data.max()
-    minimum = -maximum
+    # minimum = -maximum
 
     nlevels = kwargs.get('nlevels', kwargs.get('nc',
                                                project_preferences.number_of_contours))

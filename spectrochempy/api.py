@@ -20,6 +20,7 @@
 # """
 
 import sys
+import warnings
 
 import matplotlib as mpl
 from IPython.core.interactiveshell import InteractiveShell
@@ -116,26 +117,20 @@ else:
 
 if not (IN_IPYTHON and kernel and not NO_DISPLAY) and not IN_PYCHARM_SCIMODE:
     try:
-        import PyQt5
-
+        import PyQt5    # noqa: F401
         backend = 'Qt5Agg'
         mpl.use('Qt5Agg', force=True)
-    except:
+    except ImportError:
+        mpl.use('tkagg', force=True)
 
-        try:
-            mpl.use('tkagg', force=True)
-
-        except:
-            # case of test in the pipeline
-            mpl.use('tkagg', force=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Now we can start loading the API
 # ----------------------------------------------------------------------------------------------------------------------
 
 # import the core api
-from spectrochempy.core import *
-from spectrochempy import core
+from spectrochempy.core import *         # noqa: F403, F401, E402
+from spectrochempy import core           # noqa: E402
 
 __all__ = core.__all__
 __all__ += ['HAS_QT', 'IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
@@ -171,7 +166,7 @@ def set_backend():
                     ip.magic('matplotlib inline')
                 else:
                     ip.magic('matplotlib widget')
-        except:
+        except Exception:
             ip.magic('matplotlib tk')
 
 
@@ -191,7 +186,10 @@ def check_for_update():
 
     # Gets version
     conda_url = "https://anaconda.org/spectrocat/spectrochempy/files"
-    response = requests.get(conda_url)
+    try:
+        response = requests.get(conda_url)
+    except requests.exceptions.RequestException:
+        return False
 
     regex = r"\<a.*\>(.*-\d{2})\/spectrochempy-(\d{1,2})\.(\d{1,2})\.(\d{1,2})-(\d{1})\.tar\.bz2\</a\>"
 
@@ -205,7 +203,7 @@ def check_for_update():
 
     if OS in vavailables.keys():
         new_major, new_minor, new_patch = map(int, vavailables[OS])
-        major, minor, patch = map(int, release.split('.'))
+        major, minor, patch = map(int, core.release.split('.'))
         # patch -= 1 # test
         if new_major > major:
             return True
@@ -217,12 +215,7 @@ def check_for_update():
             return False
 
 
-try:
-    upd = check_for_update()
-except:
-    # probably no connection
-    upd = False
-
+upd = check_for_update()
 if upd:
     from spectrochempy.application import display_info_string
 
@@ -230,8 +223,6 @@ if upd:
                                 '\nPlease consider updating for bug fixes and new features !', logo=False)
 
 __all__.append('check_for_update')
-
-import warnings
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 # warnings.filterwarnings(action="error", category=DeprecationWarning)

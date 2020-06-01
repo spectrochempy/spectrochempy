@@ -11,8 +11,8 @@
 terminal command line
 
 """
-import sys
-import os
+# import sys
+# import os
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
         ds.plot()
         scp.show()
 
-    except:
+    except Exception:
         print(f"Sorry, but the '{fname}' file couldn't be read.")
         print()
         app.print_help()

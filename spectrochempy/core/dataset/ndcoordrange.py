@@ -15,7 +15,7 @@ __all__ = ['CoordRange']
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
-from traitlets import (HasTraits, List, Bool, TraitType, TraitError, class_of)
+from traitlets import (HasTraits, List, Bool, TraitError, class_of)
 
 
 # ======================================================================================================================
@@ -37,21 +37,6 @@ class Range(List):
     default_value : SequenceType [ optional ]
         The default value for the Trait.  Must be list/tuple/set, and
         will be cast to the container type.
-
-
-    Examples
-    --------
-
-    >>> class MyClass(HasTraits):
-    ...     r = Range([10,5])  # Initialized with some default values
-
-    >>> c = MyClass()
-    >>> print(c.r) # the list is ordered
-    [5, 10]
-    >>> c.r = [1, 3, 5]
-    Traceback (most recent call last):
-     ...
-    traitlets.traitlets.TraitError : The 'r' trait of a type instance must be of length 2 exactly, but a value of [1, 3, 5] was specified.
 
     """
     klass = list

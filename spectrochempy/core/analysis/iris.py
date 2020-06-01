@@ -15,7 +15,7 @@ __dataset_methods__ = []
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.npy import dot
+# from spectrochempy.core.dataset.npy import dot
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -37,9 +37,9 @@ class IRIS:
         param : dict
             Dict of inversion parameters with the following keys :
 
-            *   'custom_kernel': a two-variable lambda function ker(p, eps) where p and eps are the external experimental
-                variable and  the internal physico-chemical parameter, respectively. If not given, one of the
-                pre-defined kernel must be defined in param['kernel'], below.
+            *   'custom_kernel': a two-variable lambda function ker(p, eps) where p and eps are the external
+                experimental variable and  the internal physico-chemical parameter, respectively. If not given,
+                one of the pre-defined kernel must be defined in param['kernel'], below.
             *   'kernel': the name of  the kernel used to make the inversion. The kernel K(p, eps) is a functional
                 relationship holding between 'p', the experimental variable that was changed in the rows direction of X
                 (e.g. temperature, pressure, time, ...) and the concentration of pure species characterized
@@ -66,18 +66,18 @@ class IRIS:
 
         elif 'kernel' in param:
             if param['kernel'].lower() == 'langmuir':
-                ker = lambda p_, eps_: np.exp(-eps_) * p_ / (1 + np.exp(-eps_) * p_)
+                def ker(p_, eps_): return np.exp(-eps_) * p_ / (1 + np.exp(-eps_) * p_)
 
             elif param['kernel'].lower() == 'ca':
-                ker = lambda p_, eps_: 0 if p_ < np.exp(eps_) else 1
+                def ker(p_, eps_): return 0 if p_ < np.exp(eps_) else 1
 
             elif param['kernel'].lower() == 'reactant-first-order':
-                ker = lambda t, lnk: np.exp(-1 * np.exp(lnk) * t)
+                def ker(t, lnk): return np.exp(-1 * np.exp(lnk) * t)
 
             elif param['kernel'].lower() == 'product-first-order':
-                ker = lambda t, lnk: 1 - np.exp(-1 * np.exp(lnk) * t)
+                def ker(t, lnk): return 1 - np.exp(-1 * np.exp(lnk) * t)
             else:
-                raise NameError('This kernel: <{}> is not implemented'.format(ker))
+                raise NameError(f"This kernel: <{param['kernel']}> is not implemented")
 
         else:
             raise NameError('A kernel must be given !')
@@ -92,7 +92,7 @@ class IRIS:
             lambdaRange = None
         else:
             lambdaRange = param['lambdaRange']
-        if lambdaRange == None:
+        if lambdaRange is None:
             regularization = False
             searchLambda = False
             lamb = [0]
@@ -125,10 +125,10 @@ class IRIS:
             p = X.y
             pval = X.y.data  # values
 
-        if 'guess' in param:
-            guess = param['guess']
-        else:
-            guess = 'previous'
+        # if 'guess' in param:
+        #     guess = param['guess']       <-- # TODO: never used.
+        # else:
+        #     guess = 'previous'
 
         verbose = kwargs.get('verbose', False)
 
@@ -191,18 +191,23 @@ class IRIS:
             b = np.zeros(len(eps))
 
             def solve_lambda(X, K, G0, lamda, S, verbose):
-                ''' QP optimization
+                """
+                QP optimization
+
                 parameters:
-                ----------
+                -----------
                 X: NDDataset of experimental spectra
                 K: NDDataset, kernel datase
-                G0: the lamda independent part of G 
+                G0: the lambda independent part of G
                 lamda: regularization parameter
                 S: penalty function (shaprness)
                 verbose: print info
-    
-                returns: f, RSS and SM for a given regularization parameter
-                ------- '''
+
+                returns:
+                --------
+                f, RSS and SM for a given regularization parameter
+
+                """
                 fi = np.zeros((len(eps), len(X.x.data)))
                 if verbose:
                     print('... Solving for lambda = {} ...'.format(lamda))
@@ -218,8 +223,11 @@ class IRIS:
                 return fi, RSSi, SMi
 
             def menger(x, y):
-                '''returns the Menger curvature of a triplet of
-                points. x, y = sets of 3 cartesian coordinates '''
+                """
+                returns the Menger curvature of a triplet of
+                points. x, y = sets of 3 cartesian coordinates
+
+                """
 
                 numerator = 2 * (x[0] * y[1] + x[1] * y[2] + x[2] * y[0]
                                  - x[0] * y[2] - x[1] * y[0] - x[2] * y[1])
@@ -267,11 +275,11 @@ class IRIS:
                         if verbose:
                             print('Curvatures: C1 = {} ; C2 = {}'.format(C1, C2))
                         while C2 < 0:
-                            x[3] = x[2];
-                            Rx[3] = Rx[2];
+                            x[3] = x[2]
+                            Rx[3] = Rx[2]
                             Sy[3] = Sy[2]
-                            x[2] = x[1];
-                            Rx[2] = Rx[1];
+                            x[2] = x[1]
+                            Rx[2] = Rx[1]
                             Sy[2] = Sy[1]
                             x[1] = (x[3] + phi * x[0]) / (1 + phi)
                             if verbose:
@@ -284,11 +292,11 @@ class IRIS:
                             C2 = menger(Rx[1:4], Sy[1:4])
                             print('new curvature: C2 = {}'.format(C2))
                         if C1 > C2:
-                            x[3] = x[2];
-                            Rx[3] = Rx[2];
+                            x[3] = x[2]
+                            Rx[3] = Rx[2]
                             Sy[3] = Sy[2]
-                            x[2] = x[1];
-                            Rx[2] = Rx[1];
+                            x[2] = x[1]
+                            Rx[2] = Rx[1]
                             Sy[2] = Sy[1]
                             x[1] = (x[3] + phi * x[0]) / (1 + phi)
                             if verbose:
@@ -299,11 +307,11 @@ class IRIS:
                             RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                             SM = np.concatenate((SM, np.array(Sy[1:2])))
                         else:
-                            x[0] = x[1];
-                            Rx[0] = Rx[1];
+                            x[0] = x[1]
+                            Rx[0] = Rx[1]
                             Sy[0] = Sy[1]
-                            x[1] = x[2];
-                            Rx[1] = Rx[2];
+                            x[1] = x[2]
+                            Rx[1] = Rx[2]
                             Sy[1] = Sy[2]
                             x[2] = x[0] - (x[1] - x[3])
                             if verbose:
@@ -338,7 +346,7 @@ class IRIS:
         """
         Transform data back to the original space
 
-        The following matrix operation is performed : :math:`\hat{X} = K.f[i]`
+        The following matrix operation is performed : :math:`\\hat{X} = K.f[i]`
         for each value of the regularization parameter.
 
         Returns
@@ -370,6 +378,7 @@ class IRIS:
         Returns
         -------
         ax : subplot axis
+
         """
 
         fig = plt.figure()
@@ -391,12 +400,14 @@ class IRIS:
 
         Parameters
         ----------
-        index : optional, int, list or tuple of int. Index(es) of the inversions (i.e. of the lambda values) to consider.
-         If 'None': plots for all indices. default: None
+        index : optional, int, list or tuple of int.
+            Index(es) of the inversions (i.e. of the lambda values) to consider.
+            If 'None': plots for all indices. default: None
 
         Returns
         -------
         list of axes
+
         """
 
         colX, colXhat, colRes = kwargs.get('colors', ['blue', 'green', 'red'])
@@ -412,7 +423,7 @@ class IRIS:
             ax = self.X.plot()
             ax.plot(self.X.x.data, X_hats[i].squeeze().T.data, color=colXhat)
             ax.plot(self.X.x.data, res.T.data, color=colRes)
-            ax.set_title('2D IRIS merit plot, $\lambda$ = ' + str(self.lamda[i]))
+            ax.set_title(r'2D IRIS merit plot, $\lambda$ = ' + str(self.lamda[i]))
             axeslist.append(ax)
         return axeslist
 
@@ -422,12 +433,16 @@ class IRIS:
 
         Parameters
         ----------
-        index : optional, int, list or tuple of int. Index(es) of the inversions (i.e. of the lambda values) to consider.
-         If 'None': plots for all indices. default: None
-        other optional arguments are passed in the plots
+        index : optional, int, list or tuple of int.
+            Index(es) of the inversions (i.e. of the lambda values) to consider.
+            If 'None': plots for all indices. default: None
+        kwargs:
+            other optional arguments are passed in the plots
+
         Returns
         -------
         list of axes
+
         """
 
         axeslist = []
@@ -509,11 +524,11 @@ def nearestPD(A):
     # `spacing` will, for Gaussian random matrixes of small dimension, be on
     # othe order of 1e-16. In practice, both ways converge, as the unit test
     # below suggests.
-    I = np.eye(A.shape[0])
+    Ie = np.eye(A.shape[0])
     k = 1
     while not isPD(A3):
         mineig = np.min(np.real(np.linalg.eigvals(A3)))
-        A3 += I * (-mineig * k ** 2 + spacing)
+        A3 += Ie * (-mineig * k ** 2 + spacing)
         k += 1
         print('makes PD matrix')
     return A3

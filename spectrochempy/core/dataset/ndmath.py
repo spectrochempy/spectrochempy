@@ -23,6 +23,7 @@ import copy as cpy
 import functools
 import sys
 import operator
+import types
 
 # ======================================================================================================================
 # third-party imports
@@ -33,29 +34,29 @@ from warnings import catch_warnings
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from ...units.units import ur, Quantity, DimensionalityError
-from .ndarray import NDArray
-from ...utils import docstrings, MaskedArray, NOMASK
-from ...core import warning_, error_
-from ...extern.orderedset import OrderedSet
+from spectrochempy.units.units import ur, Quantity, DimensionalityError
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.utils import docstrings, MaskedArray, NOMASK
+from spectrochempy.core import warning_, error_
+from spectrochempy.extern.orderedset import OrderedSet
 
 # ======================================================================================================================
 # utility
 # ======================================================================================================================
 thismodule = sys.modules[__name__]
 
-get_name = lambda x: str(x.name if hasattr(x, 'name') else x)
+
+def get_name(x): return str(x.name if hasattr(x, 'name') else x)
+
 
 DIMENSIONLESS = ur('dimensionless').units
 UNITLESS = None
 TYPEPRIORITY = {'Coord': 2, 'NDDataset': 3, 'NDPanel': 4}
 
+
 # ======================================================================================================================
 # function signature
 # ======================================================================================================================
-
-import types
-
 
 def change_func_args(func, new_args):
     """
@@ -416,13 +417,13 @@ class NDMath(object):
     absolute = abs
 
     def pipe(self, func, *args, **kwargs):
-        """Apply func(self, \*args, \*\*kwargs)
+        """Apply func(self, *args, **kwargs)
 
         Parameters
         ----------
         func : function
             function to apply to the |NDDataset|.
-            `\*args`, and `\*\*kwargs` are passed into `func`.
+            `*args`, and `**kwargs` are passed into `func`.
             Alternatively a `(callable, data_keyword)` tuple where
             `data_keyword` is a string indicating the keyword of
             `callable` that expects the array object.
@@ -496,9 +497,9 @@ class NDMath(object):
     def ptp(self, *args, **kwargs):
         """
         Range of values (maximum - minimum) along a dimension.
-        
+
         The name of the function comes from the acronym for 'peak to peak'.
-        
+
         Parameters
         ----------
         axis : None or int, optional
@@ -508,12 +509,12 @@ class NDMath(object):
             If this is set to True, the dimensions which are reduced are left
             in the result as dimensions with size one. With this option,
             the result will broadcast correctly against the input dataset.
-        
+
         Returns
         -------
         ptp : nddataset
             A new dataset holding the result.
-        
+
         """
 
         return self._reduce_method('ptp', *args, **kwargs)
@@ -546,14 +547,14 @@ class NDMath(object):
     def clip(self, *args, **kwargs):
         """
         Clip (limit) the values in a dataset.
-        
+
         Given an interval, values outside the interval are clipped to
         the interval edges.  For example, if an interval of ``[0, 1]``
         is specified, values smaller than 0 become 0, and values larger
         than 1 become 1.
-        
+
         No check is performed to ensure ``a_min < a_max``.
-        
+
         Parameters
         ----------
         a_min : scalar or array_like or None
@@ -572,6 +573,7 @@ class NDMath(object):
             An array with the elements of `a`, but where values
             < `a_min` are replaced with `a_min`, and those > `a_max`
             with `a_max`.
+
         """
         if len(args) > 2 or len(args) == 0:
             raise ValueError('Clip requires at least one argument or at most two arguments')
@@ -599,7 +601,7 @@ class NDMath(object):
     def amin(self, *args, **kwargs):
         """
         Return the maximum of the dataset or maxima along given dimensions.
-        
+
         Parameters
         ----------
         dim : None or int or dimension name or tuple of int or dimensions, optional
@@ -627,7 +629,7 @@ class NDMath(object):
         amin : ndarray or scalar
             Minimum of the data. If `dim` is None, the result is a scalar value.
             If `dim` is given, the result is an array of dimension ``ndim - 1``.
-        
+
         See Also
         --------
         amax :
@@ -651,7 +653,7 @@ class NDMath(object):
     def max(self, *args, **kwargs):
         """
         Return the maximum of the dataset or maxima along given dimensions.
-        
+
         Parameters
         ----------
         dim : None or int or dimension name or tuple of int or dimensions, optional
@@ -680,7 +682,7 @@ class NDMath(object):
         amax : ndarray or scalar
             Maximum of the data. If `dim` is None, the result is a scalar value.
             If `dim` is given, the result is an array of dimension ``ndim - 1``.
-        
+
         See Also
         --------
         amin :
@@ -694,7 +696,7 @@ class NDMath(object):
         argmin :
             Return the indices or coordinates of the minimum values.
         nanmax, maximum, fmax
-        
+
         """
 
         return self._reduce_method('max', *args, **kwargs)
@@ -893,7 +895,7 @@ class NDMath(object):
         objtypes = []
         objunits = OrderedSet()
         returntype = None
-        isquaternion = False
+        # isquaternion = False     (  # TODO: not yet used)
         ismasked = False
         compatible_units = (fname in self._compatible_units)
         for i, obj in enumerate(inputs):
@@ -919,8 +921,8 @@ class NDMath(object):
                 pass
 
             # If one of the input is hypercomplex, this will demand a special treatment
-            if objtype != 'NDPanel' and hasattr(obj, 'is_quaternion'):
-                isquaternion = obj.is_quaternion
+            # if objtype != 'NDPanel' and hasattr(obj, 'is_quaternion'):
+            #    isquaternion = obj.is_quaternion     # TODO: not yet used
             # elif   #TODO: check if it is a quaternion scalar
 
             # Do we have to deal with mask?
@@ -1001,12 +1003,10 @@ class NDMath(object):
                 if other._squeeze_ndim == 0:
                     pass
 
-
                 # or that we suppress or add a row to the whole dataset
                 elif other._squeeze_ndim == 1 and obj._data.shape[-1] != other._data.size:
                     raise ValueError(
                         "coordinate's sizes do not match")
-
 
                 elif other._squeeze_ndim > 1 and obj.coords and other.coords and \
                         not (obj._coords[0].is_empty and obj._coords[0].is_empty) and \
@@ -1298,8 +1298,8 @@ class NDMath(object):
             fname = f.__name__
             if hasattr(self, 'history'):
                 self.history = f'Inplace binary op: {fname}  with `{get_name(other)}` '
-            else:
-                history = None
+            # else:
+            #    history = None
             objs = [self, other]
             fm, objs = self._check_order(fname, objs)
 

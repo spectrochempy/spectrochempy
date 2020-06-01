@@ -11,22 +11,22 @@ __all__ = ["smooth"]
 __dataset_methods__ = __all__
 
 import numpy as np
-from .. import error_, warning_, print_, debug_
+from spectrochempy.core import error_
 
 
 def smooth(dataset, **kwargs):
     """
     Smooth the data using a window with requested size.
-    
+
     This method is based on the convolution of a scaled window with the signal.
     The signal is prepared by introducing reflected copies of the signal (with the window size) in both ends so that
     transient parts are minimized in the begining and end part of the output data.
-    
+
     Parameters
     ----------
     dataset :  |NDDataset| or a ndarray-like object
         Input object
-        
+
     Other Parameters
     ----------------
     dim : str or int, optional, default='x'.
@@ -39,12 +39,12 @@ def smooth(dataset, **kwargs):
     window : str, optional, default='hanning'
         the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
         flat window will produce a moving average smoothing.
-        
+
     Returns
     -------
     out : same type as input dataset
         the smoothed object
-    
+
     TODO: implement this for NDPanel too
     """
 
@@ -86,7 +86,7 @@ def smooth(dataset, **kwargs):
         'blackman': np.blackman,
     }
     if not callable(window):
-        if not window in wind.keys():
+        if window not in wind.keys():
             error_("Window must be a callable or a string among 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
             return new
         window = wind[window]

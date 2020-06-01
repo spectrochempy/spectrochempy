@@ -19,18 +19,10 @@ __all__ = ['FitParameters', 'ParameterScript']
 # ==============
 import sys
 import re  # For regular expression search
-from collections import \
-    UserDict  # This is to be able to create a special dictionary
-
-from spectrochempy.core import project_preferences, general_preferences, info_, warning_
-
+from collections import UserDict  # This is to be able to create a special dictionary
+from spectrochempy.core import info_
 from spectrochempy.core.dataset.nddataset import NDDataset
-
 import numpy as np
-
-# =================
-# enthought import
-# =================
 from traitlets import (HasTraits, Unicode, Instance, List, observe)
 
 
@@ -98,7 +90,7 @@ class FitParameters(UserDict):
                     self.lob[key] = self._evaluate(value[1])
                     self.upb[key] = self._evaluate(value[2])
                     self._checkerror(key)
-            except:
+            except Exception:
                 pass
             self.fixed[key] = False
             if isinstance(value[-1], bool):
@@ -125,11 +117,9 @@ class FitParameters(UserDict):
         key = str(key)
         if self.lob[key] is None and self.upb[key] is None:
             return False
-        elif (self.lob[key] is not None and self.data[key] < self.lob[key]) \
-                or (self.upb[key] is not None and self.data[key] > self.upb[
-            key]):
-            raise ValueError(
-                '%s value %s is out of bounds' % (key, str(self.data[key])))
+        elif (self.lob[key] is not None and self.data[key] < self.lob[key]) or (self.upb[key] is not None
+                                                                                and self.data[key] > self.upb[key]):
+            raise ValueError('%s value %s is out of bounds' % (key, str(self.data[key])))
 
     # ------------------------------------------------------------------------------------------------------------------
     def __str__(self):
@@ -181,7 +171,7 @@ class FitParameters(UserDict):
             message += "shape: %s\n" % self.model[model]
             for key in sorted(self.keys()):
                 keyspl = key.split('_')
-                if not model in '_'.join(keyspl[1:]):
+                if model not in '_'.join(keyspl[1:]):
                     continue
                 message += makestr(key)
         return message
@@ -208,7 +198,7 @@ class FitParameters(UserDict):
 
         if isinstance(strg, str):
             # strg=string.upper(strg)
-            p = re.compile('\s+')
+            p = re.compile(r'\s+')
             m = p.split(strg.strip())
             try:
                 res = eval(m[0])
@@ -458,10 +448,10 @@ class ParameterScript(HasTraits):
                 elif len(s) == 1:
                     s.extend(['none', 'none'])
                 value, mini, maxi = s
-                if mini.strip().lower() in ['none', '']: mini = str(
-                    -1. / sys.float_info.epsilon)
-                if maxi.strip().lower() in ['none', '']: maxi = str(
-                    +1. / sys.float_info.epsilon)
+                if mini.strip().lower() in ['none', '']:
+                    mini = str(-1. / sys.float_info.epsilon)
+                if maxi.strip().lower() in ['none', '']:
+                    maxi = str(+1. / sys.float_info.epsilon)
                 if modlabel != 'common':
                     ks = "%s_%s" % (key, modlabel)
                     # print(ks)

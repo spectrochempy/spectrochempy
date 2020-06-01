@@ -37,8 +37,8 @@ import shutil as sh
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
 
-from traitlets.config.configurable import Config, Configurable
-from traitlets.config.application import Application, catch_config_error
+from traitlets.config.configurable import Config
+from traitlets.config.application import Application
 from traitlets import (Bool, Unicode, List, Dict, Integer, Float, Enum,
                        HasTraits, Instance, default, observe, import_item, )
 from traitlets.config.manager import BaseJSONConfigManager
@@ -49,12 +49,12 @@ from matplotlib.lines import Line2D
 
 from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
-from IPython.core import magic_arguments
+
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
 from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
 from IPython.utils.text import get_text_list
-from IPython.display import HTML, publish_display_data, clear_output
+from IPython.display import publish_display_data, clear_output
 from jinja2 import Template
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ try:
                               local_scheme=local_scheme,
                               version_scheme=version_scheme)
     "Version string of this package"
-except:  # pragma: no cover
+except LookupError:  # pragma: no cover
     __version__ = __release__
 
 
@@ -196,11 +196,8 @@ __copyright__ = _get_copyright()
 
 # .............................................................................
 def _get_release_date():
-    try:
-        return subprocess.getoutput(
+    return subprocess.getoutput(
             "git log -1 --tags --date='short' --format='%ad'")
-    except:  # pragma: no cover
-        pass
 
 
 __release_date__ = _get_release_date()
@@ -336,8 +333,8 @@ class SpectroChemPyMagics(Magics):
         """
         opts, args = self.parse_options(pars, 'p:o:s:n:a')
 
-        append = 'a' in opts
-        mode = 'a' if append else 'w'
+        # append = 'a' in opts
+        # mode = 'a' if append else 'w'
         search_ns = 'n' in opts
 
         if not args and not cell and not search_ns:  # pragma: no cover
@@ -361,13 +358,11 @@ class SpectroChemPyMagics(Magics):
 
         contents = ""
         if search_ns:
-            contents += "\n" + self.shell.find_user_code(opts['n'],
-                                                         search_ns=search_ns) + "\n"
+            contents += "\n" + self.shell.find_user_code(opts['n'], search_ns=search_ns) + "\n"
 
         args = " ".join(args)
         if args.strip():
-            contents += "\n" + self.shell.find_user_code(args,
-                                                         search_ns=search_ns) + "\n"
+            contents += "\n" + self.shell.find_user_code(args, search_ns=search_ns) + "\n"
 
         if 's' in opts:  # pragma: no cover
             try:
@@ -718,15 +713,13 @@ class ProjectPreferences(MetaConfigurable):
 
     method_1D = Enum(['pen', 'scatter', 'scatter+pen', 'bar'],
                      default_value='pen',
-                     help='Default plot methods for 1D datasets').tag(
-        config=True, type='list')
+                     help='Default plot methods for 1D datasets').tag(config=True, type='list')
 
     # 2D/3D options
     # ----------
 
     method_2D = Enum(['map', 'image', 'stack', 'surface', '3D'], default_value='stack',
-                     help='Default plot methods for 2D datasets').tag(
-        config=True, type='list')
+                     help='Default plot methods for 2D datasets').tag(config=True, type='list')
 
     # method_3D = Enum(['surface'], default_value='surface',
     #                 help='Default plot methods for 3D datasets').tag(
@@ -734,44 +727,31 @@ class ProjectPreferences(MetaConfigurable):
 
     colorbar = Bool(True, help='Show color bar for 2D plots').tag(config=True)
 
-    show_projections = Bool(False, help='Show all projections').tag(
-        config=True)
+    show_projections = Bool(False, help='Show all projections').tag(config=True)
 
-    show_projection_x = Bool(False, help='Show projection along x').tag(
-        config=True)
+    show_projection_x = Bool(False, help='Show projection along x').tag(config=True)
 
-    show_projection_y = Bool(False, help='Show projection along y').tag(
-        config=True)
+    show_projection_y = Bool(False, help='Show projection along y').tag(config=True)
 
-    number_of_x_labels = Integer(5, min=3, help='Number of X labels').tag(
-        config=True)
+    number_of_x_labels = Integer(5, min=3, help='Number of X labels').tag(config=True)
 
-    number_of_y_labels = Integer(5, min=3, help='Number of Y labels').tag(
-        config=True)
+    number_of_y_labels = Integer(5, min=3, help='Number of Y labels').tag(config=True)
 
-    number_of_z_labels = Integer(5, min=3, help='Number of Z labels').tag(
-        config=True)
+    number_of_z_labels = Integer(5, min=3, help='Number of Z labels').tag(config=True)
 
-    number_of_contours = Integer(50, min=10, help='Number of contours').tag(
-        config=True)
+    number_of_contours = Integer(50, min=10, help='Number of contours').tag(config=True)
 
-    contour_alpha = Float(1.00, min=0., max=1.0, help='Transparency of the ' \
-                                                      'contours').tag(
-        config=True)
+    contour_alpha = Float(1.00, min=0., max=1.0, help='Transparency of the contours').tag(config=True)
 
     contour_start = Float(0.05, min=0.001, help='Fraction of the maximum '
                                                 'for starting contour '
-                                                'levels').tag(
-        config=True)
+                                                'levels').tag(config=True)
 
-    antialiased = Bool(True, help='antialiased option for surface plot').tag(
-        config=True)
+    antialiased = Bool(True, help='antialiased option for surface plot').tag(config=True)
 
-    rcount = Integer(50, help='rcount (steps in the row mode) for surface plot').tag(
-        config=True)
+    rcount = Integer(50, help='rcount (steps in the row mode) for surface plot').tag(config=True)
 
-    ccount = Integer(50, help='ccount (steps in the column mode) for surface plot').tag(
-        config=True)
+    ccount = Integer(50, help='ccount (steps in the column mode) for surface plot').tag(config=True)
 
     # colors / style
     # ------------------------------------------------------------------------------------------------------------------
@@ -1110,8 +1090,8 @@ class SpectroChemPy(Application):
 
             if self.reset_config:
                 # remove the user json file to reset to defaults
-                l = os.listdir(self.config_dir)
-                for f in l:
+                lis = os.listdir(self.config_dir)
+                for f in lis:
                     if f.endswith('.json'):
                         jsonname = os.path.join(self.config_dir, f)
                         os.remove(jsonname)

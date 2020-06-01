@@ -20,23 +20,23 @@ __dataset_methods__ = __all__
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import scipy.interpolate
+# import scipy.interpolate
 import numpy as np
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from ...utils import NOMASK, MASKED, UnitsCompatibilityError
-from ...extern.orderedset import OrderedSet
-from .. import warning_, error_
+from spectrochempy.utils import MASKED, UnitsCompatibilityError
+# from ...extern.orderedset import OrderedSet
+from spectrochempy.core import warning_, error_
 
 
 # ..................................................................................................................
 def can_merge_or_align(coord1, coord2):
     """
     Check if two coordinates can be merged or aligned
-    
+
     Parameters
     ----------
     coord1, coord2 : |Coord|
@@ -46,7 +46,7 @@ def can_merge_or_align(coord1, coord2):
     -------
     can_merge, can_align : tuple of bools
         Two flags about merge and alignment possibility
-        
+
     """
     if (coord1 == coord2):
         # same coordinates
@@ -89,9 +89,9 @@ def align(dataset, *others, **kwargs):
         Align along all dims defined in dims (if dim or axis is also defined, then dims have higher priority).
     method : enum ['outer', 'inner', 'first', 'last', 'interpolate'], optional, default='outer'
         Which method to use for the alignment.
-        
+
         If align is defined :
-        
+
         * 'outer' means that a union of the different coordinates is achieved (missing values are masked)
         * 'inner' means that the intersection of the coordinates is used
         * 'first' means that the first dataset is used as reference
@@ -100,7 +100,7 @@ def align(dataset, *others, **kwargs):
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'.
         Method of interpolation to performs for the alignment.
     interpolate_sampling : 'auto', int or float. Optional, default='auto'.
-    
+
         * 'auto' : sampling is determined automatically from the existing data.
         * int :  if an integer values is specified, then the
           sampling interval for the interpolated data will be splitted in this number of points.
@@ -110,7 +110,7 @@ def align(dataset, *others, **kwargs):
     copy : bool, optional, default=True
         If False then the returned objects will share memory with the original objects, whenever it is possible :
         in principle only if reindexing is not necessary.
-    
+
     Returns
     --------
     aligned_datasets : tuple of |NDDataset| or a |NDPanel|.
@@ -120,7 +120,7 @@ def align(dataset, *others, **kwargs):
     ------
     ValueError
         issued when the dimensions given in `dim` or `dims` argument are not compatibles (units, titles, etc...)
-    
+
     """
     # TODO: Perform an alignment along numeric labels
     # TODO: add example in docs
@@ -353,7 +353,8 @@ def align(dataset, *others, **kwargs):
     #
     #     if method == 'linear':
     #         interpolator = lambda data, ax=0: scipy.interpolate.interp1d(
-    #             oldaxisdata, data, axis=ax, kind=method, bounds_error=False, fill_value=fill_value, assume_sorted=True)
+    #             oldaxisdata, data, axis=ax, kind=method, bounds_error=False,
+    #             fill_value=fill_value, assume_sorted=True)
     #
     #     elif method == 'pchip':
     #         interpolator = lambda data, ax=0: scipy.interpolate.PchipInterpolator(

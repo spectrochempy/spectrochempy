@@ -20,7 +20,7 @@ __dataset_methods__ = []
 # imports
 # ----------------------------------------------------------------------------
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import warnings
 from traitlets import HasTraits, Instance
 
@@ -139,7 +139,7 @@ class SIMPLISMA(HasTraits):
         if not interactive:
             logs = '*** Automatic SIMPL(I)SMA analysis *** \n'
         else:
-            logs = '*** Interative SIMPLISMA analysis *** \n'.format(X.name)
+            logs = '*** Interative SIMPLISMA analysis *** \n'
         logs += 'dataset: {}\n'.format(X.name)
         logs += '  noise: {:2} %\n'.format(noise)
         if not interactive:
@@ -335,19 +335,18 @@ class SIMPLISMA(HasTraits):
                         diff = 100 * (stdev_resj - prev_stdev_res) / prev_stdev_res
                         prev_stdev_res + stdev_resj
 
-                        logs += '   |--> changed pure variable #{}\n'.format(j + 1)
+                        logs += f'   |--> changed pure variable #{j + 1}\n'
                         llog = str_iter_summary(j, maxPIndex[j], maxPCoordinate[j], rsquarej, stdev_resj, 'diff')
                         logs += llog + '\n'
                         info_(llog)
 
-                        info_('purest variable #{} set at index = {} ; x = {}'.format(j + 1, maxPIndex[j],
-                                                                                      maxPCoordinate[j]))
+                        info_(f'purest variable #{j + 1} set at index = {maxPIndex[j]} ; x = {maxPCoordinate[j]}')
                         ans = input('   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop: ')
 
                     if ans.lower() == 'r':
                         maxPCoordinate[j] = 0
                         maxPIndex[j] = 0
-                        logs += '   |--> rejected pure variable #{}\n'.format(j + 1)
+                        logs += f'   |--> rejected pure variable #{j+1}\n'
                         j = j - 1
 
                     elif ans.lower() == 'a':
@@ -356,8 +355,7 @@ class SIMPLISMA(HasTraits):
                     elif ans.lower() == 'f':
                         finished = True
                         j = j + 1
-                        llog = ('\n**** Interrupted by user at compound # {} \n**** End of SIMPL(I)SMA analysis.'
-                                .format(j))
+                        llog = (f'\n**** Interrupted by user at compound # {j} \n**** End of SIMPL(I)SMA analysis.')
                         logs += llog + '\n'
                         Pt = Pt[0:j, :]
                         St = St[0:j, :]
@@ -367,9 +365,8 @@ class SIMPLISMA(HasTraits):
                 else:
                     j = j + 1
                     if (1 - rsquarej) < tol / 100:
-                        llog = (
-                            '\n**** Unexplained variance lower than \'tol\' ({}%) \n**** End of SIMPL(I)SMA analysis.'
-                                .format(tol))
+                        llog = (f"\n**** Unexplained variance lower than 'tol' ({tol}%) \n"
+                                "**** End of SIMPL(I)SMA analysis.")
                         logs += llog + '\n'
                         Pt = Pt[0:j, :]
                         St = St[0:j, :]
@@ -380,9 +377,8 @@ class SIMPLISMA(HasTraits):
                         finished = True
             if j == n_pc:
                 if not interactive:
-                    llog = (
-                        '\n**** Reached maximum number of pure compounds \'n_pc\' ({}) \n**** End of SIMPL(I)SMA analysis.'
-                            .format(n_pc))
+                    llog = (f"\n**** Reached maximum number of pure compounds 'n_pc' ({n_pc}) \n"
+                            "**** End of SIMPL(I)SMA analysis.")
                     logs += llog + '\n'
                     info_(llog)
                     finished = True
@@ -444,7 +440,7 @@ class SIMPLISMA(HasTraits):
         res = self.X - X_hat
 
         ax = self.X.plot(label='$X$')
-        ax.plot(X_hat.data.T, color=colXhat, label='$\hat{X}')
+        ax.plot(X_hat.data.T, color=colXhat, label=r'$\hat{X}')
         ax.plot(res.data.T, color=colRes, label='Residual')
         ax.set_title('SIMPLISMA plot: ' + self.X.name)
 

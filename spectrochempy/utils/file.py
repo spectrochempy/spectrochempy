@@ -312,10 +312,8 @@ def generate_api(api_path):
         if pkg.endswith('api') or "test" in pkg:
             continue
         try:
-            # print(pkg)
             pkg = import_item(pkg)
-        except:
-            # pkg = import_item(pkg)
+        except Exception:
             raise ImportError(pkg)
         if not hasattr(pkg, '__all__'):
             continue
@@ -381,7 +379,8 @@ def unzip(source_filename, dest_dir):
             for word in words[:-1]:
                 drive, word = os.path.splitdrive(word)
                 head, word = os.path.split(word)
-                if word in (os.curdir, os.pardir, ''): continue
+                if word in (os.curdir, os.pardir, ''):
+                    continue
                 path = os.path.join(path, word)
             zf.extract(member, path)
 

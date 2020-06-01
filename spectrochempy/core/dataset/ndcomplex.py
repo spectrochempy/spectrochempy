@@ -35,7 +35,7 @@ from quaternion import as_float_array, as_quat_array
 # ======================================================================================================================
 from .ndarray import NDArray
 from ...utils import (SpectroChemPyWarning, NOMASK, TYPE_FLOAT, TYPE_COMPLEX, insert_masked_print, docstrings)
-from ...core import info_, debug_, error_, warning_
+# from ...core import info_, debug_, error_, warning_
 from ...units.units import Quantity
 
 # ======================================================================================================================
@@ -66,11 +66,11 @@ class NDComplexArray(NDArray):
     def implements(self, name=None):
         """
         Utility to check if the current object implement `NDComplexArray`.
-        
+
         Rather than isinstance(obj, NDComplexArrray) use object.implements('NDComplexArray').
-        
         This is useful to check type without importing the module
-        
+
+
         """
         if name is None:
             return 'NDComplexArray'
@@ -158,7 +158,7 @@ class NDComplexArray(NDArray):
         """
         try:
             return super().is_masked
-        except:
+        except Exception:
             if self._data.dtype == typequaternion:
                 return np.any(self._mask['I'])
             else:
@@ -286,7 +286,8 @@ class NDComplexArray(NDArray):
         Returns
         -------
         %(generic_method.returns.object)s
-        
+
+
         See Also
         --------
         conj, real, imag, RR, RI, IR, II, part, set_complex, is_complex
@@ -388,21 +389,21 @@ class NDComplexArray(NDArray):
     def set_complex(self, inplace=False):
         """
         Set the object data as complex.
-        
-        When nD-dimensional array are set to complex, we assume that it is along the first dimension. Two succesives rows
-        are merged to form a complex rows. This means that the number of row must be even.
-        
+
+
+        When nD-dimensional array are set to complex, we assume that it is along the first dimension.
+        Two succesives rows are merged to form a complex rows. This means that the number of row must be even
         If the complexity is to be applied in other dimension, either transpose/swapaxes your data before applying this
         function in order that the complex dimension is the first in the array.
-        
+
         Parameters
         ----------
         %(generic_method.parameters.inplace)s
-        
+
         Returns
         -------
         %(generic_method.returns)s
-        
+
         See Also
         --------
         set_quaternion, has_complex_dims, is_complex, is_quaternion
@@ -620,7 +621,7 @@ class NDComplexArray(NDArray):
 
         try:
             super().__setitem__(items, value)
-        except:
+        except Exception:
             if self.ndim > 1 and self.is_quaternion:  # TODO: why not?
                 raise NotImplementedError("Sorry but setting values for hypercomplex array is not yet possible")
 

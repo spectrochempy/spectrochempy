@@ -7,7 +7,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-# TODO: 0.1.18 - Do we need this?
+# TODO: 0.1.21 - Do we need this?
 
 __all__ = ['readXlCellRange']
 
@@ -32,10 +32,10 @@ def readXlCellRange(xlFileName, cellRange, sheetNumber=0):
 
     start, stop = cellRange.split(':')
 
-    colstart = colNameToColNumber(''.join([l for l in start if l.isalpha()]))
-    colstop = colNameToColNumber(''.join([l for l in stop if l.isalpha()]))
-    linstart = int(''.join([l for l in start if not l.isalpha()])) - 1
-    linstop = int(''.join([l for l in stop if not l.isalpha()])) - 1
+    colstart = colNameToColNumber(''.join([item for item in start if item.isalpha()]))
+    colstop = colNameToColNumber(''.join([item for item in stop if item.isalpha()]))
+    linstart = int(''.join([item for item in start if not item.isalpha()])) - 1
+    linstop = int(''.join([item for item in stop if not item.isalpha()])) - 1
 
     xlfile = xlrd.open_workbook(xlFileName)
     sheetnames = xlfile.sheet_names()

@@ -17,7 +17,7 @@ __dataset_methods__ = []
 
 import numpy as np
 from traitlets import HasTraits, Instance
-from collections.abc import Iterable
+# from collections.abc import Iterable
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.analysis.pca import PCA
@@ -50,7 +50,7 @@ class MCRALS(HasTraits):
             Initial concentration or spectra
         param : dict
             Dict of optimization parameters with the following keys :
-        
+
             * tol : float, optional,  default=0.1
                 convergence criterion on the change of resisuals.
                 (percent change of standard deviation of residuals).
@@ -69,12 +69,12 @@ class MCRALS(HasTraits):
                 index of species for which a concentration profile is provided by an external function.
             *  getExtlConc : callable
                 an external function that will provide `n_ext` concentration profiles:
-                    getExtConc(C, extConc, ext_to_C_idx, \*args) -> extC
-                
+                    getExtConc(C, extConc, ext_to_C_idx, *args) -> extC
+
                 or
-                    getExtConc(C, extConc, ext_to_C_idx, \*args) -> (extC, out2, out3, ...)
-                
-                where C is the current concentration matrix, \*args are the parameters needed to completely
+                    getExtConc(C, extConc, ext_to_C_idx, *args) -> (extC, out2, out3, ...)
+
+                where C is the current concentration matrix, *args are the parameters needed to completely
                 specify the function, extC is a  nadarray or NDDataset of shape (C.y, n_ext), and out1, out2, ... are
                 supplementary outputs returned by the function (e.g. optimized rate parameters)
             * args : tuple, optional.
@@ -90,7 +90,7 @@ class MCRALS(HasTraits):
         verbose : bool
             If set to True, prints a summary of residuals and residuals change at each iteration. default = False.
             In any case, the same information is returned in self._log
-        
+
         Attributes
         ----------
         self.X :
@@ -107,6 +107,7 @@ class MCRALS(HasTraits):
             the final spectral profiles
         self.log :
             logs
+
         """
 
         verbose = kwargs.get('verbose', False)
@@ -148,7 +149,7 @@ class MCRALS(HasTraits):
         # TODO: make a preference  file to set this kwargs
         param = kwargs.get('param', dict())
 
-        ### optimization
+        # optimization
 
         tol = param.get('tol', 0.1)
         maxit = param.get('maxit', 50)
@@ -173,7 +174,7 @@ class MCRALS(HasTraits):
         if externalConc is not None:
             try:
                 getExternalConc = param.get('getExternalConc')
-            except:
+            except Exception:
                 raise ValueError('A function must be given to get the external concentration profile(s)')
             external_to_C_idx = param.get('external_to_C_idx', externalConc)
             args = param.get('args', ())
@@ -349,8 +350,8 @@ class MCRALS(HasTraits):
                 info_(logentry)
 
             if ndiv == maxdiv:
-                logline = 'Optimization not improved since {} iterations... unconverged or \'tol\' set too small ?\n'.format(
-                    maxdiv)
+                logline = f"Optimization not improved since {maxdiv} iterations... unconverged " \
+                          f"or 'tol' set too small ?\n"
                 logline += 'Stop ALS optimization'
                 logs += logline + '\n'
                 info_(logline)

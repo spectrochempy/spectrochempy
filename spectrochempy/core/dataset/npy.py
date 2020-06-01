@@ -21,8 +21,8 @@ __all__ = ['diag', 'dot', 'empty', 'empty_like', 'zeros', 'eye', 'identity', 'ze
 
 import numpy as np
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
+# from spectrochempy.core.dataset.ndcoordset import CoordSet
+# from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import NOMASK, make_new_object
 
 
@@ -190,23 +190,23 @@ def ones(shape, dtype=None, **kwargs):
 def identity(N, dtype=None, **kwargs):
     """
     Return the identity array.
-    
+
     The identity array is a square array with ones on
     the main diagonal.
-    
+
     Parameters
     ----------
     N : int
         Number of rows (and columns) in `n` x `n` output.
     dtype : data-type, optional
         Data-type of the output.  Defaults to ``float``.
-        
+
     Returns
     -------
     out : nddataset
         `n` x `n` array with its main diagonal set to one,
         and all other elements 0.
-        
+
     Examples
     --------
     >>> scp.identity(3).data
@@ -236,18 +236,18 @@ def eye(N, M=None, k=0, dtype=float, order='C', **kwargs):
     order : {'C', 'F'}, optional
         Whether the output should be stored in row-major (C-style) or
         column-major (Fortran-style) order in memory.
-        
+
     Returns
     -------
     I : NDDataset of shape (N,M)
       An array where all elements are equal to zero, except for the `k`-th
       diagonal, whose values are equal to one.
-      
+
     See Also
     --------
     identity : equivalent function with k=0.
     diag : diagonal 2-D NDDataset from a 1-D array specified by the user.
-    
+
     Examples
     --------
     >>> np.eye(2, dtype=int)
@@ -257,7 +257,7 @@ def eye(N, M=None, k=0, dtype=float, order='C', **kwargs):
     array([[0.,  1.,  0.],
            [0.,  0.,  1.],
            [0.,  0.,  0.]])
-           
+
     """
     return NDDataset(np.eye(N, M, k, dtype, order), **kwargs)
 
@@ -298,7 +298,6 @@ def zeros_like(a, dtype=None, ):
     >>> scp.zeros_like(x)
     NDDataset: [[       0,        0,        0],
                 [       0,        0,        0]] s
-
 
     """
     new = a.copy()
@@ -461,7 +460,6 @@ def dot(a, b, strict=True, out=None):
     .. note::
       Works only with 2-D arrays at the moment.
 
-
     Parameters
     ----------
     a, b : masked_array_like
@@ -555,7 +553,7 @@ def diag(dataset, k=0):
     are using.
 
     Adapted from numpy (licence #TO ADD)
-    
+
     Parameters
     ----------
     v : array_like
@@ -568,8 +566,6 @@ def diag(dataset, k=0):
     out : ndarray
         The extracted diagonal or constructed diagonal array.
 
-    
-    
     """
     # TODO: fix this - other diagonals
     # k : int, optional

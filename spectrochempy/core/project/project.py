@@ -14,19 +14,18 @@ import uuid
 import json
 import warnings
 from copy import copy as cpy
-from collections import OrderedDict
+# from collections import OrderedDict
 
 from functools import wraps
 
 from traitlets import (Dict, Instance, Unicode, This, default)
 
-from spectrochempy.core import project_preferences, general_preferences, config_manager, config_dir
+from spectrochempy.core import general_preferences, config_manager, config_dir, project_preferences, app
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.scripts.script import Script
-from spectrochempy.utils import (Meta, SpectroChemPyWarning, make_zipfile,
-                                 ScpFile, )
+from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
 from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.units.units import Quantity
+# from spectrochempy.units.units import Quantity
 
 cfg = config_manager
 preferences = general_preferences
@@ -105,8 +104,7 @@ class Project(AbstractProject):
 
         else:
             raise ValueError('objects of type {} has no name and so '
-                             'cannot be appended to the project '.format(
-                type(obj).__name__))
+                             'cannot be appended to the project '.format(type(obj).__name__))
 
     # ..................................................................................................................
     def _get_from_type(self, name):
@@ -395,8 +393,7 @@ class Project(AbstractProject):
         list - all items contained in this project
 
         """
-        return list(self._datasets.items()) + list(self._projects.items()) + \
-               list(self._scripts.items())
+        return list(self._datasets.items()) + list(self._projects.items()) + list(self._scripts.items())
 
     @property
     def filename(self):
@@ -802,10 +799,9 @@ class Project(AbstractProject):
                           "from filename!", SpectroChemPyWarning)
 
         filename = os.path.expanduser(os.path.join(directory, filename))
-        if (not os.path.exists(filename)
-            or os.path.isdir(filename)  # this maay happen when the zip has
-                #  been decompressed externally (we ignore this)
-        ) and not filename.endswith('.pscp'):
+        if (not os.path.exists(filename) or os.path.isdir(filename)
+            # this may happen when the zip has been decompressed externally (we ignore this)
+            ) and not filename.endswith('.pscp'):
             filename = filename + '.pscp'
             if not os.path.exists(filename):
                 raise IOError('no valid project filename provided')
@@ -818,15 +814,14 @@ class Project(AbstractProject):
         # read json files in the pscp file (obj[f])
         # then write it in the main config directory
         f = 'ProjectPreferences.json'
-        if f in obj.files:
-            prefjsonfile = os.path.join(app.config_dir, f)
+        if f in obj.files:   #TODO: work on this
+            prefjsonfile = os.path.join(config_dir, f)
             with open(prefjsonfile, 'w') as fd:
                 json.dump(obj[f], fd, indent=4)
             # we must also reinit preferences
             app.init_all_preferences()
             app.load_config_file(prefjsonfile)
-            project_preferences = app.project_preferences = \
-                ProjectPreferences(config=app.config, parent=app)
+            project_preferences = app.project_preferences = ProjectPreferences(config=app.config, parent=app)
 
         # make a project (or a subclass of it, so we use cls)
         pars = obj['pars.json']

@@ -14,6 +14,7 @@ from traitlets import (HasTraits, Unicode, validate, TraitError, Instance,
                        Float, )
 
 from spectrochempy.core.project.baseproject import AbstractProject
+from spectrochempy.core import error_
 
 __all__ = ['Script', 'run_script', 'run_all_scripts']
 
@@ -69,7 +70,7 @@ class Script(HasTraits):
         pv = proposal['value']
         if len(pv) < 2:
             raise TraitError('script name must have at least 2 characters')
-        p = re.compile("^([^\W0-9]?[a-zA-Z_]+[\w]*)")
+        p = re.compile(r"^([^\W0-9]?[a-zA-Z_]+[\w]*)")
         if p.match(pv) and p.match(pv).group() == pv:
             return pv
         raise TraitError('Not a valid script name : only _ letters and numbers '
@@ -91,8 +92,8 @@ class Script(HasTraits):
             raise TraitError("Script content must be non Null!")
 
         try:
-            py_code = ast.parse(pv)
-        except:
+            ast.parse(pv)
+        except Exception:
             raise
 
         return pv
@@ -170,6 +171,9 @@ def run_all_scripts(project):
         The project in which the scripts have to be executed
 
     """
+    # TODO: complete this run_all_script function
+
+    project
 
 
 if __name__ == '__main__':

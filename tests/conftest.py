@@ -7,23 +7,24 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
+# suppress test for PEP8 in this file
+# flake8: noqa
+
 import os
 import numpy as np
 import pandas as pd
 import pytest
 
+
 # initialize a ipython session before calling spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------
-
-from IPython.testing.globalipapp import start_ipython
-
 
 @pytest.fixture(scope='session')
 def session_ip():
     try:
+        from IPython.testing.globalipapp import start_ipython
         return start_ipython()
-    except Exception as e:
-        print('start ipython', e)
+    except ImportError:
         return None
 
 
@@ -32,19 +33,15 @@ def ip(session_ip):
     yield session_ip
 
 
-from spectrochempy.core import app
-
-try:
-    # work only if spectrochempy is installed
-    from spectrochempy.core import app
-except ModuleNotFoundError as e:
-    raise ModuleNotFoundError('You must install spectrochempy and its dependencies '
-                              'before executing tests!')
-
 # ======================================================================================================================
 # FIXTURES
 # ======================================================================================================================
-
+try:
+    # work only if spectrochempy is installed
+    from spectrochempy.core import app
+except ModuleNotFoundError:
+    raise ModuleNotFoundError('You must install spectrochempy and its dependencies '
+                              'before executing tests!')
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.nddataset import NDDataset

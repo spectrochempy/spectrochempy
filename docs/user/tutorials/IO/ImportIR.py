@@ -209,14 +209,14 @@ print(X)
 # The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence, one can open sample Opus files contained in the `datadir` using:
 
 # %%
-Z = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata\\OPUS')
+Z = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
 print(Z)
 
 # %% [markdown]
 # or:
 
 # %%
-Z2 = scp.read_dir('irdata\\OPUS')
+Z2 = scp.read_dir('irdata/OPUS')
 print(Z2)
 
 # %% [markdown]
@@ -226,7 +226,7 @@ print(Z2)
 from brukeropusreader import read_file
 import os
 
-opusfile = os.path.join(scp.general_preferences.datadir, "irdata\\OPUS\\test.0000")  # the full pathname of the file
+opusfile = os.path.join(scp.general_preferences.datadir, "irdata","OPUS","test.0000")  # the full pathname of the file
 Z3 = read_file(opusfile)  # returns a dictionary of the data and metadata extracted
 Z3.keys()  # returns the key of the dictionary
 

@@ -47,8 +47,8 @@ except ImportError:
 
     class FileSelector(object):
         def __repr__(self):
-            raise RuntimeError("Please install ipywidgets to use the FileSe"
-                               "lector")
+            raise RuntimeError("Please install ipywidgets to use the "
+                               "FileSelector")
 
 
 @contextmanager
@@ -115,8 +115,10 @@ class URLSelector(Base):
 class FileSelector(Base):
     """
     ipywidgets interface for picking files
-    The current path is stored in ``.path`` 
-    and the current selection is stored in ``.value``.
+
+    The current path is stored in ``.path`` and the current selection is stored
+    in ``.value``.
+
     """
 
     def __init__(self, done_callback=None, path=None, filters=None):
@@ -182,8 +184,8 @@ class FileSelector(Base):
                     not any(f.startswith(prefix) for prefix in "._~")):
                 out.append(f + '/')
             elif (not any(f.startswith(prefix) for prefix in "._~") and
-                  any(f.endswith(ext) for ext in self.filters + \
-                                                 list(map(str.upper, self.filters)))):
+                  any(f.endswith(ext) for ext in self.filters +
+                  list(map(str.upper, self.filters)))):
                 out.append(f)
         self.main.value = self.value = None
         self.fullpath = self.path

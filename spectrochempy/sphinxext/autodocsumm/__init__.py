@@ -128,8 +128,7 @@ class AutosummaryDocumenter(object):
         if self.objpath:
             self.env.temp_data['autodoc:class'] = self.objpath[0]
 
-        want_all = all_members or self.options.inherited_members or \
-                   self.options.members is ALL
+        want_all = all_members or self.options.inherited_members or self.options.members is ALL
         # find out which members are documentable
         members_check_module, members = self.get_object_members(want_all)
 
@@ -154,8 +153,7 @@ class AutosummaryDocumenter(object):
             classes.sort(key=lambda cls: cls.priority)
             # give explicitly separated module name, so that members
             # of inner classes can be documented
-            full_mname = self.modname + '::' + \
-                         '.'.join(self.objpath + [mname])
+            full_mname = self.modname + '::' + '.'.join(self.objpath + [mname])
 
             documenter = classes[-1](self.directive, full_mname, self.indent)
             memberdocumenters.append((documenter,
@@ -697,11 +695,10 @@ def dont_document_data(config, fullname):
         not_document_data = [re.compile('.*')]
     else:
         not_document_data = config.not_document_data
-    return (
-        # data should not be documented
-            (any(re.match(p, fullname) for p in not_document_data)) or
-            # or data is not included in what should be documented
-            (not any(re.match(p, fullname) for p in document_data)))
+    return (  # data should not be documented
+              (any(re.match(p, fullname) for p in not_document_data)) or
+               # or data is not included in what should be documented
+               (not any(re.match(p, fullname) for p in document_data)))
 
 
 class NoDataDataDocumenter(CallableDataDocumenter):

@@ -58,8 +58,7 @@ class SpectroChemPyDocstringProcessor(DocstringProcessor):
         'Possible types']
 
     @_docstrings.dedent
-    def get_sections(self, s, base, sections=[
-        'Parameters', 'Other Parameters', 'Returns', 'Possible types']):
+    def get_sections(self, s, base, sections=['Parameters', 'Other Parameters', 'Returns', 'Possible types']):
         """
         Extract the specified sections out of the given string
 
@@ -85,13 +84,13 @@ del _docstrings
 #: the reuse of docstrings from between different python objects.
 docstrings = SpectroChemPyDocstringProcessor()
 
-## Set some general parameters
+# Set some general parameters
 docstrings.get_sections(docstrings.dedents(
     """
     Note
     ----
     To be completed with useful common parameters
-    
+
     Parameters
     ----------
     dim : int or str, optional, default=0
@@ -103,15 +102,15 @@ docstrings.get_sections(docstrings.dedents(
     inplace : bool, optional, default=`False`
         Flag to say that the method return a new object (default)
         or not (inplace=True)
-    
+
     Other Parameters
     ----------------
-    
+
     Returns
     -------
     object
         Same object or a copy depending on the `inplace` flag.
-    
+
     """
 ), 'generic_method', sections=['Parameters', 'Returns'])
 

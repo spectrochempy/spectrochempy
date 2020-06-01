@@ -24,8 +24,6 @@ import numpy as np
 import pandas as pd
 from io import StringIO
 
-
-
 # ======================================================================================================================
 # Third-party imports
 # ======================================================================================================================
@@ -179,7 +177,7 @@ class Isotopes(HasTraits):
         try:
             return float(self.isotopes.loc[self.nucleus][
                              'quadrupole']) * 1000. * ur.mbarn
-        except:
+        except Exception:
             return 0. * ur.barn
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -209,7 +207,7 @@ class Isotopes(HasTraits):
         DATABASES = prefs.databases
         filename = os.path.join(DATABASES, 'isotopes.csv')
         with open(filename) as f:
-            txt = f.read().replace(" ","")
+            txt = f.read().replace(" ", "")
         self.isotopes = pd.read_csv(StringIO(txt), index_col=0)
         self._nucleus = nucleus
 
