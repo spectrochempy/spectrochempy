@@ -125,8 +125,7 @@ def create_api_files(rootpath, opts):
     members = [m for m in clsmembers if
                m[0] in _imported_item.__all__ and not m[0].startswith('__')]
 
-
-indextemplate = textwrap.dedent("""
+    indextemplate = textwrap.dedent("""
     .. _api_reference_spectrochempy:
 
     User API reference
@@ -179,7 +178,7 @@ indextemplate = textwrap.dedent("""
 
     """)
 
-classtemplate = textwrap.dedent("""
+    classtemplate = textwrap.dedent("""
 
     {project}.{klass}
     ==============================================================================
@@ -198,7 +197,7 @@ classtemplate = textwrap.dedent("""
 
     """)
 
-functemplate = textwrap.dedent("""
+    functemplate = textwrap.dedent("""
 
     {project}.{func}
     ==============================================================================
@@ -215,39 +214,39 @@ functemplate = textwrap.dedent("""
 
     """)
 
-lconsts = [":%s: %s\n" % m for m in members if
+    lconsts = [":%s: %s\n" % m for m in members if
            type(m[1]) in [int, float, str, bool, tuple]]
-lclasses = []
-classes = [m[0] for m in members if
+    lclasses = []
+    classes = [m[0] for m in members if
            inspect.isclass(m[1]) and not type(m[1]).__name__ == 'type']
-for klass in classes:
-    if klass not in opts.exclude_patterns:
-        name = "{project}.{klass}".format(project=project, klass=klass)
+    for klass in classes:
+        if klass not in opts.exclude_patterns:
+            name = "{project}.{klass}".format(project=project, klass=klass)
+            example_exists = os.path.exists(f"{rootpath}/../docs/gen_modules/backreferences/{name}.examples")
+            include = "include::" if example_exists else ''
+            text = classtemplate.format(project=project, klass=klass, include=include)
+            write_file(name, text, opts)
+            lclasses.append(name + '\n')
+
+    lfuncs = []
+    funcs = [m[0] for m in members if
+             inspect.isfunction(m[1]) or inspect.ismethod(m[1])]
+    for func in funcs:
+        name = "{project}.{func}".format(project=project, func=func)
         example_exists = os.path.exists(f"{rootpath}/../docs/gen_modules/backreferences/{name}.examples")
         include = "include::" if example_exists else ''
-        text = classtemplate.format(project=project, klass=klass, include=include)
+        text = functemplate.format(project=project, func=func, include=include)
         write_file(name, text, opts)
-        lclasses.append(name + '\n')
+        lfuncs.append(name + '\n')
 
-lfuncs = []
-funcs = [m[0] for m in members if
-         inspect.isfunction(m[1]) or inspect.ismethod(m[1])]
-for func in funcs:
-    name = "{project}.{func}".format(project=project, func=func)
-    example_exists = os.path.exists(f"{rootpath}/../docs/gen_modules/backreferences/{name}.examples")
-    include = "include::" if example_exists else ''
-    text = functemplate.format(project=project, func=func, include=include)
-    write_file(name, text, opts)
-    lfuncs.append(name + '\n')
+    _classes = "    ".join(lclasses)
+    _funcs = "    ".join(lfuncs)
+    _consts = "".join(lconsts)
 
-_classes = "    ".join(lclasses)
-_funcs = "    ".join(lfuncs)
-_consts = "".join(lconsts)
-
-text = indextemplate.format(consts=_consts, preferences=write_prefs(),
-                            classes="    " + _classes,
-                            funcs="    " + _funcs)
-write_file('index', text, opts)
+    text = indextemplate.format(consts=_consts, preferences=write_prefs(),
+                                classes="    " + _classes,
+                                funcs="    " + _funcs)
+    write_file('index', text, opts)
 
 
 def write_prefs():
