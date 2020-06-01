@@ -22,6 +22,9 @@ import re
 from fractions import Fraction
 import numpy as np
 import pandas as pd
+from io import StringIO
+
+
 
 # ======================================================================================================================
 # Third-party imports
@@ -205,7 +208,9 @@ class Isotopes(HasTraits):
         # filename = resource_filename(PKG, 'isotopes.csv')
         DATABASES = prefs.databases
         filename = os.path.join(DATABASES, 'isotopes.csv')
-        self.isotopes = pd.read_csv(filename, index_col=0)
+        with open(filename) as f:
+            txt = f.read().replace(" ","")
+        self.isotopes = pd.read_csv(StringIO(txt), index_col=0)
         self._nucleus = nucleus
 
     # ------------------------------------------------------------------------------------------------------------------
