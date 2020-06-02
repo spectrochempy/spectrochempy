@@ -14,7 +14,7 @@ import numpy as np
 from spectrochempy.core import error_
 
 
-def smooth(dataset, **kwargs):
+def smooth(dataset, window_length=5, window='flat', **kwargs):
     """
     Smooth the data using a window with requested size.
 
@@ -27,6 +27,12 @@ def smooth(dataset, **kwargs):
     dataset :  |NDDataset| or a ndarray-like object
         Input object
 
+    window_length:  int, optional, default=5
+        the dimension of the smoothing window; must be an odd integer
+    window : str, optional, default='flat'
+        the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
+        flat window will produce a moving average smoothing.
+
     Other Parameters
     ----------------
     dim : str or int, optional, default='x'.
@@ -34,12 +40,8 @@ def smooth(dataset, **kwargs):
         to the usual `axis` numpy parameter.
     inplace : bool, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new object
-    len:  int, optional, default=11
-        the dimension of the smoothing window; should be an odd integer
-    window_length : str, optional, default='hanning'
-        the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
-        flat window will produce a moving average smoothing.
 
+        
     Returns
     -------
     out : same type as input dataset
@@ -66,17 +68,15 @@ def smooth(dataset, **kwargs):
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    length = kwargs.pop('length', 11)
-    length = int(length / 2) * 2 + 1
+    if (window_length % 2) != 1:
+        error_("Window length must be an odd integer.")
 
-    if new.shape[-1] < length:
+    if new.shape[-1] < window_length:
         error_("Input vector needs to be bigger than window size.")
         return new
 
-    if length < 3:
+    if window_length < 3:
         return new
-
-    window = kwargs.pop('window', 'hanning')
 
     wind = {
         'flat': np.ones,
@@ -92,15 +92,15 @@ def smooth(dataset, **kwargs):
         window = wind[window]
 
     # extend on both side to limit side effects
-    dat = np.r_['-1', new.data[..., length - 1:0:-1], new.data, new.data[..., -1:-length:-1]]
+    dat = np.r_['-1', new.data[..., window_length - 1:0:-1], new.data, new.data[..., -1:-window_length:-1]]
 
-    w = window(length)
+    w = window(window_length)
     data = np.apply_along_axis(np.convolve, -1, dat, w / w.sum(), mode='valid')
-    data = data[..., int(length / 2):-int(length / 2)]
+    data = data[..., int(window_length / 2):-int(window_length / 2)]
 
     if not is_ndarray:
         new.data = data
-        new.history = f'smoothing with a window:{window.__name__} of length {length}'
+        new.history = f'smoothing with a window:{window.__name__} of length {window_length}'
 
         # restore original data order if it was swaped
         if swaped:

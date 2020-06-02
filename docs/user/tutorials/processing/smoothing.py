@@ -36,9 +36,9 @@ ax = X.plot() # plot
 # ## 1. The `smooth()` method
 # The `smooth()` method is adapted from the ["Smoothing of a 1D signal" code](https://scipy-cookbook.readthedocs.io/items/SignalSmooth.html) of the [Scipy cookbook](https://scipy-cookbook.readthedocs.io/). It is a (weighted)-moving average method and consist in the convolution of a window of a given length with the spectrum. 
 #
-# In its simplest form - i.e. unweighted moving average - each absorbance at a given wavenumber of the smoothed spectrum is the average of the aborbances at the the absorbance at the considered wavenumber and N neighboring wavenumbers (i.e. N/2 before and N/2 after), hence the conventional use of an odd number of N+1 points to define the window length. For the points located at both end of the spectra, the extremities of the spectrum are mirrored beyond the initial limits so as to minimize boundary effects.
+# In its simplest form - i.e. unweighted moving average - each absorbance at a given wavenumber of the smoothed spectrum is the average of the aborbances at the the absorbance at the considered wavenumber and the N neighboring wavenumbers (i.e. N/2 before and N/2 after), hence the conventional use of an odd number of N+1 points to define the window length. For the points located at both end of the spectra, the extremities of the spectrum are mirrored beyond the initial limits so as to minimize boundary effects.
 #
-# When pass as is (i.e. `X.smooth()`), the method uses a moving average of 11 points:
+# When pass as is (i.e. `X.smooth()`), the method uses a moving average of 5 points:
 
 # %%
 ax = X.smooth().plot()
@@ -50,8 +50,8 @@ ax = X.smooth().plot()
 
 # %%
 Xs = X[0]    # Xs will store the noisy spectrum (X[0]); smoothed spectra will be concatenated
-for i, length in enumerate([11, 27, 51, 101, 201, 501]):   # loop over 6 window lengths. The i index will run from 0 to 5.
-    s = X[0].smooth(length=length)        # smooth
+for i, length in enumerate([5, 11, 27, 51, 101, 201, 501]):   # loop over various window lengths. The i index will run from 0 to 6.
+    s = X[0].smooth(window_length=length)        # smooth
     s += 0.1 * (1 + i)                    # shift the absorbance by +0.1 a.u. with respect to previous iteration
     Xs = scp.concatenate(Xs, s, axis='y') # concatenate to Xs along the `y` (rows) dimension
 ax = Xs.plot()  
@@ -67,7 +67,7 @@ ax = Xs.plot()
 # %%
 Xs = X[0]     
 for i, window in enumerate(['flat', 'bartlett', 'hanning', 'hamming', 'blackman']):   # loop over 5 window types
-    s = X[0].smooth(length=27, window=window) + 0.1 * (1 + i)   # smooth and shift
+    s = X[0].smooth(window_length=27, window=window) + 0.1 * (1 + i)   # smooth and shift
     Xs = scp.concatenate(Xs, s, axis='y')
 ax = Xs.plot()
 
@@ -99,16 +99,16 @@ Xs_diff.std(dim='x').data # from left to right: flat, bartlett/triangular, hanni
 # %% [markdown]
 # ## 3. Savitzky-Golay algorithm:`savgol_filter()`
 #
-# The second algorithm implemented in spectrochempy is the Savitzky-Golay filter which uses a polynomial interpolation in the moving window. A demonstrative illustration of the method cann= be found on the [Savitzky-Golay filter](https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter) entry of Wikipedia.
+# The second algorithm implemented in spectrochempy is the Savitzky-Golay filter which uses a polynomial interpolation in the moving window. A demonstrative illustration of the method can be found on the [Savitzky-Golay filter](https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter) entry of Wikipedia.
 #
 # The function implemented in spectrochempy is a wrapper of the [savgol_filert() method](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html) from the [scipy.signal](https://docs.scipy.org/doc/scipy/reference/signal.html) module to which we refer the interested reader. It not only used to smooth spectra but also to compute their successive derivatives. The latter are treated in [the peak-finding tutorial](../analysis/peak_finding.ipynb) and we will focus here on the smoothing wich is the default of the filter (default parameter: `deriv=0`).
 #
-# As for the `smooth()` method, it is a moving-window based method. Hence, the window length (`window_length` parameter) plays an equivalent role, except that it *must* be odd. Moreover, instead of choosing a window function, the user can choose the order of the polynomial used to fit the window datapoints (`polyorder`, default value: 3). The latter must be strictly smaller than the window size (so that the polynomial coefficients can be fully determined).   
+# As for the `smooth()` method, it is a moving-window based method. Hence, the window length (`window_length` parameter) plays an equivalent role, except that it *must* be odd. Moreover, instead of choosing a window function, the user can choose the order of the polynomial used to fit the window datapoints (`polyorder`, default value: 0). The latter must be strictly smaller than the window size (so that the polynomial coefficients can be fully determined).   
 #
 # The use of this methid is illustrtaed below, we leave to the reader to assess the impact of the window length and polynomial order (see Exercises below)
 
 # %%
-_ = X.savgol_filter(window_length = 11, polyorder=1).plot()
+_ = X.savgol_filter(window_length = 5, polyorder=0).plot()
 
 # %% [markdown]
 # ## 3. Exercises
