@@ -199,7 +199,7 @@ def NNLS(C, d, x0=None, tol=None, itmax_factor=3):
     outeriter = 0
     it = 0
     itmax = itmax_factor * n
-    exitflag = 1
+    # exitflag = 1
 
     # outer loop to put variables into set to hold positive coefficients
     while np.any(Z) and np.any(w[ZZ - 1] > tol):

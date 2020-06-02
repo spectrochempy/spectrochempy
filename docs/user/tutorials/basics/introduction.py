@@ -30,7 +30,6 @@
 import numpy as np
 import spectrochempy as scp
 import matplotlib.pyplot as plt
-import sys, os
 
 # %% [markdown]
 # ## Numpy array
@@ -38,9 +37,11 @@ import sys, os
 # Let's create a simple rank-1 (1D) numpy array
 
 # %% [markdown]
-# ***Note*** *that in a notebook, if one wants to quickly transform a code cell (the default at the cell creation) 
-# to a markdown cell (as this one) we can use the key's combination:* **\<ESC\>+m** 
-#  
+# ***Note*** *that in a notebook, if one wants to quickly transform a code cell (the default at the cell creation)
+
+# to a markdown cell (as this one) we can use the key's combination:* **\<ESC\>+m**
+
+#
 
 # %%
 a = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])  # Create a rank 1 array
@@ -52,7 +53,6 @@ a
 
 # %%
 # a = np.array(1,2,3,4)    # This is WRONG !  it must be np.array((1,2,3,4)) or np.array([1,2,3,4]) !!!
-
 
 # %% [markdown]
 # Now we can get some information about this newly created array
@@ -205,7 +205,7 @@ np.arange(1, 21, 3)  # create a rank-1 numpy array with successive elements
 np.linspace(-5, 5, 50)  # create un array with 50 values regularly spaced betwwen -5 and 5
 
 # %% [markdown]
-# The same is possible with dataset for some of the above functions (zeros, ones, full, eye (in 0.1.18-dev) 
+# The same is possible with dataset for some of the above functions (zeros, ones, full, eye (in 0.1.18-dev)
 
 # %%
 scp.full((2, 3, 4), 100.)
@@ -240,20 +240,24 @@ nd3 = scp.NDDataset(a)
 nd3
 
 # %%
-# warning: nd3.reshape(8) DOES NOT WORK ! # for now no similar function as reshape has been implemented in SpectroChemPy 
+# warning: nd3.reshape(8) DOES NOT WORK ! # for now no similar function as reshape has been implemented in SpectroChemPy
+
 # (it could be in future roadmap)
 
 # %% [markdown]
-# ## Creating an array from files or from functions 
+# ## Creating an array from files or from functions
 
 # %% [markdown]
 # ### Import data from files
-# Suppose you want to plot a nice figure with the results of experiments - It is possible to do this purely 
-# using numpy and matplotlib libraries, but we suggest to use the tools included in SpectroChemPy for this task. 
+# Suppose you want to plot a nice figure with the results of experiments - It is possible to do this purely
+
+# using numpy and matplotlib libraries, but we suggest to use the tools included in SpectroChemPy for this task.
+
 #
 # First, some spectroscopic data import functions are defined in SpectroChemPy and can be used conveniently.
 #
-# See the [Import-export userguide](https://www.spectrochempy.fr/dev/user/userguide/dataset/4_importexport.html). **WARNING:** *it is under work*
+# See the [Import-export userguide](https://www.spectrochempy.fr/dev/user/userguide/dataset/4_importexport.html).
+# **WARNING:** *it is under work*
 #
 # Here I will just give an example, using some data from OMNIC.
 
@@ -270,7 +274,9 @@ fs = scp.FileSelector(path=path, filters=['spg', 'spa'])
 fs
 
 # %% nbsphinx="hidden"
-# THESE TWO LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION (THEY SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
+# THESE TWO LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION
+
+# (THEY SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
 fs.fullpath = '/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/CO@Mo_Al2O3.SPG'
 fs.value = 'CO@Mo_Al2O3.SPG'
 
@@ -285,18 +291,21 @@ data
 ax = data.plot()  # now plot it
 _ = ax.set_title(fs.value)  # add a title
 
+
 # %% [markdown]
 # ### Create array from functions and plot it
 #
-# Let's assume we have some model giving a series of data. For example, we have a simple model to generate a NMR free induction decay.
+# Let's assume we have some model giving a series of data. For example, we have a simple model
+# to generate a NMR free induction decay.
 #
 # We can create specially dedicated function using the python block struture `def function(): ....`.
 #
 # But a simple and fast methods is to use `lambda` function.
 
 # %%
-fid = lambda t, w, T2: (np.cos(2. * np.pi * w * t) + 1j * np.sin(2. * np.pi * w * t)) * np.exp(-t / T2)
-# in this model function we generate a sinusoidal time (t) evolution with an angular frequency w, and a relaxation T2.  
+def fid(t, w, T2): return (np.cos(2. * np.pi * w * t) + 1j * np.sin(2. * np.pi * w * t)) * np.exp(-t / T2)
+# in this model function we generate a sinusoidal time (t) evolution with an angular frequency w, and a relaxation T2.
+
 
 # %%
 # example
@@ -319,23 +328,29 @@ ndfid.plot()
 # %% [markdown]
 # ## Basic operations on arrays and NDDatasets
 #
-# An essential property of numpy arrays is the ability to perform mathematical operations on and between them.  
+# An essential property of numpy arrays is the ability to perform mathematical operations on and between them.
 
 # %%
 a = np.full((5, 3), 10.)  # A 2D array with 5 rows and 3 columns
 b = np.array([[1, 2, 3, 4, 5]])  # A 2D array with & row and 5 columns
 
 # %% [markdown]
-# Clearly, the addition of a and b which is perfomed elementwise can not be used in this cas because the shapes mismatch. 
+# Clearly, the addition of a and b which is perfomed elementwise can not be used in this cas because
+# the shapes mismatch.
 
 # %% [markdown]
-# the addition of the two array `a+b` gives an error :  
+# the addition of the two array `a+b` gives an error :
+
 #
-#     ValueError: operands could not be broadcast together with shapes (5,2) (1,5) 
-#     
-# because the shape mismacth. 
+#     ValueError: operands could not be broadcast together with shapes (5,2) (1,5)
+
 #
-# However, there is one case where such operation can be perfomred, this is when the array have shape differing only  
+
+# because the shape mismacth.
+
+#
+# However, there is one case where such operation can be perfomred, this is when the array have shape differing only
+
 #
 
 # %%

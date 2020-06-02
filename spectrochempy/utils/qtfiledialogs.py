@@ -6,7 +6,7 @@ __all__ = []
 
 HAS_QT = False
 try:
-    from PyQt5 import QtGui, QtWidgets
+    from PyQt5 import QtWidgets
 
     QFileDialog = QtWidgets.QFileDialog
     HAS_QT = True

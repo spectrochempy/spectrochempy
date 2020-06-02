@@ -19,7 +19,7 @@ from pint import set_application_registry
 from pint import UnitRegistry, DimensionalityError
 from pint.unit import UnitsContainer
 from pint.quantity import _Quantity as Quantity
-from pint.measurement import _Measurement as Measure
+# from pint.measurement import _Measurement as Measure
 from pint.unit import _Unit as Unit
 from pint import formatting
 from pint.formatting import siunitx_format_unit
@@ -166,13 +166,13 @@ Q_.default_format = ''  # .2fK'
 # ----------------------------------------------------------------------------------------------------------------------
 
 def set_nmr_context(larmor):
-    """Set a NMR context ur\_ relative to the given Larmor frequency
+    """Set a NMR context relative to the given Larmor frequency
 
     Parameters
     ----------
     larmor : Quantity or float
         The Larmor frequency of the current nucleus.
-        If it is not a quantity it is assumed to be given i MHz
+        If it is not a quantity it is assumed to be given in MHz
 
 
     Examples

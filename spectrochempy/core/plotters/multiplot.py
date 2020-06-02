@@ -26,7 +26,7 @@ import matplotlib as mpl
 
 from spectrochempy.core.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
-from spectrochempy.core import general_preferences, project_preferences
+# from spectrochempy.core import general_preferences, project_preferences
 
 
 # .............................................................................
@@ -283,7 +283,8 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
         raise ValueError("invalid option for sharex. Should be"
                          " among (None, False, True, 'all' or 'col')")
 
-    if sharex: sharex = 'all'
+    if sharex:
+        sharex = 'all'
 
     if ndim == 1:
         sharez = False
@@ -300,16 +301,17 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
 
     if sharey not in [None, False, True, 'all', 'col']:
         raise ValueError("invalid option for {}. Should be"
-                         " among (None, False, True, 'all' or 'row')".format(
-            textsharey))
+                         " among (None, False, True, 'all' or 'row')".format(textsharey))
 
     if sharez not in [None, False, True, 'all', 'col', 'row']:
         raise ValueError("invalid option for {}. Should be"
                          " among (None, False, True, "
                          "'all', 'row' or 'col')".format(textsharez))
 
-    if sharey: sharey = 'all'
-    if sharez: sharez = 'all'
+    if sharey:
+        sharey = 'all'
+    if sharez:
+        sharez = 'all'
 
     for irow in range(nrow):
         for icol in range(ncol):
@@ -318,7 +320,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
             dataset = datasets[idx]
             try:
                 label = labels[idx]
-            except:
+            except Exception:
                 label = ''
 
             _sharex = None

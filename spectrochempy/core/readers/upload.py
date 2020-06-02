@@ -28,7 +28,7 @@ import numpy as np
 import requests
 
 # ----------------------------------------------------------------------------------------------------------------------
-# localimports
+# local imports
 # ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -59,8 +59,8 @@ def upload_IRIS():
             data = np.loadtxt(fil, delimiter=',', usecols=range(4))
             fil.seek(0)
             labels = np.loadtxt(fil, delimiter=',', usecols=(4,), dtype='|S')
-            labels = list((l.decode("utf8") for l in labels))
-        except:
+            labels = list((lab.decode("utf8") for lab in labels))
+        except Exception:
             raise IOError(
                 '{} is not a .csv file or its structure cannot be recognized')
 
@@ -73,7 +73,7 @@ def upload_IRIS():
                         name='IRIS Dataset',
                         units='cm')
 
-        history = 'Loaded from UC Irvine machine learning repository'
+        new.history = 'Loaded from UC Irvine machine learning repository'
 
         return new
 
@@ -97,7 +97,7 @@ def upload_IRIS():
                             name='IRIS Dataset',
                             units='cm')
 
-            history = 'Loaded from scikit-learn datasets'
+            new.history = 'Loaded from scikit-learn datasets'
 
             return new
 

@@ -18,12 +18,12 @@ __all__ = ['NDDataset']
 # Standard python imports
 # ======================================================================================================================
 
-import itertools
+# import itertools
 import textwrap
 from datetime import datetime
 import warnings
 from collections import OrderedDict
-import re
+# import re
 
 # ======================================================================================================================
 # third-party imports
@@ -38,20 +38,18 @@ import matplotlib.pyplot as plt
 # Local imports
 # ======================================================================================================================
 
-from ...extern.traittypes import Array
-from ...core.project.baseproject import AbstractProject
-from .ndarray import NDArray, DEFAULT_DIM_NAME
-from .ndcomplex import NDComplexArray
-from .ndcoord import Coord
-from .ndcoordset import CoordSet
-from .ndmath import NDMath, set_operators, make_func_from
-from .ndio import NDIO
-from .ndplot import NDPlot
-from ...core import HAS_XARRAY, HAS_PANDAS, info_, debug_, error_, warning_, print_
-from ...utils import (INPLACE, TYPE_INTEGER, TYPE_COMPLEX, TYPE_FLOAT,
-                      colored_output, convert_to_html,
-                      SpectroChemPyWarning, SpectroChemPyDeprecationWarning, SpectroChemPyException,
-                      get_user_and_node, docstrings, deprecated)
+from spectrochempy.extern.traittypes import Array
+from spectrochempy.core.project.baseproject import AbstractProject
+from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
+from spectrochempy.core.dataset.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndmath import NDMath, set_operators, make_func_from
+from spectrochempy.core.dataset.ndio import NDIO
+from spectrochempy.core.dataset.ndplot import NDPlot
+from spectrochempy.core import HAS_XARRAY, HAS_PANDAS,  error_, warning_
+from spectrochempy.utils import (colored_output, SpectroChemPyWarning, SpectroChemPyException, get_user_and_node,
+                                 docstrings)
 
 
 # ======================================================================================================================
@@ -143,7 +141,6 @@ class NDDataset(
         >>> print(x.data) # doctest: +NORMALIZE_WHITESPACE
         [       1        2        3]
 
-
         """
         super().__init__(data, **kwargs)
 
@@ -220,7 +217,7 @@ class NDDataset(
         if isinstance(items, str):
             try:
                 return self._coords[items]
-            except:
+            except Exception:
                 pass
 
         # slicing
@@ -324,11 +321,13 @@ class NDDataset(
         #                 'description', 'history', 'id', 'dims', 'mask', '_mask_metadata',
         #                 'labels', 'plotmeta', 'modeldata', 'modelnames',
         #                 'figsize', 'fig', 'ndaxes', 'clevels', 'divider', 'fignum', 'ax_lines', 'axcb',
-        #                 'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock', 'notify_change']:
+        #                 'trait_values', 'trait_notifiers', 'trait_validators', 'cross_validation_lock',
+
+        #                 'notify_change']:
         #         super().__setattr__(key, value)
         #         return
         #
-        if key in DEFAULT_DIM_NAME:  #:# syntax such as ds.x, ds.y, etc...
+        if key in DEFAULT_DIM_NAME:  # syntax such as ds.x, ds.y, etc...
             # Note the above test is important to avoid errors with traitlets
             # even if it looks redundant with the folllowing
             if key in self.dims:
@@ -448,7 +447,7 @@ class NDDataset(
     def coordunits(self):
         """
         list - list of the |Coord| units
-        
+
         Read only property. Use set_coordunits to eventually set units
 
         """
@@ -485,7 +484,7 @@ class NDDataset(
         """
         |CoordSet| instance - Contains the coordinates of the various
         dimensions of the dataset.
-        
+
         It's a readonly property. Use set_coords to change one or more coordinates at once.
 
         """
@@ -676,7 +675,7 @@ class NDDataset(
     def delete_coords(self):
         """
         Delete all coordinate settings
-        
+
         """
         self._coords = None
 
@@ -684,11 +683,10 @@ class NDDataset(
     def implements(self, name=None):
         """
         Utility to check if the current object implement `NDDataset`.
-        
+
         Rather than isinstance(obj, NDDataset) use object.implements('NDDataset').
-        
         This is useful to check type without importing the module
-        
+
         """
 
         if name is None:
@@ -700,11 +698,11 @@ class NDDataset(
     def set_coords(self, *args, **kwargs):
         """
         Set one or more coordinates at once
-        
+
         Warnings
         --------
         This method replace all existing coordinates
-        
+
         See Also
         --------
         add_coords, set_coordtitles, set_coordunits
@@ -717,7 +715,7 @@ class NDDataset(
     def set_coordtitles(self, *args, **kwargs):
         """
         Set titles of the one or more coordinates
-        
+
         """
         self._coords.set_titles(*args, **kwargs)
 
@@ -960,7 +958,6 @@ class NDDataset(
         -------
         object : a xarray.DataArray object
 
-
         """
         # Information about DataArray from the DataArray docstring
         #
@@ -1039,7 +1036,7 @@ class NDDataset(
     def to_panel(self, **kwargs):
         """
         Transform the current |NDDataset| to a new |NDPanel| object
-        
+
         Parameters
         ----------
         **kwargs : additional keyword arguments
@@ -1047,7 +1044,7 @@ class NDDataset(
         Returns
         -------
         object : A |NDPanel| object
-        
+
         """
         import spectrochempy as scp
         return scp.NDPanel(self, **kwargs)
@@ -1195,7 +1192,6 @@ class NDDataset(
 
         return
 
-
 # ======================================================================================================================
 # module function
 # ======================================================================================================================
@@ -1204,6 +1200,7 @@ class NDDataset(
 # We want a slightly different docstring so we cannot just make:
 #     func = NDDataset.func
 #
+
 
 copy = make_func_from(NDDataset.copy, first='dataset')
 sort = make_func_from(NDDataset.sort, first='dataset')

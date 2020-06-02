@@ -15,10 +15,10 @@ import numpy as np
 import datetime as datetime
 from warnings import warn
 
-from ..dataset.nddataset import NDDataset
-from ..dataset.ndcoordset import CoordSet
-from ..dataset.ndcoord import Coord
-from ...utils import is_sequence, docstrings
+from spectrochempy.core.dataset.nddataset import NDDataset
+# from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.utils import docstrings    # , is_sequence
 
 
 @docstrings.dedent
@@ -90,7 +90,7 @@ def concatenate(*datasets, **kwargs):
         if not isinstance(dataset, NDDataset):
             try:
                 dataset = NDDataset(dataset)
-            except:
+            except Exception:
                 raise TypeError(f"Only instance of NDDataset can be concatenated, not {type(dataset).__name__}, "
                                 f"but casting to this type failed. ")
 

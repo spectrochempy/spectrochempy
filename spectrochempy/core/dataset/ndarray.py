@@ -24,7 +24,7 @@ import re
 import textwrap
 import uuid
 import itertools
-import sys
+# import sys
 
 # ======================================================================================================================
 # Third party imports
@@ -38,20 +38,20 @@ import numpy as np
 # local imports
 # ======================================================================================================================
 
-from ...units import Unit, ur, Quantity, set_nmr_context
-from ...core import info_, debug_, error_, warning_, print_
-from ...utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence, is_number,
-                      numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
-                      SpectroChemPyDeprecationWarning, deprecated,
-                      make_new_object, convert_to_html, HAS_PANDAS, HAS_XARRAY)
+from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
+from spectrochempy.core import info_, error_, print_
+from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
+                                 is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
+                                 # SpectroChemPyDeprecationWarning, deprecated,
+                                 make_new_object, convert_to_html, HAS_PANDAS)
 from ...extern.traittypes import Array
 
 if HAS_PANDAS:
-    import pandas as pd
+    # import pandas as pd
     from pandas.core.generic import NDFrame, Index
 
-if HAS_XARRAY:
-    import xarray as xr
+# if HAS_XARRAY:
+#    import xarray as xr
 
 # ======================================================================================================================
 # constants
@@ -208,11 +208,11 @@ class NDArray(HasTraits):
     def implements(self, name=None):
         """
         Utility to check if the current object implement `NDArray`.
-       
+
         Rather than isinstance(obj, NDArrray) use object.implements('NDArray').
-       
+
         This is useful to check type without importing the module
-       
+
         """
         if name is None:
             return 'NDArray'
@@ -621,10 +621,10 @@ class NDArray(HasTraits):
     def dims(self):
         """
         list -  Names of the dimensions
-        
-        The name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension.
-        """
 
+        The name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension.
+
+        """
         ndim = self.ndim
         if ndim > 0:
             # if len(self._dims)< ndim:
@@ -657,8 +657,9 @@ class NDArray(HasTraits):
     def dlabel(self):
         """
         str - An user friendly data label.
-        
+
         It's an alias of the `title` property
+
         """
         return self.title
 
@@ -752,7 +753,7 @@ class NDArray(HasTraits):
     def mask(self):
         """
         |ndarray| (bool) - Mask for the data
-        
+
         """
         if not self.is_masked:
             return NOMASK
@@ -829,10 +830,10 @@ class NDArray(HasTraits):
     def title(self):
         """
         str - An user friendly title.
-        
+
         When the title is provided, it can be used for labeling the object,
         e.g., axe title in a matplotlib plot.
-        
+
         """
         if self._title:
             return self._title
@@ -851,7 +852,7 @@ class NDArray(HasTraits):
     def name(self):
         """
         str - An user friendly name.
-        
+
         When the name is not provided, the `id` of the object is retruned instead
 
         """
@@ -875,7 +876,7 @@ class NDArray(HasTraits):
     def units(self):
         """
         |Unit| - The units of the data.
-        
+
         """
         return self._units
 
@@ -1123,7 +1124,8 @@ class NDArray(HasTraits):
     @property
     def umasked_data(self):
         """
-        |ndarray|, dtype:object - The actual array with mask and unit 
+        |ndarray|, dtype:object - The actual array with mask and unit
+
         (Readonly property).
         """
         if self._data is None:
@@ -1162,7 +1164,7 @@ class NDArray(HasTraits):
     def T(self):
         """
         |NDArray| - Transposed array.
-        
+
         The same object is returned if `ndim` is less than 2.
 
         """
@@ -1250,7 +1252,7 @@ class NDArray(HasTraits):
             or 'dims'
         negative_axis : bool, optional, default=False.
             If True a negative index is returned for the axis value (-1 for the last dimension, etc...)
-            
+
         Returns
         -------
         axis : int
@@ -1355,7 +1357,7 @@ class NDArray(HasTraits):
         -------
         object
             same object with new units.
-            
+
         See Also
         --------
         to
@@ -1426,7 +1428,6 @@ class NDArray(HasTraits):
         """
         Interchange two dims of a NDArray.
 
-
         Parameters
         ----------
         dim1 : int or str
@@ -1438,7 +1439,7 @@ class NDArray(HasTraits):
         Returns
         -------
         %(generic_method.returns)s
-        
+
         See Also
         --------
         transpose
@@ -1477,7 +1478,6 @@ class NDArray(HasTraits):
         force : bool, optional, default=False
             If True the change of units is forced, even for incompatible units
 
- 
          Returns
         -------
         %(generic_method.returns.object)s
@@ -1604,15 +1604,14 @@ class NDArray(HasTraits):
             index or names must match the number of dimensions.
         %(generic_method.parameters.inplace)s
 
- 
         Returns
         -------
         %(generic_method.returns)s
-        
+
         See Also
         --------
         swapaxes
-        
+
         """
         if not inplace:
             new = self.copy()
@@ -1636,12 +1635,12 @@ class NDArray(HasTraits):
     def astype(self, dtype=None, **kwargs):
         """
         Cast the data to a specified type.
-    
+
         Parameters
         ----------
         dtype : str or dtype
     T       typecode or data-type to which the array is cast.
-        
+
         """
         self.data = self.data.astype(dtype, **kwargs)
         return self
@@ -1690,7 +1689,7 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     def _str_value(self, sep='\n', ufmt=' {:~K}',
                    header='         data: ... \n'):
-        prefix = ['']
+        # prefix = ['']
         if self.is_empty and 'data: ...' not in header:
             return header + '{}'.format(textwrap.indent('empty', ' ' * 9))
         elif self.is_empty:
@@ -1815,8 +1814,8 @@ class NDArray(HasTraits):
         # Return the index of a location (label or values such as coordinates) along a 1D array.
         # Do not apply for multidimensionnal arrays (ndim>1)
         if self.ndim > 1:
-            raise NotImplemented(f'not implemented for {type(self).__name__} objects which are not 1-dimensional '
-                                 f'(current ndim:{self.ndim})')
+            raise NotImplementedError(f'not implemented for {type(self).__name__} objects which are not 1-dimensional '
+                                      f'(current ndim:{self.ndim})')
 
         if self.is_empty and not self.is_labeled:
 
@@ -1843,8 +1842,8 @@ class NDArray(HasTraits):
             elif is_sequence(loc):
                 # TODO: is there a simpler way to do this with numpy functions
                 index = []
-                for l in loc:
-                    index.append((np.abs(data - l)).argmin())
+                for lo in loc:
+                    index.append((np.abs(data - lo)).argmin())
                     # TODO: add some precison to this result
                 return index
 
@@ -1956,7 +1955,7 @@ class NDArray(HasTraits):
                 if stop != start:
                     stop = stop + 1  # to include last loc or label index
             if step is not None and not isinstance(step, (int, np.int_, np.int64)):
-                raise NotImplemented('step in location slicing is not yet possible.')
+                raise NotImplementedError('step in location slicing is not yet possible.')
                 # TODO: we have may be a special case with datetime
                 # step = 1
         if step is None:
@@ -2032,7 +2031,7 @@ class NDArray(HasTraits):
 
         return new
 
-    # # ..................................................................................................................
+    # ..................................................................................................................
     # def _take(self, indices):
     #     # get a ndarray with passed indices
     #     new = self.copy()

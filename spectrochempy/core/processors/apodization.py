@@ -18,9 +18,9 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from ...units import ur, Quantity
-from ...utils import epsilon, docstrings
-from .. import general_preferences, error_
+from spectrochempy.units import ur, Quantity
+from spectrochempy.utils import EPSILON, docstrings
+from spectrochempy.core import error_
 
 
 # ======================================================================================================================
@@ -30,9 +30,9 @@ from .. import general_preferences, error_
 @docstrings.dedent
 def _apodize(dataset, method, apod, **kwargs):
     """
-    
+
     Calculate an apodization window function using the given `method` and the `apod` parameters
-    
+
     Parameters
     ----------
     dataset : |NDDataset| or |NDPanel|.
@@ -55,7 +55,7 @@ def _apodize(dataset, method, apod, **kwargs):
         True if we make the transform inplace.  If False, the function return a new dataset
     retfunc : bool, keyword parameter, optional, default=False
         True to return the apodization array along with the apodized object
-    
+
     Returns
     -------
     out : |NDDataset| or |NDPanel|.
@@ -102,10 +102,11 @@ def _apodize(dataset, method, apod, **kwargs):
 
     # if we are in NMR we have an additional complication due to the mode
     # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
-    # TODO: CHECK IF THIS WORK WITH 2D DATA - IMPORTANT - CHECK IN PARTICULAR IF SWAPING ALSO SWAP METADATA (NOT SURE FOR NOW)
-    iscomplex = new.is_complex
-    isquaternion = new.is_quaternion
-    encoding = new.meta.encoding[-1]
+    # TODO: CHECK IF THIS WORK WITH 2D DATA -
+    #       IMPORTANT - CHECK IN PARTICULAR IF SWAPING ALSO SWAP METADATA (NOT SURE FOR NOW)
+    # iscomplex = new.is_complex
+    # isquaternion = new.is_quaternion
+    # encoding = new.meta.encoding[-1]
     # TODO: handle this eventual complexity
 
     new._data *= apod_arr
@@ -164,7 +165,7 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     For multidimensional NDDataset or NDPanels,
     the apodization is by default performed on the last dimension.
-    
+
     The data in the last dimension MUST be time-domain,
     or an error is raised.
 
@@ -172,9 +173,9 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     .. math::
         em(t) = \exp(- e (t-t_0) )
-        
+
     where
-    
+
     .. math::
         e = \pi * lb
 
@@ -190,19 +191,19 @@ def em(dataset, lb=1, shifted=0, **kwargs):
         Shift the data time origin by this amount. If it is not a quantity
         it is assumed to be expressed in the data units of the last
         dimension.
-        
+
     Other Parameters
     ----------------
     %(apodize.other_parameters)s
-    
+
     Returns
     -------
     %(apodize.returns)s
-    
+
     See Also
     --------
     gm, sp, sine, sinm, qsin
-    
+
     """
 
     # what's the line broadening ?
@@ -214,12 +215,12 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     if not isinstance(shifted, Quantity):
         # we default to microsecond units
         shifted = shifted * ur.us
-    if shifted.magnitude < epsilon:
+    if shifted.magnitude < EPSILON:
         shifted = 0. * ur.us
 
     def func(x, lb, shifted):
         e = np.ones_like(x)
-        if lb.magnitude <= epsilon:
+        if lb.magnitude <= EPSILON:
             return e
         else:
             units = x.units
@@ -256,9 +257,8 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     .. math::
         e = \pi * lb *  (t - t0)
 
-        
     and
-    
+
     .. math::
         g = 0.6 * \pi * gb * (t - t0)
 
@@ -278,11 +278,11 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
         Shift the data time origin by this amount. If it is not a quantity
         it is assumed to be expressed in the data units of the last
         dimension.
-        
+
     Other Parameters
     ----------------
     %(apodize.other_parameters)s
-    
+
     Returns
     -------
     %(apodize.returns)s
@@ -290,7 +290,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     See Also
     --------
     em, sp, sine, sinm, qsin
-    
+
     """
 
     # what's the line broadening ?
@@ -310,19 +310,19 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     def func(x, gb, lb, shifted):
         g = np.ones_like(x)
-        if abs(lb.magnitude) and abs(gb.magnitude) <= epsilon:
+        if abs(lb.magnitude) and abs(gb.magnitude) <= EPSILON:
             return g
         else:
             units = x.units
             shifted = shifted.to(units)
             xs = np.pi * np.abs(x - shifted)
-            if abs(lb.magnitude) > epsilon:
+            if abs(lb.magnitude) > EPSILON:
                 tc1 = 1. / lb
                 tc1 = tc1.to(units)
                 e = x / tc1
             else:
                 e = np.zeros_like(x)
-            if gb.magnitude > epsilon:
+            if gb.magnitude > EPSILON:
                 tc2 = 1. / gb
                 tc2 = tc2.to(units)
                 g = 0.6 * xs / tc2
@@ -346,7 +346,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 def sp(dataset, ssb=1, pow=1, **kwargs):
     r"""
     Calculate apodization with a Sine window multiplication.
-    
+
     For multidimensional NDDataset or NDPanels,
     the apodization is by default performed on the last dimension.
 
@@ -354,14 +354,14 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
 
     .. math::
         sp(t) = \sin(\frac{(\pi - \phi) t }{\text{aq}} + \phi)^{pow}
-        
+
     where :math:`0 < t < \text{aq}` and  :math:`\phi = \pi ⁄ \text{sbb}` when :math:`\text{ssb} \ge 2` or
     :math:`\phi = 0` when :math:`\text{ssb} < 2`
-    
+
     :math:`\text{aq}` is an acquisition status parameter and :math:`\text{ssb}` is a processing parameter (see the
     `ssb` parameter definition below) and :math:`\text{pow}` is an exponent equal to 1 for a sine bell window
     or 2 for a squared sine bell window.
-    
+
     Parameters
     ----------
     dataset : |NDDataset| or |NDPanel|.
@@ -377,11 +377,11 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     Other Parameters
     ----------------
     %(apodize.other_parameters)s
-    
+
     Returns
     -------
     %(apodize.returns)s
-    
+
     See Also
     --------
     em, gm, sine, sinm, qsin
@@ -421,11 +421,11 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
 def sine(dataset, *args, **kwargs):
     """
     Strictly equivalent to :meth:`sp`.
-    
+
     See Also
     --------
     em, gm, sp, sinm, qsin
-    
+
     """
     return sp(dataset, *args, **kwargs)
 
@@ -434,11 +434,11 @@ def sine(dataset, *args, **kwargs):
 def sinm(dataset, ssb=1, **kwargs):
     """
     Equivalent to :meth:`sp`, with pow = 1 (sine bell apodization window).
-    
+
     See Also
     --------
     em, gm, sp, sine, qsin
-    
+
     """
     return sp(dataset, ssb=ssb, pow=1, **kwargs)
 
@@ -447,7 +447,7 @@ def sinm(dataset, ssb=1, **kwargs):
 def qsin(dataset, ssb=1, **kwargs):
     """
     Equivalent to :meth:`sp`, with pow = 2 (squared sine bell apodization window).
-    
+
     See Also
     --------
     em, gm, sp, sine, sinm

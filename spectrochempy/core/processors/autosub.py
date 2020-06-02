@@ -27,7 +27,7 @@ from numba import jit
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from ..dataset.ndcoordrange import CoordRange
 
 
@@ -105,7 +105,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
 
     try:
         ref.to(dataset.units)
-    except:
+    except Exception:
         raise ValueError('Units of the dataset and reference are not compatible')
 
     swaped = False
@@ -118,7 +118,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
 
     # selection of the multiple ranges
 
-    shape = list(new.shape)
+    # shape = list(new.shape)
     ranges = tuple(np.array(ranges, dtype=float))
     # must be float to be considered as frequency for instance
 

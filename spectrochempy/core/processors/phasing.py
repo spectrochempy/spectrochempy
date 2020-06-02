@@ -15,17 +15,15 @@ import numpy as np
 
 from ipywidgets import FloatSlider, interactive
 from IPython.display import display
-import matplotlib.pyplot as pl
-
-# from masai.core.utils.misc import position2index, getsection
+# import matplotlib.pyplot as pl
 
 from ..fitting.parameters import FitParameters
 from ..fitting.optimization import optimize
 
-from .baseline import BaselineCorrection
+# from .baseline import BaselineCorrection
 # from ..analysis.picking import picking
 
-from .. import error_, warning_, print_, debug_
+from .. import error_, debug_
 from ...units import ur
 
 
@@ -144,7 +142,7 @@ def pk(dataset, phc0=None, phc1=None, pivot='auto', dim=-1, inplace=False, inter
 
 def timeshift(dataset, timeshift):
     """
-    
+
     Parameters
     ----------
     dataset

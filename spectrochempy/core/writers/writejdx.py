@@ -11,15 +11,15 @@
 """Plugin module to extend NDDataset with export methods method.
 
 """
-import os as os
+# import os as os
 import numpy as np
-from datetime import datetime, timezone, timedelta
+from datetime import datetime    # , timezone, timedelta
 
-from traitlets import HasTraits, Unicode, List
+# from traitlets import HasTraits, Unicode, List
 
 from spectrochempy.core.dataset.nddataset import NDDataset
-from ...utils import savefilename
-from ...core import info_, debug_, error_, warning_
+from spectrochempy.utils import savefilename
+from spectrochempy.core import debug_    # info_, error_, warning_
 
 __all__ = ['write_jdx']
 

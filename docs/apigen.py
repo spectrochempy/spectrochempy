@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     sphinx.apidoc (https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py)
-    
+
 
     Parses a directory tree looking for Python modules and packages and creates
     ReST files appropriately to create code documentation with Sphinx.  It also
@@ -130,96 +130,95 @@ def create_api_files(rootpath, opts):
 
     User API reference
     ==================
-    
+
     .. currentmodule:: spectrochempy
-    
+
     The |scpy| API exposes many objects and functions that are described below.
-    
+
     To use the API, one must load it using one of the following syntax :
-    
+
     >>> import spectrochempy as scp
-    
+
     >>> from spectrochempy import *
-    
+
     In the second syntax, as usual in python, access to the objects/functions
     may be simplified (*e.g.*, we can use `plot_stack` instead of  `scp.plot_stack` but there is always a risk of
     overwriting some variables already in the namespace. Therefore, the first syntax is in general
     recommended,
     although that, for the examples in this documentation, we have often use the
     second one for simplicity.
-    
-    
+
     Objects
     -------
-    
+
     .. autosummary::
        :toctree:
-    
+
     {classes}
-    
+
     Functions
     ---------
-    
+
     .. currentmodule:: spectrochempy
-    
+
     .. autosummary::
        :toctree:
-    
+
     {funcs}
-    
+
     Preferences
     -----------
-    
+
     {preferences}
-    
+
     Constants
     ---------
-    
+
     {consts}
-    
+
     """)
 
     classtemplate = textwrap.dedent("""
-    
+
     {project}.{klass}
     ==============================================================================
 
     .. automodule:: {project}
-    
+
     .. autoclass:: {project}.{klass}
        :members:
        :inherited-members:
-    
+
     .. {include} /gen_modules/backreferences/{project}.{klass}.examples
-    
+
     .. raw:: html
-    
+
        <div style='clear:both'></div>
-    
+
     """)
 
     functemplate = textwrap.dedent("""
-    
+
     {project}.{func}
     ==============================================================================
-    
+
     .. automodule:: {project}
-    
+
     .. autofunction:: {project}.{func}
-    
+
     .. {include} /gen_modules/backreferences/{project}.{func}.examples
-    
+
     .. raw:: html
-    
+
        <div style='clear:both'></div>
-    
+
     """)
 
     lconsts = [":%s: %s\n" % m for m in members if
-               type(m[1]) in [int, float, str, bool, tuple]]
+           type(m[1]) in [int, float, str, bool, tuple]]
     lclasses = []
     classes = [m[0] for m in members if
-               inspect.isclass(m[1]) and not type(m[1]).__name__ == 'type']
+           inspect.isclass(m[1]) and not type(m[1]).__name__ == 'type']
     for klass in classes:
         if klass not in opts.exclude_patterns:
             name = "{project}.{klass}".format(project=project, klass=klass)

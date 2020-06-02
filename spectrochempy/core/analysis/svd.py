@@ -26,10 +26,10 @@ import numpy as np
 # local imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from spectrochempy.core.dataset.ndcoordset import CoordSet
+# from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndarray import MASKED, NOMASK
+from spectrochempy.core.dataset.ndarray import MASKED
 from spectrochempy.utils import docstrings
 
 
@@ -39,7 +39,7 @@ class SVD(HasTraits):
     """
     Performs a Singular Value Decomposition of a dataset.
 
-    The SVD is commonly written as :math:`X = U \Sigma V^{T}`.
+    The SVD is commonly written as :math:`X = U \\Sigma V^{T}`.
 
     This class has the attributes : U, s = diag(S) and VT=V:math:`^T`.
 

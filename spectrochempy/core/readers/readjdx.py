@@ -40,7 +40,7 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
     Limited to AFFN encoding (see R. S. McDonald and Paul A. Wilks,
     JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in Computer Readable Form,
     Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734.)
-    
+
     Parameters
     ----------
     dataset : |NDDataset|
@@ -54,7 +54,7 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
         the defaults datadir.
     sortbydate : bool, optional, default=True.
         Sort spectra by acquisition date
-    
+
     Returns
     -------
     dataset : |NDDataset|
@@ -123,8 +123,10 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
 
             # Reset variables
             keyword = ''
+
+            # (year, month,...) must be reset at each spectrum because labels "time"
+            # and "longdate" are not required and JDX file
             [year, month, day, hour, minute, second] = '', '', '', '', '', ''
-            # (year, month,...) must be reset at each spectrum because labels "time" and "longdate" are not required and JDX file
 
             # Read JDX file for spectrum n° i
             while keyword != '##END':
@@ -135,7 +137,7 @@ def read_jdx(dataset, filename=None, directory=None, sortbydate=True):
                 elif keyword == '##LONGDATE':
                     [year, month, day] = text.split('/')
                 elif keyword == '##TIME':
-                    [hour, minute, second] = re.split(':|\.', text)
+                    [hour, minute, second] = re.split(r':|\.', text)
                 elif keyword == '##XUNITS':
                     xunits.append(text)
                 elif keyword == '##YUNITS':

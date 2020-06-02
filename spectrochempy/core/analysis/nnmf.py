@@ -24,13 +24,16 @@ from sys import stdout
 
 from traitlets import HasTraits
 
+from spectrochempy.core import info_
+
 
 class NNMF(HasTraits):
     """
     Performs a Non Negative Matrix Factorization of a |NDDataset|.
 
     Algorithm based on :
-    C.-J. Lin. Projected gradient methods for non-negative matrix factorization. Neural Computation, 19(2007), 2756-2779.
+    C.-J. Lin. Projected gradient methods for non-negative matrix factorization.
+    Neural Computation, 19(2007), 2756-2779.
     If you find this tool useful, please cite the above work.
     Author : Chih-Jen Lin, National Taiwan University
     Copyright (c) 2005-2008 Chih-Jen Lin
@@ -94,7 +97,8 @@ class NNMF(HasTraits):
 
             for n_iter in range(1, maxiter + 1):
                 grad = np.dot(WtW, H) - WtV
-                if norm(grad * np.logical_or(grad < 0, H > 0)) < tol: break
+                if norm(grad * np.logical_or(grad < 0, H > 0)) < tol:
+                    break
 
             Hp = H
 
@@ -163,7 +167,8 @@ class NNMF(HasTraits):
             if iterH == 1:
                 tolH = 0.1 * tolH
 
-            if myiter % 10 == 0: stdout.write('.')
+            if myiter % 10 == 0:
+                stdout.write('.')
 
         info_(
             '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,

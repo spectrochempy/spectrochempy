@@ -20,16 +20,16 @@ __dataset_methods__ = __all__
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import scipy.interpolate
-import numpy as np
+# import scipy.interpolate
+# import numpy as np
 
 # ----------------------------------------------------------------------------------------------------------------------
-# localimports
+# local imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from ...utils import NOMASK, MASKED, UnitsCompatibilityError
-from spectrochempy.extern.orderedset import OrderedSet
-from spectrochempy.core import warning_, error_
+# from ...utils import NOMASK, MASKED, UnitsCompatibilityError
+# from spectrochempy.extern.orderedset import OrderedSet
+# from spectrochempy.core import warning_, error_
 
 
 # ............................................................................

@@ -26,18 +26,17 @@ import os
 # Third party imports
 # ======================================================================================================================
 import numpy as np
-from ....extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
+from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from ....core import project_preferences, general_preferences as prefs
-from ....core import info_, debug_, error_, warning_
+from spectrochempy.core import general_preferences as prefs, info_, warning_
 
-from ....utils.meta import Meta
-from ....core.dataset.nddataset import NDDataset
-from ....core.dataset.ndcoord import Coord
-from ....units import ur, Quantity
+from spectrochempy.utils.meta import Meta
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.units import ur, Quantity
 from .parameter import nmr_valid_meta
 
 # ======================================================================================================================
@@ -540,7 +539,7 @@ def read_bruker_nmr(dataset, *args, **kwargs):
                     else:  # status parameters (replace initial)
                         try:
                             meta[key.lower()][dim] = value
-                        except:
+                        except Exception:
                             pass
 
             else:
@@ -782,5 +781,3 @@ def read_bruker_nmr(dataset, *args, **kwargs):
             dataset.origin = 'bruker'
 
     return dataset
-
-###EOF######################################################################

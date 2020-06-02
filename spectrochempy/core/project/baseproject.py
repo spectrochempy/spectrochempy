@@ -9,7 +9,7 @@
 
 __all__ = []
 
-import uuid
+# import uuid
 
 from traitlets import HasTraits
 

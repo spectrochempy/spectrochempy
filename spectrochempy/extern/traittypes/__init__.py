@@ -70,11 +70,14 @@ conda install -c conda-forge traittypes
 
 ## Usage
 
-`traittypes` extends the `traitlets` library with an implementation of trait types for numpy arrays, pandas dataframes and pandas series.
+`traittypes` extends the `traitlets` library with an implementation of trait types for numpy arrays, pandas dataframes
+and pandas series.
  - `traittypes` works around some limitations with numpy array comparison to only trigger change events when necessary.
- - `traittypes` also extends the traitlets API for adding custom validators to constained proposed values for the attribute.
+ - `traittypes` also extends the traitlets API for adding custom validators to constained proposed values for the
+ attribute.
 
-For a general introduction to `traitlets`, check out the [traitlets documentation](https://traitlets.readthedocs.io/en/stable/).
+For a general introduction to `traitlets`, check out the
+[traitlets documentation](https://traitlets.readthedocs.io/en/stable/).
 
 ### Example usage with a custom validator
 
@@ -147,7 +150,8 @@ class SciType(TraitType):
             def shape(*dimensions):
                 def validator(trait, value):
                     if value.shape != dimensions :
-                        raise TraitError('Expected an of shape %s and got and array with shape %s' % (dimensions, value.shape))
+                        raise TraitError('Expected an of shape %s and got and array with shape %s' % (dimensions,
+                        value.shape))
                     else :
                         return value
                 return validator

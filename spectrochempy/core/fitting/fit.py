@@ -28,7 +28,7 @@ from warnings import warn
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-from traitlets import (HasTraits, Bool, Any, List, Unicode, Instance)
+from traitlets import (HasTraits, Bool, Any, List, Instance)
 import numpy as np
 # IPython
 from IPython import display
@@ -43,7 +43,7 @@ from spectrochempy.core.fitting.models import getmodel
 from spectrochempy.core.fitting.optimization import optimize
 from spectrochempy.utils import htmldoc
 
-from spectrochempy.core import general_preferences, info_
+from spectrochempy.core import info_
 
 
 # ======================================================================================================================
@@ -124,10 +124,10 @@ class Fit(HasTraits):
 
     @staticmethod
     def script_default():
-
         """ Return a default script
+
         """
-        s = """
+        return """
         #-----------------------------------------------------------
         # syntax for parameters definition:
         # name: value, low_bound,  high_bound
@@ -138,28 +138,27 @@ class Fit(HasTraits):
         # common block parameters should not have a _ in their names
         #-----------------------------------------------------------
         #
-        
+
         COMMON:
         # common parameters ex.
         experiment_variables: ampl
-        
+
         # $ gwidth: 1.0, 0.0, none
           $ gratio: 0.5, 0.0, 1.0
-        
+
         MODEL: LINE_1
         shape: voigtmodel
             $ ampl:  1.0, 0.0, none
             $ pos:   0.0, -100.0, 100.0
             > ratio: gratio
             $ width: 1.0, 0, 100
-        
+
         """
 
     def dry_run(self):
         return self.run(dry=True)
 
-    def run(self, maxiter=100, maxfun=None, every=10,
-            method='simplex', **kwargs):
+    def run(self, maxiter=100, maxfun=None, every=10, method='simplex', **kwargs):
         """ Main fitting procedure
 
         Parameters
@@ -417,7 +416,7 @@ class Fit(HasTraits):
                     refpar = par
                 try:
                     new_param[key] = eval(str(refpar))
-                except:
+                except Exception:
                     raise ValueError('Cannot evaluate the expression %s: %s'
                                      % (key, param[refpar]))
 
@@ -464,9 +463,12 @@ class Fit(HasTraits):
                     n * sFI ** 2 - n * sFd * sId + sF ** 2 * sId - 2 * sF * sFI * sI + sFd * sI ** 2)
 
         # in case the modeldata is zero, to avoid further errors
-        if np.isnan(A): A = 0.0
-        if np.isnan(a): a = 0.0
-        if np.isnan(b): b = 0.0
+        if np.isnan(A):
+            A = 0.0
+        if np.isnan(a):
+            a = 0.0
+        if np.isnan(b):
+            b = 0.0
         return A, a, b
 
     @staticmethod
@@ -488,20 +490,27 @@ class Fit(HasTraits):
         sJd = sum(yj ** 2)
 
         c = (sE * (
-                -m * n * sFd * sId * sJd + m * sFJ ** 2 * sId + n * sFI ** 2 * sJd - 2 * sFI * sFJ * sIJ + sFd * sIJ ** 2) + sEF * (
+                -m * n * sFd * sId * sJd + m * sFJ ** 2 * sId + n * sFI ** 2 * sJd - 2 * sFI * sFJ * sIJ
+                + sFd * sIJ ** 2) + sEF * (
                      m * n * sF * sId * sJd
-                     - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ + n * sFI * sIJ * sJ - sF * sIJ ** 2) + sEI * (
+                     - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ + n * sFI * sIJ * sJ
+                     - sF * sIJ ** 2) + sEI * (
                      m * n * sFd * sI * sJd
-                     - m * sFJ ** 2 * sI - n * sF * sFI * sJd + n * sFI * sFJ * sJ - n * sFd * sIJ * sJ + sF * sFJ * sIJ) + sEJ * (
+                     - m * sFJ ** 2 * sI - n * sF * sFI * sJd + n * sFI * sFJ * sJ - n * sFd * sIJ * sJ
+                     + sF * sFJ * sIJ) + sEJ * (
                      m * n * sFd * sId * sJ - m * sF * sFJ * sId
                      + m * sFI * sFJ * sI - m * sFd * sI * sIJ - n * sFI ** 2 * sJ + sF * sFI * sIJ)) / (
                     -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId
-                    + m ** 2 * n * sFd * sI ** 2 * sJd - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd
-                    - 2 * m * n * sF * sFI * sI * sJd - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ
-                    + m * n * sFd * sIJ ** 2 + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+                    + m ** 2 * n * sFd * sI ** 2 * sJd - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd
+                    + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd
+                    - 2 * m * n * sF * sFI * sI * sJd - 2 * m * n * sF * sFJ * sId * sJ
+                    + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ
+                    + m * n * sFd * sIJ ** 2 + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2
+                    + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
 
         a = (n * sEF * (
-                m * n * sFI * sJd - m * sF * sI * sJd + m * sFJ * sI * sJ - m * sFJ * sIJ - n * sFI * sJ ** 2 + sF * sIJ * sJ) + n * sEI * (
+                m * n * sFI * sJd - m * sF * sI * sJd + m * sFJ * sI * sJ - m * sFJ * sIJ
+                - n * sFI * sJ ** 2 + sF * sIJ * sJ) + n * sEI * (
                      -m * n * sFd * sJd
                      + m * sFJ ** 2 + n * sFd * sJ ** 2 + sF ** 2 * sJd - 2 * sF * sFJ * sJ) + sE * (
                      m * n * sFd * sI * sJd - m * sFJ ** 2 * sI - n * sF * sFI * sJd
@@ -509,9 +518,12 @@ class Fit(HasTraits):
                      m * n * sFI * sFJ + m * n * sFd * sI * sJ - m * n * sFd * sIJ - m * sF * sFJ * sI
                      - n * sF * sFI * sJ + sF ** 2 * sIJ)) / (
                     -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 +
+                    m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
+                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ
+                    - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
+                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ
+                    - sF ** 2 * sIJ ** 2)
 
         A = (m * n * sEF * (
                 -m * n * sId * sJd + m * sI ** 2 * sJd + n * sId * sJ ** 2 - 2 * sI * sIJ * sJ + sIJ ** 2) + m * sEJ * (
@@ -522,12 +534,16 @@ class Fit(HasTraits):
                      m * n * sF * sId * sJd - m * n * sFI * sI * sJd - m * n * sFJ * sId * sJ + m * sFJ * sI * sIJ
                      + n * sFI * sIJ * sJ - sF * sIJ ** 2)) / (
                     -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2
+                    + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
+                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ
+                    - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
+                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ
+                    - sF ** 2 * sIJ ** 2)
 
         b = (m * sEF * (
-                m * n * sFJ * sId - m * sFJ * sI ** 2 - n * sF * sId * sJ + n * sFI * sI * sJ - n * sFI * sIJ + sF * sI * sIJ) + m * sEJ * (
+                m * n * sFJ * sId - m * sFJ * sI ** 2 - n * sF * sId * sJ + n * sFI * sI * sJ - n * sFI * sIJ
+                + sF * sI * sIJ) + m * sEJ * (
                      -m * n * sFd * sId
                      + m * sFd * sI ** 2 + n * sFI ** 2 + sF ** 2 * sId - 2 * sF * sFI * sI) + sE * (
                      m * n * sFd * sId * sJ - m * sF * sFJ * sId + m * sFI * sFJ * sI
@@ -535,15 +551,22 @@ class Fit(HasTraits):
                      m * n * sFI * sFJ + m * n * sFd * sI * sJ - m * n * sFd * sIJ - m * sF * sFJ * sI
                      - n * sF * sFI * sJ + sF ** 2 * sIJ)) / (
                     -m ** 2 * n ** 2 * sFd * sId * sJd + m ** 2 * n * sFJ ** 2 * sId + m ** 2 * n * sFd * sI ** 2 * sJd
-                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2 + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
-                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
-                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ - sF ** 2 * sIJ ** 2)
+                    - m ** 2 * sFJ ** 2 * sI ** 2 + m * n ** 2 * sFI ** 2 * sJd + m * n ** 2 * sFd * sId * sJ ** 2
+                    + m * n * sF ** 2 * sId * sJd - 2 * m * n * sF * sFI * sI * sJd
+                    - 2 * m * n * sF * sFJ * sId * sJ + 2 * m * n * sFI * sFJ * sI * sJ - 2 * m * n * sFI * sFJ * sIJ
+                    - 2 * m * n * sFd * sI * sIJ * sJ + m * n * sFd * sIJ ** 2
+                    + 2 * m * sF * sFJ * sI * sIJ - n ** 2 * sFI ** 2 * sJ ** 2 + 2 * n * sF * sFI * sIJ * sJ
+                    - sF ** 2 * sIJ ** 2)
 
         # in case the modeldata is zero, to avoid further errors
-        if np.isnan(A): A = 0.0
-        if np.isnan(a): a = 0.0
-        if np.isnan(b): b = 0.0
-        if np.isnan(c): c = 0.0
+        if np.isnan(A):
+            A = 0.0
+        if np.isnan(a):
+            a = 0.0
+        if np.isnan(b):
+            b = 0.0
+        if np.isnan(c):
+            c = 0.0
         return A, a, b, c
 
 

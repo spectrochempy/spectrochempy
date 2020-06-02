@@ -12,7 +12,8 @@ SpectroChemPy documentation build configuration file
 
 """
 
-import sys, os
+import sys
+import os
 import sphinx_rtd_theme  # Theme for the website
 import warnings
 

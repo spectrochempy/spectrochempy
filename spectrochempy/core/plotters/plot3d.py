@@ -22,11 +22,11 @@ __dataset_methods__ = []
 # ----------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------
-from spectrochempy.core import project_preferences
+# from spectrochempy.core import project_preferences
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import numpy as np
+# import matplotlib.pyplot as plt
+# import matplotlib as mpl
+# import numpy as np
 
 
 # =============================================================================

@@ -13,7 +13,6 @@ In this example, we perform the Evolving Factor Analysis
 
 """
 import spectrochempy as scp
-import matplotlib.pyplot as plt
 import os
 
 # sphinx_gallery_thumbnail_number = 2

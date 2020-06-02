@@ -19,14 +19,14 @@ elements can be accessed by key, but also by attributes, *e.g.*
 
 """
 
-from traitlets import HasTraits, Dict, Bool, default
+# from traitlets import HasTraits, Dict, Bool, default
 import numpy as np
-import sys
+# import sys
 import copy
 
-from . import (is_sequence, SpectroChemPyWarning)
+from . import is_sequence
 
-# contants
+# constants
 # ----------------------------------------------------------------------------------------------------------------------
 
 __all__ = ['Meta']

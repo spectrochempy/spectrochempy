@@ -30,7 +30,7 @@ def find_peaks(X, height=None, threshold=None, distance=None,
     Wrapper of scpy.signal.find_peaks(). Find peaks inside a 1D NDDataset based on peak properties.
     This function finds all local maxima by simple comparison of neighbouring values. Optionally, a subset of these
     peaks can be selected by specifying conditions for a peak's properties.
-    
+
     Parameters
     ----------
     x : |NDDataset|
@@ -73,17 +73,16 @@ def find_peaks(X, height=None, threshold=None, distance=None,
         ``None``, an array matching `x` or a 2-element sequence of the former.
         The first element is always interpreted as the minimal and the second,
         if supplied as the maximal required plateau size.
-    
+
     Returns
     -------
     peaks : ndarray
         Indices of peaks in `x` that satisfy all given conditions.
-    
     properties : dict
         A dictionary containing properties of the returned peaks which were
         calculated as intermediate results during evaluation of the specified
         conditions:
-    
+
         * peak_heights
               If `height` is given, the height of each peak in `x`.
         * left_thresholds, right_thresholds
@@ -99,22 +98,22 @@ def find_peaks(X, height=None, threshold=None, distance=None,
               If `plateau_size` is given, these keys are accessible and contain
               the indices of a peak's edges (edges are still part of the
               plateau) and the calculated plateau sizes.
-              
+
         To calculate and return properties without excluding peaks, provide the
         open interval ``(None, None)`` as a value to the appropriate argument
         (excluding `distance`).
-    
+
     Warns
     -----
     PeakPropertyWarning
         Raised if a peak's properties have unexpected values (see
         `peak_prominences` and `peak_widths`).
-    
+
     Warnings
     --------
     This function may return unexpected results for data containing NaNs. To
     avoid this, NaNs should either be removed or replaced.
-    
+
     See Also
     --------
     find_peaks_cwt:
@@ -123,7 +122,7 @@ def find_peaks(X, height=None, threshold=None, distance=None,
         Directly calculate the prominence of peaks.
     peak_widths:
         Directly calculate the width of peaks.
-    
+
     Notes
     -----
     In the context of this function, a peak or local maximum is defined as any
@@ -135,7 +134,7 @@ def find_peaks(X, height=None, threshold=None, distance=None,
     signal before searching for peaks or use other peak finding and fitting
     methods (like `find_peaks_cwt`).
     Some additional comments on specifying conditions:
-    
+
     * Almost all conditions (excluding `distance`) can be given as half-open or
       closed intervals, e.g ``1`` or ``(1, None)`` defines the half-open
       interval :math:`[1, \\infty]` while ``(None, 1)`` defines the interval

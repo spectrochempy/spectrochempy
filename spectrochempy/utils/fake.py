@@ -79,10 +79,10 @@ def generate_fake():
     POS = (6000., 4000., 2000., 2500.)
     WIDTH = (6000., 1000., 600., 800.)
     AMPL = (100., 100., 20., 50.)
-    C1 = lambda t: t * .05 + .01  # linear evolution of the baseline
-    C2 = lambda t: np.exp(-t / .5) * .3 + .1
-    C3 = lambda t: np.exp(-t / 3.) * .7
-    C4 = lambda t: 1. - C2(t) - C3(t)
+    def C1(t): return t * .05 + .01  # linear evolution of the baseline
+    def C2(t): return np.exp(-t / .5) * .3 + .1
+    def C3(t): return np.exp(-t / 3.) * .7
+    def C4(t): return 1. - C2(t) - C3(t)
 
     spec = _make_spectra_matrix(POS, WIDTH, AMPL)
     spec.plot_stack(colorbar=False)

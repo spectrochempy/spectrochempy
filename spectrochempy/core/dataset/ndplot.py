@@ -28,7 +28,7 @@ import warnings
 
 from cycler import cycler
 import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, default
@@ -38,15 +38,16 @@ from traitlets import Dict, HasTraits, Instance, default
 from spectrochempy.utils import (is_sequence, SpectroChemPyDeprecationWarning,
                                  docstrings, NBlack, NBlue, NGreen, NRed, get_figure)
 from spectrochempy.core import general_preferences, project_preferences
-from ...core import info_, debug_, error_, warning_
-
-prefs = general_preferences
+from spectrochempy.core import error_
 
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.core.plotters.plot2d import plot_2D
 from spectrochempy.utils.meta import Meta
-from spectrochempy.utils import deprecated
+
+# from spectrochempy.utils import deprecated
+
+prefs = general_preferences
 
 
 # ======================================================================================================================
@@ -64,7 +65,7 @@ class NDPlot(HasTraits):
     # The figure on which this dataset can be plotted
     _fig = Instance(plt.Figure, allow_none=True)
 
-    # The axes on which this dataset and other elements such as projections 
+    # The axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
     _ndaxes = Dict(Instance(plt.Axes))
 

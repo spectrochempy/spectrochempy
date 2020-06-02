@@ -2,7 +2,7 @@ import numpy as np
 import re
 from . import NOMASK
 from .misc import TYPE_INTEGER, TYPE_COMPLEX, TYPE_FLOAT
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 
 __all__ = ['numpyprintoptions', 'insert_masked_print',
            'TBold', 'TRed', 'TGreen', 'TBlue', 'TCyan', 'TMagenta',
@@ -21,15 +21,14 @@ def pstr(object, **kwargs):
 # Terminal colors and styles
 # ======================================================================================================================
 
-TBold = lambda text: Style.BRIGHT + str(text) + Style.RESET_ALL
-
-TRed = lambda text: Fore.RED + str(text) + Fore.RESET
-TGreen = lambda text: Fore.GREEN + str(text) + Fore.RESET
-TBlue = lambda text: Fore.BLUE + str(text) + Fore.RESET
-TMagenta = lambda text: Fore.MAGENTA + str(text) + Fore.RESET
-TYellow = lambda text: Fore.YELLOW + str(text) + Fore.RESET
-TCyan = lambda text: Fore.CYAN + str(text) + Fore.RESET
-TBlack = lambda text: Fore.BLACK + str(text) + Fore.RESET
+def TBold(text): return Style.BRIGHT + str(text) + Style.RESET_ALL
+def TRed(text): return Fore.RED + str(text) + Fore.RESET
+def TGreen(text): return Fore.GREEN + str(text) + Fore.RESET
+def TBlue(text): return Fore.BLUE + str(text) + Fore.RESET
+def TMagenta(text): return Fore.MAGENTA + str(text) + Fore.RESET
+def TYellow(text): return Fore.YELLOW + str(text) + Fore.RESET
+def TCyan(text): return Fore.CYAN + str(text) + Fore.RESET
+def TBlack(text): return Fore.BLACK + str(text) + Fore.RESET
 
 
 def colored(text, color):
@@ -85,8 +84,9 @@ def convert_to_html(obj):
     out = obj._cstr()
 
     regex = r'\0{3}[\w\W]*?\0{3}'
+
     # noinspection PyPep8
-    subst = lambda match: "<div>{}</div>".format(match.group(0).replace('\n', '<br/>').replace('\0', ''))
+    def subst(match): return "<div>{}</div>".format(match.group(0).replace('\n', '<br/>').replace('\0', ''))
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
     regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"  # r"^(\W*\w+\W?\w+)(:.*$)"
@@ -102,14 +102,16 @@ def convert_to_html(obj):
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
     regex = r'\0{2}[\w\W]*?\0{2}'
+
     # noinspection PyPep8
-    subst = lambda match: "<div><font color='darkcyan'>{}</font></div>".format(
+    def subst(match): return "<div><font color='darkcyan'>{}</font></div>".format(
         match.group(0).replace('\n', '<br/>').replace('\0', ''))
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
     regex = r'\0{1}[\w\W]*?\0{1}'
+
     # noinspection PyPep8
-    subst = lambda match: "<div><font color='blue'>{}</font></div>".format(
+    def subst(match): return "<div><font color='blue'>{}</font></div>".format(
         match.group(0).replace('\n', '<br/>').replace('\0', ''))
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 

@@ -14,17 +14,13 @@ This module holds the definitions all the various models
 
 __all__ = []
 
-import os
 import numpy as np
-from spectrochempy.core import project_preferences, general_preferences
-from spectrochempy.utils import SpectroChemPyWarning
-from spectrochempy.core import info_
 
 
 ############
-###      ###
-###  1D  ###
-###      ###
+#          #
+#    1D    #
+#          #
 ############
 
 # ======================================================================================================================
@@ -204,7 +200,7 @@ class assymvoigtmodel(object):
     def f(self, x, ampl, width, ratio, assym, pos, **kargs):
         try:
             x = x.values  # case pandas
-        except:
+        except Exception:
             pass
         g = 2. * width / (1. + np.exp(assym * (x - pos)))
         # sigmoid variation of width
@@ -215,9 +211,9 @@ class assymvoigtmodel(object):
 
 
 #################
-###           ###
-###  GENERAL  ###
-###           ###
+#               #
+#    GENERAL    #
+#               #
 #################
 
 # ======================================================================================================================

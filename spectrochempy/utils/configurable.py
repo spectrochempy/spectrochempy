@@ -7,7 +7,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-from traitlets.config.configurable import Configurable, Config
+from traitlets.config.configurable import Configurable
 from traitlets import All, observe
 
 

@@ -25,8 +25,6 @@ import sys
 import time
 import warnings
 
-warnings.filterwarnings("ignore")
-
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
@@ -36,6 +34,8 @@ import matplotlib as mpl
 import numpy as np
 import scipy
 from tqdm.autonotebook import tqdm
+
+warnings.filterwarnings("ignore")
 
 # ======================================================================================================================
 # Tells here the methods or object we allow to import from this library
@@ -47,8 +47,8 @@ __all__ = [
 
     'np', 'plt', 'scipy', 'os', 'sys', 'mpl',
 
-    ### methods and objects from other packages will be added
-    ### later on this module (see below)
+    # methods and objects from other packages will be added
+    # later on this module (see below)
 
 ]
 
@@ -60,7 +60,6 @@ if os.environ.get('USE_TQDM', 'Yes') == 'Yes':
     pbar.set_description('Loading SpectroChemPy API')
     val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]
 
-
     def _pbar_update(i):
         if i == 'CLOSE':
             pbar.clear()
@@ -69,6 +68,7 @@ if os.environ.get('USE_TQDM', 'Yes') == 'Yes':
             time.sleep(.1)
             pbar.update(val_tqdm[i])
 else:
+
     def _pbar_update(i):
         pass
 
@@ -78,16 +78,16 @@ else:
 # ======================================================================================================================
 
 _pbar_update(0)
-from spectrochempy.application import SpectroChemPy
+from spectrochempy.application import SpectroChemPy   # noqa: E402
 
 app = SpectroChemPy()
-# __all__ += ['app']
+__all__ += ['app']
 
 # ======================================================================================================================
 # logging functions
 # ======================================================================================================================
 
-from spectrochempy.utils import pstr
+from spectrochempy.utils import pstr   # noqa: E402
 
 
 def print_(*args, **kwargs):
@@ -139,7 +139,7 @@ def warning_(*args, **kwargs):
 
 __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']
 
-from spectrochempy.application import (
+from spectrochempy.application import (          # noqa: E402
     __version__ as version,
     __release__ as release,
     __copyright__ as copyright,
@@ -175,7 +175,7 @@ def get_loglevel():
 
 
 __all__ += [
-    ### Helpers
+    # Helpers
     'DEBUG',
     'WARNING',
     'ERROR',
@@ -189,7 +189,7 @@ __all__ += [
     'set_loglevel',
     'get_loglevel',
 
-    ### Info
+    # Info
     'copyright',
     'version',
     'release',
@@ -205,9 +205,8 @@ __all__ += [
 # load the default style
 # print("mpl_config_dir", mpl.get_configdir(), plt.style.available)
 try:
-    # print('styles', project_preferences.style)
     plt.style.use(project_preferences.style)
-except:
+except Exception:
     pass  # if the scp styles are not yet installed, ignore it
 
 # IPython methods
@@ -215,24 +214,23 @@ except:
 # we put them before so that we can eventually overwrite them
 
 _pbar_update(1)
-from IPython.core.display import *
-from IPython.core import display
+from IPython.core.display import *          # noqa: E402,F403,F401
+from IPython.core import display            # noqa: E402
 
 __all__.extend(display.__all__)
 
-from IPython.lib.display import *
-from IPython.lib import display
+from IPython.lib.display import *           # noqa: E402,F401,F403
+from IPython.lib import display             # noqa: E402
 
 __all__.extend(display.__all__)
 
 """
-This packages contains most of the core methods expose in the spectrochempy 
-API.
+This packages contains most of the core methods expose in the spectrochempy API.
 
 """
 # constants
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE
+from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: E402
 
 __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 
@@ -240,7 +238,7 @@ __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 # ----------------------------------------------------------------------------------------------------------------------
 
 try:
-    import sympy as sym
+    import sympy as sym    # noqa: E402, F401
 
     HAS_SYMPY__ = True
     __all__.append('sym')
@@ -250,7 +248,7 @@ except ImportError:
 __all__.append('HAS_SYMPY')
 
 try:
-    import sklearn as skl
+    import sklearn as skl      # noqa: E402, F401
 
     HAS_SCIKITLEARN = True
     __all__.append('skl')
@@ -260,21 +258,21 @@ except ImportError:
 __all__.append('HAS_SCIKITLEARN')
 
 try:
-    import xarray as xr
+    import xarray as xr         # noqa: E402, F401
 
     HAS_XARRAY = True
     __all__.append('xr')
-except:
+except ImportError:
     HAS_XARRAY = False
 
 __all__.append('HAS_XARRAY')
 
 try:
-    import pandas as pd
+    import pandas as pd         # noqa: E402, F401
 
     HAS_PANDAS = True
     __all__.append('pd')
-except:
+except ImportError:
     HAS_PANDAS = False
 
 __all__.append('HAS_PANDAS')
@@ -282,96 +280,96 @@ __all__.append('HAS_PANDAS')
 # dataset
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(2)
-from spectrochempy.core.dataset.api import *
-from spectrochempy.core.dataset import api
+from spectrochempy.core.dataset.api import *     # noqa: E402,F403,F401
+from spectrochempy.core.dataset import api       # noqa: E402
 
 __all__ += api.__all__
 
 # plotters
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(3)
-from spectrochempy.core.plotters.api import *
-from spectrochempy.core.plotters import api
+from spectrochempy.core.plotters.api import *      # noqa: E402,F403,F401
+from spectrochempy.core.plotters import api        # noqa: E402
 
 __all__ += api.__all__
 
 # processors
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(4)
-from spectrochempy.core.processors.api import *
-from spectrochempy.core.processors import api
+from spectrochempy.core.processors.api import *     # noqa: E402,F403,F401
+from spectrochempy.core.processors import api       # noqa: E402
 
 __all__ += api.__all__
 
 # readers
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(5)
-from spectrochempy.core.readers.api import *
-from spectrochempy.core.readers import api
+from spectrochempy.core.readers.api import *        # noqa: E402,F403,F401
+from spectrochempy.core.readers import api          # noqa: E402
 
 __all__ += api.__all__
 
 # writers
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(6)
-from spectrochempy.core.writers.api import *
-from spectrochempy.core.writers import api
+from spectrochempy.core.writers.api import *         # noqa: E402,F403,F401
+from spectrochempy.core.writers import api           # noqa: E402
 
 __all__ += api.__all__
 
 # units
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(7)
-from spectrochempy.units.units import *
-from spectrochempy.units import units
+from spectrochempy.units.units import *               # noqa: E402,F403,F401
+from spectrochempy.units import units                 # noqa: E402
 
 __all__ += units.__all__
 
 # databases
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(8)
-from spectrochempy.databases.api import *
-from spectrochempy.databases import api
+from spectrochempy.databases.api import *              # noqa: E402,F403,F401
+from spectrochempy.databases import api                # noqa: E402
 
 __all__ += api.__all__
 
 # analysis
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(9)
-from spectrochempy.core.analysis.api import *
-from spectrochempy.core.analysis import api
+from spectrochempy.core.analysis.api import *           # noqa: E402,F403,F401
+from spectrochempy.core.analysis import api             # noqa: E402
 
 __all__ += api.__all__
 
 # fitting
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(10)
-from spectrochempy.core.fitting.api import *
-from spectrochempy.core.fitting import api
+from spectrochempy.core.fitting.api import *             # noqa: E402,F403,F401
+from spectrochempy.core.fitting import api               # noqa: E402
 
 __all__ += api.__all__
 
 # project
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(11)
-from spectrochempy.core.project.api import *
-from spectrochempy.core.project import api
+from spectrochempy.core.project.api import *              # noqa: E402,F403,F401
+from spectrochempy.core.project import api                # noqa: E402
 
 __all__ += api.__all__
 
 # script
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(12)
-from spectrochempy.core.scripts.api import *
-from spectrochempy.core.scripts import api
+from spectrochempy.core.scripts.api import *              # noqa: E402,F403,F401
+from spectrochempy.core.scripts import api                # noqa: E402
 
 __all__ += api.__all__
 
 # widgets
 # ----------------------------------------------------------------------------------------------------------------------
 _pbar_update(13)
-from spectrochempy.widgets.api import *
-from spectrochempy.widgets import api
+from spectrochempy.widgets.api import *                    # noqa: E402,F403,F401
+from spectrochempy.widgets import api                      # noqa: E402
 
 __all__ += api.__all__
 

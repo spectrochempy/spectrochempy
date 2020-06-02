@@ -7,9 +7,6 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-
-"""
-"""
 __all__ = ['get_user_and_node',
            'get_user',
            'get_node',
@@ -18,8 +15,6 @@ __all__ = ['get_user_and_node',
 
 import getpass
 import platform
-import inspect
-import os
 import sys
 
 

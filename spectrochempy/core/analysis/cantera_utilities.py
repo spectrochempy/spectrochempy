@@ -63,7 +63,7 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
 
     else:
         raise NotImplementedError('not implmented for reactive_phase={}'.format(str(type(reactive_phase))))
-        ## code for reactorNet
+        # # code for reactorNet
         # if type(t) is Coord:
         #     t = t.data
         #
@@ -138,10 +138,10 @@ def modify_reactive_phase(reactive_phase, param_to_change, param_value):
 def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, param_to_optimize, guess_param, **kwargs):
     r"""
     Function fitting rate parameters and concentrations to a given concentration profile.
-    
+
     Parameters
     ------------
-    
+
     C: NDDataset
         experimental concentration profiles on which to fit the model. C can contain more concentration
         profiles than those to fit.
@@ -158,11 +158,11 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
         initial guess for the parameters to fit
     **kwargs:
         parameters for the optimization (see scipy.optimize.minimize)
-    
+
     Returns
     ----------
     a dictionary
-    
+
     """
 
     def objective(param_value, param_to_optimize, C, externalConc, external_to_C_idx, surface):

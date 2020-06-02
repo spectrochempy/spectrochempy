@@ -17,7 +17,7 @@ __all__ = ['CoordSet']
 # ----------------------------------------------------------------------------------------------------------------------
 import copy as cpy
 import warnings
-import textwrap
+# import textwrap
 import uuid
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -29,10 +29,10 @@ from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, de
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-from .ndarray import NDArray, DEFAULT_DIM_NAME
-from ...core import HAS_PANDAS, HAS_XARRAY, info_, debug_, error_, warning_
-from .ndcoord import Coord
-from ...utils import is_sequence, colored_output, convert_to_html
+from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
+from spectrochempy.core import HAS_PANDAS  # , HAS_XARRAY, info_, debug_, error_, warning_
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.utils import is_sequence, colored_output, convert_to_html
 
 
 # ======================================================================================================================
@@ -209,11 +209,11 @@ class CoordSet(HasTraits):
     def implements(self, name=None):
         """
         Utility to check if the current object implement `CoordSet`.
-        
+
         Rather than isinstance(obj, CoordSet) use object.implements('CoordSet').
-        
+
         This is useful to check type without importing the module
-        
+
         """
         if name is None:
             return 'CoordSet'
@@ -244,7 +244,7 @@ class CoordSet(HasTraits):
 
                 # check this is valid in term of size
                 try:
-                    size = coord.sizes
+                    coord.sizes
                 except ValueError:
                     raise
 
@@ -448,12 +448,12 @@ class CoordSet(HasTraits):
     def keys(self):
         """
         Alias for names
-        
+
         Returns
         -------
         out : list
             list of all coordinates names (including reference to other coordinates)
-            
+
         """
         keys = []
         if self.names:
@@ -466,7 +466,7 @@ class CoordSet(HasTraits):
     def set(self, *args, **kwargs):
         """
         Set one or more coordinates in the current CoordSet
-        
+
         Parameters
         ----------
         args
@@ -500,12 +500,12 @@ class CoordSet(HasTraits):
     def set_titles(self, *args, **kwargs):
         """
         Set one or more coord title at once
-        
+
         Notes
         -----
         If the args are not named, then the attributions are made in coordinate's  name alhabetical order :
         e.g, the first title will be for the `x` coordinates, the second for the `y`, etc.
-        
+
         Parameters
         ----------
         args : str(s)
@@ -514,9 +514,6 @@ class CoordSet(HasTraits):
         kwargs : str
             keyword attribution of the titles. The keys must be valid names among the coordinate's name list. This
             is the recommended way to set titles as this will be less prone to errors.
-            
-        Examples
-        --------
 
         """
         if len(args) == 1 and (is_sequence(args[0]) or isinstance(args[0], CoordSet)):
@@ -537,12 +534,12 @@ class CoordSet(HasTraits):
     def set_units(self, *args, **kwargs):
         """
         Set one or more coord units at once.
-        
+
         Notes
         -----
         If the args are not named, then the attributions are made in coordinate's name alhabetical order :
         e.g, the first units will be for the `x` coordinates, the second for the `y`, etc.
-        
+
         Parameters
         ----------
         args : str(s)
@@ -553,12 +550,6 @@ class CoordSet(HasTraits):
             is the recommended way to set units as this will be less prone to errors.
         force : bool, optional, default=False
             whether or not the new units must be compatible with the current units. See the `Coord`.`to` method.
-            
-        Examples
-        --------
-        
-        
-        
 
         """
         force = kwargs.pop('force', False)
@@ -581,12 +572,12 @@ class CoordSet(HasTraits):
     def to_dict(self):
         """
         Return a dict of the coordinates from the coordset
-        
+
         Returns
         -------
         out : dict
             A dictionary where keys are the names of the coordinates, and the values the coordinates themselves
-            
+
         """
         return dict(zip(self.names, self._coords))
 
@@ -651,15 +642,13 @@ class CoordSet(HasTraits):
     # ..................................................................................................................
     def _loc2index(self, loc):
         # Return the index of a location
-        error = None
         for coord in self.coords:
             try:
                 return coord._loc2index(loc)
-            except IndexError as error:
+            except IndexError:
                 continue
         # not found!
-        if error is not None:
-            raise error
+        raise IndexError
 
     # ..................................................................................................................
     def _set_names(self, names):
@@ -801,7 +790,7 @@ class CoordSet(HasTraits):
 
         try:
             self.__setitem__(key, value)
-        except:
+        except Exception:
             super().__setattr__(key, value)
 
     # ..................................................................................................................
@@ -990,7 +979,7 @@ class CoordSet(HasTraits):
             return False
         try:
             return self._coords == other._coords
-        except:
+        except Exception:
             return False
 
     # ..................................................................................................................

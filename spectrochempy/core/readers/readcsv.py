@@ -24,10 +24,10 @@ import locale
 
 try:
     locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
-except:
+except Exception:
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.utf8')  # to avoid problems with date format
-    except:
+    except Exception:
         warnings.warn('Could not set locale: en_US or en_US.utf8')
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ def read_zip(*args, **kwargs):
 
 # .............................................................................
 def read_csv(*args, **kwargs):
-    """Open a \*.csv file or a list of \*.csv files and set data/metadata
+    """Open a *.csv file or a list of *.csv files and set data/metadata
     in the current dataset
 
     Parameters
@@ -205,7 +205,7 @@ def _read_zip(filename, **kwargs):
                                   "set the keyword 'origin'." % origin)
 
     temp = os.path.join(os.path.dirname(filename), '~temp')
-    basename = os.path.splitext(os.path.basename(filename))[0]
+    # basename = os.path.splitext(os.path.basename(filename))[0]
 
     obj = NpzFile(filename)
     # unzip(filename, temp)
@@ -231,10 +231,7 @@ def _read_zip(filename, **kwargs):
         if len(datasets) + 1 > only:
             break
 
-    try:
-        shutil.rmtree(temp)
-    except:
-        pass
+    shutil.rmtree(temp, ignore_errors=True)
 
     return datasets
 
@@ -260,7 +257,7 @@ def _read_csv(filename='', fid=None, **kwargs):
         _delimiter = ';'
         try:
             d = np.loadtxt(f, delimiter=_delimiter)
-        except:
+        except Exception:
             # in french, very often the decimal '.' is replaced by a
             # comma:  Let's try to correct this
             if not isinstance(f, StringIO):
@@ -272,7 +269,7 @@ def _read_csv(filename='', fid=None, **kwargs):
             fil = StringIO(txt)
             try:
                 d = np.loadtxt(fil, delimiter=delimiter)
-            except:
+            except Exception:
                 raise IOError(
                     '{} is not a .csv file or its structure cannot be recognized')
 

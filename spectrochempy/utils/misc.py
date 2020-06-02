@@ -18,7 +18,8 @@ __all__ = [
     "TYPE_FLOAT",
     "HAS_PANDAS",
     "HAS_XARRAY",
-
+    "EPSILON",
+    "INPLACE",
     "make_new_object",
     "getdocfrom",
     "dict_compare",
@@ -43,11 +44,9 @@ import os
 import numpy as np
 import sys
 from contextlib import contextmanager
-import inspect
 import functools
 from datetime import datetime
 import uuid
-import warnings
 
 #
 # constants
@@ -56,15 +55,21 @@ TYPE_INTEGER = (int, np.int_, np.int32, np.int64)
 TYPE_FLOAT = (float, np.float_, np.float32, np.float64)
 TYPE_COMPLEX = (complex, np.complex_, np.complex64, np.complex128)
 
+EPSILON = epsilon = np.finfo(float).eps
+"Minimum value before considering it as zero value"
+
+INPLACE = "INPLACE"
+"Flag used to specify inplace slicing"
+
 try:
-    import pandas as pd
+    import pandas as pd    # noqa: F401
 
     HAS_PANDAS = True
 except ImportError:
     HAS_PANDAS = False
 
 try:
-    import xarray as xr
+    import xarray as xr    # noqa: F401
 
     HAS_XARRAY = True
 except ImportError:
@@ -132,7 +137,7 @@ except ImportError:
 
 class _DummyFile(object):
     """
-    A noop writeable object.
+    A writeable object.
 
     """
 
@@ -240,7 +245,7 @@ def makedirs(newdir):
     if os.path.isdir(newdir):
         pass
     elif os.path.isfile(newdir):
-        raise OSError("a file with the same name as the desired " \
+        raise OSError("a file with the same name as the desired "
                       "dir, '%s', already exists." % newdir)
     else:
         head, tail = os.path.split(newdir)
@@ -366,18 +371,18 @@ def srepr(arg):
     return repr(arg)
 
 
-def makestr(l):
+def makestr(li):
     """
     make a string from a list of string
 
     """
 
-    if is_sequence(l):
-        l = " ".join(map(str, l))
-    l = l.replace('$', '')
-    l = l.replace(' ', '\ ')
-    l = r'$%s$' % l
-    return l
+    if is_sequence(li):
+        li = " ".join(map(str, li))
+    li = li.replace('$', '')
+    li = li.replace(' ', r'\ ')
+    li = r'$%s$' % li
+    return li
 
 
 def primefactors(n):
@@ -397,7 +402,7 @@ def spacing(arr):
     """
     Return a scalar for the spacing in the one-dimensional input array (if it is uniformly spaced,
     else return an array of the different spacings
-    
+
     Parameters
     ----------
     arr : 1D np.array
@@ -405,7 +410,7 @@ def spacing(arr):
     Returns
     -------
     out : float or array
-    
+
     """
     spacings = np.diff(arr)
     # we need to take into account only the significative digits ( but round to some decimals doesn't work
