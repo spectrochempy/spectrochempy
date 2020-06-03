@@ -12,7 +12,9 @@ __all__ = ['find_peaks']
 __dataset_methods__ = __all__
 
 import scipy.signal
+import numpy as np
 from datetime import datetime
+
 
 """wrappers of scipy.signal peak finding functions"""
 
@@ -25,7 +27,7 @@ from datetime import datetime
 
 def find_peaks(X, height=None, threshold=None, distance=None,
                prominence=None, width=None, wlen=None, rel_height=0.5,
-               plateau_size=None):
+               plateau_size=None, use_coord=True):
     """
     Wrapper of scpy.signal.find_peaks(). Find peaks inside a 1D NDDataset based on peak properties.
     This function finds all local maxima by simple comparison of neighbouring values. Optionally, a subset of these
@@ -59,30 +61,38 @@ def find_peaks(X, height=None, threshold=None, distance=None,
         Required width of peaks in samples. Either a number, ``None``, an array
         matching `x` or a 2-element sequence of the former. The first
         element is always interpreted as the  minimal and the second, if
-        supplied, as the maximal required width.
-    wlen : int, optional
+        supplied, as the maximal required width. Floats are interpreted as width
+        measured along the 'x' Coord; ints are interpreted as a number of points
+    wlen : int or float, optional
         Used for calculation of the peaks prominences, thus it is only used if
-        one of the arguments `prominence` or `width` is given. See argument
-        `wlen` in `peak_prominences` for a full description of its effects.
-    rel_height : float, optional
+        one of the arguments `prominence` or `width` is given. Floats are interpreted
+        as measured along the 'x' Coord; ints are interpreted as a number of points.
+        See argument len` in `peak_prominences` of the scipy documentation for a full
+         description of its effects.
+    rel_height : float, optional,
         Used for calculation of the peaks width, thus it is only used if `width`
-        is given. See argument  `rel_height` in `peak_widths` for a full
-        description of its effects.
+        is given. See argument  `rel_height` in `peak_widths` of the scipy documentation
+        for a full description of its effects.
     plateau_size : number or ndarray or sequence, optional
         Required size of the flat top of peaks in samples. Either a number,
         ``None``, an array matching `x` or a 2-element sequence of the former.
         The first element is always interpreted as the minimal and the second,
-        if supplied as the maximal required plateau size.
-
+        if supplied as the maximal required plateau size. Floats are interpreted
+        as measured along the 'x' Coord; ints are interpreted as a number of points.
+    use_coord : bool, optional
+        Set whether the x Coord (when it exists) should be used instead of indices
+        for the positions and width
+    
     Returns
     -------
     peaks : ndarray
         Indices of peaks in `x` that satisfy all given conditions.
+    
     properties : dict
         A dictionary containing properties of the returned peaks which were
         calculated as intermediate results during evaluation of the specified
         conditions:
-
+    
         * peak_heights
               If `height` is given, the height of each peak in `x`.
         * left_thresholds, right_thresholds
@@ -116,13 +126,13 @@ def find_peaks(X, height=None, threshold=None, distance=None,
 
     See Also
     --------
-    find_peaks_cwt:
+    find_peaks_cwt in scipy.signal:
         Find peaks using the wavelet transformation.
-    peak_prominences:
+    peak_prominences in scipy.signal:
         Directly calculate the prominence of peaks.
-    peak_widths:
+    peak_widths in scipy.signal:
         Directly calculate the width of peaks.
-
+    
     Notes
     -----
     In the context of this function, a peak or local maximum is defined as any
@@ -134,7 +144,7 @@ def find_peaks(X, height=None, threshold=None, distance=None,
     signal before searching for peaks or use other peak finding and fitting
     methods (like `find_peaks_cwt`).
     Some additional comments on specifying conditions:
-
+    
     * Almost all conditions (excluding `distance`) can be given as half-open or
       closed intervals, e.g ``1`` or ``(1, None)`` defines the half-open
       interval :math:`[1, \\infty]` while ``(None, 1)`` defines the interval
@@ -159,17 +169,58 @@ def find_peaks(X, height=None, threshold=None, distance=None,
     if X.ndim > 2 or (X.ndim == 2 and len(X.y) > 1):
         raise ValueError("Works only for 1D NDDataset or a 2D NDdataset with `len(X.y) <= 1`")
 
+    # if the following parameters are entered as floats, the coordinates are used. Else, they will
+    # be treated as indices as in scipy.signal.find_peak()
+
+    # transform coord (if exists) to index
+    if use_coord and X.coords is not None:
+        step = np.abs(X.x.data[-1] - X.x.data[0])/(len(X.x) - 1)
+
+        if isinstance(distance, float):
+            distance = int(round(distance / step))
+
+        if isinstance(width, float):
+            width = int(round(width / step))
+
+        if isinstance(wlen, float):
+            wlen = int(round(wlen / step))
+
+        if isinstance(plateau_size, float):
+            plateau_size = int(round(plateau_size / step))
+
     peaks, properties = scipy.signal.find_peaks(X.data.squeeze(), height=height, threshold=threshold,
                                                 distance=distance, prominence=prominence, width=width, wlen=wlen,
                                                 rel_height=rel_height, plateau_size=plateau_size)
 
+    # transform back index to coord
+    if use_coord and X.coords is not None:
+        for key in ('left_bases', 'right_bases', 'left_edges', 'right_edges'):  # values are int type
+            if key in properties:
+                properties[key] = properties[key].astype('float64')
+                for i, index in enumerate(properties[key]):
+                    properties[key][i] = X.x.data[int(index)]
+
+        for key in ('left_ips', 'right_ips'):  # values are float type
+            if key in properties:
+                for i, ips in enumerate(properties[key]):
+                    # interpolate coord
+                    floor = int(np.floor(ips))
+                    properties[key][i] = X.x.data[floor] + (ips - floor) * (X.x.data[floor + 1] - X.x.data[floor])
+
+        if 'widths' in properties:
+            for i in range(len(properties['widths'])):
+                properties['widths'][i] = np.abs(properties['left_ips'][i] - properties['right_ips'][i])
+
+        if 'plateau_sizes' in properties:
+            properties['plateau_sizes'] = properties['plateau_sizes'].astype('float64')
+            for i in range(len(properties['plateau_sizes'])):
+                properties['plateau_sizes'][i] = np.abs(properties['left_edges'][i] - properties['right_edges'][i])
+
     if X.ndim == 1:
         out = X[peaks]
-    if X.ndim == 2:
+    else:  # ndim == 2
         out = X[:, peaks]
 
-    # Todo: check why slicing by indexes removes the x coord
-    out.x = X.x[peaks]
     out.name = 'peaks of ' + X.name
     out.history[-1] = str(datetime.now()) + f': find_peaks(): {len(peaks)} peak(s) found'
 

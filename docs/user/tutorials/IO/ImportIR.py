@@ -31,14 +31,13 @@ import os
 # # 1. Supported fileformats
 #
 # At the time of writing of this tutorial (Scpy v.0.1.18), spectrochempy has the following readers which are specific
-# to IR
-# data:
+# to IR data:
 #
 # - `read_omnic()` to open omnic (spa and spg) files
 # - `read_bruker_opus()` to open Opus (*.0, ...) files
 # - `read_jdx()` to open an IR JCAMP-DX datafile
 #
-# General purpose data exchange formats such as  \*.csv or \*.mat can also be read using:
+# General purpose data exchange formats such as  \*.csv or \*.mat will be treated in another tutorial (yet to come...) can also be read using:
 #
 # - `read_csv()` to open csv files
 # - `read_matlab()` to open .mat files
@@ -51,7 +50,7 @@ import os
 # - .spa files that handle single spectra
 # - .spg files which contain a group of spectra
 #
-# Both have been reverse engineered, hence allowing extracting key data. The Omnic reader of
+# Both have been reverse engineered, hence allowing extracting their key data. The Omnic reader of
 #  Spectrochempy (`read_omnic()`) has been developed based on posts in open forums on the .spa
 #  file format and extended to .spg file formats.
 #
@@ -62,7 +61,7 @@ import os
 # its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
-X = scp.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
+X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')
 X
 
 # %% [markdown]
@@ -119,7 +118,7 @@ print(X.units)
 #
 # - the `y` dimension contains:
 #
-#     - one coordinate mede of the 19 acquisition timestamps
+#     - one coordinate made of the 19 acquisition timestamps
 
 #
 
@@ -159,15 +158,15 @@ X.y
 # minutes of the last spectrum is:
 
 # %%
-_ = X[-1].y.data[0]  # the last items of a table can be refered by negative indexes
-# the values of the Coord object are accessed through the `data` attribute
-# whiche is a ndarray, hence the final [0] to have the value:
+tf = X[-1].y.data[0]  # the last items of an array can be refered by negative indexes
+                      # the values of the Coord object are accessed through the `data` attribute 
+                      # which is a ndarray, hence the final [0] to have the value:
 
 # %% [markdown]
 # which gives the exact time in seconds:
 
 # %%
-_ * 60  # the underscore _ recalls the last output.
+tf * 60           
 
 # %% [markdown]
 # Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
@@ -184,7 +183,7 @@ X.y
 # original OMNIC order can be kept using the `sortbydate=True` at the function call. For instance:
 
 # %%
-X2 = scp.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'), order=False)
+X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', sortbydate=False)
 
 # %% [markdown]
 # In the present case this will not change nothing because the spectra in the OMNIC file wre already ordered by
@@ -194,7 +193,7 @@ X2 = scp.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'), order=False)
 # instance, the following will inverse the order of the first dimension:
 
 # %%
-X = X[::-1, :]  # reorders the NDDataset along the first dimension going backward
+X = X[::-1,:]  # reorders the NDDataset along the first dimension going backward
 X.y  # displays the `y` dimension
 
 # %% [markdown]
@@ -211,10 +210,10 @@ X.y  # displays the `y` dimension
 # %% [markdown]
 # ### b) Import of .spa files
 #
-# The import of a single follows exactly the same rules as that of the import of a group:
+# The import of a single spectrum follows exactly the same rules as that of the import of a group:
 
 # %%
-Y = scp.read_omnic(os.path.join('irdata', 'subdir', '7_CZ0-100 Pd_101.spa'))
+Y = scp.read_omnic('irdata/subdir/7_CZ0-100 Pd_101.spa')
 Y
 
 # %% [markdown]
@@ -225,8 +224,7 @@ Y
 
 # %%
 list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.spa", "7_CZ0-100 Pd_103.spa", "7_CZ0-100 Pd_104.spa"]
-directory = os.path.join(scp.general_preferences.datadir, "irdata", "subdir")
-X = scp.read_omnic(list_files, directory=directory)
+X = scp.read_omnic(list_files, directory='irdata/subdir')
 print(X)
 
 # %% [markdown]
@@ -234,7 +232,7 @@ print(X)
 # that will gather the .spa files together:
 
 # %%
-X = scp.read_dir(directory, recursive=False)
+X = scp.read_dir('irdata/subdir')
 print(X)
 
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
@@ -243,7 +241,7 @@ print(X)
 # [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/
 # opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_opus()`)
 # of spectrochempy is essentially a wrapper of the python module
-# [brukeropusreader](https://github.com/qedsoftware/brukeropusreader) developed by QED. It imports absorbance
+# [brukeropusreader](https://github.com/spectrochempy/brukeropusreader) developed by QED. It imports absorbance
 # spectra (the AB block), acquisition times and name of spectra.
 #
 # The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence, one can open sample
@@ -282,8 +280,7 @@ Z3['Optik']  # looks what is the Optik block:
 # AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in
 # Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details).
 #
-# The reader hase been essentially developed to read again the jcamp-dx files exported by spectrochempy
-# `write_jdx()` writer.
+# The JCAMP-DX reader of spectrochempy has been essentially written to read again the jcamp-dx files exported by spectrochempy `write_jdx()` writer.
 #
 # Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 

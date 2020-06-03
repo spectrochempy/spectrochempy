@@ -18,8 +18,7 @@
 # %% [markdown] {"pycharm": {"is_executing": false, "name": "#%% md\n"}}
 # # Import Data
 #
-# This tutorial shows how to import data in Spectrochempy. First, let's import spectrochempy as scp in the current
-# namespace, so that all spectrochempy commands will be called as ```scp.method(<method parameters>)```.
+# This tutorial shows how to import data in Spectrochempy. First, let's import spectrochempy as scp in the current namespace, so that all spectrochempy commands will be called as ```scp.method(<method parameters>)```.
 
 # %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"is_executing": false, "name": "#%%\n"}}
 import spectrochempy as scp
@@ -62,8 +61,7 @@ print(X)
 # select any file (e.g. by pressing 'cancel' in th Dialog Box, the result will be `None`, as nothing has been loaded
 # in `X`.
 #
-# > Note: By default the Dialog Box opens in the current directory, i.e. the directory in which this notebook is run.
-# See below for more information
+# > Note: By default the Dialog Box opens in the current directory, i.e. the directory in which this notebook is run. See below for more information 
 #
 #
 # - At the time of writing this tutorial (Scpy v.0.1.18), the following commands will behave similarly:
@@ -90,21 +88,16 @@ print(X)
 # the following command:
 #
 # ```
-# X = scp.read_omnic(directory='C:\\')
+# X = scp.read_omnic(directory='C:/')
 # ```
 #
 # will open the dialog box at the root directory of the `C:` drive.
 
 #
-# > Note that in this command, the backslash (`\`) is repeated twice. This is a specificity of python
-# (and a handful of other languages): `\` is the escape character, so if you type `X = read_omnic(directory='C:\')`,
-# a `SyntaxError` will be raised because python expects a character after the first `\`.
-#
-# On the other hand if a `filename` is passed, like here:
-
+# On the other hand if a `filename` is passed, like here: 
 #
 # ```
-# X = scp.read_omnic('wodger.spg', directory='C:\\')
+# X = scp.read_omnic('wodger.spg', directory='C:/')
 # ```
 #
 # then Scpy will attempt opening a file named `wodger.spg` supposedly located in `C:\`.
@@ -115,17 +108,17 @@ print(X)
 # commands are all equivalent and will allow opening the file:
 
 #
-# - using only the full pathname of the file (note once again, the double backslashes):
+# - using only the full pathname of the file:
 #
 #     ```
-#     X = scp.read_omnic('C:\\users\\Brian\\s\\Life\\wodger.spg')
+#     X = scp.read_omnic('C:/users/Brian/s/Life/wodger.spg')
 #     ```
 #
 # - or using a combination of directory and file pathnames:
 #
 #     ```
-#     X = scp.read_omnic('wodger.spg', directory='C:\\users\\Brian\\s\\Life'
-#     X = scp.read_omnic('Life\\wodger.spg', directory='C:\\users\\Brian\\s')
+#     X = scp.read_omnic('wodger.spg', directory='C:/users/Brian/s/Life'
+#     X = scp.read_omnic('Life/wodger.spg', directory='C:/users/Brian/s')
 #     ```
 #
 
@@ -164,7 +157,7 @@ print(X)
 # by the command:
 #
 # ```
-# X = scp.read_omnic('Life\\wodger.spg'))
+# X = scp.read_omnic('Life/wodger.spg'))
 # ```
 #
 # or:
@@ -206,7 +199,7 @@ print(scp.general_preferences.datadir)
 # It can be set to another pathname *permanently* (i.e. even after computer restart) by a new assignment:
 #
 # ```
-# general_preferences.datadir = 'C:\\Brian\\s\\Life'`
+# general_preferences.datadir = 'C:/Brian/s/Life'`
 # ```
 #
 # This will change the default value in the spectrochempy preference file located in the hidden folder
