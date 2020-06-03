@@ -82,17 +82,17 @@ def find_peaks(X, height=None, threshold=None, distance=None,
     use_coord : bool, optional
         Set whether the x Coord (when it exists) should be used instead of indices
         for the positions and width
-    
+
     Returns
     -------
     peaks : ndarray
         Indices of peaks in `x` that satisfy all given conditions.
-    
+
     properties : dict
         A dictionary containing properties of the returned peaks which were
         calculated as intermediate results during evaluation of the specified
         conditions:
-    
+
         * peak_heights
               If `height` is given, the height of each peak in `x`.
         * left_thresholds, right_thresholds
@@ -132,7 +132,7 @@ def find_peaks(X, height=None, threshold=None, distance=None,
         Directly calculate the prominence of peaks.
     peak_widths in scipy.signal:
         Directly calculate the width of peaks.
-    
+
     Notes
     -----
     In the context of this function, a peak or local maximum is defined as any
@@ -144,7 +144,7 @@ def find_peaks(X, height=None, threshold=None, distance=None,
     signal before searching for peaks or use other peak finding and fitting
     methods (like `find_peaks_cwt`).
     Some additional comments on specifying conditions:
-    
+
     * Almost all conditions (excluding `distance`) can be given as half-open or
       closed intervals, e.g ``1`` or ``(1, None)`` defines the half-open
       interval :math:`[1, \\infty]` while ``(None, 1)`` defines the interval
