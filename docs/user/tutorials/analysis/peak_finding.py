@@ -197,17 +197,17 @@ properties
 # %%
 ax = s.plot()
 plt.plot(peaks.x, peaks.data[0,0], 'v', color='green') # plots the  maximum
-idleft, idright = properties['left_bases'][0],  properties['right_bases'][0] # inedexes of left and right bases
-for index in (idleft, idright):
-    plt.axvline(s.x[index].data, linestyle='--')   # add vertical line at the bases 
-    plt.plot(s.x[index].data, s.data[0,index].T, 'v', color='red')  # and a red mark
+wl, wr = properties['left_bases'][0],  properties['right_bases'][0] # wavenumbres of of left and right bases
+for w in (wl, wr):
+    plt.axvline(w, linestyle='--')   # add vertical line at the bases 
+    plt.plot(w, s[0,w].T, 'v', color='red')  # and a red mark
 ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
 
 # %% [markdown]
 # It leads to base marks at their expected locations. We can further check that the prominence of the peak is defined as the difference between its height and the highest base, here the 'right_base':
 
 # %%
-print("calc. prominence={:f}".format((peaks - s[:,idright]).data[0,0]))  # peaks is a NDDataset with a single value (the peak height)
+print("calc. prominence={:f}".format((peaks - s[:,wr]).data[0,0]))  # peaks is a NDDataset with a single value (the peak height)
                                          # s[:,idright]  is a NDDataset with a single value: intensity at the index of the right_base (see above)  
                                          # both are 2-dimensional (wavenumber and time): [0,0] is required to get the data.
 
@@ -222,7 +222,7 @@ print("calc. prominence={:f}".format((peaks - s[:,idright]).data[0,0]))  # peaks
 peak, prop = s.find_peaks(height=0.2, prominence=0)
 print("prominence with full spectrum: {:f}".format(prop['prominences'][0]))
 
-peak, prop = s.find_peaks(height=0.2, prominence=0, wlen=50)
+peak, prop = s.find_peaks(height=0.2, prominence=0, wlen=50.0)  # a float should be explicitely passed, else will be considered as points
 print("prominence with reduced window: {:f}".format(prop['prominences'][0]))
 
 # %% [markdown]
@@ -251,14 +251,14 @@ prop
 # extraction of data (for better readbility pof the code below)
 height = prop['peak_heights'][0]
 width_height =prop['width_heights'][0]
-left_idx  = int(round(prop['left_ips'][0]))  # round and cast to integer
-right_idx = int(round(prop['right_ips'][0])) # round and cast to integer
+wl  = prop['left_ips'][0] 
+wr =  prop['right_ips'][0]
 
 s.plot()
 plt.axhline(height, linestyle='--', color='blue')
 plt.axhline(width_height, linestyle='--', color='red')
-plt.axvline(s.x[left_idx].data[0], linestyle='--', color='green')
-plt.axvline(s.x[right_idx].data[0], linestyle='--', color='green')
+plt.axvline(wl, linestyle='--', color='green')
+plt.axvline(wr, linestyle='--', color='green')
 plt.show()
 
 # %% [markdown]
@@ -278,7 +278,7 @@ s = X[-1]    # define a single-row NDDataset
 height = 0.2       # minimal height or min and max heights) 
 prominence = 0.0   # minimal prominence or min and max prominences
 width = 0.0        # minimal width or min and max widths  
-threshold = 0.0    # minimal threshold or min and max threshold)  
+threshold = None   # minimal threshold or min and max threshold)  
 
 # prominence and width parameter
 wlen = None         # the length of the window used to compute the prominence
@@ -289,17 +289,15 @@ peak, prop = s.find_peaks(height=height, prominence=prominence, wlen=wlen,
                           threshold=threshold, width=width, rel_height=rel_height)
 s.plot()
 plt.plot(peak.x, peak.data[0,0], 'v', color='blue') 
-idleft, idright = prop['left_bases'][0],  prop['right_bases'][0] 
-for index in (idleft, idright):
-    plt.plot(s.x[index].data, s.data[0,index].T, 'v', color='red')  
-plt.axvline(s.x[int(round(prop['left_ips'][0]))].data[0], linestyle='--', color='green')
-plt.axvline(s.x[int(round(prop['right_ips'][0]))].data[0], linestyle='--', color='green')
+for w in (prop['left_bases'][0],  prop['right_bases'][0]):
+    plt.plot(w, s[0,w].data.T, 'v', color='red')  
+for w in (prop['left_ips'][0],  prop['right_ips'][0]):    
+    plt.axvline(w, linestyle='--', color='green')
 plt.show()
 
+print('{:>16}: {:<8.4f}'.format("peak_maximum", peak.x.data[0]))
 for key in prop:
-    print('{:>16}: {:<8.4f}'.format(key, prop[key][0]))
-
-# %%
+    print('{:>16}: {:<8.4f}'.format(key[:-1], prop[key][0]))
 
 # %% [markdown]
 # -- this is the end of this tutorial --
