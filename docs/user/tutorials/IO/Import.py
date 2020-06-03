@@ -51,7 +51,7 @@ print(X)
 
 # %% [markdown]
 # If successful, the output of the above cell should read something like
-
+#
 #
 # ```
 # Out[2] NDDataset: [float32] a.u. (shape: (y:2, x:5549))
@@ -72,9 +72,9 @@ print(X)
 #     - `read_matlab()` to open MATLAB (.mat) files including Eingenvector's Dataset objects
 #     - `read_omnic()` to open omnic (spa and spg) files
 #
-
 #
-
+#
+#
 # - The list of readers available will hopefully increase in future **Scpy** releases:-)
 
 # %% [markdown]
@@ -92,7 +92,7 @@ print(X)
 # ```
 #
 # will open the dialog box at the root directory of the `C:` drive.
-
+#
 #
 # On the other hand if a `filename` is passed, like here: 
 #
@@ -101,12 +101,12 @@ print(X)
 # ```
 #
 # then Scpy will attempt opening a file named `wodger.spg` supposedly located in `C:\`.
-
+#
 #
 # Imagine now that the file of interest is actually located in `C:\users\Brian\s\Life`. The following
-
+#
 # commands are all equivalent and will allow opening the file:
-
+#
 #
 # - using only the full pathname of the file:
 #
@@ -121,7 +121,7 @@ print(X)
 #     X = scp.read_omnic('Life/wodger.spg', directory='C:/users/Brian/s')
 #     ```
 #
-
+#
 # - etc...
 #
 # # 4. A good practice: use relative paths
@@ -133,14 +133,11 @@ print(X)
 # ```
 # C:\users
 # |    +-- Brian
-
 # |    |    +-- s
-
 # |    |    |   +-- Life
-
 # |    |    |   |   +-- wodger.spg
 # |    |    |   +-- welease.ipynb
-
+#
 # ```
 #
 # Then running this project in John's Linux computer (e.g. in `\home\john\s_copy`) will certainly result in execution
@@ -149,7 +146,7 @@ print(X)
 # ```
 # OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
 # ```
-
+#
 #
 # In this respect, a good practice consists in using relative pathnames in scripts/notebooks and fortunately,
 # Spectrochempy readers use relative paths. If the given path is not absolute, then spectrochempy will search
@@ -171,14 +168,14 @@ print(X)
 # As `os`is automatically imported with Scpy, we mention the following methods that can be particularely useful:
 #
 # - `os.getcwd()`: returns the absolute path of the current working directory (i.e. the directory of the script)
-
+#
 # - `os.path.expanduser("~")` : returns the home directory of the user (e.g. the `C:\users\<username>` path on WIN
 # platforms or `/home/<username>` on linux)
 # - `os.path.join()`: concatenates intelligently path components.
 #
-
+#
 # The interested readers will find more details on te use of these modules here:
-
+#
 #
 # - [os - Miscellaneous operating system interfaces](https://docs.python.org/3/library/os.html)
 # - [pathlib — Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
@@ -213,7 +210,7 @@ print(scp.general_preferences.datadir)
 #    3. try in `datadir`
 #    4. if none of these works: generate an OSError (file or directory not found)
 #
-
+#
 #
 
 # %% [markdown]

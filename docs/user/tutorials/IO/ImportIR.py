@@ -54,7 +54,7 @@ import os
 #  Spectrochempy (`read_omnic()`) has been developed based on posts in open forums on the .spa
 #  file format and extended to .spg file formats.
 #
-
+#
 # ## a) import spg file
 #
 # Let's import an .spg file from the `datadir` (see [Import Tutorial](Import.ipynb)) and display
@@ -111,26 +111,22 @@ print(X.units)
 # - `shape` is the same as the ndarray `shape` attribute and gives the shape of the data array, here 19 x 3112.
 #
 # Then come the attributes related to the dimensions of the dataset.
-
+#
 #
 # - the `x` dimension has one coordinate made of the 3112 the wavenumbers.
-
+#
 #
 # - the `y` dimension contains:
 #
 #     - one coordinate made of the 19 acquisition timestamps
-
 #
-
 #     - two labels
 #
-
 #         - the acquision date (UTC) of each spectrum
 #
-
 #         - the name of each spectrum.
 #
-
+#
 # Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,j]` will return
 # the absorbance of the ith spetrum at the jth  wavenumber.
 #
