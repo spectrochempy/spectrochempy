@@ -15,7 +15,6 @@ In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide
 """
 
 import spectrochempy as scp
-import matplotlib.pyplot as plt
 import os
 
 ########################################################################################################################

@@ -32,8 +32,8 @@ ndOH = nd[54, 3700.:3400.]
 ndOH.plot()
 
 ########################################################################
-## Perform a Fit
-#  Fit parameters are defined in a script (a single text as below)
+# Perform a Fit
+# Fit parameters are defined in a script (a single text as below)
 
 
 script = """
@@ -47,7 +47,7 @@ script = """
 # common block parameters should not have a _ in their names
 #-----------------------------------------------------------
 #
-        
+
 COMMON:
 # common parameters ex.
 # $ gwidth: 1.0, 0.0, none
@@ -68,7 +68,7 @@ shape: assymvoigtmodel
     > ratio: gratio
     $ assym: 0.1, 0, 1
     $ width: 200, 0, 1000
-        
+
 """
 
 ##############################################################################

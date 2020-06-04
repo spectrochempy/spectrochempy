@@ -18,7 +18,8 @@
 # %% [markdown] {"pycharm": {"is_executing": false, "name": "#%% md\n"}}
 # # Import Data
 #
-# This tutorial shows how to import data in Spectrochempy. First, let's import spectrochempy as scp in the current namespace, so that all spectrochempy commands will be called as ```scp.method(<method parameters>)```.
+# This tutorial shows how to import data in Spectrochempy. First, let's import spectrochempy as scp in the current
+# namespace, so that all spectrochempy commands will be called as ```scp.method(<method parameters>)```.
 
 # %% {"jupyter": {"outputs_hidden": false}, "pycharm": {"is_executing": false, "name": "#%%\n"}}
 import spectrochempy as scp
@@ -61,7 +62,8 @@ print(X)
 # select any file (e.g. by pressing 'cancel' in th Dialog Box, the result will be `None`, as nothing has been loaded
 # in `X`.
 #
-# > Note: By default the Dialog Box opens in the current directory, i.e. the directory in which this notebook is run. See below for more information 
+# > Note: By default the Dialog Box opens in the current directory, i.e. the directory in which this notebook is run.
+# See below for more information
 #
 #
 # - At the time of writing this tutorial (Scpy v.0.1.18), the following commands will behave similarly:
@@ -94,7 +96,7 @@ print(X)
 # will open the dialog box at the root directory of the `C:` drive.
 #
 #
-# On the other hand if a `filename` is passed, like here: 
+# On the other hand if a `filename` is passed, like here:
 #
 # ```
 # X = scp.read_omnic('wodger.spg', directory='C:/')
@@ -104,7 +106,6 @@ print(X)
 #
 #
 # Imagine now that the file of interest is actually located in `C:\users\Brian\s\Life`. The following
-#
 # commands are all equivalent and will allow opening the file:
 #
 #

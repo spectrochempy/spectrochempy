@@ -8,8 +8,7 @@
     creates a modules index (named modules.<suffix>).
 
     This is derived from the "sphinx-autopackage" script, which is :
-    Copyright 2008 Société des arts technologiques (SAT),
-    http://www.sat.qc.ca/
+    Copyright 2008 Société des arts technologiques (SAT), http://www.sat.qc.ca/
 
     :copyright: Copyright 2007-2017 by the Sphinx team, see AUTHORS .
     :license: BSD, see LICENSE_SPHINX for details.
@@ -215,10 +214,10 @@ def create_api_files(rootpath, opts):
     """)
 
     lconsts = [":%s: %s\n" % m for m in members if
-           type(m[1]) in [int, float, str, bool, tuple]]
+               type(m[1]) in [int, float, str, bool, tuple]]
     lclasses = []
     classes = [m[0] for m in members if
-           inspect.isclass(m[1]) and not type(m[1]).__name__ == 'type']
+               inspect.isclass(m[1]) and not type(m[1]).__name__ == 'type']
     for klass in classes:
         if klass not in opts.exclude_patterns:
             name = "{project}.{klass}".format(project=project, klass=klass)

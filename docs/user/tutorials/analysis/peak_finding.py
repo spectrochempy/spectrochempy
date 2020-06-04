@@ -26,8 +26,8 @@ import spectrochempy as scp
 import matplotlib.pyplot as plt  # will be used for some plots
 
 # %% [markdown]
-# Second, import and plot a typical IR dataset (CO adsorption on supported CoMo catalyst in the 2300-1900 cm-1 region) that
-# will be used throughout:
+# Second, import and plot a typical IR dataset (CO adsorption on supported CoMo catalyst in the 2300-1900 cm-1 region)
+# that will be used throughout:
 
 # %%
 X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
@@ -37,14 +37,14 @@ X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
 #
 # The use of the "magic command" `%matplotlib widget` in a notebook triggers the plotting of interactive plots
 # integrated in the notebook with basic tools to navigate inside the plot. As shown below from top to bottom of the
-# side bar: 
-# - hide/show the tools, 
-# - reset view ('home'), 
-# - previous view ('left arrow'), 
+# side bar:
+# - hide/show the tools,
+# - reset view ('home'),
+# - previous view ('left arrow'),
 # - next view ('right arrow),
-# - move ('arrow cross') 
-# - zoom ('rectangle'), 
-# - save image ('floppy disc'). 
+# - move ('arrow cross'),
+# - zoom ('rectangle'),
+# - save image ('floppy disc').
 #
 # Another possibility is to use `%matplotlib qt` instead. In this case, the plot is generated
 #
@@ -56,23 +56,25 @@ X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
 ax = X.plot(cmap='Dark2')
 
 # %% Once a given maximum has been approximately located manually with the mouse, it is possible to obtain [markdown]
-# For instance, after zooming on the highest peak of the last spectrum, 
-# one finds that it is locate at ~ 2115.5 cm$^{-1}$. The exact coordinate can the be obtained using the following code (
-# see the [slicing tutorial](../processing/slicing.ipynb) for more info):
+# For instance, after zooming on the highest peak of the last spectrum,
+# one finds that it is locate at ~ 2115.5 cm$^{-1}$. The exact coordinate can the be obtained using the following code
+# (see the [slicing tutorial](../processing/slicing.ipynb) for more info):
 
 # %%
-X.x[2115.5].data[0]  # X.x[2115.5] returns a Coord object of 1 element,
-                     # which value is accessed through the data attribute (a ndarray), which value is
-                     # is the first (and only) element indexed '0'
+# X.x[2115.5] returns a Coord object of 1 element, its data attribute is a ndarray which first (and only) element
+# is indexed '0':
+X.x[2115.5].data[0]
 
 # %% [markdown]
-# The value of the absorbance can be also obtained using: 
+# The value of the absorbance can be also obtained using:
 
 # %%
 X[-1, 2115.5].data[0, 0]
 
 # %% ### Note: on Magics Technically, a "magic command", invoked by the % sign, controls the behaviour of [markdown]
-# IPython itself.  In the present case (`%matplotlib widget`), a particular matplotlib backend is triggered *once and
+# #### Note on "magics"
+# A 'magic command' introduced with the % sign  are enhancements added over the normal python code. In the
+# present case (`%matplotlib widget`), a particular matplotlib backend is triggered *once and
 # for all in the current ipython session*. The only way to change it back to the previous one (`%matplotlib inline`
 # which is the default) requires restarting the Ipython Kernel in the menu of Jupyter.
 #
@@ -81,7 +83,7 @@ X[-1, 2115.5].data[0, 0]
 # in particular for complex plots.
 
 # %% [markdown]
-# ## 2 find maxima with an automated method: `find_peaks()` 
+# ## 2 find maxima with an automated method: `find_peaks()`
 #
 # Exploring the spectra manually is useful, but cannot be made systematically in large datasets with many - possibly
 # shifting peaks. The maxima of a given spectrum can be found automatically by the find_peaks() method which is based
@@ -118,7 +120,7 @@ for s in X:  # loop over rows (= spectra)
         plt.plot(peaks.x, peaks.data.T, 'v', color='black')
 
 # %% [markdown]
-# It should be noted that this method finds only true maxima, not shoulders (!). For the detection of such undrelying
+# It should be noted that this method finds only true maxima, not shoulders (!). For the detection of such underlying
 # peaks, the use of methods based on derivatives or advanced detection methods - which will be treated in separate
 # tutorial - are required. Once ther maxima of a given peak have been found, it is possible, for instance,
 # to plot its evolution with, e.g. the time. For instance for the peaks located at 2220-2180 cm$^{-1}$:
@@ -127,7 +129,7 @@ for s in X:  # loop over rows (= spectra)
 maxwn = []  # empty list, will contain wavenumbers at the maximum
 for s in X:  # loop over  spectra
     peak, prop = s[:, 2220.:2180.].find_peaks()  # find peak
-    maxwn.append(peak.x.data[0])  # append the wavenumber 
+    maxwn.append(peak.x.data[0])  # append the wavenumber
 
 time = (X.y - X.y[0]).to("minute").data  # return a ndarray of time in minutes, relative to the 1st spectrum
 
@@ -143,23 +145,23 @@ plt.show()
 # The default behaviour of find_peaks() will return *all* the detected maxima. The user can choose various options to
 # select among these peaks:
 #
-# **Parameters relative to "peak intensity":** 
-# - `height`: minimal required height of the peaks (single number) or minimal and maximal heights 
-# (sequence of two numbers) 
+# **Parameters relative to "peak intensity":**
+# - `height`: minimal required height of the peaks (single number) or minimal and maximal heights
+# (sequence of two numbers)
 # - `prominence`: minimal prominence of the peak to be detected
 # (single number) or minimal and maximal prominence (sequence of 2 numbers). In brief the "prominence" of a peak
 # measures how much a peak stands out from its surrounding and is the vertical distance between the peak and its
 # lowest "contour line". It should not be confused with the height as a peak can have an important height but a small
-# prominence when surronded by other peaks (see below for an illustration). 
-#     - in addition to the prominence, the user can define `wlen`, the width (in points) of the window used to look 
-#     at neighboring minima, the peak maximum being is at the center of the window. 
+# prominence when surronded by other peaks (see below for an illustration).
+#     - in addition to the prominence, the user can define `wlen`, the width (in points) of the window used to look
+#     at neighboring minima, the peak maximum being is at the center of the window.
 # - `threshold`: a single number (the minimal required threshold) or a sequence of two numbers (minimal and maximal).
 # The thresholds are the difference of height of the
 # maximum with its two neighboring points (useful to detect spikes for instance)
 #
-# **Parameters relative to "peak spacing":** 
+# **Parameters relative to "peak spacing":**
 # - `distance`: the required minimal horizontal distance between neighbouring peaks. Smaller peaks are removed first.
-# - `width`: Required minimal width of peaks in samples (single number) or minimal and maximal width. The width is 
+# - `width`: Required minimal width of peaks in samples (single number) or minimal and maximal width. The width is
 # assessed from the peak height,
 # prominence and neighboring signal. - In addition the user can define `rel_height` (a float between 0. and 1. used
 # to compute the width - see the [scipy documentation](
@@ -185,7 +187,7 @@ peaks, properties = s.find_peaks(height=0.05)
 for peak in peaks:
     plt.plot(peaks.x, peaks.data.T + 0.05, 'v', color='blue')
 
-# find peaks heights between 0.05 and 0.2 (the highest peak won't be detected)     
+# find peaks heights between 0.05 and 0.2 (the highest peak won't be detected)
 peaks, properties = s.find_peaks(height=(0.05, 0.2))
 (s + 0.1).plot(clear=False)
 for peak in peaks:
@@ -200,10 +202,11 @@ for peak in peaks:
 # find peaks with distance >= 10 (only tht highest of the two maxima at ~ 2075 is detected)
 peaks, properties = s.find_peaks(distance=10)
 (s + 0.20).plot(clear=False)
-for peak in peaks: plt.plot(peaks.x, peaks.data.T + 0.20, 'v', color='green')
+for peak in peaks:
+    plt.plot(peaks.x, peaks.data.T + 0.20, 'v', color='green')
 
 # find peaks with width >= 10 (none of the two maxima at ~ 2075 is detected)
-peaks, properties = s.find_peaks(width=10);
+peaks, properties = s.find_peaks(width=10)
 (s + 0.25).plot(clear=False)
 for peak in peaks:
     plt.plot(peaks.x, peaks.data.T + 0.25, 'v', color='grey')
@@ -215,7 +218,7 @@ for peak in peaks:
 # used in `find_peaks()`. They can be obtained (and used) by passing the parameters `height`, `prominence`,
 # `threshold`  and `width`. Then `find_peaks()` will return the corresponding properties of the detected peaks in the
 # `properties` dictionary.
-#   
+#
 # #### Prominence
 #
 # The prominence of a peak can be defined as the vertical distance from the peak’s maximum to the *lowest horizontal
@@ -233,13 +236,14 @@ peaks, properties = s.find_peaks(height=(0.15, 0.22), prominence=0)
 properties
 
 # %% The actual prominence of the peak is this 0.0689, a value significantly lower that is peak height ( [markdown]
-# The peak prominence is 0.0689, a much lower value than the height (0.1995), as could be expected by the illustration above. 
+# The peak prominence is 0.0689, a much lower value than the height (0.1995), as could be expected by the illustration
+# above.
 #
-# The algorithm used to determine the left and right 'bases' is illustrated below: 
+# The algorithm used to determine the left and right 'bases' is illustrated below:
 # - (1) extend a line to the left and right of the maximum until until it reaches the window border (here on
-# the left) or the signal (here on the right. 
+# the left) or the signal (here on the right.
 # - (2) find the minimum value within the intervals defined above. These
-# points are the peak's bases. 
+# points are the peak's bases.
 # - (3) use the higher base (here the right base) and peak maximum to calculate the
 # prominence.
 #
@@ -257,18 +261,20 @@ for w in (wl, wr):
 ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
 
 # %% It leads to base marks at their expected locations. We can further check that the prominence of the [markdown]
-# We can check that the correct value of the peak prominence is obtained by the difference between its height 
+# We can check that the correct value of the peak prominence is obtained by the difference between its height
 # and the highest base, here the 'right_base':
 
 # %%
-print("calc. prominence={:f}".format((peaks - s[:, wr]).data[0, 0]))  
+print("calc. prominence={:f}".format((peaks - s[:, wr]).data[0, 0]))
 
 # %% Finally, we illustrate how the use of the `wlen` parameter - which limits the search of the "base [markdown]
-# Finally, the figure below shows how the prominence can be affected by `wlen`, the size of the window used to determine the peaks' bases.
+# Finally, the figure below shows how the prominence can be affected by `wlen`, the size of the window used to
+#  determine the peaks' bases.
 #
 # <img src="figures/prominence_wlen.png" alt="prominence_def" width="700" align="center" />
 #
-# As illustrated above a reduction of the window should reduce the prominence of the peak. This impact can be checked with the code below:
+# As illustrated above a reduction of the window should reduce the prominence of the peak. This impact can be checked
+# with the code below:
 
 # %%
 peak, prop = s.find_peaks(height=0.2, prominence=0)
@@ -282,9 +288,9 @@ print("prominence with reduced window: {:f}".format(prop['prominences'][0]))
 # #### Width
 
 # %% The peak widths, as returned by `find_peaks()` can be *very approximate* and for precise assessment, [markdown]
-# The find_peaks() method also returns the peak widths. As we will see below, the method is **very approximate** and 
-# more advanced methods (such as peak fitting, also implemented in spectrochempy - see [this example](
-# https://www.spectrochempy.fr/dev/gallery/auto_examples/fitting/plot_fit.html#sphx-glr-gallery-auto-examples-fitting
+# The find_peaks() method also returns the peak widths. As we will see below, the method is **very approximate** and
+# more advanced methods (such as peak fitting, also implemented in spectrochempy - see [this example]
+# (https://www.spectrochempy.fr/dev/gallery/auto_examples/fitting/plot_fit.html#sphx-glr-gallery-auto-examples-fitting
 # -plot-fit-py) should be used. On the other hand, **the magnitude of the width is generally fine**.
 #
 # This estimate is based on an algorithm similar to that used for the "bases" above, except that the horizontal
@@ -319,7 +325,9 @@ plt.axvline(wr, linestyle='--', color='green')
 plt.show()
 
 # %% As stressed above, we see here that the peak width is very approximate and probably exaggerated in [markdown]
-# It is obvius here that the peak width is overestimated in the present case due to the presence of the second peak on the left. Here a better estimate would be obtained by considering the right half-width, or reducing the `rel_height` parameter as shown below.
+# It is obvious here that the peak width is overestimated in the present case due to the presence of the second peak on
+# the left. Here a better estimate would be obtained by considering the right half-width, or reducing the `rel_height`
+# parameter as shown below.
 
 # %% [markdown]
 # ### 2.4 A code snippet to display properties
@@ -331,8 +339,7 @@ plt.show()
 # user defined parameters ------------------------------
 
 s = X[-1]  # define a single-row NDDataset
-
-# peak selection parameters; should be set to return a single peak 
+# peak selection parameters; should be set to return a single peak
 height = 0.2  # minimal height or min and max heights)
 prominence = 0.0  # minimal prominence or min and max prominences
 width = 0.0  # minimal width or min and max widths
@@ -342,7 +349,7 @@ threshold = None  # minimal threshold or min and max threshold)
 wlen = None  # the length of the window used to compute the prominence
 rel_height = 0.47  # the fraction of the prominence used to compute the width
 
-# code: find peaks, plot and print properties -------------------      
+# code: find peaks, plot and print properties -------------------
 peak, prop = s.find_peaks(height=height, prominence=prominence, wlen=wlen,
                           threshold=threshold, width=width, rel_height=rel_height)
 s.plot()

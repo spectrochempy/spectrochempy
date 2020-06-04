@@ -15,9 +15,7 @@ equation.
 """
 # sphinx_gallery_thumbnail_number = 2
 
-import os
 import spectrochempy as scp
-from spectrochempy import show
 
 ##############################################################################
 # Let's take a similar example to the one given in the `numpy.linalg`
