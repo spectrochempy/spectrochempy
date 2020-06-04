@@ -41,7 +41,7 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
     inplace : bool, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new object
 
-        
+
     Returns
     -------
     out : same type as input dataset

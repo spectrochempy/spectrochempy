@@ -9,8 +9,8 @@
 """
 MCR ALS optimization example (original example from Jaumot)
 ------------------------------------------------------------
-In this example, we perform the MCR ALS optimization of a dataset 
-corresponding to a HPLC-DAD run, from Jaumot et al. Chemolab, 76 (2005), 
+In this example, we perform the MCR ALS optimization of a dataset
+corresponding to a HPLC-DAD run, from Jaumot et al. Chemolab, 76 (2005),
 pp. 101-110 and Jaumot et al. Chemolab, 140 (2015) pp. 1-12.
 This dataset (and others) can be loaded from the "Multiovariate Curve Resolution Homepage"
 at https://mcrals.wordpress.com/download/example-data-sets.

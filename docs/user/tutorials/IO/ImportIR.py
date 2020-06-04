@@ -37,7 +37,8 @@ import os
 # - `read_bruker_opus()` to open Opus (*.0, ...) files
 # - `read_jdx()` to open an IR JCAMP-DX datafile
 #
-# General purpose data exchange formats such as  \*.csv or \*.mat will be treated in another tutorial (yet to come...) can also be read using:
+# General purpose data exchange formats such as  \*.csv or \*.mat will be treated in another tutorial (yet to come...)
+# can also be read using:
 #
 # - `read_csv()` to open csv files
 # - `read_matlab()` to open .mat files
@@ -54,7 +55,7 @@ import os
 #  Spectrochempy (`read_omnic()`) has been developed based on posts in open forums on the .spa
 #  file format and extended to .spg file formats.
 #
-
+#
 # ## a) import spg file
 #
 # Let's import an .spg file from the `datadir` (see [Import Tutorial](Import.ipynb)) and display
@@ -111,26 +112,22 @@ print(X.units)
 # - `shape` is the same as the ndarray `shape` attribute and gives the shape of the data array, here 19 x 3112.
 #
 # Then come the attributes related to the dimensions of the dataset.
-
+#
 #
 # - the `x` dimension has one coordinate made of the 3112 the wavenumbers.
-
+#
 #
 # - the `y` dimension contains:
 #
 #     - one coordinate made of the 19 acquisition timestamps
-
 #
-
 #     - two labels
 #
-
 #         - the acquision date (UTC) of each spectrum
 #
-
 #         - the name of each spectrum.
 #
-
+#
 # Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,j]` will return
 # the absorbance of the ith spetrum at the jth  wavenumber.
 #
@@ -158,15 +155,15 @@ X.y
 # minutes of the last spectrum is:
 
 # %%
-tf = X[-1].y.data[0]  # the last items of an array can be refered by negative indexes
-                      # the values of the Coord object are accessed through the `data` attribute 
-                      # which is a ndarray, hence the final [0] to have the value:
+# the last item of a NDDataset such as X can be referred by a negative index (-1). The values of the Coord object
+# are accessed through the `data` attribute which is a ndarray, hence the final [0] to have the value:
+tf = X[-1].y.data[0]
 
 # %% [markdown]
 # which gives the exact time in seconds:
 
 # %%
-tf * 60           
+tf * 60
 
 # %% [markdown]
 # Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
@@ -193,7 +190,7 @@ X2 = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG', sortbydate=False)
 # instance, the following will inverse the order of the first dimension:
 
 # %%
-X = X[::-1,:]  # reorders the NDDataset along the first dimension going backward
+X = X[::-1, :]  # reorders the NDDataset along the first dimension going backward
 X.y  # displays the `y` dimension
 
 # %% [markdown]
@@ -280,7 +277,8 @@ Z3['Optik']  # looks what is the Optik block:
 # AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for Exchange of Infrared Spectra in
 # Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 fo details).
 #
-# The JCAMP-DX reader of spectrochempy has been essentially written to read again the jcamp-dx files exported by spectrochempy `write_jdx()` writer.
+# The JCAMP-DX reader of spectrochempy has been essentially written to read again the jcamp-dx files exported by
+# spectrochempy `write_jdx()` writer.
 #
 # Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 

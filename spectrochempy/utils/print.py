@@ -22,12 +22,26 @@ def pstr(object, **kwargs):
 # ======================================================================================================================
 
 def TBold(text): return Style.BRIGHT + str(text) + Style.RESET_ALL
+
+
 def TRed(text): return Fore.RED + str(text) + Fore.RESET
+
+
 def TGreen(text): return Fore.GREEN + str(text) + Fore.RESET
+
+
 def TBlue(text): return Fore.BLUE + str(text) + Fore.RESET
+
+
 def TMagenta(text): return Fore.MAGENTA + str(text) + Fore.RESET
+
+
 def TYellow(text): return Fore.YELLOW + str(text) + Fore.RESET
+
+
 def TCyan(text): return Fore.CYAN + str(text) + Fore.RESET
+
+
 def TBlack(text): return Fore.BLACK + str(text) + Fore.RESET
 
 
@@ -86,7 +100,9 @@ def convert_to_html(obj):
     regex = r'\0{3}[\w\W]*?\0{3}'
 
     # noinspection PyPep8
-    def subst(match): return "<div>{}</div>".format(match.group(0).replace('\n', '<br/>').replace('\0', ''))
+    def subst(match):
+        return "<div>{}</div>".format(match.group(0).replace('\n', '<br/>').replace('\0', ''))
+
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
     regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"  # r"^(\W*\w+\W?\w+)(:.*$)"
@@ -104,15 +120,19 @@ def convert_to_html(obj):
     regex = r'\0{2}[\w\W]*?\0{2}'
 
     # noinspection PyPep8
-    def subst(match): return "<div><font color='darkcyan'>{}</font></div>".format(
-        match.group(0).replace('\n', '<br/>').replace('\0', ''))
+    def subst(match):
+        return "<div><font color='darkcyan'>{}</font></div>".format(
+            match.group(0).replace('\n', '<br/>').replace('\0', ''))
+
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
     regex = r'\0{1}[\w\W]*?\0{1}'
 
     # noinspection PyPep8
-    def subst(match): return "<div><font color='blue'>{}</font></div>".format(
-        match.group(0).replace('\n', '<br/>').replace('\0', ''))
+    def subst(match):
+        return "<div><font color='blue'>{}</font></div>".format(
+            match.group(0).replace('\n', '<br/>').replace('\0', ''))
+
     out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
     regex = r'\.{3}\s+\n'
@@ -330,30 +350,30 @@ def numpyprintoptions(precision=4, threshold=6, edgeitems=2, suppress=True,
             el = str(x)[2:].split('_')
             typ = el[0].lower()
             if 'int' in typ:
-                fmt = "{:>{l}s}".format('--', l=precision + spc)
+                fmt = "{:>{lspace}s}".format('--', lspace=precision + spc)
             elif 'float' in typ:
-                fmt = "{:>{l}s}".format('--', l=2 * precision - 4 + spc)
+                fmt = "{:>{lspace}s}".format('--', lspace=2 * precision - 4 + spc)
             elif 'complex' in typ:
-                fmt = "{:>{l}s}".format('--', l=4 * precision - 8 + spc)
+                fmt = "{:>{lspace}s}".format('--', lspace=4 * precision - 8 + spc)
             else:
                 fmt = 'n.d.'
 
         elif isinstance(x, TYPE_FLOAT):
-            fmt = '{:{l}.0{prec}g}'.format(
+            fmt = '{:{lspace}.0{prec}g}'.format(
                 x,
                 prec=precision,  # - 1,
-                l=precision + spc)
+                lspace=precision + spc)
 
         elif isinstance(x, TYPE_COMPLEX):
-            fmt = '{:{l}.0{prec}g}{:+{lc}.0{prec}g}j'.format(
+            fmt = '{:{lspace}.0{prec}g}{:+{lc}.0{prec}g}j'.format(
                 x.real, x.imag, prec=precision - 1,
-                l=precision + spc,
+                lspace=precision + spc,
                 lc=precision)
 
         elif isinstance(x, TYPE_INTEGER):
-            fmt = '{:>{l}d}'.format(
+            fmt = '{:>{lspace}d}'.format(
                 x,
-                l=precision + spc)
+                lspace=precision + spc)
 
         else:
             fmt = '  {}'.format(x)

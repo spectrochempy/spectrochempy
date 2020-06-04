@@ -33,7 +33,7 @@ S, LT = pca.reduce(n_pc='auto')
 
 print(LT)
 
-###############################################################@
+###############################################################
 # Finally, display the results graphically
 #
 # ScreePlot

@@ -16,25 +16,25 @@
 # %% [markdown]
 # # Peak integration
 #
-# This tutorial shows how to find peak maxima and determine peak areas with spectrochempy. As prerequisite, the user is
-# expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),  [slicing](../process/slicing.ipynb) and [baseline corrrection](../process/baseline_correct.ipynb) tutorials. 
+# This tutorial shows how to find peak maxima and determine peak areas with spectrochempy. As prerequisite,
+# the user is expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
+# [slicing](../process/slicing.ipynb) and [baseline correction](../process/baseline_correct.ipynb) tutorials.
 #
 # First lets import the modules that will be used in this tutorial
 
 # %%
-import spectrochempy as scp           
-import matplotlib.pyplot as plt  # will be used for some plots 
+import spectrochempy as scp
+import matplotlib.pyplot as plt  # will be used for some plots
 
 # %%
-X = scp.read_omnic("irdata//nh4y-activation.SPG")[:20,1200.0:1900.]
+X = scp.read_omnic("irdata//nh4y-activation.SPG")[:20, 1200.0:1900.]
 subplot1 = X.plot(cmap='Dark2')
 
 # %%
-X2 = X[:,1800.0:1550.]
+X2 = X[:, 1800.0:1550.]
 blc = scp.BaselineCorrection(X2)
-X2corr = blc.compute([1800.,1740.0], [1570.,1550.])    # compute the corrected NDDataset 
+X2corr = blc.compute([1800., 1740.0], [1570., 1550.])  # compute the corrected NDDataset
 subplot5 = X2corr.plot()
-
 
 # %%
 areas = X2corr.trapz()
@@ -43,6 +43,5 @@ areas = X2corr.trapz()
 
 
 # %%
-temps = (X.y - X.y[0]).to("minute")
-temps
-plt.plot(temps.data, aires)
+time = (X.y - X.y[0]).to("minute")
+plt.plot(time.data, areas)
