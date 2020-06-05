@@ -1,4 +1,4 @@
-name: scpy-test-py3.6
+name: scpy3.6
 channels:
   - conda-forge
   - spectrocat
@@ -34,3 +34,9 @@ dependencies:
   # testing required
   - pytest
   - scikit-image
+  - coverage
+
+  # deploy
+  - conda-build
+  - conda-verify
+  - anaconda-client

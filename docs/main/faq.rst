@@ -1,7 +1,8 @@
 .. _faq:
 
 ..
-    todo we could just make a link to redmine FAQ forum?
+
+To read FAQ, please go to `GitHub FAQ pages <https://github.com/spectrochempy/spectrochempy/wiki/FAQ>`_.
 
 Frequently Asked Questions (FAQ)
 =================================
