@@ -75,4 +75,4 @@ new4.plot(data_only=True, color='g', clear=False, label=' qsin with ssb= 1')
 curve5.plot(color='c', ls='--', clear=False)
 new5.plot(data_only=True, color='c', ls='--', clear=False, label=' sinm with ssb= 8', legend='best')
 
-scp.show()
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

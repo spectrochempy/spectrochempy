@@ -60,4 +60,4 @@ mcr.St.plot()
 # an residuals. The fit is good and comparable with the original paper.
 X_hat = mcr.plotmerit()
 
-# show() # uncomment to show plot if needed()
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

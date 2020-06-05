@@ -92,3 +92,5 @@ both.T.plot(yscale="log")
 
 c = efa.get_conc(n_pc)
 c.T.plot()
+
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

@@ -74,3 +74,5 @@ lst = scp.LSTSQ(d)
 
 v, d0 = lst.transform()
 print('speed : {:.3fK},  d0 : {:.3fK}'.format(v, d0))
+
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

@@ -82,4 +82,5 @@ new.plot(method='stack')
 ##################################################################
 # Note that the scp allows one to use this syntax too:
 scp.plot_stack(new)
-scp.show()  # uncomment to show plot if needed()
+
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

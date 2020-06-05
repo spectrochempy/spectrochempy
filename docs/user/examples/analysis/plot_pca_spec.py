@@ -53,4 +53,4 @@ _ = pca.scoreplot(1, 2, 3)
 
 LT[:4].plot_stack()
 
-# show() # uncomment to show plot if needed()
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
