@@ -16,8 +16,6 @@ __all__ = [
     "TYPE_INTEGER",
     "TYPE_COMPLEX",
     "TYPE_FLOAT",
-    "HAS_PANDAS",
-    "HAS_XARRAY",
     "EPSILON",
     "INPLACE",
     "make_new_object",
@@ -60,21 +58,6 @@ EPSILON = epsilon = np.finfo(float).eps
 
 INPLACE = "INPLACE"
 "Flag used to specify inplace slicing"
-
-try:
-    import pandas as pd    # noqa: F401
-
-    HAS_PANDAS = True
-except ImportError:
-    HAS_PANDAS = False
-
-try:
-    import xarray as xr    # noqa: F401
-
-    HAS_XARRAY = True
-except ImportError:
-    HAS_XARRAY = False
-
 
 def make_new_object(obj):
     """

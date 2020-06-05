@@ -40,7 +40,7 @@ def test_svd(IR_dataset_2D):
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
     dataset[10:12] = MASKED
 
-    ax = dataset.plot_stack()
+    dataset.plot_stack()
 
     svd = SVD(dataset)
 
@@ -58,7 +58,7 @@ def test_svd(IR_dataset_2D):
     dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
     dataset[10:12] = MASKED
 
-    ax = dataset.plot_stack()
+    dataset.plot_stack()
 
     svd = SVD(dataset, full_matrices=True)
 

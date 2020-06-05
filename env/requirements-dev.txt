@@ -36,8 +36,8 @@ pyqt
 
 # for testing
 pytest
-pytest-runner
 pytest-cov
+pytest-flake8
 pytest-xdist
 scikit-image
 

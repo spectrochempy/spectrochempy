@@ -7,22 +7,17 @@
 
 #
 from copy import copy, deepcopy
-from datetime import datetime
 from quaternion import as_quat_array, as_float_array, quaternion
 import numpy as np
 import pytest
 
-from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray
 from spectrochempy.core import info_, print_
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
-                                         raises, catch_warnings,
                                          assert_approx_equal)
 
 # TODO: a lot of repetition - must be simplified with some logics
-
-import numpy as np
 
 typequaternion = np.dtype(np.quaternion)
 
@@ -66,14 +61,14 @@ def test_ndcomplex_init_quaternion_error1():
     # test with complex data in all dimension but odd number of comlumn (should raise an error
     d = np.random.random((3, 3)) * np.exp(.1j)
     with pytest.raises(ValueError):
-        d0 = NDComplexArray(d, dtype=typequaternion)  # with units & mask
+        NDComplexArray(d, dtype=typequaternion)  # with units & mask
 
 
 def test_ndcomplex_init_quaternion_error2():
     # test with complex data in all dimension but odd number of rows(should raise an error
     d = np.random.random((3, 4))
     with pytest.raises(ValueError):
-        d0 = NDComplexArray(d, dtype=typequaternion)  # with units & mask
+        NDComplexArray(d, dtype=typequaternion)  # with units & mask
 
 
 def test_ndcomplex_init_complex_with_copy_of_ndarray():
@@ -184,8 +179,6 @@ def test_ndcomplex_real_imag():
     np.random.seed(12345)
     d = np.random.random((2, 2)) * np.exp(.1j)
     d3 = NDComplexArray(d)
-    d3r = d3.real
-    d3i = d3.imag
     new = d3.copy()
     new.data = d3.real.data + 1j * d3.imag.data
     assert_equal(d3.data, new.data)

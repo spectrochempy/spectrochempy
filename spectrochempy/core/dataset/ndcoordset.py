@@ -24,13 +24,13 @@ import uuid
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
 import numpy as np
+import pandas as pd
 from traitlets import HasTraits, List, Bool, Unicode, observe, All, validate, default, Dict
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
-from spectrochempy.core import HAS_PANDAS  # , HAS_XARRAY, info_, debug_, error_, warning_
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import is_sequence, colored_output, convert_to_html
 
@@ -594,11 +594,6 @@ class CoordSet(HasTraits):
             than more dimension.
 
         """
-        if HAS_PANDAS:
-            import pandas as pd
-        else:
-            raise ImportError('Cannot perform this conversion as Pandas is not installed.')
-
         if len(self) == 0:
             raise ValueError('no valid index for a 0-dimensional object')
 

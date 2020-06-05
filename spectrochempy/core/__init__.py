@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import scipy
-from tqdm.autonotebook import tqdm
+from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
@@ -214,15 +214,15 @@ except Exception:
 # we put them before so that we can eventually overwrite them
 
 _pbar_update(1)
-from IPython.core.display import *          # noqa: E402,F403,F401
-from IPython.core import display            # noqa: E402
+#from IPython.core.display import *          # noqa: E402,F403,F401
+#from IPython.core import display            # noqa: E402
 
-__all__.extend(display.__all__)
+#__all__.extend(display.__all__)
 
-from IPython.lib.display import *           # noqa: E402,F401,F403
-from IPython.lib import display             # noqa: E402
+#from IPython.lib.display import *           # noqa: E402,F401,F403
+#from IPython.lib import display             # noqa: E402
 
-__all__.extend(display.__all__)
+#__all__.extend(display.__all__)
 
 """
 This packages contains most of the core methods expose in the spectrochempy API.
@@ -234,48 +234,6 @@ from spectrochempy.utils import show, MASKED, NOMASK, EPSILON, INPLACE  # noqa: 
 
 __all__ += ['show', 'MASKED', 'NOMASK', 'EPSILON', 'INPLACE']
 
-# optional libraries
-# ----------------------------------------------------------------------------------------------------------------------
-
-try:
-    import sympy as sym    # noqa: E402, F401
-
-    HAS_SYMPY__ = True
-    __all__.append('sym')
-except ImportError:
-    HAS_SYMPY = True
-
-__all__.append('HAS_SYMPY')
-
-try:
-    import sklearn as skl      # noqa: E402, F401
-
-    HAS_SCIKITLEARN = True
-    __all__.append('skl')
-except ImportError:
-    HAS_SCIKITLEARN = False
-
-__all__.append('HAS_SCIKITLEARN')
-
-try:
-    import xarray as xr         # noqa: E402, F401
-
-    HAS_XARRAY = True
-    __all__.append('xr')
-except ImportError:
-    HAS_XARRAY = False
-
-__all__.append('HAS_XARRAY')
-
-try:
-    import pandas as pd         # noqa: E402, F401
-
-    HAS_PANDAS = True
-    __all__.append('pd')
-except ImportError:
-    HAS_PANDAS = False
-
-__all__.append('HAS_PANDAS')
 
 # dataset
 # ----------------------------------------------------------------------------------------------------------------------

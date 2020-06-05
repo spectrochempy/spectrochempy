@@ -19,8 +19,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
-from spectrochempy.core import info_, debug_, warning_, error_, print_
-from spectrochempy import *
+from spectrochempy.core import info_, print_
 
 from pint.errors import (UndefinedUnitError, DimensionalityError)
 from spectrochempy.utils import (MASKED, NOMASK, TYPE_FLOAT, TYPE_INTEGER,
@@ -1502,7 +1501,7 @@ def test_nddataset_apply_funcs(IR_dataset_1D):
     out = np.ma.array(IR_dataset_1D)
     IR_dataset_1D[1] = MASKED
     out = np.ma.array(IR_dataset_1D)
-    out = array(IR_dataset_1D)
+    out = np.array(IR_dataset_1D)
 
     print(out)
 

@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
-
 # ======================================================================================================================
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
-#
-"""
-
-"""
 
 from copy import copy
 
@@ -101,7 +95,7 @@ def test_coord():
 
     # but coordinates must be 1D
 
-    with pytest.raises(ValueError) as e_info:
+    with pytest.raises(ValueError):
         # should raise an error as coords must be 1D
         Coord(data=np.ones((2, 10)))
 
@@ -307,13 +301,12 @@ def test_coord_slicing():
 # ----------------------------------------------------------------------------------------------------------------------
 
 # first operand has units km, second is a scalar with units m
-@pytest.mark.parametrize(('operation', 'result_units'),
-                         [
+@pytest.mark.parametrize(('operation', 'result_units'), [
                              ('__add__', ur.km),
                              ('__sub__', ur.km),
                              ('__mul__', ur.km * ur.m),
                              ('__truediv__', ur.km / ur.m)
-                         ]
+                          ]
                          )
 def test_coord_unit_conversion_operators_a(operation, result_units):
     print(operation, result_units)
@@ -379,4 +372,4 @@ def test_coord_not_implemented(name):
                    mask=None,
                    title='wavelength')
     with pytest.raises(NotImplementedError):
-        f = getattr(coord0, name)()
+        getattr(coord0, name)()

@@ -8,8 +8,7 @@
 Tests for general issues
 
 """
-from spectrochempy.core.analysis import PCA
-from spectrochempy.core.readers import read_omnic
+from spectrochempy import PCA, read_omnic
 
 
 def _test_issue_15():

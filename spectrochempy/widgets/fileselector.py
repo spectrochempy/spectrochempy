@@ -39,17 +39,7 @@ import os
 
 __all__ = ['FileSelector', 'URLSelector']
 
-try:
-
-    import ipywidgets as widgets
-
-except ImportError:
-
-    class FileSelector(object):
-        def __repr__(self):
-            raise RuntimeError("Please install ipywidgets to use the "
-                               "FileSelector")
-
+import ipywidgets as widgets
 
 @contextmanager
 def ignore(ob):

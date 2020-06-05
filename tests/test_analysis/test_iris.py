@@ -30,10 +30,10 @@ def test_IRIS():
     # and plot the results
 
     param = {
-            'epsRange':    [-8, -1, 20],
-            'lambdaRange': [-7, -5, 3],
-            'kernel':      'langmuir'
-            }
+             'epsRange':    [-8, -1, 20],
+             'lambdaRange': [-7, -5, 3],
+             'kernel':      'langmuir'
+             }
 
     X_ = X[:, 2250.:1950.]
     X_.plot()

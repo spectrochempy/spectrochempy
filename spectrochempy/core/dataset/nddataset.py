@@ -14,29 +14,16 @@ This module implements the |NDDataset| class.
 
 __all__ = ['NDDataset']
 
-# ======================================================================================================================
-# Standard python imports
-# ======================================================================================================================
-
-# import itertools
 import textwrap
-from datetime import datetime
 import warnings
 from collections import OrderedDict
-# import re
+from datetime import datetime
 
-# ======================================================================================================================
-# third-party imports
-# ======================================================================================================================
-
-import numpy as np
-from traitlets import (HasTraits, List, Unicode, Instance, Bool, All, Float,
-                       validate, observe, default)
 import matplotlib.pyplot as plt
-
-# ======================================================================================================================
-# Local imports
-# ======================================================================================================================
+import numpy as np
+import pandas as pd
+from pandas.core.generic import NDFrame
+from traitlets import HasTraits, List, Unicode, Instance, Bool, All, Float,  validate, observe, default
 
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.core.project.baseproject import AbstractProject
@@ -47,21 +34,27 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndmath import NDMath, set_operators, make_func_from
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
-from spectrochempy.core import HAS_XARRAY, HAS_PANDAS,  error_, warning_
-from spectrochempy.utils import (colored_output, SpectroChemPyWarning, SpectroChemPyException, get_user_and_node,
-                                 docstrings)
+from spectrochempy.core import error_, warning_
+from spectrochempy.utils import colored_output, SpectroChemPyException, get_user_and_node, docstrings, \
+    SpectroChemPyWarning
 
+HAS_XARRAY = False
+try:
+    import xarray as xr
+    HAS_XARRAY = True
+except ImportError:
+    pass
 
 # ======================================================================================================================
 # NDDataset class definition
 # ======================================================================================================================
 
 class NDDataset(
-    NDIO,
-    NDPlot,
-    NDMath,
-    NDComplexArray,
-):
+        NDIO,
+        NDPlot,
+        NDMath,
+        NDComplexArray,
+        ):
     """
     The main N-dimensional dataset class used by |scpy|.
 
@@ -417,9 +410,10 @@ class NDDataset(
                     idx = self._get_dims_index(coord.name)[0]  # idx in self.dims
                     if size != self._data.shape[idx]:
                         raise ValueError(
-                            f'the size of a coordinates array must None or be equal'
-                            f' to that of the respective `{coord.name}`'
-                            f' data dimension but coordinate size={size} != data shape[{idx}]={self._data.shape[idx]}')
+                                f'the size of a coordinates array must None or be equal'
+                                f' to that of the respective `{coord.name}`'
+                                f' data dimension but coordinate size={size} != data shape[{idx}]='
+                                f'{self._data.shape[idx]}')
                 else:
                     pass  # bypass this checking for any other derived type (should be done in the subclass)
 
@@ -516,13 +510,9 @@ class NDDataset(
         # see comment in the data.setter of NDArray
         super()._set_data(data)
 
-        if HAS_PANDAS:
-
-            from pandas.core.generic import NDFrame
-
-            if isinstance(data, NDFrame):  # and hasattr(self, "coords"):  # case of the NDDataset subclass
-                coords = [Coord(item.values, title=item.name) for item in data.axes]
-                self.set_coords(*coords)
+        if isinstance(data, NDFrame):  # and hasattr(self, "coords"):  # case of the NDDataset subclass
+            coords = [Coord(item.values, title=item.name) for item in data.axes]
+            self.set_coords(*coords)
 
     # .................................................................................................................
     @property
@@ -609,8 +599,10 @@ class NDDataset(
         _dict = {}
         for index, dim in enumerate(self.dims):
             if dim not in _dict:
-                _dict[dim] = {'size': self.shape[index],
-                              'coord': getattr(self, dim)}
+                _dict[dim] = {
+                        'size':  self.shape[index],
+                        'coord': getattr(self, dim)
+                        }
         return _dict
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -933,13 +925,6 @@ class NDDataset(
         Each rows holds a different observation.
 
         """
-        if not HAS_PANDAS:
-            warnings.warn('Pandas is not available! This function can not be used',
-                          SpectroChemPyWarning)
-            return None
-
-        import pandas as pd
-
         columns = [self.title]  # title
         data = [self.data.reshape(-1)]
         index = self._coords.to_index()
@@ -1005,12 +990,10 @@ class NDDataset(
         #     include '_FillValue', 'scale_factor', 'add_offset', 'dtype',
         #     'units' and 'calendar' (the later two only for datetime arrays).
         #     Unrecognized keys are ignored.
-        if not HAS_XARRAY:
-            warnings.warn('Xarray is not available! This function can not be used',
-                          SpectroChemPyWarning)
-            return None
 
-        import xarray as xr
+        if not HAS_XARRAY:
+            warnings.warn('Xarray is not available! This function can not be used', SpectroChemPyWarning)
+            return None
 
         x, y = self.x, self.y
         tx = x.title
@@ -1139,8 +1122,8 @@ class NDDataset(
 
         if self._coords is None:
             raise SpectroChemPyException(
-                'No coords have been defined. Slicing or selection'
-                ' by location ({}) needs coords definition.'.format(loc))
+                    'No coords have been defined. Slicing or selection'
+                    ' by location ({}) needs coords definition.'.format(loc))
 
         coord = self.coord(dim)
 
@@ -1191,6 +1174,7 @@ class NDDataset(
         self._modified = datetime.now()
 
         return
+
 
 # ======================================================================================================================
 # module function

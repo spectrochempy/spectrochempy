@@ -4,24 +4,11 @@
 # ======================================================================================================================
 
 import os
-import pandas as pd
-import pytest
+
 import numpy as np
-from numpy.random import rand
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.units import ur, Quantity
-from spectrochempy.core import info_, debug_, warning_, error_, print_
-from spectrochempy import *
-
-from pint.errors import (UndefinedUnitError, DimensionalityError)
-from spectrochempy.utils import (MASKED, NOMASK, TYPE_FLOAT, TYPE_INTEGER,
-                                 Meta, SpectroChemPyException)
-from spectrochempy.utils.testing import (assert_equal, assert_array_equal, raises, RandomSeedContext)
-
-from quaternion import quaternion
+from spectrochempy import read_omnic
+from spectrochempy.units import ur
 
 typequaternion = np.dtype(np.quaternion)
 

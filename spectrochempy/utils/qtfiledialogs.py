@@ -2,30 +2,24 @@
 
 __all__ = []
 
-# TODO: put a tk version to avoid dependencies to PyQT
 
-HAS_QT = False
-try:
-    from PyQt5 import QtWidgets
+def QFileDialog():
 
-    QFileDialog = QtWidgets.QFileDialog
-    HAS_QT = True
-except ImportError:
-    pass
-
-
-def _noqt():
-    from spectrochempy.core import error_
-    error_('PyQT is necessary for this function, but PyQT is not installed. \n'
+    try:
+        from PyQt5 import QtWidgets
+        return QtWidgets.QFileDialog
+    except ImportError:
+        raise ImportError('PyQT is necessary for this function, but PyQT is not installed. \n'
            'Run "conda install pyqt -y" to solve this issue. ')
-    return None
 
+QFileDialog = QFileDialog()
 
 def OpenExistingDirectory(parent=None,
                           caption='Select a folder',
                           directory=''):
-    if not HAS_QT:
-        return _noqt()
+
+    if QFileDialog is None:
+        return
 
     options = QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly
     directory = QFileDialog.getExistingDirectory(parent,
@@ -40,8 +34,9 @@ def OpenFileName(parent=None,
                  directory='',
                  caption='Select file',
                  filters=["All Files (*)", "Text Files (*.txt)"]):
-    if not HAS_QT:
-        return _noqt()
+
+    if QFileDialog is None:
+        return
 
     options = QFileDialog.Options()
     options |= QFileDialog.AnyFile
@@ -60,8 +55,9 @@ def OpenMultipleFileNames(
         directory='',
         caption='Select file(s)',
         filters=["All Files (*)", "Text Files (*.txt)"]):
-    if not HAS_QT:
-        return _noqt()
+
+    if QFileDialog is None:
+        return
 
     options = QFileDialog.Options()
     # options |= QFileDialog.DontUseNativeDialog
@@ -78,8 +74,9 @@ def SaveFileName(parent=None,
                  filename='',
                  caption='Select file',
                  filters=["All Files (*)", "Text Files (*.txt)"]):
-    if not HAS_QT:
-        return _noqt()
+
+    if QFileDialog is None:
+        return
 
     options = QFileDialog.Options()
     # options |= QFileDialog.DontUseNativeDialog
@@ -120,8 +117,8 @@ def opendialog(single=True,
     """
     # gui = QtGui.QApplication(sys.argv)
 
-    if not HAS_QT:
-        return _noqt()
+    if QFileDialog is None:
+        return
 
     if filters == 'directory':
         if not caption:

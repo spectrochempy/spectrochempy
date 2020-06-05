@@ -23,18 +23,14 @@ __all__ = ["assert_equal",
            ]
 
 import os
-# import sys
 import functools
 import tempfile
 import warnings
-import nbformat
 import pytest
 import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
-from nbconvert.preprocessors import ExecutePreprocessor
-from nbconvert.preprocessors.execute import CellExecutionError
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_approx_equal, assert_raises)
 
@@ -209,55 +205,13 @@ class catch_warnings(warnings.catch_warnings):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Testing examples and notebooks in docs
+# Testing examples and notebooks (Py version) in docs
 # ----------------------------------------------------------------------------------------------------------------------
-
-# .............................................................................
-def notebook_run(path):
-    """
-    Execute a notebook via nbconvert and collect output.
-
-    returns
-    -------
-
-     results : (parsed nb object, execution errors)
-
-    """
-    import sys
-    # import subprocess
-
-    print(sys.version_info)
-    kernel_name = 'python%d' % sys.version_info[0]
-    this_file_directory = os.path.dirname(__file__)
-    errors = []
-
-    with open(path) as f:
-        nb = nbformat.read(f, as_version=4)
-        nb.metadata.get('kernelspec', {})['name'] = kernel_name
-        ep = ExecutePreprocessor(kernel_name=kernel_name,
-                                 timeout=10, allow_errors=True)
-
-        try:
-            ep.preprocess(nb, {'metadata': {'path': this_file_directory}})
-
-        except CellExecutionError as e:
-            if "SKIP" in e.traceback:
-                print(str(e.traceback).split("\n")[-2])
-            else:
-                raise e
-
-    return nb, errors
-
 
 # .............................................................................
 def example_run(path):
     import subprocess
 
-    try:
-        print('env', os.environ['CONDA_DEFAULT_ENV'])
-    except Exception:
-        pass
-        # debug_('no conda env')
     pipe = None
     try:
         pipe = subprocess.Popen(

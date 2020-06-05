@@ -33,6 +33,7 @@ dependencies:
 
   # testing required
   - pytest
+  - pytest-flake8
   - scikit-image
   - coverage
 

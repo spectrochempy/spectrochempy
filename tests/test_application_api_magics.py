@@ -7,7 +7,7 @@
 import pytest
 from subprocess import Popen, PIPE
 
-from spectrochempy import *
+from spectrochempy import APIref, set_loglevel, get_loglevel, warning_, version
 
 set_loglevel('WARNING')
 
