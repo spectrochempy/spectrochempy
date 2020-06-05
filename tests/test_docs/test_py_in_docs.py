@@ -11,13 +11,13 @@
 
 import pytest
 from glob import glob
-import os, sys
+import os
 
 from spectrochempy.utils.testing import example_run
 
 path = os.getcwd()
-path = path[:path.find('/tests')]
-
+if "/tests" in path:
+    path = path[:path.find('/tests')]
 
 @pytest.mark.parametrize('example', glob(os.path.join(path, 'docs', 'user', '**', '*.py'), recursive=True))
 def test_example(example):
