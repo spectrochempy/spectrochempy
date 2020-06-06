@@ -27,7 +27,7 @@ import spectrochempy as scp
 import matplotlib.pyplot as plt  # will be used for some plots
 
 # %%
-X = scp.read_omnic("irdata//nh4y-activation.SPG")[:20, 1200.0:1900.]
+X = scp.read_omnic("irdata/nh4y-activation.spg")[:20, 1200.0:1900.]
 subplot1 = X.plot(cmap='Dark2')
 
 # %%

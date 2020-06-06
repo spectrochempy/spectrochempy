@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt  # will be used for some plots
 # Now let's import and plot a typical IR dataset which wase recorded during the removal of amonia from a NH4-Y zeolite:
 
 # %%
-X = scp.read_omnic("irdata//nh4y-activation.SPG")
+X = scp.read_omnic("irdata//nh4y-activation.spg")
 subplot1 = X.plot()
 
 # %% [markdown]

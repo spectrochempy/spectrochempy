@@ -267,7 +267,7 @@ path = scp.general_preferences.datadir  # this is a path provided that point on 
 
 # %% hidden="true" jupyter={"source_hidden": true} nbsphinx="hidden"
 # THESE LINE IS JUST HERE FOR BUILDING THE DOCUMENTATION (IT SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
-path = '/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata'
+path = 'irdata'
 
 # %%
 fs = scp.FileSelector(path=path, filters=['spg', 'spa'])

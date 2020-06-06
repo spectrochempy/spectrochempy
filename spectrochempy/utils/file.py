@@ -130,7 +130,7 @@ def readfilename(filename=None, **kwargs):
                     _f = os.path.join(prefs.datadir, filename)
                     if not os.path.exists(_f):
                         raise IOError("Can't find  this filename %s in the specified directory "
-                                      "(or in the current one, or in the default data directory %s"
+                                      "(or in the current one, or in the default data directory `%s` "
                                       "if directory was not specified " % (filename, prefs.datadir))
             _filenames.append(_f)
 
