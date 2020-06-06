@@ -153,6 +153,7 @@ else:
 U_.define('__wrapped__ = 1')  # <- hack to avoid an error with pytest (doctest activated)
 U_.define('ppm = 1. = ppm')
 U_.define('absorbance = 1. = a.u.')
+U_.define('Kubelka_Munk = 1. = K.M.')
 
 U_.define(UnitDefinition('percent', 'pct', (), ScaleConverter(1 / 100.0)))
 U_.define(UnitDefinition('weight_percent', 'wt_pct', (), ScaleConverter(1 / 100.0)))
