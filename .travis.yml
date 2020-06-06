@@ -12,12 +12,15 @@ jobs:
   fast_finish: false
   include:
     - stage: pytest-linux
+      if: branch = master OR branch = feature/travis
       env:
         TEST=true
     - stage: conda-deploy
+      if: branch = master OR branch = feature/travis-deploy OR tag = /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
       env:
         DEPLOY=true
     - stage: build-docs
+      if: branch = master OR branch = feature/travis-docs OR tag = /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
       env:
         BUILDOCS=true
 
@@ -38,7 +41,7 @@ branches:
     - develop
     - /^release/.*$/
     - /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
-    - feature/travis
+    - /^feature/travis.*$/
 
 # use https://github.com/theochem/cgrid/blob/ac5d1e263b8f3fe0e659f908ab8bc849970ec24f/.travis.yml#L46-L54 method
 cache:
