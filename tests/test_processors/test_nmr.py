@@ -232,7 +232,7 @@ def test_nmr_multiple_auto_1D_phasing():
     show()
 
 
-##### 2D NMR ########
+# #### 2D NMR ########
 
 def test_nmr_reader_2D():
     path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')

@@ -32,7 +32,7 @@ def test_1D():
     try:
         assert same_images('IR_dataset_1D.png',
                            os.path.join(figures_dir, 'IR_dataset_1D.png'))
-    except:
+    except AssertionError:
         os.remove('IR_dataset_1D.png')
         raise AssertionError('comparison fails')
     os.remove('IR_dataset_1D.png')
@@ -74,7 +74,7 @@ def test_1D():
         assert same_images('multiple_IR_dataset_1D_scatter',
                            os.path.join(figures_dir,
                                         'multiple_IR_dataset_1D_scatter'))
-    except:
+    except AssertionError:
         os.remove('multiple_IR_dataset_1D_scatter.png')
         raise AssertionError('comparison fails')
     os.remove('multiple_IR_dataset_1D_scatter.png')

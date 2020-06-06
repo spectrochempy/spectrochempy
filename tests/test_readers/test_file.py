@@ -38,9 +38,9 @@ def test_readfilename_w_bad_filename():
     # should raise an error
     with pytest.raises(IOError):
         readfilename(os.path.expanduser("~/xxxx"),
-                         filetypes=["OMNIC files (*.sp*)",
-                                    "SpectroChemPy files (*.scp)",
-                                    "all files (*)"])
+                     filetypes=["OMNIC files (*.sp*)",
+                                "SpectroChemPy files (*.scp)",
+                                "all files (*)"])
 
 
 def test_readfilename_w_good_filename_in_tesdata():
