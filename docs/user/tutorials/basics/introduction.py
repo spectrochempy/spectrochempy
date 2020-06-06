@@ -276,9 +276,10 @@ fs = scp.FileSelector(path=path, filters=['spg', 'spa'])
 fs
 
 # %% nbsphinx="hidden"
-# THESE TWO LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION AND TESTING
+# THESE THREE LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION AND TESTING
 # THEY SHOULD BE COMMENTED FOR AN INTERACTIVE USE OF THIS TUTORIAL
-fs.fullpath = os.path.join(os.path.expanduser('~'),'irdata','CO@Mo_Al2O3.SPG')
+sop = scp.os.path
+fs.fullpath = sop.join(sop.expanduser('~'),'irdata','CO@Mo_Al2O3.SPG')
 fs.value = 'CO@Mo_Al2O3.SPG'
 
 # %%
