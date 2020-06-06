@@ -267,9 +267,10 @@ path = scp.general_preferences.datadir  # this is a path provided that point on 
 # It can be replaced by any other path you like
 
 # %% hidden="true" nbsphinx="hidden"
-# THESE LINE IS JUST HERE FOR BUILDING THE DOCUMENTATION AND TESTING
-# IT SHOULD BE COMMENTED FOR A INTERACTIVE USE OF THIS TUTORIAL)
-path = 'irdata'
+# THESE TWO LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION AND TESTING
+# ITHEY SHOULD BE COMMENTED FOR A INTERACTIVE USE OF THIS TUTORIAL)
+sop = scp.os.path
+path = sop.join(path, 'irdata')
 
 # %%
 fs = scp.FileSelector(path=path, filters=['spg', 'spa'])
@@ -278,8 +279,7 @@ fs
 # %% nbsphinx="hidden"
 # THESE THREE LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION AND TESTING
 # THEY SHOULD BE COMMENTED FOR AN INTERACTIVE USE OF THIS TUTORIAL
-sop = scp.os.path
-fs.fullpath = sop.join(sop.expanduser('~'),'irdata','CO@Mo_Al2O3.SPG')
+fs.fullpath = sop.join(path,'CO@Mo_Al2O3.SPG')
 fs.value = 'CO@Mo_Al2O3.SPG'
 
 # %%
