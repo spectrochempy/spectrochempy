@@ -10,7 +10,7 @@
 """This module to extend NDDataset with the import methods method.
 
 """
-__all__ = ['read_omnic']
+__all__ = ['read_omnic', 'read_spg', 'read_spa']
 
 __dataset_methods__ = __all__
 
@@ -26,6 +26,7 @@ import numpy as np
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.utils import readfilename, pathclean
 
 
@@ -104,6 +105,7 @@ def read_omnic(dataset=None, **kwargs):
     files = readfilename(filename,
                          directory=directory,
                          filetypes=['OMNIC files (*.spa, *.spg)',
+                                    'OMNIC series (*.srs)',
                                     'all files (*)'])
 
     if not files:
@@ -121,6 +123,10 @@ def read_omnic(dataset=None, **kwargs):
 
         elif extension == '.spa':
             datasets.append(_read_spa(dataset, files[extension], **kwargs))
+
+        if extension == '.srs':
+            for filename in files[extension]:
+                datasets.append(_read_srs(dataset, filename, **kwargs))
         else:
             # try another format!
             datasets = dataset.read(filename, protocol=extension[1:], sortbydate=sortbydate, **kwargs)
@@ -130,6 +136,16 @@ def read_omnic(dataset=None, **kwargs):
 
     # several datasets returned (only if several .spg files have been passed)
     return datasets
+
+
+# alias
+read_spg = read_omnic
+read_spa = read_omnic
+
+# make also classmethod
+NDIO.read_spg = read_omnic
+NDIO.read_spa = read_omnic
+
 
 # ======================================================================================================================
 # private functions
@@ -254,6 +270,8 @@ def _getintensities(f, pos):
     # Read and return spectral intensities
     f.seek(intensity_pos)
     return np.fromfile(f, 'float32', int(nintensities))
+
+
 # .............................................................................
 
 
@@ -590,6 +608,10 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset._date = datetime.now()
     dataset._modified = dataset.date
 
+    return dataset
+
+
+def _read_srs(dataset, filenames, **kwargs):
     return dataset
 
 
