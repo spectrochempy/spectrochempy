@@ -112,7 +112,7 @@ script:
     elif [[ $DEPLOY = true ]]; then
 
       chmod +x .ci/conda-upload.sh;
-      echo "BUILD AND UPLOADS";
+      bash .ci/conda-upload.sh;
 
     elif [[ $BUILDOCS = true ]]; then
 
