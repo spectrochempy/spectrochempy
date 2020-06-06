@@ -220,12 +220,12 @@ Y
 
 # %% [markdown]
 # The omnic reader can also import several spa files together, providing that they share a common axis for the
-# wavenumbers. Tis is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.spa", ...,
+# wavenumbers. Tis is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.SPA", ...,
 # "7_CZ0-100 Pd_104.spa". It is possible to import them in a single NDDataset by using the list of filenames
 # in the function call:
 
 # %%
-list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.SPA", "7_CZ0-100 Pd_103.SPA", "7_CZ0-100 Pd_104.SPA"]
+list_files = ["7_CZ0-100 Pd_101.SPA", "7_CZ0-100 Pd_102.SPA", "7_CZ0-100 Pd_103.SPA", "7_CZ0-100 Pd_104.SPA"]
 X = scp.read_omnic(list_files, directory='irdata/subdir')
 print(X)
 
