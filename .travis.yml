@@ -106,8 +106,8 @@ before_script:
 script:
   - if [[ $TEST = true ]]; then
 
-      coverage run -m pytest -v -k "not test_example" --nodisplay;
-      pytest -v -k "test_example" --nodisplay;
+      coverage run -m pytest -v --flake8 -k "not test_example" --nodisplay;
+      pytest -v --flake8 -k "test_example" --nodisplay;
 
     elif [[ $DEPLOY = true ]]; then
 
