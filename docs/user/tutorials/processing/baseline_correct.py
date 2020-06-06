@@ -25,10 +25,10 @@ import spectrochempy as scp
 import matplotlib.pyplot as plt  # will be used for some plots
 
 # %% [markdown]
-# Now let's import and plot a typical IR dataset which wase recorded during the removal of amonia from a NH4-Y zeolite:
+# Now let's import and plot a typical IR dataset which wase recorded during the removal of ammonia from a NH4-Y zeolite:
 
 # %%
-X = scp.read_omnic("irdata//nh4y-activation.spg")
+X = scp.read_omnic("irdata/nh4y-activation.spg")
 subplot1 = X.plot()
 
 # %% [markdown]
