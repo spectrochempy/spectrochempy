@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
-#
-# =============================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
-# =============================================================================
-"""
-pytests file for 
-
-"""
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
 
 import numpy as np
 import pytest
-from spectrochempy.core.dataset.npy import *
+
+from spectrochempy.core.dataset.npy import (identity, eye, full, ones, zeros, dot, diag, empty_like,
+                                            zeros_like, ones_like, full_like, )
 from spectrochempy.units import ur
 
 

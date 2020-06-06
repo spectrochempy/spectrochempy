@@ -52,4 +52,4 @@ new1.plot(color='r', clear=False, label=' em = 20 hz')
 curve2.plot(color='b', clear=False)
 new2.plot(dcolor='b', clear=False, label=' em = 30 HZ, shifted = ')
 
-scp.show()
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

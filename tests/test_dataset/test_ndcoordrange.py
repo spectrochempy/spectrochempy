@@ -1,30 +1,19 @@
 # -*- coding: utf-8 -*-
+
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
+
 #
-# ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT 
-# See full LICENSE agreement in the root directory
-# ======================================================================================================================
-
-
 """
 
 """
-
-from copy import copy
-
-import numpy as np
-import pytest
 
 from traitlets import TraitError, HasTraits
-from spectrochempy.core.dataset.ndcoordrange import CoordRange, Range
-from spectrochempy.units import ur, Quantity
-from spectrochempy.core.dataset.ndarray import NDArray
 
-from spectrochempy.utils.testing import (assert_array_equal,
-                                         assert_equal_units, raises)
-from spectrochempy.core import info_, print_
+from spectrochempy.core.dataset.ndcoordrange import CoordRange, Range
+from spectrochempy.utils.testing import raises
 
 
 # ======================================================================================================================

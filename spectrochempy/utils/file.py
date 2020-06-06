@@ -11,6 +11,8 @@ import os
 import sys
 import io
 import json
+import warnings
+from pathlib import Path, WindowsPath
 from pkgutil import walk_packages
 from numpy.lib.format import read_array
 from numpy.compat import asstr
@@ -18,7 +20,7 @@ from traitlets import import_item
 
 from .qtfiledialogs import opendialog, SaveFileName
 
-__all__ = ['readfilename', 'readdirname', 'savefilename',
+__all__ = ['readfilename', 'readdirname', 'savefilename', 'pathclean',
            'list_packages', 'generate_api',
            'make_zipfile', 'ScpFile',
            'unzip'  # tempo
@@ -26,8 +28,40 @@ __all__ = ['readfilename', 'readdirname', 'savefilename',
 
 
 # ======================================================================================================================
-# Utility function
+# Utility functions
 # ======================================================================================================================
+def pathclean(path):
+    """
+    Clean the path in order to be compatible with windows and unix-based system.
+
+    Parameters
+    ----------
+    path :  str
+        Path to clean. It may contain windows or conventional python separators.
+        If a windows drive letters is specified, the letter is suppressed when run on unix-based system
+
+    Returns
+    -------
+    out : str
+        Cleaned path
+
+    """
+    if path is not None:
+        try:
+            path = WindowsPath(path)
+            path = path.as_posix()
+        except NotImplementedError:
+            # we are not on window.
+            path = Path(path)
+            path = path.as_posix()
+            if ':' in path:
+                # looks like a window path (but we are not on windows)
+                # let's try without the drive
+                i = path.index(':')
+                path = path[i+1:]
+    return path
+
+
 
 def readfilename(filename=None, **kwargs):
     """
@@ -35,22 +69,20 @@ def readfilename(filename=None, **kwargs):
 
     Parameters
     ----------
-    filename : `str`, `list` of strings, optional.
+    filename : `str` or `list` of strings, optional.
         A filename or a list of filenames. If not provided, a dialog box is opened
-        to select files in the specified directory or in
-        the current directory if not specified.
+        to select files in the specified directory or in the current directory if not specified.
     directory : `str`, optional.
         The directory where to look at. If not specified, read in
         current directory, or in the datadir if unsuccessful
-
-    filetypes : `list`, optional filter, default=['all files, '.*)'].
-
-    dictionary: `bool`, default=True
+    filetypes : `list`, optional, default=['all files, '.*)'].
+        file type filter
+    dictionary : `bool`, optional, default=True
         Whether a dictionary or a list should be returns
 
     Returns
     --------
-        list of filenames
+    out : list of filenames
 
     """
 
@@ -98,7 +130,7 @@ def readfilename(filename=None, **kwargs):
                     _f = os.path.join(prefs.datadir, filename)
                     if not os.path.exists(_f):
                         raise IOError("Can't find  this filename %s in the specified directory "
-                                      "(or in the current one, or in the default data directory %s"
+                                      "(or in the current one, or in the default data directory `%s` "
                                       "if directory was not specified " % (filename, prefs.datadir))
             _filenames.append(_f)
 
@@ -207,7 +239,9 @@ def readdirname(dirname=None, **kwargs):
             return os.path.join(prefs.datadir, dirname)
 
         else:
-            raise ValueError(f'"{dirname}" is not a valid directory')
+            # raise ValueError(f'"{dirname}" is not a valid directory')
+            warnings.warn(f'"{dirname}" is not a valid directory')
+            return None
 
     if not dirname:
         # open a file dialog

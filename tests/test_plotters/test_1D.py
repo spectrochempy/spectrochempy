@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
-#
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import pytest
-from spectrochempy import *
+from spectrochempy import plot_multiple, general_preferences, NDDataset, os, show
 from spectrochempy.utils.testing import figures_dir, same_images
 
 prefs = general_preferences
@@ -17,35 +13,35 @@ prefs = general_preferences
 # @pytest.mark.skip
 def test_1D():
     dataset = NDDataset.read_omnic(
-        os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))
+            os.path.join(prefs.datadir, 'irdata', 'nh4y-activation.spg'))
 
     # get first spectrum
     nd0 = dataset[0]
 
     # plot generic
-    ax = nd0.plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
-                  savedpi=150)
+    nd0.plot(output=os.path.join(figures_dir, 'IR_dataset_1D'),
+             savedpi=150)
 
     # plot generic style
-    ax = nd0.plot(style='poster',
-                  output=os.path.join(figures_dir, 'IR_dataset_1D_poster'),
-                  savedpi=150)
+    nd0.plot(style='poster',
+             output=os.path.join(figures_dir, 'IR_dataset_1D_poster'),
+             savedpi=150)
 
     # check that style reinit to default
-    ax = nd0.plot(output='IR_dataset_1D', savedpi=150)
+    nd0.plot(output='IR_dataset_1D', savedpi=150)
     try:
         assert same_images('IR_dataset_1D.png',
                            os.path.join(figures_dir, 'IR_dataset_1D.png'))
-    except:
+    except AssertionError:
         os.remove('IR_dataset_1D.png')
         raise AssertionError('comparison fails')
     os.remove('IR_dataset_1D.png')
 
     # try other type of plots
-    ax = nd0.plot_pen()
-    ax = nd0[:, ::100].plot_scatter()
-    ax = nd0.plot_lines()
-    ax = nd0[:, ::100].plot_bar()
+    nd0.plot_pen()
+    nd0[:, ::100].plot_scatter()
+    nd0.plot_lines()
+    nd0[:, ::100].plot_bar()
 
     show()
 
@@ -78,7 +74,7 @@ def test_1D():
         assert same_images('multiple_IR_dataset_1D_scatter',
                            os.path.join(figures_dir,
                                         'multiple_IR_dataset_1D_scatter'))
-    except:
+    except AssertionError:
         os.remove('multiple_IR_dataset_1D_scatter.png')
         raise AssertionError('comparison fails')
     os.remove('multiple_IR_dataset_1D_scatter.png')

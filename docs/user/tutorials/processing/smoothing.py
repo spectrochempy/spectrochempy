@@ -20,14 +20,14 @@
 # and gives informations on the algorithms used in Spectrochempy.
 #
 # We first import spectrochempy, the other libraries used in this tutorial, and a sample dataset (
-# nh4y-activation.SPG) from which we extract a noisy part:
+# nh4y-activation.spg) from which we extract a noisy part:
 
 # %%
 import spectrochempy as scp
 import numpy as np
 import matplotlib.pyplot as plt
 
-X = scp.read_omnic('irdata//nh4y-activation.SPG')  # import spectra
+X = scp.read_omnic('irdata//nh4y-activation.spg')  # import spectra
 X = X[0:5, 3600.0:2800.0]  # select a noisy part (the first 5 spectra in the 3700-2800 cm-1 range)
 ax = X.plot()  # plot
 

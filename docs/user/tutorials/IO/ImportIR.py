@@ -28,7 +28,7 @@ import spectrochempy as scp
 import os
 
 # %% [markdown]
-# # 1. Supported fileformats
+# # 1. Supported file formats
 #
 # At the time of writing of this tutorial (Scpy v.0.1.18), spectrochempy has the following readers which are specific
 # to IR data:
@@ -140,14 +140,17 @@ print(X.units)
 # which has the index `0`:
 
 # %%
-X.y = X.y - X[0].y
+X.y = X.y - X.y[0]
 X.y
 
 # %% [markdown]
-# It is also possible tu use the ability of Scpy to handle utnit changes:
+# It is also possible to use the ability of Scpy to handle unit changes. For this one can use the  `to` or `ito` (inplace) methods.
+#
+#     val = val.to(some_units) 
+#     val.ito(some_units)   # the same inplace
 
 # %%
-X.y = X.y.to("minute")
+X.y.ito("minute")
 X.y
 
 # %% [markdown]
@@ -157,13 +160,15 @@ X.y
 # %%
 # the last item of a NDDataset such as X can be referred by a negative index (-1). The values of the Coord object
 # are accessed through the `data` attribute which is a ndarray, hence the final [0] to have the value:
-tf = X[-1].y.data[0]
+tf = X[-1].y.values
+tf
 
 # %% [markdown]
 # which gives the exact time in seconds:
 
 # %%
-tf * 60
+tf.ito('s')
+tf
 
 # %% [markdown]
 # Finally, if the time axis needs to be shifted by 2 minutes for instance, it is also very easy to do so:
@@ -210,17 +215,17 @@ X.y  # displays the `y` dimension
 # The import of a single spectrum follows exactly the same rules as that of the import of a group:
 
 # %%
-Y = scp.read_omnic('irdata/subdir/7_CZ0-100 Pd_101.spa')
+Y = scp.read_omnic('irdata/subdir/7_CZ0-100 Pd_101.SPA')
 Y
 
 # %% [markdown]
 # The omnic reader can also import several spa files together, providing that they share a common axis for the
-# wavenumbers. Tis is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.spa", ...,
+# wavenumbers. Tis is the case of the following files in the irdata/subdir directory: "7_CZ0-100 Pd_101.SPA", ...,
 # "7_CZ0-100 Pd_104.spa". It is possible to import them in a single NDDataset by using the list of filenames
 # in the function call:
 
 # %%
-list_files = ["7_CZ0-100 Pd_101.spa", "7_CZ0-100 Pd_102.spa", "7_CZ0-100 Pd_103.spa", "7_CZ0-100 Pd_104.spa"]
+list_files = ["7_CZ0-100 Pd_101.SPA", "7_CZ0-100 Pd_102.SPA", "7_CZ0-100 Pd_103.SPA", "7_CZ0-100 Pd_104.SPA"]
 X = scp.read_omnic(list_files, directory='irdata/subdir')
 print(X)
 
@@ -304,7 +309,10 @@ print('Mean change in wavenumber: {}'.format((X.x.data - newX.x.data).mean()))
 # This is much beyond the experimental accuracy but can lead to undesirable effects. For instance:
 
 # %%
-X - newX
+try:
+    X - newX
+except ValueError as e:
+    print(e)
 
 # %% [markdown]
 # returns an error because of the small shift of coordinates. We will see in another tutorial how to re-align datasets
@@ -313,5 +321,3 @@ X - newX
 
 # %% [markdown]
 # -- this is the end of this tutorial --
-
-# %%

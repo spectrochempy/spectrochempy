@@ -1,11 +1,11 @@
-name: scpy-test-py3.8
+name: scpy3.7
 channels:
   - conda-forge
   - spectrocat
   - cantera
   - defaults
 dependencies:
-  - python=3.8
+  - python=3.7
   - numpy
   - matplotlib
   - traitlets
@@ -33,4 +33,11 @@ dependencies:
 
   # testing required
   - pytest
+  - pytest-flake8
   - scikit-image
+  - coverage
+
+  # deploy
+  - conda-build
+  - conda-verify
+  - anaconda-client

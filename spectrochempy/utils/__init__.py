@@ -27,7 +27,7 @@ from .file import *             # noqa: F403, F401
 from .misc import *             # noqa: F403, F401
 from .print import *            # noqa: F403, F401
 from .system import *           # noqa: F403, F401
-from .excel import *            # noqa: F403, F401
+# from .excel import *            # noqa: F403, F401
 from .matplolib_utils import *  # noqa: F403, F401
 from .arrays import *           # noqa: F403, F401
 from .docstring import *        # noqa: F403, F401

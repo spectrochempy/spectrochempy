@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
+
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
+
 #
-# ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
-# See full LICENSE agreement in the root directory
-# ======================================================================================================================
-
-
-from spectrochempy import *
-import os
+from spectrochempy import Fit, show
 import pytest
 from spectrochempy.utils.testing import assert_approx_equal
 
@@ -17,7 +14,7 @@ from spectrochempy.utils.testing import assert_approx_equal
 @pytest.fixture()
 def script():
     return """
-    
+
     #-----------------------------------------------------------
     # syntax for parameters definition :
     # name : value, low_bound,  high_bound

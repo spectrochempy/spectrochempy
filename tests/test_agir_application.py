@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
-#
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 import os
-from spectrochempy import NDDataset
 
 import pytest
+
+from spectrochempy import NDDataset
 from spectrochempy import general_preferences as prefs
 
 
@@ -18,7 +16,8 @@ from spectrochempy import general_preferences as prefs
 @pytest.fixture(scope="module")
 def test_samples():
     def _make_samples(force_original=False):
-        _samples = {'P350': {'label': r'$\mathrm{M_P}\,(623\,K)$'},
+        _samples = {
+                    'P350': {'label': r'$\mathrm{M_P}\,(623\,K)$'},
                     # 'A350': {'label': r'$\mathrm{M_A}\,(623\,K)$'},
                     # 'B350': {'label': r'$\mathrm{M_B}\,(623\,K)$'}
                     }

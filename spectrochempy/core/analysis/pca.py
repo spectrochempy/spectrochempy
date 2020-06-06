@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-#
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 """
 This module implement the PCA (Principal Component Analysis) class.
+
 """
 
 __all__ = ['PCA']
@@ -16,24 +14,27 @@ __all__ = ['PCA']
 __dataset_methods__ = []
 
 # ----------------------------------------------------------------------------------------------------------------------
-# imports
+# standard imports
+# ----------------------------------------------------------------------------------------------------------------------
+import warnings
+
+# ----------------------------------------------------------------------------------------------------------------------
+# third-party imports
 # ----------------------------------------------------------------------------------------------------------------------
 import numpy as np
-import warnings
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from scipy.special import gammaln
 from traitlets import HasTraits, Instance
-from matplotlib import pyplot as plt
-# from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 # ----------------------------------------------------------------------------------------------------------------------
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.analysis.svd import SVD
-from spectrochempy.core.dataset.npy import diag, dot
 from spectrochempy.core import project_preferences
+from spectrochempy.core.analysis.svd import SVD
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.npy import diag, dot
 from spectrochempy.utils import docstrings, NRed, NBlue
 
 
@@ -188,7 +189,7 @@ class PCA(HasTraits):
         n_pc = min(n_pc, len(self.ev.data))
         for i in range(n_pc):
             tup = (
-                i + 1, np.sqrt(self.ev.data[i]), self.ev_ratio.data[i], self.ev_cum.data[i])
+                    i + 1, np.sqrt(self.ev.data[i]), self.ev_ratio.data[i], self.ev_cum.data[i])
             s += '#{}  \t{:8.3e}\t\t {:6.3f}\t      {:6.3f}\n'.format(*tup)
 
         return s
@@ -472,9 +473,9 @@ class PCA(HasTraits):
             ax.set_title('Score plot')
 
             ax.set_xlabel('PC# {} ({:.3f}%)'.format(
-                pcs[0] + 1, self.ev_ratio.data[pcs[0]]))
+                    pcs[0] + 1, self.ev_ratio.data[pcs[0]]))
             ax.set_ylabel('PC# {} ({:.3f}%)'.format(
-                pcs[1] + 1, self.ev_ratio.data[pcs[1]]))
+                    pcs[1] + 1, self.ev_ratio.data[pcs[1]]))
             axsc = ax.scatter(self.S.masked_data[:, pcs[0]],
                               self.S.masked_data[:, pcs[1]],
                               s=30,
@@ -498,14 +499,14 @@ class PCA(HasTraits):
             ax = plt.axes(projection='3d')
             ax.set_title('Score plot')
             ax.set_xlabel(
-                'PC# {} ({:.3f}%)'.format(pcs[0] + 1, self.ev_ratio.data[pcs[
-                    0]]))
+                    'PC# {} ({:.3f}%)'.format(pcs[0] + 1, self.ev_ratio.data[pcs[
+                        0]]))
             ax.set_ylabel(
-                'PC# {} ({:.3f}%)'.format(pcs[1] + 1, self.ev_ratio.data[pcs[
-                    1]]))
+                    'PC# {} ({:.3f}%)'.format(pcs[1] + 1, self.ev_ratio.data[pcs[
+                        1]]))
             ax.set_zlabel(
-                'PC# {} ({:.3f}%)'.format(pcs[2] + 1, self.ev_ratio.data[pcs[
-                    2]]))
+                    'PC# {} ({:.3f}%)'.format(pcs[2] + 1, self.ev_ratio.data[pcs[
+                        2]]))
             axsc = ax.scatter(self.S.masked_data[:, pcs[0]],
                               self.S.masked_data[:, pcs[1]],
                               self.S.masked_data[:, pcs[2]],

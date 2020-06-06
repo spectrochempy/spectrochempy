@@ -49,4 +49,4 @@ scp.plot_multiple(method='scatter', style='sans',
 scp.plot_multiple(method='scatter',
                   datasets=datasets, labels=labels, legend='best')
 
-# show() # uncomment to show plot if needed()
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

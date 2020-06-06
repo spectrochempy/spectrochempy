@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-#
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
+
 """
 This module implements the base |NDArray| class.
 
@@ -24,7 +22,6 @@ import re
 import textwrap
 import uuid
 import itertools
-# import sys
 
 # ======================================================================================================================
 # Third party imports
@@ -33,6 +30,8 @@ import itertools
 from traitlets import List, Unicode, Instance, Bool, Union, Int, HasTraits, default, validate
 from pint.errors import DimensionalityError
 import numpy as np
+import pandas as pd
+from pandas.core.generic import NDFrame, Index
 
 # ======================================================================================================================
 # local imports
@@ -42,16 +41,9 @@ from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
-                                 # SpectroChemPyDeprecationWarning, deprecated,
-                                 make_new_object, convert_to_html, HAS_PANDAS)
-from ...extern.traittypes import Array
+                                 make_new_object, convert_to_html)
+from spectrochempy.extern.traittypes import Array
 
-if HAS_PANDAS:
-    # import pandas as pd
-    from pandas.core.generic import NDFrame, Index
-
-# if HAS_XARRAY:
-#    import xarray as xr
 
 # ======================================================================================================================
 # constants
@@ -560,11 +552,11 @@ class NDArray(HasTraits):
                     # some attribute of NDDataset are missing in NDArray
                     pass
 
-        elif HAS_PANDAS and isinstance(data, NDFrame):  # pandas object
+        elif isinstance(data, NDFrame):  # pandas object
             # debug_("init data with data from pandas NDFrame object")
             self._data = data.values
 
-        elif HAS_PANDAS and isinstance(data, Index):  # pandas index object
+        elif isinstance(data, Index):  # pandas index object
             # debug_("init data with data from a pandas Index")
             self._data = data.values
             self._title = data.name
@@ -1571,11 +1563,6 @@ class NDArray(HasTraits):
             DataFrame for multidimentional arrays
 
         """
-        if HAS_PANDAS:
-            import pandas as pd
-        else:
-            raise ImportError('Cannot perform this conversion as Pandas is not installed.')
-
         if self.is_empty and not self.is_labeled:
             raise ValueError('no valid index for a 0-dimensional object.')
 

@@ -1,29 +1,19 @@
 # -*- coding: utf-8 -*-
+
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
+
 #
-# ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
-# See full LICENSE agreement in the root directory
-# ======================================================================================================================
-
-
 """ Tests for the ndplugin module
 
 """
-import numpy as np
-import pandas as pd
 
-from spectrochempy.core.processors.autosub import autosub
+import numpy as np
+
 from spectrochempy.api import show
-from spectrochempy.utils import SpectroChemPyWarning
-from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
-                                         assert_array_almost_equal, assert_equal_units,
-                                         raises)
-
-import pytest
-import numpy as np
-import os
+from spectrochempy.core.processors.autosub import autosub
 
 
 # autosub
@@ -67,9 +57,9 @@ def test_autosub(IR_dataset_2D):
 
     s.plot_stack()
 
-    s5 = dataset.copy()
-    ref2 = s5[:, 0].squeeze()
-    ranges2 = [0, 5], [45, 54]
+    # s5 = dataset.copy()
+    # ref2 = s5[:, 0].squeeze()
+    # ranges2 = [0, 5], [45, 54]
 
     # TODO: not yet implemented
     # s6 = s5.autosub(ref2, *ranges2, dim='y', method='varfit', inplace=False)

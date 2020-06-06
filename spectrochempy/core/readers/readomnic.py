@@ -27,7 +27,7 @@ from spectrochempy.core import debug_
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.utils import readfilename
+from spectrochempy.utils import readfilename, pathclean
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ def read_omnic(dataset=None, **kwargs):
     debug_("reading omnic files")
 
     # filename will be given by a keyword parameter except if the first parameters is already the filename
-    filename = kwargs.get('filename', None)
+    filename = pathclean(kwargs.get('filename', None))
 
     # check if the first parameter is a dataset because we allow not to pass it
     if not isinstance(dataset, NDDataset):
@@ -92,8 +92,9 @@ def read_omnic(dataset=None, **kwargs):
     sortbydate = kwargs.pop("sortbydate", True)
 
     # returns a list of files to read
+    directory = pathclean(kwargs.get("directory", None))
     files = readfilename(filename,
-                         directory=kwargs.get("directory", None),
+                         directory=directory,
                          filetypes=['OMNIC files (*.spa, *.spg)',
                                     'all files (*)'])
 

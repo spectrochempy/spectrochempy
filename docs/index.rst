@@ -103,9 +103,7 @@ API reference
 Contributing
 *************
 
-* :doc:`dev/signin`
 * :doc:`dev/issues`
-* :doc:`dev/forums`
 * :doc:`dev/contributing`
 
 .. toctree::
@@ -113,9 +111,7 @@ Contributing
     :hidden:
     :caption: Contributing
 
-    dev/signin
     dev/issues
-    dev/forums
     dev/contributing
 
 Credits

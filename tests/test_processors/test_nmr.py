@@ -1,36 +1,27 @@
 # -*- coding: utf-8 -*-
-#
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-
-""" Tests for the nmr related processors
-
-"""
-
-import pytest
 
 import os
+
 import numpy as np
+import pytest
 
-from spectrochempy.utils.testing import (assert_equal, assert_array_equal, assert_raises,
-                                         assert_array_almost_equal, assert_equal_units, raises)
-
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import general_preferences as prefs
-from spectrochempy.utils import show
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.units import ur
+from spectrochempy.utils import show
+from spectrochempy.utils.testing import (assert_equal, assert_array_equal, assert_array_almost_equal)
 
 pytestmark = pytest.mark.skip("all tests still WIP")
 
 
 # 1D
 
-## Reader
+# Reader
 
 def test_nmr_reader_1D():
     path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
@@ -45,13 +36,13 @@ def test_nmr_reader_1D():
            "</td><tr>" in ndd._repr_html_()
 
 
-## plot
+# plot
 
 def test_nmr_1D_show(NMR_dataset_1D):
     # test simple plot
 
     dataset = NMR_dataset_1D.copy()
-    ax1 = dataset.plot()
+    dataset.plot()
 
 
 def test_nmr_1D_show_complex(NMR_dataset_1D):
@@ -65,7 +56,7 @@ def test_nmr_1D_show_complex(NMR_dataset_1D):
     show()
 
 
-## apodization
+# apodization
 def test_nmr_1D_apodization(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
     dataset /= dataset.real.data.max()  # normalize
@@ -118,7 +109,7 @@ def test_nmr_1D_apodization(NMR_dataset_1D):
     show()
 
 
-## FFT
+# FFT
 
 def test_nmr_fft_1D(NMR_dataset_1D):
     dataset1D = NMR_dataset_1D.copy()
@@ -241,7 +232,7 @@ def test_nmr_multiple_auto_1D_phasing():
     show()
 
 
-##### 2D NMR ########
+# #### 2D NMR ########
 
 def test_nmr_reader_2D():
     path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')

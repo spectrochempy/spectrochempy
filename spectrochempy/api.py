@@ -25,6 +25,7 @@ import warnings
 import matplotlib as mpl
 from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
+from PyQt5 import QtWidgets
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Check the environment for plotting
@@ -116,13 +117,8 @@ else:
     IN_PYCHARM_SCIMODE = False
 
 if not (IN_IPYTHON and kernel and not NO_DISPLAY) and not IN_PYCHARM_SCIMODE:
-    try:
-        import PyQt5    # noqa: F401
-        backend = 'Qt5Agg'
-        mpl.use('Qt5Agg', force=True)
-    except ImportError:
-        mpl.use('tkagg', force=True)
-
+    backend = 'Qt5Agg'
+    mpl.use('Qt5Agg', force=True)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Now we can start loading the API
@@ -133,16 +129,7 @@ from spectrochempy.core import *         # noqa: F403, F401, E402
 from spectrochempy import core           # noqa: E402
 
 __all__ = core.__all__
-__all__ += ['HAS_QT', 'IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
-
-HAS_QT = False
-try:
-    from PyQt5 import QtWidgets
-
-    GUI = QtWidgets.QApplication(sys.argv)
-    HAS_QT = True
-except ImportError:
-    pass
+__all__ += ['IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
 
 if not IN_IPYTHON:
     # needed in windows terminal - but must not be inited in Jupyter notebook
@@ -150,8 +137,11 @@ if not IN_IPYTHON:
 
     initcolor()
 
+# GUI application needed for dialogs
+GUI = QtWidgets.QApplication(sys.argv)
 
 def set_backend():
+
     if IN_IPYTHON and kernel and not NO_DISPLAY:
         try:
             if 'ipykernel_launcher' in sys.argv[0] and \
@@ -159,15 +149,9 @@ def set_backend():
                 # We are running from NBSphinx - the plot must be inline to show up.
                 ip.magic('matplotlib inline')
             else:
-                # here its a normal magic function that works in both
-                # jupyter notebook and jupyter lab < 2.1.0 -
-                import jupyterlab
-                if jupyterlab.__version__.split('.')[0] == '2':
-                    ip.magic('matplotlib inline')
-                else:
-                    ip.magic('matplotlib widget')
+                ip.magic('matplotlib widget')
         except Exception:
-            ip.magic('matplotlib tk')
+            ip.magic('matplotlib qt')
 
 
 set_backend()

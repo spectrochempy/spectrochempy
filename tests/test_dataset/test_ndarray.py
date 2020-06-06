@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-#
+
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT 
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
+#
 import numpy as np
 from copy import copy, deepcopy
 from datetime import datetime
@@ -15,14 +14,13 @@ import pytest
 from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core import info_, debug_
+from spectrochempy.core import info_
 from spectrochempy.units import ur, Quantity
 from spectrochempy.utils import (SpectroChemPyWarning,
                                  INPLACE, MASKED,
                                  TYPE_INTEGER, TYPE_FLOAT)
 from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
-                                         raises, catch_warnings,
-                                         assert_approx_equal)
+                                         raises, catch_warnings)
 
 
 #  TEST INITIALIZATION
@@ -563,8 +561,8 @@ def test_ndarray_slicing(refarray, ndarray):
     assert_array_equal(nd[..., am].data, amm)
 
 
-def test_dim_names_specified(refarray, ndarray):
-    ref = refarray
+def test_dim_names_specified(ndarray):
+
     nd = ndarray.copy()
     assert not nd.is_masked
     assert nd.dims == ['y', 'x']
@@ -627,19 +625,17 @@ def test_ndarray_issue_23():
     assert ndt.dims == ['x', 'y', 'z']
     # squeezing
     nd2 = nd1.squeeze()
-    dim = nd2.dims
     assert nd2.shape == (10, 2)
     assert nd2.dims == ['z', 'x']
 
 
-############### Bugs Fixes################
+# Bugs Fixes
 
 def test_ndarray_bug_13(ndarrayunit):
     nd = ndarrayunit[0]
     info_('\n', nd)
     info_('\n', nd.units)
 
-    x = nd[0]
     assert isinstance(nd[0], NDArray)
     info_('\n', nd[0])
 

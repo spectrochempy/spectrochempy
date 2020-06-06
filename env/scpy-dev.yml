@@ -6,48 +6,50 @@ channels:
   - defaults
 dependencies:
   - numpy
+  - scipy
+  - pandas
   - matplotlib
   - traitlets
   - pint
   - quaternion
-  - scipy
+  - pyqt
   - colorama
+  - tqdm
   - setuptools_scm
   - git
   - ipython
-  - jupyterlab
-  - ipykernel
-  - ipywidgets
-  - jupyter_nbextensions_configurator
-  - ipympl
-  - widgetsnbextension
-  - xlrd
   - numba
-  - nodejs
-  - jupytext
-  - pytest
-  - pytest-runner
-  - pytest-cov
-  - pytest-xdist
-  - scikit-image
-  - sphinx=1.8.5
-  - sphinx_rtd_theme
-  - sphinx-gallery=0.5.0
-  - nbsphinx
-  - jupyter_sphinx
-  - nbconvert
-  - numpydoc=0.8
-  - conda-build
-  - conda-smithy
   - cantera
   - quadprog
-  - pyqt
-  - twine
-  - tqdm
   - brukeropusreader
-  - pandas
-  - xarray
-  - datashader
-  - scikit-learn
   - requests
-
+  - jinja2
+  - ipywidgets
+  - ipympl
+  - jupyterlab
+  #- jupyter_nbextensions_configurator
+  #- nodejs
+  #
+  -
+  # tests
+  - pytest
+  - pytest-flake8
+  - scikit-image
+  # docs
+  - jupytext
+  #- sphinx=1.8.5
+  #- sphinx_rtd_theme
+  #- sphinx-gallery=0.5.0
+  #- nbsphinx
+  #- jupyter_sphinx
+  #- numpydoc=0.8
+  # build
+  # - conda-build
+  # - conda-smithy
+  # - twine
+  # optional
+  # - xarray
+  # - datashader
+  # - scikit-learn
+  # to be suppressed when code change is finished
+  - xlrd

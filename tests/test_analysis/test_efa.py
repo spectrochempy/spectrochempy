@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
-#
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
-# ======================================================================================================================
-
+from spectrochempy.core import info_
 from spectrochempy.core.analysis.efa import EFA
 from spectrochempy.utils import MASKED, show
-from spectrochempy.core import info_
 
 
 def test_EFA(IR_dataset_2D):
@@ -35,8 +31,3 @@ def test_EFA(IR_dataset_2D):
     c.T.plot()
 
     show()
-
-
-# ======================================================================================================================
-if __name__ == '__main__':
-    pass

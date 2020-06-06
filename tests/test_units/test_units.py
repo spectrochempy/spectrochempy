@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-#
+
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from spectrochempy import ur, set_nmr_context, Quantity, np, show
-from spectrochempy.utils.testing import raises
+#
+from spectrochempy import ur, set_nmr_context, Quantity
 
 
 def test_ppm():
@@ -35,14 +33,12 @@ def test_units():
     assert ur.km / ur.m == 1000.
     x = (ur.km / ur.m)
     assert x.dimensionless
-    assert type(x) == type(ur.km)
 
 
 def test_repr_html():
     a = Quantity(10, 's/km')
     assert "{}".format(a) == "10 second / kilometer"
     assert a._repr_html_() == r"\[10\ s.km<sup>-1</sup>\]"
-    # print(a)
 
 
 def test_unit_dimensionality():

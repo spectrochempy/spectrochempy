@@ -53,4 +53,4 @@ npc = 4
 c = efa.get_conc(npc)
 c.T.plot()
 
-# plt.show() # uncomment to show plot if needed()
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

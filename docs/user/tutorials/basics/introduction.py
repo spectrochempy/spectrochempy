@@ -28,8 +28,9 @@
 
 # %%
 import numpy as np
-import spectrochempy as scp
 import matplotlib.pyplot as plt
+
+import spectrochempy as scp
 
 # %% [markdown]
 # ## Numpy array
@@ -38,9 +39,9 @@ import matplotlib.pyplot as plt
 
 # %% [markdown]
 # ***Note*** *that in a notebook, if one wants to quickly transform a code cell (the default at the cell creation)
-
+#
 # to a markdown cell (as this one) we can use the key's combination:* **\<ESC\>+m**
-
+#
 #
 
 # %%
@@ -250,9 +251,9 @@ nd3
 # %% [markdown]
 # ### Import data from files
 # Suppose you want to plot a nice figure with the results of experiments - It is possible to do this purely
-
+#
 # using numpy and matplotlib libraries, but we suggest to use the tools included in SpectroChemPy for this task.
-
+#
 #
 # First, some spectroscopic data import functions are defined in SpectroChemPy and can be used conveniently.
 #
@@ -265,19 +266,20 @@ nd3
 path = scp.general_preferences.datadir  # this is a path provided that point on a example set of data.
 # It can be replaced by any other path you like
 
-# %% hidden="true" jupyter={"source_hidden": true} nbsphinx="hidden"
-# THESE LINE IS JUST HERE FOR BUILDING THE DOCUMENTATION (IT SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
-path = '/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata'
+# %% hidden="true" nbsphinx="hidden"
+# THESE TWO LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION AND TESTING
+# ITHEY SHOULD BE COMMENTED FOR A INTERACTIVE USE OF THIS TUTORIAL)
+sop = scp.os.path
+path = sop.join(path, 'irdata')
 
 # %%
 fs = scp.FileSelector(path=path, filters=['spg', 'spa'])
 fs
 
 # %% nbsphinx="hidden"
-# THESE TWO LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION
-
-# (THEY SHOULD BE COMMENTED FOR A NORMAL USE OF THIS TUTORIAL)
-fs.fullpath = '/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/CO@Mo_Al2O3.SPG'
+# THESE THREE LINES ARE JUST HERE FOR BUILDING THE DOCUMENTATION AND TESTING
+# THEY SHOULD BE COMMENTED FOR AN INTERACTIVE USE OF THIS TUTORIAL
+fs.fullpath = sop.join(path,'CO@Mo_Al2O3.SPG')
 fs.value = 'CO@Mo_Al2O3.SPG'
 
 # %%
@@ -340,17 +342,17 @@ b = np.array([[1, 2, 3, 4, 5]])  # A 2D array with & row and 5 columns
 
 # %% [markdown]
 # the addition of the two array `a+b` gives an error :
-
+#
 #
 #     ValueError: operands could not be broadcast together with shapes (5,2) (1,5)
-
 #
-
+#
+#
 # because the shape mismacth.
-
+#
 #
 # However, there is one case where such operation can be perfomred, this is when the array have shape differing only
-
+#
 #
 
 # %%

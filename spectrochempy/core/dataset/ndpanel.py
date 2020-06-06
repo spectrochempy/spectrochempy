@@ -44,10 +44,6 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndio import NDIO
 
-# from spectrochempy.core import HAS_XARRAY
-# from spectrochempy.utils import colored_output
-
-
 # ======================================================================================================================
 # NDPanel class definition
 # ======================================================================================================================

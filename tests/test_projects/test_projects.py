@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
-#
+
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
+#
 import os
 
+from spectrochempy import Project, general_preferences, NDDataset, INPLACE, Script, run_script
 from spectrochempy.utils.testing import assert_array_equal
-from spectrochempy import *
-
-import pytest
 
 prefs = general_preferences
 
@@ -97,10 +94,10 @@ def test_empty_project():
 def test_project_with_script():
     # Example from tutorial agir notebook
     proj = Project(
-        Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
-        Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
-        Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
-        name='HIZECOKE_TEST')
+            Project(name='P350', label=r'$\mathrm{M_P}\,(623\,K)$'),
+            Project(name='A350', label=r'$\mathrm{M_A}\,(623\,K)$'),
+            Project(name='B350', label=r'$\mathrm{M_B}\,(623\,K)$'),
+            name='HIZECOKE_TEST')
 
     assert proj.projects_names == ['A350', 'B350', 'P350']
 
@@ -177,4 +174,4 @@ def test_save_and_load_nmr_project():
     myp.save('NMR_1')
 
     # now load it
-    myp2 = Project.load('NMR_1')
+    Project.load('NMR_1')

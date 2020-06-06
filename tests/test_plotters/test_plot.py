@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
+
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
+
 #
-# ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT  
-# See full LICENSE agreement in the root directory
-# ======================================================================================================================
-
-
 import matplotlib.pyplot as mpl
 
 from spectrochempy.utils.testing import image_comparison
 
-from spectrochempy import *
+from spectrochempy import set_loglevel, INFO, WARNING, MASKED, show, multiplot, plot_multiple
 
 set_loglevel(INFO)
 
@@ -145,13 +143,13 @@ def tests_multipleplots_and_styles(IR_dataset_1D, IR_dataset_2D):
     dataset = IR_dataset_1D
 
     # plot generic
-    ax = dataset.copy().plot()
+    dataset.copy().plot()
 
     # plot generic style
-    ax = dataset.copy().plot(style='sans')
+    dataset.copy().plot(style='sans')
 
     # check that style reinit to default
-    ax = dataset.copy().plot()
+    dataset.copy().plot()
 
     dataset = IR_dataset_2D
 
@@ -172,9 +170,9 @@ def tests_multipleplots_and_styles(IR_dataset_1D, IR_dataset_2D):
                   datasets=datasets, labels=labels, legend='best')
 
 
-##### debugging ####
+# #### debugging ####
 
-#### deprecation #
+# ### deprecation #
 
 def test_kind_deprecated(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
