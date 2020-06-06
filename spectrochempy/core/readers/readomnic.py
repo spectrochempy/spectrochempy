@@ -124,7 +124,7 @@ def read_omnic(dataset=None, **kwargs):
         elif extension == '.spa':
             datasets.append(_read_spa(dataset, files[extension], **kwargs))
 
-        if extension == '.srs':
+        elif extension == '.srs':
             for filename in files[extension]:
                 datasets.append(_read_srs(dataset, filename, **kwargs))
         else:
