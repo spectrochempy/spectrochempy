@@ -26,7 +26,6 @@ import numpy as np
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.utils import readfilename, pathclean
 
 
@@ -189,7 +188,7 @@ def _readheader02(f, pos):
         out['xtitle'] = 'Wavelengths'
     elif key == 4:
         out['xunits'] = 'um'
-        out['xtitle']= 'Wavelengths'
+        out['xtitle'] = 'Wavelengths'
     elif key == 32:
         out['xunits'] = 'cm^-1'
         out['xtitle'] = 'Raman Shift'
@@ -322,7 +321,7 @@ def _read_spg(dataset, filename, **kwargs):
         # Extracts positions of '02' keys
         key_is_02 = (keys == 2)  # ex: [T F F F F T F (...) F T ....]'
         indices02 = np.nonzero(key_is_02)  # ex: [1 9 ...]
-        position02 = 304 * np.ones(len(indices02[0]), dtype='int') + 16 * indices02[0] # ex: [304 432 ...]
+        position02 = 304 * np.ones(len(indices02[0]), dtype='int') + 16 * indices02[0]  # ex: [304 432 ...]
 
         for i in range(nspec):
             info02 = _readheader02(f, position02[i])
@@ -360,7 +359,7 @@ def _read_spg(dataset, filename, **kwargs):
 
         # Read number of spectral intensities
         for i in range(nspec):
-            data[i, :] = _getintensities(f, position03[i] )
+            data[i, :] = _getintensities(f, position03[i])
         # ..............................................................................................................
 
         # Get spectra titles & acquisition dates:
@@ -449,7 +448,7 @@ def _read_spg(dataset, filename, **kwargs):
 
     return dataset
 
-# .............................................................................
+
 def _read_spa(dataset, filenames, **kwargs):
     nspec = len(filenames)
 
@@ -592,6 +591,7 @@ def _read_spa(dataset, filenames, **kwargs):
     dataset._modified = dataset.date
 
     return dataset
+
 
 if __name__ == '__main__':
     pass
