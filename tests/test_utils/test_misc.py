@@ -4,8 +4,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-
 from spectrochempy.utils import dict_compare
+
 
 def test_dict_compare():
     x = dict(a=1, b=2)

@@ -10,9 +10,11 @@
 
 """
 import os
+
 import pytest
-from spectrochempy.utils import *
+
 from spectrochempy.core import info_
+from spectrochempy.utils import readfilename
 
 
 def test_readfilename_wo_filename_provided():
@@ -35,7 +37,7 @@ def test_readfilename_w_directory_instead_of_filename():
 def test_readfilename_w_bad_filename():
     # should raise an error
     with pytest.raises(IOError):
-        f = readfilename(os.path.expanduser("~/xxxx"),
+        readfilename(os.path.expanduser("~/xxxx"),
                          filetypes=["OMNIC files (*.sp*)",
                                     "SpectroChemPy files (*.scp)",
                                     "all files (*)"])

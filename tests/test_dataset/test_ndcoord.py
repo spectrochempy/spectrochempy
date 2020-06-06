@@ -9,15 +9,12 @@ from copy import copy
 import numpy as np
 import pytest
 
-from traitlets import TraitError, HasTraits
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
-from spectrochempy.core.dataset.ndarray import NDArray
 
-from spectrochempy.utils.testing import (assert_array_equal,
-                                         assert_equal_units, raises)
+from spectrochempy.utils.testing import assert_array_equal, assert_equal_units
 
-from spectrochempy.core import info_, debug_, print_
+from spectrochempy.core import info_, debug_
 
 
 # ======================================================================================================================
@@ -252,7 +249,7 @@ def test_coord():
                    mask=None,
                    title='wavelength')
     with pytest.raises(AttributeError):
-        c = coord0.real
+        coord0.real
 
 
 def test_coord_slicing():
@@ -261,7 +258,7 @@ def test_coord_slicing():
     coord0 = Coord(data=np.linspace(4000, 1000, 10),
                    mask=None,
                    title='wavelength')
-    c0 = coord0[0]
+
     assert coord0[0] == 4000.0
 
     coord1 = Coord(data=np.linspace(4000, 1000, 10),

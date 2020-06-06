@@ -10,14 +10,14 @@
 
 """
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core import general_preferences as prefs
-
 import os
+
 import pytest
 
-from spectrochempy.core import info_, debug_
+from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core import info_
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.testing import assert_array_equal
 
 
@@ -61,7 +61,7 @@ def test_ndio_save1D_load(IR_dataset_1D):
     dataset = IR_dataset_1D.copy()
     # debug_(dataset)
     dataset.save('essai')
-    ir = NDDataset.load("essai")
+    NDDataset.load("essai")
     # debug_(ir)
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 
@@ -70,7 +70,7 @@ def test_ndio_save2D_load(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
     # debug_(dataset)
     dataset.save('essai')
-    ir = dataset.load("essai")
+    dataset.load("essai")
     # debug_(ir)
     os.remove(os.path.join(prefs.datadir, 'essai.scp'))
 

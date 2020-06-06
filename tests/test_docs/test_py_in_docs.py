@@ -1,17 +1,13 @@
-#! python3
 # -*- coding: utf-8 -*-
-#
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT 
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
+import os
+from glob import glob
 
 import pytest
-from glob import glob
-import os
 
 from spectrochempy.utils.testing import example_run
 
@@ -19,11 +15,11 @@ path = os.getcwd()
 if "/tests" in path:
     path = path[:path.find('/tests')]
 
+
 @pytest.mark.parametrize('example', glob(os.path.join(path, 'docs', 'user', '**', '*.py'), recursive=True))
 def test_example(example):
     name = os.path.basename(example)
-    if (name in [__name__ + '.py', 'conf.py', 'builddocs.py', 'apigen.py'] or
-            'auto_examples' in example):
+    if (name in [__name__ + '.py', 'conf.py', 'builddocs.py', 'apigen.py'] or 'auto_examples' in example):
         return
 
     # some test will failed due to the magic commands or for other known reasons

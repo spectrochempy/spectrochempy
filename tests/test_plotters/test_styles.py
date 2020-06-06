@@ -8,7 +8,7 @@
 #
 import pytest
 
-from spectrochempy import *
+from spectrochempy import general_preferences, plt, os
 
 prefs = general_preferences
 

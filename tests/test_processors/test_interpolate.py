@@ -11,9 +11,6 @@
 """
 import pytest
 
-from spectrochempy.core import info_
-from spectrochempy.core.processors.interpolate import interpolate
-
 
 # align
 # -------

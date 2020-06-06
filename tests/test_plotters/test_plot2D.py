@@ -17,9 +17,9 @@ def test_plot2D():
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'
-    ax = A.copy().plot_stack()
-    axT = A.copy().plot_stack(data_transposed=True)
-    ax2 = A.copy().plot_image(style=['sans', 'paper'], fontsize=9)
+    A.copy().plot_stack()
+    A.copy().plot_stack(data_transposed=True)
+    A.copy().plot_image(style=['sans', 'paper'], fontsize=9)
 
     mystyle = {'image.cmap': 'magma',
                'font.size': 10,

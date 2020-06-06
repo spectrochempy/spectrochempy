@@ -11,15 +11,11 @@ from copy import copy
 import numpy as np
 import pytest
 
-from traitlets import TraitError, HasTraits
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.units import ur, Quantity, DimensionalityError
-from spectrochempy.core.dataset.ndarray import NDArray
-
-from spectrochempy.utils.testing import (assert_array_equal,
-                                         assert_equal_units, raises)
 from spectrochempy.core import info_, print_
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.units import ur, DimensionalityError
 
 
 # ======================================================================================================================
@@ -45,7 +41,7 @@ def test_coordset_init(coord0, coord1, coord2):
 
     # but warning
     coordsa1 = CoordSet(
-        [coord0[:3], coord3[:3], coord2[:3]])  # A list means that it is a sub-coordset (different meaning)
+            [coord0[:3], coord3[:3], coord2[:3]])  # A list means that it is a sub-coordset (different meaning)
     assert coordsa1.names == ['x']
     assert coordsa1.x.names == ['_1', '_2', '_3']
 
@@ -135,7 +131,7 @@ def test_coordset_multicoord_for_a_single_dim():
     # pass as a list of coord -> this become a subcoordset
     coordsa = CoordSet([coord1, coord0])
     assert repr(
-        coordsa) == 'CoordSet: [x:[_1:wavelengths, _2:temperature]]'  # note the internal coordinates are not sorted
+            coordsa) == 'CoordSet: [x:[_1:wavelengths, _2:temperature]]'  # note the internal coordinates are not sorted
     assert not coordsa.is_same_dim
     assert coordsa.x.is_same_dim
 
@@ -221,7 +217,7 @@ def test_coordset_del(coord0, coord1, coord2):
     coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
 
     assert str(coords) == repr(
-        coords) == 'CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber], z:temperature]'
+            coords) == 'CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber], z:temperature]'
 
     del coords['temperature']
     assert str(coords) == repr(coords) == 'CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber]]'
@@ -282,10 +278,10 @@ def test_coordset_sizes(coord0, coord1):
 
 def test_coordset_to_index(coord0, coord1):
     coordsa = CoordSet(coord0)
-    pdindexa = coordsa.to_index()
+    coordsa.to_index()
 
     coordsb = CoordSet(coord0, coord1)
-    pdindexb = coordsb.to_index()
+    coordsb.to_index()
 
 
 def test_coordset_update(coord0, coord1):
@@ -300,7 +296,7 @@ def test_coordset_str_repr(coord0, coord1, coord2):
     coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
 
     assert str(coords) == repr(
-        coords) == 'CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber], z:temperature]'
+            coords) == 'CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber], z:temperature]'
     assert repr(coords) == str(coords)
     print_(coords)
 
@@ -310,7 +306,7 @@ def test_coordset_str_repr(coord0, coord1, coord2):
 def test_coordset_set(coord0, coord1, coord2):
     coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
     assert str(coords) == repr(
-        coords) == 'CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber], z:temperature]'
+            coords) == 'CoordSet: [x:time-on-stream, y:[_1:wavenumber, _2:wavenumber], z:temperature]'
 
     coords.set_titles('time', 'dddd', 'celcius')
     assert str(coords) == 'CoordSet: [x:time, y:[_1:wavenumber, _2:wavenumber], z:celcius]'
@@ -334,7 +330,7 @@ def test_coordset_set(coord0, coord1, coord2):
     assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:g], z:z]'
     assert coords.y_1.units == ur('s')
 
-    ## set item
+    # set item
 
     coords['z'] = coord2
     assert str(coords) == 'CoordSet: [x:t, y:[_1:l, _2:g], z:temperature]'

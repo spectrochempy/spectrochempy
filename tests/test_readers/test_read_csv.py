@@ -5,17 +5,17 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
+import pytest
+
+from spectrochempy.core import general_preferences as prefs
 #
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils import show
-from spectrochempy.utils.testing import assert_approx_equal
-import pytest
 
 
 def test_read_zunimplemented():
     with pytest.raises(NotImplementedError):
-        A = NDDataset.read_zip('agirdata/P350/FTIR/FTIR.zip')
+        NDDataset.read_zip('agirdata/P350/FTIR/FTIR.zip')
 
 
 def test_read_zip():

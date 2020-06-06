@@ -5,9 +5,9 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
-from spectrochempy import *
 import pytest
+
+from spectrochempy import show, np
 
 pytestmark = pytest.mark.skip("WIP with NMR data")
 

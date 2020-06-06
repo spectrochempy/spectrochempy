@@ -13,5 +13,5 @@ def test_script():
 
     try:
         Script('0name', 'print(3)')
-    except:
+    except Exception:
         info_('name not valid')

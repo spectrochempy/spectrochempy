@@ -1,36 +1,17 @@
 # -*- coding: utf-8 -*-
-
 # ======================================================================================================================
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
-"""
-
-
-"""
 import numpy as np
-from copy import copy, deepcopy
-from datetime import datetime
-import pytest
 
-from pint.errors import DimensionalityError
-
+from spectrochempy.core import info_
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndpanel import NDPanel
 from spectrochempy.core.dataset.nddataset import NDDataset
-
-from spectrochempy.core import info_, debug_, warning_, error_, print_
-from spectrochempy.units import ur, Quantity
-from spectrochempy.utils import (SpectroChemPyWarning,
-                                 INPLACE, MASKED,
-                                 TYPE_INTEGER, TYPE_FLOAT)
-from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
-                                         raises, catch_warnings,
-                                         assert_approx_equal, RandomSeedContext)
+from spectrochempy.core.dataset.ndpanel import NDPanel
+from spectrochempy.utils.testing import (raises, RandomSeedContext)
 
 
 def test_ndpanel_init():
@@ -50,7 +31,7 @@ def test_ndpanel_init():
     assert panel['data_0'].dims == ['y', 'x']
     assert panel.x is None
     with raises(AttributeError):  # not in dims
-        z = panel.z
+        panel.z
 
     # without coordinates, multiple datasets, merge dimension
     arr2 = np.random.rand(3, 4)

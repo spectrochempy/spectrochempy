@@ -8,11 +8,10 @@
 #
 # ======================================================================================================================
 
-from spectrochempy import NDDataset, general_preferences as prefs
-
-from spectrochempy.utils.testing import assert_approx_equal
 import os
-import pytest
+
+from spectrochempy import NDDataset, general_preferences as prefs
+from spectrochempy.utils.testing import assert_approx_equal
 
 
 # datasets are defined in conftest as fixture
@@ -41,4 +40,4 @@ def test_methods_read_access():
     ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 
     # alternatively
-    ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)

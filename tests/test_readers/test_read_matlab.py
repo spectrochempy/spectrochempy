@@ -7,11 +7,9 @@
 
 #
 import os
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core import general_preferences as prefs
+
 from spectrochempy.core import info_
-from spectrochempy.utils.testing import assert_approx_equal
-import pytest
+from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 # comment the next line to test it manually

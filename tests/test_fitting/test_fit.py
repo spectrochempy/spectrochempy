@@ -6,8 +6,7 @@
 # ======================================================================================================================
 
 #
-from spectrochempy import *
-import os
+from spectrochempy import Fit, show
 import pytest
 from spectrochempy.utils.testing import assert_approx_equal
 
@@ -15,7 +14,7 @@ from spectrochempy.utils.testing import assert_approx_equal
 @pytest.fixture()
 def script():
     return """
-    
+
     #-----------------------------------------------------------
     # syntax for parameters definition :
     # name : value, low_bound,  high_bound

@@ -137,7 +137,7 @@ plt.figure()  # classic instructions for a xy plot in matplotlib.
 plt.plot(time, maxwn, 'o-')
 plt.xlabel("acquisition time / min")
 plt.ylabel("wavenumber at maximum / cm$^{-1}$")
-plt.show()
+
 
 # %% [markdown]
 # ###  2.2. Options of `find_peaks()`
@@ -322,7 +322,6 @@ plt.axhline(height, linestyle='--', color='blue')
 plt.axhline(width_height, linestyle='--', color='red')
 plt.axvline(wl, linestyle='--', color='green')
 plt.axvline(wr, linestyle='--', color='green')
-plt.show()
 
 # %% As stressed above, we see here that the peak width is very approximate and probably exaggerated in [markdown]
 # It is obvious here that the peak width is overestimated in the present case due to the presence of the second peak on
@@ -358,11 +357,11 @@ for w in (prop['left_bases'][0], prop['right_bases'][0]):
     plt.plot(w, s[0, w].data.T, 'v', color='red')
 for w in (prop['left_ips'][0], prop['right_ips'][0]):
     plt.axvline(w, linestyle='--', color='green')
-plt.show()
 
 print('{:>16}: {:<8.4f}'.format("peak_maximum", peak.x.data[0]))
 for key in prop:
     print('{:>16}: {:<8.4f}'.format(key[:-1], prop[key][0]))
+
 
 # %% [markdown]
 # -- this is the end of this tutorial --
