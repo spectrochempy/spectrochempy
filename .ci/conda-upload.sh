@@ -28,6 +28,14 @@ NUMBER="${arr[1]}"
 export CONDA_BLD_PATH="$HOME/conda-bld"
 mkdir -p "$CONDA_BLD_PATH"
 
+## configure conda
+conda config --set always_yes yes --set changeps1 no
+conda update -q conda
+conda config --add channels conda-forge
+conda config --add channels cantera
+conda config --add channels spectrocat
+conda config --set channel_priority flexible
+
 ## Here we will choose depending on the way this script is run
 if [[ $USER != "travis" ]]; then
   ## if we are in local

@@ -32,7 +32,7 @@ requirements:
     - scipy
     - matplotlib
     - traitlets
-    - pint=0.9
+    - pint
     - cantera
     - quadprog
     - brukeropusreader
@@ -53,8 +53,6 @@ requirements:
     - quaternion
   test:
     - python                {{ python }}
-    - pytest
-    - scikit-image
 
 test:
   script_env:
