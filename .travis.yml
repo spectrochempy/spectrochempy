@@ -6,28 +6,20 @@ dist: xenial
 env:
   global:
     - CONDAPY=3.7
+    - CC_TEST_REPORTER_ID=$CODECLIMATE_TEST_REPORTER_ID
 
 jobs:
   fast_finish: false
   include:
     - stage: pytest-linux
-      if: branch !~ /^feature/travis-deploy$/ \
-          AND branch !~ /^feature/travis-docs$/
-      env:
-        - TEST=true
-        - CC_TEST_REPORTER_ID=$CODECLIMATE_TEST_REPORTER_ID
+      if: branch != feature/travis-deploy AND branch != feature/travis-docs
+      env: TEST=true
     - stage: conda-deploy
-      if: branch = master \
-          OR branch = feature/travis-deploy \
-          OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
-      env:
-        - DEPLOY=true
+      if: branch = master OR branch = feature/travis-deploy OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      env: DEPLOY=true
     - stage: build-docs
-      if: branch = master \
-          OR branch = feature/travis-docs \
-          OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
-      env:
-        - BUILDOCS=true
+      if: branch = master OR branch = feature/travis-docs OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      env: BUILDOCS=true
 
 # limit got clone depth to 50 commits
 git:
