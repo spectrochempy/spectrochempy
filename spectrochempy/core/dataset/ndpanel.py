@@ -31,12 +31,12 @@ import textwrap
 # ======================================================================================================================
 # import numpy as np
 from traitlets import Any, validate, default
+from orderedset import OrderedSet
 
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
 
-from ...extern.orderedset import OrderedSet
 from spectrochempy.core.processors.align import can_merge_or_align
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.nddataset import NDDataset

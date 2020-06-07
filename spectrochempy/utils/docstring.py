@@ -8,7 +8,7 @@ We use the docrep_ package for managing our docstrings
 
 """
 
-from spectrochempy.extern.docrep import DocstringProcessor, dedents
+from docrep import DocstringProcessor, dedents
 
 __all__ = ['docstrings', 'dedent', 'dedents', 'indent', 'append_original_doc']
 

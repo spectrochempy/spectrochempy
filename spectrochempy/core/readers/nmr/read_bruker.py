@@ -26,7 +26,7 @@ import os
 # Third party imports
 # ======================================================================================================================
 import numpy as np
-from spectrochempy.extern.nmrglue.fileio.bruker import read, read_pdata, read_lowmem
+from nmrglue.fileio.bruker import read, read_pdata, read_lowmem
 
 # ======================================================================================================================
 # Local imports

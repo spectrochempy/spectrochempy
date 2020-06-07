@@ -51,7 +51,6 @@ def colored(text, color):
 
 
 def colored_output(out):
-    import re
 
     regex = r"^(\W*(DIMENSION|DATA).*)$"
     subst = TBold(r"\1")

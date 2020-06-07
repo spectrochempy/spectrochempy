@@ -21,7 +21,7 @@ import os
 import shutil
 
 from sphinx.util.osutil import FileAvoidWrite
-from spectrochempy.sphinxext.traitlets_sphinxdoc import reverse_aliases, class_config_rst_doc
+from spectrochempy.extern.sphinxext.traitlets_sphinxdoc import reverse_aliases, class_config_rst_doc
 
 from traitlets import import_item
 import inspect

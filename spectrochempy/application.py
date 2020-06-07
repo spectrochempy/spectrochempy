@@ -139,28 +139,27 @@ def display_info_string(**kwargs):
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
 
-def version_scheme(version, local=False):
+def _version_scheme(version, local=False):
     branch = version.branch
     dist = version.distance
     tag = next = version.tag.public
     next = next.split('.')
     next[-1] = str(int(next[-1]) + 1)
     next = '.'.join(next)
-    dev = ''
-    if branch != 'master':
+    if branch == 'master':
+        if dist==0:
+            dev=''
+        else:
+            dev = f'-rc.{dist}'
+            tag = next
+    else:
         dev = f'-dev.{dist}'
         tag = next
-
     version_scheme = f'{tag}{dev}'
-    # if not dev:
-    #     # write it only for stable TAG
-    #     # This means, always tag the latest master version
-    #     with open(os.path.join('..', os.path.dirname(os.path.relpath(__file__)), 'version.py'), 'w') as f:
-    #         f.write(f"version = '{version_scheme}' # Do not delete. Automatically set when needed\n\n")
     return version_scheme
 
 
-def local_scheme(version):
+def _local_scheme(version):
     dirty = '+dirty' if version.dirty else ''
     return dirty
 
@@ -175,8 +174,8 @@ except DistributionNotFound:  # pragma: no cover
 try:
     __version__ = get_version(root='..',
                               relative_to=__file__,
-                              local_scheme=local_scheme,
-                              version_scheme=version_scheme)
+                              local_scheme=_local_scheme,
+                              version_scheme=_version_scheme)
     "Version string of this package"
 except LookupError:  # pragma: no cover
     __version__ = __release__

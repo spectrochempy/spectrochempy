@@ -20,40 +20,41 @@ where optional parameters indicates which job(s) is(are) to perform.
 
 import argparse
 import os
-import sys
 import shutil
+import sys
 import warnings
 import zipfile
 from glob import iglob
 from subprocess import Popen, PIPE
-from skimage.transform import resize
-from skimage.io import imread, imsave
+
 import numpy as np
-from jinja2 import Template
 import pandas as pd
+from jinja2 import Template
+from skimage.io import imread, imsave
+from skimage.transform import resize
+from sphinx.application import Sphinx
+from spectrochempy import version
 
-from sphinx.application import Sphinx, RemovedInSphinx30Warning, RemovedInSphinx40Warning
-
-warnings.filterwarnings(action='ignore', category=DeprecationWarning)
-warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
-warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
+# warnings.filterwarnings(action='ignore', category=DeprecationWarning)
+# warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
+# warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 
 SERVER = os.environ.get('SERVER_FOR_LCS', None)
 PROJECT = "spectrochempy"
 URL_SCPY = "spectrochempy.github.io"
-PROJECTDIR = os.path.dirname(os.path.abspath(__file__))
-SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
-DOCDIR = os.path.join(PROJECTDIR, "docs")
 
-USERDIR = os.path.join(PROJECTDIR, "docs", "user")
+DOCDIR = os.path.dirname(os.path.abspath(__file__))
+PROJECTDIR = os.path.dirname(DOCDIR)
+SOURCESDIR = os.path.join(PROJECTDIR, "spectrochempy")
+USERDIR = os.path.join(DOCDIR, "user")
 TEMPLATES = os.path.join(DOCDIR, '_templates')
 TUTORIALS = os.path.join(USERDIR, "tutorials", "*", "*.py")
 USERGUIDE = os.path.join(USERDIR, "userguide", "*", "*.py")
 API = os.path.join(DOCDIR, 'api', 'generated')
 GALLERYDIR = os.path.join(DOCDIR, "gallery")
 
-BUILDDIR = os.path.normpath(os.path.join(DOCDIR, '..', '..', 'spectrochempy.github.io'))
+BUILDDIR = os.path.normpath(os.path.join(os.path.dirname(PROJECTDIR), 'spectrochempy.github.io'))
 DOCTREES = os.path.normpath(os.path.join(BUILDDIR, '~doctrees'))
 LATEX = os.path.join(BUILDDIR, 'latex')
 HTML = BUILDDIR
@@ -73,7 +74,6 @@ class Build(object):
     # ..................................................................................................................
     @property
     def doc_version(self):
-        from spectrochempy import version
 
         if self._doc_version is None:
             # determine if we are in the developement branch (dev) or master (stable)
@@ -190,8 +190,6 @@ class Build(object):
             Type of builder
 
         """
-        from spectrochempy import version
-
         doc_version = self.doc_version
 
         if builder not in ['html', 'latex']:
@@ -336,11 +334,11 @@ class Build(object):
                     includeprivate=True,
                     destdir=API,
                     exclude_patterns=[
-                        'NDArray',
-                        'NDComplexArray',
-                        'NDIO',
-                        'NDPlot',
-                    ], )
+                            'NDArray',
+                            'NDComplexArray',
+                            'NDIO',
+                            'NDPlot',
+                            ], )
 
     # ..................................................................................................................
     def gitstatus(self):
@@ -438,8 +436,8 @@ class Build(object):
         for nb in iglob(os.path.join(DOCDIR, '**', '*.ipynb'), recursive=True):
             # This will erase all notebook output
             self._cmd_exec(
-                f'jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {nb}',
-                shell=True)
+                    f'jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {nb}',
+                    shell=True)
 
     # ..................................................................................................................
     def make_dirs(self):
@@ -450,12 +448,12 @@ class Build(object):
 
         # Create regular directories.
         build_dirs = [
-            os.path.join(DOCTREES, doc_version),
-            os.path.join(HTML, doc_version),
-            os.path.join(LATEX, doc_version),
-            DOWNLOADS,
-            os.path.join(DOCDIR, '_static'),
-        ]
+                os.path.join(DOCTREES, doc_version),
+                os.path.join(HTML, doc_version),
+                os.path.join(LATEX, doc_version),
+                DOWNLOADS,
+                os.path.join(DOCDIR, '_static'),
+                ]
         for d in build_dirs:
             os.makedirs(d, exist_ok=True)
 

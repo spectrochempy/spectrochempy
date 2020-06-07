@@ -25,7 +25,8 @@ import numpy as np
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
-from ...extern.nmrglue.process.proc_base import largest_power_of_2, zf_size
+
+from nmrglue.process.proc_base import largest_power_of_2, zf_size
 from .. import error_
 from ...units import ur
 

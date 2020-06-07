@@ -16,6 +16,9 @@ quadprog
 brukeropusreader
 requests
 jinja2
+nmrglue
+docrep
+orderedset
 
 # to be suppressed when code change is finished
 xlrd

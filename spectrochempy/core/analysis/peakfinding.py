@@ -126,12 +126,12 @@ def find_peaks(X, height=None, threshold=None, distance=None,
 
     See Also
     --------
-    find_peaks_cwt in scipy.signal:
-        Find peaks using the wavelet transformation.
-    peak_prominences in scipy.signal:
-        Directly calculate the prominence of peaks.
-    peak_widths in scipy.signal:
-        Directly calculate the width of peaks.
+    find_peaks_cwt:
+        in scipy.signal: Find peaks using the wavelet transformation.
+    peak_prominences:
+        in scipy.signal: Directly calculate the prominence of peaks.
+    peak_widths:
+        in scipy.signal: Directly calculate the width of peaks.
 
     Notes
     -----
