@@ -5,27 +5,34 @@ channels:
   - cantera
   - defaults
 dependencies:
+  # for the core package
   - numpy
+  - scipy
+  - pandas
   - matplotlib
   - traitlets
   - pint
   - quaternion
-  - scipy
+  - pyqt
   - colorama
-  - setuptools_scm
-  - git
-  - xlrd
+  - tqdm
+  - ipython
   - numba
-  - pandas
   - cantera
   - quadprog
   - brukeropusreader
-  - ipython
-  - jupyterlab
-  - ipympl
-  - nodejs
-  - ipykernel
+  - requests
+  - jinja2
+
+  # to be suppressed when code change is finished
+  - xlrd
+
+  # mainly for install and a bit more...
+  - setuptools_scm
+  - git
+
+  # need this, because the API is mainly designed to run in Jupyter notebook
   - ipywidgets
-  - widgetsnbextension
-  - pyqt
-  - tqdm
+  - ipympl
+  - jupyterlab
+  - nodejs

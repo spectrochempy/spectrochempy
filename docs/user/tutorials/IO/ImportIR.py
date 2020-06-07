@@ -28,7 +28,7 @@ import spectrochempy as scp
 import os
 
 # %% [markdown]
-# # 1. Supported file formats
+# ## Supported file formats
 #
 # At the time of writing of this tutorial (Scpy v.0.1.18), spectrochempy has the following readers which are specific
 # to IR data:
@@ -43,7 +43,7 @@ import os
 # - `read_csv()` to open csv files
 # - `read_matlab()` to open .mat files
 #
-# # 1.1. Import of OMNIC files
+# ## Import of OMNIC files
 #
 # [Thermo Scientific OMNIC](https://www.thermofisher.com/search/browse/category/us/fr/602580/FTIR%2C+NIR+%26amp%3B+
 # Raman+Software+%26amp%3B+Libraries)
@@ -56,7 +56,7 @@ import os
 #  file format and extended to .spg file formats.
 #
 #
-# ## a) import spg file
+# ### a) import spg file
 #
 # Let's import an .spg file from the `datadir` (see [Import Tutorial](Import.ipynb)) and display
 # its main attributes:
@@ -131,7 +131,7 @@ print(X.units)
 # Note that the `x` and `y` dimensions are the second and first dimension respectively. Hence, `X[i,j]` will return
 # the absorbance of the ith spetrum at the jth  wavenumber.
 #
-# ### Note: acquisition dates and `y` axis
+# **Note: acquisition dates and `y` axis**
 #
 # The acquisition timestamps are the *Unix times* of the acquisition, i.e. the time elapsed in seconds since the
 # reference date of Jan 1st 1970, 00:00:00 UTC. In OMNIC, the acquisition time is that of the start of the acquisison.
@@ -159,7 +159,7 @@ X.y
 
 # %%
 # the last item of a NDDataset such as X can be referred by a negative index (-1). The values of the Coord object
-# are accessed through the `data` attribute which is a ndarray, hence the final [0] to have the value:
+# are accessed through the `values` attribute:
 tf = X[-1].y.values
 tf
 
@@ -178,7 +178,7 @@ X.y = X.y + 2
 X.y
 
 # %% [markdown]
-# ### Note: The order of spectra
+# **Note: The order of spectra**
 #
 # The order of spectra in OMNIC .spg files depends depends on the order in which the spectra were included in the OMNIC
 # window before the group was saved. By default, sepctrochempy reorders the spectra by acquisistion date but the
@@ -199,7 +199,7 @@ X = X[::-1, :]  # reorders the NDDataset along the first dimension going backwar
 X.y  # displays the `y` dimension
 
 # %% [markdown]
-# ### Note: Case of groups with different wavenumbers
+# **Note: Case of groups with different wavenumbers**
 #
 # An OMNIC .spg file can contain spectra having different wavenumber axes (e.g. different spacings or wavenumber
 # ranges). In its current implementation, the spg reader will purposedly return an error because such spectra
@@ -238,7 +238,7 @@ X = scp.read_dir('irdata/subdir')
 print(X)
 
 # %% [markdown] {"pycharm": {"name": "#%% md\n"}}
-# # 1.2. Import of Bruker OPUS files
+# ## Import of Bruker OPUS files
 #
 # [Bruker OPUS](https://www.bruker.com/products/infrared-near-infrared-and-raman-spectroscopy/
 # opus-spectroscopy-software.html) files have also a proprietary file format. The Opus reader (`read_opus()`)
@@ -275,7 +275,7 @@ Z3.keys()  # returns the key of the dictionary
 Z3['Optik']  # looks what is the Optik block:
 
 # %% [markdown]
-# # 1.3. Import/Export of JCAMP-DX files
+# ## Import/Export of JCAMP-DX files
 #
 # [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developped for IR data and extended to
 # other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is limited to IR data and

@@ -30,27 +30,27 @@ requirements:
   run:
     - numpy
     - scipy
+    - pandas
     - matplotlib
     - traitlets
     - pint
-    - cantera
-    - quadprog
-    - brukeropusreader
-    - xlrd
-    - numba
-    - pandas
-    - tqdm
+    - quaternion
+    - pyqt
     - colorama
+    - tqdm
     - setuptools_scm
     - git
     - ipython
-    - jupyterlab
-    - ipympl
-    - nodejs
-    - ipykernel
+    - numba
+    - cantera
+    - quadprog
+    - brukeropusreader
+    - requests
+    - jinja2
     - ipywidgets
-    - widgetsnbextension
-    - quaternion
+    - ipympl
+    - jupyterlab
+    - xlrd
   test:
     - python                {{ python }}
 
