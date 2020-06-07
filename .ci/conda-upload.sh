@@ -60,7 +60,7 @@ if [[ $TRAVIS_BRANCH == "master" ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <dev> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PACKAGE_FILE"
+  ## anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PACKAGE_FILE"
   exit $?
 fi
 
@@ -76,7 +76,7 @@ if [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <main> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER  "$PACKAGE_FILE"
+  ## anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER  "$PACKAGE_FILE"
   exit $?
 fi
 
@@ -97,7 +97,7 @@ if [[ $TRAVIS_BRANCH == "develop" ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <test> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER -l test "$PACKAGE_FILE"
+  ## anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER -l test "$PACKAGE_FILE"
   exit $?
 fi
 
