@@ -12,15 +12,15 @@ jobs:
   fast_finish: false
   include:
     - stage: pytest-linux
-      if: branch = master OR branch = feature/travis
+      if: branch = master OR branch =~ /^feature/travis.*$/
       env:
         TEST=true
     - stage: conda-deploy
-      if: branch = master OR branch = feature/travis-deploy OR tag = /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      if: branch = master OR branch =~ feature/travis-deploy OR tag = /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
       env:
         DEPLOY=true
     - stage: build-docs
-      if: branch = master OR branch = feature/travis-docs OR tag = /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      if: branch = master OR branch =~ feature/travis-docs OR tag = /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
       env:
         BUILDOCS=true
 
