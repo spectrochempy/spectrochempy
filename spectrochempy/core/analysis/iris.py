@@ -13,14 +13,13 @@ This module implements the IRIS class.
 __all__ = ['IRIS']
 __dataset_methods__ = []
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndcoord import Coord
-# from spectrochempy.core.dataset.npy import dot
-
 import numpy as np
+import quadprog
 from matplotlib import pyplot as plt
 from scipy import optimize
-import quadprog
+
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 class IRIS:
@@ -66,16 +65,20 @@ class IRIS:
 
         elif 'kernel' in param:
             if param['kernel'].lower() == 'langmuir':
-                def ker(p_, eps_): return np.exp(-eps_) * p_ / (1 + np.exp(-eps_) * p_)
+                def ker(p_, eps_):
+                    return np.exp(-eps_) * p_ / (1 + np.exp(-eps_) * p_)
 
             elif param['kernel'].lower() == 'ca':
-                def ker(p_, eps_): return 0 if p_ < np.exp(eps_) else 1
+                def ker(p_, eps_):
+                    return 0 if p_ < np.exp(eps_) else 1
 
             elif param['kernel'].lower() == 'reactant-first-order':
-                def ker(t, lnk): return np.exp(-1 * np.exp(lnk) * t)
+                def ker(t, lnk):
+                    return np.exp(-1 * np.exp(lnk) * t)
 
             elif param['kernel'].lower() == 'product-first-order':
-                def ker(t, lnk): return 1 - np.exp(-1 * np.exp(lnk) * t)
+                def ker(t, lnk):
+                    return 1 - np.exp(-1 * np.exp(lnk) * t)
             else:
                 raise NameError(f"This kernel: <{param['kernel']}> is not implemented")
 
@@ -253,7 +256,7 @@ class IRIS:
                           'in [10**{}, 10**{}]\n'
                           .format(X.shape[1], X.shape[0], str(min(lambdaRange)), str(max(lambdaRange))))
 
-                    x = lamda = np.ndarray((4))
+                    x = np.ndarray((4))
                     epsilon = 0.1
                     phi = (1 + np.sqrt(5)) / 2
 

@@ -495,7 +495,7 @@ class PCA(HasTraits):
 
         if len(pcs) == 3:
             # tridimensional score plot
-            fig = plt.figure(**kwargs)
+            plt.figure(**kwargs)
             ax = plt.axes(projection='3d')
             ax.set_title('Score plot')
             ax.set_xlabel(

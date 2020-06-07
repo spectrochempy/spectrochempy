@@ -216,7 +216,7 @@ class Coord(NDMath, NDArray):
         raise NotImplementedError
 
     # ..................................................................................................................
-    def pipe(self, func, *args, **kwargs):
+    def pipe(self, func=None, *args, **kwargs):
         raise NotImplementedError
 
     # ..................................................................................................................
