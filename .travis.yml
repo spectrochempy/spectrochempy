@@ -12,14 +12,14 @@ jobs:
   fast_finish: false
   include:
     - stage: pytest-linux
-      env:
-        TEST=true
+      if: branch != feature/travis-deploy AND branch != feature/travis-docs
+      env: TEST=true
     - stage: conda-deploy
-      env:
-        DEPLOY=true
+      if: branch = master OR branch = feature/travis-deploy OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      env: DEPLOY=true
     - stage: build-docs
-      env:
-        BUILDOCS=true
+      if: branch = master OR branch = feature/travis-docs OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      env: BUILDOCS=true
 
 # limit got clone depth to 50 commits
 git:
@@ -30,15 +30,6 @@ addons:
   apt:
     packages:
       - xvfb
-
-# safelist (run only on these branches:  master, develop, release and when tagging)
-branches:
-  only:
-    - master
-    - develop
-    - /^release/.*$/
-    - /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
-    - feature/travis
 
 # use https://github.com/theochem/cgrid/blob/ac5d1e263b8f3fe0e659f908ab8bc849970ec24f/.travis.yml#L46-L54 method
 cache:
@@ -54,24 +45,16 @@ before_install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   - if [[ -d $HOME/miniconda/bin ]]; then
-
       echo "miniconda already installed.";
-
     else
-
       echo "Installing miniconda.";
       sudo apt-get update;
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/download/miniconda.sh;
       bash $HOME/download/miniconda.sh -b -u -p $HOME/miniconda;
-
     fi
-
   - if [[ -d $HOME/miniconda/envs/scpy$CONDAPY/bin ]]; then
-
       echo "scpy$CONDAPY environment already exists.";
-
     else
-
       echo "creating scpy$CONDAPY environment";
       source "$HOME/miniconda/etc/profile.d/conda.sh";
       hash -r;
@@ -82,7 +65,6 @@ before_install:
       conda config --add channels spectrocat;
       conda config --set channel_priority flexible;
       conda env create -q -f .ci/env/scpy$CONDAPY.yml;
-
     fi
 
 # create env and install scpy from sources
@@ -95,36 +77,27 @@ install:
 # command to install code-climate dependencies
 before_script:
   - if [[ $TEST = true ]]; then
-
       echo "downloading cc-test-reporter";
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
       chmod +x ./cc-test-reporter;
       ./cc-test-reporter before-build;
-
     fi
 
 script:
   - if [[ $TEST = true ]]; then
-
       coverage run -m pytest -v --flake8 -k "not test_example" --nodisplay;
       pytest -v --flake8 -k "test_example" --nodisplay;
-
     elif [[ $DEPLOY = true ]]; then
-
+      echo $ANA
       chmod +x .ci/conda-upload.sh;
-      echo "BUILD AND UPLOADS";
-
+      .ci/conda-upload.sh;
     elif [[ $BUILDOCS = true ]]; then
-
       echo "BUILDING DOCS";
-
     fi
 
+# command to notify code-climate
 after_success:
   - if [[ $TEST = true ]]; then
-
       coverage xml;
       ./cc-test-reporter after-build;
-
     fi
-

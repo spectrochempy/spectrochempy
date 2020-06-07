@@ -4,11 +4,15 @@
 
 SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python. It is a cross platform software, running on Linux, Windows or OS X.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3823841.svg)](https://doi.org/10.5281/zenodo.3823841)
-![Conda](https://img.shields.io/conda/v/spectrocat/spectrochempy)
-![Conda](https://img.shields.io/conda/pn/spectrocat/spectrochempy)
-[![Anaconda-Server Badge](https://anaconda.org/spectrocat/spectrochempy/badges/downloads.svg)](https://anaconda.org/spectrocat/spectrochempy)
-![Conda](https://img.shields.io/conda/l/spectrocat/spectrochempy)
+||| 
+|---:|:---|
+|**Tests**|[![Build Status](https://travis-ci.com/spectrochempy/spectrochempy.svg?branch=master)](https://travis-ci.com/spectrochempy/spectrochempy) [![Total alerts](https://img.shields.io/lgtm/alerts/g/spectrochempy/spectrochempy.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/spectrochempy/spectrochempy/alerts/) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/spectrochempy/spectrochempy.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/spectrochempy/spectrochempy/context:python) [![Maintainability](https://api.codeclimate.com/v1/badges/78681bc1aabbb8ca915f/maintainability)](https://codeclimate.com/github/spectrochempy/spectrochempy/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/78681bc1aabbb8ca915f/test_coverage)](https://codeclimate.com/github/spectrochempy/spectrochempy/test_coverage)
+| 
+|**Packages**| ![Conda](https://img.shields.io/conda/v/spectrocat/spectrochempy) [![Anaconda-Server Badge](https://anaconda.org/spectrocat/spectrochempy/badges/downloads.svg)](https://anaconda.org/spectrocat/spectrochempy)
+| 
+|**Docs**|[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3823841.svg)](https://doi.org/10.5281/zenodo.3823841) ![Conda](https://img.shields.io/conda/l/spectrocat/spectrochempy)|  
+|**Implementations**|![Conda](https://img.shields.io/conda/pn/spectrocat/spectrochempy)|
+ 
 
 ## Features
 

@@ -86,12 +86,12 @@ def concatenate(*datasets, **kwargs):
             datasets = datasets[0]
 
     # try to cast of dataset to NDDataset
-    for dataset in datasets:
-        if not isinstance(dataset, NDDataset):
+    for i, item in enumerate(datasets):
+        if not isinstance(item, NDDataset):
             try:
-                dataset = NDDataset(dataset)
+                datasets[i] = NDDataset(item)
             except Exception:
-                raise TypeError(f"Only instance of NDDataset can be concatenated, not {type(dataset).__name__}, "
+                raise TypeError(f"Only instance of NDDataset can be concatenated, not {type(item).__name__}, "
                                 f"but casting to this type failed. ")
 
     # a flag to force stacking of dataset instead of the default concatenation
@@ -108,8 +108,8 @@ def concatenate(*datasets, **kwargs):
     # check if data shapes are compatible (all dimension must have the same size
     # except the one to be concatenated)
     rshapes = []
-    for dataset in datasets:
-        sh = list(dataset.shape)
+    for item in datasets:
+        sh = list(item.shape)
         if len(sh) > 1:
             del sh[axis]
         rshapes.append(sh)

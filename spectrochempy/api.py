@@ -149,7 +149,8 @@ def set_backend():
                 # We are running from NBSphinx - the plot must be inline to show up.
                 ip.magic('matplotlib inline')
             else:
-                ip.magic('matplotlib widget')
+              pass #  ip.magic('matplotlib widget')
+              # TODO: Why widget does not work!!!!
         except Exception:
             ip.magic('matplotlib qt')
 

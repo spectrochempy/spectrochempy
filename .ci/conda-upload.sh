@@ -28,6 +28,14 @@ NUMBER="${arr[1]}"
 export CONDA_BLD_PATH="$HOME/conda-bld"
 mkdir -p "$CONDA_BLD_PATH"
 
+## configure conda
+conda config --set always_yes yes --set changeps1 no
+conda update -q conda
+conda config --add channels conda-forge
+conda config --add channels cantera
+conda config --add channels spectrocat
+conda config --set channel_priority flexible
+
 ## Here we will choose depending on the way this script is run
 if [[ $USER != "travis" ]]; then
   ## if we are in local
@@ -52,7 +60,9 @@ if [[ $TRAVIS_BRANCH == "master" ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <dev> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PACKAGE_FILE"
+  if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PACKAGE_FILE"
+  fi
   exit $?
 fi
 
@@ -68,7 +78,9 @@ if [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <main> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER  "$PACKAGE_FILE"
+  if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER  "$PACKAGE_FILE"
+  fi
   exit $?
 fi
 
@@ -89,11 +101,13 @@ if [[ $TRAVIS_BRANCH == "develop" ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <test> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER -l test "$PACKAGE_FILE"
+  if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER -l test "$PACKAGE_FILE"
+  fi
   exit $?
 fi
 
-## this is a local "dev" release not yet merged with develop (will not be uploaded)
+## this is a local "dev" branch not yet merged with develop (will not be uploaded)
 export DEVSTRING="test$NUMBER"
 export VERSION="$NEXT_TAG"
 PACKAGE_FILE="$CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"

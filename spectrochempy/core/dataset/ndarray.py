@@ -1222,7 +1222,6 @@ class NDArray(HasTraits):
 
             except ValueError:
                 # ensure that if deepcopy do not work, a shadow copy can be done
-                _attr = cpy.copy(getattr(self, f"_{attr}"))
                 _attr = do_copy(getattr(self, f"_{attr}"))
                 setattr(new, f"_{attr}", _attr)
 

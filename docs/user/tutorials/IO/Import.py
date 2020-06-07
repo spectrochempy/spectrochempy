@@ -25,7 +25,7 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# ## 1. Dialog boxes
+# ## Dialog boxes
 #
 # Retrieving Files and Directories, in day-to-day work is often made through Dialog Boxes. While we do not recommand
 # this procedure for adanced usage (see below), it is quite easy to do that with **Scpy**. For instance, to import
@@ -72,7 +72,7 @@ print(X)
 # - The list of readers available will hopefully increase in future **Scpy** releases:-)
 
 # %% [markdown]
-# ## 2. Import with explicit directory or file pathnames
+# ## Import with explicit directory or file pathnames
 #
 # While the use of Dialog Box seems at first 'user-friendly', you will probably experience, that it is often NOT
 # efficient because you will have to select the file *each time* the notebook (or the script) is run... Hence, the
@@ -125,7 +125,7 @@ X = scp.read_omnic(directory=r'C:\users\Brian')
 # - etc...
 
 # %% [markdown]
-# ## 3. A good practice: use relative paths
+# ## A good practice: use relative paths
 #
 # The above directives require explicitly writing the absolute pathnames, which are virtually always computer specific.
 # If, for instance, Brian has a project organized in a folder (`s`) with a directory dedicated to input data (`Life`)
@@ -157,7 +157,7 @@ X = scp.read_omnic(directory=r'C:\users\Brian')
 #
 #     X = scp.read_omnic('wodger.spg', directory='Life')
 #
-# ## 4. Good practice: use `os` or `pathlib` modules
+# ## Good practice: use `os` or `pathlib` modules
 #
 # In python, working with pathnames is classically done with dedicated modules such as `os` or `pathlib` python modules.
 # As `os`is automatically imported with Scpy, we mention the following methods that can be particularely useful:
@@ -175,7 +175,7 @@ X = scp.read_omnic(directory=r'C:\users\Brian')
 # - [os - Miscellaneous operating system interfaces](https://docs.python.org/3/library/os.html)
 # - [pathlib — Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
 #
-# ## 5. Another default search directory: `datadir`
+# ## Another default search directory: `datadir`
 #
 # Spectrochempy comes also with the definition of a second default directory path where to look at the data:
 # the `datadir` directory. It is defined in the variable `general_preferences.datadir` which is impotrted at the same

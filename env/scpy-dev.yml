@@ -5,6 +5,7 @@ channels:
   - spectrocat
   - defaults
 dependencies:
+  # for the core package
   - numpy
   - scipy
   - pandas
@@ -15,8 +16,6 @@ dependencies:
   - pyqt
   - colorama
   - tqdm
-  - setuptools_scm
-  - git
   - ipython
   - numba
   - cantera
@@ -24,17 +23,25 @@ dependencies:
   - brukeropusreader
   - requests
   - jinja2
+
+  # to be suppressed when code change is finished
+  - xlrd
+
+  # mainly for install and a bit more...
+  - setuptools_scm
+  - git
+
+  # need this, because the API is mainly designed to run in Jupyter notebook
   - ipywidgets
   - ipympl
   - jupyterlab
-  #- jupyter_nbextensions_configurator
-  #- nodejs
-  #
-  -
-  # tests
+  - nodejs
+
+  # DEV: just for testing
   - pytest
   - pytest-flake8
   - scikit-image
+
   # docs
   - jupytext
   #- sphinx=1.8.5
@@ -51,5 +58,4 @@ dependencies:
   # - xarray
   # - datashader
   # - scikit-learn
-  # to be suppressed when code change is finished
-  - xlrd
+
