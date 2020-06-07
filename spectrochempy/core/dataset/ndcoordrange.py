@@ -50,7 +50,6 @@ class Range(List):
 
         super(Range, self).__init__(trait=None, default_value=default_value,
                                     **kwargs)
-        pass
 
     def length_error(self, obj, value):
         e = "The '%s' trait of %s instance must be of length 2 exactly," \
