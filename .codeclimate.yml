@@ -5,19 +5,27 @@ plugins:
 checks:
   file-lines:
     config:
-      threshold: 5000
+      threshold: 6000
   argument-count:
     config:
       threshold: 10
   complex-logic:
     config:
-      threshold: 100
+      threshold: 500
   method-lines:
     config:
-      threshold: 100
+      threshold: 300
   method-count:
     config:
       threshold: 50
   method-complexity:
     config:
-      threshold: 20
+      threshold: 30
+  similar-code:
+    config:
+      threshold: 50
+exclude_patterns:
+  - ".git/"
+  - "tests/"
+  - "**/extern/"
+  - "docs/"
