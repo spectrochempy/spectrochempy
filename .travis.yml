@@ -114,7 +114,7 @@ script:
     elif [[ $DEPLOY = true ]]; then
 
       chmod +x .ci/conda-upload.sh;
-      bash .ci/conda-upload.sh;
+      .ci/conda-upload.sh;
 
     elif [[ $BUILDOCS = true ]]; then
 
