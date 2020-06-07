@@ -7,6 +7,8 @@ env:
   global:
     - CONDAPY=3.7
     - CC_TEST_REPORTER_ID=$CODECLIMATE_TEST_REPORTER_ID
+    - CONDA_UPLOAD_TOKEN=$CONDA_UPLOAD_TOKEN
+    - ANACONDA_USER=$ANACONDA_USER
 
 jobs:
   fast_finish: false
