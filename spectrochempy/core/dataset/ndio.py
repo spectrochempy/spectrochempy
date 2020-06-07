@@ -475,7 +475,7 @@ class NDIO(HasTraits):
         if not isinstance(fid, (list, tuple)):
             files = [fid]
 
-        for f in files:
+        for f in files:  # lgtm [py/iteration-string-and-sequence]
             nd = NDIO._load(cls, fid=f, protocol=protocol, directory=directory, **kwargs)
             datasets.append(nd)
 
