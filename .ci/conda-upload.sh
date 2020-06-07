@@ -60,7 +60,9 @@ if [[ $TRAVIS_BRANCH == "master" ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <dev> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PACKAGE_FILE"
+  if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PACKAGE_FILE"
+  fi
   exit $?
 fi
 
@@ -76,7 +78,9 @@ if [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <main> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER  "$PACKAGE_FILE"
+  if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER  "$PACKAGE_FILE"
+  fi
   exit $?
 fi
 
@@ -97,11 +101,13 @@ if [[ $TRAVIS_BRANCH == "develop" ]]; then
   echo "***************************************************************************************************************"
   echo "--> UPLOADING $PACKAGE_FILE to <test> anaconda repository"
   echo "***************************************************************************************************************"
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER -l test "$PACKAGE_FILE"
+  if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload --force -u $ANACONDA_USER -l test "$PACKAGE_FILE"
+  fi
   exit $?
 fi
 
-## this is a local "dev" release not yet merged with develop (will not be uploaded)
+## this is a local "dev" branch not yet merged with develop (will not be uploaded)
 export DEVSTRING="test$NUMBER"
 export VERSION="$NEXT_TAG"
 PACKAGE_FILE="$CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
