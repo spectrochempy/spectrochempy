@@ -6,4 +6,4 @@ extraction:
       exclude:
         - .git
         - tests
-        - /**/extern
+        - spectrochempy/extern
