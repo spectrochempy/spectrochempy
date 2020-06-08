@@ -24,8 +24,8 @@ import numpy as np
 import pandas as pd
 from pandas.core.generic import NDFrame
 from traitlets import HasTraits, List, Unicode, Instance, Bool, All, Float,  validate, observe, default
+from traittypes import Array
 
-from spectrochempy.extern.traittypes import Array
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.core.dataset.ndarray import NDArray, DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.ndcomplex import NDComplexArray

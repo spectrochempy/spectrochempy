@@ -50,6 +50,7 @@ requirements:
     - nmrglue
     - docrep
     - orderedset
+    - traittypes
     - xlrd
     - setuptools_scm
     - git
