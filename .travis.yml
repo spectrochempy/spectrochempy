@@ -11,16 +11,16 @@ jobs:
   fast_finish: false
   include:
     - stage: pytest-linux
-      if: branch != feature/travis-deploy AND branch != feature/travis-docs
+      if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
       env: TEST=true
     - stage: conda-deploy
-      if: branch = master OR branch = feature/travis-deploy OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      if: type != pull_request AND (branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
       env: DEPLOY=true
     - stage: build-docs
-      if: branch = master OR branch = feature/travis-docs OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
       env: BUILDOCS=true
 
-# limit got clone depth to 50 commits
+# limit got clone depth to 50 commits (this means that pull requests must be done with less than 50 commit changes)
 git:
   depth: 50
 
@@ -39,7 +39,7 @@ cache:
 before_cache:
   - rm -rf $HOME/miniconda/locks $HOME/miniconda/pkgs $HOME/miniconda/var $HOME/miniconda/conda-meta/history
 
-# install miniconda
+# install miniconda and create environment (or laod them from caches)
 before_install:
   - echo "Setup display...";
   - export DISPLAY=':99.0'

@@ -32,15 +32,14 @@ echo "---> Building $PKG_FILE"
 
 if [[ $TRAVIS_BRANCH == "master" ]]; then
   ## We build the current master release (i.e.the latest development version)
-  echo $PWD
   conda build conda
   if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    echo 'anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PKG_FILE"'
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PKG_FILE"
   fi
 elif [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   ## This is a "stable" release
   conda build conda
   if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    echo 'anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER "$PKG_FILE"'
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER "$PKG_FILE"
   fi
 fi
