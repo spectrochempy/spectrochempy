@@ -29,17 +29,17 @@ conda config -q --set channel_priority flexible
 
 PKG_FILE="$CONDA_BLD_PATH/$OS/$PKG_NAME_VERSION"
 echo "---> Building $PKG_FILE"
+conda build conda
 
+echo "---> Uploading $PKG_FILE"
 if [[ $TRAVIS_BRANCH == "master" ]]; then
   ## We build the current master release (i.e.the latest development version)
-  conda build conda
-  if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PKG_FILE"
-  fi
+  ## This is a "dev" release
+  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PKG_FILE"
 elif [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
-  ## This is a "stable" release
-  conda build conda
-  if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER "$PKG_FILE"
-  fi
+  ## This is a "main" release
+  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER "$PKG_FILE"
+else
+  ## This is a "test" release
+  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l test "$PKG_FILE"
 fi
