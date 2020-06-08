@@ -30,6 +30,7 @@ import types
 # ======================================================================================================================
 import numpy as np
 from warnings import catch_warnings
+from orderedset import OrderedSet
 
 # ======================================================================================================================
 # Local imports
@@ -38,7 +39,6 @@ from spectrochempy.units.units import ur, Quantity, DimensionalityError
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.utils import docstrings, MaskedArray, NOMASK
 from spectrochempy.core import warning_, error_
-from spectrochempy.extern.orderedset import OrderedSet
 
 # ======================================================================================================================
 # utility

@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 """
 Loading an IR (omnic SPG) experimental file
 ============================================

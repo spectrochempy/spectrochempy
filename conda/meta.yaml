@@ -1,5 +1,6 @@
 {% set name = "SpectroChemPy" %}
-  {% set version = environ['VERSION'] %}
+{% set version = environ['VERSION'] %}
+{% set devstring = environ['DEVSTRING'] %}
 
 package:
   name: "{{ name|lower }}"
@@ -11,8 +12,9 @@ source:
 build:
   script_env:
     - VERSION
+    - DEVSTRING
     - CONDA_BLD_PATH
-  string: {{ environ['DEVSTRING'] }}
+  string: "{{ devstring }}"
   noarch: python
   script:  "{{ PYTHON }} -m pip install . -vv"
   entry_points:
@@ -38,8 +40,6 @@ requirements:
     - pyqt
     - colorama
     - tqdm
-    - setuptools_scm
-    - git
     - ipython
     - numba
     - cantera
@@ -47,16 +47,24 @@ requirements:
     - brukeropusreader
     - requests
     - jinja2
+    - nmrglue
+    - docrep
+    - orderedset
+    - traittypes
+    - xlrd
+    - setuptools_scm
+    - git
     - ipywidgets
     - ipympl
     - jupyterlab
-    - xlrd
+    - nodejs
   test:
     - python                {{ python }}
 
 test:
   script_env:
     - VERSION
+    - DEVSTRING
     - CONDA_BLD_PATH
   imports:
     - spectrochempy

@@ -4,6 +4,7 @@ channels:
   - cantera
   - spectrocat
   - defaults
+
 dependencies:
   # for the core package
   - numpy
@@ -23,6 +24,10 @@ dependencies:
   - brukeropusreader
   - requests
   - jinja2
+  - nmrglue
+  - docrep
+  - orderedset
+  - traittypes
 
   # to be suppressed when code change is finished
   - xlrd
@@ -37,25 +42,32 @@ dependencies:
   - jupyterlab
   - nodejs
 
+  # ############ DEV
+
   # DEV: just for testing
   - pytest
   - pytest-flake8
   - scikit-image
 
-  # docs
+  # DEV: docs
   - jupytext
-  #- sphinx=1.8.5
-  #- sphinx_rtd_theme
-  #- sphinx-gallery=0.5.0
-  #- nbsphinx
-  #- jupyter_sphinx
-  #- numpydoc=0.8
-  # build
-  # - conda-build
-  # - conda-smithy
+  - sphinx
+  - sphinx_rtd_theme
+  - autodocsumm
+  - sphinx-gallery
+  - nbsphinx
+  - jupyter_sphinx
+  - numpydoc
+
+  # DEV: build
+  - conda-build
   # - twine
+
   # optional
   # - xarray
   # - datashader
   # - scikit-learn
 
+# pip only for docs
+pip:
+  - autodoc_traits

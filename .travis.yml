@@ -6,7 +6,6 @@ dist: xenial
 env:
   global:
     - CONDAPY=3.7
-    - CC_TEST_REPORTER_ID=$CODECLIMATE_TEST_REPORTER_ID
 
 jobs:
   fast_finish: false
@@ -42,6 +41,7 @@ before_cache:
 
 # install miniconda
 before_install:
+  - echo "Setup display...";
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   - if [[ -d $HOME/miniconda/bin ]]; then
@@ -69,10 +69,11 @@ before_install:
 
 # create env and install scpy from sources
 install:
-  - source "$HOME/miniconda/etc/profile.d/conda.sh"
-  - conda activate scpy$CONDAPY
-  - git fetch --tags
-  - pip install .
+  - echo "Activate scpy$CONDAPY environnment...";
+  - source "$HOME/miniconda/etc/profile.d/conda.sh";
+  - conda activate scpy$CONDAPY;
+  - git fetch --tags;
+  - pip install .;
 
 # command to install code-climate dependencies
 before_script:
@@ -85,12 +86,12 @@ before_script:
 
 script:
   - if [[ $TEST = true ]]; then
+      echo "RUNNING TESTS";
       coverage run -m pytest -v --flake8 -k "not test_example" --nodisplay;
       pytest -v --flake8 -k "test_example" --nodisplay;
     elif [[ $DEPLOY = true ]]; then
-      echo $ANA
-      chmod +x .ci/conda-upload.sh;
-      .ci/conda-upload.sh;
+      echo "BUILDING AND UPLOADING ON ANACONDA";
+      bash .ci/scripts/conda-upload.sh;
     elif [[ $BUILDOCS = true ]]; then
       echo "BUILDING DOCS";
     fi
@@ -101,3 +102,4 @@ after_success:
       coverage xml;
       ./cc-test-reporter after-build;
     fi
+

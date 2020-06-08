@@ -32,6 +32,7 @@ from pint.errors import DimensionalityError
 import numpy as np
 import pandas as pd
 from pandas.core.generic import NDFrame, Index
+from traittypes import Array
 
 # ======================================================================================================================
 # local imports
@@ -42,7 +43,7 @@ from spectrochempy.core import info_, error_, print_
 from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
                                  is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
                                  make_new_object, convert_to_html)
-from spectrochempy.extern.traittypes import Array
+
 
 
 # ======================================================================================================================

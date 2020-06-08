@@ -58,7 +58,6 @@ def test_basecor_multivariate(IR_dataset_2D):
 
 
 def test_notebook_basecor_bug():
-    # coding: utf-8
 
     dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 

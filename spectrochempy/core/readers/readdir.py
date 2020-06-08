@@ -102,7 +102,6 @@ def read_dir(dataset=None, directory=None, **kwargs):
         # so the first parameter must be the directory
         if isinstance(dataset, str) and dataset != '':
             directory = dataset
-            dataset = None
 
     parent_dir = kwargs.get('parent_dir', None)
     directory = readdirname(directory, parent_dir=parent_dir)
@@ -232,7 +231,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         # so the first parameter must be the directory
         if isinstance(dataset, str) and dataset != '':
             directory = dataset
-            dataset = None
 
     parent_dir = kwargs.get('parent_dir', None)
     directory = readdirname(directory, parent_dir=parent_dir)
