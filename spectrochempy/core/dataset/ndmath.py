@@ -400,7 +400,10 @@ class NDMath(object):
         %(generic_method.returns)s
 
         """
-        new = self.copy()
+        if inplace:
+            new = self
+        else:
+            new = self.copy()
         if not new.has_complex_dims:
             return np.fabs(new)  # not a complex, return fabs should be faster
 
@@ -409,8 +412,6 @@ class NDMath(object):
         else:
             new = np.sqrt(new.real ** 2 + new.part('IR') ** 2 + new.part('RI') ** 2 + new.part('II') ** 2)
             new._is_quaternion = False
-        if inplace:
-            self = new
 
         return new
 

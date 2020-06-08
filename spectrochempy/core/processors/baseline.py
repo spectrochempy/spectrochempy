@@ -12,7 +12,8 @@ This module implements the `BaselineCorrection` class for baseline corrections.
 
 """
 __all__ = ['BaselineCorrection', 'ab']
-__dataset_methods__ = __all__
+
+__dataset_methods__ = ['ab']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -329,10 +330,10 @@ class BaselineCorrection(HasTraits):
             if self.zoompreview > 1:
                 zb = 1.  # self.zoompreview
                 zlim = [corrected.data.min() / zb, corrected.data.max() / zb]
-                ax2 = corrected.plot_stack(ax=ax2, colorbar=False,
+                _ = corrected.plot_stack(ax=ax2, colorbar=False,
                                            zlim=zlim, clear=False)
             else:
-                ax2 = corrected.plot_stack(ax=ax2, colorbar=False, clear=False)
+                _ = corrected.plot_stack(ax=ax2, colorbar=False, clear=False)
 
         show_basecor(ax2)
 

@@ -1747,7 +1747,7 @@ class NDArray(HasTraits):
                 print_unit = False
 
             if isinstance(data, Quantity):
-                data = data.magnitude
+                data = data.magnitude                   # TODO:   Check why it is not used???
 
             if print_unit:
                 units = ' {:~K}'.format(self.units) if self.has_units else ' unitless'
@@ -1770,8 +1770,8 @@ class NDArray(HasTraits):
         if by == 'value':
             args = np.argsort(self.data)
         elif 'label' in by and not self.is_labeled:
-            by = 'value'
-            pos = None
+            # by = 'value'
+            # pos = None
             warnings.warn('no label to sort, use `value` by default', SpectroChemPyWarning)
             args = np.argsort(self.data)
         elif 'label' in by and self.is_labeled:
@@ -1788,7 +1788,7 @@ class NDArray(HasTraits):
                 labels = self._labels[..., pos]
             args = np.argsort(labels)
         else:
-            by = 'value'
+            # by = 'value'
             warnings.warn('parameter `by` should be set to `value` or `label`, use `value` by default',
                           SpectroChemPyWarning)
             args = np.argsort(self.data)

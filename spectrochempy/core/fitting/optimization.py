@@ -33,19 +33,24 @@ def optimize(func, fp0, args=(), constraints={}, method="SIMPLEX",
              maxfun=None, maxiter=1000,
              ftol=1e-8, xtol=1e-8,
              callback=None):
-    """
-    Optimization procedure
 
-    :param func :
-    :param x0 :
-    :param args :
-    :param method :
-    :param maxfun :
-    :param maxiter :
-    :param ftol :
-    :param xtol :
-    :param callback :
-    :return :
+    """
+
+    Parameters
+    ----------
+    func
+    fp0
+    args
+    constraints
+    method
+    maxfun
+    maxiter
+    ftol
+    xtol
+    callback
+
+    Returns
+    -------
 
     """
 

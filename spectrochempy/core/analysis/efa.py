@@ -153,7 +153,7 @@ class EFA(HasTraits):
         M, K = self.f.shape
         if n_pc is None:
             n_pc = K
-        n_pc = min(K, n_pc)
+        # n_pc = min(K, n_pc)
 
         f = self.f
         if cutoff is not None:
@@ -175,7 +175,7 @@ class EFA(HasTraits):
         M, K = self.b.shape
         if n_pc is None:
             n_pc = K
-        n_pc = min(K, n_pc)
+        # n_pc = min(K, n_pc)
 
         b = self.b
         if cutoff is not None:

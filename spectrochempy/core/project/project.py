@@ -821,7 +821,7 @@ class Project(AbstractProject):
             # we must also reinit preferences
             app.init_all_preferences()
             app.load_config_file(prefjsonfile)
-            project_preferences = app.project_preferences = ProjectPreferences(config=app.config, parent=app)
+            app.project_preferences = ProjectPreferences(config=app.config, parent=app)
 
         # make a project (or a subclass of it, so we use cls)
         pars = obj['pars.json']
