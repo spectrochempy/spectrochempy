@@ -1739,15 +1739,17 @@ class NDArray(HasTraits):
 
         if not self.is_empty:
 
-            if self._data is not None:
-                data = self.umasked_data
-            else:
-                # no data but labels
-                data = self.get_labels()
+            # if self._data is not None:
+            #    data = self.umasked_data
+            # else:
+            #    # no data but labels
+            #    data = self.get_labels()
+
+            if self._data is None:
                 print_unit = False
 
-            if isinstance(data, Quantity):
-                data = data.magnitude                   # TODO:   Check why it is not used???
+            # if isinstance(data, Quantity):
+            #    data = data.magnitude                   # TODO:   Check why it is not used???
 
             if print_unit:
                 units = ' {:~K}'.format(self.units) if self.has_units else ' unitless'
