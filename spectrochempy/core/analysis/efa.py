@@ -150,7 +150,7 @@ class EFA(HasTraits):
         -------
 
         """
-        M, K = self.f.shape
+        # M, K = self.f.shape
         # if n_pc is None:
         #    n_pc = K
         # n_pc = min(K, n_pc)
@@ -172,7 +172,7 @@ class EFA(HasTraits):
         -------
 
         """
-        M, K = self.b.shape
+        # M, K = self.b.shape
         # if n_pc is None:
         #    n_pc = K
         # n_pc = min(K, n_pc)
