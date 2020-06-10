@@ -1746,8 +1746,8 @@ class NDArray(HasTraits):
                 data = self.get_labels()
                 print_unit = False
 
-            if isinstance(data, Quantity):
-                data = data.magnitude                   # TODO:   Check why it is not used???
+            # if isinstance(data, Quantity):
+            #    data = data.magnitude                   # TODO:   Check why it is not used???
 
             if print_unit:
                 units = ' {:~K}'.format(self.units) if self.has_units else ' unitless'

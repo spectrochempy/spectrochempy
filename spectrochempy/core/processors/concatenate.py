@@ -148,34 +148,34 @@ def concatenate(*datasets, **kwargs):
     # get the coordss
     coordss = [dataset.coords for dataset in datasets]
 
-    def check_coordinates(coordss, force_stack):
-
-        # We will call this only in case of problems because it takes a lot of time
-
-        # how many different coordss
-        coordss = set(coordss)
-        if len(coordss) == 1 and force_stack:
-            # nothing to do (all datasets have the same coords and so are
-            # perfectly compatibles for stacking)
-            pass
-
-        else:
-            for i, cs in enumerate(zip(*coordss)):
-
-                axs = set(cs)
-                axref = axs.pop()
-                for ax in axs:
-                    # we expect compatible units
-                    if not ax.is_units_compatible(axref):
-                        raise ValueError(
-                            "units of the dataset's axis are not compatible"
-                        )
-                    if i != axis and ax.size != axref.size:
-                        # and same size for the non-concatenated axis
-                        raise ValueError(
-                            "size of the non-concatenated dimension must be "
-                            "identical"
-                        )
+    # def check_coordinates(coordss, force_stack):
+    #
+    #     # We will call this only in case of problems because it takes a lot of time
+    #
+    #     # how many different coordss
+    #     coordss = set(coordss)
+    #     if len(coordss) == 1 and force_stack:
+    #         # nothing to do (all datasets have the same coords and so are
+    #         # perfectly compatibles for stacking)
+    #         pass
+    #
+    #     else:
+    #         for i, cs in enumerate(zip(*coordss)):
+    #
+    #             axs = set(cs)
+    #             axref = axs.pop()
+    #             for ax in axs:
+    #                 # we expect compatible units
+    #                 if not ax.is_units_compatible(axref):
+    #                     raise ValueError(
+    #                         "units of the dataset's axis are not compatible"
+    #                     )
+    #                 if i != axis and ax.size != axref.size:
+    #                     # and same size for the non-concatenated axis
+    #                     raise ValueError(
+    #                         "size of the non-concatenated dimension must be "
+    #                         "identical"
+    #                     )
 
     # concatenate or stack the data array + mask
     # ------------------------------------------------------------------------------------------------------------------
