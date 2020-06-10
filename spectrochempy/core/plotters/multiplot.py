@@ -394,7 +394,7 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
             xlims.append(ax.get_xlim())
             ylims.append(ax.get_ylim())
             xrev = (ax.get_xlim()[1] - ax.get_xlim()[0]) < 0
-            yrev = (ax.get_ylim()[1] - ax.get_ylim()[0]) < 0
+            # yrev = (ax.get_ylim()[1] - ax.get_ylim()[0]) < 0
 
     # TODO: add a common color bar (set vmin and vmax using zlims)
 
