@@ -9,7 +9,7 @@
 
 __all__ = ['trapz']
 
-__dataset_methods__ = __all__
+__dataset_methods__ = ['trapz']
 
 import scipy.signal
 

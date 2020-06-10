@@ -9,7 +9,7 @@
 
 __all__ = ['find_peaks']
 
-__dataset_methods__ = __all__
+__dataset_methods__ = ['find_peaks']
 
 import scipy.signal
 import numpy as np

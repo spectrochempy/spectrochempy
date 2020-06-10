@@ -76,6 +76,13 @@ about:
   summary: "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
   doc_url: "https://www.spectrochempy.fr"
   dev_url: "https://github.com/spectrochempy/spectrochempy"
+  description: |
+    SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python.
+    It is a cross platform software, running on Linux, Windows or OS X.
+
+    SpectroChemPy is still experimental and under active development.
+    Its current design is subject to major changes, reorganizations, bugs and crashes!!!.
+    Please report any issues to the Issue Tracker on github.
 
 extra:
   recipe-maintainers:

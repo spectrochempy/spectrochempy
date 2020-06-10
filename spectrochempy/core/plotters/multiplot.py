@@ -402,9 +402,9 @@ def multiplot(datasets=[], labels=[], nrow=1, ncol=1,
     ylim = [np.min(np.array(ylims) - amp * 0.01), np.max(np.array(ylims)) + amp * 0.01]
     for ax in axes.values():
         ax.set_ylim(ylim)
-    if yrev:
-        ylim = ylim[::-1]
-    amp = np.ptp(np.array(xlims))
+    # if yrev:
+    #    ylim = ylim[::-1]
+    # amp = np.ptp(np.array(xlims))
 
     if not show_transposed:
         xlim = [np.min(np.array(xlims)), np.max(np.array(xlims))]
