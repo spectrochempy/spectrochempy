@@ -609,8 +609,10 @@ def _read_spa(dataset, filenames, **kwargs):
     return dataset
 
 
-def _read_srs(dataset, filenames, **kwargs):
-    return dataset
+def _read_srs(dataset, filename, **kwargs):
+    # Import Thermo series spectra files(*.srs) in a NDDataset
+
+    return
 
 
 if __name__ == '__main__':

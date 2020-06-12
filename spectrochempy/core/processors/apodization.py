@@ -5,14 +5,17 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-__all__ = ['em', 'gm', "sp", "sine", "sinm", "qsin"]
+__all__ = ['em', 'gm', "sp", "sine", "sinm", "qsin", "hamming", "triang", "bartlett", "blackmanharris", "mertz"]
 __dataset_methods__ = __all__
 
 # ======================================================================================================================
 # Third party imports
 # ======================================================================================================================
 import numpy as np
-
+from scipy.signal.windows import triang as scpy_triang
+from scipy.signal.windows import hamming as scpy_hamming
+from scipy.signal.windows import blackmanharris as scpy_blackmanharris
+from scipy.signal.windows import bartlett as scpy_bartlett
 # ======================================================================================================================
 # Local imports
 # ======================================================================================================================
@@ -26,7 +29,7 @@ from spectrochempy.core import error_
 # ======================================================================================================================
 @docstrings.get_sectionsf('apodize', sections=['Other Parameters', 'Returns'])
 @docstrings.dedent
-def _apodize(dataset, method, apod, **kwargs):
+def _apodize(dataset, method, apod=None, **kwargs):
     """
 
     Calculate an apodization window function using the given `method` and the `apod` parameters
@@ -81,16 +84,18 @@ def _apodize(dataset, method, apod, **kwargs):
         swaped = True
 
     x = new.coords[dim]
-    if (x.unitless or x.dimensionless or
-            x.units.dimensionality != '[time]'):
-        error_('em apply only to dimensions with [time] dimensionality\n'
-               'em processing was thus cancelled')
+    if not x.unitless and not x.dimensionless and x.units.dimensionality != '[time]':
+        error_('apply only to dimensions with [time] dimensionality\n'
+               'apodization processing was thus cancelled')
         apod_arr = 1.
     else:
         # compute the apodization function
         name = method.__module__.split('.')[-1]
         new.history = f'{name} apodization performed on dimension {dim} with parameters:' + str(apod)
-        apod_arr = method(x, *apod)
+        if apod is not None:
+            apod_arr = method(x, *apod)
+        else:
+            apod_arr = method(x)
 
         if kwargs.pop('rev', False):
             apod_arr = apod_arr[::-1]  # reverse apodization
@@ -338,7 +343,6 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     return out
 
-
 # ======================================================================================================================
 @docstrings.dedent
 def sp(dataset, ssb=1, pow=1, **kwargs):
@@ -452,3 +456,235 @@ def qsin(dataset, ssb=1, **kwargs):
 
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
+
+# ================================================================================================
+
+@docstrings.dedent
+def hamming(dataset, **kwargs):
+    r"""
+    Calculate Hamming (== Happ-Genzel) apodization.
+
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
+
+    The data in the last dimension MUST be time-domain or dimensionless,
+    otherwise an error is raised.
+
+    Functional form of apodization window :
+
+    .. math::
+        hamming(n) = 0.54 + 0.46 \cos(\frac{2 \pi n}{M - 1}) where M is the number of point of the
+        output window
+
+    Parameters
+    ----------
+    dataset : |NDDataset| or |NDPanel|.
+        Input dataset or panel
+
+    Other Parameters
+    ----------------
+    %(apodize.other_parameters)s
+
+    Returns
+    -------
+    %(apodize.returns)s
+
+    See Also
+    --------
+    gm, sp, sine, sinm, qsin
+
+    """
+
+    def func(x):
+        return scpy_hamming(len(x), sym=True)
+
+    # Call the generic apodization function
+    out, apodcurve = _apodize(dataset, func, **kwargs)
+
+    # Should we return the apodization array?
+    if kwargs.pop('retfunc', False):
+        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        return out, apodcurve
+
+    return out
+
+@docstrings.dedent
+def triang(dataset, **kwargs):
+    r"""
+    Calculate triangular apodization with non-null extremities and maximum value normalized to 1
+    The apodizeatiopn function is the scpy.signal.triang
+
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
+
+    The data in the last dimension MUST be time-domain or dimensionless,
+    otherwise an error is raised.
+
+    The functional form of apodization is the scpy.signal.triang
+
+
+    Parameters
+    ----------
+    dataset : |NDDataset| or |NDPanel|.
+        Input dataset or panel
+
+    Other Parameters
+    ----------------
+    %(apodize.other_parameters)s
+
+    Returns
+    -------
+    %(apodize.returns)s
+
+
+
+    """
+
+    def func(x):
+        return x * scpy_triang(len(x), sym=True)
+
+    # Call the generic apodization function
+    out, apodcurve = _apodize(dataset, func, **kwargs)
+
+    # Should we return the apodization array?
+    if kwargs.pop('retfunc', False):
+        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        return out, apodcurve
+
+    return out
+
+@docstrings.dedent
+def bartlett(dataset, **kwargs):
+    r"""
+    Calculate Bartlett apodization (triangular window with end points at zero)
+
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
+
+    The data in the last dimension MUST be time-domain or dimensionless,
+    otherwise an error is raised.
+
+    Functional form of apodization window is the scpy.signal.bartlett
+
+    Parameters
+    ----------
+    dataset : |NDDataset| or |NDPanel|.
+        Input dataset or panel
+
+    Other Parameters
+    ----------------
+    %(apodize.other_parameters)s
+
+    Returns
+    -------
+    %(apodize.returns)s
+
+
+
+    """
+
+    def func(x):
+        return x * scpy_bartlett(len(x), sym=True)
+
+    # Call the generic apodization function
+    out, apodcurve = _apodize(dataset, func, **kwargs)
+
+    # Should we return the apodization array?
+    if kwargs.pop('retfunc', False):
+        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        return out, apodcurve
+
+    return out
+
+@docstrings.dedent
+def blackmanharris(dataset, **kwargs):
+    r"""
+    Calculate a minimum 4-term Blackman-Harris apodization
+
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
+
+    The data in the last dimension MUST be time-domain or dimensionless,
+    otherwise an error is raised.
+
+    Functional form of apodization window is the scpy.signal.blackmanharris
+
+    Parameters
+    ----------
+    dataset : |NDDataset| or |NDPanel|.
+        Input dataset or panel
+
+    Other Parameters
+    ----------------
+    %(apodize.other_parameters)s
+
+    Returns
+    -------
+    %(apodize.returns)s
+
+
+
+    """
+
+    def func(x):
+        return x * scpy_blackmanharris(len(x), sym=True)
+
+    # Call the generic apodization function
+    out, apodcurve = _apodize(dataset, func, **kwargs)
+
+    # Should we return the apodization array?
+    if kwargs.pop('retfunc', False):
+        apodcurve = type(out)(apodcurve,
+                              coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        return out, apodcurve
+
+    return out
+
+@docstrings.dedent
+def mertz(dataset, zpd, **kwargs):
+    r"""
+    Calculate asymetric Mertz apodization
+
+    For multidimensional NDDataset or NDPanels,
+    the apodization is by default performed on the last dimension.
+
+    The data in the last dimension MUST be time-domain or dimensionless,
+    otherwise an error is raised.
+
+    Functional form of apodization window is the scpy.signal.blackmanharris
+
+    Parameters
+    ----------
+    dataset : |NDDataset| or |NDPanel|.
+        Input dataset or panel
+
+    Other Parameters
+    ----------------
+    %(apodize.other_parameters)s
+
+    Returns
+    -------
+    %(apodize.returns)s
+
+
+
+    """
+
+    def func(x, zpd):
+        # ramp
+        w1 = np.arange(1, 2 * zpd + 1) / (2 * zpd)
+        # plateau
+        w2 = np.arange(1, len(x) - 2 * zpd + 1)[::-1] / (len(x) - 2 * zpd)
+        w = np.concatenate((w1, w2))
+        return w
+
+    # Call the generic apodization function
+    out, apodcurve = _apodize(dataset, func, (zpd,), **kwargs)
+
+    # Should we return the apodization array?
+    if kwargs.pop('retfunc', False):
+        apodcurve = type(out)(apodcurve,
+                              coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        return out, apodcurve
+
+    return out
