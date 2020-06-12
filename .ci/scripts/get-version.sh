@@ -31,7 +31,7 @@ if [[ $TRAVIS_BRANCH == "master" ]]; then
   ## i.e., this is the latest development version
   VERSION="$NEXT_TAG"
   DEVSTRING="dev$NUMBER"
-  PKG_NAME_VERSION="$PKG_NAME-$VERSION.$DEVSTRING.tar.bz2"
+  PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
 elif [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   ## this is a "stable" release
   VERSION="$LAST_TAG"
