@@ -4,6 +4,7 @@ channels:
   - spectrocat
   - cantera
   - defaults
+
 dependencies:
   - python=3.7
   # for the core package
@@ -68,5 +69,6 @@ dependencies:
   # - scikit-learn
 
 # pip only for docs
-pip:
-  - autodoc_traits
+  - pip
+  - pip:
+    - autodoc_traits

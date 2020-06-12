@@ -1626,7 +1626,7 @@ class NDArray(HasTraits):
         Parameters
         ----------
         dtype : str or dtype
-    T       typecode or data-type to which the array is cast.
+            typecode or data-type to which the array is cast.
 
         """
         self.data = self.data.astype(dtype, **kwargs)

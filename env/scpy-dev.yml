@@ -69,5 +69,6 @@ dependencies:
   # - scikit-learn
 
 # pip only for docs
-pip:
-  - autodoc_traits
+  - pip
+  - pip:
+    - autodoc_traits

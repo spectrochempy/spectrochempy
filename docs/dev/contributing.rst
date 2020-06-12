@@ -18,19 +18,6 @@ In the following we will talk about more advanced topic regarding contributions 
 * contributing to the code and pull request to the |scpy| repository.
 * ...
 
-**Table of Contents**
-
-.. toctree::
-    :maxdepth: 3
-
-    github
-    coding
-    ide
-    testing
-    docs
-    pypi
-    conda
-    docker
 
 
 

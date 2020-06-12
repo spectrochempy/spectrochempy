@@ -138,32 +138,6 @@ def display_info_string(**kwargs):
 # ----------------------------------------------------------------------------------------------------------------------
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
-
-def _version_scheme(version, local=False):
-    branch = version.branch
-    dist = version.distance
-    tag = next = version.tag.public
-    next = next.split('.')
-    next[-1] = str(int(next[-1]) + 1)
-    next = '.'.join(next)
-    if branch == 'master':
-        if dist==0:
-            dev=''
-        else:
-            dev = f'-rc.{dist}'
-            tag = next
-    else:
-        dev = f'-dev.{dist}'
-        tag = next
-    version_scheme = f'{tag}{dev}'
-    return version_scheme
-
-
-def _local_scheme(version):
-    dirty = '+dirty' if version.dirty else ''
-    return dirty
-
-
 try:
     __release__ = get_distribution('spectrochempy').version
     "Release version string of this package"
@@ -173,9 +147,7 @@ except DistributionNotFound:  # pragma: no cover
 
 try:
     __version__ = get_version(root='..',
-                              relative_to=__file__,
-                              local_scheme=_local_scheme,
-                              version_scheme=_version_scheme)
+                              relative_to=__file__)
     "Version string of this package"
 except LookupError:  # pragma: no cover
     __version__ = __release__

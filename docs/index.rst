@@ -91,14 +91,16 @@ User Guide
 API reference
 ***************
 
-* :doc:`api/generated/index`
+* :doc:`api/preference`
+* :doc:`api/index`
 
 .. toctree::
     :maxdepth: 2
     :hidden:
     :caption: API reference
 
-    api/generated/index
+    api/preference
+    api/index
 
 Contributing
 *************
