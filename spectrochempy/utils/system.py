@@ -16,6 +16,7 @@ import platform
 import sys
 from subprocess import run, PIPE, STDOUT
 
+
 def get_user():
     return getpass.getuser()
 
@@ -25,7 +26,7 @@ def get_node():
 
 
 def get_user_and_node():
-    return "{0}@{1}".format(get_user(), get_node())
+    return f"{get_user()}@{get_node()}"
 
 
 def is_kernel():
@@ -41,6 +42,7 @@ def is_kernel():
     # check for `kernel` attribute on the IPython instance
     return getattr(get_ipython(), 'kernel', None) is not None  # pragma: no cover
 
+
 class _ExecCommand():
 
     def __init__(self, command):
@@ -54,13 +56,12 @@ class _ExecCommand():
         """
         self.commands = [command]
 
-
     def __call__(self, *args, **kwargs):
 
         self.commands.extend(args)
 
         silent = kwargs.pop("silent", False)
-        proc = run(self.commands, text=True, stdout=PIPE, stderr=STDOUT) # capture_output=True)
+        proc = run(self.commands, text=True, stdout=PIPE, stderr=STDOUT)  # capture_output=True)
 
         # TODO: handle error codes
         if not silent:
@@ -88,5 +89,4 @@ class sh(object):
         return proc.stdout
 
 
-sh =sh()
-
+sh = sh()

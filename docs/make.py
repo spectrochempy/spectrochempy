@@ -235,7 +235,7 @@ class Build(object):
 
     # ..................................................................................................................
     def __init__(self):
-        # determine if we are in the test or developement branch (test or dev) or master (stable)
+        # determine if we are in the developement branch (latest) or master (stable)
 
         if 'dev' in version:
             self._doc_version = 'latest'
