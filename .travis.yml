@@ -29,6 +29,7 @@ addons:
   apt:
     packages:
       - xvfb
+      - texlive-full
 
 # install miniconda and create environment
 before_install:
@@ -80,7 +81,7 @@ script:
       echo "BUILDING DOCS";
       echo "cloning spectrochempy.github.io repository";
       git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git $HOME/spectrochempy_docs/html;
-      python docs/make.py --clean --sync --html;
+      python docs/make.py --clean --sync --html --pdf;
     fi
 
 # command to notify code-climate
@@ -91,11 +92,22 @@ after_success:
     fi
 
 deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
-  keep_history: false
-  local_dir: ../../../spectrochempy_docs/html
-  on:
-    all_branches: true
-    condition: $BUILDOCS = true
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+    keep_history: false
+    local_dir: ../../../spectrochempy_docs/html
+    on:
+      all_branches: true
+      repo: spectrochempy/spectrochempy
+      condition: $BUILDOCS = true
+  - provider: pypi
+    username: spectrocat
+    password: $PYPI_PASSWORD
+    skip_existing: true
+    distributions: "sdist bdist_wheel"
+    edge: true # opt in to dpl v2
+    on:
+      tags: true
+      repo: spectrochempy/spectrochempy
+      condition: $DEPLOY = true

@@ -39,7 +39,4 @@ if [[ $TRAVIS_BRANCH == "master" ]]; then
 elif [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   ## This is a "main" release
   anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER "$PKG_FILE"
-else
-  ## This is a "test" release
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l test "$PKG_FILE"
 fi
