@@ -29,6 +29,7 @@ addons:
   apt:
     packages:
       - xvfb
+      - texlive-full
 
 # install miniconda and create environment
 before_install:
