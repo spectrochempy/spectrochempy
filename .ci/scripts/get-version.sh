@@ -30,16 +30,12 @@ if [[ $TRAVIS_BRANCH == "master" ]]; then
   ## we are in the current master branch
   ## i.e., this is the latest development version
   VERSION="$NEXT_TAG"
-  DEVSTRING="rc.$NUMBER"
-  PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
+  DEVSTRING="dev$NUMBER"
+  PKG_NAME_VERSION="$PKG_NAME-$VERSION.$DEVSTRING.tar.bz2"
 elif [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   ## this is a "stable" release
   VERSION="$LAST_TAG"
   PKG_NAME_VERSION="$PKG_NAME-$VERSION.tar.bz2"
-else
-  VERSION="$NEXT_TAG"
-  DEVSTRING="test.$NUMBER"
-  PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
 fi
 
 echo "VERSION=$VERSION"
