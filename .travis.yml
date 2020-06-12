@@ -14,8 +14,10 @@ jobs:
       if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
       env: TEST=true
     - stage: conda-deploy
-      if: type != pull_request AND (branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
-      env: DEPLOY=true
+      if: branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      env:
+        - DEPLOY=true
+        - PR=(type = pull_request)
     - stage: build-docs
       if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
       env: BUILDOCS=true
