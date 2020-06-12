@@ -287,8 +287,6 @@ class Build(object):
         if args.pdf:
             self.make_docs('latex')
             self.make_pdf()
-        if args.release:
-            self.release()
         if args.tutorials:
             self.make_tutorials()
         if args.changelogs:
@@ -302,7 +300,6 @@ class Build(object):
             self.make_docs('latex')
             self.make_pdf()
             self.make_tutorials()
-            self.release()
 
     @staticmethod
     def _confirm(action):
@@ -374,7 +371,7 @@ class Build(object):
                 # reduce size
                 image_resized = resize(image, (int(image.shape[0] * ratio), int(image.shape[1] * ratio)),
                                        anti_aliasing=True)
-                print(img, 'original:', image.shape, 'ratio:', ratio, " -> ", image_resized.shape)
+                # print(img, 'original:', image.shape, 'ratio:', ratio, " -> ", image_resized.shape)
                 imsave(filename, (image_resized * 255.).astype(np.uint8))
 
     # ..................................................................................................................
@@ -432,8 +429,8 @@ class Build(object):
                 sh(f"jupyter nbconvert {nb} --to notebook"
                    f" --ClearOutputPreprocessor.enabled=True"
                    f" --stdout > out_{basename}.ipynb")
-                sh(f"rm {nb}")
-                sh(f"mv out_{basename}.ipynb {nb}")
+                sh(f"rm {nb}", silent=True)
+                sh(f"mv out_{basename}.ipynb {nb}", silent=True)
                 arcnb = nb.replace(path, dest)
                 ziph.write(nb, arcname=arcnb)
 
