@@ -442,7 +442,7 @@ os.environ['USE_TQDM'] = 'No'
 intersphinx_mapping = {
         'python': ('https://docs.python.org/3', None),
         'ipython': ('https://ipython.readthedocs.io/en/stable/', None),
-        'numpy': ('https://numpy.org/doc/stable/objects.inv', None),
+        'numpy': ('https://numpy.org/doc/stable/', None),
         'SciPy': ('https://docs.scipy.org/doc/scipy/reference', None),
         'matplotlib': ('https://matplotlib.org/', None),
         'sklearn': ('https://scikit-learn.org/stable/', None),

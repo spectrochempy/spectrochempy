@@ -96,6 +96,13 @@ class Apigen(object):
         :license: BSD, see LICENSE_SPHINX for details.
 
     """
+    def __init__(self):
+
+        with open(os.path.join(DOCDIR, "_templates","class.rst")) as f:
+            self.class_template = f.read()
+
+        with open(os.path.join(DOCDIR, "_templates", "function.rst")) as f:
+            self.function_template = f.read()
 
     @staticmethod
     def makename(package, module):
@@ -136,42 +143,9 @@ class Apigen(object):
         members = [m for m in clsmembers if
                    m[0] in _imported_item.__all__ and not m[0].startswith('__')]
 
-        classtemplate = textwrap.dedent(
-                """{project}.{klass}
-                ==============================================================================
-                
-                .. currentmodule:: {project}
-                
-                .. autoclass:: {project}.{klass}
-                   :members:
-                   :inherited-members:
-                   :autosummary:
-                   :autosummary-members:
-                   :autosummary-inherited-members:
-                
-                .. {include} /gen_modules/backreferences/{project}.{klass}.examples
-                
-                .. raw:: html
-                
-                   <div style='clear:both'></div>
-                
-                """)
+        classtemplate = textwrap.dedent(self.class_template)
 
-        functemplate = textwrap.dedent(
-                """{project}.{func}
-                ==============================================================================
-                
-                .. currentmodule:: {project}
-                
-                .. autofunction:: {project}.{func}
-                
-                .. {include} /gen_modules/backreferences/{project}.{func}.examples
-                
-                .. raw:: html
-                
-                   <div style='clear:both'></div>
-                
-                """)
+        functemplate = textwrap.dedent(self.function_template)
 
         lconsts = [":%s: %s\n" % m for m in members if
                    type(m[1]) in [int, float, str, bool, tuple]]
