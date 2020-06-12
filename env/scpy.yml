@@ -4,6 +4,7 @@ channels:
   - spectrocat
   - cantera
   - defaults
+
 dependencies:
   # for the core package
   - numpy

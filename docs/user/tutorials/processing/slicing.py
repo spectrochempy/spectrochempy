@@ -88,7 +88,7 @@ print(X[::2])  # selects one spectrum out of 2
 print(X[:, ::2])  # all spectra, one wavenumber out of 2   (note the bug: X[,::2] generates an error)
 print(X[0:3, 200:1000:2])  # 3 first spectra, one wavenumbers out of 2, frm index 200 to 1000
 
-# %% [markdown] Would you easily guess which wavenumber range have been actually selected ?.... probably not because
+# %% Would you easily guess which wavenumber range have been actually selected ?.... probably not because [markdown]
 # the relationship between the index and the wavenumber is not straightforward as it depends on the the value of the
 # first wavenumber, the wavenumber spacing, and whether the wavenumbers are arranged in ascending or descending
 # order... Here is the answer:

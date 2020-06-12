@@ -31,7 +31,7 @@ X = scp.read_omnic('irdata//nh4y-activation.spg')  # import spectra
 X = X[0:5, 3600.0:2800.0]  # select a noisy part (the first 5 spectra in the 3700-2800 cm-1 range)
 ax = X.plot()  # plot
 
-# %% [markdown] Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension (
+# %% Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ( [markdown]
 # i.e. in this example: wavenumbers or acquision time). In this tutorial we will how to use them for smoothing the
 # spectra along the wavlength dimension. Both methods are based on window functions, which ptototype is the *moving
 # average*.
@@ -65,7 +65,7 @@ for i, length in enumerate([5, 11, 27, 51, 101, 201, 501]):  # loop over window 
     Xs = scp.concatenate(Xs, s, axis='y')  # concatenate to Xs along the `y` (rows) dimension
 ax = Xs.plot()
 
-# %% [markdown] The above spectra clearly show that as that the width of the window increases, the peaks belonging to
+# %% The above spectra clearly show that as that the width of the window increases, the peaks belonging to [markdown]
 # the spectrum are flattened out and distorted. When determining the optimum window length, one should thus consier
 # the balance between noise removal and signal integrity: the larger the window length, the stronger the smoothing,
 # but also the greater the chance to distort the spectrum.
@@ -83,7 +83,7 @@ for i, window in enumerate(['flat', 'bartlett', 'hanning', 'hamming', 'blackman'
     Xs = scp.concatenate(Xs, s, axis='y')
 ax = Xs.plot()
 
-# %% [markdown] Close examination of the spectra shows that the flat window leads to the stronger smoothing. This is
+# %% Close examination of the spectra shows that the flat window leads to the stronger smoothing. This is [markdown]
 # because the other window functions (also known as *apodization functions*) are used as weighting functions for the
 # N+1 points, with the largest weight on the central point and smaller weights for external points.
 #
@@ -96,7 +96,7 @@ for i, f in enumerate([np.bartlett, np.hanning, np.hamming, np.blackman]):
     winfunc = f(27) / np.sum(27)  # normalized window function
     plt.plot(np.arange(27) - 13, winfunc + i * 0.01)  # shift along x (centered on 0) and y (+0.1 for each function)
 
-# %% [markdown] As shown above, the "bartlett" function is equivalent to a triangular apodization, while other
+# %% As shown above, the "bartlett" function is equivalent to a triangular apodization, while other [markdown]
 # fonctions ("hanning", "hamming", "blackman") are bell-shaped. More information on window funcntions can be found [
 # here](https://en.wikipedia.org/wiki/Window_function).
 #

@@ -8,7 +8,7 @@ env:
     - CONDAPY=3.7
 
 jobs:
-  fast_finish: false
+  fast_finish: true
   include:
     - stage: pytest-linux
       if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
@@ -30,42 +30,26 @@ addons:
     packages:
       - xvfb
 
-# use https://github.com/theochem/cgrid/blob/ac5d1e263b8f3fe0e659f908ab8bc849970ec24f/.travis.yml#L46-L54 method
-cache:
-  directories:
-    - $HOME/download
-    - $HOME/miniconda
-
-before_cache:
-  - rm -rf $HOME/miniconda/locks $HOME/miniconda/pkgs $HOME/miniconda/var $HOME/miniconda/conda-meta/history
-
-# install miniconda and create environment (or laod them from caches)
+# install miniconda and create environment
 before_install:
   - echo "Setup display...";
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-  - if [[ -d $HOME/miniconda/bin ]]; then
-      echo "miniconda already installed.";
-    else
-      echo "Installing miniconda.";
-      sudo apt-get update;
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/download/miniconda.sh;
-      bash $HOME/download/miniconda.sh -b -u -p $HOME/miniconda;
-    fi
-  - if [[ -d $HOME/miniconda/envs/scpy$CONDAPY/bin ]]; then
-      echo "scpy$CONDAPY environment already exists.";
-    else
-      echo "creating scpy$CONDAPY environment";
-      source "$HOME/miniconda/etc/profile.d/conda.sh";
-      hash -r;
-      conda config --set always_yes yes --set changeps1 no;
-      conda update -q conda;
-      conda config --add channels conda-forge;
-      conda config --add channels cantera;
-      conda config --add channels spectrocat;
-      conda config --set channel_priority flexible;
-      conda env create -q -f .ci/env/scpy$CONDAPY.yml;
-    fi
+  - echo "Installing miniconda.";
+  - sudo apt-get update;
+  - mkdir $HOME/download;
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/download/miniconda.sh;
+  - bash $HOME/download/miniconda.sh -b -u -p $HOME/miniconda;
+  - echo "creating scpy$CONDAPY environment";
+  - source "$HOME/miniconda/etc/profile.d/conda.sh";
+  - hash -r;
+  - conda config --set always_yes yes --set changeps1 no;
+  - conda update -q conda;
+  - conda config --add channels conda-forge;
+  - conda config --add channels cantera;
+  - conda config --add channels spectrocat;
+  - conda config --set channel_priority flexible;
+  - conda env create -q -f .ci/env/scpy$CONDAPY.yml;
 
 # create env and install scpy from sources
 install:
@@ -94,6 +78,9 @@ script:
       bash .ci/scripts/conda-upload.sh;
     elif [[ $BUILDOCS = true ]]; then
       echo "BUILDING DOCS";
+      echo "cloning spectrochempy.github.io repository";
+      git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git $HOME/spectrochempy_docs/html;
+      python docs/make.py --clean --sync --html;
     fi
 
 # command to notify code-climate
@@ -103,3 +90,12 @@ after_success:
       ./cc-test-reporter after-build;
     fi
 
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep_history: false
+  local_dir: ../../../spectrochempy_docs/html
+  on:
+    all_branches: true
+    condition: $BUILDOCS = true

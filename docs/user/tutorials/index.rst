@@ -21,20 +21,31 @@ Import data
 
    IO/*
 
-Chemometrics
+Processing
 ------------
 
 .. toctree::
    :glob:
-   :maxdepth: 3
+   :maxdepth: 2
 
-   chemometrics/*
+   processing/*
+
+Analysis
+------------
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+
+   analysis/*
+
 
 .. NMR
 .. ----
 
 .. .. toctree::
-:glob:
-:maxdepth: 3
+.. :glob:
+.. :maxdepth: 3
 
 ..   nmr/*
+

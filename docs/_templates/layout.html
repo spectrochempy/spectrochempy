@@ -25,13 +25,13 @@
             </dl>
             <hr/>
             <dl>
-                <dt>Sources on Bitbucket</dt>
+                <dt>Sources on GitHub</dt>
                 {% for slug, url in versions %}
                     {% if slug == 'stable' %}
-                        <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Master</a></dd>
+                        <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
                     {% endif %}
                     {% if slug == 'dev' %}
-                        <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Develop</a></dd>
+                        <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
                     {% endif %}
                 {% endfor %}
             </dl>

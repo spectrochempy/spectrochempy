@@ -8,8 +8,8 @@ Why |scpy|  ?
 .. contents::
    :local:
 
-The |scpy| project has been developed to provide advanced tools for the processing and analysis of
-spectroscopic data, initially for internal needs in the `LCS <https://www.lcs.ensicaen.fr/>`_, for the following
+The |scpy| project was developed to provide advanced tools for processing and analyzing
+spectroscopic data, initially for internal purposes in the `LCS <https://www.lcs.ensicaen.fr/>`_, for the following
 reasons:
 
 Designed for Open Science
