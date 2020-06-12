@@ -68,7 +68,7 @@ __pycache__/
 
 # Sphinx documentation
 # ----------------------------------------------------------------------------------------------------------------------
-docs/api/
+docs/api/generated
 docs/_build/
 docs/index.doctree
 generated/
