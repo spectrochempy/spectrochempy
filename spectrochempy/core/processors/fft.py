@@ -17,11 +17,13 @@ __dataset_methods__ = __all__
 # Standard python imports
 # ======================================================================================================================
 import re
+import matplotlib.pyplot as plt
 
 # ======================================================================================================================
 # Third party imports
 # ======================================================================================================================
 import numpy as np
+from scipy.interpolate import interp1d
 
 # ======================================================================================================================
 # Local imports
@@ -30,7 +32,9 @@ import numpy as np
 from nmrglue.process.proc_base import largest_power_of_2, zf_size
 from .. import error_
 from ...units import ur
-
+from ..dataset.npy import zeros_like
+from .apodization import hamming, mertz, triang
+from .concatenate import concatenate
 
 def ifft(dataset, size=None, inplace=False, **kwargs):
     r"""
@@ -77,7 +81,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
     ----------------
     tdeff : int, optional
         alias of sizeff (specific to NMR). If both sizeff and tdeff are passed, sizeff has the priority.
-        
+
     Returns
     -------
     object : nd-dataset or nd-array
@@ -85,7 +89,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     """
     # datatype
-    is_nmr = dataset.origin in ["bruker", ]
+    is_nmr = dataset.origin.lower() in ["bruker", ]
+    is_ir = dataset.origin.lower() in ["omnic", ]
 
     # On which axis do we want to apodize? (get axis from arguments)
     axis, dim = dataset.get_axis(dim, negative_axis=True)
@@ -101,12 +106,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
     # select the last coordinates
     lastcoord = dataset.coords[dim]
 
-    if (not inv and lastcoord.units.dimensionality != '[time]'):
-        error_('fft apply only to dimensions with [time] dimensionality\n'
+    if not inv and not lastcoord.dimensionless \
+            and lastcoord.units.dimensionality != '[time]':
+        error_('fft apply only to dimensions with [time] dimensionality or dimensionless coords\n'
                'fft processing was thus cancelled')
         return dataset
 
-    elif (inv and lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm'):
+    elif inv and lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm':
         error_('ifft apply only to dimensions with [frequency] dimensionality or with ppm units\n'
                ' ifft processing was thus cancelled')
         return dataset
@@ -164,6 +170,38 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         # we assume no special encoding for inverse fft transform
         data = np.fft.ifftshift(new.data, -1)
         data = np.fft.ifft(data)
+    elif is_ir and not inv:
+        # determine phase correction (Mertz)
+        zpd = int(new.meta.zpd)
+        windowed = triang(new[:, 0: 2*zpd])
+        mirrored = concatenate(windowed[:, zpd:], windowed[:, 0:zpd])
+        spectrum = np.fft.rfft(mirrored.data)
+        # phase_angle = np.arctan(spectrum.imag/spectrum.real)[:, 0:spectrum.shape[1]//2]
+        phase_angle = np.arctan2(spectrum.imag, spectrum.real)
+        plt.plot(phase_angle[0])
+        plt.show()
+        initx = np.arange(phase_angle.shape[1])
+        interpolate_phase_angle = interp1d(initx, phase_angle)
+
+        #
+        apodized = mertz(new, zpd)
+        mirrored = concatenate(apodized[:, zpd:], zeros_like(new[:, zpd:-zpd]), apodized[:, 0:zpd])
+        # mirrored = apodized[:, zpd:]
+        # mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
+        spectrum = np.fft.rfft(mirrored.data)
+        # spectrum = spectrum[:, 0:spectrum.shape[1]//2]
+        plt.plot(spectrum[0])
+        plt.show()
+        newx = np.arange(spectrum.shape[1])*max(initx)/max(np.arange(spectrum.shape[1]))
+        phase_angle = interpolate_phase_angle(newx)
+        plt.plot(phase_angle[0])
+        plt.show()
+        spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
+        LaserFreq = 15798.3  # cm-1, this is the sampling distance for the interferogram.
+        # dx = 1/(2*LaserFreq)
+        wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 1 / (LaserFreq))
+        plt.plot(wavenumbers, spectrum[0])
+        plt.show()
     else:
         raise NotImplementedError(encoding)
 
