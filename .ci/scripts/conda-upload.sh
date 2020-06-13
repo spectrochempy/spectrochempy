@@ -54,12 +54,12 @@ echo "---> Uploading $PKG_FILE"
 if [[ $TRAVIS_BRANCH == "master" ]]; then
   ## We build the current master release (i.e.the latest development version)
   ## This is a "dev" release
-  if [[ ! $TRAVIS_PULL_REQUEST ]]; then
+  if [[ $TRAVIS_PULL_REQUEST == false ]]; then
     anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PKG_FILE";
   fi;
 elif [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   ## This is a "main" release
-  if [[ ! $TRAVIS_PULL_REQUEST ]]; then
+  if [[ $TRAVIS_PULL_REQUEST == false ]]; then
     anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER "$PKG_FILE";
   fi;
 fi
