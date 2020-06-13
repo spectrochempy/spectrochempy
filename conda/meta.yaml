@@ -16,19 +16,19 @@ build:
     - CONDA_BLD_PATH
   string: "{{ devstring }}"
   noarch: python
-  script:  "{{ PYTHON }} -m pip install . -vv"
-  entry_points:
-    - scpy=spectrochempy.scripts.launch_api:main
+  script:
+    - export SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
+    - {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
 
 requirements:
   host:
-    - python
-  build:
-    - python
+    - pip
+    - python >=3.6
     - setuptools
     - setuptools_scm
     - nodejs
     - jupyterlab
+    - conda-verify
   run:
     - numpy
     - scipy
