@@ -9,13 +9,6 @@ set -ex
 PKG_NAME=spectrochempy
 OS=noarch
 
-#!/usr/bin/env bash
-
-PKG_NAME=spectrochempy
-
-## Exit immediately if a command exits with a non-zero status.
-set -e
-
 ## get version string from setuptools_scm
 PVS=$(python setup.py --version)
 ECHO "Current version string = $PVS"
