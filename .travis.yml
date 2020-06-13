@@ -14,8 +14,10 @@ jobs:
       if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
       env: TEST=true
     - stage: conda-deploy
-      if: type != pull_request AND (branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
-      env: DEPLOY=true
+      if: branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
+      env:
+        - DEPLOY=true
+        - PR=(type = pull_request)
     - stage: build-docs
       if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
       env: BUILDOCS=true
@@ -24,12 +26,11 @@ jobs:
 git:
   depth: 50
 
-# display setup
 addons:
   apt:
+    update: true
     packages:
       - xvfb
-      - texlive-full
 
 # install miniconda and create environment
 before_install:
@@ -37,7 +38,6 @@ before_install:
   - export DISPLAY=':99.0'
   - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   - echo "Installing miniconda.";
-  - sudo apt-get update;
   - mkdir $HOME/download;
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/download/miniconda.sh;
   - bash $HOME/download/miniconda.sh -b -u -p $HOME/miniconda;
@@ -76,11 +76,13 @@ script:
       pytest -v --flake8 -k "test_example" --nodisplay;
     elif [[ $DEPLOY = true ]]; then
       echo "BUILDING AND UPLOADING ON ANACONDA";
+      python setup.py --version;
       bash .ci/scripts/conda-upload.sh;
     elif [[ $BUILDOCS = true ]]; then
-      echo "BUILDING DOCS";
+      echo "BUILDING DOCS"
       echo "cloning spectrochempy.github.io repository";
       git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git $HOME/spectrochempy_docs/html;
+      apt-get install texlive-full;
       python docs/make.py --clean --sync --html --pdf;
     fi
 

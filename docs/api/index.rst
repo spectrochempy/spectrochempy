@@ -24,7 +24,7 @@ second one for simplicity.
     :maxdepth: 1
 
     NDDataset object <generated/spectrochempy.NDDataset>
-    io
+    inout
     processing
     analysis
     fitting
