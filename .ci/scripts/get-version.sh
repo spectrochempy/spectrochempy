@@ -17,12 +17,14 @@ read -ra arr <<< "$PVS"
 LATEST="${arr[0]}"
 ECHO "LATEST = $LATEST"
 
-## make the latest tag
+## find the stable tag
 IFS=$"."
 read -ra tag <<< "$LATEST"
-NEXT_TAG="${tag[0]}.${tag[1]}.`expr ${tag[2]} + 1`"
-NUMBER="${arr[1]}"
-if [ ! $NUMBER ]; then NUMBER="0"; fi
+STABLE="${tag[0]}.${tag[1]}.`expr ${tag[2]} - 1`"
+ECHO "STABLE = $STABLE"
+
+DEVSTRING="${tag[3]}"
+ECHO "DEVSTRING = $DEVSTRING"
 
 ## Here we will choose depending on the way this script is run
 if [[ $USER != "travis" ]]; then
