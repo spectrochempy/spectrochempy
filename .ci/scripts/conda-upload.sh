@@ -11,7 +11,7 @@ OS=noarch
 
 ## get version string from setuptools_scm
 PVS="$(python setup.py --version)"
-ECHO "Current version string = $PVS"
+echo "Current version string = $PVS"
 
 ## Extract components
 IFS=$"+"

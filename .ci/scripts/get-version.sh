@@ -7,7 +7,7 @@ set -e
 
 ## get version string from setuptools_scm
 PVS="$(python setup.py --version)"
-ECHO "Current version string = $PVS"
+echo "Current version string = $PVS"
 
 ## Extract components
 IFS=$"+"
@@ -27,6 +27,6 @@ else
   PKG_NAME_VERSION="$PKG_NAME-$VERSION.tar.bz2"
 fi
 
-ECHO "VERSION = $VERSION"
-ECHO "DEVSTRING = $DEVSTRING"
-ECHO "PKG_NAME_VERSION=$PKG_NAME_VERSION"
+echo "VERSION = $VERSION"
+echo "DEVSTRING = $DEVSTRING"
+echo "PKG_NAME_VERSION=$PKG_NAME_VERSION"
