@@ -10,7 +10,7 @@ PKG_NAME=spectrochempy
 OS=noarch
 
 ## get version string from setuptools_scm
-PVS=$(python setup.py --version)
+PVS="$(python setup.py --version)"
 ECHO "Current version string = $PVS"
 
 ## Extract components
@@ -19,8 +19,6 @@ read -ra arr <<< "$PVS"
 
 ## latest version string
 LATEST="${arr[0]}"
-
-## find the stable tag
 IFS=$"."
 read -ra tag <<< "$LATEST";
 DEVSTRING="${tag[3]}"

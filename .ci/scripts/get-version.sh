@@ -6,7 +6,7 @@ PKG_NAME=spectrochempy
 set -e
 
 ## get version string from setuptools_scm
-PVS=$(python setup.py --version)
+PVS="$(python setup.py --version)"
 ECHO "Current version string = $PVS"
 
 ## Extract components
