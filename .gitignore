@@ -168,3 +168,4 @@ ci.sh
 /docker/travisci/
 !/recipe/spectrochempy/conda-bld/
 .coverage
+/.ci/scripts/make_changelog.sh

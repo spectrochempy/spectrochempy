@@ -20,6 +20,7 @@ where optional parameters indicates which job(s) is(are) to perform.
 
 import argparse
 import inspect
+import json
 import os
 import shutil
 import sys
@@ -29,7 +30,7 @@ import zipfile
 from glob import iglob
 
 import numpy as np
-import pandas as pd
+import requests
 from jinja2 import Template
 from skimage.io import imread, imsave
 from skimage.transform import resize
@@ -38,7 +39,7 @@ from sphinx.deprecation import RemovedInSphinx50Warning, RemovedInSphinx40Warnin
 from sphinx.util.osutil import FileAvoidWrite
 from traitlets import import_item
 
-from spectrochempy import version
+from spectrochempy import version, release
 from spectrochempy.utils import sh
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
@@ -49,6 +50,8 @@ warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
 
 # CONSTANT
 PROJECT = "spectrochempy"
+REPO_URI = f"spectrochempy/{PROJECT}"
+API_GITHUB_URL = "https://api.github.com"
 URL_SCPY = "spectrochempy.github.io/spectrochempy"
 
 # PATHS
@@ -81,24 +84,25 @@ class Options(dict):
 # ======================================================================================================================
 class Apigen(object):
     """
-        borrowed and heavily modified from :
-        sphinx.apidoc (https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py)
+    borrowed and heavily modified from :
+    sphinx.apidoc (https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py)
 
 
-        Parses a directory tree looking for Python modules and packages and creates
-        ReST files appropriately to create code documentation with Sphinx.  It also
-        creates a modules index (named modules.<suffix>).
+    Parses a directory tree looking for Python modules and packages and creates
+    ReST files appropriately to create code documentation with Sphinx.  It also
+    creates a modules index (named modules.<suffix>).
 
-        This is derived from the "sphinx-autopackage" script, which is :
-        Copyright 2008 Société des arts technologiques (SAT), http://www.sat.qc.ca/
+    This is derived from the "sphinx-autopackage" script, which is :
+    Copyright 2008 Société des arts technologiques (SAT), http://www.sat.qc.ca/
 
-        :copyright: Copyright 2007-2017 by the Sphinx team, see AUTHORS .
-        :license: BSD, see LICENSE_SPHINX for details.
+    :copyright: Copyright 2007-2017 by the Sphinx team, see AUTHORS .
+    :license: BSD, see LICENSE_SPHINX for details.
 
     """
+
     def __init__(self):
 
-        with open(os.path.join(DOCDIR, "_templates","class.rst")) as f:
+        with open(os.path.join(DOCDIR, "_templates", "class.rst")) as f:
             self.class_template = f.read()
 
         with open(os.path.join(DOCDIR, "_templates", "function.rst")) as f:
@@ -226,6 +230,7 @@ class Apigen(object):
         self.create_api_files(rootpath, opts)
 
         return
+
 
 apigen = Apigen()
 
@@ -509,36 +514,27 @@ class Build(object):
     # ..................................................................................................................
     def make_changelog(self):
         """
-        Utility to update changelog
+        Utility to update changelog (using the GITHUB API)
         """
-        csv = "https://redmine.spectrochempy.fr/projects/spectrochempy/issues.csv?" \
-              "c%5B%5D=tracker" \
-              "&c%5B%5D=status" \
-              "&c%5B%5D=category" \
-              "&c%5B%5D=priority" \
-              "&c%5B%5D=subject" \
-              "&c%5B%5D=fixed_version" \
-              "&f%5B%5D=status_id" \
-              "&f%5B%5D=" \
-              "&group_by=" \
-              "&op%5Bstatus_id%5D=%2A" \
-              "&set_filter=1" \
-              "&sort=id%3Adesc"
-
-        from spectrochempy import version, release
-
-        issues = pd.read_csv(csv, encoding="ISO-8859-1")
+        print("getting latest release tag")
+        LATEST = os.path.join(API_GITHUB_URL, "repos", REPO_URI, "releases", "latest")
+        tag = json.loads(requests.get(LATEST).text)['tag_name'].split('.')
+        milestone = f"{tag[0]}.{tag[1]}.{int(tag[2])+1}"
         doc_version = self.doc_version
         target = version.split('-')[0] if doc_version == 'latest' else release
-        changes = issues[issues['Target version'] == target]
+
+        def get(milestone, label):
+            print("getting list of issues with label ", label)
+            issues = os.path.join(API_GITHUB_URL, "search", f"issues?q=repo:{REPO_URI}"
+                                                            f"+milestone:{milestone}"
+                                                            f"+is:issue"
+                                                            f"+label:{label}")
+            return json.loads(requests.get(issues).text)
 
         # Create a versionlog file for the current target
-        bugs = changes.loc[
-            (changes['Tracker'] == 'Bug') & (changes['Status'] != 'New') & (changes['Status'] != 'In Progress')]
-        features = changes.loc[
-            (changes['Tracker'] == 'Feature') & (changes['Status'] != 'New') & (changes['Status'] != 'In Progress')]
-        tasks = changes.loc[
-            (changes['Tracker'] == 'Task') & (changes['Status'] != 'New') & (changes['Status'] != 'In Progress')]
+        bugs = get(milestone, "bug")
+        features = get(milestone, "enhancement")
+        tasks = get(milestone, "task")
 
         with open(os.path.join(TEMPLATES, 'versionlog.rst'), 'r') as f:
             template = Template(f.read())
@@ -548,7 +544,6 @@ class Build(object):
             f.write(out)
 
         # make the full version history
-
         lhist = sorted(iglob(os.path.join(DOCDIR, 'versionlogs', '*.rst')))
         lhist.reverse()
         history = ""
@@ -571,6 +566,7 @@ class Build(object):
             f.write(out)
 
         return
+
 
 Build = Build()
 
