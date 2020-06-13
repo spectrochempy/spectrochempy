@@ -5,13 +5,21 @@ PKG_NAME=spectrochempy
 ## Exit immediately if a command exits with a non-zero status.
 set -e
 
-## get TAG
-TAG=$(git describe --tags)
-IFS=$"-"
-read -ra arr <<< "$TAG"
-LAST_TAG="${arr[0]}"
+## get version string from setuptools_scm
+PVS=$(python setup.py --version)
+ECHO "Current version string = $PVS"
+
+## Extract components
+IFS=$"+"
+read -ra arr <<< "$PVS"
+
+## latest version string
+LATEST="${arr[0]}"
+ECHO "LATEST = $LATEST"
+
+## make the latest tag
 IFS=$"."
-read -ra tag <<< "$LAST_TAG"
+read -ra tag <<< "$LATEST"
 NEXT_TAG="${tag[0]}.${tag[1]}.`expr ${tag[2]} + 1`"
 NUMBER="${arr[1]}"
 if [ ! $NUMBER ]; then NUMBER="0"; fi

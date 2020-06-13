@@ -12,7 +12,6 @@ OS=noarch
 ## Avoid uploading automatically
 conda config --set anaconda_upload no
 
-eval $(".ci/scripts/get-version.sh")
 export VERSION=$VERSION
 export DEVSTRING=$DEVSTRING
 
