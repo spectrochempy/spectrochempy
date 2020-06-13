@@ -9,10 +9,29 @@ set -ex
 PKG_NAME=spectrochempy
 OS=noarch
 
+## get version string from setuptools_scm
+PVS="$(python setup.py --version)"
+echo "Current version string = $PVS"
+
+## Extract components
+IFS=$"+"
+read -ra arr <<< "$PVS"
+
+## latest version string
+LATEST="${arr[0]}"
+IFS=$"."
+read -ra tag <<< "$LATEST";
+DEVSTRING="${tag[3]}"
+VERSION="${tag[0]}.${tag[1]}.${tag[2]}"
+if [[ $DEVSTRING ]]; then
+  PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
+else
+  PKG_NAME_VERSION="$PKG_NAME-$VERSION.tar.bz2"
+fi
+
 ## Avoid uploading automatically
 conda config --set anaconda_upload no
 
-eval $(".ci/scripts/get-version.sh")
 export VERSION=$VERSION
 export DEVSTRING=$DEVSTRING
 
@@ -35,8 +54,12 @@ echo "---> Uploading $PKG_FILE"
 if [[ $TRAVIS_BRANCH == "master" ]]; then
   ## We build the current master release (i.e.the latest development version)
   ## This is a "dev" release
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PKG_FILE"
+  if [[ ! $PR ]]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER -l dev "$PKG_FILE";
+  fi;
 elif [[ $TRAVIS_BRANCH == $TRAVIS_TAG ]]; then
   ## This is a "main" release
-  anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER "$PKG_FILE"
+  if [[ ! $PR ]]; then
+    anaconda -t "$CONDA_UPLOAD_TOKEN" upload -f -u $ANACONDA_USER "$PKG_FILE";
+  fi;
 fi
