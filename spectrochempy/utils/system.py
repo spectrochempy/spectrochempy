@@ -64,7 +64,7 @@ class _ExecCommand():
         proc = run(self.commands, text=True, stdout=PIPE, stderr=STDOUT)  # capture_output=True)
 
         # TODO: handle error codes
-        if not silent:
+        if not silent and proc.stdout:
             print(proc.stdout)
         return proc.stdout
 

@@ -32,6 +32,7 @@ from spectrochempy import *
 
 # %%
 import os
+
 dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 print(dataset.description)
 
@@ -39,11 +40,11 @@ print(dataset.description)
 # To plot a dataset, use the `plot` command (generic plot). As the current NDDataset is 2D, a contour plot is displayed by default.
 
 # %%
-_ = dataset.plot(colorbar=True) # plot the source.  
+_ = dataset.plot(colorbar=True)  # plot the source.
 
 # %%
-#import matplotlib as mpl
-#mpl.rcParams
+# import matplotlib as mpl
+# mpl.rcParams
 
 # %% [markdown]
 # The plot function return a reference to the subplot on which the data have been plotted.
@@ -85,34 +86,34 @@ available_styles()
 # these styles can be combined
 
 # %%
-_ = dataset.plot(style=['sans','paper','grayscale'], colorbar=True)
+_ = dataset.plot(style=['sans', 'paper', 'grayscale'], colorbar=True)
 
 # %% [markdown]
 # New styles can also be created, using a simple dictionary:
 
 # %%
-mystyle={'image.cmap':'magma', 
-         'font.size':10, 
-         'font.weight':'bold', 
-         'axes.grid':True}
-#TODO: store these styles for further use
+mystyle = {'image.cmap': 'magma',
+           'font.size': 10,
+           'font.weight': 'bold',
+           'axes.grid': True}
+# TODO: store these styles for further use
 _ = dataset.plot(style=mystyle)
 
 # %% [markdown]
 # To display all entry for definig plot style, uncomment the next line:
 
 # %%
-#import matplotlib as mpl
-#mpl.rcParams
+# import matplotlib as mpl
+# mpl.rcParams
 
 # %% [markdown]
 # ## Changing axis
 # The `y` axis with timestamp in the above plots is not very informative, lets rescale it in hours and change the origin. 
 
 # %%
-dataset.y -= dataset.y[0]                # change origin
-dataset.y.title = u'Aquisition time'    # change the title (default axis label)
-dataset.y.to('hour')                    # change unit base
+dataset.y -= dataset.y[0]  # change origin
+dataset.y.title = u'Aquisition time'  # change the title (default axis label)
+dataset.y.to('hour')  # change unit base
 _ = dataset.plot()
 
 # %% [markdown]
@@ -136,4 +137,4 @@ so = dataset.copy()
 so += 2
 
 _ = so.plot(method='stack', colormap='jet', data_only=True, clear=False)
-so.ax.set_ylim(-1,9)
+so.ax.set_ylim(-1, 9)

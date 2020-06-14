@@ -3,7 +3,7 @@
 
 Analysis tools
 ---------------
-.. currentmodule:: spectrochempy
+.. currentmodule:: spectrochempy.core.analysis.api
 
 .. automodule:: spectrochempy.core.analysis.api
     :no-members:

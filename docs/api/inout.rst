@@ -6,7 +6,7 @@ Input/output Tools
 Readers
 ********
 
-.. currentmodule:: spectrochempy
+.. currentmodule:: spectrochempy.core.readers.api
 
 .. automodule:: spectrochempy.core.readers.api
     :no-members:
@@ -18,7 +18,7 @@ Readers
 Writers
 ********
 
-. currentmodule:: spectrochempy
+.. currentmodule:: spectrochempy.core.writers.api
 
 .. automodule:: spectrochempy.core.writers.api
     :no-members:
@@ -30,7 +30,7 @@ Writers
 Plotters
 *********
 
-. currentmodule:: spectrochempy
+.. currentmodule:: spectrochempy.core.plotters.api
 
 .. automodule:: spectrochempy.core.plotters.api
     :no-members:

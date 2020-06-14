@@ -28,8 +28,9 @@ import warnings
 import zipfile
 from glob import iglob
 
+import json5 as json
 import numpy as np
-import pandas as pd
+import requests
 from jinja2 import Template
 from skimage.io import imread, imsave
 from skimage.transform import resize
@@ -49,6 +50,8 @@ warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
 
 # CONSTANT
 PROJECT = "spectrochempy"
+REPO_URI = f"spectrochempy/{PROJECT}"
+API_GITHUB_URL = "https://api.github.com"
 URL_SCPY = "spectrochempy.github.io/spectrochempy"
 
 # PATHS
@@ -81,24 +84,25 @@ class Options(dict):
 # ======================================================================================================================
 class Apigen(object):
     """
-        borrowed and heavily modified from :
-        sphinx.apidoc (https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py)
+    borrowed and heavily modified from :
+    sphinx.apidoc (https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py)
 
 
-        Parses a directory tree looking for Python modules and packages and creates
-        ReST files appropriately to create code documentation with Sphinx.  It also
-        creates a modules index (named modules.<suffix>).
+    Parses a directory tree looking for Python modules and packages and creates
+    ReST files appropriately to create code documentation with Sphinx.  It also
+    creates a modules index (named modules.<suffix>).
 
-        This is derived from the "sphinx-autopackage" script, which is :
-        Copyright 2008 Société des arts technologiques (SAT), http://www.sat.qc.ca/
+    This is derived from the "sphinx-autopackage" script, which is :
+    Copyright 2008 Société des arts technologiques (SAT), http://www.sat.qc.ca/
 
-        :copyright: Copyright 2007-2017 by the Sphinx team, see AUTHORS .
-        :license: BSD, see LICENSE_SPHINX for details.
+    :copyright: Copyright 2007-2017 by the Sphinx team, see AUTHORS .
+    :license: BSD, see LICENSE_SPHINX for details.
 
     """
+
     def __init__(self):
 
-        with open(os.path.join(DOCDIR, "_templates","class.rst")) as f:
+        with open(os.path.join(DOCDIR, "_templates", "class.rst")) as f:
             self.class_template = f.read()
 
         with open(os.path.join(DOCDIR, "_templates", "function.rst")) as f:
@@ -227,6 +231,7 @@ class Apigen(object):
 
         return
 
+
 apigen = Apigen()
 
 
@@ -262,8 +267,8 @@ class Build(object):
         parser.add_argument("--api", help="execute a full regeneration of the api", action="store_true")
         parser.add_argument("-R", "--release", help="release the current version documentation on website",
                             action="store_true")
-        parser.add_argument("-C", "--changelogs", help="update changelogs using the redmine issues status",
-                            action="store_true")
+        parser.add_argument("-C", "--changelogs", help="update changelogs using the github issues",
+                            default="latest")
         parser.add_argument("--all", help="Build all docs", action="store_true")
 
         args = parser.parse_args()
@@ -276,6 +281,8 @@ class Build(object):
 
         if args.sync:
             self.sync_notebooks()
+        if args.changelogs:
+            self.make_changelog(args.changelogs)
         if args.delnb:
             self.delnb()
         if args.clean and args.html:
@@ -289,8 +296,6 @@ class Build(object):
             self.make_pdf()
         if args.tutorials:
             self.make_tutorials()
-        if args.changelogs:
-            self.make_changelog()
         if args.all:
             self.clean('html')
             self.clean('latex')
@@ -507,59 +512,50 @@ class Build(object):
             os.makedirs(d, exist_ok=True)
 
     # ..................................................................................................................
-    def make_changelog(self):
+    def make_changelog(self, milestone="latest"):
         """
-        Utility to update changelog
+        Utility to update changelog (using the GITHUB API)
         """
-        csv = "https://redmine.spectrochempy.fr/projects/spectrochempy/issues.csv?" \
-              "c%5B%5D=tracker" \
-              "&c%5B%5D=status" \
-              "&c%5B%5D=category" \
-              "&c%5B%5D=priority" \
-              "&c%5B%5D=subject" \
-              "&c%5B%5D=fixed_version" \
-              "&f%5B%5D=status_id" \
-              "&f%5B%5D=" \
-              "&group_by=" \
-              "&op%5Bstatus_id%5D=%2A" \
-              "&set_filter=1" \
-              "&sort=id%3Adesc"
+        if milestone == 'latest':
+            # we build the latest
+            print("getting latest release tag")
+            LATEST = os.path.join(API_GITHUB_URL, "repos", REPO_URI, "releases", "latest")
+            tag = json.loads(requests.get(LATEST).text)['tag_name'].split('.')
+            milestone = f"{tag[0]}.{tag[1]}.{int(tag[2]) + 1}"  # TODO: this will not work if we change the minor or
+            # major
 
-        from spectrochempy import version, release
-
-        issues = pd.read_csv(csv, encoding="ISO-8859-1")
-        doc_version = self.doc_version
-        target = version.split('-')[0] if doc_version == 'latest' else release
-        changes = issues[issues['Target version'] == target]
+        def get(milestone, label):
+            print("getting list of issues with label ", label)
+            issues = os.path.join(API_GITHUB_URL, "search", f"issues?q=repo:{REPO_URI}"
+                                                            f"+milestone:{milestone}"
+                                                            f"+is:closed"
+                                                            f"+label:{label}")
+            return json.loads(requests.get(issues).text)['items']
 
         # Create a versionlog file for the current target
-        bugs = changes.loc[
-            (changes['Tracker'] == 'Bug') & (changes['Status'] != 'New') & (changes['Status'] != 'In Progress')]
-        features = changes.loc[
-            (changes['Tracker'] == 'Feature') & (changes['Status'] != 'New') & (changes['Status'] != 'In Progress')]
-        tasks = changes.loc[
-            (changes['Tracker'] == 'Task') & (changes['Status'] != 'New') & (changes['Status'] != 'In Progress')]
+        bugs = get(milestone, "bug")
+        features = get(milestone, "enhancement")
+        tasks = get(milestone, "task")
 
         with open(os.path.join(TEMPLATES, 'versionlog.rst'), 'r') as f:
             template = Template(f.read())
-        out = template.render(target=target, bugs=bugs, features=features, tasks=tasks)
+        out = template.render(target=milestone, bugs=bugs, features=features, tasks=tasks)
 
-        with open(os.path.join(DOCDIR, 'versionlogs', f'versionlog.{target}.rst'), 'w') as f:
+        with open(os.path.join(DOCDIR, 'versionlogs', f'versionlog.{milestone}.rst'), 'w') as f:
             f.write(out)
 
         # make the full version history
-
         lhist = sorted(iglob(os.path.join(DOCDIR, 'versionlogs', '*.rst')))
         lhist.reverse()
         history = ""
         for filename in lhist:
-            if '.'.join(filename.split('.')[-4:-1]) > target:
+            if '.'.join(filename.split('.')[-4:-1]) > milestone:
                 continue  # do not take into account future version for change log - obviously!
             with open(filename, 'r') as f:
                 history += "\n\n"
                 nh = f.read().strip()
                 vc = ".".join(filename.split('.')[1:4])
-                nh = nh.replace(':orphan:', f".. _version_{vc}:")
+                nh = nh.replace(':orphan:', '') #f".. _version_{vc}:")
                 history += nh
         history += '\n'
 
@@ -567,10 +563,15 @@ class Build(object):
             template = Template(f.read())
         out = template.render(history=history)
 
-        with open(os.path.join(DOCDIR, 'gettingstarted', 'changelog.rst'), 'w') as f:
+        outfile = os.path.join(DOCDIR, 'gettingstarted', 'changelog.rst')
+        with open(outfile, 'w') as f:
             f.write(out)
 
+        sh.pandoc(outfile, '-f', 'rst', '-t', 'markdown',  '-o',
+                  os.path.join(PROJECTDIR,'CHANGELOG.md'))
+
         return
+
 
 Build = Build()
 

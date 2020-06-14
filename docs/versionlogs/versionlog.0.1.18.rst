@@ -6,22 +6,22 @@ Version 0.1.18
 Bugs fixed
 ~~~~~~~~~~~
 
-* FIX `#62 <https://redmine.spectrochempy.fr/issues/62>`_ - Bug, issues: Install of the matplotlib styles doesn't work during setup
-* FIX `#60 <https://redmine.spectrochempy.fr/issues/60>`_ - Core code: Generic read function do not open a dialog when called without argument
-* FIX `#56 <https://redmine.spectrochempy.fr/issues/56>`_ - Documentation: Wrong instruction in install guides (MAC and WIN
+* FIX `#64 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/64>`_ : Install of the matplotlib styles doesn't work during setup
+* FIX `#62 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/62>`_ : Generic read function do not open a dialog when called without argument
+* FIX `#58 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/58>`_ : Wrong instruction in install guides (MAC and WIN
 
 Features added
 ~~~~~~~~~~~~~~~~
 
-* `#51 <https://redmine.spectrochempy.fr/issues/51>`_ - Core code: implement the numpy equivalent method `astype`
-* `#50 <https://redmine.spectrochempy.fr/issues/50>`_ - Core code: Add new numpy equivalent functions such as np.eyes, np.identity.
-* `#41 <https://redmine.spectrochempy.fr/issues/41>`_ - Core code: Bruker Opus Import
+* `#54 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/54>`_ : implement the numpy equivalent method `astype`
+* `#53 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/53>`_ : Add new numpy equivalent functions such as np.eyes, np.identity.
+* `#45 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/45>`_ : Bruker Opus Import
 
 Tasks terminated
 ~~~~~~~~~~~~~~~~~
 
-* `#59 <https://redmine.spectrochempy.fr/issues/59>`_ - Deployment: PyPi, Conda, ...: Make a repository on github. Get a DOI number for it. 
-* `#53 <https://redmine.spectrochempy.fr/issues/53>`_ - Deployment: PyPi, Conda, ...: Add nmrglue to our conda channel - and remove it from extern
-* `#48 <https://redmine.spectrochempy.fr/issues/48>`_ - Deployment: PyPi, Conda, ...: Add  brukeropusreader to our conda channel
-* `#47 <https://redmine.spectrochempy.fr/issues/47>`_ - Deployment: PyPi, Conda, ...: Add a linux quadprog version into our conda channel 
+* `#61 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/61>`_ : Make a repository on github. Get a DOI number for it. 
+* `#56 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/56>`_ : Add nmrglue to our conda channel - and remove it from extern
+* `#52 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/52>`_ : Add  brukeropusreader to our conda channel
+* `#51 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/51>`_ : Add a linux quadprog version into our conda channel 
 
