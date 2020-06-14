@@ -176,36 +176,40 @@ def check_for_update():
     except requests.exceptions.RequestException:
         return False
 
-    regex = r"\<a.*\>(.*-\d{2})\/spectrochempy-(\d{1,2})\.(\d{1,2})\.(\d{1,2})-(\d{1})\.tar\.bz2\</a\>"
-
+    regex = r"\/(\d{1,2})\.(\d{1,2})\.(\d{1,2})\/download\/noarch\/spectrochempy-\d{1,2}\.\d{1,2}\.\d{1,2}(\-dev\d{" \
+            r"1,2})?.tar.bz2"
     matches = re.finditer(regex, response.text, re.MULTILINE)
     vavailables = {}
-    for matchNum, match in enumerate(matches, start=1):
-        vavailables[match[1]] = (match[2], match[3], match[4])
+    for matchNum, match in enumerate(matches):
+        vavailables[match[0]] = (match[1], match[2], match[3], match[4])
 
-    key = {'darwin': 'osx', 'win32': 'win', 'linux': 'linux', 'linux2': 'linux'}
-    OS = f'{key[sys.platform]}-{_nbit()}'
+    for k,v in vavailables.items():
+        new_major, new_minor, new_patch = list(map(int, v[:3]))
+        new_dev = int(v[3][4:]) if v[3] is not None else None
 
-    if OS in vavailables.keys():
-        new_major, new_minor, new_patch = map(int, vavailables[OS])
-        major, minor, patch = map(int, core.release.split('.'))
-        # patch -= 1 # test
+        release = list(core.release.split('.'))
+        major, minor, patch = list(map(int, release[:3]))
+        dev = None if len(release)==3 else int(release[3][3:])
+
+        upd = False
         if new_major > major:
-            return True
+            upd = 'major'
         elif new_minor > minor:
-            return True
+            upd = 'minor'
         elif new_patch > patch:
-            return True
-        else:
-            return False
+            upd ='patch'
+        elif new_dev is not None and general_preferences.use_dev_version:
+            if dev is None or new_dev > dev:
+                upd = 'dev'
+
+        return upd
 
 
 upd = check_for_update()
 if upd:
-    from spectrochempy.application import display_info_string
-
-    display_info_string(message='A new release version is available on the anaconda `Spectrocat` Channel (or Pypi). '
-                                '\nPlease consider updating for bug fixes and new features !', logo=False)
+    warning_(f"A new {upd if upd=='dev' else ''} version is available.\n\n"
+                                'Please consider updating for bug fixes and new features !\n'
+             f"use:   conda update {'-c spectrocat/label/dev' if upd=='dev' else ''} spectrochempy")
 
 __all__.append('check_for_update')
 

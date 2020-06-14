@@ -139,7 +139,7 @@ def display_info_string(**kwargs):
 # Version
 # ----------------------------------------------------------------------------------------------------------------------
 try:
-    __release__ = get_distribution('spectrochempy').version
+    __release__ = get_distribution('spectrochempy').version.split('+')[0]
     "Release version string of this package"
 except DistributionNotFound:  # pragma: no cover
     # package is not installed
@@ -482,13 +482,15 @@ class GeneralPreferences(MetaConfigurable):
 
     show_close_dialog = Bool(True, help='Display the close project dialog'
                                         ' project changing or on '
-                                        'apllication exit').tag(config=True)
+                                        'application exit').tag(config=True)
 
     csv_delimiter = Unicode(',', help='CSV data delimiter').tag(config=True)
 
     project_directory = Unicode(help='Directory where projects are '
                                      'stored by default').tag(config=True,
                                                               type='folder')
+
+    use_dev_version = Bool(True, help='use latest development versions').tag(config=True)
 
     @default('project_directory')
     def _get_default_project_directory(self):
