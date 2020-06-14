@@ -23,7 +23,7 @@ IFS=$"."
 read -ra tag <<< "$LATEST";
 DEVSTRING="${tag[3]}"
 VERSION="${tag[0]}.${tag[1]}.${tag[2]}"
-if [[ -n $DEVSTRING ]]; then
+if [[ -z $DEVSTRING ]]; then
   DEVSTRING="stable"
 fi
 PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
