@@ -23,11 +23,10 @@ IFS=$"."
 read -ra tag <<< "$LATEST";
 DEVSTRING="${tag[3]}"
 VERSION="${tag[0]}.${tag[1]}.${tag[2]}"
-if [[ $DEVSTRING ]]; then
-  PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
-else
-  PKG_NAME_VERSION="$PKG_NAME-$VERSION.tar.bz2"
+if [[ -n $DEVSTRING ]]; then
+  DEVSTRING="stable"
 fi
+PKG_NAME_VERSION="$PKG_NAME-$VERSION-$DEVSTRING.tar.bz2"
 
 ## Avoid uploading automatically
 conda config --set anaconda_upload no

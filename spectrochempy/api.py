@@ -176,33 +176,35 @@ def check_for_update():
     except requests.exceptions.RequestException:
         return False
 
-    regex = r"\/(\d{1,2})\.(\d{1,2})\.(\d{1,2})\/download\/noarch\/spectrochempy-\d{1,2}\.\d{1,2}\.\d{1,2}(\-dev\d{" \
-            r"1,2})?.tar.bz2"
+    regex = r"\/(\d{1,2})\.(\d{1,2})\.(\d{1,2})\/download\/noarch" \
+            r"\/spectrochempy-\d{1,2}\.\d{1,2}\.\d{1,2}\-(dev\d{1,2}|stable).tar.bz2"
     matches = re.finditer(regex, response.text, re.MULTILINE)
     vavailables = {}
     for matchNum, match in enumerate(matches):
         vavailables[match[0]] = (match[1], match[2], match[3], match[4])
 
+    upd = False
     for k,v in vavailables.items():
         new_major, new_minor, new_patch = list(map(int, v[:3]))
-        new_dev = int(v[3][4:]) if v[3] is not None else None
+        new_dev = v[3] if v[3] is not None else None
+        new_dev = int(new_dev[3:]) if "dev" in new_dev else new_dev
 
         release = list(core.release.split('.'))
         major, minor, patch = list(map(int, release[:3]))
         dev = None if len(release)==3 else int(release[3][3:])
 
-        upd = False
         if new_major > major:
             upd = 'major'
         elif new_minor > minor:
             upd = 'minor'
         elif new_patch > patch:
             upd ='patch'
-        elif new_dev is not None and general_preferences.use_dev_version:
+
+        if upd and new_dev is not None and general_preferences.use_dev_version:
             if dev is None or new_dev > dev:
                 upd = 'dev'
 
-        return upd
+    return upd
 
 
 upd = check_for_update()
