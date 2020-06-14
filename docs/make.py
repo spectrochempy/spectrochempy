@@ -20,7 +20,6 @@ where optional parameters indicates which job(s) is(are) to perform.
 
 import argparse
 import inspect
-import json
 import os
 import shutil
 import sys
@@ -29,6 +28,7 @@ import warnings
 import zipfile
 from glob import iglob
 
+import json5 as json
 import numpy as np
 import requests
 from jinja2 import Template
@@ -39,7 +39,7 @@ from sphinx.deprecation import RemovedInSphinx50Warning, RemovedInSphinx40Warnin
 from sphinx.util.osutil import FileAvoidWrite
 from traitlets import import_item
 
-from spectrochempy import version, release
+from spectrochempy import version
 from spectrochempy.utils import sh
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
@@ -267,8 +267,8 @@ class Build(object):
         parser.add_argument("--api", help="execute a full regeneration of the api", action="store_true")
         parser.add_argument("-R", "--release", help="release the current version documentation on website",
                             action="store_true")
-        parser.add_argument("-C", "--changelogs", help="update changelogs using the redmine issues status",
-                            action="store_true")
+        parser.add_argument("-C", "--changelogs", help="update changelogs using the github issues",
+                            default="latest")
         parser.add_argument("--all", help="Build all docs", action="store_true")
 
         args = parser.parse_args()
@@ -281,6 +281,8 @@ class Build(object):
 
         if args.sync:
             self.sync_notebooks()
+        if args.changelogs:
+            self.make_changelog(args.changelogs)
         if args.delnb:
             self.delnb()
         if args.clean and args.html:
@@ -294,8 +296,6 @@ class Build(object):
             self.make_pdf()
         if args.tutorials:
             self.make_tutorials()
-        if args.changelogs:
-            self.make_changelog()
         if args.all:
             self.clean('html')
             self.clean('latex')
@@ -512,24 +512,25 @@ class Build(object):
             os.makedirs(d, exist_ok=True)
 
     # ..................................................................................................................
-    def make_changelog(self):
+    def make_changelog(self, milestone="latest"):
         """
         Utility to update changelog (using the GITHUB API)
         """
-        print("getting latest release tag")
-        LATEST = os.path.join(API_GITHUB_URL, "repos", REPO_URI, "releases", "latest")
-        tag = json.loads(requests.get(LATEST).text)['tag_name'].split('.')
-        milestone = f"{tag[0]}.{tag[1]}.{int(tag[2])+1}"
-        doc_version = self.doc_version
-        target = version.split('-')[0] if doc_version == 'latest' else release
+        if milestone == 'latest':
+            # we build the latest
+            print("getting latest release tag")
+            LATEST = os.path.join(API_GITHUB_URL, "repos", REPO_URI, "releases", "latest")
+            tag = json.loads(requests.get(LATEST).text)['tag_name'].split('.')
+            milestone = f"{tag[0]}.{tag[1]}.{int(tag[2]) + 1}"  # TODO: this will not work if we change the minor or
+            # major
 
         def get(milestone, label):
             print("getting list of issues with label ", label)
             issues = os.path.join(API_GITHUB_URL, "search", f"issues?q=repo:{REPO_URI}"
                                                             f"+milestone:{milestone}"
-                                                            f"+is:issue"
+                                                            f"+is:closed"
                                                             f"+label:{label}")
-            return json.loads(requests.get(issues).text)
+            return json.loads(requests.get(issues).text)['items']
 
         # Create a versionlog file for the current target
         bugs = get(milestone, "bug")
@@ -538,9 +539,9 @@ class Build(object):
 
         with open(os.path.join(TEMPLATES, 'versionlog.rst'), 'r') as f:
             template = Template(f.read())
-        out = template.render(target=target, bugs=bugs, features=features, tasks=tasks)
+        out = template.render(target=milestone, bugs=bugs, features=features, tasks=tasks)
 
-        with open(os.path.join(DOCDIR, 'versionlogs', f'versionlog.{target}.rst'), 'w') as f:
+        with open(os.path.join(DOCDIR, 'versionlogs', f'versionlog.{milestone}.rst'), 'w') as f:
             f.write(out)
 
         # make the full version history
@@ -548,13 +549,13 @@ class Build(object):
         lhist.reverse()
         history = ""
         for filename in lhist:
-            if '.'.join(filename.split('.')[-4:-1]) > target:
+            if '.'.join(filename.split('.')[-4:-1]) > milestone:
                 continue  # do not take into account future version for change log - obviously!
             with open(filename, 'r') as f:
                 history += "\n\n"
                 nh = f.read().strip()
                 vc = ".".join(filename.split('.')[1:4])
-                nh = nh.replace(':orphan:', f".. _version_{vc}:")
+                nh = nh.replace(':orphan:', '') #f".. _version_{vc}:")
                 history += nh
         history += '\n'
 
@@ -562,8 +563,12 @@ class Build(object):
             template = Template(f.read())
         out = template.render(history=history)
 
-        with open(os.path.join(DOCDIR, 'gettingstarted', 'changelog.rst'), 'w') as f:
+        outfile = os.path.join(DOCDIR, 'gettingstarted', 'changelog.rst')
+        with open(outfile, 'w') as f:
             f.write(out)
+
+        sh.pandoc(outfile, '-f', 'rst', '-t', 'markdown',  '-o',
+                  os.path.join(PROJECTDIR,'CHANGELOG.md'))
 
         return
 

@@ -1,27 +1,24 @@
 :orphan:
 
 Version {{ target }}
----------------------
+-----------------------------------
 
 Bugs fixed
 ~~~~~~~~~~~
-{% for item in bugs.index  %}
-{% set fields = bugs.loc[item] -%}
-* FIX `#{{ fields['#'] }} <https://redmine.spectrochempy.fr/issues/{{ fields['#'] }}>`_ - {{ fields.Category }}: {{ fields.Subject }}
+{% for item in bugs  %}
+* FIX `#{{ item["number"] }} <{{ item["url"] }}>`_ : {{ item["title"] }}
 {%- endfor %}
 
 Features added
 ~~~~~~~~~~~~~~~~
-{% for item in features.index  %}
-{% set fields = features.loc[item] -%}
-* `#{{ fields['#'] }} <https://redmine.spectrochempy.fr/issues/{{ fields['#'] }}>`_ - {{ fields.Category }}: {{ fields.Subject }}
+{% for item in features  %}
+* `#{{ item["number"] }} <{{ item["url"] }}>`_ : {{ item["title"] }}
 {%- endfor %}
 
 Tasks terminated
 ~~~~~~~~~~~~~~~~~
-{% for item in tasks.index  %}
-{% set fields = tasks.loc[item] -%}
-* `#{{ fields['#'] }} <https://redmine.spectrochempy.fr/issues/{{ fields['#'] }}>`_ - {{ fields.Category }}: {{ fields.Subject }}
+{% for item in tasks  %}
+* `#{{ item["number"] }} <{{ item["url"] }}>`_ : {{ item["title"] }}
 {%- endfor %}
 
 
