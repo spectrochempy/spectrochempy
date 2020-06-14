@@ -10,6 +10,9 @@ Version 0.1.20
     [\#116](https://api.github.com/repos/spectrochempy/spectrochempy/issues/116)
     : CI: try to fix bug on deploy
 -   FIX
+    [\#115](https://api.github.com/repos/spectrochempy/spectrochempy/issues/115)
+    : CI: revise the changelog script in make.py
+-   FIX
     [\#76](https://api.github.com/repos/spectrochempy/spectrochempy/issues/76)
     : read\_opus() shifts the xaxis
 -   FIX
