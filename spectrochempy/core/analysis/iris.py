@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-#
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
+
 """
 This module implements the IRIS class.
 
@@ -56,6 +54,7 @@ class IRIS:
             If set to True, prints informations during the 2D IRIS  analysis.
             In a
             ny case, the same information is returned in self._log
+
         """
         # check options
         # defines the kernel
@@ -256,78 +255,78 @@ class IRIS:
                           'in [10**{}, 10**{}]\n'
                           .format(X.shape[1], X.shape[0], str(min(lambdaRange)), str(max(lambdaRange))))
 
-                    x = np.ndarray((4))
-                    epsilon = 0.1
-                    phi = (1 + np.sqrt(5)) / 2
+                x = np.ndarray((4))
+                epsilon = 0.1
+                phi = (1 + np.sqrt(5)) / 2
 
-                    x[0] = min(lambdaRange)
-                    x[3] = max(lambdaRange)
-                    x[1] = (x[3] + phi * x[0]) / (1 + phi)
-                    x[2] = x[0] + x[3] - x[1]
-                    lamb = 10 ** x
+                x[0] = min(lambdaRange)
+                x[3] = max(lambdaRange)
+                x[1] = (x[3] + phi * x[0]) / (1 + phi)
+                x[2] = x[0] + x[3] - x[1]
+                lamb = 10 ** x
+                if verbose:
+                    print('Log lambda= ' + str(x))
+                for i, xi in enumerate(x):
+                    f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, 10 ** xi, S, verbose)
+
+                Rx = RSS
+                Sy = SM
+                while "convergence not reached":
+                    C1 = menger(Rx[0:3], Sy[0:3])
+                    C2 = menger(Rx[1:4], Sy[1:4])
                     if verbose:
-                        print('Log lambda= ' + str(x))
-                    for i, xi in enumerate(x):
-                        f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, 10 ** xi, S, verbose)
-
-                    Rx = RSS
-                    Sy = SM
-                    while "convergence not reached":
-                        C1 = menger(Rx[0:3], Sy[0:3])
-                        C2 = menger(Rx[1:4], Sy[1:4])
+                        print('Curvatures: C1 = {} ; C2 = {}'.format(C1, C2))
+                    while C2 < 0:
+                        x[3] = x[2]
+                        Rx[3] = Rx[2]
+                        Sy[3] = Sy[2]
+                        x[2] = x[1]
+                        Rx[2] = Rx[1]
+                        Sy[2] = Sy[1]
+                        x[1] = (x[3] + phi * x[0]) / (1 + phi)
                         if verbose:
-                            print('Curvatures: C1 = {} ; C2 = {}'.format(C1, C2))
-                        while C2 < 0:
-                            x[3] = x[2]
-                            Rx[3] = Rx[2]
-                            Sy[3] = Sy[2]
-                            x[2] = x[1]
-                            Rx[2] = Rx[1]
-                            Sy[2] = Sy[1]
-                            x[1] = (x[3] + phi * x[0]) / (1 + phi)
-                            if verbose:
-                                print('Log lambda= ' + str(x))
-                            f_, Rx[1], S[1] = solve_lambda(X, K, G0, 10 ** x[1], S, verbose)
-                            lamb = np.append(lamb, np.array(10 ** x[1]))
-                            f = np.concatenate((f, np.atleast_3d(f_.T).T))
-                            RSS = np.concatenate((RSS, np.array(Rx[1:2])))
-                            SM = np.concatenate((SM, np.array(Sy[1:2])))
-                            C2 = menger(Rx[1:4], Sy[1:4])
-                            print('new curvature: C2 = {}'.format(C2))
-                        if C1 > C2:
-                            x[3] = x[2]
-                            Rx[3] = Rx[2]
-                            Sy[3] = Sy[2]
-                            x[2] = x[1]
-                            Rx[2] = Rx[1]
-                            Sy[2] = Sy[1]
-                            x[1] = (x[3] + phi * x[0]) / (1 + phi)
-                            if verbose:
-                                print('Log lambda= ' + str(x))
-                            f_, Rx[1], S[1] = solve_lambda(X, K, G0, 10 ** x[1], S, verbose)
-                            f = np.concatenate((f, np.atleast_3d(f_.T).T))
-                            lamb = np.append(lamb, np.array(10 ** x[1]))
-                            RSS = np.concatenate((RSS, np.array(Rx[1:2])))
-                            SM = np.concatenate((SM, np.array(Sy[1:2])))
-                        else:
-                            x[0] = x[1]
-                            Rx[0] = Rx[1]
-                            Sy[0] = Sy[1]
-                            x[1] = x[2]
-                            Rx[1] = Rx[2]
-                            Sy[1] = Sy[2]
-                            x[2] = x[0] - (x[1] - x[3])
-                            if verbose:
-                                print('Log lambda= ' + str(x))
-                            f_, Rx[2], S[2] = solve_lambda(X, K, G0, 10 ** x[2], S, verbose)
-                            f = np.concatenate((f, np.atleast_3d(f_.T).T))
-                            lamb = np.append(lamb, np.array(10 ** x[2]))
-                            RSS = np.concatenate((RSS, np.array(Rx[1:2])))
-                            SM = np.concatenate((SM, np.array(Sy[1:2])))
-                        if (10 ** x[3] - 10 ** x[0]) / 10 ** x[3] < epsilon:
-                            break
-                    if verbose:
-                        print('\n optimum found !')
+                            print('Log lambda= ' + str(x))
+                        f_, Rx[1], S[1] = solve_lambda(X, K, G0, 10 ** x[1], S, verbose)
+                        lamb = np.append(lamb, np.array(10 ** x[1]))
+                        f = np.concatenate((f, np.atleast_3d(f_.T).T))
+                        RSS = np.concatenate((RSS, np.array(Rx[1:2])))
+                        SM = np.concatenate((SM, np.array(Sy[1:2])))
+                        C2 = menger(Rx[1:4], Sy[1:4])
+                        print('new curvature: C2 = {}'.format(C2))
+                    if C1 > C2:
+                        x[3] = x[2]
+                        Rx[3] = Rx[2]
+                        Sy[3] = Sy[2]
+                        x[2] = x[1]
+                        Rx[2] = Rx[1]
+                        Sy[2] = Sy[1]
+                        x[1] = (x[3] + phi * x[0]) / (1 + phi)
+                        if verbose:
+                            print('Log lambda= ' + str(x))
+                        f_, Rx[1], S[1] = solve_lambda(X, K, G0, 10 ** x[1], S, verbose)
+                        f = np.concatenate((f, np.atleast_3d(f_.T).T))
+                        lamb = np.append(lamb, np.array(10 ** x[1]))
+                        RSS = np.concatenate((RSS, np.array(Rx[1:2])))
+                        SM = np.concatenate((SM, np.array(Sy[1:2])))
+                    else:
+                        x[0] = x[1]
+                        Rx[0] = Rx[1]
+                        Sy[0] = Sy[1]
+                        x[1] = x[2]
+                        Rx[1] = Rx[2]
+                        Sy[1] = Sy[2]
+                        x[2] = x[0] - (x[1] - x[3])
+                        if verbose:
+                            print('Log lambda= ' + str(x))
+                        f_, Rx[2], S[2] = solve_lambda(X, K, G0, 10 ** x[2], S, verbose)
+                        f = np.concatenate((f, np.atleast_3d(f_.T).T))
+                        lamb = np.append(lamb, np.array(10 ** x[2]))
+                        RSS = np.concatenate((RSS, np.array(Rx[1:2])))
+                        SM = np.concatenate((SM, np.array(Sy[1:2])))
+                    if (10 ** x[3] - 10 ** x[0]) / 10 ** x[3] < epsilon:
+                        break
+                if verbose:
+                    print('\n optimum found !')
         if verbose:
             print('\n Done.')
         f = NDDataset(f)
