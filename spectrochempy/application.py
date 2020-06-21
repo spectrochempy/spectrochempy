@@ -29,6 +29,7 @@ import warnings
 import pprint
 import json
 import shutil as sh
+import asyncio
 
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
@@ -1189,7 +1190,8 @@ class SpectroChemPy(Application):
                 display_info_string(message=info_string.strip())
 
             else:
-                print(info_string.strip())
+                if "/bin/scpy" not in sys.argv[0]:   # deactivate for console scripts
+                    print(info_string.strip())
 
         self.running = True
 

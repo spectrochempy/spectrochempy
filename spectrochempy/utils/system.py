@@ -8,13 +8,14 @@ __all__ = ['get_user_and_node',
            'get_user',
            'get_node',
            'is_kernel',
-           'sh'
+           'sh',
+           'run_detached_process'
            ]
 
 import getpass
 import platform
 import sys
-from subprocess import run, PIPE, STDOUT
+from subprocess import run, Popen, PIPE, STDOUT
 
 
 def get_user():
@@ -41,6 +42,24 @@ def is_kernel():
     from IPython import get_ipython  # pragma: no cover
     # check for `kernel` attribute on the IPython instance
     return getattr(get_ipython(), 'kernel', None) is not None  # pragma: no cover
+
+
+def run_detached_process(process):
+    # solution from https://stackoverflow.com/a/13256908
+    # set system/version dependent "start_new_session" analogs
+    kwargs = {}
+    if platform.system() == 'Windows':
+        # from msdn [1]
+        CREATE_NEW_PROCESS_GROUP = 0x00000200  # note: could get it from subprocess
+        DETACHED_PROCESS = 0x00000008  # 0x8 | 0x200 == 0x208
+        kwargs.update(creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP)
+    # elif sys.version_info < (3, 2):  # assume posix
+    #     kwargs.update(preexec_fn=os.setsid)
+    else:  # Python 3.2+ and Unix
+        kwargs.update(start_new_session=True)
+
+    p = Popen(process.split(), stdin=PIPE, stdout=PIPE, stderr=PIPE, **kwargs)
+    #,assert not p.poll()
 
 
 class _ExecCommand():
