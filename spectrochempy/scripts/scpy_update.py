@@ -59,11 +59,11 @@ conda update {'-c spectrocat/label/dev ' if  'dev' in new_version else ''}spectr
         new_major, new_minor, new_patch, new_dev = major, minor, patch, dev
         upd = False
         dev_upd=False
-        print(major, minor, patch, dev)
+        #print(major, minor, patch, dev)
         for k, v in vavailables.items():
             _major, _minor, _patch = list(map(int, v[:3]))
             _dev = int(v[3][3:]) if v[3] is not None and 'dev' in v[3] else 0
-            print (_major, _minor, _patch, _dev)
+            #print (_major, _minor, _patch, _dev)
             if _major > new_major:
                 new_major = _major
                 new_dev = 0  # reset dev
