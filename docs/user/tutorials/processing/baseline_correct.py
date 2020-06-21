@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ---
 # jupyter:
 #   jupytext:
@@ -18,8 +17,9 @@
 # %% [markdown]
 # # Baseline corrections
 #
-# This tutorial shows how to make baseline corrections with spectrochempy As prerequisite, the user is
-# expected to have read the [Import](../IO/import.ipynb) and [Import IR](../IO/importIR.ipynb) tutorials.
+# This tutorial shows how to make baseline corrections with spectrochempy.
+# As prerequisite, the user is expected to have read the [Import](../IO/import.ipynb)
+# and [Import IR](../IO/importIR.ipynb) tutorials.
 
 # %%
 import spectrochempy as scp

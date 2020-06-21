@@ -1,5 +1,7 @@
 .. _api_loading:
 
+.. currentmodule:: spectrochempy
+
 API reference
 ===============
 
@@ -31,7 +33,6 @@ is in general recommended, although that, for the examples in this
 documentation, we have often use the
 second one for simplicity.
 
-.. currentmodule:: spectrochempy
 
 The NDDataset object
 ---------------------
@@ -89,8 +90,8 @@ These functions mimics numpy equivalent, but output a NDDataset object
     full
     full_like
 
-import data from external sources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Import of data from external sources
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
     :nosignatures:
@@ -118,40 +119,6 @@ Export a NDDataset
     to_xarray
     to_dataframe
     write_jdx
-
-Plotting functions
--------------------
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    plot
-    plot_1D
-    plot_pen
-    plot_scatter
-    plot_bar
-    plot_2D
-    plot_map
-    plot_stack
-    plot_image
-    plot_surface
-    plot_3D
-
-NDDataset manipulation
------------------------
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    sort
-    copy
-    squeeze
-    swapaxes
-    transpose
-    set_complex
-    set_quaternion
 
 Coordinates manipulation
 -------------------------
@@ -232,12 +199,46 @@ Mathematical operations
     var
     dot
 
+Plotting functions
+-------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    plot
+    plot_1D
+    plot_pen
+    plot_scatter
+    plot_bar
+    plot_2D
+    plot_map
+    plot_stack
+    plot_image
+    plot_surface
+    plot_3D
+
 Processing
 ----------
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
+
+Transformation and processing
+------------------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    sort
+    copy
+    squeeze
+    swapaxes
+    transpose
+    set_complex
+    set_quaternion
 
 
 Utilities
@@ -249,25 +250,7 @@ Utilities
 
     upload_IRIS
 
-.. _api_reference_spectrochempy_preferences:
 
-Preferences
-===========
 
-.. currentmodule:: spectrochempy
 
-API Configuration
-------------------
-
-.. autoconfigurable:: spectrochempy.application.SpectroChemPy
-
-General Preferences
---------------------
-
-.. autoconfigurable:: spectrochempy.application.GeneralPreferences
-
-Project preferences
---------------------
-
-.. autoconfigurable:: spectrochempy.application.ProjectPreferences
 

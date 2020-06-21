@@ -26,6 +26,7 @@
 {%- endfor %}
 {% endif %}
 {% endblock %}
+
 .. include:: /gen_modules/backreferences/{{fullname}}.examples
 
 .. raw:: html
