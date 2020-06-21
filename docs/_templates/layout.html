@@ -13,27 +13,22 @@
                 <dt>Other versions</dt>
                 {% for slug, url in versions %}
                     {% if slug != current_version %}
-                        <dd><a href="{{ url }}">{{ slug.upper() }}</a></dd>
+                        <dd><a href="{{ base_url }}{{ url }}">{{ slug.upper() }}</a></dd>
                     {% endif %}
                 {% endfor %}
             </dl>
             <hr/>
             <dl>
                 <dt>Downloads</dt>
-                <dd><a href="/downloads/{{ current_version }}-spectrochempy.pdf">PDF</a></dd>
-                <dd><a href="/downloads/{{ current_version }}-spectrochempy-notebooks.zip">Notebooks</a></dd>
+                <dd><a href="{{ base_url }}/downloads/{{ current_version }}-spectrochempy.pdf">PDF</a></dd>
+                <dd><a href="{{ base_url }}/downloads/{{ current_version }}-spectrochempy-notebooks.zip">Notebooks</a></dd>
             </dl>
             <hr/>
             <dl>
                 <dt>Sources on GitHub</dt>
-                {% for slug, url in versions %}
-                    {% if slug == 'stable' %}
-                        <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
-                    {% endif %}
-                    {% if slug == 'dev' %}
-                        <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
-                    {% endif %}
-                {% endfor %}
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
             </dl>
 
         </div>
@@ -50,8 +45,8 @@
         <div class="admonition warning">
             <p class="first admonition-title">Note</p>
             <p class="last"> You are reading the documentation related to the current development version.
-                <a href="/stable/index.html">Go here</a> if you are looking for the documentation of the latest
-                released version: <a href="/stable/index.html">{{ release }}</a>.
+                <a href="{{ base_url }}/stable/index.html">Go here</a> if you are looking for the documentation of the latest
+                released version: <a href="{{ base_url }}/stable/index.html">{{ release }}</a>.
             </p>
         </div>
     {% endif %}

@@ -33,3 +33,13 @@ a.sphx-glr-backref-module-sphinx_gallery {
     text-decoration: underline;
     background-color: #E6E6E6;
 }
+
+table.colwidths-given {
+    table-layout: fixed;
+    width: 100%;
+}
+
+table.docutils td {
+    white-space: unset;
+    word-wrap: break-word;
+}

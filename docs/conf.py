@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-#
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 """
@@ -12,13 +9,14 @@ SpectroChemPy documentation build configuration file
 
 """
 
+import inspect
 import os
 import sys
 import warnings
 
 import sphinx_rtd_theme  # Theme for the website
 
-import spectrochempy
+import spectrochempy  # isort:skip
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -36,20 +34,20 @@ import spectrochempy
 
 
 # hack to make import
-# sys._called_from_sphinx = True
+sys._called_from_sphinx = True
 
 # Sphinx Extensions
 source = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(source, "docs", "sphinxext"))
 # print (sys.path)
 extensions = \
-            [
+    [
             'nbsphinx',
             'sphinx.ext.mathjax',
             'sphinx.ext.autodoc',
             'sphinx.ext.doctest',
             'sphinx.ext.intersphinx',
-            'sphinx.ext.viewcode',
+            'sphinx.ext.linkcode',
             'sphinx.ext.todo',
             'sphinx_gallery.gen_gallery',
             'matplotlib.sphinxext.plot_directive',
@@ -57,13 +55,8 @@ extensions = \
             'IPython.sphinxext.ipython_directive',
             "sphinx.ext.napoleon",
             "autodoc_traitlets",
-            'autodocsumm',
+            "sphinx.ext.autosummary",
             ]
-
-# Numpy autodoc attributes
-numpydoc_show_class_members = False
-numpydoc_use_plots = True
-numpydoc_class_members_toctree = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -271,9 +264,10 @@ warnings.filterwarnings("ignore", category=UserWarning,
 html_context = {
         'current_version': 'latest' if ('dev' in version) else 'stable',
         'release': spectrochempy.application.__release__,
+        'base_url': 'https://spectrochempy.github.io/spectrochempy',
         'versions': (
-                ('latest', 'spectrochempy/latest/index.html"'),
-                ('stable', 'spectrochempy/stable/index.html'),
+                ('latest', '/latest/index.html"'),
+                ('stable', '/stable/index.html'),
                 )
         }
 
@@ -360,40 +354,6 @@ pdf_language = "en_EN"
 # If false, no coverpage is generated.
 # pdf_use_coverpage = True
 
-# Autosummary ------------------------------------------------------------------
-
-autosummary_generate = True
-
-autoclass_content = 'both'  # Both the class’ and the __init__ method’s
-# docstring are concatenated and inserted.
-
-autodoc_default_flags = ['autosummary']
-
-exclusions = (
-        'with_traceback', 'with_traceback', 'observe', 'unobserve', 'observe',
-        'cross_validation_lock', 'unobserve_all', 'class_config_rst_doc',
-        'class_config_section', 'class_get_help', 'class_print_help',
-        'section_names', 'update_config', 'clear_instance',
-        'document_config_options', 'flatten_flags', 'generate_config_file',
-        'initialize_subcommand', 'initialized', 'instance',
-        'json_config_loader_class', 'launch_instance', 'setup_instance',
-        'load_config_file',
-        'parse_command_line', 'print_alias_help', 'print_description',
-        'print_examples', 'print_flag_help', 'print_help', 'print_subcommands',
-        'print_version', 'python_config_loader_class', 'raises',)
-
-
-def autodoc_skip_member(app, what, name, obj, skip, options):
-    exclude = name in exclusions or 'trait' in name
-    return skip or exclude
-
-
-def setup(app):
-    app.connect('autodoc-skip-member', autodoc_skip_member)
-    app.add_stylesheet("theme_override.css")  # also can be a full URL
-    # app.add_stylesheet("ANOTHER.css")
-    # app.add_stylesheet("AND_ANOTHER.css")
-
 
 # Sphinx-gallery ---------------------------------------------------------------
 
@@ -448,6 +408,7 @@ intersphinx_mapping = {
         'sklearn': ('https://scikit-learn.org/stable/', None),
         }
 
+
 # linkcode ---------------------------------------------------------------------
 
 def linkcode_resolve(domain, info):
@@ -458,8 +419,7 @@ def linkcode_resolve(domain, info):
         obj = sys.modules[info['module']]
         for part in info['fullname'].split('.'):
             obj = getattr(obj, part)
-        import inspect
-        import os
+
         fn = inspect.getsourcefile(obj)
         fn = os.path.relpath(fn, start=os.path.dirname(spectrochempy.__file__))
         source, lineno = inspect.getsourcelines(obj)
@@ -473,3 +433,45 @@ def linkcode_resolve(domain, info):
         filename = info['module'].replace('.', '/') + '.py'
     tag = 'master'
     return f"https://github.com/spectrochempy/spectrochempy/blob/{tag}/{filename}"
+
+
+# Autosummary ------------------------------------------------------------------
+
+autosummary_generate = True
+
+autodoc_typehints = "none"
+
+napoleon_use_param = True
+napoleon_use_rtype = True
+
+numpydoc_class_members_toctree = True
+numpydoc_show_class_members = False
+numpydoc_use_plots = True
+
+autoclass_content = 'both'  # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
+
+autodoc_default_flags = ['autosummary']
+
+exclusions = (
+        'with_traceback', 'with_traceback', 'observe', 'unobserve', 'observe',
+        'cross_validation_lock', 'unobserve_all', 'class_config_rst_doc',
+        'class_config_section', 'class_get_help', 'class_print_help',
+        'section_names', 'update_config', 'clear_instance',
+        'document_config_options', 'flatten_flags', 'generate_config_file',
+        'initialize_subcommand', 'initialized', 'instance',
+        'json_config_loader_class', 'launch_instance', 'setup_instance',
+        'load_config_file',
+        'parse_command_line', 'print_alias_help', 'print_description',
+        'print_examples', 'print_flag_help', 'print_help', 'print_subcommands',
+        'print_version', 'python_config_loader_class', 'raises', '_*')
+
+
+def autodoc_skip_member(app, what, name, obj, skip, options):
+    doc = True if obj.__doc__ is not None else False
+    exclude = name in exclusions or 'trait' in name or name.startswith('_')  # or not doc
+    return skip or exclude
+
+
+def setup(app):
+    app.connect('autodoc-skip-member', autodoc_skip_member)
+    app.add_stylesheet("theme_override.css")  # also can be a full URL
