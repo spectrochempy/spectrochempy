@@ -19,6 +19,10 @@
 *.py[cod]
 *.pdf
 *.zip
+*.egg
+*.manifest
+*.spec
+*.pyc
 
 # git files
 # ----------------------------------------------------------------------------------------------------------------------
@@ -113,30 +117,10 @@ scp_data/testdata/figures
 3iii
 auditp.txt
 
-# Installer logs
-# ----------------------------------------------------------------------------------------------------------------------
-pip-log.txt
-pip-delete-this-directory.txt
-
-# various files related to conda recipes
-# ----------------------------------------------------------------------------------------------------------------------
-recipes/spectrochempy/linux-32/
-recipes/spectrochempy/linux-64/
-recipes/spectrochempy/linux-aarch64/
-recipes/spectrochempy/win-32/
-recipes/spectrochempy/win-64/
-
 # Docker / bitbucket
 # ----------------------------------------------------------------------------------------------------------------------
 .dockerignore
 .pipeline*.sh
-
-# personnal files
-# ----------------------------------------------------------------------------------------------------------------------
-mymd.md
-myrst.rst
-mytodo.txt
-Untitled.py
 
 # Distribution / packaging
 # ----------------------------------------------------------------------------------------------------------------------
@@ -152,20 +136,5 @@ parts/
 sdist/
 var/
 *.egg-info/
-.installed.cfg
-*.egg
-*.manifest
-*.spec
-
-
-# conda smithy ci-skeleton start
-*.pyc
-
-build_artifacts
-# conda smithy ci-skeleton end
-recipe/pkg_folder
-ci.sh
-/docker/travisci/
-!/recipe/spectrochempy/conda-bld/
 .coverage
-/.ci/scripts/make_changelog.sh
+

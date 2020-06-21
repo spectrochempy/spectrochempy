@@ -55,7 +55,7 @@ __all__ = [
 # ======================================================================================================================
 # Progress bar
 # ======================================================================================================================
-if os.environ.get('USE_TQDM', 'Yes') == 'Yes':
+if os.environ.get('USE_TQDM', 'Yes') == 'Yes' and "/bin/scpy" not in sys.argv[0]:      # deactivate for console scripts
     pbar = tqdm(total=1211)
     pbar.set_description('Loading SpectroChemPy API')
     val_tqdm = [1, 39, 52, 83, 83, 89, 92, 93, 94, 95, 96, 97, 98, 99, 100]

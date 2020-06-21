@@ -1,18 +1,16 @@
 # standalone dialogs
 
+
 __all__ = []
 
 
 def QFileDialog():
-
-    try:
-        from PyQt5 import QtWidgets
-        return QtWidgets.QFileDialog
-    except ImportError:
-        raise ImportError('PyQT is necessary for this function, but PyQT is not installed. \n'
-           'Run "conda install pyqt -y" to solve this issue. ')
+    # delayed import
+    from PyQt5 import QtWidgets
+    return QtWidgets.QFileDialog
 
 QFileDialog = QFileDialog()
+
 
 def OpenExistingDirectory(parent=None,
                           caption='Select a folder',

@@ -14,7 +14,7 @@ __all__ = ['get_user_and_node',
 import getpass
 import platform
 import sys
-from subprocess import run, PIPE, STDOUT
+from subprocess import run, Popen, PIPE, STDOUT
 
 
 def get_user():
