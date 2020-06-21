@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
 import logging
 from spectrochempy import WARNING, INFO, error_, debug_, info_, warning_, set_loglevel
 

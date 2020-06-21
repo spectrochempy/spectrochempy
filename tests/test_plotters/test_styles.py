@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
 import pytest
 
 from spectrochempy import general_preferences, plt, os

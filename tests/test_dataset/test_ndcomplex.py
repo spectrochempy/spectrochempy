@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
 from copy import copy, deepcopy
 from quaternion import as_quat_array, as_float_array, quaternion
 import numpy as np
