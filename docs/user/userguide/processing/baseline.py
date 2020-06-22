@@ -24,6 +24,7 @@ dataset = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 dataset
 
 # %%
+# # %matplotlib qt
 s = dataset[:, 1260.0:5999.0]
 s = s - s[-1]
 
@@ -55,3 +56,5 @@ print(ranges)
 
 # %%
 _ = basc.corrected.plot_stack()
+
+# %%

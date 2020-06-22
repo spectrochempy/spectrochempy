@@ -782,6 +782,7 @@ class SpectroChemPy(Application):
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
+        self.logs = self.log  # we change the noame in order to avoid latter conflict with numpy.log
 
         self.initialize()
 
@@ -990,13 +991,13 @@ class SpectroChemPy(Application):
         # deactivate potential command line arguments
         # (such that those from jupyter which cause problems here)
 
-        self.log.debug('initialization of SpectroChemPy')
+        self.logs.debug('initialization of SpectroChemPy')
 
         IN_IPYTHON = False
         if InteractiveShell.initialized():
             IN_IPYTHON = True
 
-        self.log.debug("scpy command line arguments are: %s" % " ".join(sys.argv))
+        self.logs.debug("scpy command line arguments are: %s" % " ".join(sys.argv))
 
         # workaround the problem with argument not in our aliases or flags
         # e.g., when using pytest options or setup.py options
@@ -1025,7 +1026,7 @@ class SpectroChemPy(Application):
         # warning handler
         # --------------------------------------------------------------------
         def send_warnings_to_log(message, category, filename, lineno, *args):
-            self.log.warning('%s:  %s' % (category.__name__, message))
+            self.logs.warning('%s:  %s' % (category.__name__, message))
             return
 
         warnings.showwarning = send_warnings_to_log
@@ -1043,7 +1044,7 @@ class SpectroChemPy(Application):
                     shell.showtraceback((etype, evalue, tb),
                                         tb_offset=tb_offset)
                 else:
-                    self.log.error("%s: %s" % (etype.__name__, evalue))
+                    self.logs.error("%s: %s" % (etype.__name__, evalue))
 
             ip.set_custom_exc((Exception,), _custom_exc)
 
@@ -1173,13 +1174,13 @@ class SpectroChemPy(Application):
 
     def _start(self):
 
-        debug = self.log.debug
+        debug = self.logs.debug
 
         if self.running:
             debug('API already started. Nothing done!')
             return
 
-        self.log.debug("show info on loading %s" % self.general_preferences.show_info_on_loading)
+        self.logs.debug("show info on loading %s" % self.general_preferences.show_info_on_loading)
         if self.general_preferences.show_info_on_loading:
             info_string = "SpectroChemPy's API - v.{}\n" \
                           "© Copyright {}".format(__version__, __copyright__)
@@ -1209,7 +1210,7 @@ class SpectroChemPy(Application):
 
         if not os.path.exists(fname):
             s = self.generate_config_file()
-            self.log.info("Generating default config file: %r" % fname)
+            self.logs.info("Generating default config file: %r" % fname)
             with open(fname, 'w') as f:
                 f.write(s)
 
@@ -1269,11 +1270,11 @@ class SpectroChemPy(Application):
         if change.new == DEBUG:
             self.log_format = '[%(filename)s-%(funcName)s %(levelname)s] %(' \
                               'message)s'
-        self.log._cache = {}
-        self.log.level = self.log_level
-        for handler in self.log.handlers:
+        self.logs._cache = {}
+        self.logs.level = self.log_level
+        for handler in self.logs.handlers:
             handler.level = self.log_level
-        self.log.info("changed default log_level to {}".format(
+        self.logs.info("changed default log_level to {}".format(
             logging.getLevelName(change.new)))
 
 
