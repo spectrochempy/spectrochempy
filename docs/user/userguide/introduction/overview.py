@@ -67,7 +67,7 @@
 # Then follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst) to get strated with **SpectroChemPy**
 
 # %% [markdown]
-# ### Loading the API
+# ## Loading the API
 
 # %% [markdown]
 # Before using the package, we need to load the **API (Application Programming Interface)**

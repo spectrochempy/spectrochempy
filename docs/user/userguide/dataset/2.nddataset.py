@@ -194,5 +194,3 @@ ds.std('y', keepdims=True)
 
 # %%
 ds.cumsum('y')
-
-# %%

@@ -241,6 +241,8 @@ class BuildDocumentation(object):
 
         for nb in iglob(os.path.join(USERDIR, '**', '*.ipynb'), recursive=True):
             sh.rm(nb)
+        for nbch in iglob(os.path.join(USERDIR, '**', '.ipynb_checkpoints'), recursive=True):
+            sh(f'rm -r {nbch}')
 
     # ..................................................................................................................
     def make_tutorials(self):
