@@ -89,6 +89,7 @@ Help & Reference
 
 * :doc:`api/changelog`
 * :doc:`api/index`
+* :doc:`api/preference`
 * :doc:`dev/issues`
 * :doc:`dev/contributing`
 
@@ -99,6 +100,7 @@ Help & Reference
 
     api/changelog
     api/index
+    api/preference
     dev/issues
     dev/contributing
 
