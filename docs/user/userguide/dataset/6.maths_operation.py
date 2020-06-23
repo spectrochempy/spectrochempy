@@ -599,8 +599,8 @@ _ = out.plot(figsize=(6,2.5))
 # Logarithm of the sum of exponentiations of the inputs in base-2.
 
 # %%
-out = np.logaddexp2(dataset, dataset2)
-_ = out.plot(figsize=(6,2.5))
+# out = np.logaddexp2(dataset, dataset2)   (TODO: do not work - apparently with the new version of pint!)
+# _ = out.plot(figsize=(6,2.5))
 
 
 # %% [markdown]
@@ -614,10 +614,10 @@ _ = out.plot(figsize=(6,2.5))
 # ```
 
 # %%
-h = np.heaviside(dataset, dataset2)
-_ = h.plot(figsize=(6,2.5))
-out = dataset * h
-_ = out.plot(figsize=(6,2.5))
+#h = np.heaviside(dataset, dataset2)       (TODO: do not work - apparently with the new version of pint!)
+#_ = h.plot(figsize=(6,2.5))
+#out = dataset * h
+#_ = out.plot(figsize=(6,2.5))
 
 
 # %% [markdown]
