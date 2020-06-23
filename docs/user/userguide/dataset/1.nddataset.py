@@ -21,9 +21,14 @@
 #
 # Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to matematical operations. 
 #
-# But, in addition, NDDataset may have units, can be masked and each dimensions can have coordinates also with units. This make NDDataset aware of unit compatibility, *e.g.*, for binary operation such as addtions or subtraction or during the application of mathematical operations. In addition or in replacement of numerical data for coordinates, NDDatset can also have labeled coordinates where labels can be different kind of objects (strings, datetime, numpy nd.ndarray or othe NDDatasets, etc...). 
+# But, in addition, NDDataset may have units, can be masked and each dimensions can have coordinates also with units.
+# This make NDDataset aware of unit compatibility, *e.g.*, for binary operation such as addtions or subtraction or
+# during the application of mathematical operations. In addition or in replacement of numerical data for coordinates,
+# NDDatset can also have labeled coordinates where labels can be different kind of objects (strings, datetime,
+# numpy nd.ndarray or othe NDDatasets, etc...).
 #
-# This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful for applications. See the **Tutorials** for more information about such possible applications. 
+# This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful for applications.
+# See the **Tutorials** for more information about such possible applications.
 #
 # **SpectroChemPy** provides another kind of data structure, aggregating several datasets: **NDPanel**: See 
 
@@ -38,7 +43,8 @@ from spectrochempy import *
 #
 # ``NDDataset`` objects mostly behave as numpy's `numpy.ndarray`.
 #
-# However, unlike raw numpy's ndarray, the presence of optional properties make them (hopefully) more appropriate for handling spectroscopic information, one of the major objectives of the SpectroChemPy package:
+# However, unlike raw numpy's ndarray, the presence of optional properties make them (hopefully) more appropriate for
+# handling spectroscopic information, one of the major objectives of the SpectroChemPy package:
 #
 # * **mask**, 
 # * **units**, 
@@ -75,7 +81,8 @@ d1D.plot()
 print(d1D)
 
 # %% [markdown]
-# To get a rich display of the dataset, we can simply type on the last line of the cell: This output a html version of the information string.
+# To get a rich display of the dataset, we can simply type on the last line of the cell: This output a html version of
+# the information string.
 
 # %%
 d1D
@@ -135,7 +142,8 @@ d1D.ndim # the number of dimensions
 d1D.dims # the name of the dimension (it has been automatically attributed)
 
 # %% [markdown]
-# **Note**: The names of the dimensions are set automatically. But they can be changed, with the limitation that the name must be a single letter.
+# **Note**: The names of the dimensions are set automatically. But they can be changed, with the limitation that the
+# name must be a single letter.
 
 # %%
 d1D.dims = ['q']  # change the list of dim names.
@@ -173,7 +181,8 @@ d2D = NDDataset(a, dims = ['v','u','t'], title = 'Energy', name = '3D_dataset',
 d2D
 
 # %% [markdown]
-# Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are: 'z','y','x' automatically attributed)
+# Three names are attributed at the creation (if they are not provided with the `dims` attribute, then the name are:
+# 'z','y','x' automatically attributed)
 
 # %%
 d2D.dims 
@@ -219,7 +228,8 @@ d1D.to('K')
 # ### Coordinates
 
 # %% [markdown]
-# The above created `d2D` dataset has 3 dimensions, but no coordinate for these dimensions. Here arises a big difference with simple `numpy`-arrays: 
+# The above created `d2D` dataset has 3 dimensions, but no coordinate for these dimensions. Here arises a big difference
+# with simple `numpy`-arrays:
 # * We can add coordinates to each dimensions of a NDDataset. 
 
 # %% [markdown]
@@ -280,7 +290,9 @@ except KeyError:
     error_('not found')
 
 # %% [markdown]
-# In some case it can also be usefull to get a coordinate from its title instead of its name (the limitation is that if several coordinates have the same title, then only the first ones that is found in the coordinate list, will be returned - this can be ambiguous) 
+# In some case it can also be usefull to get a coordinate from its title instead of its name (the limitation is that if
+# several coordinates have the same title, then only the first ones that is found in the coordinate list, will be
+# returned - this can be ambiguous)
 
 # %%
 d2D['time']
@@ -289,7 +301,8 @@ d2D['time']
 d2D.time
 
 # %% [markdown]
-# It is possible to use labels instead of numerical coordinates. They are sequence of objects .The length of the sequence must be equal to the size of a dimension
+# It is possible to use labels instead of numerical coordinates. They are sequence of objects .The length of the
+# sequence must be equal to the size of a dimension
 
 # %%
 from datetime import datetime, timedelta, time
@@ -317,7 +330,8 @@ d2D.time
 # %% [markdown]
 # Sometimes it is not necessary to have different coordinates for the various axes. 
 #
-# For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can refer to the first.
+# For example, if we have a square matrix with the same coordinate in the two dimensions, the second dimension can
+# refer to the first.
 
 # %%
 a = np.diag((3,3,2.5))
@@ -331,7 +345,8 @@ nd
 #
 # Above we have created a `NDDataset` from a simple list, but also from a `numpy.ndarray`).
 #
-# Below is an example of a 3D-Dataset created from a ``numpy.ndarray`` to which axes for each dimension can be added at creation. 
+# Below is an example of a 3D-Dataset created from a ``numpy.ndarray`` to which axes for each dimension can be added at
+# creation.
 #
 # Let's first create the 3 one-dimensional coordinates, for which we can define `labels`, `units`, and `masks`! 
 
@@ -426,7 +441,7 @@ d3D
 # Some additional information about coordinate setting syntax
 
 # %%
-# A. fist syntax (probably the safer because thename of the dimension is specified, so this is less prone to errors!)
+# A. fist syntax (probably the safer because the name of the dimension is specified, so this is less prone to errors!)
 d3D.set_coords(x=CoordSet(coord2,coord2b), y=coord1, z=coord0)
 d3D.set_coords(x=[coord2,coord2b], y=coord1, z=coord0) # equivalent
 
@@ -483,7 +498,7 @@ d3Dduplicate
 # ### Other ways to create NDDatasets
 #
 # Some numpy creation function can be used to set up the initial dataset array:
-#        [numpy array creation routines](https://docs.scipy.org/doc/numpy/reference/routines.array-creation.html#routines-array-creation)
+# [numpy array creation routines](https://docs.scipy.org/doc/numpy/reference/routines.array-creation.html#routines-array-creation)
 #
 
 # %%
@@ -581,7 +596,9 @@ outside_limits = d3D[2000]
 # <div class='alert alert-info'>
 #     
 # **NOTE:**
-# If one use an integer value (2000), then the slicing is made **by index not by value**, and in the following particular case, an `Error` is issued as index 2000 does not exists (size along axis `x` (axis:0) is only 100, so that index vary between 0 and 99!). 
+# If one use an integer value (2000), then the slicing is made **by index not by value**, and in the following
+# particular case, an `Error` is issued as index 2000 does not exists (size along axis `x` (axis:0) is only 100, so
+# that index vary between 0 and 99!).
 #
 # </div>
 
@@ -631,7 +648,7 @@ ndd2
 # ### IR data
 
 # %%
-dataset = NDDataset.read_omnic(os.path.join(datadir, 'irdata', 'NH4Y-activation.SPG'))
+dataset = NDDataset.read_omnic(os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
 dataset
 
 # %%
@@ -641,7 +658,8 @@ ax = dataset.plot(method='stack')
 # ## Masks
 
 # %% [markdown]
-# if we try to get for example the maximum of the previous dataset, we face a problem due to the saturation around 1100 cm$^{-1}$.
+# if we try to get for example the maximum of the previous dataset, we face a problem due to the saturation around
+# 1100 cm$^{-1}$.
 
 # %%
 dataset.max()
@@ -677,7 +695,8 @@ datasetT = dataset.T
 datasetT
 
 # %% [markdown]
-# As it can be observed the dimension `x`and `y`have been exchanged, *e.g.* the originalshape was **(x:5549, y:55)**, and after transposition it is **(y:55, x:5549)**.
+# As it can be observed the dimension `x`and `y`have been exchanged, *e.g.* the originalshape was **(x:5549, y:55)**,
+# and after transposition it is **(y:55, x:5549)**.
 # (the dimension names stay the same, but the index of the corresponding axis are exchanged).
 
 # %% [markdown]
@@ -742,7 +761,8 @@ da = NDDataset([[1. + 2.j, 2. + 0j], [1.3 + 2.j, 2. + 0.5j], [1. + 4.2j, 2. + 3j
 da
 
 # %% [markdown]
-# A dataset of type float can be transformed into a complex dataset (using two cionsecutive rows to create a complex row)
+# A dataset of type float can be transformed into a complex dataset (using two cionsecutive rows to create a complex
+# row)
 
 # %%
 da = NDDataset(np.arange(40).reshape(10,4))
@@ -756,7 +776,8 @@ dac
 # Note the `x`dimension size is divided by a factor of two 
 
 # %% [markdown]
-# A dataset which is complex in two dimensions is called hypercomplex (it's datatype in SpectroChemPy is set to quaternion). 
+# A dataset which is complex in two dimensions is called hypercomplex (it's datatype in SpectroChemPy is set to
+# quaternion).
 
 # %%
 daq = da.set_quaternion()   # equivalently one can use the set_hypercomplex method

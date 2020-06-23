@@ -64,7 +64,8 @@
 #
 # From there, it is quite easy to create new notebooks or to navigate to already existing ones.
 #
-# Then follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst) to get strated with **SpectroChemPy**
+# Then follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst) to get strated with
+# **SpectroChemPy**
 
 # %% [markdown]
 # ## Loading the API
@@ -72,7 +73,8 @@
 # %% [markdown]
 # Before using the package, we need to load the **API (Application Programming Interface)**
 #
-# The simplest way is to import all the objects and methods at once into your python namespace. The loading step may take several seconds due to the large number of method to import in the API namespace.
+# The simplest way is to import all the objects and methods at once into your python namespace. The loading step may
+# take several seconds due to the large number of method to import in the API namespace.
 
 # %%
 from spectrochempy import *
@@ -224,7 +226,7 @@ xa[1] * 2.5
 # For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:
 
 # %%
-nd = NDDataset.read_omnic(os.path.join('irdata', 'NH4Y-activation.SPG'))
+nd = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
 
 # %% [markdown]
 # Note that for this example, we use data stored in a ``test`` directory. For your own usage, you probably have to
