@@ -85,4 +85,4 @@ iris.plotlcurve()
 iris.plotdistribution(-1)
 iris.plotmerit(-1)
 
-scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
