@@ -3,8 +3,10 @@
 See Also
 ========
 
-If you are looking for intuitive GUI for spectroscopic data, `Orange <https://orange.biolab.si/>`_,
-together with the `Orange-Spectroscopy Add-on <https://orange-spectroscopy.readthedocs.io/en/latest/>`_
+If you are looking for intuitive GUI for spectroscopic data,
+`Orange <https://orange.biolab.si/>`_,
+together with the
+`Orange-Spectroscopy Add-on <https://orange-spectroscopy.readthedocs.io/en/latest/>`_
 could be a good choice.
 
 If you are looking for librairies allowing the manipulation of dataset with
