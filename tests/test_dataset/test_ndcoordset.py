@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
 from copy import copy
 
 import numpy as np

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 #
 # ======================================================================================================================
 # Copyright (©) 2015-2019 LCS
@@ -461,7 +462,7 @@ class NDDataset(
     @property
     def T(self):
         """
-        |NDDataset| - Transposed array.
+        Transposed |NDDataset|.
 
         The same object is returned if `ndim` is less than 2.
 
@@ -611,7 +612,16 @@ class NDDataset(
 
     # ..................................................................................................................
     def add_coords(self, *args, **kwargs):
+        """
+        Add one or a set of coordinates from a dataset or panel
 
+        Parameters
+        ----------
+        args : Coord object(s)
+        kwargs :
+
+
+        """
         if not args and not kwargs:
             # reset coordinates
             self._coords = None
@@ -627,6 +637,7 @@ class NDDataset(
             HasTraits.observe(self._coords, self._dims_update, '_updated')
             # force it one time after this initialization
             self._coords._updated = True
+
 
     # ..................................................................................................................
     def coord(self, dim='x'):
@@ -885,6 +896,7 @@ class NDDataset(
     # ..................................................................................................................
     def take(self, indices, **kwargs):
         """
+        Take elements from an array
 
         Parameters
         ----------

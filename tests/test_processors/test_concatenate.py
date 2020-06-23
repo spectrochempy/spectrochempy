@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
 from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.core.dataset.ndcoordrange import CoordRange
 from spectrochempy.units import ur

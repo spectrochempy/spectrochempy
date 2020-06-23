@@ -6,11 +6,11 @@ User Guide
 
 .. toctree::
     :glob:
-    :maxdepth: 2
    
-    introduction/*
+    introduction/*.ipynb
     dataset/*
-    projects/*
+    project/*
+    panel/*
     processing/*
 
 

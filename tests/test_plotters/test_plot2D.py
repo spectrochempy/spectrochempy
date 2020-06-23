@@ -5,9 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
-# ======================================================================================================================
-
 from spectrochempy import NDDataset, show, general_preferences as prefs
 
 

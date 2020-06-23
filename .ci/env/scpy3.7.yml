@@ -56,7 +56,7 @@ dependencies:
   - sphinx-gallery
   - nbsphinx
   - jupyter_sphinx
-  - numpydoc
+  - json5
 
   # DEV: build
   - conda-build

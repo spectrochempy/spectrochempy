@@ -8,6 +8,7 @@ Bugs fixed
 
 * FIX `#116 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/116>`_ : CI: try to fix bug on deploy
 * FIX `#115 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/115>`_ : CI: revise the changelog script in make.py
+* FIX `#87 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/87>`_ : Check for update not working
 * FIX `#76 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/76>`_ : read_opus() shifts the xaxis
 * FIX `#27 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/27>`_ : Solve pint version > 0.9 incompatibilities
 * FIX `#17 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/17>`_ : Doc building using sphinx generates some warnings

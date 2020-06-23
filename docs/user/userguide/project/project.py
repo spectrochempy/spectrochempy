@@ -136,4 +136,12 @@ proj2 = Project.load('NMR')
 proj2
 
 # %%
+_ = proj2.NMR_1D.plot()
+
+# %%
 proj2.NMR_2D  # TODO: something wrong there!
+
+# %%
+proj.NMR_2D.plot()
+
+# %%

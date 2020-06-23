@@ -18,7 +18,7 @@
 #
 # This tutorial shows how to find peak maxima and determine peak areas with spectrochempy. As prerequisite,
 # the user is expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
-# [slicing](../process/slicing.ipynb) and [baseline correction](../process/baseline_correct.ipynb) tutorials.
+# [slicing](../processing/slicing.ipynb) and [baseline correction](../processing/baseline_correct.ipynb) tutorials.
 #
 # First lets import the modules that will be used in this tutorial
 

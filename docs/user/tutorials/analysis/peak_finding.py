@@ -21,7 +21,7 @@
 # expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
 # [slicing](../processing/slicing.ipynb) tutorials. First lets import the modules that will be used in this tutorial:
 
-# %%
+# %% execution={"iopub.status.busy": "2020-06-22T12:21:23.097Z", "iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.idle": "2020-06-22T12:21:29.376Z", "shell.execute_reply": "2020-06-22T12:21:29.348Z"}
 import spectrochempy as scp
 import matplotlib.pyplot as plt  # will be used for some plots
 
@@ -29,15 +29,16 @@ import matplotlib.pyplot as plt  # will be used for some plots
 # Second, import and plot a typical IR dataset (CO adsorption on supported CoMo catalyst in the 2300-1900 cm-1 region)
 # that will be used throughout:
 
-# %%
+# %% execution={"iopub.status.busy": "2020-06-22T12:21:31.942Z", "iopub.execute_input": "2020-06-22T12:21:31.950Z", "shell.execute_reply": "2020-06-22T12:21:31.994Z", "iopub.status.idle": "2020-06-22T12:21:31.987Z"}
 X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
 
 # %% [markdown]
-# ## 1 Find maxima by manual inspection of the plot
+# ## Find maxima by manual inspection of the plot
 #
 # The use of the "magic command" `%matplotlib widget` in a notebook triggers the plotting of interactive plots
 # integrated in the notebook with basic tools to navigate inside the plot. As shown below from top to bottom of the
 # side bar:
+#
 # - hide/show the tools,
 # - reset view ('home'),
 # - previous view ('left arrow'),
@@ -46,13 +47,19 @@ X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
 # - zoom ('rectangle'),
 # - save image ('floppy disc').
 #
+# <img src="figures/widgetsmode.png" alt="widgets mode" width="700" align="center" />
+#
 # Another possibility is to use `%matplotlib qt` instead. In this case, the plot is generated
 #
 # In this interactive mode, the current abscissa and ordinates are indicated when the mouse pointer is displaced in
 # the plot area.
-
-# %%
-# %matplotlib widget
+#
+#    **Note**:
+#    This feature doesn't work (for now in with `jupyter lab` but with `Jupyter notebook` it is OK.
+#    (It is commented below to avoir problem when generating this documentation)
+#
+# %% execution={"iopub.status.busy": "2020-06-22T12:21:38.285Z", "iopub.execute_input": "2020-06-22T12:21:38.304Z", "iopub.status.idle": "2020-06-22T12:21:38.801Z", "shell.execute_reply": "2020-06-22T12:21:38.971Z"}
+# #%matplotlib widget
 ax = X.plot(cmap='Dark2')
 
 # %% Once a given maximum has been approximately located manually with the mouse, it is possible to obtain [markdown]
@@ -83,7 +90,7 @@ X[-1, 2115.5].data[0, 0]
 # in particular for complex plots.
 
 # %% [markdown]
-# ## 2 find maxima with an automated method: `find_peaks()`
+# ## Find maxima with an automated method: `find_peaks()`
 #
 # Exploring the spectra manually is useful, but cannot be made systematically in large datasets with many - possibly
 # shifting peaks. The maxima of a given spectrum can be found automatically by the find_peaks() method which is based
@@ -92,7 +99,7 @@ X[-1, 2115.5].data[0, 0]
 # a dictionary containing properties of the returned peaks (it is empty if no particular option is selected,
 # see section 2.3. for more information).
 #
-# ###  2.1. default behaviour
+# ###  Default behaviour
 # Applying this method on the last spectrum without any option will yield 7 peaks :
 
 # %%
@@ -140,7 +147,7 @@ plt.ylabel("wavenumber at maximum / cm$^{-1}$")
 
 
 # %% [markdown]
-# ###  2.2. Options of `find_peaks()`
+# ###  Options of `find_peaks()`
 #
 # The default behaviour of find_peaks() will return *all* the detected maxima. The user can choose various options to
 # select among these peaks:
@@ -212,7 +219,7 @@ for peak in peaks:
     plt.plot(peaks.x, peaks.data.T + 0.25, 'v', color='grey')
 
 # %% [markdown]
-# ### 2.3 More on peak properties
+# ### More on peak properties
 #
 # If the concept of "peak height" is pretty clear, it is worth examining further some peak properties as defined and
 # used in `find_peaks()`. They can be obtained (and used) by passing the parameters `height`, `prominence`,
@@ -329,7 +336,7 @@ plt.axvline(wr, linestyle='--', color='green')
 # parameter as shown below.
 
 # %% [markdown]
-# ### 2.4 A code snippet to display properties
+# ### A code snippet to display properties
 #
 # The self-contained code snippet below can be used to display in a matplolib plot and print the various
 # peak properties of a single peak as returned by `find_peaks()`:

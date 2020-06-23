@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
-#
-# ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
-# ======================================================================================================================
 
-# We intentionnaly DO NOT SET DOCSTRING, HERE... due to the way the documentation
-# is builded.
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
 
 # """
 # Main package

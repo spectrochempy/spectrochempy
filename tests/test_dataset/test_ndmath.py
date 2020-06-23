@@ -5,8 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
-"""Tests for the ndmath module
+"""
+Tests for the ndmath module
 
 """
 import numpy as np

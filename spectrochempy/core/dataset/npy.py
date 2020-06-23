@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-#
+
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 """
@@ -189,7 +187,7 @@ def ones(shape, dtype=None, **kwargs):
 
 def identity(N, dtype=None, **kwargs):
     """
-    Return the identity array.
+    Return the identity |NDDataset| of a given shape.
 
     The identity array is a square array with ones on
     the main diagonal.

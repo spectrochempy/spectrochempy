@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#
+
 # ======================================================================================================================
 # Copyright (©) 2015-2020 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
@@ -39,9 +39,6 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 # ======================================================================================================================
-
-# We intentionnaly DO NOT SET DOCSTRING, HERE... due to the way doc is
-# builded.
 
 # check for update
 import sys

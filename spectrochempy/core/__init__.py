@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-#
+
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 """
@@ -107,7 +105,7 @@ def info_(*args, **kwargs):
     for a in args:
         s += pstr(a, **kwargs) + ' '
     s = s.replace('\0', '').strip()
-    app.log.info(s)
+    app.logs.info(s)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -116,7 +114,7 @@ def debug_(*args, **kwargs):
     for a in args:
         s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()
-    app.log.debug(s)
+    app.logs.debug(s)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -125,7 +123,7 @@ def error_(*args, **kwargs):
     for a in args:
         s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()
-    app.log.error(s)
+    app.logs.error(s)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -134,7 +132,7 @@ def warning_(*args, **kwargs):
     for a in args:
         s += pstr(a, **kwargs) + ' '
         s = s.replace('\0', '').strip()
-    app.log.warning(s)
+    app.logs.warning(s)
 
 
 __all__ += ['info_', 'debug_', 'error_', 'warning_', 'print_']

@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
 import matplotlib.pyplot as mpl
 
 from spectrochempy.utils.testing import image_comparison

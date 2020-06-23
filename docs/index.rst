@@ -56,7 +56,6 @@ Getting Started
 * :doc:`gettingstarted/whyscpy`
 * :doc:`gettingstarted/install/index`
 * :doc:`gettingstarted/license`
-* :doc:`gettingstarted/changelog`
 
 .. toctree::
     :maxdepth: 1
@@ -66,7 +65,6 @@ Getting Started
     gettingstarted/whyscpy
     gettingstarted/install/index
     gettingstarted/license
-    gettingstarted/changelog
 
 .. usage was removed for now
 
@@ -76,43 +74,33 @@ User Guide
 * :doc:`user/userguide/index`
 * :doc:`user/tutorials/index`
 * :doc:`gallery/auto_examples/index`
-* :doc:`main/faq`
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :hidden:
     :caption: User Guide & Tutorials
 
     user/userguide/index
     user/tutorials/index
     gallery/auto_examples/index
-    main/faq
 
-API reference
-***************
+Help & Reference
+****************
 
-* :doc:`api/preference`
+* :doc:`api/changelog`
 * :doc:`api/index`
-
-.. toctree::
-    :maxdepth: 2
-    :hidden:
-    :caption: API reference
-
-    api/preference
-    api/index
-
-Contributing
-*************
-
+* :doc:`api/preference`
 * :doc:`dev/issues`
 * :doc:`dev/contributing`
 
 .. toctree::
     :maxdepth: 1
     :hidden:
-    :caption: Contributing
+    :caption: Help & Reference
 
+    api/changelog
+    api/index
+    api/preference
     dev/issues
     dev/contributing
 

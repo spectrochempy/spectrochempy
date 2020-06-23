@@ -5,11 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
-"""
-
-"""
-
 from traitlets import TraitError, HasTraits
 
 from spectrochempy.core.dataset.ndcoordrange import CoordRange, Range

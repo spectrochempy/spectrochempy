@@ -4,8 +4,6 @@
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
-
-#
 # suppress test for PEP8 in this file
 # flake8: noqa
 

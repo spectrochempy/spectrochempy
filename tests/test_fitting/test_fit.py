@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
 from spectrochempy import Fit, show
 import pytest
 from spectrochempy.utils.testing import assert_approx_equal

@@ -6,7 +6,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-#
 """
 Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
 
@@ -19,11 +18,9 @@ where optional parameters indicates which job(s) is(are) to perform.
 """
 
 import argparse
-import inspect
 import os
 import shutil
 import sys
-import textwrap
 import warnings
 import zipfile
 from glob import iglob
@@ -34,19 +31,15 @@ import requests
 from jinja2 import Template
 from skimage.io import imread, imsave
 from skimage.transform import resize
-from sphinx.application import Sphinx
-from sphinx.deprecation import RemovedInSphinx50Warning, RemovedInSphinx40Warning  # , RemovedInSphinx30Warning
-from sphinx.util.osutil import FileAvoidWrite
-from traitlets import import_item
-
 from spectrochempy import version
 from spectrochempy.utils import sh
+from sphinx.application import Sphinx
+from sphinx.deprecation import RemovedInSphinx50Warning, RemovedInSphinx40Warning
 
 warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
-# warnings.filterwarnings(action='error')
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx50Warning)
 warnings.filterwarnings(action='ignore', category=RemovedInSphinx40Warning)
-# warnings.filterwarnings(action='ignore', category=RemovedInSphinx30Warning)
+
 
 # CONSTANT
 PROJECT = "spectrochempy"
@@ -75,168 +68,7 @@ __all__ = []
 
 
 # ======================================================================================================================
-class Options(dict):
-    def __init__(self, *args, **kwargs):
-        super(Options, self).__init__(*args, **kwargs)
-        self.__dict__ = self
-
-
-# ======================================================================================================================
-class Apigen(object):
-    """
-    borrowed and heavily modified from :
-    sphinx.apidoc (https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py)
-
-
-    Parses a directory tree looking for Python modules and packages and creates
-    ReST files appropriately to create code documentation with Sphinx.  It also
-    creates a modules index (named modules.<suffix>).
-
-    This is derived from the "sphinx-autopackage" script, which is :
-    Copyright 2008 Société des arts technologiques (SAT), http://www.sat.qc.ca/
-
-    :copyright: Copyright 2007-2017 by the Sphinx team, see AUTHORS .
-    :license: BSD, see LICENSE_SPHINX for details.
-
-    """
-
-    def __init__(self):
-
-        with open(os.path.join(DOCDIR, "_templates", "class.rst")) as f:
-            self.class_template = f.read()
-
-        with open(os.path.join(DOCDIR, "_templates", "function.rst")) as f:
-            self.function_template = f.read()
-
-    @staticmethod
-    def makename(package, module):
-        """Join package and module with a dot."""
-
-        # Both package and module can be None/empty.
-        if package:
-            name = package
-            if module:
-                name += '.' + module
-        else:
-            name = module
-        return name
-
-    @staticmethod
-    def write_file(name, text, opts):
-        """Write the output file for module/package <name>."""
-        if name == 'spectrochempy':
-            return
-        fname = os.path.join(opts.destdir, '%s.rst' % (name))
-        if opts.dryrun:
-            print('Would create file %s.' % fname)
-            return
-
-        with FileAvoidWrite(fname) as f:
-            f.write(text)
-            print('Writing file %s.' % fname)
-
-    def create_api_files(self, rootpath, opts):
-        """Build the text of the file and write the file."""
-        # generate separate file for the members of the api
-
-        project = os.path.basename(rootpath)
-        _imported_item = import_item(project)
-
-        clsmembers = inspect.getmembers(_imported_item)
-
-        members = [m for m in clsmembers if
-                   m[0] in _imported_item.__all__ and not m[0].startswith('__')]
-
-        classtemplate = textwrap.dedent(self.class_template)
-
-        functemplate = textwrap.dedent(self.function_template)
-
-        lconsts = [":%s: %s\n" % m for m in members if
-                   type(m[1]) in [int, float, str, bool, tuple]]
-        lclasses = []
-        classes = [m[0] for m in members if
-                   inspect.isclass(m[1]) and not type(m[1]).__name__ == 'type']
-        for klass in classes:
-            if klass not in opts.exclude_patterns:
-                name = "{project}.{klass}".format(project=project, klass=klass)
-                example_exists = os.path.exists(f"{rootpath}/../docs/gen_modules/backreferences/{name}.examples")
-                include = "include::" if example_exists else ''
-                text = classtemplate.format(project=project, klass=klass, include=include)
-                self.write_file(name, text, opts)
-                lclasses.append(name + '\n')
-
-        lfuncs = []
-        funcs = [m[0] for m in members if
-                 inspect.isfunction(m[1]) or inspect.ismethod(m[1])]
-        for func in funcs:
-            name = "{project}.{func}".format(project=project, func=func)
-            example_exists = os.path.exists(f"{rootpath}/../docs/gen_modules/backreferences/{name}.examples")
-            include = "include::" if example_exists else ''
-            text = functemplate.format(project=project, func=func, include=include)
-            self.write_file(name, text, opts)
-            lfuncs.append(name + '\n')
-
-        _classes = "    ".join(lclasses)
-        _funcs = "    ".join(lfuncs)
-        _consts = "".join(lconsts)
-
-    # ----------------------------------------------------------------------------------------------------------------------
-    def __call__(self, rootpath, **kwargs):
-        """
-        Modified version of apidoc
-
-        Parameters
-        ----------
-        rootpath : str
-            Path of the package to document. If not given, we will try to guess it
-            from the location of apidoc.
-        destdir : str, optional
-            Path of the output file. By default output='./api/'
-
-        Other parameters
-        ----------------
-        exclude_patterns : list of str, optional
-            pattern for filenames to exclude
-        force : bool, optional
-            if False old ``rst`` file will not be overwritten
-        dryrun : bool, optional
-            if True, no output file will be created
-
-        Returns
-        -------
-        done : bool
-
-        """
-
-        # default options
-        opts = Options({
-                'destdir': None,
-                'exclude_patterns': [],
-                'force': False,
-                'dryrun': False,
-                })
-
-        # get options form kwargs
-        opts.update(kwargs)
-
-        destdir = os.path.abspath(opts.destdir)
-
-        if opts.force:
-            shutil.rmtree(destdir, ignore_errors=True)
-
-        if not opts.dryrun or opts.force:
-            os.makedirs(destdir, exist_ok=True)
-
-        self.create_api_files(rootpath, opts)
-
-        return
-
-
-apigen = Apigen()
-
-
-# ======================================================================================================================
-class Build(object):
+class BuildDocumentation(object):
 
     # ..................................................................................................................
     def __init__(self):
@@ -331,10 +163,6 @@ class Build(object):
             self.clean(builder)
         self.make_dirs()
 
-        # regenate api documentation
-        if (self.regenerate_api or not os.path.exists(API)):
-            self.api_gen()
-
         # run sphinx
         srcdir = confdir = DOCDIR
         outdir = f"{BUILDDIR}/{doc_version}"
@@ -413,6 +241,8 @@ class Build(object):
 
         for nb in iglob(os.path.join(USERDIR, '**', '*.ipynb'), recursive=True):
             sh.rm(nb)
+        for nbch in iglob(os.path.join(USERDIR, '**', '.ipynb_checkpoints'), recursive=True):
+            sh(f'rm -r {nbch}')
 
     # ..................................................................................................................
     def make_tutorials(self):
@@ -447,25 +277,8 @@ class Build(object):
         sh(f"mv ~notebooks.zip {DOWNLOADS}/{self.doc_version}-{PROJECT}-notebooks.zip")
 
     # ..................................................................................................................
-    def api_gen(self):
-        """
-        Generate the API reference rst files
-        """
-
-        apigen(SOURCESDIR,
-               tocdepth=1,
-               force=True,
-               includeprivate=False,
-               destdir=API,
-               exclude_patterns=[
-                       'NDArray',
-                       'NDComplexArray',
-                       'NDIO',
-                       'NDPlot',
-                       ], )
-
-    # ..................................................................................................................
     def make_redirection_page(self, ):
+        # create an index page a the site root to redirect to latest version
 
         html = f"""
         <html>
@@ -481,9 +294,7 @@ class Build(object):
 
     # ..................................................................................................................
     def clean(self, builder):
-        """
-        Clean/remove the built documentation.
-        """
+        # Clean/remove the built documentation.
 
         doc_version = self.doc_version
 
@@ -495,9 +306,8 @@ class Build(object):
 
     # ..................................................................................................................
     def make_dirs(self):
-        """
-        Create the directories required to build the documentation.
-        """
+        # Create the directories required to build the documentation.
+
         doc_version = self.doc_version
 
         # Create regular directories.
@@ -513,9 +323,8 @@ class Build(object):
 
     # ..................................................................................................................
     def make_changelog(self, milestone="latest"):
-        """
-        Utility to update changelog (using the GITHUB API)
-        """
+        # Utility to update changelog (using the GITHUB API)
+
         if milestone == 'latest':
             # we build the latest
             print("getting latest release tag")
@@ -555,7 +364,7 @@ class Build(object):
                 history += "\n\n"
                 nh = f.read().strip()
                 vc = ".".join(filename.split('.')[1:4])
-                nh = nh.replace(':orphan:', '') #f".. _version_{vc}:")
+                nh = nh.replace(':orphan:', '')
                 history += nh
         history += '\n'
 
@@ -563,17 +372,17 @@ class Build(object):
             template = Template(f.read())
         out = template.render(history=history)
 
-        outfile = os.path.join(DOCDIR, 'gettingstarted', 'changelog.rst')
+        outfile = os.path.join(DOCDIR, 'api', 'changelog.rst')
         with open(outfile, 'w') as f:
             f.write(out)
 
-        sh.pandoc(outfile, '-f', 'rst', '-t', 'markdown',  '-o',
-                  os.path.join(PROJECTDIR,'CHANGELOG.md'))
+        sh.pandoc(outfile, '-f', 'rst', '-t', 'markdown', '-o',
+                  os.path.join(PROJECTDIR, 'CHANGELOG.md'))
 
         return
 
 
-Build = Build()
+Build = BuildDocumentation()
 
 if __name__ == '__main__':
     Build()

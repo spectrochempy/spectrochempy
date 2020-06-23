@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ======================================================================================================================
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
@@ -14,7 +15,7 @@ __all__ = ['get_user_and_node',
 import getpass
 import platform
 import sys
-from subprocess import run, Popen, PIPE, STDOUT
+from subprocess import run, PIPE, STDOUT
 
 
 def get_user():

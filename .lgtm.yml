@@ -6,7 +6,16 @@ extraction:
       version: 3
     index:
       exclude:
+        - ".ci/"
         - ".git/"
-        - "tests/"
-        - "**/extern"
+        - ".eggs/"
+        - ".github/"
+        - "conda/"
+        - "docker/"
         - "docs/"
+        - "env"
+        - "scp_data"
+        - "*.egg_info/"
+        - "tests/"
+
+

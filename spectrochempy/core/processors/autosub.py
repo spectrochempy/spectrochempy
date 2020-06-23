@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-#
+
 # ======================================================================================================================
-# Copyright (©) 2015-2020 LCS
-# Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
 
-"""Plugin module to perform automatic subtraction of ref on a dataset.
+"""
+Plugin module to perform automatic subtraction of ref on a dataset.
 
 """
 __all__ = ['autosub']
@@ -27,48 +26,47 @@ from numba import jit
 # localimports
 # ----------------------------------------------------------------------------------------------------------------------
 
-# import matplotlib.pyplot as plt
-from ..dataset.ndcoordrange import CoordRange
+from spectrochempy.core.dataset.ndcoordrange import CoordRange
 
 
 def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False, inplace=False):
-    """Automatic subtraction of ref to the dataset. The subtraction coefficient are adjusted to either
-     minimise the variance of the subtraction (method = 'vardiff') which will minimize peaks due to ref;
-     or minimize the sum of squares of the subtraction (method = 'ssdiff').
+    """
+    Automatic subtraction of a reference to the dataset.
+
+    The subtraction coefficient are adjusted to either
+    minimise the variance of the subtraction (method = 'vardiff') which will
+    minimize peaks due to ref or minimize the sum of squares of the subtraction
+    (method = 'ssdiff').
 
     Parameters
-    -----------
+    ----------
     dataset : |NDDataset|.
         Dataset to which we want to subtract the reference data
-
     ref : |NDDataset|.
          1D reference data, with a size maching the axis to subtract
          (axis parameter) #TODO : optionally use title of axis
-
-    ranges : pair(s) of values. Any number of pairs is allowed.
+    ranges : pair(s) of values.
+        Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized
-
-    dim : str or int [optional, default='x'].
-        Tells on which dimension to perform the subtraction. If dim is an integer it refers to the axis index.
-
-    method : str [optional, default='vardiff'].
+    dim : `str` or `int`, optional, default='x'.
+        Tells on which dimension to perform the subtraction.
+        If dim is an integer it refers to the axis index.
+    method : str, optional, default='vardiff'.
         'vardiff': minimize the difference of the variance
         'ssdiff': minimize the sum of sqares difference of sum of squares
-
-    return_coefs : `bool` [optional, defaulf='False']
+    return_coefs : `bool`, optional, default=`False`.
          returns the table of coefficients
-
-    inplace : `bool` [optional, default=`False`].
+    inplace : `bool`, optional, default=`False`.
         True if the subtraction is done in place.
         In this case we do not need to catch the function output
 
     Returns
     --------
     out : |NDDataset|.
-        The subtracted dataset
-
-    coefs: `ndarray`.
-        The table of subtraction coeffcients (only if `return_coefs` is set to `True`)
+        The subtracted dataset.
+    coefs : `ndarray`.
+        The table of subtraction coeffcients
+        (only if `return_coefs` is set to `True`).
 
     Examples
     ---------
@@ -143,7 +141,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
 
     # two methods
     # @jit
-    def f_(alpha, p):
+    def _f(alpha, p):
         if method == 'ssdiff':
             return np.sum((p - alpha * ref_r) ** 2)
         elif method == 'vardiff':
@@ -152,7 +150,7 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
             raise ValueError('Not implemented for method={}'.format(method))
 
     @jit(cache=True)
-    def minim():
+    def _minim():
         # table of subtraction coefficients
         x = []
 
@@ -161,13 +159,13 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
             # slices.append(slice(None))
             # args = (X_r[slices],)
             args = X_r[tup]
-            res = minimize_scalar(f_, args=(args,), method='brent')
+            res = minimize_scalar(_f, args=(args,), method='brent')
             x.append(res.x)
 
         x = np.asarray(x)
         return x
 
-    x = minim()
+    x = _minim()
 
     new._data -= np.dot(x.reshape(-1, 1), ref.data.reshape(1, -1))
 
@@ -181,3 +179,4 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
         return new, x
     else:
         return new
+
