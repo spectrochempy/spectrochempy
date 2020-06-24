@@ -170,6 +170,11 @@ def _readbtext(f, pos):
     return text
 
 
+def _nextline(pos):
+    # reset current position to the begining of next line (16 bytes length)
+    return 16 * (1 + pos // 16)
+
+
 def _readheader02(f, pos):
     # read spectrum header, pos is the position of the 02 key
     # returns a dict
@@ -253,6 +258,125 @@ def _readheader02(f, pos):
     out['nbkgscan'] = np.fromfile(f, 'uint32', 1)
 
     return out
+
+
+def _read_xheader(f, pos):
+    # read spectrum header, pos is the position of the 03 or 01 key
+    # for series files
+    # return a dict and updated position in the file
+    # Todo: merge with _readheader02
+
+    f.seek(pos)
+    key = np.fromfile(f, dtype='uint8', count=1)[0]
+
+    if key not in (1, 3):
+        raise ValueError("xheader key={} not recognized yet.".format(key) +
+                         " Please report this error (and the corresponding srs file) to the developers"
+                         "They will do their best to fix the issue")
+    else:
+        out = {'xheader': key}
+
+    #   positions
+    #   nx_pos = info_pos + 4
+    #   xaxis unit code = info_pos + 8
+    #   data unit code = info_pos + 12
+    #   fistx_pos = info_pos + 16
+    #   lastx_pos = info_pos + 20
+    #   scan_pts_pos = info_pos + 29,
+    #   nscan_pos = info_pos + 36;
+    #   nbkgscan_pos = info_pos + 52;
+
+    f.seek(pos + 4)
+    out['nx'] = np.fromfile(f, 'uint32', 1)[0]
+
+    # read xaxis unit
+    f.seek(pos + 8)
+    key = np.fromfile(f, dtype='uint8', count=1)[0]
+    if key == 1:
+        out['xunits'] = 'cm ^ -1'
+        out['xtitle'] = 'Wavenumbers'
+    elif key == 2:
+        out['xunits'] = 'dimensionless'
+        out['xtitle'] = 'Data points'
+    elif key == 3:
+        out['xunits'] = 'nm'
+        out['xtitle'] = 'Wavelengths'
+    elif key == 4:
+        out['xunits'] = 'um'
+        out['xtitle'] = 'Wavelengths'
+    elif key == 32:
+        out['xunits'] = 'cm^-1'
+        out['xtitle'] = 'Raman Shift'
+    else:
+        out['xunits'] = None
+        out['xtitle'] = 'xaxis'
+        # warning: 'The nature of data is not recognized, xtitle set to \'xaxis\')
+    # read data unit
+    f.seek(pos + 12)
+    key = np.fromfile(f, dtype='uint8', count=1)[0]
+    if key == 17:
+        out['units'] = 'absorbance'
+        out['title'] = 'Absorbance'
+    elif key == 16:
+        out['units'] = 'percent'
+        out['title'] = 'Transmittance'
+    elif key == 11:
+        out['units'] = 'percent'
+        out['title'] = 'Reflectance'
+    elif key == 12:
+        out['units'] = None
+        out['title'] = 'Log(1/R)'
+    elif key == 20:
+        out['units'] = 'Kubelka_Munk'
+        out['title'] = 'Kubelka-Munk'
+    elif key == 22:
+        out['units'] = 'V'
+        out['title'] = 'Volts'
+    elif key == 26:
+        out['units'] = None
+        out['title'] = 'Photoacoustic'
+    elif key == 31:
+        out['units'] = None
+        out['title'] = 'Raman Intensity'
+    else:
+        out['title'] = None
+        out['title'] = 'Intensity'
+        # warning: 'The nature of data is not recognized, title set to \'Intensity\')
+
+    f.seek(pos + 16)
+    out['firstx'] = np.fromfile(f, 'float32', 1)[0]
+    f.seek(pos + 20)
+    out['lastx'] = np.fromfile(f, 'float32', 1)[0]
+    f.seek(pos + 28)
+    out['scan_pts'] = np.fromfile(f, 'uint32', 1)[0]
+    f.seek(pos + 32)
+    out['zpd'] = np.fromfile(f, 'uint32', 1)[0]
+    f.seek(pos + 36)
+    out['nscan'] = np.fromfile(f, 'uint32', 1)[0]
+    f.seek(pos + 52)
+    out['nbkgscan'] = np.fromfile(f, 'uint32', 1)[0]
+    if out['nbkgscan'] == 0:  # then probably interferogram in rapid scan mode
+    #     out['units'] = 'V'
+    #     out['title'] = 'Volts'
+    #     out['xunits'] = 'dimensionless'
+    #     out['xtitle'] = 'Data points'
+        if out['firstx'] > out['lastx']:
+            out['firstx'], out['lastx'] = out['lastx'], out['firstx']
+        out['mode'] = 'rapidscan'
+    else:
+        out['mode'] = 'GC-IR of TGA-IR'
+
+    out['name'] = _readbtext(f, pos + 938)
+    f.seek(pos + 1002)
+    out['coll_length'] = np.fromfile(f, 'float32', 1)[0] * 60
+    f.seek(pos + 1006)
+    out['lasty'] = np.fromfile(f, 'float32', 1)[0]
+    f.seek(pos + 1010)
+    out['firsty'] = np.fromfile(f, 'float32', 1)[0]
+    f.seek(pos + 1026)
+    out['ny'] = np.fromfile(f, 'uint32', 1)[0]
+    #  y unit could be at pos+1030 with 01 = minutes ?
+    return out, pos + 1026
 
 
 def _getintensities(f, pos):
@@ -399,7 +523,7 @@ def _read_spg(dataset, filename, **kwargs):
 
             # and the acquisition date
             f.seek(spa_title_pos[0] + 256)
-            timestamp = np.fromfile(f, dtype=np.uint32, count=1)[0]  # days since 31/12/1899, 00:00
+            timestamp = np.fromfile(f, dtype=np.uint32, count=1)[0]  # since 31/12/1899, 00:00
             acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
             acquisitiondates.append(acqdate)
             timestamp = acqdate.timestamp()
@@ -610,10 +734,171 @@ def _read_spa(dataset, filenames, **kwargs):
 
 
 def _read_srs(dataset, filename, **kwargs):
-    # Import Thermo series spectra files(*.srs) in a NDDataset
+    """ read a series file (*.srs)
+    implemented for rapid scan only.
+    returns:
+    a NDDataset conteining the spectra of interferograms vs time and
+    the background for non reprocessed series."""
+    with open(filename, 'rb') as f:
+        # at pos=306 (hex:132) is the position of the xheader
+        f.seek(306)
+        pos_xheader = np.fromfile(f, dtype='int32', count=1)[0]
+        info, pos = _read_xheader(f, pos_xheader)
 
-    return
+        # reset current position at the start of next line
+        pos = _nextline(pos)
 
+        if info['mode'] != 'rapidscan':
+            raise NotImplementedError("Only implemented for rapidscan")
+
+        # read the data part of series files
+        found = False
+        background = None
+        GSfound = False
+        names = []
+        data = np.zeros((info['ny'], info['nx']))
+
+        # find the position of the background and of the first interferogram based on
+        # empirical "fingerprints".
+
+        while not found:
+            pos += 16
+            f.seek(pos)
+            line = np.fromfile(f, dtype='uint8', count=16)
+            if np.all(line == [15, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
+                # hex 0F 00 00 00 02 00 00 00 18 00 00 00 00 00 48 43
+                # this is a fingerprint of header of data fields for non-processed series
+                # the first one is the background
+                if background is None:
+                        pos += 52
+                        f.seek(pos)
+                        key = np.fromfile(f, dtype='uint16', count=1)[0]
+
+                        if key > 0:
+                            # a background file was selected; it is present as a single sided interferogram
+                            #  key could be the zpd of the double sided interferogram
+                            background_size = key - 2
+                            pos += 8
+                            background_name = _readbtext(f, pos)
+                            pos += 256  # max length of text
+                            pos += 8  # unknown info ?
+                            f.seek(pos)
+                            background = np.fromfile(f, dtype='float32', count=background_size)
+                            pos += background_size * 4
+                            pos = _nextline(pos)
+
+                        elif key == 0:
+                            # no background file was selected; the background is the one that was recorded with the series
+                            background_size = info['nx']
+                            pos += 8
+                            f.seek(pos)
+                            background = np.fromfile(f, dtype='float32', count=background_size)
+                            pos += background_size * 4
+                            background_name = _readbtext(f, pos)
+                            # uncomment below to read unused data (noise measurement ?)
+                            # pos += 268
+                            # f.seek(pos)
+                            # noisy_data = np.fromfile(f, dtype='float32', count=499)
+                            pos = _nextline(pos)
+
+                        # Create a NDDataset for the background
+
+                        background = NDDataset(background)
+                        _x = Coord(np.around(np.linspace(0, background_size - 1, background_size), 0),
+                                   title='Data points',
+                                   units='dimensionless')
+                        background.set_coords(x=_x)
+                        background.name = background_name
+                        background.units = 'V'
+                        background.title = 'volts'
+                        background.origin = 'omnic'
+                        background.description = 'background from omnic srs file.'
+                        background.history = str(datetime.now()) + ':imported from srs file'
+
+                else:  # this is likely the first interferogram of the series
+                    found = True
+                    names.append(_readbtext(f, pos + 64))
+                    pos += 148
+
+            elif np.all(line == [2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67, 0, 80, 67, 71]):
+                # hex 02 00 00 00 18 00 00 00 00 00 48 43 00 50 43 47
+                # this is likely header of data field of reprocessed series
+                # the first one is skipped TODO: check the nature of these data
+                if background is None:
+                    # skip
+                    background = NDDataset()
+                else:  # this is likely the first spectrum of the series
+                    found = True
+                    names.append(_readbtext(f, pos + 64))
+                    pos += 148
+
+        # read first data
+        f.seek(pos)
+        data[0, :] = np.fromfile(f, dtype='float32', count=info['nx'])[:]
+        pos += info['nx'] * 4
+        # and the remaining part:
+        for i in np.arange(info['ny'])[1:]:
+            pos += 16
+            names.append(_readbtext(f, pos))
+            pos += 84
+            f.seek(pos)
+            data[i, :] = np.fromfile(f, dtype='float32', count=info['nx'])[:]
+            pos += info['nx'] * 4
+
+        # Create NDDataset Object for the series
+        dataset = NDDataset(data)
+        dataset.name = info['name']
+        dataset.units = info['units']
+        dataset.title = info['title']
+        dataset.origin = 'omnic'
+        dataset.meta.zpd = info['zpd']
+        # now add coordinates
+        _x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)),
+                   title=info['xtitle'],
+                   units=info['xunits'])
+
+        _y = Coord(np.around(np.linspace(info['firsty'], info['lasty'], info['ny']), 3),
+                   title='Time',
+                   units='minute',
+                   labels=names)
+
+        dataset.set_coords(y=_y, x=_x)
+
+        # Set origin, description and history
+        dataset.origin = "omnic"
+        dataset.description = kwargs.get('description',
+                                         'Dataset from omnic srs file.')
+
+        dataset.history = str(datetime.now()) + ':imported from srs file {} ; '.format(filename)
+
+        # uncomment below to load the last datafield
+        # has the same dimension as the time axis
+        # its function is not known. related to Grams-schmidt ?
+
+        # pos = _nextline(pos)
+        # found = False
+        # while not found:
+        #     pos += 16
+        #     f.seek(pos)
+        #     key = np.fromfile(f, dtype='uint8', count=1)
+        #     if key == 1:
+        #         pos += 4
+        #         f.seek(pos)
+        #         X = np.fromfile(f, dtype='float32', count=info['ny'])
+        #         found = True
+        #
+        # X = NDDataset(X)
+        # _x = Coord(np.around(np.linspace(0, info['ny']-1, info['ny']), 0),
+        #            title='time',
+        #            units='minutes')
+        # X.set_coords(x=_x)
+        # X.name = '?'
+        # X.title = '?'
+        # X.origin = 'omnic'
+        # X.description = 'unknown'
+        # X.history = str(datetime.now()) + ':imported from srs
+
+        return dataset, background
 
 if __name__ == '__main__':
     pass
