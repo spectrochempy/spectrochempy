@@ -39,7 +39,7 @@ def _pretty_fmt_exponent(num):
     """
     # work badly for decimals as superscript dot do not exist in unicode
     # (as far as we know)
-    ret = '{0:n}'.format(num).replace('-', '⁻').replace('.', u"\u2027")
+    ret = '{0:n}'.format(num).replace('-', '⁻').replace('.', "\u22C5")
     for n in range(10):
         ret = ret.replace(str(n), _PRETTY_EXPONENTS[n])
     return ret
@@ -85,7 +85,14 @@ formats = {
 formatting._FORMATS.update(formats)
 formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ['~'])
 
-setattr(Quantity, '_repr_html_', lambda cls: cls.__format__('~H'))
+def _repr_html_(cls):
+    p = cls.__format__('~H')
+    # attempt to solve a display problem in notebook (recent version of pint
+    # have a strange way to handle HTML. For me it doen't work
+    p = p.replace(r'\[','').replace(r'\]','').replace(r'\ ',' ')
+    return p
+
+setattr(Quantity, '_repr_html_', _repr_html_)
 setattr(Quantity, '_repr_latex_', lambda cls: "$" + cls.__format__('~L') + "$")
 
 # TODO: work on this latex format
@@ -130,7 +137,7 @@ def __format__(self, spec):
         units = self._units
 
     if "H" in spec:
-        # HTML / Jupyter Notebook
+        # HTML / Jupyter Notebook (
         return r"\[" + format(units, spec).replace(" ", r"\ ") + r"\]"
 
     return '%s' % (format(units, spec))
