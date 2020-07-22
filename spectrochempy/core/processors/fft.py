@@ -9,7 +9,7 @@
 # See full LICENSE agreement in the root directory
 # ======================================================================================================================
 
-__all__ = ["fft", "ifft"]
+__all__ = ["fft", "ifft", "get_zpd"]
 
 __dataset_methods__ = __all__
 
@@ -35,6 +35,33 @@ from ...units import ur
 from ..dataset.npy import zeros_like, ones_like
 from .apodization import hamming, mertz, triang
 from .concatenate import concatenate
+
+def get_zpd(dataset, dim='x', mode='max'):
+    r"""
+    Find the zero path difference (zpd) positions. For multidimensional NDDataset
+    the search is performed along the last dimension
+
+    Parameter
+    ---------
+    dataset : NDDataset
+    dim: int or str, dimension along which to make the search. Default = 'x' == -1
+
+    Returns:
+        The indexes
+    """
+    if isinstance(dim, int):
+        axis = dim
+    elif dim == 'x':
+        axis = -1
+    elif dim == 'y':
+        axis = -2
+    elif dim == 'z':
+        axis = -3
+    if mode == 'max':
+        return np.argmax(dataset.data, axis=axis)
+    elif mode == 'abs':
+        return np.argmax(np.abs(dataset.data), axis=axis)
+
 
 def ifft(dataset, size=None, inplace=False, **kwargs):
     r"""
@@ -170,33 +197,36 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         # we assume no special encoding for inverse fft transform
         data = np.fft.ifftshift(new.data, -1)
         data = np.fft.ifft(data)
+
     elif is_ir and not inv:
         # subtract  DC
-        # new -= new.mean()
+        new -= new.mean()
         # determine phase correction (Mertz)
-        zpd = int(new.meta.zpd)
-        narrowed = hamming(new[:, 0: 2*zpd+1])
-        mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd+1])
+        zpd = new.get_zpd()
+        if not np.all(zpd[0] == zpd):
+            raise ValueError("zpd should be at the same index")
+        zpd = zpd[0]
+        narrowed = hamming(new[:, 0: 2*zpd])
+        mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd])
         spectrum = np.fft.rfft(mirrored.data)
         phase_angle = np.arctan(spectrum.imag, spectrum.real)
         initx = np.arange(phase_angle.shape[1])
         interpolate_phase_angle = interp1d(initx, phase_angle)
 
-        zeroed = concatenate(zeros_like(new[:, 2*zpd+1:]), new)
+        zeroed = concatenate(zeros_like(new[:, zpd+1:]), new)
         apodized = hamming(zeroed) #mertz(new, zpd)
         zpd = len(apodized.x)//2
         mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
-        mirrored[0, :].plot()
-        plt.show()
+
+        wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05*2)
+
         spectrum = np.fft.rfft(mirrored.data)
-        plt.plot(spectrum[0])
+        plt.plot(wavenumbers, spectrum[0])
         plt.show()
         newx = np.arange(spectrum.shape[1])*max(initx)/max(np.arange(spectrum.shape[1]))
         phase_angle = interpolate_phase_angle(newx)
-        plt.plot(phase_angle[0])
-        plt.show()
         spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
-        wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05)
+
         plt.plot(wavenumbers, spectrum[0])
         plt.show()
     else:
