@@ -851,7 +851,7 @@ def _read_srs(dataset, filename, **kwargs):
         dataset.units = info['units']
         dataset.title = info['title']
         dataset.origin = 'omnic'
-        dataset.meta.zpd = info['zpd']
+
         # now add coordinates
         _x = Coord(np.around(np.linspace(info['firstx'], info['lastx'], info['nx'], 3)),
                    title=info['xtitle'],
