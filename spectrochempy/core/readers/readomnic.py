@@ -244,7 +244,7 @@ def _readheader02(f, pos):
         out['units'] = None
         out['title'] = 'Raman Intensity'
     else:
-        out['title'] = None
+        out['units'] = None
         out['title'] = 'Intensity'
         # warning: 'The nature of data is not recognized, title set to \'Intensity\')
 
@@ -694,10 +694,10 @@ def _read_spa(dataset, filenames, **kwargs):
             'Error : Inconsistent data set - the x axis should end at same value')
     elif len(set(xunits)) != 1:
         raise ValueError(
-            'Error : Inconsistent data set - data units should be identical')
+            'Error : Inconsistent data set - x axis data units should be identical')
     elif len(set(units)) != 1:
         raise ValueError(
-            'Error : Inconsistent data set - x axis units should be identical')
+            'Error : Inconsistent data set - data units should be identical')
 
     # load spectral content into the  NDDataset
     dataset.data = np.array(allintensities, dtype='float32')
@@ -711,7 +711,7 @@ def _read_spa(dataset, filenames, **kwargs):
                title=xtitles[0],
                units=xunits[0])
 
-    _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels=(allacquisitiondates, titles))
+    _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels=(allacquisitiondates, filenames))
     dataset.set_coords(y=_y, x=_x)
 
     # Set origin, description, history, date
