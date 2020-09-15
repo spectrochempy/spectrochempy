@@ -754,7 +754,6 @@ def _read_srs(dataset, filename, **kwargs):
         # read the data part of series files
         found = False
         background = None
-        GSfound = False
         names = []
         data = np.zeros((info['ny'], info['nx']))
 
