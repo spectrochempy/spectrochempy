@@ -247,8 +247,8 @@ class IRIS:
                     print('Solving for {} wavenumbers, {} spectra and {} regularization parameters \n'
                           .format(X.shape[1], X.shape[0], len(lamb)))
 
-                    for i, lamda in enumerate(lamb):
-                        f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, lamda, S, verbose)
+                for i, lamda in enumerate(lamb):
+                    f[i], RSS[i], SM[i] = solve_lambda(X, K, G0, lamda, S, verbose)
 
             else:
                 if verbose:
