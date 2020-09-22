@@ -328,17 +328,14 @@ class BuildDocumentation(object):
         if milestone == 'latest':
             # we build the latest
             print("getting latest release tag")
-            LATEST = os.path.join(API_GITHUB_URL, "repos", REPO_URI, "releases", "latest")
+            LATEST = API_GITHUB_URL + "/" +  "repos/"  + REPO_URI + "/releases/latest"
             tag = json.loads(requests.get(LATEST).text)['tag_name'].split('.')
             milestone = f"{tag[0]}.{tag[1]}.{int(tag[2]) + 1}"  # TODO: this will not work if we change the minor or
             # major
 
         def get(milestone, label):
             print("getting list of issues with label ", label)
-            issues = os.path.join(API_GITHUB_URL, "search", f"issues?q=repo:{REPO_URI}"
-                                                            f"+milestone:{milestone}"
-                                                            f"+is:closed"
-                                                            f"+label:{label}")
+            issues = API_GITHUB_URL + "/search/issues?q=repo:"+REPO_URI+"+milestone:" + milestone + "+is:closed+label:" + label
             return json.loads(requests.get(issues).text)['items']
 
         # Create a versionlog file for the current target
