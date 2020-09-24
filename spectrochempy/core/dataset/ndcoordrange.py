@@ -13,7 +13,7 @@ __all__ = ['CoordRange']
 # ----------------------------------------------------------------------------------------------------------------------
 # third party imports
 # ----------------------------------------------------------------------------------------------------------------------
-from traitlets import (HasTraits, List, Bool, TraitError, class_of)
+from traitlets import (HasTraits, List, Bool, TraitError)
 
 
 # ======================================================================================================================
@@ -50,9 +50,9 @@ class Range(List):
                                     **kwargs)
 
     def length_error(self, obj, value):
-        e = "The '%s' trait of %s instance must be of length 2 exactly," \
+        e = "The '%s' trait of '%s' instance must be of length 2 exactly," \
             " but a value of %s was specified." \
-            % (self.name, class_of(obj), value)
+            % (self.name, type(obj), value)
         raise TraitError(e)
 
     def validate_elements(self, obj, value):
