@@ -6,19 +6,20 @@
 #
 # ---------------------------------------------------------------------------------
 
-__all__ = ['coverages_vs_time', 'concentrations_vs_time', 'modify_rate',
-           'modify_reactive_phase', 'fit_to_concentrations']
+__all__ = ['surface_coverages_vs_time', 'surface_concentrations_vs_time', 'modify_rate',
+           'reactors_composition_vs_time', 'modify_reactive_phase', 'fit_to_concentrations',
+           'PFR']
 
 import cantera as ct
 import datetime
 import numpy as np
 from scipy.optimize import minimize
+from collections.abc import Iterable
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 
-
-def coverages_vs_time(surface, t, returnNDDataset=False):
-    ''' Returns the surface coverages at time(s) t
+def surface_coverages_vs_time(surface, t, returnNDDataset=False):
+    ''' Returns the surface coverages at time(s) t of a reactive surface
     params:
     ------
     surface: instance of cantera.composite.Interface
@@ -45,7 +46,7 @@ def coverages_vs_time(surface, t, returnNDDataset=False):
     return coverages
 
 
-def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=False):
+def surface_concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=False):
     ''' Returns the  concentrations at time(s) t
     params:
     ------
@@ -56,28 +57,112 @@ def concentrations_vs_time(reactive_phase, t, reactorNet=None, returnNDDataset=F
     '''
 
     if type(reactive_phase) is ct.composite.Interface:
-        concentrations = coverages_vs_time(reactive_phase, t, returnNDDataset) * reactive_phase.site_density
+        concentrations = surface_coverages_vs_time(reactive_phase, t, returnNDDataset) * reactive_phase.site_density
         if returnNDDataset:
             concentrations.x.title = 'concentration'
         return concentrations
 
     else:
         raise NotImplementedError('not implmented for reactive_phase={}'.format(str(type(reactive_phase))))
-        # # code for reactorNet
-        # if type(t) is Coord:
-        #     t = t.data
-        #
-        # for i, ti in enumerate(t):
-        #     reactorNet.advance(ti)
-        #     concentrations[i, :] = reactive_phase.concentrations
-        #     reactive_phase.concentrations = init_concentrations
-        #
-        #
-        # if returnNDDataset:
-        #     concentrations = NDDataset(concentrations)
-        #     concentrations.y = Coord(t, title='time')
-        #     concentrations.x.title = 'concentrations'
-        #     concentrations.x.labels = reactive_phase.species_names
+
+def reactors_composition_vs_time(reactors, t, surfaces=None, returnNDDataset=False):
+    ''' Returns the gas molar fractions - and optionally the surfaces coverages vs. time in a single reactor
+    or a list of connected reactors
+
+    parameters:
+    -----------
+    gasreactors: cantera._cantera.IdealGasReactor or list of cantera._cantera.IdealGasReactor
+        reactor(s) in which the mole fractions are computed
+    t: iterable or spectrochempy.Coord
+        times at which the coverages must be computed
+    surfaces: instance of cantera._cantera.ReactorSurface or list a of such instances, optional
+        reacting surface(s) in contact with the reactors. If not None, all gas reactors are expected to be
+        in contact with a reacting surface of the same type.
+    return_NDDataset: boolean, optional
+        if True returns the mole fraction matrix (and coverage matrix if surfaces are includes) as NDDataset
+        else as np.ndarray
+        default: False (returns ndarray(s)
+
+    returns:
+    --------
+    gas_compositions: ndarray or NDDataset
+        mole fractions in reactor(s) at times t
+    coverages: ndarray or NDDataset
+        surface coverages in reactor(s) at times t
+    '''
+
+    # check input
+    if isinstance(reactors, ct._cantera.IdealGasReactor):
+        reactors = [reactors]
+    elif isinstance(reactors, Iterable):
+        for r in reactors:
+            if not isinstance(r, ct._cantera.IdealGasReactor):
+                raise TypeError("reactors should contain only IdealGasReactor elements")
+    else:
+        raise TypeError("reactors should be either a single IdealGasReactor or a list of IdealGasReactor(s)")
+
+    if surfaces is not None:
+        if isinstance(surfaces, ct._cantera.ReactorSurface):
+            surfaces = [surfaces]
+        elif isinstance(surfaces, Iterable):
+            for s in surfaces:
+                if not isinstance(s, ct._cantera.ReactorSurface):
+                    raise TypeError("surfaces should contain only ReactorSurface elements")
+        else:
+            raise TypeError("surfaces should be either a single ReactorSurface or a list of ReactorSurface(s)")
+
+        if len(surfaces) != len(reactors):
+            raise IOError("all reactors should ")
+
+    if type(t) is Coord:
+        t = t.data
+
+    if len(reactors)==1:
+        gas_compositions  = np.zeros((len(t), reactors[0].Y.size))
+        if surfaces is not None:
+            surf_coverages = np.zeros((len(t), surfaces[0].coverages.size))
+    else:
+        gas_compositions = np.zeros((len(reactors), len(t), reactors[0].Y.size))
+        if surfaces is not None:
+            surf_coverages = np.zeros((len(reactors), len(t), surfaces[0].coverages.size))
+
+    rnet = ct.ReactorNet(reactors)
+
+    for i, ti in enumerate(t):
+        rnet.advance(ti)
+        if len(reactors) > 1:
+            for j, r in enumerate(reactors):
+                gas_compositions[j, i, :] = reactors[j].thermo.X[:]
+                if surfaces is not None:
+                    surf_coverages[j, i, :] = surfaces[j].coverages[:]
+        else:
+            gas_compositions[i, :] = reactors[0].thermo.X[:]
+            if surfaces is not None:
+                surf_coverages[i, :] = surfaces[0].coverages[:]
+
+
+    if returnNDDataset:
+        gas_compositions = NDDataset(gas_compositions)
+        gas_compositions.title = 'mol fraction'
+        gas_compositions.y = Coord(t, title='time')
+        gas_compositions.x.title = 'species'
+        gas_compositions.x.labels = reactors[0].kinetics.species_names
+        if len(gas_compositions.dims) == 3:
+            gas_compositions.z.labels = [r.name for r in reactors]
+
+        if surfaces is not None:
+            surf_coverages = NDDataset(surf_coverages)
+            surf_coverages.title = 'coverage'
+            surf_coverages.y = Coord(t, title='time')
+            surf_coverages.x.title = 'species'
+            surf_coverages.x.labels = surfaces[0].kinetics.species_names
+            if len(surf_coverages.dims) == 3:
+                surf_coverages.z.labels = [r.name for r in reactors]
+
+    if surfaces is None:
+        return gas_compositions
+    else:
+        return gas_compositions, surf_coverages
 
 
 def modify_rate(reactive_phase, i_reaction, rate):
@@ -137,7 +222,7 @@ def modify_reactive_phase(reactive_phase, param_to_change, param_value):
 
 def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, param_to_optimize, guess_param, **kwargs):
     r"""
-    Function fitting rate parameters and concentrations to a given concentration profile.
+    Fits rate parameters and concentrations to a given concentration profile.
 
     Parameters
     ------------
@@ -167,7 +252,7 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
 
     def objective(param_value, param_to_optimize, C, externalConc, external_to_C_idx, surface):
         modify_reactive_phase(surface, param_to_optimize, param_value)
-        Chat = concentrations_vs_time(surface, C.y)
+        Chat = surface_concentrations_vs_time(surface, C.y)
         return np.sum(np.square(C.data[:, externalConc] - Chat[:, external_to_C_idx]))
 
     method = kwargs.get("method", "Nelder-Mead")
@@ -187,8 +272,58 @@ def fit_to_concentrations(C, externalConc, external_to_C_idx, reactive_phase, pa
     if options['disp']:
         print('         Optimization time: {}'.format((toc - tic)))
         print('         Final parameters: {}'.format(guess_param))
-    Ckin = concentrations_vs_time(reactive_phase, C.y, returnNDDataset=True)
+    Ckin = surface_concentrations_vs_time(reactive_phase, C.y, returnNDDataset=True)
     newargs = (reactive_phase, param_to_optimize, guess_param)
     return {'concentrations': Ckin,
             'results': res,
             'new_args': newargs}
+
+def PFR(Vcstr, initial_atmosphere, inlet_gas, inlet_flow, surface=None, areaCstr=None):
+    r"""creates a PFR reactor as a network of CSTRs in series
+
+    parameters
+    ----------
+    Vcstr: iterable
+        contains the volumes of the CSTRs
+
+
+    """
+
+
+    # create the inlet gas reservoir and set the entry profile, to be connected to the first reactor with a Mass Flow Controller.
+
+    inlet = ct.Reservoir(contents=inlet_gas, name='inlet')
+    Ncstr = len(Vcstr)
+    cstr = []
+    if surface is not None:
+        cstrSurf = []
+
+    for i in range(Ncstr):
+        # create reactor i
+        cstr.append(ct.IdealGasReactor(initial_atmosphere, name="R_{}".format(i), energy='off'))
+        # sets the volume of the cstr reactor
+        cstr[i].volume = Vcstr[i]
+        if surface is not None:
+            # add reactive surface
+            cstrSurf.append(ct.ReactorSurface(kin=surface, r=cstr[i], A=areaCstr[i]))
+        # make the connection with the previous element:
+        if i == 0:  # this is the first reactor,
+            # connect it to the upstream reservoir by a MFC:
+            if callable(inlet_flow):
+                mfc = ct.MassFlowController(upstream=inlet, downstream=cstr[i],
+                                        mdot= lambda t: inlet_flow(t) * inlet_gas.density)
+            else:
+                mfc = ct.MassFlowController(upstream=inlet, downstream=cstr[i],
+                                            mdot= inlet_flow * inlet_gas.density)
+
+        else:  # this reactor i is connected the previous one (i-1) through a pressure controller:
+            ct.PressureController(upstream=cstr[i - 1], downstream=cstr[i], master=mfc, K=1e-5)
+
+    # create a final reservoir for the exhaust of the last reactor. The composition of this reservoir is irrelevant.
+    event = ct.Reservoir(initial_atmosphere, name='event')
+    ct.PressureController(upstream=cstr[-1], downstream=event, master=mfc, K=1e-5)
+
+    if surface is None:
+        return cstr
+    else:
+        return cstr, cstrSurf
