@@ -27,7 +27,7 @@ from spectrochempy.core import error_
 # ======================================================================================================================
 # Private module methods
 # ======================================================================================================================
-@docstrings.get_sectionsf('apodize', sections=['Other Parameters', 'Returns'])
+@docstrings.get_sections(base='apodize', sections=['Other Parameters', 'Returns'])
 @docstrings.dedent
 def _apodize(dataset, method, apod=None, **kwargs):
     """
