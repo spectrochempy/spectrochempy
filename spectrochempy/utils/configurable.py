@@ -29,12 +29,9 @@ class MetaConfigurable(Configurable):
             A regular dictionary
 
         """
-
-        d = self._trait_values.copy()
-        keys = list(d.keys())
-        for k in keys:
-            if k not in self.traits(config=True):
-                del d[k]
+        d = {}
+        for k,v in self.traits(config=True).items():
+            d[k] = v.default_value
         return d
 
     @observe(All)
