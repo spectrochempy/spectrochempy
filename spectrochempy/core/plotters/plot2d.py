@@ -233,8 +233,8 @@ def plot_2D(dataset, **kwargs):
 
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
-    ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-    ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
+    ax.xaxis.set_major_locator(MaxNLocator(nbins=number_x_labels))
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=number_y_labels))
     if method not in ['surface']:
         ax.xaxis.set_ticks_position('bottom')
         ax.yaxis.set_ticks_position('left')
