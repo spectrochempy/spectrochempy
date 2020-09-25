@@ -55,7 +55,7 @@ class SVD(HasTraits):
     VT = Instance(NDDataset, allow_none=True)
     """|NDDataset| - Contains a transpose matrix of the Loadings. Its shape depends on `full_matrices`"""
 
-    @docstrings.get_sectionsf('SVD')
+    @docstrings.get_sections(base='SVD')
     @docstrings.dedent
     def __init__(self, dataset, full_matrices=False, compute_uv=True):
         """

@@ -45,8 +45,6 @@ from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant,
                                  is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
                                  make_new_object, convert_to_html)
 
-
-
 # ======================================================================================================================
 # constants
 # ======================================================================================================================
@@ -112,7 +110,7 @@ class NDArray(HasTraits):
     _html_output = Bool(False)
 
     # ..................................................................................................................
-    @docstrings.get_sectionsf('NDArray')
+    @docstrings.get_sections(base='NDArray')
     @docstrings.dedent
     def __init__(self, data=None, **kwargs):
         """
