@@ -1,6 +1,7 @@
 channels:
   - spectrocat
   - cantera
+  - cantera/label/dev
   - conda-forge
   - defaults
 ssl_verify: true

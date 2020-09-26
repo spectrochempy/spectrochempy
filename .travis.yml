@@ -6,6 +6,7 @@ dist: xenial
 env:
   global:
     - CONDAPY=3.7
+    - CONDAPY=3.8
 
 jobs:
   fast_finish: true
