@@ -125,9 +125,7 @@ auditp.txt
 # Distribution / packaging
 # ----------------------------------------------------------------------------------------------------------------------
 .Python
-build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 lib/
@@ -138,3 +136,4 @@ var/
 *.egg-info/
 .coverage
 
+saved_pkglist.txt
