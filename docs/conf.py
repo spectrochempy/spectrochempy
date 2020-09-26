@@ -123,45 +123,45 @@ pygments_style = 'sphinx'
 
 rst_epilog = """
 
-.. |ndarray| replace:: :class:`~numpy.ndarray`
+.. |ndarray| replace:: :class:``~numpy.ndarray``  
 
-.. |ma.ndarray| replace:: :class:`~numpy.ma.array`
+.. |ma.ndarray| replace:: :class:``~numpy.ma.array`` 
 
-.. |scpy| replace:: **SpectroChemPy**
+.. |scpy| replace:: **SpectroChemPy** 
 
-.. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
+.. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project` 
 
-.. |Script| replace:: :class:`~spectrochempy.core.dataset.scripts.Script`
+.. |Script| replace:: :class:`~spectrochempy.core.dataset.scripts.Script` 
 
-.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
+.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray` 
 
-.. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
+.. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset` 
 
-.. |NDPanel| replace:: :class:`~spectrochempy.core.dataset.ndpanel.NDPanel`
+.. |NDPanel| replace:: :class:`~spectrochempy.core.dataset.ndpanel.NDPanel` 
 
-.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
+.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord` 
 
-.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoordrange.CoordRange`
+.. |CoordRange| replace:: :class:`~spectrochempy.core.dataset.ndcoordrange.CoordRange` 
 
-.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`
+.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet` 
 
-.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
+.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO` 
 
-.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDMath`
+.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDMath` 
 
-.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta`
+.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta` 
 
-.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
+.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot` 
 
-.. |Unit| replace:: :class:`~spectrochempy.units.units.Unit`
+.. |Unit| replace:: :class:`~spectrochempy.units.units.Unit` 
 
-.. |Quantity| replace:: :class:`~spectrochempy.units.units.Quantity`
+.. |Quantity| replace:: :class:`~spectrochempy.units.units.Quantity` 
 
-.. |Measurement| replace:: :class:`~spectrochempy.units.units.Measurement`
+.. |Measurement| replace:: :class:`~spectrochempy.units.units.Measurement` 
 
-.. |Axes| replace:: :class:`~matplotlib.Axes`
+.. |Axes| replace:: :class:`~matplotlib.Axes` 
 
-.. |userguide| replace:: :ref:`userguide`
+.. |userguide| replace:: :ref:`userguide` 
 
 """
 

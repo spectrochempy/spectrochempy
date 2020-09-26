@@ -1,4 +1,5 @@
 :orphan:
+
 {% if bugs or features or tasks %}
 Version {{ target }}
 -----------------------------------

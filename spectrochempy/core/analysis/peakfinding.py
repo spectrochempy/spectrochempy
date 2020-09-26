@@ -70,7 +70,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
         one of the arguments `prominence` or `width` is given. Floats are interpreted
         as measured along the 'x' Coord; ints are interpreted as a number of points.
         See argument len` in `peak_prominences` of the scipy documentation for a full
-         description of its effects.
+        description of its effects.
     rel_height : float, optional,
         Used for calculation of the peaks width, thus it is only used if `width`
         is given. See argument  `rel_height` in `peak_widths` of the scipy documentation

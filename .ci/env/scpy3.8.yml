@@ -50,7 +50,8 @@ dependencies:
 
   # DEV: just for testing
     - pytest
-    # - pytest-tornasync
+    - pytest-doctestplus
+    - pytest-tornasync
     - pytest-flake8
     - scikit-image
     - coverage
@@ -64,6 +65,7 @@ dependencies:
     - nbsphinx
     - jupyter_sphinx
     - json5
+    - voila
 
   # DEV: build
     - conda-build

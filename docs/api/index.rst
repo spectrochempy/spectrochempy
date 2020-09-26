@@ -2,16 +2,18 @@
 
 .. currentmodule:: spectrochempy
 
-API reference
-===============
 
+##############
+API reference
+##############
+
+****************
 Loading the API
-----------------
+****************
 
 The |scpy| API exposes many objects and functions.
 
-To use the API, one must load it using one of the following syntax and used as
-follow:
+To use the API, you must import it using one of the following syntaxes:
 
 .. ipython:: python
 
@@ -23,19 +25,36 @@ follow:
     from spectrochempy import *
     nd = NDDataset(...)
 
-
-In the second syntax, as usual in python, access to the objects/functions
-may be simplified (*e.g.*, we can use `NDDataset` without any prefix  instead
-of  `scp.NDDataset` is the first syntax)
-but there is always a risk of overwriting some variables already in the
-namespace. Therefore, the first syntax
-is in general recommended, although that, for the examples in this
-documentation, we have often use the
-second one for simplicity.
+With the second syntax, as often in python, the access to objects/functions
+can be greatly simplified. For example, we can use "NDDataset" without a prefix
+instead of `scp.NDDataset` which is the first syntax) but there is always a risk
+of overwriting some variables or functions already present in the namespace.
+Therefore, the first syntax is generally highly recommended.
 
 
 The NDDataset object
 ---------------------
+
+The NDDataset is the main object use by |scpy|.
+
+Like numpy ndarrays, NDDataset have the capability to be sliced,
+sorted and subject to matematical operations.
+
+But, in addition, NDDataset may have units, can be masked and each
+dimensions can have coordinates also with units. This make NDDataset
+aware of unit compatibility, *e.g.*, for binary operation such as
+addtions or subtraction or during the application of mathematical
+operations. In addition or in replacement of numerical data for
+coordinates, NDDatset can also have labeled coordinates where labels
+can be different kind of objects (strings, datetime, numpy nd.ndarray
+or othe NDDatasets, etc...).
+
+This offers a lot of flexibility in using NDDatasets that, we hope,
+will be useful for applications. See the **Tutorials** for more
+information about such possible applications.
+
+**SpectroChemPy** provides another kind of data structure,
+aggregating several datasets: **NDPanel**: See
 
 .. autosummary::
     :nosignatures:
@@ -43,8 +62,13 @@ The NDDataset object
 
     NDDataset
 
-Coordinates objects
---------------------
+Coordinates related objects
+---------------------------
+
+NDDataset in SpectroChemPy in contrast to numpy nd-arrays can have coordinates for each dimension.
+The individual coordinates are represented by a specific object: Coord.
+All coordinates of an NDDataset are grouped in a particular object: CoordSet.
+Finally, a range of coordinates can be represented by the object: CoordRange.
 
 .. autosummary::
     :nosignatures:
@@ -91,7 +115,7 @@ These functions mimics numpy equivalent, but output a NDDataset object
     full_like
 
 Import of data from external sources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
     :nosignatures:
@@ -109,6 +133,7 @@ Import of data from external sources
     read_spa
     read_opus
 
+
 Export a NDDataset
 -------------------
 
@@ -119,6 +144,7 @@ Export a NDDataset
     to_xarray
     to_dataframe
     write_jdx
+
 
 Coordinates manipulation
 -------------------------
@@ -131,6 +157,7 @@ Coordinates manipulation
     coord
     delete_coords
 
+
 Select data in a NDDataset
 --------------------------
 
@@ -141,8 +168,49 @@ Select data in a NDDataset
     take
     clip
 
-Mathematical operations
------------------------
+
+Plotting functions
+-------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    plot
+    plot_1D
+    plot_pen
+    plot_scatter
+    plot_bar
+    plot_2D
+    plot_map
+    plot_stack
+    plot_image
+    plot_surface
+    plot_3D
+
+
+Processing
+-----------
+
+Transformations
+~~~~~~~~~~~~~~~~
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    sort
+    copy
+    squeeze
+    swapaxes
+    transpose
+    set_complex
+    set_quaternion
+
+
+
+Unary mathematical operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
     :nosignatures:
@@ -197,48 +265,63 @@ Mathematical operations
     std
     sum
     var
+
+Binary mathematical operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
     dot
 
-Plotting functions
--------------------
+Other processing operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    plot
-    plot_1D
-    plot_pen
-    plot_scatter
-    plot_bar
-    plot_2D
-    plot_map
-    plot_stack
-    plot_image
-    plot_surface
-    plot_3D
+    BaselineCorrection
+    align
+    autosub
+    ab
+    em
+    gm
+    sp
+    sine
+    qsin
+    sinm
+    concatenate
+    stack
+    fft
+    ifft
+    detrend
+    savgol_filter
+    interpolate
+    smooth
 
-Processing
+
+
+Project management
+--------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    Project
+
+Scripting
 ----------
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-Transformation and processing
-------------------------------
+This is rather experimental
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    sort
-    copy
-    squeeze
-    swapaxes
-    transpose
-    set_complex
-    set_quaternion
+    Script
 
 
 Utilities

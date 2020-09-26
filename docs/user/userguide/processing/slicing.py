@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
+
 # ---
 # jupyter:
 #   jupytext:
@@ -7,7 +13,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.4.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python

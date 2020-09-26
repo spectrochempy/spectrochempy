@@ -100,7 +100,7 @@ class BuildDocumentation(object):
         parser.add_argument("-R", "--release", help="release the current version documentation on website",
                             action="store_true")
         parser.add_argument("-C", "--changelogs", help="update changelogs using the github issues",
-                            default="latest")
+                            action="store_true")
         parser.add_argument("--all", help="Build all docs", action="store_true")
 
         args = parser.parse_args()
@@ -114,7 +114,7 @@ class BuildDocumentation(object):
         if args.sync:
             self.sync_notebooks()
         if args.changelogs:
-            self.make_changelog(args.changelogs)
+            self.make_changelog()
         if args.delnb:
             self.delnb()
         if args.clean and args.html:
@@ -157,6 +157,8 @@ class BuildDocumentation(object):
 
         BUILDDIR = os.path.join(DOCREPO, builder)
         print(f'building {builder.upper()} documentation ({doc_version.capitalize()} version : {version})')
+
+        self.make_changelog()
 
         # recreate dir if needed
         if clean:
@@ -326,16 +328,22 @@ class BuildDocumentation(object):
             os.makedirs(d, exist_ok=True)
 
     # ..................................................................................................................
-    def make_changelog(self, milestone="latest"):
+    def make_changelog(self):
         # Utility to update changelog (using the GITHUB API)
 
+        print("getting latest release tag")
+        LATEST = os.path.join(API_GITHUB_URL, "repos", REPO_URI, "releases", "latest")
+        tag = json.loads(requests.get(LATEST).text)['tag_name']
+
+        milestone = self.doc_version
+        print(milestone)
         if milestone == 'latest':
             # we build the latest
-            print("getting latest release tag")
-            LATEST = API_GITHUB_URL + "/" +  "repos/"  + REPO_URI + "/releases/latest"
-            tag = json.loads(requests.get(LATEST).text)['tag_name'].split('.')
+            tag = tag.split('.')
             milestone = f"{tag[0]}.{tag[1]}.{int(tag[2]) + 1}"  # TODO: this will not work if we change the minor or
             # major
+        else:
+            milestone = tag
 
         def get(milestone, label):
             print("getting list of issues with label ", label)

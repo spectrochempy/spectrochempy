@@ -31,11 +31,15 @@ jobs:
 git:
   depth: 50
 
+cache:
+  apt: true
+
 addons:
   apt:
     update: true
     packages:
       - xvfb
+      - texlive-full
 
 # install miniconda and create environment
 before_install:
@@ -87,8 +91,7 @@ script:
       echo "BUILDING DOCS"
       echo "cloning spectrochempy.github.io repository";
       git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git $HOME/spectrochempy_docs/html;
-      apt-get install texlive-full;
-      python docs/make.py --clean --sync --html --pdf;
+      python docs/make.py --clean -C --sync --html --pdf;
     fi
 
 # command to notify code-climate

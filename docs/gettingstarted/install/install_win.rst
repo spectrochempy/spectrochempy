@@ -3,7 +3,6 @@
 Installation Guide for Windows
 ===============================
 
-
 Installation
 -------------
 
@@ -13,14 +12,12 @@ The following steps have been checked only with windows 10 but should work with
 previous versions as well.
 
 We highly recommend that all new users install |scpy| interface via Conda. You
-can install Spectrochempy
-in a dedicated environment (recommended, steps 4. and 5. below). You can also
-use your base environment or an
-existing environment (then skip steps 4. and 5.)
+can install Spectrochempy in a dedicated environment (recommended, steps 4. and
+5. below). You can also use your base environment or an existing environment
+(then skip steps 4. and 5.)
 
 #.  Open a command prompt (Select the Start button and type cmd), or preferably
-open the Anaconda Prompt
-    in the Anaconda start Menu.
+    open the Anaconda Prompt in the Anaconda start Menu.
 
     .. image:: images/Aprompt.png
        :width: 200
@@ -33,7 +30,7 @@ open the Anaconda Prompt
         (base) C:\<yourDefaultPath>> conda update conda
 
     where `<yourDefaultPath>` is you default workspace directory (often:
-`C:\\Users\\<user>`)
+    `C:\\Users\\<user>`)
 
 #.  Add channels to get specific packages:
 
@@ -43,17 +40,15 @@ open the Anaconda Prompt
         (base) C:\<yourDefaultPath>> conda config --add channels cantera
         (base) C:\<yourDefaultPath>> conda config --add channels spectrocat
 
-#.  Recommended: you can create a dedicated environment. We will name it
-`scpy` in this
-    example
+#.  **Recommended**: you can create a dedicated environment. We will name it
+    `scpy` in this example
 
     .. sourcecode:: bat
 
         (base) C:\<yourDefaultPath>> conda create --name scpy
 
-#.  Recommended: switch to this environment. At this point, `(scpy)` should
-appear before
-    the prompt instead of `(base)`.
+    Switch to this environment. At this point, `(scpy)` should
+    appear before the prompt instead of `(base)`.
 
     .. sourcecode:: bat
 
@@ -63,7 +58,7 @@ appear before
     .. Note::
 
         You can make the scipy environment permanent by creating and using the
-following batch file (.bat)
+        following batch file (.bat)
 
         .. sourcecode:: bat
 
@@ -79,20 +74,39 @@ following batch file (.bat)
         Save the .bat file, for instance in
         `C:\\<yourAnacondaFolder>\Scripts\activate-scpy.bat`,
         create a shortcut, name it, for instance, `Anaconda prompt (scpy)`
-        and place it in an easily accessible
-        place (e.g. the Windows Startmenu Folder).
+        and place it in an easily accessible place (e.g. the Windows Startmenu
+        Folder).
 
 #. Install |scpy|
 
-    .. sourcecode:: bat
+   .. sourcecode:: bat
 
         (scpy) C:\<yourDefaultPath>> conda install spectrochempy
 
-    This can take time, depending on your python installation and the number of
-    missing packages.
+   This can take time, depending on your python installation and the number of
+   missing packages.
 
-Install a developper version (Advanced usage)
-----------------------------------------------
+   If you prefer to deal with the latest development version, you must use the
+   following command to install from the
+   `spectrocat/label/dev <https://anaconda.org/spectrocat/spectrochempy>`_
+   channel instead of the `spectrocat` channel:
+
+   .. sourcecode:: bat
+
+        (scpy) C:\<yourDefaultPath>> conda install -c spectrocat/label/dev spectrochempy
+
+Install using pip
+-----------------
+
+|scpy| can be installed using `pip`. However, although the package is provided
+on Pypi, we are not supporting this method.
+
+.. sourcecode:: bat
+
+   (scpy)  C:\<yourDefaultPath>>  pip install spectrochempy
+
+Install a developper version from sources (Advanced usage)
+----------------------------------------------------------
 
 Installation of the developper version is described here:  :ref:`develguide`.
 

@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.4.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -166,5 +166,3 @@ for r in ranges:  # loop over the ranges
 
 # %% [markdown]
 # -- end of this tutorial -- Now, you should be ready to correct the baseline of your own data :-)
-
-# %%

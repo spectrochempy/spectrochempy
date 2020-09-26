@@ -13,77 +13,30 @@
 #     name: python3
 # ---
 
-# %% [markdown]
-# # Getting Started
-#
-# Currently **SpectroChemPy** can be used as a library for python script. 
-# Indeed, at this time, there is no particular graphical user interface (GUI) available. This may change in the future
-# but for now we prefer to recommend the use of `Jupyter Notebook` document (see https://jupyter.org/).
+# %%
 
 # %% [markdown]
-# <div class="alert alert-info">
+# # Overview
 #
-# **Note:** We assume the spectrochemistry package has been properly installed - if not please go to [Spectrochempy installation procedure](../../../gettingstarted/install/index.rst)
-#
-# </div>
-
-# %% [markdown]
-# ## Using `Jupyter Notebook`
-#
-# Assuming `Jupyter` is installed (*i.e.*, you have followed the [Spectrochempy installation procedure](../../../gettingstarted/install/index.rst)), go to your favorite user document folder (*e.g.,* `$HOME/workspace/) or any other folder you want to use to store your development).
-#
-#     $ cd ~/workspace
-#
-# From this location, type the following command:
-#
-#     $ jupyter notebook
-#
-# Your default Web explorer is now launched.
-#
-# <img src="../images/jupyter_home.png" alt="launched" width="690"/>
-#
-# Here you can create a new notebook and follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst).
-
-# %% [markdown]
-# ## Using `Jupyter Lab`
-#
-# Using the new application `jupyter lab` is very similar to the `jupyter notebook`. 
-#
-# We recommend to use this application as it is quite intuitive to use, and advantageously replace the traditional `jupyter notebook` application.
-#
-# To get more information on its usage, one can go to: 
-# [https://jupyterlab.readthedocs.io](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)
-#
-# From you worspace folder or any other location on your computer, open a terminal and issue commands as follows:
-#
-#     $ jupyter lab
-#
-# The home window should looks similar to this:
-#
-# <img src="../images/jupyter_lab_home.png" alt="launch" width="690"/>
-#
-# From there, it is quite easy to create new notebooks or to navigate to already existing ones.
-#
-# Then follow our [UserGuide](../index.rst) or [Tutorials](../../tutorials/index.rst) to get strated with
-# **SpectroChemPy**
-
-# %% [markdown]
 # ## Loading the API
 
 # %% [markdown]
-# Before using the package, we need to load the **API (Application Programming Interface)**
+# Before using the package, we need to load the **API
+# (Application Programming Interface)**
 #
-# The simplest way is to import all the objects and methods at once into your python namespace. The loading step may
-# take several seconds due to the large number of method to import in the API namespace.
+# The simplest way is to import all the objects and methods at once into your
+# python namespace. The loading step may take several seconds due to the
+# large number of method to import in the API namespace.
 
 # %%
 from spectrochempy import *
 
 # %% [markdown]
-# This is a simple way to do this, but you can also import method only when it is needed.
+# This is a simple way to do this, but you can also import method only when
+# it is needed.
 #
-# For instances, one object very usefull in the following will be a nd-dataset to contain some data. Instead of
-# issuing the previous command, one can do:
+# For instances, one object very usefull in the following will be a nd-dataset
+# to contain some data. Instead of issuing the previous command, one can do:
 
 # %%
 from spectrochempy import NDDataset
