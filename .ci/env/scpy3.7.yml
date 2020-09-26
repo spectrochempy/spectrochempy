@@ -7,6 +7,7 @@ channels:
 
 dependencies:
   - python=3.7
+
   # for the core package
   - numpy
   - scipy
@@ -32,10 +33,12 @@ dependencies:
 
   # to be suppressed when code change is finished
   - xlrd
+
   # mainly for install and a bit more...
   - setuptools
   - setuptools_scm
   - git
+
   # need this, because the API is mainly designed to run in Jupyter notebook
   - ipywidgets
   - ipympl

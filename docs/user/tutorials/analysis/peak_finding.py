@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.4.2
+#       jupytext_version: 1.6.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -21,7 +21,7 @@
 # expected to have read the [Import](../IO/import.ipynb), [Import IR](../IO/importIR.ipynb),
 # [slicing](../processing/slicing.ipynb) tutorials. First lets import the modules that will be used in this tutorial:
 
-# %% execution={"iopub.status.busy": "2020-06-22T12:21:23.097Z", "iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.idle": "2020-06-22T12:21:29.376Z", "shell.execute_reply": "2020-06-22T12:21:29.348Z"}
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:23.143Z", "iopub.status.busy": "2020-06-22T12:21:23.097Z", "iopub.status.idle": "2020-06-22T12:21:29.376Z", "shell.execute_reply": "2020-06-22T12:21:29.348Z"}
 import spectrochempy as scp
 import matplotlib.pyplot as plt  # will be used for some plots
 
@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt  # will be used for some plots
 # Second, import and plot a typical IR dataset (CO adsorption on supported CoMo catalyst in the 2300-1900 cm-1 region)
 # that will be used throughout:
 
-# %% execution={"iopub.status.busy": "2020-06-22T12:21:31.942Z", "iopub.execute_input": "2020-06-22T12:21:31.950Z", "shell.execute_reply": "2020-06-22T12:21:31.994Z", "iopub.status.idle": "2020-06-22T12:21:31.987Z"}
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:31.950Z", "iopub.status.busy": "2020-06-22T12:21:31.942Z", "iopub.status.idle": "2020-06-22T12:21:31.987Z", "shell.execute_reply": "2020-06-22T12:21:31.994Z"}
 X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
 
 # %% [markdown]
@@ -58,7 +58,7 @@ X = scp.read_omnic('irdata/CO@Mo_Al2O3.SPG')[:, 2300.:1900.]
 #    This feature doesn't work (for now in with `jupyter lab` but with `Jupyter notebook` it is OK.
 #    (It is commented below to avoir problem when generating this documentation)
 #
-# %% execution={"iopub.status.busy": "2020-06-22T12:21:38.285Z", "iopub.execute_input": "2020-06-22T12:21:38.304Z", "iopub.status.idle": "2020-06-22T12:21:38.801Z", "shell.execute_reply": "2020-06-22T12:21:38.971Z"}
+# %% execution={"iopub.execute_input": "2020-06-22T12:21:38.304Z", "iopub.status.busy": "2020-06-22T12:21:38.285Z", "iopub.status.idle": "2020-06-22T12:21:38.801Z", "shell.execute_reply": "2020-06-22T12:21:38.971Z"}
 # #%matplotlib widget
 ax = X.plot(cmap='Dark2')
 

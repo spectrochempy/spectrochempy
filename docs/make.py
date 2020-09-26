@@ -186,6 +186,10 @@ class BuildDocumentation(object):
         if builder == 'latex':
             self.resize_img(GALLERYDIR, size=580.)
 
+        #when it is terminated suppress all ipynb to avoid problems with
+        # jupyter lab abd jupytex
+        self.delnb()
+
     # ..................................................................................................................
     @staticmethod
     def resize_img(folder, size):
