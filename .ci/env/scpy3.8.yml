@@ -1,0 +1,83 @@
+name: scpy3.8
+channels:
+    - conda-forge
+    - spectrocat
+    - cantera
+    - cantera/label/dev
+    - defaults
+
+dependencies:
+    - python=3.8
+
+    # specific
+    - cantera
+    - quadprog
+    - brukeropusreader
+    - quaternion
+    - nmrglue
+
+  # for the core package
+    - colorama
+    - docrep
+    - ipython
+    - jinja2
+    - matplotlib
+    - numba
+    - numpy
+    - orderedset
+    - pandas
+    - pint
+    - pyqt
+    - requests
+    - scipy
+    - tqdm
+    - traitlets
+    - traittypes
+
+  # to be suppressed when code change is finished
+    - xlrd
+
+  # mainly for install and a bit more...
+    - setuptools
+    - setuptools_scm
+    - git
+
+  # need this, because the API is mainly designed to run in Jupyter notebook
+    - ipywidgets
+    - ipympl
+    - jupyterlab
+    - nodejs
+
+  # DEV: just for testing
+    - pytest
+    # - pytest-tornasync
+    - pytest-flake8
+    - scikit-image
+    - coverage
+
+  # DEV: docs
+    - jupytext
+    - sphinx
+    - sphinx_rtd_theme
+    - autodocsumm
+    - sphinx-gallery
+    - nbsphinx
+    - jupyter_sphinx
+    - json5
+
+  # DEV: build
+    - conda-build
+    - conda-verify
+    - anaconda-client
+  # - twine
+
+  # optional
+  # - xarray
+  # - datashader
+  # - scikit-learn
+
+  # pip only for docs
+    - pip
+    - pip:
+        - autodoc_traits
+

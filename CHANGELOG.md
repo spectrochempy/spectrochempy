@@ -16,10 +16,6 @@ Version 0.1.22
     [\#71](https://api.github.com/repos/spectrochempy/spectrochempy/issues/71)
     : interactive baseline not working (in Jupyter Lab)
 
-### Features added
-
-### Tasks terminated
-
 Version 0.1.21
 --------------
 
@@ -46,8 +42,6 @@ Version 0.1.21
 -   FIX
     [\#127](https://api.github.com/repos/spectrochempy/spectrochempy/issues/127)
     : FIX: an indentation error
-
-### Features added
 
 ### Tasks terminated
 

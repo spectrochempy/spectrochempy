@@ -14,10 +14,6 @@ Bugs fixed
 * FIX `#128 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/128>`_ : FIX: modify the way update are checked.
 * FIX `#127 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/127>`_ : FIX: an indentation error
 
-Features added
-~~~~~~~~~~~~~~~~
-
-
 Tasks terminated
 ~~~~~~~~~~~~~~~~~
 

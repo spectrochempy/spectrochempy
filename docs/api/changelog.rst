@@ -17,13 +17,6 @@ Bugs fixed
 * FIX `#72 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/72>`_ : Matplotlib widgets not working (in jupyter Lab)
 * FIX `#71 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/71>`_ : interactive baseline not working (in Jupyter Lab)
 
-Features added
-~~~~~~~~~~~~~~~~
-
-
-Tasks terminated
-~~~~~~~~~~~~~~~~~
-
 
 
 Version 0.1.21
@@ -39,10 +32,6 @@ Bugs fixed
 * FIX `#132 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/132>`_ : FIX: Unit display
 * FIX `#128 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/128>`_ : FIX: modify the way update are checked.
 * FIX `#127 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/127>`_ : FIX: an indentation error
-
-Features added
-~~~~~~~~~~~~~~~~
-
 
 Tasks terminated
 ~~~~~~~~~~~~~~~~~

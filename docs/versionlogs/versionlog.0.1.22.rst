@@ -10,11 +10,4 @@ Bugs fixed
 * FIX `#72 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/72>`_ : Matplotlib widgets not working (in jupyter Lab)
 * FIX `#71 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/71>`_ : interactive baseline not working (in Jupyter Lab)
 
-Features added
-~~~~~~~~~~~~~~~~
-
-
-Tasks terminated
-~~~~~~~~~~~~~~~~~
-
 
