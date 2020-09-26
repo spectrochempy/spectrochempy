@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - spectrocat
   - cantera
+  - cantera/label/dev
   - defaults
 
 dependencies:
