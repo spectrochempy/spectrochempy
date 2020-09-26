@@ -1,6 +1,25 @@
 What\'s new
 ===========
 
+Version 0.1.22
+--------------
+
+### Bugs fixed
+
+-   FIX
+    [\#140](https://api.github.com/repos/spectrochempy/spectrochempy/issues/140)
+    : compatibilyTraitlets 5.0
+-   FIX
+    [\#72](https://api.github.com/repos/spectrochempy/spectrochempy/issues/72)
+    : Matplotlib widgets not working (in jupyter Lab)
+-   FIX
+    [\#71](https://api.github.com/repos/spectrochempy/spectrochempy/issues/71)
+    : interactive baseline not working (in Jupyter Lab)
+
+### Features added
+
+### Tasks terminated
+
 Version 0.1.21
 --------------
 
@@ -9,6 +28,9 @@ Version 0.1.21
 -   FIX
     [\#142](https://api.github.com/repos/spectrochempy/spectrochempy/issues/142)
     : Fail in test due to units
+-   FIX
+    [\#140](https://api.github.com/repos/spectrochempy/spectrochempy/issues/140)
+    : compatibilyTraitlets 5.0
 -   FIX
     [\#138](https://api.github.com/repos/spectrochempy/spectrochempy/issues/138)
     : build doc fails: make.py

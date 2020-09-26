@@ -166,5 +166,3 @@ for r in ranges:  # loop over the ranges
 
 # %% [markdown]
 # -- end of this tutorial -- Now, you should be ready to correct the baseline of your own data :-)
-
-# %%
