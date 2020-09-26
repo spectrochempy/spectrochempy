@@ -11,3 +11,8 @@ Bugs fixed
 * FIX `#71 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/71>`_ : interactive baseline not working (in Jupyter Lab)
 
 
+Tasks terminated
+~~~~~~~~~~~~~~~~~
+
+* `#145 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/145>`_ : Compatibility with py-3.8
+* `#144 <https://api.github.com/repos/spectrochempy/spectrochempy/issues/144>`_ : remove ipynb file after building docs
