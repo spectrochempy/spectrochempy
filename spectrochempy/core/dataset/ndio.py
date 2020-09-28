@@ -420,6 +420,7 @@ class NDIO(HasTraits):
     def load(cls,
              fid='',
              protocol=None,
+             content=None,
              directory=prefs.datadir,
              **kwargs
              ):
@@ -435,6 +436,8 @@ class NDIO(HasTraits):
             The names of the files to read (or the file objects).
         protocol : str, optional, default:'scp'
             The default type for loading.
+        content : str, optional #TODO: work on this for a list of contents
+             The optional content of the file(s) to be loaded as a binary string
         directory : str, optional, default:`prefs.datadir`
             The directory from where to load the file.
         kwargs : optional keyword parameters.
@@ -496,10 +499,12 @@ class NDIO(HasTraits):
         filename : str
             The path to the file to be read. If it is not provided,
             at least a protocol must be given.
-        protocol : str
+        protocol : str, optional
             Protocol used for reading. If not provided, the correct protocol
             is evaluated from the file name extension.
             Existing protocol: 'scp', 'omnic', 'opus', 'matlab', 'jdx', 'csv', ...
+        content : str, optional
+             The optional contents of the file to be loaded as a binary string
         kwargs : optional keyword parameters
             Any additional keyword to pass to the actual reader
 
@@ -511,6 +516,7 @@ class NDIO(HasTraits):
 
         protocol = kwargs.pop('protocol', None)
         sortbydate = kwargs.pop('sortbydate', True)
+        content= kwargs.pop('content', None)
 
         if filename is None and protocol is None:
             raise ValueError('read method require a parameter ``filename`` '
@@ -524,12 +530,12 @@ class NDIO(HasTraits):
 
         if protocol == 'scp':
             # default reader
-            return cls.load(filename, protocol='scp', **kwargs)
+            return cls.load(filename, protocol='scp', content=content, **kwargs)
 
             # try:
             # find the adequate reader
         _reader = getattr(cls, 'read_{}'.format(protocol))
-        return _reader(filename, sortbydate=sortbydate, **kwargs)
+        return _reader(filename, sortbydate=sortbydate, content=content, **kwargs)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Generic write function

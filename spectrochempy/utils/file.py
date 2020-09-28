@@ -77,6 +77,8 @@ def readfilename(filename=None, **kwargs):
         file type filter
     dictionary : `bool`, optional, default=True
         Whether a dictionary or a list should be returns
+    check_exists : `bool`, optional, default=True
+        If False do not check file existence
 
     Returns
     --------
@@ -122,7 +124,7 @@ def readfilename(filename=None, **kwargs):
                 _f = os.path.expanduser(os.path.join(directory, filename))
             else:
                 _f = filename
-                if not os.path.exists(_f):
+                if kwargs.get('check_exists', True) and not os.path.exists(_f):
                     # the filename provided doesn't exists in the specified directory
                     # or the current directory let's try in the default data directory
                     _f = os.path.join(prefs.datadir, filename)

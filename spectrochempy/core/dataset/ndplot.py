@@ -189,6 +189,11 @@ class NDPlot(HasTraits):
 
         return ax
 
+    def close_figure(self):
+        """Close a Matplotlib figure associated to this dataset"""
+        if self._fig is not None:
+            plt.close(self._fig)
+
     # ------------------------------------------------------------------------------------------------------------------
     # setup figure properties
     # ------------------------------------------------------------------------------------------------------------------

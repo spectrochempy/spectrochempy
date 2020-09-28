@@ -18,6 +18,8 @@ __dataset_methods__ = __all__
 
 import os
 from datetime import datetime, timezone, timedelta
+import io
+import struct
 
 import numpy as np
 
@@ -34,6 +36,30 @@ from spectrochempy.utils import readfilename, pathclean
 # ----------------------------------------------------------------------------------------------------------------------
 # local imports
 # ----------------------------------------------------------------------------------------------------------------------
+
+
+def _fromfile(f, dtype, count):
+    # to replace np.fromfile in case of io.BytesIO object instead of byte object
+    t = {
+        'uint8':'B',
+        'int8':'b',
+        'uint16':'H',
+        'int16':'h',
+        'uint32':'I',
+        'int32':'i',
+        'float32':'f',
+    }
+    typ = t[dtype] * count
+    if dtype.endswith('16'):
+        count=count*2
+    elif dtype.endswith('32'):
+        count=count*4
+
+    out = struct.unpack(typ, f.read(count))
+    if len(out)==1:
+        return out[0]
+    return np.array(out)
+
 
 # ======================================================================================================================
 # Public functions
@@ -59,6 +85,8 @@ def read_omnic(dataset=None, **kwargs):
         Filename of the file(s) to load. If `None` : opens a dialog box to select
         ``.spa`` or ``.spg`` files. If `str` : a single filename. It list of str :
         a list of filenames.
+    content : str, optional
+             The optional contents of the file to be loaded as a binary string
     directory : str, optional, default="".
         From where to read the specified filename. If not specified, read in
         the defaults datadir.
@@ -98,14 +126,16 @@ def read_omnic(dataset=None, **kwargs):
 
     sortbydate = kwargs.pop("sortbydate", True)
 
+    content = kwargs.get('content', None)
+
     # returns a list of files to read
     directory = pathclean(kwargs.get("directory", None))
     files = readfilename(filename,
+                         check_exists=content is None,
                          directory=directory,
                          filetypes=['OMNIC files (*.spa, *.spg)',
                                     'OMNIC series (*.srs)',
                                     'all files (*)'])
-
     if not files:
         # there is no files, return nothing
         return None
@@ -179,7 +209,7 @@ def _readheader02(f, pos):
     # read spectrum header, pos is the position of the 02 key
     # returns a dict
     f.seek(pos + 2)  # go to line and skip 2 bytes
-    info_pos = np.fromfile(f, dtype='uint32', count=1)[0]
+    info_pos = _fromfile(f, dtype='uint32', count=1)
 
     # other positions:
     #   nx_pos = info_pos + 4
@@ -191,11 +221,11 @@ def _readheader02(f, pos):
     #   nbkgscan_pos = info_pos + 52;
 
     f.seek(info_pos + 4)
-    out = {'nx': np.fromfile(f, 'uint32', 1)}
+    out = {'nx': _fromfile(f, 'uint32', 1)}
 
     # read xaxis unit
     f.seek(info_pos + 8)
-    key = np.fromfile(f, dtype='uint8', count=1)[0]
+    key = _fromfile(f, dtype='uint8', count=1)
     if key == 1:
         out['xunits'] = 'cm ^ -1'
         out['xtitle'] = 'Wavenumbers'
@@ -218,7 +248,7 @@ def _readheader02(f, pos):
 
     # read data unit
     f.seek(info_pos + 12)
-    key = np.fromfile(f, dtype='uint8', count=1)[0]
+    key = _fromfile(f, dtype='uint8', count=1)
     if key == 17:
         out['units'] = 'absorbance'
         out['title'] = 'Absorbance'
@@ -249,13 +279,13 @@ def _readheader02(f, pos):
         # warning: 'The nature of data is not recognized, title set to \'Intensity\')
 
     f.seek(info_pos + 16)
-    out['firstx'] = np.fromfile(f, 'float32', 1)
+    out['firstx'] = _fromfile(f, 'float32', 1)
     f.seek(info_pos + 20)
-    out['lastx'] = np.fromfile(f, 'float32', 1)
+    out['lastx'] = _fromfile(f, 'float32', 1)
     f.seek(info_pos + 36)
-    out['nscan'] = np.fromfile(f, 'uint32', 1)
+    out['nscan'] = _fromfile(f, 'uint32', 1)
     f.seek(info_pos + 52)
-    out['nbkgscan'] = np.fromfile(f, 'uint32', 1)
+    out['nbkgscan'] = _fromfile(f, 'uint32', 1)
 
     return out
 
@@ -267,7 +297,7 @@ def _read_xheader(f, pos):
     # Todo: merge with _readheader02
 
     f.seek(pos)
-    key = np.fromfile(f, dtype='uint8', count=1)[0]
+    key = _fromfile(f, dtype='uint8', count=1)[0]
 
     if key not in (1, 3):
         raise ValueError("xheader key={} not recognized yet.".format(key) +
@@ -287,11 +317,11 @@ def _read_xheader(f, pos):
     #   nbkgscan_pos = info_pos + 52;
 
     f.seek(pos + 4)
-    out['nx'] = np.fromfile(f, 'uint32', 1)[0]
+    out['nx'] = _fromfile(f, 'uint32', count=1)
 
     # read xaxis unit
     f.seek(pos + 8)
-    key = np.fromfile(f, dtype='uint8', count=1)[0]
+    key = _fromfile(f, dtype='uint8', count=1)
     if key == 1:
         out['xunits'] = 'cm ^ -1'
         out['xtitle'] = 'Wavenumbers'
@@ -313,7 +343,7 @@ def _read_xheader(f, pos):
         # warning: 'The nature of data is not recognized, xtitle set to \'xaxis\')
     # read data unit
     f.seek(pos + 12)
-    key = np.fromfile(f, dtype='uint8', count=1)[0]
+    key = _fromfile(f, dtype='uint8', count=1)
     if key == 17:
         out['units'] = 'absorbance'
         out['title'] = 'Absorbance'
@@ -344,17 +374,17 @@ def _read_xheader(f, pos):
         # warning: 'The nature of data is not recognized, title set to \'Intensity\')
 
     f.seek(pos + 16)
-    out['firstx'] = np.fromfile(f, 'float32', 1)[0]
+    out['firstx'] = _fromfile(f, 'float32', 1)
     f.seek(pos + 20)
-    out['lastx'] = np.fromfile(f, 'float32', 1)[0]
+    out['lastx'] = _fromfile(f, 'float32', 1)
     f.seek(pos + 28)
-    out['scan_pts'] = np.fromfile(f, 'uint32', 1)[0]
+    out['scan_pts'] = _fromfile(f, 'uint32', 1)
     f.seek(pos + 32)
-    out['zpd'] = np.fromfile(f, 'uint32', 1)[0]
+    out['zpd'] = _fromfile(f, 'uint32', 1)
     f.seek(pos + 36)
-    out['nscan'] = np.fromfile(f, 'uint32', 1)[0]
+    out['nscan'] = _fromfile(f, 'uint32', 1)
     f.seek(pos + 52)
-    out['nbkgscan'] = np.fromfile(f, 'uint32', 1)[0]
+    out['nbkgscan'] = _fromfile(f, 'uint32', 1)
     if out['nbkgscan'] == 0:  # then probably interferogram in rapid scan mode
     #     out['units'] = 'V'
     #     out['title'] = 'Volts'
@@ -368,13 +398,13 @@ def _read_xheader(f, pos):
 
     out['name'] = _readbtext(f, pos + 938)
     f.seek(pos + 1002)
-    out['coll_length'] = np.fromfile(f, 'float32', 1)[0] * 60
+    out['coll_length'] = _fromfile(f, 'float32', 1) * 60
     f.seek(pos + 1006)
-    out['lasty'] = np.fromfile(f, 'float32', 1)[0]
+    out['lasty'] = _fromfile(f, 'float32', 1)
     f.seek(pos + 1010)
-    out['firsty'] = np.fromfile(f, 'float32', 1)[0]
+    out['firsty'] = _fromfile(f, 'float32', 1)
     f.seek(pos + 1026)
-    out['ny'] = np.fromfile(f, 'uint32', 1)[0]
+    out['ny'] = _fromfile(f, 'uint32', 1)
     #  y unit could be at pos+1030 with 01 = minutes ?
     return out, pos + 1026
 
@@ -384,14 +414,14 @@ def _getintensities(f, pos):
     # returns a ndarray
 
     f.seek(pos + 2)  # skip 2 bytes
-    intensity_pos = np.fromfile(f, 'uint32', 1)[0]
+    intensity_pos = _fromfile(f, 'uint32', 1)
     f.seek(pos + 6)
-    intensity_size = np.fromfile(f, 'uint32', 1)[0]
+    intensity_size = _fromfile(f, 'uint32', 1)
     nintensities = int(intensity_size / 4)
 
     # Read and return spectral intensities
     f.seek(intensity_pos)
-    return np.fromfile(f, 'float32', int(nintensities))
+    return _fromfile(f, 'float32', int(nintensities))
 
 
 # .............................................................................
@@ -401,154 +431,161 @@ def _read_spg(dataset, filename, **kwargs):
     # read spg file
 
     sortbydate = kwargs.get('sortbydate', True)
-    with open(filename, 'rb') as f:
+    content = kwargs.get('content', None)
+    if content is not None:
+        f = io.BytesIO(content)
+    else:
+        f = open(filename, 'rb')
 
-        # Read title:
-        # The file title starts at position hex 1e = decimal 30. Its max length is 256 bytes.
-        #  It is the original filename under which the group has been saved: it won't match with
-        #  the actual filename if a subsequent renaming has been done in the OS.
+    # Read title:
+    # The file title starts at position hex 1e = decimal 30. Its max length is 256 bytes.
+    #  It is the original filename under which the group has been saved: it won't match with
+    #  the actual filename if a subsequent renaming has been done in the OS.
 
-        spg_title = _readbtext(f, 30)
+    spg_title = _readbtext(f, 30)
 
-        # Count the number of spectra
-        # From hex 120 = decimal 304, individual spectra are described
-        # by blocks of lines starting with "key values",
-        # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
-        # Each of theses lines provides positions of data and metadata in the file:
-        #
-        #     key: hex 02, dec  02: position of spectral header (=> nx,
-        #                                 firstx, lastx, nscans, nbkgscans)
-        #     key: hex 03, dec  03: intensity position
-        #     key: hex 04, dec  04: user text position
-        #     key: hex 1B, dec  27: position of History text
-        #     key: hex 69, dec 105: ?
-        #     key: hex 6a, dec 106: ?
-        #     key: hex 6b, dec 107: position of spectrum title, the acquisition
-        #                                 date follows at +256(dec)
-        #     key: hex 80, dec 128: ?
-        #     key: hex 82, dec 130: ?
-        #
-        # the number of line per block may change from one omnic version to another,
-        # but the total number of lines is given at hex 294, hence allowing counting
-        # number of spectra:
+    # Count the number of spectra
+    # From hex 120 = decimal 304, individual spectra are described
+    # by blocks of lines starting with "key values",
+    # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
+    # Each of theses lines provides positions of data and metadata in the file:
+    #
+    #     key: hex 02, dec  02: position of spectral header (=> nx,
+    #                                 firstx, lastx, nscans, nbkgscans)
+    #     key: hex 03, dec  03: intensity position
+    #     key: hex 04, dec  04: user text position
+    #     key: hex 1B, dec  27: position of History text
+    #     key: hex 69, dec 105: ?
+    #     key: hex 6a, dec 106: ?
+    #     key: hex 6b, dec 107: position of spectrum title, the acquisition
+    #                                 date follows at +256(dec)
+    #     key: hex 80, dec 128: ?
+    #     key: hex 82, dec 130: ?
+    #
+    # the number of line per block may change from one omnic version to another,
+    # but the total number of lines is given at hex 294, hence allowing counting
+    # number of spectra:
 
-        # read total number of lines
-        f.seek(294)
-        nlines = np.fromfile(f, 'uint16', count=1)
+    # read total number of lines
+    f.seek(294)
+    nlines = _fromfile(f, 'uint16', count=1)
 
-        # read "key values"
-        pos = 304
-        keys = np.zeros(nlines)
-        for i in range(nlines[0]):
-            f.seek(pos)
-            keys[i] = np.fromfile(f, dtype='uint8', count=1)[0]
-            pos = pos + 16
+    # read "key values"
+    pos = 304
+    keys = np.zeros(nlines)
+    for i in range(nlines):
+        f.seek(pos)
+        keys[i] = _fromfile(f, dtype='uint8', count=1)
+        pos = pos + 16
 
-        # the number of occurences of the key '02' is number of spectra
-        nspec = np.count_nonzero((keys == 2))
+    # the number of occurences of the key '02' is number of spectra
+    nspec = np.count_nonzero((keys == 2))
 
-        if nspec == 0:
-            raise IOError('Error : File format not recognized'
-                          ' - information markers not found')
+    if nspec == 0:
+        raise IOError('Error : File format not recognized'
+                      ' - information markers not found')
 
-        # container to hold values
-        nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec, 'float'), np.zeros(nspec, 'float')
-        xunits = []
-        xtitles = []
-        units = []
-        titles = []
+    # container to hold values
+    nx, firstx, lastx = np.zeros(nspec, 'int'), np.zeros(nspec, 'float'), np.zeros(nspec, 'float')
+    xunits = []
+    xtitles = []
+    units = []
+    titles = []
 
-        # Extracts positions of '02' keys
-        key_is_02 = (keys == 2)  # ex: [T F F F F T F (...) F T ....]'
-        indices02 = np.nonzero(key_is_02)  # ex: [1 9 ...]
-        position02 = 304 * np.ones(len(indices02[0]), dtype='int') + 16 * indices02[0]  # ex: [304 432 ...]
+    # Extracts positions of '02' keys
+    key_is_02 = (keys == 2)  # ex: [T F F F F T F (...) F T ....]'
+    indices02 = np.nonzero(key_is_02)  # ex: [1 9 ...]
+    position02 = 304 * np.ones(len(indices02[0]), dtype='int') + 16 * indices02[0]  # ex: [304 432 ...]
 
-        for i in range(nspec):
-            info02 = _readheader02(f, position02[i])
-            nx[i] = info02['nx']
-            firstx[i] = info02['firstx']
-            lastx[i] = info02['lastx']
-            xunits.append(info02['xunits'])
-            xtitles.append(info02['xtitle'])
-            units.append(info02['units'])
-            titles.append(info02['title'])
+    for i in range(nspec):
+        info02 = _readheader02(f, position02[i])
+        nx[i] = info02['nx']
+        firstx[i] = info02['firstx']
+        lastx[i] = info02['lastx']
+        xunits.append(info02['xunits'])
+        xtitles.append(info02['xtitle'])
+        units.append(info02['units'])
+        titles.append(info02['title'])
 
-        # check the consistency of xaxis and data units
-        if np.ptp(nx) != 0:
-            raise ValueError('Error : Inconsistent data set -'
-                             ' number of wavenumber per spectrum should be identical')
-        elif np.ptp(firstx) != 0:
-            raise ValueError('Error : Inconsistent data set - '
-                             'the x axis should start at same value')
-        elif np.ptp(lastx) != 0:
-            raise ValueError('Error : Inconsistent data set -'
-                             ' the x axis should end at same value')
-        elif len(set(xunits)) != 1:
-            raise ValueError('Error : Inconsistent data set - '
-                             'data units should be identical')
-        elif len(set(units)) != 1:
-            raise ValueError('Error : Inconsistent data set - '
-                             'x axis units should be identical')
+    # check the consistency of xaxis and data units
+    if np.ptp(nx) != 0:
+        raise ValueError('Error : Inconsistent data set -'
+                         ' number of wavenumber per spectrum should be identical')
+    elif np.ptp(firstx) != 0:
+        raise ValueError('Error : Inconsistent data set - '
+                         'the x axis should start at same value')
+    elif np.ptp(lastx) != 0:
+        raise ValueError('Error : Inconsistent data set -'
+                         ' the x axis should end at same value')
+    elif len(set(xunits)) != 1:
+        raise ValueError('Error : Inconsistent data set - '
+                         'data units should be identical')
+    elif len(set(units)) != 1:
+        raise ValueError('Error : Inconsistent data set - '
+                         'x axis units should be identical')
 
-        data = np.ndarray((nspec, nx[0]), dtype='float32')
-        # now the intensity data
-        # Extracts positions of '03' keys
-        key_is_03 = (keys == 3)
-        indices03 = np.nonzero(key_is_03)
-        position03 = 304 * np.ones(len(indices03[0]), dtype='int') + 16 * indices03[0]
+    data = np.ndarray((nspec, nx[0]), dtype='float32')
+    # now the intensity data
+    # Extracts positions of '03' keys
+    key_is_03 = (keys == 3)
+    indices03 = np.nonzero(key_is_03)
+    position03 = 304 * np.ones(len(indices03[0]), dtype='int') + 16 * indices03[0]
 
-        # Read number of spectral intensities
-        for i in range(nspec):
-            data[i, :] = _getintensities(f, position03[i])
-        # ..............................................................................................................
+    # Read number of spectral intensities
+    for i in range(nspec):
+        data[i, :] = _getintensities(f, position03[i])
+    # ..............................................................................................................
 
-        # Get spectra titles & acquisition dates:
-        # container to hold values
-        spectitles, acquisitiondates, timestamps = [], [], []
+    # Get spectra titles & acquisition dates:
+    # container to hold values
+    spectitles, acquisitiondates, timestamps = [], [], []
 
-        # extract positions of '6B' keys (spectra titles & acquisition dates)
-        key_is_6B = (keys == 107)
-        indices6B = np.nonzero(key_is_6B)
-        position6B = 304 * np.ones(len(indices6B[0]), dtype='int') + 16 * indices6B[0]
+    # extract positions of '6B' keys (spectra titles & acquisition dates)
+    key_is_6B = (keys == 107)
+    indices6B = np.nonzero(key_is_6B)
+    position6B = 304 * np.ones(len(indices6B[0]), dtype='int') + 16 * indices6B[0]
 
-        # read spectra titles and acquisition date
-        for i in range(nspec):
-            # determines the position of informatioon
-            f.seek(position6B[i] + 2)  # go to line and skip 2 bytes
-            spa_title_pos = np.fromfile(f, 'uint32', 1)
+    # read spectra titles and acquisition date
+    for i in range(nspec):
+        # determines the position of informatioon
+        f.seek(position6B[i] + 2)  # go to line and skip 2 bytes
+        spa_title_pos = _fromfile(f, 'uint32', 1)
 
-            # read filename
-            spa_title = _readbtext(f, spa_title_pos[0])
-            spectitles.append(spa_title)
+        # read filename
+        spa_title = _readbtext(f, spa_title_pos) # [0])
+        spectitles.append(spa_title)
 
-            # and the acquisition date
-            f.seek(spa_title_pos[0] + 256)
-            timestamp = np.fromfile(f, dtype=np.uint32, count=1)[0]  # since 31/12/1899, 00:00
-            acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
-            acquisitiondates.append(acqdate)
-            timestamp = acqdate.timestamp()
-            # Transform back to timestamp for storage in the Coord object
-            # use datetime.fromtimestamp(d, timezone.utc))
-            # to transform back to datetime obkct
+        # and the acquisition date
+        f.seek(spa_title_pos + 256)
+        timestamp = _fromfile(f, dtype='uint32', count=1) #
+        # since 31/12/1899, 00:00
+        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
+        acquisitiondates.append(acqdate)
+        timestamp = acqdate.timestamp()
+        # Transform back to timestamp for storage in the Coord object
+        # use datetime.fromtimestamp(d, timezone.utc))
+        # to transform back to datetime obkct
 
-            timestamps.append(timestamp)
+        timestamps.append(timestamp)
 
-            # Not used at present
-            # -------------------
-            # extract positions of '1B' codes (history text
-            #  -- sometimes absent, e.g. peakresolve)
-            # key_is_1B = (keys == 27)
-            # indices1B = np.nonzero(key_is_1B)
-            # position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
-            # if len(position1B) != 0:
-            #    # read history texts
-            #    for j in range(nspec):
-            #        # determine the position of information
-            #        f.seek(position1B[j] + 2)
-            #        history_pos = np.fromfile(f, 'uint32', 1)
-            #        # read history
-            #        history = _readbtext(f, history_pos[0])
-            #        allhistories.append(history)
+        # Not used at present
+        # -------------------
+        # extract positions of '1B' codes (history text
+        #  -- sometimes absent, e.g. peakresolve)
+        # key_is_1B = (keys == 27)
+        # indices1B = np.nonzero(key_is_1B)
+        # position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
+        # if len(position1B) != 0:
+        #    # read history texts
+        #    for j in range(nspec):
+        #        # determine the position of information
+        #        f.seek(position1B[j] + 2)
+        #        history_pos = _fromfile(f, 'uint32', 1)
+        #        # read history
+        #        history = _readbtext(f, history_pos[0])
+        #        allhistories.append(history)
+
+    f.close()
 
     # Create Dataset Object of spectral content
     dataset.data = data
@@ -590,6 +627,7 @@ def _read_spg(dataset, filename, **kwargs):
 
 
 def _read_spa(dataset, filenames, **kwargs):
+
     nspec = len(filenames)
 
     # containers to hold values
@@ -605,6 +643,9 @@ def _read_spa(dataset, filenames, **kwargs):
     allacquisitiondates = []
     alltimestamps = []
     allhistories = []
+
+    content = kwargs.get('content', None)
+    # TODO: bytesIO handling
 
     for i, _filename in enumerate(filenames):
 
@@ -623,7 +664,7 @@ def _read_spa(dataset, filenames, **kwargs):
             f.seek(296)
 
             # days since 31/12/1899, 00:00
-            timestamp = np.fromfile(f, dtype=np.uint32, count=1)[0]
+            timestamp = _fromfile(f, dtype=np.uint32, count=1)
             acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
             allacquisitiondates.append(acqdate)
             timestamp = acqdate.timestamp()
@@ -653,7 +694,7 @@ def _read_spa(dataset, filenames, **kwargs):
             pos = 304
             while not (all(gotinfos)):
                 f.seek(pos)
-                key = np.fromfile(f, dtype='uint8', count=1)[0]
+                key = _fromfile(f, dtype='uint8', count=1)
                 if key == 2:
                     info02 = _readheader02(f, pos)
                     nx[i] = info02['nx']
@@ -671,7 +712,7 @@ def _read_spa(dataset, filenames, **kwargs):
 
                 elif key == 27:
                     f.seek(pos + 2)
-                    history_pos = np.fromfile(f, 'uint32', 1)[0]
+                    history_pos = _fromfile(f, 'uint32', 1)
                     # read history
                     history = _readbtext(f, history_pos)
                     allhistories.append(history)
@@ -742,7 +783,7 @@ def _read_srs(dataset, filename, **kwargs):
     with open(filename, 'rb') as f:
         # at pos=306 (hex:132) is the position of the xheader
         f.seek(306)
-        pos_xheader = np.fromfile(f, dtype='int32', count=1)[0]
+        pos_xheader = _fromfile(f, dtype='int32', count=1)
         info, pos = _read_xheader(f, pos_xheader)
 
         # reset current position at the start of next line
@@ -763,7 +804,7 @@ def _read_srs(dataset, filename, **kwargs):
         while not found:
             pos += 16
             f.seek(pos)
-            line = np.fromfile(f, dtype='uint8', count=16)
+            line = _fromfile(f, dtype='uint8', count=16)
             if np.all(line == [15, 0, 0, 0, 2, 0, 0, 0, 24, 0, 0, 0, 0, 0, 72, 67]):
                 # hex 0F 00 00 00 02 00 00 00 18 00 00 00 00 00 48 43
                 # this is a fingerprint of header of data fields for non-processed series
@@ -771,7 +812,7 @@ def _read_srs(dataset, filename, **kwargs):
                 if background is None:
                         pos += 52
                         f.seek(pos)
-                        key = np.fromfile(f, dtype='uint16', count=1)[0]
+                        key = _fromfile(f, dtype='uint16', count=1)
 
                         if key > 0:
                             # a background file was selected; it is present as a single sided interferogram
@@ -782,7 +823,7 @@ def _read_srs(dataset, filename, **kwargs):
                             pos += 256  # max length of text
                             pos += 8  # unknown info ?
                             f.seek(pos)
-                            background = np.fromfile(f, dtype='float32', count=background_size)
+                            background = _fromfile(f, dtype='float32', count=background_size)
                             pos += background_size * 4
                             pos = _nextline(pos)
 
@@ -791,13 +832,13 @@ def _read_srs(dataset, filename, **kwargs):
                             background_size = info['nx']
                             pos += 8
                             f.seek(pos)
-                            background = np.fromfile(f, dtype='float32', count=background_size)
+                            background = _fromfile(f, dtype='float32', count=background_size)
                             pos += background_size * 4
                             background_name = _readbtext(f, pos)
                             # uncomment below to read unused data (noise measurement ?)
                             # pos += 268
                             # f.seek(pos)
-                            # noisy_data = np.fromfile(f, dtype='float32', count=499)
+                            # noisy_data = _fromfile(f, dtype='float32', count=499)
                             pos = _nextline(pos)
 
                         # Create a NDDataset for the background
@@ -833,7 +874,7 @@ def _read_srs(dataset, filename, **kwargs):
 
         # read first data
         f.seek(pos)
-        data[0, :] = np.fromfile(f, dtype='float32', count=info['nx'])[:]
+        data[0, :] = _fromfile(f, dtype='float32', count=info['nx'])[:]
         pos += info['nx'] * 4
         # and the remaining part:
         for i in np.arange(info['ny'])[1:]:
@@ -841,7 +882,7 @@ def _read_srs(dataset, filename, **kwargs):
             names.append(_readbtext(f, pos))
             pos += 84
             f.seek(pos)
-            data[i, :] = np.fromfile(f, dtype='float32', count=info['nx'])[:]
+            data[i, :] = _fromfile(f, dtype='float32', count=info['nx'])[:]
             pos += info['nx'] * 4
 
         # Create NDDataset Object for the series
@@ -879,11 +920,11 @@ def _read_srs(dataset, filename, **kwargs):
         # while not found:
         #     pos += 16
         #     f.seek(pos)
-        #     key = np.fromfile(f, dtype='uint8', count=1)
+        #     key = _fromfile(f, dtype='uint8', count=1)
         #     if key == 1:
         #         pos += 4
         #         f.seek(pos)
-        #         X = np.fromfile(f, dtype='float32', count=info['ny'])
+        #         X = _fromfile(f, dtype='float32', count=info['ny'])
         #         found = True
         #
         # X = NDDataset(X)

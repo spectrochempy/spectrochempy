@@ -3,36 +3,44 @@ channels:
   - conda-forge
   - spectrocat
   - cantera
+  - cantera/label/dev
   - defaults
 
 dependencies:
-  # for the core package
-  - numpy
-  - scipy
-  - pandas
-  - matplotlib
-  - traitlets
-  - pint
-  - quaternion
-  - pyqt
-  - colorama
-  - tqdm
-  - ipython
-  - numba
+  - python=3.8
+
+  # specific
   - cantera
   - quadprog
   - brukeropusreader
-  - requests
-  - jinja2
+  - quaternion
   - nmrglue
+
+  # for the core package
+  - colorama
+  - dash
   - docrep
+  - ipython
+  - jinja2
+  - matplotlib
+  - numba
+  - numpy
   - orderedset
+  - pandas
+  - pint
+  - plotly
+  - pyqt
+  - requests
+  - scipy
+  - tqdm
+  - traitlets
   - traittypes
 
   # to be suppressed when code change is finished
   - xlrd
 
   # mainly for install and a bit more...
+  - setuptools
   - setuptools_scm
   - git
 

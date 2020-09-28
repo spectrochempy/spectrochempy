@@ -1,38 +1,46 @@
 name: scpy-dev
 channels:
   - conda-forge
-  - cantera
   - spectrocat
+  - cantera
+  - cantera/label/dev
   - defaults
 
 dependencies:
-  # for the core package
-  - numpy
-  - scipy
-  - pandas
-  - matplotlib
-  - traitlets
-  - pint
-  - quaternion
-  - pyqt
-  - colorama
-  - tqdm
-  - ipython
-  - numba
+  - python=3.8
+
+  # specific
   - cantera
   - quadprog
   - brukeropusreader
-  - requests
-  - jinja2
+  - quaternion
   - nmrglue
+
+  # for the core package
+  - colorama
+  - dash
   - docrep
+  - ipython
+  - jinja2
+  - matplotlib
+  - numba
+  - numpy
   - orderedset
+  - pandas
+  - pint
+  - plotly
+  - pyqt
+  - requests
+  - scipy
+  - tqdm
+  - traitlets
   - traittypes
 
   # to be suppressed when code change is finished
   - xlrd
 
   # mainly for install and a bit more...
+  - setuptools
   - setuptools_scm
   - git
 
@@ -42,14 +50,15 @@ dependencies:
   - jupyterlab
   - nodejs
 
-  # ############ DEV
-
   # DEV: just for testing
   - pytest
+  - pytest-doctestplus
   - pytest-flake8
   - scikit-image
+  - coverage
 
-  # DEV: docs
+  # DEV: code and docs
+  - jupyter-dash
   - jupytext
   - sphinx
   - sphinx_rtd_theme
@@ -61,14 +70,16 @@ dependencies:
 
   # DEV: build
   - conda-build
-  # - twine
+  - conda-verify
+  - anaconda-client
 
   # optional
   # - xarray
   # - datashader
   # - scikit-learn
 
-# pip only for docs
+  # pip only for docs
   - pip
   - pip:
-    - autodoc_traits
+      - autodoc_traits
+

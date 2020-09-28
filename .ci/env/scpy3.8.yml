@@ -18,6 +18,7 @@ dependencies:
 
   # for the core package
     - colorama
+    - dash
     - docrep
     - ipython
     - jinja2
@@ -27,6 +28,7 @@ dependencies:
     - orderedset
     - pandas
     - pint
+    - plotly
     - pyqt
     - requests
     - scipy
@@ -51,12 +53,12 @@ dependencies:
   # DEV: just for testing
     - pytest
     - pytest-doctestplus
-    - pytest-tornasync
     - pytest-flake8
     - scikit-image
     - coverage
 
-  # DEV: docs
+  # DEV: code and docs
+    - jupyter-dash
     - jupytext
     - sphinx
     - sphinx_rtd_theme
@@ -65,13 +67,11 @@ dependencies:
     - nbsphinx
     - jupyter_sphinx
     - json5
-    - voila
 
   # DEV: build
     - conda-build
     - conda-verify
     - anaconda-client
-  # - twine
 
   # optional
   # - xarray

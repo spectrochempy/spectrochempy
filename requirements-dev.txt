@@ -1,0 +1,25 @@
+# DEV: just for testing
+pytest
+pytest-doctestplus
+pytest-flake8
+scikit-image
+coverage
+
+# DEV: code and docs
+jupyter-dash
+jupytext
+sphinx
+sphinx_rtd_theme
+autodocsumm
+sphinx-gallery
+nbsphinx
+jupyter_sphinx
+json5
+
+# DEV: build
+conda-build
+conda-verify
+anaconda-client
+
+# pip only
+autodoc_traits

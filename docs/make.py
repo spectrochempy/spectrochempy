@@ -284,13 +284,13 @@ class BuildDocumentation(object):
 
     # ..................................................................................................................
     def make_redirection_page(self, ):
-        # create an index page a the site root to redirect to latest version
+        # create an index page a the site root to redirect to stable version
 
         html = f"""
         <html>
         <head>
         <title>redirect to the dev version of the documentation</title>
-        <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/latest">
+        <meta http-equiv="refresh" content="0; URL=https://{URL_SCPY}/stable">
         </head>
         <body></body>
         </html>
