@@ -17,7 +17,7 @@ brukeropusreader
 requests
 jinja2
 nmrglue
-docrep==0.2.7
+docrep
 orderedset
 traittypes
 

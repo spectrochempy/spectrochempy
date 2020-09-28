@@ -522,8 +522,8 @@ class CoordSet(HasTraits):
                 self[i].title = item
             else:
                 if is_sequence(item):
-                    for i, v in enumerate(self[i]):
-                        v.title = item[i]
+                    for j, v in enumerate(self[i]):
+                        v.title = item[j]
 
         for k, item in kwargs.items():
             self[k].title = item
@@ -560,8 +560,8 @@ class CoordSet(HasTraits):
                 self[i].to(item, force=force, inplace=True)
             else:
                 if is_sequence(item):
-                    for i, v in enumerate(self[i]):
-                        v.to(item[i], force=force, inplace=True)
+                    for j, v in enumerate(self[i]):
+                        v.to(item[j], force=force, inplace=True)
 
         for k, item in kwargs.items():
             self[k].to(item, force=force, inplace=True)

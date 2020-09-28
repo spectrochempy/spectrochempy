@@ -60,7 +60,7 @@ class BaselineCorrection(HasTraits):
     zoompreview = Float(1.)
     figsize = Tuple((8, 6))
 
-    @docstrings.get_sectionsf('BaselineCorrection', sections=['Parameters', 'Other Parameters'])
+    @docstrings.get_sections(base='BaselineCorrection', sections=['Parameters', 'Other Parameters'])
     @docstrings.dedent
     def __init__(self,
                  dataset,

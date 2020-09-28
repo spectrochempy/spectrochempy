@@ -4,13 +4,15 @@ We use the docrep_ package for managing our docstrings
 
 .. _docrep : http://docrep.readthedocs.io/en/latest/
 
-(this module is copied from psyplot)
+(this module is modified from psyplot:
+https://github.com/Chilipp/psyplot/blob/master/psyplot/docstring.py)
 
 """
+import inspect
 
-from docrep import DocstringProcessor, dedents
+from docrep import DocstringProcessor
 
-__all__ = ['docstrings', 'dedent', 'dedents', 'indent', 'append_original_doc']
+__all__ = ['docstrings', 'dedent', 'indent', 'append_original_doc']
 
 
 def dedent(func):
@@ -21,7 +23,7 @@ def dedent(func):
     ----------
     func : function
         function with the documentation to dedent"""
-    func.__doc__ = func.__doc__ and dedents(func.__doc__)
+    func.__doc__ = func.__doc__ and inspect.cleandoc(func.__doc__)
     return func
 
 
@@ -34,19 +36,17 @@ def indent(text, num=4):
 def append_original_doc(parent, num=0):
     """Return an iterator that append the docstring of the given `parent`
     function to the applied function"""
-
     def func(func):
         func.__doc__ = func.__doc__ and func.__doc__ + indent(
             parent.__doc__, num)
         return func
-
     return func
 
 
 _docstrings = DocstringProcessor()
 
-_docstrings.get_sectionsf('DocstringProcessor.get_sections')(
-    dedent(DocstringProcessor.get_sections))
+_docstrings.get_sections(base='DocstringProcessor.get_sections')(
+        dedent(DocstringProcessor.get_sections))
 
 
 class SpectroChemPyDocstringProcessor(DocstringProcessor):
@@ -58,7 +58,8 @@ class SpectroChemPyDocstringProcessor(DocstringProcessor):
         'Possible types']
 
     @_docstrings.dedent
-    def get_sections(self, s, base, sections=['Parameters', 'Other Parameters', 'Returns', 'Possible types']):
+    def get_sections(self, s=None, base=None, sections=[
+        'Parameters', 'Other Parameters', 'Returns', 'Possible types']):
         """
         Extract the specified sections out of the given string
 
@@ -85,7 +86,7 @@ del _docstrings
 docstrings = SpectroChemPyDocstringProcessor()
 
 # Set some general parameters
-docstrings.get_sections(docstrings.dedents(
+docstrings.get_sections(docstrings.dedent(
     """
     Note
     ----

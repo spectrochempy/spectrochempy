@@ -9,7 +9,7 @@ from spectrochempy.utils import docstrings
 
 
 def test_docstrings():
-    @docstrings.get_sectionsf('do_something')
+    @docstrings.get_sections(base='do_something')
     @docstrings.dedent
     def do_something(a, b, c, d):
         """

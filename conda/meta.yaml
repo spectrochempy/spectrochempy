@@ -23,7 +23,7 @@ build:
 requirements:
   host:
     - pip
-    - python >=3.6
+    - python >=3.7
     - setuptools
     - setuptools_scm
     - nodejs
@@ -48,7 +48,7 @@ requirements:
     - requests
     - jinja2
     - nmrglue
-    - docrep 0.2.7
+    - docrep
     - orderedset
     - traittypes
     - xlrd

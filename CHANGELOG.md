@@ -1,6 +1,60 @@
 What\'s new
 ===========
 
+Version 0.1.22
+--------------
+
+### Bugs fixed
+
+-   FIX
+    [\#140](https://api.github.com/repos/spectrochempy/spectrochempy/issues/140)
+    : compatibilyTraitlets 5.0
+-   FIX
+    [\#72](https://api.github.com/repos/spectrochempy/spectrochempy/issues/72)
+    : Matplotlib widgets not working (in jupyter Lab)
+-   FIX
+    [\#71](https://api.github.com/repos/spectrochempy/spectrochempy/issues/71)
+    : interactive baseline not working (in Jupyter Lab)
+
+### Tasks terminated
+
+-   [\#145](https://api.github.com/repos/spectrochempy/spectrochempy/issues/145)
+    : Compatibility with py-3.8
+-   [\#144](https://api.github.com/repos/spectrochempy/spectrochempy/issues/144)
+    : remove ipynb file after building docs
+
+Version 0.1.21
+--------------
+
+### Bugs fixed
+
+-   FIX
+    [\#142](https://api.github.com/repos/spectrochempy/spectrochempy/issues/142)
+    : Fail in test due to units
+-   FIX
+    [\#140](https://api.github.com/repos/spectrochempy/spectrochempy/issues/140)
+    : compatibilyTraitlets 5.0
+-   FIX
+    [\#138](https://api.github.com/repos/spectrochempy/spectrochempy/issues/138)
+    : build doc fails: make.py
+-   FIX
+    [\#133](https://api.github.com/repos/spectrochempy/spectrochempy/issues/133)
+    : error with last version of docrep
+-   FIX
+    [\#132](https://api.github.com/repos/spectrochempy/spectrochempy/issues/132)
+    : FIX: Unit display
+-   FIX
+    [\#128](https://api.github.com/repos/spectrochempy/spectrochempy/issues/128)
+    : FIX: modify the way update are checked.
+-   FIX
+    [\#127](https://api.github.com/repos/spectrochempy/spectrochempy/issues/127)
+    : FIX: an indentation error
+
+### Tasks terminated
+
+-   [\#123](https://api.github.com/repos/spectrochempy/spectrochempy/issues/123)
+    : Revise the API reference generation
+
 Version 0.1.20
 --------------
 
@@ -17,7 +71,7 @@ Version 0.1.20
     : Check for update not working
 -   FIX
     [\#76](https://api.github.com/repos/spectrochempy/spectrochempy/issues/76)
-    : read\_opus() shifts the xaxis
+    : read_opus() shifts the xaxis
 -   FIX
     [\#27](https://api.github.com/repos/spectrochempy/spectrochempy/issues/27)
     : Solve pint version \> 0.9 incompatibilities
@@ -43,9 +97,9 @@ Version 0.1.20
 -   [\#98](https://api.github.com/repos/spectrochempy/spectrochempy/issues/98)
     : PEP8 + Travis CI setup
 -   [\#93](https://api.github.com/repos/spectrochempy/spectrochempy/issues/93)
-    : find\_peaks() should makes use of Coord instead on indices
+    : find_peaks() should makes use of Coord instead on indices
 -   [\#90](https://api.github.com/repos/spectrochempy/spectrochempy/issues/90)
-    : make smooth() and savgol\_filter() more consistent
+    : make smooth() and savgol_filter() more consistent
 -   [\#46](https://api.github.com/repos/spectrochempy/spectrochempy/issues/46)
     : Tutorials on IR data import
 
@@ -66,7 +120,7 @@ Version 0.1.19
     : Fix warning issued during tests
 -   FIX
     [\#69](https://api.github.com/repos/spectrochempy/spectrochempy/issues/69)
-    : allow passing description to read\_omnic
+    : allow passing description to read_omnic
 -   FIX
     [\#65](https://api.github.com/repos/spectrochempy/spectrochempy/issues/65)
     : Installation of matplotlib styles

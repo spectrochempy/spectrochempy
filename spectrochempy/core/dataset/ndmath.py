@@ -56,50 +56,16 @@ TYPEPRIORITY = {'Coord': 2, 'NDDataset': 3, 'NDPanel': 4}
 # function signature
 # ======================================================================================================================
 
-def change_func_args(func, new_args):
-    """
-    Create a new func with its arguments renamed to new_args.
-
-    """
-    # based on:
-    # https://stackoverflow.com/questions/20712403/creating-a-python-function-at-runtime-with-specified-argument-names
-    # https://stackoverflow.com/questions/16064409/how-to-create-a-code-object-in-python
-
-    code_obj = func.__code__
-    new_varnames = tuple(list(new_args))
-
-    new_code_obj = types.CodeType(
-        code_obj.co_argcount,  # integer
-        code_obj.co_kwonlyargcount,  # integer
-        code_obj.co_nlocals,  # integer
-        code_obj.co_stacksize,  # integer
-        code_obj.co_flags,  # integer
-        code_obj.co_code,  # bytes
-        code_obj.co_consts,  # tuple
-        code_obj.co_names,  # tuple
-        new_varnames,  # tuple
-        code_obj.co_filename,  # string
-        code_obj.co_name,  # string
-        code_obj.co_firstlineno,  # integer
-        code_obj.co_lnotab,  # bytes
-        code_obj.co_freevars,  # tuple
-        code_obj.co_cellvars  # tuple
-    )
-    modified = types.FunctionType(new_code_obj, func.__globals__)
-    func.__code__ = modified.__code__  # replace code portion of original
-
-
-def change_first_func_args(func, new_arg):
-    """ This will change the first argument of function
-     to the new_arg. This is essentially useful for documentation process
-
-    """
-    code_obj = func.__code__
-    new_varnames = tuple([new_arg] +
-                         list(code_obj.co_varnames[
-                              1:code_obj.co_argcount]))
-    change_func_args(func, new_varnames)
-
+def _codechange(code_obj, changes):
+    code = types.CodeType
+    names = [ 'co_argcount','co_nlocals', 'co_stacksize', 'co_flags', 'co_code', 'co_consts', 'co_names', 'co_varnames',
+              'co_filename', 'co_name', 'co_firstlineno', 'co_lnotab', 'co_freevars', 'co_cellvars']
+    if hasattr(code, 'co_kwonlyargcount'):
+        names.insert(1, 'co_kwonlyargcount')
+    if hasattr(code, 'co_posonlyargcount'):
+        names.insert(1, 'co_posonlyargcount')
+    values = [changes.get(name, getattr(code_obj, name)) for name in names]
+    return code(*values)
 
 def make_func_from(func, first=None):
     """
@@ -111,24 +77,7 @@ def make_func_from(func, first=None):
     if first:
         new_varnames[0] = first
     new_varnames = tuple(new_varnames)
-
-    new_code_obj = types.CodeType(
-        code_obj.co_argcount,  # integer
-        code_obj.co_kwonlyargcount,  # integer
-        code_obj.co_nlocals,  # integer
-        code_obj.co_stacksize,  # integer
-        code_obj.co_flags,  # integer
-        code_obj.co_code,  # bytes
-        code_obj.co_consts,  # tuple
-        code_obj.co_names,  # tuple
-        new_varnames,  # tuple
-        code_obj.co_filename,  # string
-        code_obj.co_name,  # string
-        code_obj.co_firstlineno,  # integer
-        code_obj.co_lnotab,  # bytes
-        code_obj.co_freevars,  # tuple
-        code_obj.co_cellvars  # tuple
-    )
+    new_code_obj = _codechange(code_obj, changes={'co_varnames':new_varnames})
     modified = types.FunctionType(new_code_obj,
                                   func.__globals__,
                                   func.__name__,
