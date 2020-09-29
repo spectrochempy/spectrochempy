@@ -2,3 +2,4 @@ include LICENSE MANIFEST.in README.md
 graft env
 graft tests
 recursive-include scp_data *
+recursive-include spectrochempy/scripts/assets *
