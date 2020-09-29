@@ -1,81 +1,86 @@
 name: scpy3.7
 channels:
-  - conda-forge
-  - spectrocat
-  - cantera
-  - cantera/label/dev
-  - defaults
+    - conda-forge
+    - spectrocat
+    - cantera
+    - cantera/label/dev
+    - plotly
+    - defaults
 
 dependencies:
-  - python=3.7
+    - python=3.7
 
-  # for the core package
-  - numpy
-  - scipy
-  - pandas
-  - matplotlib
-  - traitlets
-  - pint
-  - quaternion
-  - pyqt
-  - colorama
-  - tqdm
-  - ipython
-  - numba
-  - cantera
-  - quadprog
-  - brukeropusreader
-  - requests
-  - jinja2
-  - nmrglue
-  - docrep
-  - orderedset
-  - traittypes
+    # specific
+    - cantera
+    - quadprog
+    - brukeropusreader
+    - quaternion
+    - nmrglue
 
-  # to be suppressed when code change is finished
-  - xlrd
+    # for the core package
+    - colorama
+    - dash
+    - dash-bootstrap-components
+    - docrep
+    - ipython
+    - jinja2
+    - matplotlib
+    - numba
+    - numpy
+    - orderedset
+    - pandas
+    - pint
+    - plotly
+    - pyqt
+    - requests
+    - scipy
+    - tqdm
+    - traitlets
+    - traittypes
 
-  # mainly for install and a bit more...
-  - setuptools
-  - setuptools_scm
-  - git
+    # to be suppressed when code change is finished
+    - xlrd
 
-  # need this, because the API is mainly designed to run in Jupyter notebook
-  - ipywidgets
-  - ipympl
-  - jupyterlab
-  - nodejs
+    # mainly for install and a bit more...
+    - setuptools
+    - setuptools_scm
+    - git
 
-  # DEV: just for testing
-  - pytest
-  - pytest-flake8
-  - pytest-doctestplus
-  - pytest-tornasync
-  - scikit-image
-  - coverage
+    # need this, because the API is mainly designed to run in Jupyter notebook
+    - ipywidgets
+    - ipympl
+    - jupyterlab
+    - nodejs
 
-  # DEV: docs
-  - jupytext
-  - sphinx
-  - sphinx_rtd_theme
-  - autodocsumm
-  - sphinx-gallery
-  - nbsphinx
-  - jupyter_sphinx
-  - json5
+    # DEV: just for testing
+    - pytest
+    - pytest-doctestplus
+    - pytest-flake8
+    - scikit-image
+    - coverage
 
-  # DEV: build
-  - conda-build
-  - conda-verify
-  - anaconda-client
-  # - twine
+    # DEV: code and docs
+    - jupyter-dash
+    - jupytext
+    - sphinx
+    - sphinx_rtd_theme
+    - autodocsumm
+    - sphinx-gallery
+    - nbsphinx
+    - jupyter_sphinx
+    - json5
 
-  # optional
-  # - xarray
-  # - datashader
-  # - scikit-learn
+    # DEV: build
+    - conda-build
+    - conda-verify
+    - anaconda-client
 
-# pip only for docs
-  - pip
-  - pip:
-    - autodoc_traits
+    # optional
+    # - xarray
+    # - datashader
+    # - scikit-learn
+
+    # pip only for docs
+    - pip
+    - pip:
+        - autodoc_traits

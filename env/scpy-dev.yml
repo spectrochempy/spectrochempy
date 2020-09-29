@@ -19,6 +19,7 @@ dependencies:
   # for the core package
   - colorama
   - dash
+  - dash-bootstrap-components
   - docrep
   - ipython
   - jinja2
