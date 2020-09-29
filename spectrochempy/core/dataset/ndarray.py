@@ -224,8 +224,6 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def __dir__(self):
-        # Note: dtype must stay first item in this list. Important for the copy
-        # function to work properly
         return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name', 'origin']
 
     # ..................................................................................................................
@@ -586,6 +584,9 @@ class NDArray(HasTraits):
         else:
             # debug_("numpy array detected - initialize data with a numpy array")
             self._data = np.array(data, subok=True, copy=self._copy)
+
+        if self._dtype is not None:
+            self._data = self._data.astype(self._dtype)
 
     # ..................................................................................................................
     @property
