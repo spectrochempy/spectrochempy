@@ -127,6 +127,11 @@ def test_nddataset_init_using_dataset(nd1d, nd2d, ds1):
     nd3 = NDDataset(nd2d, copy=True)
     assert nd3.data is not nd2d.data
 
+    # check change of type
+    nd3b = NDDataset(nd2d, copy=True, dtype='int64')
+    assert nd3b.data is not nd2d.data
+    assert nd3b.data.dtype == np.int64
+
     # check no coordinates
     assert nd3.coords is None
     assert nd3.x is None
