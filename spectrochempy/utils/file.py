@@ -28,23 +28,24 @@ __all__ = ['readfilename', 'readdirname', 'savefilename', 'pathclean',
 # ======================================================================================================================
 # Utility functions
 # ======================================================================================================================
-def pathclean(path):
+def pathclean(paths):
     """
-    Clean the path in order to be compatible with windows and unix-based system.
+    Clean a path or a series of path in order to be compatible with windows and unix-based system.
 
     Parameters
     ----------
-    path :  str
+    paths :  str or a list of str
         Path to clean. It may contain windows or conventional python separators.
         If a windows drive letters is specified, the letter is suppressed when run on unix-based system
 
     Returns
     -------
-    out : str
-        Cleaned path
+    out : str or list of str
+        Cleaned path(s)
 
     """
-    if path is not None:
+
+    def _clean(path):
         try:
             path = WindowsPath(path)
             path = path.as_posix()
@@ -56,8 +57,16 @@ def pathclean(path):
                 # looks like a window path (but we are not on windows)
                 # let's try without the drive
                 i = path.index(':')
-                path = path[i+1:]
-    return path
+                path = path[i + 1:]
+        return path
+
+    if paths is not None:
+        if isinstance(paths, str):
+            return _clean(paths)
+        elif isinstance(paths, (list, tuple)):
+            return [_clean(p) for p in paths]
+
+    return paths
 
 
 
