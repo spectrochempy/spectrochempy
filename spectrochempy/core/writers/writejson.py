@@ -11,6 +11,7 @@
 """
 import os
 import json
+import pickle
 import base64
 import numpy as np
 from datetime import datetime
@@ -29,11 +30,14 @@ __all__ = ['write_json']
 
 __dataset_methods__ = __all__
 
+
 def json_serialiser(byte_obj):
    if isinstance(byte_obj, datetime):
        return {"isoformat": byte_obj.isoformat(), "__class__": str(byte_obj.__class__)}
    if isinstance(byte_obj, np.ndarray):
-       return {"ndarray":byte_obj.tolist(), "dtype": byte_obj.dtype.name}
+       #return {"ndarray":byte_obj.tolist(), "dtype": byte_obj.dtype.name}
+       return {"serialized":base64.b64encode(pickle.dumps(byte_obj)).decode(), "__class__": str(byte_obj.__class__)}
+
    raise ValueError('No encoding handler for data type ' + type(byte_obj))
 
 

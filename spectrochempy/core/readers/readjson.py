@@ -20,6 +20,7 @@ import json
 import base64
 import io
 from datetime import datetime
+import pickle
 
 import numpy as np
 
@@ -37,10 +38,12 @@ def json_decoder(dic):
     if "__class__" in dic:
         if dic["__class__"] == str(datetime):
             return datetime.fromisoformat(dic["isoformat"])
-        raise TypeError("datetime expected.")
-    if  "dtype" in dic:
-        return np.array(dic['ndarray']).astype(dic['dtype'])
-        raise TypeError("numpy array expected.")
+
+        if dic["__class__"] == str(np.ndarray):
+            return pickle.loads(base64.b64decode(dic['serialized']))
+
+        raise TypeError("numpy array or datetime expected.")
+
     return dic
 
 def read_json(dataset=None, **kwargs):
