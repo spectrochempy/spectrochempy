@@ -274,8 +274,7 @@ class NDArray(HasTraits):
                         return False
                     if (oattr is None and sattr is not None):
                         return False
-                    if hasattr(oattr, 'size') and hasattr(sattr, 'size') \
-                            and oattr.size != sattr.size:
+                    if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
                         return False
                     eq &= np.all(sattr == oattr)
                     if not eq:
@@ -1632,7 +1631,7 @@ class NDArray(HasTraits):
             typecode or data-type to which the array is cast.
 
         """
-        self.data = self.data.astype(dtype, **kwargs)
+        self._data = self._data.astype(dtype, **kwargs)
         return self
 
     # ------------------------------------------------------------------------------------------------------------------

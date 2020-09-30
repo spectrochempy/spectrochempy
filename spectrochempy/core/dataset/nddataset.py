@@ -341,7 +341,8 @@ class NDDataset(
     # ..................................................................................................................
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
-        for attr in ('filename', 'plotmeta', 'name', 'description', 'history', 'date', 'modified'):
+        for attr in ('filename', 'plotmeta', 'name', 'description', 'history', 'date', 'modified', 'modeldata',
+                     'origin'):
             # these attibutes are not used for comparison (comparison based on data and units!)
             attrs.remove(attr)
         return super().__eq__(other, attrs)

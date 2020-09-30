@@ -6,7 +6,7 @@
 # ======================================================================================================================
 
 
-"""Plugin module to extend NDDataset with export methods method.
+"""Plugin module to extend NDDataset with a JCAMP-DX export method.
 
 """
 # import os as os
@@ -32,7 +32,7 @@ def write_jdx(*args, **kwargs):
     dataset : |NDDataset|
         The dataset
     filename : `None`, `str`
-        Filename of the file to write. If `None`: opens a dialog box to safe files.
+        Filename of the file to write. If `None`: opens a dialog box to save files.
     directory: str, optional, default="".
         Where to save the file. If not specified, write in
         the current directory.

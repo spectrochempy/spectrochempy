@@ -6,7 +6,7 @@
 # ======================================================================================================================
 
 """
-This module to extend NDDataset with the import methods method.
+This module to extend NDDataset with the import methods.
 
 """
 

@@ -82,14 +82,14 @@ def read_omnic(dataset=None, **kwargs):
     Parameters
     ----------
     filename : `None`, `str`, or list of `str`
-        Filename of the file(s) to load. If `None` : opens a dialog box to select
-        ``.spa`` or ``.spg`` files. If `str` : a single filename. It list of str :
-        a list of filenames.
+        Filename or list of filename for the file(s) to load.
+        If not given and if content is None, a dialog box will be opened to select
+        ``.spa`` or ``.spg`` files.
     content : str, optional
-             The optional contents of the file to be loaded as a binary string
+        The optional contents of the file to be loaded as a binary string
     directory : str, optional, default="".
-        From where to read the specified filename. If not specified, read in
-        the defaults datadir.
+        From where to read the specified filename.
+        If not specified, read in the defaults datadir.
     sortbydate : bool, optional, default=True.
         Sort spectra by acquisition date
     description: string, default=None
@@ -103,17 +103,14 @@ def read_omnic(dataset=None, **kwargs):
 
     Examples
     --------
-    >>> A = NDDataset.read_omnic('irdata/nh4y-activation.spg')
-    >>> print(A)
-    <BLANKLINE>
-      id : NH4Y-activation.SPG ...
-
+    >>> A = NDDataset.read_omnic('nh4y-activation.spg')
 
     """
     debug_("reading omnic files")
 
-    # filename will be given by a keyword parameter except if the first parameters is already the filename
-    filename = pathclean(kwargs.get('filename', None))
+    # filename will be given by a keyword parameter except if the first parameters
+    # is already the filename
+    filename = kwargs.get('filename', None)
 
     # check if the first parameter is a dataset because we allow not to pass it
     if not isinstance(dataset, NDDataset):
@@ -125,12 +122,11 @@ def read_omnic(dataset=None, **kwargs):
         dataset = NDDataset()  # create an instance of NDDataset
 
     sortbydate = kwargs.pop("sortbydate", True)
-
     content = kwargs.get('content', None)
+    directory = pathclean(kwargs.get("directory", None))
 
     # returns a list of files to read
-    directory = pathclean(kwargs.get("directory", None))
-    files = readfilename(filename,
+    files = readfilename(pathclean(filename),
                          check_exists=content is None,
                          directory=directory,
                          filetypes=['OMNIC files (*.spa, *.spg)',
@@ -664,7 +660,7 @@ def _read_spa(dataset, filenames, **kwargs):
             f.seek(296)
 
             # days since 31/12/1899, 00:00
-            timestamp = _fromfile(f, dtype=np.uint32, count=1)
+            timestamp = _fromfile(f, dtype="uint32", count=1)
             acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=int(timestamp))
             allacquisitiondates.append(acqdate)
             timestamp = acqdate.timestamp()

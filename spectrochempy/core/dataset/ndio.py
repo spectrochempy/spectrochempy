@@ -452,15 +452,6 @@ class NDIO(HasTraits):
         <BLANKLINE>
         ...
 
-        by default, directory for saving is the `data`.
-        So the same thing can be done simply by :
-
-        >>> mydataset = NDDataset.load('mydataset.scp')
-        >>> print(mydataset)
-        <BLANKLINE>
-        ...
-
-
         Notes
         -----
         adapted from `numpy.load`
@@ -580,8 +571,7 @@ class NDIO(HasTraits):
             _writer = getattr(self, 'write_{}'.format(protocol))
             return _writer(filename, **kwargs)
 
-        except Exception:
-
+        except Exception as e:
             raise AttributeError(f'The specified writter for protocol `{protocol}` was not found!')
 
 
