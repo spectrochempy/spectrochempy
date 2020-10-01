@@ -311,7 +311,7 @@ def fid(t, w, T2): return (np.cos(2. * np.pi * w * t) + 1j * np.sin(2. * np.pi *
 
 # %%
 # example
-t = np.linspace(0, 100., 1000.)  # t in second
+t = np.linspace(0, 100., 1000)  # t in second
 y = fid(t, 200., 10.)  # we get a complex array   w in MHz, T2 in s
 y.dtype
 
