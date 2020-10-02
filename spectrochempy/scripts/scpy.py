@@ -7,52 +7,47 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                        
 
 # %% [markdown]
-# **Note:** Run this app with the command `scpy` in a terminal and then visit http://127.0.0.1:8050/ in your web browser.
+# **Note:** Run this app with the command `scpy` in a terminal and then visit http://127.0.0.1:8050/ in your web
+# browser.
 
 # %%
-import datetime
 import base64
 import io
-import os
 
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-
+from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
-# see https://dash-bootstrap-components.opensource.faculty.ai/docs
-
-import plotly.express as px
+from matplotlib.figure import Figure
 
 import spectrochempy as scp
 from spectrochempy.dash_gui import run_standalone_app
-from spectrochempy.utils import convert_to_html
-from matplotlib.figure import Figure
+
+import webbrowser
+from threading import Timer
+
+import plotly.graph_objects as go
+from matplotlib import cm
+import numpy as np
+
+# see https://dash-bootstrap-components.opensource.faculty.ai/docs
 
 # .............................................................................
 def menus():
-    dropdown = dbc.DropdownMenu(
-            children=[
-                dbc.DropdownMenuItem("Open", id='menu_open'),
-                dbc.DropdownMenuItem("Close", id='menu_close'),
-                dbc.DropdownMenuItem("Save", id='menu_save'),
-                dbc.DropdownMenuItem(divider=True),
-                dbc.DropdownMenuItem("Preferences", id='menu_preferences'),
-            ],
-            nav=True,
-            in_navbar=True,
-            label="File",
-    )
-    return [dropdown]
+	dropdown = dbc.DropdownMenu(
+			children=[dbc.DropdownMenuItem("Open", id='menu_open'), dbc.DropdownMenuItem("Close", id='menu_close'),
+					  dbc.DropdownMenuItem("Save", id='menu_save'), dbc.DropdownMenuItem(divider=True),
+					  dbc.DropdownMenuItem("Preferences", id='menu_preferences'), ], nav=True, in_navbar=True,
+			label="File", )
+	return [dropdown]
+
 
 # .............................................................................
 def about_tab():
-    return dbc.Card(
-            dbc.CardBody(
-                    [
+	return dbc.Card(dbc.CardBody([
 
-                        dcc.Markdown(
-"""
+		dcc.Markdown("""
 ### What is 
 
 SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic 
@@ -103,150 +98,256 @@ https://github.com/spectrochempy/spectrochempy
 [CeCILL-B FREE SOFTWARE LICENSE AGREEMENT](https://cecill.info/licences/Licence_CeCILL-B_V1-en.html)
 
 
-""",
-                        ),
-                    ]
-            )
-    )
+""", ), ]))
+
 
 def data_tab():
+	upload = dcc.Upload(id='upload-data',
+						children=html.Div(['Drag & Drop or ', html.A('Select file')]),
+						style={
+							'width': '100%',
+							'height': '30px',
+							'lineHeight': '30px',
+							'borderWidth': '1px',
+							'borderStyle': 'dashed',
+							'borderRadius': '5px',
+							'textAlign': 'center',
+							'margin': '10px'
+							},
+						# Allow multiple files to be uploaded
+						multiple=True)
 
-    upload = dcc.Upload(
-            id='upload-data',
-            children=html.Div([
-                'Drag & Drop or ',
-                html.A('Select file', )
-            ]),
-            style={
-                'height': '30px',
-                'lineHeight': '30px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px',
-            },
-            # Allow multiple files to be uploaded
-            multiple=True
-    )
+	upload_form = dbc.Card(dbc.CardBody(
+				[
+					html.H6("Input data"),
+			 		upload
+				]
+			))
 
-    upload_form = dbc.FormGroup(
-            [
-                dbc.Label("Input data"),
-                upload,
-            ],
-    )
+	return dbc.Card(dbc.CardBody(
+					[
+						dbc.Collapse(upload_form, id='show-upload-form'),
+						dbc.Collapse(html.Div(id='current-data'), id='show-current-data'),
+						dcc.Loading(
+								dbc.Collapse(
+										dbc.Button("Close", color="danger",
+												   style={'float': 'right', 'margin-top':'10px'},
+												   id='close-data'),
+										id='show-close-data'),
+								type='circle'), ]
+			))
 
-    return dbc.Card(
-            dbc.CardBody(
-                    [
-                        upload_form,
-                        html.Div(
-                        dbc.Button(
-                                "Clear",
-                                color="danger",
-                                id='input_clear_data',
-                        ),
-                        id='output-button-clear-data'),
-                    ]
-            ),
-            className="mt-3",
-    )
+
+def processing_tab():
+	return dbc.Card(dbc.CardBody(
+			[html.P("This is tab 2!", className="card-text"),
+			 dbc.Button("Don't click here", color="success"), ]),
+			className="mt-3", )
+
 
 def layout():
+	tabs = dbc.Tabs(
+			[dbc.Tab(about_tab(), label="About", tab_id='tab-1'),
+			 dbc.Tab(data_tab(), label="Data", tab_id='tab-2'),
+			 dbc.Tab(processing_tab(), label="Processing", tab_id='tab-3', id='output-processing-tab')
+			 # disabled=True),
+			 ], style={'background-color': 'beige'}, active_tab='tab-2', )
 
-    tab2_content = dbc.Card(
-        dbc.CardBody(
-            [
-                html.P("This is tab 2!", className="card-text"),
-                dbc.Button("Don't click here", color="success"),
-            ]
-        ),
-        className="mt-3",
-    )
+	return html.Div([
+		html.P(""),
+		dbc.Container(
+				dbc.Row( # 12 columns
+						[dbc.Col(tabs, width=4, ),
+						 dbc.Col(
+								 dcc.Loading(
+										 dcc.Graph(
+												 id='graph'
+												 ),
+										 )
+								 ),
+						 ],
+						),
+			fluid=True, style={"font-size": '.75em'}, ), ],)
+
+def plotly_2D(*datasets):
+
+	figs = []
+	for ds in datasets:
+		x = ds.x.data
+		ds.y -= ds.y[0]
+
+		rgbfactor = 255/ds.y.values.max()
+		cmap = np.array(cm.get_cmap('viridis').colors)*255
+
+		data = []
+		for i, row in enumerate(ds):
+			trace =row.data.squeeze()
+			name = str(row.y.values)
+			k = int(row.y.values * rgbfactor)
+			data.append(dict(x=x,
+							 xaxis='x',
+							 y=trace,
+							 yaxis='y',
+							 name=name,
+							 mode='lines',
+							 type='scatter',
+							 line=dict(
+									 color=f'rgb{tuple(cmap[k].astype("uint8"))}',
+									 dash='solid',
+									 width= 0.7),
+							 )
+						)
+
+		layout = dict({'autosize': True,
+					   #'height': 422,
+					   'hovermode': 'closest',
+					   #'margin': {'b': 63, 'l': 56, 'pad': 0, 'r': 14, 't': 14},
+					   'showlegend': False,
+					   #'width': 652,
+					   'xaxis': {'anchor': 'y',
+								 'domain': [0.0, 1.0],
+								 'nticks': 7,
+								 'range': [5999.556, 649.904],
+								 'showgrid': False,
+								 'side': 'bottom',
+								 'tickfont': {'family':'Times', 'size': 20.0},
+								 'ticks': 'inside',
+								 'title': {'font': {'family':'Times','color': '#000000', 'size': 20.0},
+										   'text': r'$\text{Wavenumbers}\ /\ \text{cm}^\text{-1}$'},
+								 'type': 'linear',
+								 'zeroline': False},
+					   'yaxis': {'anchor': 'x',
+								 'domain': [0.0, 1.0],
+								 'nticks': 9,
+								 'range': [-0.14341419234871866, 6.1204590988159175],
+								 'showgrid': False,
+								 'side': 'left',
+								 'tickfont': {'family':'Times','size': 20.0},
+								 'ticks': 'inside',
+								 'title': {'font': {'family':'Times','color': '#000000', 'size': 20.0},
+										   'text': r'$\text{Absorbance}\ /\ \text{a.u.}$'},
+								 'type': 'linear',
+								 'zeroline': False}})
 
 
-    tabs = dbc.Tabs(
-        [
-            dbc.Tab(about_tab(), label="About"),
-            dbc.Tab(data_tab(), label="Data"),
-            dbc.Tab(tab2_content, label="Tab 2", disabled=True),
-        ]
-    )
+		# Create traces
+		fig = go.Figure( data=data,
+					 layout=go.Layout(layout))
+		figs.append(fig)
 
-    return  html.Div([
-            html.P(""),
-            dbc.Container(
-            dbc.Row(  # 12 columns
-                  [
-                      dbc.Col(
-                              tabs,
-                              width=4,
-                      ),
-                      dbc.Col(
-                              dcc.Loading(
-                                      html.Div(
-                                              id='output-data-upload',
-                                      ),
-                              ),
-                              width=8,
-                      ),
-                  ],
-            ),
-            fluid=True,
-            style={"font-size":'.75em'},
-    ),
-    ]
-            ,)
-
+	return fig
 
 # Callbacks ............................................................................................................
 
-def callbacks(_app):
+def callbacks(app):
+	def parse_upload_contents(contents, filename):
+		content_type, content_string = contents.split(',')
+		decoded = base64.b64decode(content_string)
+		ds = scp.NDDataset.read(filename, content=decoded)
+		return ds
 
-    def parse_upload_contents(contents, filename, date):
-        content_type, content_string = contents.split(',')
-        decoded = base64.b64decode(content_string)
-        ds = scp.NDDataset.read(filename, content=decoded)
-        # get the matplotlib image
-        fig = Figure()
-        ds.plot(fig=fig)
-        buf=io.BytesIO()
-        ds.fig.savefig(buf, format='png')
-        ds.close_figure()
-        data = base64.b64encode(buf.getbuffer()).decode("ascii")
-        return  html.Img(src=f'data:image/png;base64,{data}')
+	def make_thumbnail(*datasets):
+		# get the matplotlib image
+		thumbnails = []
+		for ds in datasets:
+			fig = Figure()
+			ds.plot(fig=fig)
+			buf = io.BytesIO()
+			ds.fig.savefig(buf, format='png')
+			ds.close_figure()
+			data = base64.b64encode(buf.getbuffer()).decode("ascii")
 
-    # add upload callback
-    @_app.callback([Output('output-data-upload', 'children'),
-                    Output('output-button-clear-data', 'style')],
-                  [Input('upload-data', 'contents')],
-                  [State('upload-data', 'filename'),
-                   State('upload-data', 'last_modified')])
-    def update_data_output(list_of_contents, list_of_names, list_of_dates):
-        children=[]
-        style={'visibility':'hidden'}
-        if list_of_contents is not None:
-            children = [
-                parse_upload_contents(c, n, d) for c, n, d in
-                zip(list_of_contents, list_of_names, list_of_dates)]
-            style={'visibility':'visible'}
-        return children, style
+			thumbnails.append(dbc.Card(dbc.CardBody([
+				html.H6(ds.filename, className="card-title"),
+				html.Img(src=f'data:image/png;base64,{data}', style={'width': '75px'}),
+				html.P(str(ds))
+				]
+			)))
+		return thumbnails
 
-    # add callback for toggling the collapse on small screens
-    @_app.callback(
-            Output("navbar-collapse", "is_open"),
-            [Input("navbar-toggler", "n_clicks")],
-            [State("navbar-collapse", "is_open")],
-    )
-    def toggle_navbar_collapse(n, is_open):
-        if n:
-            return not is_open
-        return is_open
+	# add upload callback
+	@app.callback(Output('session-data', 'data'),
+				  [Input('upload-data', 'contents')],
+				  [State('upload-data', 'filename')])
+	def update_data_output(list_of_contents, list_of_names):
+		# Store data in dcc.Store components
 
-app = run_standalone_app(layout, callbacks, __file__, menus=menus)
-server = app.server
+		data = {}  # must be JSON serializable
 
-app.run_server(debug=True, port=8049)
+		if list_of_contents is not None:
+			z = zip(list_of_names, list_of_contents)
+			data = {n: c for n, c in z}
+
+		else:
+			# prevent the None callbacks is important with the store component.
+			# you don't want to update the store for nothing.
+			raise PreventUpdate
+		return data
+
+	# # output the data information with  thumbnail img.
+	@app.callback([Output('current-data', 'children'),
+				   Output('graph', 'figure'),
+				   Output('show-upload-form', 'is_open'),
+				   Output('show-current-data', 'is_open'),
+				   Output('show-close-data', 'is_open')],
+				  # Since we use the data prop in an output,
+				  # we cannot get the initial data on load with the data prop.
+				  # To counter this, you can use the modified_timestamp
+				  # as Input and the data as State.
+				  # This limitation is due to the initial None callbacks
+				  # https://github.com/plotly/dash-renderer/pull/81
+				  [Input('session-data', 'modified_timestamp')],
+				  [State('session-data', 'data')])
+	def on_data(ts, data):
+		if ts is None:
+			raise PreventUpdate
+
+		thumbnails = None
+		figure= None
+		is_open = True
+
+		if data is not None:
+			datasets = [parse_upload_contents(c, n) for n, c in data.items()]
+			thumbnails = make_thumbnail(*datasets)
+			figure = plotly_2D(*datasets)
+			is_open = False
+		data_is_open = not is_open
+		button_is_open = not is_open
+		return thumbnails, figure, is_open, data_is_open, button_is_open
+
+	# close data callback
+	@app.callback(
+			Output("session-data", "clear_data"),
+			[Input("close-data", "n_clicks")]
+			)
+	def on_button_click(n):
+		if n is None:
+			return False
+		else:
+			return True
+
+	# add callback for toggling the collapse on small screens
+	# note that navbar is defined in dash_gui.py
+	@app.callback(Output("navbar-collapse", "is_open"),
+				  [Input("navbar-toggler", "n_clicks")],
+				  [State("navbar-collapse", "is_open")], )
+	def toggle_navbar_collapse(n, is_open):
+		if n:
+			return not is_open
+		return is_open
 
 
+# .............................................................................
+
+def open_browser():
+	webbrowser.open_new('http://127.0.0.1:8049/')
+
+def main():
+	app = run_standalone_app(layout, callbacks, __file__, menus=menus)
+	server = app.server
+
+	Timer(1, open_browser).start()
+	app.run_server(debug=True, port=8049)
+
+if __name__ == '__main__':
+    main()
