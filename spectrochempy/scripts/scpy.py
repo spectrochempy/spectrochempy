@@ -13,7 +13,10 @@
 # %%
 import base64
 import io
+import os
 
+# from jupyter_dash import JupyterDash
+from dash import Dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
@@ -22,7 +25,6 @@ import dash_bootstrap_components as dbc
 from matplotlib.figure import Figure
 
 import spectrochempy as scp
-from spectrochempy.dash_gui import run_standalone_app
 
 import webbrowser
 from threading import Timer
@@ -32,6 +34,159 @@ from matplotlib import cm
 import numpy as np
 
 # see https://dash-bootstrap-components.opensource.faculty.ai/docs
+import dash_defer_js_import as dji
+
+def description():
+	return 'SpectroChemPy DASH application.'
+
+
+def logo(filename):
+	SCPY_LOGO = os.path.join(os.path.dirname(os.path.abspath(filename)), 'assets', 'scpy_logo.png')
+	return html.Img(
+			src='data:image/png;base64,{}'.format(
+					base64.b64encode(
+							open(SCPY_LOGO, 'rb'
+								 ).read()
+					).decode()
+			),
+			width='75px',
+	)
+
+
+def navbarbrand():
+	return dbc.NavbarBrand(
+			children='SpectroChemPy',
+			className="ml-2",
+			id="navbarbrand",
+	)
+
+
+def doc():
+	return dbc.NavItem(
+			dbc.NavLink(
+					"Documentation",
+					href="https://www.spectrochempy.fr",
+					target="_blank",
+			),
+	)
+
+
+def navbar(filename, **kwargs):
+	_menus = kwargs.get('menus', None)
+	menus = _menus() if _menus is not None else []
+	menus.append(doc())
+	nav = dbc.Collapse(
+			dbc.Nav(
+					children=menus,
+					fill=True,
+			),
+			id="navbar-collapse",
+			navbar=True,
+	)
+
+	return dbc.Navbar(
+			[dcc.Store(id='session-data', storage_type='session'),
+			 logo(filename),
+			 navbarbrand(),
+			 dbc.NavbarToggler(
+					 id="navbar-toggler",
+			 ),
+			 nav,
+			 ],
+			color="dark",
+			dark=True,
+			#sticky='top',
+	)
+
+
+def run_standalone_app(
+		layout,
+		callbacks,
+		filename,
+		**kwargs
+):
+	"""
+	Run a dash application as standalone (or in Jupyter Lab)
+
+	Parameters
+	----------
+	layout: callable
+	callbacks: callable
+	filename: name of the calling file
+	kwargs: other optional parameters
+
+	Returns
+	-------
+	app: Dash application
+
+	"""
+
+	# Initialisation............................................................
+
+	theme = kwargs.pop('theme', dbc.themes.BOOTSTRAP)
+	# CERULEAN, COSMO, CYBORG, DARKLY, FLATLY, JOURNAL, LITERA, LUMEN, LUX, MATERIA, MINTY, PULSE, SANDSTONE,
+	# SIMPLEX, SKETCHY, SLATE, SOLAR, SPACELAB, SUPERHERO, UNITED, YETI
+	print(__name__)
+	app = Dash(__name__, title='Dash-SpectroChemPy',
+			   external_stylesheets=[theme])
+	app.css.config.serve_locally = True
+	app.scripts.config.serve_locally = True
+	app.index_string = """
+	<!DOCTYPE html>
+	<html>
+		<head>
+			{%metas%}
+			<title>{%title%}</title>
+			{%favicon%}
+			{%css%}
+		</head>
+		<body>
+			{%app_entry%}
+			<footer>
+				{%config%}
+				{%scripts%}
+				<script type="text/x-mathjax-config">
+				MathJax.Hub.Config({
+					tex2jax: {
+					inlineMath: [ ['$','$'],],
+					processEscapes: true
+					}
+				});
+				</script>
+				{%renderer%}
+			</footer>
+		</body>
+	</html>
+	"""
+
+	# Assign layout
+	app.layout = app_page_layout(
+			page_layout=layout(),
+			filename=filename,
+			**kwargs,
+	)
+
+	# Register all callbacks
+	callbacks(app)
+
+	# return app object
+	return app
+
+
+def app_page_layout(page_layout,
+					filename,
+					**kwargs):
+	return html.Div(
+			id='main_page',
+			children=[
+				dcc.Location(id='url', refresh=False),
+				navbar(filename, **kwargs),
+				html.Div(
+						id='app-page-content',
+						children=page_layout
+				)
+			],
+	)
 
 # .............................................................................
 def menus():
@@ -153,6 +308,10 @@ def layout():
 			 # disabled=True),
 			 ], style={'background-color': 'beige'}, active_tab='tab-2', )
 
+
+	mathjax_script = dji.Import(src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_SVG")
+	refresh_plots = dji.Import(src="https://www.spectrochempy.fr/gui/redraw.js")
+
 	return html.Div([
 		html.P(""),
 		dbc.Container(
@@ -160,17 +319,29 @@ def layout():
 						[dbc.Col(tabs, width=4, ),
 						 dbc.Col(
 								 dcc.Loading(
-										 dcc.Graph(
-												 id='graph'
-												 ),
+										 dcc.Graph( id='graph'),
 										 )
 								 ),
 						 ],
 						),
-			fluid=True, style={"font-size": '.75em'}, ), ],)
+			fluid=True, style={"font-size": '.75em'}, ),
+		refresh_plots,
+		mathjax_script,
+	],)
+
 
 def plotly_2D(*datasets):
+	"""
+	Create a plotly figure for each dataset
 
+	Parameters
+	----------
+	datasets
+
+	Returns
+	-------
+
+	"""
 	figs = []
 	for ds in datasets:
 		x = ds.x.data
@@ -199,20 +370,19 @@ def plotly_2D(*datasets):
 						)
 
 		layout = dict({'autosize': True,
-					   #'height': 422,
+					   'height':600,
 					   'hovermode': 'closest',
-					   #'margin': {'b': 63, 'l': 56, 'pad': 0, 'r': 14, 't': 14},
 					   'showlegend': False,
-					   #'width': 652,
 					   'xaxis': {'anchor': 'y',
-								 'domain': [0.0, 1.0],
+								 #'domain': [0.0, 1.0],
 								 'nticks': 7,
 								 'range': [5999.556, 649.904],
 								 'showgrid': False,
 								 'side': 'bottom',
-								 'tickfont': {'family':'Times', 'size': 20.0},
+								 'tickfont': {'family':'Times', 'size': 15},
 								 'ticks': 'inside',
-								 'title': {'font': {'family':'Times','color': '#000000', 'size': 20.0},
+								 'title': {'font': {'family':'Times',
+													'color': '#000000'},
 										   'text': r'$\text{Wavenumbers}\ /\ \text{cm}^\text{-1}$'},
 								 'type': 'linear',
 								 'zeroline': False},
@@ -222,9 +392,9 @@ def plotly_2D(*datasets):
 								 'range': [-0.14341419234871866, 6.1204590988159175],
 								 'showgrid': False,
 								 'side': 'left',
-								 'tickfont': {'family':'Times','size': 20.0},
+								 'tickfont': {'family':'Times','size': 15.0},
 								 'ticks': 'inside',
-								 'title': {'font': {'family':'Times','color': '#000000', 'size': 20.0},
+								 'title': {'font': {'family':'Times','color': '#000000'},
 										   'text': r'$\text{Absorbance}\ /\ \text{a.u.}$'},
 								 'type': 'linear',
 								 'zeroline': False}})
@@ -232,10 +402,11 @@ def plotly_2D(*datasets):
 
 		# Create traces
 		fig = go.Figure( data=data,
-					 layout=go.Layout(layout))
+					     layout=go.Layout(layout)
+					)
 		figs.append(fig)
 
-	return fig
+	return figs
 
 # Callbacks ............................................................................................................
 
@@ -303,13 +474,13 @@ def callbacks(app):
 			raise PreventUpdate
 
 		thumbnails = None
-		figure= None
+		figure= go.Figure(data=None)
 		is_open = True
 
 		if data is not None:
 			datasets = [parse_upload_contents(c, n) for n, c in data.items()]
 			thumbnails = make_thumbnail(*datasets)
-			figure = plotly_2D(*datasets)
+			figure = plotly_2D(*datasets)[0]
 			is_open = False
 		data_is_open = not is_open
 		button_is_open = not is_open
