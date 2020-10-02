@@ -40,6 +40,32 @@ def json_serialiser(byte_obj):
 
    raise ValueError('No encoding handler for data type ' + type(byte_obj))
 
+def _check_io_args(*args, **kwargs):
+
+    # filename will be given by a keyword parameter except if the first parameters is already the filename
+    filename = kwargs.get('filename', None)
+    dataset = kwargs.get('dataset', None)
+
+    args = list(args)
+
+    # check if the first argument is a dataset because we allow not to pass it
+    if args:
+        arg = args.pop(0)
+        if isinstance(arg, NDDataset):
+            dataset = arg
+            if args: # still some data, should be the filename, else something is wrong
+                filename = args.pop()
+                if not isinstance(filename, str):
+                    raise TypeError('Filename must be a string')
+        else:
+            filename = arg
+
+    if not dataset:
+        # make a void dataset
+        dataset = NDDataset()
+
+    return dataset, filename
+
 
 def write_json(*args, **kwargs):
     """Writes a dataset in JSON format
@@ -68,28 +94,7 @@ def write_json(*args, **kwargs):
     """
     debug_("writing json file")
 
-    # filename will be given by a keyword parameter except if the first parameters is already the filename
-    filename = kwargs.get('filename', None)
-
-    # check if the first parameter is a dataset because we allow not to pass it
-    if not isinstance(args[0], NDDataset):
-        # probably did not specify a dataset
-        # so the first parameters must be the filename
-        if isinstance(args[0], str) and args[0] != '':
-            filename = args[0]
-    else:  # then the dataset is the first and the filename might be the second parameter:
-        dataset = args[0]
-        if isinstance(args[1], str) and args[0] != '':
-            filename = args[1]
-
-    directory = kwargs.get('directory', None)
-
-    filename = savefilename(filename=filename,
-                            directory=directory,
-                            filters="json (*.json) ;; All files (*)")
-    if filename is None:
-        # no filename from the dialogbox
-        return
+    dataset, filename = _check_io_args(*args, **kwargs)
 
     dic = {}
     objnames = dataset.__dir__()
@@ -147,6 +152,24 @@ def write_json(*args, **kwargs):
 
     _loop_on_obj(objnames)
 
-    with open(filename, 'wb') as f:
-        js = json.dumps(dic, default=json_serialiser)
-        f.write(js.encode('utf-8'))
+    # make the json string
+    js = json.dumps(dic, default=json_serialiser)
+
+    if not kwargs.get('memory', False):
+
+        # output on a disk
+        directory = kwargs.get('directory', None)
+
+        filename = savefilename(filename=filename,
+                                directory=directory,
+                                filters="json (*.json) ;; All files (*)")
+        if filename is None:
+            # no filename from the dialogbox
+            return
+
+        with open(filename, 'wb') as f:
+            f.write(js.encode('utf-8'))
+
+    else:
+        return js
+
