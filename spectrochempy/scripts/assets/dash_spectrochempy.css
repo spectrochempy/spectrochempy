@@ -9,35 +9,37 @@ body, .plot-container {
     height: 80vh;
 }
 
-#scpy-control-tabs {
-    font-size: 10pt;
-}
-
-#scpy-control-tabs .nav-tabs {
-    border-bottom: 1px solid gray;
-}
-
-#scpy-control-tabs .control-tab {
+.control-tab {
     font-size: 10pt;
     max-height:690px;
     overflow-y: auto;
     background-color: #F3F5F9;
-    border: 1px solid gray;
+    border: 0;
 }
 
-#scpy-control-tabs .nav-tabs .nav-link {
+.tab-content {
+    border: 1px solid gray;
+    background-color: #F3F5F9;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid gray;
+}
+
+.nav-tabs .nav-link {
     background-color: #dddddd;
     border: 1px solid gray;
     border-top-left-radius: .25rem;
     border-top-right-radius: .25rem;
 }
 
-#scpy-control-tabs .nav-tabs .nav-link.active {
+.nav-tabs .nav-link.active {
     color: #495057;
     background-color: #F3F5F9;
     border-color: gray   #000000 #F3F5F9 #000000;
     border-width: 5px 1px 1px 1px;
 }
+
 
 
 .markdown {font-size:1em}
