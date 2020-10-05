@@ -606,8 +606,7 @@ class GeneralPreferences(MetaConfigurable):
                                                    ' plot in stack plots').tag(
         config=True)
 
-    usempl = Bool(help='Use MatPlotLib for plotting (slow but mode suitable '
-                       'for printing)').tag(config=True, group='mpl')
+    usempl = Bool(help='Use MatPlotLib for plotting (mode suitable for printing)').tag(config=True, group='mpl')
 
     simplify = Bool(help='Matplotlib path simplification for improving '
                          'performance').tag(config=True, group='mpl')
@@ -937,6 +936,9 @@ class SpectroChemPy(Application):
     test = Bool(False, help='test flag').tag(config=True)
     """Flag to set the application in testing mode"""
 
+    port = Integer(8050, help='Dash server port').tag(config=True)
+    """Dash server port"""
+
     # Command line interface
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -964,6 +966,8 @@ class SpectroChemPy(Application):
             show_config_json=({'SpectroChemPy': {'show_config_json': True, }},
                               "Show the application's configuration (json "
                               "format)"),
+            port=({'SpectroChemPy': {'port': 8050}},
+                       "Set Port for opening the Dash server"),
         ))
 
     classes = List([GeneralPreferences, ProjectPreferences, DataDir, ])
