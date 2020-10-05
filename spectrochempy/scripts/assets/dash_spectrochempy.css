@@ -1,10 +1,47 @@
-#scpy-control-tabs {
-    font-size: 12pt;
+
+body, .plot-container {
+    background-color: #cccccc;
 }
 
-#scpy-control-tabs .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
-    color: #495057;
-    background-color: #f1e4c4;
-    border-color: #2c389c #dee2e6 #fff;
-    border-width: 5px 2px 2px 2px;
+/* graph */
+.dash-graph {
+    display: block;
+    height: 80vh;
 }
+
+#scpy-control-tabs {
+    font-size: 10pt;
+}
+
+#scpy-control-tabs .nav-tabs {
+    border-bottom: 1px solid gray;
+}
+
+#scpy-control-tabs .control-tab {
+    font-size: 10pt;
+    max-height:690px;
+    overflow-y: auto;
+    background-color: #F3F5F9;
+    border: 1px solid gray;
+}
+
+#scpy-control-tabs .nav-tabs .nav-link {
+    background-color: #dddddd;
+    border: 1px solid gray;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+}
+
+#scpy-control-tabs .nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #F3F5F9;
+    border-color: gray   #000000 #F3F5F9 #000000;
+    border-width: 5px 1px 1px 1px;
+}
+
+
+.markdown {font-size:1em}
+.markdown p {margin-bottom: .5em;
+}
+
+.card {margin-bottom:5pt}
