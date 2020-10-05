@@ -28,7 +28,7 @@ import itertools
 # Third party imports
 # ======================================================================================================================
 
-from traitlets import List, Unicode, Instance, Bool, Union, Int, HasTraits, default, validate
+from traitlets import List, Unicode, Instance, Bool, Union, Int, Any, HasTraits, default, validate
 from pint.errors import DimensionalityError
 import numpy as np
 import pandas as pd
@@ -89,6 +89,8 @@ class NDArray(HasTraits):
     _mask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
     _labels = Array(allow_none=True)
     _units = Instance(Unit, allow_none=True)
+    _offset = Any()
+    _roi = List(allow_none=True)
 
     # metadata
     _meta = Instance(Meta, allow_none=True)
@@ -498,6 +500,14 @@ class NDArray(HasTraits):
     # ..................................................................................................................
     @default('_title')
     def _title_default(self):
+        return None
+
+    @default('_offset')
+    def _offset_default(self):
+        return 0
+
+    @default('_roi')
+    def _roi_default(self):
         return None
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -1173,6 +1183,47 @@ class NDArray(HasTraits):
 
         """
         return self.transpose()
+
+    @property
+    def offset(self):
+        return self._offset
+
+    @offset.setter
+    def offset(self, val):
+        self._offset = val
+
+
+    @property
+    def offset_value(self):
+        offset = self.offset
+        if self.units:
+            return Quantity(offset, self._units)
+        else:
+            return offset
+
+    @property
+    def limits(self):
+        """list - range of the data"""
+        return [self.data.min(), self.data.max()] if self._data is not None else None
+
+    @property
+    def roi(self):
+        """list - ROI limits"""
+        if self._roi is None:
+            self._roi = self.limits
+        return self._roi
+
+    @roi.setter
+    def roi(self, val):
+        self._roi = val
+
+    @property
+    def roi_values(self):
+        offset = self.offset
+        if self.units is None:
+            return list(np.array(self.roi) - self.offset)
+        else:
+            return list(self._uarray(self.roi, self._units)-self.offset_value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods

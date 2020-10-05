@@ -203,6 +203,7 @@ class Coord(NDMath, NDArray):
         # else return an array of the differents spacings
         return spacing(self.data) * self.units
 
+
     # NDmath methods
 
     # ..................................................................................................................
@@ -258,7 +259,8 @@ class Coord(NDMath, NDArray):
     def __dir__(self):
         # remove some methods with respect to the full NDArray
         # as they are not usefull for Coord.
-        return ['data', 'labels', 'units', 'meta', 'title', 'name', 'origin']
+        return ['data', 'labels', 'units', 'meta', 'title', 'name',
+                'offset', 'roi']
 
     # ..................................................................................................................
     def __getitem__(self, items, return_index=False):

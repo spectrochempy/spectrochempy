@@ -6,14 +6,15 @@
 # ======================================================================================================================
 
 import os
-from spectrochempy import NDDataset, info_
 
+import spectrochempy as scp
+from spectrochempy.core.dataset.nddataset import NDDataset
 
-def test_read_without_filename():
-    A = NDDataset.read_omnic()
-    info_(A)
+def test_read_omnic():
+    A = NDDataset.read_omnic()  # should open a dialog
+    assert A is None
 
+    A = scp.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
+    assert A.filename == 'nh4y-activation'
+    assert str(A)=='NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
-def test_read_with_filename():
-    A = NDDataset.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
-    info_(A)

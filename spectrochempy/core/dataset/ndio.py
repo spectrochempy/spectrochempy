@@ -48,7 +48,6 @@ from spectrochempy.units import Unit, Quantity
 from spectrochempy.core import general_preferences as prefs
 # from spectrochempy.core import info_, debug_, error_, warning_
 
-
 # ==============================================================================
 # Class NDIO to handle I/O of datasets
 # ==============================================================================
@@ -481,9 +480,9 @@ class NDIO(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     @classmethod
-    def read(cls, filename=None, **kwargs):
+    def read(cls, *args, **kwargs):
         """
-        Generic read function. It's like `load` a class method.
+        Generic read function.
 
         Parameters
         ----------
@@ -504,7 +503,12 @@ class NDIO(HasTraits):
         load
 
         """
+        filename = None
+        if args:
+            filename = args[0]
+        filename = kwargs.pop('filename', filename)
 
+        # kwargs only
         protocol = kwargs.pop('protocol', None)
         sortbydate = kwargs.pop('sortbydate', True)
         content= kwargs.pop('content', None)
@@ -523,16 +527,17 @@ class NDIO(HasTraits):
             # default reader
             return cls.load(filename, protocol='scp', content=content, **kwargs)
 
-            # try:
-            # find the adequate reader
+        # find the adequate reader
         _reader = getattr(cls, 'read_{}'.format(protocol))
-        return _reader(filename, sortbydate=sortbydate, content=content, **kwargs)
+        kwargs['filename'] = filename
+        kwargs['sortbydate'] = sortbydate
+        kwargs['content'] = content
+        return _reader(**kwargs)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Generic write function
     # ------------------------------------------------------------------------------------------------------------------
-
-    def write(self, filename, **kwargs):
+    def write(self, *args, **kwargs):
         """
         Generic write function which actually delegate the work to an
         writer defined by the parameter ``protocol``.
@@ -553,7 +558,17 @@ class NDIO(HasTraits):
         save
 
         """
+
+        filename = None
+        if args:
+            filename = args[0]
+        filename = kwargs.pop('filename', filename)
+
+        # kwargs only
         protocol = kwargs.pop('protocol', None)
+        if kwargs.get('to_string', False):
+            # json by default if we output a string
+            protocol='json'
 
         if not protocol:
             # try to estimate the protocol from the file name extension
@@ -565,24 +580,27 @@ class NDIO(HasTraits):
             return self.save(filename)
 
         # find the adequate reader
-
         try:
             # find the adequate reader
             _writer = getattr(self, 'write_{}'.format(protocol))
-            return _writer(filename, **kwargs)
+            return _writer(filename=filename, **kwargs)
 
         except Exception as e:
             raise AttributeError(f'The specified writter for protocol `{protocol}` was not found!')
 
 
 # make some methods accessible from the main scp API
+# while
 # ----------------------------------------------------------------------------------------------------------------------
 
 load = NDIO.load
 read = NDIO.read
 write = NDIO.write
 
-__all__ += ['load', 'read', 'write']
+__all__ += ['write', 'read', 'load']
+__dataset_methods__ = __all__
+
+
 
 # ======================================================================================================================
 if __name__ == '__main__':

@@ -21,7 +21,7 @@ from .qtfiledialogs import opendialog, SaveFileName
 __all__ = ['readfilename', 'readdirname', 'savefilename', 'pathclean',
            'list_packages', 'generate_api',
            'make_zipfile', 'ScpFile',
-           'unzip'  # tempo
+           'unzip', 'check_io_args'
            ]
 
 
@@ -68,6 +68,33 @@ def pathclean(paths):
 
     return paths
 
+def check_io_args(*args, **kwargs):
+
+    from spectrochempy.core.dataset.nddataset import NDDataset
+
+    # filename will be given by a keyword parameter except if the first parameters is already the filename
+    filename = kwargs.pop('filename', None)
+    dataset = kwargs.pop('dataset', None)
+
+    args = list(args)
+
+    # check if the first argument is a dataset because we allow not to pass it
+    if args:
+        arg = args.pop(0)
+        if isinstance(arg, NDDataset):
+            dataset = arg
+            if args: # still some data, should be the filename, else something is wrong
+                filename = args.pop()
+                if not isinstance(filename, str):
+                    raise TypeError('Filename must be a string')
+        else:
+            filename = arg
+
+    if not dataset:
+        # make a void dataset
+        dataset = NDDataset()
+
+    return dataset, filename
 
 
 def readfilename(filename=None, **kwargs):
