@@ -107,6 +107,8 @@ class NDPlot(HasTraits):
         dpi : [ None | scalar > 0]
             The resolution in dots per inch. If None it will default to the
             value savefig.dpi in the matplotlibrc file.
+        use_plotly: bool, optional, default=False
+            whether or not using plotly for plotting
 
         """
 
@@ -120,15 +122,7 @@ class NDPlot(HasTraits):
 
         method = 'generic'
 
-        # check the deprecated use of `kind`
-        kind = kwargs.pop('kind', None)
-        if kind is not None:
-            method = kind
-            warnings.warn('`kind`is deprecated, use `method` instead',
-                          SpectroChemPyDeprecationWarning)
-
         method = kwargs.pop('method', method)
-        # debug_('Call to plot_{}'.format(method))
 
         # Find or guess the adequate plotter
         # -----------------------------------
@@ -203,10 +197,9 @@ class NDPlot(HasTraits):
 
         # debug_('figure setup')
 
-        # by default we use the matplotlib librairy especially for plotting
-        # in the jupyter notebook
-        # but there is also possibility that the plots are made using
-        # pyqtgraph in the GUI - usempl is the flag for that option
+        # by default we use the matplotlib librairy
+        # but alternatively plots can be done using plotly
+        # use_plotly is the flag for that option
 
         usempl = kwargs.get('usempl', True)
         method = kwargs.get('method', project_preferences.method_2D)
