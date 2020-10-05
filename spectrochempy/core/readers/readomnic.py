@@ -9,7 +9,6 @@
 
 """
 __all__ = ['read_omnic', 'read_spg', 'read_spa']
-
 __dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -27,7 +26,7 @@ from spectrochempy.core import debug_
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.utils import readfilename, pathclean
+from spectrochempy.utils import readfilename, pathclean, check_io_args
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -66,7 +65,7 @@ def _fromfile(f, dtype, count):
 # ======================================================================================================================
 
 # .............................................................................
-def read_omnic(dataset=None, **kwargs):
+def read_omnic(*args, **kwargs):
     """Open a Thermo Nicolet with extension ``.spg`` or a list of ``.spa`` files
      and set data/metadata in the current dataset. The collected metatdata are:
      - names of spectra
@@ -108,19 +107,7 @@ def read_omnic(dataset=None, **kwargs):
     """
     debug_("reading omnic files")
 
-    # filename will be given by a keyword parameter except if the first parameters
-    # is already the filename
-    filename = kwargs.get('filename', None)
-
-    # check if the first parameter is a dataset because we allow not to pass it
-    if not isinstance(dataset, NDDataset):
-        # probably did not specify a dataset
-        # so the first parameters must be the filename
-        if isinstance(dataset, (str, list)) and dataset != '':
-            filename = dataset
-
-        dataset = NDDataset()  # create an instance of NDDataset
-
+    dataset, filename = check_io_args(*args, **kwargs)
     sortbydate = kwargs.pop("sortbydate", True)
     content = kwargs.get('content', None)
     directory = pathclean(kwargs.get("directory", None))
@@ -423,11 +410,13 @@ def _getintensities(f, pos):
 # .............................................................................
 
 
-def _read_spg(dataset, filename, **kwargs):
+def _read_spg(*args, **kwargs):
     # read spg file
 
-    sortbydate = kwargs.get('sortbydate', True)
+    dataset, filename = check_io_args(*args, **kwargs)
+    sortbydate = kwargs.pop("sortbydate", True)
     content = kwargs.get('content', None)
+
     if content is not None:
         f = io.BytesIO(content)
     else:

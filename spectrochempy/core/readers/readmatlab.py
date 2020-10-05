@@ -15,12 +15,12 @@ import numpy as np
 import scipy.io as sio
 
 __all__ = ['read_matlab']
-
 __dataset_methods__ = __all__
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
+from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.utils import readfilename
-from ...core import debug_
+from spectrochempy.core import debug_
 
 
 def read_matlab(dataset=None, **kwargs):
@@ -115,6 +115,8 @@ def read_matlab(dataset=None, **kwargs):
     else:
         return datasets
 
+# make also classmethod
+NDIO.read_matlab = read_matlab
 
 def _read_DSO(f, x):
     dso = x[0]

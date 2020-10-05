@@ -20,7 +20,6 @@ from spectrochempy.utils import savefilename
 from spectrochempy.core import debug_    # info_, error_, warning_
 
 __all__ = ['write_jdx']
-
 __dataset_methods__ = __all__
 
 

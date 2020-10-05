@@ -9,8 +9,7 @@
 
 """
 __all__ = ['read_json']
-
-__dataset_methods__ = __all__
+__dataset_methods__ = ['read_json']
 
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
@@ -31,7 +30,7 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity
 from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.utils import readfilename, pathclean
+from spectrochempy.utils import readfilename, pathclean, check_io_args
 from spectrochempy.core import general_preferences as prefs
 
 def json_decoder(dic):
@@ -46,7 +45,7 @@ def json_decoder(dic):
 
     return dic
 
-def read_json(dataset=None, **kwargs):
+def read_json(*args, **kwargs):
     """
     Read a single file or a byte string in JSON format
 
@@ -71,26 +70,40 @@ def read_json(dataset=None, **kwargs):
     """
     debug_("reading a json file")
 
-    # filename will be given by a keyword parameter except if the first parameters
-    # is already the filename
-    filename = kwargs.get('filename', None)
-
-    # check if the first parameter is a dataset because we allow not to pass it
-    if not isinstance(dataset, NDDataset):
-        # probably did not specify a dataset
-        # so the first parameters must be the filename
-        if isinstance(dataset, (str, list)) and dataset != '':
-            filename = dataset
-
-        dataset = NDDataset()  # create an instance of NDDataset
+    dataset, filename = check_io_args(*args, **kwargs)
 
     content = kwargs.get('content', None)
-    directory = pathclean(kwargs.get("directory", prefs.datadir))
 
     if content is not None:
         f = io.BytesIO(content)
+        datasets = [_read(f, dataset)]
+
     else:
-        f = open(filename, 'rb')
+        directory = pathclean(kwargs.get("directory", None))
+
+        # returns a list of files to read
+        files = readfilename(filename,
+                             directory=directory,
+                             filetypes=['JSON files (*.json)'])
+
+        if not files:
+            # there is no files, return nothing
+            return None
+
+        files = files['.json']
+        datasets = []
+        for filename in files:
+            f = open(filename, 'rb')
+            datasets.append(_read(f, dataset, filename))
+
+    if len(datasets) == 1:
+        return datasets[0]
+    else:
+        return datasets
+
+NDIO.read_json = read_json
+
+def _read(f, dataset, filename=None):
 
     # read file content
     obj = json.loads(f.read(),object_hook=json_decoder)

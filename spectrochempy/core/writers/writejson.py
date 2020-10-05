@@ -23,11 +23,10 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity
-from spectrochempy.utils import savefilename
+from spectrochempy.utils import savefilename, check_io_args
 from spectrochempy.core import debug_    # info_, error_, warning_
 
 __all__ = ['write_json']
-
 __dataset_methods__ = __all__
 
 
@@ -40,48 +39,26 @@ def json_serialiser(byte_obj):
 
    raise ValueError('No encoding handler for data type ' + type(byte_obj))
 
-def _check_io_args(*args, **kwargs):
-
-    # filename will be given by a keyword parameter except if the first parameters is already the filename
-    filename = kwargs.get('filename', None)
-    dataset = kwargs.get('dataset', None)
-
-    args = list(args)
-
-    # check if the first argument is a dataset because we allow not to pass it
-    if args:
-        arg = args.pop(0)
-        if isinstance(arg, NDDataset):
-            dataset = arg
-            if args: # still some data, should be the filename, else something is wrong
-                filename = args.pop()
-                if not isinstance(filename, str):
-                    raise TypeError('Filename must be a string')
-        else:
-            filename = arg
-
-    if not dataset:
-        # make a void dataset
-        dataset = NDDataset()
-
-    return dataset, filename
-
-
 def write_json(*args, **kwargs):
     """Writes a dataset in JSON format
 
     Parameters
     ----------
-    dataset : |NDDataset|
-        The dataset
-    filename : `None`, `str`
-        Filename of the file to write. If `None`: opens a dialog box to save files.
-    directory: str, optional, default="".
-        Where to save the file. If not specified, write in the current directory.
+    dataset : |NDDataset|.
+        The dataset to export with a JSON format
+    filename : str, optional, default=None.
+        Filename of the file to write.
+        If not specified, open a dialog box except if `to_string` is True
+    directory: str, optional, default=None.
+        Where to save the file.
+        If not specified, write in the current directory.
+    to_string: bool, optional, default=False.
+        If True, return a JSON string
 
     Returns
     -------
-    None
+    string:
+        a JSON string if to_string, else None
 
     Examples
     --------
@@ -92,9 +69,8 @@ def write_json(*args, **kwargs):
     >>> X.write('myfile.json')
 
     """
-    debug_("writing json file")
 
-    dataset, filename = _check_io_args(*args, **kwargs)
+    dataset, filename = check_io_args(*args, **kwargs)
 
     dic = {}
     objnames = dataset.__dir__()
@@ -155,7 +131,7 @@ def write_json(*args, **kwargs):
     # make the json string
     js = json.dumps(dic, default=json_serialiser)
 
-    if not kwargs.get('memory', False):
+    if not kwargs.get('to_string', False):
 
         # output on a disk
         directory = kwargs.get('directory', None)
@@ -171,5 +147,6 @@ def write_json(*args, **kwargs):
             f.write(js.encode('utf-8'))
 
     else:
+        # just return the json string
         return js
 
