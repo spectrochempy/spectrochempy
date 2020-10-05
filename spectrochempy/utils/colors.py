@@ -9,8 +9,10 @@ class colorscale:
 
     def normalize(self, data, cmap='viridis'):
         _colormap = plt.get_cmap(cmap)
-        p = data.ptp()*0.02
-        _norm = mpl.colors.Normalize(vmin=data.min()-p, vmax=data.max()+p)
+        amp = 0. # np.ma.ptp(data) / 10.
+        range = [np.ma.min(np.ma.min(data) - amp), np.ma.max(np.ma.max(data)) + amp]
+        range.sort()
+        _norm = mpl.colors.Normalize(vmin=range[0], vmax=range[1])
         self.scalarMap = mpl.cm.ScalarMappable(norm=_norm, cmap=_colormap)
 
     def rgba(self, z):
