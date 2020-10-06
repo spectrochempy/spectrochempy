@@ -936,20 +936,19 @@ class SpectroChemPy(Application):
     test = Bool(False, help='test flag').tag(config=True)
     """Flag to set the application in testing mode"""
 
-    port = Integer(8050, help='Dash server port').tag(config=True)
+    port = Integer( 8050, help='Dash server port').tag(config=True)
     """Dash server port"""
 
     # Command line interface
     # ------------------------------------------------------------------------------------------------------------------
 
-    aliases = Dict(
-        dict(test='SpectroChemPy.test',
-             p='SpectroChemPy.last_project',
+    aliases = dict(test='SpectroChemPy.test',
+             project='SpectroChemPy.last_project',
              f='SpectroChemPy.startup_filename',
-             ))
+             port='SpectroChemPy.port',
+             )
 
-    flags = Dict(
-        dict(
+    flags =dict(
             debug=({'SpectroChemPy': {'log_level': DEBUG}},
                    "Set log_level to DEBUG - most verbose mode"),
             info=({'SpectroChemPy': {'log_level': INFO}},
@@ -966,9 +965,7 @@ class SpectroChemPy(Application):
             show_config_json=({'SpectroChemPy': {'show_config_json': True, }},
                               "Show the application's configuration (json "
                               "format)"),
-            port=({'SpectroChemPy': {'port': 8050}},
-                       "Set Port for opening the Dash server"),
-        ))
+        )
 
     classes = List([GeneralPreferences, ProjectPreferences, DataDir, ])
 
@@ -1003,21 +1000,8 @@ class SpectroChemPy(Application):
 
         self.logs.debug("scpy command line arguments are: %s" % " ".join(sys.argv))
 
-        # workaround the problem with argument not in our aliases or flags
-        # e.g., when using pytest options or setup.py options
-
-        options = []
-        for item in sys.argv[:]:
-            for k in list(self.flags.keys()):
-                if item.startswith("--" + k) or k in ['--help', '--help-all']:
-                    options.append(item)
-                continue
-            for k in list(self.aliases.keys()):
-                if item.startswith("-" + k) or k in ['h', ]:
-                    options.append(item)
-
         if not IN_IPYTHON:
-            self.parse_command_line(options)
+            self.parse_command_line(sys.argv)
 
         # Get preferences from the config file and init everything
         # ---------------------------------------------------------------------
@@ -1062,6 +1046,9 @@ class SpectroChemPy(Application):
         # Get preferences from the config file
         # ---------------------------------------------------------------------
 
+        if not self.config:
+            self.config = Config()
+
         if self.config_file_name:
             config_file = os.path.join(self.config_dir, self.config_file_name)
 
@@ -1072,8 +1059,6 @@ class SpectroChemPy(Application):
                     if f.endswith('.json'):
                         jsonname = os.path.join(self.config_dir, f)
                         os.remove(jsonname)
-
-            self.config = Config()
 
             for cfgname in [config_file, ]:
                 self.load_config_file(cfgname)
@@ -1097,6 +1082,7 @@ class SpectroChemPy(Application):
         # Eventually write the default config file
         # --------------------------------------
         self._make_default_config_file()
+
 
     def start_show_config(self, **kwargs):
         """start function used when show_config is True"""
@@ -1174,6 +1160,9 @@ class SpectroChemPy(Application):
 
         All configuration must have been done before calling this function
         """
+
+        print(f'{sys.argv}')
+
         return self._start()
 
     def _start(self):
@@ -1286,3 +1275,7 @@ class SpectroChemPy(Application):
 
 if __name__ == "__main__":
     pass
+
+
+
+
