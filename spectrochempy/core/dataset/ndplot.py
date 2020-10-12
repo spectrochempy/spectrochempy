@@ -28,13 +28,15 @@ from cycler import cycler
 import matplotlib as mpl
 # from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import pyplot as plt
+import plotly.graph_objects as go
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from traitlets import Dict, HasTraits, Instance, default
+from traitlets import Dict, HasTraits, Instance, Union, default
 
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.utils import (is_sequence, SpectroChemPyDeprecationWarning,
-                                 docstrings, NBlack, NBlue, NGreen, NRed, get_figure)
+                                 docstrings, NBlack, NBlue, NGreen, NRed,
+                                 get_figure, get_plotly_figure)
 from spectrochempy.core import general_preferences, project_preferences
 from spectrochempy.core import error_
 
@@ -60,8 +62,13 @@ class NDPlot(HasTraits):
 
     """
 
-    # The figure on which this dataset can be plotted
-    _fig = Instance(plt.Figure, allow_none=True)
+    #variable containing the matplotlib axis defined for a NDArray object
+    _ax = Instance(plt.Axes, allow_none=True)
+
+    # The figure on which this NDArray can be plotted
+    _fig = Union((Instance(plt.Figure),
+                  Instance(go.Figure)
+                  ), allow_none=True)
 
     # The axes on which this dataset and other elements such as projections
     # and colorbar can be plotted
@@ -107,8 +114,6 @@ class NDPlot(HasTraits):
         dpi : [ None | scalar > 0]
             The resolution in dots per inch. If None it will default to the
             value savefig.dpi in the matplotlibrc file.
-        use_plotly: bool, optional, default=False
-            whether or not using plotly for plotting
 
         """
 
@@ -195,26 +200,16 @@ class NDPlot(HasTraits):
     # ..................................................................................................................
     def _figure_setup(self, ndim=1, **kwargs):
 
-        # debug_('figure setup')
-
-        # by default we use the matplotlib librairy
-        # but alternatively plots can be done using plotly
-        # use_plotly is the flag for that option
-
-        usempl = kwargs.get('usempl', True)
         method = kwargs.get('method', project_preferences.method_2D)
         ax3d = '3d' if method in ['surface'] else None
 
-        # make matplolib specific setup
+        _set_figure_style(**kwargs)
 
-        if usempl:
-            _set_figure_style(**kwargs)
+        self._figsize = mpl.rcParams['figure.figsize'] = \
+            kwargs.get('figsize', mpl.rcParams['figure.figsize'])
 
-            self._figsize = mpl.rcParams['figure.figsize'] = \
-                kwargs.get('figsize', mpl.rcParams['figure.figsize'])
-
-            mpl.rcParams[
-                'figure.autolayout'] = kwargs.pop('autolayout', True)
+        mpl.rcParams[
+            'figure.autolayout'] = kwargs.pop('autolayout', True)
 
         # Get current figure information
         # ------------------------------
@@ -240,10 +235,12 @@ class NDPlot(HasTraits):
                 raise ValueError(
                     '{} is not recognized as a valid Axe'.format(tax))
 
-        if usempl:
-            # get the current figure (or the last used)
-            self._fig = get_figure(clear)
-            self._fig.rcParams = plt.rcParams.copy()
+        # get the current figure (or the last used)
+        self._fig = get_figure(clear)
+
+        # save parameter used by this figure for eventually using it later
+        # (e.g. see testing.py -> wrapper)
+        self._fig.rcParams = plt.rcParams.copy()
 
         if clear:
             self._ndaxes = {}  # reset ndaxes
@@ -252,8 +249,7 @@ class NDPlot(HasTraits):
         if ax is not None:
             # ax given in the plot parameters,
             # in this case we will plot on this ax
-            if isinstance(ax, (plt.Axes)) or (hasattr(ax, 'implements') and
-                                              ax.implements('PyQtGraphWidget')):
+            if isinstance(ax, (plt.Axes)):
                 ax.name = 'main'
                 self.ndaxes['main'] = ax
             else:
@@ -286,9 +282,8 @@ class NDPlot(HasTraits):
                 cycler('linestyle',
                        ['-', '--', ':', '-.']))
 
-        if usempl:
-            # Get the number of the present figure
-            self._fignum = self._fig.number
+        # Get the number of the present figure
+        self._fignum = self._fig.number
 
         # for generic plot, we assume only a single axe
         # with possible projections
@@ -621,3 +616,4 @@ plot = NDPlot.plot  # make plot accessible directly from the scp API
 # ======================================================================================================================
 if __name__ == '__main__':
     pass
+

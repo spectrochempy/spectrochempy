@@ -26,8 +26,19 @@ def test_plot2D():
     A.plot(style=mystyle)
     A.plot(style=['sans', 'paper', 'grayscale'], colorbar=False)
     show()
-
     pass
+
+def test_plotly2D():
+
+    A = NDDataset.read_omnic('irdata/nh4y-activation.spg',
+                             directory=prefs.datadir)
+    A.y -= A.y[0]
+    A.y.to('hour', inplace=True)
+    A.y.title = u'Aquisition time'
+
+    ax = A.copy().plot(use_plotly=True)
+
+
 
 
 # ======================================================================================================================

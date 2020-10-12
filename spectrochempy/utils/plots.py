@@ -5,10 +5,15 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
+import matplotlib as mpl
 from matplotlib import pyplot as plt
+import plotly.graph_objects as go
+import numpy as np
 
 __all__ = ['cmyk2rgb', 'NBlack', 'NRed', 'NBlue', 'NGreen',
-           'figure', 'show', 'get_figure']
+           'figure', 'show', 'get_figure',
+           # Plotly specific
+           'get_plotly_figure', 'colorscale']
 
 
 # ............................................................................
@@ -101,3 +106,52 @@ def get_figure(clear=True, **kwargs):
 
     # a figure already exists - if several we take the last
     return plt.figure(n[-1])
+
+
+# FOR PLOTLY
+# .............................................................................
+def get_plotly_figure(clear=True, fig=None, **kwargs):
+    """
+    Get the figure where to plot.
+
+    Parameters
+    ----------
+    clear : bool
+        if False the figure provided in the `fig` parameters is used.
+    fig : plotly figure
+        if provided, and clear is not True, it will be used for plotting
+    kwargs : any
+        keywords arguments to be passed to the plotly figure constructor.
+
+    Returns
+    -------
+    Plotly figure instance
+
+    """
+
+    if clear or fig is None:
+        # create a figure
+        return go.Figure()
+
+    # a figure already exists - if several we take the last
+    return fig
+
+class colorscale:
+
+    def normalize(self, vmin, vmax, cmap='viridis', rev=False, offset=0):
+        """
+        """
+        if rev:
+            cmp = cmap+'_r'
+        _colormap = plt.get_cmap(cmap)
+
+        _norm = mpl.colors.Normalize(vmin=vmin-offset, vmax=vmax-offset)
+        self.scalarMap = mpl.cm.ScalarMappable(norm=_norm, cmap=_colormap)
+
+    def rgba(self, z, offset=0):
+        c = np.array(self.scalarMap.to_rgba(z.squeeze()-offset))
+        c[0:3] *= 255
+        c[0:3] = np.round(c[0:3].astype('uint16'),0)
+        return  f'rgba'+str(tuple(c))
+
+colorscale = colorscale()

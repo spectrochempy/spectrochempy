@@ -48,8 +48,10 @@ def plot_scatter(dataset, **kwargs):
 
     """
     kwargs['method'] = 'scatter'
-    ax = plot_1D(dataset, **kwargs)
-    return ax
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_1D(dataset, **kwargs)
 
 
 # plot lines -----------------------------------------------------------------
@@ -63,9 +65,10 @@ def plot_lines(dataset, **kwargs):
 
     """
     kwargs['method'] = 'pen'
-    ax = plot_1D(dataset, **kwargs)
-    return ax
-
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_1D(dataset, **kwargs)
 
 # plot pen (default) ---------------------------------------------------------
 
@@ -77,8 +80,10 @@ def plot_pen(dataset, **kwargs):
 
     """
     kwargs['method'] = 'pen'
-    ax = plot_1D(dataset, **kwargs)
-    return ax
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_1D(dataset, **kwargs)
 
 
 # plot bars ------------------------------------------------------------------
@@ -91,8 +96,10 @@ def plot_bar(dataset, **kwargs):
 
     """
     kwargs['method'] = 'bar'
-    ax = plot_1D(dataset, **kwargs)
-    return ax
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_1D(dataset, **kwargs)
 
 
 # plot multiple --------------------------------------------------------------
@@ -253,6 +260,17 @@ def plot_1D(dataset, **kwargs):
 
     """
 
+    # if plotly execute plotly routine not this one
+    if kwargs.get('use_plotly', False):
+        # we use the 2D routine for 1D and 2D
+        return dataset.plotly(**kwargs)
+
+    # make a copy
+    # ------------------------------------------------------------------------------------------------------------------
+
+    new = dataset.copy()
+    new = new.squeeze()
+
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -261,30 +279,8 @@ def plot_1D(dataset, **kwargs):
         # not yet set, initialize with default project preferences
         prefs.update(project_preferences.to_dict())
 
-    usempl = True  # by default we use matplotlib for plotting
-
-    # make a copy
-    # ------------------------------------------------------------------------------------------------------------------
-    new = dataset.copy()  # Do we need a copy?
-    new = new.squeeze()  # and squeeze it
-
-    # If we are in the GUI, we will plot on a widget: but which one?
-    # ------------------------------------------------------------------------------------------------------------------
-
-    widget = kwargs.get('widget', None)
-
-    # this is not active for now
-    if widget is not None:
-        if hasattr(widget, 'implements') and widget.implements('PyQtGraphWidget'):
-            # let's go to a particular treament for the pyqtgraph plots
-            kwargs['usempl'] = usempl = False
-            # we try to have a commmon interface for both plot library
-            kwargs['ax'] = ax = widget  # return qt_plot_1D(dataset, **kwargs)
-        else:
-            # this must be a matplotlibwidget
-            kwargs['usempl'] = usempl = True
-            fig = widget.fig
-            kwargs['ax'] = ax = fig.gca()
+    usempl = kwargs.pop('usempl', True)    # by default we use matplotlib for plotting (which is faster but
+                                                    # wich is hardly  interactive)
 
     # If no method parameters was provided when this function was called,
     # we first look in the meta parameters of the dataset for the defaults
@@ -303,8 +299,7 @@ def plot_1D(dataset, **kwargs):
     # Figure setup
     # ------------------------------------------------------------------------------------------------------------------
 
-    new._figure_setup(pen=pen or scatterpen, scatter=scatter or scatterpen,
-                      **kwargs)
+    new._figure_setup(pen=pen or scatterpen, scatter=scatter or scatterpen, **kwargs)
 
     ax = new.ndaxes['main']
     ax.prefs = prefs
@@ -381,10 +376,6 @@ def plot_1D(dataset, **kwargs):
     else:
         z = new.imag
         zdata = z.masked_data
-
-    # offset
-    offset = kwargs.pop('offset', 0.0)
-    zdata = zdata - offset
 
     # plot_lines
     # ------------------------------------------------------------------------------------------------------------------

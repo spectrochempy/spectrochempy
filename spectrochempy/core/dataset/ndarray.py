@@ -521,10 +521,14 @@ class NDArray(HasTraits):
         |ndarray| - The `data` array.
 
         If there is no data but labels, then the labels are returned instead of data.
+        If there is an offset the data are returned relative to the offset
 
         """
 
-        return self._data
+        if self._data is not None:
+            return self._data - self.offset
+        else:
+            return None
 
     # ..................................................................................................................
     @data.setter
@@ -849,6 +853,18 @@ class NDArray(HasTraits):
         if title:
             self._title = title
 
+
+    @property
+    def alt_title(self):
+        # title provided in case of offset
+        if self._title:
+            # case of timestamp - they must be modified if there is an offset!
+            if 'timestamp' in self._title.lower() and self.offset:
+                return 'Time'
+            return self._title
+        else:
+            return "<untitled>"
+
     # ..................................................................................................................
     @property
     def name(self):
@@ -1028,6 +1044,16 @@ class NDArray(HasTraits):
         else:
             return False
 
+    @property
+    def has_offset(self):
+        """
+        bool - True is the data are relative to an offset
+
+        """
+        if self._offset:
+            return True
+        return False
+
     # ..................................................................................................................
     @property
     def is_masked(self):
@@ -1165,7 +1191,7 @@ class NDArray(HasTraits):
         """
 
         if self._data is not None:
-            data = self._uarray(self._data, self._units)
+            data = self._uarray(self._data - self._offset, self._units)
             if self.size > 1:
                 return data
             else:
@@ -2103,7 +2129,8 @@ class NDArray(HasTraits):
         # This ensures that a masked array is returned.
         if not np.any(mask):
             mask = np.zeros(data.shape).astype(bool)
-        data = np.ma.masked_array(data, mask)
+        data =  np.ma.masked_where(mask,data) # np.ma.masked_array(data, mask)
+
         return data
 
     # ..................................................................................................................

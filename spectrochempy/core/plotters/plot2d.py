@@ -14,7 +14,7 @@
 """
 __all__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_surface']
 
-__dataset_methods__ = ['plot_2D', 'plot_map', 'plot_stack', 'plot_image', 'plot_surface']
+__dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
@@ -31,9 +31,11 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+import plotly.graph_objects as go
+from matplotlib import cm
 
 # ----------------------------------------------------------------------------------------------------------------------
-# localimports
+# local imports
 # ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.plotters.utils import make_label
@@ -55,8 +57,10 @@ def plot_map(dataset, **kwargs):
 
     """
     kwargs['method'] = 'map'
-    ax = plot_2D(dataset, **kwargs)
-    return ax
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_2D(dataset, **kwargs)
 
 
 # stack plot  -----------------------------------------------------------------
@@ -69,9 +73,10 @@ def plot_stack(dataset, **kwargs):
 
     """
     kwargs['method'] = 'stack'
-    ax = plot_2D(dataset, **kwargs)
-    return ax
-
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_2D(dataset, **kwargs)
 
 # image plot --------------------------------------------------------
 
@@ -83,8 +88,10 @@ def plot_image(dataset, **kwargs):
 
     """
     kwargs['method'] = 'image'
-    ax = plot_2D(dataset, **kwargs)
-    return ax
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_2D(dataset, **kwargs)
 
 
 # surface plot -----------------------------------------------------------------
@@ -97,8 +104,10 @@ def plot_surface(dataset, **kwargs):
 
     """
     kwargs['method'] = 'surface'
-    ax = plot_2D(dataset, **kwargs)
-    return ax
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+    else:
+        return plot_2D(dataset, **kwargs)
 
 
 # generic plot (default stack plot) -------------------------------------------
@@ -136,6 +145,10 @@ def plot_2D(dataset, **kwargs):
 
     """
 
+    # if plotly excute plotly routine not this one
+    if kwargs.get('use_plotly', False):
+        return dataset.plotly(**kwargs)
+
     # get all plot preferences
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -156,39 +169,21 @@ def plot_2D(dataset, **kwargs):
     if method is None:
         method = prefs.method_2D
 
-    # If we are in the GUI, we will plot on a widget: but which one?
-    # ------------------------------------------------------------------------------------------------------------------
-
-    widget = kwargs.get('widget', None)
-
-    if widget is not None:
-        if hasattr(widget, 'implements') and widget.implements('PyQtGraphWidget'):
-            # let's go to a particular treament for the pyqtgraph plots
-            kwargs['usempl'] = False
-            # we try to have a commmon interface for both plot library
-            kwargs['ax'] = widget  # return qt_plot_1D(dataset, **kwargs)
-        else:
-            # this must be a matplotlibwidget
-            kwargs['usempl'] = True
-            fig = widget.fig
-            kwargs['ax'] = fig.gca()
-
     data_only = kwargs.get('data_only', False)
 
     data_transposed = kwargs.get('data_transposed', False)
 
     if data_transposed:
-        new = dataset.T.copy()  # transpose dataset
+        new = dataset.copy().T  # transpose dataset
         nameadd = '.T'
     else:
-        new = dataset.copy()  # TODO: why loose time to make a copy?
+        new = dataset #.copy()
         nameadd = ''
 
     new = new.squeeze()
 
     # figure setup
     # ------------------------------------------------------------------------------------------------------------------
-
     new._figure_setup(ndim=2, **kwargs)
     ax = new.ndaxes['main']
     ax.name = ax.name + nameadd
@@ -198,7 +193,7 @@ def plot_2D(dataset, **kwargs):
 
     colorbar = kwargs.get('colorbar', prefs.colorbar)
 
-    cmap = mpl.rcParams['image.cmap']
+    cmap = "viridis"
 
     # viridis is the default setting,
     # so we assume that it must be overwritten here
@@ -233,6 +228,7 @@ def plot_2D(dataset, **kwargs):
 
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
+
     ax.xaxis.set_major_locator(MaxNLocator(nbins=number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(nbins=number_y_labels))
     if method not in ['surface']:
@@ -287,7 +283,7 @@ def plot_2D(dataset, **kwargs):
     ax.set_xlim(xlim)
 
     xscale = kwargs.get("xscale", "linear")
-    ax.set_xscale(xscale, nonposx='mask')
+   # ax.set_xscale(xscale, nonposx='mask')
 
     # set the ordinates axis
     # ------------------------------------------------------------------------------------------------------------------
@@ -320,7 +316,7 @@ def plot_2D(dataset, **kwargs):
     ylim[0] = max(ylim[0], yl[0])
 
     yscale = kwargs.get("yscale", "linear")
-    ax.set_yscale(yscale)
+ #   ax.set_yscale(yscale)
 
     # z intensity (by default we plot real part of the data)
     # ------------------------------------------------------------------------------------------------------------------

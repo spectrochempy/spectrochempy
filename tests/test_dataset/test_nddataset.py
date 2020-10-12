@@ -1557,7 +1557,31 @@ def test_nddataset_init_pandas(series, dataframe):
 
 # TODO: write test for to_pandas conversion
 
-# ----------------------------------------------------------------------------------------------------------------------
+def test_to_dataframe():
+
+    dx = np.random.random((2, 10))
+    coord0 = np.arange(2)*1.5
+    coord1 = np.arange(10)*1.1
+
+    da = NDDataset(dx,
+                   coords=(coord0, coord1),
+                   title='absorbance',
+                   coordtitles=['wavelength', 'time-on-stream'],
+                   coordunits=['cm^-1', 's'],
+                   )
+
+    assert da.shape == (2,10)
+
+    df = da.to_dataframe()
+
+    assert df.shape == (2.10)
+
+
+
+
+
+
+
 # Xarray
 # ----------------------------------------------------------------------------------------------------------------------
 

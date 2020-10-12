@@ -579,29 +579,7 @@ class CoordSet(HasTraits):
         """
         return dict(zip(self.names, self._coords))
 
-    # ..................................................................................................................
-    def to_index(self):
-        """
-        Convert all index coordinates into a `pandas.Index`
-
-        Returns
-        -------
-        pandas.Index
-            Index subclass corresponding to the outer-product of all dimension
-            coordinates. This will be a MultiIndex if this object is has more
-            than more dimension.
-
-        """
-        if len(self) == 0:
-            raise ValueError('no valid index for a 0-dimensional object')
-
-        elif len(self) == 1:
-            return self[0].to_pandas()
-
-        else:
-            return pd.MultiIndex.from_product([item.data for item in self], names=self.titles)
-
-    # ..................................................................................................................
+# ..................................................................................................................
     def update(self, **kwargs):
         """
         Update a specific coordinates in the CoordSet.

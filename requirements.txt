@@ -7,8 +7,6 @@ nmrglue
 
 # for the core package
 colorama
-dash
-dash-bootstrap-components
 docrep
 ipython
 jinja2
@@ -28,6 +26,14 @@ traittypes
 
 # to be suppressed when code change is finished
 xlrd
+
+# for Dash
+
+dash
+dash-bootstrap-components
+dash_daq
+dash-ace
+dash_defer_js_import
 
 # mainly for install and a bit more...
 setuptools

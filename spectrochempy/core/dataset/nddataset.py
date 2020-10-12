@@ -83,11 +83,6 @@ class NDDataset(
     # we use the abstract class to avoid circular imports.
     _parent = Instance(AbstractProject, allow_none=True)
 
-    # _ax is a hidden variable containing the matplotlib axis defined
-    # for a NDArray object.
-    # most generally it is accessed using the public read-only property ax
-    _ax = Instance(plt.Axes, allow_none=True)
-    _fig = Instance(plt.Figure, allow_none=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # initialisation
@@ -927,24 +922,6 @@ class NDDataset(
         return new
 
     # ..................................................................................................................
-    def to_dataframe(self, **kwargs):
-        """
-        Convert to a tidy structured Pandas DataFrame.
-        (needs Pandas library installed)
-
-        tidy data :  http://www.jstatsoft.org/v59/i10/
-
-        Each column holds a different variable (For a NDDataset there is only one column)
-        Each rows holds a different observation.
-
-        """
-        columns = [self.title]  # title
-        data = [self.data.reshape(-1)]
-        index = self._coords.to_index()
-
-        return pd.DataFrame(OrderedDict(zip(columns, data)), index=index)
-
-    # ..................................................................................................................
     def to_xarray(self, **kwargs):
         """
         Convert a NDDataset instance to an `~xarray.DataArray` object
@@ -971,7 +948,8 @@ class NDDataset(
         #     Name of this array.
         # attrs: OrderedDict
         #     Dictionary for holding arbitrary metadata.
-        # Init docstring:
+        # Init docstring
+        #
         # Parameters
         # ----------
         # data: array_like
@@ -1014,15 +992,15 @@ class NDDataset(
             ty = y.title
             da = xr.DataArray(np.array(self.data, dtype=np.float64),
                               coords=[(ty, y.data), (tx, x.data)],
-                              attrs=self.meta,
                               )
-            da.attrs['units'] = (y.units, x.units, self.units)
+
+            da.attrs['units'] = self.units
         else:
             da = xr.DataArray(np.array(self.data, dtype=np.float64),
                               coords=[(tx, x.data)],
-                              attrs=self.meta,
                               )
-            da.attrs['units'] = (x.units, self.units)
+
+            da.attrs['units'] = self.units
 
         da.attrs['title'] = self.title
 
@@ -1205,7 +1183,6 @@ squeeze = make_func_from(NDDataset.squeeze, first='dataset')
 swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')
 transpose = make_func_from(NDDataset.transpose, first='dataset')
 to_xarray = make_func_from(NDDataset.to_xarray, first='dataset')
-to_dataframe = make_func_from(NDDataset.to_dataframe, first='dataset')
 take = make_func_from(NDDataset.take, first='dataset')
 
 __all__ += ['sort',
@@ -1214,7 +1191,6 @@ __all__ += ['sort',
             'swapaxes',
             'transpose',
             'to_xarray',
-            'to_dataframe',
             'take',
             ]
 
