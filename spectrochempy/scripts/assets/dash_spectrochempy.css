@@ -3,15 +3,17 @@ body, .plot-container {
     background-color: #cccccc;
 }
 
+H1,H2,H3,H4,H5,H6,H7 {margin-top: 15px}
+
 /* graph */
 .dash-graph {
     display: block;
-    height: 80vh;
+    height: 85vh;
 }
 
 .control-tab {
     font-size: 10pt;
-    max-height:690px;
+    max-height: 85vh;
     overflow-y: auto;
     background-color: #F3F5F9;
     border: 0;
@@ -40,6 +42,14 @@ body, .plot-container {
     border-width: 5px 1px 1px 1px;
 }
 
+#navbarbrand p {
+    padding-left: 10px;
+    margin-bottom:0
+}
+
+#navbarbrand em {
+    font-size: .5em;
+}
 
 
 .markdown {font-size:1em}
@@ -47,3 +57,9 @@ body, .plot-container {
 }
 
 .card {margin-bottom:5pt}
+
+#graph .modebar {
+    background: transparent;
+    top: 70px;
+    right: 70px;
+}
