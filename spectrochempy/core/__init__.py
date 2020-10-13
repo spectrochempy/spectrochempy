@@ -63,7 +63,7 @@ if os.environ.get('USE_TQDM', 'Yes') == 'Yes' and "/bin/scpy" not in sys.argv[0]
             pbar.clear()
             pbar.close()
         else:
-            time.sleep(.1)
+           # time.sleep(.1)
             pbar.update(val_tqdm[i])
 else:
 
