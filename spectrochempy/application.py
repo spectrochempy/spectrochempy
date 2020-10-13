@@ -1001,7 +1001,20 @@ class SpectroChemPy(Application):
         self.logs.debug("scpy command line arguments are: %s" % " ".join(sys.argv))
 
         if not IN_IPYTHON:
-            self.parse_command_line(sys.argv)
+            # remove argument not known by spectrochempy
+            if 'make.py' in sys.argv[0]:  # building docs
+                options = []
+                for item in sys.argv[:]:
+                    for k in list(self.flags.keys()):
+                        if item.startswith("--" + k) or k in ['--help', '--help-all']:
+                            options.append(item)
+                        continue
+                    for k in list(self.aliases.keys()):
+                        if item.startswith("-" + k) or k in ['h', ]:
+                            options.append(item)
+                self.parse_command_line(options)
+            else:
+                self.parse_command_line(sys.argv)
 
         # Get preferences from the config file and init everything
         # ---------------------------------------------------------------------
