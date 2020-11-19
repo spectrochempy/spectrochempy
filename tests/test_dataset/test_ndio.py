@@ -9,83 +9,134 @@
 
 """
 
-import os
+
+import pathlib
 
 import pytest
 
-from spectrochempy.core import general_preferences as prefs
-from spectrochempy.core import info_
-from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils.testing import assert_array_equal
-
+from spectrochempy.utils import pathclean, SpectroChemPyException
 
 # Basic
 # ----------------------------------------------------------------------------------------------------------------------
-def test_ndio_basic():
-    ir = NDDataset([1.1, 2.2, 3.3], coords=[[1, 2, 3]])
-    ir.save('essai')
+def test_ndio_generic(IR_dataset_1D, IR_dataset_2D):
+
+    ir = IR_dataset_1D
+    assert ir.directory == pathclean(prefs.datadir) / "irdata"
+
+    # save in the self.directory
+    path = ir.save('essai')               # save essai.scp
+    assert ir.directory == pathclean(prefs.datadir) / "irdata" # should not change
+    assert path.name == "essai.scp"
+    assert path.parent == pathlib.Path.cwd()
+    assert path.suffix == ".scp"
+
+    # try to load without extension specification (will first assume it is scp)
     dl = NDDataset.load('essai')
     assert_array_equal(dl.data, ir.data)
+    assert dl.directory == pathlib.Path.cwd()
 
-    ir = NDDataset([[1.1, 2.2, 3.3]], coords=[[0], [1, 2, 3]])
-    ir.save('essai')
-    dl = NDDataset.load('essai')
+    path.unlink()
+
+    # save in the same directory as original
+    path = ir.save('essai', same_dir=True)
+    assert path.parent == ir.directory
+
+    # try to load without extension specification (will first assume it is scp)
+    dl = NDDataset.load('irdata/essai')
     assert_array_equal(dl.data, ir.data)
 
-    ir = NDDataset([[1.1, 2.2, 3.3], [1.1, 2.2, 3.3]], coords=[[1, 2], [1, 2, 3]])
-    ir.save('essai')
-    dl = NDDataset.load('essai')
+    # or with extension
+    dl = NDDataset.load('irdata/essai.scp')
     assert_array_equal(dl.data, ir.data)
 
+    # this should fail as the file is not saved at the root of data_dir
+    with pytest.raises(SpectroChemPyException):
+        dl = NDDataset.load('essai.scp')
+    path.unlink()                         # remove this test file
 
-def test_ndio_less_basic(coord2, coord2b, dsm):  # dsm is defined in conftest
+    # test with a 2D
+    ir2 = IR_dataset_2D.copy()
+    path = ir2.save('essai2D')
+    assert path.parent == pathlib.Path.cwd()
+    dl2 = NDDataset.load("essai2D")
+    assert dl2.directory == pathlib.Path.cwd()
+    path.unlink()
 
-    coordm = CoordSet(coord2, coord2b)
-
-    # for multiple coordinates
-    assert dsm.coords['x'] == coordm
-
-    info_(dsm)
-
-    dsm.save('essai')
-    da = NDDataset.load('essai')
-
-    info_(da)
-
-    assert da == dsm
-
-
-def test_ndio_save1D_load(IR_dataset_1D):
-    dataset = IR_dataset_1D.copy()
-    # debug_(dataset)
-    dataset.save('essai')
-    NDDataset.load("essai")
-    # debug_(ir)
-    os.remove(os.path.join(prefs.datadir, 'essai.scp'))
+    # save with no filename
+    path = ir2.save()
+    assert path.stem == IR_dataset_2D.name
 
 
-def test_ndio_save2D_load(IR_dataset_2D):
-    dataset = IR_dataset_2D.copy()
-    # debug_(dataset)
-    dataset.save('essai')
-    dataset.load("essai")
-    # debug_(ir)
-    os.remove(os.path.join(prefs.datadir, 'essai.scp'))
+def test_generic_read():
+    import time
+
+    # filename + extension specified
+    start = time.time()
+    ds = NDDataset.read('wodger.spg')
+    t1 = (time.time() - start)
+    assert ds.name == 'wodger'
+
+    # save with no filename (should save wodger.scp)
+    path = ds.save()
+
+    assert isinstance(path, pathlib.Path)
+    assert path.stem == ds.name
+    assert path.parent == ds.directory
+
+    # should be équivalent to load (but read is a more general function
+    start = time.time()
+    dataset = NDDataset.read('wodger.scp')
+    t2 =(time.time() - start)
+
+    p =  (t2 - t1) * 100./ t1
+    assert p<0
 
 
-def test_ndio_save_and_load_mydataset(IR_dataset_2D):
-    ds = IR_dataset_2D.copy()
-    ds.save('mydataset')
-    dl = NDDataset.load('mydataset')
-    assert_array_equal(dl.data, ds.data)
-    assert_array_equal(dl.x.data, ds.x.data)
-    assert (dl == ds)
-    assert (dl.meta == ds.meta)
-    assert (dl.plotmeta == ds.plotmeta)
+def test_generic_read_content():
 
+    # Test bytes content reading
+    datadir = prefs.datadir
+    filename = pathclean(datadir) / 'wodger.spg'
+    content = filename.read_bytes()
 
-def test_issue_60():
-    with pytest.raises(ValueError):
-        NDDataset.read()
-    NDDataset.read(protocol='omnic')
+    # change the filename to be sure that the file will be read from the passed content
+    filename = 'try.spg'
+
+    # The most direct way to pass the byte content information
+    nd = NDDataset.read(filename, content=content)
+    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+
+    # It can also be passed using a dictionary structure {filename:content, ....}
+    nd = NDDataset.read({filename:content})
+    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+
+    # Case where the filename is not provided
+    nd = NDDataset.read(content)
+    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+
+    # Try with an .spa file
+    filename = pathclean(datadir) / 'irdata/subdir/7_CZ0-100 Pd_101.SPA'
+    content = filename.read_bytes()
+    filename = 'try.spa'
+
+    filename2 = pathclean(datadir) / 'irdata/subdir/7_CZ0-100 Pd_102.SPA'
+    content2 = filename2.read_bytes()
+    filename = 'try2.spa'
+
+    nd = NDDataset.read({filename:content})
+    assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
+
+    # Try with only a .spa content
+    nd = NDDataset.read(content)
+    assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
+
+    # Try with several .spa content (should be stacked into a single nddataset)
+    nd = NDDataset.read({filename:content, filename2:content2})
+    assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+
+    nd = NDDataset.read(content, content2)
+    assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+

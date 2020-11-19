@@ -17,6 +17,9 @@
 import sys
 import warnings
 
+from os import environ
+from os.path import join
+
 import matplotlib as mpl
 from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
@@ -81,23 +84,26 @@ if InteractiveShell.initialized():
 #   -> keep it
 
 NO_DISPLAY = False
+NO_DIALOG = False
 
 # Are we buidings the docs ?
 if 'make.py' in sys.argv[0]:
     # if we are building the documentation, in principle it should be done
     # using the make.py located at the root of the spectrchempy package.
     NO_DISPLAY = True
+    NO_DIALOG = True
     mpl.use('agg', force=True)
 
 # Are we running pytest ?
 if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
+    NO_DIALOG = True
 
-    # OK, but if we are doing individual module or function testing in PyCharm
-    # it is interesting to see the plots!
+    # OK, but if we are doing individual function testing in PyCharm
+    # it is interesting to see the plots and the file dialogs (except if we set explicitely --nodisplay argument!
     if len(sys.argv) > 1 \
-            and not any([argv.endswith("tests") for argv in sys.argv[1:]]) \
+            and not any([arg.endswith(".py") for arg in sys.argv[1:]]) \
             and '--nodisplay' not in sys.argv:
         # individual module testing
         NO_DISPLAY = False
@@ -151,10 +157,12 @@ def set_backend():
 
 set_backend()
 
+# set a test file in environment
+# environ['TEST_FILE'] = join(general_preferences.datadir, 'irdata/nh4y-activation.spg')
+
 __all__ += ['set_backend']
 
-
-warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
+# warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 # warnings.filterwarnings(action="error", category=DeprecationWarning)
 
 # ==============================================================================

@@ -17,7 +17,6 @@ from spectrochempy.core import project_preferences
 from time import time as tm
 
 __all__ = ['plotly', 'plotly_stack']
-
 __dataset_methods__ = __all__
 
 

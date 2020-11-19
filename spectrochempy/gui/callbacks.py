@@ -23,11 +23,10 @@ import dash_bootstrap_components as dbc
 
 import spectrochempy as scp
 
-
 class Callbacks(object):
 
     @staticmethod
-    def parse_upload_contents(filename, contents):
+    def parse_upload_contents(filename, contents, single=False):
         #
         # transform uploaded content to a NDDataset
         #
@@ -89,21 +88,44 @@ class Callbacks(object):
     def add_callbacks(self, app):
         """ Add all application calbacks """
 
-        # ------------
-        # DATA UPLOAD
-        # ------------
+        # # ------------
+        # # DATA UPLOAD
+        # # ------------
+        # @app.callback(Output('original-data', 'data'),
+        #               Input('upload-data', 'contents'),
+        #               State('upload-data', 'filename'))
+        # def data_upload(list_of_contents, list_of_names):
+        #     # Store data in components
+        #
+        #     data = {}  # the data must be JSON serializable
+        #
+        #     if list_of_contents is not None:
+        #         # data uploaded
+        #         z = zip(list_of_names, list_of_contents)
+        #         data = {n: self.parse_upload_contents(n, c) for n, c in z}
+        #     else:
+        #         raise PreventUpdate
+        #     return data
+
+        # --------------
+        # PROJECT UPLOAD
+        # --------------
+
         @app.callback(Output('original-data', 'data'),
-                      Input('upload-data', 'contents'),
-                      State('upload-data', 'filename'))
-        def data_upload(list_of_contents, list_of_names):
-            # Store data in components
+                      Input('upload-project', 'contents'),
+                      State('upload-project', 'filename'))
+
+        def project_upload(content, name):
+            # Store project data in components
 
             data = {}  # the data must be JSON serializable
 
-            if list_of_contents is not None:
+            if content is not None:
                 # data uploaded
-                z = zip(list_of_names, list_of_contents)
-                data = {n: self.parse_upload_contents(n, c) for n, c in z}
+                content_type, content_string = content.split(',')
+                decoded = base64.b64decode(content_string)
+                pj = scp.Project.load(content=decoded)
+                data = pj.to_json()
             else:
                 raise PreventUpdate
             return data
@@ -143,8 +165,9 @@ class Callbacks(object):
             if data is None:
                 raise PreventUpdate
 
-            # extract the datasets from original data store
-            datasets = [scp.read_json(content=c.encode()) for n, c in data.items()]
+            project = scp.Project.from_json(data)
+            # extract the project information from original data store
+            #datasets = [scp.read_json(content=c.encode()) for n, c in data.items()]
 
             # show processed flag
             processed = True if 'Processed' in selector else False
@@ -216,6 +239,7 @@ class Callbacks(object):
         # UPDATE DATA TAB CONTENT
         # -----------------------
         @app.callback([Output('current-data', 'children'),
+                       Output('show-project', 'style'),
                        Output('show-current-data', 'style'),
                        Output('show-graph', 'is_open'),
                        Output('x-roi', 'children'),
@@ -271,7 +295,7 @@ class Callbacks(object):
                                      'display': 'block'
                                      })
 
-            return (dataloaded, style, not is_open,
+            return (dataloaded, style, style, not is_open,
                     xr, yr, xrl, xru, yrl, yru,
                     xr_units, yr_units, xro, yro)
 
@@ -335,6 +359,7 @@ class Callbacks(object):
         # -------------------
         @app.callback(
                 [Output("close-data", "style"),
+                 Output('data-tab', 'disabled'),
                  Output('graph-tab', 'disabled'),
                  Output('processing-tab', 'disabled')],
                 [Input('current-data', 'children')])
@@ -342,11 +367,11 @@ class Callbacks(object):
             if not children:
                 return dict({
                                     'display': 'none'
-                                    }), True, True
+                                    }), True, True, True
             else:
                 return dict({
                                     'display': 'block'
-                                    }), False, False
+                                    }), False, False, False
 
         # ----------------------------------
         # MODIFY CLOSING/OPENING CARD BUTTON
@@ -366,6 +391,31 @@ class Callbacks(object):
                     return False, "More", "info"
                 else:
                     return True, "Close this card", "warning"
+
+        # ------------
+        # MENU PROJECT
+        # ------------
+        @app.callback(
+                [Output(f"project-name", "placeholder"),
+                 Output(f"project-name", "disabled"),
+                 Output(f"project-close", "disabled"),
+                 Output(f"project-save", "disabled")],
+                [Input(f"project-new", "n_clicks"),
+                 Input(f"project-open", "n_clicks")]
+                )
+        def on_menu_project(new, open):
+            # ctx = callback_context.triggered
+            if new is None and open is None:
+                raise PreventUpdate
+
+            ctx = callback_context.triggered
+            if ctx and 'new' in ctx[0]['prop_id'] and ctx[0]['value'] is not None:
+                return 'Untitled (edit to chnge this name)', False, False, False
+            elif ctx and 'new' in ctx[0]['prop_id'] and ctx[0]['value'] is not None:
+                pass
+                return
+
+
 
         # Set masks
         # @app.callback()
@@ -423,6 +473,7 @@ class Callbacks(object):
 
         #
         # Mask selection button aspect
+        #
 
         @app.callback(
                 [Output('select-mask', 'children'),

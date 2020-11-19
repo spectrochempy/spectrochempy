@@ -1350,7 +1350,7 @@ class NDArray(HasTraits):
         allows_none = kwargs.get('allows_none', False)
         if axis is None and dims is None and allows_none:
             return None, None
-        axis = axis[0] if axis else -1  # None
+        axis = axis[0] if axis else self.ndim - 1  # None
         dim = self.dims[axis]
         if axis is not None and kwargs.get('negative_axis', False):
             if axis >= 0:

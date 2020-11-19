@@ -158,19 +158,18 @@ def test_save_and_load_project(ds1, ds2):
 
     myp.save('PROCESS')
 
+def test_json(project_test):
 
-def test_save_and_load_nmr_project():
-    myp = Project(name='process')
+    proj = project_test
 
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr',
-                        'bruker_1d')
+    Project.load('project_test.pscp', directory=prefs.datadir)
+    assert str(proj) == \
+"""Project TEST:
+    ⤷ S1 (dataset)
+    ⤷ S2 (dataset)
+    ⤷ print_info (script)
+"""
 
-    # load the data in a new dataset
-    ndd = NDDataset(name='NMR_1D')
-    ndd.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    pj = proj.to_json()
 
-    myp.add_dataset(ndd)
-    myp.save('NMR_1')
-
-    # now load it
-    Project.load('NMR_1')
+    assert pj['main.name'] == 'TEST'

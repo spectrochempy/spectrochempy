@@ -9,7 +9,7 @@
 
 """
 __all__ = ['read_json']
-__dataset_methods__ = ['read_json']
+__dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
@@ -30,20 +30,9 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity
 from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.utils import readfilename, pathclean, check_io_args
+from spectrochempy.utils import get_filename, pathclean, check_filename_to_open, json_decoder
 from spectrochempy.core import general_preferences as prefs
 
-def json_decoder(dic):
-    if "__class__" in dic:
-        if dic["__class__"] == str(datetime):
-            return datetime.fromisoformat(dic["isoformat"])
-
-        if dic["__class__"] == str(np.ndarray):
-            return pickle.loads(base64.b64decode(dic['serialized']))
-
-        raise TypeError("numpy array or datetime expected.")
-
-    return dic
 
 def read_json(*args, **kwargs):
     """
@@ -70,38 +59,31 @@ def read_json(*args, **kwargs):
     """
     debug_("reading a json file")
 
-    dataset, filename = check_io_args(*args, **kwargs)
+    dataset, files = check_filename_to_open(*args, **kwargs)
 
-    content = kwargs.get('content', None)
-
-    if content is not None:
-        f = io.BytesIO(content)
-        datasets = [_read(f, dataset)]
-
-    else:
-        directory = pathclean(kwargs.get("directory", None))
-
-        # returns a list of files to read
-        files = readfilename(filename,
-                             directory=directory,
+    if not files:
+        # open a file selector dialog
+        directory = kwargs.get('directory', prefs.datadir)
+        files = get_filename(directory=directory,
                              filetypes=['JSON files (*.json)'])
 
-        if not files:
-            # there is no files, return nothing
-            return None
+    if not files:
+        # still, there is no files, we thus return nothing
+        return None
 
-        files = files['.json']
-        datasets = []
-        for filename in files:
-            f = open(filename, 'rb')
-            datasets.append(_read(f, dataset, filename))
+
+    files = files['.json']  # select only file with the correct extension
+    datasets = []
+    for filename in files:
+        f = open(filename, 'rb')
+        js = json.loads(f.read(), object_hook=json_decoder)
+        datasets.append(NDDataset.from_json(js))
 
     if len(datasets) == 1:
         return datasets[0]
     else:
         return datasets
 
-NDIO.read_json = read_json
 
 def _read(f, dataset, filename=None):
 

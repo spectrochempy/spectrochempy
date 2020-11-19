@@ -10,7 +10,7 @@ import os
 import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-def test_rw_json(IR_dataset_2D):
+def test_read_write_json(IR_dataset_2D):
     ds = IR_dataset_2D
 
     ds.write('try2D.json')
@@ -31,7 +31,7 @@ def test_rw_json(IR_dataset_2D):
 
 
     #write to string
-    s = ds.write(to_string=True, protocol='json')
+    s = ds.write(to_string=True, protocol='.json')
     assert s.startswith('{"data": {"serialized": "gASVhAAA')
 
     s = ds.write(to_string=True) # json by default

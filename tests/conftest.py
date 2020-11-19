@@ -9,7 +9,6 @@
 
 import os
 import numpy as np
-import pandas as pd
 import pytest
 
 
@@ -48,6 +47,9 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils.testing import RandomSeedContext
 from spectrochempy.core import general_preferences as prefs
 
+# set a test file in environment
+from os import environ, path
+environ['TEST_FILE'] = path.join(prefs.datadir, 'irdata/nh4y-activation.spg')
 
 # Handle command line argument for spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------
@@ -294,6 +296,7 @@ def NMR_dataset_2D():
 
 @pytest.fixture(scope="function")
 def series():
+    import pandas as pd
     with RandomSeedContext(2345):
         arr = pd.Series(np.random.randn(4), index=np.arange(4) * 10.)
     arr.index.name = 'un nom'
@@ -302,29 +305,38 @@ def series():
 
 @pytest.fixture(scope="function")
 def dataframe():
+    import pandas as pd
     with RandomSeedContext(23451):
         arr = pd.DataFrame(np.random.randn(6, 4), index=np.arange(6) * 10., columns=np.arange(4) * 10.)
     for ax, name in zip(arr.axes, ['time', 'temperature']):
         ax.name = name
     return arr.copy()
 
-# Panel is removed from Panda
-# @pytest.fixture(scope="function")
-# def panel():
-#     shape = (7, 6, 5)
-#     with RandomSeedContext(23452):
-#         arr = pd.Panel(data = np.random.randn(*shape), items=np.arange(shape[0]) * 10.,
-#                        major_axis=np.arange(shape[1]) * 10.,
-#                        minor_axis=np.arange(shape[2]) * 10.)
-#     for ax, name in zip(arr.axes, ['axe0', 'axe1', 'axe2']):
-#         ax.name = name
-#     return arr.copy()
+# Project fixture
 
-# GUI Fixtures
-# ----------------------------------------------------------------------------------------------------------------------
+@pytest.fixture(scope="function")
+def project_test():
 
-# from pyqtgraph import mkQApp
+    from spectrochempy import Project, Script
 
-# @pytest.fixture(scope="module")
-# def app():
-#    return mkQApp()
+    proj = Project(name='TEST')
+
+    # add datasets to a subproject
+    datadir = prefs.datadir
+
+    d1 = NDDataset.read(os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
+    proj['S1'] = d1
+
+    d2 = NDDataset.read(os.path.join(datadir, 'irdata', 'CO@Mo_Al2O3.SPG'))
+    proj['S2'] = d2
+
+    script_source = 'set_loglevel(INFO)\n' \
+                    'info_("samples contained in the project are : ' \
+                    '%s"%proj.projects_names)'
+
+    proj['print_info'] = Script('print_info', script_source)
+
+    proj.save(os.path.join(datadir, 'project_test.pscp'))  # save it for other use
+
+    return proj
+

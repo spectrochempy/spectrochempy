@@ -5,14 +5,14 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from spectrochempy.core.readers.upload import upload_IRIS
+from spectrochempy.core.readers.upload import download_IRIS
 from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.core import show
 from spectrochempy.core import info_
 
 
 def test_upload():
-    ds = upload_IRIS()
+    ds = download_IRIS()
     info_(ds)
     assert ds.shape == (150, 4)
     assert repr(ds[0]) == "NDDataset: [float64] cm (shape: (y:1, x:4))"

@@ -442,8 +442,8 @@ autosummary_generate = True
 
 autodoc_typehints = "none"
 
-napoleon_use_param = True
-napoleon_use_rtype = True
+napoleon_use_param = False
+napoleon_use_rtype = False
 
 numpydoc_class_members_toctree = True
 numpydoc_show_class_members = False

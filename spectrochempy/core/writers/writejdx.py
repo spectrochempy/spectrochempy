@@ -43,6 +43,7 @@ def write_jdx(*args, **kwargs):
     Examples
     --------
     >>> X.write_jdx('myfile.jdx')
+
     """
     debug_("writing jdx file")
 

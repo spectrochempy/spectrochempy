@@ -12,26 +12,25 @@ __dataset_methods__ = __all__
 import numpy as np
 import datetime as datetime
 from warnings import warn
+from orderedset import OrderedSet
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 # from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import docstrings    # , is_sequence
+from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
+from spectrochempy.utils import SpectroChemPyWarning, DimensionsCompatibilityError
 
-
-@docstrings.dedent
 def concatenate(*datasets, **kwargs):
     """
     Concatenation of |NDDataset| objects along a given axis (by default
-    the first)
+    the last)
 
     Any number of |NDDataset| objects can be concatenated. For this operation
     to be defined the following must be true :
 
         #. all inputs must be valid |NDDataset| objects;
-        #. units of data and axis must be compatible (rescaling is applied
-           automatically if necessary);
-        #. concatenation is along the axis specified or the first one;
+        #. units of data and axis must be compatible
+        #. concatenation is along the axis specified or the last one;
         #. along the non-concatenated dimensions, shape and units coordinates
            must match.
 
@@ -45,6 +44,11 @@ def concatenate(*datasets, **kwargs):
         The dimension along which the operation is applied
     axis : int, optional, default=None
         Alternative to the the dim keyword. Direct specification of the axis index to use for concatenation.
+    force_stack : bool, optional, default=False
+        If True, the dataset are stacked instead of being concatenated. This means that a new dimension is prepended
+        to each dataset before being stacked, except if one of the dimension is of size one. If this case the datasets
+        are squeezed before stacking. The stacking is only possible is the shape of the various datasets are identical.
+        This process is equivalent of using the method `stack`.
 
     Returns
     --------
@@ -52,12 +56,16 @@ def concatenate(*datasets, **kwargs):
         A dataset created from the contenations of the |NDDataset| input
         objects
 
+    See Also
+    ---------
+    stack
+
     Examples
     --------
     >>> from spectrochempy import * # doctest: +ELLIPSIS
     ...
-    >>> A = NDDataset.load('spec.spg', protocol='omnic')
-    >>> B = NDDataset.load('mydataset.scp')
+    >>> A = NDDataset.load('irdata/nh4y-activation.spg', protocol='.omnic')
+    >>> B = NDDataset.load('irdata/nh4y-activation.scp')
     >>> C = NDDataset.concatenate( A[10:], B[3:5], A[:10], axis=0)
     >>> A[10:].shape, B[3:5].shape, A[:10].shape, C.shape
     ((45, 5549), (2, 5549), (10, 5549), (57, 5549))
@@ -71,6 +79,17 @@ def concatenate(*datasets, **kwargs):
     >>> E = A.concatenate(B, axis=1)
     >>> A.shape, B.shape, E.shape
     ((55, 5549), (55, 5549), (55, 11098))
+
+    Stacking of datasets:
+    for nDimensional datasets (with the same shape), a new dimension is added
+    >>> F = A.concatenate(B, force_stack=True)
+    >>> A.shape, B.shape, F.shape
+    ((55, 5549), (55, 5549), (2, 55, 5549))
+
+    If one of the dimensions is of size one, then this dimension is removed before stacking
+    >>> G = A[0].concatenate(B[0], force_stack=True)
+    >>> A[0].shape, B[0].shape, G.shape
+    ((1, 5549), (1, 5549), (2, 5549))
 
     """
 
@@ -92,40 +111,61 @@ def concatenate(*datasets, **kwargs):
                 raise TypeError(f"Only instance of NDDataset can be concatenated, not {type(item).__name__}, "
                                 f"but casting to this type failed. ")
 
+    # get the shapes and ndims for comparison
+    rshapes = []
+    rndims = []
+    for item in datasets:
+        sh = list(item.shape)
+        rshapes.append(sh)
+        rndims.append(len(sh))
+
+    # The number of dimensions is expected to be the same for all datasets
+    if len(list(set(rndims))) > 1:
+        raise DimensionsCompatibilityError(f"Only NDDataset with the same number of dimensions can be concatenated.")
+
+    rcompat = list(map(list,list(map(set,list(zip(*rshapes))))))
+
     # a flag to force stacking of dataset instead of the default concatenation
     force_stack = kwargs.get('force_stack', False)
     if force_stack:
+        # when stacking, we add a new first dimension except if one dimension is of size one: in this case we use this
+        # dimension for stacking
+        prepend = False
+        if len(set(list(map(len,rcompat)))) == 1:
+            # all dataset have the same shape
+            # they can be stacked by prepending a new dimension
+            prepend = True
+            # else we will try to stack them on the first dimension
+
+        if not prepend:
+            warn('These datasets have not the same shape, so they cannot be stacked. By default they will be '
+                 'concatenated along the first dimension.', category=SpectroChemPyWarning)
+
+        for i, dataset in enumerate(datasets):
+            if not prepend or dataset.shape[0] == 1:
+                continue
+            dataset._data = dataset.data[np.newaxis]
+            dataset._mask = dataset.mask[np.newaxis]
+            newcoord = Coord([i], labels=[dataset.name])
+            newcoord.name = (OrderedSet(DEFAULT_DIM_NAME) - dataset._dims).pop()
+            dataset.add_coords(newcoord)
+            dataset.dims = [newcoord.name]+dataset.dims
+            # TODO: make a function to simplify this process of adding new dimensions with coords
         axis, dim = datasets[0].get_axis(0)
+
     else:
         # get axis from arguments
         if kwargs:
             axis, dim = datasets[0].get_axis(**kwargs)
         else:
-            axis, dim = datasets[0].get_axis('x')
+            axis, dim = datasets[0].get_axis(-1)
 
     # check if data shapes are compatible (all dimension must have the same size
     # except the one to be concatenated)
-    rshapes = []
-    for item in datasets:
-        sh = list(item.shape)
-        if len(sh) > 1:
-            del sh[axis]
-        rshapes.append(sh)
-
-    for item in zip(*rshapes):
-        if len(set(item)) > 1:
-            raise ValueError("Datasets must have the same shape for all dimensions except the one along which the"
+    for i, item in enumerate(zip(*rshapes)):
+        if i != axis and len(set(item)) > 1:
+            raise DimensionsCompatibilityError("Datasets must have the same shape for all dimensions except the one along which the"
                              " concatenation is performed")
-
-    if force_stack:
-        # for this stack operation, we need the a dimension y of at least length 1
-        # except if it is already of size 1
-        for i, dataset in enumerate(datasets):
-            if dataset.shape[-1] >= 1:
-                continue
-            dataset._data = dataset.data[np.newaxis]
-            dataset._mask = dataset.mask[np.newaxis]
-            dataset.set_coords(y=Coord(labels=[str(i)]))
 
     # Check unit compatibility
     # ------------------------------------------------------------------------------------------------------------------
@@ -250,7 +290,7 @@ def concatenate(*datasets, **kwargs):
 
 def stack(*datasets):
     """
-    Stack of |NDDataset| objects along the last dimension
+    Stack of |NDDataset| objects along the first dimension
 
     Any number of |NDDataset| objects can be stacked. For this operation
     to be defined the following must be true :
@@ -275,11 +315,11 @@ def stack(*datasets):
     --------
     >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     ...
-    >>> A = NDDataset.load('spec.spg', protocol='omnic')
-    >>> B = NDDataset.load('mydataset.scp')
+    >>> A = NDDataset.load('irdata/nh4y-activation.spg', protocol='.omnic')
+    >>> B = NDDataset.load('irdata/nh4y-activation.scp')
     >>> C = NDDataset.stack( A, B)
     >>> print(C) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-          name/id : NDDataset...
+    NDDataset: [float32] a.u. (shape: (y:110, x:5549))
 
     """
 

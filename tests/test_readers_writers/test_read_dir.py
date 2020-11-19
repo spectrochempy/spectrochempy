@@ -6,13 +6,21 @@
 # ======================================================================================================================
 
 import os
+
 from spectrochempy.core.dataset.nddataset import NDDataset
-import pytest
 
+def test_read_dir():
 
-def test_read_with_filename():
-    A = NDDataset.read_opus(os.path.join('irdata', 'OPUS', 'test.0000'))
-    assert A[0, 2303.8694].data == pytest.approx(2.72740, 0.00001)
-    B = NDDataset.read_opus(['test.0000', 'test.0001', 'test.0002'],
-                            directory=os.path.join('irdata', 'OPUS', ))
-    assert len(B) == 3
+    A = NDDataset.read_dir(os.path.join('irdata', 'subdir'), recursive=True)
+    assert len(A) == 9
+
+    # in case we do not specify a directory:
+    #  - open a dialog but handle the case we clik cancel
+    NDDataset.read_dir()
+
+    C = NDDataset.read_dir(os.path.join('matlabdata'))
+    print('Matrixes in .mat files:')
+    for x in C:
+        print(C)
+    assert len(C) == 6
+    assert C[3].shape == (204, 96)

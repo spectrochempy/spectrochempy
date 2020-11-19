@@ -18,7 +18,7 @@ import spectrochempy as scp
 ############################################################
 # Upload a dataset form a distant server
 
-dataset = scp.upload_IRIS()
+dataset = scp.download_IRIS()
 
 ##############################################################
 # Create a PCA object

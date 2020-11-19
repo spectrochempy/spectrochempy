@@ -20,10 +20,8 @@ from threading import Timer
 
 import dash
 import dash_bootstrap_components as dbc
-
 import spectrochempy as scp
-from spectrochempy.dashboard import Layout, Callbacks
-
+from spectrochempy.gui import Layout, Callbacks
 
 def main():
 

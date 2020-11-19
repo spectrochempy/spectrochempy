@@ -11,41 +11,24 @@
 __all__ = ['read_dir', 'read_carroucell']
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import os
 import warnings
 import datetime
+
 import scipy.interpolate
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import numpy as np
-
-# ----------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------
-
 import xlrd
-
-# ----------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------------------------------------------------
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import readfilename, readdirname
-from spectrochempy.core import info_, print_
+from spectrochempy.utils import get_filename, readdirname, \
+    check_filename_to_open
+from spectrochempy.core import debug_, info_, print_
 
 
 # function for reading data in a directory
-# ----------------------------------------------------------------------------------------------------------------------
-def read_dir(dataset=None, directory=None, **kwargs):
+# ------------------------------------------------------------------------------
+def read_dir(*args, **kwargs):
     """
     Open readable files in a directory and store data/metadata in a dataset or
     a list of datasets according to the following rules :
@@ -63,13 +46,11 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     Parameters
     ----------
-    dataset : `NDDataset`
+    dataset : |NDDataset|
         The dataset to store the data and metadata.
-        If None, a NDDataset is created
+        If None, a new |NDDataset| is created
     directory : str, optional.
         If not specified, opens a dialog box.
-    parent_dir : str, optional.
-        The parent directory where to look at
     sortbydate : bool, optional,  default:True.
         Sort spectra by acquisition date
     recursive : bool, optional,  default=False.
@@ -89,18 +70,11 @@ def read_dir(dataset=None, directory=None, **kwargs):
 
     """
 
-    # debug_("starting reading in a folder")
+    debug_("starting reading in a folder")
 
-    # check if the first parameter is a dataset
-    # because we allow not to pass it
-    if not isinstance(dataset, NDDataset):
-        # probably did not specify a dataset
-        # so the first parameter must be the directory
-        if isinstance(dataset, str) and dataset != '':
-            directory = dataset
-
-    parent_dir = kwargs.get('parent_dir', None)
-    directory = readdirname(directory, parent_dir=parent_dir)
+    kwargs['dictionary'] = False
+    _, directory = check_filename_to_open(*args, **kwargs)
+    directory = readdirname(directory)
 
     if not directory:
         # probably cancel has been chosen in the open dialog
@@ -140,7 +114,7 @@ def _read_single_dir(directory, **kwargs):
         # debug_("empty directory")
         return datasets
 
-    files = readfilename(filenames, directory=directory)
+    files = get_filename(filenames, directory=directory)
 
     for extension in files.keys():
         if extension == '.spg':
@@ -154,7 +128,7 @@ def _read_single_dir(directory, **kwargs):
             datasets.append(NDDataset.read_csv(filename=files[extension], **kwargs))
 
         elif extension == '.scp':
-            datasets.append(NDDataset.read(files[extension], protocol='scp'))
+            datasets.append(NDDataset.read(files[extension], protocol='.scp'))
 
         elif extension == '.mat':
             for filename in files[extension]:
@@ -197,8 +171,6 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         If None, a NDDataset is created
     directory : str, optional.
         If not specified, opens a dialog box.
-    parent_dir : str, optional.
-        The parent directory where to look at
     spectra : arraylike of 2 int (min, max), optional, default=None
         The first and last spectrum to be loaded as determined by their number.
          If None all spectra are loaded
@@ -228,8 +200,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
         if isinstance(dataset, str) and dataset != '':
             directory = dataset
 
-    parent_dir = kwargs.get('parent_dir', None)
-    directory = readdirname(directory, parent_dir=parent_dir)
+    directory = readdirname(directory)
 
     if not directory:
         # probably cancel has been chosen in the open dialog

@@ -3,7 +3,6 @@
 
 __all__ = []
 
-
 def QFileDialog():
     # delayed import
     from PyQt5 import QtWidgets
@@ -25,7 +24,8 @@ def OpenExistingDirectory(parent=None,
                                                  directory=directory,
                                                  options=options)
     if directory:
-        return directory
+        from spectrochempy.utils.file import pathclean
+        return pathclean(directory)
 
 
 def OpenFileName(parent=None,
@@ -45,7 +45,8 @@ def OpenFileName(parent=None,
                                               filter=';;'.join(filters),
                                               options=options)
     if filename:
-        return filename
+        from spectrochempy.utils.file import pathclean
+        return pathclean(filename)
 
 
 def OpenMultipleFileNames(
@@ -65,7 +66,8 @@ def OpenMultipleFileNames(
                                             filter=';;'.join(filters),
                                             options=options)
     if files:
-        return files
+        from spectrochempy.utils.file import pathclean
+        return pathclean(files)
 
 
 def SaveFileName(parent=None,
@@ -76,6 +78,10 @@ def SaveFileName(parent=None,
     if QFileDialog is None:
         return
 
+    if not isinstance(filename, str):
+        # probably a Path
+        filename = filename.name
+
     options = QFileDialog.Options()
     # options |= QFileDialog.DontUseNativeDialog
     filename, _ = QFileDialog.getSaveFileName(parent,
@@ -84,11 +90,11 @@ def SaveFileName(parent=None,
                                               filters,
                                               options=options)
     if filename:
-        return filename
+        from spectrochempy.utils.file import pathclean
+        return pathclean(filename)
 
 
 def opendialog(single=True,
-               parent=None,
                directory='',
                caption='',
                filters=["All Files (*)", "Text Files (*.txt)"]
@@ -121,16 +127,15 @@ def opendialog(single=True,
     if filters == 'directory':
         if not caption:
             caption = 'Select a folder'
-        f = OpenExistingDirectory(caption=caption, directory=directory)
+        f = OpenExistingDirectory(caption=caption, directory=str(directory))
     elif single:
         if not caption:
             caption = 'Select file'
-        f = OpenFileName(directory=directory, caption=caption, filters=filters)
+        f = OpenFileName(caption=caption, directory=str(directory), filters=filters)
     else:
         if not caption:
             caption = 'Select file(s)'
-        f = OpenMultipleFileNames(directory=directory, caption=caption,
-                                  filters=filters)
+        f = OpenMultipleFileNames(caption=caption, directory=str(directory), filters=filters)
 
     return f
 

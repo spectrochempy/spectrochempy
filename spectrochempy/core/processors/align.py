@@ -11,7 +11,6 @@ This module defines functions related to NDDataset or NDPanel alignment.
 """
 
 __all__ = ['align']
-
 __dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -169,7 +168,7 @@ def align(dataset, *others, **kwargs):
 
     _last = _nobj - 1
 
-    # get the reference object (by default the fist, except if method if set  to 'last'
+    # get the reference object (by default the first, except if method if set to 'last'
     ref_obj_index = 0
     if method == 'last':
         ref_obj_index = _last

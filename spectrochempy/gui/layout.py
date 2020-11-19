@@ -120,10 +120,11 @@ https://github.com/spectrochempy/spectrochempy
 [CeCILL-B FREE SOFTWARE LICENSE AGREEMENT](https://cecill.info/licences/Licence_CeCILL-B_V1-en.html)
 
 
-""", className='markdown'), className='control-tab')
+""", className='markdown',),
+                    className='control-tab')
 
     # ------------------------------------------------------------------------------------------------------------------
-    # DATA TAB
+    # PROJECT TAB
     # ------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -135,7 +136,59 @@ https://github.com/spectrochempy/spectrochempy
                            multiple=True, style={
                             'float': 'left'
                             }, ),
-                dbc.Button("Clear current data", color="danger", outline=True, size='sm', id='close-data')])
+                dbc.Button("Clear current data", color="danger", outline=True, size='sm', id='close-data'),
+                ])
+
+    def project_tab(self):
+        return dbc.Card(
+                dbc.CardBody(
+                        [
+                                dbc.InputGroup(
+                                        [
+                                                dbc.InputGroupAddon(
+                                                        dbc.DropdownMenu(label="Project",
+                                                                         bs_size='sm',
+                                                                         addon_type='prepend',
+                                                                         children=[
+                                                                                 dbc.DropdownMenuItem("New",
+                                                                                                      id='project-new'),
+                                                            dbc.DropdownMenuItem(dcc.Upload("Open", id='upload-project'),
+                                                                                                      id='project-open'),
+                                                                                 dbc.DropdownMenuItem("Save",
+                                                                                                      id='project-save',
+                                                                                                      disabled=True),
+                                                                                 dbc.DropdownMenuItem("Close",
+                                                                                                      id='project-close',
+                                                                                                      disabled=True),
+                                                                                 ])
+                                                        ),
+                                                dbc.Input(
+                                                        id='project-name',
+                                                        placeholder='',
+                                                        disabled=True,
+                                                        size='sm')
+                                                ]),
+                                dbc.Collapse(id='show-project',
+                                             children=[
+                                                     self.upload_form(),
+                                                     dbc.Collapse(id='show-project-data',
+                                                                  children=generic_card(
+                                                                          key='current-data',
+                                                                          title='Uploaded data',
+                                                                          markdown=''
+                                                                          # children filled from a callback
+                                                                          )
+                                                                  )
+                                                     ],
+                                             )
+                                ], style={
+                                'min-height': '200px'
+                                }),
+                className='control-tab')
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # DATA TAB
+    # ------------------------------------------------------------------------------------------------------------------
 
     def roi_content(self):
         return [dcc.Markdown("""
@@ -184,15 +237,8 @@ To mask one of the trace, click on it (selected trace are highlihted. Confirmati
 
     def data_tab(self):
         return dbc.Card(dbc.CardBody([
-                self.upload_form(),
                 dbc.Collapse(id='show-current-data',
                              children=[
-                                     generic_card(
-                                             key='current-data',
-                                             title='Uploaded data',
-                                             markdown=''
-                                             # children filled from a callback
-                                             ),
                                      generic_card(
                                              key='roi',
                                              title='Region of interest',
@@ -327,11 +373,14 @@ To mask one of the trace, click on it (selected trace are highlihted. Confirmati
         return dbc.Col(
                 [
                         dbc.Tabs([dbc.Tab(self.about_tab(), label="About", tab_id='about'),
-                                 dbc.Tab(self.data_tab(), label="Data", tab_id='data'),
-                                 dbc.Tab(self.graph_tab(), label="Graph", tab_id='graph', id='graph-tab'),
-                                 dbc.Tab(self.processing_tab(), label="Processing", tab_id='processing',
+                                  dbc.Tab(self.project_tab(), label="Project", tab_id='project'),
+                                  dbc.Tab(self.data_tab(), label="Data", tab_id='data',
+                                          id='data-tab'),
+                                  dbc.Tab(self.graph_tab(), label="Graph", tab_id='graph',
+                                          id='graph-tab'),
+                                  dbc.Tab(self.processing_tab(), label="Processing", tab_id='processing',
                                          id='processing-tab')
-                                  ], active_tab='data'),
+                                  ], active_tab='project'),
                         ],
                        width=4, id='scpy-control-tabs',
                        className='control-tabs')

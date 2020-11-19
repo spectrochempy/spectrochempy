@@ -31,7 +31,7 @@ xlrd
 
 dash
 dash-bootstrap-components
-dash_daq
+dash-daq
 dash-ace
 dash_defer_js_import
 

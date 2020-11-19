@@ -384,7 +384,9 @@ def _get_pkg_datadir_path(data_name, package=None):
 
 
 class DataDir(HasTraits):
-    """ A class used to determine the path to the testdata directory. """
+    """ A class used to determine the path to the testdata directory.
+
+    """
 
     # ------------------------------------------------------------------------------------------------------------------
     # public methods
@@ -415,6 +417,7 @@ class DataDir(HasTraits):
             return s
 
         return _listdir(strg, self.path, -1)
+
 
     @classmethod
     def class_print_help(cls):
@@ -546,6 +549,9 @@ class GeneralPreferences(MetaConfigurable):
     databases = Unicode(help='Directory where to look for database files '
                              'such as csv').tag(config=True, type="folder")
 
+    cloudURL = Unicode(help='URL where to look for data by '
+                            'default if not found on datadir').tag(config=True, type="folder")
+
     @default('stylesheets')
     def _get_stylesheets_default(self):
         # the spectra path in package data
@@ -563,6 +569,10 @@ class GeneralPreferences(MetaConfigurable):
     @observe('datadir')
     def _datadir_changed(self, change):
         self.parent.datadir.path = change['new']
+
+    @default('cloudURL')
+    def _get_default_cloudURL(self):
+        return 'https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHoFEXXxYY3wIqmh?usp=sharing'
 
     @property
     def log_level(self):
@@ -936,7 +946,7 @@ class SpectroChemPy(Application):
     test = Bool(False, help='test flag').tag(config=True)
     """Flag to set the application in testing mode"""
 
-    port = Integer( 8050, help='Dash server port').tag(config=True)
+    port = Integer( 7000, help='Dash server port').tag(config=True)
     """Dash server port"""
 
     # Command line interface

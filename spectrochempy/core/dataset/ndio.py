@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
-# ======================================================================================================================
-#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
-#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
-# ======================================================================================================================
+# ==============================================================================
+#  Copyright (©) 2015-2020
+#  LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+#  See full LICENSE agreement in the root directory
+# ==============================================================================
 
 """
 This module define the class |NDIO| in which input/output standard
@@ -11,22 +12,13 @@ methods for a |NDDataset| are defined.
 
 """
 
-__all__ = ['NDIO']
+__all__ = ['NDIO', 'write', 'read', 'load']
+__dataset_methods__ = __all__
 
-__dataset_methods__ = []
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Python imports
-# ----------------------------------------------------------------------------------------------------------------------
-
-import os
+from os import close as osclose, remove as osremove
 import datetime
 import json
-import warnings
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
+from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,18 +27,12 @@ from numpy.lib.format import write_array
 from numpy.lib.npyio import zipfile_factory, NpzFile
 from traitlets import HasTraits, Unicode
 
-# ----------------------------------------------------------------------------------------------------------------------
-# local import
-# ----------------------------------------------------------------------------------------------------------------------
-
-# from .ndarray import NDArray
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.utils import SpectroChemPyWarning
-from spectrochempy.utils.meta import Meta
+from spectrochempy.utils import SpectroChemPyException
+from spectrochempy.utils import pathclean, Meta, readdirname, check_filenames, check_filename_to_open
 from spectrochempy.units import Unit, Quantity
-from spectrochempy.core import general_preferences as prefs
-# from spectrochempy.core import info_, debug_, error_, warning_
+from spectrochempy.core.readers.importer import _Importer
 
 # ==============================================================================
 # Class NDIO to handle I/O of datasets
@@ -69,9 +55,9 @@ class NDIO(HasTraits):
 
         """
         if self._filename:
-            return os.path.basename(self._filename)
+            return pathclean(self._filename).name
         else:
-            return self.name
+            return None
 
     @filename.setter
     def filename(self, fname):
@@ -80,16 +66,16 @@ class NDIO(HasTraits):
     @property
     def directory(self):
         """
-        str - current directory for this dataset.
+        `Pathlib` object - current directory for this dataset.
 
         """
         if self._filename:
-            return os.path.dirname(self._filename)
+            return pathclean(self._filename).parent
         else:
-            return ''
+            return None
 
     # ------------------------------------------------------------------------------------------------------------------
-    # special methods
+    # Special methods
     # ------------------------------------------------------------------------------------------------------------------
 
     def __dir__(self):
@@ -99,7 +85,7 @@ class NDIO(HasTraits):
     # Generic save function
     # ------------------------------------------------------------------------------------------------------------------
 
-    def save(self, filename='', **kwargs):
+    def save(self, filename=None, **kwargs):
         """
         Save the current |NDDataset| (default extension : ``.scp`` ).
 
@@ -116,7 +102,7 @@ class NDIO(HasTraits):
         Read some experimental data and then save in our proprietary format
         **scp**
 
-        >>> from spectrochempy import * #doctest: +ELLIPSIS
+        >>> from spectrochempy import NDDataset #doctest: +ELLIPSIS
 
         >>> mydataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
         >>> mydataset.save('mydataset.scp')
@@ -131,46 +117,40 @@ class NDIO(HasTraits):
 
         """
 
-        directory = kwargs.get("directory", prefs.datadir)
+        filename = pathclean(filename)
+        same_dir = kwargs.pop('same_dir', False)
+        directory = kwargs.get('directory',
+                               self.directory if same_dir else Path.cwd())
 
         if not filename:
             # the current file name or default filename (id)
-            filename = self.filename
+            filename = pathclean(self.filename)
             if self.directory:
-                directory = self.directory
+                directory = pathclean(self.directory)
 
-        if not os.path.exists(directory):
-            raise IOError("directory doesn't exists!")
+        if not filename.suffix == '.scp':
+            filename = filename.with_suffix('.scp')
 
-        if not filename.endswith('.scp'):
-            filename = filename + '.scp'
+        if directory:
+            filename = directory / filename
 
-        if os.path.isdir(directory):
-            filename = os.path.expanduser(os.path.join(directory, filename))
-        else:
-            warnings.warn('Provided directory is a file, '
-                          'so we use its parent directory',
-                          SpectroChemPyWarning)
-            filename = os.path.join(os.path.dirname(directory), filename)
-
-        # Import is postponed to here since zipfile depends on gzip, an optional
-        # component of the so-called standard library.
-        import zipfile
-        # Import deferred for startup time improvement
-        import tempfile
-
-        zipf = zipfile_factory(filename, mode="w",
-                               compression=zipfile.ZIP_DEFLATED)
+        directory = readdirname(filename.parent)
+        if directory is not None:
+            filename = directory / filename.name
 
         # Stage data in a temporary file on disk, before writing to zip.
+        import zipfile
+        import tempfile
+        zipf = zipfile_factory(filename, mode="w",
+                               compression=zipfile.ZIP_DEFLATED)
         fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.scp')
-        os.close(fd)
+        osclose(fd)
 
         pars = {}
         objnames = self.__dir__()
 
-        def _loop_on_obj(_names, obj=self, level=''):
-            """Recursive scan on NDDataset objects"""
+        def _loop_on_obj(_names, obj, level=''):
+            # Recursive scan on NDDataset objects
 
             for key in _names:
 
@@ -188,13 +168,17 @@ class NDIO(HasTraits):
                     for v in val._coords:
                         _objnames = dir(v)
                         if isinstance(v, Coord):
-                            _loop_on_obj(_objnames, obj=v, level=f"coord_{v.name}_")
+                            _loop_on_obj(_objnames, obj=v,
+                                         level=f"coord_{v.name}_")
                         elif isinstance(v, CoordSet):
                             _objnames.remove('coords')
-                            _loop_on_obj(_objnames, obj=v, level=f"coordset_{v.name}_")
+                            _loop_on_obj(_objnames, obj=v,
+                                         level=f"coordset_{v.name}_")
                             for vi in v:
                                 _objnames = dir(vi)
-                                _loop_on_obj(_objnames, obj=vi, level=f"coordset_{v.name}_coord_{vi.name[1:]}_")
+                                _loop_on_obj(_objnames, obj=vi,
+                                             level=f"coordset_{v.name}_"
+                                                   f"coord_{vi.name[1:]}_")
 
                 elif isinstance(val, datetime.datetime):
 
@@ -235,31 +219,32 @@ class NDIO(HasTraits):
                 else:
                     pars[level + key] = val
 
-        _loop_on_obj(objnames)
+        _loop_on_obj(objnames, self)
 
         with open(tmpfile, 'w') as f:
             f.write(json.dumps(pars))
 
         zipf.write(tmpfile, arcname='pars.json')
 
-        os.remove(tmpfile)
+        osremove(tmpfile)
 
         zipf.close()
 
-        self._filename = filename
+        return filename
 
     # ------------------------------------------------------------------------------------------------------------------
     # Generic load function
     # ------------------------------------------------------------------------------------------------------------------
 
-    @staticmethod
+    @classmethod
     def _load(cls,
-              fid='',
+              filename=None,
               protocol=None,
               **kwargs
               ):
 
-        filename = None
+        # be sure to convert filename to a pathlib object
+        filename = pathclean(filename)
 
         # case where load was call directly from the API
         # e.g.,  A= scp.load("dataset.scp")
@@ -270,49 +255,33 @@ class NDIO(HasTraits):
             cls = NDDataset
 
         if protocol is not None and protocol not in ['scp']:
-            # TODO: case where fp is a file object
-            filename = fid
+            # use one of the specific readers
+            filename = check_filenames(filename, **kwargs)[0]
             return cls.read(filename, protocol=protocol)
 
-        if isinstance(fid, str) and protocol is None:
-            filename, ext = os.path.splitext(fid)
-            try:
-                return cls.read(fid, protocol=ext[1:])
-            except Exception:
-                pass
-
-        if isinstance(fid, str):
-            # this is a filename
-
-            filename = fid
-            directory = kwargs.get("directory", prefs.datadir)
-            if not filename:
-                raise IOError('no filename provided!')
-            else:
-                filename = os.path.expanduser(
-                    os.path.join(directory, filename))
+        if protocol is None:
+            ext = filename.suffix
+            if not ext:
+                # it is not a default scp file. Without extension it could be a bruker nmr file
+                filename = check_filenames(filename, **kwargs)[0]
                 try:
-                    # cast to file in the testdata directory
-                    # TODO: add possibility to search in several directory
-                    fid = open(filename, 'rb')
-                except Exception:
-                    if not filename.endswith('.scp'):
-                        filename = filename + '.scp'
-                    try:
-                        # try again
-                        fid = open(filename, 'rb')
-                    except Exception:
-                        # try the working directory
-                        filename = os.path.join(os.getcwd(), filename)
-                        try:
-                            fid = open(filename, 'rb')
-                        except IOError:
-                            raise IOError('no valid filename provided')
+                    return cls.read_bruker_nmr(filename)
+                except Exception as e:
+                    pass
+
+        if not filename.exists():
+            filename = check_filenames(filename.with_suffix('.scp'), **kwargs)[0]
 
         # get zip file
-        obj = NpzFile(fid, allow_pickle=True)
-
-        # debug_(str(obj.files) + '\n')
+        try:
+            fid = filename.open('rb')
+            obj = NpzFile(fid, allow_pickle=True)
+        except FileNotFoundError:
+            raise SpectroChemPyException(f"File {filename} doesn't exist!")
+        except Exception as e:
+            if str(e) == 'File is not a zipfile':
+                raise SpectroChemPyException("File not in 'scp' format!")
+            raise SpectroChemPyException("Undefined error!")
 
         # interpret
         coords = None
@@ -335,15 +304,21 @@ class NDIO(HasTraits):
                 dim = els[1]
                 idx = "_" + els[3]
                 if dim not in coords.keys():
-                    coords[dim] = CoordSet({idx: Coord()})
+                    coords[dim] = CoordSet({
+                            idx: Coord()
+                            })
                 if idx not in coords[dim].names:
-                    coords[dim].set(**{idx: Coord()})
+                    coords[dim].set(**{
+                            idx: Coord()
+                            })
                 setattr(coords[dim][idx], "_%s" % els[4], val)
 
             elif key == "pars.json":
                 pars = json.loads(asstr(val))
             else:
                 setattr(new, "_%s" % key, val)
+
+        fid.close()
 
         def setattributes(clss, key, val):
             # utility function to set the attributes
@@ -408,7 +383,7 @@ class NDIO(HasTraits):
                 setattributes(new, key, val)
 
         if filename:
-            new._filename = filename
+            new._filename = str(filename)
 
         if coords:
             new.set_coords(coords)
@@ -417,28 +392,26 @@ class NDIO(HasTraits):
 
     @classmethod
     def load(cls,
-             fid='',
+             filename=None,
              protocol=None,
              content=None,
-             directory=prefs.datadir,
              **kwargs
              ):
         """
-        Load a list of dataset objects saved as a pickle files ( e.g., '*.scp' file).
+        Load a list of dataset objects saved as a pickle files
+        ( e.g., '*.scp' file).
 
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
 
         Parameters
         ----------
-        fid : list of `str` or `file` objects
+        filename : list of `str`, `pathlib` or `file` objects
             The names of the files to read (or the file objects).
-        protocol : str, optional, default:'scp'
+        protocol : str, optional, default:'.scp'
             The default type for loading.
-        content : str, optional #TODO: work on this for a list of contents
+        content : str, optional
              The optional content of the file(s) to be loaded as a binary string
-        directory : str, optional, default:`prefs.datadir`
-            The directory from where to load the file.
         kwargs : optional keyword parameters.
             Any additional keyword(s) to pass to the actual reader.
 
@@ -462,12 +435,12 @@ class NDIO(HasTraits):
 
         """
         datasets = []
-        files = fid
-        if not isinstance(fid, (list, tuple)):
-            files = [fid]
+        files = filename
+        if not isinstance(filename, (list, tuple)):
+            files = [filename]
 
         for f in files:  # lgtm [py/iteration-string-and-sequence]
-            nd = NDIO._load(cls, fid=f, protocol=protocol, directory=directory, **kwargs)
+            nd = cls._load(filename=f, protocol=protocol, **kwargs)
             datasets.append(nd)
 
             # TODO: allow a concatenation or stack if possible
@@ -481,62 +454,92 @@ class NDIO(HasTraits):
 
     @classmethod
     def read(cls, *args, **kwargs):
+
+        if 'filetypes' not in kwargs.keys():
+            kwargs['filetypes'] = ['OMNIC files (*.spg, )']
+            kwargs['protocol'] = ['.spg']
+            importer = _Importer()
+            return importer(*args, **kwargs)
+
+    def __read(cls, *args, **kwargs):
         """
         Generic read function.
 
         Parameters
         ----------
-        filename : str
-            The path to the file to be read. If it is not provided,
-            at least a protocol must be given.
-        protocol : str, optional
-            Protocol used for reading. If not provided, the correct protocol
-            is evaluated from the file name extension.
-            Existing protocol: 'scp', 'omnic', 'opus', 'matlab', 'jdx', 'csv', ...
-        content : str, optional
-             The optional contents of the file to be loaded as a binary string
+        filename : `str` or `pathlib` object, optional
+            The path to the file to be read.
+            If it is not provided, a dialog will be opened.
         kwargs : optional keyword parameters
             Any additional keyword to pass to the actual reader
+
+            e.g.,
+
+            * protocol : `str`
+                Protocol used for reading. If not provided, the correct protocol
+                is evaluated from the file name extension.
+                Existing protocol: 'scp', 'omnic', 'opus', 'matlab', 'jdx', 'csv', ...
+            * content : `str`, default=None
+                The optional contents of the file to be loaded as a binary string
+            * sortbydate: `bool`, optional, default=True
+
 
         See Also
         --------
         load
 
         """
-        filename = None
-        if args:
-            filename = args[0]
-        filename = kwargs.pop('filename', filename)
+
+        out = check_filenames(*args, **kwargs)
+        content = None
+        if isinstance(out, dict):
+            # particular case of content passing
+            filename, content =  list(out.items())[0]
+        else:
+            filename = out
+
+        filename = pathclean(filename)
 
         # kwargs only
         protocol = kwargs.pop('protocol', None)
         sortbydate = kwargs.pop('sortbydate', True)
-        content= kwargs.pop('content', None)
 
         if filename is None and protocol is None:
-            raise ValueError('read method require a parameter ``filename`` '
+            raise ValueError('read method require a parameter `filename` '
                              'or at least a protocol such as `scp`, `omnic`, ... !')
 
         if filename is not None and protocol is None:
-            # try to estimate the protocol from the file name extension
-            _, extension = os.path.splitext(filename)
-            if len(extension) > 0:
-                protocol = extension[1:].lower()
 
-        if protocol == 'scp':
+            # try to estimate the protocol from the file name extension
+            extension = filename.suffix
+            if extension:
+                protocol = extension.lower()
+
+        if protocol is None:
+            # probably, it cannot be determined from the extension
+            # (case of Bruker NMR file for instance or when a content is passed without a filename or protocol
+            # information )
+            if content is None:
+                # TODO: try bruker NMR reading
+                raise NotImplementedError('Needs to be implemented soon')
+            else:
+                # try Omnic files by default
+                protocol = '.spg'
+
+        if protocol.lower() == '.scp':
             # default reader
-            return cls.load(filename, protocol='scp', content=content, **kwargs)
+            return cls.load(filename, content=content, **kwargs)
+
 
         # find the adequate reader
-        _reader = getattr(cls, 'read_{}'.format(protocol))
-        kwargs['filename'] = filename
+        _reader = getattr(cls, 'read_{}'.format(protocol[1:]))
         kwargs['sortbydate'] = sortbydate
-        kwargs['content'] = content
-        return _reader(**kwargs)
+        return _reader(out , **kwargs)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Generic write function
     # ------------------------------------------------------------------------------------------------------------------
+
     def write(self, *args, **kwargs):
         """
         Generic write function which actually delegate the work to an
@@ -568,11 +571,11 @@ class NDIO(HasTraits):
         protocol = kwargs.pop('protocol', None)
         if kwargs.get('to_string', False):
             # json by default if we output a string
-            protocol='json'
+            protocol = 'json'
 
         if not protocol:
             # try to estimate the protocol from the file name extension
-            _, extension = os.path.splitext(filename)
+            extension = filename.suffix
             if len(extension) > 0:
                 protocol = extension[1:].lower()
 
@@ -591,17 +594,13 @@ class NDIO(HasTraits):
 
 # make some methods accessible from the main scp API
 # while
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 load = NDIO.load
 read = NDIO.read
 write = NDIO.write
 
-__all__ += ['write', 'read', 'load']
-__dataset_methods__ = __all__
+# ==============================================================================
 
-
-
-# ======================================================================================================================
 if __name__ == '__main__':
     pass

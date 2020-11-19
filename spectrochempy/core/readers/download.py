@@ -10,7 +10,8 @@ In this module, methods are provided to download external datasets
 from public database.
 
 """
-__all__ = ['upload_IRIS']
+__all__ = ['download_IRIS']
+__dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
 # standard imports
@@ -34,7 +35,7 @@ from spectrochempy.core.dataset.ndcoord import Coord
 
 
 # ............................................................................
-def upload_IRIS():
+def download_IRIS():
     """
     Upload the classical IRIS dataset from the UCI distant repository
 
@@ -103,9 +104,6 @@ def upload_IRIS():
 
             raise IOError('Failed in uploading the IRIS dataset!')
 
-
-# make a NDDataset class method
-NDDataset.upload_IRIS = upload_IRIS
 
 # ======================================================================================================================
 if __name__ == '__main__':

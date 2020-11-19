@@ -91,6 +91,7 @@
    NDDataset.read_opus
    NDDataset.read_spa
    NDDataset.read_spg
+   NDDataset.read_srs
    NDDataset.read_zip
    NDDataset.remove_masks
    NDDataset.round
@@ -130,7 +131,7 @@
    NDDataset.trapz
    NDDataset.unobserve
    NDDataset.unobserve_all
-   NDDataset.upload_IRIS
+   NDDataset.download_IRIS
    NDDataset.var
    NDDataset.write
    NDDataset.write_jdx

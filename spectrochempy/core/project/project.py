@@ -8,6 +8,7 @@
 __all__ = ['Project']
 
 import os
+import io
 import uuid
 import json
 import warnings
@@ -18,12 +19,15 @@ from functools import wraps
 
 from traitlets import (Dict, Instance, Unicode, This, default)
 
-from spectrochempy.core import general_preferences, config_manager, config_dir, project_preferences, app
+from spectrochempy.core import general_preferences, config_manager, config_dir, app, debug_
+from spectrochempy.application import ProjectPreferences
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
 from spectrochempy.core.project.baseproject import AbstractProject
-# from spectrochempy.units.units import Quantity
+from spectrochempy.utils import get_filename, savefilename, pathclean, \
+    check_filename_to_open, json_serialiser
+
 
 cfg = config_manager
 preferences = general_preferences
@@ -610,8 +614,7 @@ class Project(AbstractProject):
         self._scripts = {}
 
     # ..................................................................................................................
-    def save(self, filename=None, directory=None, overwrite_data=True,
-             **kwargs):
+    def save(self, *args, **kwargs):
         """
         Save the current project
         (default extension : ``.pscp`` ).
@@ -636,9 +639,36 @@ class Project(AbstractProject):
 
         """
 
-        # get the filename associated to this project
+        debug_("project.load: reading project files")
 
-        directory = kwargs.get("directory", general_preferences.project_directory)
+        # get the filename associated to this project
+        if args:
+            filename = args[0]
+        else:
+            filename = kwargs.pop('filename', None)
+
+        default_directory = kwargs.get("directory", general_preferences.project_directory)
+
+        if not filename:
+            filename = savefilename(filename=filename,
+                         directory=default_directory,
+                         filters="PROJECT files (*.pscp)")
+
+        if filename:
+            filename = pathclean(filename)
+            directory, filename = os.path.split(filename)
+
+            if not os.path.exists(directory):
+                directory = default_directory
+                warnings.warn(f"Saving project in the default directory '{directory}' ", SpectroChemPyWarning)
+
+            filename = os.path.expanduser(os.path.join(directory, filename))
+            if (not os.path.exists(filename) or os.path.isdir(filename)
+                    # this may happen when the zip has been decompressed externally (we ignore this)
+            ) and not filename.endswith('.pscp'):
+                filename = filename + '.pscp'
+                if not os.path.exists(filename):
+                    raise IOError('no valid project filename provided')
 
         if not filename:
             # the current file name or default filename (project name)
@@ -666,7 +696,8 @@ class Project(AbstractProject):
 
         global savedproj, keepdata
         keepdata = False
-        if not overwrite_data and os.path.exists(filename):
+        overwrite = kwargs.pop('overwrite', 'True')
+        if not overwrite and os.path.exists(filename):
             # We need to check if the file already exists, as we want not to
             # change the original data
             keepdata = True
@@ -731,7 +762,7 @@ class Project(AbstractProject):
 
                 elif isinstance(val, Meta):
                     # we assume that objects in the meta objects
-                    # are all json serialisable #TODO: could be imporved.
+                    # are all json serialisable #TODO: could be improved.
                     pars[level + key] = val.to_dict()
 
                 elif key == 'parent':
@@ -743,6 +774,9 @@ class Project(AbstractProject):
 
         # Recursive scan on Project content
         _loop_on_obj(objnames)
+
+
+        # write
 
         with open(tmpfile, 'w') as f:
             f.write(json.dumps(pars, sort_keys=True, indent=2))
@@ -759,8 +793,110 @@ class Project(AbstractProject):
 
         self._filename = filename
 
+    def to_json(self):
+        """
+        return a project representation in json format
+
+        Examples
+        --------
+        >>> p = Project.load('HIZECOKE.pscp')
+        >>> pj = p.to_json()
+        >>> pj['main.name']
+        'HIZECOKE'
+        >>> pj['main.projects']
+        ['P350', 'A350', 'B350']
+
+        """
+
+        main = {}
+        objnames = self.__dir__()
+
+        def _loop_on_obj(_names, obj=self, parent='', level='main.'):
+
+            for key in _names:
+
+                val = getattr(obj, "_%s" % key)
+                if val is None:
+                    # ignore None - when reading if something is missing it
+                    # will be considered as None anyways
+                    continue
+
+                elif key == 'projects':
+                    main[level + key] = []
+                    for k, proj in val.items():
+                        _objnames = dir(proj)
+                        _loop_on_obj(_objnames, obj=proj, parent=level[:-1],
+                                     level=k + '.')
+                        main[level + key].append(k)
+
+                elif key == 'datasets':
+                    main[level + key] = []
+                    for k, ds in val.items():
+                        dsj = ds.to_json()
+                        main[level + key].append(dsj)
+
+                elif key == 'scripts':
+                    main[level + key] = []
+                    for k, sc in val.items():
+                        _objnames = dir(sc)
+                        _loop_on_obj(_objnames, obj=sc, parent=level[:-1],
+                                     level=k + '.')
+                        main[level + key].append(k)
+
+                elif isinstance(val, Meta):
+                    # we assume that objects in the meta objects
+                    # are all json serialisable #TODO: could be improved.
+                    main[level + key] = val.to_dict()
+
+                elif key == 'parent':
+                    main[level + key] = parent
+
+                else:
+                    # probably some string
+                    main[level + key] = val
+
+        # Recursive scan on Project content
+        _loop_on_obj(objnames)
+
+        return main
+
     @classmethod
-    def load(cls, filename='', directory=None, **kwargs):
+    def from_json(cls, js):
+
+
+        def _make_project(js, pname):
+
+            args = []
+            argnames = []
+
+            projects = js[f'{pname}.projects']
+            for item in projects:
+                args.append(_make_project(js, item))
+                argnames.append(item)
+
+            datasets = js[f'{pname}.datasets']
+            for item in datasets:
+                args.append(obj[item])
+                item = item.split('.')
+                argnames.append(item[-2])
+
+            scripts = js[f'{pname}.scripts']
+            for item in scripts:
+                args.append(Script(item, pars['%s.content' % item]))
+                argnames.append(item)
+
+            name = pars['%s.name' % pname]
+            meta = pars['%s.meta' % pname]
+
+            project = Project(*args, argnames=argnames, name=name, **meta)
+
+            return project
+
+        return _make_project(js, 'main')
+
+
+    @classmethod
+    def load(cls, *args, **kwargs):
         """Load a project file ( extension : ``.pscp``).
 
         It's a class method, that can be used directly on the class,
@@ -768,46 +904,91 @@ class Project(AbstractProject):
 
         Parameters
         ----------
-        filename : str
+        filename : str, optional
             The filename to the file to be read.
+            Not provided if content is not None
+        content : str, optional
+            The optional contents of the file to be loaded as a binary string
         directory : str, optional
             The directory from where to load the file. If this information is
             not given, the project will be loaded if possible from
             the default location defined in the configuration options.
 
+        Examples
+        --------
+        Load a project from the current diectory
+        or if not found from the location found in preferences
+        >>> proj1 = Project.load('HIZECOKE.pscp')
+        >>> print(proj1.name)
+        HIZECOKE
+
+        Load a project from a json byte-string.
+        In this example, there us only very minimal information
+        >>> c = "{'type':'Project','project.name': 'Untitled'}"
+        >>> # proj2 = Project.load(content=c)
+        >>> # print(proj2.name)
+
+        #TODO: make this doctest work
         See Also
         --------
         save
 
 
         """
-        # TODO: use pathlib instead of os.path? may simplify the code.
+        debug_("project.load: reading project files")
 
+        if args:
+            filename = args[0]
+        else:
+            filename = kwargs.pop('filename', None)
+
+        # if filename set, content is ignored
+        # else it is used before trying toopen a dialog
+        content = None
         if not filename:
-            raise IOError('no filename provided!')
+            content = kwargs.pop('content', None)
+            if content is None:
+                files = get_filename(
+                        filetypes=['PROJECT files (*.pscp)',
+                                   'all files (*)'])
+                if files:
+                    filename = files[0]
 
-        directory, filename = os.path.split(filename)
+        # directory extracted from the filename has prevalence on kwargs
+        directory=None
+        if filename:
+            filename = pathclean( filename)
+            directory, filename = os.path.split(filename)
 
-        if not os.path.exists(directory):
-            directory = kwargs.get("directory",
-                                   preferences.project_directory)
-        elif kwargs.get("directory", None) is not None:
-            warnings.warn("got multiple directory information. Use that "
-                          "obtained "
-                          "from filename!", SpectroChemPyWarning)
+            if not os.path.exists(directory):
+                directory = kwargs.get("directory", preferences.project_directory)
+            elif kwargs.get("directory", None) is not None:
+                warnings.warn("got multiple directory information. Use that "
+                              "obtained from filename!", SpectroChemPyWarning)
 
-        filename = os.path.expanduser(os.path.join(directory, filename))
-        if (not os.path.exists(filename) or os.path.isdir(filename)
-            # this may happen when the zip has been decompressed externally (we ignore this)
-            ) and not filename.endswith('.pscp'):
-            filename = filename + '.pscp'
-            if not os.path.exists(filename):
-                raise IOError('no valid project filename provided')
+            filename = os.path.expanduser(os.path.join(directory, filename))
+            if (not os.path.exists(filename) or os.path.isdir(filename)
+                # this may happen when the zip has been decompressed externally (we ignore this)
+                ) and not filename.endswith('.pscp'):
+                filename = filename + '.pscp'
+                if not os.path.exists(filename):
+                    raise IOError('no valid project filename provided')
 
-        fid = open(filename, 'rb')
+        if content is not None:
+            if isinstance(content, bytes):
+                fid = io.BytesIO(content)
+            elif isinstance(content, str):
+                fid = io.BytesIO(content.encode('utf-8'))
+        else:
+            fid = open(filename, 'rb')
+
 
         # open the zip file as a dict-like object
-        obj = ScpFile(fid)
+        try:
+            obj = ScpFile(fid)
+        except Exception as e:
+            if 'File is not a zip file' in e.args[0]:
+                obj = {}
 
         # read json files in the pscp file (obj[f])
         # then write it in the main config directory

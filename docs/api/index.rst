@@ -13,17 +13,17 @@ Loading the API
 
 The |scpy| API exposes many objects and functions.
 
-To use the API, you must import it using one of the following syntaxes:
+To use the API, you must import it using one of the following syntax:
 
 .. ipython:: python
 
     import spectrochempy as scp
-    nd = scp.NDDataset(...)
+    nd = scp.NDDataset()
 
 .. ipython:: python
 
     from spectrochempy import *
-    nd = NDDataset(...)
+    nd = NDDataset()
 
 With the second syntax, as often in python, the access to objects/functions
 can be greatly simplified. For example, we can use "NDDataset" without a prefix
@@ -38,14 +38,14 @@ The NDDataset object
 The NDDataset is the main object use by |scpy|.
 
 Like numpy ndarrays, NDDataset have the capability to be sliced,
-sorted and subject to matematical operations.
+sorted and subject to mathematical operations.
 
 But, in addition, NDDataset may have units, can be masked and each
 dimensions can have coordinates also with units. This make NDDataset
 aware of unit compatibility, *e.g.*, for binary operation such as
-addtions or subtraction or during the application of mathematical
+additions or subtraction or during the application of mathematical
 operations. In addition or in replacement of numerical data for
-coordinates, NDDatset can also have labeled coordinates where labels
+coordinates, NDDataset can also have labeled coordinates where labels
 can be different kind of objects (strings, datetime, numpy nd.ndarray
 or othe NDDatasets, etc...).
 
@@ -106,13 +106,13 @@ These functions mimics numpy equivalent, but output a NDDataset object
     empty
     empty_like
     zeros
-    eye
-    identity
     zeros_like
     ones
     ones_like
     full
     full_like
+    eye
+    identity
 
 Import of data from external sources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -124,14 +124,15 @@ Import of data from external sources
     read_bruker_nmr
     read_zip
     read_csv
-    read_dir
-    read_carroucell
     read_jdx
     read_matlab
     read_omnic
     read_spg
     read_spa
+	read_srs
     read_opus
+	read_dir
+    read_carroucell
 
 
 Export a NDDataset
@@ -331,7 +332,7 @@ Utilities
     :nosignatures:
     :toctree: generated/
 
-    upload_IRIS
+    download_IRIS
 
 
 

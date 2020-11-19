@@ -9,141 +9,127 @@
 
 """
 
+import io
+from warnings import warn
 from datetime import datetime
 
 import numpy as np
 import scipy.io as sio
 
-__all__ = ['read_matlab']
+__all__ = ['read_matlab', 'read_mat']
 __dataset_methods__ = __all__
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.utils import readfilename
 from spectrochempy.core import debug_
 
+from spectrochempy.core.readers.importer import _Importer
 
-def read_matlab(dataset=None, **kwargs):
+def read_matlab(*args, **kwargs):
     """
     Open a matlab file with extension ``.mat`` and returns its content as a list
 
     The array of numbers (i.e. matlab matrices) and Eigenvector's DataSet Object (DSO, see
     `DSO <https://www.eigenvector.com/software/dataset.htm>`_ ) are returned as NDDatasets.  The
-    content not recognized by SCpy  is returned as a tuple (name, object)
+    content not recognized by SpectroChemPy is returned as a tuple (name, object)
 
     Parameters
     ----------
-    dataset : |NDDataset|
-        The dataset (or list of datasets) to store the data and metadata read from the file(s).
-        If None, a |NDDataset| is created.
-    filename : None, str, or list of str
-        Filename of the file(s) to load. If `None`: opens a dialog box to select
-        ``.mat`` files. If str : a single filename. It list of str:
-        a list of filenames.
-    directory : str, optional, default="".
-        From where to read the specified filename. If not specified, read in
-        the defaults datadir.
+    %(read_method.parameters.no_origin|csv_delimiter)s
+
+    Other Parameters
+    ----------------
+    %(read_method.other_parameters)s
 
     Returns
     -------
-    dataset : list or |NDDataset|
-        A dataset or a list of datasets or tuples (name, object) if some content
-        is not recognized in the .mat file.
+    out : NDDataset| or list of |NDDataset|
+        The dataset or a list of dataset corresponding to a (set of) .mat file(s).
+
+    See Also
+    --------
+    read, read_csv, read_zip, read_jdx, read_omnic, read_opus, read_topspin
 
     """
-    debug_("reading .mat file")
+    if 'filetypes' not in kwargs.keys():
+        kwargs['filetypes'] = ['MAT files (*.mat)']
+    kwargs['protocol'] = ['.mat']
+    importer = _Importer()
+    return importer(*args, **kwargs)
 
-    # filename will be given by a keyword parameter except the first parameters
-    # is already the filename
-    filename = kwargs.get('filename', None)
 
-    # check if the first parameter is a dataset
-    # because we allow not to pass it
-    if not isinstance(dataset, NDDataset):
-        # probably did not specify a dataset
-        # so the first parameters must be the filename
-        if isinstance(dataset, (str, list)) and dataset != '':
-            filename = dataset
+def _read_mat(*args, **kwargs):
 
-    # check if directory was specified
-    directory = kwargs.get("directory", None)
+    _ , filename = args
+    content = kwargs.get('content', False)
 
-    # returns a list of files to read
-    files = readfilename(filename,
-                         directory=directory,
-                         filetypes=['MAT files (*.mat)'])
+    if content:
+        fid = io.BytesIO(content)
+    else:
+        fid = open(filename, 'rb')
 
-    if not files:
-        # there is no files, return nothing
-        return None
-
-    files = files['.mat']
+    dic = sio.loadmat(fid)
 
     datasets = []
+    for name, data in dic.items():
 
-    for file in files:
-        content = sio.whosmat(file)
-        f = sio.loadmat(file)
+        dataset = NDDataset()
+        if name == '__header__':
+            dataset.description = str(data, 'utf-8', 'ignore')
+            continue
+        if name.startswith('__'):
+            continue
 
-        for x in content:
-            if x[2] in ['double', 'single', 'int8', 'int16',
-                        'int32', 'int64', 'uint8', 'uint16', 'uint32', 'uint64']:
-                # this is an array of numbers
-                name = x[0]
-                data = f[name]
+        if data.dtype in [np.dtype('float64'), np.dtype('float32'), np.dtype('int8'), np.dtype('int16'),
+                          np.dtype('int32'), np.dtype('int64'), np.dtype('uint8'), np.dtype('uint16'),
+                          np.dtype('uint32'), np.dtype('uint64')]:
 
-                ds = NDDataset()
-                ds.data = data
-                ds.name = name
-                ds.history.append(str(datetime.now()) + ':imported from .mat file \n')
-                datasets.append(ds)
-                # TODO: reshape from fortran/Matlab order to C opder
-                # for 3D or higher datasets ?
+            # this is an array of numbers
+            dataset.data = data
+            dataset.name = name
+            dataset.history = str(datetime.now()) + ':imported from .mat file \n'
+            # TODO: reshape from fortran/Matlab order to C opder
+            # for 3D or higher datasets ?
+            datasets.append(dataset)
 
-            elif x[2] == 'object':
-                # this is probably a DSO object
+        elif data.dtype == 'object':
+            # this is probably a DSO object
+            dataset = _read_DSO(dataset, name, data)
+            datasets.append(dataset)
 
-                ds = _read_DSO(f, x)
-                datasets.append(ds)
-            else:
-                debug_('unsupported data type')
-                # TODO: implement DSO reader
-                datasets.append((x[0], f[x[0]]))
+        else:
+            warn(f'unsupported data type : {data.dtype}')
+            # TODO: implement DSO reader
+            datasets.append([name, data])
 
-    if len(datasets) == 1:
-        return datasets[0]
-    else:
-        return datasets
 
-# make also classmethod
-NDIO.read_matlab = read_matlab
+    return datasets
 
-def _read_DSO(f, x):
-    dso = x[0]
 
-    name_mat = f[dso]['name'][0][0]
+def _read_DSO(dataset, name, data):
+
+    name_mat = data['name'][0][0]
     if len(name_mat) == 0:
         name = ''
     else:
         name = name_mat[0]
 
-    typedata_mat = f[dso]['type'][0][0]
+    typedata_mat = data['type'][0][0]
     if len(typedata_mat) == 0:
         typedata = ''
     else:
         typedata = typedata_mat[0]
 
     if typedata != 'data':
-        return ((x[0], f[x[0]]))
+        return ((name, data))
 
     else:
-        author_mat = f[dso]['author'][0][0]
+        author_mat = data['author'][0][0]
         if len(author_mat) == 0:
             author = '*unknown*'
         else:
             author = author_mat[0]
 
-        date_mat = f[dso]['date'][0][0]
+        date_mat = data['date'][0][0]
         if len(date_mat) == 0:
             date = datetime(1, 1, 1, 0, 0)
         else:
@@ -152,36 +138,36 @@ def _read_DSO(f, x):
                             int(date_mat[0][4]),
                             int(date_mat[0][5]))
 
-        data = f[dso]['data'][0][0]
+        dat = data['data'][0][0]
 
         # look at coords and labels
         # only the first label and axisscale are taken into account
         # the axisscale title is used as the coordinate title
 
         coords = []
-        for i in range(len(data.shape)):
+        for i in range(len(dat.shape)):
             coord = datac = None  # labels = title = None
-            labelsarray = f[dso]['label'][0][0][i][0]
+            labelsarray = data['label'][0][0][i][0]
             if len(labelsarray):  # some labels might be present
                 if isinstance(labelsarray[0], np.ndarray):
-                    labels = f[dso]['label'][0][0][i][0][0]
+                    labels = data['label'][0][0][i][0][0]
                 else:
-                    labels = f[dso]['label'][0][0][i][0]
+                    labels = data['label'][0][0][i][0]
                 if len(labels):
                     coord = (Coord(labels=[str(label) for label in labels]))
-                if len(f[dso]['label'][0][0][i][1]):
-                    if isinstance(f[dso]['label'][0][0][i][1][0], np.ndarray):
-                        if len(f[dso]['label'][0][0][i][1][0]):
-                            coord.name = f[dso]['label'][0][0][i][1][0][0]
-                    elif isinstance(f[dso]['label'][0][0][i][1][0], str):
-                        coord.name = f[dso]['label'][0][0][i][1][0]
+                if len(data['label'][0][0][i][1]):
+                    if isinstance(data['label'][0][0][i][1][0], np.ndarray):
+                        if len(data['label'][0][0][i][1][0]):
+                            coord.name = data['label'][0][0][i][1][0][0]
+                    elif isinstance(data['label'][0][0][i][1][0], str):
+                        coord.name = data['label'][0][0][i][1][0]
 
-            axisdataarray = f[dso]['axisscale'][0][0][i][0]
+            axisdataarray = data['axisscale'][0][0][i][0]
             if len(axisdataarray):  # some axiscale might be present
                 if isinstance(axisdataarray[0], np.ndarray):
-                    if len(axisdataarray[0]) == data.shape[i]:
+                    if len(axisdataarray[0]) == dat.shape[i]:
                         datac = axisdataarray[0]  # take the first axiscale data
-                    elif axisdataarray[0].size == data.shape[i]:
+                    elif axisdataarray[0].size == dat.shape[i]:
                         datac = axisdataarray[0][0]
 
                 if datac is not None:
@@ -190,37 +176,49 @@ def _read_DSO(f, x):
                     else:
                         coord = Coord(data=datac)
 
-                if len(f[dso]['axisscale'][0][0][i][1]):  # some titles might be present
+                if len(data['axisscale'][0][0][i][1]):  # some titles might be present
                     try:
-                        coord.title = f[dso]['axisscale'][0][0][i][1][0]
+                        coord.title = data['axisscale'][0][0][i][1][0]
                     except Exception:
                         try:
-                            coord.title = f[dso]['axisscale'][0][0][i][1][0][0]
+                            coord.title = data['axisscale'][0][0][i][1][0][0]
                         except Exception:
                             pass
 
             if not isinstance(coord, Coord):
-                coord = Coord(data=[j for j in range(data.shape[i])], title='index')
+                coord = Coord(data=[j for j in range(dat.shape[i])], title='index')
 
             coords.append(coord)
 
-        ds = NDDataset(data,
-                       author=author,
-                       coords=coords,
-                       name=name,
-                       date=date)
-
-        ds.name = name
-        ds.date = date
+        dataset.data = dat
+        dataset.coords = coords
+        dataset.author = author
+        dataset.name = name
+        dataset.date = date
+        dataset.protocol = '.dso'
 
         # TODO: reshape from fortran/Matlab order to C order
         #  for 3D or higher datasets ?
 
-        for i in f[dso]['description'][0][0]:
-            ds.description += i
+        for i in data['description'][0][0]:
+            dataset.description += i
 
-        for i in f[dso]['history'][0][0][0][0]:
-            ds.history.append(i)
+        for i in data['history'][0][0][0][0]:
+            dataset.history.append(i)
 
-        ds.history = (str(datetime.now()) + ': Imported by spectrochempy ')
-    return ds
+        dataset.history = (str(datetime.now()) + ': Imported by spectrochempy ')
+    return dataset
+
+
+# Register the readers
+# ----------------------------------------------------------------------------------------------------------------------
+_Importer._read_mat = staticmethod(_read_mat)
+
+# create alias
+# ----------------------------------------------------------------------------------------------------------------------
+read_mat = read_matlab
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+if __name__ == '__main__':
+    pass

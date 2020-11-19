@@ -12,6 +12,7 @@ __all__ = ['SpectroChemPyWarning',
            'SpectroChemPyDeprecationWarning',
            'SpectroChemPyException',
            'UnitsCompatibilityError',
+           'DimensionsCompatibilityError',
            'deprecated',
            ]
 
@@ -51,6 +52,13 @@ class UnitsCompatibilityError(SpectroChemPyException):
 
     """
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+class DimensionsCompatibilityError(SpectroChemPyException):
+    """
+    Exception raised when dimensions are not compatible for concatenation for instance
+
+    """
 
 # ----------------------------------------------------------------------------------------------------------------------
 def deprecated(message):

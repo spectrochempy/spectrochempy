@@ -6,15 +6,15 @@
 # ======================================================================================================================
 
 import os
-
-import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.processors.align import align
 
-def test_read_omnic():
-    A = NDDataset.read_omnic()  # should open a dialog
-    assert A is None
 
-    A = scp.read_omnic(os.path.join('irdata', 'nh4y-activation.spg'))
-    assert A.filename == 'nh4y-activation'
-    assert str(A)=='NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
-
+def test_read_write_jdx(IR_dataset_2D):
+    X = IR_dataset_2D.copy()
+    X.write_jdx('nh4y-activation.jdx')
+    Y = NDDataset.read_jdx('nh4y-activation.jdx')
+    os.remove('nh4y-activation.jdx')
+    X1, Y1 = align(X, Y)
+    maxdiff = (X1[:, 1:-1] - Y1[:, 1:-1]).abs().max()
+    assert maxdiff.data < 1e-8

@@ -1598,3 +1598,15 @@ def test_nddataset_xarray_export_w_spa():
     info_(na)
     da = na.to_xarray()
     info_(da)
+
+#
+# JSON import/export
+#
+
+def test_json_import_export(IR_dataset_2D):
+
+    nd = IR_dataset_2D.copy()
+    dic = nd.to_json()
+    ndout = NDDataset.from_json()
+    assert ndout==nd
+

@@ -19,6 +19,7 @@ import textwrap
 import warnings
 from collections import OrderedDict
 from datetime import datetime
+import json
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -36,8 +37,11 @@ from spectrochempy.core.dataset.ndmath import NDMath, set_operators, make_func_f
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core import error_, warning_
+from spectrochempy.utils.meta import Meta
+from spectrochempy.units import Unit, Quantity
 from spectrochempy.utils import colored_output, SpectroChemPyException, get_user_and_node, docstrings, \
     SpectroChemPyWarning
+from spectrochempy.utils import json_serialiser
 
 HAS_XARRAY = False
 try:
@@ -921,6 +925,88 @@ class NDDataset(
         new = self[index]
         return new
 
+    def to_json(self, to_string=False):
+        """
+        Convert to JSON format
+
+        Returns
+        -------
+        dic:
+            a JSON dictionary
+
+        Examples
+        --------
+        >>> X = NDDataset.read('wodger.spg')
+        >>> js = X.to_json()
+        >>> js['name']
+        'wodger.spg'
+
+        """
+
+        dic = {}
+
+        objnames = self.__dir__()
+
+        def _loop_on_obj(_names, obj=self, level=''):
+            """Recursive scan on NDDataset objects"""
+
+            for key in _names:
+                val = getattr(obj, f"_{key}")
+
+                if isinstance(val, np.ndarray):
+                    dic[level + key] = val
+
+                elif isinstance(val, CoordSet):
+                    for v in val._coords:
+                        _objnames = dir(v)
+                        if isinstance(v, Coord):
+                            _loop_on_obj(_objnames, obj=v, level=f"coord_{v.name}_")
+                        elif isinstance(v, CoordSet):
+                            _objnames.remove('coords')
+                            _loop_on_obj(_objnames, obj=v, level=f"coordset_{v.name}_")
+                            for vi in v:
+                                _objnames = dir(vi)
+                                _loop_on_obj(_objnames, obj=vi, level=f"coordset_{v.name}_coord_{vi.name[1:]}_")
+
+                elif isinstance(val, Unit):
+                    dic[level + key] = str(val)
+
+                elif isinstance(val, Meta):
+                    d = val.to_dict()
+                    # we must handle Quantities
+                    for k, v in d.items():
+                        if isinstance(v, list):
+                            for i, item in enumerate(v):
+                                if isinstance(item, Quantity):
+                                    item = list(item.to_tuple())
+                                    if isinstance(item[0], np.ndarray):
+                                        item[0] = item[0].tolist()
+                                    d[k][i] = tuple(item)
+                    dic[level + key] = d
+
+                elif val is None:
+                    continue
+
+                elif isinstance(val, dict) and key == 'axes':
+                    # do not save the matplotlib axes
+                    continue
+
+                elif isinstance(val, (plt.Figure, plt.Axes)):
+                    # pass the figures and Axe
+                    continue
+
+                else:
+                    dic[level + key] = val
+
+        _loop_on_obj(objnames)
+
+        if not to_string:
+            return dic
+
+        # make the json string
+        return json.dumps(dic, default=json_serialiser, indent=2)
+
+
     # ..................................................................................................................
     def to_xarray(self, **kwargs):
         """
@@ -1183,6 +1269,7 @@ squeeze = make_func_from(NDDataset.squeeze, first='dataset')
 swapaxes = make_func_from(NDDataset.swapaxes, first='dataset')
 transpose = make_func_from(NDDataset.transpose, first='dataset')
 to_xarray = make_func_from(NDDataset.to_xarray, first='dataset')
+to_json = make_func_from(NDDataset.to_json, first='dataset')
 take = make_func_from(NDDataset.take, first='dataset')
 
 __all__ += ['sort',
