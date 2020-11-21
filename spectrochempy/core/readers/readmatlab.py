@@ -50,9 +50,8 @@ def read_matlab(*args, **kwargs):
     read, read_csv, read_zip, read_jdx, read_omnic, read_opus, read_topspin
 
     """
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['MAT files (*.mat)']
-    kwargs['protocol'] = ['.mat']
+    kwargs['filetypes'] = ['MATLAB files (*.mat, *.dso)']
+    kwargs['protocol'] = ['.mat', '.dso']
     importer = _Importer()
     return importer(*args, **kwargs)
 
@@ -93,7 +92,7 @@ def _read_mat(*args, **kwargs):
 
         elif data.dtype == 'object':
             # this is probably a DSO object
-            dataset = _read_DSO(dataset, name, data)
+            dataset = _read_dso(dataset, name, data)
             datasets.append(dataset)
 
         else:
@@ -105,7 +104,7 @@ def _read_mat(*args, **kwargs):
     return datasets
 
 
-def _read_DSO(dataset, name, data):
+def _read_dso(dataset, name, data):
 
     name_mat = data['name'][0][0]
     if len(name_mat) == 0:

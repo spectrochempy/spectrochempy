@@ -8,7 +8,8 @@
 """This module define a generic class to import files and contents.
 
 """
-__all__ = []
+__all__ = ['read']
+__dataset_methods__ = __all__
 
 from warnings import warn
 from datetime import datetime
@@ -19,60 +20,7 @@ from spectrochempy.utils import check_filename_to_open, docstrings, DimensionsCo
 from spectrochempy.core import error_
 
 
-# Set some general parameters
 # ----------------------------------------------------------------------------------------------------------------------
-docstrings.get_sections(
-        docstrings.dedent(
-"""
-Parameters
-----------
-*args : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-    The data source(s) can be specified by the name or a list of name for the file(s) to be loaded: 
-    
-    *e.g.,( file1, file2, ...,  **kwargs )*
-    
-    If the list of filenames are enclosed into brackets: 
-    
-    *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
-     
-    The returned datasets are merged to form a single dataset, 
-    except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`), 
-    a dialog box will be opened to select files. 
-directory : str, optional
-    From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
-    SpectroChemPy Preferences.
-merge : bool, optional
-    Default value is False. If True, and several filenames have been provided as arguments, 
-    then a single dataset with merged (stacked along the first 
-    dimension) is returned (default=False)
-listdir : bool, optional
-    If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge` 
-    is True. It is assumed that all the files correspond to current reading protocol (default=True)
-sortbydate : bool, optional
-    Sort multiple spectra by acquisition date (default=True)
-description: str, optional
-    A Custom description.
-origin : {'omnic', 'tga'}, optional
-    in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
-    Up to now only 'omnic' and 'tga' have been implemented.
-csv_delimiter : str, optional
-    By default the column delimiter is the one set in SpectroChemPy `Preferences`.
-
-Other Parameters
-----------------
-content : bytes object, optional
-    Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-    The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application 
-    to handle drag and drop of files into a Browser. 
-    For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory 
-
-"""
-),
-        base='read_method',
-        sections=['Parameters', 'Other Parameters'])
-
-docstrings.delete_params('read_method.parameters', 'origin', 'csv_delimiter')
-
 class _Importer(HasTraits):
     # Private _Importer class
 
@@ -82,12 +30,13 @@ class _Importer(HasTraits):
     default_key = Unicode
     protocol = Unicode
 
+    # ..................................................................................................................
     def __call__(self, *args, **kwargs):
 
         from spectrochempy.core.dataset.nddataset import NDDataset
 
         self.datasets = []
-        self.default_key = kwargs.pop('default_key','.spg')
+        self.default_key = kwargs.pop('default_key','.scp')
 
         if 'objtype' not in kwargs.keys():
             kwargs['objtype'] = NDDataset
@@ -140,17 +89,15 @@ class _Importer(HasTraits):
             dataset.history = str(datetime.now()) + ':sorted by date'
             return dataset
 
+    # ..................................................................................................................
     def _switch_protocol(self, key, files, **kwargs):
 
-        if not key:
-            # default key if no key is specified
-            key = self.default_key
-
         protocol = kwargs.get('protocol', None)
-        if not isinstance(protocol, list):
-            protocol = [protocol]
-        if key not in protocol:
-            return
+        if protocol:
+            if not isinstance(protocol, list):
+                protocol = [protocol]
+            if key and key not in protocol:
+                return
 
         for filename in files[key]:
             read_ = getattr(self, f"_read_{key[1:]}")
@@ -170,3 +117,211 @@ class _Importer(HasTraits):
             except Exception as e:
                 # try another format!
                 self.datasets = self.objtype.read(self.datasets, files, protocol=key, **kwargs)
+
+# ......................................................................................................................
+def importermethod(func):
+    # Decorateur
+    setattr(_Importer, func.__name__, staticmethod(func))
+    return func
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Generic Read function
+# ----------------------------------------------------------------------------------------------------------------------
+
+@docstrings.get_sections(base='read_method')
+@docstrings.dedent
+def read(*args, **kwargs):
+    """
+    Parameters
+    ----------
+    *args : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+
+        *e.g.,( file1, file2, ...,  **kwargs )*
+
+        If the list of filenames are enclosed into brackets:
+
+        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+
+        The returned datasets are merged to form a single dataset,
+        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        a dialog box will be opened to select files.
+    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+        Protocol used for reading. If not provided, the correct protocol
+        is inferred (whnever it is possible) from the file name extension.
+    directory : str, optional
+        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        SpectroChemPy Preferences.
+    merge : bool, optional
+        Default value is False. If True, and several filenames have been provided as arguments,
+        then a single dataset with merged (stacked along the first
+        dimension) is returned (default=False)
+    listdir : bool, optional
+        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+    sortbydate : bool, optional
+        Sort multiple spectra by acquisition date (default=True)
+    description: str, optional
+        A Custom description.
+    origin : {'omnic', 'tga'}, optional
+        in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
+        Up to now only 'omnic' and 'tga' have been implemented.
+    csv_delimiter : str, optional
+        Set the column delimiter in CSV file.
+        By default it is the one set in SpectroChemPy `Preferences`.
+    content : bytes object, optional
+        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        to handle drag and drop of files into a Browser.
+        For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
+
+    Returns
+    --------
+    out : NDDataset| or list of |NDDataset|
+        The dataset or a list of dataset corresponding to a (set of) OPUS file(s).
+
+    Examples
+    ---------
+
+    >>> from spectrochempy import read
+
+    Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
+
+    >>> read_opus('irdata\\\\OPUS\\\\test.0000')
+    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+
+    Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
+    Note that here read_opus is called as a classmethod of the NDDataset class
+
+    >>> NDDataset.read_opus('irdata/OPUS/test.0000')
+    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+
+    Single file specified with pathlib.Path object
+
+    >>> from pathlib import Path
+    >>> folder = Path('irdata/OPUS')
+    >>> p = folder / 'test.0000'
+    >>> read_opus(p)
+    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+
+    Multiple files not merged (return a list of datasets). Note that a directory is specified
+
+    >>> l = read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
+    >>> len(l)
+    3
+    >>> l[0]
+    NDDataset: [float32] a.u. (shape: (y:1, x:2567))
+
+    Multiple files merged as the `merge` keyword is set to true
+
+    >>> read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
+    NDDataset: [float32] a.u. (shape: (y:3, x:2567))
+
+    Multiple files to merge : they are passed as a list instead of using the keyword `merge`
+
+    >>> read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
+    NDDataset: [float32] a.u. (shape: (y:3, x:2567))
+
+    Multiple files not merged : they are passed as a list but `merge` is set to false
+
+    >>> l = read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
+    >>> len(l)
+    3
+
+    Read without a filename. This has the effect of opening a dialog for file(s) selection
+
+    >>> read_opus() # doctest: +ELLIPSIS
+    ...
+
+    Read in a directory (assume that only OPUS files are present in the directory
+    (else we must use the generic `read` function instead)
+
+    >>> l = read_opus(directory='irdata/OPUS')
+    >>> len(l)
+    4
+
+    Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
+
+    >>> read_opus(directory='irdata/OPUS', merge=True)
+    NDDataset: [float32] a.u. (shape: (y:4, x:2567))
+
+    See Also
+    --------
+    read_topspin: read TopSpin Bruker NMR spectra. Equivalent to set protocol='topspin'.
+    read_omnic: read Omnic spectra
+    read_spg: Read Omnic *.spg spectra read_spa, read_srs, read_csv, read_matlab, read_zip
+
+    """
+    protocol = kwargs.get('protocol', None)
+
+    if protocol in ['omnic']:
+        kwargs['filetypes'] = ['Nicolet OMNIC files (*.spa, *.spg)',
+                               'Nicolet OMNIC series (*.srs)']
+        kwargs['protocol'] = ['.spg', '.spa', '.srs' ]
+    elif protocol in ['opus']:
+        kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
+        kwargs['protocol'] = ['.opus']
+    elif protocol in ['topspin']:
+        kwargs['filetypes'] = ['Bruker TOPSPIN files (fid, ser, 1r, 2rr, 3rrr)',
+                               'Compressed Bruker TOPSPIN folder (*.zip)']
+        kwargs['protocol'] = ['.topspin']
+    elif protocol in ['matlab']:
+        kwargs['filetypes'] = ['MATLAB files (*.mat, *.dso)']
+        kwargs['protocol'] = ['.mat', '.dso']
+    elif protocol in ['jcamp']:
+        kwargs['filetypes'] = ['JCAMP-DX files (*.jdx, *.dx)']
+        kwargs['protocol'] = ['.jdx', '.dx']
+    elif protocol in ['csv']:
+        kwargs['filetypes'] = ['CSV files (*.csv, *.txt)',
+                               'Compressed CSV file(s) *.zip)']
+        kwargs['protocol'] = ['.csv', '.zip']
+    elif protocol in ['excel']:
+        kwargs['filetypes'] = ['Microsoft Excel files (*.xls)']
+        kwargs['protocol'] = ['.xls']
+    elif protocol in ['scp']:
+        kwargs['filetypes'] = ['SpectroChemPy files (*.scp)']
+        kwargs['protocol'] = ['.scp']
+    else:
+        kwargs['filetypes'] = ['All files (*.*)']
+        warn('This protocol is unknown. Try to infer from the filename extension')
+
+
+    importer = _Importer()
+    return importer(*args, **kwargs)
+
+
+# ......................................................................................................................
+@importermethod
+def _read_scp(*args, **kwargs):
+
+    dataset, filename = args
+    return dataset.load(filename, **kwargs)
+
+
+# ......................................................................................................................
+@importermethod
+def _read_(*args, **kwargs):
+
+    dataset, filename = args
+
+    protocol = kwargs.get('protocol', None)
+    if protocol and '.scp' in protocol:
+        return dataset.load(filename, **kwargs)
+    elif filename.name in ('fid', 'ser', '1r', '2rr', '3rrr'):
+        # probably an Topspin NMR file
+        return dataset.read_topspin(filename, **kwargs)
+    else:
+        # lets try scp format
+        try:
+            # scp?
+            return dataset.load(filename, **kwargs)
+        except:
+            raise NotImplementedError
+
+# ......................................................................................................................
+docstrings.delete_params('read_method.parameters', 'origin', 'csv_delimiter')
+
+# ----------------------------------------------------------------------------------------------------------------------
+if __name__ == '__main__':
+    pass

@@ -21,7 +21,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import docstrings, _Importer
+from spectrochempy.core.readers.importer import docstrings, importermethod, _Importer
 
 
 # ======================================================================================================================
@@ -151,10 +151,8 @@ def read_omnic(*args, **kwargs):
 
     """
 
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['OMNIC files (*.spa, *.spg)',
-                               'OMNIC series (*.srs)']
-    kwargs['protocol'] = ['.omnic', '.spg', '.spa', '.srs' ]
+    kwargs['filetypes'] = ['OMNIC files (*.spa, *.spg)', 'OMNIC series (*.srs)']
+    kwargs['protocol'] = ['.spg', '.spa', '.srs' ]
     importer = _Importer()
     return importer(*args, **kwargs)
 
@@ -200,8 +198,7 @@ def read_spg(*args, **kwargs):
 
     """
 
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['OMNIC files (*.spg)']
+    kwargs['filetypes'] = ['OMNIC files (*.spg)']
     kwargs['protocol'] = ['.spg']
     importer = _Importer()
     return importer(*args, **kwargs)
@@ -251,8 +248,7 @@ def read_spa(*args, **kwargs):
 
     """
 
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['OMNIC files (*.spa)']
+    kwargs['filetypes'] = ['OMNIC files (*.spa)']
     kwargs['protocol'] = ['.spa']
     importer = _Importer()
     return importer(*args, **kwargs)
@@ -299,8 +295,7 @@ def read_srs(*args, **kwargs):
 
     """
 
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['OMNIC series (*.srs)']
+    kwargs['filetypes'] = ['OMNIC series (*.srs)']
     kwargs['protocol'] = ['.srs']
     importer = _Importer()
     return importer(*args, **kwargs)
@@ -312,6 +307,7 @@ def read_srs(*args, **kwargs):
 # ======================================================================================================================
 
 # ......................................................................................................................
+@importermethod
 def _read_spg(*args, **kwargs):
     # read spg file
 
@@ -502,6 +498,7 @@ def _read_spg(*args, **kwargs):
     return dataset
 
 # ......................................................................................................................
+@importermethod
 def _read_spa(*args, **kwargs):
 
     dataset, filename = args
@@ -607,6 +604,7 @@ def _read_spa(*args, **kwargs):
     return dataset
 
 # ......................................................................................................................
+@importermethod
 def _read_srs(*args, **kwargs):
 
     dataset, filename = args
@@ -1041,14 +1039,6 @@ def _getintensities(fid, pos):
     # Read and return spectral intensities
     fid.seek(intensity_pos)
     return _fromfile(fid, 'float32', int(nintensities))
-
-
-# Register the readers
-# ----------------------------------------------------------------------------------------------------------------------
-_Importer._read_spg = staticmethod(_read_spg)
-_Importer._read_spa = staticmethod(_read_spa)
-_Importer._read_srs = staticmethod(_read_srs)
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':

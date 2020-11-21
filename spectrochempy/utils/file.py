@@ -25,18 +25,20 @@ from traitlets import import_item
 
 from spectrochempy.utils.qtfiledialogs import opendialog, SaveFileName
 
-__all__ = ['get_filename', 'readdirname', 'savefilename', 'pathclean',
-           'list_packages', 'generate_api',
-           'make_zipfile', 'ScpFile',
-           'unzip', 'check_filenames', 'check_filename_to_open', 'check_filename_to_save',
-           'json_serialiser', 'json_decoder'
-           ]
+__all__ = [
+            'get_filename', 'readdirname', 'savefilename', 'pathclean',
+            'list_packages', 'generate_api',
+            'make_zipfile', 'ScpFile',
+            'unzip', 'check_filenames', 'check_filename_to_open', 'check_filename_to_save',
+            'json_serialiser', 'json_decoder',
+            'pattern'
+          ]
 
 
 # ======================================================================================================================
 # Utility functions
 # ======================================================================================================================
-def insensitive_case_glob(pattern):
+def _insensitive_case_glob(pattern):
     def either(c):
         return f'[{c.lower()}{c.upper()}]' if c.isalpha() else c
     return ''.join(map(either, pattern))
@@ -44,11 +46,11 @@ def insensitive_case_glob(pattern):
 
 def pattern(filetypes):
     regex = r"\*\.*\[*[0-9-]*\]*\w*\**"
-    patterns = []
+    patterns= []
     for ft in filetypes:
         m = re.finditer(regex, ft)
-        patterns.extend([insensitive_case_glob(match.group(0)) for match in m])
-    return patterns
+        patterns.extend([match.group(0) for match in m])
+    return [_insensitive_case_glob(p) for p in patterns(filetypes)]
 
 
 def pathclean(paths):

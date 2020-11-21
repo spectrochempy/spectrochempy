@@ -56,8 +56,7 @@ def read_jdx(*args, **kwargs):
     read_csv, read_zip, read_matlab, read_omnic, read_opus, read_topspin
 
     """
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['JCAMP-DX files (*.jdx, *.dx)']
+    kwargs['filetypes'] = ['JCAMP-DX files (*.jdx, *.dx)']
     kwargs['protocol'] = ['.jdx', '.dx']
     importer = _Importer()
     return importer(*args, **kwargs)

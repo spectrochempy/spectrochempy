@@ -12,10 +12,11 @@ methods for a |NDDataset| are defined.
 
 """
 
-__all__ = ['NDIO', 'write', 'read', 'load']
-__dataset_methods__ = __all__
+__all__ = ['NDIO']
+# __dataset_methods__ = ['write', 'load']
 
 from os import close as osclose, remove as osremove
+import io
 import datetime
 import json
 from pathlib import Path
@@ -237,44 +238,54 @@ class NDIO(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     @classmethod
-    def _load(cls,
-              filename=None,
-              protocol=None,
-              **kwargs
-              ):
+    def load(cls, filename, **kwargs):
+        """
+        Load a data from a '*.scp' file.
 
-        # be sure to convert filename to a pathlib object
-        filename = pathclean(filename)
+        It's a class method, that can be used directly on the class,
+        without prior opening of a class instance.
 
-        # case where load was call directly from the API
-        # e.g.,  A= scp.load("dataset.scp")
-        # In this case we need to define cls as a NDDataset class
-        if isinstance(cls(), NDIO):
-            # not run as a class method of NDDataset
-            from spectrochempy import NDDataset
-            cls = NDDataset
+        Parameters
+        ----------
+        filename :  `str`, `pathlib` or `file` objects
+            The name of the file to read (or a file objects.
+        content : str, optional
+             The optional content of the file(s) to be loaded as a binary string
+        kwargs : optional keyword parameters.
+            Any additional keyword(s) to pass to the actual reader.
 
-        if protocol is not None and protocol not in ['scp']:
-            # use one of the specific readers
-            filename = check_filenames(filename, **kwargs)[0]
-            return cls.read(filename, protocol=protocol)
 
-        if protocol is None:
-            ext = filename.suffix
-            if not ext:
-                # it is not a default scp file. Without extension it could be a bruker nmr file
-                filename = check_filenames(filename, **kwargs)[0]
-                try:
-                    return cls.read_bruker_nmr(filename)
-                except Exception as e:
-                    pass
+        Examples
+        --------
+        >>> from spectrochempy import *
+        >>> mydataset = NDDataset.load('mydataset.scp')
+        >>> print(mydataset)
+        <BLANKLINE>
+        ...
 
-        if not filename.exists():
-            filename = check_filenames(filename.with_suffix('.scp'), **kwargs)[0]
+        Notes
+        -----
+        adapted from `numpy.load`
+
+        See Also
+        --------
+        read, save
+
+
+        """
+        content = kwargs.get('content', None)
+
+        if content:
+            fid = io.BytesIO(content)
+        else:
+            # be sure to convert filename to a pathlib object
+            filename = pathclean(filename)
+            if not filename.exists():
+                filename = check_filenames(filename.with_suffix('.scp'), **kwargs)[0]
+            fid = open(filename, 'rb')
 
         # get zip file
         try:
-            fid = filename.open('rb')
             obj = NpzFile(fid, allow_pickle=True)
         except FileNotFoundError:
             raise SpectroChemPyException(f"File {filename} doesn't exist!")
@@ -390,151 +401,6 @@ class NDIO(HasTraits):
 
         return new
 
-    @classmethod
-    def load(cls,
-             filename=None,
-             protocol=None,
-             content=None,
-             **kwargs
-             ):
-        """
-        Load a list of dataset objects saved as a pickle files
-        ( e.g., '*.scp' file).
-
-        It's a class method, that can be used directly on the class,
-        without prior opening of a class instance.
-
-        Parameters
-        ----------
-        filename : list of `str`, `pathlib` or `file` objects
-            The names of the files to read (or the file objects).
-        protocol : str, optional, default:'.scp'
-            The default type for loading.
-        content : str, optional
-             The optional content of the file(s) to be loaded as a binary string
-        kwargs : optional keyword parameters.
-            Any additional keyword(s) to pass to the actual reader.
-
-
-        Examples
-        --------
-        >>> from spectrochempy import *
-        >>> mydataset = NDDataset.load('mydataset.scp')
-        >>> print(mydataset)
-        <BLANKLINE>
-        ...
-
-        Notes
-        -----
-        adapted from `numpy.load`
-
-        See Also
-        --------
-        read, save
-
-
-        """
-        datasets = []
-        files = filename
-        if not isinstance(filename, (list, tuple)):
-            files = [filename]
-
-        for f in files:  # lgtm [py/iteration-string-and-sequence]
-            nd = cls._load(filename=f, protocol=protocol, **kwargs)
-            datasets.append(nd)
-
-            # TODO: allow a concatenation or stack if possible
-
-        if len(datasets) == 1:
-            return datasets[0]
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Generic read function
-    # ------------------------------------------------------------------------------------------------------------------
-
-    @classmethod
-    def read(cls, *args, **kwargs):
-
-        if 'filetypes' not in kwargs.keys():
-            kwargs['filetypes'] = ['OMNIC files (*.spg, )']
-            kwargs['protocol'] = ['.spg']
-            importer = _Importer()
-            return importer(*args, **kwargs)
-
-    def __read(cls, *args, **kwargs):
-        """
-        Generic read function.
-
-        Parameters
-        ----------
-        filename : `str` or `pathlib` object, optional
-            The path to the file to be read.
-            If it is not provided, a dialog will be opened.
-        kwargs : optional keyword parameters
-            Any additional keyword to pass to the actual reader
-
-            e.g.,
-
-            * protocol : `str`
-                Protocol used for reading. If not provided, the correct protocol
-                is evaluated from the file name extension.
-                Existing protocol: 'scp', 'omnic', 'opus', 'matlab', 'jdx', 'csv', ...
-            * content : `str`, default=None
-                The optional contents of the file to be loaded as a binary string
-            * sortbydate: `bool`, optional, default=True
-
-
-        See Also
-        --------
-        load
-
-        """
-
-        out = check_filenames(*args, **kwargs)
-        content = None
-        if isinstance(out, dict):
-            # particular case of content passing
-            filename, content =  list(out.items())[0]
-        else:
-            filename = out
-
-        filename = pathclean(filename)
-
-        # kwargs only
-        protocol = kwargs.pop('protocol', None)
-        sortbydate = kwargs.pop('sortbydate', True)
-
-        if filename is None and protocol is None:
-            raise ValueError('read method require a parameter `filename` '
-                             'or at least a protocol such as `scp`, `omnic`, ... !')
-
-        if filename is not None and protocol is None:
-
-            # try to estimate the protocol from the file name extension
-            extension = filename.suffix
-            if extension:
-                protocol = extension.lower()
-
-        if protocol is None:
-            # probably, it cannot be determined from the extension
-            # (case of Bruker NMR file for instance or when a content is passed without a filename or protocol
-            # information )
-            if content is None:
-                # TODO: try bruker NMR reading
-                raise NotImplementedError('Needs to be implemented soon')
-            else:
-                # try Omnic files by default
-                protocol = '.spg'
-
-        if protocol.lower() == '.scp':
-            # default reader
-            return cls.load(filename, content=content, **kwargs)
-
-
-        # find the adequate reader
-        _reader = getattr(cls, 'read_{}'.format(protocol[1:]))
-        kwargs['sortbydate'] = sortbydate
-        return _reader(out , **kwargs)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Generic write function
@@ -592,13 +458,6 @@ class NDIO(HasTraits):
             raise AttributeError(f'The specified writter for protocol `{protocol}` was not found!')
 
 
-# make some methods accessible from the main scp API
-# while
-# ------------------------------------------------------------------------------
-
-load = NDIO.load
-read = NDIO.read
-write = NDIO.write
 
 # ==============================================================================
 

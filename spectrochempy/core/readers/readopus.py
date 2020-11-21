@@ -20,7 +20,7 @@ from brukeropusreader.opus_parser import parse_data, parse_meta
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.readers.importer import docstrings, _Importer
+from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
 
 
 # ======================================================================================================================
@@ -38,9 +38,6 @@ def read_opus(*args, **kwargs):
     -----------
     %(read_method.parameters.no_origin|csv_delimiter)s
 
-    Other Parameters
-    -----------------
-    %(read_method.other_parameters)s
 
     Returns
     --------
@@ -119,8 +116,7 @@ def read_opus(*args, **kwargs):
 
     """
 
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
+    kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
     kwargs['protocol'] = ['.opus']
     importer = _Importer()
     return importer(*args, **kwargs)
@@ -131,6 +127,7 @@ def read_opus(*args, **kwargs):
 # ======================================================================================================================
 
 # ......................................................................................................................
+@importermethod
 def _read_opus(*args, **kwargs):
     # read a 1D opus file
 
@@ -194,11 +191,6 @@ def _read_data(fid):
     meta_data = parse_meta(data)
     opus_data = parse_data(data, meta_data)
     return opus_data
-
-
-# Register the readers
-# ----------------------------------------------------------------------------------------------------------------------
-_Importer._read_opus = staticmethod(_read_opus)
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':

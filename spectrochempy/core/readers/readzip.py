@@ -58,8 +58,7 @@ def read_zip(*args, **kwargs):
 
 
     """
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['Compressed files (*.zip)']
+    kwargs['filetypes'] = ['Compressed files (*.zip)']
     # TODO: allows other type of compressed files
     kwargs['protocol'] = ['.zip']
     importer = _Importer()

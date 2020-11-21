@@ -91,8 +91,7 @@ def read_csv(*args, **kwargs):
 
 
     """
-    if 'filetypes' not in kwargs.keys():
-        kwargs['filetypes'] = ['CSV files (*.csv)']
+    kwargs['filetypes'] = ['CSV files (*.csv)']
     kwargs['protocol'] = ['.csv']
     importer = _Importer()
     return importer(*args, **kwargs)
