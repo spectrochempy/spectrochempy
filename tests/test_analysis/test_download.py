@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from spectrochempy.core.readers.upload import download_IRIS
+from spectrochempy.core.readers.download import download_IRIS
 from spectrochempy.core.analysis.pca import PCA
 from spectrochempy.core import show
 from spectrochempy.core import info_

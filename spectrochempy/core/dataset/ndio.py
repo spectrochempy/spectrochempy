@@ -13,7 +13,6 @@ methods for a |NDDataset| are defined.
 """
 
 __all__ = ['NDIO']
-# __dataset_methods__ = ['write', 'load']
 
 from os import close as osclose, remove as osremove
 import io

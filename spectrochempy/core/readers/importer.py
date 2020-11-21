@@ -312,11 +312,18 @@ def _read_(*args, **kwargs):
         # probably an Topspin NMR file
         return dataset.read_topspin(filename, **kwargs)
     else:
-        # lets try scp format
+        # try scp format
         try:
-            # scp?
             return dataset.load(filename, **kwargs)
         except:
+            # lets try some common format
+            for key in ['omnic', 'opus', 'topspin', 'matlab', 'jdx']:
+                try:
+                    _read = getattr(dataset, f"read_{key}")
+                    f = f'{filename}.{key}'
+                    return _read(f, **kwargs)
+                except:
+                    pass
             raise NotImplementedError
 
 # ......................................................................................................................

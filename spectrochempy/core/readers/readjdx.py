@@ -57,7 +57,7 @@ def read_jdx(*args, **kwargs):
 
     """
     kwargs['filetypes'] = ['JCAMP-DX files (*.jdx, *.dx)']
-    kwargs['protocol'] = ['.jdx', '.dx']
+    kwargs['protocol'] = ['jcamp', '.jdx', '.dx']
     importer = _Importer()
     return importer(*args, **kwargs)
 

@@ -201,6 +201,7 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.name = name
     dataset.description = ('Dataset from .csv file: {}\n'.format(desc))
     dataset.history = str(datetime.now()) + ':read from omnic exported csv file \n'
+    dataset.origin = 'omnic'
 
     # Set the NDDataset date
     dataset._date = datetime.now()
@@ -247,6 +248,7 @@ def _add_tga_info(dataset, **kwargs):
     dataset.units = 'weight_percent'
     dataset.x.title = 'Time-on-stream'
     dataset.title = 'Mass change'
+    dataset.origin = 'tga'
 
     return dataset
 

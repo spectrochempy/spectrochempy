@@ -51,7 +51,7 @@ def read_matlab(*args, **kwargs):
 
     """
     kwargs['filetypes'] = ['MATLAB files (*.mat, *.dso)']
-    kwargs['protocol'] = ['.mat', '.dso']
+    kwargs['protocol'] = ['.matlab', '.mat', '.dso']
     importer = _Importer()
     return importer(*args, **kwargs)
 

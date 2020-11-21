@@ -152,7 +152,7 @@ def read_omnic(*args, **kwargs):
     """
 
     kwargs['filetypes'] = ['OMNIC files (*.spa, *.spg)', 'OMNIC series (*.srs)']
-    kwargs['protocol'] = ['.spg', '.spa', '.srs' ]
+    kwargs['protocol'] = ['.omnic', '.spg', '.spa', '.srs' ]
     importer = _Importer()
     return importer(*args, **kwargs)
 
@@ -496,6 +496,14 @@ def _read_spg(*args, **kwargs):
     # debug_("end of reading")
 
     return dataset
+
+
+# ......................................................................................................................
+@importermethod
+def _read_omnic(*args, **kwargs):
+
+    return _Importer._read_spg(*args, **kwargs)
+
 
 # ......................................................................................................................
 @importermethod
