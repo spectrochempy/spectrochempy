@@ -392,8 +392,9 @@ nbsphinx_timeout = 180
 # Use this kernel instead of the one stored in the notebook metadata:
 nbsphinx_kernel_name = 'python3'
 
-# set a filename by default for notebook which have file dialogs
+# set a filename and default folder by default for notebook which have file dialogs
 os.environ['TUTORIAL_FILENAME'] = 'wodger.spg'
+os.environ['TUTORIAL_FOLDER'] = 'irdata/subdir'
 
 # set a flag to deactivate TQDM
 os.environ['USE_TQDM'] = 'No'

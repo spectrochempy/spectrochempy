@@ -102,11 +102,11 @@ if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
 
     # OK, but if we are doing individual function testing in PyCharm
     # it is interesting to see the plots and the file dialogs (except if we set explicitely --nodisplay argument!
-    if len(sys.argv) > 1 \
-            and not any([arg.endswith(".py") for arg in sys.argv[1:]]) \
-            and '--nodisplay' not in sys.argv:
+    # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
+    if len(sys.argv) > 1 and any([arg.split('::')[0].endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
         # individual module testing
         NO_DISPLAY = False
+        NO_DIALOG = False
 
     if NO_DISPLAY:
         mpl.use('agg', force=True)
@@ -156,9 +156,6 @@ def set_backend():
 
 
 set_backend()
-
-# set a test file in environment
-# environ['TEST_FILE'] = join(general_preferences.datadir, 'irdata/nh4y-activation.spg')
 
 __all__ += ['set_backend']
 

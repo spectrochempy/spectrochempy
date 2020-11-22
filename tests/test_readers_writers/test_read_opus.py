@@ -34,7 +34,7 @@ def test_read_opus():
 
     # multiple files not merged
     B = NDDataset.read_opus('test.0000', 'test.0001', 'test.0002', directory=os.path.join('irdata', 'OPUS'))
-    assert isinstance(B, list)
+    assert isinstance(B, NDDataset)
     assert len(B) == 3
 
     # multiple files merged as the merge keyword is set to true

@@ -11,7 +11,7 @@ from spectrochempy.core.processors.align import align
 
 
 def test_read_write_jdx(IR_dataset_2D):
-    X = IR_dataset_2D.copy()
+    X = IR_dataset_2D[:10]
     X.write_jdx('nh4y-activation.jdx')
     Y = NDDataset.read_jdx('nh4y-activation.jdx')
     os.remove('nh4y-activation.jdx')

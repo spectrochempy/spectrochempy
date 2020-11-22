@@ -8,25 +8,14 @@
 __all__ = ['read_zip']
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard and other imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import io
-
-import numpy as np
-from numpy.lib.npyio import NpzFile
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Local imports
-# ----------------------------------------------------------------------------------------------------------------------
-
-from spectrochempy.core.readers.importer import _Importer
+from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
 
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
 
+@docstrings.dedent
 def read_zip(*args, **kwargs):
     """Open a zipped list of data files and set data/metadata in the
     current dataset
@@ -69,6 +58,7 @@ def read_zip(*args, **kwargs):
 # Private functions
 # ======================================================================================================================
 
+@importermethod
 def _read_zip(*args, **kwargs):
 
     # Below we assume that files to read are in a unique directory
@@ -122,12 +112,6 @@ def _read_zip(*args, **kwargs):
             datasets.append(read_(children.name, content=children.read_bytes(), **kwargs))
 
     return datasets
-
-
-# Register the readers
-# ----------------------------------------------------------------------------------------------------------------------
-_Importer._read_zip = staticmethod(_read_zip)
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':

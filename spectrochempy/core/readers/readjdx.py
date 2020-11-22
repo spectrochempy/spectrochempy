@@ -13,23 +13,21 @@ This module to extend NDDataset with the import methods.
 __all__ = ['read_jdx']
 __dataset_methods__ = __all__
 
-# ----------------------------------------------------------------------------------------------------------------------
-# standard imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 import io
 import re
 from datetime import datetime, timezone
 import numpy as np
 
-# ----------------------------------------------------------------------------------------------------------------------
-# local imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.readers.importer import _Importer
+from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
+
+
+# ======================================================================================================================
+# Public functions
+# ======================================================================================================================
 
 # ............................................................................
+@docstrings.dedent
 def read_jdx(*args, **kwargs):
     """
     Open Infrared JCAMP-DX files with extension ``.jdx`` or ``.dx``.
@@ -65,6 +63,7 @@ def read_jdx(*args, **kwargs):
 # private functions
 # ======================================================================================================================
 
+@importermethod
 def _read_jdx(*args, **kwargs):
 
     # read jdx file
@@ -278,10 +277,6 @@ def _readl(fid):
         keyword = ''
         text = line.strip()
     return keyword, text
-
-# Register the readers
-# ----------------------------------------------------------------------------------------------------------------------
-_Importer._read_jdx = staticmethod(_read_jdx)
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':

@@ -5,7 +5,7 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-"""This module extend NDDataset with some import methods.
+"""This module provides methods for reading data in a directory
 
 """
 __all__ = ['read_dir', 'read_carroucell']
@@ -21,13 +21,16 @@ import xlrd
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import get_filename, readdirname, \
-    check_filename_to_open
+from spectrochempy.utils import get_filename, readdirname, check_filename_to_open
 from spectrochempy.core import debug_, info_, print_
+from spectrochempy.core.readers.importer import docstrings, importermethod, _Importer
 
 
-# function for reading data in a directory
-# ------------------------------------------------------------------------------
+# ======================================================================================================================
+# Public functions
+# ======================================================================================================================
+
+@docstrings.dedent
 def read_dir(*args, **kwargs):
     """
     Open readable files in a directory and store data/metadata in a dataset or
@@ -45,20 +48,21 @@ def read_dir(*args, **kwargs):
     native format for spectrochempy : *.scp).
 
     Parameters
-    ----------
-    dataset : |NDDataset|
-        The dataset to store the data and metadata.
-        If None, a new |NDDataset| is created
-    directory : str, optional.
-        If not specified, opens a dialog box.
-    sortbydate : bool, optional,  default:True.
-        Sort spectra by acquisition date
-    recursive : bool, optional,  default=False.
-        Read also subfolders
+    -----------
+    %(read_method.parameters.no_origin|csv_delimiter)s
+
+    Other Parameters
+    -----------------
+    %(read_method.other_parameters)s
 
     Returns
     --------
-    nddataset : |NDDataset| or list of |NDDataset|
+    out : |NDDataset| or list of |NDDataset|
+
+    See Also
+    --------
+    read : Generic read method
+    read_omnic, read_spg, read_spa, read_srs, read_opus, read_topspin, read_csv, read_matlab, read_zip
 
     Examples
     --------
@@ -69,39 +73,24 @@ def read_dir(*args, **kwargs):
     >>> B = NDDataset.read_dir()
 
     """
+    kwargs['listdir'] = True
+    importer = _Importer()
+    return importer(*args, **kwargs)
 
-    debug_("starting reading in a folder")
-
-    kwargs['dictionary'] = False
-    _, directory = check_filename_to_open(*args, **kwargs)
+@importermethod
+def _read_dir(*args, **kwargs):
+    _, directory = args
     directory = readdirname(directory)
-
-    if not directory:
-        # probably cancel has been chosen in the open dialog
-        info_("No directory was selected.")
-        return
-
+    files = get_filename(directory, **kwargs)
     datasets = []
-
-    recursive = kwargs.get('recursive', False)
-    if recursive:
-        for i, root in enumerate(os.walk(directory)):
-            if i == 0:
-                pass  # debug_("reading root directory")
-            else:
-                pass  # debug_("reading subdirectory")
-            datasets += _read_single_dir(root[0], **kwargs)
-    else:
-        # debug_("reading root directory only")
-        datasets += _read_single_dir(directory, **kwargs)
-
-    if len(datasets) == 1:
-        # debug_("finished read_dir()")
-        return datasets[0]  # a single dataset is returned
-
-    # debug_("finished read_dir()")
-    return datasets  # several datasets returned
-
+    for key in files.keys():
+        if key:
+            importer = _Importer()
+            nd =  importer(files[key], **kwargs)
+            if not isinstance(nd, list):
+                nd = [nd]
+            datasets.extend(nd)
+    return datasets
 
 def _read_single_dir(directory, **kwargs):
     # lists all filenames of readable files in directory:

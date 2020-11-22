@@ -52,17 +52,18 @@ def test_read_omnic():
     nd = scp.read_omnic('wodger.spg', 'irdata/nh4y-activation.spg', merge=True)
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:57, x:5549))'
 
-    # Read in a directory (assume that only OPUS files are present in the directory
+def test_read_omnic_dir():
+    # Read in a directory (assume that only OMNIC files are present in the directory
     #        (else we must use the generic `read` function instead)
 
-    l = scp.read_omnic(directory='irdata/subdir/1-20')
+    nd = scp.read_omnic('irdata/subdir/1-20')
+    assert isinstance(nd, NDDataset)
+    assert len(nd) == 3
+
+    # we can use merge=False
+    l = scp.read_omnic('irdata/subdir/1-20', merge=False)
+    assert isinstance(l, list)
     assert len(l) == 3
-
-    # Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
-
-    nd = scp.read_omnic(directory='irdata/subdir', merge=True)
-    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:4, x:5549))'
-
 
 
 def test_read_omnic_contents():
@@ -101,5 +102,13 @@ def test_read_spa():
     nd = scp.read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
 
-    nd = scp.read_spa(directory='irdata/subdir', merge=True)
+    nd = scp.read_spa('irdata/subdir', merge=True)
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:4, x:5549))'
+
+    nd = scp.read_spa('irdata/subdir', merge=True, recursive=True)
+    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:8, x:5549))'
+
+    l = scp.read('irdata/subdir', merge=True, recursive=True) # not selective on extension
+    assert isinstance(l, list)
+    assert str(l[0]) == 'NDDataset: [float32] a.u. (shape: (y:8, x:5549))'
+    assert len(l) == 7 # we have matlab data in the six last datasets

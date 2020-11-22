@@ -47,20 +47,20 @@ def test_read():
     A8 = scp.read('nh4', directory='irdata')
     assert str(A8) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
-    # multiple files not merged
+    # multiple compatible 1D files automatically merged
     B = NDDataset.read('test.0000', 'test.0001', 'test.0002', directory=os.path.join('irdata', 'OPUS'))
-    assert isinstance(B, list)
+    assert str(B) == 'NDDataset: [float32] a.u. (shape: (y:3, x:2567))'
     assert len(B) == 3
 
-    # multiple files merged as the merge keyword is set to true
-    C = scp.read('test.0000', 'test.0001', 'test.0002', directory=os.path.join('irdata', 'OPUS'), merge=True)
-    assert C.shape == (3, 2567)
+    # multiple compatible 1D files not merged if the merge keyword is set to False
+    C = scp.read('test.0000', 'test.0001', 'test.0002', directory=os.path.join('irdata', 'OPUS'), merge=False)
+    assert isinstance(C, list)
 
-    # multiple files to merge : they are passed as a list)
+    # multiple 1D files to merge
     D = NDDataset.read(['test.0000', 'test.0001', 'test.0002'], directory=os.path.join('irdata', 'OPUS'))
     assert D.shape == (3, 2567)
 
-    # multiple files not merged : they are passed as a list but merge is set to false
+    # multiple 1D files not merged : they are passed as a list but merge is set to false
     E = scp.read(['test.0000', 'test.0001', 'test.0002'], directory=os.path.join('irdata', 'OPUS'), merge=False)
     assert isinstance(E, list)
     assert len(E) == 3
@@ -73,15 +73,17 @@ def test_read():
     assert F.name == p.name
     assert F.shape == (1, 2567)
 
-    # read multiple contents
+    # read multiple 1D contents and merge them
     l = [ datadir / 'irdata' / 'OPUS' / f'test.000{i}' for i in range(3)]
     G = NDDataset.read({p.name : p.read_bytes() for p in l})
+    assert G.shape == (3, 2567)
     assert len(G)==3
 
-    # read multiple contents and merge them
+    # read multiple  1D contents awithout merging
     l = [ datadir / 'irdata' / 'OPUS' / f'test.000{i}' for i in range(3)]
-    H = NDDataset.read({p.name : p.read_bytes() for p in l}, merge=True)
-    assert H.shape == (3, 2567)
+    H = NDDataset.read({p.name : p.read_bytes() for p in l}, merge=False)
+    isinstance(H, list)
+    assert len(H) == 3
 
     filename = datadir / 'wodger.spg'
     content = filename.read_bytes()
@@ -118,10 +120,10 @@ def test_read():
     assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
 
     # Try with several .spa content (should be stacked into a single nddataset)
-    nd = NDDataset.read({filename:content, filename2:content2}, merge=True)
+    nd = NDDataset.read({filename:content, filename2:content2})
     assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
 
-    nd = NDDataset.read(content, content2, merge=True)
+    nd = NDDataset.read(content, content2)
     assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
 
 
@@ -130,7 +132,7 @@ def test_generic_read():
 
     # filename + extension specified
     start = time.time()
-    ds = NDDataset.read('wodger.spg')
+    ds = scp.read('wodger.spg')
     t1 = (time.time() - start)
     assert ds.name == 'wodger'
 
@@ -141,12 +143,36 @@ def test_generic_read():
     assert path.stem == ds.name
     assert path.parent == ds.directory
 
-    # should be équivalent to load (but read is a more general function
+    # read should be équivalent to load (but read is a more general function,
     start = time.time()
-    dataset = NDDataset.read('wodger.scp')
+    dataset = NDDataset.load('wodger.scp')
     t2 =(time.time() - start)
 
     p =  (t2 - t1) * 100./ t1
-    assert p<0
+    assert p < 0
+
+def test_read_dir():
+
+    datadir = Path(prefs.datadir)
+
+    A = scp.read()    # should open a dialog (but to selects individual filename
+
+    # if we want the whole dir  - listdir must be used
+    # this is equivalent to read_dir with a dialog to select directories only
+    A = scp.read(listdir=True)
+    assert len(A) == 4  # assuming irdata/subdir folder was selected
+    A1 = scp.read_dir()
+    assert A == A1
+
+    # listdir is not necessary if a directory location is given as a single argument
+    B = scp.read(datadir/'irdata'/'subdir', listdir=True)
+    B1 = scp.read(datadir/'irdata'/'subdir')
+    assert B == B1
+
+    # if a directory is passed as a keyword, the behavior is different:
+    # a dialog for file selection occurs except if listdir is set to True
+    scp.read(directory=datadir/'irdata'/'subdir', listdir=True)   # -> file selection dialog
+    scp.read(directory=datadir/'irdata'/'subdir', listdir=True)   # -> directory selection dialog
+
 
 

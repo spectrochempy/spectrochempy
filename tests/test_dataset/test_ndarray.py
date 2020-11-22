@@ -134,7 +134,8 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d6.dims == ['y', 'x']
     assert d6.size == refarray.size
     assert_array_equal(d6.data, refarray)
-    assert d6.data is ndarraymask.data  # by default we do not copy
+    assert d6._data is ndarraymask._data  # by default we do not copy
+    # d6.data and ndarraym ask.data are however different due to the addition of un offset
     assert d6.is_masked
     assert_array_equal(d6.mask, refmask)
     assert d6.mask is ndarraymask.mask  # no copy by default

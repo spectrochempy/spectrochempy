@@ -121,7 +121,7 @@ def test_nddataset_init_using_dataset(nd1d, nd2d, ds1):
     # init from another dataset
 
     nd2 = NDDataset(nd1d, copy=False)
-    assert nd2.data is nd1d.data
+    assert nd2._data is nd1d._data
 
     # check copy flag
     nd3 = NDDataset(nd2d, copy=True)
@@ -1553,33 +1553,6 @@ def test_nddataset_init_pandas(series, dataframe):
     # assert isinstance(da.coords(0, 2), CoordSet)
     # assert isinstance(da.coords(0, 2)[0], Coord)
     # assert isinstance(da.coords(2), Coord)
-
-
-# TODO: write test for to_pandas conversion
-
-def test_to_dataframe():
-
-    dx = np.random.random((2, 10))
-    coord0 = np.arange(2)*1.5
-    coord1 = np.arange(10)*1.1
-
-    da = NDDataset(dx,
-                   coords=(coord0, coord1),
-                   title='absorbance',
-                   coordtitles=['wavelength', 'time-on-stream'],
-                   coordunits=['cm^-1', 's'],
-                   )
-
-    assert da.shape == (2,10)
-
-    df = da.to_dataframe()
-
-    assert df.shape == (2.10)
-
-
-
-
-
 
 
 # Xarray

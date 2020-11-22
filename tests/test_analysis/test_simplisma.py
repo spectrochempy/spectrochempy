@@ -13,7 +13,7 @@ from spectrochempy.core.analysis.simplisma import SIMPLISMA
 
 def test_SIMPLISMA():
     print('')
-    data = NDDataset.read_matlab(os.path.join('matlabdata', 'als2004dataset.MAT'))
+    data = NDDataset.read_matlab(os.path.join('matlabdata', 'als2004dataset.MAT'), merge=False)
     print('Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110)):')
     print('')
     for mat in data:

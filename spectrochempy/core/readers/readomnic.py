@@ -147,6 +147,7 @@ def read_omnic(*args, **kwargs):
     See Also
     --------
     read : Generic read method
+    read_dir : Read a set of data from a directory
     read_spg, read_spa, read_srs, read_opus, read_topspin, read_csv, read_matlab, read_zip
 
     """

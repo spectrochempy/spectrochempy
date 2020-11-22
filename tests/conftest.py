@@ -47,9 +47,10 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils.testing import RandomSeedContext
 from spectrochempy.core import general_preferences as prefs
 
+# set test file and folder in environment
 # set a test file in environment
-from os import environ, path
-environ['TEST_FILE'] = path.join(prefs.datadir, 'irdata/nh4y-activation.spg')
+os.environ['TEST_FILE'] = os.path.join(prefs.datadir, 'irdata/nh4y-activation.spg')
+os.environ['TEST_FOLDER'] =  os.path.join(prefs.datadir, 'irdata', 'subdir')
 
 # Handle command line argument for spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------

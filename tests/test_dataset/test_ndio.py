@@ -53,7 +53,7 @@ def test_ndio_generic(IR_dataset_1D, IR_dataset_2D):
     assert_array_equal(dl.data, ir.data)
 
     # this should fail as the file is not saved at the root of data_dir
-    with pytest.raises(SpectroChemPyException):
+    with pytest.raises(FileNotFoundError):
         dl = NDDataset.load('essai.scp')
     path.unlink()                         # remove this test file
 

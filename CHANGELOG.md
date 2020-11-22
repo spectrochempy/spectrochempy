@@ -1,8 +1,6 @@
-What\'s new
-===========
+# What\'s new
 
-Version 0.1.22
---------------
+## Version 0.1.22
 
 ### Bugs fixed
 
@@ -23,8 +21,7 @@ Version 0.1.22
 -   [\#144](https://api.github.com/repos/spectrochempy/spectrochempy/issues/144)
     : remove ipynb file after building docs
 
-Version 0.1.21
---------------
+## Version 0.1.21
 
 ### Bugs fixed
 
@@ -55,8 +52,7 @@ Version 0.1.21
 -   [\#123](https://api.github.com/repos/spectrochempy/spectrochempy/issues/123)
     : Revise the API reference generation
 
-Version 0.1.20
---------------
+## Version 0.1.20
 
 ### Bugs fixed
 
@@ -110,8 +106,7 @@ Version 0.1.20
 -   [\#49](https://api.github.com/repos/spectrochempy/spectrochempy/issues/49)
     : Remove nmrglue from spectrochempy/extern
 
-Version 0.1.19
---------------
+## Version 0.1.19
 
 ### Bugs fixed
 
@@ -150,8 +145,7 @@ Version 0.1.19
 -   [\#40](https://api.github.com/repos/spectrochempy/spectrochempy/issues/40)
     : Automate building and deployment of new releases
 
-Version 0.1.18
---------------
+## Version 0.1.18
 
 ### Bugs fixed
 
@@ -186,8 +180,7 @@ Version 0.1.18
 -   [\#51](https://api.github.com/repos/spectrochempy/spectrochempy/issues/51)
     : Add a linux quadprog version into our conda channel
 
-Version 0.1.17
---------------
+## Version 0.1.17
 
 ### Bugs fixed
 
@@ -244,12 +237,10 @@ Version 0.1.17
 -   [\#13](https://api.github.com/repos/spectrochempy/spectrochempy/issues/13)
     : Redmine website configuration
 
-Version 0.1.16
---------------
+## Version 0.1.16
 
 -   Initial version released as pypi and conda package
 
-Versions 0.1.0
---------------
+## Versions 0.1.0
 
 -   initial Development version

@@ -50,7 +50,7 @@ def pattern(filetypes):
     for ft in filetypes:
         m = re.finditer(regex, ft)
         patterns.extend([match.group(0) for match in m])
-    return [_insensitive_case_glob(p) for p in patterns(filetypes)]
+    return [_insensitive_case_glob(p) for p in patterns]
 
 
 def pathclean(paths):
@@ -292,7 +292,9 @@ def check_filenames(*args, **kwargs):
         directory = pathclean(kwargs.get("directory", None))
         filenames = get_filename(directory=directory,
                                  dictionary=True,
-                                 filetypes=filetypes)
+                                 filetypes=filetypes,
+                                 listdir=kwargs.get('listdir', False),
+                                 recursive=kwargs.get('recursive', False))
     return filenames
 
 
@@ -334,6 +336,8 @@ def get_filename(*filenames, **kwargs):
     from spectrochempy.core import general_preferences as prefs
     from spectrochempy.api import NO_DISPLAY, NO_DIALOG
 
+    NODIAL = NO_DIALOG
+
     # allowed filetypes
     # -----------------
     # alias filetypes and filters as both can be used
@@ -344,13 +348,19 @@ def get_filename(*filenames, **kwargs):
     if len(filenames) == 1 and isinstance(filenames[0], (list, tuple)):
         filenames = filenames[0]
 
+    filenames = pathclean(list(filenames))
+
     directory = None
-    if len(filenames) == 1 and filenames[0].endswith('/'):
-        # this specify a directory not a filename
-        directory = pathclean(filenames[0])
-        filenames = None
-    else:
-        filenames = pathclean(list(filenames))
+    if len(filenames) == 1:
+        # check if it is a directory
+        f = readdirname(filenames[0])
+        if f and f.is_dir():
+            # this specify a directory not a filename
+            directory = f
+            filenames = None
+            NODIAL = True
+    #else:
+    #    filenames = pathclean(list(filenames))
 
     # directory
     # ---------
@@ -408,25 +418,42 @@ def get_filename(*filenames, **kwargs):
 
         if not listdir:
             # we open a dialogue to select one or several files manually
-            if not (NO_DISPLAY or NO_DIALOG):
+            if not (NO_DISPLAY or NODIAL):
 
                 filenames = opendialog(single=False,
                                        directory=directory,
-                                       caption='select files',
                                        filters=filetypes)
+                if not filenames:
+                    # cancel
+                    return None
+
             elif environ.get('TEST_FILE', None) is not None:
                 # happen for testing
                 filenames = [pathclean(environ.get('TEST_FILE'))]
 
         else:
             # automatic reading of the whole directory
+            if not (NO_DISPLAY or NODIAL):
+                directory = opendialog(
+                                directory=directory,
+                                filters='directory')
+                if not directory:
+                    # cancel
+                    return None
+
+            elif not directory:
+                directory = readdirname(environ.get('TEST_FOLDER'))
+
             filenames = []
+
             for pat in pattern(filetypes):
+                if kwargs.get('recursive', False):
+                    pat = f'**/{pat}'
                 filenames.extend(list(directory.glob(pat)))
             filenames = pathclean(filenames)
 
         if not filenames:
-            # the dialog has been cancelled or return nothing
+            # problem with reading?
             return None
 
     # now we have either a list of the selected files
@@ -449,6 +476,8 @@ def get_filename(*filenames, **kwargs):
         # make and return a dictionary
         filenames_dict = {}
         for filename in filenames:
+            if filename.is_dir():
+                continue
             extension = filename.suffix.lower()
             if extension[1:].isdigit():
                 # probably an opus file
@@ -477,7 +506,7 @@ def readdirname(dirname):
     """
 
     from spectrochempy.core import general_preferences as prefs
-    from spectrochempy.api import NO_DISPLAY
+    from spectrochempy.api import NO_DISPLAY, NO_DIALOG
 
     data_dir = pathclean(prefs.datadir)
     working_dir = Path.cwd()
@@ -504,7 +533,7 @@ def readdirname(dirname):
     else:
         # open a file dialog
         dirname = data_dir
-        if not NO_DISPLAY:  # this is for allowing test to continue in the background
+        if not NO_DISPLAY and not NO_DIALOG:  # this is for allowing test to continue in the background
             dirname = opendialog(single=False,
                                  directory=working_dir,
                                  caption='Select directory',

@@ -35,9 +35,11 @@ def test_get_filename():
 
     # directory specified by a keyword as well as the filename
     f = get_filename("nh4.scp", directory="irdata")
+    assert f == {'.scp': [Path('/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/nh4.scp')]}
 
     # directory specified in the filename as a subpath of the data directory
     f = get_filename("irdata/nh4.scp")
+    assert f == {'.scp': [Path('/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/nh4.scp')]}
 
     # no directory specified (filename must be in the working or the default  data directory
     f = get_filename("wodger.spg")

@@ -1117,17 +1117,17 @@ class NDArray(HasTraits):
         else:
             return len([x for x in self._data.shape if x > 1])
 
-    @property
-    def real(self):
-        return self
-
-    @property
-    def imag(self):
-        return None
-
-    @property
-    def has_complex_dims(self):
-        return False
+    # @property
+    # def real(self):
+    #     return self
+    #
+    # @property
+    # def imag(self):
+    #     return None
+    #
+    # @property
+    # def has_complex_dims(self):
+    #     return False
 
     # ..................................................................................................................
     @property

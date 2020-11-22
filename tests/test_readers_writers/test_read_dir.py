@@ -7,20 +7,34 @@
 
 import os
 
-from spectrochempy.core.dataset.nddataset import NDDataset
+import spectrochempy as scp
 
 def test_read_dir():
 
-    A = NDDataset.read_dir(os.path.join('irdata', 'subdir'), recursive=True)
-    assert len(A) == 9
+    A = scp.read_dir('irdata/subdir')
+    assert A.shape == (4, 5549)
 
-    # in case we do not specify a directory:
-    #  - open a dialog but handle the case we clik cancel
-    NDDataset.read_dir()
-
-    C = NDDataset.read_dir(os.path.join('matlabdata'))
+    C = scp.NDDataset.read_dir('matlabdata')
     print('Matrixes in .mat files:')
     for x in C:
         print(C)
     assert len(C) == 6
     assert C[3].shape == (204, 96)
+
+    A = scp.read_dir(directory='irdata/subdir')  # should open a dialog
+    assert A.shape == (4, 5549)
+
+    B = scp.read_dir('irdata/subdir', recursive=True)
+    assert len(B) == 7
+    assert B[0].shape == (8, 5549)
+
+    B = scp.read_dir(directory='irdata/subdir', recursive=True)
+    assert len(B) == 7
+    assert B[0].shape == (8, 5549)
+
+    C = scp.read_dir()
+
+    return
+
+
+

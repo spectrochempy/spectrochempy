@@ -9,6 +9,9 @@
 
 """
 
+__all__ = ['read_matlab', 'read_mat']
+__dataset_methods__ = __all__
+
 import io
 from warnings import warn
 from datetime import datetime
@@ -16,14 +19,15 @@ from datetime import datetime
 import numpy as np
 import scipy.io as sio
 
-__all__ = ['read_matlab', 'read_mat']
-__dataset_methods__ = __all__
-
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.core import debug_
+from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
 
-from spectrochempy.core.readers.importer import _Importer
+# ======================================================================================================================
+# Public functions
+# ======================================================================================================================
 
+# ......................................................................................................................
+@docstrings.dedent
 def read_matlab(*args, **kwargs):
     """
     Open a matlab file with extension ``.mat`` and returns its content as a list
@@ -55,7 +59,14 @@ def read_matlab(*args, **kwargs):
     importer = _Importer()
     return importer(*args, **kwargs)
 
+# ......................................................................................................................
+read_mat = read_matlab
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Private methods
+# ----------------------------------------------------------------------------------------------------------------------
+
+@importermethod
 def _read_mat(*args, **kwargs):
 
     _ , filename = args
@@ -103,7 +114,7 @@ def _read_mat(*args, **kwargs):
 
     return datasets
 
-
+@importermethod
 def _read_dso(dataset, name, data):
 
     name_mat = data['name'][0][0]
@@ -207,15 +218,6 @@ def _read_dso(dataset, name, data):
 
         dataset.history = (str(datetime.now()) + ': Imported by spectrochempy ')
     return dataset
-
-
-# Register the readers
-# ----------------------------------------------------------------------------------------------------------------------
-_Importer._read_mat = staticmethod(_read_mat)
-
-# create alias
-# ----------------------------------------------------------------------------------------------------------------------
-read_mat = read_matlab
 
 
 # ----------------------------------------------------------------------------------------------------------------------

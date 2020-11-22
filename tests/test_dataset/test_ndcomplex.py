@@ -76,7 +76,7 @@ def test_ndcomplex_init_complex_with_copy_of_ndarray():
     d = np.ones((2, 2)) * np.exp(.1j)
     d1 = NDComplexArray(d)
     d2 = NDComplexArray(d1)
-    assert d1.data is d2.data
+    assert d1._data is d2._data
     assert np.all(d1.data == d2.data)
     assert d2.has_complex_dims
     assert not d2.is_quaternion

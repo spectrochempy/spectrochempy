@@ -19,12 +19,9 @@ from datetime import datetime
 
 import numpy as np
 
-# ----------------------------------------------------------------------------------------------------------------------
-# Local imports
-# ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import general_preferences as prefs
-from spectrochempy.core.readers.importer import docstrings, _Importer
+from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
 
 
 try:
@@ -101,7 +98,7 @@ def read_csv(*args, **kwargs):
 # Private functions
 # ======================================================================================================================
 
-
+@importermethod
 def _read_csv(*args, **kwargs):
 
     # read csv file
@@ -251,17 +248,6 @@ def _add_tga_info(dataset, **kwargs):
     dataset.origin = 'tga'
 
     return dataset
-
-
-# Register the readers
-# ----------------------------------------------------------------------------------------------------------------------
-_Importer._read_csv = staticmethod(_read_csv)
-
-
-
-# make also classmethod
-# ----------------------------------------------------------------------------------------------------------------------
-# NDIO.read_csv = read_csv
 
 
 # ----------------------------------------------------------------------------------------------------------------------

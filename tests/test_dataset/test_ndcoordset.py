@@ -275,14 +275,6 @@ def test_coordset_sizes(coord0, coord1):
         coords = CoordSet([coord0, coord0[:7]], coord1)
 
 
-def test_coordset_to_index(coord0, coord1):
-    coordsa = CoordSet(coord0)
-    coordsa.to_index()
-
-    coordsb = CoordSet(coord0, coord1)
-    coordsb.to_index()
-
-
 def test_coordset_update(coord0, coord1):
     coords = CoordSet(coord0, coord1)
 

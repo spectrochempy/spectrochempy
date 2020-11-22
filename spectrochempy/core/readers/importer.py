@@ -46,7 +46,8 @@ class _Importer(HasTraits):
 
         if 'merge' not in kwargs.keys():
             # if merge is not specified, but the args are provided as a single list, then will are supposed to merge
-            # the datasets. If merge is specified then it has priority
+            # the datasets. If merge is specified then it has priority.
+            # This is not usefull for the 1D datasets, as if they are compatible they are merged automatically
             if args and len(args)==1 and isinstance(args[0], (list,tuple)):
                 kwargs['merge'] = True
 
@@ -58,10 +59,7 @@ class _Importer(HasTraits):
 
         for key in self.files.keys():
 
-            if key != 'frombytes':
-                # here files are read from the disk using filenames
-                self._switch_protocol(key, self.files, **kwargs)
-            else:
+            if key == 'frombytes':
                 # here we need to read contents
                 for filename, content in self.files[key].items():
                     _, files_ = check_filename_to_open(filename)
@@ -69,25 +67,17 @@ class _Importer(HasTraits):
                     key_ = list(files_.keys())[0]
                     self._switch_protocol(key_, files_, **kwargs)
 
+                self.datasets = self._do_merge(self.datasets, **kwargs)
+
+            else:
+                # here files are read from the disk using filenames
+                self._switch_protocol(key, self.files, **kwargs)
+
         if len(self.datasets) == 1:
             return self.datasets[0]  # a single dataset is returned
-
-        # several datasets returned (only if several files have been passed) and the `merge` keyword argument is False
-        merged = kwargs.get('merge', False)
-        if not merged:
-            return self.datasets
         else:
-            # Try to stack the dataset into a single one
-            try:
-                dataset = self.objtype.stack(self.datasets)
-            except DimensionsCompatibilityError as e:
-                error_(str(e))
-                return
+            return self.datasets
 
-            if kwargs.pop("sortbydate", True):
-                dataset.sort(dim='y', inplace=True)
-            dataset.history = str(datetime.now()) + ':sorted by date'
-            return dataset
 
     # ..................................................................................................................
     def _switch_protocol(self, key, files, **kwargs):
@@ -98,25 +88,60 @@ class _Importer(HasTraits):
                 protocol = [protocol]
             if key and key not in protocol:
                 return
-
+        datasets = []
         for filename in files[key]:
             read_ = getattr(self, f"_read_{key[1:]}")
             try:
                 res = read_(self.objtype(), filename, **kwargs)
                 if not isinstance(res, list):
-                    self.datasets.append(res)
+                    datasets.append(res)
                 else:
-                    self.datasets.extend(res)
+                    datasets.extend(res)
+
             except NotImplementedError as e:
                 raise e
+
             except IOError as e:
                 if 'is not an Absorbance spectrum' in str(e):
                     # we do not read this filename
                     warn(str(e))
                     continue
-            except Exception as e:
-                # try another format!
-                self.datasets = self.objtype.read(self.datasets, files, protocol=key, **kwargs)
+
+        datasets = self._do_merge(datasets, **kwargs)
+
+        self.datasets.extend(datasets)
+            # except Exception as e:
+            #     # try another format!
+            #     self.datasets = self.objtype.read(self.datasets, files, protocol=key, **kwargs)
+
+    def _do_merge(self, datasets, **kwargs):
+
+        # several datasets returned (only if several files have been passed) and the `merge` keyword argument is False
+        merged = kwargs.get('merge', False)
+        shapes = {nd.shape for nd in datasets}
+        if len(datasets) > 1 and len(shapes) == 1:
+            # homogeneous set of files
+            dim0 = shapes.pop()[0]
+            if dim0 == 1:
+                merged = kwargs.get('merge', True)  # priority to the keyword setting
+        else:
+            merged = kwargs.get('merge', False)
+            # TODO: may be create a panel, when possible?
+
+        if len(datasets) > 1 and merged:
+            # Try to stack the dataset into a single one
+            try:
+                dataset = self.objtype.stack(datasets)
+                if kwargs.pop("sortbydate", True):
+                    dataset.sort(dim='y', inplace=True)
+                    dataset.history = str(datetime.now()) + ':sorted by date'
+                datasets = [dataset]
+
+            except DimensionsCompatibilityError as e:
+                warn(str(e))
+                # return only the list
+
+        return datasets
 
 # ......................................................................................................................
 def importermethod(func):
@@ -129,7 +154,7 @@ def importermethod(func):
 # Generic Read function
 # ----------------------------------------------------------------------------------------------------------------------
 
-@docstrings.get_sections(base='read_method')
+@docstrings.get_sections(base='read_method', sections=['Parameters', 'Other Parameters'])
 @docstrings.dedent
 def read(*args, **kwargs):
     """
@@ -157,9 +182,6 @@ def read(*args, **kwargs):
         Default value is False. If True, and several filenames have been provided as arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False)
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True)
     sortbydate : bool, optional
         Sort multiple spectra by acquisition date (default=True)
     description: str, optional
@@ -175,6 +197,14 @@ def read(*args, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For exemples on how to use this feature, one can look in the ``tests/tests_readers`` directory
+
+    Other Parameters
+    ----------------
+    listdir : bool, optional
+        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current reading protocol (default=True)
+    recursive : bool, optional
+        Read also in subfolders. (default=False)
 
     Returns
     --------
@@ -305,13 +335,17 @@ def _read_(*args, **kwargs):
 
     dataset, filename = args
 
+    if not filename or filename.is_dir():
+        return _Importer._read_dir(*args, **kwargs)
+
     protocol = kwargs.get('protocol', None)
     if protocol and '.scp' in protocol:
         return dataset.load(filename, **kwargs)
-    elif filename.name in ('fid', 'ser', '1r', '2rr', '3rrr'):
+
+    elif filename and filename.name in ('fid', 'ser', '1r', '2rr', '3rrr'):
         # probably an Topspin NMR file
         return dataset.read_topspin(filename, **kwargs)
-    else:
+    elif filename:
         # try scp format
         try:
             return dataset.load(filename, **kwargs)
@@ -325,6 +359,10 @@ def _read_(*args, **kwargs):
                 except:
                     pass
             raise NotImplementedError
+
+
+
+
 
 # ......................................................................................................................
 docstrings.delete_params('read_method.parameters', 'origin', 'csv_delimiter')
