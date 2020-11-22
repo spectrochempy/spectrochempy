@@ -1157,7 +1157,7 @@ def test_nddataset_create_from_complex_data_with_units():
     nd2.units = 'm**-1'
     nd2.ito('cm^-1')
 
-
+@pytest.mark.skip()
 def test_nddataset_real_imag_quaternion():
     na = np.array(
             [[1. + 2.j, 2. + 0j, 1.3 + 2.j],
@@ -1192,6 +1192,8 @@ def test_nddataset_real_imag_quaternion():
              [0. + 4.2j, 0. + 3j],
              [5. + 4.2j, 2. + 3j]])
     ndj = NDDataset(nb, dtype=quaternion)
+
+    x = nd.roi
 
     assert nd.imag == ndj
 

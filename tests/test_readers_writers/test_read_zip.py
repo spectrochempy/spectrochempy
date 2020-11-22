@@ -30,5 +30,5 @@ def test_read_zip():
     # Test read_zip with several contents
     C = NDDataset.read_zip({'name1.zip':content2, 'name2.zip':content2}, origin='omnic', only=10, csv_delimiter=';',
                              merge=True)
-    assert C.shape == (20, 2843)
+    assert C.shape == (2, 10, 2843)
 

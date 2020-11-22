@@ -71,12 +71,14 @@ def test_read_opus():
     I = NDDataset.read_opus()
 
     # read in a directory (assume homogeneous type of data - else we must use the read function instead)
-    I = NDDataset.read_opus(directory=datadir / 'irdata' / 'OPUS')
-    assert len(I) == 4
+    I = NDDataset.read_opus(datadir / 'irdata' / 'OPUS')
+    assert I.shape == (4, 2567)
 
-    # again we can use merge to stack all 4 spectra
-    J = NDDataset.read_opus(directory=datadir / 'irdata' / 'OPUS', merge=True)
-    assert J.shape == (4, 2567)
+
+    # again we can use merge to avoid stacking of all 4 spectra
+    J = NDDataset.read_opus(datadir / 'irdata' / 'OPUS', merge=False)
+    assert isinstance(J, list)
+    assert len(J) == 4
 
     # single opus file using generic read function
     # if the protocol is given it is similar to the read_opus function
