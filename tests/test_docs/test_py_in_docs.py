@@ -30,7 +30,8 @@ def test_example(example):
                  'agir_setup_figure.py',
                  '1_nmr.py',
                  '1_nmr-Copy1.py',
-                 'fft.py', ]):
+                 'fft.py',
+                 'Import.py']):
         print(example, ' ---> test skipped - DO IT MANUALLY')
         return
 

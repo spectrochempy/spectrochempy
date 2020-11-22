@@ -65,7 +65,6 @@ def pytest_cmdline_preparse(config, args):
             if item.startswith("-" + k) or k in ['h', ]:
                 args.remove.append(item)
 
-
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------
 
