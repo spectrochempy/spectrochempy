@@ -6,7 +6,6 @@
 # ======================================================================================================================
 
 import warnings
-# from .print import pstr
 
 __all__ = ['SpectroChemPyWarning',
            'SpectroChemPyDeprecationWarning',

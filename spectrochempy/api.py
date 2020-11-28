@@ -23,7 +23,7 @@ from os.path import join
 import matplotlib as mpl
 from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
-from PyQt5 import QtWidgets
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Check the environment for plotting
@@ -137,9 +137,6 @@ if not IN_IPYTHON:
     from colorama import init as initcolor
 
     initcolor()
-
-# GUI application needed for dialogs
-GUI = QtWidgets.QApplication(sys.argv)
 
 def set_backend():
 

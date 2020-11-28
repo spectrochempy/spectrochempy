@@ -65,6 +65,9 @@ from spectrochempy import api
 
 __all__ = api.__all__
 
+# GUI application needed for dialogs
+from PyQt5 import QtWidgets
+GUI = QtWidgets.QApplication(sys.argv)
 
 # ==============================================================================
 if __name__ == '__main__':

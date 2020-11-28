@@ -19,7 +19,7 @@ import numpy as np
 # import sys
 import copy
 
-from . import is_sequence
+from .misc import is_sequence
 
 # constants
 # ----------------------------------------------------------------------------------------------------------------------

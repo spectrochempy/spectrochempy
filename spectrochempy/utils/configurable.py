@@ -8,6 +8,8 @@
 from traitlets.config.configurable import Configurable
 from traitlets import All, observe
 
+__all__ = ["MetaConfigurable"]
+
 
 class MetaConfigurable(Configurable):
 

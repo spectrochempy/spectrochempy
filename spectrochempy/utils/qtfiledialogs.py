@@ -1,128 +1,88 @@
-# standalone dialogs
+# -*- coding: utf-8 -*-
 
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
+
+# standalone dialogs
 
 __all__ = []
 
-def QFileDialog():
-    # delayed import
-    from PyQt5 import QtWidgets
-    return QtWidgets.QFileDialog
+from PyQt5 import QtWidgets
 
-QFileDialog = QFileDialog()
-
+QFileDialog = QtWidgets.QFileDialog
 
 def OpenExistingDirectory(parent=None,
                           caption='Select a folder',
                           directory=''):
 
-    if QFileDialog is None:
-        return
 
-    options = QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly
+    options = QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly | QFileDialog.DontUseNativeDialog
     directory = QFileDialog.getExistingDirectory(parent,
                                                  caption=caption,
                                                  directory=directory,
                                                  options=options)
     if directory:
-        from spectrochempy.utils.file import pathclean
-        return pathclean(directory)
+        return directory
 
 
 def OpenFileName(parent=None,
                  directory='',
                  caption='Select file',
-                 filters=["All Files (*)", "Text Files (*.txt)"]):
+                 filters=["All Files (*)"]):
 
-    if QFileDialog is None:
-        return
-
-    options = QFileDialog.Options()
-    options |= QFileDialog.AnyFile
-    # options |= QFileDialog.DontUseNativeDialog
+    options = QFileDialog.AnyFile | QFileDialog.DontUseNativeDialog
     filename, _ = QFileDialog.getOpenFileName(parent,
                                               caption=caption,
                                               directory=directory,
                                               filter=';;'.join(filters),
                                               options=options)
     if filename:
-        from spectrochempy.utils.file import pathclean
-        return pathclean(filename)
+        return filename
 
 
 def OpenMultipleFileNames(
         parent=None,
         directory='',
         caption='Select file(s)',
-        filters=["All Files (*)", "Text Files (*.txt)"]):
+        filters=["All Files (*)"]):
 
-    if QFileDialog is None:
-        return
-
-    options = QFileDialog.Options()
-    # options |= QFileDialog.DontUseNativeDialog
+    options = QFileDialog.DontUseNativeDialog
     files, _ = QFileDialog.getOpenFileNames(parent,
                                             caption=caption,
                                             directory=directory,
                                             filter=';;'.join(filters),
                                             options=options)
     if files:
-        from spectrochempy.utils.file import pathclean
-        return pathclean(files)
+        return files
 
 
-def SaveFileName(parent=None,
-                 filename='',
-                 caption='Select file',
-                 filters=["All Files (*)", "Text Files (*.txt)"]):
+def savedialog(  filename='',
+                 caption='Save as...',
+                 selectedfilter = '',
+                 filters=["All Files (*)"]):
 
-    if QFileDialog is None:
-        return
-
-    if not isinstance(filename, str):
-        # probably a Path
-        filename = filename.name
-
-    options = QFileDialog.Options()
-    # options |= QFileDialog.DontUseNativeDialog
-    filename, _ = QFileDialog.getSaveFileName(parent,
-                                              caption,
-                                              filename,
-                                              filters,
+    options = QFileDialog.DontUseNativeDialog
+    options |= QFileDialog.DontConfirmOverwrite  # bug : this seems to work only with DontUseNativeDialog on OSX.
+                                                 # TODO: Check on windows and Linux
+                                                 # second problems: if we confirm owerwrite here a new dialog is opened,
+                                                 # and thus the main one do not close on exit!
+    filename, _ = QFileDialog.getSaveFileName(parent = None,
+                                              caption=caption,
+                                              directory=str(filename),
+                                              initialFilter = selectedfilter,
+                                              filter=';;'.join(filters),
                                               options=options)
     if filename:
-        from spectrochempy.utils.file import pathclean
-        return pathclean(filename)
+        return filename
 
 
 def opendialog(single=True,
                directory='',
                caption='',
-               filters=["All Files (*)", "Text Files (*.txt)"]
+               filters=["All Files (*)"]
                ):
-    """
-
-    Parameters
-    ----------
-    single : Bool, optional, default=True
-        Open single or multiple files
-    directory : str, optional
-        Folder where to start selection of files or folder
-    caption : str, optional
-        Caption for the dialog window, optional
-    filters : str or list of str, optional, default=["All Files (*)", "Text Files (*.txt)"]
-        Type of files to select. if filters='directory', then the dialog is to select
-        an existing directory
-
-    Returns
-    -------
-    filename : str
-        Filename or folder name
-
-    """
-    # gui = QtGui.QApplication(sys.argv)
-
-    if QFileDialog is None:
-        return
 
     if filters == 'directory':
         if not caption:
@@ -137,9 +97,11 @@ def opendialog(single=True,
             caption = 'Select file(s)'
         f = OpenMultipleFileNames(caption=caption, directory=str(directory), filters=filters)
 
-    return f
+    from spectrochempy.utils.file import pathclean
+    return pathclean(f)
 
 
 # ======================================================================================================================
 if __name__ == '__main__':
     pass
+

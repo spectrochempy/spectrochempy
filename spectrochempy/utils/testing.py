@@ -9,15 +9,13 @@
 __all__ = ["assert_equal",
            "assert_array_equal",
            "assert_array_almost_equal",
+           'assert_dataset_equal',
+           'assert_dataset_almost_equal',
            "assert_approx_equal",
            "assert_raises",
            "raises",
            "catch_warnings",
            "RandomSeedContext",
-           "EPSILON",
-           "is_sequence",
-           "preferences",
-           "datadir"
            ]
 
 import os
@@ -29,37 +27,139 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from matplotlib.testing.compare import calculate_rms, ImageComparisonFailure
-from numpy.testing import (assert_equal, assert_array_equal,
-                           assert_array_almost_equal, assert_approx_equal, assert_raises)
+from numpy.testing import (
+    assert_equal,
+    assert_array_equal,
+    assert_array_almost_equal,
+    assert_approx_equal,
+    assert_raises,
+    )
 
 
-#  we defer import in order to avoid importing all the spectroscopy namespace
-def preferences():
-    from spectrochempy.core import app
-    return app
+# ======================================================================================================================
+# NDDataset comparison
+# ======================================================================================================================
+
+def _compare_datasets(this, other, approx=False, decimal=6):
+
+    from spectrochempy.core.dataset.ndarray import NDArray
+    from spectrochempy.units import ur, Quantity
+
+    eq = True
+
+    if not isinstance(other, NDArray):
+        # try to make some assumption to make useful comparison.
+        if isinstance(other, Quantity):
+            otherdata = other.magnitude
+            otherunits = other.units
+        elif isinstance(other, (float, int, np.ndarray)):
+            otherdata = other
+            otherunits = False
+        else:
+            return f'{this} and {other} objects are too different to be compared.'
+
+        if not this.has_units and not otherunits:
+            eq = np.all(this._data == otherdata)
+        elif this.has_units and otherunits:
+            eq = np.all(this._data * this._units == otherdata * otherunits)
+        else:
+            return f'units of {this} and {other} objects does not match'
+        return eq
+
+    attrs = this.__dir__()
+    for attr in ('filename', 'plotmeta', 'name', 'description', 'history', 'date', 'modified', 'modeldata',
+                 'origin', 'roi', 'offset', 'name'):
+        # these attibutes are not used for comparison (comparison based on data and units!)
+        if attr in attrs:
+            if attr in attrs:
+                attrs.remove(attr)
+
+    # if 'title' in attrs:
+    #    attrs.remove('title')  #TODO: should we use title for comparison?
+
+    for attr in attrs:
+        if attr != 'units':
+            sattr = getattr(this, f'_{attr}')
+            if hasattr(other, f'_{attr}'):
+                oattr = getattr(other, f'_{attr}')
+                # to avoid deprecation warning issue for unequal array
+                if (sattr is None and oattr is not None):
+                    return f'{attr} of {this} is None.'
+                if (oattr is None and sattr is not None):
+                    return f'{attr} of {other} is None.'
+                if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
+                    # particular case of mask
+                    if attr != 'mask':
+                        return f'sizes of {attr} are different.'
+                    else:
+                        if other.mask != this.mask:
+                            return f'{this} and {other} object\'s masks are different.'
+                if attr in ['data', 'mask']:
+                    if approx:
+                        try:
+                            assert_array_almost_equal(sattr, oattr, decimal=decimal)
+                        except AssertionError as e:
+                            return f'{this} and {other} object\'s {attr} are too different.\n{e}'
+                    else:
+                        try:
+                            assert_array_equal(sattr, oattr)
+                        except AssertionError as e:
+                            return f'{this} and {other} object\'s {attr} are not equals..\n{e}'
+                elif attr in ['coords']:
+                    for item in zip(sattr, oattr):
+                        decimal = _significant_decimal(np.max(item[0].ptp().data))
+                        res = _compare_datasets(*item, approx=approx, decimal=decimal)
+                        if res is not None:
+                            return f'coords differs:\n{res}'
+                else:
+                    eq &= np.all(sattr == oattr)
+                if not eq:
+                    return f'{this} and {other} object\'s {attr} are different.'
+            else:
+                return False
+        else:
+            # unitlesss and dimensionless are supposed equals
+            sattr = this._units
+            if sattr is None:
+                sattr = ur.dimensionless
+            if hasattr(other, '_units'):
+                oattr = other._units
+                if oattr is None:
+                    oattr = ur.dimensionless
+
+                eq &= np.all(sattr == oattr)
+                if not eq:
+                    # debug_(f"attributes `{attr}` are not equals or one is missing: \n{sattr} != {oattr}")
+                    return False
+            else:
+                return False
+
+    return None
+
+def _significant_decimal(x):
+
+    for decimal in range(7):
+        if np.round(x/1.e4,decimal) > 0:
+            break
+    return decimal
+
+# ......................................................................................................................
+def assert_dataset_equal(nd1, nd2):
+
+    if _compare_datasets(nd1, nd2) is None:
+        return
+
+    raise AssertionError('NDDatasets are not equals')
 
 
-preferences = preferences()
+# ......................................................................................................................
+def assert_dataset_almost_equal(nd1, nd2, decimal=6):
 
+    decimal = _significant_decimal(np.max(nd1.ptp().data))
+    if _compare_datasets(nd1, nd2, approx=True, decimal=decimal) is None:
+        return
 
-def datadir():
-    from spectrochempy.core import app
-    return app.datadir.path
-
-
-datadir = datadir()
-
-figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
-os.makedirs(figures_dir, exist_ok=True)
-
-
-# utilities
-def is_sequence(arg):
-    return (not hasattr(arg, 'strip')) and hasattr(arg, "__iter__")
-
-
-EPSILON = epsilon = np.finfo(float).eps
-
+    raise AssertionError('NDDatasets are not almost equals')
 
 # ======================================================================================================================
 # RandomSeedContext
@@ -203,28 +303,11 @@ class catch_warnings(warnings.catch_warnings):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Testing examples and notebooks (Py version) in docs
-# ----------------------------------------------------------------------------------------------------------------------
-
-# .............................................................................
-def example_run(path):
-    import subprocess
-
-    pipe = None
-    try:
-        pipe = subprocess.Popen(
-            ["python", path, '--nodisplay'],
-            stdout=subprocess.PIPE)
-        (so, serr) = pipe.communicate()
-    except Exception:
-        pass
-
-    return pipe.returncode, so, serr
-
-
-# ----------------------------------------------------------------------------------------------------------------------
 # Matplotlib testing utilities
 # ----------------------------------------------------------------------------------------------------------------------
+
+figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
+os.makedirs(figures_dir, exist_ok=True)
 
 # .............................................................................
 def _compute_rms(x, y):
@@ -276,6 +359,7 @@ def compare_images(imgpath1, imgpath2,
                    min_similarity=None, ):
     sim, rms, _ = _image_compare(imgpath1, imgpath2, False)
 
+    EPSILON = np.finfo(float).eps
     CHECKSIM = (min_similarity is not None)
     SIM = min_similarity if CHECKSIM else 100. - EPSILON
     MESSSIM = "(similarity : {:.2f}%)".format(sim)
@@ -354,6 +438,7 @@ def image_comparison(reference=None,
         dot per inch of the generated figures
 
     """
+    from spectrochempy.utils import is_sequence
 
     if not reference:
         raise ValueError('no reference image provided. Stopped')
@@ -375,9 +460,9 @@ def image_comparison(reference=None,
                                         '{}.{}'.format(ref, extension))
                 if not os.path.exists(filename) and not force_creation:
                     raise ValueError(
-                        'One or more reference file do not exist.\n'
-                        'Creation can be forced from the generated '
-                        'figure, by setting force_creation flag to True')
+                            'One or more reference file do not exist.\n'
+                            'Creation can be forced from the generated '
+                            'figure, by setting force_creation flag to True')
 
             # get the nums of the already existing figures
             # that, obviously,should not considered in
@@ -424,8 +509,8 @@ def image_comparison(reference=None,
                     else:
                         # else we create a temporary file to save the figure
                         fd, tmpfile = tempfile.mkstemp(
-                            prefix='temp{}-'.format(fignum),
-                            suffix='.{}'.format(extension), text=True)
+                                prefix='temp{}-'.format(fignum),
+                                suffix='.{}'.format(extension), text=True)
                         os.close(fd)
 
                     fig.savefig(tmpfile, dpi=savedpi)
@@ -437,7 +522,7 @@ def image_comparison(reference=None,
                         sim, rms, REDO_ON_TYPEERROR = _image_compare(referfile,
                                                                      tmpfile,
                                                                      REDO_ON_TYPEERROR)
-
+                    EPSILON = epsilon = np.finfo(float).eps
                     CHECKSIM = (min_similarity is not None)
                     SIM = min_similarity if CHECKSIM else 100. - EPSILON
                     MESSSIM = "(similarity : {:.2f}%)".format(sim)
@@ -455,9 +540,9 @@ def image_comparison(reference=None,
                         message = "different images {}".format(MESSSIM)
 
                     message += "\n\t reference : {}".format(
-                        os.path.basename(referfile))
+                            os.path.basename(referfile))
                     message += "\n\t generated : {}\n".format(
-                        tmpfile)
+                            tmpfile)
 
                     if not message.startswith("identical"):
                         errors += message

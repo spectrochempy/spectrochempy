@@ -19,19 +19,21 @@ from numpy.ma.core import masked as MASKED, nomask as NOMASK, MaskedArray, Maske
 
 # import util files content
 # ----------------------------------------------------------------------------------------------------------------------
+from .arrays import *           # noqa: F403, F401
+from .configurable import *     # noqa: F403, F401
+from .docstring import *        # noqa: F403, F401
 from .exceptions import *       # noqa: F403, F401
 from .fake import *             # noqa: F403, F401
 from .file import *             # noqa: F403, F401
+from .jsonutils import *        # noqa: F403, F401
+from .meta import *             # noqa: F403, F401
 from .misc import *             # noqa: F403, F401
 from .print import *            # noqa: F403, F401
+# from .excel import *          # noqa: F403, F401
+from .packages import *         # noqa: F403, F401
+from .plots import *            # noqa: F403, F401
 from .system import *           # noqa: F403, F401
-# from .excel import *            # noqa: F403, F401
-from .plots import *  # noqa: F403, F401
-from .arrays import *           # noqa: F403, F401
-from .docstring import *        # noqa: F403, F401
-from .meta import *             # noqa: F403, F401
-from .configurable import MetaConfigurable  # noqa: F403, F401
-
+from .zip import *              # noqa: F403, F401
 
 #
 # # internal utilities
