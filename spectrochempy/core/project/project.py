@@ -12,6 +12,7 @@ import io
 import uuid
 import json
 import warnings
+import pathlib
 from copy import copy as cpy
 # from collections import OrderedDict
 
@@ -25,8 +26,8 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
 from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.utils import get_filename, savefilename, pathclean, \
-    check_filename_to_open, json_serialiser
+from spectrochempy.utils import get_filename,pathclean, json_serialiser
+from spectrochempy.utils.qtfiledialogs import savedialog
 
 
 cfg = config_manager
@@ -50,7 +51,7 @@ class Project(AbstractProject):
     _scripts = Dict(Instance(Script))
     _others = Dict()
     _meta = Instance(Meta)
-    _filename = Unicode()
+    _filename = Instance(pathlib.Path, allow_none=True)
 
     # ..................................................................................................................
     def __init__(self, *args, argnames=None, name=None, **meta):
@@ -650,7 +651,7 @@ class Project(AbstractProject):
         default_directory = kwargs.get("directory", general_preferences.project_directory)
 
         if not filename:
-            filename = savefilename(filename=filename,
+            filename = savedialog(filename=filename,
                          directory=default_directory,
                          filters="PROJECT files (*.pscp)")
 

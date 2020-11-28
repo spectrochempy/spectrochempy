@@ -199,7 +199,7 @@ class NDDataset(
     def __dir__(self):
         return ['data', 'dims', 'mask', 'units',
                 'meta', 'plotmeta', 'name', 'title', 'coords', 'description',
-                'history', 'date', 'modified', 'modeldata', 'origin'] + NDIO().__dir__()
+                'history', 'date', 'modified', 'modeldata', 'origin', 'roi', 'offset'] + NDIO().__dir__()
 
     # ..................................................................................................................
     def __getitem__(self, items):
@@ -341,7 +341,7 @@ class NDDataset(
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
         for attr in ('filename', 'plotmeta', 'name', 'description', 'history', 'date', 'modified', 'modeldata',
-                     'origin'):
+                     'origin', 'roi', 'offset'):
             # these attibutes are not used for comparison (comparison based on data and units!)
             attrs.remove(attr)
         return super().__eq__(other, attrs)

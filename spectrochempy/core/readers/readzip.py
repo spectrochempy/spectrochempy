@@ -9,7 +9,8 @@ __all__ = ['read_zip']
 __dataset_methods__ = __all__
 
 import io
-from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
+from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
+from spectrochempy.utils import pathclean
 
 # ======================================================================================================================
 # Public functions
@@ -50,8 +51,13 @@ def read_zip(*args, **kwargs):
     kwargs['filetypes'] = ['Compressed files (*.zip)']
     # TODO: allows other type of compressed files
     kwargs['protocol'] = ['.zip']
-    importer = _Importer()
-    return importer(*args, **kwargs)
+    importer = Importer()
+    nd = importer(*args, **kwargs)
+    if hasattr(nd, 'implements') and nd.implements('NDDataset'):
+        # we need to set a name
+        nd.name = pathclean(args[0]).stem
+        nd.filename = pathclean(args[0])
+    return nd
 
 
 # ======================================================================================================================

@@ -20,7 +20,7 @@ import numpy as np
 import scipy.io as sio
 
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
-from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
+from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 # ======================================================================================================================
 # Public functions
@@ -56,11 +56,13 @@ def read_matlab(*args, **kwargs):
     """
     kwargs['filetypes'] = ['MATLAB files (*.mat, *.dso)']
     kwargs['protocol'] = ['.matlab', '.mat', '.dso']
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
 # ......................................................................................................................
 read_mat = read_matlab
+read_mat.__doc__ = 'This method is an alias of `read_matlab` '
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Private methods

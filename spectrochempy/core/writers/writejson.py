@@ -21,9 +21,9 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity
-from spectrochempy.utils import savefilename, check_filename_to_save
+from spectrochempy.utils.qtfiledialogs import savedialog
 from spectrochempy.core import debug_    # info_, error_, warning_
-from spectrochempy.utils import json_serialiser
+from spectrochempy.utils import json_serialiser, check_filename_to_save
 
 __all__ = ['write_json']
 __dataset_methods__ = __all__
@@ -68,7 +68,7 @@ def write_json(*args, **kwargs):
     js = json.dumps(dic, default=json_serialiser)
 
     directory = kwargs.get('directory', None)
-    filename = savefilename(filename=filename,
+    filename = savedialog(filename=filename,
                             directory=directory,
                             filters="json (*.json) ;; All files (*)")
     if filename is None:

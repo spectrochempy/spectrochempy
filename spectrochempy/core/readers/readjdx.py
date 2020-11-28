@@ -10,7 +10,7 @@ This module to extend NDDataset with the import methods.
 
 """
 
-__all__ = ['read_jdx']
+__all__ = ['read_jcamp', 'read_jdx']
 __dataset_methods__ = __all__
 
 import io
@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 import numpy as np
 
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
+from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 
 # ======================================================================================================================
@@ -28,7 +28,7 @@ from spectrochempy.core.readers.importer import docstrings, _Importer, importerm
 
 # ............................................................................
 @docstrings.dedent
-def read_jdx(*args, **kwargs):
+def read_jcamp(*args, **kwargs):
     """
     Open Infrared JCAMP-DX files with extension ``.jdx`` or ``.dx``.
     Limited to AFFN encoding (see R. S. McDonald and Paul A. Wilks,
@@ -56,8 +56,13 @@ def read_jdx(*args, **kwargs):
     """
     kwargs['filetypes'] = ['JCAMP-DX files (*.jdx, *.dx)']
     kwargs['protocol'] = ['jcamp', '.jdx', '.dx']
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
+
+read_jdx = read_jcamp
+read_jdx.__doc__ = 'This method is an alias of `read_jcamp` '
+read_dx = read_jcamp
+read_dx.__doc__ = 'This method is an alias of `read_jcamp` '
 
 # ======================================================================================================================
 # private functions
@@ -159,7 +164,7 @@ def _read_jdx(*args, **kwargs):
                         allintensities += intensities
                 spectra = np.array([allintensities])  # convert allintensities into an array
                 spectra[spectra == '?'] = 'nan'  # deals with missing or out of range intensity values
-                spectra = spectra.astype(float)
+                spectra = spectra.astype(np.float32)
                 spectra *= yfactor
                 # add spectra in "data" matrix
                 if not data.size:
@@ -260,6 +265,12 @@ def _read_jdx(*args, **kwargs):
     dataset._modified = dataset.date
 
     return dataset
+
+# ......................................................................................................................
+@importermethod
+def _read_dx(*args, **kwargs):
+    return _read_jdx(*args, **kwargs)
+
 
 # ......................................................................................................................
 def _readl(fid):

@@ -14,18 +14,17 @@ __dataset_methods__ = __all__
 from warnings import warn
 from datetime import datetime
 
-from traitlets import HasTraits, List, Dict, Type, Unicode
+from traitlets import HasTraits, default, List, Dict, Type, Unicode
 
 from spectrochempy.utils import check_filename_to_open, docstrings, DimensionsCompatibilityError
-from spectrochempy.core import error_
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-class _Importer(HasTraits):
+class Importer(HasTraits):
     # Private _Importer class
 
-    datasets = List
     objtype = Type
+    datasets = List
     files = Dict
     default_key = Unicode
     protocol = Unicode
@@ -33,27 +32,21 @@ class _Importer(HasTraits):
     # ..................................................................................................................
     def __call__(self, *args, **kwargs):
 
-        from spectrochempy.core.dataset.nddataset import NDDataset
-
         self.datasets = []
-        self.default_key = kwargs.pop('default_key','.scp')
-
-        if 'objtype' not in kwargs.keys():
-            kwargs['objtype'] = NDDataset
-
-        if 'dictionary' not in kwargs.keys():
-            kwargs['dictionary'] = True
+        self.default_key = kwargs.pop('default_key', '.scp')
 
         if 'merge' not in kwargs.keys():
             # if merge is not specified, but the args are provided as a single list, then will are supposed to merge
             # the datasets. If merge is specified then it has priority.
             # This is not usefull for the 1D datasets, as if they are compatible they are merged automatically
-            if args and len(args)==1 and isinstance(args[0], (list,tuple)):
+            if args and len(args) == 1 and isinstance(args[0], (list, tuple)):
                 kwargs['merge'] = True
 
+
+        args, kwargs = self._setup_objtype(*args, **kwargs)
         res = check_filename_to_open(*args, **kwargs)
         if res:
-            self.objtype, self.files = res
+            self.files = res
         else:
             return None
 
@@ -62,7 +55,7 @@ class _Importer(HasTraits):
             if key == 'frombytes':
                 # here we need to read contents
                 for filename, content in self.files[key].items():
-                    _, files_ = check_filename_to_open(filename)
+                    files_ = check_filename_to_open(filename)
                     kwargs['content'] = content
                     key_ = list(files_.keys())[0]
                     self._switch_protocol(key_, files_, **kwargs)
@@ -78,6 +71,20 @@ class _Importer(HasTraits):
         else:
             return self.datasets
 
+    # ..................................................................................................................
+    def _setup_objtype(self, *args, **kwargs):
+        # check if the first argument is an instance of NDDataset, NDPanel, or Project
+
+        args = list(args)
+        if args and hasattr(args[0], 'implements') and args[0].implements() in ['NDDataset', 'NDPanel']:
+            # the first arg is an instance of NDDataset or NDPanel
+            self.objtype = type(args.pop(0))
+        else:
+            # by default returned objtype is NDDataset (import here to avoid circular import)
+            from spectrochempy import NDDataset
+            self.objtype = kwargs.pop('objtype', NDDataset)
+
+        return args, kwargs
 
     # ..................................................................................................................
     def _switch_protocol(self, key, files, **kwargs):
@@ -110,9 +117,7 @@ class _Importer(HasTraits):
         datasets = self._do_merge(datasets, **kwargs)
 
         self.datasets.extend(datasets)
-            # except Exception as e:
-            #     # try another format!
-            #     self.datasets = self.objtype.read(self.datasets, files, protocol=key, **kwargs)
+
 
     def _do_merge(self, datasets, **kwargs):
 
@@ -143,10 +148,11 @@ class _Importer(HasTraits):
 
         return datasets
 
+
 # ......................................................................................................................
 def importermethod(func):
     # Decorateur
-    setattr(_Importer, func.__name__, staticmethod(func))
+    setattr(Importer, func.__name__, staticmethod(func))
     return func
 
 
@@ -288,7 +294,7 @@ def read(*args, **kwargs):
     if protocol in ['omnic']:
         kwargs['filetypes'] = ['Nicolet OMNIC files (*.spa, *.spg)',
                                'Nicolet OMNIC series (*.srs)']
-        kwargs['protocol'] = ['.spg', '.spa', '.srs' ]
+        kwargs['protocol'] = ['.spg', '.spa', '.srs']
     elif protocol in ['opus']:
         kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
         kwargs['protocol'] = ['.opus']
@@ -316,15 +322,13 @@ def read(*args, **kwargs):
         kwargs['filetypes'] = ['All files (*.*)']
         warn('This protocol is unknown. Try to infer from the filename extension')
 
-
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
 
 # ......................................................................................................................
 @importermethod
 def _read_scp(*args, **kwargs):
-
     dataset, filename = args
     return dataset.load(filename, **kwargs)
 
@@ -332,11 +336,10 @@ def _read_scp(*args, **kwargs):
 # ......................................................................................................................
 @importermethod
 def _read_(*args, **kwargs):
-
     dataset, filename = args
 
     if not filename or filename.is_dir():
-        return _Importer._read_dir(*args, **kwargs)
+        return Importer._read_dir(*args, **kwargs)
 
     protocol = kwargs.get('protocol', None)
     if protocol and '.scp' in protocol:
@@ -359,9 +362,6 @@ def _read_(*args, **kwargs):
                 except:
                     pass
             raise NotImplementedError
-
-
-
 
 
 # ......................................................................................................................

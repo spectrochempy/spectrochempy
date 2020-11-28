@@ -5,7 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-"""This module provides methods for reading data in a directory
+"""
+This module provides methods for reading data in a directory
 
 """
 __all__ = ['read_dir', 'read_carroucell']
@@ -21,9 +22,9 @@ import xlrd
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils import get_filename, readdirname, check_filename_to_open
+from spectrochempy.utils import get_filename, readdirname
 from spectrochempy.core import debug_, info_, print_
-from spectrochempy.core.readers.importer import docstrings, importermethod, _Importer
+from spectrochempy.core.readers.importer import docstrings, importermethod, Importer
 
 
 # ======================================================================================================================
@@ -74,69 +75,11 @@ def read_dir(*args, **kwargs):
 
     """
     kwargs['listdir'] = True
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
-@importermethod
-def _read_dir(*args, **kwargs):
-    _, directory = args
-    directory = readdirname(directory)
-    files = get_filename(directory, **kwargs)
-    datasets = []
-    for key in files.keys():
-        if key:
-            importer = _Importer()
-            nd =  importer(files[key], **kwargs)
-            if not isinstance(nd, list):
-                nd = [nd]
-            datasets.extend(nd)
-    return datasets
-
-def _read_single_dir(directory, **kwargs):
-    # lists all filenames of readable files in directory:
-    filenames = [os.path.join(directory, f) for f in os.listdir(directory)
-                 if os.path.isfile(os.path.join(directory, f))]
-
-    datasets = []
-
-    if not filenames:
-        # debug_("empty directory")
-        return datasets
-
-    files = get_filename(filenames, directory=directory)
-
-    for extension in files.keys():
-        if extension == '.spg':
-            for filename in files[extension]:
-                datasets.append(NDDataset.read_omnic(filename, **kwargs))
-
-        elif extension == '.spa':
-            datasets.append(NDDataset.read_omnic(files[extension], **kwargs))
-
-        elif extension == '.csv':
-            datasets.append(NDDataset.read_csv(filename=files[extension], **kwargs))
-
-        elif extension == '.scp':
-            datasets.append(NDDataset.read(files[extension], protocol='.scp'))
-
-        elif extension == '.mat':
-            for filename in files[extension]:
-                matlist = NDDataset.read_matlab(filename)
-                for mat in matlist:
-                    datasets.append(mat)
-
-        elif extension == 'opus':
-            datasets.append(NDDataset.read_opus(files[extension], **kwargs))
-
-        # else the files are not (yet) readable
-        else:
-            pass
-    # TODO: extend to other implemented readers (NMR !)
-    return datasets
-
-
-# function for reading data in a directory
-# --------------------------------------
+# TODO: make an importer function, when a test directory will be provided.
+# ......................................................................................................................
 def read_carroucell(dataset=None, directory=None, **kwargs):
     """
     Open .spa files in a directory after a carroucell experiment.
@@ -165,11 +108,9 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
          If None all spectra are loaded
     discardbg : bool, optional, default=True
         If True : do not load background (sample #9)
-
     delta_clocks : int, optional, default=0
         Difference in seconds between the clocks used for spectra and temperature acquisition.
         Defined as t(thermocouple clock) - t(spectrometer clock).
-
 
     Returns
     --------
@@ -263,7 +204,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
             for i in range(9, sheet.nrows):
                 try:
                     time = datetime.datetime.strptime(sheet.cell(i, 0).value, '%d/%m/%y %H:%M:%S').replace(
-                        tzinfo=datetime.timezone.utc)
+                            tzinfo=datetime.timezone.utc)
                     if ti <= time <= tf:
                         t.append(time)
                         T.append(sheet.cell(i, 4).value)
@@ -294,6 +235,26 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     # debug_("finished read_dir()")
     # several datasets returned, sorted by sample #
     return sorted(datasets, key=lambda ds: int(ds.name.split('_')[0]))
+
+
+# ======================================================================================================================
+# Private functions
+# ======================================================================================================================
+
+@importermethod
+def _read_dir(*args, **kwargs):
+    _, directory = args
+    directory = readdirname(directory)
+    files = get_filename(directory, **kwargs)
+    datasets = []
+    for key in files.keys():
+        if key:
+            importer = Importer()
+            nd = importer(files[key], **kwargs)
+            if not isinstance(nd, list):
+                nd = [nd]
+            datasets.extend(nd)
+    return datasets
 
 
 if __name__ == '__main__':

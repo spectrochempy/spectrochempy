@@ -21,7 +21,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import general_preferences as prefs
-from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
+from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 
 try:
@@ -90,7 +90,7 @@ def read_csv(*args, **kwargs):
     """
     kwargs['filetypes'] = ['CSV files (*.csv)']
     kwargs['protocol'] = ['.csv']
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
 
@@ -161,6 +161,7 @@ def _read_csv(*args, **kwargs):
 
     # set the additional attributes
     name = filename.stem
+    dataset.filename = filename
     dataset.name = kwargs.get('name', name)
     dataset.title = kwargs.get('title', None)
     dataset.units = kwargs.get('units', None)

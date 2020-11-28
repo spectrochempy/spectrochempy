@@ -226,7 +226,7 @@ class NDArray(HasTraits):
 
     # ..................................................................................................................
     def __dir__(self):
-        return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name', 'origin']
+        return ['data', 'dims', 'mask', 'labels', 'units', 'meta', 'title', 'name', 'origin', 'roi', 'offset']
 
     # ..................................................................................................................
     def __hash__(self):
@@ -277,7 +277,12 @@ class NDArray(HasTraits):
                     if (oattr is None and sattr is not None):
                         return False
                     if hasattr(oattr, 'size') and hasattr(sattr, 'size') and oattr.size != sattr.size:
-                        return False
+                        # particular case of mask
+                        if attr != 'mask':
+                            return False
+                        else:
+                            if other.mask != self.mask:
+                                return False
                     eq &= np.all(sattr == oattr)
                     if not eq:
                         return False
@@ -1117,13 +1122,13 @@ class NDArray(HasTraits):
         else:
             return len([x for x in self._data.shape if x > 1])
 
-    # @property
-    # def real(self):
-    #     return self
-    #
-    # @property
-    # def imag(self):
-    #     return None
+    @property
+    def real(self):
+        return self
+
+    @property
+    def imag(self):
+        return None
     #
     # @property
     # def has_complex_dims(self):

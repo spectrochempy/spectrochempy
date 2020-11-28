@@ -30,7 +30,7 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity
 from spectrochempy.core.dataset.ndio import NDIO
-from spectrochempy.utils import get_filename, pathclean, check_filename_to_open, json_decoder
+from spectrochempy.utils import get_filename, json_decoder
 from spectrochempy.core import general_preferences as prefs
 
 

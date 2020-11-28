@@ -21,7 +21,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import docstrings, importermethod, _Importer
+from spectrochempy.core.readers.importer import docstrings, importermethod, Importer
 
 
 # ======================================================================================================================
@@ -154,7 +154,7 @@ def read_omnic(*args, **kwargs):
 
     kwargs['filetypes'] = ['OMNIC files (*.spa, *.spg)', 'OMNIC series (*.srs)']
     kwargs['protocol'] = ['.omnic', '.spg', '.spa', '.srs' ]
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
 # ......................................................................................................................
@@ -201,7 +201,7 @@ def read_spg(*args, **kwargs):
 
     kwargs['filetypes'] = ['OMNIC files (*.spg)']
     kwargs['protocol'] = ['.spg']
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
 
@@ -251,7 +251,7 @@ def read_spa(*args, **kwargs):
 
     kwargs['filetypes'] = ['OMNIC files (*.spa)']
     kwargs['protocol'] = ['.spa']
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
 
@@ -298,7 +298,7 @@ def read_srs(*args, **kwargs):
 
     kwargs['filetypes'] = ['OMNIC series (*.srs)']
     kwargs['protocol'] = ['.srs']
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
 
@@ -472,7 +472,7 @@ def _read_spg(*args, **kwargs):
     dataset.units = units[0]
     dataset.title = titles[0]
     dataset.name = filename.stem
-    dataset.filename = str(filename)
+    dataset.filename = filename
 
     # now add coordinates
     _x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3), title=xtitles[0], units=xunits[0])
@@ -503,7 +503,7 @@ def _read_spg(*args, **kwargs):
 @importermethod
 def _read_omnic(*args, **kwargs):
 
-    return _Importer._read_spg(*args, **kwargs)
+    return Importer._read_spg(*args, **kwargs)
 
 
 # ......................................................................................................................

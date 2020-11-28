@@ -18,21 +18,22 @@ from os import close as osclose, remove as osremove
 import io
 import datetime
 import json
-from pathlib import Path
+import pathlib
 
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.compat import asstr
 from numpy.lib.format import write_array
 from numpy.lib.npyio import zipfile_factory, NpzFile
-from traitlets import HasTraits, Unicode
+from traitlets import HasTraits, Instance
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils import SpectroChemPyException
-from spectrochempy.utils import pathclean, Meta, readdirname, check_filenames, check_filename_to_open
 from spectrochempy.units import Unit, Quantity
-from spectrochempy.core.readers.importer import _Importer
+from spectrochempy.utils import pathclean, Meta, readdirname, check_filenames, ScpFile, check_filename_to_save
+
+from spectrochempy.core import general_preferences as prefs
 
 # ==============================================================================
 # Class NDIO to handle I/O of datasets
@@ -46,27 +47,29 @@ class NDIO(HasTraits):
 
     """
 
-    _filename = Unicode()
+    _filename = Instance(pathlib.Path, allow_none=True)
 
     @property
     def filename(self):
         """
-        str - current filename for this dataset.
+        `Pathlib` object - current filename for this dataset.
 
         """
         if self._filename:
-            return pathclean(self._filename).name
+            return self._filename.name
         else:
             return None
 
     @filename.setter
     def filename(self, fname):
-        self._filename = fname
+        self._filename = pathclean(fname)
 
     @property
     def directory(self):
         """
-        `Pathlib` object - current directory for this dataset.
+        `Pathlib` object - current directory for this dataset
+
+        ReadOnly property
 
         """
         if self._filename:
@@ -82,12 +85,46 @@ class NDIO(HasTraits):
         return ['filename', ]
 
     # ------------------------------------------------------------------------------------------------------------------
-    # Generic save function
+    # Public methods
     # ------------------------------------------------------------------------------------------------------------------
 
-    def save(self, filename=None, **kwargs):
+    # ..................................................................................................................
+    def save(self):
         """
-        Save the current |NDDataset| (default extension : ``.scp`` ).
+        Save the current |NDDataset| in SpectroChemPy format (*.scp).
+
+        See Also
+        ---------
+        save_as : save current dataset with a different name and/or directory
+        write : export current dataset to different format
+
+        Examples
+        ---------
+
+        >>> mydataset.save()
+
+        """
+
+        filename = pathclean(self.filename)
+
+        if filename is None:
+            raise IOError('Filename is not set in the dataset. Use save_as or set a filename first.')
+
+        elif filename.suffix != '.scp' or not filename.exists():
+            # never saved
+            # in this case we will save with the defined name and directory
+            filename = pathclean(self.directory) / self.name
+            filename = filename.with_suffix('.scp')
+            return self.save_as(filename, caption='Save')
+
+        # was already saved previously with this name,
+        # in this case we do not display a dialog and overwrite the same file
+        return self._save(filename)
+
+    # ..................................................................................................................
+    def save_as(self, filename='', **kwargs):
+        """
+        Save the current |NDDataset| in SpectroChemPy format (*.scp)
 
         Parameters
         ----------
@@ -106,6 +143,7 @@ class NDIO(HasTraits):
 
         >>> mydataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
         >>> mydataset.save('mydataset.scp')
+        The dataset has been saved as 'mydataset.scp'
 
         Notes
         -----
@@ -113,30 +151,29 @@ class NDIO(HasTraits):
 
         See Also
         ---------
-        write
+        save : save current dataset
+        write : export current dataset to different format
 
         """
+        if filename:
+            # we have a filename
+            # by default it use the saved directory
+            filename = self.directory / filename
+            if not filename.suffix == '.scp':
+                filename = filename.with_suffix('.scp')
+        else:
+            filename = self.directory
 
-        filename = pathclean(filename)
-        same_dir = kwargs.pop('same_dir', False)
-        directory = kwargs.get('directory',
-                               self.directory if same_dir else Path.cwd())
+        kwargs['filetypes'] = ['SpectroChemPy files (*.scp)']
+        filename = check_filename_to_save(self, filename, save_as=True, **kwargs)
 
-        if not filename:
-            # the current file name or default filename (id)
-            filename = pathclean(self.filename)
-            if self.directory:
-                directory = pathclean(self.directory)
+        if filename:
+            self.filename = filename
+            return self._save(filename)
 
-        if not filename.suffix == '.scp':
-            filename = filename.with_suffix('.scp')
-
-        if directory:
-            filename = directory / filename
-
-        directory = readdirname(filename.parent)
-        if directory is not None:
-            filename = directory / filename.name
+    # ..................................................................................................................
+    def _save(self, filename):
+        # machinery to save the current dataset into native spectrochempy format
 
         # Stage data in a temporary file on disk, before writing to zip.
         import zipfile
@@ -184,11 +221,7 @@ class NDIO(HasTraits):
 
                     pars[level + key] = val.timestamp()
 
-                elif isinstance(val, np.dtype):
-
-                    pars[level + key] = str(val)
-
-                elif isinstance(val, Unit):
+                elif isinstance(val, (np.dtype, Unit, pathlib.Path)):
 
                     pars[level + key] = str(val)
 
@@ -225,17 +258,13 @@ class NDIO(HasTraits):
             f.write(json.dumps(pars))
 
         zipf.write(tmpfile, arcname='pars.json')
-
         osremove(tmpfile)
-
         zipf.close()
 
         return filename
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Generic load function
-    # ------------------------------------------------------------------------------------------------------------------
 
+    # ..................................................................................................................
     @classmethod
     def load(cls, filename, **kwargs):
         """
@@ -285,7 +314,7 @@ class NDIO(HasTraits):
 
         # get zip file
         try:
-            obj = NpzFile(fid, allow_pickle=True)
+            obj = ScpFile(fid)
         except FileNotFoundError:
             raise SpectroChemPyException(f"File {filename} doesn't exist!")
         except Exception as e:
@@ -305,7 +334,8 @@ class NDIO(HasTraits):
                 dim = els[1]
                 if dim not in coords.keys():
                     coords[dim] = Coord()
-                setattr(coords[dim], "_%s" % els[2], val)
+                base, ext = els[2].split('.npy')
+                setattr(coords[dim], "_%s" % base, val)
 
             if key.startswith('coordset_'):
                 if not coords:
@@ -324,9 +354,11 @@ class NDIO(HasTraits):
                 setattr(coords[dim][idx], "_%s" % els[4], val)
 
             elif key == "pars.json":
-                pars = json.loads(asstr(val))
+                pars = val #
+                #pars = json.loads(asstr(val))
             else:
-                setattr(new, "_%s" % key, val)
+                base, ext = key.split('.npy')
+                setattr(new, "_%s" % base, val)
 
         fid.close()
 
@@ -365,6 +397,8 @@ class NDIO(HasTraits):
                 setattr(clss, key, val)
             elif key in ['dtype']:
                 setattr(clss, "_%s" % key, np.dtype(val))
+            elif key in ['filename']:
+                setattr(clss, key, pathclean(val))
             else:
                 setattr(clss, "_%s" % key, val)
 
@@ -393,72 +427,15 @@ class NDIO(HasTraits):
                 setattributes(new, key, val)
 
         if filename:
-            new._filename = str(filename)
+            new._filename = pathclean(filename)
 
         if coords:
             new.set_coords(coords)
 
         return new
 
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Generic write function
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def write(self, *args, **kwargs):
-        """
-        Generic write function which actually delegate the work to an
-        writer defined by the parameter ``protocol``.
-
-        Parameters
-        ----------
-        filename : str
-            The path to the file to be read
-        protocol : str
-            The protocol used to write the
-            |NDDataset| in a file,
-            which will determine the exporter to use.
-        kwargs : optional keyword parameters
-            Any additional keyword to pass to the actual exporter
-
-        See Also
-        --------
-        save
-
-        """
-
-        filename = None
-        if args:
-            filename = args[0]
-        filename = kwargs.pop('filename', filename)
-
-        # kwargs only
-        protocol = kwargs.pop('protocol', None)
-        if kwargs.get('to_string', False):
-            # json by default if we output a string
-            protocol = 'json'
-
-        if not protocol:
-            # try to estimate the protocol from the file name extension
-            extension = filename.suffix
-            if len(extension) > 0:
-                protocol = extension[1:].lower()
-
-        if protocol == 'scp':
-            return self.save(filename)
-
-        # find the adequate reader
-        try:
-            # find the adequate reader
-            _writer = getattr(self, 'write_{}'.format(protocol))
-            return _writer(filename=filename, **kwargs)
-
-        except Exception as e:
-            raise AttributeError(f'The specified writter for protocol `{protocol}` was not found!')
-
-
-
-# ==============================================================================
-
+# ======================================================================================================================
 if __name__ == '__main__':
     pass
+
+# EOF

@@ -20,7 +20,7 @@ from brukeropusreader.opus_parser import parse_data, parse_meta
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.core.readers.importer import docstrings, _Importer, importermethod
+from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 
 # ======================================================================================================================
@@ -118,7 +118,7 @@ def read_opus(*args, **kwargs):
 
     kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
     kwargs['protocol'] = ['.opus']
-    importer = _Importer()
+    importer = Importer()
     return importer(*args, **kwargs)
 
 
@@ -161,13 +161,13 @@ def _read_opus(*args, **kwargs):
     acqtime = opus_data["AB Data Parameter"]["TIM"]
     GMT_offset_hour = float(acqtime.split('GMT')[1].split(')')[0])
     date_time = datetime.strptime(acqdate + '_' + acqtime.split()[0], '%d/%m/%Y_%H:%M:%S.%f')
-    UTC_date_time = date_time - timedelta(hours=GMT_offset_hour)
-    UTC_date_time = UTC_date_time.replace(tzinfo=timezone.utc)
-    timestamp = UTC_date_time.timestamp()
+    utc_dt = date_time - timedelta(hours=GMT_offset_hour)
+    utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+    timestamp = utc_dt.timestamp()
     yaxis = Coord([timestamp],
                   title='Acquisition timestamp (GMT)',
                   units='s',
-                  labels=([UTC_date_time], [name]))
+                  labels=([utc_dt], [name]))
 
     # set dataset's Coordset
     dataset.set_coords(y=yaxis, x=xaxis)
@@ -191,6 +191,7 @@ def _read_data(fid):
     meta_data = parse_meta(data)
     opus_data = parse_data(data, meta_data)
     return opus_data
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
