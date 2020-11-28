@@ -35,7 +35,7 @@ def make_samples(force_original=False):
             filename = basename + '.zip'
             sample['IR'] = NDDataset.read_zip(filename, only=10, origin='omnic', merge=True)
             # save
-            sample['IR'].save(basename + '.scp')
+            sample['IR'].save()
 
     for key, sample in _samples.items():
         basename = os.path.join(prefs.datadir, f'agirdata/{key}/TGA/tg')
@@ -51,7 +51,7 @@ def make_samples(force_original=False):
             # lets keep only data from something close to 0.
             s = sample['TGA'] = ss[-0.5:35.0]
             # save
-            s.save(basename + '.scp')
+            s.save()
 
     return _samples
 

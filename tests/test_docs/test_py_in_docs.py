@@ -5,18 +5,38 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Testing examples and notebooks (Py version) in docs
+# ----------------------------------------------------------------------------------------------------------------------
+
 import os
 from glob import glob
 
 import pytest
-
-from spectrochempy.utils.testing import example_run
 
 path = os.getcwd()
 if "/tests" in path:
     path = path[:path.find('/tests')]
 
 
+# ......................................................................................................................
+def example_run(path):
+    import subprocess
+
+    pipe = None
+    so=None
+    serr=None
+    try:
+        pipe = subprocess.Popen(
+                ["python", path, '--nodisplay'],
+                stdout=subprocess.PIPE)
+        (so, serr) = pipe.communicate()
+    except Exception:
+        pass
+
+    return pipe.returncode, so, serr
+
+# ......................................................................................................................
 @pytest.mark.parametrize('example', glob(os.path.join(path, 'docs', 'user', '**', '*.py'), recursive=True))
 def test_example(example):
     name = os.path.basename(example)
@@ -35,7 +55,6 @@ def test_example(example):
         print(example, ' ---> test skipped - DO IT MANUALLY')
         return
 
-    print("testing", example)
     if os.path.exists(example) and os.path.splitext(example)[-1] == '.py':
         e, message, err = example_run(example)
         print(e, message.decode('utf8'), err)

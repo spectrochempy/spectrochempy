@@ -38,13 +38,13 @@ def test_read():
     assert str(A5) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
     # native format
-    A6 = scp.read('irdata/nh4.scp')
+    A6 = scp.read('irdata/nh4y.scp')
     assert str(A6) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
-    A7 = scp.read('nh4', directory='irdata', protocol='.scp')
+    A7 = scp.read('nh4y', directory='irdata', protocol='.scp')
     assert str(A7) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
-    A8 = scp.read('nh4', directory='irdata')
+    A8 = scp.read('nh4y', directory='irdata')
     assert str(A8) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
     # multiple compatible 1D files automatically merged
@@ -133,7 +133,6 @@ def test_generic_read():
     # filename + extension specified
     start = time.time()
     ds = scp.read('wodger.spg')
-    t1 = (time.time() - start)
     assert ds.name == 'wodger'
 
     # save with no filename (should save wodger.scp)
@@ -146,10 +145,7 @@ def test_generic_read():
     # read should be équivalent to load (but read is a more general function,
     start = time.time()
     dataset = NDDataset.load('wodger.scp')
-    t2 =(time.time() - start)
-
-    p =  (t2 - t1) * 100./ t1
-    assert p < 0
+    assert dataset.name == 'wodger'
 
 def test_read_dir():
 

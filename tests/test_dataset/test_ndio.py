@@ -9,7 +9,6 @@
 
 """
 
-
 import pathlib
 
 import pytest
@@ -19,53 +18,56 @@ from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils.testing import assert_array_equal
 from spectrochempy.utils import pathclean, SpectroChemPyException
 
+irdatadir = pathclean(prefs.datadir) / "irdata"
+cwd = pathlib.Path.cwd()
+
 # Basic
 # ----------------------------------------------------------------------------------------------------------------------
-def test_ndio_generic(IR_dataset_1D, IR_dataset_2D):
+def test_ndio_generic(IR_dataset_1D):
 
     ir = IR_dataset_1D
-    assert ir.directory == pathclean(prefs.datadir) / "irdata"
+    assert ir.filename == 'nh4y-activation.spg'
+    assert ir.directory == irdatadir
 
-    # save in the self.directory
-    path = ir.save('essai')               # save essai.scp
-    assert ir.directory == pathclean(prefs.datadir) / "irdata" # should not change
-    assert path.name == "essai.scp"
-    assert path.parent == pathlib.Path.cwd()
-    assert path.suffix == ".scp"
+    # save with the default name (equivalent to save_as in this case)
+    # as this file doesn't yet exist a confirmation is opened
+    ir.save()
+    assert ir.filename == 'nh4y-activation.scp'
+    assert ir.directory == irdatadir
+
+    ir.save()  # as it has been already saved, we should not get dialogs
+    assert ir.filename == 'nh4y-activation.scp'
+
+    f = ir.save_as()  # now it opens a dialog and the name can be changed
+    assert ir.filename == f.name
+
+    # save in the self.directory with a new name without dialog
+    ir.save_as('essai')               # save essai.scp
+    assert ir.directory == cwd         # should not change
+    assert ir.filename == "essai.scp"
+    f.unlink()
+
+    # save in a specified directory
+    ir.save_as(irdatadir / 'essai')               # save essai.scp
+    assert ir.directory == irdatadir
+    assert ir.filename == "essai.scp"
 
     # try to load without extension specification (will first assume it is scp)
     dl = NDDataset.load('essai')
-    assert_array_equal(dl.data, ir.data)
-    assert dl.directory == pathlib.Path.cwd()
-
-    path.unlink()
-
-    # save in the same directory as original
-    path = ir.save('essai', same_dir=True)
-    assert path.parent == ir.directory
-
-    # try to load without extension specification (will first assume it is scp)
-    dl = NDDataset.load('irdata/essai')
+    assert dl.directory == cwd
     assert_array_equal(dl.data, ir.data)
 
-    # or with extension
-    dl = NDDataset.load('irdata/essai.scp')
-    assert_array_equal(dl.data, ir.data)
 
-    # this should fail as the file is not saved at the root of data_dir
-    with pytest.raises(FileNotFoundError):
-        dl = NDDataset.load('essai.scp')
-    path.unlink()                         # remove this test file
-
+def test_ndio_2D(IR_dataset_2D):
     # test with a 2D
-    ir2 = IR_dataset_2D.copy()
-    path = ir2.save('essai2D')
-    assert path.parent == pathlib.Path.cwd()
-    dl2 = NDDataset.load("essai2D")
-    assert dl2.directory == pathlib.Path.cwd()
-    path.unlink()
 
-    # save with no filename
-    path = ir2.save()
-    assert path.stem == IR_dataset_2D.name
+    ir2 = IR_dataset_2D.copy()
+    f = ir2.save_as('essai2D')
+    assert ir2.directory == irdatadir
+    with pytest.raises(FileNotFoundError):
+        nd = NDDataset.load("essai2D")
+    nd = NDDataset.load("irdata/essai2D")
+    assert nd.directory == irdatadir
+    f.unlink()
+
 

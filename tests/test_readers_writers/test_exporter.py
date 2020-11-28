@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+
+# ======================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+# ======================================================================================================================
+
+import os
+import pytest
+from pathlib import Path
+
+
+import spectrochempy as scp
+from spectrochempy import NDDataset, general_preferences as prefs
+from spectrochempy.utils import pathclean
+
+irdatadir = pathclean(prefs.datadir) / "irdata"
+cwd = Path.cwd()
+
+# ......................................................................................................................
+def test_write():
+
+    nd = scp.read_omnic('irdata/nh4y-activation.spg')
+
+    # API write methods needs an instance of a NDDataset as the first argument
+    with pytest.raises(TypeError):
+        scp.write()
+
+    # the simplest way to save a dataset, is to use the function write with a filename as argument
+    filename = nd.write('essai.scp')
+    assert filename == cwd / 'essai.scp'
+
+    nd2 = NDDataset.load(filename)
+    assert nd2 == nd
+    filename.unlink()
+
+    # if the filename is omitted, the a dialog is opened to select a name (and a protocol)
+    filename = nd.write()
+    assert filename is not None
+    assert filename.stem == nd.name
+    assert filename.suffix == '.scp'
+    # filename.unlink()
+
+    # # a write protocole can be specified
+    # filename = nd.write(protocole='json')
+    # assert filename is not None
+    # assert filename.stem == nd.name
+    # assert filename.suffix == '.json'
+    # filename.unlink()
+
+
+
+

@@ -9,6 +9,7 @@
 from datetime import datetime
 import pickle
 import base64
+import pathlib
 
 import numpy as np
 
@@ -24,22 +25,29 @@ def json_serialiser(byte_obj):
                 "isoformat": byte_obj.isoformat(),
                 "__class__": str(byte_obj.__class__)
                 }
-    if isinstance(byte_obj, np.ndarray):
+    elif isinstance(byte_obj, np.ndarray):
         # return {"ndarray":byte_obj.tolist(), "dtype": byte_obj.dtype.name}
         return {
                 "serialized": base64.b64encode(pickle.dumps(byte_obj)).decode(),
                 "__class__" : str(byte_obj.__class__)
                 }
-    raise ValueError('No encoding handler for data type ' + type(byte_obj))
+    elif isinstance(byte_obj, pathlib.PosixPath):
+        return {
+                "str": str(byte_obj),
+                "__class__": str(byte_obj.__class__)
+                }
+    raise ValueError(f'No encoding handler for data type {type(byte_obj)}')
 
 
 def json_decoder(dic):
     if "__class__" in dic:
         if dic["__class__"] == str(datetime):
             return datetime.fromisoformat(dic["isoformat"])
-        if dic["__class__"] == str(np.ndarray):
+        elif dic["__class__"] == str(np.ndarray):
             return pickle.loads(base64.b64decode(dic['serialized']))
-        raise TypeError("numpy array or datetime expected.")
+        elif dic["__class__"] == str(pathlib.PosixPath):
+            return pathlib.Path(dic["str"])
+        raise TypeError("numpy array, datetime or pathlib.PosixPath expected.")
     return dic
 
 

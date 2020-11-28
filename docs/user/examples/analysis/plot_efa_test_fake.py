@@ -18,7 +18,7 @@ import numpy as np
 ############################################################
 # Upload and preprocess a dataset
 
-dataset = scp.load("irdata/nh4y-activation.spg")
+dataset = scp.read("irdata/nh4y-activation.spg")
 
 # columns masking
 # dataset[:, 1230.0:920.0] = scp.masked  # do not forget to use float in slicing

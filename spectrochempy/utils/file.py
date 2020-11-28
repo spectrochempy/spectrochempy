@@ -5,13 +5,16 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from os import environ, getcwd
-import os.path as opath
-import re, fnmatch
+"""
+file utilities
+
+"""
+from os import environ
+import re
 import warnings
 from pathlib import Path, WindowsPath, PosixPath
 
-from spectrochempy.utils.qtfiledialogs import opendialog, savedialog
+from spectrochempy.utils.qtfiledialogs import open_dialog, save_dialog
 
 __all__ = ['get_filename', 'readdirname', 'pathclean', 'patterns',
            'check_filenames', 'check_filename_to_open', 'check_filename_to_save']
@@ -311,9 +314,9 @@ def get_filename(*filenames, **kwargs):
             # we open a dialogue to select one or several files manually
             if not (NO_DISPLAY or NODIAL):
 
-                filenames = opendialog(single=False,
-                                       directory=directory,
-                                       filters=filetypes)
+                filenames = open_dialog(single=False,
+                                        directory=directory,
+                                        filters=filetypes)
                 if not filenames:
                     # cancel
                     return None
@@ -325,7 +328,7 @@ def get_filename(*filenames, **kwargs):
         else:
             # automatic reading of the whole directory
             if not (NO_DISPLAY or NODIAL):
-                directory = opendialog(
+                directory = open_dialog(
                                 directory=directory,
                                 filters='directory')
                 if not directory:
@@ -382,18 +385,20 @@ def get_filename(*filenames, **kwargs):
         return filenames
 
 
-def readdirname(dirname):
+def readdirname(directory):
     """
     returns a valid directory name
 
     Parameters
     ----------
-    dirname : `str`, optional.
+    directory : `str` or `pathlib.Path` object, optional.
         A directory name. If not provided, a dialog box is opened to select a directory.
 
     Returns
     --------
+    out: `pathlib.Path` object
         valid directory name
+
     """
 
     from spectrochempy.core import general_preferences as prefs
@@ -402,60 +407,57 @@ def readdirname(dirname):
     data_dir = pathclean(prefs.datadir)
     working_dir = Path.cwd()
 
-    dirname = pathclean(dirname)
+    directory = pathclean(directory)
 
-    if dirname:
-        if dirname.is_dir():
+    if directory:
+        if directory.is_dir():
             # nothing else to do
-            return dirname
+            return directory
 
-        elif (working_dir / dirname).is_dir():
+        elif (working_dir / directory).is_dir():
             # if no parent directory: look at current working dir
-            return working_dir / dirname
+            return working_dir / directory
 
-        elif (data_dir / dirname).is_dir():
-            return data_dir / dirname
+        elif (data_dir / directory).is_dir():
+            return data_dir / directory
 
         else:
             # raise ValueError(f'"{dirname}" is not a valid directory')
-            warnings.warn(f'"{dirname}" is not a valid directory')
+            warnings.warn(f'"{directory}" is not a valid directory')
             return None
 
     else:
         # open a file dialog
-        dirname = data_dir
+        directory = data_dir
         if not NO_DISPLAY and not NO_DIALOG:  # this is for allowing test to continue in the background
-            dirname = opendialog(single=False,
-                                 directory=working_dir,
-                                 caption='Select directory',
-                                 filters='directory')
+            directory = open_dialog(single=False,
+                                    directory=working_dir,
+                                    caption='Select directory',
+                                    filters='directory')
 
-        return pathclean(dirname)
+        return pathclean(directory)
 
 # ......................................................................................................................
 def check_filename_to_save(dataset, filename=None, save_as=True, **kwargs):
 
-    from spectrochempy.utils.file import pathclean
     from spectrochempy.api import NO_DIALOG
 
     if not filename  or save_as:
+
         # no filename provided
+        if filename is None or (NO_DIALOG and  pathclean(filename).resolve().is_dir()):
+            filename = dataset.name
+            filename = filename + kwargs.get('suffix', '.scp')
+
         if not NO_DIALOG:
-
-            if filename is None:
-
-                filename = dataset.name
-                if 'suffix' in kwargs:
-                    filename = filename + kwargs['suffix']
-
-            filename = savedialog(caption=kwargs.get('caption', 'Save as ...'),
-                                  filename=filename,
-                                  filters=kwargs.get('filetypes', ['All file types (*.*)']))
+            filename = save_dialog(caption=kwargs.get('caption', 'Save as ...'),
+                                   filename=filename,
+                                   filters=kwargs.get('filetypes', ['All file types (*.*)']))
             if filename is None:
                 # this is probably due to a cancel action for an open dialog.
                 return
 
-    return pathclean(filename)
+    return pathclean(filename).resolve()
 
 
 # ..................................................................................................................

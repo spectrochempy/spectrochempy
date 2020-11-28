@@ -6,16 +6,15 @@
 #  =====================================================================================================================
 #
 
-import io
+import os
 import json
 from os import curdir, pardir
-import os.path as opath
 from collections.abc import Mapping
 
-from numpy.lib.format import read_array, MAGIC_PREFIX
+from numpy.lib.format import read_array
 from numpy.compat import asstr
 
-__all__ = ['make_zipfile', 'unzip', 'ScpFile']
+__all__ = ['make_zipfile', 'ScpFile']
 
 
 # ======================================================================================================================
@@ -39,35 +38,6 @@ def make_zipfile(file, **kwargs):
     kwargs['allowZip64'] = True
     return zipfile.ZipFile(file, **kwargs)
 
-
-# ............................................................................
-def unzip(source_filename, dest_dir):
-    """
-    Unzip a zipped file in a directory
-
-    Parameters
-    ----------
-    source_filename
-    dest_dir
-
-    Returns
-    -------
-
-    """
-    import zipfile
-    with zipfile.ZipFile(source_filename) as zf:
-        for member in zf.infolist():
-            # Path traversal defense copied from
-            # http://hg.python.org/cpython/file/tip/Lib/http/server.py#l789
-            words = member.filename.split('/')
-            path = dest_dir
-            for word in words[:-1]:
-                drive, word = opath.splitdrive(word)
-                head, word = opath.split(word)
-                if word in (curdir, pardir, ''):
-                    continue
-                path = opath.join(path, word)
-            zf.extract(member, path)
 
 class ScpFile(Mapping):
     """
@@ -142,12 +112,11 @@ class ScpFile(Mapping):
     def __getitem__(self, key):
 
         member = False
-        base = None
         ext = None
 
         if key in self.files:
             member = True
-            base, ext = opath.splitext(key)
+            _, ext = os.path.splitext(key)
 
         if member and ext in [".npy"]:
             f = self.zip.open(key)
@@ -155,8 +124,9 @@ class ScpFile(Mapping):
 
         elif member and ext in ['.scp']:
             from spectrochempy.core.dataset.nddataset import NDDataset
-            f = io.BytesIO(self.zip.read(key))
-            return NDDataset.load(f)
+            # f = io.BytesIO(self.zip.read(key))
+            content = self.zip.read(key)
+            return NDDataset.load(key, content=content)
 
         elif member and ext in ['.json']:
             return json.loads(asstr(self.zip.read(key)))
@@ -167,19 +137,6 @@ class ScpFile(Mapping):
         else:
             raise KeyError("%s is not a file in the archive or is not "
                            "allowed" % key)
-
-
-    # def items(self):
-    #     """
-    #     Return a list of tuples, with each tuple (filename, array in file).
-    #
-    #     """
-    #     return [(f, self[f]) for f in self.files]
-    #
-    # def keys(self):
-    #     """Return files in the archive with a ``.npy``,``.scp`` or ``.json``
-    #     extension."""
-    #     return self.files
 
     def __contains__(self, key):
         return self.files.__contains__(key)

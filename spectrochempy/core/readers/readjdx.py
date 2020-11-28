@@ -18,9 +18,9 @@ import re
 from datetime import datetime, timezone
 import numpy as np
 
+from spectrochempy.core import debug_
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
-
 
 # ======================================================================================================================
 # Public functions
@@ -55,7 +55,7 @@ def read_jcamp(*args, **kwargs):
 
     """
     kwargs['filetypes'] = ['JCAMP-DX files (*.jdx, *.dx)']
-    kwargs['protocol'] = ['jcamp', '.jdx', '.dx']
+    kwargs['protocol'] = ['.jcamp', '.jdx', '.dx']
     importer = Importer()
     return importer(*args, **kwargs)
 
@@ -70,6 +70,8 @@ read_dx.__doc__ = 'This method is an alias of `read_jcamp` '
 
 @importermethod
 def _read_jdx(*args, **kwargs):
+
+    debug_("reading a json file")
 
     # read jdx file
     dataset , filename = args

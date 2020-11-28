@@ -243,14 +243,6 @@ def test_coord():
                    title='wavenumbers')
     assert coord0.reversed
 
-    # not implemented
-
-    coord0 = Coord(data=np.linspace(4000, 1000, 10),
-                   units='cm^-1',
-                   mask=None,
-                   title='wavelength')
-    with pytest.raises(AttributeError):
-        coord0.real
 
 
 def test_coord_slicing():

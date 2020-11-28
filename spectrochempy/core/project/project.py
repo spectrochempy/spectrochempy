@@ -16,6 +16,7 @@ import pathlib
 from copy import copy as cpy
 # from collections import OrderedDict
 
+import dill
 from functools import wraps
 
 from traitlets import (Dict, Instance, Unicode, This, default)
@@ -27,7 +28,7 @@ from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.utils import get_filename,pathclean, json_serialiser
-from spectrochempy.utils.qtfiledialogs import savedialog
+from spectrochempy.utils.qtfiledialogs import save_dialog
 
 
 cfg = config_manager
@@ -51,6 +52,7 @@ class Project(AbstractProject):
     _scripts = Dict(Instance(Script))
     _others = Dict()
     _meta = Instance(Meta)
+
     _filename = Instance(pathlib.Path, allow_none=True)
 
     # ..................................................................................................................
@@ -401,24 +403,30 @@ class Project(AbstractProject):
     @property
     def filename(self):
         """
-        str - current filename for this project.
+        `Pathlib` object - current filename for this project.
 
         """
         if self._filename:
-            return os.path.basename(self._filename)
+            return self._filename.name
         else:
-            return self.id
+            return None
+
+    @filename.setter
+    def filename(self, fname):
+        self._filename = pathclean(fname)
 
     @property
     def directory(self):
         """
-        str - current directory for this project.
+        `Pathlib` object - current directory for this project
+
+        ReadOnly property
 
         """
         if self._filename:
-            return os.path.dirname(self._filename)
+            return pathclean(self._filename).parent.resolve()
         else:
-            return ''
+            return None
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
@@ -651,9 +659,9 @@ class Project(AbstractProject):
         default_directory = kwargs.get("directory", general_preferences.project_directory)
 
         if not filename:
-            filename = savedialog(filename=filename,
-                         directory=default_directory,
-                         filters="PROJECT files (*.pscp)")
+            filename = save_dialog(filename=filename,
+                                   directory=default_directory,
+                                   filters="PROJECT files (*.pscp)")
 
         if filename:
             filename = pathclean(filename)
@@ -714,7 +722,7 @@ class Project(AbstractProject):
         zipf = make_zipfile(filename, mode="w", compression=compression)
 
         # Stage data in a temporary file on disk, before writing to zip.
-        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.pscp.scp')
+        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.scp')
         os.close(fd)
 
         pars = {}
@@ -742,7 +750,7 @@ class Project(AbstractProject):
                     pars[level + key] = []
                     for k, ds in val.items():
                         if not keepdata:
-                            ds.save(filename=tmpfile)
+                            ds._save(tmpfile)
                         else:
                             # we take the saved version
                             if level == 'main.':
@@ -792,7 +800,7 @@ class Project(AbstractProject):
         os.remove(tmpfile)
         zipf.close()
 
-        self._filename = filename
+        self.filename = filename
 
     def to_json(self):
         """

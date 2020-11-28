@@ -16,26 +16,6 @@ prefs = general_preferences
 # Basic
 # --------------------------------------------------------------------------------------------------------
 
-def test_save_and_load_file_with_nofilename(IR_dataset_2D):
-    A = IR_dataset_2D.copy()
-    A.save()
-
-    # no directory for saving passed ... it must be in data
-    path = os.path.join(prefs.datadir, A.filename)
-    assert os.path.exists(path)
-    assert A.directory == prefs.datadir
-
-    B = NDDataset.load(path)
-    assert B.description == A.description
-    assert_array_equal(A.data, B.data)
-
-    # the filename should be stored in the object just loaded
-    assert B.filename == A.filename
-    assert B.directory == prefs.datadir
-
-    os.remove(path)
-
-
 def test_project(ds1, ds2, dsm):
     myp = Project(name='AGIR processing', method='stack')
 

@@ -8,7 +8,7 @@
 """This module extend NDDataset with the import methods.
 
 """
-__all__ = ['read_json']
+__all__ = ['read_json', 'from_json']
 __dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -32,8 +32,15 @@ from spectrochempy.units import Unit, Quantity
 from spectrochempy.core.dataset.ndio import NDIO
 from spectrochempy.utils import get_filename, json_decoder
 from spectrochempy.core import general_preferences as prefs
+from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 
+# ======================================================================================================================
+# Public functions
+# ======================================================================================================================
+
+# ......................................................................................................................
+@docstrings.dedent
 def read_json(*args, **kwargs):
     """
     Read a single file or a byte string in JSON format
@@ -57,38 +64,59 @@ def read_json(*args, **kwargs):
     >>> A = NDDataset.read_json('nh4.json')
 
     """
+    kwargs['filetypes'] = ['JSON files (*.json)']
+    kwargs['protocol'] = ['.json']
+    importer = Importer()
+    return importer(*args, **kwargs)
+
+
+@docstrings.dedent
+def from_json(dic):
+    """
+    Transform a JSON object into a NDDataset
+
+    Parameters
+    ----------
+    args
+    kwargs
+
+    Returns
+    -------
+
+    """
+
+    dataset = NDDataset()
+    return _from_json(dataset, dic)
+
+
+# ======================================================================================================================
+# private functions
+# ======================================================================================================================
+
+@importermethod
+def _read_json(*args, **kwargs):
+
     debug_("reading a json file")
 
-    dataset, files = check_filename_to_open(*args, **kwargs)
+    # read jdx file
+    dataset , filename = args
+    content = kwargs.get('content', None)
 
-    if not files:
-        # open a file selector dialog
-        directory = kwargs.get('directory', prefs.datadir)
-        files = get_filename(directory=directory,
-                             filetypes=['JSON files (*.json)'])
-
-    if not files:
-        # still, there is no files, we thus return nothing
-        return None
-
-
-    files = files['.json']  # select only file with the correct extension
-    datasets = []
-    for filename in files:
-        f = open(filename, 'rb')
-        js = json.loads(f.read(), object_hook=json_decoder)
-        datasets.append(NDDataset.from_json(js))
-
-    if len(datasets) == 1:
-        return datasets[0]
+    if content is not None:
+        fid = io.StringIO(content.decode("utf-8"))
     else:
-        return datasets
+        fid = open(filename, 'rb')
+
+    js = json.loads(fid.read(), object_hook=json_decoder)
+
+    dataset = _from_json(dataset, js)
+    dataset.filename = filename
+    dataset.name = filename.stem
+
+    return dataset
 
 
-def _read(f, dataset, filename=None):
-
-    # read file content
-    obj = json.loads(f.read(),object_hook=json_decoder)
+def _from_json(dataset, obj):
 
     # interpret
     coords = None
@@ -158,9 +186,6 @@ def _read(f, dataset, filename=None):
                 setattributes(coords[dim][idx], els[4], val)
         else:
             setattributes(dataset, key, val)
-
-    if filename:
-        dataset._filename = filename
 
     if coords:
         dataset.set_coords(coords)

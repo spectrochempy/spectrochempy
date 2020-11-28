@@ -5,19 +5,25 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-# standalone dialogs
+"""
+Dialog utilities
 
-__all__ = []
+"""
+
+__all__ = ['open_dialog', 'save_dialog']
 
 from PyQt5 import QtWidgets
 
 QFileDialog = QtWidgets.QFileDialog
 
-def OpenExistingDirectory(parent=None,
-                          caption='Select a folder',
-                          directory=''):
 
+# ------------------------------------------------------------------------------------------------------------------
+# Private functions
+# ------------------------------------------------------------------------------------------------------------------
 
+def _open_existing_directory(parent=None,
+                             caption='Select a folder',
+                             directory=''):
     options = QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly | QFileDialog.DontUseNativeDialog
     directory = QFileDialog.getExistingDirectory(parent,
                                                  caption=caption,
@@ -27,11 +33,11 @@ def OpenExistingDirectory(parent=None,
         return directory
 
 
-def OpenFileName(parent=None,
-                 directory='',
-                 caption='Select file',
-                 filters=["All Files (*)"]):
-
+# noinspection PyRedundantParentheses
+def _open_filename(parent=None,
+                   directory='',
+                   caption='Select file',
+                   filters=("All Files (*)")):
     options = QFileDialog.AnyFile | QFileDialog.DontUseNativeDialog
     filename, _ = QFileDialog.getOpenFileName(parent,
                                               caption=caption,
@@ -42,12 +48,16 @@ def OpenFileName(parent=None,
         return filename
 
 
-def OpenMultipleFileNames(
+# noinspection PyRedundantParentheses
+def _open_multiple_filenames(
         parent=None,
         directory='',
         caption='Select file(s)',
-        filters=["All Files (*)"]):
+        filters=("All Files (*)")):
+    """
+    Return one or several files to open
 
+    """
     options = QFileDialog.DontUseNativeDialog
     files, _ = QFileDialog.getOpenFileNames(parent,
                                             caption=caption,
@@ -58,44 +68,55 @@ def OpenMultipleFileNames(
         return files
 
 
-def savedialog(  filename='',
-                 caption='Save as...',
-                 selectedfilter = '',
-                 filters=["All Files (*)"]):
+# ------------------------------------------------------------------------------------------------------------------
+# Public functions
+# ------------------------------------------------------------------------------------------------------------------
+# noinspection PyRedundantParentheses
+def save_dialog(filename='',
+                caption='Save as...',
+                selected_filter='',
+                filters=("All Files (*)")):
+    """
+    Return a file where to save
 
+    """
     options = QFileDialog.DontUseNativeDialog
     options |= QFileDialog.DontConfirmOverwrite  # bug : this seems to work only with DontUseNativeDialog on OSX.
-                                                 # TODO: Check on windows and Linux
-                                                 # second problems: if we confirm owerwrite here a new dialog is opened,
-                                                 # and thus the main one do not close on exit!
-    filename, _ = QFileDialog.getSaveFileName(parent = None,
+    # TODO: Check on windows and Linux
+    # second problems: if we confirm overwrite here a new dialog is opened,
+    # and thus the main one do not close on exit!
+    filename, _ = QFileDialog.getSaveFileName(parent=None,
                                               caption=caption,
                                               directory=str(filename),
-                                              initialFilter = selectedfilter,
+                                              initialFilter=selected_filter,
                                               filter=';;'.join(filters),
                                               options=options)
     if filename:
         return filename
 
 
-def opendialog(single=True,
-               directory='',
-               caption='',
-               filters=["All Files (*)"]
-               ):
+# noinspection PyRedundantParentheses
+def open_dialog(single=True,
+                directory='',
+                caption='',
+                filters=("All Files (*)")
+                ):
+    """
+    Return one or several files to open
 
+    """
     if filters == 'directory':
         if not caption:
             caption = 'Select a folder'
-        f = OpenExistingDirectory(caption=caption, directory=str(directory))
+        f = _open_existing_directory(caption=caption, directory=str(directory))
     elif single:
         if not caption:
             caption = 'Select file'
-        f = OpenFileName(caption=caption, directory=str(directory), filters=filters)
+        f = _open_filename(caption=caption, directory=str(directory), filters=filters)
     else:
         if not caption:
             caption = 'Select file(s)'
-        f = OpenMultipleFileNames(caption=caption, directory=str(directory), filters=filters)
+        f = _open_multiple_filenames(caption=caption, directory=str(directory), filters=filters)
 
     from spectrochempy.utils.file import pathclean
     return pathclean(f)
@@ -104,4 +125,3 @@ def opendialog(single=True,
 # ======================================================================================================================
 if __name__ == '__main__':
     pass
-

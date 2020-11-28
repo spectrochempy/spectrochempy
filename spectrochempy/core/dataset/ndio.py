@@ -14,7 +14,6 @@ methods for a |NDDataset| are defined.
 
 __all__ = ['NDIO']
 
-from os import close as osclose, remove as osremove
 import io
 import datetime
 import json
@@ -22,18 +21,16 @@ import pathlib
 
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.compat import asstr
 from numpy.lib.format import write_array
-from numpy.lib.npyio import zipfile_factory, NpzFile
+from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils import SpectroChemPyException
 from spectrochempy.units import Unit, Quantity
-from spectrochempy.utils import pathclean, Meta, readdirname, check_filenames, ScpFile, check_filename_to_save
+from spectrochempy.utils import pathclean, Meta, check_filenames, ScpFile, check_filename_to_save
 
-from spectrochempy.core import general_preferences as prefs
 
 # ==============================================================================
 # Class NDIO to handle I/O of datasets
@@ -73,7 +70,7 @@ class NDIO(HasTraits):
 
         """
         if self._filename:
-            return pathclean(self._filename).parent
+            return pathclean(self._filename).parent.resolve()
         else:
             return None
 
@@ -158,7 +155,9 @@ class NDIO(HasTraits):
         if filename:
             # we have a filename
             # by default it use the saved directory
-            filename = self.directory / filename
+            filename = pathclean(filename)
+            if self.directory and self.directory != filename.parent.resolve():
+                filename = self.directory / filename
             if not filename.suffix == '.scp':
                 filename = filename.with_suffix('.scp')
         else:
@@ -180,8 +179,8 @@ class NDIO(HasTraits):
         import tempfile
         zipf = zipfile_factory(filename, mode="w",
                                compression=zipfile.ZIP_DEFLATED)
-        fd, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.scp')
-        osclose(fd)
+        _, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.scp')
+        tmpfile = pathclean(tmpfile)
 
         pars = {}
         objnames = self.__dir__()
@@ -254,15 +253,14 @@ class NDIO(HasTraits):
 
         _loop_on_obj(objnames, self)
 
-        with open(tmpfile, 'w') as f:
-            f.write(json.dumps(pars))
+        tmpfile.write_text(json.dumps(pars))
 
         zipf.write(tmpfile, arcname='pars.json')
-        osremove(tmpfile)
+        tmpfile.unlink()
+
         zipf.close()
 
         return filename
-
 
     # ..................................................................................................................
     @classmethod
@@ -354,8 +352,8 @@ class NDIO(HasTraits):
                 setattr(coords[dim][idx], "_%s" % els[4], val)
 
             elif key == "pars.json":
-                pars = val #
-                #pars = json.loads(asstr(val))
+                pars = val  #
+                # pars = json.loads(asstr(val))
             else:
                 base, ext = key.split('.npy')
                 setattr(new, "_%s" % base, val)
@@ -426,13 +424,15 @@ class NDIO(HasTraits):
 
                 setattributes(new, key, val)
 
-        if filename:
-            new._filename = pathclean(filename)
-
         if coords:
             new.set_coords(coords)
 
+        if filename:
+            filename = pathclean(filename)
+            new._filename = filename
+            new.name = filename.stem
         return new
+
 
 # ======================================================================================================================
 if __name__ == '__main__':

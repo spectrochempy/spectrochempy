@@ -52,12 +52,7 @@ def read_zip(*args, **kwargs):
     # TODO: allows other type of compressed files
     kwargs['protocol'] = ['.zip']
     importer = Importer()
-    nd = importer(*args, **kwargs)
-    if hasattr(nd, 'implements') and nd.implements('NDDataset'):
-        # we need to set a name
-        nd.name = pathclean(args[0]).stem
-        nd.filename = pathclean(args[0])
-    return nd
+    return importer(*args, **kwargs)
 
 
 # ======================================================================================================================

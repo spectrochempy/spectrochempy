@@ -16,7 +16,7 @@ from datetime import datetime
 
 from traitlets import HasTraits, default, List, Dict, Type, Unicode
 
-from spectrochempy.utils import check_filename_to_open, docstrings, DimensionsCompatibilityError
+from spectrochempy.utils import pathclean, check_filename_to_open, docstrings, DimensionsCompatibilityError
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -59,8 +59,8 @@ class Importer(HasTraits):
                     kwargs['content'] = content
                     key_ = list(files_.keys())[0]
                     self._switch_protocol(key_, files_, **kwargs)
-
-                self.datasets = self._do_merge(self.datasets, **kwargs)
+                if len(self.datasets) > 1:
+                    self.datasets = self._do_merge(self.datasets, **kwargs)
 
             else:
                 # here files are read from the disk using filenames
@@ -68,6 +68,7 @@ class Importer(HasTraits):
 
         if len(self.datasets) == 1:
             return self.datasets[0]  # a single dataset is returned
+
         else:
             return self.datasets
 
@@ -114,7 +115,11 @@ class Importer(HasTraits):
                     warn(str(e))
                     continue
 
-        datasets = self._do_merge(datasets, **kwargs)
+        if len(datasets)>1:
+            datasets = self._do_merge(datasets, **kwargs)
+            if kwargs.get('merge', False):
+                datasets[0].name = pathclean(filename).stem
+                datasets[0].filename = pathclean(filename)
 
         self.datasets.extend(datasets)
 
@@ -124,7 +129,7 @@ class Importer(HasTraits):
         # several datasets returned (only if several files have been passed) and the `merge` keyword argument is False
         merged = kwargs.get('merge', False)
         shapes = {nd.shape for nd in datasets}
-        if len(datasets) > 1 and len(shapes) == 1:
+        if len(shapes) == 1:
             # homogeneous set of files
             dim0 = shapes.pop()[0]
             if dim0 == 1:
@@ -133,7 +138,7 @@ class Importer(HasTraits):
             merged = kwargs.get('merge', False)
             # TODO: may be create a panel, when possible?
 
-        if len(datasets) > 1 and merged:
+        if merged:
             # Try to stack the dataset into a single one
             try:
                 dataset = self.objtype.stack(datasets)
@@ -318,6 +323,9 @@ def read(*args, **kwargs):
     elif protocol in ['scp']:
         kwargs['filetypes'] = ['SpectroChemPy files (*.scp)']
         kwargs['protocol'] = ['.scp']
+    elif protocol in ['scp']:
+        kwargs['filetypes'] = ['JSON files (*.json)']
+        kwargs['protocol'] = ['.json']
     else:
         kwargs['filetypes'] = ['All files (*.*)']
         warn('This protocol is unknown. Try to infer from the filename extension')
@@ -354,7 +362,7 @@ def _read_(*args, **kwargs):
             return dataset.load(filename, **kwargs)
         except:
             # lets try some common format
-            for key in ['omnic', 'opus', 'topspin', 'matlab', 'jdx']:
+            for key in ['omnic', 'opus', 'topspin', 'matlab', 'jdx', 'json']:
                 try:
                     _read = getattr(dataset, f"read_{key}")
                     f = f'{filename}.{key}'

@@ -97,7 +97,6 @@ tests/figures
 
 # data
 # ----------------------------------------------------------------------------------------------------------------------
-*.scp
 scpy.svg
 *.sample
 scp_data/testdata/figures
@@ -137,3 +136,7 @@ var/
 .coverage
 
 saved_pkglist.txt
+tests/**/*.jdx
+tests/**/*.scp
+essai.scp
+nh4y-activation.scp

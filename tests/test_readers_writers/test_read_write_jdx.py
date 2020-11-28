@@ -5,16 +5,23 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import os
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.processors.align import align
-
+from spectrochempy.utils.testing import assert_dataset_equal, assert_dataset_almost_equal
 
 def test_read_write_jdx(IR_dataset_2D):
-    X = IR_dataset_2D[:10]
-    X.write_jdx('nh4y-activation.jdx')
-    Y = NDDataset.read_jdx('nh4y-activation.jdx')
-    os.remove('nh4y-activation.jdx')
-    X1, Y1 = align(X, Y)
-    maxdiff = (X1[:, 1:-1] - Y1[:, 1:-1]).abs().max()
-    assert maxdiff.data < 1e-8
+
+    X = IR_dataset_2D[:10,:100]
+
+    # write
+    f = X.write_jdx('nh4y-activation.jdx')
+
+    # read
+    Y = NDDataset.read_jdx(f)
+    assert_dataset_almost_equal(X,Y)
+
+    # delete
+    f.unlink()
+
+    # write
+    f = X.write_jdx()
+    assert f.stem == X.name

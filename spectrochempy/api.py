@@ -94,7 +94,13 @@ if 'make.py' in sys.argv[0]:
     NO_DIALOG = True
     mpl.use('agg', force=True)
 
-# Are we running pytest ?
+# is there a --nodisplay flag
+if '--nodisplay' in sys.argv:
+    NO_DISPLAY = True
+    NO_DIALOG = True
+    mpl.use('agg', force=True)
+
+# Are we running pytest?
 if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
@@ -117,7 +123,7 @@ if mpl.get_backend() == 'module://backend_interagg':
 else:
     IN_PYCHARM_SCIMODE = False
 
-if not (IN_IPYTHON and kernel and not NO_DISPLAY) and not IN_PYCHARM_SCIMODE:
+if not (IN_IPYTHON and kernel) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY:
     backend = 'Qt5Agg'
     mpl.use('Qt5Agg', force=True)
 
