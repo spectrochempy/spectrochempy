@@ -98,7 +98,6 @@ def save_dialog(filename='',
 # noinspection PyRedundantParentheses
 def open_dialog(single=True,
                 directory='',
-                caption='',
                 filters=("All Files (*)")
                 ):
     """
@@ -106,16 +105,13 @@ def open_dialog(single=True,
 
     """
     if filters == 'directory':
-        if not caption:
-            caption = 'Select a folder'
+        caption = 'Select a folder'
         f = _open_existing_directory(caption=caption, directory=str(directory))
     elif single:
-        if not caption:
-            caption = 'Select file'
+        caption = 'Select file'
         f = _open_filename(caption=caption, directory=str(directory), filters=filters)
     else:
-        if not caption:
-            caption = 'Select file(s)'
+        caption = 'Select file(s)'
         f = _open_multiple_filenames(caption=caption, directory=str(directory), filters=filters)
 
     from spectrochempy.utils.file import pathclean

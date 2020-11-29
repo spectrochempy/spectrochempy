@@ -659,8 +659,7 @@ class Project(AbstractProject):
         default_directory = kwargs.get("directory", general_preferences.project_directory)
 
         if not filename:
-            filename = save_dialog(filename=filename,
-                                   directory=default_directory,
+            filename = save_dialog(filename=default_directory,
                                    filters="PROJECT files (*.pscp)")
 
         if filename:

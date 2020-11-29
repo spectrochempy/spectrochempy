@@ -160,7 +160,7 @@ def set_backend():
 
 set_backend()
 
-__all__ += ['set_backend']
+
 
 # warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 # warnings.filterwarnings(action="error", category=DeprecationWarning)
