@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TopSpin 4.1.0
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 8	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= christian
+$$ 2020-11-30 08:07:12.151 +0100  christian@MacCF.local
+$$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/topspin_2d/1/pdata/1/clevels
+$$ process /opt/topspin4.1.0/prog/mod/dataserver
+##$LEVELS= (0..255)
+-27624378.0068928 -15346876.670496 -8526042.59472 -4736690.3304 -2631494.628
+-1461941.46 -812189.7 -451216.5 451216.5 812189.7 1461941.46 2631494.628
+4736690.3304 8526042.59472 15346876.670496 27624378.0068928 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -451216.5
+##$NEGINCR= 1.8
+##$POSBASE= 451216.5
+##$POSINCR= 1.8
+##END=

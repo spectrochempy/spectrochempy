@@ -38,7 +38,7 @@ def _open_filename(parent=None,
                    directory='',
                    caption='Select file',
                    filters=("All Files (*)")):
-    options = QFileDialog.AnyFile | QFileDialog.DontUseNativeDialog
+    options = QFileDialog.DontUseNativeDialog
     filename, _ = QFileDialog.getOpenFileName(parent,
                                               caption=caption,
                                               directory=directory,
@@ -104,6 +104,8 @@ def open_dialog(single=True,
     Return one or several files to open
 
     """
+    if directory is None:
+        directory = ''
     if filters == 'directory':
         caption = 'Select a folder'
         f = _open_existing_directory(caption=caption, directory=str(directory))

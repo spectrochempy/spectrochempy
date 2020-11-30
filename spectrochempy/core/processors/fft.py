@@ -74,16 +74,16 @@ def ifft(dataset, size=None, inplace=False, **kwargs):
 def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=True, **kwargs):
     r"""
     Apply a complex fast fourier transform.
-    
+
     For multidimensional NDDataset or NDPanels,
     the apodization is by default performed on the last dimension.
-    
+
     The data in the last dimension MUST be in time-domain (or without dimension)
     or an error is raised.
-    
+
     To make reverse Fourier transform, i.e., from frequency to time domain, use the `ifft` transform
     (or equivalently, the `inv=True` parameters.
-    
+
     Parameters
     ----------
     size : int, optional
@@ -103,7 +103,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
     **kwargs :
         other parameters (see other parameters)
-    
+
     Other Parameters
     ----------------
     tdeff : int, optional
@@ -116,7 +116,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
 
     """
     # datatype
-    is_nmr = dataset.origin.lower() in ["bruker", ]
+    is_nmr = dataset.origin.lower() in ["topspin", ]
     is_ir = dataset.origin.lower() in ["omnic", ]
 
     # On which axis do we want to apodize? (get axis from arguments)
@@ -313,8 +313,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
     if swaped:
         new.swapaxes(axis, -1, inplace=True)  # must be done inplace
 
-    new.history = f'fft applied on dimension {dim}'
-
+    s = 'ifft' if inv else 'fft'
+    new.history = f'{s} applied on dimension {dim}'
     return new
 
 

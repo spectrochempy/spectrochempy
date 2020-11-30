@@ -21,6 +21,7 @@ from brukeropusreader.opus_parser import parse_data, parse_meta
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
+from spectrochempy.core import debug_
 
 
 # ======================================================================================================================
@@ -47,11 +48,11 @@ def read_opus(*args, **kwargs):
     Examples
     ---------
 
-    >>> from spectrochempy import read_opus
+    >>> import spectrochempy as scp
 
     Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
 
-    >>> read_opus('irdata\\\\OPUS\\\\test.0000')
+    >>> scp.read_opus('irdata\\\\OPUS\\\\test.0000')
     NDDataset: [float32] a.u. (shape: (y:1, x:2567))
 
     Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
@@ -70,7 +71,7 @@ def read_opus(*args, **kwargs):
 
     Multiple files not merged (return a list of datasets). Note that a directory is specified
 
-    >>> l = read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
+    >>> l = scp.read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
     >>> len(l)
     3
     >>> l[0]
@@ -78,35 +79,35 @@ def read_opus(*args, **kwargs):
 
     Multiple files merged as the `merge` keyword is set to true
 
-    >>> read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
+    >>> scp.read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
     NDDataset: [float32] a.u. (shape: (y:3, x:2567))
 
     Multiple files to merge : they are passed as a list instead of using the keyword `merge`
 
-    >>> read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
+    >>> scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
     NDDataset: [float32] a.u. (shape: (y:3, x:2567))
 
     Multiple files not merged : they are passed as a list but `merge` is set to false
 
-    >>> l = read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
+    >>> l = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
     >>> len(l)
     3
 
     Read without a filename. This has the effect of opening a dialog for file(s) selection
 
-    >>> read_opus() # doctest: +ELLIPSIS
+    >>> scp.read_opus() # doctest: +ELLIPSIS
     ...
 
     Read in a directory (assume that only OPUS files are present in the directory
     (else we must use the generic `read` function instead)
 
-    >>> l = read_opus(directory='irdata/OPUS')
+    >>> l = scp.read_opus(directory='irdata/OPUS')
     >>> len(l)
     4
 
     Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
 
-    >>> read_opus(directory='irdata/OPUS', merge=True)
+    >>> scp.read_opus(directory='irdata/OPUS', merge=True)
     NDDataset: [float32] a.u. (shape: (y:4, x:2567))
 
     See Also
@@ -129,7 +130,8 @@ def read_opus(*args, **kwargs):
 # ......................................................................................................................
 @importermethod
 def _read_opus(*args, **kwargs):
-    # read a 1D opus file
+
+    debug_('Bruker OPUS import')
 
     dataset, filename = args
     content = kwargs.get('content', None)
@@ -159,9 +161,9 @@ def _read_opus(*args, **kwargs):
     name = opus_data["Sample"]['SNM']
     acqdate = opus_data["AB Data Parameter"]["DAT"]
     acqtime = opus_data["AB Data Parameter"]["TIM"]
-    GMT_offset_hour = float(acqtime.split('GMT')[1].split(')')[0])
+    gmt_offset_hour = float(acqtime.split('GMT')[1].split(')')[0])
     date_time = datetime.strptime(acqdate + '_' + acqtime.split()[0], '%d/%m/%Y_%H:%M:%S.%f')
-    utc_dt = date_time - timedelta(hours=GMT_offset_hour)
+    utc_dt = date_time - timedelta(hours=gmt_offset_hour)
     utc_dt = utc_dt.replace(tzinfo=timezone.utc)
     timestamp = utc_dt.timestamp()
     yaxis = Coord([timestamp],

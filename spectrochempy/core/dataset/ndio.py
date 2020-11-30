@@ -316,7 +316,7 @@ class NDIO(HasTraits):
         except FileNotFoundError:
             raise SpectroChemPyException(f"File {filename} doesn't exist!")
         except Exception as e:
-            if str(e) == 'File is not a zipfile':
+            if str(e) == 'File is not a zip file':
                 raise SpectroChemPyException("File not in 'scp' format!")
             raise SpectroChemPyException("Undefined error!")
 

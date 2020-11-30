@@ -113,7 +113,8 @@ class Importer(HasTraits):
                 if 'is not an Absorbance spectrum' in str(e):
                     # we do not read this filename
                     warn(str(e))
-                    continue
+                else:
+                    raise e
 
         if len(datasets)>1:
             datasets = self._do_merge(datasets, **kwargs)

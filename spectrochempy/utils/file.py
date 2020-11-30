@@ -135,7 +135,7 @@ def check_filenames(*args, **kwargs):
             return args[0]
 
     if not filenames:
-        # look into keywords (only the case wher ea real str or pathlib filename is given in handled here
+        # look into keywords (only the case where a str or pathlib filename is given are accepted)
         filenames = kwargs.pop('filename', None)
         filenames = [pathclean(filenames)] if pathclean(filenames) is not None else None
 
@@ -373,7 +373,10 @@ def get_filename(*filenames, **kwargs):
             if filename.is_dir():
                 continue
             extension = filename.suffix.lower()
-            if extension[1:].isdigit():
+            if not extension:
+                if re.match(r"^fid$|^ser$|^[1-3][ri]*$", filename.name) is not None:
+                    extension = '.topspin'
+            elif extension[1:].isdigit():
                 # probably an opus file
                 extension = '.opus'
             if extension in filenames_dict.keys():
@@ -472,10 +475,12 @@ def check_filename_to_open(*args, **kwargs):
     if not isinstance(filenames, dict):
         # deal with some specific cases
         key = filenames[0].suffix.lower()
+        if not key:
+            if re.match(r"^fid$|^ser$|^[1-3][ri]*$", filenames[0].name) is not None:
+                key  = '.topspin'
         if key[1:].isdigit():
             # probably an opus file
             key = '.opus'
-
         return {
                 key: filenames
                 }

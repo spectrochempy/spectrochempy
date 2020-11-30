@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+#  =====================================================================================================================
+#  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
+#  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
+#  =====================================================================================================================
+#
+
 # ======================================================================================================================
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
@@ -13,7 +19,7 @@ import pytest
 
 from spectrochempy.core import info_, general_preferences as prefs
 from spectrochempy.api import NO_DISPLAY
-from spectrochempy.utils import get_filename
+from spectrochempy.utils import get_filename, check_filenames
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 
@@ -63,3 +69,14 @@ def test_get_filename():
                                 "SpectroChemPy files (*.scp)",
                                 "all files (*)"])
 
+def test_check_filenames():
+
+    f1 = check_filenames("irdata",
+                     filetypes=['OMNIC files (*.spa, *.spg)','OMNIC series (*.srs)', 'all files (*.*)'],
+                     listdir=True)
+    f2 = get_filename("irdata",
+                     filetypes=['OMNIC files (*.spa, *.spg)','OMNIC series (*.srs)', 'all files (*.*)'],
+                     )
+
+    #assert len(f1.keys()) == 3
+    #assert f1 == f

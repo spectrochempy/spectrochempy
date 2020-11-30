@@ -37,7 +37,7 @@ def example_run(path):
     return pipe.returncode, so, serr
 
 # ......................................................................................................................
-@pytest.mark.parametrize('example', glob(os.path.join(path, 'docs', 'user', '**', '*.py'), recursive=True))
+@pytest.mark.parametrize('example', glob(os.path.join(path, '..', 'user', '**', '*.py'), recursive=True))
 def test_example(example):
     name = os.path.basename(example)
     if (name in [__name__ + '.py', 'conf.py', 'builddocs.py', 'apigen.py'] or 'auto_examples' in example):

@@ -101,7 +101,13 @@ class ScpFile(Mapping):
             self.fid = None
 
     def __del__(self):
-        self.close()
+        try:
+            self.close()
+        except AttributeError as e:
+            if str(e) == "'ScpFile' object has no attribute 'zip'":
+                pass
+        except Exception as e:
+           raise e
 
     def __iter__(self):
         return iter(self.files)

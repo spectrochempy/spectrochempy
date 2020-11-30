@@ -56,6 +56,10 @@ def plot_map(dataset, **kwargs):
     Alias of plot_2D (with `method` argument set to ``map``.
 
     """
+    if dataset.ndim < 2:
+        from spectrochempy import plot_1D
+        return plot_1D(dataset, **kwargs)
+
     kwargs['method'] = 'map'
     if kwargs.get('use_plotly', False):
         return dataset.plotly(**kwargs)
@@ -72,6 +76,10 @@ def plot_stack(dataset, **kwargs):
     Alias of plot_2D (with `method` argument set to ``stack``).
 
     """
+    if dataset.ndim < 2:
+        from spectrochempy import plot_1D
+        return plot_1D(dataset, **kwargs)
+
     kwargs['method'] = 'stack'
     if kwargs.get('use_plotly', False):
         return dataset.plotly(**kwargs)
@@ -87,6 +95,10 @@ def plot_image(dataset, **kwargs):
     Alias of plot_2D (with `method` argument set to ``image``).
 
     """
+    if dataset.ndim < 2:
+        from spectrochempy import plot_1D
+        return plot_1D(dataset, **kwargs)
+
     kwargs['method'] = 'image'
     if kwargs.get('use_plotly', False):
         return dataset.plotly(**kwargs)
@@ -103,6 +115,10 @@ def plot_surface(dataset, **kwargs):
     Alias of plot_2D (with `method` argument set to ``surface``.
 
     """
+    if dataset.ndim < 2:
+        from spectrochempy import plot_1D
+        return plot_1D(dataset, **kwargs)
+
     kwargs['method'] = 'surface'
     if kwargs.get('use_plotly', False):
         return dataset.plotly(**kwargs)
@@ -144,6 +160,10 @@ def plot_2D(dataset, **kwargs):
     kwargs : additional keywords
 
     """
+
+    if dataset.ndim < 2:
+        from spectrochempy import plot_1D
+        return plot_1D(dataset, **kwargs)
 
     # if plotly excute plotly routine not this one
     if kwargs.get('use_plotly', False):

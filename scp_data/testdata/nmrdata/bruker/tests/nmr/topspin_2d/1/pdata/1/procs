@@ -1,12 +1,12 @@
-##TITLE= Parameter file, TopSpin 4.0.7
+##TITLE= Parameter file, TopSpin 4.1.0
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 58	$$ modification sequence number
+##NPOINTS= 59	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= nmr
-$$ 2019-12-05 12:28:16.733 +0100  christian@lcs191n.ensicaen.fr
-$$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/bruker_2d/1/pdata/1/procs
-$$ process /opt/topspin4.0.7/prog/mod/dataserver
+$$ 2020-11-30 08:07:12.130 +0100  christian@MacCF.local
+$$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/topspin_2d/1/pdata/1/procs
+$$ process /opt/topspin4.1.0/prog/mod/proc2d
 ##$ABSF1= 0
 ##$ABSF2= 0
 ##$ABSG= 0
@@ -38,7 +38,7 @@ $$ process /opt/topspin4.0.7/prog/mod/dataserver
 ##$ERETIC= no
 ##$F1P= 51.2885
 ##$F2P= 9.0509
-##$FCOR= 0.5
+##$FCOR= 1
 ##$FTSIZE= 2048
 ##$FT_mod= 6
 ##$GAMMA= 0
@@ -70,7 +70,12 @@ $$ process /opt/topspin4.0.7/prog/mod/dataserver
 ##$Mdd_CsLAMBDA= 0
 ##$Mdd_CsNITER= 0
 ##$Mdd_CsNORM= 0
+##$Mdd_CsVE= yes
 ##$Mdd_CsZF= 0
+##$Mdd_LrLAMBDA= 0
+##$Mdd_LrNITER= 0
+##$Mdd_LrRANK= 0
+##$Mdd_LrZF= 0
 ##$Mdd_mod= 0
 ##$NCOEF= 0
 ##$NC_proc= -5
@@ -94,6 +99,11 @@ $$ process /opt/topspin4.0.7/prog/mod/dataserver
 ##$PSCAL= 0
 ##$PSIGN= 0
 ##$PYNMP= <proc.py>
+##$RDF1= 0
+##$RDF2= 0
+##$RDFWHM= 0
+##$RDINT= 0
+##$RDPOS= 0
 ##$REVERSE= no
 ##$SF= 104.311138
 ##$SI= 2048
@@ -102,6 +112,7 @@ $$ process /opt/topspin4.0.7/prog/mod/dataserver
 ##$SINO= 58.55999
 ##$SIOLD= 2048
 ##$SPECTYP= <UNDEFINED>
+##$SREF_mod= 1
 ##$SREGLST= <>
 ##$SSB= 0
 ##$STSI= 2048
@@ -124,5 +135,5 @@ $$ process /opt/topspin4.0.7/prog/mod/dataserver
 ##$WDW= 1
 ##$XDIM= 2048
 ##$YMAX_p= 53464332
-##$YMIN_p= -4474785
+##$YMIN_p= -4474784
 ##END=

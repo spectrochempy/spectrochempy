@@ -1,12 +1,12 @@
-##TITLE= Parameter file, TOPSPIN		Version 3.2
+##TITLE= Parameter file, TopSpin 4.1.0
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 55	$$ modification sequence number
+##NPOINTS= 56	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= nmr
-$$ 2014-05-02 11:07:16.762 +0200  christian@macbookcf.local
-$$ /Users/christian/Documents/data_storage/bruker/Data/PST5_HMQC/31/pdata/1/proc2s
-$$ process /opt/topspin3.2/prog/mod/proc2d
+$$ 2020-11-30 08:07:12.131 +0100  christian@MacCF.local
+$$ /Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/nmrdata/bruker/tests/nmr/topspin_2d/1/pdata/1/proc2s
+$$ process /opt/topspin4.1.0/prog/mod/proc2d
 ##$ABSF1= 0
 ##$ABSF2= 0
 ##$ABSG= 0
@@ -70,7 +70,12 @@ $$ process /opt/topspin3.2/prog/mod/proc2d
 ##$Mdd_CsLAMBDA= 0
 ##$Mdd_CsNITER= 0
 ##$Mdd_CsNORM= 0
+##$Mdd_CsVE= yes
 ##$Mdd_CsZF= 0
+##$Mdd_LrLAMBDA= 0
+##$Mdd_LrNITER= 0
+##$Mdd_LrRANK= 0
+##$Mdd_LrZF= 0
 ##$Mdd_mod= 0
 ##$NCOEF= 0
 ##$NC_proc= -5
@@ -94,6 +99,11 @@ $$ process /opt/topspin3.2/prog/mod/proc2d
 ##$PSCAL= 1
 ##$PSIGN= 0
 ##$PYNMP= <proc.py>
+##$RDF1= 0
+##$RDF2= 0
+##$RDFWHM= 0
+##$RDINT= 0
+##$RDPOS= 0
 ##$REVERSE= no
 ##$SF= 162.052977410004
 ##$SI= 1024
@@ -102,6 +112,7 @@ $$ process /opt/topspin3.2/prog/mod/proc2d
 ##$SINO= 0
 ##$SIOLD= 1024
 ##$SPECTYP= <>
+##$SREF_mod= 1
 ##$SREGLST= <>
 ##$SSB= 0
 ##$STSI= 1024
@@ -124,5 +135,5 @@ $$ process /opt/topspin3.2/prog/mod/proc2d
 ##$WDW= 1
 ##$XDIM= 1024
 ##$YMAX_p= 53464332
-##$YMIN_p= -4474785
+##$YMIN_p= -4474784
 ##END=
