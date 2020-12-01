@@ -11,6 +11,19 @@ import os
 import numpy as np
 import pytest
 
+# Handle command line argument for spectrochempy
+# ----------------------------------------------------------------------------------------------------------------------
+
+# def pytest_cmdline_preparse(config, args):
+#     print(args)
+#     for item in args[:]:
+#         for k in list(app.flags.keys()):
+#             if item.startswith("--" + k) or k in ['--help', '--help-all']:
+#                 args.remove(item)
+#             continue
+#         for k in list(app.aliases.keys()):
+#             if item.startswith("-" + k) or k in ['h', ]:
+#                 args.remove.append(item)
 
 # initialize a ipython session before calling spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------
@@ -52,18 +65,6 @@ from spectrochempy.core import general_preferences as prefs
 os.environ['TEST_FILE'] = os.path.join(prefs.datadir, 'irdata/nh4y-activation.spg')
 os.environ['TEST_FOLDER'] =  os.path.join(prefs.datadir, 'irdata', 'subdir')
 
-# Handle command line argument for spectrochempy
-# ----------------------------------------------------------------------------------------------------------------------
-
-def pytest_cmdline_preparse(config, args):
-    for item in args[:]:
-        for k in list(app.flags.keys()):
-            if item.startswith("--" + k) or k in ['--help', '--help-all']:
-                args.remove(item)
-            continue
-        for k in list(app.aliases.keys()):
-            if item.startswith("-" + k) or k in ['h', ]:
-                args.remove.append(item)
 
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------

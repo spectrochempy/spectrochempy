@@ -18,30 +18,32 @@ def test_plot2D():
     A.copy().plot_stack(data_transposed=True)
     A.copy().plot_image(style=['sans', 'paper'], fontsize=9)
 
-    mystyle = {'image.cmap': 'magma',
-               'font.size': 10,
-               'font.weight': 'bold',
-               'axes.grid': True}
+    mystyle = {
+            'image.cmap': 'magma',
+            'font.size': 10,
+            'font.weight': 'bold',
+            'axes.grid': True
+            }
     # TODO: store these styles for further use
     A.plot(style=mystyle)
     A.plot(style=['sans', 'paper', 'grayscale'], colorbar=False)
     show()
     pass
 
-def test_plotly2D():
 
+def test_plotly2D():
     A = NDDataset.read_omnic('irdata/nh4y-activation.spg',
                              directory=prefs.datadir)
     A.y -= A.y[0]
     A.y.to('hour', inplace=True)
     A.y.title = u'Aquisition time'
 
-    ax = A.copy().plot(use_plotly=True)
-
-
+    A.copy().plot(use_plotly=True)
 
 
 # ======================================================================================================================
 
 if __name__ == '__main__':
     pass
+
+# EOF

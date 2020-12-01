@@ -7,11 +7,8 @@
 
 import os
 
-import pytest
-
 from spectrochempy import NDDataset
 from spectrochempy import general_preferences as prefs
-from spectrochempy import info_
 
 
 # TODO: to revise with project!
