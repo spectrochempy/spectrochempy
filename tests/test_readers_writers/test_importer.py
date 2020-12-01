@@ -135,7 +135,6 @@ def test_read():
 
 
 def test_generic_read():
-    import time
 
     # filename + extension specified
     ds = scp.read('wodger.spg')

@@ -141,8 +141,7 @@ def test_json(project_test):
     proj = project_test
 
     Project.load('project_test.pscp', directory=prefs.datadir)
-    assert str(proj) == \
-"""Project TEST:
+    assert str(proj) == """Project TEST:
     ⤷ S1 (dataset)
     ⤷ S2 (dataset)
     ⤷ print_info (script)
