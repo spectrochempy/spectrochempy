@@ -5,14 +5,13 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import pytest
 from pathlib import Path
 
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-def test_read_zip():
 
+def test_read_zip():
     datadir = prefs.datadir
 
     # with pytest.raises(NotImplementedError):
@@ -22,13 +21,17 @@ def test_read_zip():
     assert A.shape == (10, 2843)
 
     # Test bytes contents for ZIP files
-    z = Path(datadir) /'agirdata' /'P350'/'FTIR'/'FTIR.zip'
+    z = Path(datadir) / 'agirdata' / 'P350' / 'FTIR' / 'FTIR.zip'
     content2 = z.read_bytes()
-    B = NDDataset.read_zip({'name.zip':content2}, origin='omnic', only=10, csv_delimiter=';', merge=True)
+    B = NDDataset.read_zip({
+            'name.zip': content2
+            }, origin='omnic', only=10, csv_delimiter=';', merge=True)
     assert B.shape == (10, 2843)
 
     # Test read_zip with several contents
-    C = NDDataset.read_zip({'name1.zip':content2, 'name2.zip':content2}, origin='omnic', only=10, csv_delimiter=';',
-                             merge=True)
+    C = NDDataset.read_zip({
+            'name1.zip': content2,
+            'name2.zip': content2
+            }, origin='omnic', only=10, csv_delimiter=';',
+            merge=True)
     assert C.shape == (2, 10, 2843)
-

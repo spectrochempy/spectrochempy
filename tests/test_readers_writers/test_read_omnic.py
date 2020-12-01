@@ -14,10 +14,9 @@ from spectrochempy.core import general_preferences as prefs
 
 
 def test_read_omnic():
-
     # Class method opening a dialog (but for test it is preset)
     nd = NDDataset.read_omnic()
-    assert nd.name  == 'nh4y-activation'
+    assert nd.name == 'nh4y-activation'
 
     # class method
     nd1 = scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
@@ -52,6 +51,7 @@ def test_read_omnic():
     nd = scp.read_omnic('wodger.spg', 'irdata/nh4y-activation.spg', merge=True)
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:57, x:5549))'
 
+
 def test_read_omnic_dir():
     # Read in a directory (assume that only OMNIC files are present in the directory
     #        (else we must use the generic `read` function instead)
@@ -61,30 +61,32 @@ def test_read_omnic_dir():
     assert len(nd) == 3
 
     # we can use merge=False
-    l = scp.read_omnic('irdata/subdir/1-20', merge=False)
-    assert isinstance(l, list)
-    assert len(l) == 3
+    lst = scp.read_omnic('irdata/subdir/1-20', merge=False)
+    assert isinstance(lst, list)
+    assert len(lst) == 3
 
 
 def test_read_omnic_contents():
-
     # test read_omnic with byte spg content
     datadir = prefs.datadir
     filename = 'wodger.spg'
     with open(os.path.join(datadir, filename), 'rb') as fil:
         content = fil.read()
     nd1 = scp.read_omnic(filename)
-    nd2 = scp.read_omnic({filename:content})
+    nd2 = scp.read_omnic({
+            filename: content
+            })
     assert nd1 == nd2
-
 
     # Test bytes contents for spa files
     datadir = prefs.datadir
     filename = '7_CZ0-100 Pd_101.SPA'
     with open(os.path.join(datadir, 'irdata', 'subdir', filename), 'rb') as fil:
         content = fil.read()
-    nd = NDDataset.read_omnic({filename:content})
-    assert nd.shape == (1,5549)
+    nd = NDDataset.read_omnic({
+            filename: content
+            })
+    assert nd.shape == (1, 5549)
 
     # test read_omnic with several contents
     datadir = prefs.datadir
@@ -94,11 +96,14 @@ def test_read_omnic_contents():
     filename2 = 'wodger.spg'
     with open(os.path.join(datadir, filename2), 'rb') as fil:
         content2 = fil.read()
-    listnd = NDDataset.read_omnic({filename1:content1, filename2:content2}, merge=True)
-    assert listnd.shape == (3,5549)
+    listnd = NDDataset.read_omnic({
+            filename1: content1,
+            filename2: content2
+            }, merge=True)
+    assert listnd.shape == (3, 5549)
+
 
 def test_read_spa():
-
     nd = scp.read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
 
@@ -108,7 +113,7 @@ def test_read_spa():
     nd = scp.read_spa('irdata/subdir', merge=True, recursive=True)
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:8, x:5549))'
 
-    l = scp.read('irdata/subdir', merge=True, recursive=True) # not selective on extension
-    assert isinstance(l, list)
-    assert str(l[0]) == 'NDDataset: [float32] a.u. (shape: (y:8, x:5549))'
-    assert len(l) == 7 # we have matlab data in the six last datasets
+    lst = scp.read('irdata/subdir', merge=True, recursive=True)  # not selective on extension
+    assert isinstance(lst, list)
+    assert str(lst[0]) == 'NDDataset: [float32] a.u. (shape: (y:8, x:5549))'
+    assert len(lst) == 7  # we have matlab data in the six last datasets

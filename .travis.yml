@@ -81,8 +81,7 @@ before_script:
 script:
   - if [[ $TEST = true ]]; then
       echo "RUNNING TESTS";
-      coverage run -m pytest -v --flake8 -k "not test_example" --nodisplay;
-      pytest -v --flake8 -k "test_example" --nodisplay;
+      coverage run -m pytest -v --flake8 -k tests;
     elif [[ $DEPLOY = true ]]; then
       echo "BUILDING AND UPLOADING ON ANACONDA";
       bash .ci/scripts/conda-upload.sh;

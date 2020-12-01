@@ -5,12 +5,10 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import os
-
 import spectrochempy as scp
 
-def test_read_dir():
 
+def test_read_dir():
     A = scp.read_dir('irdata/subdir')
     assert A.shape == (4, 5549)
 
@@ -35,6 +33,3 @@ def test_read_dir():
     C = scp.read_dir()
 
     return
-
-
-

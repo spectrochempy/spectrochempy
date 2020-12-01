@@ -10,6 +10,7 @@ import os
 import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
 
+
 def test_read_write_json(IR_dataset_2D):
     ds = IR_dataset_2D
 
@@ -28,7 +29,6 @@ def test_read_write_json(IR_dataset_2D):
     assert ds == dsr2
 
     os.remove('try2D.json')
-
 
     # #write to string
     # s = ds.write(to_string=True, protocol='.json')

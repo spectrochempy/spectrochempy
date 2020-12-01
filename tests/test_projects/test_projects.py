@@ -5,10 +5,8 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import os
 
 from spectrochempy import Project, general_preferences, NDDataset, INPLACE, Script, run_script
-from spectrochempy.utils.testing import assert_array_equal
 
 prefs = general_preferences
 
@@ -138,8 +136,8 @@ def test_save_and_load_project(ds1, ds2):
 
     myp.save('PROCESS')
 
-def test_json(project_test):
 
+def test_json(project_test):
     proj = project_test
 
     Project.load('project_test.pscp', directory=prefs.datadir)

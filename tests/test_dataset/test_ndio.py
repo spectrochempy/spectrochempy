@@ -16,15 +16,15 @@ import pytest
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils.testing import assert_array_equal
-from spectrochempy.utils import pathclean, SpectroChemPyException
+from spectrochempy.utils import pathclean
 
 irdatadir = pathclean(prefs.datadir) / "irdata"
 cwd = pathlib.Path.cwd()
 
+
 # Basic
 # ----------------------------------------------------------------------------------------------------------------------
 def test_ndio_generic(IR_dataset_1D):
-
     ir = IR_dataset_1D
     assert ir.filename == 'nh4y-activation.spg'
     assert ir.directory == irdatadir
@@ -42,13 +42,13 @@ def test_ndio_generic(IR_dataset_1D):
     assert ir.filename == f.name
 
     # save in the self.directory with a new name without dialog
-    ir.save_as('essai')               # save essai.scp
-    assert ir.directory == cwd         # should not change
+    ir.save_as('essai')  # save essai.scp
+    assert ir.directory == cwd  # should not change
     assert ir.filename == "essai.scp"
     f.unlink()
 
     # save in a specified directory
-    ir.save_as(irdatadir / 'essai')               # save essai.scp
+    ir.save_as(irdatadir / 'essai')  # save essai.scp
     assert ir.directory == irdatadir
     assert ir.filename == "essai.scp"
 
@@ -70,4 +70,4 @@ def test_ndio_2D(IR_dataset_2D):
     assert nd.directory == irdatadir
     f.unlink()
 
-
+# EOF

@@ -5,7 +5,6 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import os
 import pytest
 from pathlib import Path
 
@@ -16,6 +15,7 @@ from spectrochempy.utils import pathclean
 
 irdatadir = pathclean(prefs.datadir) / "irdata"
 cwd = Path.cwd()
+
 
 # ......................................................................................................................
 def test_write():
@@ -48,6 +48,4 @@ def test_write():
     # assert filename.suffix == '.json'
     # filename.unlink()
 
-
-
-
+# EOF

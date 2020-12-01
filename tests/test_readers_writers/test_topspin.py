@@ -8,24 +8,22 @@
 from pathlib import Path
 
 import spectrochempy as scp
-from spectrochempy.core import general_preferences as prefs
-from spectrochempy.core.dataset.nddataset import NDDataset
+
 
 def test_read_topspin():
 
-    datadir = prefs.datadir
     nmrdir = Path('nmrdata/bruker/tests/nmr')
 
     # Open a dialog for selecting a Topspin directory
-    #A = scp.read_topspin(directory = nmrdir)
+    # A = scp.read_topspin(directory = nmrdir)
 
-    #A.plot()
-    #scp.show()
+    # A.plot()
+    # scp.show()
 
-    #A = scp.read_topspin(nmrdir / 'exam2d_HC/3/pdata/1/2rr')
+    # A = scp.read_topspin(nmrdir / 'exam2d_HC/3/pdata/1/2rr')
 
-    #A.plot_map()
-    #scp.show()
+    # A.plot_map()
+    # scp.show()
 
     # Select a TOPSPIN spectra using the full name
     B = scp.read_topspin(nmrdir / 'topspin_1d/1/fid')

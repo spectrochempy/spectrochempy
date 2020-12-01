@@ -6,10 +6,7 @@
 # ======================================================================================================================
 
 from spectrochempy.core.processors.concatenate import concatenate, stack
-from spectrochempy.core.dataset.ndcoordrange import CoordRange
 from spectrochempy.units import ur
-from spectrochempy.utils import MASKED, show
-from spectrochempy.core import info_
 
 
 def test_concatenate(IR_dataset_2D):
@@ -70,7 +67,9 @@ def test_concatenate(IR_dataset_2D):
 
     # Stacking of datasets:
     # for nDimensional datasets (with the same shape), a new dimension is added
-    ss = concatenate(s.copy(), s.copy(), force_stack=True)   # make a copy of s (dataset cannot be concatenated to itself!)
+    ss = concatenate(s.copy(), s.copy(),
+                     force_stack=True)  # make a copy of s
+    # (dataset cannot be concatenated to itself!)
     assert ss.shape == (2, 45, 5549)
 
     # If one of the dimensions is of size one, then this dimension is removed before stacking

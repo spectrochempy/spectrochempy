@@ -17,10 +17,9 @@ from os.path import join
 
 import pytest
 
-from spectrochempy.core import info_, general_preferences as prefs
+from spectrochempy.core import general_preferences as prefs
 from spectrochempy.api import NO_DISPLAY
-from spectrochempy.utils import get_filename, check_filenames
-from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import get_filename
 
 
 def test_get_filename():
@@ -41,11 +40,15 @@ def test_get_filename():
 
     # directory specified by a keyword as well as the filename
     f = get_filename("nh4y.scp", directory="irdata")
-    assert f == {'.scp': [Path('/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/nh4y.scp')]}
+    assert f == {
+            '.scp': [Path('/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/nh4y.scp')]
+            }
 
     # directory specified in the filename as a subpath of the data directory
     f = get_filename("irdata/nh4y.scp")
-    assert f == {'.scp': [Path('/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/nh4y.scp')]}
+    assert f == {
+            '.scp': [Path('/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/nh4y.scp')]
+            }
 
     # no directory specified (filename must be in the working or the default  data directory
     f = get_filename("wodger.spg")
@@ -57,7 +60,7 @@ def test_get_filename():
     # directory is implicit (we get every files inside, with an allowed extension)
     # WARNING:  Must end with a backslash
     f = get_filename("irdata/",
-                     filetypes=['OMNIC files (*.spa, *.spg)','OMNIC series (*.srs)', 'all files (*.*)'],
+                     filetypes=['OMNIC files (*.spa, *.spg)', 'OMNIC series (*.srs)', 'all files (*.*)'],
                      listdir=True)
 
     assert len(f.keys()) == 3
@@ -69,14 +72,4 @@ def test_get_filename():
                                 "SpectroChemPy files (*.scp)",
                                 "all files (*)"])
 
-def test_check_filenames():
-
-    f1 = check_filenames("irdata",
-                     filetypes=['OMNIC files (*.spa, *.spg)','OMNIC series (*.srs)', 'all files (*.*)'],
-                     listdir=True)
-    f2 = get_filename("irdata",
-                     filetypes=['OMNIC files (*.spa, *.spg)','OMNIC series (*.srs)', 'all files (*.*)'],
-                     )
-
-    #assert len(f1.keys()) == 3
-    #assert f1 == f
+# EOF

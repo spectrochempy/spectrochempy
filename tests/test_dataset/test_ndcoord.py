@@ -244,7 +244,6 @@ def test_coord():
     assert coord0.reversed
 
 
-
 def test_coord_slicing():
     # slicing by index
 

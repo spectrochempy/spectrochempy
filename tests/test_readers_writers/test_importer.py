@@ -6,17 +6,15 @@
 # ======================================================================================================================
 
 import os
-import pytest
 from pathlib import Path
-
 
 import spectrochempy as scp
 from spectrochempy import NDDataset
 from spectrochempy import general_preferences as prefs
 
+
 # ......................................................................................................................
 def test_read():
-
     f = Path('irdata/OPUS/test.0000')
 
     A1 = NDDataset.read_opus(f)
@@ -32,7 +30,7 @@ def test_read():
     # single file without protocol
     # inferred from filename
     A4 = NDDataset.read(f)
-    assert A4==A1
+    assert A4 == A1
 
     A5 = scp.read('irdata/nh4y-activation.spg')
     assert str(A5) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
@@ -69,19 +67,21 @@ def test_read():
     datadir = Path(prefs.datadir)
     p = datadir / 'irdata' / 'OPUS' / 'test.0000'
     content = p.read_bytes()
-    F = NDDataset.read({p.name:content})
+    F = NDDataset.read({
+            p.name: content
+            })
     assert F.name == p.name
     assert F.shape == (1, 2567)
 
     # read multiple 1D contents and merge them
-    l = [ datadir / 'irdata' / 'OPUS' / f'test.000{i}' for i in range(3)]
-    G = NDDataset.read({p.name : p.read_bytes() for p in l})
+    lst = [datadir / 'irdata' / 'OPUS' / f'test.000{i}' for i in range(3)]
+    G = NDDataset.read({p.name: p.read_bytes() for p in lst})
     assert G.shape == (3, 2567)
-    assert len(G)==3
+    assert len(G) == 3
 
     # read multiple  1D contents awithout merging
-    l = [ datadir / 'irdata' / 'OPUS' / f'test.000{i}' for i in range(3)]
-    H = NDDataset.read({p.name : p.read_bytes() for p in l}, merge=False)
+    lst = [datadir / 'irdata' / 'OPUS' / f'test.000{i}' for i in range(3)]
+    H = NDDataset.read({p.name: p.read_bytes() for p in lst}, merge=False)
     isinstance(H, list)
     assert len(H) == 3
 
@@ -96,7 +96,9 @@ def test_read():
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
 
     # It can also be passed using a dictionary structure {filename:content, ....}
-    nd = NDDataset.read({filename:content})
+    nd = NDDataset.read({
+            filename: content
+            })
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
 
     # Case where the filename is not provided
@@ -112,26 +114,30 @@ def test_read():
     content2 = filename2.read_bytes()
     filename = 'try2.spa'
 
-    nd = NDDataset.read({filename:content})
-    assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
+    nd = NDDataset.read({
+            filename: content
+            })
+    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
 
     # Try with only a .spa content
     nd = NDDataset.read(content)
-    assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
+    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:1, x:5549))'
 
     # Try with several .spa content (should be stacked into a single nddataset)
-    nd = NDDataset.read({filename:content, filename2:content2})
-    assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+    nd = NDDataset.read({
+            filename: content,
+            filename2: content2
+            })
+    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
 
     nd = NDDataset.read(content, content2)
-    assert str(nd)=='NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
+    assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:2, x:5549))'
 
 
 def test_generic_read():
     import time
 
     # filename + extension specified
-    start = time.time()
     ds = scp.read('wodger.spg')
     assert ds.name == 'wodger'
 
@@ -143,15 +149,14 @@ def test_generic_read():
     assert path.parent == ds.directory
 
     # read should be équivalent to load (but read is a more general function,
-    start = time.time()
     dataset = NDDataset.load('wodger.scp')
     assert dataset.name == 'wodger'
 
-def test_read_dir():
 
+def test_read_dir():
     datadir = Path(prefs.datadir)
 
-    A = scp.read()    # should open a dialog (but to selects individual filename
+    A = scp.read()  # should open a dialog (but to selects individual filename
 
     # if we want the whole dir  - listdir must be used
     # this is equivalent to read_dir with a dialog to select directories only
@@ -161,14 +166,11 @@ def test_read_dir():
     assert A == A1
 
     # listdir is not necessary if a directory location is given as a single argument
-    B = scp.read(datadir/'irdata'/'subdir', listdir=True)
-    B1 = scp.read(datadir/'irdata'/'subdir')
+    B = scp.read(datadir / 'irdata' / 'subdir', listdir=True)
+    B1 = scp.read(datadir / 'irdata' / 'subdir')
     assert B == B1
 
     # if a directory is passed as a keyword, the behavior is different:
     # a dialog for file selection occurs except if listdir is set to True
-    scp.read(directory=datadir/'irdata'/'subdir', listdir=True)   # -> file selection dialog
-    scp.read(directory=datadir/'irdata'/'subdir', listdir=True)   # -> directory selection dialog
-
-
-
+    scp.read(directory=datadir / 'irdata' / 'subdir', listdir=True)  # -> file selection dialog
+    scp.read(directory=datadir / 'irdata' / 'subdir', listdir=True)  # -> directory selection dialog

@@ -11,8 +11,8 @@ import spectrochempy as scp
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-def test_read_csv():
 
+def test_read_csv():
     datadir = prefs.datadir
 
     A = NDDataset.read_csv('agirdata/P350/TGA/tg.csv', directory=datadir, origin='tga')
@@ -32,6 +32,7 @@ def test_read_csv():
 
     # Read CSV content
     content = p.read_bytes()
-    E = scp.read_csv({'somename.csv':content})
+    E = scp.read_csv({
+                             'somename.csv': content
+                             })
     assert E == C
-

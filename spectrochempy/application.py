@@ -1012,7 +1012,7 @@ class SpectroChemPy(Application):
 
         if not IN_IPYTHON:
             # remove argument not known by spectrochempy
-            if 'make.py' in sys.argv[0]:  # building docs
+            if 'make.py' in sys.argv[0] or 'pytest' in sys.argv[0]:  # building docs
                 options = []
                 for item in sys.argv[:]:
                     for k in list(self.flags.keys()):
