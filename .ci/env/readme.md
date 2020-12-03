@@ -6,10 +6,10 @@ In this directory, two yaml file serve for the creation of initial environments:
 
   ```bash
       $ conda deactivate
-      $ conda env create -f=env/scpy.yml
+      $ conda env create -f=.ci/env/scpy.yml
 
     ```
-  Modify the ``env/scpy.yml`` string with the full path if you are not in the 
+  Modify the ``.ci/env/scpy.yml`` string with the full path if you are not in the 
   top-level spectrochempy directory (where you have 
   unzipped the spectrochempy package). 
   
@@ -24,7 +24,7 @@ In this directory, two yaml file serve for the creation of initial environments:
   
   ```bash
       $ conda deactivate
-      $ conda env create -f=env/scpy-dev.yml
+      $ conda env create -f=.ci/env/scpy-dev.yml
 
     ```
     

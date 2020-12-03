@@ -1,4 +1,4 @@
-name: scpy-dev
+name: scpy
 channels:
   - conda-forge
   - spectrocat
@@ -9,14 +9,13 @@ channels:
 dependencies:
   - python=3.8
 
-  # specific
-  - cantera
+  # from spectrocat channel
   - quadprog
   - brukeropusreader
-  - quaternion
   - nmrglue
 
   # for the core package
+  - cantera
   - colorama
   - dash
   - dash-bootstrap-components
@@ -32,6 +31,7 @@ dependencies:
   - pint
   - plotly
   - pyqt
+  - quaternion
   - requests
   - scipy
   - tqdm
@@ -51,37 +51,3 @@ dependencies:
   - ipympl
   - jupyterlab
   - nodejs
-
-  # DEV: just for testing
-  - pytest
-  - pytest-doctestplus
-  - pytest-flake8
-  - scikit-image
-  - coverage
-
-  # DEV: code and docs
-  - jupyter-dash
-  - jupytext
-  - sphinx
-  - sphinx_rtd_theme
-  - autodocsumm
-  - sphinx-gallery
-  - nbsphinx
-  - jupyter_sphinx
-  - json5
-
-  # DEV: build
-  - conda-build
-  - conda-verify
-  - anaconda-client
-
-  # optional
-  # - xarray
-  # - datashader
-  # - scikit-learn
-
-  # pip only for docs
-  - pip
-  - pip:
-      - autodoc_traits
-
