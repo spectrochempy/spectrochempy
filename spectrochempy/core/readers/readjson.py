@@ -95,11 +95,10 @@ def from_json(dic):
 
 @importermethod
 def _read_json(*args, **kwargs):
-
     debug_("reading a json file")
 
     # read jdx file
-    dataset , filename = args
+    dataset, filename = args
     content = kwargs.get('content', None)
 
     if content is not None:
@@ -117,7 +116,6 @@ def _read_json(*args, **kwargs):
 
 
 def _from_json(dataset, obj):
-
     # interpret
     coords = None
 

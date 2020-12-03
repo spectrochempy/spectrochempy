@@ -159,11 +159,20 @@ def align(dataset, *others, **kwargs):
             for k, v in object.datasets.items():
                 # set the coordset into the NDDataset object (temporary: this will be unset at the end)
                 v.coords = object.coords
-                _objects[_nobj] = {'obj': v, 'idx': idx, 'is_panel': True, 'key': k}
+                _objects[_nobj] = {
+                        'obj': v,
+                        'idx': idx,
+                        'is_panel': True,
+                        'key': k
+                        }
                 _nobj += 1
 
         else:
-            _objects[_nobj] = {'obj': object, 'idx': idx, 'is_panel': False}
+            _objects[_nobj] = {
+                    'obj': object,
+                    'idx': idx,
+                    'is_panel': False
+                    }
             _nobj += 1
 
     _last = _nobj - 1

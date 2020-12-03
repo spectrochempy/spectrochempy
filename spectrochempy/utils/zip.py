@@ -107,7 +107,7 @@ class ScpFile(Mapping):
             if str(e) == "'ScpFile' object has no attribute 'zip'":
                 pass
         except Exception as e:
-           raise e
+            raise e
 
     def __iter__(self):
         return iter(self.files)
@@ -146,6 +146,7 @@ class ScpFile(Mapping):
 
     def __contains__(self, key):
         return self.files.__contains__(key)
+
 
 # ======================================================================================================================
 if __name__ == '__main__':

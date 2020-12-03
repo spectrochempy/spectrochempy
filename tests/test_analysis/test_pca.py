@@ -20,6 +20,7 @@ from spectrochempy.utils.testing import assert_array_almost_equal
 HAS_SCIKITLEARN = False
 try:
     from sklearn.decomposition import PCA as sklPCA
+
     HAS_SCIKITLEARN = True
 except ImportError:
     pass
@@ -54,7 +55,6 @@ def test_pca(IR_dataset_2D):
 
 @pytest.mark.skipif(not HAS_SCIKITLEARN, reason="scikit-learn library not loaded")
 def test_compare_scikit_learn(IR_dataset_2D):
-
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
 
     pcas = sklPCA(n_components=2)

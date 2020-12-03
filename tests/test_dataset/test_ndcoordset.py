@@ -47,7 +47,11 @@ def test_coordset_init(coord0, coord1, coord2):
     coordsc = CoordSet(x=coord2, y=coord3, z=coord0)  # third syntax
     assert coordsc.names == ['x', 'y', 'z']
 
-    coordsc1 = CoordSet({'x': coord2, 'y': coord3, 'z': coord0})
+    coordsc1 = CoordSet({
+            'x': coord2,
+            'y': coord3,
+            'z': coord0
+            })
     assert coordsc1.names == ['x', 'y', 'z']
 
     coordsd = CoordSet(coord3, x=coord2, y=coord3, z=coord0)  # conflict (keyw replace args)

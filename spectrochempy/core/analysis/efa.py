@@ -31,6 +31,8 @@ from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import docstrings, MASKED
 from spectrochempy.core.analysis.svd import SVD
+
+
 # from spectrochempy.core.plotters.plot1d import plot_multiple
 # from spectrochempy.utils import show
 

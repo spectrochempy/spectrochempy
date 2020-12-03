@@ -6,6 +6,7 @@
 # ======================================================================================================================
 
 import os
+
 import numpy as np
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -36,7 +37,10 @@ def test_MCRALS_no_coords():
     print('\n test on single experiment (m1) with EFA estimate of pure species (verbose off)...\n')
     guess = EFA(X).get_conc(4)
 
-    param = {'normSpec': 'euclid', 'maxit': 100}
+    param = {
+            'normSpec': 'euclid',
+            'maxit': 100
+            }
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr2.plotmerit()
 
@@ -77,7 +81,10 @@ def test_MCRALS():
     guess = EFA(X).get_conc(4)
     guess.plot(title='EFA guess')
 
-    param = {'normSpec': 'euclid', 'maxit': 100}
+    param = {
+            'normSpec': 'euclid',
+            'maxit': 100
+            }
     mcr2 = MCRALS(X, guess, param=param, verbose=False)
     mcr.plotmerit()
 

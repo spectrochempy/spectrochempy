@@ -11,17 +11,15 @@ import spectrochempy as scp
 
 
 def test_read_topspin():
-
     nmrdir = Path('nmrdata/bruker/tests/nmr')
 
     # Open a dialog for selecting a Topspin directory
-    A = scp.read_topspin(directory = nmrdir)
+    A = scp.read_topspin(directory=nmrdir)
 
-    #A.plot()
+    # A.plot()
 
     A = scp.read_topspin(nmrdir / 'exam2d_HC/3/pdata/1/2rr')
     A.plot_map()
-
 
     # Select a TOPSPIN spectra using the full name
     B = scp.read_topspin(nmrdir / 'topspin_1d/1/fid')
@@ -41,4 +39,3 @@ def test_read_topspin():
     C.plot_image()
 
     scp.show()
-

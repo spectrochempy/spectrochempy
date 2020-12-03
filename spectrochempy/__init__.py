@@ -44,6 +44,7 @@
 import sys
 from time import time
 from pathlib import Path
+
 if '/bin/scpy_update' not in sys.argv[0]:  # avoid indefinite loop of calls this process
 
     p = Path('~/.spectrochempy/tmp')
@@ -53,20 +54,22 @@ if '/bin/scpy_update' not in sys.argv[0]:  # avoid indefinite loop of calls this
     q.touch(exist_ok=True)
     text = q.read_text()
     if not text:
-        text = str(time()-90000)
-    if time()-float(text) > 90000:   # check every 24 hours at the maximum
+        text = str(time() - 90000)
+    if time() - float(text) > 90000:  # check every 24 hours at the maximum
         import subprocess
+
         subprocess.Popen(["scpy_update"])
         q.write_text(str(time()))
 
 # import the main api
-from spectrochempy.api import *    # noqa: F403,F401
+from spectrochempy.api import *  # noqa: F403,F401
 from spectrochempy import api
 
 __all__ = api.__all__
 
 # GUI application needed for dialogs
 from PyQt5 import QtWidgets
+
 GUI = QtWidgets.QApplication(sys.argv)
 
 # ==============================================================================

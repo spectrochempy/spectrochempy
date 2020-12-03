@@ -42,13 +42,14 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.core.dataset.ndio import NDIO
 
+
 # ======================================================================================================================
 # NDPanel class definition
 # ======================================================================================================================
 
 class NDPanel(
-    NDDataset
-):
+        NDDataset
+        ):
     """
     A multi-dimensional array container.
 
@@ -224,9 +225,11 @@ class NDPanel(
         for dataset in self._datasets.values():
             for index, dim in enumerate(dataset.dims):
                 if dim not in _dict:
-                    _dict[dim] = {'datasets': [dataset.name],
-                                  'size': dataset.shape[index],
-                                  'coord': getattr(self, dim)}
+                    _dict[dim] = {
+                            'datasets': [dataset.name],
+                            'size': dataset.shape[index],
+                            'coord': getattr(self, dim)
+                            }
         return _dict
 
     # ------------------------------------------------------------------------------------------------------------------

@@ -21,8 +21,10 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndmath import unary_ufuncs, binary_ufuncs, comp_ufuncs
 from spectrochempy.units.units import ur, Quantity
 from spectrochempy.utils import (MASKED, TYPE_FLOAT, TYPE_INTEGER)
-from spectrochempy.utils.testing import (assert_array_equal,
-                                         assert_equal_units, )
+from spectrochempy.utils.testing import (
+    assert_array_equal,
+    assert_equal_units,
+    )
 
 typequaternion = np.dtype(np.quaternion)
 
@@ -297,30 +299,68 @@ def test_ndmath_max(IR_dataset_2D):
                                  ('np.argmax', (TYPE_INTEGER, tuple), None, {}),
                                  ('np.argmin', (TYPE_INTEGER, tuple), None, {}),
 
-                                 ('np.max', NDDataset, None, {'keepdims': True}),
-                                 ('np.sum', NDDataset, None, {'keepdims': True}),
-                                 ('np.mean', (NDDataset), None, {'keepdims': True}),
-                                 ('np.std', (NDDataset), None, {'keepdims': True}),
-                                 ('np.var', (NDDataset), None, {'keepdims': True}),
+                                 ('np.max', NDDataset, None, {
+                                         'keepdims': True
+                                         }),
+                                 ('np.sum', NDDataset, None, {
+                                         'keepdims': True
+                                         }),
+                                 ('np.mean', (NDDataset), None, {
+                                         'keepdims': True
+                                         }),
+                                 ('np.std', (NDDataset), None, {
+                                         'keepdims': True
+                                         }),
+                                 ('np.var', (NDDataset), None, {
+                                         'keepdims': True
+                                         }),
 
-                                 ('np.max', (TYPE_FLOAT, NDDataset), None, {'axis': 0}),
-                                 ('max', (TYPE_FLOAT, NDDataset), None, {'dim': 'x'}),
-                                 ('np.sum', (TYPE_FLOAT, NDDataset), None, {'axis': 0}),
-                                 ('sum', (TYPE_FLOAT, NDDataset), None, {'dim': 'x'}),
+                                 ('np.max', (TYPE_FLOAT, NDDataset), None, {
+                                         'axis': 0
+                                         }),
+                                 ('max', (TYPE_FLOAT, NDDataset), None, {
+                                         'dim': 'x'
+                                         }),
+                                 ('np.sum', (TYPE_FLOAT, NDDataset), None, {
+                                         'axis': 0
+                                         }),
+                                 ('sum', (TYPE_FLOAT, NDDataset), None, {
+                                         'dim': 'x'
+                                         }),
 
-                                 ('np.max', (NDDataset), None, {'axis': 0, 'keepdims': True}),
-                                 ('max', (NDDataset), None, {'dim': 'x', 'keepdims': True}),
-                                 ('np.mean', (NDDataset), None, {'axis': 0, 'keepdims': True}),
-                                 ('mean', (NDDataset), None, {'dim': 'x', 'keepdims': True}),
+                                 ('np.max', (NDDataset), None, {
+                                         'axis': 0,
+                                         'keepdims': True
+                                         }),
+                                 ('max', (NDDataset), None, {
+                                         'dim': 'x',
+                                         'keepdims': True
+                                         }),
+                                 ('np.mean', (NDDataset), None, {
+                                         'axis': 0,
+                                         'keepdims': True
+                                         }),
+                                 ('mean', (NDDataset), None, {
+                                         'dim': 'x',
+                                         'keepdims': True
+                                         }),
 
                                  ('np.cumsum', NDDataset, None, {}),
                                  ('cumsum', NDDataset, None, {}),
-                                 ('np.cumsum', NDDataset, None, {'axis': 0}),
-                                 ('cumsum', NDDataset, None, {'axis': 0}),
+                                 ('np.cumsum', NDDataset, None, {
+                                         'axis': 0
+                                         }),
+                                 ('cumsum', NDDataset, None, {
+                                         'axis': 0
+                                         }),
 
                                  ('np.ptp', (TYPE_FLOAT, NDDataset), None, {}),
-                                 ('np.ptp', (TYPE_FLOAT, NDDataset), None, {'axis': 0}),
-                                 ('ptp', (TYPE_FLOAT, NDDataset), None, {'dim': 'x'}),
+                                 ('np.ptp', (TYPE_FLOAT, NDDataset), None, {
+                                         'axis': 0
+                                         }),
+                                 ('ptp', (TYPE_FLOAT, NDDataset), None, {
+                                         'dim': 'x'
+                                         }),
 
                                  ('np.all', np.bool_, None, {}),
                                  ('np.any', np.bool_, None, {}),

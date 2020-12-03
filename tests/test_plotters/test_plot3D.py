@@ -5,9 +5,9 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-from spectrochempy import NDDataset, Coord, show
-
 import os
+
+from spectrochempy import NDDataset, Coord, show
 
 
 def test_plot2D_as_3D():

@@ -130,7 +130,6 @@ def read_opus(*args, **kwargs):
 # ......................................................................................................................
 @importermethod
 def _read_opus(*args, **kwargs):
-
     debug_('Bruker OPUS import')
 
     dataset, filename = args

@@ -46,51 +46,53 @@ def _pretty_fmt_exponent(num):
 
 
 formats = {
-    'P': {  # Pretty format.
-        'as_ratio': False,  # True in pint
-        'single_denominator': False,
-        'product_fmt': '·',
-        'division_fmt': '/',
-        'power_fmt': '{}{}',
-        'parentheses_fmt': '({})',
-        'exp_call': _pretty_fmt_exponent,
-    },
-    'L': {  # spectrochempy Latex format.
-        'as_ratio': False,  # True in pint
-        'single_denominator': True,
-        'product_fmt': r' \cdot ',
-        'division_fmt': r'\frac[{}][{}]',
-        'power_fmt': '{}^[{}]',
-        'parentheses_fmt': r'\left({}\right)',
-    },
-    'H': {  # spectrochempy HTML format.
-        'as_ratio': False,  # True in pint
-        'single_denominator': False,
-        'product_fmt': r'.',
-        'division_fmt': r'{}/{}',
-        'power_fmt': '{}<sup>{}</sup>',
-        'parentheses_fmt': r'{}',
-    },
-    'K': {  # spectrochempy Compact format.
-        'as_ratio': False,
-        'single_denominator': False,
-        'product_fmt': '.',
-        'division_fmt': '/',
-        'power_fmt': '{}^{}',
-        'parentheses_fmt': r'({})',
-    },
+        'P': {  # Pretty format.
+                'as_ratio': False,  # True in pint
+                'single_denominator': False,
+                'product_fmt': '·',
+                'division_fmt': '/',
+                'power_fmt': '{}{}',
+                'parentheses_fmt': '({})',
+                'exp_call': _pretty_fmt_exponent,
+                },
+        'L': {  # spectrochempy Latex format.
+                'as_ratio': False,  # True in pint
+                'single_denominator': True,
+                'product_fmt': r' \cdot ',
+                'division_fmt': r'\frac[{}][{}]',
+                'power_fmt': '{}^[{}]',
+                'parentheses_fmt': r'\left({}\right)',
+                },
+        'H': {  # spectrochempy HTML format.
+                'as_ratio': False,  # True in pint
+                'single_denominator': False,
+                'product_fmt': r'.',
+                'division_fmt': r'{}/{}',
+                'power_fmt': '{}<sup>{}</sup>',
+                'parentheses_fmt': r'{}',
+                },
+        'K': {  # spectrochempy Compact format.
+                'as_ratio': False,
+                'single_denominator': False,
+                'product_fmt': '.',
+                'division_fmt': '/',
+                'power_fmt': '{}^{}',
+                'parentheses_fmt': r'({})',
+                },
 
-}
+        }
 
 formatting._FORMATS.update(formats)
 formatting._KNOWN_TYPES = frozenset(list(formatting._FORMATS.keys()) + ['~'])
+
 
 def _repr_html_(cls):
     p = cls.__format__('~H')
     # attempt to solve a display problem in notebook (recent version of pint
     # have a strange way to handle HTML. For me it doen't work
-    p = p.replace(r'\[','').replace(r'\]','').replace(r'\ ',' ')
+    p = p.replace(r'\[', '').replace(r'\]', '').replace(r'\ ', ' ')
     return p
+
 
 setattr(Quantity, '_repr_html_', _repr_html_)
 setattr(Quantity, '_repr_latex_', lambda cls: "$" + cls.__format__('~L') + "$")
@@ -113,22 +115,36 @@ def __format__(self, spec):
     if '~' in spec or 'K' in spec or 'T' in spec or 'L' in spec:  # spectrochempy modified
         if self.dimensionless and 'absorbance' not in self._units:
             if self._units == 'ppm':
-                units = UnitsContainer({'ppm': 1})
+                units = UnitsContainer({
+                                               'ppm': 1
+                                               })
             elif self._units == 'percent':
-                units = UnitsContainer({'%': 1})
+                units = UnitsContainer({
+                                               '%': 1
+                                               })
             elif self._units == 'weight_percent':
-                units = UnitsContainer({'wt.%': 1})
+                units = UnitsContainer({
+                                               'wt.%': 1
+                                               })
             elif self._units == 'radian':
-                units = UnitsContainer({'rad': 1})
+                units = UnitsContainer({
+                                               'rad': 1
+                                               })
             elif self._units == 'degree':
-                units = UnitsContainer({'deg': 1})
+                units = UnitsContainer({
+                                               'deg': 1
+                                               })
             # elif self._units == 'absorbance':
             #    units = UnitsContainer({'a.u.': 1})
             elif abs(self.scaling - 1.) < 1.e-10:
-                units = UnitsContainer({'': 1})
+                units = UnitsContainer({
+                                               '': 1
+                                               })
             else:
                 units = UnitsContainer(
-                    {'scaled-dimensionless (%.2g)' % self.scaling: 1})
+                        {
+                                'scaled-dimensionless (%.2g)' % self.scaling: 1
+                                })
         else:
             units = UnitsContainer(dict((self._REGISTRY._get_symbol(key), value)
                                         for key, value in list(self._units.items())))
@@ -222,14 +238,16 @@ def set_nmr_context(larmor):
         larmor = larmor * U_.MHz
 
     if 'nmr' not in list(U_._contexts.keys()):
-        c = Context('nmr', defaults={'larmor': larmor})
+        c = Context('nmr', defaults={
+                'larmor': larmor
+                })
 
         c.add_transformation('[]', '[frequency]',
                              lambda U_, x, **kwargs: x * kwargs.get(
-                                 'larmor') / 1.e6)
+                                     'larmor') / 1.e6)
         c.add_transformation('[frequency]', '[]',
                              lambda U_, x, **kwargs: x * 1.e6 / kwargs.get(
-                                 'larmor'))
+                                     'larmor'))
         U_.add_context(c)
 
     else:

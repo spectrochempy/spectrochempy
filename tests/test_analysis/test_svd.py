@@ -8,10 +8,11 @@
 """ Tests for the SVD class
 
 """
+from numpy.testing import assert_allclose
+
 from spectrochempy.core.analysis.svd import SVD
 from spectrochempy.utils import MASKED
 from spectrochempy.core import info_
-from numpy.testing import assert_allclose
 
 
 # test svd

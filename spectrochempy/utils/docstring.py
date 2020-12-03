@@ -36,10 +36,12 @@ def indent(text, num=4):
 def append_original_doc(parent, num=0):
     """Return an iterator that append the docstring of the given `parent`
     function to the applied function"""
+
     def func(func):
         func.__doc__ = func.__doc__ and func.__doc__ + indent(
-            parent.__doc__, num)
+                parent.__doc__, num)
         return func
+
     return func
 
 
@@ -55,11 +57,11 @@ class SpectroChemPyDocstringProcessor(DocstringProcessor):
     """
 
     param_like_sections = DocstringProcessor.param_like_sections + [
-        'Possible types']
+            'Possible types']
 
     @_docstrings.dedent
     def get_sections(self, s=None, base=None, sections=[
-        'Parameters', 'Other Parameters', 'Returns', 'Possible types']):
+            'Parameters', 'Other Parameters', 'Returns', 'Possible types']):
         """
         Extract the specified sections out of the given string
 
@@ -76,7 +78,7 @@ class SpectroChemPyDocstringProcessor(DocstringProcessor):
             The replaced string
         """
         return super(SpectroChemPyDocstringProcessor, self).get_sections(
-            s, base, sections)
+                s, base, sections)
 
 
 del _docstrings
@@ -87,33 +89,33 @@ docstrings = SpectroChemPyDocstringProcessor()
 
 # Set some general parameters
 docstrings.get_sections(docstrings.dedent(
-    """
-    Note
-    ----
-    To be completed with useful common parameters
-
-    Parameters
-    ----------
-    dim : int or str, optional, default=0
-        Dimension name or index along which the method should be applied.
-    dims : int, str or tuple of int or str, optional, default=(0,)
-        Dimension names or indexes along which the method should be applied.
-    axis : int, optional, default=-1
-        Dimension index along which the method should be applied.
-    inplace : bool, optional, default=`False`
-        Flag to say that the method return a new object (default)
-        or not (inplace=True)
-
-    Other Parameters
-    ----------------
-
-    Returns
-    -------
-    object
-        Same object or a copy depending on the `inplace` flag.
-
-    """
-), 'generic_method', sections=['Parameters', 'Returns'])
+        """
+        Note
+        ----
+        To be completed with useful common parameters
+    
+        Parameters
+        ----------
+        dim : int or str, optional, default=0
+            Dimension name or index along which the method should be applied.
+        dims : int, str or tuple of int or str, optional, default=(0,)
+            Dimension names or indexes along which the method should be applied.
+        axis : int, optional, default=-1
+            Dimension index along which the method should be applied.
+        inplace : bool, optional, default=`False`
+            Flag to say that the method return a new object (default)
+            or not (inplace=True)
+    
+        Other Parameters
+        ----------------
+    
+        Returns
+        -------
+        object
+            Same object or a copy depending on the `inplace` flag.
+    
+        """
+        ), 'generic_method', sections=['Parameters', 'Returns'])
 
 docstrings.keep_params('generic_method.parameters', 'dim')
 docstrings.keep_params('generic_method.parameters', 'dims')

@@ -61,7 +61,7 @@ def download_IRIS():
             labels = list((lab.decode("utf8") for lab in labels))
         except Exception:
             raise IOError(
-                '{} is not a .csv file or its structure cannot be recognized')
+                    '{} is not a .csv file or its structure cannot be recognized')
 
         coordx = Coord(labels=['sepal_length', 'sepal width', 'petal_length', 'petal_width'], title='features')
         coordy = Coord(labels=labels, title='samples')

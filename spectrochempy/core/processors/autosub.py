@@ -173,10 +173,9 @@ def autosub(dataset, ref, *ranges, dim='x', method='vardiff', return_coefs=False
         new = new.swapaxes(axis, -1)
 
     new.history = str(
-        new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'
+            new.modified) + ': ' + 'Automatic subtraction of:' + ref.name + '\n'
 
     if return_coefs:
         return new, x
     else:
         return new
-

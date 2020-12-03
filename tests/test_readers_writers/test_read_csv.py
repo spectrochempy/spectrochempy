@@ -33,6 +33,6 @@ def test_read_csv():
     # Read CSV content
     content = p.read_bytes()
     E = scp.read_csv({
-                             'somename.csv': content
-                             })
+            'somename.csv': content
+            })
     assert E == C

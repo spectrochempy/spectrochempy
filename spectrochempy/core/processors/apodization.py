@@ -343,6 +343,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     return out
 
+
 # ======================================================================================================================
 @docstrings.dedent
 def sp(dataset, ssb=1, pow=1, **kwargs):
@@ -457,6 +458,7 @@ def qsin(dataset, ssb=1, **kwargs):
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
 
+
 # ================================================================================================
 
 @docstrings.dedent
@@ -508,6 +510,7 @@ def hamming(dataset, **kwargs):
 
     return out
 
+
 @docstrings.dedent
 def triang(dataset, **kwargs):
     r"""
@@ -553,6 +556,7 @@ def triang(dataset, **kwargs):
 
     return out
 
+
 @docstrings.dedent
 def bartlett(dataset, **kwargs):
     r"""
@@ -595,6 +599,7 @@ def bartlett(dataset, **kwargs):
         return out, apodcurve
 
     return out
+
 
 @docstrings.dedent
 def blackmanharris(dataset, **kwargs):
@@ -639,6 +644,7 @@ def blackmanharris(dataset, **kwargs):
         return out, apodcurve
 
     return out
+
 
 @docstrings.dedent
 def mertz(dataset, zpd, **kwargs):

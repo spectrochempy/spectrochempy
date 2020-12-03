@@ -19,6 +19,7 @@ from spectrochempy.core.writers.exporter import docstrings, Exporter, exporterme
 __all__ = ['write_matlab', 'write_mat']
 __dataset_methods__ = __all__
 
+
 # .......................................................................................................................
 @docstrings.dedent
 def write_matlab(*args, **kwargs):
@@ -43,8 +44,8 @@ def write_matlab(*args, **kwargs):
 
     """
     exporter = Exporter()
-    kwargs['filetypes']=['MATLAB files (*.mat)']
-    kwargs['suffix']='.mat'
+    kwargs['filetypes'] = ['MATLAB files (*.mat)']
+    kwargs['suffix'] = '.mat'
     return exporter(*args, **kwargs)
 
 

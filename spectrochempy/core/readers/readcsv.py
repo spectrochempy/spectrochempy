@@ -23,7 +23,6 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
-
 try:
     locale.setlocale(locale.LC_ALL, 'en_US')  # to avoid problems with date format
 except Exception:
@@ -31,6 +30,7 @@ except Exception:
         locale.setlocale(locale.LC_ALL, 'en_US.utf8')  # to avoid problems with date format
     except Exception:
         warnings.warn('Could not set locale: en_US or en_US.utf8')
+
 
 # ======================================================================================================================
 # Public functions
@@ -100,7 +100,6 @@ def read_csv(*args, **kwargs):
 
 @importermethod
 def _read_csv(*args, **kwargs):
-
     # read csv file
     dataset, filename = args
     content = kwargs.get('content', None)
@@ -189,7 +188,6 @@ def _read_csv(*args, **kwargs):
 
 # .............................................................................
 def _add_omnic_info(dataset, **kwargs):
-
     # get the time and name
     name = desc = dataset.name
 
@@ -239,7 +237,6 @@ def _add_omnic_info(dataset, **kwargs):
 
 
 def _add_tga_info(dataset, **kwargs):
-
     # for TGA, some information are needed.
     # we add them here
     dataset.x.units = 'hour'

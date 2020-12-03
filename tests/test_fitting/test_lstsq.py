@@ -5,10 +5,10 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import spectrochempy.core as sc
 import numpy as np
-
 import matplotlib.pyplot as plt
+
+import spectrochempy.core as sc
 
 
 # ............................................................................

@@ -347,7 +347,7 @@ class SIMPLISMA(HasTraits):
                     if ans.lower() == 'r':
                         maxPCoordinate[j] = 0
                         maxPIndex[j] = 0
-                        logs += f'   |--> rejected pure variable #{j+1}\n'
+                        logs += f'   |--> rejected pure variable #{j + 1}\n'
                         j = j - 1
 
                     elif ans.lower() == 'a':

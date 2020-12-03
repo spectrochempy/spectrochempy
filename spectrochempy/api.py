@@ -24,7 +24,6 @@ import matplotlib as mpl
 from IPython.core.interactiveshell import InteractiveShell
 from IPython import get_ipython
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Check the environment for plotting
 # ----------------------------------------------------------------------------------------------------------------------
@@ -109,7 +108,8 @@ if 'pytest' in sys.argv[0] or 'py.test' in sys.argv[0]:
     # OK, but if we are doing individual function testing in PyCharm
     # it is interesting to see the plots and the file dialogs (except if we set explicitely --nodisplay argument!
     # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
-    if len(sys.argv) > 1 and any([arg.split('::')[0].endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
+    if len(sys.argv) > 1 and any(
+            [arg.split('::')[0].endswith(".py") for arg in sys.argv[1:]]) and '--nodisplay' not in sys.argv:
         # individual module testing
         NO_DISPLAY = False
         NO_DIALOG = False
@@ -132,8 +132,8 @@ if not (IN_IPYTHON and kernel) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY:
 # ----------------------------------------------------------------------------------------------------------------------
 
 # import the core api
-from spectrochempy.core import *         # noqa: F403, F401, E402
-from spectrochempy import core           # noqa: E402
+from spectrochempy.core import *  # noqa: F403, F401, E402
+from spectrochempy import core  # noqa: E402
 
 __all__ = core.__all__
 __all__ += ['IN_IPYTHON', 'NO_DISPLAY', 'ip', 'kernel']
@@ -144,8 +144,8 @@ if not IN_IPYTHON:
 
     initcolor()
 
-def set_backend():
 
+def set_backend():
     if IN_IPYTHON and kernel and not NO_DISPLAY:
         try:
             if 'ipykernel_launcher' in sys.argv[0] and \
@@ -159,8 +159,6 @@ def set_backend():
 
 
 set_backend()
-
-
 
 # warnings.filterwarnings(action='ignore', module='matplotlib', category=UserWarning)
 # warnings.filterwarnings(action="error", category=DeprecationWarning)

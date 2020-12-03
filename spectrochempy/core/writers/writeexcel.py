@@ -19,6 +19,7 @@ from spectrochempy.core.writers.exporter import docstrings, Exporter, exporterme
 __all__ = ['write_excel']
 __dataset_methods__ = __all__
 
+
 # .......................................................................................................................
 @docstrings.dedent
 def write_excel(*args, **kwargs):
@@ -43,8 +44,8 @@ def write_excel(*args, **kwargs):
 
     """
     exporter = Exporter()
-    kwargs['filetypes']=['Microsoft Excel files (*.xls)']
-    kwargs['suffix']='.xls'
+    kwargs['filetypes'] = ['Microsoft Excel files (*.xls)']
+    kwargs['suffix'] = '.xls'
     return exporter(*args, **kwargs)
 
 

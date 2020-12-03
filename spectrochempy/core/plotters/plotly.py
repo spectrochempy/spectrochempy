@@ -160,7 +160,7 @@ def plotly(dataset, **kwargs):
     # should we use the previous figure?
     clear = kwargs.get('clear', True)
 
-    dragmode = kwargs.get('dragmode','zoom')
+    dragmode = kwargs.get('dragmode', 'zoom')
 
     if fig is None or not isinstance(fig, go.Figure) or clear:
 
@@ -168,16 +168,16 @@ def plotly(dataset, **kwargs):
 
         # set the layout
         layout = dict(
-            title=name + nameadd,
-            paper_bgcolor='rgba(0,0,0,0)',  # transparent
-            autosize=True,
-            hovermode='closest',
-            showlegend=False,
-            clickmode='event+select',
-            dragmode=dragmode,
-            selectdirection='h',
-            margin=dict(t=43, r=50),
-            )
+                title=name + nameadd,
+                paper_bgcolor='rgba(0,0,0,0)',  # transparent
+                autosize=True,
+                hovermode='closest',
+                showlegend=False,
+                clickmode='event+select',
+                dragmode=dragmode,
+                selectdirection='h',
+                margin=dict(t=43, r=50),
+                )
 
         fig.update_layout(layout)
 
@@ -195,7 +195,7 @@ def plotly(dataset, **kwargs):
                                 ax=0,
                                 ay=-40
                                 )
-                ]
+                        ]
                 )
     # Other properties
     # ------------------------------------------------------------------------------------------------------------------
@@ -290,10 +290,10 @@ def plotly(dataset, **kwargs):
     xscale = kwargs.get("xscale", "linear")
 
     fig.update_layout(
-        dict(
-            xaxis=_make_axis('x', range=xlim, label=f'{x.alt_title} / {x.units:~P}', **kwargs),
+            dict(
+                    xaxis=_make_axis('x', range=xlim, label=f'{x.alt_title} / {x.units:~P}', **kwargs),
+                    )
             )
-        )
 
     # set the ordinates axis
     # ------------------------------------------------------------------------------------------------------------------
@@ -325,10 +325,10 @@ def plotly(dataset, **kwargs):
     yscale = kwargs.get("yscale", "linear")
 
     fig.update_layout(
-        dict(
-            yaxis=_make_axis('y', label=f'{new.title} / {new.units:~P}', **kwargs),
+            dict(
+                    yaxis=_make_axis('y', label=f'{new.title} / {new.units:~P}', **kwargs),
+                    )
             )
-        )
 
     zoomreset = kwargs.get('zoomreset', None)
     uirevision = f'{new}  {zoomreset}'
@@ -374,72 +374,72 @@ def plotly(dataset, **kwargs):
             z[trace.mask] = np.NaN
         else:
             z = trace.data
-        y_string = f'{getattr(new, dimy).alt_title}:' + ' %{fullData.name} <br>' if getattr(new, dimy).size >1 else ''
+        y_string = f'{getattr(new, dimy).alt_title}:' + ' %{fullData.name} <br>' if getattr(new, dimy).size > 1 else ''
         data.append(dict(x=x,
                          xaxis='x',
                          y=z,
                          yaxis='y',
                          name=name,
                          hoverlabel=dict(
-                             font_size=12,
-                             font_family="Rockwell"
-                             ),
-                         hovertemplate= f'{getattr(trace, dimx).alt_title}:' + ' %{x:.2f} ' + f'{getattr(trace, dimx).units:~P}<br>'
-                                        f'{y_string}'
-                                        f'{trace.alt_title}:' + ' %{y:.2f} ' + f'{trace.units:~P}'
-                                        '<extra></extra>',
+                                 font_size=12,
+                                 font_family="Rockwell"
+                                 ),
+                         hovertemplate=f'{getattr(trace, dimx).alt_title}:' + ' %{x:.2f} ' + f'{getattr(trace, dimx).units:~P}<br>'
+                                                                                             f'{y_string}'
+                                                                                             f'{trace.alt_title}:' +
+                                       ' %{y:.2f} ' + f'{trace.units:~P}'
+                                                                                                                                    '<extra></extra>',
                          mode='lines',
                          type='scattergl',
                          connectgaps=False,
                          line=dict(
-                             color=color,
-                             dash='solid',
-                             width=1.5),
+                                 color=color,
+                                 dash='solid',
+                                 width=1.5),
                          )
                     )
     fig.add_traces(data)
-
 
     # show out of X ROI zone
     fullrange = getattr(new, dimx).limits
     roirange = getattr(new, dimx).roi
 
-    x0, x1 = fullrange[0], roirange[0]-offset
-    x2, x3 = fullrange[1], roirange[1]-offset
+    x0, x1 = fullrange[0], roirange[0] - offset
+    x2, x3 = fullrange[1], roirange[1] - offset
     fig.update_layout(
-        shapes=[
-            dict(
-                type="rect",
-                # x-reference is assigned to the x-values
-                xref="x",
-                # y-reference is assigned to the plot paper [0,1]
-                yref="paper",
-                x0=x0,
-                y0=0,
-                x1=x1,
-                y1=1,
-                fillcolor="LightSalmon",
-                opacity=0.2,
-                layer="below",
-                line_width=0,
-                ),
-            dict(
-                type="rect",
-                # x-reference is assigned to the x-values
-                xref="x",
-                # y-reference is assigned to the plot paper [0,1]
-                yref="paper",
-                x0=x2,
-                y0=0,
-                x1=x3,
-                y1=1,
-                fillcolor="LightSalmon",
-                opacity=0.2,
-                layer="below",
-                line_width=0,
-                ),
-            ]
-        )
+            shapes=[
+                    dict(
+                            type="rect",
+                            # x-reference is assigned to the x-values
+                            xref="x",
+                            # y-reference is assigned to the plot paper [0,1]
+                            yref="paper",
+                            x0=x0,
+                            y0=0,
+                            x1=x1,
+                            y1=1,
+                            fillcolor="LightSalmon",
+                            opacity=0.2,
+                            layer="below",
+                            line_width=0,
+                            ),
+                    dict(
+                            type="rect",
+                            # x-reference is assigned to the x-values
+                            xref="x",
+                            # y-reference is assigned to the plot paper [0,1]
+                            yref="paper",
+                            x0=x2,
+                            y0=0,
+                            x1=x3,
+                            y1=1,
+                            fillcolor="LightSalmon",
+                            opacity=0.2,
+                            layer="below",
+                            line_width=0,
+                            ),
+                    ]
+            )
 
     return fig
 
@@ -451,35 +451,36 @@ def _make_axis(axis,
     fontsize = kwargs.get('fontsize', 18)
 
     return dict(
-        anchor='y' if axis == 'x' else 'x',
-        domain=[0.0, 1.0],
-        nticks=7,
-        range=range,
-        showgrid=True,
-        side='bottom' if axis == 'x' else 'left',
-        tickfont={
-            # 'family': 'Times',
-            'size': fontsize
-            },
-        ticks='outside',
-        title={
-            'font': {
-                # 'family': 'Times',
-                'color': '#000000',
-                'size':  fontsize,
-                },
-            'text': label,
-            },
-        type='linear',
-        zeroline=False,
-        linecolor='black',
-        linewidth=1,
-        mirror=True,
-        )
+            anchor='y' if axis == 'x' else 'x',
+            domain=[0.0, 1.0],
+            nticks=7,
+            range=range,
+            showgrid=True,
+            side='bottom' if axis == 'x' else 'left',
+            tickfont={
+                    # 'family': 'Times',
+                    'size': fontsize
+                    },
+            ticks='outside',
+            title={
+                    'font': {
+                            # 'family': 'Times',
+                            'color': '#000000',
+                            'size': fontsize,
+                            },
+                    'text': label,
+                    },
+            type='linear',
+            zeroline=False,
+            linecolor='black',
+            linewidth=1,
+            mirror=True,
+            )
 
 
-def point_line_distance(x0,y0,x1,y1,x2,y2):
-    return np.abs((x2-x1)*(y1-y0)-(x1-x0)*(y2-y1)) / np.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
+def point_line_distance(x0, y0, x1, y1, x2, y2):
+    return np.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / np.sqrt(
+        (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
 
 
 def calc_distances(p, start=None, end=None):
@@ -494,12 +495,12 @@ def calc_distances(p, start=None, end=None):
     z = p.data
     ny = z.shape[0]
     if start is None:
-        start=0
+        start = 0
     if end is None:
-        end=x.size-1
+        end = x.size - 1
     distances = np.zeros(z.shape)
-    for i in range(start+1,end):
-         distances[i] = point_line_distance(x[i],z[i],x[start],z[start],x[end],z[end])
+    for i in range(start + 1, end):
+        distances[i] = point_line_distance(x[i], z[i], x[start], z[start], x[end], z[end])
     return distances
 
 
@@ -515,20 +516,22 @@ def douglas_peucker(tolerance, p, mask, start, end, it):
         mask = np.logical_and(mask, m1)
         mask = np.logical_and(mask, m2)
     else:
-        for i in range(start+1,end):
+        for i in range(start + 1, end):
             if distances[i] <= tolerance:
                 mask[i] = True
     return mask
 
-def simplify_douglas_peucker(tolerance,ds):
+
+def simplify_douglas_peucker(tolerance, ds):
     # start by masking all the row of data except extremity
     new = ds.copy()
     new.mask = np.ones_like(ds, dtype='bool')
-    new.mask[0]=False
-    new.mask[-1]=False
-    mask = douglas_peucker(tolerance,new,new.mask.copy(),0,new.size-1,0)
+    new.mask[0] = False
+    new.mask[-1] = False
+    mask = douglas_peucker(tolerance, new, new.mask.copy(), 0, new.size - 1, 0)
     new.mask[:] = mask
     return new
+
 
 def _compress(ds, optimisation=None):
     """
@@ -547,20 +550,25 @@ def _compress(ds, optimisation=None):
 
     # # find the closeness of each trace
     # # we always keep the first and the last
-    if (optimisation==0 and sizey<100) or sizey<5 :
+    if (optimisation == 0 and sizey < 100) or sizey < 5:
         return ds
 
-
-    COUNT = {0:1000, 1:500, 2:150, 3:30, 4:5}[optimisation]
+    COUNT = {
+            0: 1000,
+            1: 500,
+            2: 150,
+            3: 30,
+            4: 5
+            }[optimisation]
     dd = np.sum(ds, axis=1)
     new = dd.copy()
     if new.size > 250:
-        COUNT = COUNT/4
+        COUNT = COUNT / 4
     TOLERANCE = np.max(calc_distances(dd)) / COUNT
-    new=simplify_douglas_peucker(TOLERANCE,dd)
+    new = simplify_douglas_peucker(TOLERANCE, dd)
 
     print(np.count_nonzero(~new.mask), COUNT)
-    keep=[]
+    keep = []
     for i, b in enumerate(new.mask):
         if not b:
             keep.append(ds[i])

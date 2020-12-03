@@ -169,6 +169,6 @@ class NNMF(HasTraits):
                 stdout.write('.')
 
         info_(
-            '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
-                                                             projnorm))
+                '\nIter = {} Final proj-grad norm {:.3f}'.format(myiter,
+                                                                 projnorm))
         return W, H

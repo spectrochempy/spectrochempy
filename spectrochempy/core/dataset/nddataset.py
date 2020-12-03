@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pandas.core.generic import NDFrame
-from traitlets import HasTraits, List, Unicode, Instance, Bool, All, Float,  validate, observe, default
+from traitlets import HasTraits, List, Unicode, Instance, Bool, All, Float, validate, observe, default
 from traittypes import Array
 
 from spectrochempy.core.project.baseproject import AbstractProject
@@ -39,16 +39,20 @@ from spectrochempy.core.dataset.ndplot import NDPlot
 from spectrochempy.core import error_, warning_
 from spectrochempy.utils.meta import Meta
 from spectrochempy.units import Unit, Quantity
-from spectrochempy.utils import colored_output, SpectroChemPyException, get_user_and_node, docstrings, \
-    SpectroChemPyWarning
+from spectrochempy.utils import (
+    colored_output, SpectroChemPyException, get_user_and_node, docstrings,
+    SpectroChemPyWarning,
+    )
 from spectrochempy.utils import json_serialiser
 
 HAS_XARRAY = False
 try:
     import xarray as xr
+
     HAS_XARRAY = True
 except ImportError:
     pass
+
 
 # ======================================================================================================================
 # NDDataset class definition
@@ -86,7 +90,6 @@ class NDDataset(
     # dataset can be members of a project or panels.
     # we use the abstract class to avoid circular imports.
     _parent = Instance(AbstractProject, allow_none=True)
-
 
     # ------------------------------------------------------------------------------------------------------------------
     # initialisation
@@ -601,7 +604,7 @@ class NDDataset(
         for index, dim in enumerate(self.dims):
             if dim not in _dict:
                 _dict[dim] = {
-                        'size':  self.shape[index],
+                        'size': self.shape[index],
                         'coord': getattr(self, dim)
                         }
         return _dict
@@ -637,7 +640,6 @@ class NDDataset(
             HasTraits.observe(self._coords, self._dims_update, '_updated')
             # force it one time after this initialization
             self._coords._updated = True
-
 
     # ..................................................................................................................
     def coord(self, dim='x'):
@@ -1005,7 +1007,6 @@ class NDDataset(
 
         # make the json string
         return json.dumps(dic, default=json_serialiser, indent=2)
-
 
     # ..................................................................................................................
     def to_xarray(self, **kwargs):

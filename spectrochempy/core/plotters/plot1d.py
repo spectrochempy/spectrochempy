@@ -70,6 +70,7 @@ def plot_lines(dataset, **kwargs):
     else:
         return plot_1D(dataset, **kwargs)
 
+
 # plot pen (default) ---------------------------------------------------------
 
 def plot_pen(dataset, **kwargs):
@@ -170,7 +171,10 @@ def plot_multiple(datasets, method='scatter', pen=True,
                       frameon=True, facecolor='lightyellow')
 
     # now we can output the final figure
-    kw = {'output': output, 'commands': commands}
+    kw = {
+            'output': output,
+            'commands': commands
+            }
     datasets[0]._plot_resume(datasets[-1], **kw)
 
     return ax
@@ -279,8 +283,8 @@ def plot_1D(dataset, **kwargs):
         # not yet set, initialize with default project preferences
         prefs.update(project_preferences.to_dict())
 
-    usempl = kwargs.pop('usempl', True)    # by default we use matplotlib for plotting (which is faster but
-                                                    # wich is hardly  interactive)
+    usempl = kwargs.pop('usempl', True)  # by default we use matplotlib for plotting (which is faster but
+    # wich is hardly  interactive)
 
     # If no method parameters was provided when this function was called,
     # we first look in the meta parameters of the dataset for the defaults

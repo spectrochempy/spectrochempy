@@ -8,8 +8,10 @@
 # flake8: noqa
 
 import os
+
 import numpy as np
 import pytest
+
 
 # Handle command line argument for spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------
@@ -63,8 +65,7 @@ from spectrochempy.core import general_preferences as prefs
 # set test file and folder in environment
 # set a test file in environment
 os.environ['TEST_FILE'] = os.path.join(prefs.datadir, 'irdata/nh4y-activation.spg')
-os.environ['TEST_FOLDER'] =  os.path.join(prefs.datadir, 'irdata', 'subdir')
-
+os.environ['TEST_FOLDER'] = os.path.join(prefs.datadir, 'irdata', 'subdir')
 
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------
@@ -313,11 +314,11 @@ def dataframe():
         ax.name = name
     return arr.copy()
 
+
 # Project fixture
 
 @pytest.fixture(scope="function")
 def project_test():
-
     from spectrochempy import Project, Script
 
     proj = Project(name='TEST')
@@ -340,4 +341,3 @@ def project_test():
     proj.save(os.path.join(datadir, 'project_test.pscp'))  # save it for other use
 
     return proj
-

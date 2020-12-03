@@ -11,28 +11,28 @@ Various methods and classes used in other part of the program
 """
 __all__ = [
 
-    "TYPE_INTEGER",
-    "TYPE_COMPLEX",
-    "TYPE_FLOAT",
-    "EPSILON",
-    "INPLACE",
-    "make_new_object",
-    "getdocfrom",
-    "dict_compare",
-    'htmldoc',
-    "ignored",
-    "is_iterable",
-    "is_sequence",
-    "is_number",
-    "silence",
-    "makedirs",
-    "multisort",
-    'makestr',
-    'srepr',
-    "spacing",
+        "TYPE_INTEGER",
+        "TYPE_COMPLEX",
+        "TYPE_FLOAT",
+        "EPSILON",
+        "INPLACE",
+        "make_new_object",
+        "getdocfrom",
+        "dict_compare",
+        'htmldoc',
+        "ignored",
+        "is_iterable",
+        "is_sequence",
+        "is_number",
+        "silence",
+        "makedirs",
+        "multisort",
+        'makestr',
+        'srepr',
+        "spacing",
 
-    #
-]
+        #
+        ]
 
 import re
 from operator import itemgetter
@@ -56,6 +56,7 @@ EPSILON = epsilon = np.finfo(float).eps
 
 INPLACE = "INPLACE"
 "Flag used to specify inplace slicing"
+
 
 def make_new_object(obj):
     """

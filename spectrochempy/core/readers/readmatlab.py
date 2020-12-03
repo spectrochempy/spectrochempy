@@ -22,6 +22,7 @@ import scipy.io as sio
 from spectrochempy.core.dataset.nddataset import NDDataset, Coord
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
+
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
@@ -59,6 +60,7 @@ def read_matlab(*args, **kwargs):
     importer = Importer()
     return importer(*args, **kwargs)
 
+
 # ......................................................................................................................
 read_mat = read_matlab
 read_mat.__doc__ = 'This method is an alias of `read_matlab` '
@@ -70,8 +72,7 @@ read_mat.__doc__ = 'This method is an alias of `read_matlab` '
 
 @importermethod
 def _read_mat(*args, **kwargs):
-
-    _ , filename = args
+    _, filename = args
     content = kwargs.get('content', False)
 
     if content:
@@ -113,12 +114,11 @@ def _read_mat(*args, **kwargs):
             # TODO: implement DSO reader
             datasets.append([name, data])
 
-
     return datasets
+
 
 @importermethod
 def _read_dso(dataset, name, data):
-
     name_mat = data['name'][0][0]
     if len(name_mat) == 0:
         name = ''

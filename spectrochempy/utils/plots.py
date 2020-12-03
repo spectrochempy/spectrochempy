@@ -136,22 +136,24 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
     # a figure already exists - if several we take the last
     return fig
 
+
 class colorscale:
 
     def normalize(self, vmin, vmax, cmap='viridis', rev=False, offset=0):
         """
         """
         if rev:
-            cmp = cmap+'_r'
+            cmp = cmap + '_r'
         _colormap = plt.get_cmap(cmap)
 
-        _norm = mpl.colors.Normalize(vmin=vmin-offset, vmax=vmax-offset)
+        _norm = mpl.colors.Normalize(vmin=vmin - offset, vmax=vmax - offset)
         self.scalarMap = mpl.cm.ScalarMappable(norm=_norm, cmap=_colormap)
 
     def rgba(self, z, offset=0):
-        c = np.array(self.scalarMap.to_rgba(z.squeeze()-offset))
+        c = np.array(self.scalarMap.to_rgba(z.squeeze() - offset))
         c[0:3] *= 255
-        c[0:3] = np.round(c[0:3].astype('uint16'),0)
-        return  f'rgba'+str(tuple(c))
+        c[0:3] = np.round(c[0:3].astype('uint16'), 0)
+        return f'rgba' + str(tuple(c))
+
 
 colorscale = colorscale()

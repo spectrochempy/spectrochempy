@@ -188,7 +188,7 @@ def _transf_meta(y, meta):
     # Dates effectives de chacun des spectres de la série : le temps indiqué est celui où l'on démarre l'acquisition
     # Labels for time : dates with the initial time for each spectrum
     try:
-        y.labels = [dateacq + delayspectra*i for i in range(len(y))]
+        y.labels = [dateacq + delayspectra * i for i in range(len(y))]
     except Exception as e:
         print(e)
 

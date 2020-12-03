@@ -34,9 +34,11 @@ from traitlets import Dict, HasTraits, Instance, Union, default
 
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
-from spectrochempy.utils import (is_sequence, SpectroChemPyDeprecationWarning,
-                                 docstrings, NBlack, NBlue, NGreen, NRed,
-                                 get_figure, get_plotly_figure)
+from spectrochempy.utils import (
+    is_sequence, SpectroChemPyDeprecationWarning,
+    docstrings, NBlack, NBlue, NGreen, NRed,
+    get_figure, get_plotly_figure,
+    )
 from spectrochempy.core import general_preferences, project_preferences
 from spectrochempy.core import error_
 
@@ -62,7 +64,7 @@ class NDPlot(HasTraits):
 
     """
 
-    #variable containing the matplotlib axis defined for a NDArray object
+    # variable containing the matplotlib axis defined for a NDArray object
     _ax = Instance(plt.Axes, allow_none=True)
 
     # The figure on which this NDArray can be plotted
@@ -233,7 +235,7 @@ class NDPlot(HasTraits):
                 self.ndaxes['twin'] = tax
             else:
                 raise ValueError(
-                    '{} is not recognized as a valid Axe'.format(tax))
+                        '{} is not recognized as a valid Axe'.format(tax))
 
         # get the current figure (or the last used)
         self._fig = get_figure(clear)
@@ -254,7 +256,7 @@ class NDPlot(HasTraits):
                 self.ndaxes['main'] = ax
             else:
                 raise ValueError(
-                    '{} is not recognized as a valid Axe'.format(ax))
+                        '{} is not recognized as a valid Axe'.format(ax))
 
         elif self._fig.get_axes():
             # no ax parameters in keywords, so we need to get those existing
@@ -268,19 +270,19 @@ class NDPlot(HasTraits):
 
         if ax is not None and kwargs.pop('scatter', False):
             ax.set_prop_cycle(
-                cycler('color',
-                       [NBlack, NBlue, NRed, NGreen, 'magenta', 'cyan'] *
-                       2) +
-                cycler('linestyle',
-                       ['-', '--', ':', '-.'] * 3) +
-                cycler('marker',
-                       ['o', 's', '^'] * 4))
+                    cycler('color',
+                           [NBlack, NBlue, NRed, NGreen, 'magenta', 'cyan'] *
+                           2) +
+                    cycler('linestyle',
+                           ['-', '--', ':', '-.'] * 3) +
+                    cycler('marker',
+                           ['o', 's', '^'] * 4))
         elif ax is not None and kwargs.pop('pen', False):
             ax.set_prop_cycle(
-                cycler('color',
-                       [NBlack, NBlue, NRed, NGreen]) +
-                cycler('linestyle',
-                       ['-', '--', ':', '-.']))
+                    cycler('color',
+                           [NBlack, NBlue, NRed, NGreen]) +
+                    cycler('linestyle',
+                           ['-', '--', ':', '-.']))
 
         # Get the number of the present figure
         self._fignum = self._fig.number
@@ -607,7 +609,7 @@ def _set_figure_style(**kwargs):
         mpl.rcParams['xtick.labelsize'] = int(fontsize)
         mpl.rcParams['ytick.labelsize'] = int(fontsize)
         mpl.rcParams['axes.prop_cycle'] = (
-            cycler('color', [NBlack, NBlue, NRed, NGreen]))
+                cycler('color', [NBlack, NBlue, NRed, NGreen]))
 
 
 # .............................................................................
@@ -616,4 +618,3 @@ plot = NDPlot.plot  # make plot accessible directly from the scp API
 # ======================================================================================================================
 if __name__ == '__main__':
     pass
-

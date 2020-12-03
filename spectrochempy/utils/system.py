@@ -18,9 +18,11 @@ import platform
 import sys
 from subprocess import run, PIPE, STDOUT
 
+
 def is_windows():
     win = 'Windows' in platform.platform()
     return win
+
 
 def get_user():
     return getpass.getuser()

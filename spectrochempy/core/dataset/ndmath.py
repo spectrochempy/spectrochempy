@@ -49,7 +49,11 @@ def get_name(x): return str(x.name if hasattr(x, 'name') else x)
 
 DIMENSIONLESS = ur('dimensionless').units
 UNITLESS = None
-TYPEPRIORITY = {'Coord': 2, 'NDDataset': 3, 'NDPanel': 4}
+TYPEPRIORITY = {
+        'Coord': 2,
+        'NDDataset': 3,
+        'NDPanel': 4
+        }
 
 
 # ======================================================================================================================
@@ -58,14 +62,15 @@ TYPEPRIORITY = {'Coord': 2, 'NDDataset': 3, 'NDPanel': 4}
 
 def _codechange(code_obj, changes):
     code = types.CodeType
-    names = [ 'co_argcount','co_nlocals', 'co_stacksize', 'co_flags', 'co_code', 'co_consts', 'co_names', 'co_varnames',
-              'co_filename', 'co_name', 'co_firstlineno', 'co_lnotab', 'co_freevars', 'co_cellvars']
+    names = ['co_argcount', 'co_nlocals', 'co_stacksize', 'co_flags', 'co_code', 'co_consts', 'co_names', 'co_varnames',
+             'co_filename', 'co_name', 'co_firstlineno', 'co_lnotab', 'co_freevars', 'co_cellvars']
     if hasattr(code, 'co_kwonlyargcount'):
         names.insert(1, 'co_kwonlyargcount')
     if hasattr(code, 'co_posonlyargcount'):
         names.insert(1, 'co_posonlyargcount')
     values = [changes.get(name, getattr(code_obj, name)) for name in names]
     return code(*values)
+
 
 def make_func_from(func, first=None):
     """
@@ -77,7 +82,9 @@ def make_func_from(func, first=None):
     if first:
         new_varnames[0] = first
     new_varnames = tuple(new_varnames)
-    new_code_obj = _codechange(code_obj, changes={'co_varnames':new_varnames})
+    new_code_obj = _codechange(code_obj, changes={
+            'co_varnames': new_varnames
+            })
     modified = types.FunctionType(new_code_obj,
                                   func.__globals__,
                                   func.__name__,
@@ -253,16 +260,34 @@ class NDMath(object):
     """
 
     __radian = 'radian'
-    __require_units = {'cumprod': '',
-                       'arccos': '', 'arcsin': '', 'arctan': '',
-                       'arccosh': '', 'arcsinh': '', 'arctanh': '',
-                       'exp': '', 'expm1': '', 'exp2': '',
-                       'log': '', 'log10': '', 'log1p': '', 'log2': '',
-                       'sin': __radian, 'cos': __radian, 'tan': __radian,
-                       'sinh': __radian, 'cosh': __radian, 'tanh': __radian,
-                       'radians': 'degree', 'degrees': __radian,
-                       'deg2rad': 'degree', 'rad2deg': __radian,
-                       'logaddexp': '', 'logaddexp2': ''}
+    __require_units = {
+            'cumprod': '',
+            'arccos': '',
+            'arcsin': '',
+            'arctan': '',
+            'arccosh': '',
+            'arcsinh': '',
+            'arctanh': '',
+            'exp': '',
+            'expm1': '',
+            'exp2': '',
+            'log': '',
+            'log10': '',
+            'log1p': '',
+            'log2': '',
+            'sin': __radian,
+            'cos': __radian,
+            'tan': __radian,
+            'sinh': __radian,
+            'cosh': __radian,
+            'tanh': __radian,
+            'radians': 'degree',
+            'degrees': __radian,
+            'deg2rad': 'degree',
+            'rad2deg': __radian,
+            'logaddexp': '',
+            'logaddexp2': ''
+            }
     __keep_title = ['negative', 'absolute', 'abs', 'fabs', 'rint', 'floor', 'ceil', 'trunc',
                     'add', 'subtract']
     __remove_title = ['multiply', 'divide', 'true_divide', 'floor_divide', 'mod', 'fmod', 'remainder',
@@ -954,13 +979,13 @@ class NDMath(object):
                 # or that we suppress or add a row to the whole dataset
                 elif other._squeeze_ndim == 1 and obj._data.shape[-1] != other._data.size:
                     raise ValueError(
-                        "coordinate's sizes do not match")
+                            "coordinate's sizes do not match")
 
                 elif other._squeeze_ndim > 1 and obj.coords and other.coords and \
                         not (obj._coords[0].is_empty and obj._coords[0].is_empty) and \
                         not np.all(obj._coords[0]._data == other._coords[0]._data):
                     raise ValueError(
-                        "coordinate's values do not match")
+                            "coordinate's values do not match")
 
             if othertype in ['NDDataset', 'Coord']:
 

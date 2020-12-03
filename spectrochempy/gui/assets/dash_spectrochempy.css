@@ -1,17 +1,23 @@
 
-body, .plot-container {
+body, .plot-container
+{
     background-color: #cccccc;
 }
 
-H1,H2,H3,H4,H5,H6,H7 {margin-top: 15px}
+H1, H2, H3, H4, H5, H6, H7
+{
+    margin-top: 15px
+}
 
 /* graph */
-.dash-graph {
+.dash-graph
+{
     display: block;
     height: 85vh;
 }
 
-.control-tab {
+.control-tab
+{
     font-size: 10pt;
     max-height: 85vh;
     overflow-y: auto;
@@ -19,46 +25,62 @@ H1,H2,H3,H4,H5,H6,H7 {margin-top: 15px}
     border: 0;
 }
 
-.tab-content {
+.tab-content
+{
     border: 1px solid gray;
     background-color: #F3F5F9;
 }
 
-.nav-tabs {
+.nav-tabs
+{
     border-bottom: 1px solid gray;
 }
 
-.nav-tabs .nav-link {
+.nav-tabs .nav-link
+{
     background-color: #dddddd;
     border: 1px solid gray;
     border-top-left-radius: .25rem;
     border-top-right-radius: .25rem;
 }
 
-.nav-tabs .nav-link.active {
+.nav-tabs .nav-link.active
+{
     color: #495057;
     background-color: #F3F5F9;
-    border-color: gray   #000000 #F3F5F9 #000000;
+    border-color: gray #000000 #F3F5F9 #000000;
     border-width: 5px 1px 1px 1px;
 }
 
-#navbarbrand p {
+#navbarbrand p
+{
     padding-left: 10px;
-    margin-bottom:0
+    margin-bottom: 0
 }
 
-#navbarbrand em {
+#navbarbrand em
+{
     font-size: .5em;
 }
 
 
-.markdown {font-size:1em}
-.markdown p {margin-bottom: .5em;
+.markdown
+{
+    font-size: 1em
 }
 
-.card {margin-bottom:5pt}
+.markdown p
+{
+    margin-bottom: .5em;
+}
 
-#graph .modebar {
+.card
+{
+    margin-bottom: 5pt
+}
+
+#graph .modebar
+{
     background: transparent;
     top: 70px;
     right: 70px;

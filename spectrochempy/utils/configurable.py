@@ -32,7 +32,7 @@ class MetaConfigurable(Configurable):
 
         """
         d = {}
-        for k,v in self.traits(config=True).items():
+        for k, v in self.traits(config=True).items():
             d[k] = v.default_value
         return d
 
@@ -45,8 +45,10 @@ class MetaConfigurable(Configurable):
 
         if change.name in self.traits(config=True):
             self.cfg.update(self.jsonfile, {
-                self.__class__.__name__: {change.name: change.new, }
-            })
+                    self.__class__.__name__: {
+                            change.name: change.new,
+                            }
+                    })
 
             self.updated = True
 

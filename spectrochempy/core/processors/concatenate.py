@@ -20,6 +20,7 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.utils import SpectroChemPyWarning, DimensionsCompatibilityError
 
+
 def concatenate(*datasets, **kwargs):
     """
     Concatenation of |NDDataset| objects along a given axis (by default
@@ -123,7 +124,7 @@ def concatenate(*datasets, **kwargs):
     if len(list(set(rndims))) > 1:
         raise DimensionsCompatibilityError(f"Only NDDataset with the same number of dimensions can be concatenated.")
 
-    rcompat = list(map(list,list(map(set,list(zip(*rshapes))))))
+    rcompat = list(map(list, list(map(set, list(zip(*rshapes))))))
 
     # a flag to force stacking of dataset instead of the default concatenation
     force_stack = kwargs.get('force_stack', False)
@@ -131,7 +132,7 @@ def concatenate(*datasets, **kwargs):
         # when stacking, we add a new first dimension except if one dimension is of size one: in this case we use this
         # dimension for stacking
         prepend = False
-        if len(set(list(map(len,rcompat)))) == 1:
+        if len(set(list(map(len, rcompat)))) == 1:
             # all dataset have the same shape
             # they can be stacked by prepending a new dimension
             prepend = True
@@ -149,7 +150,7 @@ def concatenate(*datasets, **kwargs):
             newcoord = Coord([i], labels=[dataset.name])
             newcoord.name = (OrderedSet(DEFAULT_DIM_NAME) - dataset._dims).pop()
             dataset.add_coords(newcoord)
-            dataset.dims = [newcoord.name]+dataset.dims
+            dataset.dims = [newcoord.name] + dataset.dims
             # TODO: make a function to simplify this process of adding new dimensions with coords
         axis, dim = datasets[0].get_axis(0)
 
@@ -164,8 +165,9 @@ def concatenate(*datasets, **kwargs):
     # except the one to be concatenated)
     for i, item in enumerate(zip(*rshapes)):
         if i != axis and len(set(item)) > 1:
-            raise DimensionsCompatibilityError("Datasets must have the same shape for all dimensions except the one along which the"
-                             " concatenation is performed")
+            raise DimensionsCompatibilityError(
+                "Datasets must have the same shape for all dimensions except the one along which the"
+                " concatenation is performed")
 
     # Check unit compatibility
     # ------------------------------------------------------------------------------------------------------------------
@@ -174,7 +176,7 @@ def concatenate(*datasets, **kwargs):
     for dataset in datasets:
         if not dataset.is_units_compatible(datasets[0]):
             raise ValueError(
-                'units of the datasets to concatenate are not compatible')
+                    'units of the datasets to concatenate are not compatible')
         # if needed transform to the same unit
         dataset.ito(units)
     # TODO: make concatenation of heterogeneous data possible by using labels

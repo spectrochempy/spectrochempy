@@ -531,8 +531,8 @@ class NDComplexArray(NDArray):
                 mask_string = f'--{dtype}'
                 ds = insert_masked_print(ds, mask_string=mask_string)
             body = np.array2string(
-                ds, separator=' ',
-                prefix=pref)
+                    ds, separator=' ',
+                    prefix=pref)
             body = body.replace('\n', sep)
             text = ''.join([pref, body, units])
             text += sep
@@ -596,7 +596,7 @@ class NDComplexArray(NDArray):
         if data.dtype not in TYPE_COMPLEX:
             if data.shape[1] % 2 != 0:
                 raise ValueError(
-                    "An array of real data to be transformed to quaternion must have even number of columns!.")
+                        "An array of real data to be transformed to quaternion must have even number of columns!.")
             # convert to double precision complex
             data = self._make_complex(data)
 

@@ -35,7 +35,6 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
-
 # ======================================================================================================================
 # Constants
 # ======================================================================================================================
@@ -535,7 +534,6 @@ nmr_valid_meta = [
         # ('ymin_p', ''),
         ]
 
-
 # ======================================================================================================================
 # Digital filter functions
 # ======================================================================================================================
@@ -557,90 +555,90 @@ nmr_valid_meta = [
 # fracions which would round to those in the original table.
 
 bruker_dsp_table = {
-    10: {
-        2: 44.75,
-        3: 33.5,
-        4: 66.625,
-        6: 59.083333333333333,
-        8: 68.5625,
-        12: 60.375,
-        16: 69.53125,
-        24: 61.020833333333333,
-        32: 70.015625,
-        48: 61.34375,
-        64: 70.2578125,
-        96: 61.505208333333333,
-        128: 70.37890625,
-        192: 61.5859375,
-        256: 70.439453125,
-        384: 61.626302083333333,
-        512: 70.4697265625,
-        768: 61.646484375,
-        1024: 70.48486328125,
-        1536: 61.656575520833333,
-        2048: 70.492431640625,
-    },
-    11: {
-        2: 46.,
-        3: 36.5,
-        4: 48.,
-        6: 50.166666666666667,
-        8: 53.25,
-        12: 69.5,
-        16: 72.25,
-        24: 70.166666666666667,
-        32: 72.75,
-        48: 70.5,
-        64: 73.,
-        96: 70.666666666666667,
-        128: 72.5,
-        192: 71.333333333333333,
-        256: 72.25,
-        384: 71.666666666666667,
-        512: 72.125,
-        768: 71.833333333333333,
-        1024: 72.0625,
-        1536: 71.916666666666667,
-        2048: 72.03125
-    },
-    12: {
-        2: 46.,
-        3: 36.5,
-        4: 48.,
-        6: 50.166666666666667,
-        8: 53.25,
-        12: 69.5,
-        16: 71.625,
-        24: 70.166666666666667,
-        32: 72.125,
-        48: 70.5,
-        64: 72.375,
-        96: 70.666666666666667,
-        128: 72.5,
-        192: 71.333333333333333,
-        256: 72.25,
-        384: 71.666666666666667,
-        512: 72.125,
-        768: 71.833333333333333,
-        1024: 72.0625,
-        1536: 71.916666666666667,
-        2048: 72.03125
-    },
-    13: {
-        2: 2.75,
-        3: 2.8333333333333333,
-        4: 2.875,
-        6: 2.9166666666666667,
-        8: 2.9375,
-        12: 2.9583333333333333,
-        16: 2.96875,
-        24: 2.9791666666666667,
-        32: 2.984375,
-        48: 2.9895833333333333,
-        64: 2.9921875,
-        96: 2.9947916666666667
-    }
-}
+        10: {
+                2: 44.75,
+                3: 33.5,
+                4: 66.625,
+                6: 59.083333333333333,
+                8: 68.5625,
+                12: 60.375,
+                16: 69.53125,
+                24: 61.020833333333333,
+                32: 70.015625,
+                48: 61.34375,
+                64: 70.2578125,
+                96: 61.505208333333333,
+                128: 70.37890625,
+                192: 61.5859375,
+                256: 70.439453125,
+                384: 61.626302083333333,
+                512: 70.4697265625,
+                768: 61.646484375,
+                1024: 70.48486328125,
+                1536: 61.656575520833333,
+                2048: 70.492431640625,
+                },
+        11: {
+                2: 46.,
+                3: 36.5,
+                4: 48.,
+                6: 50.166666666666667,
+                8: 53.25,
+                12: 69.5,
+                16: 72.25,
+                24: 70.166666666666667,
+                32: 72.75,
+                48: 70.5,
+                64: 73.,
+                96: 70.666666666666667,
+                128: 72.5,
+                192: 71.333333333333333,
+                256: 72.25,
+                384: 71.666666666666667,
+                512: 72.125,
+                768: 71.833333333333333,
+                1024: 72.0625,
+                1536: 71.916666666666667,
+                2048: 72.03125
+                },
+        12: {
+                2: 46.,
+                3: 36.5,
+                4: 48.,
+                6: 50.166666666666667,
+                8: 53.25,
+                12: 69.5,
+                16: 71.625,
+                24: 70.166666666666667,
+                32: 72.125,
+                48: 70.5,
+                64: 72.375,
+                96: 70.666666666666667,
+                128: 72.5,
+                192: 71.333333333333333,
+                256: 72.25,
+                384: 71.666666666666667,
+                512: 72.125,
+                768: 71.833333333333333,
+                1024: 72.0625,
+                1536: 71.916666666666667,
+                2048: 72.03125
+                },
+        13: {
+                2: 2.75,
+                3: 2.8333333333333333,
+                4: 2.875,
+                6: 2.9166666666666667,
+                8: 2.9375,
+                12: 2.9583333333333333,
+                16: 2.96875,
+                24: 2.9791666666666667,
+                32: 2.984375,
+                48: 2.9895833333333333,
+                64: 2.9921875,
+                96: 2.9947916666666667
+                }
+        }
 
 
 def _remove_digital_filter(dic, data):
@@ -683,7 +681,7 @@ def _remove_digital_filter(dic, data):
     # fft
     si = data.shape[-1]
     pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(
-        si / 2)
+            si / 2)
     pdata = (pdata.T - pdata.T[0]).T  # TODO: this allow generally to
     # TODO: remove Bruker smiles, not so sure actually
 
@@ -694,7 +692,7 @@ def _remove_digital_filter(dic, data):
 
     # ifft
     data = np.fft.ifft(np.fft.ifftshift(pdata, -1), si, axis=-1) * float(
-        si / 2)
+            si / 2)
 
     # remove last points * 2
     rp = 2 * (phase // 2)
@@ -744,7 +742,6 @@ def _remove_digital_filter(dic, data):
 #         return scal()
 
 
-
 # ======================================================================================================================
 # bruker topspin import function
 # ======================================================================================================================
@@ -788,7 +785,7 @@ def read_topspin(*args, **kwargs):
 # ......................................................................................................................
 def _get_files(path, typ='acqu'):
     files = []
-    for i in ['',2,3]:
+    for i in ['', 2, 3]:
         f = path / f'{typ}{i}'
         if f.exists():
             files.append(f)
@@ -800,7 +797,6 @@ def _get_files(path, typ='acqu'):
 
 @importermethod
 def _read_topspin(*args, **kwargs):
-
     debug_('Bruker TOPSPIN import')
 
     dataset, path = args
@@ -811,7 +807,6 @@ def _read_topspin(*args, **kwargs):
 
     # low memory handling (lowmem) ?
     lowmem = kwargs.get('lowmem', False)  # load all in numero by default
-
 
     # ------------------------------------------------------------------------------------------------------------------
     # start reading ....
@@ -870,14 +865,14 @@ def _read_topspin(*args, **kwargs):
             data = data[..., :ntd]
 
         # Eliminate the digital filter
-        if kwargs.get('remove_digital_filter',True):
+        if kwargs.get('remove_digital_filter', True):
             data = _remove_digital_filter(dic, data)
 
     else:
 
         dic, datalist = read_pdata(f_procno, acqus_files=acqus_files,
                                    procs_files=procs_files, all_components=True)
-        if isinstance(datalist,list):
+        if isinstance(datalist, list):
             if datalist[0].ndim == 2:
                 data, dataRI, dataIR, dataII = datalist
                 # make quaternion
@@ -889,13 +884,12 @@ def _read_topspin(*args, **kwargs):
             elif datalist[0].ndim == 1:
                 # make complex
                 data, dataI = datalist
-                data = data + dataI*1.j
+                data = data + dataI * 1.j
 
             else:
                 return None
         else:
             data = datalist
-
 
     # ..............................................................................................................
     # we now make some rearrangement of the dic to have something more user friendly
@@ -938,7 +932,7 @@ def _read_topspin(*args, **kwargs):
                         value = np.array(value) * units
 
                 if key.lower() not in meta:
-                    meta[key.lower()] = [None]*data.ndim
+                    meta[key.lower()] = [None] * data.ndim
 
                 try:
                     meta[key.lower()][dim] = value
@@ -992,7 +986,7 @@ def _read_topspin(*args, **kwargs):
                 meta.td[axis] = meta.td[axis] // 2
             meta.tdeff[axis] = meta.tdeff[axis] // 2
 
-    meta.sw_h = [(meta.sw[axis].m * meta.sfo1[axis] * 1e-6).to('Hz') for axis in range(parmode+1)]
+    meta.sw_h = [(meta.sw[axis].m * meta.sfo1[axis] * 1e-6).to('Hz') for axis in range(parmode + 1)]
 
     if processed:
         meta.si = [si for si in data.shape]
@@ -1074,8 +1068,6 @@ def _read_topspin(*args, **kwargs):
 
     return dataset
 
-
-
     # list_meta.append(meta)
     # list_coords.append(coords)
     # list_data.append(data)
@@ -1106,8 +1098,6 @@ def _read_topspin(*args, **kwargs):
     #
     # if len(list_data) == 1:
     # # debug_('One experiment read. Make it the current dataset')
-
-
 
 # def _read_topspin_dir(*args, **kwargs):
 #
@@ -1211,7 +1201,8 @@ def _read_topspin(*args, **kwargs):
 #                                                      True):
 #             data = _remove_digital_filter(dic, data)
 #
-#         # ..............................................................................................................
+#         #
+#         ..............................................................................................................
 #         # we now make some rearrangement of the dic
 #         # to have something more user friendly
 #         # we assume that all experiments have similar (important)
@@ -1225,7 +1216,8 @@ def _read_topspin(*args, **kwargs):
 #         # we need the ndim of the data
 #         parmode = int(dic['acqus']['PARMODE'])
 #         if parmode + 1 != data.ndim:
-#             raise KeyError(f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't fit"
+#             raise KeyError(f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't
+#             fit"
 #                            f" the actual number of dimensions ({data.ndim})")
 #
 #         # read the acqu and proc

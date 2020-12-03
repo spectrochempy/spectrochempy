@@ -12,7 +12,6 @@
 __all__ = ['read_omnic', 'read_spg', 'read_spa', 'read_srs']
 __dataset_methods__ = __all__
 
-
 from datetime import datetime, timezone, timedelta
 import io
 import struct
@@ -155,6 +154,7 @@ def read_omnic(*args, **kwargs):
     kwargs['protocol'] = ['omnic', 'spa', 'spg', 'srs']
     importer = Importer()
     return importer(*args, **kwargs)
+
 
 # ......................................................................................................................
 
@@ -301,7 +301,6 @@ def read_srs(*args, **kwargs):
     return importer(*args, **kwargs)
 
 
-
 # ======================================================================================================================
 # Private functions
 # ======================================================================================================================
@@ -333,7 +332,6 @@ def _read_spg(*args, **kwargs):
         # try .spa
         fid.close()
         return _read_spa(*args, **kwargs)
-
 
     # Count the number of spectra
     # From hex 120 = decimal 304, individual spectra are described
@@ -494,8 +492,6 @@ def _read_spg(*args, **kwargs):
         dataset.sort(dim='y', inplace=True)
         dataset.history = str(dataset.date) + ':sorted by date'
 
-
-
     # debug_("end of reading")
 
     return dataset
@@ -504,14 +500,12 @@ def _read_spg(*args, **kwargs):
 # ......................................................................................................................
 @importermethod
 def _read_omnic(*args, **kwargs):
-
     return Importer._read_spg(*args, **kwargs)
 
 
 # ......................................................................................................................
 @importermethod
 def _read_spa(*args, **kwargs):
-
     dataset, filename = args
     content = kwargs.get('content', False)
 
@@ -613,10 +607,10 @@ def _read_spa(*args, **kwargs):
 
     return dataset
 
+
 # ......................................................................................................................
 @importermethod
 def _read_srs(*args, **kwargs):
-
     dataset, filename = args
     frombytes = kwargs.get('frombytes', False)
 
@@ -781,18 +775,19 @@ def _read_srs(*args, **kwargs):
 
     return dataset, background
 
+
 # ......................................................................................................................
 def _fromfile(fid, dtype, count):
     # to replace np.fromfile in case of io.BytesIO object instead of byte object
     t = {
-        'uint8':   'B',
-        'int8':    'b',
-        'uint16':  'H',
-        'int16':   'h',
-        'uint32':  'I',
-        'int32':   'i',
-        'float32': 'f',
-        }
+            'uint8': 'B',
+            'int8': 'b',
+            'uint16': 'H',
+            'int16': 'h',
+            'uint32': 'I',
+            'int32': 'i',
+            'float32': 'f',
+            }
     typ = t[dtype] * count
     if dtype.endswith('16'):
         count = count * 2
@@ -803,6 +798,7 @@ def _fromfile(fid, dtype, count):
     if len(out) == 1:
         return out[0]
     return np.array(out)
+
 
 # ......................................................................................................................
 def _readbtext(fid, pos):
@@ -848,8 +844,8 @@ def _readheader02(fid, pos):
 
     fid.seek(info_pos + 4)
     out = {
-        'nx': _fromfile(fid, 'uint32', 1)
-        }
+            'nx': _fromfile(fid, 'uint32', 1)
+            }
 
     # read xaxis unit
     fid.seek(info_pos + 8)
@@ -928,12 +924,12 @@ def _read_xheader(fid, pos):
 
     if key not in (1, 3):
         raise ValueError("xheader key={} not recognized yet.".format(
-            key) + " Please report this error (and the corresponding srs file) to the developers"
-                   "They will do their best to fix the issue")
+                key) + " Please report this error (and the corresponding srs file) to the developers"
+                       "They will do their best to fix the issue")
     else:
         out = {
-            'xheader': key
-            }
+                'xheader': key
+                }
 
     #   positions
     #   nx_pos = info_pos + 4
@@ -1035,6 +1031,7 @@ def _read_xheader(fid, pos):
     #  y unit could be at pos+1030 with 01 = minutes ?
     return out, pos + 1026
 
+
 # ......................................................................................................................
 def _getintensities(fid, pos):
     # get intensities from the 03 key
@@ -1049,6 +1046,7 @@ def _getintensities(fid, pos):
     # Read and return spectral intensities
     fid.seek(intensity_pos)
     return _fromfile(fid, 'float32', int(nintensities))
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':

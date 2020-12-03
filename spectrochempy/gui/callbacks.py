@@ -23,6 +23,7 @@ import dash_bootstrap_components as dbc
 
 import spectrochempy as scp
 
+
 class Callbacks(object):
 
     @staticmethod
@@ -73,7 +74,7 @@ class Callbacks(object):
         x.roi = [float(xrl) if xrl else 0, float(xru) if xru else 0]
         ds.history = f">>> ds.{dimx}.roi = {x.roi}"
 
-        if len(ds.dims)>1:
+        if len(ds.dims) > 1:
 
             dimy = ds.dims[-2]
             y = getattr(ds, dimy)
@@ -114,7 +115,6 @@ class Callbacks(object):
         @app.callback(Output('original-data', 'data'),
                       Input('upload-project', 'contents'),
                       State('upload-project', 'filename'))
-
         def project_upload(content, name):
             # Store project data in components
 
@@ -167,7 +167,7 @@ class Callbacks(object):
 
             project = scp.Project.from_json(data)
             # extract the project information from original data store
-            #datasets = [scp.read_json(content=c.encode()) for n, c in data.items()]
+            # datasets = [scp.read_json(content=c.encode()) for n, c in data.items()]
 
             # show processed flag
             processed = True if 'Processed' in selector else False
@@ -270,8 +270,8 @@ class Callbacks(object):
             xro = 0
             yro = 0
             style = dict({
-                                 'display': 'none'
-                                 })
+                    'display': 'none'
+                    })
 
             if saveddata is not None:  # take the saved data!
                 data = saveddata  # json.loads(saveddata)
@@ -292,8 +292,8 @@ class Callbacks(object):
                 xro = ds.x.offset
                 yro = ds.y.offset
                 style = dict({
-                                     'display': 'block'
-                                     })
+                        'display': 'block'
+                        })
 
             return (dataloaded, style, style, not is_open,
                     xr, yr, xrl, xru, yrl, yru,
@@ -366,12 +366,12 @@ class Callbacks(object):
         def tab_display_control(children):
             if not children:
                 return dict({
-                                    'display': 'none'
-                                    }), True, True, True
+                        'display': 'none'
+                        }), True, True, True
             else:
                 return dict({
-                                    'display': 'block'
-                                    }), False, False, False
+                        'display': 'block'
+                        }), False, False, False
 
         # ----------------------------------
         # MODIFY CLOSING/OPENING CARD BUTTON
@@ -415,8 +415,6 @@ class Callbacks(object):
                 pass
                 return
 
-
-
         # Set masks
         # @app.callback()
 
@@ -457,7 +455,7 @@ class Callbacks(object):
             text = json.dumps(hoverData, indent=2) + json.dumps(relayoutData, indent=2) + json.dumps(selectedData,
                                                                                                      indent=2) + \
                    json.dumps(
-                clickData, indent=2)
+                           clickData, indent=2)
             confirm = False
             message = ''
             nclicks = no_update

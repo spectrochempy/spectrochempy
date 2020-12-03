@@ -329,7 +329,7 @@ class BaselineCorrection(HasTraits):
                 zb = 1.  # self.zoompreview
                 zlim = [corrected.data.min() / zb, corrected.data.max() / zb]
                 _ = corrected.plot_stack(ax=ax2, colorbar=False,
-                                           zlim=zlim, clear=False)
+                                         zlim=zlim, clear=False)
             else:
                 _ = corrected.plot_stack(ax=ax2, colorbar=False, clear=False)
 

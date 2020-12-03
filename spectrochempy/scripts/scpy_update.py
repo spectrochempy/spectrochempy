@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 os.environ['USE_TQDM'] = 'No'
 from spectrochempy import version
 
+
 class UpdateWindow(QMainWindow):
 
     def __init__(self):
@@ -31,10 +32,9 @@ but version {new_version} is available.
 Please consider updating for bug fixes and new features !
 
 Use: 
-conda update {'-c spectrocat/label/dev ' if  'dev' in new_version else ''}spectrochempy"""
+conda update {'-c spectrocat/label/dev ' if 'dev' in new_version else ''}spectrochempy"""
             QMainWindow.__init__(self)
             QMessageBox.warning(self, "SpectroChempy has been updated", message)
-
 
     def check_for_updates(self):
         # Gets version
@@ -59,12 +59,12 @@ conda update {'-c spectrocat/label/dev ' if  'dev' in new_version else ''}spectr
         # check the online version string
         new_major, new_minor, new_patch, new_dev = major, minor, patch, dev
         upd = False
-        dev_upd=False
-        #print(major, minor, patch, dev)
+        dev_upd = False
+        # print(major, minor, patch, dev)
         for k, v in vavailables.items():
             _major, _minor, _patch = list(map(int, v[:3]))
             _dev = int(v[3][3:]) if v[3] is not None and 'dev' in v[3] else 0
-            #print (_major, _minor, _patch, _dev)
+            # print (_major, _minor, _patch, _dev)
             if _major > new_major:
                 new_major = _major
                 new_dev = 0  # reset dev
@@ -91,6 +91,7 @@ conda update {'-c spectrocat/label/dev ' if  'dev' in new_version else ''}spectr
                 new_version = f'{new_version}.dev{new_dev}'
 
         return new_version
+
 
 def main():
     _ = QApplication(sys.argv)

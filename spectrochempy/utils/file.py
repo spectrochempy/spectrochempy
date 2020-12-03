@@ -27,12 +27,13 @@ __all__ = ['get_filename', 'readdirname', 'pathclean', 'patterns',
 def _insensitive_case_glob(pattern):
     def either(c):
         return f'[{c.lower()}{c.upper()}]' if c.isalpha() else c
+
     return ''.join(map(either, pattern))
 
 
 def patterns(filetypes, allcase=True):
     regex = r"\*\.*\[*[0-9-]*\]*\w*\**"
-    patterns= []
+    patterns = []
     if not isinstance(filetypes, (list, tuple)):
         filetypes = [filetypes]
     for ft in filetypes:
@@ -160,8 +161,8 @@ def check_filenames(*args, **kwargs):
             if directory and kw_directory and directory != kw_directory:
                 # conflit we do not take into account the kw.
                 warnings.warn(
-                    'Two differents directory where specified (from args and keywords arg). '
-                    'Keyword `directory` will be ignored!')
+                        'Two differents directory where specified (from args and keywords arg). '
+                        'Keyword `directory` will be ignored!')
             elif not directory and kw_directory:
                 filename = kw_directory / filename
             # check if the file exists here
@@ -254,7 +255,7 @@ def get_filename(*filenames, **kwargs):
             directory = f
             filenames = None
             NODIAL = True
-    #else:
+    # else:
     #    filenames = pathclean(list(filenames))
 
     # directory
@@ -330,8 +331,8 @@ def get_filename(*filenames, **kwargs):
             # automatic reading of the whole directory
             if not (NO_DISPLAY or NODIAL):
                 directory = open_dialog(
-                                directory=directory,
-                                filters='directory')
+                        directory=directory,
+                        filters='directory')
                 if not directory:
                     # cancel
                     return None
@@ -446,15 +447,15 @@ def readdirname(directory):
 
         return pathclean(directory)
 
+
 # ......................................................................................................................
 def check_filename_to_save(dataset, filename=None, save_as=True, **kwargs):
-
     from spectrochempy.api import NO_DIALOG
 
-    if not filename  or save_as:
+    if not filename or save_as:
 
         # no filename provided
-        if filename is None or (NO_DIALOG and  pathclean(filename).resolve().is_dir()):
+        if filename is None or (NO_DIALOG and pathclean(filename).resolve().is_dir()):
             filename = dataset.name
             filename = filename + kwargs.get('suffix', '.scp')
 
@@ -483,7 +484,7 @@ def check_filename_to_open(*args, **kwargs):
         key = filenames[0].suffix.lower()
         if not key:
             if re.match(r"^fid$|^ser$|^[1-3][ri]*$", filenames[0].name) is not None:
-                key  = '.topspin'
+                key = '.topspin'
         if key[1:].isdigit():
             # probably an opus file
             key = '.opus'
@@ -501,6 +502,5 @@ def check_filename_to_open(*args, **kwargs):
     else:
         # probably no args (which means that we are coming from a dialog or from a full list of a directory
         return filenames
-
 
 # EOF

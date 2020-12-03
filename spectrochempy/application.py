@@ -38,8 +38,10 @@ from setuptools_scm import get_version
 
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
-from traitlets import (Bool, Unicode, List, Dict, Integer, Float, Enum,
-                       HasTraits, Instance, default, observe, import_item, )
+from traitlets import (
+    Bool, Unicode, List, Dict, Integer, Float, Enum,
+    HasTraits, Instance, default, observe, import_item,
+    )
 from traitlets.config.manager import BaseJSONConfigManager
 
 import matplotlib as mpl
@@ -129,9 +131,13 @@ def display_info_string(**kwargs):
     message = kwargs.get('message', 'info ')
 
     template = Template(_template)
-    html = template.render({'logo': logo,
-                            'message': message.strip().replace('\n', '<br/>')})
-    publish_display_data(data={'text/html': html})
+    html = template.render({
+                                   'logo': logo,
+                                   'message': message.strip().replace('\n', '<br/>')
+                                   })
+    publish_display_data(data={
+            'text/html': html
+            })
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -346,8 +352,8 @@ class SpectroChemPyMagics(Magics):
                 warnings.warn('The symbol `%s` was not found' % not_found[0])
             elif len(not_found) > 1:
                 warnings.warn(
-                    'The symbols %s were not found' % get_text_list(not_found,
-                                                                    wrap_item_with='`'))
+                        'The symbols %s were not found' % get_text_list(not_found,
+                                                                        wrap_item_with='`'))
 
             contents = '\n'.join(blocks)
 
@@ -418,7 +424,6 @@ class DataDir(HasTraits):
 
         return _listdir(strg, self.path, -1)
 
-
     @classmethod
     def class_print_help(cls):
         # to work with --help-all
@@ -480,7 +485,7 @@ class GeneralPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------------------------------------------------
 
     show_info_on_loading = Bool(True, help='Display info on loading').tag(
-        config=True)
+            config=True)
 
     show_close_dialog = Bool(True, help='Display the close project dialog'
                                         ' project changing or on '
@@ -601,11 +606,11 @@ class GeneralPreferences(MetaConfigurable):
 
     background_color = Unicode('#EFEFEF',
                                help='Background color for plots').tag(
-        config=True, type='color')
+            config=True, type='color')
 
     foreground_color = Unicode('#000000',
                                help='Foreground color for plots elements').tag(
-        config=True, type='color')
+            config=True, type='color')
 
     antialias = Bool(True, help='Antialiasing')
 
@@ -614,7 +619,7 @@ class GeneralPreferences(MetaConfigurable):
 
     max_lines_in_stack = Integer(1000, min=1, help='Maximum number of lines to'
                                                    ' plot in stack plots').tag(
-        config=True)
+            config=True)
 
     usempl = Bool(help='Use MatPlotLib for plotting (mode suitable for printing)').tag(config=True, group='mpl')
 
@@ -666,7 +671,7 @@ class ProjectPreferences(MetaConfigurable):
 
     # ..................................................................................................................
     use_latex = Bool(True, help='Use latex for plotting labels and texts').tag(
-        config=True)
+            config=True)
 
     @observe('use_latex')
     def _use_latex_changed(self, change):
@@ -738,14 +743,14 @@ class ProjectPreferences(MetaConfigurable):
     # ------------------------------------------------------------------------------------------------------------------
 
     pen_linewidth = Float(.70, min=0, help='Default pen width').tag(
-        config=True)
+            config=True)
 
     pen_color = Unicode('#000000', help='Default pen color for 1D plots').tag(
-        config=True, type='color')
+            config=True, type='color')
 
     pen_linestyle = Enum(linestyles, default_value=linestyles[0],
                          help='Default pen style for 1D plots').tag(
-        config=True, type='list')
+            config=True, type='list')
 
     marker = Enum(markers, default_value=markers[2],
                   help='Default symbols for 1D scatter plots').tag(config=True,
@@ -760,11 +765,11 @@ class ProjectPreferences(MetaConfigurable):
 
     colormap_stack = Enum(cmaps, default_value='viridis',
                           help='Default colormap for stack plots').tag(
-        config=True, type='list')
+            config=True, type='list')
 
     colormap_surface = Enum(cmaps, default_value='jet',
                             help='Default colormap for surface plots').tag(
-        config=True, type='list')
+            config=True, type='list')
 
     colormap_transposed = Enum(cmaps, default_value='magma',
                                help='Default colormap for transposed stack '
@@ -865,7 +870,7 @@ class SpectroChemPy(Application):
     defaults"""
 
     config_file_name = Unicode(None, help="Configuration file name").tag(
-        config=True)
+            config=True)
     """Configuration file name"""
 
     @default('config_file_name')
@@ -874,7 +879,7 @@ class SpectroChemPy(Application):
 
     config_dir = Unicode(None,
                          help="Set the configuration directory location").tag(
-        config=True)
+            config=True)
     """Configuration directory"""
 
     @default('config_dir')
@@ -891,13 +896,13 @@ class SpectroChemPy(Application):
     # ------------------------------------------------------------------------------------------------------------------
 
     debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(
-        config=True)
+            config=True)
     """Flag to set debugging mode"""
     info = Bool(False, help='Set INFO mode, with msg outputs').tag(
-        config=True)
+            config=True)
     """Flag to set info mode"""
     quiet = Bool(False, help='Set Quiet mode, with minimal outputs').tag(
-        config=True)
+            config=True)
     """Flag to set in fully quite mode (even no warnings)"""
     nodisplay = Bool(False, help='Set NO DISPLAY mode, i.e., no graphics '
                                  'outputs').tag(config=True)
@@ -915,23 +920,25 @@ class SpectroChemPy(Application):
 
         if change.name in self.traits(config=True):
             self.config_manager.update(self.config_file_name, {
-                self.__class__.__name__: {change.name: change.new, }
-            })
+                    self.__class__.__name__: {
+                            change.name: change.new,
+                            }
+                    })
 
     # filename to load at startup
     # ------------------------------------------------------------------------------------------------------------------
     startup_filename = Unicode(os.path.join('irdata', 'nh4y-activation.spg'),
                                help='File name to load at startup').tag(
-        config=True, type='file')
+            config=True, type='file')
 
     # TESTING
     # ------------------------------------------------------------------------------------------------------------------
 
     show_config = Bool(help="Dump configuration to stdout at startup").tag(
-        config=True)
+            config=True)
 
     show_config_json = Bool(help="Dump configuration to stdout (as JSON)").tag(
-        config=True)
+            config=True)
 
     @observe('show_config_json')
     def _show_config_json_changed(self, change):
@@ -946,36 +953,64 @@ class SpectroChemPy(Application):
     test = Bool(False, help='test flag').tag(config=True)
     """Flag to set the application in testing mode"""
 
-    port = Integer( 7000, help='Dash server port').tag(config=True)
+    port = Integer(7000, help='Dash server port').tag(config=True)
     """Dash server port"""
 
     # Command line interface
     # ------------------------------------------------------------------------------------------------------------------
 
     aliases = dict(test='SpectroChemPy.test',
-             project='SpectroChemPy.last_project',
-             f='SpectroChemPy.startup_filename',
-             port='SpectroChemPy.port',
-             )
+                   project='SpectroChemPy.last_project',
+                   f='SpectroChemPy.startup_filename',
+                   port='SpectroChemPy.port',
+                   )
 
-    flags =dict(
-            debug=({'SpectroChemPy': {'log_level': DEBUG}},
+    flags = dict(
+            debug=({
+                           'SpectroChemPy': {
+                                   'log_level': DEBUG
+                                   }
+                           },
                    "Set log_level to DEBUG - most verbose mode"),
-            info=({'SpectroChemPy': {'log_level': INFO}},
+            info=({
+                          'SpectroChemPy': {
+                                  'log_level': INFO
+                                  }
+                          },
                   "Set log_level to INFO - verbose mode"),
-            quiet=({'SpectroChemPy': {'log_level': ERROR}},
+            quiet=({
+                           'SpectroChemPy': {
+                                   'log_level': ERROR
+                                   }
+                           },
                    "Set log_level to ERROR - no verbosity at all"),
-            nodisplay=({'SpectroChemPy': {'nodisplay': True}},
+            nodisplay=({
+                               'SpectroChemPy': {
+                                       'nodisplay': True
+                                       }
+                               },
                        "Set NO DISPLAY mode to true - no graphics at all"),
             reset_config=(
-                {'SpectroChemPy': {'reset_config': True}}, "Reset config to default"),
-            show_config=({'SpectroChemPy': {'show_config': True, }},
+                    {
+                            'SpectroChemPy': {
+                                    'reset_config': True
+                                    }
+                            }, "Reset config to default"),
+            show_config=({
+                                 'SpectroChemPy': {
+                                         'show_config': True,
+                                         }
+                                 },
                          "Show the application's configuration (human-readable "
                          "format)"),
-            show_config_json=({'SpectroChemPy': {'show_config_json': True, }},
+            show_config_json=({
+                                      'SpectroChemPy': {
+                                              'show_config_json': True,
+                                              }
+                                      },
                               "Show the application's configuration (json "
                               "format)"),
-        )
+            )
 
     classes = List([GeneralPreferences, ProjectPreferences, DataDir, ])
 
@@ -1106,7 +1141,6 @@ class SpectroChemPy(Application):
         # --------------------------------------
         self._make_default_config_file()
 
-
     def start_show_config(self, **kwargs):
         """start function used when show_config is True"""
         config = self.config.copy()
@@ -1205,7 +1239,7 @@ class SpectroChemPy(Application):
                 display_info_string(message=info_string.strip())
 
             else:
-                if "/bin/scpy" not in sys.argv[0]:   # deactivate for console scripts
+                if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
                     print(info_string.strip())
 
         self.running = True
@@ -1273,7 +1307,7 @@ class SpectroChemPy(Application):
             return os.path.abspath(scp)
 
         return os.path.abspath(
-            self._find_or_create_spectrochempy_dir('config'))
+                self._find_or_create_spectrochempy_dir('config'))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Events from Application
@@ -1291,14 +1325,10 @@ class SpectroChemPy(Application):
         for handler in self.logs.handlers:
             handler.level = self.log_level
         self.logs.info("changed default log_level to {}".format(
-            logging.getLevelName(change.new)))
+                logging.getLevelName(change.new)))
 
 
 # ======================================================================================================================
 
 if __name__ == "__main__":
     pass
-
-
-
-

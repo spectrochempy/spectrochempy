@@ -123,7 +123,9 @@ class Meta(object):  # HasTraits):
             raise KeyError('`{}` can not be used as a metadata key'.format(key))
 
         elif not self.readonly:
-            self._data.update({key: value})
+            self._data.update({
+                                      key: value
+                                      })
         else:
             raise ValueError('the metadata `{}` is read only'.format(key))
 
@@ -190,7 +192,6 @@ class Meta(object):  # HasTraits):
 
         """
         return self._data.get(key, default)
-
 
     def update(self, d):
         """Feed a metadata dictionary with the content of an another

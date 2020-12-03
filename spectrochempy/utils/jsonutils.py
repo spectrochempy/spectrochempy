@@ -15,6 +15,7 @@ import numpy as np
 
 __all__ = ['json_serialiser', 'json_decoder']
 
+
 # ======================================================================================================================
 # JSON UTILITIES
 # ======================================================================================================================
@@ -29,7 +30,7 @@ def json_serialiser(byte_obj):
         # return {"ndarray":byte_obj.tolist(), "dtype": byte_obj.dtype.name}
         return {
                 "serialized": base64.b64encode(pickle.dumps(byte_obj)).decode(),
-                "__class__" : str(byte_obj.__class__)
+                "__class__": str(byte_obj.__class__)
                 }
     elif isinstance(byte_obj, pathlib.PosixPath):
         return {
@@ -49,5 +50,3 @@ def json_decoder(dic):
             return pathlib.Path(dic["str"])
         raise TypeError("numpy array, datetime or pathlib.PosixPath expected.")
     return dic
-
-

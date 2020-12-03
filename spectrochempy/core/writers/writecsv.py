@@ -19,6 +19,7 @@ from spectrochempy.core.writers.exporter import docstrings, Exporter, exporterme
 __all__ = ['write_csv']
 __dataset_methods__ = __all__
 
+
 # .......................................................................................................................
 @docstrings.dedent
 def write_csv(*args, **kwargs):
@@ -43,8 +44,8 @@ def write_csv(*args, **kwargs):
 
     """
     exporter = Exporter()
-    kwargs['filetypes']=['CSV files (*.csv)']
-    kwargs['suffix']='.csv'
+    kwargs['filetypes'] = ['CSV files (*.csv)']
+    kwargs['suffix'] = '.csv'
     return exporter(*args, **kwargs)
 
 

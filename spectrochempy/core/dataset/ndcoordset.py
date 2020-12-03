@@ -405,7 +405,7 @@ class CoordSet(HasTraits):
                 _titles.append(item.title if item.title else item.name)  # TODO:name
             elif isinstance(item, CoordSet):
                 _titles.append(
-                    [el.title if el.title else el.name for el in item])  # TODO:name
+                        [el.title if el.title else el.name for el in item])  # TODO:name
             else:
                 raise ValueError('Something wrong with the titles!')
         return _titles
@@ -579,7 +579,7 @@ class CoordSet(HasTraits):
         """
         return dict(zip(self.names, self._coords))
 
-# ..................................................................................................................
+    # ..................................................................................................................
     def update(self, **kwargs):
         """
         Update a specific coordinates in the CoordSet.

@@ -13,8 +13,6 @@ import scipy.signal
 import numpy as np
 from datetime import datetime
 
-
-
 """wrappers of scipy.signal peak finding functions"""
 
 
@@ -176,13 +174,12 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
     if window_length % 2 == 0:
         raise ValueError("window_length must be an odd integer")
 
-
     # if the following parameters are entered as floats, the coordinates are used. Else, they will
     # be treated as indices as in scipy.signal.find_peak()
 
     # transform coord (if exists) to index
     if use_coord and X.coords is not None:
-        step = np.abs(X.x.data[-1] - X.x.data[0])/(len(X.x) - 1)
+        step = np.abs(X.x.data[-1] - X.x.data[0]) / (len(X.x) - 1)
 
         if isinstance(distance, float):
             distance = int(round(distance / step))
@@ -203,17 +200,17 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
 
     if X.ndim == 1:
         out = X[peaks]
-    else: # ndim == 2
-       out = X[:, peaks]
+    else:  # ndim == 2
+        out = X[:, peaks]
 
     if window_length > 1:
         # quadratic interpolation to find the maximum
         for i, peak in enumerate(peaks):
-            y = data[peak - window_length//2:peak + window_length//2 + 1]
+            y = data[peak - window_length // 2:peak + window_length // 2 + 1]
             if use_coord and X.coords is not None:
-                x = X.x[peak - window_length//2:peak + window_length//2 + 1]
+                x = X.x[peak - window_length // 2:peak + window_length // 2 + 1]
             else:
-                x = range(peak - window_length//2, peak + window_length//2 + 1)
+                x = range(peak - window_length // 2, peak + window_length // 2 + 1)
 
             coef = np.polyfit(x, y, 2)
 

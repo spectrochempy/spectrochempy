@@ -5,21 +5,25 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import numpy as np
 from copy import copy, deepcopy
 from datetime import datetime
-import pytest
 
+import numpy as np
+import pytest
 from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core import info_
 from spectrochempy.units import ur, Quantity
-from spectrochempy.utils import (SpectroChemPyWarning,
-                                 INPLACE, MASKED,
-                                 TYPE_INTEGER, TYPE_FLOAT)
-from spectrochempy.utils.testing import (assert_equal, assert_array_equal,
-                                         raises, catch_warnings)
+from spectrochempy.utils import (
+    SpectroChemPyWarning,
+    INPLACE, MASKED,
+    TYPE_INTEGER, TYPE_FLOAT,
+    )
+from spectrochempy.utils.testing import (
+    assert_equal, assert_array_equal,
+    raises, catch_warnings,
+    )
 
 
 #  TEST INITIALIZATION
@@ -562,7 +566,6 @@ def test_ndarray_slicing(refarray, ndarray):
 
 
 def test_dim_names_specified(ndarray):
-
     nd = ndarray.copy()
     assert not nd.is_masked
     assert nd.dims == ['y', 'x']

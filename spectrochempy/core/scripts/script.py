@@ -8,8 +8,10 @@
 import re
 import ast
 
-from traitlets import (HasTraits, Unicode, validate, TraitError, Instance,
-                       Float, )
+from traitlets import (
+    HasTraits, Unicode, validate, TraitError, Instance,
+    Float,
+    )
 
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.core import error_
@@ -129,9 +131,9 @@ class Script(HasTraits):
             # let's try to substitute the parent to the missing name
             regex = re.compile(r"'(\w+)'")
             s = regex.search(e.args[0]).group(1)
-            localvars[s] = self.parent                        # lgtm [py/modification-of-locals]
-                                                              # TODO: check if this a real error or not  (need to come
-                                                              #  back on this later)
+            localvars[s] = self.parent  # lgtm [py/modification-of-locals]
+            # TODO: check if this a real error or not  (need to come
+            #  back on this later)
         try:
             exec(code, globals(), localvars)
         except NameError as e:

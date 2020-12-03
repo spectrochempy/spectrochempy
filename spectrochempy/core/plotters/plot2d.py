@@ -40,6 +40,8 @@ from matplotlib import cm
 
 from spectrochempy.core.plotters.utils import make_label
 from spectrochempy.core import project_preferences, general_preferences
+
+
 # from spectrochempy.core import info_, debug_, error_, warning_
 
 
@@ -85,6 +87,7 @@ def plot_stack(dataset, **kwargs):
         return dataset.plotly(**kwargs)
     else:
         return plot_2D(dataset, **kwargs)
+
 
 # image plot --------------------------------------------------------
 
@@ -197,7 +200,7 @@ def plot_2D(dataset, **kwargs):
         new = dataset.copy().T  # transpose dataset
         nameadd = '.T'
     else:
-        new = dataset #.copy()
+        new = dataset  # .copy()
         nameadd = ''
 
     new = new.squeeze()
@@ -303,7 +306,7 @@ def plot_2D(dataset, **kwargs):
     ax.set_xlim(xlim)
 
     xscale = kwargs.get("xscale", "linear")
-   # ax.set_xscale(xscale, nonposx='mask')
+    # ax.set_xscale(xscale, nonposx='mask')
 
     # set the ordinates axis
     # ------------------------------------------------------------------------------------------------------------------
@@ -336,7 +339,7 @@ def plot_2D(dataset, **kwargs):
     ylim[0] = max(ylim[0], yl[0])
 
     yscale = kwargs.get("yscale", "linear")
- #   ax.set_yscale(yscale)
+    #   ax.set_yscale(yscale)
 
     # z intensity (by default we plot real part of the data)
     # ------------------------------------------------------------------------------------------------------------------

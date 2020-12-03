@@ -77,12 +77,12 @@ def smooth(dataset, window_length=5, window='flat', **kwargs):
         return new
 
     wind = {
-        'flat': np.ones,
-        'hanning': np.hanning,
-        'hamming': np.hamming,
-        'bartlett': np.bartlett,
-        'blackman': np.blackman,
-    }
+            'flat': np.ones,
+            'hanning': np.hanning,
+            'hamming': np.hamming,
+            'bartlett': np.bartlett,
+            'blackman': np.blackman,
+            }
     if not callable(window):
         if window not in wind.keys():
             error_("Window must be a callable or a string among 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")

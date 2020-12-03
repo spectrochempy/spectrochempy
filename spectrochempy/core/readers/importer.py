@@ -48,7 +48,7 @@ class Importer(HasTraits):
                 ('excel', 'Microsoft Excel files (*.xls)'),
                 ('json', 'JSON files (*.json)'),
                 ('zip', 'Compressed folder of data files (*.zip)'),
-              #  ('all', 'All files (*.*)')
+                #  ('all', 'All files (*.*)')
                 ]
 
         self.filetypes = dict(FILETYPES)
@@ -61,14 +61,14 @@ class Importer(HasTraits):
                 ('spa', 'omnic'),
                 ('srs', 'omnic'),
                 ('mat', 'matlab'),
-                ('txt','labspec'),
+                ('txt', 'labspec'),
                 ('jdx', 'jcamp'),
                 ('dx', 'jcamp'),
                 ('xls', 'excel'),
                 ]
         self.alias = dict(ALIAS)
 
-# ..................................................................................................................
+    # ..................................................................................................................
     def __call__(self, *args, **kwargs):
 
         self.datasets = []
@@ -80,7 +80,6 @@ class Importer(HasTraits):
             # This is not usefull for the 1D datasets, as if they are compatible they are merged automatically
             if args and len(args) == 1 and isinstance(args[0], (list, tuple)):
                 kwargs['merge'] = True
-
 
         args, kwargs = self._setup_objtype(*args, **kwargs)
         res = check_filename_to_open(*args, **kwargs)
@@ -155,14 +154,13 @@ class Importer(HasTraits):
                 else:
                     raise e
 
-        if len(datasets)>1:
+        if len(datasets) > 1:
             datasets = self._do_merge(datasets, **kwargs)
             if kwargs.get('merge', False):
                 datasets[0].name = pathclean(filename).stem
                 datasets[0].filename = pathclean(filename)
 
         self.datasets.extend(datasets)
-
 
     def _do_merge(self, datasets, **kwargs):
 

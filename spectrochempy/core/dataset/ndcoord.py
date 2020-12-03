@@ -203,7 +203,6 @@ class Coord(NDMath, NDArray):
         # else return an array of the differents spacings
         return spacing(self.data) * self.units
 
-
     # NDmath methods
 
     # ..................................................................................................................

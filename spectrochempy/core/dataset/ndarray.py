@@ -41,9 +41,11 @@ from traittypes import Array
 
 from spectrochempy.units import Unit, ur, Quantity, set_nmr_context
 from spectrochempy.core import info_, error_, print_
-from spectrochempy.utils import (TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
-                                 is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
-                                 make_new_object, convert_to_html)
+from spectrochempy.utils import (
+    TYPE_INTEGER, TYPE_FLOAT, Meta, MaskedConstant, MASKED, NOMASK, INPLACE, is_sequence,
+    is_number, numpyprintoptions, insert_masked_print, docstrings, SpectroChemPyWarning,
+    make_new_object, convert_to_html,
+    )
 
 # ======================================================================================================================
 # constants
@@ -858,7 +860,6 @@ class NDArray(HasTraits):
         if title:
             self._title = title
 
-
     @property
     def alt_title(self):
         # title provided in case of offset
@@ -1129,6 +1130,7 @@ class NDArray(HasTraits):
     @property
     def imag(self):
         return None
+
     #
     # @property
     # def has_complex_dims(self):
@@ -1223,7 +1225,6 @@ class NDArray(HasTraits):
     def offset(self, val):
         self._offset = val
 
-
     @property
     def offset_value(self):
         offset = self.offset
@@ -1254,7 +1255,7 @@ class NDArray(HasTraits):
         if self.units is None:
             return list(np.array(self.roi) - self.offset)
         else:
-            return list(self._uarray(self.roi, self._units)-self.offset_value)
+            return list(self._uarray(self.roi, self._units) - self.offset_value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
@@ -1789,8 +1790,8 @@ class NDArray(HasTraits):
                 mask_string = f'--{dtype}'
                 ds = insert_masked_print(ds, mask_string=mask_string)
             body = np.array2string(
-                ds, separator=' ',
-                prefix=pref)
+                    ds, separator=' ',
+                    prefix=pref)
             body = body.replace('\n', sep)
             text = ''.join([pref, body, units])
             text += sep
@@ -2134,7 +2135,7 @@ class NDArray(HasTraits):
         # This ensures that a masked array is returned.
         if not np.any(mask):
             mask = np.zeros(data.shape).astype(bool)
-        data =  np.ma.masked_where(mask,data) # np.ma.masked_array(data, mask)
+        data = np.ma.masked_where(mask, data)  # np.ma.masked_array(data, mask)
 
         return data
 

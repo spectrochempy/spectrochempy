@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from subprocess import Popen, PIPE
+
 # ======================================================================================================================
 #  Copyright (©) 2015-2020 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.                                  =
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 import pytest
-from subprocess import Popen, PIPE
 
 from spectrochempy import APIref, set_loglevel, get_loglevel, warning_, version
 

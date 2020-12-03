@@ -27,9 +27,8 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
 from spectrochempy.core.project.baseproject import AbstractProject
-from spectrochempy.utils import get_filename,pathclean, json_serialiser
+from spectrochempy.utils import get_filename, pathclean, json_serialiser
 from spectrochempy.utils.qtfiledialogs import save_dialog
-
 
 cfg = config_manager
 preferences = general_preferences
@@ -184,7 +183,7 @@ class Project(AbstractProject):
 
         else:
             raise AttributeError(
-                "`%s` has no attribute `%s`" % (type(self).__name__, item))
+                    "`%s` has no attribute `%s`" % (type(self).__name__, item))
 
     # ..................................................................................................................
     def __iter__(self):
@@ -783,7 +782,6 @@ class Project(AbstractProject):
         # Recursive scan on Project content
         _loop_on_obj(objnames)
 
-
         # write
 
         with open(tmpfile, 'w') as f:
@@ -871,7 +869,6 @@ class Project(AbstractProject):
     @classmethod
     def from_json(cls, js):
 
-
         def _make_project(js, pname):
 
             args = []
@@ -901,7 +898,6 @@ class Project(AbstractProject):
             return project
 
         return _make_project(js, 'main')
-
 
     @classmethod
     def load(cls, *args, **kwargs):
@@ -963,9 +959,9 @@ class Project(AbstractProject):
                     filename = files[0]
 
         # directory extracted from the filename has prevalence on kwargs
-        directory=None
+        directory = None
         if filename:
-            filename = pathclean( filename)
+            filename = pathclean(filename)
             directory, filename = os.path.split(filename)
 
             if not os.path.exists(directory):
@@ -976,8 +972,8 @@ class Project(AbstractProject):
 
             filename = os.path.expanduser(os.path.join(directory, filename))
             if (not os.path.exists(filename) or os.path.isdir(filename)
-                # this may happen when the zip has been decompressed externally (we ignore this)
-                ) and not filename.endswith('.pscp'):
+                    # this may happen when the zip has been decompressed externally (we ignore this)
+            ) and not filename.endswith('.pscp'):
                 filename = filename + '.pscp'
                 if not os.path.exists(filename):
                     raise IOError('no valid project filename provided')
@@ -990,7 +986,6 @@ class Project(AbstractProject):
         else:
             fid = open(filename, 'rb')
 
-
         # open the zip file as a dict-like object
         try:
             obj = ScpFile(fid)
@@ -1001,7 +996,7 @@ class Project(AbstractProject):
         # read json files in the pscp file (obj[f])
         # then write it in the main config directory
         f = 'ProjectPreferences.json'
-        if f in obj.files:   #TODO: work on this
+        if f in obj.files:  # TODO: work on this
             prefjsonfile = os.path.join(config_dir, f)
             with open(prefjsonfile, 'w') as fd:
                 json.dump(obj[f], fd, indent=4)

@@ -53,9 +53,9 @@ class Exporter(HasTraits):
             if 'filetypes' not in kwargs:
                 kwargs['filetypes'] = self.filetypes.values()
                 protocol = 'scp'
-                if args: # filename
+                if args:  # filename
                     protocol = self.protocols[pathclean(args[0]).suffix]
-                    kwargs['filetypes']= [self.filetypes[protocol]]
+                    kwargs['filetypes'] = [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
             protocol = self.protocols[filename.suffix]
             write_ = getattr(self, f"_write_{protocol}")

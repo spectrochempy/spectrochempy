@@ -135,7 +135,6 @@ def test_read():
 
 
 def test_generic_read():
-
     # filename + extension specified
     ds = scp.read('wodger.spg')
     assert ds.name == 'wodger'
@@ -159,9 +158,9 @@ def test_read_dir():
 
     # if we want the whole dir  - listdir must be used
     # this is equivalent to read_dir with a dialog to select directories only
-    A = scp.read(listdir=True, directory=datadir/'irdata'/'subdir')
+    A = scp.read(listdir=True, directory=datadir / 'irdata' / 'subdir')
     assert len(A) == 4
-    A1 = scp.read_dir(directory=datadir/'irdata'/'subdir')
+    A1 = scp.read_dir(directory=datadir / 'irdata' / 'subdir')
     assert A == A1
 
     # listdir is not necessary if a directory location is given as a single argument

@@ -25,16 +25,16 @@ jobs:
       if: branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
       env:
       - DEPLOY=true
-      - CONDAPY=3.7
+      - CONDAPY=3.8
     - stage: build-docs
       if: type != pull_request AND (branch IN (master,feature/travis-docs) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/)
       env:
       - BUILDOCS=true
-      - CONDAPY=3.7
+      - CONDAPY=3.8
 
 # limit got clone depth to 50 commits (this means that pull requests must be done with less than 50 commit changes)
-git:
-  depth: 50
+# git:
+#  depth: 50
 
 cache:
   apt: true

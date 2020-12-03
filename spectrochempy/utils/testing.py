@@ -41,7 +41,6 @@ from numpy.testing import (
 # ======================================================================================================================
 
 def _compare_datasets(this, other, approx=False, decimal=6):
-
     from spectrochempy.core.dataset.ndarray import NDArray
     from spectrochempy.units import ur, Quantity
 
@@ -136,16 +135,16 @@ def _compare_datasets(this, other, approx=False, decimal=6):
 
     return None
 
-def _significant_decimal(x):
 
+def _significant_decimal(x):
     for decimal in range(7):
-        if np.round(x/1.e4,decimal) > 0:
+        if np.round(x / 1.e4, decimal) > 0:
             break
     return decimal
 
+
 # ......................................................................................................................
 def assert_dataset_equal(nd1, nd2):
-
     if _compare_datasets(nd1, nd2) is None:
         return
 
@@ -154,12 +153,12 @@ def assert_dataset_equal(nd1, nd2):
 
 # ......................................................................................................................
 def assert_dataset_almost_equal(nd1, nd2, decimal=6):
-
     decimal = _significant_decimal(np.max(nd1.ptp().data))
     if _compare_datasets(nd1, nd2, approx=True, decimal=decimal) is None:
         return
 
     raise AssertionError('NDDatasets are not almost equals')
+
 
 # ======================================================================================================================
 # RandomSeedContext
@@ -308,6 +307,7 @@ class catch_warnings(warnings.catch_warnings):
 
 figures_dir = os.path.join(os.path.expanduser("~"), ".spectrochempy", "figures")
 os.makedirs(figures_dir, exist_ok=True)
+
 
 # .............................................................................
 def _compute_rms(x, y):

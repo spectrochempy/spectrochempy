@@ -18,12 +18,16 @@ __dataset_methods__ = []
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.tight_layout import (get_renderer, get_tight_layout_figure,
-                                     get_subplotspec_list)
+from matplotlib.tight_layout import (
+    get_renderer, get_tight_layout_figure,
+    get_subplotspec_list,
+    )
 import matplotlib as mpl
 
 from spectrochempy.core.dataset.ndplot import _set_figure_style
 from spectrochempy.utils import is_sequence
+
+
 # from spectrochempy.core import general_preferences, project_preferences
 
 

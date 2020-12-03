@@ -36,6 +36,7 @@ from ..dataset.npy import zeros_like
 from .apodization import hamming
 from .concatenate import concatenate
 
+
 def get_zpd(dataset, dim='x', mode='max'):
     r"""
     Find the zero path difference (zpd) positions. For multidimensional NDDataset
@@ -206,24 +207,24 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         if not np.all(zpd[0] == zpd):
             raise ValueError("zpd should be at the same index")
         zpd = zpd[0]
-        narrowed = hamming(new[:, 0: 2*zpd])
+        narrowed = hamming(new[:, 0: 2 * zpd])
         mirrored = concatenate(narrowed[:, zpd:], narrowed[:, :zpd])
         spectrum = np.fft.rfft(mirrored.data)
         phase_angle = np.arctan(spectrum.imag, spectrum.real)
         initx = np.arange(phase_angle.shape[1])
         interpolate_phase_angle = interp1d(initx, phase_angle)
 
-        zeroed = concatenate(zeros_like(new[:, zpd+1:]), new)
-        apodized = hamming(zeroed) #mertz(new, zpd)
-        zpd = len(apodized.x)//2
+        zeroed = concatenate(zeros_like(new[:, zpd + 1:]), new)
+        apodized = hamming(zeroed)  # mertz(new, zpd)
+        zpd = len(apodized.x) // 2
         mirrored = concatenate(apodized[:, zpd:], apodized[:, 0:zpd])
 
-        wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05*2)
+        wavenumbers = np.fft.rfftfreq(mirrored.shape[1], 3.165090310992977e-05 * 2)
 
         spectrum = np.fft.rfft(mirrored.data)
         plt.plot(wavenumbers, spectrum[0])
         plt.show()
-        newx = np.arange(spectrum.shape[1])*max(initx)/max(np.arange(spectrum.shape[1]))
+        newx = np.arange(spectrum.shape[1]) * max(initx) / max(np.arange(spectrum.shape[1]))
         phase_angle = interpolate_phase_angle(newx)
         spectrum = spectrum.real * np.cos(phase_angle) + spectrum.imag * np.sin(phase_angle)
 

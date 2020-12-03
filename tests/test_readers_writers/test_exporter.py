@@ -5,9 +5,9 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import pytest
 from pathlib import Path
 
+import pytest
 
 import spectrochempy as scp
 from spectrochempy import NDDataset, general_preferences as prefs
@@ -19,7 +19,6 @@ cwd = Path.cwd()
 
 # ......................................................................................................................
 def test_write():
-
     nd = scp.read_omnic('irdata/nh4y-activation.spg')
 
     # API write methods needs an instance of a NDDataset as the first argument

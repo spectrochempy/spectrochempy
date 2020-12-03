@@ -12,6 +12,7 @@ import io
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 from spectrochempy.utils import pathclean
 
+
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
@@ -61,13 +62,12 @@ def read_zip(*args, **kwargs):
 
 @importermethod
 def _read_zip(*args, **kwargs):
-
     # Below we assume that files to read are in a unique directory
     from spectrochempy import NDDataset
     import zipfile
 
     # read zip file
-    _ , filename = args
+    _, filename = args
     content = kwargs.pop('content', None)
 
     if content:
@@ -96,14 +96,13 @@ def _read_zip(*args, **kwargs):
             parent = file
             break
 
-
         for count, children in enumerate(parent.iterdir()):
 
             if count == only:
                 # limits to only this number of files
                 break
 
-            _ , extension = children.name.split('.')
+            _, extension = children.name.split('.')
             if extension == 'DS_Store':
                 only += 1
                 continue
@@ -113,6 +112,7 @@ def _read_zip(*args, **kwargs):
             datasets.append(read_(children.name, content=children.read_bytes(), **kwargs))
 
     return datasets
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':

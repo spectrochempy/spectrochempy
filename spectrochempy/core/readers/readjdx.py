@@ -22,6 +22,7 @@ from spectrochempy.core import debug_
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
+
 # ======================================================================================================================
 # Public functions
 # ======================================================================================================================
@@ -59,10 +60,12 @@ def read_jcamp(*args, **kwargs):
     importer = Importer()
     return importer(*args, **kwargs)
 
+
 read_jdx = read_jcamp
 read_jdx.__doc__ = 'This method is an alias of `read_jcamp` '
 read_dx = read_jcamp
 read_dx.__doc__ = 'This method is an alias of `read_jcamp` '
+
 
 # ======================================================================================================================
 # private functions
@@ -70,11 +73,10 @@ read_dx.__doc__ = 'This method is an alias of `read_jcamp` '
 
 @importermethod
 def _read_jdx(*args, **kwargs):
-
     debug_("reading a json file")
 
     # read jdx file
-    dataset , filename = args
+    dataset, filename = args
     content = kwargs.get('content', None)
     sortbydate = kwargs.pop("sortbydate", True)
 
@@ -109,7 +111,6 @@ def _read_jdx(*args, **kwargs):
         nspec = 1
     else:
         raise ValueError('DATA TYPE must be LINK or INFRARED SPECTRUM')
-
 
     # Create variables
     # ..................................................................................................................
@@ -268,6 +269,7 @@ def _read_jdx(*args, **kwargs):
 
     return dataset
 
+
 # ......................................................................................................................
 @importermethod
 def _read_dx(*args, **kwargs):
@@ -290,6 +292,7 @@ def _readl(fid):
         keyword = ''
         text = line.strip()
     return keyword, text
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':

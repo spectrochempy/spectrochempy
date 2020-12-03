@@ -229,8 +229,8 @@ def NNLS(C, d, x0=None, tol=None, itmax_factor=3):
             if it > itmax:
                 max_error = z[PP - 1].max()
                 raise Exception(
-                    'Exiting: Iteration count (=%d) exceeded\n Try raising the tolerance tol. (max_error=%d)' % (
-                        it, max_error))
+                        'Exiting: Iteration count (=%d) exceeded\n Try raising the tolerance tol. (max_error=%d)' % (
+                                it, max_error))
 
             QQ = np.where((z <= tol) & (P != 0))[0]
             alpha = min(x[QQ] / (x[QQ] - z[QQ]))

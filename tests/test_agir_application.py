@@ -13,12 +13,13 @@ from spectrochempy import general_preferences as prefs
 
 # TODO: to revise with project!
 def make_samples(force_original=False):
-
     _samples = {
-                'P350': {'label': r'$\mathrm{M_P}\,(623\,K)$'},
-                # 'A350': {'label': r'$\mathrm{M_A}\,(623\,K)$'},
-                # 'B350': {'label': r'$\mathrm{M_B}\,(623\,K)$'}
-                }
+            'P350': {
+                    'label': r'$\mathrm{M_P}\,(623\,K)$'
+                    },
+            # 'A350': {'label': r'$\mathrm{M_A}\,(623\,K)$'},
+            # 'B350': {'label': r'$\mathrm{M_B}\,(623\,K)$'}
+            }
 
     for key, sample in _samples.items():
         # our data are in our test `datadir` directory.

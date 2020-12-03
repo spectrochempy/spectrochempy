@@ -12,9 +12,7 @@ import pytest
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
-
 from spectrochempy.utils.testing import assert_array_equal, assert_equal_units
-
 from spectrochempy.core import info_, debug_
 
 
@@ -44,7 +42,9 @@ def test_coord():
     a.name = 'y'
     assert a.name == 'y'
     a.meta = None
-    a.meta = {'val': 125}  # need to be an OrderedDic
+    a.meta = {
+            'val': 125
+            }  # need to be an OrderedDic
     assert a.meta['val'] == 125
 
     # now with labels
@@ -291,11 +291,11 @@ def test_coord_slicing():
 
 # first operand has units km, second is a scalar with units m
 @pytest.mark.parametrize(('operation', 'result_units'), [
-                             ('__add__', ur.km),
-                             ('__sub__', ur.km),
-                             ('__mul__', ur.km * ur.m),
-                             ('__truediv__', ur.km / ur.m)
-                          ]
+        ('__add__', ur.km),
+        ('__sub__', ur.km),
+        ('__mul__', ur.km * ur.m),
+        ('__truediv__', ur.km / ur.m)
+        ]
                          )
 def test_coord_unit_conversion_operators_a(operation, result_units):
     print(operation, result_units)
@@ -331,8 +331,8 @@ def test_coord_unary_ufuncs_simple_data(name):
 
 # first operand has units km, second is a scalar unitless
 @pytest.mark.parametrize(('operation', 'result_units'), [
-    ('__mul__', ur.km),
-    ('__truediv__', ur.km)])
+        ('__mul__', ur.km),
+        ('__truediv__', ur.km)])
 def test_coord_unit_conversion_operators(operation, result_units):
     in_km = Coord(data=np.linspace(4000, 1000, 10),
                   units='km',

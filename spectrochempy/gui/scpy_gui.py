@@ -23,8 +23,8 @@ import dash_bootstrap_components as dbc
 import spectrochempy as scp
 from spectrochempy.gui import Layout, Callbacks
 
-def main():
 
+def main():
     debug = scp.get_loglevel() == scp.DEBUG
 
     # create the standalone application
@@ -73,9 +73,9 @@ def main():
     port = scp.app.port
     for i in range(10):
         try:
-            _open_browser = lambda: webbrowser.open_new(f'http://127.0.0.1:{port+i}/')
+            _open_browser = lambda: webbrowser.open_new(f'http://127.0.0.1:{port + i}/')
             Timer(1, _open_browser).start()
-            app.run_server(debug=debug, port=port+i)
+            app.run_server(debug=debug, port=port + i)
             break
 
         except OSError as e:

@@ -8,7 +8,6 @@
 import matplotlib.pyplot as mpl
 
 from spectrochempy.utils.testing import image_comparison
-
 from spectrochempy import set_loglevel, INFO, WARNING, MASKED, show, multiplot, plot_multiple
 
 set_loglevel(INFO)

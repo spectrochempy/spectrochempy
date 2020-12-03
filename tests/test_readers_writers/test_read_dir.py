@@ -9,7 +9,6 @@ import spectrochempy as scp
 
 
 def test_read_dir():
-
     A = scp.read_dir('irdata/subdir')
     assert A.shape == (4, 5549)
 

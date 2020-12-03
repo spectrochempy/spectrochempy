@@ -11,8 +11,8 @@ from pkgutil import walk_packages
 
 from traitlets import import_item
 
+__all__ = ['list_packages', 'generate_api']
 
-__all__ = [ 'list_packages', 'generate_api' ]
 
 # ======================================================================================================================
 # PACKAGE and API UTILITIES
@@ -75,6 +75,7 @@ def generate_api(api_path):
                 setattr(NDIO, item, getattr(pkg, item))
 
     return __all__
+
 
 # ======================================================================================================================
 

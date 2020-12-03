@@ -61,6 +61,7 @@ def test_ndio_generic(IR_dataset_1D):
         if (irdatadir / f).is_file():
             (irdatadir / f).unlink()
 
+
 def test_ndio_2D(IR_dataset_2D):
     # test with a 2D
 

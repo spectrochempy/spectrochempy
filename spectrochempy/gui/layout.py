@@ -68,8 +68,9 @@ class Layout(object):
     def topbar(self):
         self.LOGO = html.Img(src='data:image/png;base64,{}'.format(base64.b64encode(
                 open(
-                    os.path.join(os.path.dirname(os.path.abspath(self.calling_script_name)), 'assets', 'scpy_logo.png'),
-                    'rb').read()).decode()), width='75px', )
+                        os.path.join(os.path.dirname(os.path.abspath(self.calling_script_name)), 'assets',
+                                     'scpy_logo.png'),
+                        'rb').read()).decode()), width='75px', )
 
         self.TITLE = dbc.NavbarBrand(children=dcc.Markdown('**S**pectro**C**hem**P**y *by Dash*'), id="navbarbrand",
                                      className='navbarbrand')
@@ -120,7 +121,7 @@ https://github.com/spectrochempy/spectrochempy
 [CeCILL-B FREE SOFTWARE LICENSE AGREEMENT](https://cecill.info/licences/Licence_CeCILL-B_V1-en.html)
 
 
-""", className='markdown',),
+""", className='markdown', ),
                     className='control-tab')
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -152,7 +153,8 @@ https://github.com/spectrochempy/spectrochempy
                                                                          children=[
                                                                                  dbc.DropdownMenuItem("New",
                                                                                                       id='project-new'),
-                                                            dbc.DropdownMenuItem(dcc.Upload("Open", id='upload-project'),
+                                                                                 dbc.DropdownMenuItem(dcc.Upload("Open",
+                                                                                                                 id='upload-project'),
                                                                                                       id='project-open'),
                                                                                  dbc.DropdownMenuItem("Save",
                                                                                                       id='project-save',
@@ -224,7 +226,8 @@ If an offset is defined then the actual roi below is displayed accordingly (*see
     def mask_content(self):
         return [dcc.Markdown("""
 To mask a region, click on the **Select region button** then select your region on the graph.
-To mask one of the trace, click on it (selected trace are highlihted. Confirmation will be asked before saving the masks. 
+To mask one of the trace, click on it (selected trace are highlihted. Confirmation will be asked before saving the 
+masks. 
                 """, className='markdown'),  # roi x limits
                 dbc.InputGroup([dbc.InputGroupAddon("Masks", id='masks', addon_type="prepend"),
                                 dbc.Button("Select region", color="secondary",
@@ -265,47 +268,78 @@ To mask one of the trace, click on it (selected trace are highlihted. Confirmati
                                       title='Graph layout',
                                       markdown="",
                                       children=[
-                                              dbc.Button("Zoom reset", color="secondary", outline=True, size='sm', id='zoom-reset'),
-                                              dcc.Markdown("*To reset to full range display, one can also double click on the graph area (It will be faster!)* "),
+                                              dbc.Button("Zoom reset", color="secondary", outline=True, size='sm',
+                                                         id='zoom-reset'),
+                                              dcc.Markdown(
+                                                  "*To reset to full range display, one can also double click on the "
+                                                  "graph area (It will be faster!)* "),
 
                                               # data type selection
                                               dcc.Markdown("###### Data to display"),
                                               dcc.Checklist(
                                                       id='graph-selector',
                                                       options=[
-                                                              {'label': 'Processed', 'value': 'Processed'},
-                                                              {'label': 'Transposed', 'value': 'Transposed'},
+                                                              {
+                                                                      'label': 'Processed',
+                                                                      'value': 'Processed'
+                                                                      },
+                                                              {
+                                                                      'label': 'Transposed',
+                                                                      'value': 'Transposed'
+                                                                      },
                                                               ],
                                                       value=['Processed'],
-                                                      labelStyle={'display': 'inline-block',
-                                                                  'margin-right':'10px'}),
+                                                      labelStyle={
+                                                              'display': 'inline-block',
+                                                              'margin-right': '10px'
+                                                              }),
 
-                                              #optimisation
-                                                dcc.Markdown("###### Graph display optimisation"),
-                                                html.Div(daq.Slider(min=0, max=4, value=3, step=1, marks={
-                                                        '0'  : 'None',
-                                                        '1': 'Low',
-                                                        '2'  : 'Moderate',
-                                                        '3': 'High',
-                                                        '4'  : 'Severe'
-                                                        }, id='graph-optimisation', ), style={
-                                                        'margin-left'  : '30px',
-                                                        'margin-bottom': '30px'
-                                                        }),
+                                              # optimisation
+                                              dcc.Markdown("###### Graph display optimisation"),
+                                              html.Div(daq.Slider(min=0, max=4, value=3, step=1, marks={
+                                                      '0': 'None',
+                                                      '1': 'Low',
+                                                      '2': 'Moderate',
+                                                      '3': 'High',
+                                                      '4': 'Severe'
+                                                      }, id='graph-optimisation', ), style={
+                                                      'margin-left': '30px',
+                                                      'margin-bottom': '30px'
+                                                      }),
 
                                               # Colormap
                                               dcc.Markdown("###### Colormap"),
                                               dcc.Dropdown(id='cmap-select',
                                                            options=[
-                                                           {'label': 'jet', 'value': 'jet'},
-                                                           {'label': 'jetr', 'value': 'jet_r'},
-                                                           {'label': 'viridis', 'value': 'viridis'},
-                                                           {'label': 'viridis_r', 'value': 'viridis_r'},
-                                                           {'label': 'magma', 'value': 'magma'},
-                                                           {'label': 'magma_r', 'value': 'magma_r'},
+                                                                   {
+                                                                           'label': 'jet',
+                                                                           'value': 'jet'
+                                                                           },
+                                                                   {
+                                                                           'label': 'jetr',
+                                                                           'value': 'jet_r'
+                                                                           },
+                                                                   {
+                                                                           'label': 'viridis',
+                                                                           'value': 'viridis'
+                                                                           },
+                                                                   {
+                                                                           'label': 'viridis_r',
+                                                                           'value': 'viridis_r'
+                                                                           },
+                                                                   {
+                                                                           'label': 'magma',
+                                                                           'value': 'magma'
+                                                                           },
+                                                                   {
+                                                                           'label': 'magma_r',
+                                                                           'value': 'magma_r'
+                                                                           },
                                                                    ],
                                                            value='jet',
-                                                           style={'width':'150px'}
+                                                           style={
+                                                                   'width': '150px'
+                                                                   }
                                                            )
                                               ],
                                       ),
@@ -343,15 +377,15 @@ To mask one of the trace, click on it (selected trace are highlihted. Confirmati
         return [html.Hr(),
                 html.H6('Method'),
                 dcc.Dropdown(options=[{
-                'label': 'Subtract first row',
-                'value': 'first'
-                }, {
-                'label': 'Subtract last row',
-                'value': 'last'
-                }, {
-                'label': 'Subtract an external reference spectra',
-                'value': 'external'
-                },  ], multi=False, id='subtraction-correction'),
+                        'label': 'Subtract first row',
+                        'value': 'first'
+                        }, {
+                        'label': 'Subtract last row',
+                        'value': 'last'
+                        }, {
+                        'label': 'Subtract an external reference spectra',
+                        'value': 'external'
+                        }, ], multi=False, id='subtraction-correction'),
                 html.Div(id='baseline_parameters')]
 
     def processing_tab(self):
@@ -379,11 +413,11 @@ To mask one of the trace, click on it (selected trace are highlihted. Confirmati
                                   dbc.Tab(self.graph_tab(), label="Graph", tab_id='graph',
                                           id='graph-tab'),
                                   dbc.Tab(self.processing_tab(), label="Processing", tab_id='processing',
-                                         id='processing-tab')
+                                          id='processing-tab')
                                   ], active_tab='project'),
                         ],
-                       width=4, id='scpy-control-tabs',
-                       className='control-tabs')
+                width=4, id='scpy-control-tabs',
+                className='control-tabs')
 
     # ------------------------------------------------------------------------------------------------------------------
     # DISPLAY ZONE
@@ -392,14 +426,13 @@ To mask one of the trace, click on it (selected trace are highlihted. Confirmati
     def graph_zone(self):
         graph_selector = dbc.ButtonGroup([
 
-                                   ],)
+                ], )
         config = {
                 'scrollZoom': True,
                 'doubleClick': 'reset',
                 'displayModeBar': False,
                 'displaylogo': False
                 }
-
 
         graph = dcc.Loading(dcc.Graph(id='graph',
                                       config=config,
@@ -425,7 +458,7 @@ To mask one of the trace, click on it (selected trace are highlihted. Confirmati
                            dbc.Container(children=[dbc.Row([self.tabs_zone(), self.graph_zone()], ), ], fluid=True,
                                          style={
                                                  "font-size": '10pt',
-                                                 'height'   : '80vh'
+                                                 'height': '80vh'
                                                  }, ), refresh_plots, mathjax_script, ], )
 
         return layout

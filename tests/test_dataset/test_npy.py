@@ -8,8 +8,10 @@
 import numpy as np
 import pytest
 
-from spectrochempy.core.dataset.npy import (identity, eye, full, ones, zeros, dot, diag, empty_like,
-                                            zeros_like, ones_like, full_like, )
+from spectrochempy.core.dataset.npy import (
+    identity, eye, full, ones, zeros, dot, diag, empty_like,
+    zeros_like, ones_like, full_like,
+    )
 from spectrochempy.units import ur
 
 
