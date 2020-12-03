@@ -141,7 +141,7 @@ tests/**/*.scp
 
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_13C
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_1H
-scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HC
+#scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HC
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HH
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_1
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_2

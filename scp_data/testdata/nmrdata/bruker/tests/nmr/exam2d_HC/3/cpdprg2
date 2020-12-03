@@ -1,0 +1,27 @@
+;$OWNER=Bruker
+#setphase
+bilev "l31=(nsdone+ds)%4+1"
+1 p63*0.5:sp14:0 pl=sp14
+  lo to 1 times l31
+  p63:sp31:0 pl=sp31
+2 p63:sp31:150
+  p63:sp31:60
+  p63:sp31:150
+  p63:sp31:0
+  p63:sp31:0 
+  p63:sp31:150
+  p63:sp31:60
+  p63:sp31:150
+  p63:sp31:0
+  p63:sp31:180 
+  p63:sp31:330
+  p63:sp31:240
+  p63:sp31:330
+  p63:sp31:180
+  p63:sp31:180 
+  p63:sp31:330
+  p63:sp31:240
+  p63:sp31:330
+  p63:sp31:180
+  p63:sp31:0
+  jump to 2

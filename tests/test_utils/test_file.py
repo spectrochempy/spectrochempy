@@ -41,13 +41,13 @@ def test_get_filename():
     # directory specified by a keyword as well as the filename
     f = get_filename("nh4y.scp", directory="irdata")
     assert f == {
-            '.scp': [Path('/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/nh4y.scp')]
+            '.scp': [Path(prefs.datadir)/'irdata'/'nh4y.scp']
             }
 
     # directory specified in the filename as a subpath of the data directory
     f = get_filename("irdata/nh4y.scp")
     assert f == {
-            '.scp': [Path('/Users/christian/Dropbox/SCP/spectrochempy/scp_data/testdata/irdata/nh4y.scp')]
+            '.scp': [Path(prefs.datadir)/'irdata'/'nh4y.scp']
             }
 
     # no directory specified (filename must be in the working or the default  data directory
