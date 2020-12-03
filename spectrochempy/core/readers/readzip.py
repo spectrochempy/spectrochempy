@@ -50,7 +50,7 @@ def read_zip(*args, **kwargs):
     """
     kwargs['filetypes'] = ['Compressed files (*.zip)']
     # TODO: allows other type of compressed files
-    kwargs['protocol'] = ['.zip']
+    kwargs['protocol'] = ['zip']
     importer = Importer()
     return importer(*args, **kwargs)
 

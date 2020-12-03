@@ -9,26 +9,27 @@ import spectrochempy as scp
 
 
 def test_read_dir():
+
     A = scp.read_dir('irdata/subdir')
     assert A.shape == (4, 5549)
 
     C = scp.NDDataset.read_dir('matlabdata')
-    print('Matrixes in .mat files:')
-    for x in C:
-        print(C)
-    assert len(C) == 6
+    assert isinstance(C, list)
+    assert len(C) == 6  # six matrices
     assert C[3].shape == (204, 96)
 
-    A = scp.read_dir(directory='irdata/subdir')  # should open a dialog
+    A = scp.read_dir(directory='irdata/subdir')  # open a dialog to eventually select
+    # directory inside the specified one
     assert A.shape == (4, 5549)
 
     B = scp.read_dir('irdata/subdir', recursive=True)
-    assert len(B) == 7
-    assert B[0].shape == (8, 5549)
+    assert len(B) == 8
+    assert B.shape == (8, 5549)
 
-    B = scp.read_dir(directory='irdata/subdir', recursive=True)
-    assert len(B) == 7
-    assert B[0].shape == (8, 5549)
+    # no merging
+    B = scp.read_dir(directory='irdata/subdir', recursive=True, merge=False)
+    assert len(B) == 8
+    assert isinstance(B, list)
 
     C = scp.read_dir()
 

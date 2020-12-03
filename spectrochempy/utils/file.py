@@ -23,6 +23,7 @@ __all__ = ['get_filename', 'readdirname', 'pathclean', 'patterns',
 # ======================================================================================================================
 # Utility functions
 # ======================================================================================================================
+
 def _insensitive_case_glob(pattern):
     def either(c):
         return f'[{c.lower()}{c.upper()}]' if c.isalpha() else c
@@ -344,6 +345,11 @@ def get_filename(*filenames, **kwargs):
                 if kwargs.get('recursive', False):
                     pat = f'**/{pat}'
                 filenames.extend(list(directory.glob(pat)))
+
+            # on mac case insensitive OS this cause doubling the number of files.
+            # Eliminates doublons:
+            filenames = list(set(filenames))
+
             filenames = pathclean(filenames)
 
         if not filenames:

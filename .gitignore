@@ -138,8 +138,7 @@ var/
 saved_pkglist.txt
 tests/**/*.jdx
 tests/**/*.scp
-essai.scp
-nh4y-activation.scp
+
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_13C
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam1d_1H
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam2d_HC
@@ -148,6 +147,8 @@ scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_1
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_2
 scp_data/testdata/nmrdata/bruker/tests/nmr/exam_CMCse_3
 Icon*
+essai.scp
+nh4y-activation.scp
 nh4y-activation.jdx
 FTIR.scp
 tg.scp

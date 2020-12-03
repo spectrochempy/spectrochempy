@@ -48,4 +48,9 @@ def test_write():
     # assert filename.suffix == '.json'
     # filename.unlink()
 
+    irdatadir = pathclean(prefs.datadir) / "irdata"
+    for f in ['essai.scp', 'nh4y-activation.scp']:
+        if (irdatadir / f).is_file():
+            (irdatadir / f).unlink()
+
 # EOF

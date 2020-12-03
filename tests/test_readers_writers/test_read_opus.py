@@ -83,7 +83,7 @@ def test_read_opus():
 
     # single opus file using generic read function
     # if the protocol is given it is similar to the read_opus function
-    F = NDDataset.read(os.path.join('irdata', 'OPUS', 'test.0000'), protocol='.opus')
+    F = NDDataset.read(os.path.join('irdata', 'OPUS', 'test.0000'), protocol='opus')
     assert F.shape == (1, 2567)
 
     # No protocol?

@@ -29,7 +29,6 @@ from spectrochempy.core.readers.importer import docstrings, importermethod, Impo
 # ======================================================================================================================
 
 # ......................................................................................................................
-
 @docstrings.dedent
 def read_omnic(*args, **kwargs):
     """
@@ -153,7 +152,7 @@ def read_omnic(*args, **kwargs):
     """
 
     kwargs['filetypes'] = ['OMNIC files (*.spa *.spg)', 'OMNIC series (*.srs)']
-    kwargs['protocol'] = ['.omnic', '.spg', '.spa', '.srs' ]
+    kwargs['protocol'] = ['omnic', 'spa', 'spg', 'srs']
     importer = Importer()
     return importer(*args, **kwargs)
 
@@ -200,7 +199,7 @@ def read_spg(*args, **kwargs):
     """
 
     kwargs['filetypes'] = ['OMNIC files (*.spg)']
-    kwargs['protocol'] = ['.spg']
+    kwargs['protocol'] = ['spg']
     importer = Importer()
     return importer(*args, **kwargs)
 
@@ -250,7 +249,7 @@ def read_spa(*args, **kwargs):
     """
 
     kwargs['filetypes'] = ['OMNIC files (*.spa)']
-    kwargs['protocol'] = ['.spa']
+    kwargs['protocol'] = ['spa']
     importer = Importer()
     return importer(*args, **kwargs)
 
@@ -297,7 +296,7 @@ def read_srs(*args, **kwargs):
     """
 
     kwargs['filetypes'] = ['OMNIC series (*.srs)']
-    kwargs['protocol'] = ['.srs']
+    kwargs['protocol'] = ['srs']
     importer = Importer()
     return importer(*args, **kwargs)
 
@@ -481,18 +480,21 @@ def _read_spg(*args, **kwargs):
 
     dataset.set_coords(y=_y, x=_x)
 
-    # Set origin, description and history
+    # Set origin and description
     dataset.origin = "omnic"
     dataset.description = kwargs.get('description', f'Omnic title: {spg_title}\nOmnic filename: {filename}')
-    dataset.history = str(datetime.now()) + ':imported from spg file {} ; '.format(filename)
-
-    if sortbydate:
-        dataset.sort(dim='y', inplace=True)
-        dataset.history = str(datetime.now()) + ':sorted by date'
 
     # Set the NDDataset date
     dataset._date = datetime.now()
     dataset._modified = dataset.date
+
+    # Set origin, description and history
+    dataset.history = str(dataset.date) + ':imported from spg file {} ; '.format(filename)
+    if sortbydate:
+        dataset.sort(dim='y', inplace=True)
+        dataset.history = str(dataset.date) + ':sorted by date'
+
+
 
     # debug_("end of reading")
 
@@ -604,7 +606,6 @@ def _read_spa(*args, **kwargs):
 
     # Set origin, description, history, date
     dataset.origin = "omnic"
-    dataset.protocol = '.spa'
     dataset.description = kwargs.get('description', f'Omnic title: {spa_title}\nOmnic filename: {filename.name}')
     dataset.history = str(datetime.now()) + ':imported from spa files ; '
     dataset._date = datetime.now()

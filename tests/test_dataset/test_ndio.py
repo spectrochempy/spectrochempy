@@ -57,6 +57,9 @@ def test_ndio_generic(IR_dataset_1D):
     assert dl.directory == cwd
     assert_array_equal(dl.data, ir.data)
 
+    for f in ['essai.scp', 'nh4y-activation.scp']:
+        if (irdatadir / f).is_file():
+            (irdatadir / f).unlink()
 
 def test_ndio_2D(IR_dataset_2D):
     # test with a 2D

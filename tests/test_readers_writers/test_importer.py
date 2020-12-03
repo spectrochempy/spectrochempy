@@ -39,7 +39,7 @@ def test_read():
     A6 = scp.read('irdata/nh4y.scp')
     assert str(A6) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
-    A7 = scp.read('nh4y', directory='irdata', protocol='.scp')
+    A7 = scp.read('nh4y', directory='irdata', protocol='scp')
     assert str(A7) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
     A8 = scp.read('nh4y', directory='irdata')
@@ -159,9 +159,9 @@ def test_read_dir():
 
     # if we want the whole dir  - listdir must be used
     # this is equivalent to read_dir with a dialog to select directories only
-    A = scp.read(listdir=True)
-    assert len(A) == 4  # assuming irdata/subdir folder was selected
-    A1 = scp.read_dir()
+    A = scp.read(listdir=True, directory=datadir/'irdata'/'subdir')
+    assert len(A) == 4
+    A1 = scp.read_dir(directory=datadir/'irdata'/'subdir')
     assert A == A1
 
     # listdir is not necessary if a directory location is given as a single argument

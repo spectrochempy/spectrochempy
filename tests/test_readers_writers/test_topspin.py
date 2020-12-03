@@ -15,36 +15,30 @@ def test_read_topspin():
     nmrdir = Path('nmrdata/bruker/tests/nmr')
 
     # Open a dialog for selecting a Topspin directory
-    # A = scp.read_topspin(directory = nmrdir)
+    A = scp.read_topspin(directory = nmrdir)
 
-    # A.plot()
-    # scp.show()
+    #A.plot()
 
-    # A = scp.read_topspin(nmrdir / 'exam2d_HC/3/pdata/1/2rr')
+    A = scp.read_topspin(nmrdir / 'exam2d_HC/3/pdata/1/2rr')
+    A.plot_map()
 
-    # A.plot_map()
-    # scp.show()
 
     # Select a TOPSPIN spectra using the full name
     B = scp.read_topspin(nmrdir / 'topspin_1d/1/fid')
     assert str(B) == 'NDDataset: [complex128] unitless (size: 12411)'
-    B.plot()
-    scp.show()
 
     C = scp.read_topspin(nmrdir / 'topspin_1d/1/pdata/1/1r')
     assert str(C) == 'NDDataset: [complex128] unitless (size: 16384)'
     C.plot_map()
-    scp.show()
 
     # Select a TOPSPIN spectra using the full name
     B = scp.read_topspin(nmrdir / 'topspin_2d/1/ser')
     assert str(B) == 'NDDataset: [quaternion] unitless (shape: (y:96, x:948))'
     B.plot_surface()
-    scp.show()
 
     C = scp.read_topspin(nmrdir / 'topspin_2d/1/pdata/1/2rr')
     assert str(C) == 'NDDataset: [quaternion] unitless (shape: (y:1024, x:2048))'
     C.plot_image()
+
     scp.show()
 
-    print()

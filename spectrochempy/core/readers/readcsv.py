@@ -89,7 +89,7 @@ def read_csv(*args, **kwargs):
 
     """
     kwargs['filetypes'] = ['CSV files (*.csv)']
-    kwargs['protocol'] = ['.csv']
+    kwargs['protocol'] = ['csv']
     importer = Importer()
     return importer(*args, **kwargs)
 

@@ -15,7 +15,7 @@ from warnings import warn
 
 from traitlets import HasTraits, Any, List
 
-from spectrochempy.utils import check_filename_to_save, docstrings
+from spectrochempy.utils import pathclean, check_filename_to_save, docstrings, patterns
 from spectrochempy.utils.qtfiledialogs import save_dialog
 
 
@@ -24,26 +24,25 @@ class Exporter(HasTraits):
     # Exporter class
 
     object = Any
-    filetypes = List(['SpectroChemPy files (*.scp)',
-                      'MATLAB files (*.mat)',
-                      'JCAMP-DX files (*.jdx)',
-                      'CSV files (*.csv)',
-                      'Microsoft Excel files (*.xls)',
-                      'JSON format(*.json)'])
-    suffixes = List(['.scp','.mat','.jdx','.csv','.xls', '.json'])
-    protocols = List(['scp','matlab','jcamp','csv', 'excel', 'json'])
 
-    def _suffix_from_protocol(self, val):
-        d = dict(zip(self.protocols, self.suffixes))
-        return d.get(val, '.scp')
+    def __init__(self):
 
-    def _suffix_from_filetype(self, val):
-        d = dict(zip(self.filetypes, self.suffixes))
-        return d.get(val, '.scp')
+        FILETYPES = [
+                ('scp', 'SpectroChemPy files (*.scp)'),
+                ('labspec', 'LABSPEC exported files (*.txt)'),
+                ('matlab', 'MATLAB files (*.mat)'),
+                ('dso', 'Data Set Object files (*.dso)'),
+                ('jcamp', 'JCAMP-DX files (*.jdx *dx)'),
+                ('csv', 'CSV files (*.csv)'),
+                ('excel', 'Microsoft Excel files (*.xls)'),
+                ('json', 'JSON files (*.json)')
+                ]
 
-    def _protocol_from_suffix(self, val):
-        d = dict(zip(self.suffixes, self.protocols))
-        return d.get(val, 'scp')
+        self.filetypes = dict(FILETYPES)
+        self.protocols = {}
+        for protocol, filter in self.filetypes.items():
+            for s in patterns(filter, allcase=False):
+                self.protocols[s[1:]] = protocol
 
     # ..................................................................................................................
     def __call__(self, *args, **kwargs):
@@ -52,10 +51,13 @@ class Exporter(HasTraits):
 
         try:
             if 'filetypes' not in kwargs:
-                kwargs['filetypes'] = self.filetypes
-                kwargs['suffix']='.scp'
+                kwargs['filetypes'] = self.filetypes.values()
+                protocol = 'scp'
+                if args: # filename
+                    protocol = self.protocols[pathclean(args[0]).suffix]
+                    kwargs['filetypes']= [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
-            protocol = self._protocol_from_suffix(filename.suffix)
+            protocol = self.protocols[filename.suffix]
             write_ = getattr(self, f"_write_{protocol}")
             write_(self.object, filename, **kwargs)
             return filename

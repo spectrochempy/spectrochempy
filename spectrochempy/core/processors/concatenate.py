@@ -64,8 +64,8 @@ def concatenate(*datasets, **kwargs):
     --------
     >>> from spectrochempy import * # doctest: +ELLIPSIS
     ...
-    >>> A = NDDataset.load('irdata/nh4y-activation.spg', protocol='.omnic')
-    >>> B = NDDataset.load('irdata/nh4y-activation.scp')
+    >>> A = NDDataset.read('irdata/nh4y-activation.spg', protocol='omnic')
+    >>> B = NDDataset.read('irdata/nh4y-activation.scp')
     >>> C = NDDataset.concatenate( A[10:], B[3:5], A[:10], axis=0)
     >>> A[10:].shape, B[3:5].shape, A[:10].shape, C.shape
     ((45, 5549), (2, 5549), (10, 5549), (57, 5549))
@@ -315,8 +315,8 @@ def stack(*datasets):
     --------
     >>> from spectrochempy import * # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     ...
-    >>> A = NDDataset.load('irdata/nh4y-activation.spg', protocol='.omnic')
-    >>> B = NDDataset.load('irdata/nh4y-activation.scp')
+    >>> A = NDDataset.read('irdata/nh4y-activation.spg', protocol='omnic')
+    >>> B = NDDataset.read('irdata/nh4y-activation.scp')
     >>> C = NDDataset.stack( A, B)
     >>> print(C) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     NDDataset: [float32] a.u. (shape: (y:110, x:5549))

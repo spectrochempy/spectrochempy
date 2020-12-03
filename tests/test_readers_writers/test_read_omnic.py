@@ -113,7 +113,6 @@ def test_read_spa():
     nd = scp.read_spa('irdata/subdir', merge=True, recursive=True)
     assert str(nd) == 'NDDataset: [float32] a.u. (shape: (y:8, x:5549))'
 
-    lst = scp.read('irdata/subdir', merge=True, recursive=True)  # not selective on extension
+    lst = scp.read('irdata', merge=True, recursive=True)  # not selective on extension
     assert isinstance(lst, list)
-    assert str(lst[0]) == 'NDDataset: [float32] a.u. (shape: (y:8, x:5549))'
-    assert len(lst) == 7  # we have matlab data in the six last datasets
+    assert len(lst) == 6

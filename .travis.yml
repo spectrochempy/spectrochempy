@@ -16,6 +16,11 @@ jobs:
       env:
       - TEST=true
       - CONDAPY=3.8
+    - stage: pytest-linux
+      if: branch NOT IN (feature/travis-deploy,feature/travis-docs)
+      env:
+      - TEST=true
+      - CONDAPY=3.9
     - stage: conda-deploy
       if: branch IN (master,feature/travis-deploy) OR tag =~ /^\d{1,2}\.\d{1,2}\.\d{1,2}$/
       env:

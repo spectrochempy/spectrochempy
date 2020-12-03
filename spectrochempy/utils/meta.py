@@ -15,9 +15,12 @@ elements can be accessed by key, but also by attributes, *e.g.*
 """
 
 # from traitlets import HasTraits, Dict, Bool, default
-import numpy as np
+
 # import sys
 import copy
+from collections import OrderedDict
+
+import numpy as np
 
 from .misc import is_sequence
 
@@ -72,7 +75,7 @@ class Meta(object):  # HasTraits):
     # private attributes
     # ------------------------------------------------------------------------------------------------------------------
 
-    _data = {}  # Dict()
+    _data = OrderedDict()
 
     # @default('_data')
     # def _get_data(self):
@@ -95,7 +98,7 @@ class Meta(object):  # HasTraits):
             The dictionary can be already inited with some keywords.
 
         """
-        self._data = dict(data)
+        self._data = OrderedDict(data)
 
     def implements(self, name=None):
         if name is None:
@@ -176,6 +179,18 @@ class Meta(object):  # HasTraits):
         """
 
         return self._data
+
+    def get(self, key, default=None):
+        """
+
+        Parameters
+        ----------
+        :param key:
+        :return:
+
+        """
+        return self._data.get(key, default)
+
 
     def update(self, d):
         """Feed a metadata dictionary with the content of an another

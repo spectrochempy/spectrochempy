@@ -780,7 +780,7 @@ def read_topspin(*args, **kwargs):
     """
     kwargs['filetypes'] = ['Bruker TOPSPIN fid\'s or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)',
                            'Compressed TOPSPIN data directories (*.zip)']
-    kwargs['protocol'] = ['.topspin']
+    kwargs['protocol'] = ['topspin']
     importer = Importer()
     return importer(*args, **kwargs)
 

@@ -118,7 +118,7 @@ def read_opus(*args, **kwargs):
     """
 
     kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
-    kwargs['protocol'] = ['.opus']
+    kwargs['protocol'] = ['opus']
     importer = Importer()
     return importer(*args, **kwargs)
 

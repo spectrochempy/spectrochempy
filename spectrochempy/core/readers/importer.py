@@ -16,7 +16,8 @@ from datetime import datetime
 
 from traitlets import HasTraits, default, List, Dict, Type, Unicode
 
-from spectrochempy.utils import pathclean, check_filename_to_open, docstrings, DimensionsCompatibilityError
+from spectrochempy.utils import pathclean, check_filename_to_open, docstrings
+from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -29,7 +30,45 @@ class Importer(HasTraits):
     default_key = Unicode
     protocol = Unicode
 
-    # ..................................................................................................................
+    protocols = Dict
+    filetypes = Dict
+
+    def __init__(self):
+
+        FILETYPES = [
+                ('scp', 'SpectroChemPy files (*.scp)'),
+                ('omnic', 'Nicolet OMNIC files and series (*.spa *.spg *.srs)'),
+                ('labspec', 'LABSPEC exported files (*.txt)'),
+                ('opus', 'Bruker OPUS files (*.[0-9]*)'),
+                ('topspin', 'Bruker TOPSPIN fid or series or processed data files(fid ser 1[r|i] 2[r|i]* 3[r|i]*)'),
+                ('matlab', 'MATLAB files (*.mat)'),
+                ('dso', 'Data Set Object files (*.dso)'),
+                ('jcamp', 'JCAMP-DX files (*.jdx *.dx)'),
+                ('csv', 'CSV files (*.csv)'),
+                ('excel', 'Microsoft Excel files (*.xls)'),
+                ('json', 'JSON files (*.json)'),
+                ('zip', 'Compressed folder of data files (*.zip)'),
+              #  ('all', 'All files (*.*)')
+                ]
+
+        self.filetypes = dict(FILETYPES)
+        temp = list(zip(*FILETYPES))
+        temp.reverse()
+        self.protocols = dict(zip(*temp))
+        #  add alias
+        ALIAS = [
+                ('spg', 'omnic'),
+                ('spa', 'omnic'),
+                ('srs', 'omnic'),
+                ('mat', 'matlab'),
+                ('txt','labspec'),
+                ('jdx', 'jcamp'),
+                ('dx', 'jcamp'),
+                ('xls', 'excel'),
+                ]
+        self.alias = dict(ALIAS)
+
+# ..................................................................................................................
     def __call__(self, *args, **kwargs):
 
         self.datasets = []
@@ -94,7 +133,7 @@ class Importer(HasTraits):
         if protocol:
             if not isinstance(protocol, list):
                 protocol = [protocol]
-            if key and key not in protocol:
+            if key and key[1:] not in protocol and self.alias[key[1:]] not in protocol:
                 return
         datasets = []
         for filename in files[key]:
@@ -295,43 +334,21 @@ def read(*args, **kwargs):
     read_spg: Read Omnic *.spg spectra read_spa, read_srs, read_csv, read_matlab, read_zip
 
     """
-    protocol = kwargs.get('protocol', None)
-
-    if protocol in ['omnic']:
-        kwargs['filetypes'] = ['Nicolet OMNIC files (*.spa, *.spg)',
-                               'Nicolet OMNIC series (*.srs)']
-        kwargs['protocol'] = ['.spg', '.spa', '.srs']
-    elif protocol in ['opus']:
-        kwargs['filetypes'] = ['Bruker OPUS files (*.[0-9]*)']
-        kwargs['protocol'] = ['.opus']
-    elif protocol in ['topspin']:
-        kwargs['filetypes'] = ['Bruker TOPSPIN files (fid, ser, 1r, 2rr, 3rrr)',
-                               'Compressed Bruker TOPSPIN folder (*.zip)']
-        kwargs['protocol'] = ['.topspin']
-    elif protocol in ['matlab']:
-        kwargs['filetypes'] = ['MATLAB files (*.mat, *.dso)']
-        kwargs['protocol'] = ['.mat', '.dso']
-    elif protocol in ['jcamp']:
-        kwargs['filetypes'] = ['JCAMP-DX files (*.jdx, *.dx)']
-        kwargs['protocol'] = ['.jdx', '.dx']
-    elif protocol in ['csv']:
-        kwargs['filetypes'] = ['CSV files (*.csv, *.txt)',
-                               'Compressed CSV file(s) *.zip)']
-        kwargs['protocol'] = ['.csv', '.zip']
-    elif protocol in ['excel']:
-        kwargs['filetypes'] = ['Microsoft Excel files (*.xls)']
-        kwargs['protocol'] = ['.xls']
-    elif protocol in ['scp']:
-        kwargs['filetypes'] = ['SpectroChemPy files (*.scp)']
-        kwargs['protocol'] = ['.scp']
-    elif protocol in ['scp']:
-        kwargs['filetypes'] = ['JSON files (*.json)']
-        kwargs['protocol'] = ['.json']
-    else:
-        kwargs['filetypes'] = ['All files (*.*)']
-        warn('This protocol is unknown. Try to infer from the filename extension')
 
     importer = Importer()
+
+    protocol = kwargs.get('protocol', None)
+    available_protocols = list(importer.protocols.values())
+    available_protocols.extend(list(importer.alias.keys()))  # to handle variants of protocols
+    if protocol is None:
+        kwargs['filetypes'] = list(importer.filetypes.values())
+        kwargs['protocol'] = None
+    else:
+        try:
+            kwargs['filetypes'] = [importer.filetypes[protocol]]
+        except KeyError:
+            raise ProtocolError(protocol, list(importer.protocols.values()))
+
     return importer(*args, **kwargs)
 
 
@@ -363,7 +380,7 @@ def _read_(*args, **kwargs):
             return dataset.load(filename, **kwargs)
         except:
             # lets try some common format
-            for key in ['omnic', 'opus', 'topspin', 'matlab', 'jdx', 'json']:
+            for key in ['omnic', 'opus', 'topspin', 'labspec', 'matlab', 'jdx', 'json']:
                 try:
                     _read = getattr(dataset, f"read_{key}")
                     f = f'{filename}.{key}'

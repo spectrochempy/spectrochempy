@@ -55,7 +55,7 @@ def read_matlab(*args, **kwargs):
 
     """
     kwargs['filetypes'] = ['MATLAB files (*.mat *.dso)']
-    kwargs['protocol'] = ['.matlab', '.mat', '.dso']
+    kwargs['protocol'] = ['matlab', 'mat', 'dso']
     importer = Importer()
     return importer(*args, **kwargs)
 
@@ -207,7 +207,6 @@ def _read_dso(dataset, name, data):
         dataset.author = author
         dataset.name = name
         dataset.date = date
-        dataset.protocol = '.dso'
 
         # TODO: reshape from fortran/Matlab order to C order
         #  for 3D or higher datasets ?

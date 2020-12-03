@@ -12,6 +12,7 @@ __all__ = ['SpectroChemPyWarning',
            'SpectroChemPyException',
            'UnitsCompatibilityError',
            'DimensionsCompatibilityError',
+           'ProtocolError',
            'deprecated',
            ]
 
@@ -58,6 +59,17 @@ class DimensionsCompatibilityError(SpectroChemPyException):
     Exception raised when dimensions are not compatible for concatenation for instance
 
     """
+
+class ProtocolError(SpectroChemPyException):
+
+    def __init__(self, protocol, available_protocols):
+
+        print(f'The `{protocol}` protocol is unknown or not yet implemented:\n'
+              f'it is expected to be one of {tuple(available_protocols)}')
+
+
+
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 def deprecated(message):

@@ -65,7 +65,7 @@ def read_json(*args, **kwargs):
 
     """
     kwargs['filetypes'] = ['JSON files (*.json)']
-    kwargs['protocol'] = ['.json']
+    kwargs['protocol'] = ['json']
     importer = Importer()
     return importer(*args, **kwargs)
 
