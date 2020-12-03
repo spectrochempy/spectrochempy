@@ -31,7 +31,7 @@ def make_samples(force_original=False):
         else:
             # else read the original zip file
             filename = basename + '.zip'
-            sample['IR'] = NDDataset.read_zip(filename, only=10, origin='omnic', merge=True)
+            sample['IR'] = NDDataset.read_zip(filename, only=5, origin='omnic', merge=True)
             # save
             sample['IR'].save()
 
@@ -68,6 +68,6 @@ def test_slicing_agir():
 
         samples[key]['IR'] = s
 
-    assert samples['P350']['IR'].shape == (10, 2801)
+    assert samples['P350']['IR'].shape == (5, 2801)
 
     # set_loglevel(DEBUG)

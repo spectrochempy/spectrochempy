@@ -82,35 +82,53 @@ def _read_zip(*args, **kwargs):
 
         datasets = []
 
-        for file in zf.filelist:
+        # for file in filelist:
+        #
+        #   # make a pathlib object (but this doesn't work with python 3.7)
+        #     file = zipfile.Path(zf, at=file.filename)      # TODO:
+        #
+        #     if file.name.startswith('__MACOSX'):
+        #         continue  # bypass non-data files
+        #
+        #     # seek the parent directory containing the files to read
+        #     if not file.is_dir():
+        #         continue
+        #
+        #     parent = file
+        #     break
+        #
+        #
+        # for count, children in enumerate(parent.iterdir()):
+        #
+        #     if count == only:
+        #         # limits to only this number of files
+        #         break
+        #
+        #     _ , extension = children.name.split('.')
+        #     if extension == 'DS_Store':
+        #         only += 1
+        #         continue
+        #
+        #     read_ = getattr(NDDataset, f"read_{extension}")
+        #
+        #     datasets.append(read_(children.name, content=children.read_bytes(), **kwargs))
 
-            file = zipfile.Path(zf, at=file.filename)
+        # 3.7 compatible code
 
-            if file.name.startswith('__MACOSX'):
-                continue  # bypass non-data files
-
-            # seek the parent directory containing the files to read
-            if not file.is_dir():
-                continue
-
-            parent = file
-            break
-
-        for count, children in enumerate(parent.iterdir()):
-
-            if count == only:
-                # limits to only this number of files
+        # seek the parent directory containing the files to read
+        for file in filelist:
+            if not file.filename.startswith('__') and file.is_dir():
+                parent = file.filename
                 break
 
-            _, extension = children.name.split('.')
-            if extension == 'DS_Store':
-                only += 1
-                continue
-
-            read_ = getattr(NDDataset, f"read_{extension}")
-
-            datasets.append(read_(children.name, content=children.read_bytes(), **kwargs))
-
+        count = 0
+        for file in filelist:
+            if not file.is_dir() and file.filename.startswith(parent) and 'DS_Store' not in file.filename:
+                # read it
+                datasets.append(NDDataset.read({file.filename:zf.read(file.filename)}))
+                count += 1
+                if count == only:
+                    break
     return datasets
 
 

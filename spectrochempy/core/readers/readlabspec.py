@@ -12,7 +12,7 @@
 
 """
 
-__all__ = ['read_labspec']
+__all__ = ['read_labspec', 'read_txt']
 __dataset_methods__ = __all__
 
 import io
@@ -65,6 +65,9 @@ def read_labspec(*args, **kwargs):
     importer = Importer()
     return importer(*args, **kwargs)
 
+
+def read_txt(*args, **kwargs):
+    return read_labspec(*args, **kwargs)
 
 # ======================================================================================================================
 # Private functions
