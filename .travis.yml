@@ -81,6 +81,7 @@ before_script:
 script:
   - if [[ $TEST = true ]]; then
       echo "RUNNING TESTS";
+      mkdir $HOME/spectrochempy/projects;
       coverage run -m pytest -v --flake8 -k tests;
     elif [[ $DEPLOY = true ]]; then
       echo "BUILDING AND UPLOADING ON ANACONDA";
