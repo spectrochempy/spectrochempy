@@ -21,7 +21,7 @@
 from spectrochempy import *
 
 # %% [markdown]
-# Spectrochempy NDDatasets are homogeneous multidimensionnal objects. 
+# Spectrochempy NDDatasets are homogeneous multidimensionnal objects.
 #
 # Below we summarize the main properties, attributes and functions
 
@@ -34,11 +34,11 @@ ds
 # ## The basic NDDataset attributes
 
 # %% [markdown]
-# * **ndim**: 
+# * **ndim**:
 #
 # the number of dimensions of the array (Read-Only)
 #
-# * **shape**: 
+# * **shape**:
 #
 # the size of the dimensions of the array. The length of the shape tuple is therefore the number of dimensions:  ndim (Read-Only).
 #
@@ -46,13 +46,13 @@ ds
 #
 # the total number of elements of the array. This is equal to the product of the elements of shape (Read-Only).
 #
-# * **dtype**: 
+# * **dtype**:
 #
 # an object describing the type of the elements in the array (Read-Only).
 #
 # * **itemsize**:
 #
-# the size in bytes of each element of the array (Read-Only). 
+# the size in bytes of each element of the array (Read-Only).
 #
 # * **dims**:
 #
@@ -108,13 +108,13 @@ ds.title
 # %% [markdown]
 # ### Finding extrema of a NDDataset
 #
-# numpy functions **np.max** and **np.min** works on `NDDataset` objects. 
+# numpy functions **np.max** and **np.min** works on `NDDataset` objects.
 
 # %% [markdown]
 # <div class='alert-info'>
-#     
-# **Note** : when using the numpy functions on NDDataset, only the `axis` and `keepdims` parameters are available.  
-#     
+#
+# **Note** : when using the numpy functions on NDDataset, only the `axis` and `keepdims` parameters are available.
+#
 # </div>
 
 # %% [markdown]
@@ -127,7 +127,7 @@ np.max(ds)
 np.min(ds)
 
 # %% [markdown]
-# If one wants to keep the coordinates information of the extremum, `keepdims` keyword must be set to True. In this case a ``NDDataset`` object is returned. 
+# If one wants to keep the coordinates information of the extremum, `keepdims` keyword must be set to True. In this case a ``NDDataset`` object is returned.
 
 # %%
 np.max(ds, keepdims=True)
@@ -139,19 +139,19 @@ np.max(ds, keepdims=True)
 ds.max()
 
 # %% [markdown]
-# As for numpy array, the indices of the extrema along each dimension can be found using **argmax** or **argmin**. 
+# As for numpy array, the indices of the extrema along each dimension can be found using **argmax** or **argmin**.
 
 # %%
 np.argmax(ds)
 
 # %% [markdown]
-# To get the corresponding coordinates, there is obviously no available numpy functions, but `NDDataset` possess two methods for this purpose: **coordmax** and **coordmin**. 
+# To get the corresponding coordinates, there is obviously no available numpy functions, but `NDDataset` possess two methods for this purpose: **coordmax** and **coordmin**.
 
 # %%
 ds.coordmax()
 
 # %% [markdown]
-# The `axis` keywords can be sued to find extrema along a dimension (Note that only the `axis` but `dim` keyword can be used for the the numpy functions. 
+# The `axis` keywords can be sued to find extrema along a dimension (Note that only the `axis` but `dim` keyword can be used for the the numpy functions.
 
 # %%
 np.max(ds, axis=1)
@@ -166,7 +166,7 @@ ds.max(dim='x')
 np.max(ds, axis=1, keepdims=True)
 
 # %% [markdown]
-# when using the numpy function, it is important to keep the numpy syntax. 
+# when using the numpy function, it is important to keep the numpy syntax.
 # An extended syntax can be used while using the fonction as NDDataset methods.
 #
 # For instance, one can use `ds.max(...)` instead of `np.max(ds, ...)`. In this case one can use the `dim` parameter, which cannot be used with numpy functions.

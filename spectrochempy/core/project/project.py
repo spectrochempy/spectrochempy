@@ -21,14 +21,14 @@ from functools import wraps
 
 from traitlets import (Dict, Instance, Unicode, This, default)
 
+import spectrochempy as scp
 from spectrochempy.core import general_preferences, config_manager, config_dir, app, debug_
 from spectrochempy.application import ProjectPreferences
-from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.nddataset import NDDataset, NDIO
 from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.utils import get_filename, pathclean, json_serialiser
-from spectrochempy.utils.filedialogs import save_dialog
 
 cfg = config_manager
 preferences = general_preferences
@@ -37,7 +37,7 @@ preferences = general_preferences
 # ======================================================================================================================
 # Project class
 # ======================================================================================================================
-class Project(AbstractProject):
+class Project(AbstractProject, NDIO):
     """A manager for multiple projects and datasets in a main project
 
     """
@@ -399,37 +399,25 @@ class Project(AbstractProject):
         """
         return list(self._datasets.items()) + list(self._projects.items()) + list(self._scripts.items())
 
-    @property
-    def filename(self):
-        """
-        `Pathlib` object - current filename for this project.
-
-        """
-        if self._filename:
-            return self._filename.name
-        else:
-            return None
-
-    @filename.setter
-    def filename(self, fname):
-        self._filename = pathclean(fname)
-
-    @property
-    def directory(self):
-        """
-        `Pathlib` object - current directory for this project
-
-        ReadOnly property
-
-        """
-        if self._filename:
-            return pathclean(self._filename).parent.resolve()
-        else:
-            return None
-
     # ------------------------------------------------------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------------------------------------------------------
+
+    # ..................................................................................................................
+    def implements(self, name=None):
+        """
+        Utility to check if the current object implement `Project`.
+
+        Rather than isinstance(obj, Project) use object.implements('Project').
+
+        This is useful to check type without importing the module
+
+        """
+        if name is None:
+            return 'Project'
+        else:
+            return name == 'Project'
+
 
     def copy(self):
         """
@@ -622,7 +610,7 @@ class Project(AbstractProject):
         self._scripts = {}
 
     # ..................................................................................................................
-    def save(self, *args, **kwargs):
+    def _____save(self, *args, **kwargs):
         """
         Save the current project
         (default extension : ``.pscp`` ).
@@ -646,7 +634,7 @@ class Project(AbstractProject):
         load
 
         """
-
+        from spectrochempy.core import save_dialog
         debug_("project.load: reading project files")
 
         # get the filename associated to this project
@@ -799,7 +787,7 @@ class Project(AbstractProject):
 
         self.filename = filename
 
-    def to_json(self):
+    def ____to_json(self):
         """
         return a project representation in json format
 
@@ -814,57 +802,58 @@ class Project(AbstractProject):
 
         """
 
-        main = {}
-        objnames = self.__dir__()
+        # main = {}
+        # objnames = self.__dir__()
+        #
+        # def _loop_on_obj(_names, obj=self, parent='', level='main.'):
+        #
+        #     for key in _names:
+        #
+        #         val = getattr(obj, "_%s" % key)
+        #         if val is None:
+        #             # ignore None - when reading if something is missing it
+        #             # will be considered as None anyways
+        #             continue
+        #
+        #         elif key == 'projects':
+        #             main[level + key] = []
+        #             for k, proj in val.items():
+        #                 _objnames = dir(proj)
+        #                 _loop_on_obj(_objnames, obj=proj, parent=level[:-1],
+        #                              level=k + '.')
+        #                 main[level + key].append(k)
+        #
+        #         elif key == 'datasets':
+        #             main[level + key] = {}
+        #             for k, ds in val.items():
+        #                 dsj = ds.to_json()
+        #                 main[level + key][k] = dsj
+        #
+        #         elif key == 'scripts':
+        #             main[level + key] = []
+        #             for k, sc in val.items():
+        #                 _objnames = dir(sc)
+        #                 _loop_on_obj(_objnames, obj=sc, parent=level[:-1],
+        #                              level=k + '.')
+        #                 main[level + key].append(k)
+        #
+        #         elif isinstance(val, Meta):
+        #             main[level + key] = val.to_dict()
+        #
+        #         elif key == 'parent':
+        #             main[level + key] = parent
+        #
+        #         else:
+        #             # probably some string
+        #             main[level + key] = val
+        #
+        # # Recursive scan on Project content
+        # _loop_on_obj(objnames)
+        #
+        # return main
 
-        def _loop_on_obj(_names, obj=self, parent='', level='main.'):
 
-            for key in _names:
 
-                val = getattr(obj, "_%s" % key)
-                if val is None:
-                    # ignore None - when reading if something is missing it
-                    # will be considered as None anyways
-                    continue
-
-                elif key == 'projects':
-                    main[level + key] = []
-                    for k, proj in val.items():
-                        _objnames = dir(proj)
-                        _loop_on_obj(_objnames, obj=proj, parent=level[:-1],
-                                     level=k + '.')
-                        main[level + key].append(k)
-
-                elif key == 'datasets':
-                    main[level + key] = []
-                    for k, ds in val.items():
-                        dsj = ds.to_json()
-                        main[level + key].append(dsj)
-
-                elif key == 'scripts':
-                    main[level + key] = []
-                    for k, sc in val.items():
-                        _objnames = dir(sc)
-                        _loop_on_obj(_objnames, obj=sc, parent=level[:-1],
-                                     level=k + '.')
-                        main[level + key].append(k)
-
-                elif isinstance(val, Meta):
-                    # we assume that objects in the meta objects
-                    # are all json serialisable #TODO: could be improved.
-                    main[level + key] = val.to_dict()
-
-                elif key == 'parent':
-                    main[level + key] = parent
-
-                else:
-                    # probably some string
-                    main[level + key] = val
-
-        # Recursive scan on Project content
-        _loop_on_obj(objnames)
-
-        return main
 
     @classmethod
     def from_json(cls, js):
@@ -881,8 +870,8 @@ class Project(AbstractProject):
 
             datasets = js[f'{pname}.datasets']
             for item in datasets:
-                args.append(obj[item])
-                item = item.split('.')
+                nd = NDDataset.from_json(item)
+                args.append(nd)
                 argnames.append(item[-2])
 
             scripts = js[f'{pname}.scripts']
@@ -900,7 +889,7 @@ class Project(AbstractProject):
         return _make_project(js, 'main')
 
     @classmethod
-    def load(cls, *args, **kwargs):
+    def ___load(cls, *args, **kwargs):
         """Load a project file ( extension : ``.pscp``).
 
         It's a class method, that can be used directly on the class,

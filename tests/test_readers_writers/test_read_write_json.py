@@ -5,34 +5,36 @@
 #  CeCILL-B FREE SOFTWARE LICENSE AGREEMENT - See full LICENSE agreement in the root directory                         =
 # ======================================================================================================================
 
-import os
-
 import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 def test_read_write_json(IR_dataset_2D):
+
     ds = IR_dataset_2D
 
-    ds.write('try2D.json')
+    f = ds.write('try2D.json')
     ds.read('try2D.json')
-
     dsr = scp.read('try2D.json')
     assert ds == dsr
-    os.remove('try2D.json')
+    f.unlink()
 
-    scp.write(ds, 'try2D.json')
+    f = scp.write(ds, 'try2D.json')
     dsr = scp.read_json('try2D.json')
     assert ds == dsr
 
     dsr2 = NDDataset.read('try2D.json')  # NDDataset class method
     assert ds == dsr2
 
-    os.remove('try2D.json')
+    f.unlink()
 
-    # #write to string
-    # s = ds.write(to_string=True, protocol='json')
-    # assert s.startswith('{"data": {"serialized": "gASVhAAA')
-    #
-    # s = ds.write(to_string=True) # json by default
-    # assert s.startswith('{"data": {"serialized": "gASVhAAA')
+def test_write_nmr_to_json(NMR_dataset_1D):
+
+    nd = NMR_dataset_1D
+    nd.name = "nmr_1d"
+
+    f = nd.write_json()
+    assert f.name == 'nmr_1d.json'
+
+    nd2 = scp.read_json('nmr_1d')
+    assert nd2 == nd

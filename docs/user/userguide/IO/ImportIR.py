@@ -146,7 +146,7 @@ X.y
 # %% [markdown]
 # It is also possible to use the ability of Scpy to handle unit changes. For this one can use the  `to` or `ito` (inplace) methods.
 #
-#     val = val.to(some_units) 
+#     val = val.to(some_units)
 #     val.ito(some_units)   # the same inplace
 
 # %%

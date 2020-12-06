@@ -467,8 +467,8 @@ exclusions = (
         'print_version', 'python_config_loader_class', 'raises', '_*')
 
 
-def autodoc_skip_member(app, what, name, obj, skip, options):
-    doc = True if obj.__doc__ is not None else False
+def autodoc_skip_member(name, obj, skip):
+    True if obj.__doc__ is not None else False
     exclude = name in exclusions or 'trait' in name or name.startswith('_')  # or not doc
     return skip or exclude
 

@@ -17,8 +17,9 @@ __all__ = []
 # standard imports
 # ----------------------------------------------------------------------------------------------------------------------
 
-import os
 import glob
+
+import os
 import sys
 import logging
 import subprocess
@@ -27,30 +28,20 @@ import warnings
 import pprint
 import json
 import shutil as sh
-import asyncio
-
-# ----------------------------------------------------------------------------------------------------------------------
-# third party imports
-# ----------------------------------------------------------------------------------------------------------------------
-
 from pkg_resources import get_distribution, DistributionNotFound
 from setuptools_scm import get_version
-
 from traitlets.config.configurable import Config
 from traitlets.config.application import Application
 from traitlets import (
-    Bool, Unicode, List, Dict, Integer, Float, Enum,
+    Bool, Unicode, List, Integer, Float, Enum,
     HasTraits, Instance, default, observe, import_item,
     )
 from traitlets.config.manager import BaseJSONConfigManager
-
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
-
 from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
-
 from IPython.core.magic import (Magics, magics_class, line_cell_magic)
 from IPython.core.magics.code import extract_symbols
 from IPython.core.error import UsageError
@@ -58,11 +49,14 @@ from IPython.utils.text import get_text_list
 from IPython.display import publish_display_data, clear_output
 from jinja2 import Template
 
+from spectrochempy.utils import MetaConfigurable
+
+# ----------------------------------------------------------------------------------------------------------------------
+# third party imports
+# ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
-
-from spectrochempy.utils import MetaConfigurable
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Log levels
@@ -132,9 +126,9 @@ def display_info_string(**kwargs):
 
     template = Template(_template)
     html = template.render({
-                                   'logo': logo,
-                                   'message': message.strip().replace('\n', '<br/>')
-                                   })
+            'logo': logo,
+            'message': message.strip().replace('\n', '<br/>')
+            })
     publish_display_data(data={
             'text/html': html
             })
@@ -362,6 +356,7 @@ class SpectroChemPyMagics(Magics):
 
         # import delayed to avoid circular import error
         from spectrochempy.core.scripts.script import Script
+
         script = Script(name, content=contents)
         projobj[name] = script
 
@@ -476,28 +471,83 @@ class GeneralPreferences(MetaConfigurable):
 
     """
 
+    name = Unicode('GeneralPreferences')
+    description = Unicode('General options for the SpectroChemPy application')
     updated = Bool(False)
 
-    def __init__(self, **kwargs):
-        super(GeneralPreferences, self).__init__(**kwargs)
-
-    # various settings
+    # ------------------------------------------------------------------------------------------------------------------
+    # Gonfiguration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    show_info_on_loading = Bool(True, help='Display info on loading').tag(
-            config=True)
+    use_qt = Bool(False, help='Use QT for dialog instead of TK wich is the default. '
+                              'If True the PyQt libraries mut be installed').tag(config=True)
 
-    show_close_dialog = Bool(True, help='Display the close project dialog'
-                                        ' project changing or on '
-                                        'application exit').tag(config=True)
+    show_info_on_loading = Bool(True, help='Display info on loading').tag(config=True)
+
+    show_close_dialog = Bool(True, help='Display the close project dialog project changing or on application exit'
+                             ).tag(config=True)
 
     csv_delimiter = Unicode(',', help='CSV data delimiter').tag(config=True)
 
-    project_directory = Unicode(help='Directory where projects are '
-                                     'stored by default').tag(config=True,
-                                                              type='folder')
-
     use_dev_version = Bool(True, help='use latest development versions').tag(config=True)
+
+    autosave_projects = Bool(False, help='Automatic saving of the current project').tag(config=True)
+
+    autoload_project = Bool(False, help='Automatic loading of the last project at startup').tag(config=True)
+
+    datadir = Unicode(help='Directory where to look for data by default').tag(config=True, type="folder")
+
+    @default('datadir')
+    def _get_default_datadir(self):
+        return self.parent.datadir.path
+
+    @observe('datadir')
+    def _datadir_changed(self, change):
+        self.parent.datadir.path = change['new']
+
+    stylesheets = Unicode(help='Directory where to look for local defined matplotlib styles when they are not in the '
+                               ' standard location').tag(config=True, type="folder")
+
+    @default('stylesheets')
+    def _get_stylesheets_default(self):
+        # the spectra path in package data
+        return _get_pkg_datadir_path('stylesheets', 'scp_data')
+
+    databases = Unicode(help='Directory where to look for database files such as csv').tag(config=True, type="folder")
+
+    @default('databases')
+    def _get_databases_default(self):
+        # the spectra path in package data
+        return _get_pkg_datadir_path('databases', 'scp_data')
+
+    cloudURL = Unicode(help='URL where to look for data by default if not found on datadir'
+                       ).tag(config=True, type="folder")
+
+    @default('cloudURL')
+    def _get_default_cloudURL(self):
+        return 'https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHoFEXXxYY3wIqmh?usp=sharing'
+
+    leftbuttonpan = Bool(True, help="LeftButtonPan: If false, left button drags a rubber band for zooming in viewbox"
+                         ).tag(config=True, )
+
+    background_color = Unicode('#EFEFEF', help='Background color for plots').tag(config=True, type='color')
+
+    foreground_color = Unicode('#000000', help='Foreground color for plots elements').tag(config=True, type='color')
+
+    antialias = Bool(True, help='Antialiasing')
+
+    max_lines_in_stack = Integer(1000, min=1, help='Maximum number of lines to plot in stack plots').tag(config=True)
+
+    use_mpl = Bool(help='Use MatPlotLib for plotting (mode suitable for printing)').tag(config=True, group='mpl')
+
+    simplify = Bool(help='Matplotlib path simplification for improving performance').tag(config=True, group='mpl')
+
+    @observe('simplify')
+    def _simplify_changed(self, change):
+        plt.rcParams['path.simplify'] = change.new
+        plt.rcParams['path.simplify_threshold'] = 1.
+
+    project_directory = Unicode(help='Directory where projects are stored by default').tag(config=True, type='folder')
 
     @default('project_directory')
     def _get_default_project_directory(self):
@@ -537,48 +587,6 @@ class GeneralPreferences(MetaConfigurable):
 
         return os.path.abspath(scp)
 
-    autosave_projects = Bool(False, help='Automatic saving of the current '
-                                         'project').tag(config=True)
-
-    autoload_project = Bool(False, help='Automatic loading of the last '
-                                        'project at startup').tag(config=True)
-
-    datadir = Unicode(help='Directory where to look for data by '
-                           'default').tag(config=True, type="folder")
-
-    stylesheets = Unicode(help='Directory where to look for local defined '
-                               ' matplotlib styles when they are not in the '
-                               ' standard location').tag(config=True,
-                                                         type="folder")
-
-    databases = Unicode(help='Directory where to look for database files '
-                             'such as csv').tag(config=True, type="folder")
-
-    cloudURL = Unicode(help='URL where to look for data by '
-                            'default if not found on datadir').tag(config=True, type="folder")
-
-    @default('stylesheets')
-    def _get_stylesheets_default(self):
-        # the spectra path in package data
-        return _get_pkg_datadir_path('stylesheets', 'scp_data')
-
-    @default('databases')
-    def _get_databases_default(self):
-        # the spectra path in package data
-        return _get_pkg_datadir_path('databases', 'scp_data')
-
-    @default('datadir')
-    def _get_default_datadir(self):
-        return self.parent.datadir.path
-
-    @observe('datadir')
-    def _datadir_changed(self, change):
-        self.parent.datadir.path = change['new']
-
-    @default('cloudURL')
-    def _get_default_cloudURL(self):
-        return 'https://drive.google.com/drive/folders/1rfc9O7jK6v_SbygzJHoFEXXxYY3wIqmh?usp=sharing'
-
     @property
     def log_level(self):
         """
@@ -597,40 +605,8 @@ class GeneralPreferences(MetaConfigurable):
         self.parent.log_level = value
 
     # ------------------------------------------------------------------------------------------------------------------
-    # General configuration for plotting
-    # ------------------------------------------------------------------------------------------------------------------
-
-    leftbuttonpan = Bool(True, help="LeftButtonPan: If false, left button "
-                                    "drags a rubber band for "
-                                    "zooming in viewbox").tag(config=True, )
-
-    background_color = Unicode('#EFEFEF',
-                               help='Background color for plots').tag(
-            config=True, type='color')
-
-    foreground_color = Unicode('#000000',
-                               help='Foreground color for plots elements').tag(
-            config=True, type='color')
-
-    antialias = Bool(True, help='Antialiasing')
-
-    # matplotlib specific  group
-    # ------------------------------------------------------------------------------------------------------------------
-
-    max_lines_in_stack = Integer(1000, min=1, help='Maximum number of lines to'
-                                                   ' plot in stack plots').tag(
-            config=True)
-
-    usempl = Bool(help='Use MatPlotLib for plotting (mode suitable for printing)').tag(config=True, group='mpl')
-
-    simplify = Bool(help='Matplotlib path simplification for improving '
-                         'performance').tag(config=True, group='mpl')
-
-    @observe('simplify')
-    def _simplify_changed(self, change):
-        plt.rcParams['path.simplify'] = change.new
-        plt.rcParams['path.simplify_threshold'] = 1.
-
+    def __init__(self, **kwargs):
+        super(GeneralPreferences, self).__init__(**kwargs)
 
 # ======================================================================================================================
 class ProjectPreferences(MetaConfigurable):
@@ -641,43 +617,27 @@ class ProjectPreferences(MetaConfigurable):
 
     """
 
+    name = Unicode('ProjectPreferences')
+    description = Unicode('Options for datasets, e.g., for plotting')
     updated = Bool(False)
 
-    def __init__(self, **kwargs):
-        super(ProjectPreferences, self).__init__(jsonfile='ProjectPreferences',
-                                                 **kwargs)
-
     # ------------------------------------------------------------------------------------------------------------------
-    # attributes
+    # Gonfiguration entries
     # ------------------------------------------------------------------------------------------------------------------
 
-    name = Unicode('ProjectPreferences')
-
-    description = Unicode('Options for datasets, e.g., for plotting')
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # configuration
-    # ------------------------------------------------------------------------------------------------------------------
-
-    # ..................................................................................................................
-    _styles = available_styles()
-    if 'scpy' not in _styles:
-        _styles.append('scpy')
-    style = Enum(_styles, default_value='scpy', help='Basic matplotlib style to use').tag(config=True, type='list')
-
-    @observe('style')
-    def _style_changed(self, change):
-        plt.style.use(change.new)
-
-    # ..................................................................................................................
-    use_latex = Bool(True, help='Use latex for plotting labels and texts').tag(
-            config=True)
+    use_latex = Bool(True, help='Use latex for plotting labels and texts').tag(config=True)
 
     @observe('use_latex')
     def _use_latex_changed(self, change):
         mpl.rc('text', usetex=change.new)
 
-    # ..................................................................................................................
+    style = Enum(available_styles() + ['scpy'], default_value='scpy', help='Basic matplotlib style to use'
+                 ).tag(config=True, type='list')
+
+    @observe('style')
+    def _style_changed(self, change):
+        plt.style.use(change.new)
+
     latex_preamble = Unicode(r"""\usepackage{siunitx}
                             \sisetup{detect-all}
                             \usepackage{times} # set the normal font here
@@ -692,17 +652,8 @@ class ProjectPreferences(MetaConfigurable):
     def _set_latex_preamble(self, change):
         mpl.rcParams['text.latex.preamble'] = change.new.split('\n')
 
-    # ------------------------------------------------------------------------------------------------------------------
-
-    # 1D options
-    # ------------------------------------------------------------------------------------------------------------------
-
-    method_1D = Enum(['pen', 'scatter', 'scatter+pen', 'bar'],
-                     default_value='pen',
+    method_1D = Enum(['pen', 'scatter', 'scatter+pen', 'bar'], default_value='pen',
                      help='Default plot methods for 1D datasets').tag(config=True, type='list')
-
-    # 2D/3D options
-    # ----------
 
     method_2D = Enum(['map', 'image', 'stack', 'surface', '3D'], default_value='stack',
                      help='Default plot methods for 2D datasets').tag(config=True, type='list')
@@ -729,9 +680,8 @@ class ProjectPreferences(MetaConfigurable):
 
     contour_alpha = Float(1.00, min=0., max=1.0, help='Transparency of the contours').tag(config=True)
 
-    contour_start = Float(0.05, min=0.001, help='Fraction of the maximum '
-                                                'for starting contour '
-                                                'levels').tag(config=True)
+    contour_start = Float(0.05, min=0.001, help='Fraction of the maximum for starting contour levels'
+                          ).tag(config=True)
 
     antialiased = Bool(True, help='antialiased option for surface plot').tag(config=True)
 
@@ -739,41 +689,35 @@ class ProjectPreferences(MetaConfigurable):
 
     ccount = Integer(50, help='ccount (steps in the column mode) for surface plot').tag(config=True)
 
-    # colors / style
+    pen_linewidth = Float(.70, min=0, help='Default pen width').tag(config=True)
+
+    pen_color = Unicode('#000000', help='Default pen color for 1D plots').tag(config=True, type='color')
+
+    pen_linestyle = Enum(linestyles, default_value=linestyles[0], help='Default pen style for 1D plots'
+                         ).tag(config=True, type='list')
+
+    marker = Enum(markers, default_value=markers[2], help='Default symbols for 1D scatter plots'
+                  ).tag(config=True, type='list')
+
+    markersize = Float(5.0, min=.5, help='Default symbol size for scatter plots'
+                       ).tag(config=True)
+
+    colormap = Enum(cmaps, default_value='jet', help='Default colormap for contour plots'
+                    ).tag(config=True, type='list')
+
+    colormap_stack = Enum(cmaps, default_value='viridis', help='Default colormap for stack plots'
+                          ).tag(config=True, type='list')
+
+    colormap_surface = Enum(cmaps, default_value='jet', help='Default colormap for surface plots'
+                            ).tag(config=True, type='list')
+
+    colormap_transposed = Enum(cmaps, default_value='magma', help='Default colormap for transposed stack plots'
+                               ).tag(config=True, type='list')
+
     # ------------------------------------------------------------------------------------------------------------------
 
-    pen_linewidth = Float(.70, min=0, help='Default pen width').tag(
-            config=True)
-
-    pen_color = Unicode('#000000', help='Default pen color for 1D plots').tag(
-            config=True, type='color')
-
-    pen_linestyle = Enum(linestyles, default_value=linestyles[0],
-                         help='Default pen style for 1D plots').tag(
-            config=True, type='list')
-
-    marker = Enum(markers, default_value=markers[2],
-                  help='Default symbols for 1D scatter plots').tag(config=True,
-                                                                   type='list')
-
-    markersize = Float(5.0, min=.5, help='Default symbol size for scatter '
-                                         'plots').tag(config=True)
-
-    colormap = Enum(cmaps, default_value='jet',
-                    help='Default colormap for contour plots').tag(config=True,
-                                                                   type='list')
-
-    colormap_stack = Enum(cmaps, default_value='viridis',
-                          help='Default colormap for stack plots').tag(
-            config=True, type='list')
-
-    colormap_surface = Enum(cmaps, default_value='jet',
-                            help='Default colormap for surface plots').tag(
-            config=True, type='list')
-
-    colormap_transposed = Enum(cmaps, default_value='magma',
-                               help='Default colormap for transposed stack '
-                                    'plots').tag(config=True, type='list')
+    def __init__(self, **kwargs):
+        super(ProjectPreferences, self).__init__(jsonfile='ProjectPreferences', **kwargs)
 
 
 # ======================================================================================================================
@@ -789,21 +733,6 @@ class SpectroChemPy(Application):
 
     """
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # initialization
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def __init__(self, *args, **kwargs):
-
-        super().__init__(*args, **kwargs)
-        self.logs = self.log  # we change the noame in order to avoid latter conflict with numpy.log
-
-        self.initialize()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # applications attributes
-    # ------------------------------------------------------------------------------------------------------------------
-
     icon = Unicode('scpy.png')
     "Icon for the application"
 
@@ -813,9 +742,7 @@ class SpectroChemPy(Application):
     name = Unicode('SpectroChemPy')
     "Running name of the application"
 
-    description = Unicode('SpectroChemPy is a '
-                          'framework for processing, '
-                          'analysing and modelling Spectroscopic data for '
+    description = Unicode('SpectroChemPy is a framework for processing, analysing and modelling Spectroscopic data for '
                           'Chemistry with Python.')
     "Short description of the |scpy| application"
 
@@ -826,32 +753,21 @@ class SpectroChemPy(Application):
     def _get_long_description(self):
         desc = """
         Welcome to <strong>SpectroChemPy</strong> Application<br><br>
-        <p><strong>SpectroChemPy</strong> is a framework for processing,
-        analysing and
-        modelling <strong>Spectro</>scopic data for <strong>Chem</strong>istry
-        with
-        <strong>Py</strong>thon. It is a cross platform software, running on
-        Linux,
-        Windows or OS X.</p><br><br>
+        <p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling 
+        <strong>Spectro</>scopic data for <strong>Chem</strong>istry with <strong>Py</strong>thon. 
+        It is a cross platform software, running on Linux, Windows or OS X.</p><br><br>
         <strong>version:</strong> {version}<br>
         <strong>Authors:</strong> {authors}<br>
         <strong>License:</strong> {license}<br>
-        <div class='warning'> SpectroChemPy is still experimental and under active
-        development. Its current design and functionalities are subject to major
-        changes, reorganizations, bugs and crashes!!!. Please report any issues
-        to the
-        <a url='https://redmine.spectrochempy.fr/projects/spectrochempy/issues'>Issue Tracker<a>
+        <div class='warning'> SpectroChemPy is still experimental and under active development. Its current design and 
+        functionalities are subject to major changes, reorganizations, bugs and crashes!!!. Please report any issues
+        to the <a url='https://redmine.spectrochempy.fr/projects/spectrochempy/issues'>Issue Tracker<a>
         </div><br><br>
-        When using <strong>SpectroChemPy</strong> for your own work, you are
-        kindly requested to cite it this way:
-        <pre>
-        Arnaud Travert & Christian Fernandez,
-        SpectroChemPy, a framework for processing, analysing and modelling of
+        When using <strong>SpectroChemPy</strong> for your own work, you are kindly requested to cite it this way:
+        <pre>Arnaud Travert & Christian Fernandez, SpectroChemPy, a framework for processing, analysing and modelling of
         Spectroscopic data for Chemistry with Python https://www.spectrochempy.fr, (version {version})
-        Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of
-        Caen/CNRS, 2019
-        </pre>
-        </p>
+        Laboratoire Catalyse and Spectrochemistry, ENSICAEN/University of Caen/CNRS, 2019
+        </pre></p>
         """.format(version=__release__, authors=__author__, license=__license__)
 
         return desc
@@ -864,13 +780,10 @@ class SpectroChemPy(Application):
     # ------------------------------------------------------------------------------------------------------------------
     _loaded_config_files = List()
 
-    reset_config = Bool(False, help='Should we restore a default '
-                                    'configuration ?').tag(config=True)
-    """Flag: True if one wants to reset settings to the original config
-    defaults"""
+    reset_config = Bool(False, help='Should we restore a default configuration ?').tag(config=True)
+    """Flag: True if one wants to reset settings to the original config defaults"""
 
-    config_file_name = Unicode(None, help="Configuration file name").tag(
-            config=True)
+    config_file_name = Unicode(None, help="Configuration file name").tag(config=True)
     """Configuration file name"""
 
     @default('config_file_name')
@@ -892,32 +805,23 @@ class SpectroChemPy(Application):
     def _get_default_config_manager(self):
         return BaseJSONConfigManager(config_dir=self.config_dir)
 
-    # Logger at startup
-    # ------------------------------------------------------------------------------------------------------------------
-
-    debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(
-            config=True)
+    debug = Bool(True, help='Set DEBUG mode, with full outputs').tag(config=True)
     """Flag to set debugging mode"""
-    info = Bool(False, help='Set INFO mode, with msg outputs').tag(
-            config=True)
+
+    info = Bool(False, help='Set INFO mode, with msg outputs').tag(config=True)
     """Flag to set info mode"""
-    quiet = Bool(False, help='Set Quiet mode, with minimal outputs').tag(
-            config=True)
+
+    quiet = Bool(False, help='Set Quiet mode, with minimal outputs').tag(config=True)
     """Flag to set in fully quite mode (even no warnings)"""
-    nodisplay = Bool(False, help='Set NO DISPLAY mode, i.e., no graphics '
-                                 'outputs').tag(config=True)
+
+    nodisplay = Bool(False, help='Set NO DISPLAY mode, i.e., no graphics outputs').tag(config=True)
     """Flag to set in NO DISPLAY mode """
 
-    # last project
-    # ------------------------------------------------------------------------------------------------------------------
-
-    last_project = Unicode('', help='Last used project').tag(config=True,
-                                                             type='project')
+    last_project = Unicode('', help='Last used project').tag(config=True, type='project')
+    """Last used project"""
 
     @observe('last_project')
     def _last_project_changed(self, change):
-        # update configuration
-
         if change.name in self.traits(config=True):
             self.config_manager.update(self.config_file_name, {
                     self.__class__.__name__: {
@@ -925,30 +829,22 @@ class SpectroChemPy(Application):
                             }
                     })
 
-    # filename to load at startup
-    # ------------------------------------------------------------------------------------------------------------------
-    startup_filename = Unicode(os.path.join('irdata', 'nh4y-activation.spg'),
-                               help='File name to load at startup').tag(
-            config=True, type='file')
+    startup_filename = Unicode(os.path.join('irdata', 'nh4y-activation.spg'), help='File name to load at startup'
+                               ).tag(config=True, type='file')
 
-    # TESTING
-    # ------------------------------------------------------------------------------------------------------------------
-
-    show_config = Bool(help="Dump configuration to stdout at startup").tag(
-            config=True)
-
-    show_config_json = Bool(help="Dump configuration to stdout (as JSON)").tag(
-            config=True)
-
-    @observe('show_config_json')
-    def _show_config_json_changed(self, change):
-        self.show_config = change.new
+    show_config = Bool(help="Dump configuration to stdout at startup").tag(config=True)
 
     @observe('show_config')
     def _show_config_changed(self, change):
         if change.new:
             self._save_start = self.start
             self.start = self.start_show_config
+
+    show_config_json = Bool(help="Dump configuration to stdout (as JSON)").tag(config=True)
+
+    @observe('show_config_json')
+    def _show_config_json_changed(self, change):
+        self.show_config = change.new
 
     test = Bool(False, help='test flag').tag(config=True)
     """Flag to set the application in testing mode"""
@@ -1018,6 +914,18 @@ class SpectroChemPy(Application):
     # Initialisation of the application
     # ------------------------------------------------------------------------------------------------------------------
 
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+        self.datadir = DataDir()  # config=self.config)
+        self.general_preferences = GeneralPreferences(config=self.config,
+                                                      parent=self)
+        self.project_preferences = ProjectPreferences(config=self.config,
+                                                      parent=self)
+        self.logs = self.log  # we change the noame in order to avoid latter conflict with numpy.log
+
+        self.initialize()
+
     # @catch_config_error
     def initialize(self, argv=None):
         """
@@ -1071,7 +979,7 @@ class SpectroChemPy(Application):
 
         # warning handler
         # --------------------------------------------------------------------
-        def send_warnings_to_log(message, category, filename, lineno, *args):
+        def send_warnings_to_log(message, category):
             self.logs.warning('%s:  %s' % (category.__name__, message))
             return
 
@@ -1126,16 +1034,9 @@ class SpectroChemPy(Application):
         # add other preferences
         # ---------------------------------------------------------------------
 
-        self.datadir = DataDir()  # config=self.config)
-        self.general_preferences = GeneralPreferences(config=self.config,
-                                                      parent=self)
-
         # Before setting default preference for project, check if the installation of some styles was already done
         # if not do it now.
         self._install_styles()
-
-        self.project_preferences = ProjectPreferences(config=self.config,
-                                                      parent=self)
 
         # Eventually write the default config file
         # --------------------------------------

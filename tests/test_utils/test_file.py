@@ -39,15 +39,15 @@ def test_get_filename():
         assert str(f[0]) == join(prefs.datadir, environ['TEST_FILE'])
 
     # directory specified by a keyword as well as the filename
-    f = get_filename("nh4y.scp", directory="irdata")
+    f = get_filename("nh4y-activation.spg", directory="irdata")
     assert f == {
-            '.scp': [Path(prefs.datadir) / 'irdata' / 'nh4y.scp']
+            '.spg': [Path(prefs.datadir) / 'irdata' / 'nh4y-activation.spg']
             }
 
     # directory specified in the filename as a subpath of the data directory
-    f = get_filename("irdata/nh4y.scp")
+    f = get_filename("irdata/nh4y-activation.spg")
     assert f == {
-            '.scp': [Path(prefs.datadir) / 'irdata' / 'nh4y.scp']
+            '.spg': [Path(prefs.datadir) / 'irdata' / 'nh4y-activation.spg']
             }
 
     # no directory specified (filename must be in the working or the default  data directory
@@ -55,7 +55,7 @@ def test_get_filename():
 
     # if it is not found an error is generated
     with pytest.raises(IOError):
-        f = get_filename("nh4y.scp")
+        f = get_filename("nh4y-activation.spg")
 
     # directory is implicit (we get every files inside, with an allowed extension)
     # WARNING:  Must end with a backslash
@@ -63,7 +63,7 @@ def test_get_filename():
                      filetypes=['OMNIC files (*.spa, *.spg)', 'OMNIC series (*.srs)', 'all files (*.*)'],
                      listdir=True)
 
-    assert len(f.keys()) == 3
+    assert len(f.keys()) == 2
 
     # should raise an error
     with pytest.raises(IOError):

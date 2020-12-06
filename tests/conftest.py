@@ -7,10 +7,27 @@
 # suppress test for PEP8 in this file
 # flake8: noqa
 
-import os
+# import os
 
+from os import environ
 import numpy as np
 import pytest
+
+try:
+    # work only if spectrochempy is installed
+    import spectrochempy
+except ModuleNotFoundError:
+    raise ModuleNotFoundError('You must install spectrochempy and its dependencies before executing tests!')
+from spectrochempy.core.dataset.ndarray import NDArray
+from spectrochempy.core.dataset.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.ndpanel import NDPanel
+from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.core.dataset.ndcoord import Coord
+from spectrochempy.core import general_preferences as prefs
+
+from spectrochempy.utils.testing import RandomSeedContext
+from spectrochempy.utils import pathclean
 
 
 # initialize a ipython session before calling spectrochempy
@@ -32,27 +49,15 @@ def ip(session_ip):
 # ======================================================================================================================
 # FIXTURES
 # ======================================================================================================================
-try:
-    # work only if spectrochempy is installed
-    from spectrochempy.core import app
-except ModuleNotFoundError:
-    raise ModuleNotFoundError('You must install spectrochempy and its dependencies '
-                              'before executing tests!')
-from spectrochempy.core.dataset.ndarray import NDArray
-from spectrochempy.core.dataset.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.ndpanel import NDPanel
-from spectrochempy.core.dataset.ndcoordset import CoordSet
-from spectrochempy.core.dataset.ndcoord import Coord
-from spectrochempy.utils.testing import RandomSeedContext
-from spectrochempy.core import general_preferences as prefs
-
 
 # set test file and folder in environment
 # set a test file in environment
-os.environ['TEST_FILE'] = os.path.join(prefs.datadir, 'irdata/nh4y-activation.spg')
-os.environ['TEST_FOLDER'] = os.path.join(prefs.datadir, 'irdata', 'subdir')
-os.environ['TEST_NMR_FOLDER'] = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_2d')
+
+datadir = pathclean(prefs.datadir)
+
+environ['TEST_FILE'] = str(datadir / 'irdata' / 'nh4y-activation.spg')
+environ['TEST_FOLDER'] = str(datadir / 'irdata' / 'subdir')
+environ['TEST_NMR_FOLDER'] = str(datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d')
 
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------
@@ -232,25 +237,22 @@ def pnl():
 # Fixtures:  IR spectra (SPG)
 # ----------------------------------------------------------------------------------------------------------------------
 
-directory = prefs.datadir
-dataset = NDDataset.read_omnic(os.path.join(directory, 'irdata', 'nh4y-activation.spg'))
+
+dataset = NDDataset.read_omnic(datadir/'irdata'/'nh4y-activation.spg')
 
 
 @pytest.fixture(scope="function")
 def IR_dataset_2D():
-    return dataset.copy()
+    nd = dataset.copy()
+    nd.name = 'IR_2D'
+    return nd
 
 
 @pytest.fixture(scope="function")
 def IR_dataset_1D():
-    return dataset[0].squeeze().copy()
-
-
-@pytest.fixture(scope="function")
-def IR_scp_1():
-    directory = prefs.datadir
-    dataset = NDDataset.load(os.path.join(directory, 'irdata', 'nh4.scp'))
-    return dataset.copy()
+    nd = dataset[0].squeeze().copy()
+    nd.name = 'IR_1D'
+    return nd
 
 
 # Fixture: NMR spectra
@@ -258,25 +260,15 @@ def IR_scp_1():
 
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
-    directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d','1', 'fid')
-    dataset = NDDataset.read_bruker_nmr(path, remove_digital_filter=True)
-    return dataset.copy()
-
-
-@pytest.fixture(scope="function")
-def NMR_dataset_1D_1H():
-    directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'tpa', )
-    dataset = NDDataset.read_bruker_nmr(path, expno=10, remove_digital_filter=True)
+    path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_1d' / '1' / 'fid'
+    dataset = NDDataset.read_topspin(path, remove_digital_filter=True, name='NMR_1D')
     return dataset.copy()
 
 
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
-    directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_2d')
-    dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr' / 'topspin_2d' / '1' / 'ser'
+    dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True, name="NMR_2D")
     return dataset.copy()
 
 
@@ -296,35 +288,7 @@ def series():
 def dataframe():
     import pandas as pd
     with RandomSeedContext(23451):
-        arr = pd.DataFrame(np.random.randn(6, 4), index=np.arange(6) * 10., columns=np.arange(4) * 10.)
+        arr = pd.DataFrame(np.random.randn(6, 4), index=list(np.arange(6) * 10.), columns=list(np.arange(4) * 10.))
     for ax, name in zip(arr.axes, ['time', 'temperature']):
         ax.name = name
     return arr.copy()
-
-
-# Project fixture
-
-@pytest.fixture(scope="function")
-def project_test():
-    from spectrochempy import Project, Script
-
-    proj = Project(name='TEST')
-
-    # add datasets to a subproject
-    datadir = prefs.datadir
-
-    d1 = NDDataset.read(os.path.join(datadir, 'irdata', 'nh4y-activation.spg'))
-    proj['S1'] = d1
-
-    d2 = NDDataset.read(os.path.join(datadir, 'irdata', 'CO@Mo_Al2O3.SPG'))
-    proj['S2'] = d2
-
-    script_source = 'set_loglevel(INFO)\n' \
-                    'info_("samples contained in the project are : ' \
-                    '%s"%proj.projects_names)'
-
-    proj['print_info'] = Script('print_info', script_source)
-
-    proj.save(os.path.join(datadir, 'project_test.pscp'))  # save it for other use
-
-    return proj

@@ -129,7 +129,7 @@ Import of data from external sources
     read_omnic
     read_spg
     read_spa
-	read_srs
+    read_srs
     read_opus
 	read_dir
     read_carroucell
@@ -333,8 +333,3 @@ Utilities
     :toctree: generated/
 
     download_IRIS
-
-
-
-
-

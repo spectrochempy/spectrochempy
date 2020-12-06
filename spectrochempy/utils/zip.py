@@ -13,6 +13,8 @@ from collections.abc import Mapping
 from numpy.lib.format import read_array
 from numpy.compat import asstr
 
+from spectrochempy.utils import json_decoder
+
 __all__ = ['make_zipfile', 'ScpFile']
 
 
@@ -134,7 +136,7 @@ class ScpFile(Mapping):
             return NDDataset.load(key, content=content)
 
         elif member and ext in ['.json']:
-            return json.loads(asstr(self.zip.read(key)))
+            return json.loads(self.zip.read(key), object_hook=json_decoder)
 
         elif member:
             return self.zip.read(key)

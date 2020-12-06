@@ -10,11 +10,10 @@ file utilities
 
 """
 from os import environ
+
 import re
 import warnings
 from pathlib import Path, WindowsPath, PosixPath
-
-from spectrochempy.utils.filedialogs import open_dialog, save_dialog
 
 __all__ = ['get_filename', 'readdirname', 'pathclean', 'patterns',
            'check_filenames', 'check_filename_to_open', 'check_filename_to_save']
@@ -75,7 +74,7 @@ def pathclean(paths):
     >>> filename.parent.name
     'irdata'
 
-    Due to the escape character \ in Unix, path string should be escaped \\ or the raw-string prefix `r` must be used
+    Due to the escape character \\ in Unix, path string should be escaped \\\\ or the raw-string prefix `r` must be used
     as shown below
     >>> filename = pathclean(r"irdata\\nh4y-activation.spg")
     >>> filename.suffix
@@ -174,7 +173,7 @@ def check_filenames(*args, **kwargs):
             elif not directory and kw_directory:
                 filename = kw_directory / filename
             # check if the file exists here
-            f = filename
+            filename
             if not directory or str(directory).startswith('.'):
                 # search first in the current directory
                 directory = Path.cwd()
@@ -183,6 +182,7 @@ def check_filenames(*args, **kwargs):
                 filename = f
             else:
                 from spectrochempy.core import general_preferences as prefs
+
                 directory = pathclean(prefs.datadir)
                 f = directory / filename
                 if f.exists():
@@ -286,6 +286,7 @@ def get_filename(*filenames, **kwargs):
 
     from spectrochempy.core import general_preferences as prefs
     from spectrochempy.api import NO_DISPLAY, NO_DIALOG
+    from spectrochempy.core import open_dialog
 
     NODIAL = NO_DIALOG
 
@@ -476,6 +477,7 @@ def readdirname(directory):
 
     from spectrochempy.core import general_preferences as prefs
     from spectrochempy.api import NO_DISPLAY, NO_DIALOG
+    from spectrochempy.core import open_dialog
 
     data_dir = pathclean(prefs.datadir)
     working_dir = Path.cwd()
@@ -513,7 +515,9 @@ def readdirname(directory):
 
 # ......................................................................................................................
 def check_filename_to_save(dataset, filename=None, save_as=True, **kwargs):
+
     from spectrochempy.api import NO_DIALOG
+    from spectrochempy.core import save_dialog
 
     if not filename or save_as:
 
@@ -538,8 +542,8 @@ def check_filename_to_open(*args, **kwargs):
     # Check the args and keywords arg to determine the correct filename
 
     filenames = check_filenames(*args, **kwargs)
-    if filenames is None: # not args and
-    # this is probably due to a cancel action for an open dialog.
+    if filenames is None:  # not args and
+        # this is probably due to a cancel action for an open dialog.
         return None
 
     if not isinstance(filenames, dict):

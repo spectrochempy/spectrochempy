@@ -11,7 +11,7 @@ from spectrochempy.utils import NRed, NBlue, NBlack
 
 
 # ............................................................................
-def make_label(ss, lab='<no_axe_label>', usempl=True):
+def make_label(ss, lab='<no_axe_label>', use_mpl=True):
     """ make a label from title and units
 
     """
@@ -26,7 +26,7 @@ def make_label(ss, lab='<no_axe_label>', usempl=True):
     if '<untitled>' in label:
         label = 'values'
 
-    if usempl:
+    if use_mpl:
         if ss.units is not None and str(ss.units) != 'dimensionless':
             units = r"/\ {:~L}".format(ss.units)
             units = units.replace('%', r'\%')

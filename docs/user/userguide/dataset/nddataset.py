@@ -395,7 +395,7 @@ d3D = NDDataset(nd_data,
                       units='absorbance'
                       )
 
-d3D.description = """Dataset example created for this tutorial. 
+d3D.description = """Dataset example created for this tutorial.
 It's a 3-D dataset (with dimensionless intensity)"""
 
 d3D.author = 'Blake & Mortimer'
@@ -415,7 +415,7 @@ d3D = NDDataset(nd_data,
                       title='Absorbance',
                       units='absorbance'
                       )
-d3D.description = """Dataset example created for this tutorial. 
+d3D.description = """Dataset example created for this tutorial.
 It's a 3-D dataset (with dimensionless intensity)"""
 
 d3D.author = 'Blake & Mortimer'
@@ -785,5 +785,3 @@ daq
 
 # %% pycharm={"name": "#%%\n"}
 daq.dtype
-
-

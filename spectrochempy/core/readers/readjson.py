@@ -110,86 +110,8 @@ def _read_json(*args, **kwargs):
 
     js = json.loads(fid.read(), object_hook=json_decoder)
 
-    dataset = _from_json(dataset, js)
+    dataset = type(dataset).from_json(js)
     dataset.filename = filename
     dataset.name = filename.stem
 
     return dataset
-
-
-def _from_json(new, obj, from_string=False):
-
-    # interpret
-    coords = None
-
-    def setattributes(clss, key, val):
-        # utility function to set the attributes
-
-        if key in ['modified', 'date']:
-            setattr(clss, f"_{key}", val)
-
-        elif key == 'meta':
-            # handle the case were quantity were saved
-            for k, v in val.items():
-                if isinstance(v, list):
-                    for i, item in enumerate(v):
-                        if isinstance(item, (list, tuple)):
-                            try:
-                                v[i] = Quantity.from_tuple(item)
-                            except TypeError:
-                                # not a quantity
-                                pass
-                    val[k] = v
-            clss.meta.update(val)
-
-        elif key == 'plotmeta':
-            # handle the case were quantity were saved
-            for k, v in val.items():
-                if isinstance(v, list):
-                    for i, item in enumerate(v):
-                        if isinstance(item, (list, tuple)):
-                            try:
-                                v[i] = Quantity.from_tuple(item)
-                            except TypeError:
-                                # not a quantity
-                                pass
-                    val[k] = v
-            clss.plotmeta.update(val)
-
-        elif key in ['units']:
-            setattr(clss, key, val)
-
-        else:
-            setattr(clss, f"_{key}", val)
-
-    for key, val in list(obj.items()):
-
-        if key.startswith('coord_'):
-            if not coords:
-                coords = {}
-            els = key.split('_')
-            dim = els[1]
-            if dim not in coords.keys():
-                coords[dim] = Coord()
-            setattributes(coords[dim], els[2], val)
-
-        elif key.startswith('coordset_'):
-            els = key.split('_')
-            dim = els[1]
-            if key.endswith("is_same_dim"):
-                setattributes(coords[dim], "is_same_dim", val)
-            elif key.endswith("name"):
-                setattributes(coords[dim], "name", val)
-            elif key.endswith("references"):
-                setattributes(coords[dim], "references", val)
-            else:
-                idx = "_" + els[3]
-                setattributes(coords[dim][idx], els[4], val)
-        else:
-            setattributes(new, key, val)
-
-    if coords:
-        new.set_coords(coords)
-
-    return new
-

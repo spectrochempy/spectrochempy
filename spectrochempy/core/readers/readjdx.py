@@ -147,7 +147,7 @@ def _read_jdx(*args, **kwargs):
             elif keyword == '##LONGDATE':
                 [year, month, day] = text.split('/')
             elif keyword == '##TIME':
-                [hour, minute, second] = re.split(r':|\.', text)
+                [hour, minute, second] = re.split(r'[:.]', text)
             elif keyword == '##XUNITS':
                 xunits.append(text)
             elif keyword == '##YUNITS':

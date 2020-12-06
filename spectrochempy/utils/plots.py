@@ -143,7 +143,7 @@ class colorscale:
         """
         """
         if rev:
-            cmp = cmap + '_r'
+            cmap = cmap + '_r'
         _colormap = plt.get_cmap(cmap)
 
         _norm = mpl.colors.Normalize(vmin=vmin - offset, vmax=vmax - offset)
@@ -153,7 +153,7 @@ class colorscale:
         c = np.array(self.scalarMap.to_rgba(z.squeeze() - offset))
         c[0:3] *= 255
         c[0:3] = np.round(c[0:3].astype('uint16'), 0)
-        return f'rgba' + str(tuple(c))
+        return f'rgba{tuple(c)}'
 
 
 colorscale = colorscale()

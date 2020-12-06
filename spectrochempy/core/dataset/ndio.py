@@ -23,13 +23,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.lib.format import write_array
 from numpy.lib.npyio import zipfile_factory
-from traitlets import HasTraits, Instance
+from traitlets import HasTraits, Instance, Unicode
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils import SpectroChemPyException
-from spectrochempy.units import Unit, Quantity
+from spectrochempy.units import Quantity
 from spectrochempy.utils import pathclean, Meta, check_filenames, ScpFile, check_filename_to_save
+from spectrochempy.utils import json_serialiser, json_decoder
 
 
 # ==============================================================================
@@ -47,32 +48,63 @@ class NDIO(HasTraits):
     _filename = Instance(pathlib.Path, allow_none=True)
 
     @property
-    def filename(self):
-        """
-        `Pathlib` object - current filename for this dataset.
-
-        """
-        if self._filename:
-            return self._filename.name
-        else:
-            return None
-
-    @filename.setter
-    def filename(self, fname):
-        self._filename = pathclean(fname)
-
-    @property
     def directory(self):
         """
         `Pathlib` object - current directory for this dataset
 
-        ReadOnly property
+        ReadOnly property - automaticall set when the filename is updated if it contains a parent on its path
 
         """
         if self._filename:
             return pathclean(self._filename).parent.resolve()
         else:
             return None
+
+
+    @property
+    def filename(self):
+        """
+        `Pathlib` object - current filename for this dataset.
+
+        """
+        if self._filename:
+            return self._filename.stem + self.suffix
+        else:
+            return None
+
+    @filename.setter
+    def filename(self, val):
+        self._filename = pathclean(val)
+
+    @property
+    def filetype(self):
+        if self.implements('Project'):
+            return ['SpectroChemPy Project file (*.pscp)']
+        elif self.implements('NDPanel'):
+            return ['SpectroChemPy Panel file (*.nscp)']
+        elif self.implements('NDDataset'):
+            return ['SpectroChemPy dataset file (*.scp)']
+
+
+    @property
+    def suffix(self):
+        """
+        filename suffix
+
+        Read Only property - automatically set when the filename is updated if it has a suffix, else give
+        the default suffix for the given type of object.
+
+        """
+        if self._filename and  self._filename.suffix:
+            return self._filename.suffix
+        else:
+            if self.implements('Project'):
+                suffix = ".pscp"
+            elif self.implements('NDPanel'):
+                suffix = ".nscp"
+            elif self.implements('NDDataset'):
+                suffix = ".scp"
+            return suffix
 
     # ------------------------------------------------------------------------------------------------------------------
     # Special methods
@@ -86,14 +118,16 @@ class NDIO(HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
 
     # ..................................................................................................................
-    def save(self):
+    def save(self, **kwargs):
         """
-        Save the current |NDDataset| in SpectroChemPy format (*.scp).
+        Save the current object in SpectroChemPy format.
+
+        Default extension is *.scp for |NDDataset|'s, *.nscp for |NDPanel|'s, and *.pscp for |Project|'s.
 
         See Also
         ---------
-        save_as : save current dataset with a different name and/or directory
-        write : export current dataset to different format
+        save_as : save current object with a different name and/or directory
+        write : export current object to different format
 
         Examples
         ---------
@@ -116,21 +150,21 @@ class NDIO(HasTraits):
 
         """
 
-        filename = pathclean(self.filename)
+        # by default we save the file in the self.directory and with the name + suffix depending
+        # on the current object type
+        if self.directory is None:
+            self.filename = pathclean('.') / self.name
 
-        if filename is None:
-            raise IOError('Filename is not set in the dataset. Use save_as or set a filename first.')
+        filename = self.directory / self.filename
 
-        elif filename.suffix != '.scp' or not filename.exists():
+        if not filename.exists():
             # never saved
-            # in this case we will save with the defined name and directory
-            filename = pathclean(self.directory) / self.name
-            filename = filename.with_suffix('.scp')
-            return self.save_as(filename, caption='Save')
+            kwargs['caption'] = f'Save the current {self.implements()} as ... '
+            return self.save_as(filename, **kwargs)
 
         # was already saved previously with this name,
         # in this case we do not display a dialog and overwrite the same file
-        return self._save(filename)
+        return self._save(filename, **kwargs)
 
     # ..................................................................................................................
     def save_as(self, filename='', **kwargs):
@@ -180,109 +214,16 @@ class NDIO(HasTraits):
             filename = pathclean(filename)
             if self.directory and self.directory != filename.parent.resolve():
                 filename = self.directory / filename
-            if not filename.suffix == '.scp':
-                filename = filename.with_suffix('.scp')
         else:
             filename = self.directory
 
-        kwargs['filetypes'] = ['SpectroChemPy files (*.scp)']
+        kwargs['filetypes'] = self.filetype
+        kwargs['caption'] = f'Save the current {self.implements()} as ... '
         filename = check_filename_to_save(self, filename, save_as=True, **kwargs)
 
         if filename:
             self.filename = filename
-            return self._save(filename)
-
-    # ..................................................................................................................
-    def _save(self, filename):
-        # machinery to save the current dataset into native spectrochempy format
-
-        # Stage data in a temporary file on disk, before writing to zip.
-        import zipfile
-        import tempfile
-        zipf = zipfile_factory(filename, mode="w",
-                               compression=zipfile.ZIP_DEFLATED)
-        _, tmpfile = tempfile.mkstemp(suffix='-spectrochempy.scp')
-        tmpfile = pathclean(tmpfile)
-
-        pars = {}
-        objnames = self.__dir__()
-
-        def _loop_on_obj(_names, obj, level=''):
-            # Recursive scan on NDDataset objects
-
-            for key in _names:
-
-                val = getattr(obj, f"_{key}")
-
-                if isinstance(val, np.ndarray):
-
-                    with open(tmpfile, 'wb') as fid:
-                        write_array(fid, np.asanyarray(val), allow_pickle=True)
-
-                    zipf.write(tmpfile, arcname=level + key + '.npy')
-
-                elif isinstance(val, CoordSet):
-
-                    for v in val._coords:
-                        _objnames = dir(v)
-                        if isinstance(v, Coord):
-                            _loop_on_obj(_objnames, obj=v,
-                                         level=f"coord_{v.name}_")
-                        elif isinstance(v, CoordSet):
-                            _objnames.remove('coords')
-                            _loop_on_obj(_objnames, obj=v,
-                                         level=f"coordset_{v.name}_")
-                            for vi in v:
-                                _objnames = dir(vi)
-                                _loop_on_obj(_objnames, obj=vi,
-                                             level=f"coordset_{v.name}_"
-                                                   f"coord_{vi.name[1:]}_")
-
-                elif isinstance(val, datetime.datetime):
-
-                    pars[level + key] = val.timestamp()
-
-                elif isinstance(val, (np.dtype, Unit, pathlib.Path)):
-
-                    pars[level + key] = str(val)
-
-                elif isinstance(val, Meta):
-                    d = val.to_dict()
-                    # we must handle Quantities
-                    # for k, v in d.items():
-                    #     if isinstance(v, list):
-                    #         for i, item in enumerate(v):
-                    #             if isinstance(item, Quantity):
-                    #                 item = list(item.to_tuple())
-                    #                 if isinstance(item[0], np.ndarray):
-                    #                     item[0] = item[0].tolist()
-                    #                 d[k][i] = tuple(item)
-                    pars[level + key] = d
-
-                elif val is None:
-                    continue
-
-                elif isinstance(val, dict) and key == 'axes':
-                    # do not save the matplotlib axes
-                    continue
-
-                elif isinstance(val, (plt.Figure, plt.Axes)):
-                    # pass the figures and Axe
-                    continue
-
-                else:
-                    pars[level + key] = val
-
-        _loop_on_obj(objnames, self)
-
-        tmpfile.write_text(json.dumps(pars))
-
-        zipf.write(tmpfile, arcname='pars.json')
-        tmpfile.unlink()
-
-        zipf.close()
-
-        return filename
+            return self._save(filename, **kwargs)
 
     # ..................................................................................................................
     @classmethod
@@ -324,13 +265,21 @@ class NDIO(HasTraits):
         """
         content = kwargs.get('content', None)
 
+
         if content:
             fid = io.BytesIO(content)
         else:
-            # be sure to convert filename to a pathlib object
+            # be sure to convert filename to a pathlib object with the default suffix
             filename = pathclean(filename)
+            suffix = cls().suffix
+            if not filename.suffix:
+                filename.suffix = suffix
+            else:
+                filename = filename.with_suffix(suffix)
+            if kwargs.get('directory', None) is not None:
+                filename = pathclean(kwargs.get('directory')) / filename
             if not filename.exists():
-                filename = check_filenames(filename.with_suffix('.scp'), **kwargs)[0]
+                filename = check_filenames(filename, **kwargs)[0]
             fid = open(filename, 'rb')
 
         # get zip file
@@ -343,118 +292,108 @@ class NDIO(HasTraits):
                 raise SpectroChemPyException("File not in 'scp' format!")
             raise SpectroChemPyException("Undefined error!")
 
-        # interpret
-        coords = None
-        new = cls()
-
-        for key, val in list(obj.items()):
-            if key.startswith('coord_'):
-                if not coords:
-                    coords = {}
-                els = key.split('_')
-                dim = els[1]
-                if dim not in coords.keys():
-                    coords[dim] = Coord()
-                base, ext = els[2].split('.npy')
-                setattr(coords[dim], "_%s" % base, val)
-
-            if key.startswith('coordset_'):
-                if not coords:
-                    coords = {}
-                els = key.split('_')
-                dim = els[1]
-                idx = "_" + els[3]
-                if dim not in coords.keys():
-                    coords[dim] = CoordSet({
-                            idx: Coord()
-                            })
-                if idx not in coords[dim].names:
-                    coords[dim].set(**{
-                            idx: Coord()
-                            })
-                setattr(coords[dim][idx], "_%s" % els[4], val)
-
-            elif key == "pars.json":
-                pars = val  #
-                # pars = json.loads(asstr(val))
-            else:
-                base, ext = key.split('.npy')
-                setattr(new, "_%s" % base, val)
+        js = obj[obj.files[0]]
+        new = cls.from_json(js)
 
         fid.close()
-
-        def setattributes(clss, key, val):
-            # utility function to set the attributes
-            if key in ['modified', 'date']:
-                val = datetime.datetime.fromtimestamp(val)
-                setattr(clss, "_%s" % key, val)
-            elif key == 'meta':
-                # handle the case were quantity were saved
-                # for k, v in val.items():
-                #     if isinstance(v, list):
-                #         for i, item in enumerate(v):
-                #             if isinstance(item, (list, tuple)):
-                #                 try:
-                #                     v[i] = Quantity.from_tuple(item)
-                #                 except TypeError:
-                #                     # not a quantity
-                #                     pass
-                #         val[k] = v
-                clss.meta.update(val)
-            elif key == 'plotmeta':
-                # handle the case were quantity were saved
-                for k, v in val.items():
-                    if isinstance(v, list):
-                        for i, item in enumerate(v):
-                            if isinstance(item, (list, tuple)):
-                                try:
-                                    v[i] = Quantity.from_tuple(item)
-                                except TypeError:
-                                    # not a quantity
-                                    pass
-                        val[k] = v
-                clss.plotmeta.update(val)
-            elif key in ['units']:
-                setattr(clss, key, val)
-            elif key in ['dtype']:
-                setattr(clss, "_%s" % key, np.dtype(val))
-            elif key in ['filename']:
-                setattr(clss, key, pathclean(val))
-            else:
-                setattr(clss, "_%s" % key, val)
-
-        for key, val in list(pars.items()):
-
-            if key.startswith('coord_'):
-
-                els = key.split('_')
-                dim = els[1]
-                setattributes(coords[dim], els[2], val)
-
-            elif key.startswith('coordset_'):
-                els = key.split('_')
-                dim = els[1]
-                if key.endswith("is_same_dim"):
-                    setattributes(coords[dim], "is_same_dim", val)
-                elif key.endswith("name"):
-                    setattributes(coords[dim], "name", val)
-                elif key.endswith("references"):
-                    setattributes(coords[dim], "references", val)
-                else:
-                    idx = "_" + els[3]
-                    setattributes(coords[dim][idx], els[4], val)
-            else:
-
-                setattributes(new, key, val)
-
-        if coords:
-            new.set_coords(coords)
 
         if filename:
             filename = pathclean(filename)
             new._filename = filename
             new.name = filename.stem
         return new
+
+    def to_json(self):
+
+        objnames = dir(self)
+
+        def obj_to_json(obj):
+
+            objnames = dir(obj)
+
+
+        def _loop_on_obj(_names, obj=self, parent={}):
+
+            parent['type'] = self.__class__.__name__
+
+            for key in _names:
+
+                val = getattr(obj, "_%s" % key)
+                if val is None:
+                    # ignore None - when reading if something is missing it
+                    # will be considered as None anyways
+                    continue
+
+                elif key == 'projects':
+                    parent[key] = {}
+                    for k, proj in val.items():
+                        _objnames = dir(proj)
+                        _loop_on_obj(_objnames, obj=proj, parent=parent[key])
+                        parent[key][k] = projj
+
+                elif key == 'datasets':
+                    parent[key] = []
+                    for k, ds in val.items():
+                        dsj = ds.to_json()
+                        parent[key].append( {k:dsj} )
+
+                elif key == 'scripts':
+                    parent[key] = {}
+                    for k, sc in val.items():
+                        _objnames = dir(sc)
+                        scj = _loop_on_obj(_objnames, obj=sc, parent=parent[key])
+                        parent[key][k] = scj
+
+                elif isinstance(val, Meta):
+                    parent[key] = val.to_dict()
+
+                elif key == 'parent':
+                    parent[key] = main
+
+                else:
+                    # probably some string
+                    parent[key] = val
+
+        # Recursive scan on Project content
+        main = _loop_on_obj(objnames)
+
+        return main
+
+
+
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Private
+# ----------------------------------------------------------------------------------------------------------------------
+
+    # ..................................................................................................................
+    def _save(self, filename, **kwargs):
+        # machinery to save the current dataset into native spectrochempy format
+
+        # Stage data in a temporary file on disk, before writing to zip.
+        import zipfile
+        import tempfile
+
+        zipf = zipfile_factory(filename, mode="w", compression=zipfile.ZIP_DEFLATED)
+        _, tmpfile = tempfile.mkstemp(suffix='-spectrochempy')
+
+        tmpfile = pathclean(tmpfile)
+
+        js = json.dumps(self.to_json(), default=json_serialiser, indent=2)
+
+        tmpfile.write_bytes(js.encode('utf-8'))
+
+        zipf.write(tmpfile, arcname=f'{self.name}.json')
+
+        tmpfile.unlink()
+
+        zipf.close()
+
+        self.filename = filename
+        self.name = filename.stem
+
+        return filename
 
 
 # ======================================================================================================================

@@ -44,7 +44,7 @@ _ = multiplot_map(datasets=[nd1, nd2, nd3, nd4], colormap='viridis',
                   figsize=(6, 6), dpi=100)
 
 # %% [markdown]
-# The four datasets `nd1` to `nd4` have some overlapping in both dimensions. But it we want for example to add `nd2` with `nd4`. This will fail because the dimension are not aligned. 
+# The four datasets `nd1` to `nd4` have some overlapping in both dimensions. But it we want for example to add `nd2` with `nd4`. This will fail because the dimension are not aligned.
 
 # %%
 try:
@@ -131,7 +131,7 @@ _ = multiplot_map(datasets=[nd2a, nd4a, ndadd], colormap='viridis', sharey=True,
                   nrow=1, ncol=3, figsize=(8, 3), dpi=100)
 
 # %% [markdown]
-# ## Alignment along several dimensions 
+# ## Alignment along several dimensions
 
 # %%
 nd1a, nd2a, nd3a, nd4a = align(nd1, nd2, nd3, nd4, dims=['x', 'y'])  # by default the outer method is used

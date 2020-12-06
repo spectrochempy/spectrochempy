@@ -98,20 +98,6 @@ def test_ndpanel_init():
     info_(panel)
 
 
-def test_ndpanel_fixture():
-    with RandomSeedContext(12345):
-        arr1 = np.random.rand(10, 20)
-        arr2 = np.random.rand(20, 12)
-    cy1 = Coord(np.arange(10), title='ty', units='s')
-    cy2 = Coord(np.arange(12), title='ty', units='s')
-    cx = Coord(np.arange(20), title='tx', units='km')
-    nd1 = NDDataset(arr1, coords=(cy1, cx), name='arr1')
-    nd2 = NDDataset(arr2, coords=(cy2, cx), dims=['x', 'y'], name='arr2')
-    pnl = NDPanel(nd1, nd2)
-    assert pnl.dims == ['x', 'y']
-    return pnl
-
-
 # ============================================================================
 if __name__ == '__main__':
     pass

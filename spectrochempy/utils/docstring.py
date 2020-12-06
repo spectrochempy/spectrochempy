@@ -51,6 +51,7 @@ _docstrings.get_sections(base='DocstringProcessor.get_sections')(
         dedent(DocstringProcessor.get_sections))
 
 
+# noinspection PyDefaultArgument
 class SpectroChemPyDocstringProcessor(DocstringProcessor):
     """
     A :class:`docrep.DocstringProcessor` subclass with possible types section
@@ -89,31 +90,31 @@ docstrings = SpectroChemPyDocstringProcessor()
 
 # Set some general parameters
 docstrings.get_sections(docstrings.dedent(
-        """
-        Note
-        ----
-        To be completed with useful common parameters
-    
-        Parameters
-        ----------
-        dim : int or str, optional, default=0
-            Dimension name or index along which the method should be applied.
-        dims : int, str or tuple of int or str, optional, default=(0,)
-            Dimension names or indexes along which the method should be applied.
-        axis : int, optional, default=-1
-            Dimension index along which the method should be applied.
-        inplace : bool, optional, default=`False`
-            Flag to say that the method return a new object (default)
-            or not (inplace=True)
-    
-        Other Parameters
-        ----------------
-    
-        Returns
-        -------
-        object
-            Same object or a copy depending on the `inplace` flag.
-    
+    """
+    Note
+    ----
+    To be completed with useful common parameters
+
+    Parameters
+    ----------
+    dim : int or str, optional, default=0
+        Dimension name or index along which the method should be applied.
+    dims : int, str or tuple of int or str, optional, default=(0,)
+        Dimension names or indexes along which the method should be applied.
+    axis : int, optional, default=-1
+        Dimension index along which the method should be applied.
+    inplace : bool, optional, default=`False`
+        Flag to say that the method return a new object (default)
+        or not (inplace=True)
+
+    Other Parameters
+    ----------------
+
+    Returns
+    -------
+    object
+        Same object or a copy depending on the `inplace` flag.
+
         """
         ), 'generic_method', sections=['Parameters', 'Returns'])
 

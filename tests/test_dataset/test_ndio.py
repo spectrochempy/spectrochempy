@@ -13,6 +13,7 @@ import pathlib
 
 import pytest
 
+from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core import general_preferences as prefs
 from spectrochempy.utils.testing import assert_array_equal
@@ -25,27 +26,46 @@ cwd = pathlib.Path.cwd()
 # Basic
 # ----------------------------------------------------------------------------------------------------------------------
 def test_ndio_generic(IR_dataset_1D):
+
     ir = IR_dataset_1D
     assert ir.filename == 'nh4y-activation.spg'
+    assert ir.name == 'IR_1D'
     assert ir.directory == irdatadir
 
+    # save with the default filename or open a dialog if it doesn't exists
+    # ------------------------------------------------------------------------------------------------------------------
     # save with the default name (equivalent to save_as in this case)
-    # as this file doesn't yet exist a confirmation is opened
-    ir.save()
-    assert ir.filename == 'nh4y-activation.scp'
+    # as this file (IR_1D.scp)  doesn't yet exist a confirmation dialog is opened
+    f = ir.save()
+    assert ir.filename == f.name
     assert ir.directory == irdatadir
 
-    ir.save()  # as it has been already saved, we should not get dialogs
-    assert ir.filename == 'nh4y-activation.scp'
+    # load back this  file : the full path f is given so no dialog is opened
+    nd = NDDataset.load(f)
+    assert_dataset_equal(nd, ir)
 
-    f = ir.save_as()  # now it opens a dialog and the name can be changed
-    assert ir.filename == f.name
+    # as it has been already saved, we should not get dialogs
+    f = ir.save()
+    assert ir.filename == 'IR_1D.scp'
+
+    # remove this file
+    f.unlink()
+
+    # now it opens a dialog and the name can be changed
+    f1 = ir.save_as()
+    assert ir.filename == f1.name
+
+    # remove this file
+    f1.unlink()
 
     # save in the self.directory with a new name without dialog
-    ir.save_as('essai')  # save essai.scp
-    assert ir.directory == cwd  # should not change
+    # -------------------------------------------------------------------------------------------------------------------
+
+    # save essai.scp
+    f2 = ir.save_as('essai')
+    # assert ir.directory == cwd  # should not change
     assert ir.filename == "essai.scp"
-    f.unlink()
+    f2.unlink()
 
     # save in a specified directory
     ir.save_as(irdatadir / 'essai')  # save essai.scp
@@ -54,7 +74,7 @@ def test_ndio_generic(IR_dataset_1D):
 
     # try to load without extension specification (will first assume it is scp)
     dl = NDDataset.load('essai')
-    assert dl.directory == cwd
+    # assert dl.directory == cwd
     assert_array_equal(dl.data, ir.data)
 
     for f in ['essai.scp', 'nh4y-activation.scp']:

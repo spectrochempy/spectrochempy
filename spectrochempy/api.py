@@ -15,10 +15,6 @@
 # """
 
 import sys
-import warnings
-
-from os import environ
-from os.path import join
 
 import matplotlib as mpl
 from IPython.core.interactiveshell import InteractiveShell

@@ -27,6 +27,7 @@ class SpectroChemPyWarning(Warning):
 
     """
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 class SpectroChemPyException(Exception):
     """

@@ -180,7 +180,7 @@ class NDPlot(HasTraits):
 
             ax = plot_2D(self, **kwargs)
 
-        elif self._squeze_ndim == 3:
+        elif self._squeeze_ndim == 3:
 
             ax = plot_3D(self, **kwargs)
 

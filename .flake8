@@ -1,18 +1,12 @@
 [flake8]
 ignore = E402 E126 E123
 max-line-length = 120
-max-complexity = 10
+max-complexity = 100
 select = C,E,F,W,N8
 count = True
 statistics = True
 exclude =
     # exclude test, and some other folder for now (may be done later)
-    "docs/sphinxext"
-    "*.ipynb_checkpoints"
-    # tempo (no nmr and pb with project and fileselector)
-    "phasing.py"
-    "fft.py"
-    "project.py"
-    #"fileselector.py"
-    "*/nmr/"
-flake
+    gui
+    docs/sphinxext/
+    *.ipynb_checkpoints/"

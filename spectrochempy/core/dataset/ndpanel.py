@@ -101,6 +101,7 @@ class NDPanel(
 
         """
 
+        self._dataset_to_be_added = None  # reset
         datasets = kwargs.pop('datasets', datasets)
 
         # options
@@ -463,7 +464,6 @@ class NDPanel(
 
         # eventually store the dataset
         self._datasets[name] = self._dataset_to_be_added.copy(keepname=True)
-        self._dataset_to_be_added = None  # reset
 
     # ..................................................................................................................
     def implements(self, name=None):

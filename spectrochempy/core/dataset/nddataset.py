@@ -997,17 +997,7 @@ class NDDataset(
                     dic[level + key] = str(val)
 
                 elif isinstance(val, Meta):
-                    d = val.to_dict()
-                    # we must handle Quantities
-                    for k, v in d.items():
-                        if isinstance(v, list):
-                            for i, item in enumerate(v):
-                                if isinstance(item, Quantity):
-                                    item = list(item.to_tuple())
-                                    if isinstance(item[0], np.ndarray):
-                                        item[0] = item[0].tolist()
-                                    d[k][i] = tuple(item)
-                    dic[level + key] = d
+                    dic[level + key] = val.to_dict()
 
                 elif val is None:
                     continue
@@ -1026,6 +1016,84 @@ class NDDataset(
         _loop_on_obj(objnames)
 
         return dic
+
+    @classmethod
+    def from_json(cls, obj):
+
+        # interpret
+        coords = None
+        cls = cls()
+
+        def setattributes(clss, key, val):
+            # utility function to set the attributes
+
+            if key in ['modified', 'date']:
+                setattr(clss, f"_{key}", val)
+
+            elif key == 'meta':
+                # handle the case were quantity were saved
+                for k, v in val.items():
+                    if isinstance(v, list):
+                        for i, item in enumerate(v):
+                            if isinstance(item, (list, tuple)):
+                                try:
+                                    v[i] = Quantity.from_tuple(item)
+                                except TypeError:
+                                    # not a quantity
+                                    pass
+                        val[k] = v
+                clss.meta.update(val)
+
+            elif key == 'plotmeta':
+                # handle the case were quantity were saved
+                for k, v in val.items():
+                    if isinstance(v, list):
+                        for i, item in enumerate(v):
+                            if isinstance(item, (list, tuple)):
+                                try:
+                                    v[i] = Quantity.from_tuple(item)
+                                except TypeError:
+                                    # not a quantity
+                                    pass
+                        val[k] = v
+                clss.plotmeta.update(val)
+
+            elif key in ['units']:
+                setattr(clss, key, val)
+
+            else:
+                setattr(clss, f"_{key}", val)
+
+        for key, val in list(obj.items()):
+
+            if key.startswith('coord_'):
+                if not coords:
+                    coords = {}
+                els = key.split('_')
+                dim = els[1]
+                if dim not in coords.keys():
+                    coords[dim] = Coord()
+                setattributes(coords[dim], els[2], val)
+
+            elif key.startswith('coordset_'):
+                els = key.split('_')
+                dim = els[1]
+                if key.endswith("is_same_dim"):
+                    setattributes(coords[dim], "is_same_dim", val)
+                elif key.endswith("name"):
+                    setattributes(coords[dim], "name", val)
+                elif key.endswith("references"):
+                    setattributes(coords[dim], "references", val)
+                else:
+                    idx = "_" + els[3]
+                    setattributes(coords[dim][idx], els[4], val)
+            else:
+                setattributes(cls, key, val)
+
+        if coords:
+            cls.set_coords(coords)
+
+        return cls
 
     # ..................................................................................................................
     def to_xarray(self, **kwargs):

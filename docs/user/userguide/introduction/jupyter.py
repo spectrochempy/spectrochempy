@@ -16,12 +16,12 @@
 # %% [markdown]
 # # Tutorial: SpectroChempy in JupyterLab
 #
-# Currently **SpectroChemPy** can be used as a library for python script. 
+# Currently **SpectroChemPy** can be used as a library for python script.
 # Indeed, at this time, there is no particular graphical user interface
 # (GUI)  available. This may change in the future
-# but for now we prefer to recommend the use of `Jupyter Lab` application. 
+# but for now we prefer to recommend the use of `Jupyter Lab` application.
 #
-# To get complete information on its usage, one can go to: 
+# To get complete information on its usage, one can go to:
 # [https://jupyterlab.readthedocs.io](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html)
 #
 #

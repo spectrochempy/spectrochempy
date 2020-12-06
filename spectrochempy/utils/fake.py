@@ -78,13 +78,17 @@ def generate_fake():
     WIDTH = (6000., 1000., 600., 800.)
     AMPL = (100., 100., 20., 50.)
 
-    def C1(t): return t * .05 + .01  # linear evolution of the baseline
+    def C1(t):
+        return t * .05 + .01  # linear evolution of the baseline
 
-    def C2(t): return np.exp(-t / .5) * .3 + .1
+    def C2(t):
+        return np.exp(-t / .5) * .3 + .1
 
-    def C3(t): return np.exp(-t / 3.) * .7
+    def C3(t):
+        return np.exp(-t / 3.) * .7
 
-    def C4(t): return 1. - C2(t) - C3(t)
+    def C4(t):
+        return 1. - C2(t) - C3(t)
 
     spec = _make_spectra_matrix(POS, WIDTH, AMPL)
     spec.plot_stack(colorbar=False)

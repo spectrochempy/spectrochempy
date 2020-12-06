@@ -55,6 +55,13 @@ def generic_card(key, title, markdown='', children=None):
 class Layout(object):
 
     def __init__(self, calling_script_name='', fix_navbar=False, data_storage='session'):
+        self.LOGO = html.Img(src='data:image/png;base64,{}'.format(base64.b64encode(
+                open(
+                        os.path.join(os.path.dirname(os.path.abspath(self.calling_script_name)), 'assets',
+                                     'scpy_logo.png'),
+                        'rb').read()).decode()), width='75px', )
+        self.TITLE = dbc.NavbarBrand(children=dcc.Markdown('**S**pectro**C**hem**P**y *by Dash*'), id="navbarbrand",
+                                     className='navbarbrand')
         self.data_storage = data_storage
         self.STORE = [dcc.Store(id='original-data', storage_type=self.data_storage),
                       dcc.Store(id='intermediate-data', storage_type=self.data_storage),
@@ -66,15 +73,6 @@ class Layout(object):
     # TOP BAR
     # ------------------------------------------------------------------------------------------------------------------
     def topbar(self):
-        self.LOGO = html.Img(src='data:image/png;base64,{}'.format(base64.b64encode(
-                open(
-                        os.path.join(os.path.dirname(os.path.abspath(self.calling_script_name)), 'assets',
-                                     'scpy_logo.png'),
-                        'rb').read()).decode()), width='75px', )
-
-        self.TITLE = dbc.NavbarBrand(children=dcc.Markdown('**S**pectro**C**hem**P**y *by Dash*'), id="navbarbrand",
-                                     className='navbarbrand')
-
         return dbc.Navbar([self.LOGO, self.TITLE], color="dark", dark=True, sticky=self.sticky, )
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -87,8 +85,8 @@ class Layout(object):
 
 ##### What is SpectroChemPy?
 
-**SpectroChemPy** is a framework for processing, analyzing and modeling Spectroscopic 
-data for Chemistry with Python. It is a cross platform software, running on Linux, 
+**SpectroChemPy** is a framework for processing, analyzing and modeling Spectroscopic
+data for Chemistry with Python. It is a cross platform software, running on Linux,
 Windows or OS X.
 
 ##### Documentation
@@ -97,23 +95,23 @@ The online Html documentation is available here:  [HTML documentation](https://w
 
 ##### Issue Tracker
 
-SpectroChemPy is still experimental and under active development. 
-Its current design is subject to major changes, reorganizations, bugs and crashes!!!. 
+SpectroChemPy is still experimental and under active development.
+Its current design is subject to major changes, reorganizations, bugs and crashes!!!.
 
-You find a problem, want to suggest enhancements or want to look at the current issues and milestones, 
+You find a problem, want to suggest enhancements or want to look at the current issues and milestones,
 you can go there:  [Issue Tracker](https://github.com/spectrochempy/spectrochempy/issues)
 
 ##### Citing SpectroChemPy
 
 When using SpectroChemPy for your own work, you are kindly requested to cite it this way:
 ```text
-Arnaud Travert & Christian Fernandez, (2020) SpectroChemPy (Version 0.1). Zenodo. 
+Arnaud Travert & Christian Fernandez, (2020) SpectroChemPy (Version 0.1). Zenodo.
 http://doi.org/10.5281/zenodo.3823841
 ```
 
-##### Source repository 
+##### Source repository
 
-The source are versioned using the git system and hosted on the GitHub platform: 
+The source are versioned using the git system and hosted on the GitHub platform:
 https://github.com/spectrochempy/spectrochempy
 
 ##### License
@@ -194,12 +192,12 @@ https://github.com/spectrochempy/spectrochempy
 
     def roi_content(self):
         return [dcc.Markdown("""
-Most SpectroChemPy's processing and analysis methods operate only on a region of interest (roi). 
+Most SpectroChemPy's processing and analysis methods operate only on a region of interest (roi).
 By default, it is set to the whole range of data.
 
-This set up is done on the ``Original`` data. The limit are automatically visualized on the graph and applied in the 
-``Processed`` graph. 
-If an offset is defined then the actual roi below is displayed accordingly (*see actual roi values below*).             
+This set up is done on the ``Original`` data. The limit are automatically visualized on the graph and applied in the
+``Processed`` graph.
+If an offset is defined then the actual roi below is displayed accordingly (*see actual roi values below*).            
                                       """, className='markdown'),  # roi x limits
                 dbc.InputGroup([dbc.InputGroupAddon(id='x-roi', addon_type="prepend"),
                                 dbc.InputGroupAddon(id='x-roi-units', addon_type="append"), ], size='sm'),
@@ -226,8 +224,8 @@ If an offset is defined then the actual roi below is displayed accordingly (*see
     def mask_content(self):
         return [dcc.Markdown("""
 To mask a region, click on the **Select region button** then select your region on the graph.
-To mask one of the trace, click on it (selected trace are highlihted. Confirmation will be asked before saving the 
-masks. 
+To mask one of the trace, click on it (selected trace are highlihted. Confirmation will be asked before saving the
+masks.
                 """, className='markdown'),  # roi x limits
                 dbc.InputGroup([dbc.InputGroupAddon("Masks", id='masks', addon_type="prepend"),
                                 dbc.Button("Select region", color="secondary",

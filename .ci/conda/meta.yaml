@@ -1,6 +1,9 @@
 {% set name = "SpectroChemPy" %}
+
 {% set version = environ['VERSION'] %}
+
 {% set devstring = environ['DEVSTRING'] %}
+
 
 package:
   name: "{{ name|lower }}"

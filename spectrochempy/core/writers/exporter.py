@@ -16,8 +16,6 @@ from warnings import warn
 from traitlets import HasTraits, Any, List
 
 from spectrochempy.utils import pathclean, check_filename_to_save, docstrings, patterns
-from spectrochempy.utils.filedialogs import save_dialog
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 class Exporter(HasTraits):
@@ -47,12 +45,11 @@ class Exporter(HasTraits):
     # ..................................................................................................................
     def __call__(self, *args, **kwargs):
 
-        args = self._setup_object(*args, **kwargs)
+        args = self._setup_object(*args)
 
         try:
             if 'filetypes' not in kwargs:
-                kwargs['filetypes'] = self.filetypes.values()
-                protocol = 'scp'
+                kwargs['filetypes'] = list(self.filetypes.values())
                 if args:  # filename
                     protocol = self.protocols[pathclean(args[0]).suffix]
                     kwargs['filetypes'] = [self.filetypes[protocol]]
@@ -66,7 +63,7 @@ class Exporter(HasTraits):
             raise e
 
     # ..................................................................................................................
-    def _setup_object(self, *args, **kwargs):
+    def _setup_object(self, *args):
 
         # check if the first argument is an instance of NDDataset, NDPanel, or Project
         args = list(args)
@@ -138,7 +135,7 @@ def write(*args, **kwargs):
 def _write_scp(*args, **kwargs):
     dataset, filename = args
     dataset.filename = filename
-    return dataset._save(filename)
+    return dataset._save(filename, **kwargs)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

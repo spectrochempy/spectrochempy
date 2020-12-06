@@ -288,7 +288,7 @@ def save_txt(dataset, filename=''):
                                      defaultextension=".txt",
                                      filetypes=[("Text", "*.txt"), ("All Files", "*.*")],
                                      confirmoverwrite=True)
-        if f == None:  # asksaveasfile return `None` if dialog closed with "cancel".
+        if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
             return
         root.destroy()
     else:

@@ -1880,7 +1880,7 @@ class NDArray(HasTraits):
                 if not pos:
                     pos = 0
                     # try to find a pos in the by string
-                    pattern = re.compile(r"label\[(\d)\]")
+                    pattern = re.compile(r"label\[(\d)]")
                     p = pattern.search(by)
                     if p is not None:
                         pos = int(p[1])

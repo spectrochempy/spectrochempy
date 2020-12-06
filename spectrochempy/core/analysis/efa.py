@@ -138,12 +138,11 @@ class EFA(HasTraits):
         self.f = f
         self.b = b
 
-    def cut_f(self, n_pc=None, cutoff=None):
+    def cut_f(self, cutoff=None):
         """
 
         Parameters
         ----------
-        n_pc
         cutoff
 
         Returns
@@ -160,12 +159,11 @@ class EFA(HasTraits):
             f.data = np.max((f.data, np.ones_like(f.data) * cutoff), axis=0)
         return f
 
-    def cut_b(self, n_pc=None, cutoff=None):
+    def cut_b(self, cutoff=None):
         """
 
         Parameters
         ----------
-        n_pc
         cutoff
 
         Returns
@@ -206,8 +204,8 @@ class EFA(HasTraits):
             n_pc = K
         n_pc = min(K, n_pc)
 
-        f = self.cut_f(n_pc, cutoff)
-        b = self.cut_b(n_pc, cutoff)
+        f = self.cut_f(cutoff)
+        b = self.cut_b(cutoff)
 
         xcoord = Coord(range(n_pc), title='PS#')
         c = NDDataset(np.zeros((M, n_pc)),

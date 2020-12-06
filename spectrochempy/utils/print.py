@@ -1,8 +1,9 @@
 import numpy as np
 import re
+from colorama import Fore, Style
+
 from . import NOMASK
 from .misc import TYPE_INTEGER, TYPE_COMPLEX, TYPE_FLOAT
-from colorama import Fore, Style
 
 __all__ = ['numpyprintoptions', 'insert_masked_print',
            'TBold', 'TRed', 'TGreen', 'TBlue', 'TCyan', 'TMagenta',
@@ -21,28 +22,36 @@ def pstr(object, **kwargs):
 # Terminal colors and styles
 # ======================================================================================================================
 
-def TBold(text): return Style.BRIGHT + str(text) + Style.RESET_ALL
+def TBold(text):
+    return Style.BRIGHT + str(text) + Style.RESET_ALL
 
 
-def TRed(text): return Fore.RED + str(text) + Fore.RESET
+def TRed(text):
+    return Fore.RED + str(text) + Fore.RESET
 
 
-def TGreen(text): return Fore.GREEN + str(text) + Fore.RESET
+def TGreen(text):
+    return Fore.GREEN + str(text) + Fore.RESET
 
 
-def TBlue(text): return Fore.BLUE + str(text) + Fore.RESET
+def TBlue(text):
+    return Fore.BLUE + str(text) + Fore.RESET
 
 
-def TMagenta(text): return Fore.MAGENTA + str(text) + Fore.RESET
+def TMagenta(text):
+    return Fore.MAGENTA + str(text) + Fore.RESET
 
 
-def TYellow(text): return Fore.YELLOW + str(text) + Fore.RESET
+def TYellow(text):
+    return Fore.YELLOW + str(text) + Fore.RESET
 
 
-def TCyan(text): return Fore.CYAN + str(text) + Fore.RESET
+def TCyan(text):
+    return Fore.CYAN + str(text) + Fore.RESET
 
 
-def TBlack(text): return Fore.BLACK + str(text) + Fore.RESET
+def TBlack(text):
+    return Fore.BLACK + str(text) + Fore.RESET
 
 
 def colored(text, color):
@@ -159,6 +168,7 @@ def convert_to_html(obj):
 # ======================================================================================================================
 
 class _MaskedPrintOption(object):
+
     # """
     # Handle the string used to represent missing data in a masked array.
     # copied from numpy.ma.core

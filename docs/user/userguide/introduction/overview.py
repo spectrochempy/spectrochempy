@@ -71,7 +71,7 @@ mydataset = scp.NDDataset()
 # If something goes wrong with during a cell execution,  a ``traceback`` is displayed.
 #
 # For instance, the object or method ``toto`` does not exist in the API, so an error (**ImportError**) is generated
-# when trying to import this from the API. 
+# when trying to import this from the API.
 #
 # Here we catch the error with a conventional `try-except` structure
 

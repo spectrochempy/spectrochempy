@@ -182,7 +182,7 @@ class FileSelector(Base):
         self.main.options = out
         self.ignore = False
 
-    def up(self, ev):
+    def up(self):
         self.path = os.path.dirname(
                 self.path.rstrip('/')).rstrip('/') + '/'
         self.make_options()

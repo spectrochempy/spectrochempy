@@ -19,7 +19,7 @@
 # %% [markdown]
 # <div class='alert alert-info'>
 #
-# **NOTE**: By default, all matplolib figures will be plotted **inline** in this notebook. 
+# **NOTE**: By default, all matplolib figures will be plotted **inline** in this notebook.
 # to change this behaviour, uncomment (which means: remove the #) the next line (which must be placed before importing the  ``spectrochempy.api`` library!
 #
 # </div>
@@ -59,7 +59,7 @@ title.set_fontstyle('italic')
 title.set_fontsize(16)
 
 # %% [markdown]
-# Note that by default, *sans-serif* font are used for all text in the figure. 
+# Note that by default, *sans-serif* font are used for all text in the figure.
 #
 # But if you prefer, *serif* font can be used instead. The easiest way to do this is to change the plot style:
 
@@ -108,7 +108,7 @@ _ = dataset.plot(style=mystyle)
 
 # %% [markdown]
 # ## Changing axis
-# The `y` axis with timestamp in the above plots is not very informative, lets rescale it in hours and change the origin. 
+# The `y` axis with timestamp in the above plots is not very informative, lets rescale it in hours and change the origin.
 
 # %%
 dataset.y -= dataset.y[0]  # change origin

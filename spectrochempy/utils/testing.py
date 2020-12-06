@@ -152,7 +152,7 @@ def assert_dataset_equal(nd1, nd2):
 
 
 # ......................................................................................................................
-def assert_dataset_almost_equal(nd1, nd2, decimal=6):
+def assert_dataset_almost_equal(nd1, nd2):
     decimal = _significant_decimal(np.max(nd1.ptp().data))
     if _compare_datasets(nd1, nd2, approx=True, decimal=decimal) is None:
         return
@@ -522,7 +522,7 @@ def image_comparison(reference=None,
                         sim, rms, REDO_ON_TYPEERROR = _image_compare(referfile,
                                                                      tmpfile,
                                                                      REDO_ON_TYPEERROR)
-                    EPSILON = epsilon = np.finfo(float).eps
+                    EPSILON = np.finfo(float).eps
                     CHECKSIM = (min_similarity is not None)
                     SIM = min_similarity if CHECKSIM else 100. - EPSILON
                     MESSSIM = "(similarity : {:.2f}%)".format(sim)

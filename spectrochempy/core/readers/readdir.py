@@ -23,7 +23,7 @@ import xlrd
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils import get_filename, readdirname
-from spectrochempy.core import debug_, info_, print_
+from spectrochempy.core import info_, print_
 from spectrochempy.core.readers.importer import docstrings, importermethod, Importer
 
 
@@ -147,8 +147,7 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
 
     # get the sorted list of spa files in the directory
     spafiles = sorted([f for f in os.listdir(directory)
-                       if (os.path.isfile(os.path.join(directory, f))
-                           and f[-4:].lower() == '.spa')])
+                       if (os.path.isfile(os.path.join(directory, f)) and f[-4:].lower() == '.spa')])
 
     # discard BKG files
     if discardbg:
@@ -158,13 +157,10 @@ def read_carroucell(dataset=None, directory=None, **kwargs):
     if spectra is not None:
         [min, max] = spectra
         if discardbg:
-            spafiles = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
-                               and 'BCKG' not in f])
+            spafiles = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max and 'BCKG' not in f])
         if not discardbg:
-            spafilespec = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max
-                                  and 'BCKG' not in f])
-            spafileback = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-6]) <= max
-                                  and 'BCKG' in f])
+            spafilespec = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-4]) <= max and 'BCKG' not in f])
+            spafileback = sorted([f for f in spafiles if min <= int(f.split('_')[2][:-6]) <= max and 'BCKG' in f])
             spafiles = spafilespec + spafileback
 
     curfilelist = [spafiles[0]]

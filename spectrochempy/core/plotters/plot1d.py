@@ -283,7 +283,7 @@ def plot_1D(dataset, **kwargs):
         # not yet set, initialize with default project preferences
         prefs.update(project_preferences.to_dict())
 
-    usempl = kwargs.pop('usempl', True)  # by default we use matplotlib for plotting (which is faster but
+    use_mpl = kwargs.pop('use_mpl', True)  # by default we use matplotlib for plotting (which is faster but
     # wich is hardly  interactive)
 
     # If no method parameters was provided when this function was called,
@@ -331,7 +331,7 @@ def plot_1D(dataset, **kwargs):
     number_x_labels = prefs.number_of_x_labels
     number_y_labels = prefs.number_of_y_labels
 
-    if usempl:
+    if use_mpl:
         ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
         ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
         ax.xaxis.set_ticks_position('bottom')
@@ -530,7 +530,7 @@ def plot_1D(dataset, **kwargs):
 
     zlabel = kwargs.get("zlabel", None)
     if not zlabel:
-        zlabel = make_label(new, 'z', usempl)
+        zlabel = make_label(new, 'z', use_mpl)
 
     # ax.set_ylabel(zlabel)
 

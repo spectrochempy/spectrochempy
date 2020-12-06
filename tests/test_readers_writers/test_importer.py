@@ -36,6 +36,7 @@ def test_read():
     assert str(A5) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
     # native format
+    f = A5.save_as('nh4y.scp')
     A6 = scp.read('irdata/nh4y.scp')
     assert str(A6) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
 
@@ -44,6 +45,8 @@ def test_read():
 
     A8 = scp.read('nh4y', directory='irdata')
     assert str(A8) == 'NDDataset: [float32] a.u. (shape: (y:55, x:5549))'
+
+    f.unlink()
 
     # multiple compatible 1D files automatically merged
     B = NDDataset.read('test.0000', 'test.0001', 'test.0002', directory=os.path.join('irdata', 'OPUS'))

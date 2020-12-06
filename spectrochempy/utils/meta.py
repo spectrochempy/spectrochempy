@@ -151,7 +151,7 @@ class Meta(object):  # HasTraits):
         for k, v in m1.items():
             if isinstance(v, list):
                 for i, ve in enumerate(v):
-                    eq &= np.all(ve == m2[k][i])
+                        eq &= np.all(ve == m2[k][i])
             else:
                 eq &= np.all(v == m2[k])
         return eq

@@ -28,7 +28,7 @@ from spectrochempy import *
 #
 # `NDPanel` objects are very similar to `NDDataset` in the sense they can contain array and coordinates.
 #
-# However unlike `NDDataset`s, `NDPanel`s can contain several arrays whith different shapes, units and/or coordinates. They can store heterogeneous data coming for example from different types of experiments. Arrays present in `NDPanel` can be aligned during objects initialization.   
+# However unlike `NDDataset`s, `NDPanel`s can contain several arrays whith different shapes, units and/or coordinates. They can store heterogeneous data coming for example from different types of experiments. Arrays present in `NDPanel` can be aligned during objects initialization.
 
 # %% [markdown]
 # ## Creating a NDPanel object
@@ -42,7 +42,7 @@ NDPanel()
 # The most straightforward way is probably to do it at the creation of the ``NDPanel`` object using the following syntax
 #
 #     ndp = NDPanel(a, b, c ...)
-#     
+#
 # where `a`, `b`, `c` are ``NDDataset``s or can be casted to ``NDDataset``
 
 # %% [markdown]
@@ -50,7 +50,7 @@ NDPanel()
 
 # %%
 # create a first random array
-a = np.random.rand(6,8) 
+a = np.random.rand(6,8)
 # make to coordinate's arrays for both dimensions
 cx = Coord(np.linspace(600,4000,8), units='cm^-1', title='wavenumber')
 cy = Coord(np.linspace(0,10,6), units='s', title='time')
@@ -60,7 +60,7 @@ nda
 
 # %%
 # create a second dataset
-b = np.random.rand(10,8) 
+b = np.random.rand(10,8)
 cz = Coord(np.linspace(600,4000,8), units='cm^-1', title='wavenumber')
 cu = Coord(np.linspace(0,10,10), units='s', title='time')
 ndb = NDDataset(b, coords=(cu, cz), name='b', title='dataset b', units='eV')
@@ -76,7 +76,7 @@ ndp = NDPanel(nda, ndb)
 ndp
 
 # %% [markdown]
-# The two datasets have compatible dimensions so the default behavior is to merge and align them. 
+# The two datasets have compatible dimensions so the default behavior is to merge and align them.
 
 # %%
 ndp.dims
@@ -95,7 +95,7 @@ ndp.coords
 #
 # and/or
 #
-# * **align**: None, 'outer', 'inner', 'first' or 'last' 
+# * **align**: None, 'outer', 'inner', 'first' or 'last'
 #
 
 # %% [markdown]
@@ -103,42 +103,42 @@ ndp.coords
 
 # %%
 # no merging of the dimensions (4 distinct dimensions)
-ndp = NDPanel(nda, ndb, merge=False)  
+ndp = NDPanel(nda, ndb, merge=False)
 ndp
 
 # %%
 # merging of the dimensions, but no alignment of the coordinates (dimensions x for both dataset
 # have the same coordinates so they are merged)
-ndp = NDPanel(nda, ndb, merge=True, align=None)  
+ndp = NDPanel(nda, ndb, merge=True, align=None)
 ndp.dims
 
 # %%
 # the default behavior
-ndp = NDPanel(nda, ndb, merge=True, align='outer')  
+ndp = NDPanel(nda, ndb, merge=True, align='outer')
 ndp
 
 # %%
 # get only intersection
-ndp = NDPanel(nda, ndb, merge=True, align='inner')  
+ndp = NDPanel(nda, ndb, merge=True, align='inner')
 ndp
 
 
 
 # %%
 # Align on the first dataset
-ndp = NDPanel(nda, ndb, merge=True, align='first')  
+ndp = NDPanel(nda, ndb, merge=True, align='first')
 ndp
 
 # %%
 # Align on the last dataset
-ndp = NDPanel(nda, ndb, merge=True, align='last')  
+ndp = NDPanel(nda, ndb, merge=True, align='last')
 ndp
 
 # %% [markdown]
-# ## Mathematics with NDPanels 
+# ## Mathematics with NDPanels
 
 # %%
-ndp = NDPanel(nda, ndb, merge=True, align='outer')  
+ndp = NDPanel(nda, ndb, merge=True, align='outer')
 ndp
 
 # %%
@@ -148,7 +148,7 @@ sqrt(ndp)
 # The function is automatically applied to all contained arrays
 
 # %% [markdown]
-# Simple arithmetics is also possible - The operations are dispatched on all internal dataset individually. 
+# Simple arithmetics is also possible - The operations are dispatched on all internal dataset individually.
 
 # %%
 -2*ndp+10.
