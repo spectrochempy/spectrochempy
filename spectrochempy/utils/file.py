@@ -14,7 +14,7 @@ import re
 import warnings
 from pathlib import Path, WindowsPath, PosixPath
 
-from spectrochempy.utils.qtfiledialogs import open_dialog, save_dialog
+from spectrochempy.utils.filedialogs import open_dialog, save_dialog
 
 __all__ = ['get_filename', 'readdirname', 'pathclean', 'patterns',
            'check_filenames', 'check_filename_to_open', 'check_filename_to_save']
@@ -66,7 +66,7 @@ def pathclean(paths):
     Using unix/mac way to write paths
     >>> filename = pathclean('irdata/nh4y-activation.spg')
     >>> filename.suffix
-    '.spg'
+    '.spx'
     >>> filename.parent.name
     'irdata'
 
@@ -150,7 +150,15 @@ def check_filenames(*args, **kwargs):
                 filenames[0]: content
                 }
 
-    if filenames:
+    if not filenames:
+        # no filename specified open a dialog
+        filetypes = kwargs.pop('filetypes', ['all files (*)'])
+        directory = pathclean(kwargs.pop("directory", None))
+        filenames = get_filename(directory=directory,
+                                 dictionary=True,
+                                 filetypes=filetypes,
+                                 **kwargs)
+    if filenames and not isinstance(filenames, dict):
         filenames_ = []
         for filename in filenames:
             # in which directory ?
@@ -179,18 +187,65 @@ def check_filenames(*args, **kwargs):
                 f = directory / filename
                 if f.exists():
                     filename = f
-            filenames_.append(filename)
+
+            # particular case for topspin where filename can be provided as a directory only
+            # use of expno and procno
+            if filename.is_dir() and 'topspin' in kwargs.get('protocol', []):
+                if kwargs.get('listdir', False) or kwargs.get('glob', None) is not None:
+                    # when we list topspin dataset we have to read directories, not directly files
+                    # we can retreive them using glob patterns
+                    glob = kwargs.get('glob', None)
+                    if glob:
+                        files_ = list(filename.glob(glob))
+                    else:
+                        if not kwargs.get('processed', False):
+                            files_ = list(filename.glob('**/ser'))
+                            files_.extend(list(filename.glob('**/fid')))
+                        else:
+                            files_ = list(filename.glob('**/1r'))
+                            files_.extend(list(filename.glob('**/2rr')))
+                            files_.extend(list(filename.glob('**/3rrr')))
+                else:
+                    expno = kwargs.pop('expno', None)
+                    procno = kwargs.pop('procno', None)
+                    if expno is None:
+                        expnos = sorted(filename.glob('[0-9]*'))
+                        if expnos:
+                            expno = expnos[0]
+                    if procno is None:
+                        # read a fid or a ser
+                        f = filename / str(expno)
+                        if (f / 'ser').exists():
+                            files_ = [f / 'ser']
+                        else:
+                            files_ = [f / 'fid']
+                    else:
+                        # get the adsorption spectrum
+                        f = filename / str(expno) / 'pdata' / str(procno)
+                        if (f / '3rrr').exists():
+                            files_ = [f / '3rrr']
+                        elif (f / '2rr').exists():
+                            files_ = [f / '2rr']
+                        else:
+                            files_ = [f / '1r']
+
+                # depending of the glob patterns too many files may have been selected : restriction to the valid subset
+                filename = []
+                for item in files_:
+                    if item.name in ['fid', 'ser', '1r', '2rr', '3rrr']:
+                        filename.append(item)
+
+            if not isinstance(filename, list):
+                filename = [filename]
+
+            # for f in filename:
+            #    if not f.exists():
+            #        raise FileNotFoundError(f'{f} in {filename}')
+
+            filenames_.extend(filename)
+
         filenames = filenames_
 
-    else:
-        # no filename specified open a dialog
-        filetypes = kwargs.pop('filetypes', ['all files (*)'])
-        directory = pathclean(kwargs.get("directory", None))
-        filenames = get_filename(directory=directory,
-                                 dictionary=True,
-                                 filetypes=filetypes,
-                                 listdir=kwargs.get('listdir', False),
-                                 recursive=kwargs.get('recursive', False))
     return filenames
 
 
@@ -310,9 +365,9 @@ def get_filename(*filenames, **kwargs):
         # except if a directory is specified or listdir is True.
         # currently Scpy use QT (needed for next GUI features)
 
-        listdir = kwargs.get('listdir', directory is not None)
+        getdir = kwargs.get('listdir', directory is not None or kwargs.get('protocol', None) == ['topspin'])
 
-        if not listdir:
+        if not getdir:
             # we open a dialogue to select one or several files manually
             if not (NO_DISPLAY or NODIAL):
 
@@ -328,7 +383,7 @@ def get_filename(*filenames, **kwargs):
                 filenames = [pathclean(environ.get('TEST_FILE'))]
 
         else:
-            # automatic reading of the whole directory
+
             if not (NO_DISPLAY or NODIAL):
                 directory = open_dialog(
                         directory=directory,
@@ -337,15 +392,23 @@ def get_filename(*filenames, **kwargs):
                     # cancel
                     return None
 
-            elif not directory:
+            elif NODIAL and not directory:
                 directory = readdirname(environ.get('TEST_FOLDER'))
+
+            elif NODIAL and kwargs.get('protocol', None) == ['topspin']:
+                directory = readdirname(environ.get('TEST_NMR_FOLDER'))
 
             filenames = []
 
-            for pat in patterns(filetypes):
-                if kwargs.get('recursive', False):
-                    pat = f'**/{pat}'
-                filenames.extend(list(directory.glob(pat)))
+            if kwargs.get('protocol', None) != ['topspin']:
+                # automatic reading of the whole directory
+                for pat in patterns(filetypes):
+                    if kwargs.get('recursive', False):
+                        pat = f'**/{pat}'
+                    filenames.extend(list(directory.glob(pat)))
+            else:
+                # Topspin directory detection
+                filenames = [directory]
 
             # on mac case insensitive OS this cause doubling the number of files.
             # Eliminates doublons:
@@ -373,7 +436,7 @@ def get_filename(*filenames, **kwargs):
             filenames.remove(filename)
 
     dictionary = kwargs.get("dictionary", True)
-    if dictionary:
+    if dictionary and kwargs.get('protocol', None) != ['topspin']:
         # make and return a dictionary
         filenames_dict = {}
         for filename in filenames:
@@ -475,8 +538,8 @@ def check_filename_to_open(*args, **kwargs):
     # Check the args and keywords arg to determine the correct filename
 
     filenames = check_filenames(*args, **kwargs)
-    if not args and filenames is None:
-        # this is probably due to a cancel action for an open dialog.
+    if filenames is None: # not args and
+    # this is probably due to a cancel action for an open dialog.
         return None
 
     if not isinstance(filenames, dict):

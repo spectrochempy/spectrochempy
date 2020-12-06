@@ -16,9 +16,8 @@ In this example, we use sine bell or squared sine bell window multiplication to 
 import spectrochempy as scp
 import os
 
-dataset1D = scp.NDDataset()
-path = os.path.join(scp.general_preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-dataset1D.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+path = os.path.join(scp.general_preferences.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
+dataset1D = scp.read_topspin(path, expno=1, remove_digital_filter=True)
 
 ########################################################################################################################
 # Normalize the dataset values and reduce the time domain

@@ -22,7 +22,7 @@ def test_read_write_json(IR_dataset_2D):
     os.remove('try2D.json')
 
     scp.write(ds, 'try2D.json')
-    dsr = scp.read('try2D.json')
+    dsr = scp.read_json('try2D.json')
     assert ds == dsr
 
     dsr2 = NDDataset.read('try2D.json')  # NDDataset class method

@@ -14,7 +14,7 @@ __dataset_methods__ = __all__
 from warnings import warn
 from datetime import datetime
 
-from traitlets import HasTraits, default, List, Dict, Type, Unicode
+from traitlets import HasTraits, default, List, Dict, Type, Any, Unicode
 
 from spectrochempy.utils import pathclean, check_filename_to_open, docstrings
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
@@ -40,7 +40,7 @@ class Importer(HasTraits):
                 ('omnic', 'Nicolet OMNIC files and series (*.spa *.spg *.srs)'),
                 ('labspec', 'LABSPEC exported files (*.txt)'),
                 ('opus', 'Bruker OPUS files (*.[0-9]*)'),
-                ('topspin', 'Bruker TOPSPIN fid or series or processed data files(fid ser 1[r|i] 2[r|i]* 3[r|i]*)'),
+                ('topspin', 'Bruker TOPSPIN fid or series or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)'),
                 ('matlab', 'MATLAB files (*.mat)'),
                 ('dso', 'Data Set Object files (*.dso)'),
                 ('jcamp', 'JCAMP-DX files (*.jdx *.dx)'),
@@ -104,11 +104,25 @@ class Importer(HasTraits):
                 # here files are read from the disk using filenames
                 self._switch_protocol(key, self.files, **kwargs)
 
+
+
+
         if len(self.datasets) == 1:
-            return self.datasets[0]  # a single dataset is returned
+            nd = self.datasets[0]  # a single dataset is returned
+            name = kwargs.pop('name', None)
+            if name:
+                nd.name = name
+            return nd
 
         else:
-            return self.datasets
+            nds = self.datasets
+            names = kwargs.pop('names', None)
+            if names and len(names)==len(nds):
+                for nd, name in zip(nds, names):
+                    nd.name = name
+            elif names and len(names)!=len(nds):
+                warn('length of the `names` list and of the list of datsets mismatch - names not applied')
+            return nds
 
     # ..................................................................................................................
     def _setup_objtype(self, *args, **kwargs):
@@ -117,7 +131,9 @@ class Importer(HasTraits):
         args = list(args)
         if args and hasattr(args[0], 'implements') and args[0].implements() in ['NDDataset', 'NDPanel']:
             # the first arg is an instance of NDDataset or NDPanel
-            self.objtype = type(args.pop(0))
+            object = args.pop(0)
+            self.objtype = type(object)
+
         else:
             # by default returned objtype is NDDataset (import here to avoid circular import)
             from spectrochempy import NDDataset
@@ -129,7 +145,7 @@ class Importer(HasTraits):
     def _switch_protocol(self, key, files, **kwargs):
 
         protocol = kwargs.get('protocol', None)
-        if protocol:
+        if protocol is not None and protocol != 'ALL':
             if not isinstance(protocol, list):
                 protocol = [protocol]
             if key and key[1:] not in protocol and self.alias[key[1:]] not in protocol:
@@ -340,7 +356,7 @@ def read(*args, **kwargs):
     available_protocols.extend(list(importer.alias.keys()))  # to handle variants of protocols
     if protocol is None:
         kwargs['filetypes'] = list(importer.filetypes.values())
-        kwargs['protocol'] = None
+        kwargs['protocol'] = 'ALL'
     else:
         try:
             kwargs['filetypes'] = [importer.filetypes[protocol]]

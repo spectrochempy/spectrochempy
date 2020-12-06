@@ -21,7 +21,7 @@ import os
 
 datadir = scp.general_preferences.datadir
 
-path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 
 ##########################################################
 # load the data in a new dataset

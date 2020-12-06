@@ -8,7 +8,6 @@
 import warnings
 
 __all__ = ['SpectroChemPyWarning',
-           'SpectroChemPyDeprecationWarning',
            'SpectroChemPyException',
            'UnitsCompatibilityError',
            'DimensionsCompatibilityError',
@@ -27,15 +26,6 @@ class SpectroChemPyWarning(Warning):
     The base warning class for SpectroChemPy warnings.
 
     """
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-class SpectroChemPyDeprecationWarning(SpectroChemPyWarning):
-    """
-    A warning class to indicate that something is deprecated.
-
-    """
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 class SpectroChemPyException(Exception):
@@ -84,7 +74,7 @@ def deprecated(message):
         def wrapper(*args, **kwargs):
             warnings.warn("The function `{} is deprecated : {}".format(
                     func.__name__, message),
-                    SpectroChemPyDeprecationWarning)
+                    DeprecationWarning)
             return func(*args, **kwargs)
 
         return wrapper

@@ -14,10 +14,9 @@ __dataset_methods__ = __all__
 import io
 import numpy as np
 from datetime import datetime, timezone, timedelta
-
 from numpy import linspace
-from brukeropusreader.opus_parser import parse_data, parse_meta
 
+from brukeropusreader.opus_parser import parse_data, parse_meta
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod

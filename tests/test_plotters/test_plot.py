@@ -169,14 +169,4 @@ def tests_multipleplots_and_styles(IR_dataset_1D, IR_dataset_2D):
 
 
 # #### debugging ####
-
-# ### deprecation #
-
-def test_kind_deprecated(IR_dataset_2D):
-    dataset = IR_dataset_2D.copy()
-
-    # should raise a deprecation warning
-    dataset.plot(kind='stack', style='sans', colorbar=False)
-
-
 set_loglevel(WARNING)

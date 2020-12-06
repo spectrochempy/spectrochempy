@@ -31,5 +31,18 @@ def test_read_dir():
     assert isinstance(B, list)
 
     C = scp.read_dir()
+    assert C == A
 
-    return
+
+def test_read_dir_nmr():
+    D = scp.read_dir('nmrdata/bruker/tests/nmr', protocol='topspin')
+    assert isinstance(D, list)
+    Dl = [item.name for item in D]
+    assert 'topspin_2d expno:1 procno:1 (SER)' in Dl
+    assert 'topspin_1d expno:1 procno:1 (FID)' in Dl
+
+
+def test_read_dir_glob():
+    pass
+
+# EOF

@@ -14,7 +14,6 @@ __all__ = []
 
 import base64
 import json
-
 from dash import no_update, callback_context
 from dash.dependencies import Input, Output, State
 import dash_html_components as html

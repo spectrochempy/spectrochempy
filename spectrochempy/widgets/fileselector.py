@@ -171,12 +171,11 @@ class FileSelector(Base):
         self.label.value = self.path
         out = []
         for f in sorted(os.listdir(self.path)):
-            if (os.path.isdir(self.path + f) and
-                    not any(f.startswith(prefix) for prefix in "._~")):
+            if (os.path.isdir(self.path + f) and not any(
+                    f.startswith(prefix) for prefix in "._~")):
                 out.append(f + '/')
-            elif (not any(f.startswith(prefix) for prefix in "._~") and
-                  any(f.endswith(ext) for ext in self.filters +
-                                                 list(map(str.upper, self.filters)))):
+            elif (not any(f.startswith(prefix) for prefix in "._~") and any(
+                    f.endswith(ext) for ext in self.filters + list(map(str.upper, self.filters)))):
                 out.append(f)
         self.main.value = self.value = None
         self.fullpath = self.path

@@ -8,7 +8,7 @@
 """This module extend NDDataset with the import methods.
 
 """
-__all__ = ['read_json', 'from_json']
+__all__ = ['read_json']
 __dataset_methods__ = __all__
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ import pickle
 import numpy as np
 
 from spectrochempy.core import debug_
-from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.nddataset import NDIO
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
 from spectrochempy.utils.meta import Meta
@@ -61,7 +61,27 @@ def read_json(*args, **kwargs):
 
     Examples
     --------
-    >>> A = NDDataset.read_json('nh4.json')
+    >>> import spectrochempy as scp
+
+    Read some data
+    >>> nd = scp.read_omnic('wodger.spg')
+
+    Now write it in JSON format
+    >>> filename = nd.write_json()
+
+    Check the existence of this file
+
+    >>> assert filename.is_file()
+    >>> assert filename.name == 'wodger.json'
+
+    Read the JSON file
+
+    >>> new_nd = scp.read_json('wodger.json')
+    >>> assert new_nd == nd
+
+
+    Remove this file
+    >>> filename.unlink()
 
     """
     kwargs['filetypes'] = ['JSON files (*.json)']
@@ -70,34 +90,16 @@ def read_json(*args, **kwargs):
     return importer(*args, **kwargs)
 
 
-@docstrings.dedent
-def from_json(dic):
-    """
-    Transform a JSON object into a NDDataset
-
-    Parameters
-    ----------
-    args
-    kwargs
-
-    Returns
-    -------
-
-    """
-
-    dataset = NDDataset()
-    return _from_json(dataset, dic)
-
-
 # ======================================================================================================================
 # private functions
 # ======================================================================================================================
 
 @importermethod
 def _read_json(*args, **kwargs):
+
     debug_("reading a json file")
 
-    # read jdx file
+    # read json file
     dataset, filename = args
     content = kwargs.get('content', None)
 
@@ -115,7 +117,8 @@ def _read_json(*args, **kwargs):
     return dataset
 
 
-def _from_json(dataset, obj):
+def _from_json(new, obj, from_string=False):
+
     # interpret
     coords = None
 
@@ -183,9 +186,10 @@ def _from_json(dataset, obj):
                 idx = "_" + els[3]
                 setattributes(coords[dim][idx], els[4], val)
         else:
-            setattributes(dataset, key, val)
+            setattributes(new, key, val)
 
     if coords:
-        dataset.set_coords(coords)
+        new.set_coords(coords)
 
-    return dataset
+    return new
+

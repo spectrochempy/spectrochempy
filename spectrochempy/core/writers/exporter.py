@@ -16,7 +16,7 @@ from warnings import warn
 from traitlets import HasTraits, Any, List
 
 from spectrochempy.utils import pathclean, check_filename_to_save, docstrings, patterns
-from spectrochempy.utils.qtfiledialogs import save_dialog
+from spectrochempy.utils.filedialogs import save_dialog
 
 
 # ----------------------------------------------------------------------------------------------------------------------

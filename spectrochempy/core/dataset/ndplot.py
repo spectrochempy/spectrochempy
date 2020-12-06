@@ -35,7 +35,7 @@ from traitlets import Dict, HasTraits, Instance, Union, default
 # local import
 # ----------------------------------------------------------------------------------------------------------------------
 from spectrochempy.utils import (
-    is_sequence, SpectroChemPyDeprecationWarning,
+    is_sequence,
     docstrings, NBlack, NBlue, NGreen, NRed,
     get_figure, get_plotly_figure,
     )
@@ -180,7 +180,7 @@ class NDPlot(HasTraits):
 
             ax = plot_2D(self, **kwargs)
 
-        elif self.squeze_ndim == 3:
+        elif self._squeze_ndim == 3:
 
             ax = plot_3D(self, **kwargs)
 

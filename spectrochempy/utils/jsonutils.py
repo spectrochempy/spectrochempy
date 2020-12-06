@@ -12,6 +12,7 @@ import base64
 import pathlib
 
 import numpy as np
+from spectrochempy.units import Quantity
 
 __all__ = ['json_serialiser', 'json_decoder']
 
@@ -37,6 +38,11 @@ def json_serialiser(byte_obj):
                 "str": str(byte_obj),
                 "__class__": str(byte_obj.__class__)
                 }
+    elif isinstance(byte_obj, Quantity):
+        return {
+                "tuple": byte_obj.to_tuple(),
+                "__class__": str(byte_obj.__class__)
+                }
     raise ValueError(f'No encoding handler for data type {type(byte_obj)}')
 
 
@@ -48,5 +54,8 @@ def json_decoder(dic):
             return pickle.loads(base64.b64decode(dic['serialized']))
         elif dic["__class__"] == str(pathlib.PosixPath):
             return pathlib.Path(dic["str"])
-        raise TypeError("numpy array, datetime or pathlib.PosixPath expected.")
+        elif dic["__class__"] == str(Quantity):
+            return  Quantity.from_tuple(dic["tuple"])
+        raise TypeError("numpy array, quantity, datetime or pathlib.PosixPath "
+                        "expected but a class instance of {} was found")
     return dic

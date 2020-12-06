@@ -9,7 +9,7 @@
 """ Bruker file (single dimension FID or multidimensional SER) importers
 """
 
-__all__ = ['read_topspin']
+__all__ = ['read_topspin', 'read_bruker_nmr']
 __dataset_methods__ = __all__
 
 # ======================================================================================================================
@@ -33,6 +33,7 @@ from spectrochempy.core import general_preferences as prefs, debug_, info_, warn
 from spectrochempy.utils.meta import Meta
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.units import ur, Quantity
+from spectrochempy.utils.exceptions import deprecated
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
 
 # ======================================================================================================================
@@ -778,8 +779,15 @@ def read_topspin(*args, **kwargs):
     kwargs['filetypes'] = ['Bruker TOPSPIN fid\'s or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)',
                            'Compressed TOPSPIN data directories (*.zip)']
     kwargs['protocol'] = ['topspin']
+
     importer = Importer()
     return importer(*args, **kwargs)
+
+
+@deprecated("read_bruker_nmr reading method is deprecated and may be removed in next versions "
+            "- use read_topspin instead")
+def read_bruker_nmr(*args, **kwargs):
+    return read_topspin(*args, **kwargs)
 
 
 # ......................................................................................................................
@@ -1013,7 +1021,7 @@ def _read_topspin(*args, **kwargs):
 
     # and the metadata (and make them readonly)
     meta.datatype = datatype
-    meta.pathname = path
+    meta.pathname = str(path)
 
     # make the corresponding axis
     # debug_('Create coords...')
@@ -1063,7 +1071,7 @@ def _read_topspin(*args, **kwargs):
 
     dataset.title = 'intensity'
     dataset.origin = 'topspin'
-    dataset.name = f'{f_name.name}_{expno}_{procno}_{datatype}'
+    dataset.name = f'{f_name.name} expno:{expno} procno:{procno} ({datatype})'
     dataset.filename = f_name
 
     return dataset

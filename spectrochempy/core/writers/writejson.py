@@ -36,11 +36,24 @@ def write_json(*args, **kwargs):
 
     Examples
     --------
-    >>> X.write_json('myfile.json')
+
+    Read some data from a TOPSPIN nmr file
+    >>> import spectrochempy as scp
+    >>> nd = scp.read_topspin( 'nmrdata/bruker/tests/nmr/topspin_1d', name = "NMR_1D")
+    >>> filename1 = nd.write_json()
+    >>> assert filename1.is_file()
 
     The format is also infered from the filename extension
+    >>> filename2 = nd.write('myfile.json')
+    >>> assert filename2.name == 'myfile.json'
 
-    >>> X.write('myfile.json')
+    Check that we can read back a JSON file
+    >>> new_nd = scp.read_json('myfile.json')
+    >>> assert new_nd = nd
+
+    Remove these files
+    >>> filename1.unlink()
+    >>> filename2.unlink()
 
     """
     exporter = Exporter()
@@ -58,7 +71,9 @@ def _write_json(*args, **kwargs):
     dataset, filename = args
     dataset.filename = filename
 
-    js = dataset.to_json(to_string=True)
+    # make the json string
+    dic = dataset.to_json()
+    js = json.dumps(dic, default=json_serialiser, indent=2)
 
     with open(filename, 'wb') as f:
         f.write(js.encode('utf-8'))

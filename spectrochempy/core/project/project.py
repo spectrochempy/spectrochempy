@@ -28,7 +28,7 @@ from spectrochempy.core.scripts.script import Script
 from spectrochempy.utils import Meta, SpectroChemPyWarning, make_zipfile, ScpFile
 from spectrochempy.core.project.baseproject import AbstractProject
 from spectrochempy.utils import get_filename, pathclean, json_serialiser
-from spectrochempy.utils.qtfiledialogs import save_dialog
+from spectrochempy.utils.filedialogs import save_dialog
 
 cfg = config_manager
 preferences = general_preferences
@@ -659,7 +659,7 @@ class Project(AbstractProject):
 
         if not filename:
             filename = save_dialog(filename=default_directory,
-                                   filters="PROJECT files (*.pscp)")
+                                   filters= [f"{os.environ.get('PYTEST','-')}PROJECT files (*.pscp)"])
 
         if filename:
             filename = pathclean(filename)

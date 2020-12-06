@@ -98,7 +98,21 @@ class NDIO(HasTraits):
         Examples
         ---------
 
-        >>> mydataset.save()
+        read some data from an OMNIC file
+        >>> import spectrochempy as scp
+        >>> nd = scp.read_omnic('wodger.spg')
+        >>> assert nd.name == 'wodger'
+
+        write it in SpectroChemPy format (.scp)
+        (return a `pathlib` object)
+        >>> filename = nd.save()
+
+        check the existence of the scp fie
+        >>> assert filename.is_file()
+        >>> assert filename.name == 'wodger.scp'
+
+        Remove this file
+        >>> filename.unlink()
 
         """
 
@@ -133,14 +147,22 @@ class NDIO(HasTraits):
 
         Examples
         ---------
-        Read some experimental data and then save in our proprietary format
-        **scp**
 
-        >>> from spectrochempy import NDDataset #doctest: +ELLIPSIS
+        read some data from an OMNIC file
+        >>> import spectrochempy as scp
+        >>> nd = scp.read_omnic('wodger.spg')
+        >>> assert nd.name == 'wodger'
 
-        >>> mydataset = NDDataset.read_omnic('irdata/nh4y-activation.spg')
-        >>> mydataset.save('mydataset.scp')
-        The dataset has been saved as 'mydataset.scp'
+        write it in SpectroChemPy format (.scp)
+        (return a `pathlib` object)
+        >>> filename = nd.save_as('new_wodger')
+
+        check the existence of the scp fie
+        >>> assert filename.is_file()
+        >>> assert filename.name == 'new_wodger.scp'
+
+        Remove this file
+        >>> filename.unlink()
 
         Notes
         -----
@@ -227,14 +249,14 @@ class NDIO(HasTraits):
                 elif isinstance(val, Meta):
                     d = val.to_dict()
                     # we must handle Quantities
-                    for k, v in d.items():
-                        if isinstance(v, list):
-                            for i, item in enumerate(v):
-                                if isinstance(item, Quantity):
-                                    item = list(item.to_tuple())
-                                    if isinstance(item[0], np.ndarray):
-                                        item[0] = item[0].tolist()
-                                    d[k][i] = tuple(item)
+                    # for k, v in d.items():
+                    #     if isinstance(v, list):
+                    #         for i, item in enumerate(v):
+                    #             if isinstance(item, Quantity):
+                    #                 item = list(item.to_tuple())
+                    #                 if isinstance(item[0], np.ndarray):
+                    #                     item[0] = item[0].tolist()
+                    #                 d[k][i] = tuple(item)
                     pars[level + key] = d
 
                 elif val is None:
@@ -283,11 +305,11 @@ class NDIO(HasTraits):
 
         Examples
         --------
-        >>> from spectrochempy import *
-        >>> mydataset = NDDataset.load('mydataset.scp')
-        >>> print(mydataset)
-        <BLANKLINE>
-        ...
+        >>> from spectrochempy import NDDataset
+        >>> nd = NDDataset.load('irdata/nh4y.scp')
+        >>> print(nd)
+        NDDataset: [float32] a.u. (shape: (y:55, x:5549))
+
 
         Notes
         -----
@@ -295,7 +317,8 @@ class NDIO(HasTraits):
 
         See Also
         --------
-        read, save
+        read : import dataset from various orgines
+        save : save the current dataset
 
 
         """
@@ -367,16 +390,16 @@ class NDIO(HasTraits):
                 setattr(clss, "_%s" % key, val)
             elif key == 'meta':
                 # handle the case were quantity were saved
-                for k, v in val.items():
-                    if isinstance(v, list):
-                        for i, item in enumerate(v):
-                            if isinstance(item, (list, tuple)):
-                                try:
-                                    v[i] = Quantity.from_tuple(item)
-                                except TypeError:
-                                    # not a quantity
-                                    pass
-                        val[k] = v
+                # for k, v in val.items():
+                #     if isinstance(v, list):
+                #         for i, item in enumerate(v):
+                #             if isinstance(item, (list, tuple)):
+                #                 try:
+                #                     v[i] = Quantity.from_tuple(item)
+                #                 except TypeError:
+                #                     # not a quantity
+                #                     pass
+                #         val[k] = v
                 clss.meta.update(val)
             elif key == 'plotmeta':
                 # handle the case were quantity were saved

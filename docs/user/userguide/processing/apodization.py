@@ -21,13 +21,13 @@
 from spectrochempy import *
 
 # %% [markdown]
-# ## Introduction 
+# ## Introduction
 #
 # As an example, apodization is a transformation particularly useful for preprocessing NMR time domain data before Fourier transformation. It generally help for signal to noise improvement.
 
 # %%
 # reead an experimental spectra
-path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+path = os.path.join('nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
 dataset = dataset / dataset.max()  # normalization
 # store original data
@@ -58,7 +58,7 @@ _ = nd.plot(data_only=True, clear=False, color='g')
 nd = dataset.copy()  # to go back to the original data
 _ = nd.plot(xlim=(0., 5000.))
 ndlb = nd.em(lb=300. * ur.Hz, inplace=False)  # ndlb contain the processed data
-_ = nd.plot(data_only=True, clear=False, color='g')  # nd dataset remain unchanged 
+_ = nd.plot(data_only=True, clear=False, color='g')  # nd dataset remain unchanged
 _ = ndlb.plot(data_only=True, clear=False, color='b')
 
 # %% [markdown]
@@ -124,18 +124,18 @@ _ = apod.plot(data_only=True, clear=False, color='m', linestyle='--')
 #
 # Functional form of apodization window (cfBruker TOPSPIN manual): $sp(t) = \sin(\frac{(\pi - \phi) t }{\text{aq}} + \phi)^{pow}$
 #
-# where 
-# * $0 < t < \text{aq}$ and  $\phi = \pi ⁄ \text{sbb}$ when $\text{ssb} \ge 2$ 
+# where
+# * $0 < t < \text{aq}$ and  $\phi = \pi ⁄ \text{sbb}$ when $\text{ssb} \ge 2$
 #
 # or
 # *    $\phi = 0$ when $\text{ssb} < 2$
-#         
+#
 # $\text{aq}$ is an acquisition status parameter and $\text{ssb}$ is a processing parameter (see below) and $\text{pow}$ is an exponent equal to 1 for a sine bell window or 2 for a squared sine bell window.
 #
 # The $\text{ssb}$ parameter mimics the behaviour of the `SSB` parameter on bruker TOPSPIN software:
 # * Typical values are 1 for a pure sine function and 2 for a pure cosine function.
 # * Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0, have the same effect as $\text{ssb}=1$, namely a pure sine function.
-#     
+#
 # **Shortcuts**:
 # * `sine` is strictly a alias of `sp`
 # * `sinm` is equivalent to `sp` with $\text{pow}=1$

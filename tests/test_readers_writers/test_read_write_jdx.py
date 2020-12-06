@@ -25,3 +25,7 @@ def test_read_write_jdx(IR_dataset_2D):
     # write
     f = X.write_jdx()
     assert f.stem == X.name
+
+    Y = NDDataset(name='xxx').read()
+    assert Y.name == 'xxx'
+

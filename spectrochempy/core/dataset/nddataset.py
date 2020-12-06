@@ -17,13 +17,9 @@ __all__ = ['NDDataset']
 
 import textwrap
 import warnings
-from collections import OrderedDict
 from datetime import datetime
-import json
-
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from pandas.core.generic import NDFrame
 from traitlets import HasTraits, List, Unicode, Instance, Bool, All, Float, validate, observe, default
 from traittypes import Array
@@ -43,7 +39,6 @@ from spectrochempy.utils import (
     colored_output, SpectroChemPyException, get_user_and_node, docstrings,
     SpectroChemPyWarning,
     )
-from spectrochempy.utils import json_serialiser
 
 HAS_XARRAY = False
 try:
@@ -927,7 +922,24 @@ class NDDataset(
         new = self[index]
         return new
 
-    def to_json(self, to_string=False):
+    # ..................................................................................................................
+    def to_panel(self, **kwargs):
+        """
+        Transform the current |NDDataset| to a new |NDPanel| object
+
+        Parameters
+        ----------
+        **kwargs : additional keyword arguments
+
+        Returns
+        -------
+        object : A |NDPanel| object
+
+        """
+        import spectrochempy as scp
+        return scp.NDPanel(self, **kwargs)
+
+    def to_json(self):
         """
         Convert to JSON format
 
@@ -938,10 +950,21 @@ class NDDataset(
 
         Examples
         --------
-        >>> X = NDDataset.read('wodger.spg')
-        >>> js = X.to_json()
+
+        Create some dataset
+        >>> from spectrochempy import NDDataset
+        >>> nd = NDDataset([1,2,3], units='cm', name='MYDATA')
+        >>> nd
+        NDDataset: [int64] cm (size: 3)
+
+        make a JSON dict
+        >>> js = nd.to_json()
         >>> js['name']
-        'wodger.spg'
+        'MYDATA'
+
+        >>> js['data']
+        array([       1,        2,        3])
+
 
         """
 
@@ -1002,11 +1025,7 @@ class NDDataset(
 
         _loop_on_obj(objnames)
 
-        if not to_string:
-            return dic
-
-        # make the json string
-        return json.dumps(dic, default=json_serialiser, indent=2)
+        return dic
 
     # ..................................................................................................................
     def to_xarray(self, **kwargs):
@@ -1092,23 +1111,6 @@ class NDDataset(
         da.attrs['title'] = self.title
 
         return da
-
-    # ..................................................................................................................
-    def to_panel(self, **kwargs):
-        """
-        Transform the current |NDDataset| to a new |NDPanel| object
-
-        Parameters
-        ----------
-        **kwargs : additional keyword arguments
-
-        Returns
-        -------
-        object : A |NDPanel| object
-
-        """
-        import spectrochempy as scp
-        return scp.NDPanel(self, **kwargs)
 
     # ..................................................................................................................
     @docstrings.dedent

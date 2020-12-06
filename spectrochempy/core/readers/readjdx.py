@@ -10,7 +10,7 @@ This module to extend NDDataset with the import methods.
 
 """
 
-__all__ = ['read_jcamp', 'read_jdx']
+__all__ = ['read_jcamp', 'read_jdx', 'read_dx']
 __dataset_methods__ = __all__
 
 import io
@@ -21,7 +21,7 @@ import numpy as np
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.readers.importer import docstrings, Importer, importermethod
-
+from spectrochempy.utils.exceptions import deprecated
 
 # ======================================================================================================================
 # Public functions
@@ -61,10 +61,16 @@ def read_jcamp(*args, **kwargs):
     return importer(*args, **kwargs)
 
 
-read_jdx = read_jcamp
-read_jdx.__doc__ = 'This method is an alias of `read_jcamp` '
-read_dx = read_jcamp
-read_dx.__doc__ = 'This method is an alias of `read_jcamp` '
+@deprecated("read_jdx reading method is deprecated and may be removed in next versions "
+            "- use read_jcamp instead")
+def read_jdx(*args, **kwargs):
+    return read_jcamp(*args, **kwargs)
+
+
+@deprecated("read_dx reading method is deprecated and may be removed in next versions "
+            "- use read_jcamp instead")
+def read_dx(*args, **kwargs):
+    return read_jcamp(*args, **kwargs)
 
 
 # ======================================================================================================================

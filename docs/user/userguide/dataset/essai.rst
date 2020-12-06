@@ -84,7 +84,7 @@
 
       <div class='alert-info'>
 
-      **Note**: In the above code, we use of `print_` (with an underscore) not the usual `print` function. 
+      **Note**: In the above code, we use of `print_` (with an underscore) not the usual `print` function.
       The `print` output only a short line of information
 
       </div>
@@ -226,7 +226,7 @@
    .. code:: python
 
       a = np.random.rand(2,4,6)   # note here that np (for numpy space has been automatically
-                                  # imported with spectrochempy, thus no need to use the 
+                                  # imported with spectrochempy, thus no need to use the
                                   # classical `import numpy as np`)
       a
 
@@ -250,7 +250,7 @@
 
    .. code:: python
 
-      d2D = NDDataset(a, dims = ['v','u','t'], title = 'Energy', name = '3D_dataset', 
+      d2D = NDDataset(a, dims = ['v','u','t'], title = 'Energy', name = '3D_dataset',
                       history = 'created from scratch', description = 'a single line creation example')
       d2D
 
@@ -264,7 +264,7 @@
 
    .. code:: python
 
-      d2D.dims 
+      d2D.dims
 
 .. container:: cell code
 
@@ -371,7 +371,7 @@
 
    .. code:: python
 
-      d2D.t = np.arange(6)*.1 # we need a sequence of 6 values for `t` dimension (see shape above) 
+      d2D.t = np.arange(6)*.1 # we need a sequence of 6 values for `t` dimension (see shape above)
       d2D.t.title = 'time'
       d2D.t.units = 'seconds'
       d2D.coords # now return a list of coordinates
@@ -380,7 +380,7 @@
 
    .. code:: python
 
-      d2D.t   
+      d2D.t
 
 .. container:: cell code
 
@@ -601,7 +601,7 @@
                             units='absorbance'
                             )
 
-      d3D.description = """Dataset example created for this tutorial. 
+      d3D.description = """Dataset example created for this tutorial.
       It's a 3-D dataset (with dimensionless intensity)"""
 
       d3D.author = 'Blake & Mortimer'
@@ -629,7 +629,7 @@
                             title='Absorbance',
                             units='absorbance'
                             )
-      d3D.description = """Dataset example created for this tutorial. 
+      d3D.description = """Dataset example created for this tutorial.
       It's a 3-D dataset (with dimensionless intensity)"""
 
       d3D.author = 'Blake & Mortimer'
@@ -675,7 +675,7 @@
       # B. second syntax in the order of the dimensions: z,y,x (if no swap or transpopse has been performed)
       d3D.set_coords(coord0, coord1, [coord2,coord2b])
       d3D.set_coords((coord0, coord1, [coord2,coord2b]))  # equivalent
-         
+
       # C. third syntax (from a dictionary)
       d3D.set_coords({'z':coord0, 'y':coord1, 'x':[coord2,coord2b]})
 
@@ -701,9 +701,9 @@
           d3D.coords = [coord0, coord1, coord2]
       except ValueError:
           error_('Coordinates must be of the same size for a dimension with multiple coordinates')
-          
+
       # This works (not a tuple `()`, not a list `[]`)
-      d3D.coords = (coord0, coord1, coord2) 
+      d3D.coords = (coord0, coord1, coord2)
 
 .. container:: cell markdown
 
@@ -768,7 +768,7 @@
    .. code:: python
 
       df = full((2, 2), fill_value=1.25, units='radians',
-           title='with only float=1.25')  
+           title='with only float=1.25')
       df
 
 .. container:: cell markdown
@@ -894,7 +894,7 @@
    .. raw:: html
 
       <div class='alert alert-info'>
-          
+
       **NOTE:**
       If one use an integer value (2000), then the slicing is made **by index not by value**, and in the following
       particular case, an `Error` is issued as index 2000 does not exists (size along axis `x` (axis:0) is only 100, so
@@ -931,7 +931,7 @@
 
    .. code:: python
 
-      path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+      path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 
       # load the data in a new dataset
       ndd = NDDataset()
@@ -949,7 +949,7 @@
 
    .. code:: python
 
-      path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
+      path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_2d')
 
       # load the data directly (no need to create the dataset first)
       ndd2 = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)

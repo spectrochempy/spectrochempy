@@ -25,7 +25,7 @@ pytestmark = pytest.mark.skip("all tests still WIP")
 # Reader
 
 def test_nmr_reader_1D():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
 
     # load the data in a new dataset
     ndd = NDDataset()
@@ -163,7 +163,7 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
 
 
 def test_nmr_auto_1D_phasing():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
     ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz, inplace=True)
@@ -193,7 +193,7 @@ def test_nmr_auto_1D_phasing():
 
 
 def test_nmr_multiple_manual_1D_phasing():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
     ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz)  # inplace broadening
@@ -213,7 +213,7 @@ def test_nmr_multiple_manual_1D_phasing():
 
 
 def test_nmr_multiple_auto_1D_phasing():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d')
     ndd = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10. * ur.Hz)  # inplace broadening
@@ -236,7 +236,7 @@ def test_nmr_multiple_auto_1D_phasing():
 # #### 2D NMR ########
 
 def test_nmr_reader_2D():
-    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
+    path = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_2d')
 
     # load the data in a new dataset
     ndd = NDDataset()

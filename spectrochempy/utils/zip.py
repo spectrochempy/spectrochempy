@@ -8,7 +8,6 @@
 
 import os
 import json
-from os import curdir, pardir
 from collections.abc import Mapping
 
 from numpy.lib.format import read_array

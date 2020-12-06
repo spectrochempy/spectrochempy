@@ -18,8 +18,10 @@
 # # Project management
 
 # %%
-from spectrochempy import *
-import os
+from spectrochempy import NDDataset, Project
+from spectrochempy import general_preferences as prefs
+
+from pathlib import Path
 
 # %% [markdown]
 # ## Project creation
@@ -29,7 +31,7 @@ import os
 proj = Project()
 
 # %% [markdown]
-# As we did not specify a name, a name has been attributed automatically: 
+# As we did not specify a name, a name has been attributed automatically:
 
 # %%
 proj.name
@@ -55,11 +57,10 @@ proj
 # First we read the dataset (here some NMR data) and we give it some name (e.g. 'nmr n°1')
 
 # %%
-datadir = general_preferences.datadir
-path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-nd1 = NDDataset(name='NMR_1D').read_bruker_nmr(path, expno=1, remove_digital_filter=True)
-path = os.path.join(datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
-nd2 = NDDataset(name='NMR_2D').read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+datadir = Path(prefs.datadir)
+path = datadir / 'nmrdata' / 'bruker' / 'tests' / 'nmr'
+nd1 = NDDataset.read_topspin(path/'topspin_1d', expno=1, remove_digital_filter=True, name = "NMR_1D")
+nd2 = NDDataset.read_topspin(path/'topspin_2d', expno=1, remove_digital_filter=True, name='NMR_2D')
 
 # %% [markdown]
 # To add it to the project, we use the `add_dataset` function for a single dataset:
@@ -68,7 +69,7 @@ nd2 = NDDataset(name='NMR_2D').read_bruker_nmr(path, expno=1, remove_digital_fil
 proj.add_datasets(nd1)
 
 # %% [markdown]
-# or `add_datasets` for several datasets. 
+# or `add_datasets` for several datasets.
 
 # %%
 proj.add_datasets(nd1, nd2)

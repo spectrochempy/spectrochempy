@@ -13,23 +13,8 @@ import numpy as np
 import pytest
 
 
-# Handle command line argument for spectrochempy
-# ----------------------------------------------------------------------------------------------------------------------
-
-# def pytest_cmdline_preparse(config, args):
-#     print(args)
-#     for item in args[:]:
-#         for k in list(app.flags.keys()):
-#             if item.startswith("--" + k) or k in ['--help', '--help-all']:
-#                 args.remove(item)
-#             continue
-#         for k in list(app.aliases.keys()):
-#             if item.startswith("-" + k) or k in ['h', ]:
-#                 args.remove.append(item)
-
 # initialize a ipython session before calling spectrochempy
 # ----------------------------------------------------------------------------------------------------------------------
-
 @pytest.fixture(scope='session')
 def session_ip():
     try:
@@ -62,10 +47,12 @@ from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.utils.testing import RandomSeedContext
 from spectrochempy.core import general_preferences as prefs
 
+
 # set test file and folder in environment
 # set a test file in environment
 os.environ['TEST_FILE'] = os.path.join(prefs.datadir, 'irdata/nh4y-activation.spg')
 os.environ['TEST_FOLDER'] = os.path.join(prefs.datadir, 'irdata', 'subdir')
+os.environ['TEST_NMR_FOLDER'] = os.path.join(prefs.datadir, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_2d')
 
 # create reference arrays
 # ----------------------------------------------------------------------------------------------------------------------
@@ -272,15 +259,15 @@ def IR_scp_1():
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
     directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_1d')
-    dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
+    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_1d','1', 'fid')
+    dataset = NDDataset.read_bruker_nmr(path, remove_digital_filter=True)
     return dataset.copy()
 
 
 @pytest.fixture(scope="function")
 def NMR_dataset_1D_1H():
     directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'tpa')
+    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'tpa', )
     dataset = NDDataset.read_bruker_nmr(path, expno=10, remove_digital_filter=True)
     return dataset.copy()
 
@@ -288,7 +275,7 @@ def NMR_dataset_1D_1H():
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
     directory = prefs.datadir
-    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'bruker_2d')
+    path = os.path.join(directory, 'nmrdata', 'bruker', 'tests', 'nmr', 'topspin_2d')
     dataset = NDDataset.read_bruker_nmr(path, expno=1, remove_digital_filter=True)
     return dataset.copy()
 
