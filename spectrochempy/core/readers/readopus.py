@@ -169,7 +169,7 @@ def _read_opus(*args, **kwargs):
                   labels=([utc_dt], [name]))
 
     # set dataset's Coordset
-    dataset.set_coords(y=yaxis, x=xaxis)
+    dataset.set_coordset(y=yaxis, x=xaxis)
     dataset.units = 'absorbance'
     dataset.title = 'Absorbance'
 

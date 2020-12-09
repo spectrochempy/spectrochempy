@@ -135,7 +135,7 @@ def write(*args, **kwargs):
 def _write_scp(*args, **kwargs):
     dataset, filename = args
     dataset.filename = filename
-    return dataset._save(filename, **kwargs)
+    return dataset.dump(filename, **kwargs)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

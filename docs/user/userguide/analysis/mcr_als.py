@@ -76,7 +76,7 @@ _ = X.plot()
 
 # %%
 X.title = 'absorbance'
-X.set_coords(None, None)
+X.set_coordset(None, None)
 X.set_coordtitles(y='elution time', x='wavelength')
 X
 
@@ -287,7 +287,7 @@ A[3]
 # %%
 X2 = A[3]
 X2.title = 'absorbance'
-X2.set_coords(None, None)
+X2.set_coordset(None, None)
 X2.set_coordtitles(y='elution time', x='wavelength')
 
 surf = X2.plot_surface(colorbar=True, linewidth=.2, ccount=100, figsize=(10, 5))

@@ -476,7 +476,7 @@ def _read_spg(*args, **kwargs):
 
     _y = Coord(timestamps, title='Acquisition timestamp (GMT)', units='s', labels=(acquisitiondates, spectitles))
 
-    dataset.set_coords(y=_y, x=_x)
+    dataset.set_coordset(y=_y, x=_x)
 
     # Set origin and description
     dataset.origin = "omnic"
@@ -596,7 +596,7 @@ def _read_spa(*args, **kwargs):
     # now add coordinates
     _x = Coord(np.around(np.linspace(firstx, lastx, nx), 3), title=xtitle, units=xunit)
     _y = Coord([timestamp], title='Acquisition timestamp (GMT)', units='s', labels=([acquisitiondate], [filename]))
-    dataset.set_coords(y=_y, x=_x)
+    dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description, history, date
     dataset.origin = "omnic"
@@ -684,7 +684,7 @@ def _read_srs(*args, **kwargs):
                 background = NDDataset(background)
                 _x = Coord(np.around(np.linspace(0, background_size - 1, background_size), 0), title='Data points',
                            units='dimensionless')
-                background.set_coords(x=_x)
+                background.set_coordset(x=_x)
                 background.name = background_name
                 background.units = 'V'
                 background.title = 'volts'
@@ -736,7 +736,7 @@ def _read_srs(*args, **kwargs):
     _y = Coord(np.around(np.linspace(info['firsty'], info['lasty'], info['ny']), 3), title='Time', units='minute',
                labels=names)
 
-    dataset.set_coords(y=_y, x=_x)
+    dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description and history
     dataset.origin = "omnic"
@@ -764,7 +764,7 @@ def _read_srs(*args, **kwargs):
     # _x = Coord(np.around(np.linspace(0, info['ny']-1, info['ny']), 0),
     #            title='time',
     #            units='minutes')
-    # X.set_coords(x=_x)
+    # X.set_coordset(x=_x)
     # X.name = '?'
     # X.title = '?'
     # X.origin = 'omnic'

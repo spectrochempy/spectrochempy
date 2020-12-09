@@ -18,7 +18,7 @@ def test_plot2D_as_3D():
 
     X.plot_surface()
 
-    X.set_coords(y=Coord(title='elution time'), x=Coord(title='wavenumbers'))
+    X.set_coordset(y=Coord(title='elution time'), x=Coord(title='wavenumbers'))
     X.title = 'intensity'
     X.plot_surface()
 

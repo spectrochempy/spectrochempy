@@ -203,7 +203,7 @@ def _read_dso(dataset, name, data):
             coords.append(coord)
 
         dataset.data = dat
-        dataset.coords = coords
+        dataset.coordset = coords
         dataset.author = author
         dataset.name = name
         dataset.date = date

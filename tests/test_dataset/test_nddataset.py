@@ -58,7 +58,7 @@ def test_nddataset_init_simple_list():
     assert nd1.size == 3
     assert nd1.dtype in TYPE_INTEGER
     assert not nd1.is_complex
-    assert nd1.coords is None  # no coordinates
+    assert nd1.coordset is None  # no coordinates
     assert nd1.x is None  # no coordinates
     with pytest.raises(AttributeError):
         nd1.y
@@ -133,7 +133,7 @@ def test_nddataset_init_using_dataset(nd1d, nd2d, ds1):
     assert nd3b.data.dtype == np.int64
 
     # check no coordinates
-    assert nd3.coords is None
+    assert nd3.coordset is None
     assert nd3.x is None
     assert nd3.y is None
     with pytest.raises(AttributeError):
@@ -143,7 +143,7 @@ def test_nddataset_init_using_dataset(nd1d, nd2d, ds1):
     nd = NDDataset(ds1)
     assert nd.id != ds1.id
     assert nd.title == ds1.title
-    assert nd.coords == ds1.coords
+    assert nd.coordset == ds1.coordset
     assert nd.mask == ds1.mask
     assert nd.units == ds1.units
     assert nd.meta == ds1.meta
@@ -157,12 +157,12 @@ def test_nddataset_init_using_dataset(nd1d, nd2d, ds1):
 
 def test_nddataset_init_with_coordinates():
     # intializing with coordinates
-    ndd3 = NDDataset(np.array([1, 2, 3]), coords=([0, 1, 2],))
+    ndd3 = NDDataset(np.array([1, 2, 3]), coordset=([0, 1, 2],))
     info_(ndd3)
 
 
-def test_nddataset_coords():
-    # init coordinates at NDDataset initialization
+def test_nddataset_coordset():
+    # init coordinates set at NDDataset initialization
 
     dx = np.random.random((10, 7, 3))
     coord0 = np.arange(10)
@@ -170,20 +170,20 @@ def test_nddataset_coords():
     coord2 = np.arange(3) * 100.
 
     da = NDDataset(dx,
-                   coords=(coord0, coord1, coord2),
+                   coordset=(coord0, coord1, coord2),
                    title='absorbance',
                    coordtitles=['wavelength', 'time-on-stream', 'temperature'],
                    coordunits=['cm^-1', 's', 'K'],
                    )
 
     assert da.shape == (10, 7, 3)
-    assert da.coords.titles == ['temperature', 'time-on-stream', 'wavelength']
-    assert da.coords.names == ['x', 'y', 'z']
-    assert da.coords.units == [ur.Unit('K'), ur.Unit('s'), ur.Unit('cm^-1')]
+    assert da.coordset.titles == ['temperature', 'time-on-stream', 'wavelength']
+    assert da.coordset.names == ['x', 'y', 'z']
+    assert da.coordset.units == [ur.Unit('K'), ur.Unit('s'), ur.Unit('cm^-1')]
 
     # order of dims follow data shape, but not necessarily the coord list (which is ordered by name)
     assert da.dims == ['z', 'y', 'x']
-    assert da.coords.names == sorted(da.dims)
+    assert da.coordset.names == sorted(da.dims)
 
     info_(da)
 
@@ -194,9 +194,9 @@ def test_nddataset_coords():
     info_(dat)
 
     # dims changed but did not change coords order !
-    assert dat.coords.names == sorted(dat.dims)
-    assert dat.coords.titles == da.coords.titles
-    assert dat.coords.units == da.coords.units
+    assert dat.coordset.names == sorted(dat.dims)
+    assert dat.coordset.titles == da.coordset.titles
+    assert dat.coordset.units == da.coordset.units
 
     # too many coordinates
 
@@ -204,12 +204,12 @@ def test_nddataset_coords():
     coordtitles = ['wavelength', 'time-on-stream', 'temperature']
     coordunits = ['cm^-1', 's', None]
     daa = NDDataset(dx,
-                    coords=[coord0, coord1, coord2, cadd, coord2.copy()],
+                    coordset=[coord0, coord1, coord2, cadd, coord2.copy()],
                     title='absorbance',
                     coordtitles=coordtitles,
                     coordunits=coordunits,
                     )
-    assert daa.coords.titles == coordtitles[::-1]
+    assert daa.coordset.titles == coordtitles[::-1]
     assert daa.dims == ['z', 'y', 'x']
     info_(daa)
 
@@ -221,7 +221,7 @@ def test_nddataset_coords():
     print_(cd)
 
     ds = NDDataset([1, 2, 3, 6, 8, 0],
-                   coords=cd,
+                   coordset=cd,
                    units='m')
     assert ds.dims == ['x']
     assert ds.x == cc
@@ -241,7 +241,7 @@ def test_nddataset_coords():
     coord1 = Coord(np.arange(9), title='wavelengths')  # , units='m')
     coord2 = Coord(np.arange(20), title='time')  # , units='s')
     with pytest.raises(ValueError):
-        NDDataset(np.random.random((10, 20)), coords=(coord1, coord2))
+        NDDataset(np.random.random((10, 20)), coordset=(coord1, coord2))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -256,7 +256,7 @@ def test_nddataset_coords_indexer():
 
     with pytest.raises(ValueError):  # wrong lenth
         da = NDDataset(dx,
-                       coords=[coord0, coord1, coord2],
+                       coordset=[coord0, coord1, coord2],
                        title='absorbance',
                        coordtitles=['wavelength', 'time-on-stream', 'temperature'],
                        coordunits=['cm^-1', 's', 'K'],
@@ -264,23 +264,23 @@ def test_nddataset_coords_indexer():
 
     coord1 = np.linspace(0, 60, 100)
     da = NDDataset(dx,
-                   coords=[coord0, coord1, coord2],
+                   coordset=[coord0, coord1, coord2],
                    title='absorbance',
                    coordtitles=['wavelength', 'time-on-stream', 'temperature'],
                    coordunits=['cm^-1', 's', 'K'],
                    )
 
     assert da.shape == (10, 100, 10)
-    coords = da.coords
+    coords = da.coordset
     assert len(coords) == 3
 
-    assert_array_equal(da.coords[2].data, coord0, "get axis by index failed")
-    assert_array_equal(da.coords['wavelength'].data, coord0, "get axis by title failed")
-    assert_array_equal(da.coords['time-on-stream'].data, coord1, "get axis by title failed")
-    assert_array_equal(da.coords['temperature'].data, coord2)
+    assert_array_equal(da.coordset[2].data, coord0, "get axis by index failed")
+    assert_array_equal(da.coordset['wavelength'].data, coord0, "get axis by title failed")
+    assert_array_equal(da.coordset['time-on-stream'].data, coord1, "get axis by title failed")
+    assert_array_equal(da.coordset['temperature'].data, coord2)
 
-    da.coords['temperature'] += 273.15 * ur.K
-    assert_array_equal(da.coords['temperature'].data, coord2 + 273.15)
+    da.coordset['temperature'] += 273.15 * ur.K
+    assert_array_equal(da.coordset['temperature'].data, coord2 + 273.15)
 
 
 # Methods
@@ -419,7 +419,7 @@ def test_nddataset_loc2index(ref_ds, ds1):
 
     info_(da)
     assert da.shape == ref.shape
-    coords = da.coords
+    coords = da.coordset
     assert len(coords) == 3
 
     assert da._loc2index(3990.0, dim=0) == 0
@@ -436,7 +436,7 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     ref = ref_ds
     # case where the index is an integer: the selection is by index starting at zero
     assert da.shape == ref.shape
-    coords = da.coords
+    coords = da.coordset
 
     plane0 = da[0]
     # should return a dataset of with dimension x of size 1
@@ -584,7 +584,7 @@ def test_nddataset_slicing_by_index_nocoords(ds1):
     # case where the index is an integer:
     # the selection is by index starting at zero
 
-    da.delete_coords()  # clear coords
+    da.delete_coordset()  # clear coords
     plane0 = da[1]
     assert type(plane0) == type(da)  # should return a dataset
     assert plane0.ndim == 3
@@ -598,7 +598,7 @@ def test_nddataset_slicing_by_location_but_nocoords(ref_ds, ds1):
     # case where the index is an integer:
     # the selection is by index starting at zero
 
-    da.delete_coords()  # clear coords
+    da.delete_coordset()  # clear coords
 
     # this cannot work (no coords for location)
     with pytest.raises(SpectroChemPyException):
@@ -642,8 +642,8 @@ def test_nddataset_slicing_with_coords(ds1):
 
     da00 = da[0, 0]
     assert da00.shape == (1, 1, 3)
-    assert da00.coords['x'] == da00.coords[0]
-    assert da00.coords['x'] == da.coords[0]
+    assert da00.coordset['x'] == da00.coordset[0]
+    assert da00.coordset['x'] == da.coordset[0]
 
 
 def test_nddataset_mask_array_input():
@@ -783,7 +783,7 @@ def test_nddataset_repr_html():
                    title='temperature')
 
     da = NDDataset(dx,
-                   coords=[coord0, coord1, coord2],
+                   coordset=[coord0, coord1, coord2],
                    title='absorbance',
                    units='absorbance'
                    )
@@ -814,14 +814,14 @@ def test_nddataset_sorting(ds1):  # ds1 is defined in conftest
     info_(dataset)
     dataset.sort(inplace=True, dim='z')
     labels = np.array(list('abc'))
-    assert_array_equal(dataset.coords['z'].labels, labels)
+    assert_array_equal(dataset.coordset['z'].labels, labels)
     # nochange because the  axis is naturally iversed to force it
     # we need to specify descend
 
     dataset.sort(inplace=True, descend=False, dim='z')  # order value in increasing order
     info_(dataset)
     labels = np.array(list('cba'))
-    assert_array_equal(dataset.coords['z'].labels, labels)
+    assert_array_equal(dataset.coordset['z'].labels, labels)
 
     dataset.sort(inplace=True, dim='z')
     info_(dataset)
@@ -830,8 +830,8 @@ def test_nddataset_sorting(ds1):  # ds1 is defined in conftest
     info_(new)
     assert_array_equal(new.data, dataset.data[::-1])
     assert (new[0, 0] == dataset[-1, 0])
-    assert_array_equal(new.coords['z'].labels, labels)
-    assert_array_equal(new.coords["z"].data, dataset.coords['z'].data[::-1])
+    assert_array_equal(new.coordset['z'].labels, labels)
+    assert_array_equal(new.coordset["z"].data, dataset.coordset['z'].data[::-1])
 
     # check for another dimension
 
@@ -859,48 +859,48 @@ def test_nddataset_multiple_axis(ref_ds, coord0, coord1, coord2, coord2b, dsm): 
 
     # check indexing
     assert da.shape == ref.shape
-    coords = da.coords
+    coords = da.coordset
     assert len(coords) == 3
 
     assert coords['z'] == coord0
     assert da.z == coord0
 
-    assert da.coords['wavenumber'] == coord0
+    assert da.coordset['wavenumber'] == coord0
     assert da.wavenumber == coord0
     assert da['wavenumber'] == coord0
 
     # for multiple coordinates
-    assert da.coords['x'] == coordm
+    assert da.coordset['x'] == coordm
     assert da['x'] == coordm
     assert da.x == coordm
 
     # but we can also specify, which axis should be returned explicitely
     # by an index or a label
-    assert da.coords['x_1'] == coord2b
-    assert da.coords['x_2'] == coord2
-    assert da.coords['x'][1] == coord2
-    assert da.coords['x']._1 == coord2b
+    assert da.coordset['x_1'] == coord2b
+    assert da.coordset['x_2'] == coord2
+    assert da.coordset['x'][1] == coord2
+    assert da.coordset['x']._1 == coord2b
     assert da.x['_1'] == coord2b
     assert da['x_1'] == coord2b
     assert da.x_1 == coord2b
 
-    x = da.coords['x']
+    x = da.coordset['x']
     assert x['temperature'] == coord2
-    assert da.coords['x']['temperature'] == coord2
+    assert da.coordset['x']['temperature'] == coord2
 
     # even simpler we can specify any of the axis title and get it ...
-    assert da.coords['time-on-stream'] == coord1
+    assert da.coordset['time-on-stream'] == coord1
 
-    assert da.coords['temperature'] == coord2
+    assert da.coordset['temperature'] == coord2
 
-    da.coords['magnetic field'] += 100 * ur.millitesla
+    da.coordset['magnetic field'] += 100 * ur.millitesla
 
-    assert da.coords['magnetic field'] == coord2b + 100 * ur.millitesla
+    assert da.coordset['magnetic field'] == coord2b + 100 * ur.millitesla
 
 
 def test_nddataset_coords_manipulation(IR_dataset_2D):
     dataset = IR_dataset_2D.copy()
-    coord0 = dataset.coords['y']
+    coord0 = dataset.coordset['y']
     coord0 -= coord0[0]  # remove first element
     info_(coord0)
 
@@ -908,7 +908,7 @@ def test_nddataset_coords_manipulation(IR_dataset_2D):
 def test_nddataset_square_dataset_with_identical_coordinates():
     a = np.random.rand(3, 3)
     c = Coord(np.arange(3) * .25, title='time', units='us')
-    nd = NDDataset(a, coords=CoordSet(x=c, y='x'))
+    nd = NDDataset(a, coordset=CoordSet(x=c, y='x'))
     info_(nd)
     assert nd.x == nd.y
 
@@ -999,7 +999,7 @@ def test_nddataset_fancy_indexing():
     with RandomSeedContext(1234):
         a = np.random.random((3, 5)).round(1)
     c = (np.arange(3), np.arange(5))
-    nd = NDDataset(a, coords=c)
+    nd = NDDataset(a, coordset=c)
     info_(nd)
     a = nd[[1, 0, 2]]
     info_(a)
@@ -1011,7 +1011,7 @@ def test_nddataset_extrema():
     with RandomSeedContext(1234):
         a = np.random.random((3, 5)).round(1)
     c = (np.arange(3) * 10.0 * ur.s, np.arange(5) * 7.0 * ur.kg)
-    nd = NDDataset(a, coords=c, units='m')
+    nd = NDDataset(a, coordset=c, units='m')
     info_(nd)
 
     mi = nd.min()
@@ -1047,14 +1047,14 @@ def test_nddataset_bug_par_arnaud():
 
     data = np.random.rand(x.size, y.size)
 
-    ds = scp.NDDataset(data, coords=[x, y])
+    ds = scp.NDDataset(data, coordset=[x, y])
 
     ds2 = ds[2000.0:3200.0, :]
 
-    assert ds2.coords.y.data.shape[0] == 2400, 'taille axe 0 doit être 2400'
+    assert ds2.coordset.y.data.shape[0] == 2400, 'taille axe 0 doit être 2400'
     assert ds2.data.shape[0] == 2400, "taille dimension 0 doit être 2400"
 
-    info_('taille axe 0 : ' + str(ds2.coords.y.data.shape[0]))
+    info_('taille axe 0 : ' + str(ds2.coordset.y.data.shape[0]))
     info_('taille dimension 0:' + str(ds2.data.shape[0]))
 
 
@@ -1120,7 +1120,7 @@ def test_nddataset_create_from_complex_data():
 
 
 def test_nddataset_set_complex_1D_during_math_op():
-    nd = NDDataset([1., 2.], coords=[Coord([10, 20])], units='meter')
+    nd = NDDataset([1., 2.], coordset=[Coord([10, 20])], units='meter')
     assert nd.data.size == 2
     assert nd.size == 2
     assert nd.shape == (2,)
@@ -1206,7 +1206,7 @@ def test_nddataset_quaternion():
     nd = NDDataset(na0)
     assert nd.shape == (4, 6)
     nd.dims = ['v', 'u']
-    nd.set_coords(v=np.linspace(-1, 1, 4), u=np.linspace(-10., 10., 6))
+    nd.set_coordset(v=np.linspace(-1, 1, 4), u=np.linspace(-10., 10., 6))
 
     nd.set_quaternion()
 
@@ -1215,14 +1215,14 @@ def test_nddataset_quaternion():
     info_(nds)
 
     assert_array_equal(nd.data.T, nds.data)
-    assert nd.coords[0] == nds.coords[0]  # we do not swap the coords
+    assert nd.coordset[0] == nds.coordset[0]  # we do not swap the coords
 
     # test transpose
     nds = nd.T
     info_(nds)
 
     assert_array_equal(nd.data.T, nds.data)
-    assert nd.coords[0] == nds.coords[0]
+    assert nd.coordset[0] == nds.coordset[0]
 
 
 @pytest.mark.skip()
@@ -1280,10 +1280,10 @@ def test_nddataset_complex_dataset_slicing_by_index():
     assert nd.shape == (24,)
     assert nd.data.shape == (24,)
     coords = (np.linspace(-10., 10., 24),)
-    nd.set_coords(coords)
+    nd.set_coordset(coords)
     x1 = nd.x.copy()
     info_(nd)
-    nd.coords = coords
+    nd.coordset = coords
     x2 = nd.x.copy()
     assert x1 == x2
     info_(nd)
@@ -1303,10 +1303,10 @@ def test_nddataset_complex_dataset_slicing_by_index():
     na0 = na0.reshape(6, 4)
     nd = NDDataset(na0)
     coords = CoordSet(np.linspace(-10., 10., 6), np.linspace(-1., 1., 4))
-    nd.set_coords(**coords)
+    nd.set_coordset(**coords)
     assert nd.shape == (6, 4)
     assert nd.data.shape == (6, 4)
-    nd.coords = coords
+    nd.coordset = coords
     info_(nd)
 
     # slicing 2D
@@ -1373,7 +1373,7 @@ def test_nddataset_set_coordinates(nd2d, ds1):
     # set coordinates all together
     nd = nd2d.copy()
     ny, nx = nd.shape
-    nd.set_coords(x=np.arange(nx), y=np.arange(ny))
+    nd.set_coordset(x=np.arange(nx), y=np.arange(ny))
     assert nd.dims == ['y', 'x']
     assert nd.x == np.arange(nx)
     nd.transpose(inplace=True)
@@ -1383,7 +1383,7 @@ def test_nddataset_set_coordinates(nd2d, ds1):
     # set coordinates from tuple
     nd = nd2d.copy()
     ny, nx = nd.shape
-    nd.set_coords(np.arange(ny), np.arange(nx))
+    nd.set_coordset(np.arange(ny), np.arange(nx))
     assert nd.dims == ['y', 'x']
     assert nd.x == np.arange(nx)
     nd.transpose(inplace=True)
@@ -1394,7 +1394,7 @@ def test_nddataset_set_coordinates(nd2d, ds1):
     # set coordinates from tuple
     nd = nd2d.copy()
     ny, nx = nd.shape
-    nd.set_coords(np.arange(ny), None)
+    nd.set_coordset(np.arange(ny), None)
     assert nd.dims == ['y', 'x']
     assert nd.y == np.arange(ny)
     assert nd.x.is_empty
@@ -1404,16 +1404,16 @@ def test_nddataset_set_coordinates(nd2d, ds1):
     assert nd.dims == ['x', 'y']
     assert nd.y == np.arange(ny)
     assert nd.x.is_empty
-    assert nd.coords == CoordSet(np.arange(ny), None)
+    assert nd.coordset == CoordSet(np.arange(ny), None)
 
     nd = nd2d.copy()
     ny, nx = nd.shape
-    nd.set_coords(None, np.arange(nx))
+    nd.set_coordset(None, np.arange(nx))
     assert nd.dims == ['y', 'x']
     assert nd.x == np.arange(nx)
     assert nd.y.is_empty
 
-    nd.set_coords(y=np.arange(ny), x=None)
+    nd.set_coordset(y=np.arange(ny), x=None)
 
     # set up a single coordinates
     nd = nd2d.copy()
@@ -1421,7 +1421,7 @@ def test_nddataset_set_coordinates(nd2d, ds1):
     nd.x = np.arange(nx)
     nd.x = np.arange(nx)  # do it again - fix  a bug
     nd.set_coordtitles(y='intensity', x='time')
-    assert repr(nd.coords) == 'CoordSet: [x:time, y:intensity]'
+    assert repr(nd.coordset) == 'CoordSet: [x:time, y:intensity]'
     info_(nd)
 
     # validation
@@ -1435,12 +1435,12 @@ def test_nddataset_set_coordinates_withnames(nd2d, ds1):
     # set coordinates all together
     nd = nd2d.copy()
     ny, nx = nd.shape
-    nd.coords = CoordSet(u=np.arange(nx), v=np.arange(ny))
+    nd.coordset = CoordSet(u=np.arange(nx), v=np.arange(ny))
     assert nd.dims != ['u', 'v']  # dims = ['y','x']
 
     # set dim names
     nd.dims = ['u', 'v']
-    nd.set_coords(**CoordSet(u=np.arange(ny), v=np.arange(nx)))
+    nd.set_coordset(**CoordSet(u=np.arange(ny), v=np.arange(nx)))
     assert nd.dims == ['u', 'v']
 
     info_(nd)
@@ -1456,13 +1456,13 @@ def test_nddataset_issue_29_mulitlabels():
 
     with pytest.raises(ValueError):
         # shape data and label mismatch
-        DS.set_coords(DS.y, Coord(title='xaxis', units='s', data=[1, 2, 3, 4], labels=['a', 'b', 'c']))
+        DS.set_coordset(DS.y, Coord(title='xaxis', units='s', data=[1, 2, 3, 4], labels=['a', 'b', 'c']))
 
     c = Coord(title='xaxis', units='s', data=[1, 2, 3, 4], labels=['a', 'b', 'c', 'd'])
-    DS.set_coords(x=c)
+    DS.set_coordset(x=c)
     c = Coord(title='xaxis', units='s', data=[1, 2, 3, 4], labels=[['a', 'c', 'b', 'd'], ['e', 'f', 'g', 'h']])
     d = DS.y
-    DS.set_coords(d, c)
+    DS.set_coordset(d, c)
     print_(DS.x)
     DS.x.labels = ['alpha', 'beta', 'omega', 'gamma']
     print_(DS)
@@ -1518,42 +1518,14 @@ def test_nddataset_init_pandas(series, dataframe):
     dx = dataframe
     da = NDDataset(dx)
     assert isinstance(da, NDDataset)
-    for i, coord in enumerate(da.coords):
+    for i, coord in enumerate(da.coordset):
         assert isinstance(coord, Coord)
-    assert da.coords.titles == ['temperature', 'time']  # sort was applied on the coordinates
+    assert da.coordset.titles == ['temperature', 'time']  # sort was applied on the coordinates
     assert da.dims == ['y', 'x']
     assert_equal(da.dtype, dx.values.dtype)
     assert_equal(da.shape, dx.shape)
     assert_array_equal(da.data, dx.values)
     info_(da)
-
-    # Panel was removed from Panda
-    # # init with a panel directly (get the coords)
-    # dx = panel
-    # da = NDDataset(dx)
-    # assert isinstance(da, NDDataset)
-    # assert_equal(da.dtype, dx.values.dtype)
-    # assert_equal(da.shape, dx.shape)
-    # assert_array_equal(da.data, dx.values)
-    #
-    # assert len(da.data) == 7
-    # assert da.coords.titles == ['axe2', 'axe1', 'axe0']
-    # assert da.dims == ['z', 'y', 'x']
-    #
-    # # various mode of access to the coordinates
-    # assert_array_equal(da.coords[2].data, panel.axes[0].values) # not recommended (except if one know that the
-    # coordinates are ordered)
-    # assert_equal(da.coords['x'].data, panel.axes[2].values)
-    # assert_equal(da.coords(axis=1).data, panel.axes[1].values)
-    # assert_equal(da.coords(1).data, panel.axes[1].values)
-    # assert_equal(da.coords(axis='z').data, panel.axes[0].values)
-    #
-    # # selection of the axis
-    # assert isinstance(da.coords[1], Coord)
-    # assert isinstance(da.coords[1:], CoordSet)
-    # assert isinstance(da.coords(0, 2), CoordSet)
-    # assert isinstance(da.coords(0, 2)[0], Coord)
-    # assert isinstance(da.coords(2), Coord)
 
 
 # Xarray
@@ -1574,14 +1546,5 @@ def test_nddataset_xarray_export_w_spa():
     info_(da)
 
 
-#
-# JSON import/export
-#
-
-def test_json_readwrite(IR_dataset_2D):
-    nd = IR_dataset_2D.copy()
-    js = nd.to_json()
-    ndout = NDDataset.from_json(js)
-    assert ndout == nd
 
 # EOF

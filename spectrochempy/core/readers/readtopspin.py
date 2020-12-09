@@ -1067,7 +1067,7 @@ def _read_topspin(*args, **kwargs):
 
     dataset.meta.update(meta)
     dataset.meta.readonly = True
-    dataset.set_coords(*tuple(coords))
+    dataset.set_coordset(*tuple(coords))
 
     dataset.title = 'intensity'
     dataset.origin = 'topspin'
@@ -1391,7 +1391,7 @@ def _read_topspin(*args, **kwargs):
 #
 #         dataset.meta.update(list_meta[0])
 #         dataset.meta.readonly = True
-#         dataset.set_coords(*tuple(list_coords[0]))  # must be a tuple
+#         dataset.set_coordset(*tuple(list_coords[0]))  # must be a tuple
 #         dataset.title = 'intensity'
 #         dataset.origin = 'bruker'
 #

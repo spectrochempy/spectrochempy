@@ -124,7 +124,7 @@ def _read_txt(*args, **kwargs):
 
     # set dataset metadata
     dataset.data = data
-    dataset.set_coords(y=_y, x=_x)
+    dataset.set_coordset(y=_y, x=_x)
     dataset.title = 'Raman Intensity'
     dataset.units = 'absorbance'
     dataset.name = filename.stem

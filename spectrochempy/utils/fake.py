@@ -28,7 +28,7 @@ def _make_spectra_matrix(pos, width, ampl):
 
     st = np.vstack(s)
     st = NDDataset(data=st, units='absorbance', title='absorbance',
-                   coords=[range(len(st)), x])
+                   coordset=[range(len(st)), x])
 
     return st
 
@@ -44,7 +44,7 @@ def _make_concentrations_matrix(*profiles):
     ct = np.vstack(c)
     ct = ct - ct.min()
     ct = ct / np.sum(ct, axis=0)
-    ct = NDDataset(data=ct, title='concentration', coords=[range(len(ct)), t])
+    ct = NDDataset(data=ct, title='concentration', coordset=[range(len(ct)), t])
 
     return ct
 

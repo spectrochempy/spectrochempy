@@ -101,7 +101,6 @@ class NDPanel(
 
         """
 
-        self._dataset_to_be_added = None  # reset
         datasets = kwargs.pop('datasets', datasets)
 
         # options
@@ -115,7 +114,7 @@ class NDPanel(
 
     # ..................................................................................................................
     def __dir__(self):
-        return ['datasets', 'dims', 'coords', 'meta', 'plotmeta',
+        return ['datasets', 'dims', 'coordset', 'meta', 'plotmeta',
                 'name', 'title', 'description', 'history', 'date', 'modified'] + NDIO().__dir__()
 
     # ..................................................................................................................
@@ -125,11 +124,11 @@ class NDPanel(
         if isinstance(item, str):
             try:
                 dataset = self._datasets[item]
-                if self._coords:
+                if self._coordset:
                     c = {}
                     for dim in dataset.dims:
-                        c[dim] = self.coords[dim]
-                    dataset.set_coords(c)
+                        c[dim] = self.coordset[dim]
+                    dataset.set_coordset(c)
                 return dataset
 
             except Exception:
@@ -343,9 +342,9 @@ class NDPanel(
         index = dataset._dims.index(dim)
         dataset._dims[index] = new_dim_name
         self._dims.insert(0, new_dim_name)
-        if dataset.coords:
-            dataset.coords[dim].name = new_dim_name
-            self.add_coords(dataset.coords[new_dim_name])
+        if dataset.coordset:
+            dataset.coordset[dim].name = new_dim_name
+            self.add_coordset(dataset.coordset[new_dim_name])
 
     # ..................................................................................................................
     def _equal_dim_properties(self, this, other):
@@ -403,8 +402,8 @@ class NDPanel(
         # if it was possible to merge or align, return already happened: Thus return False
         return False
 
-    def _valid_coords(self, coords):
-        coords = super()._valid_coords(coords)
+    def _valid_coordset(self, coords):
+        coords = super()._valid_coordset(coords)
         # TODO add size checking
         return coords
 
@@ -460,10 +459,11 @@ class NDPanel(
                 self._make_dim_and_coord(self._dataset_to_be_added, dim, new_name=(dim in self.dims))
 
         # datasets in panel have no internal coordinates, so delete it
-        self._dataset_to_be_added.delete_coords()
+        self._dataset_to_be_added.delete_coordset()
 
         # eventually store the dataset
         self._datasets[name] = self._dataset_to_be_added.copy(keepname=True)
+        self._dataset_to_be_added = None  # reset
 
     # ..................................................................................................................
     def implements(self, name=None):
@@ -479,13 +479,3 @@ class NDPanel(
             return 'NDPanel'
         else:
             return name == 'NDPanel'
-
-    # ..................................................................................................................
-    def to_dataframe(self):
-        """
-        Convert a NDPanel to a pandas DataFrame
-
-        Returns
-        -------
-
-        """

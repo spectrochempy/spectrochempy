@@ -254,28 +254,6 @@ def test_ndarray_comparison(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion
     assert nd2n != nd2
 
 
-def test_ndarray_to_pandas(ndarray, ndarrayunit, ndarraycplx, ndarrayquaternion):
-    import pandas as pd
-
-    nd = ndarray[0].squeeze()
-    p = nd.to_pandas()
-    info_(p)
-    assert isinstance(p, pd.Index)
-
-    nd.units = 'km'
-    p = nd.to_pandas()
-    info_(p)
-    assert isinstance(p, pd.MultiIndex)
-
-    nd = ndarray.copy()
-    with pytest.raises(NotImplementedError):  # TODO: implement this
-        p = nd.to_pandas()
-
-    with pytest.raises(ValueError):
-        nd = NDArray()
-        nd.to_pandas()
-
-
 def test_ndarray_sort():
     # labels and sort
 

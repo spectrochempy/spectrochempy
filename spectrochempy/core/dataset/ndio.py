@@ -12,30 +12,31 @@ methods for a |NDDataset| are defined.
 
 """
 
-__all__ = ['NDIO']
+__all__ = ['NDIO', 'SCPY_SUFFIX']
 
 import io
-import datetime
 import json
 import pathlib
 
-import numpy as np
-import matplotlib.pyplot as plt
-from numpy.lib.format import write_array
 from numpy.lib.npyio import zipfile_factory
-from traitlets import HasTraits, Instance, Unicode
+from traitlets import HasTraits, Instance
 
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.ndcoordset import CoordSet
+from spectrochempy.units import Quantity, Unit
+from spectrochempy.core import debug_
 from spectrochempy.utils import SpectroChemPyException
-from spectrochempy.units import Quantity
-from spectrochempy.utils import pathclean, Meta, check_filenames, ScpFile, check_filename_to_save
-from spectrochempy.utils import json_serialiser, json_decoder
+from spectrochempy.utils import pathclean, check_filenames, ScpFile, check_filename_to_save, json_serialiser
 
+SCPY_SUFFIX = {'NDDataset':'.scp', 'NDPanel':'.mscp', 'Project':'.pscp'}
 
-# ==============================================================================
+# ----------------------------------------------------------------------------------------------------------------------
+# Utilities
+# ----------------------------------------------------------------------------------------------------------------------
+
+# ======================================================================================================================
 # Class NDIO to handle I/O of datasets
-# ==============================================================================
+# ======================================================================================================================
 
 class NDIO(HasTraits):
     """
@@ -78,13 +79,8 @@ class NDIO(HasTraits):
 
     @property
     def filetype(self):
-        if self.implements('Project'):
-            return ['SpectroChemPy Project file (*.pscp)']
-        elif self.implements('NDPanel'):
-            return ['SpectroChemPy Panel file (*.nscp)']
-        elif self.implements('NDDataset'):
-            return ['SpectroChemPy dataset file (*.scp)']
-
+        klass = self.implements()
+        return [f'SpectroChemPy {klass} file (*{SCPY_SUFFIX[klass]})']
 
     @property
     def suffix(self):
@@ -98,13 +94,8 @@ class NDIO(HasTraits):
         if self._filename and  self._filename.suffix:
             return self._filename.suffix
         else:
-            if self.implements('Project'):
-                suffix = ".pscp"
-            elif self.implements('NDPanel'):
-                suffix = ".nscp"
-            elif self.implements('NDDataset'):
-                suffix = ".scp"
-            return suffix
+            klass = self.implements()
+            return SCPY_SUFFIX[klass]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Special methods
@@ -155,7 +146,9 @@ class NDIO(HasTraits):
         if self.directory is None:
             self.filename = pathclean('.') / self.name
 
-        filename = self.directory / self.filename
+        filename = self.directory / self.name
+        default_suffix = SCPY_SUFFIX[self.implements()]
+        filename = filename.with_suffix(default_suffix)
 
         if not filename.exists():
             # never saved
@@ -164,7 +157,7 @@ class NDIO(HasTraits):
 
         # was already saved previously with this name,
         # in this case we do not display a dialog and overwrite the same file
-        return self._save(filename, **kwargs)
+        return self.dump(filename, **kwargs)
 
     # ..................................................................................................................
     def save_as(self, filename='', **kwargs):
@@ -217,19 +210,22 @@ class NDIO(HasTraits):
         else:
             filename = self.directory
 
+        # suffix must be specified which correspond to the type of the object to save
+        default_suffix = SCPY_SUFFIX[self.implements()]
+        filename = filename.with_suffix(default_suffix)
         kwargs['filetypes'] = self.filetype
         kwargs['caption'] = f'Save the current {self.implements()} as ... '
         filename = check_filename_to_save(self, filename, save_as=True, **kwargs)
 
         if filename:
             self.filename = filename
-            return self._save(filename, **kwargs)
+            return self.dump(filename, **kwargs)
 
     # ..................................................................................................................
     @classmethod
     def load(cls, filename, **kwargs):
         """
-        Load a data from a '*.scp' file.
+        open a data from a '*.scp' file.
 
         It's a class method, that can be used directly on the class,
         without prior opening of a class instance.
@@ -272,10 +268,7 @@ class NDIO(HasTraits):
             # be sure to convert filename to a pathlib object with the default suffix
             filename = pathclean(filename)
             suffix = cls().suffix
-            if not filename.suffix:
-                filename.suffix = suffix
-            else:
-                filename = filename.with_suffix(suffix)
+            filename = filename.with_suffix(suffix)
             if kwargs.get('directory', None) is not None:
                 filename = pathclean(kwargs.get('directory')) / filename
             if not filename.exists():
@@ -293,7 +286,10 @@ class NDIO(HasTraits):
             raise SpectroChemPyException("Undefined error!")
 
         js = obj[obj.files[0]]
-        new = cls.from_json(js)
+        if kwargs.get('json'):
+            return js
+
+        new = cls.loads(js)
 
         fid.close()
 
@@ -303,73 +299,89 @@ class NDIO(HasTraits):
             new.name = filename.stem
         return new
 
-    def to_json(self):
+    def dumps(self, encoding=None):
 
-        objnames = dir(self)
-
-        def obj_to_json(obj):
-
-            objnames = dir(obj)
+        debug_('Dumps')
+        js = json_serialiser(self, encoding=encoding)
+        return json.dumps(js, indent = 2)
 
 
-        def _loop_on_obj(_names, obj=self, parent={}):
+    @classmethod
+    def loads(cls, js):
 
-            parent['type'] = self.__class__.__name__
+        from spectrochempy.core.project.project import Project
+        from spectrochempy.core.dataset.nddataset import NDDataset
+        from spectrochempy.core.scripts.script import Script
 
-            for key in _names:
+        # .........................
+        def item_to_attr(obj, dic):
+            for key, val in dic.items():
+                try:
+                    if hasattr(obj, f'_{key}') and key not in ['readonly']:
+                        # use the hidden attribute if it exists
+                        key = f'_{key}'
 
-                val = getattr(obj, "_%s" % key)
-                if val is None:
-                    # ignore None - when reading if something is missing it
-                    # will be considered as None anyways
-                    continue
+                    if val is None:
+                        pass
 
-                elif key == 'projects':
-                    parent[key] = {}
-                    for k, proj in val.items():
-                        _objnames = dir(proj)
-                        _loop_on_obj(_objnames, obj=proj, parent=parent[key])
-                        parent[key][k] = projj
+                    elif key in ['_meta', '_plotmeta']:
+                        setattr(obj, key, item_to_attr(getattr(obj, key), val))
 
-                elif key == 'datasets':
-                    parent[key] = []
-                    for k, ds in val.items():
-                        dsj = ds.to_json()
-                        parent[key].append( {k:dsj} )
+                    elif key in ['_coordset']:
+                        coords = [item_to_attr(Coord(), v) for v in val['coords']]
+                        if  val['is_same_dim']:
+                            obj.set_coordset(coords)
+                        else:
+                            obj.set_coordset(*coords)
+                        obj._name = val['name']
+                        obj._references = val['references']
 
-                elif key == 'scripts':
-                    parent[key] = {}
-                    for k, sc in val.items():
-                        _objnames = dir(sc)
-                        scj = _loop_on_obj(_objnames, obj=sc, parent=parent[key])
-                        parent[key][k] = scj
+                    elif key in ['_datasets']:
+                        datasets = [item_to_attr(NDDataset(name=k), v) for k, v in val.items()]
+                        obj.datasets = datasets
 
-                elif isinstance(val, Meta):
-                    parent[key] = val.to_dict()
+                    elif key in ['_projects']:
+                        for k, v in val.items():
+                            project = item_to_attr(Project(name=k), v)
+                            obj.add_project(project, name=k)
 
-                elif key == 'parent':
-                    parent[key] = main
+                    elif key in ['_scripts']:
+                        for k, v in val.items():
+                            script = item_to_attr(Script(name=k), v)
+                            obj.add_script(script, name=k)
 
-                else:
-                    # probably some string
-                    parent[key] = val
+                    elif key in ['_parent']:
+                        # automatically set
+                        pass
+                        # if not val:
+                        #     setattr(obj, key, None)
+                        # else:
+                        #     setattr(obj, key, obj.parent)
 
-        # Recursive scan on Project content
-        main = _loop_on_obj(objnames)
+                    else:
+                        # print(key, val)
+                        setattr(obj, key, val)
 
-        return main
+                except Exception as e:
+                    raise TypeError(f'for {key} {val}')
 
+            return obj
+        # ........................
 
-
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Private
-# ----------------------------------------------------------------------------------------------------------------------
+        new = item_to_attr(cls(), js)
+        return new
 
     # ..................................................................................................................
-    def _save(self, filename, **kwargs):
-        # machinery to save the current dataset into native spectrochempy format
+    def dump(self, filename, **kwargs):
+        """
+        Save the current object into compressed native spectrochempy format
+
+        Parameters
+        ----------
+        filename: str of  `pathlib` object
+            File name where to save the current object. Extension
+
+        """
 
         # Stage data in a temporary file on disk, before writing to zip.
         import zipfile
@@ -380,7 +392,7 @@ class NDIO(HasTraits):
 
         tmpfile = pathclean(tmpfile)
 
-        js = json.dumps(self.to_json(), default=json_serialiser, indent=2)
+        js = self.dumps(encoding='base64')
 
         tmpfile.write_bytes(js.encode('utf-8'))
 

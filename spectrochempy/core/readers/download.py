@@ -67,7 +67,7 @@ def download_IRIS():
         coordy = Coord(labels=labels, title='samples')
 
         new = NDDataset(data,
-                        coords=[coordy, coordx],
+                        coordset=[coordy, coordx],
                         title='size',
                         name='IRIS Dataset',
                         units='cm')
@@ -91,7 +91,7 @@ def download_IRIS():
             coordy = Coord(labels=labels, title='samples')
 
             new = NDDataset(data.data,
-                            coords=[coordy, coordx],
+                            coordset=[coordy, coordx],
                             title='size',
                             name='IRIS Dataset',
                             units='cm')

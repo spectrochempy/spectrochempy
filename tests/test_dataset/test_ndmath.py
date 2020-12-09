@@ -392,7 +392,7 @@ def test_ndmath_non_ufunc_functions(operation, restype, args, kwargs):
 
     ds1 = NDDataset(d1D, dtype='float64')
     coord0 = Coord(np.arange(10) * .1)
-    ds1.set_coords(coord0, )
+    ds1.set_coordset(coord0, )
     info_('\n\n1D' + '-' * 50)
     info_(str(ds1))
     info_('-' * 50)
@@ -413,7 +413,7 @@ def test_ndmath_non_ufunc_functions(operation, restype, args, kwargs):
     ds2 = NDDataset(d2D, dtype='float64')
     coord0 = Coord(np.arange(4) * .1)
     coord1 = Coord(np.arange(5) * .2)
-    ds2.set_coords(coord0, coord1)
+    ds2.set_coordset(coord0, coord1)
     ds2.units = ur.m
     info_('\n\n2D' + '-' * 50)
     info_(str(ds2))
@@ -453,7 +453,7 @@ def test_ndmath_absolute_of_quaternion():
     info_(nd)
     coords = CoordSet(np.linspace(-1, 1, 2), np.linspace(-10., 10., 3))
     assert nd.shape == (2, 3)
-    nd.set_coords(**coords)
+    nd.set_coordset(**coords)
     np.abs(nd)
 
     # TODO: add more testings
@@ -523,8 +523,8 @@ def test_nddataset_add_inplace():
 def test_nddataset_add_mismatch_coords():
     coord1 = Coord(np.arange(5.))
     coord2 = Coord(np.arange(1., 5.5, 1.))
-    d1 = NDDataset(np.ones((5, 5)), coords=[coord1, coord2])
-    d2 = NDDataset(np.ones((5, 5)), coords=[coord2, coord1])
+    d1 = NDDataset(np.ones((5, 5)), coordset=[coord1, coord2])
+    d2 = NDDataset(np.ones((5, 5)), coordset=[coord2, coord1])
     with pytest.raises(ValueError) as exc:
         d1 -= d2
     assert exc.value.args[0] == "coordinate's values do not match"
@@ -597,8 +597,8 @@ def test_nddataset_substract_with_numpy_array():
 def test_nddataset_subtract_mismatch_coords():
     coord1 = Coord(np.arange(5.))
     coord2 = Coord(np.arange(1., 5.5, 1.))
-    d1 = NDDataset(np.ones((5, 5)), coords=[coord1, coord2])
-    d2 = NDDataset(np.ones((5, 5)), coords=[coord2, coord1])
+    d1 = NDDataset(np.ones((5, 5)), coordset=[coord1, coord2])
+    d2 = NDDataset(np.ones((5, 5)), coordset=[coord2, coord1])
     with pytest.raises(ValueError) as exc:
         d1 -= d2
     assert exc.value.args[0] == "coordinate's values do not match"
@@ -607,7 +607,7 @@ def test_nddataset_subtract_mismatch_coords():
 def test_nddataset_binary_operation_with_other_1D():
     coord1 = Coord(np.linspace(0., 10., 10))
     coord2 = Coord(np.linspace(1., 5.5, 5))
-    d1 = NDDataset(np.random.random((10, 5)), coords=[coord1, coord2])
+    d1 = NDDataset(np.random.random((10, 5)), coordset=[coord1, coord2])
     d2 = d1[0]
     # this should work independantly of the value of the coordinates on dimension y
     d3 = d1 - d2

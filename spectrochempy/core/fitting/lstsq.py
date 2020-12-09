@@ -50,7 +50,7 @@ class LSTSQ(HasTraits):
 
         if len(datasets) == 2:
             X, Y = datasets
-            if Y.coords is not None:
+            if Y.coordset is not None:
                 if np.any(X.data != Y.x.data) or X.units != Y.x.units:
                     raise ValueError('X and Y dataset are not compatible')
 

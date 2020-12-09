@@ -185,7 +185,7 @@ class SVD(HasTraits):
             U = NDDataset(U)
             U.name = 'U'
             U.title = 'left singular vectors of ' + X.name
-            U.set_coords(x=Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components'), y=X.y)
+            U.set_coordset(x=Coord(labels=['#%d' % (i + 1) for i in range(KU)], title='Components'), y=X.y)
             U.description = 'left singular vectors of ' + X.name
             U.history = 'Created by SVD \n'
 
@@ -195,7 +195,7 @@ class SVD(HasTraits):
             VT = NDDataset(VT)
             VT.name = 'V.T'
             VT.title = 'Loadings (V.t) of ' + X.name
-            VT.set_coords(x=X.x, y=Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'))
+            VT.set_coordset(x=X.x, y=Coord(labels=['#%d' % (i + 1) for i in range(KV)], title='Components'))
             VT.description = (
                     'Loadings obtained by singular value decomposition of ' + X.name)
             VT.history = (str(VT.modified) + ': Created by SVD \n')
@@ -230,7 +230,7 @@ class SVD(HasTraits):
         sv = self.s.copy()
         sv.name = 'sv'
         sv.title = 'Singular values'
-        sv.set_coords(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
+        sv.set_coordset(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
         return sv
 
     @property
@@ -240,7 +240,7 @@ class SVD(HasTraits):
         ev = self.s ** 2 / (size - 1)
         ev.name = 'ev'
         ev.title = 'Explained variance'
-        ev.set_coords(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
+        ev.set_coordset(Coord(None, labels=['#%d' % (i + 1) for i in range(size)], title='Components'))
         return ev
 
     @property

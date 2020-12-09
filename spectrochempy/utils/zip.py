@@ -136,7 +136,8 @@ class ScpFile(Mapping):
             return NDDataset.load(key, content=content)
 
         elif member and ext in ['.json']:
-            return json.loads(self.zip.read(key), object_hook=json_decoder)
+            content = self.zip.read(key)
+            return json.loads(content, object_hook=json_decoder)
 
         elif member:
             return self.zip.read(key)

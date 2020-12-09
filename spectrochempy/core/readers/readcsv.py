@@ -156,7 +156,7 @@ def _read_csv(*args, **kwargs):
 
     # update the dataset
     dataset.data = data
-    dataset.set_coords(y=coordy, x=coordx)
+    dataset.set_coordset(y=coordy, x=coordx)
 
     # set the additional attributes
     name = filename.stem

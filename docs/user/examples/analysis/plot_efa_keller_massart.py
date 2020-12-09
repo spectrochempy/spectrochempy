@@ -32,7 +32,7 @@ data = np.zeros((2, 15), dtype=np.float64)
 data[0, 3:8] = [1, 3, 6, 3, 1]  # compound 1
 data[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
 
-dsc = scp.NDDataset(data=data, coords=[c, t])
+dsc = scp.NDDataset(data=data, coordset=[c, t])
 
 ########################################################################################################################
 # 2) Absorption spectra
@@ -41,7 +41,7 @@ dsc = scp.NDDataset(data=data, coords=[c, t])
 spec = np.array([[2., 3., 4., 2.], [3., 4., 2., 1.]])
 w = scp.Coord(np.arange(1, 5, 1), units='nm', title='wavelength')
 
-dss = scp.NDDataset(data=spec, coords=[c, w])
+dss = scp.NDDataset(data=spec, coordset=[c, w])
 
 ########################################################################################################################
 # 3) Simulated data matrix

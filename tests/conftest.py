@@ -199,13 +199,13 @@ def ref_ds():
 @pytest.fixture(scope="function")
 def ds1():
     # a dataset with coordinates
-    return NDDataset(ref3d_data, coords=[coord0_, coord1_, coord2_], title='Absorbance', units='absorbance').copy()
+    return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coord2_], title='Absorbance', units='absorbance').copy()
 
 
 @pytest.fixture(scope="function")
 def ds2():
     # another dataset
-    return NDDataset(ref3d_2_data, coords=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance',
+    return NDDataset(ref3d_2_data, coordset=[coord0_2_, coord1_2_, coord2_2_], title='Absorbance',
                      units='absorbance').copy()
 
 
@@ -214,11 +214,12 @@ def dsm():
     # dataset with coords containing several axis and a mask
 
     coordmultiple = CoordSet(coord2_, coord2b_)
-    return NDDataset(ref3d_data, coords=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
+    return NDDataset(ref3d_data, coordset=[coord0_, coord1_, coordmultiple], mask=ref3d_mask, title='Absorbance',
                      units='absorbance').copy()
 
 
 # NDPanel
+
 @pytest.fixture(scope="function")
 def pnl():
     with RandomSeedContext(12345):
@@ -227,8 +228,8 @@ def pnl():
     cy1 = Coord(np.arange(10), title='ty', units='s')
     cy2 = Coord(np.arange(12), title='ty', units='s')
     cx = Coord(np.arange(20), title='tx', units='km')
-    nd1 = NDDataset(arr1, coords=(cy1, cx), name='arr1')
-    nd2 = NDDataset(arr2, coords=(cy2, cx), dims=['x', 'y'], name='arr2')
+    nd1 = NDDataset(arr1, coordset=(cy1, cx), name='arr1')
+    nd2 = NDDataset(arr2, coordset=(cy2, cx), dims=['x', 'y'], name='arr2')
     pnl = NDPanel(nd1, nd2)
     assert pnl.dims == ['x', 'y']
     return pnl.copy()

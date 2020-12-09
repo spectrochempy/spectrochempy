@@ -310,7 +310,7 @@ def ones_like(a, dtype=None):
     """
     Return |NDDataset| of ones with the same shape and type as a given array.
 
-    It preserves original mask, units, and coords
+    It preserves original mask, units, and coordset
 
     Parameters
     ----------
@@ -513,11 +513,11 @@ def dot(a, b, strict=True, out=None):
     mask = data.mask
     data = data.data
 
-    if a.coords is not None:
+    if a.coordset is not None:
         coordy = getattr(a, a.dims[0])
     else:
         coordy = None
-    if b.coords is not None:
+    if b.coordset is not None:
         coordx = getattr(b, b.dims[1])
     else:
         coordx = None
@@ -529,7 +529,7 @@ def dot(a, b, strict=True, out=None):
     new = make_new_object(a)
     new._data = data
     new._mask = mask
-    new.set_coords(y=coordy, x=coordx)
+    new.set_coordset(y=coordy, x=coordx)
     new.history = history
     if a.unitless:
         new.units = b.units
@@ -576,7 +576,7 @@ def diag(dataset, k=0):
     # ------------------------------------------------------------------------------------------------------------------
 
     if not isinstance(dataset, NDDataset):
-        # must be anumpy object or something non valid. Let numpy deal with this
+        # must be a numpy object or something non valid. Let numpy deal with this
         return np.diag(dataset)
 
     s = dataset.data.shape
@@ -591,8 +591,8 @@ def diag(dataset, k=0):
             m = np.repeat(dataset.mask, size).reshape(size, size)
             mask = m | m.T
         coords = None
-        if dataset.coords is not None:
-            coords = dataset.coords  # [dataset.coords[0]] * 2
+        if dataset.coordset is not None:
+            coords = dataset.coordset
         history = 'Diagonal array build from the 1D dataset'
         units = dataset.units
         dims = dataset.dims * 2
@@ -605,8 +605,8 @@ def diag(dataset, k=0):
         if dataset.is_masked:
             mask = np.diagonal(dataset.mask, k).copy()
         coords = None
-        if dataset.coords is not None:
-            coords = [dataset.coords[0]]  # TODO: this is likely not
+        if dataset.coordset is not None:
+            coords = [dataset.coordset[0]]  # TODO: this is likely not
             #       correct for k != 0
         history = 'Diagonal of rank %d extracted from original dataset' % k
         units = dataset.units
@@ -625,7 +625,7 @@ def diag(dataset, k=0):
     new.dims = dims
 
     if coords:
-        new.set_coords(coords)
+        new.set_coordset(coords)
 
     return new
 

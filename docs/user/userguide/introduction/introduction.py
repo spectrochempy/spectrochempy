@@ -324,7 +324,7 @@ plt.plot(t, y)
 
 # %%
 timecoord = scp.Coord(t, title='time', units='second')
-ndfid = scp.NDDataset(y, dims=['x'], coords=[timecoord], title='signal')
+ndfid = scp.NDDataset(y, dims=['x'], coordset=[timecoord], title='signal')
 ndfid.plot()
 
 # %% [markdown]

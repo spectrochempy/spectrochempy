@@ -693,14 +693,14 @@ class NDMath(object):
         """Coordinates of minimum of data along axis"""
 
         mi = self.min(keepdims=True)
-        return mi.coords
+        return mi.coordset
 
     # ..................................................................................................................
     def coordmax(self, *args, **kwargs):
         """Coordinates of maximum of data along axis"""
 
         ma = self.max(keepdims=True)
-        return ma.coords
+        return ma.coordset
 
     # ------------------------------------------------------------------------------------------------------------------
     # private methods
@@ -745,16 +745,16 @@ class NDMath(object):
         # particular case of functions that returns Dataset with no coordinates
         if axis is None and op in ['cumsum', 'cumprod']:
             # delete all coordinates
-            new._coords.data = None
+            new._coordset.data = None
 
         # Here we must reduce the corresponding coordinates
         elif axis is not None:
             dim = new._dims[axis]
             if op not in ['cumsum', 'cumprod']:
                 del new._dims[axis]
-            if new.implements('NDDataset') and new._coords and (dim in new._coords.names):
-                idx = new._coords.names.index(dim)
-                del new._coords.coords[idx]
+            if new.implements('NDDataset') and new._coordset and (dim in new._coordset.names):
+                idx = new._coordset.names.index(dim)
+                del new._coordset.coords[idx]
 
         new.history = f'Dataset resulting from application of `{op}` method'
         return new
@@ -831,16 +831,16 @@ class NDMath(object):
             # particular case of functions that returns Dataset with no coordinates
             if axis is None and op in ['sum', 'prod', 'mean', 'var', 'std']:
                 # delete all coordinates
-                new._coords = None
+                new._coordset = None
 
             # Here we must reduce the corresponding coordinates
             elif axis is not None:
                 dim = new._dims[axis]
                 if not keepdims:
                     del new._dims[axis]
-                if new.implements('NDDataset') and new._coords and (dim in new._coords.names):
-                    idx = new._coords.names.index(dim)
-                    del new._coords.coords[idx]
+                if new.implements('NDDataset') and new._coordset and (dim in new._coordset.names):
+                    idx = new._coordset.names.index(dim)
+                    del new._coordset.coords[idx]
 
         new.history = f'Reduced dataset resulting from application of `{op}` method'
         return new
@@ -937,7 +937,7 @@ class NDMath(object):
             # Iterate on all internal dataset of the panel
             datasets = []
             for k, v in obj.datasets.items():
-                v._coords = obj.coords
+                v._coordset = obj.coordset
                 v.name = k
                 if other is not None:
                     datasets.append(f(v, other))
@@ -970,7 +970,7 @@ class NDMath(object):
         if other is not None:
 
             # If inputs are all datasets
-            if isdataset and (othertype == 'NDDataset') and (other._coords != obj._coords):
+            if isdataset and (othertype == 'NDDataset') and (other._coordset != obj._coordset):
                 # here it can be several situations:
                 # One acceptable situation could be that we have a single value
                 if other._squeeze_ndim == 0:
@@ -981,9 +981,9 @@ class NDMath(object):
                     raise ValueError(
                             "coordinate's sizes do not match")
 
-                elif other._squeeze_ndim > 1 and obj.coords and other.coords and \
-                        not (obj._coords[0].is_empty and obj._coords[0].is_empty) and \
-                        not np.all(obj._coords[0]._data == other._coords[0]._data):
+                elif other._squeeze_ndim > 1 and obj.coordset and other.coordset and \
+                        not (obj._coordset[0].is_empty and obj._coordset[0].is_empty) and \
+                        not np.all(obj._coordset[0]._data == other._coordset[0]._data):
                     raise ValueError(
                             "coordinate's values do not match")
 

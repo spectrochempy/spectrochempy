@@ -330,7 +330,7 @@ class Fit(HasTraits):
 
         expedata = dataset.real.data.squeeze()
         axis, dim = dataset.get_axis(-1)
-        x = dataset.coords[dim].data
+        x = dataset.coordset[dim].data
 
         if expedata.ndim > 1:
             # nD data

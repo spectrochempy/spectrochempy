@@ -48,7 +48,7 @@ from spectrochempy import *
 #
 # * **mask**,
 # * **units**,
-# * and **coords**.
+# * and **coordset**.
 #
 # Additional metadata can also be added to the instances of this class through the `meta` properties.
 
@@ -236,7 +236,7 @@ d1D.to('K')
 # To get the list of all defined coordinates, we can use the `coords` attribute:
 
 # %%
-d2D.coords  # no coordinates, so it returns nothing (None)
+d2D.coordset  # no coordinates, so it returns nothing (None)
 
 # %%
 d2D.t       # the same for coordinate  u, v, t which are not yet set
@@ -248,13 +248,13 @@ d2D.t       # the same for coordinate  u, v, t which are not yet set
 d2D.t = np.arange(6)*.1 # we need a sequence of 6 values for `t` dimension (see shape above)
 d2D.t.title = 'time'
 d2D.t.units = 'seconds'
-d2D.coords # now return a list of coordinates
+d2D.coordset # now return a list of coordinates
 
 # %%
 d2D.t
 
 # %%
-d2D.coords('t')  # Alternative way to get a given coordinates
+d2D.coordset('t')  # Alternative way to get a given coordinates
 
 # %%
 d2D['t'] # another alternative way to get a given coordinates
@@ -335,7 +335,7 @@ d2D.time
 
 # %%
 a = np.diag((3,3,2.5))
-nd = NDDataset(a, coords=CoordSet(x=np.arange(3), y='x'))
+nd = NDDataset(a, coordset=CoordSet(x=np.arange(3), y='x'))
 nd
 
 # %% [markdown]
@@ -390,7 +390,7 @@ nd_data = np.array(
 # %%
 d3D = NDDataset(nd_data,
                       name = 'mydataset',
-                      coords=[coord0, coord1, coord2],
+                      coordset=[coord0, coord1, coord2],
                       title='Absorbance',
                       units='absorbance'
                       )
@@ -422,8 +422,8 @@ d3D.author = 'Blake & Mortimer'
 d3D
 
 # %%
-d3D.set_coords(x=coord2, y=coord1, z=coord0)          # syntax 1
-d3D.set_coords({'x':coord2, 'y':coord1, 'z':coord0})  # syntax 2
+d3D.set_coordset(x=coord2, y=coord1, z=coord0)          # syntax 1
+d3D.set_coordset({'x':coord2, 'y':coord1, 'z':coord0})  # syntax 2
 d3D
 
 # %% [markdown]
@@ -433,7 +433,7 @@ d3D
 coord2b = Coord([1,2,3], units='millitesla', title='magnetic field')
 
 # %%
-d3D.set_coords(x=CoordSet(coord2,coord2b), y=coord1, z=coord0)
+d3D.set_coordset(x=CoordSet(coord2, coord2b), y=coord1, z=coord0)
 d3D
 
 
@@ -442,23 +442,23 @@ d3D
 
 # %%
 # A. fist syntax (probably the safer because the name of the dimension is specified, so this is less prone to errors!)
-d3D.set_coords(x=CoordSet(coord2,coord2b), y=coord1, z=coord0)
-d3D.set_coords(x=[coord2,coord2b], y=coord1, z=coord0) # equivalent
+d3D.set_coordset(x=CoordSet(coord2, coord2b), y=coord1, z=coord0)
+d3D.set_coordset(x=[coord2, coord2b], y=coord1, z=coord0) # equivalent
 
 # B. second syntax in the order of the dimensions: z,y,x (if no swap or transpopse has been performed)
-d3D.set_coords(coord0, coord1, [coord2,coord2b])
-d3D.set_coords((coord0, coord1, [coord2,coord2b]))  # equivalent
+d3D.set_coordset(coord0, coord1, [coord2, coord2b])
+d3D.set_coordset((coord0, coord1, [coord2, coord2b]))  # equivalent
 
 # C. third syntax (from a dictionary)
-d3D.set_coords({'z':coord0, 'y':coord1, 'x':[coord2,coord2b]})
+d3D.set_coordset({'z':coord0, 'y':coord1, 'x':[coord2, coord2b]})
 
 # D. Fourth syntax (from another coordset)
-d3D.set_coords(**CoordSet(z=coord0, y=coord1, x=[coord2,coord2b]))   # note the **
+d3D.set_coordset(**CoordSet(z=coord0, y=coord1, x=[coord2, coord2b]))   # note the **
 
 # It is also possible to use the coords property (with slightly less possibility)
-d3D.coords = coord0, coord1,[coord2,coord2b]
-d3D.coords = {'z':coord0, 'y':coord1, 'x':[coord2,coord2b]}
-d3D.coords = CoordSet(z=coord0, y=coord1, x=[coord2,coord2b])
+d3D.coordset = coord0, coord1, [coord2, coord2b]
+d3D.coordset = {'z':coord0, 'y':coord1, 'x':[coord2, coord2b]}
+d3D.coordset = CoordSet(z=coord0, y=coord1, x=[coord2, coord2b])
 
 # %% [markdown]
 # WARNING: do not use list for setting multiples coordinates! use tuples
@@ -466,12 +466,12 @@ d3D.coords = CoordSet(z=coord0, y=coord1, x=[coord2,coord2b])
 # %%
 # This raise an error (list have another signification: it's used to set a "same dim" CoordSet see example A or B)
 try:
-    d3D.coords = [coord0, coord1, coord2]
+    d3D.coordset = [coord0, coord1, coord2]
 except ValueError:
     error_('Coordinates must be of the same size for a dimension with multiple coordinates')
 
 # This works (not a tuple `()`, not a list `[]`)
-d3D.coords = (coord0, coord1, coord2)
+d3D.coordset = (coord0, coord1, coord2)
 
 # %% [markdown]
 # ## Copying existing NDDataset

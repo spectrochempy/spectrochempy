@@ -178,7 +178,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
     # be treated as indices as in scipy.signal.find_peak()
 
     # transform coord (if exists) to index
-    if use_coord and X.coords is not None:
+    if use_coord and X.coordset is not None:
         step = np.abs(X.x.data[-1] - X.x.data[0]) / (len(X.x) - 1)
 
         if isinstance(distance, float):
@@ -207,7 +207,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
         # quadratic interpolation to find the maximum
         for i, peak in enumerate(peaks):
             y = data[peak - window_length // 2:peak + window_length // 2 + 1]
-            if use_coord and X.coords is not None:
+            if use_coord and X.coordset is not None:
                 x = X.x[peak - window_length // 2:peak + window_length // 2 + 1]
             else:
                 x = range(peak - window_length // 2, peak + window_length // 2 + 1)
@@ -224,7 +224,7 @@ def find_peaks(X, height=None, window_length=3, threshold=None, distance=None,
             out.x.data[i] = x_at_max
 
     # transform back index to coord
-    if use_coord and X.coords is not None:
+    if use_coord and X.coordset is not None:
         for key in ('left_bases', 'right_bases', 'left_edges', 'right_edges'):  # values are int type
             if key in properties:
                 properties[key] = properties[key].astype('float64')

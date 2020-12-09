@@ -181,11 +181,11 @@ class BaselineCorrection(HasTraits):
 
         # most of the time we need sorted axis, so let's do it now
         is_sorted = False
-        if new.coords[self.dim].reversed:
+        if new.coordset[self.dim].reversed:
             new.sort(dim=self.dim, inplace=True, descend=False)
             is_sorted = True
 
-        coords = new.coords[self.dim]
+        coords = new.coordset[self.dim]
         baseline = np.zeros_like(new)
 
         if ranges:
@@ -205,7 +205,7 @@ class BaselineCorrection(HasTraits):
 
         sbase = NDDataset.concatenate(s, axis=-1)
         # TODO: probably we could use masked data instead of concatenating - could be faster
-        xbase = sbase.coords(self.dim)
+        xbase = sbase.coordset(self.dim)
 
         if self.method == 'sequential':
 
@@ -446,7 +446,7 @@ def ab(dataset, dim=-1, **kwargs):
         swaped = True
 
     # select the last coordinates and check the unit validity
-    lastcoord = new.coords[dim]
+    lastcoord = new.coordset[dim]
     if (lastcoord.units.dimensionality != '1/[time]' and lastcoord.units != 'ppm'):
         error_('`ab` apply only to dimensions with [frequency] dimensionality or with ppm units\n'
                'Baseline correction processing was thus cancelled')

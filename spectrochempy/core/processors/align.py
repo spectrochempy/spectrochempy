@@ -158,7 +158,7 @@ def align(dataset, *others, **kwargs):
 
             for k, v in object.datasets.items():
                 # set the coordset into the NDDataset object (temporary: this will be unset at the end)
-                v.coords = object.coords
+                v.coordset = object.coordset
                 _objects[_nobj] = {
                         'obj': v,
                         'idx': idx,
@@ -194,15 +194,15 @@ def align(dataset, *others, **kwargs):
 
         # as we will sort their coordinates at some point, we need to know if the coordinates need to be reversed at
         # the end of the alignment process
-        reversed = ref_obj.coords[dim].reversed
+        reversed = ref_obj.coordset[dim].reversed
         if reversed:
             ref_obj.sort(descend=False, dim=dim, inplace=True)
 
         # get the coordset corresponding to the reference object
-        ref_obj_coords = ref_obj.coords
+        ref_obj_coordset = ref_obj.coordset
 
         # get the coordinate for the reference dimension
-        ref_coord = ref_obj_coords[dim]
+        ref_coord = ref_obj_coordset[dim]
 
         # as we will sort their coordinates at some point, we need to know if the coordinates need to be reversed at
         # the end of the alignment process
@@ -224,7 +224,7 @@ def align(dataset, *others, **kwargs):
                 obj.sort(descend=False, dim=dim, inplace=True)
 
             # get the current objet coordinates and check compatibility
-            coord = obj.coords[dim]
+            coord = obj.coordset[dim]
             if not coord.is_units_compatible(ref_coord):
                 # not compatible, stop everything
                 raise UnitsCompatibilityError('NDataset to align must have compatible units!')
@@ -279,7 +279,7 @@ def align(dataset, *others, **kwargs):
                 new_obj = obj
 
             # update the data and mask
-            coord = obj.coords[dim]
+            coord = obj.coordset[dim]
             coord_data = set(coord.data)
 
             dim_loc = new_coord._loc2index(sorted(coord_data))
@@ -291,15 +291,15 @@ def align(dataset, *others, **kwargs):
             new_obj.data[loc] = obj.data
 
             # update the coordinates
-            new_coords = obj.coords.copy()
+            new_coordset = obj.coordset.copy()
             if coord.is_labeled:
                 label_shape = list(coord.labels.shape)
                 label_shape[0] = new_coord.size
                 new_coord._labels = np.zeros(tuple(label_shape)).astype(coord.labels.dtype)
                 new_coord._labels[:] = '--'
                 new_coord._labels[dim_loc] = coord.labels
-            setattr(new_coords, dim, new_coord)
-            new_obj._coords = new_coords
+            setattr(new_coordset, dim, new_coord)
+            new_obj._coordset = new_coordset
 
             # reversed?
             if reversed:
@@ -325,11 +325,11 @@ def align(dataset, *others, **kwargs):
             objects[idx] = obj
         else:
             key = object['key']
-            coords = obj.coords
-            obj.delete_coords()  # NDDataset in NDPanel are stored without coords
+            coordset = obj.coordset
+            obj.delete_coordset()  # NDDataset in NDPanel are stored without coordset
             objects[idx].datasets[key] = obj
             for dim in obj.dims:
-                setattr(objects[idx], dim, getattr(coords, dim))
+                setattr(objects[idx], dim, getattr(coordset, dim))
 
     return tuple(objects)
 
@@ -337,7 +337,7 @@ def align(dataset, *others, **kwargs):
     #
     #     # reorders dataset and reference in ascending order
     #     is_sorted = False
-    #     if dataset.coords(axis).reversed:
+    #     if dataset.coordset(axis).reversed:
     #         datasetordered = dataset.sort(axis, descend=False)
     #         refordered = ref.sort(refaxis, descend=False)
     #         is_sorted = True
@@ -346,13 +346,13 @@ def align(dataset, *others, **kwargs):
     #         refordered = ref.copy()
     #
     #     try:
-    #         datasetordered.coords(axis).to(refordered.coords(refaxis).units)
+    #         datasetordered.coordset(axis).to(refordered.coordset(refaxis).units)
     #     except:
     #         raise ValueError(
     #             'units of the dataset and reference axes on which interpolate are not compatible')
     #
-    #     oldaxisdata = datasetordered.coords(axis).data
-    #     refaxisdata = refordered.coords(refaxis).data  # TODO: at the end restore the original order
+    #     oldaxisdata = datasetordered.coordset(axis).data
+    #     refaxisdata = refordered.coordset(refaxis).data  # TODO: at the end restore the original order
     #
     #     method = kwargs.pop('method', 'linear')
     #     fill_value = kwargs.pop('fill_value', np.NaN)
@@ -377,7 +377,7 @@ def align(dataset, *others, **kwargs):
     #     else:
     #         newmask = NOMASK
     #
-    #     # interpolate_axis = interpolator(datasetordered.coords(axis).data)
+    #     # interpolate_axis = interpolator(datasetordered.coordset(axis).data)
     #     # newaxisdata = interpolate_axis(refaxisdata)
     #     newaxisdata = refaxisdata.copy()
     #
@@ -411,7 +411,7 @@ def align(dataset, *others, **kwargs):
     #     out.history = '{}: Aligned along dim {} with respect to dataset {} using coords {} \n'.format(
     #         str(dataset.modified), axis, ref.name, ref.coords[refaxis].title)
     #
-    #     if is_sorted and out.coords(axis).reversed:
+    #     if is_sorted and out.coordset(axis).reversed:
     #         out.sort(axis, descend=True, inplace=True)
     #         ref.sort(refaxis, descend=True, inplace=True)
     #

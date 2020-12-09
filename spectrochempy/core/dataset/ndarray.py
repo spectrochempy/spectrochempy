@@ -1648,32 +1648,6 @@ class NDArray(HasTraits):
         # conversion
 
     # ..................................................................................................................
-    def to_pandas(self):
-        """
-        Convert NDArray into a `pandas` object
-
-        Returns
-        -------
-        out : pandas object
-            Index for a single dimensional dataarray without units
-            MultiIndex for single dimensional dataarray with units
-            DataFrame for multidimentional arrays
-
-        """
-        if self.is_empty and not self.is_labeled:
-            raise ValueError('no valid index for a 0-dimensional object.')
-
-        if self.ndim == 1:
-            if self.has_units:
-                out = pd.MultiIndex.from_product([[str(self.units)], self.data], names=['units', self.title])
-            else:
-                out = pd.Index(self.data, name=self.title)
-        else:
-            raise NotImplementedError('Not yet implemented')
-
-        return out
-
-    # ..................................................................................................................
     @docstrings.dedent
     def transpose(self, *dims, inplace=False):
         """

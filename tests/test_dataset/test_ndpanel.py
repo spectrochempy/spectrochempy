@@ -12,14 +12,15 @@ from spectrochempy.core.dataset.ndarray import NDArray
 from spectrochempy.core.dataset.ndcoord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.ndpanel import NDPanel
-from spectrochempy.utils.testing import (raises, RandomSeedContext)
+from spectrochempy.utils.testing import raises
+from spectrochempy.utils import json_serialiser
 
 
 def test_ndpanel_init():
     # void
     panel = NDPanel()
     assert panel.datasets == {}
-    assert not panel.coords
+    assert not panel.coordset
     assert not panel.meta
     assert panel.name == panel.id
     assert panel.dims == []
@@ -54,11 +55,11 @@ def test_ndpanel_init():
     arr1 = np.random.rand(10, 4)
     cx = Coord(np.arange(4), title='tx', units='s')
     cy = Coord(np.arange(10), title='ty', units='km')
-    nd1 = NDDataset(arr1, coords=(cy, cx), name='arr1')
+    nd1 = NDDataset(arr1, coordset=(cy, cx), name='arr1')
 
     arr2 = np.random.rand(15, 4)
     cy2 = Coord(np.linspace(0, 10, 15) * 1000., title='ty2', units='m')
-    nd2 = NDDataset(arr2, coords=(cy2, cx), name='arr2')
+    nd2 = NDDataset(arr2, coordset=(cy2, cx), name='arr2')
 
     panel = NDPanel(nd1, nd2, merge=False)
     assert panel.dims == ['u', 'x', 'y', 'z']
@@ -71,6 +72,12 @@ def test_ndpanel_init():
     assert panel['arr1'].dims == ['y', 'x']
     assert panel['arr2'].dims == ['z', 'x']
 
+    js = json_serialiser(panel, encoding=None)
+    f = panel.save()
+    panel2 = NDPanel.load(f)
+
+
+    # TODO: works on alignment (seems broken)
     # dataset alignment during init (cy and cy2 can be aligned) but the title must be the same
     nd2.y.title = nd1.y.title
     panel = NDPanel(nd1, nd2, align='outer')
@@ -96,6 +103,16 @@ def test_ndpanel_init():
     assert panel['arr2'].dims == ['y', 'x']
     info_('\n\ninner')
     info_(panel)
+
+    # test save and load
+
+    js = json_serialiser(panel, encoding=None)
+
+    f = panel.save_as('mypanel')
+    print(f)
+    js2 = NDPanel.load(f, json=True)
+    info_(panel2)
+
 
 
 # ============================================================================

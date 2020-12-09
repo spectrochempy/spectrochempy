@@ -252,10 +252,10 @@ def _read_jdx(*args, **kwargs):
     _x = Coord(xaxis, title=axisname, units=axisunit)
     if jdx_data_type == 'LINK':
         _y = Coord(alltimestamps, title='Acquisition timestamp (GMT)', units='s', labels=(alldates, alltitles))
-        dataset.set_coords(y=_y, x=_x)
+        dataset.set_coordset(y=_y, x=_x)
     else:
         _y = Coord()
-    dataset.set_coords(y=_y, x=_x)
+    dataset.set_coordset(y=_y, x=_x)
 
     # Set origin, description and history
     dataset.origin = "omnic"

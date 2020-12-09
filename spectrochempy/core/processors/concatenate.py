@@ -149,7 +149,7 @@ def concatenate(*datasets, **kwargs):
             dataset._mask = dataset.mask[np.newaxis]
             newcoord = Coord([i], labels=[dataset.name])
             newcoord.name = (OrderedSet(DEFAULT_DIM_NAME) - dataset._dims).pop()
-            dataset.add_coords(newcoord)
+            dataset.add_coordset(newcoord)
             dataset.dims = [newcoord.name] + dataset.dims
             # TODO: make a function to simplify this process of adding new dimensions with coords
         axis, dim = datasets[0].get_axis(0)
@@ -186,7 +186,7 @@ def concatenate(*datasets, **kwargs):
 
     # coordinates units of NDDatasets must be compatible in all dimensions
     # get the coordss
-    coordss = [dataset.coords for dataset in datasets]
+    coordss = [dataset.coordset for dataset in datasets]
 
     # def check_coordinates(coordss, force_stack):
     #
@@ -263,7 +263,7 @@ def concatenate(*datasets, **kwargs):
 
             coords[dim]._labels = np.concatenate(labels)
 
-    out = NDDataset(data, coords=coords, mask=mask, units=units)
+    out = NDDataset(data, coordset=coords, mask=mask, units=units)
 
     thist = 'Stack' if axis == 0 else 'Concatenation'
 

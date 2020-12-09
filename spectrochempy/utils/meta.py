@@ -75,7 +75,7 @@ class Meta(object):  # HasTraits):
     # private attributes
     # ------------------------------------------------------------------------------------------------------------------
 
-    _data = OrderedDict()
+    _data = {}
 
     # @default('_data')
     # def _get_data(self):
@@ -98,13 +98,10 @@ class Meta(object):  # HasTraits):
             The dictionary can be already inited with some keywords.
 
         """
-        self._data = OrderedDict(data)
+        self._data = data
 
-    def implements(self, name=None):
-        if name is None:
-            return 'Meta'
-        else:
-            return name == 'Meta'
+    def __dir__(self):
+        return ['data', 'readonly']
 
     def __setattr__(self, key, value):
         if key not in ['readonly', '_data', '_trait_values', '_trait_notifiers',
@@ -169,6 +166,12 @@ class Meta(object):  # HasTraits):
     # ------------------------------------------------------------------------------------------------------------------
     # public methods
     # ------------------------------------------------------------------------------------------------------------------
+
+    def implements(self, name=None):
+        if name is None:
+            return 'Meta'
+        else:
+            return name == 'Meta'
 
     def to_dict(self):
         """Transform a metadata dictionary to a regular one.
@@ -332,3 +335,7 @@ class Meta(object):  # HasTraits):
             return newmeta
         else:
             self._data = newmeta._data
+
+    @property
+    def data(self):
+        return self._data

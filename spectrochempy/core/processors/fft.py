@@ -132,7 +132,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         swaped = True
 
     # select the last coordinates
-    lastcoord = dataset.coords[dim]
+    lastcoord = dataset.coordset[dim]
 
     if not inv and not lastcoord.dimensionless \
             and lastcoord.units.dimensionality != '[time]':
@@ -291,7 +291,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
                 nucleus = ""
             newcoord.title = fr"$\delta\ {nucleus}$"
 
-    new.coords[-1] = newcoord
+    new.coordset[-1] = newcoord
 
     # if some phase related metadata do not exist yet, initialize them
     new.meta.readonly = False
@@ -300,7 +300,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, inplace=False, dim=-1, ppm=T
         new.meta.phased = [False] * new.ndim
 
     if not new.meta.pivot:
-        new.meta.pivot = [float(abs(new).max().coords[i].data) * new.coords[i].units for i in
+        new.meta.pivot = [float(abs(new).max().coordset[i].data) * new.coordset[i].units for i in
                           range(new.ndim)]  # create pivot metadata
 
     # applied the stored phases

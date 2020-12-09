@@ -83,7 +83,7 @@ def _apodize(dataset, method, apod=None, **kwargs):
         new.swapaxes(axis, -1, inplace=True)  # must be done in  place
         swaped = True
 
-    x = new.coords[dim]
+    x = new.coordset[dim]
     if not x.unitless and not x.dimensionless and x.units.dimensionality != '[time]':
         error_('apply only to dimensions with [time] dimensionality\n'
                'apodization processing was thus cancelled')
@@ -238,7 +238,8 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
@@ -338,7 +339,8 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     out, apodcurve = _apodize(dataset, func, (gb, lb, shifted), **kwargs)
 
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
@@ -415,7 +417,8 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     out, apodcurve = _apodize(dataset, func, (ssb, pow), **kwargs)
 
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
     return out
 
@@ -505,7 +508,8 @@ def hamming(dataset, **kwargs):
 
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
@@ -551,7 +555,8 @@ def triang(dataset, **kwargs):
 
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
@@ -595,7 +600,8 @@ def bartlett(dataset, **kwargs):
 
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
-        apodcurve = type(out)(apodcurve, coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+        apodcurve = type(out)(apodcurve, coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray
+        # apodcurve
         return out, apodcurve
 
     return out
@@ -640,7 +646,7 @@ def blackmanharris(dataset, **kwargs):
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
         apodcurve = type(out)(apodcurve,
-                              coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+                              coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
 
     return out
@@ -690,7 +696,7 @@ def mertz(dataset, zpd, **kwargs):
     # Should we return the apodization array?
     if kwargs.pop('retfunc', False):
         apodcurve = type(out)(apodcurve,
-                              coords=[out.coords(out.dims[-1])])  # make a dataset from the ndarray apodcurve
+                              coordset=[out.coordset(out.dims[-1])])  # make a dataset from the ndarray apodcurve
         return out, apodcurve
 
     return out

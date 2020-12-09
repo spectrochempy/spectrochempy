@@ -158,17 +158,17 @@ class SIMPLISMA(HasTraits):
         # but could also be concentrations if X.T is passed)
         Pt = zeros((n_pc, X.shape[-1]))
         Pt.name = 'Purity spectra'
-        Pt.set_coords(y=Pt.y, x=X.x)
+        Pt.set_coordset(y=Pt.y, x=X.x)
         Pt.y.title = '# pure compound'
 
         # weight matrix
         w = zeros((n_pc, X.shape[-1]))
-        w.set_coords(y=Pt.y, x=X.x)
+        w.set_coordset(y=Pt.y, x=X.x)
 
         # Stdev spectrum
         s = zeros((n_pc, X.shape[-1]))
         s.name = 'Standard deviation spectra'
-        s.set_coords(y=Pt.y, x=X.x)
+        s.set_coordset(y=Pt.y, x=X.x)
 
         # maximum purity indexes and coordinates
         maxPIndex = [0] * n_pc
@@ -177,13 +177,13 @@ class SIMPLISMA(HasTraits):
         # Concentration matrix
         C = zeros((X.shape[-2], n_pc))
         C.name = 'Relative Concentrations'
-        C.set_coords(y=X.y, x=C.x)
+        C.set_coordset(y=X.y, x=C.x)
         C.x.title = '# pure compound'
 
         # Pure component spectral profiles
         St = zeros((n_pc, X.shape[-1]))
         St.name = 'Pure compound spectra'
-        St.set_coords(y=Pt.y, x=X.x)
+        St.set_coordset(y=Pt.y, x=X.x)
 
         # Compute Statistics
         # ------------------

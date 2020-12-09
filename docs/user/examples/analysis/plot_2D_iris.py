@@ -25,7 +25,7 @@ X = scp.NDDataset.read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
 ########################################################################################################################
 # X has two coordinates: `wavenumbers` named "x" and `timestamps` (i.e. the time of recording)
 # named "y".
-print(X.coords)
+print(X.coordset)
 
 ########################################################################################################################
 # We want to replace the timestamps ("y") by pressure coordinates.
@@ -37,7 +37,7 @@ p = [0.00300, 0.00400, 0.00900, 0.01400, 0.02100, 0.02600, 0.03600,
      0.05100, 0.09300, 0.15000, 0.20300, 0.30000, 0.40400, 0.50300,
      0.60200, 0.70200, 0.80100, 0.90500, 1.00400]
 
-X.coords["y"] = scp.Coord(p, title='pressure', units='torr')
+X.coordset["y"] = scp.Coord(p, title='pressure', units='torr')
 
 ########################################################################################################################
 # Select and plot the spectral range of interest

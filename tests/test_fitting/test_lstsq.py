@@ -46,7 +46,7 @@ def test_implicit_lstsq():
                  title='time')
 
     d = sc.NDDataset(data=[-1, 0.2, 0.9, 2.1],
-                     coords=[t],
+                     coordset=[t],
                      units='kilometer',
                      title='distance')
 

@@ -52,7 +52,7 @@ print(a)
 # nd-Dataset
 # +++++++++++
 # The |NDDataset| object allow making the array of data with units, etc...
-mydataset = scp.NDDataset(nd_data, coords=[coord0, coord1, coord2],
+mydataset = scp.NDDataset(nd_data, coordset=[coord0, coord1, coord2],
                           title='Absorbance', units='absorbance')
 mydataset.description = """Dataset example created for this tutorial.
 It's a 3-D dataset (with dimensionless intensity: absorbance )"""

@@ -28,7 +28,7 @@ t = scp.NDDataset(data=[0, 1, 2, 3],
                   units='hour')
 
 d = scp.NDDataset(data=[-1, 0.2, 0.9, 2.1],
-                  coords=[t],
+                  coordset=[t],
                   title='distance',
                   units='kilometer')
 

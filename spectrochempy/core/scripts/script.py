@@ -25,11 +25,11 @@ class Script(HasTraits):
 
     """
     _name = Unicode()
-    _content = Unicode()
+    _content = Unicode(allow_none=True)
     _priority = Float(min=0., max=100.)
     _parent = Instance(AbstractProject, allow_none=True)
 
-    def __init__(self, name, content="", parent=None, priority=50.):
+    def __init__(self, name, content=None, parent=None, priority=50.):
         """
         Parameters
         ----------
@@ -87,9 +87,12 @@ class Script(HasTraits):
 
     @validate('_content')
     def _content_validate(self, proposal):
+
         pv = proposal['value']
-        if len(pv) < 1:
+        if len(pv) < 1:  # do not allow null but None
             raise TraitError("Script content must be non Null!")
+        if pv is None:
+            return
 
         try:
             ast.parse(pv)
@@ -107,8 +110,23 @@ class Script(HasTraits):
         self._parent = value
 
     # ------------------------------------------------------------------------------------------------------------------
-    # private methods
+    # prublic methods
     # ------------------------------------------------------------------------------------------------------------------
+    # ..................................................................................................................
+    def implements(self, name=None):
+        """
+        Utility to check if the current object implement `Project`.
+
+        Rather than isinstance(obj, Project) use object.implements('Project').
+
+        This is useful to check type without importing the module
+
+        """
+        if name is None:
+            return 'Script'
+        else:
+            return name == 'Script'
+
     def execute(self, localvars=None):
         co = 'from spectrochempy import *\n' \
              'import spectrochempy as scp\n' + self._content

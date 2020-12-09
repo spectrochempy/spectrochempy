@@ -55,7 +55,7 @@ a = np.random.rand(6,8)
 cx = Coord(np.linspace(600,4000,8), units='cm^-1', title='wavenumber')
 cy = Coord(np.linspace(0,10,6), units='s', title='time')
 # create the dataset
-nda = NDDataset(a, coords=(cy, cx), name='a', title='dataset a', units='eV')
+nda = NDDataset(a, coordset=(cy, cx), name='a', title='dataset a', units='eV')
 nda
 
 # %%
@@ -63,7 +63,7 @@ nda
 b = np.random.rand(10,8)
 cz = Coord(np.linspace(600,4000,8), units='cm^-1', title='wavenumber')
 cu = Coord(np.linspace(0,10,10), units='s', title='time')
-ndb = NDDataset(b, coords=(cu, cz), name='b', title='dataset b', units='eV')
+ndb = NDDataset(b, coordset=(cu, cz), name='b', title='dataset b', units='eV')
 ndb
 
 # %% [markdown]
@@ -82,7 +82,7 @@ ndp
 ndp.dims
 
 # %%
-ndp.coords
+ndp.coordset
 
 # %% [markdown]
 # **Why dimension `y` is different from those of `nda` and `ndb`?**

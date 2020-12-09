@@ -92,7 +92,7 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         f = NDDataset(np.zeros((M, K)),
-                      coords=[X.y, Coord(range(K))],
+                      coordset=[X.y, Coord(range(K))],
                       title='EigenValues',
                       description='Forward EFA of ' + X.name,
                       history=str(datetime.now()) + ': created by spectrochempy ')
@@ -118,7 +118,7 @@ class EFA(HasTraits):
         # --------------------------------------------------------------------
 
         b = NDDataset(np.zeros((M, K)),
-                      coords=[X.y, Coord(range(K))],
+                      coordset=[X.y, Coord(range(K))],
                       title='EigenValues',
                       name='Backward EFA of ' + X.name,
                       history=str(datetime.now()) + ': created by spectrochempy ')
@@ -209,7 +209,7 @@ class EFA(HasTraits):
 
         xcoord = Coord(range(n_pc), title='PS#')
         c = NDDataset(np.zeros((M, n_pc)),
-                      coords=CoordSet(y=self._X.y, x=xcoord),
+                      coordset=CoordSet(y=self._X.y, x=xcoord),
                       name='C_EFA[{}]'.format(self._X.name),
                       title='relative concentration',
                       description='Concentration profile from EFA',

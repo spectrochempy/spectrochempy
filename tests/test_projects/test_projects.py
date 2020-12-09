@@ -92,12 +92,10 @@ def test_project_with_script():
     print(proj)
     print(proj.A350.label)
 
-    proj.save('HIZECOKE_TEST')
+    f = proj.save()
 
     newproj = Project.load('HIZECOKE_TEST')
-
     print(newproj)
-
     assert str(newproj) == str(proj)
     assert newproj.A350.label == proj.A350.label
 
@@ -113,7 +111,7 @@ def test_project_with_script():
     print(proj)
 
     # save but do not chnge the original data
-    proj.save('HIZECOKE_TEST', overwrite_data=False)
+    proj.save_as('HIZECOKE_TEST', overwrite_data=False)
 
     newproj = Project.load('HIZECOKE_TEST')
 
@@ -126,7 +124,7 @@ def test_project_with_script():
     # attemps to resolve locals
     newproj.print_info()
 
-    proj.save('HIZECOKE_TEST')
+    proj.save_as('HIZECOKE_TEST')
     newproj = Project.load('HIZECOKE_TEST')
 
 
@@ -138,61 +136,4 @@ def test_save_and_load_project(ds1, ds2):
 
     myp.add_datasets(ds1, ds2)
 
-    myp.save('PROCESS')
-
-
-def test_json():
-
-    from spectrochempy.core.project.project import Project, Script
-
-    proj = Project(name='TEST')
-
-    # add datasets to a subproject
-    datadir = pathclean(prefs.datadir)
-
-    d1 = NDDataset.read(datadir / 'irdata' / 'nh4y-activation.spg')
-    proj['S1'] = d1
-
-    d2 = NDDataset.read(datadir / 'irdata' / 'CO@Mo_Al2O3.SPG')
-    proj['S2'] = d2
-
-    script_source = 'set_loglevel(INFO)\n' \
-                    'info_("samples contained in the project are : ' \
-                    '%s"%proj.projects_names)'
-
-    proj['print_info'] = Script('print_info', script_source)
-
-
-    # try to make a json object
-    pj = proj.to_json()
-    assert pj['main.name'] == 'TEST'
-
-    # save with the project name as basename
-    f = proj.save()
-
-    # remove it
-    f. unlink()
-
-    # save it with a new name
-    filename = datadir / 'irdata' / 'project_test'
-    proj.save_as(filename)
-
-
-    f = Project.load('project_test.pscp', directory=datadir / 'irdata')
-    assert str(proj) == """Project TEST:
-    ⤷ S1 (dataset)
-    ⤷ S2 (dataset)
-    ⤷ print_info (script)
-"""
-
-
-    f.unlink()
-
-def test_json2():
-    # Standard import
-    import importlib
-
-    # Load "module.submodule.MyClass"
-    MyClass = getattr(importlib.import_module("spectrochempy.core"), "Project")
-    # Instantiate the class (pass arguments to the constructor, if needed)
-    instance = MyClass()
+    myp.save()
